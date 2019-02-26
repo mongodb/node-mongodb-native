@@ -1,6 +1,5 @@
 {
   "topology": [
-    "replicaset",
     "sharded"
   ],
   "database_name": "transaction-tests",
@@ -8,7 +7,134 @@
   "data": [],
   "tests": [
     {
-      "description": "commit with majority",
+      "description": "commitTransaction explicit retries include recoveryToken",
+      "useMultipleMongoses": true,
+      "operations": [
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 1
+            }
+          },
+          "result": {
+            "insertedId": 1
+          }
+        },
+        {
+          "name": "commitTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "commitTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "commitTransaction",
+          "object": "session0"
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "insert": "test",
+              "documents": [
+                {
+                  "_id": 1
+                }
+              ],
+              "ordered": true,
+              "readConcern": null,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": true,
+              "autocommit": false,
+              "writeConcern": null
+            },
+            "command_name": "insert",
+            "database_name": "transaction-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "commitTransaction": 1,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": null,
+              "autocommit": false,
+              "writeConcern": null,
+              "recoveryToken": 42
+            },
+            "command_name": "commitTransaction",
+            "database_name": "admin"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "commitTransaction": 1,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": null,
+              "autocommit": false,
+              "writeConcern": {
+                "w": "majority",
+                "wtimeout": 10000
+              },
+              "recoveryToken": 42
+            },
+            "command_name": "commitTransaction",
+            "database_name": "admin"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "commitTransaction": 1,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": null,
+              "autocommit": false,
+              "writeConcern": {
+                "w": "majority",
+                "wtimeout": 10000
+              },
+              "recoveryToken": 42
+            },
+            "command_name": "commitTransaction",
+            "database_name": "admin"
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "commitTransaction retry succeeds on new mongos",
+      "useMultipleMongoses": true,
       "operations": [
         {
           "name": "startTransaction",
@@ -32,6 +158,28 @@
           },
           "result": {
             "insertedId": 1
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "commitTransaction"
+                ],
+                "writeConcernError": {
+                  "code": 91,
+                  "errmsg": "Replication is being shut down"
+                }
+              }
+            }
           }
         },
         {
@@ -75,70 +223,11 @@
               "autocommit": false,
               "writeConcern": {
                 "w": "majority"
-              }
+              },
+              "recoveryToken": 42
             },
             "command_name": "commitTransaction",
             "database_name": "admin"
-          }
-        }
-      ],
-      "outcome": {
-        "collection": {
-          "data": [
-            {
-              "_id": 1
-            }
-          ]
-        }
-      }
-    },
-    {
-      "description": "commit with default",
-      "operations": [
-        {
-          "name": "startTransaction",
-          "object": "session0"
-        },
-        {
-          "name": "insertOne",
-          "object": "collection",
-          "arguments": {
-            "session": "session0",
-            "document": {
-              "_id": 1
-            }
-          },
-          "result": {
-            "insertedId": 1
-          }
-        },
-        {
-          "name": "commitTransaction",
-          "object": "session0"
-        }
-      ],
-      "expectations": [
-        {
-          "command_started_event": {
-            "command": {
-              "insert": "test",
-              "documents": [
-                {
-                  "_id": 1
-                }
-              ],
-              "ordered": true,
-              "readConcern": null,
-              "lsid": "session0",
-              "txnNumber": {
-                "$numberLong": "1"
-              },
-              "startTransaction": true,
-              "autocommit": false,
-              "writeConcern": null
-            },
-            "command_name": "insert",
-            "database_name": "transaction-tests"
           }
         },
         {
@@ -151,7 +240,11 @@
               },
               "startTransaction": null,
               "autocommit": false,
-              "writeConcern": null
+              "writeConcern": {
+                "w": "majority",
+                "wtimeout": 10000
+              },
+              "recoveryToken": 42
             },
             "command_name": "commitTransaction",
             "database_name": "admin"
@@ -169,191 +262,240 @@
       }
     },
     {
-      "description": "abort with majority",
-      "operations": [
-        {
-          "name": "startTransaction",
-          "object": "session0",
-          "arguments": {
-            "options": {
-              "writeConcern": {
-                "w": "majority"
-              }
-            }
-          }
-        },
-        {
-          "name": "insertOne",
-          "object": "collection",
-          "arguments": {
-            "session": "session0",
-            "document": {
-              "_id": 1
-            }
-          },
-          "result": {
-            "insertedId": 1
-          }
-        },
-        {
-          "name": "abortTransaction",
-          "object": "session0"
-        }
-      ],
-      "expectations": [
-        {
-          "command_started_event": {
-            "command": {
-              "insert": "test",
-              "documents": [
-                {
-                  "_id": 1
-                }
-              ],
-              "ordered": true,
-              "readConcern": null,
-              "lsid": "session0",
-              "txnNumber": {
-                "$numberLong": "1"
-              },
-              "startTransaction": true,
-              "autocommit": false,
-              "writeConcern": null
-            },
-            "command_name": "insert",
-            "database_name": "transaction-tests"
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
-              "abortTransaction": 1,
-              "lsid": "session0",
-              "txnNumber": {
-                "$numberLong": "1"
-              },
-              "startTransaction": null,
-              "autocommit": false,
-              "writeConcern": {
-                "w": "majority"
-              }
-            },
-            "command_name": "abortTransaction",
-            "database_name": "admin"
-          }
-        }
-      ],
-      "outcome": {
-        "collection": {
-          "data": []
-        }
-      }
-    },
-    {
-      "description": "abort with default",
-      "operations": [
-        {
-          "name": "startTransaction",
-          "object": "session0"
-        },
-        {
-          "name": "insertOne",
-          "object": "collection",
-          "arguments": {
-            "session": "session0",
-            "document": {
-              "_id": 1
-            }
-          },
-          "result": {
-            "insertedId": 1
-          }
-        },
-        {
-          "name": "abortTransaction",
-          "object": "session0"
-        }
-      ],
-      "expectations": [
-        {
-          "command_started_event": {
-            "command": {
-              "insert": "test",
-              "documents": [
-                {
-                  "_id": 1
-                }
-              ],
-              "ordered": true,
-              "readConcern": null,
-              "lsid": "session0",
-              "txnNumber": {
-                "$numberLong": "1"
-              },
-              "startTransaction": true,
-              "autocommit": false,
-              "writeConcern": null
-            },
-            "command_name": "insert",
-            "database_name": "transaction-tests"
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
-              "abortTransaction": 1,
-              "lsid": "session0",
-              "txnNumber": {
-                "$numberLong": "1"
-              },
-              "startTransaction": null,
-              "autocommit": false,
-              "writeConcern": null
-            },
-            "command_name": "abortTransaction",
-            "database_name": "admin"
-          }
-        }
-      ],
-      "outcome": {
-        "collection": {
-          "data": []
-        }
-      }
-    },
-    {
-      "description": "start with unacknowledged write concern",
-      "operations": [
-        {
-          "name": "startTransaction",
-          "object": "session0",
-          "arguments": {
-            "options": {
-              "writeConcern": {
-                "w": 0
-              }
-            }
-          },
-          "result": {
-            "errorContains": "transactions do not support unacknowledged write concern"
-          }
-        }
-      ]
-    },
-    {
-      "description": "start with implicit unacknowledged write concern",
+      "description": "commitTransaction retry fails on new mongos",
+      "useMultipleMongoses": true,
       "clientOptions": {
-        "w": 0
+        "heartbeatFrequencyMS": 5000
       },
       "operations": [
         {
           "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 1
+            }
+          },
+          "result": {
+            "insertedId": 1
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 7
+              },
+              "data": {
+                "failCommands": [
+                  "commitTransaction",
+                  "isMaster"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "commitTransaction",
           "object": "session0",
           "result": {
-            "errorContains": "transactions do not support unacknowledged write concern"
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ],
+            "errorLabelsOmit": [
+              "UnknownTransactionCommitResult"
+            ],
+            "errorCodeName": "NoSuchTransaction"
           }
         }
-      ]
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "insert": "test",
+              "documents": [
+                {
+                  "_id": 1
+                }
+              ],
+              "ordered": true,
+              "readConcern": null,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": true,
+              "autocommit": false,
+              "writeConcern": null
+            },
+            "command_name": "insert",
+            "database_name": "transaction-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "commitTransaction": 1,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": null,
+              "autocommit": false,
+              "writeConcern": null,
+              "recoveryToken": 42
+            },
+            "command_name": "commitTransaction",
+            "database_name": "admin"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "commitTransaction": 1,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": null,
+              "autocommit": false,
+              "writeConcern": {
+                "w": "majority",
+                "wtimeout": 10000
+              },
+              "recoveryToken": 42
+            },
+            "command_name": "commitTransaction",
+            "database_name": "admin"
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": []
+        }
+      }
+    },
+    {
+      "description": "abortTransaction does not send recoveryToken",
+      "useMultipleMongoses": true,
+      "operations": [
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 1
+            }
+          },
+          "result": {
+            "insertedId": 1
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "abortTransaction"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "abortTransaction",
+          "object": "session0"
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "insert": "test",
+              "documents": [
+                {
+                  "_id": 1
+                }
+              ],
+              "ordered": true,
+              "readConcern": null,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": true,
+              "autocommit": false,
+              "writeConcern": null
+            },
+            "command_name": "insert",
+            "database_name": "transaction-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "abortTransaction": 1,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": null,
+              "autocommit": false,
+              "writeConcern": null,
+              "recoveryToken": null
+            },
+            "command_name": "abortTransaction",
+            "database_name": "admin"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "abortTransaction": 1,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": null,
+              "autocommit": false,
+              "writeConcern": null,
+              "recoveryToken": null
+            },
+            "command_name": "abortTransaction",
+            "database_name": "admin"
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": []
+        }
+      }
     }
   ]
 }

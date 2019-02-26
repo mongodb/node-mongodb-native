@@ -1,4 +1,7 @@
 {
+  "topology": [
+    "sharded"
+  ],
   "database_name": "transaction-tests",
   "collection_name": "test",
   "data": [
@@ -12,6 +15,7 @@
   "tests": [
     {
       "description": "countDocuments",
+      "useMultipleMongoses": true,
       "operations": [
         {
           "name": "startTransaction",
@@ -125,6 +129,7 @@
     },
     {
       "description": "distinct",
+      "useMultipleMongoses": true,
       "operations": [
         {
           "name": "startTransaction",
@@ -246,6 +251,7 @@
     },
     {
       "description": "find",
+      "useMultipleMongoses": true,
       "operations": [
         {
           "name": "startTransaction",
@@ -391,6 +397,7 @@
     },
     {
       "description": "insertOne",
+      "useMultipleMongoses": true,
       "operations": [
         {
           "name": "startTransaction",
@@ -544,6 +551,7 @@
     },
     {
       "description": "mixed read write operations",
+      "useMultipleMongoses": true,
       "operations": [
         {
           "name": "startTransaction",
@@ -704,6 +712,7 @@
     },
     {
       "description": "multiple commits",
+      "useMultipleMongoses": true,
       "operations": [
         {
           "name": "startTransaction",
@@ -728,6 +737,24 @@
               "0": 3,
               "1": 4
             }
+          }
+        },
+        {
+          "name": "assertSessionPinned",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "name": "commitTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "assertSessionPinned",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0"
           }
         },
         {
@@ -767,8 +794,11 @@
           "object": "session0"
         },
         {
-          "name": "commitTransaction",
-          "object": "session0"
+          "name": "assertSessionPinned",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0"
+          }
         }
       ],
       "outcome": {
@@ -785,6 +815,404 @@
             },
             {
               "_id": 4
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "remain pinned after non-transient error on commit",
+      "useMultipleMongoses": true,
+      "operations": [
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "insertMany",
+          "object": "collection",
+          "arguments": {
+            "documents": [
+              {
+                "_id": 3
+              },
+              {
+                "_id": 4
+              }
+            ],
+            "session": "session0"
+          },
+          "result": {
+            "insertedIds": {
+              "0": 3,
+              "1": 4
+            }
+          }
+        },
+        {
+          "name": "assertSessionPinned",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "commitTransaction"
+                ],
+                "errorCode": 50
+              }
+            }
+          }
+        },
+        {
+          "name": "commitTransaction",
+          "object": "session0",
+          "result": {
+            "errorLabelsOmit": [
+              "TransientTransactionError"
+            ],
+            "errorCode": 50
+          }
+        },
+        {
+          "name": "assertSessionPinned",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "name": "commitTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "assertSessionPinned",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0"
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            },
+            {
+              "_id": 3
+            },
+            {
+              "_id": 4
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "unpin after transient error within a transaction",
+      "useMultipleMongoses": true,
+      "operations": [
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "result": {
+            "insertedId": 3
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "insert"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "collection",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 4
+            }
+          },
+          "result": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ],
+            "errorLabelsOmit": [
+              "UnknownTransactionCommitResult"
+            ]
+          }
+        },
+        {
+          "name": "abortTransaction",
+          "object": "session0"
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "insert": "test",
+              "documents": [
+                {
+                  "_id": 3
+                }
+              ],
+              "ordered": true,
+              "readConcern": null,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": true,
+              "autocommit": false,
+              "writeConcern": null
+            },
+            "command_name": "insert",
+            "database_name": "transaction-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "insert": "test",
+              "documents": [
+                {
+                  "_id": 4
+                }
+              ],
+              "ordered": true,
+              "readConcern": null,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": null,
+              "autocommit": false,
+              "writeConcern": null
+            },
+            "command_name": "insert",
+            "database_name": "transaction-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "abortTransaction": 1,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": null,
+              "autocommit": false,
+              "writeConcern": null,
+              "recoveryToken": null
+            },
+            "command_name": "abortTransaction",
+            "database_name": "admin"
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "unpin after transient error within a transaction and commit",
+      "useMultipleMongoses": true,
+      "clientOptions": {
+        "heartbeatFrequencyMS": 5000
+      },
+      "operations": [
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "result": {
+            "insertedId": 3
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 7
+              },
+              "data": {
+                "failCommands": [
+                  "insert",
+                  "isMaster"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "collection",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 4
+            }
+          },
+          "result": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ],
+            "errorLabelsOmit": [
+              "UnknownTransactionCommitResult"
+            ]
+          }
+        },
+        {
+          "name": "commitTransaction",
+          "object": "session0",
+          "result": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ],
+            "errorLabelsOmit": [
+              "UnknownTransactionCommitResult"
+            ],
+            "errorCodeName": "NoSuchTransaction"
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "insert": "test",
+              "documents": [
+                {
+                  "_id": 3
+                }
+              ],
+              "ordered": true,
+              "readConcern": null,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": true,
+              "autocommit": false,
+              "writeConcern": null
+            },
+            "command_name": "insert",
+            "database_name": "transaction-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "insert": "test",
+              "documents": [
+                {
+                  "_id": 4
+                }
+              ],
+              "ordered": true,
+              "readConcern": null,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": null,
+              "autocommit": false,
+              "writeConcern": null
+            },
+            "command_name": "insert",
+            "database_name": "transaction-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "commitTransaction": 1,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": null,
+              "autocommit": false,
+              "writeConcern": null,
+              "recoveryToken": 42
+            },
+            "command_name": "commitTransaction",
+            "database_name": "admin"
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
             }
           ]
         }
