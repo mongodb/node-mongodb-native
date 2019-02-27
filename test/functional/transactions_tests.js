@@ -8,6 +8,7 @@ const expect = chai.expect;
 const EJSON = require('mongodb-extjson');
 const core = require('mongodb-core');
 const sessions = core.Sessions;
+const environments = require('../environments');
 
 // mlaunch init --replicaset --arbiter  --name rs --hostname localhost --port 31000 --setParameter enableTestCommands=1 --binarypath /Users/mbroadst/Downloads/mongodb-osx-x86_64-enterprise-4.1.0-158-g3d62f3c/bin
 
@@ -49,14 +50,20 @@ function findPlaceholders(value, parent) {
       delete value[key];
       result.push({ path: key, type: null });
     } else if (value[key] === 42 || value[key] === '42') {
-      if (key.startsWith('$number') || value[key] === 42) {
+      if (key.startsWith('$number')) {
         result.push({ path: key, type: 'number' });
+      } else if (value[key] === 42) {
+        result.push({ path: key, type: 'exists' });
       } else {
         result.push({ path: key, type: 'string' });
       }
 
       // NOTE: fix this, it just passes the current examples
-      delete parent[0][parent[1]];
+      if (parent == null) {
+        delete value[key];
+      } else {
+        delete parent[0][parent[1]];
+      }
     } else if (value[key] === '') {
       result.push({ path: key, type: 'string' });
     }
@@ -87,61 +94,86 @@ function gatherTestSuites(specPath) {
     );
 }
 
+function resolveConnectionString(configuration, spec) {
+  const isShardedEnvironment = configuration.environment instanceof environments.sharded;
+  const useMultipleMongoses = spec && !!spec.useMultipleMongoses;
+
+  return isShardedEnvironment && !useMultipleMongoses
+    ? `mongodb://${configuration.host}:${configuration.port}/${configuration.db}`
+    : configuration.url();
+}
+
 class TransactionsTestContext {
   constructor() {
     this.url = null;
     this.sharedClient = null;
-    this.failPointClients = [];
-  }
-
-  runForAllClients(fn) {
-    const allClients = [this.sharedClient].concat(this.failPointClients);
-    return Promise.all(allClients.map(fn));
-  }
-
-  runFailPointCmd(fn) {
-    return this.failPointClients.length
-      ? Promise.all(this.failPointClients.map(fn))
-      : fn(this.sharedClient);
+    this.appliedFailPoints = [];
   }
 
   setup(config) {
-    if (config.options.proxies) {
-      const mainProxy = config.options.proxies[0];
-      this.url = `mongodb://${mainProxy.host}:${mainProxy.port}/`;
+    this.sharedClient = config.newClient(
+      resolveConnectionString(config, { useMultipleMongoses: true })
+    );
 
-      this.failPointClients = config.options.proxies.map(proxy =>
-        config.newClient(`mongodb://${proxy.host}:${proxy.port}/`)
+    this.failPointClients = [];
+    if (config.environment instanceof environments.sharded) {
+      this.failPointClients = [51000, 51001].map(port =>
+        config.newClient(`mongodb://localhost:${port}`)
       );
-    } else {
-      this.url = config.url();
     }
 
-    this.sharedClient = this.newClient(config);
-    return this.runForAllClients(client => client.connect());
-  }
-
-  newClient(config, clientOptions) {
-    return config.newClient(this.url, clientOptions);
+    return Promise.all(
+      this.failPointClients.concat(this.sharedClient).map(client => client.connect())
+    );
   }
 
   teardown() {
-    return this.runForAllClients(client => client.close());
+    const failPointPromise = this.failPointClients.reduce((promise, client) => {
+      return promise.then(() =>
+        this.appliedFailPoints.map(failPoint => {
+          const command = {
+            configureFailPoint: failPoint.configureFailPoint,
+            mode: 'off'
+          };
+
+          return client.db('admin').command(command);
+        })
+      );
+    }, Promise.resolve());
+
+    return failPointPromise.then(() =>
+      Promise.all(this.failPointClients.concat(this.sharedClient).map(client => client.close()))
+    );
   }
 
-  enableFailPoint(failPoint) {
-    return this.runFailPointCmd(client => {
-      return client.db(this.dbName).executeDbAdminCommand(failPoint);
-    });
-  }
+  targetedFailPoint(options) {
+    const session = options.session;
+    const failPoint = options.failPoint;
+    expect(session.transaction.isPinned).to.be.true;
 
-  disableFailPoint(failPoint) {
-    return this.runFailPointCmd(client => {
-      return client.db(this.dbName).executeDbAdminCommand({
-        configureFailPoint: failPoint.configureFailPoint,
-        mode: 'off'
+    return new Promise((resolve, reject) => {
+      const server = session.transaction.server;
+      server.command(`admin.$cmd`, failPoint, err => {
+        if (err) return reject(err);
+
+        this.appliedFailPoints.push(failPoint);
+        resolve();
       });
     });
+  }
+
+  assertSessionPinned(options) {
+    expect(options).to.have.property('session');
+
+    const session = options.session;
+    expect(session.transaction.isPinned).to.be.true;
+  }
+
+  assertSessionUnpinned(options) {
+    expect(options).to.have.property('session');
+
+    const session = options.session;
+    expect(session.transaction.isPinned).to.be.false;
   }
 }
 
@@ -196,57 +228,48 @@ describe('Transactions', function() {
   });
 });
 
-function generateTopologyTests(testSuites, testContext) {
-  [
-    { topology: 'replicaset', minServerVersion: '>=3.7.x' },
-    { topology: 'sharded', minServerVersion: '>=4.1.5' }
-  ].forEach(config => {
-    describe(config.topology, function() {
-      generateTestSuiteTests(testSuites, testContext, config);
-    });
-  });
+function parseTopologies(topologies) {
+  if (topologies == null) {
+    return ['single', 'replicaset', 'mongos'];
+  }
+
+  return topologies;
 }
 
-function generateTestSuiteTests(testSuites, testContext, config) {
+function generateTopologyTests(testSuites, testContext) {
   testSuites.forEach(testSuite => {
+    const suiteName = testSuite.name;
+    const topologies = parseTopologies(testSuite.topology);
     const minServerVersion = testSuite.minServerVersion
       ? `>=${testSuite.minServerVersion}`
-      : config.minServerVersion;
+      : '>=3.7.x';
 
-    const metadata = {
-      requires: {
-        topology: [config.topology],
-        mongodb: minServerVersion
-      }
-    };
-
-    describe(testSuite.name, {
-      metadata,
+    const tests = testSuite.tests;
+    describe(suiteName, {
+      metadata: { requires: { topology: topologies, mongodb: minServerVersion } },
       test: function() {
         beforeEach(() => prepareDatabaseForSuite(testSuite, testContext));
         afterEach(() => cleanupAfterSuite(testContext));
 
-        testSuite.tests.forEach(testData => {
-          const maybeSkipIt = testData.skipReason ? it.skip : it;
-          maybeSkipIt(testData.description, function() {
+        tests.forEach(spec => {
+          const maybeSkipIt = spec.skipReason ? it.skip : it;
+          maybeSkipIt(spec.description, function() {
             let testPromise = Promise.resolve();
 
-            if (testData.failPoint) {
-              testPromise = testPromise.then(() => testContext.enableFailPoint(testData.failPoint));
+            if (spec.failPoint) {
+              testPromise = testPromise.then(() => enableFailPoint(spec.failPoint, testContext));
             }
 
             // run the actual test
             testPromise = testPromise.then(() =>
-              runTestSuiteTest(this.configuration, testData, testContext)
+              runTestSuiteTest(this.configuration, spec, testContext)
             );
 
-            if (testData.failPoint) {
-              testPromise = testPromise.then(() =>
-                testContext.disableFailPoint(testData.failPoint)
-              );
+            if (spec.failPoint) {
+              testPromise = testPromise.then(() => disableFailPoint(spec.failPoint, testContext));
             }
 
-            return testPromise.then(() => validateOutcome(testData, testContext));
+            return testPromise;
           });
         });
       }
@@ -286,6 +309,35 @@ function cleanupAfterSuite(context) {
   }
 }
 
+function enableFailPoint(failPoint, testContext) {
+  if (testContext.failPointClients.length) {
+    return Promise.all(
+      testContext.failPointClients.map(client => {
+        return client.db(testContext.dbName).executeDbAdminCommand(failPoint);
+      })
+    );
+  }
+
+  return testContext.sharedClient.db(testContext.dbName).executeDbAdminCommand(failPoint);
+}
+
+function disableFailPoint(failPoint, testContext) {
+  const command = {
+    configureFailPoint: failPoint.configureFailPoint,
+    mode: 'off'
+  };
+
+  if (testContext.failPointClients.length) {
+    return Promise.all(
+      testContext.failPointClients.map(client => {
+        return client.db(testContext.dbName).executeDbAdminCommand(command);
+      })
+    );
+  }
+
+  return testContext.sharedClient.db(testContext.dbName).executeDbAdminCommand(command);
+}
+
 function parseSessionOptions(options) {
   const result = Object.assign({}, options);
   if (result.defaultTransactionOptions && result.defaultTransactionOptions.readPreference) {
@@ -298,17 +350,18 @@ function parseSessionOptions(options) {
 }
 
 let displayCommands = false;
-function runTestSuiteTest(configuration, testData, context) {
+function runTestSuiteTest(configuration, spec, context) {
   const commandEvents = [];
   const clientOptions = translateClientOptions(
-    Object.assign({ monitorCommands: true }, testData.clientOptions)
+    Object.assign({ monitorCommands: true }, spec.clientOptions)
   );
 
-  // test-specific client options
+  // test-specific client optionss
   clientOptions.autoReconnect = false;
   clientOptions.haInterval = 100;
 
-  const client = context.newClient(configuration, clientOptions);
+  const url = resolveConnectionString(configuration, spec);
+  const client = configuration.newClient(url, clientOptions);
   return client.connect().then(client => {
     context.testClient = client;
     client.on('commandStarted', event => {
@@ -322,25 +375,25 @@ function runTestSuiteTest(configuration, testData, context) {
       }
     });
 
-    const sessionOptions = Object.assign({}, testData.transactionOptions);
+    const sessionOptions = Object.assign({}, spec.transactionOptions);
 
-    testData.sessionOptions = testData.sessionOptions || {};
+    spec.sessionOptions = spec.sessionOptions || {};
     const database = client.db(context.dbName);
     const session0 = client.startSession(
-      Object.assign({}, sessionOptions, parseSessionOptions(testData.sessionOptions.session0))
+      Object.assign({}, sessionOptions, parseSessionOptions(spec.sessionOptions.session0))
     );
     const session1 = client.startSession(
-      Object.assign({}, sessionOptions, parseSessionOptions(testData.sessionOptions.session1))
+      Object.assign({}, sessionOptions, parseSessionOptions(spec.sessionOptions.session1))
     );
 
     // enable to see useful APM debug information at the time of actual test run
     // displayCommands = true;
 
-    const operationContext = { database, session0, session1 };
+    const operationContext = { database, session0, session1, testRunner: context };
 
     let testPromise = Promise.resolve();
     return testPromise
-      .then(() => testOperations(testData, operationContext))
+      .then(() => testOperations(spec, operationContext))
       .catch(err => {
         // If the driver throws an exception / returns an error while executing this series
         // of operations, store the error message.
@@ -350,39 +403,18 @@ function runTestSuiteTest(configuration, testData, context) {
         session0.endSession();
         session1.endSession();
 
-        return validateExpectations(commandEvents, testData, context, operationContext);
+        return validateExpectations(commandEvents, spec, context, operationContext);
       });
   });
 }
 
-function validateOutcome(testData, testContext) {
-  if (testData.outcome) {
-    if (testData.outcome.collection) {
-      // use the client without transactions to verify
-      return testContext.sharedClient
-        .db(testContext.dbName)
-        .collection(testContext.collectionName)
-        .find({}, { readPreference: 'primary', readConcern: { level: 'local' } })
-        .toArray()
-        .then(docs => {
-          expect(docs).to.eql(testData.outcome.collection.data);
-        });
-    }
-  }
-  return Promise.resolve();
-}
-
-function validateExpectations(commandEvents, testData, testContext, operationContext) {
+function validateExpectations(commandEvents, spec, testContext, operationContext) {
   const session0 = operationContext.session0;
   const session1 = operationContext.session1;
 
-  if (
-    testData.expectations &&
-    Array.isArray(testData.expectations) &&
-    testData.expectations.length > 0
-  ) {
+  if (spec.expectations && Array.isArray(spec.expectations) && spec.expectations.length > 0) {
     const actualEvents = normalizeCommandShapes(commandEvents);
-    const rawExpectedEvents = testData.expectations.map(x =>
+    const rawExpectedEvents = spec.expectations.map(x =>
       linkSessionData(x.command_started_event, { session0, session1 })
     );
 
@@ -421,12 +453,28 @@ function validateExpectations(commandEvents, testData, testContext, operationCon
       //     expect(parsedActual)
       //       .nested.property(placeholder.path)
       //       .to.be.greaterThan(0);
+      //   } else if (placeholder.type === 'exists') {
+      //     expect(parsedActual).nested.property(placeholder.path).to.exist;
       //   }
       // });
 
       // compare the command
       expect(actualCommand).to.containSubset(expectedCommand);
     });
+  }
+
+  if (spec.outcome) {
+    if (spec.outcome.collection) {
+      // use the client without transactions to verify
+      return testContext.sharedClient
+        .db(testContext.dbName)
+        .collection(testContext.collectionName)
+        .find({}, { readPreference: 'primary', readConcern: { level: 'local' } })
+        .toArray()
+        .then(docs => {
+          expect(docs).to.eql(spec.outcome.collection.data);
+        });
+    }
   }
 }
 
@@ -476,6 +524,12 @@ function extractCrudResult(result, operation) {
 
 function isTransactionCommand(command) {
   return ['startTransaction', 'commitTransaction', 'abortTransaction'].indexOf(command) !== -1;
+}
+
+function isTestRunnerCommand(command) {
+  return (
+    ['targetedFailPoint', 'assertSessionPinned', 'assertSessionUnpinned'].indexOf(command) !== -1
+  );
 }
 
 function extractBulkRequests(requests) {
@@ -550,7 +604,11 @@ function testOperation(operation, obj, context, options) {
     });
   }
 
-  if (args.length === 0 && !isTransactionCommand(operationName)) {
+  if (
+    args.length === 0 &&
+    !isTransactionCommand(operationName) &&
+    !isTestRunnerCommand(operationName)
+  ) {
     args.push({});
   }
 
