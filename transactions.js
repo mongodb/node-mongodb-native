@@ -107,10 +107,6 @@ class Transaction {
     this._recoveryToken = undefined;
   }
 
-  get isPinned() {
-    return this._pinnedServer != null;
-  }
-
   get server() {
     return this._pinnedServer;
   }
@@ -147,10 +143,6 @@ class Transaction {
     throw new MongoError(
       `Attempted illegal state transition from [${this.state}] to [${nextState}]`
     );
-  }
-
-  get isPinned() {
-    return this._pinnedServer != null;
   }
 
   pinServer(server) {
