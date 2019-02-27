@@ -236,6 +236,21 @@ function parseTopologies(topologies) {
   return topologies;
 }
 
+function shouldSkipTest(spec) {
+  const SKIP_TESTS = [
+    // commitTransaction retry seems to be swallowed by mongos in these three cases
+    'commitTransaction retry succeeds on new mongos',
+    'commitTransaction retry fails on new mongos',
+    'unpin after transient error within a transaction and commit'
+  ];
+
+  if (spec.skipReason || SKIP_TESTS.indexOf(spec.description) !== -1) {
+    return it.skip;
+  }
+
+  return it;
+}
+
 function generateTopologyTests(testSuites, testContext) {
   testSuites.forEach(testSuite => {
     const suiteName = testSuite.name;
@@ -252,7 +267,7 @@ function generateTopologyTests(testSuites, testContext) {
         afterEach(() => cleanupAfterSuite(testContext));
 
         tests.forEach(spec => {
-          const maybeSkipIt = spec.skipReason ? it.skip : it;
+          const maybeSkipIt = shouldSkipTest(spec);
           maybeSkipIt(spec.description, function() {
             let testPromise = Promise.resolve();
 
