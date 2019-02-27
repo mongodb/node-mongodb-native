@@ -453,7 +453,7 @@ function endTransaction(session, commandName, callback) {
         if (isUnknownTransactionCommitResult(e)) {
           e.errorLabels.push('UnknownTransactionCommitResult');
 
-          // Per Mongos Pinning, must unpin session
+          // per txns spec, must unpin session in this case
           session.transaction.unpinServer();
         }
       }
@@ -474,9 +474,9 @@ function endTransaction(session, commandName, callback) {
     if (err && isRetryableError(err)) {
       // SPEC-1185: apply majority write concern when retrying commitTransaction
       if (command.commitTransaction) {
-        // Per Mongos Pinning, must unpin session
+        // per txns spec, must unpin session in this case
         session.transaction.unpinServer();
-  
+
         command.writeConcern = Object.assign({ wtimeout: 10000 }, command.writeConcern, {
           w: 'majority'
         });
