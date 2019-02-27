@@ -140,6 +140,10 @@ class Transaction {
     );
   }
 
+  get isPinned() {
+    return this._pinnedServer != null;
+  }
+
   pinServer(server) {
     if (this.isActive) {
       this._pinnedServer = server;
