@@ -127,9 +127,11 @@ class TransactionsTestContext {
       resolveConnectionString(config, { useMultipleMongoses: true })
     );
 
-    this.failPointClients = config.options.proxies.map(proxy =>
-      config.newClient(`mongodb://${proxy.host}:${proxy.port}/`)
-    );
+    if (config.options && config.options.proxies) {
+      this.failPointClients = config.options.proxies.map(proxy =>
+        config.newClient(`mongodb://${proxy.host}:${proxy.port}/`)
+      );
+    }
 
     return this.runForAllClients(client => client.connect());
   }
