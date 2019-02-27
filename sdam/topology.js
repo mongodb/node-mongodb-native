@@ -295,7 +295,10 @@ class Topology extends EventEmitter {
       callback = options;
       if (typeof selector !== 'function') {
         options = selector;
-        selector = readPreferenceServerSelector(options.readPreference);
+
+        translateReadPreference(options);
+        const readPreference = options.readPreference || ReadPreference.primary;
+        selector = readPreferenceServerSelector(readPreference);
       } else {
         options = {};
       }
