@@ -469,6 +469,10 @@ function endTransaction(session, commandName, callback) {
     return commandName === 'commitTransaction' ? err : null;
   }
 
+  if (session.transaction.recoveryToken) {
+    command.recoveryToken = session.transaction.recoveryToken;
+  }
+
   // send the command
   session.topology.command('admin.$cmd', command, { session }, (err, reply) => {
     if (err && isRetryableError(err)) {

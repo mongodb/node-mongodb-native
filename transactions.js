@@ -104,10 +104,19 @@ class Transaction {
 
     // TODO: This isn't technically necessary
     this._pinnedServer = undefined;
+    this._recoveryToken = undefined;
+  }
+
+  get isPinned() {
+    return this._pinnedServer != null;
   }
 
   get server() {
     return this._pinnedServer;
+  }
+
+  get recoveryToken() {
+    return this._recoveryToken;
   }
 
   /**

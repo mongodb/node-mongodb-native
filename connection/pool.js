@@ -428,23 +428,25 @@ function messageHandler(self) {
         return handleOperationCallback(self, workItem.cb, new MongoError(err));
       }
 
-      // Look for clusterTime, and operationTime and update them if necessary
+      // Look for clusterTime, operationTime, and recoveryToken and update them if necessary
       if (message.documents[0]) {
-        if (message.documents[0].$clusterTime) {
-          const $clusterTime = message.documents[0].$clusterTime;
+        const session = workItem.session;
+        const document = message.documents[0];
+        if (document.$clusterTime) {
+          const $clusterTime = document.$clusterTime;
           self.topology.clusterTime = $clusterTime;
 
-          if (workItem.session != null) {
-            resolveClusterTime(workItem.session, $clusterTime);
+          if (session != null) {
+            resolveClusterTime(session, $clusterTime);
           }
         }
 
-        if (
-          message.documents[0].operationTime &&
-          workItem.session &&
-          workItem.session.supports.causalConsistency
-        ) {
-          workItem.session.advanceOperationTime(message.documents[0].operationTime);
+        if (document.operationTime && session && session.supports.causalConsistency) {
+          session.advanceOperationTime(message.documents[0].operationTime);
+        }
+
+        if (document.recoveryToken && session && session.inTransaction()) {
+          session.transaction._recoveryToken = document.recoveryToken;
         }
       }
 
