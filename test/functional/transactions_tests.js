@@ -107,7 +107,19 @@ class TransactionsTestContext {
   constructor() {
     this.url = null;
     this.sharedClient = null;
+    this.failPointClients = [];
     this.appliedFailPoints = [];
+  }
+
+  runForAllClients(fn) {
+    const allClients = [this.sharedClient].concat(this.failPointClients);
+    return Promise.all(allClients.map(fn));
+  }
+
+  runFailPointCmd(fn) {
+    return this.failPointClients.length
+      ? Promise.all(this.failPointClients.map(fn))
+      : fn(this.sharedClient);
   }
 
   setup(config) {
@@ -115,35 +127,37 @@ class TransactionsTestContext {
       resolveConnectionString(config, { useMultipleMongoses: true })
     );
 
-    this.failPointClients = [];
-    if (config.environment instanceof environments.sharded) {
-      this.failPointClients = [51000, 51001].map(port =>
-        config.newClient(`mongodb://localhost:${port}`)
-      );
-    }
-
-    return Promise.all(
-      this.failPointClients.concat(this.sharedClient).map(client => client.connect())
+    this.failPointClients = config.options.proxies.map(proxy =>
+      config.newClient(`mongodb://${proxy.host}:${proxy.port}/`)
     );
+
+    return this.runForAllClients(client => client.connect());
   }
 
   teardown() {
-    const failPointPromise = this.failPointClients.reduce((promise, client) => {
-      return promise.then(() =>
-        this.appliedFailPoints.map(failPoint => {
-          const command = {
-            configureFailPoint: failPoint.configureFailPoint,
-            mode: 'off'
-          };
+    this.runForAllClients(client => client.close());
+  }
 
-          return client.db('admin').command(command);
+  cleanupAfterSuite() {
+    const context = this;
+
+    // clean up applied failpoints
+    const cleanupPromises = this.appliedFailPoints.map(failPoint => {
+      return context.disableFailPoint(failPoint);
+    });
+
+    this.appliedFailPoints = [];
+
+    // cleanup
+    if (context.testClient) {
+      cleanupPromises.push(
+        context.testClient.close().then(() => {
+          delete context.testClient;
         })
       );
-    }, Promise.resolve());
+    }
 
-    return failPointPromise.then(() =>
-      Promise.all(this.failPointClients.concat(this.sharedClient).map(client => client.close()))
-    );
+    return Promise.all(cleanupPromises);
   }
 
   targetedFailPoint(options) {
@@ -174,6 +188,21 @@ class TransactionsTestContext {
 
     const session = options.session;
     expect(session.transaction.isPinned).to.be.false;
+  }
+
+  enableFailPoint(failPoint) {
+    return this.runFailPointCmd(client => {
+      return client.db(this.dbName).executeDbAdminCommand(failPoint);
+    });
+  }
+
+  disableFailPoint(failPoint) {
+    return this.runFailPointCmd(client => {
+      return client.db(this.dbName).executeDbAdminCommand({
+        configureFailPoint: failPoint.configureFailPoint,
+        mode: 'off'
+      });
+    });
   }
 }
 
@@ -230,7 +259,12 @@ describe('Transactions', function() {
 
 function parseTopologies(topologies) {
   if (topologies == null) {
-    return ['single', 'replicaset', 'mongos'];
+    return ['replicaset', 'mongos'];
+  }
+
+  const idx = topologies.indexOf('single');
+  if (idx !== -1) {
+    topologies.splice(idx, 1);
   }
 
   return topologies;
@@ -264,7 +298,7 @@ function generateTopologyTests(testSuites, testContext) {
       metadata: { requires: { topology: topologies, mongodb: minServerVersion } },
       test: function() {
         beforeEach(() => prepareDatabaseForSuite(testSuite, testContext));
-        afterEach(() => cleanupAfterSuite(testContext));
+        afterEach(() => testContext.cleanupAfterSuite());
 
         tests.forEach(spec => {
           const maybeSkipIt = shouldSkipTest(spec);
@@ -272,7 +306,7 @@ function generateTopologyTests(testSuites, testContext) {
             let testPromise = Promise.resolve();
 
             if (spec.failPoint) {
-              testPromise = testPromise.then(() => enableFailPoint(spec.failPoint, testContext));
+              testPromise = testPromise.then(() => testContext.enableFailPoint(spec.failPoint));
             }
 
             // run the actual test
@@ -281,10 +315,10 @@ function generateTopologyTests(testSuites, testContext) {
             );
 
             if (spec.failPoint) {
-              testPromise = testPromise.then(() => disableFailPoint(spec.failPoint, testContext));
+              testPromise = testPromise.then(() => testContext.disableFailPoint(spec.failPoint));
             }
 
-            return testPromise;
+            return testPromise.then(() => validateOutcome(spec, testContext));
           });
         });
       }
@@ -314,43 +348,6 @@ function prepareDatabaseForSuite(suite, context) {
         return coll.insert(suite.data, { w: 'majority' });
       }
     });
-}
-
-function cleanupAfterSuite(context) {
-  if (context.testClient) {
-    return context.testClient.close().then(() => {
-      delete context.testClient;
-    });
-  }
-}
-
-function enableFailPoint(failPoint, testContext) {
-  if (testContext.failPointClients.length) {
-    return Promise.all(
-      testContext.failPointClients.map(client => {
-        return client.db(testContext.dbName).executeDbAdminCommand(failPoint);
-      })
-    );
-  }
-
-  return testContext.sharedClient.db(testContext.dbName).executeDbAdminCommand(failPoint);
-}
-
-function disableFailPoint(failPoint, testContext) {
-  const command = {
-    configureFailPoint: failPoint.configureFailPoint,
-    mode: 'off'
-  };
-
-  if (testContext.failPointClients.length) {
-    return Promise.all(
-      testContext.failPointClients.map(client => {
-        return client.db(testContext.dbName).executeDbAdminCommand(command);
-      })
-    );
-  }
-
-  return testContext.sharedClient.db(testContext.dbName).executeDbAdminCommand(command);
 }
 
 function parseSessionOptions(options) {
@@ -423,6 +420,23 @@ function runTestSuiteTest(configuration, spec, context) {
   });
 }
 
+function validateOutcome(testData, testContext) {
+  if (testData.outcome) {
+    if (testData.outcome.collection) {
+      // use the client without transactions to verify
+      return testContext.sharedClient
+        .db(testContext.dbName)
+        .collection(testContext.collectionName)
+        .find({}, { readPreference: 'primary', readConcern: { level: 'local' } })
+        .toArray()
+        .then(docs => {
+          expect(docs).to.eql(testData.outcome.collection.data);
+        });
+    }
+  }
+  return Promise.resolve();
+}
+
 function validateExpectations(commandEvents, spec, testContext, operationContext) {
   const session0 = operationContext.session0;
   const session1 = operationContext.session1;
@@ -476,20 +490,6 @@ function validateExpectations(commandEvents, spec, testContext, operationContext
       // compare the command
       expect(actualCommand).to.containSubset(expectedCommand);
     });
-  }
-
-  if (spec.outcome) {
-    if (spec.outcome.collection) {
-      // use the client without transactions to verify
-      return testContext.sharedClient
-        .db(testContext.dbName)
-        .collection(testContext.collectionName)
-        .find({}, { readPreference: 'primary', readConcern: { level: 'local' } })
-        .toArray()
-        .then(docs => {
-          expect(docs).to.eql(spec.outcome.collection.data);
-        });
-    }
   }
 }
 
