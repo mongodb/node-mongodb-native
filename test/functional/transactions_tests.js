@@ -91,17 +91,57 @@ class TransactionsTestContext {
   constructor() {
     this.url = null;
     this.sharedClient = null;
+    this.failPointClients = [];
+  }
+
+  runForAllClients(fn) {
+    const allClients = [this.sharedClient].concat(this.failPointClients);
+    return Promise.all(allClients.map(fn));
+  }
+
+  runFailPointCmd(fn) {
+    return this.failPointClients.length
+      ? Promise.all(this.failPointClients.map(fn))
+      : fn(this.sharedClient);
   }
 
   setup(config) {
-    this.url = `mongodb://${config.host}:${config.port}/?replicaSet=${config.replicasetName}`;
+    if (config.options.proxies) {
+      const mainProxy = config.options.proxies[0];
+      this.url = `mongodb://${mainProxy.host}:${mainProxy.port}/`;
 
-    this.sharedClient = config.newClient(this.url);
-    return this.sharedClient.connect();
+      this.failPointClients = config.options.proxies.map(proxy =>
+        config.newClient(`mongodb://${proxy.host}:${proxy.port}/`)
+      );
+    } else {
+      this.url = config.url();
+    }
+
+    this.sharedClient = this.newClient(config);
+    return this.runForAllClients(client => client.connect());
+  }
+
+  newClient(config, clientOptions) {
+    return config.newClient(this.url, clientOptions);
   }
 
   teardown() {
-    return this.sharedClient.close();
+    return this.runForAllClients(client => client.close());
+  }
+
+  enableFailPoint(failPoint) {
+    return this.runFailPointCmd(client => {
+      return client.db(this.dbName).executeDbAdminCommand(failPoint);
+    });
+  }
+
+  disableFailPoint(failPoint) {
+    return this.runFailPointCmd(client => {
+      return client.db(this.dbName).executeDbAdminCommand({
+        configureFailPoint: failPoint.configureFailPoint,
+        mode: 'off'
+      });
+    });
   }
 }
 
@@ -123,7 +163,7 @@ describe('Transactions', function() {
         return testContext.setup(this.configuration);
       });
 
-      generateTestSuiteTests(testSuites, testContext);
+      generateTopologyTests(testSuites, testContext);
     });
   });
 
@@ -140,7 +180,7 @@ describe('Transactions', function() {
     });
 
     it('should provide a useful error if a Promise is not returned', {
-      metadata: { requires: { topology: ['replicaset', 'mongos'], mongodb: '>=4.0.x' } },
+      metadata: { requires: { topology: ['replicaset', 'sharded'], mongodb: '>=4.1.5' } },
       test: function(done) {
         function fnThatDoesntReturnPromise() {
           return false;
@@ -156,27 +196,43 @@ describe('Transactions', function() {
   });
 });
 
-function generateTestSuiteTests(testSuites, testContext) {
+function generateTopologyTests(testSuites, testContext) {
+  [
+    { topology: 'replicaset', minServerVersion: '>=3.7.x' },
+    { topology: 'sharded', minServerVersion: '>=4.1.5' }
+  ].forEach(config => {
+    describe(config.topology, function() {
+      generateTestSuiteTests(testSuites, testContext, config);
+    });
+  });
+}
+
+function generateTestSuiteTests(testSuites, testContext, config) {
   testSuites.forEach(testSuite => {
     const minServerVersion = testSuite.minServerVersion
       ? `>=${testSuite.minServerVersion}`
-      : '>=3.7.x';
+      : config.minServerVersion;
+
+    const metadata = {
+      requires: {
+        topology: [config.topology],
+        mongodb: minServerVersion
+      }
+    };
 
     describe(testSuite.name, {
-      metadata: { requires: { topology: ['replicaset', 'mongos'], mongodb: minServerVersion } },
+      metadata,
       test: function() {
         beforeEach(() => prepareDatabaseForSuite(testSuite, testContext));
         afterEach(() => cleanupAfterSuite(testContext));
 
         testSuite.tests.forEach(testData => {
-          const maybeSkipIt = testData.skipReason || testSuite.name === 'pin-mongos' ? it.skip : it;
+          const maybeSkipIt = testData.skipReason ? it.skip : it;
           maybeSkipIt(testData.description, function() {
             let testPromise = Promise.resolve();
 
             if (testData.failPoint) {
-              testPromise = testPromise.then(() =>
-                enableFailPoint(testData.failPoint, testContext)
-              );
+              testPromise = testPromise.then(() => testContext.enableFailPoint(testData.failPoint));
             }
 
             // run the actual test
@@ -186,11 +242,11 @@ function generateTestSuiteTests(testSuites, testContext) {
 
             if (testData.failPoint) {
               testPromise = testPromise.then(() =>
-                disableFailPoint(testData.failPoint, testContext)
+                testContext.disableFailPoint(testData.failPoint)
               );
             }
 
-            return testPromise;
+            return testPromise.then(() => validateOutcome(testData, testContext));
           });
         });
       }
@@ -230,17 +286,6 @@ function cleanupAfterSuite(context) {
   }
 }
 
-function enableFailPoint(failPoint, testContext) {
-  return testContext.sharedClient.db(testContext.dbName).executeDbAdminCommand(failPoint);
-}
-
-function disableFailPoint(failPoint, testContext) {
-  return testContext.sharedClient.db(testContext.dbName).executeDbAdminCommand({
-    configureFailPoint: failPoint.configureFailPoint,
-    mode: 'off'
-  });
-}
-
 function parseSessionOptions(options) {
   const result = Object.assign({}, options);
   if (result.defaultTransactionOptions && result.defaultTransactionOptions.readPreference) {
@@ -263,7 +308,7 @@ function runTestSuiteTest(configuration, testData, context) {
   clientOptions.autoReconnect = false;
   clientOptions.haInterval = 100;
 
-  const client = configuration.newClient(context.url, clientOptions);
+  const client = context.newClient(configuration, clientOptions);
   return client.connect().then(client => {
     context.testClient = client;
     client.on('commandStarted', event => {
@@ -308,6 +353,23 @@ function runTestSuiteTest(configuration, testData, context) {
         return validateExpectations(commandEvents, testData, context, operationContext);
       });
   });
+}
+
+function validateOutcome(testData, testContext) {
+  if (testData.outcome) {
+    if (testData.outcome.collection) {
+      // use the client without transactions to verify
+      return testContext.sharedClient
+        .db(testContext.dbName)
+        .collection(testContext.collectionName)
+        .find({}, { readPreference: 'primary', readConcern: { level: 'local' } })
+        .toArray()
+        .then(docs => {
+          expect(docs).to.eql(testData.outcome.collection.data);
+        });
+    }
+  }
+  return Promise.resolve();
 }
 
 function validateExpectations(commandEvents, testData, testContext, operationContext) {
@@ -365,20 +427,6 @@ function validateExpectations(commandEvents, testData, testContext, operationCon
       // compare the command
       expect(actualCommand).to.containSubset(expectedCommand);
     });
-  }
-
-  if (testData.outcome) {
-    if (testData.outcome.collection) {
-      // use the client without transactions to verify
-      return testContext.sharedClient
-        .db(testContext.dbName)
-        .collection(testContext.collectionName)
-        .find({}, { readPreference: 'primary', readConcern: { level: 'local' } })
-        .toArray()
-        .then(docs => {
-          expect(docs).to.eql(testData.outcome.collection.data);
-        });
-    }
   }
 }
 
