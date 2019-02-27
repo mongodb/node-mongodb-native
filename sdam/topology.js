@@ -291,7 +291,16 @@ class Topology extends EventEmitter {
    * @return {Server} An instance of a `Server` meeting the criteria of the predicate provided
    */
   selectServer(selector, options, callback) {
-    if (typeof options === 'function') (callback = options), (options = {});
+    if (typeof options === 'function') {
+      callback = options;
+      if (typeof selector !== 'function') {
+        options = selector;
+        selector = readPreferenceServerSelector(options.readPreference);
+      } else {
+        options = {};
+      }
+    }
+
     options = Object.assign(
       {},
       { serverSelectionTimeoutMS: this.s.serverSelectionTimeoutMS },
