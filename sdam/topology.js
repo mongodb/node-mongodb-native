@@ -206,7 +206,7 @@ class Topology extends EventEmitter {
     translateReadPreference(options);
     const readPreference = options.readPreference || ReadPreference.primary;
 
-    this.selectServer(readPreferenceServerSelector(readPreference), (err, server) => {
+    this.selectServer(readPreferenceServerSelector(readPreference), options, (err, server) => {
       if (err) {
         if (typeof callback === 'function') {
           callback(err, null);
@@ -310,6 +310,15 @@ class Topology extends EventEmitter {
       options
     );
 
+    const isSharded = this.description.type === TopologyType.Sharded;
+    const session = options.session;
+    const transaction = session && session.transaction;
+
+    if (isSharded && transaction && transaction.server) {
+      callback(null, transaction.server);
+      return;
+    }
+
     selectServers(
       this,
       selector,
@@ -317,7 +326,13 @@ class Topology extends EventEmitter {
       process.hrtime(),
       (err, servers) => {
         if (err) return callback(err, null);
-        callback(null, randomSelection(servers));
+
+        const selectedServer = randomSelection(servers);
+        if (isSharded && transaction && transaction.isActive) {
+          transaction.pinServer(selectedServer);
+        }
+
+        callback(null, selectedServer);
       }
     );
   }
@@ -505,7 +520,7 @@ class Topology extends EventEmitter {
     translateReadPreference(options);
     const readPreference = options.readPreference || ReadPreference.primary;
 
-    this.selectServer(readPreferenceServerSelector(readPreference), (err, server) => {
+    this.selectServer(readPreferenceServerSelector(readPreference), options, (err, server) => {
       if (err) {
         callback(err, null);
         return;
@@ -868,7 +883,7 @@ function executeWriteOperation(args, options, callback) {
     isRetryableWritesSupported(topology) &&
     !options.session.inTransaction();
 
-  topology.selectServer(writableServerSelector(), (err, server) => {
+  topology.selectServer(writableServerSelector(), options, (err, server) => {
     if (err) {
       callback(err, null);
       return;
