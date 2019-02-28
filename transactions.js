@@ -115,6 +115,10 @@ class Transaction {
     return this._recoveryToken;
   }
 
+  get isPinned() {
+    return !!this.server;
+  }
+
   /**
    * @ignore
    * @return Whether this session is presently in a transaction
