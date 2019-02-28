@@ -469,7 +469,7 @@ function endTransaction(session, commandName, callback) {
     return commandName === 'commitTransaction' ? err : null;
   }
 
-  if (session.transaction.recoveryToken) {
+  if (commandName === 'commitTransaction' && session.transaction.recoveryToken) {
     command.recoveryToken = session.transaction.recoveryToken;
   }
 
