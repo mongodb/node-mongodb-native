@@ -97,7 +97,8 @@ Each YAML file has the following keys:
   - ``clientOptions``: Optional, parameters to pass to MongoClient().
 
   - ``failPoint``: Optional, a server failpoint to enable expressed as the
-    configureFailPoint command to run on the admin database.
+    configureFailPoint command to run on the admin database. This option and
+    ``useMultipleMongoses: true`` are mutually exclusive.
 
   - ``sessionOptions``: Optional, parameters to pass to
     MongoClient.startSession().
@@ -171,6 +172,12 @@ Then for each element in ``tests``:
    ``client.admin.runCommand({killAllSessions: []})`` to clean up any open
    transactions from previous test failures.
 
+   - Running ``killAllSessions`` cleans up any open transactions from
+     a previously failed test to prevent the current test from blocking.
+     It is sufficient to run this command once before starting the test suite
+     and once after each failed test.
+   - When testing against a sharded cluster run this command on ALL mongoses.
+
 #. Create a collection object from the MongoClient, using the ``database_name``
    and ``collection_name`` fields of the YAML file.
 #. Drop the test collection, using writeConcern "majority".
@@ -181,9 +188,6 @@ Then for each element in ``tests``:
    into the test collection, using writeConcern "majority".
 #. If ``failPoint`` is specified, its value is a configureFailPoint command.
    Run the command on the admin database to enable the fail point.
-
-   - When testing against a sharded cluster run this command on ALL mongoses.
-
 #. Create a **new** MongoClient ``client``, with Command Monitoring listeners
    enabled. (Using a new MongoClient for each test ensures a fresh session pool
    that hasn't executed any transactions previously, so the tests can assert
@@ -253,8 +257,6 @@ Then for each element in ``tests``:
         mode: "off"
     });
 
-   - When testing against a sharded cluster run this command on ALL mongoses.
-
 #. For each element in ``outcome``:
 
    - If ``name`` is "collection", verify that the test collection contains
@@ -278,6 +280,15 @@ point on a specific mongos. The mongos to run the ``configureFailPoint`` is
 determined by the "session" argument (either "session0" or "session1").
 The session must already be pinned to a mongos server. The "failPoint" argument
 is the ``configureFailPoint`` command to run.
+
+If a test uses ``targetedFailPoint``, disable the fail point after running
+all ``operations`` to avoid spurious failures in subsequent tests. The fail
+point may be disabled like so::
+
+    db.adminCommand({
+        configureFailPoint: <fail point name>,
+        mode: "off"
+    });
 
 Here is an example which instructs the test runner to enable the failCommand
 fail point on the mongos server which "session0" is pinned to::
@@ -460,13 +471,15 @@ Note that mongo-orchestration >=0.6.13 automatically sets this timeout to 3
 seconds so drivers using mongo-orchestration do not need to run these commands
 manually.
 
-.. _SERVER-39349: https://jira.mongodb.org/browse/SERVER-39726
+.. _SERVER-39726: https://jira.mongodb.org/browse/SERVER-39726
 
 .. _SERVER-39349: https://jira.mongodb.org/browse/SERVER-39349
 
 **Changelog**
--------------
+=============
 
+:2019-02-28: ``useMultipleMongoses: true`` and non-targeted fail points are
+             mutually exclusive.
 :2019-02-13: Modify test format for 4.2 sharded transactions, including
              "useMultipleMongoses", ``object: testRunner``, the
              ``targetedFailPoint`` operation, and recoveryToken assertions.

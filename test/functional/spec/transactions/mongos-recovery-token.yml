@@ -176,7 +176,7 @@ tests:
       # Increase heartbeatFrequencyMS to avoid the race condition where an in
       # flight heartbeat refreshes the first mongoes' SDAM state in between
       # the initial commitTransaction and the retry attempt.
-      heartbeatFrequencyMS: 5000
+      heartbeatFrequencyMS: 30000
     operations:
       - name: startTransaction
         object: session0
