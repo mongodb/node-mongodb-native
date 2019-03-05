@@ -1,7 +1,9 @@
 'use strict';
 
 const fs = require('fs');
-const expect = require('chai').expect;
+const chai = require('chai');
+const expect = chai.expect;
+chai.use(require('chai-subset'));
 const parse = require('mongodb-core').parseConnectionString;
 
 describe('URI Options (spec)', function() {
@@ -21,22 +23,7 @@ describe('URI Options (spec)', function() {
             test: function(done) {
               parse(test.uri, {}, (err, result) => {
                 expect(err).to.not.exist;
-
-                // extract all keys from result.options, including nested keys
-                let compareKeys = [];
-                for (let optionKey in result.options) {
-                  compareKeys.push(optionKey);
-                  if (typeof result.options[optionKey] === 'object') {
-                    Object.keys(result.options[optionKey]).forEach(nestedOptionKey => {
-                      compareKeys.push(nestedOptionKey);
-                    });
-                  }
-                }
-
-                Object.keys(test.options).every(option => {
-                  expect(compareKeys.indexOf(option) === -1).to.equal(false);
-                });
-
+                expect(result.options).to.containSubset(test.options);
                 done();
               });
             }
