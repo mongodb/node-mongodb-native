@@ -5,6 +5,7 @@ const chai = require('chai');
 const expect = chai.expect;
 chai.use(require('chai-subset'));
 const parse = require('mongodb-core').parseConnectionString;
+const MongoParseError = require('mongodb-core').MongoParseError;
 
 describe('URI Options (spec)', function() {
   fs
@@ -22,8 +23,14 @@ describe('URI Options (spec)', function() {
             metadata: { requires: { topology: 'single' } },
             test: function(done) {
               parse(test.uri, {}, (err, result) => {
-                expect(err).to.not.exist;
-                expect(result.options).to.containSubset(test.options);
+                if (test.valid === true) {
+                  expect(err).to.not.exist;
+                  expect(result.options).to.containSubset(test.options);
+                } else {
+                  console.log(err);
+                  expect(err).to.exist;
+                  expect(err).to.be.an.instanceof(MongoParseError);
+                }
                 done();
               });
             }
