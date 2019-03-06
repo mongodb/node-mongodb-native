@@ -106,6 +106,9 @@ afterEach('Session Leak After Each - ensure no leaks', function() {
       `client close failed to clean up ${pooledSessions.size} pooled sessions`
     ).to.equal(0);
   } catch (e) {
+    activeSessions.clear();
+    pooledSessions.clear();
+    activeSessionsBeforeClose.clear();
     this.test.error(e);
   }
 });
