@@ -320,13 +320,16 @@ describe('Promises (Collection)', function() {
         var db = client.db(configuration.db);
         var bulk = db.collection('unordered_bulk_promise_form').initializeUnorderedBulkOp({ w: 1 });
         bulk.insert({ a: 1 });
-        bulk.execute().then(function(r) {
-          test.ok(r);
-          test.deepEqual({ w: 1 }, bulk.s.writeConcern);
+        return bulk
+          .execute()
+          .then(function(r) {
+            test.ok(r);
+            test.deepEqual({ w: 1 }, bulk.s.writeConcern);
 
-          client.close();
-          done();
-        });
+            client.close();
+            done();
+          })
+          .catch(done);
       });
     }
   });
@@ -352,13 +355,16 @@ describe('Promises (Collection)', function() {
         var db = client.db(configuration.db);
         var bulk = db.collection('unordered_bulk_promise_form').initializeOrderedBulkOp({ w: 1 });
         bulk.insert({ a: 1 });
-        bulk.execute().then(function(r) {
-          test.ok(r);
-          test.deepEqual({ w: 1 }, bulk.s.writeConcern);
+        return bulk
+          .execute()
+          .then(function(r) {
+            test.ok(r);
+            test.deepEqual({ w: 1 }, bulk.s.writeConcern);
 
-          client.close();
-          done();
-        });
+            client.close();
+            done();
+          })
+          .catch(done);
       });
     }
   });
