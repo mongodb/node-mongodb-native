@@ -156,13 +156,6 @@ class ShardedEnvironment extends EnvironmentBase {
       genShardedConfig(31012, { arbiter: true }, shardOptions)
     ];
 
-    // second set of nodes
-    const nodes2 = [
-      genShardedConfig(31020, { tags: { loc: 'ny' } }, shardOptions),
-      genShardedConfig(31021, { tags: { loc: 'sf' } }, shardOptions),
-      genShardedConfig(31022, { arbiter: true }, shardOptions)
-    ];
-
     const configOptions = this.options && this.options.config ? this.options.config : {};
     const configNodes = [
       genConfigNode(35000, configOptions),
@@ -201,10 +194,7 @@ class ShardedEnvironment extends EnvironmentBase {
       return { host: proxy.bind_ip, port: proxy.port };
     });
 
-    Promise.all([
-      this.manager.addShard(nodes1, { replSet: 'rs1' }),
-      this.manager.addShard(nodes2, { replSet: 'rs2' })
-    ])
+    Promise.all([this.manager.addShard(nodes1, { replSet: 'rs1' })])
       .then(() => this.manager.addConfigurationServers(configNodes, { replSet: 'rs3' }))
       .then(() => this.manager.addProxies(proxyNodes, { binary: 'mongos' }))
       .then(() => callback())
