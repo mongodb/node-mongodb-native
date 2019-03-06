@@ -433,16 +433,14 @@ function messageHandler(self) {
       // Establish if we have an error
       if (workItem.command && message.documents[0]) {
         const responseDoc = message.documents[0];
-        if (responseDoc.ok === 0 || responseDoc.$err || responseDoc.errmsg || responseDoc.code) {
-          return handleOperationCallback(self, workItem.cb, new MongoError(responseDoc));
-        }
 
         if (responseDoc.writeConcernError) {
-          const err =
-            responseDoc.ok === 1
-              ? new MongoWriteConcernError(responseDoc.writeConcernError, responseDoc)
-              : new MongoWriteConcernError(responseDoc.writeConcernError);
+          const err = new MongoWriteConcernError(responseDoc.writeConcernError, responseDoc);
           return handleOperationCallback(self, workItem.cb, err);
+        }
+
+        if (responseDoc.ok === 0 || responseDoc.$err || responseDoc.errmsg || responseDoc.code) {
+          return handleOperationCallback(self, workItem.cb, new MongoError(responseDoc));
         }
       }
 

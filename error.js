@@ -91,6 +91,19 @@ class MongoTimeoutError extends MongoError {
   }
 }
 
+function makeWriteConcernResultObject(input) {
+  const output = Object.assign({}, input);
+
+  if (output.ok === 0) {
+    output.ok = 1;
+    delete output.errmsg;
+    delete output.code;
+    delete output.codeName;
+  }
+
+  return output;
+}
+
 /**
  * An error thrown when the server reports a writeConcernError
  *
@@ -105,7 +118,7 @@ class MongoWriteConcernError extends MongoError {
     this.name = 'MongoWriteConcernError';
 
     if (result != null) {
-      this.result = result;
+      this.result = makeWriteConcernResultObject(result);
     }
   }
 }
