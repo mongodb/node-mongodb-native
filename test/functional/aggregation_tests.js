@@ -1354,4 +1354,71 @@ describe('Aggregation', function() {
       // DOC_END
     }
   });
+
+  it('should not send a batchSize for aggregations with an out stage', {
+    metadata: { requires: { topology: ['single', 'replicaset'] } },
+    test: function(done) {
+      const databaseName = this.configuration.db;
+      const client = this.configuration.newClient(this.configuration.writeConcernMax(), {
+        poolSize: 1,
+        monitorCommands: true
+      });
+
+      let err;
+      let coll1;
+      let coll2;
+      const events = [];
+
+      client.on('commandStarted', e => {
+        if (e.commandName === 'aggregate') {
+          events.push(e);
+        }
+      });
+
+      client
+        .connect()
+        .then(() => {
+          coll1 = client.db(databaseName).collection('coll1');
+          coll2 = client.db(databaseName).collection('coll2');
+
+          return Promise.all([coll1.remove({}), coll2.remove({})]);
+        })
+        .then(() => {
+          const docs = Array.from({ length: 10 }).map(() => ({ a: 1 }));
+
+          return coll1.insertMany(docs);
+        })
+        .then(() => {
+          return Promise.all(
+            [
+              coll1.aggregate([{ $out: 'coll2' }]),
+              coll1.aggregate([{ $out: 'coll2' }], { batchSize: 0 }),
+              coll1.aggregate([{ $out: 'coll2' }], { batchSize: 1 }),
+              coll1.aggregate([{ $out: 'coll2' }], { batchSize: 30 }),
+              coll1.aggregate([{ $match: { a: 1 } }, { $out: 'coll2' }]),
+              coll1.aggregate([{ $match: { a: 1 } }, { $out: 'coll2' }], { batchSize: 0 }),
+              coll1.aggregate([{ $match: { a: 1 } }, { $out: 'coll2' }], { batchSize: 1 }),
+              coll1.aggregate([{ $match: { a: 1 } }, { $out: 'coll2' }], { batchSize: 30 })
+            ].map(cursor => cursor.toArray())
+          );
+        })
+        .then(() => {
+          expect(events)
+            .to.be.an('array')
+            .with.a.lengthOf(8);
+          events.forEach(event => {
+            expect(event).to.have.property('commandName', 'aggregate');
+            expect(event)
+              .to.have.property('command')
+              .that.has.property('cursor')
+              .that.does.not.have.property('batchSize');
+          });
+        })
+        .catch(_err => {
+          err = _err;
+        })
+        .then(() => client.close())
+        .then(() => done(err));
+    }
+  });
 });
