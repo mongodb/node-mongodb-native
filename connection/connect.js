@@ -236,6 +236,9 @@ function makeConnection(family, options, callback) {
       socket = tls.connect(parseSslOptions(family, options));
     } else {
       socket = net.createConnection(parseConnectOptions(family, options));
+      if (typeof socket.disableRenegotiation === 'function') {
+        socket.disableRenegotiation();
+      }
     }
   } catch (err) {
     return callback(err);
