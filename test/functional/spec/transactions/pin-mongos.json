@@ -1068,7 +1068,7 @@
       "description": "unpin after transient error within a transaction and commit",
       "useMultipleMongoses": true,
       "clientOptions": {
-        "heartbeatFrequencyMS": 5000
+        "heartbeatFrequencyMS": 30000
       },
       "operations": [
         {

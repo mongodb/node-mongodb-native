@@ -265,7 +265,7 @@
       "description": "commitTransaction retry fails on new mongos",
       "useMultipleMongoses": true,
       "clientOptions": {
-        "heartbeatFrequencyMS": 5000
+        "heartbeatFrequencyMS": 30000
       },
       "operations": [
         {
