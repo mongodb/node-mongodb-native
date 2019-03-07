@@ -234,11 +234,11 @@ function makeConnection(family, options, callback) {
   try {
     if (useSsl) {
       socket = tls.connect(parseSslOptions(family, options));
-    } else {
-      socket = net.createConnection(parseConnectOptions(family, options));
       if (typeof socket.disableRenegotiation === 'function') {
         socket.disableRenegotiation();
       }
+    } else {
+      socket = net.createConnection(parseConnectOptions(family, options));
     }
   } catch (err) {
     return callback(err);
