@@ -27,8 +27,6 @@ describe('URI Options (spec)', function() {
                   expect(err).to.not.exist;
                   expect(result.options).to.containSubset(test.options);
                 } else {
-                  console.log(err);
-                  expect(err).to.exist;
                   expect(err).to.be.an.instanceof(MongoParseError);
                 }
                 done();
