@@ -403,7 +403,16 @@ function runTestSuiteTest(configuration, spec, context) {
     // enable to see useful APM debug information at the time of actual test run
     // displayCommands = true;
 
-    const operationContext = { database, session0, session1, testRunner: context };
+    const operationContext = {
+      database,
+      session0,
+      session1,
+      testRunner: context,
+      savedSessionData: {
+        session0: JSON.parse(EJSON.stringify(session0.id)),
+        session1: JSON.parse(EJSON.stringify(session1.id))
+      }
+    };
 
     let testPromise = Promise.resolve();
     return testPromise
@@ -440,13 +449,10 @@ function validateOutcome(testData, testContext) {
 }
 
 function validateExpectations(commandEvents, spec, testContext, operationContext) {
-  const session0 = operationContext.session0;
-  const session1 = operationContext.session1;
-
   if (spec.expectations && Array.isArray(spec.expectations) && spec.expectations.length > 0) {
     const actualEvents = normalizeCommandShapes(commandEvents);
     const rawExpectedEvents = spec.expectations.map(x =>
-      linkSessionData(x.command_started_event, { session0, session1 })
+      linkSessionData(x.command_started_event, operationContext.savedSessionData)
     );
 
     const expectedEventPlaceholders = rawExpectedEvents.map(event =>
@@ -496,9 +502,8 @@ function validateExpectations(commandEvents, spec, testContext, operationContext
 }
 
 function linkSessionData(command, context) {
-  const session = context[command.command.lsid];
   const result = Object.assign({}, command);
-  result.command.lsid = JSON.parse(EJSON.stringify(session.id));
+  result.command.lsid = context[command.command.lsid];
   return result;
 }
 
