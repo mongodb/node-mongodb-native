@@ -469,6 +469,8 @@
             
                 <li data-name="ClientSession#startTransaction"><a href="ClientSession.html#startTransaction">startTransaction</a></li>
             
+                <li data-name="ClientSession#withTransaction"><a href="ClientSession.html#withTransaction">withTransaction</a></li>
+            
             </ul>
             <ul class="events itemMembers">
             
@@ -883,6 +885,8 @@
                 <li data-name="Db#addUser"><a href="Db.html#addUser">addUser</a></li>
             
                 <li data-name="Db#admin"><a href="Db.html#admin">admin</a></li>
+            
+                <li data-name="Db#aggregate"><a href="Db.html#aggregate">aggregate</a></li>
             
                 <li data-name="Db#collection"><a href="Db.html#collection">collection</a></li>
             
@@ -1557,8 +1561,6 @@
             
                 <li data-name="MongoClient#isConnected"><a href="MongoClient.html#isConnected">isConnected</a></li>
             
-                <li data-name="MongoClient#logout"><a href="MongoClient.html#logout">logout</a></li>
-            
                 <li data-name="MongoClient#startSession"><a href="MongoClient.html#startSession">startSession</a></li>
             
                 <li data-name="MongoClient#watch"><a href="MongoClient.html#watch">watch</a></li>
@@ -2163,179 +2165,12 @@
     <div class="nameContainer">
         <h4 class="name" id="addToOperationsList">
             
-            addToOperationsList<span class="signature">(bulkOperation, docType, document)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="UnorderedBulkOperation.html">UnorderedBulkOperation</a>}</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="lib_bulk_unordered.js.html">lib/bulk/unordered.js</a>, <a href="lib_bulk_unordered.js.html#line24">line 24</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Add to internal list of Operations</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>bulkOperation</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type"><a href="UnorderedBulkOperation.html">UnorderedBulkOperation</a></span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                </td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>docType</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                <p>number indicating the document type</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>document</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                </td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-
-
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="addToOperationsList">
-            
             addToOperationsList<span class="signature">(bulkOperation, docType, document)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="OrderedBulkOperation.html">OrderedBulkOperation</a>}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_bulk_ordered.js.html">lib/bulk/ordered.js</a>, <a href="lib_bulk_ordered.js.html#line24">line 24</a>
+            <a href="lib_bulk_ordered.js.html">lib/bulk/ordered.js</a>, <a href="lib_bulk_ordered.js.html#line25">line 25</a>
         </div>
         
     </div>
@@ -2495,6 +2330,173 @@
             
 <dt>
     <div class="nameContainer">
+        <h4 class="name" id="addToOperationsList">
+            
+            addToOperationsList<span class="signature">(bulkOperation, docType, document)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="UnorderedBulkOperation.html">UnorderedBulkOperation</a>}</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_bulk_unordered.js.html">lib/bulk/unordered.js</a>, <a href="lib_bulk_unordered.js.html#line25">line 25</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Add to internal list of Operations</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>bulkOperation</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type"><a href="UnorderedBulkOperation.html">UnorderedBulkOperation</a></span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                </td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>docType</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>number indicating the document type</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>document</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                </td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+
+
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
         <h4 class="name" id="executeBatch">
             
             executeBatch<span class="signature">(bulkOperation, batch, options, callback)</span>
@@ -2502,7 +2504,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_bulk_unordered.js.html">lib/bulk/unordered.js</a>, <a href="lib_bulk_unordered.js.html#line141">line 141</a>
+            <a href="lib_bulk_unordered.js.html">lib/bulk/unordered.js</a>, <a href="lib_bulk_unordered.js.html#line149">line 149</a>
         </div>
         
     </div>
@@ -2687,7 +2689,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_bulk_unordered.js.html">lib/bulk/unordered.js</a>, <a href="lib_bulk_unordered.js.html#line170">line 170</a>
+            <a href="lib_bulk_unordered.js.html">lib/bulk/unordered.js</a>, <a href="lib_bulk_unordered.js.html#line178">line 178</a>
         </div>
         
     </div>
@@ -2849,7 +2851,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_bulk_ordered.js.html">lib/bulk/ordered.js</a>, <a href="lib_bulk_ordered.js.html#line132">line 132</a>
+            <a href="lib_bulk_ordered.js.html">lib/bulk/ordered.js</a>, <a href="lib_bulk_ordered.js.html#line136">line 136</a>
         </div>
         
     </div>
@@ -3219,7 +3221,7 @@
     
         
         <div class="tag-source">
-            <a href="node_modules_mongodb-core_lib_error.js.html">node_modules/mongodb-core/lib/error.js</a>, <a href="node_modules_mongodb-core_lib_error.js.html#line129">line 129</a>
+            <a href="node_modules_mongodb-core_lib_error.js.html">node_modules/mongodb-core/lib/error.js</a>, <a href="node_modules_mongodb-core_lib_error.js.html#line133">line 133</a>
         </div>
         
     </div>
@@ -3814,6 +3816,131 @@
                 
 <dt>
     <div class="nameContainer">
+        <h4 class="name" id="WithTransactionCallback">
+            
+            WithTransactionCallback<span class="signature">(session)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="node_modules_mongodb-core_lib_sessions.js.html">node_modules/mongodb-core/lib/sessions.js</a>, <a href="node_modules_mongodb-core_lib_sessions.js.html#line248">line 248</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>A user provided function to be run within a transaction</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>session</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type"><a href="ClientSession.html">ClientSession</a></span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>The parent session of the transaction running the operation. This should be passed into each operation within the lambda.</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+
+
+<h5>Returns:</h5>
+resulting Promise of operations run within this transaction
+<br />
+
+    
+    
+    
+</dd>
+
+            
+                
+<dt>
+    <div class="nameContainer">
         <h4 class="name" id="WriteConcern">WriteConcern<span class="type-signature type object">Object</span> </h4>
     </div>
     
@@ -4022,7 +4149,7 @@
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Oct 23 2018 10:55:58 GMT-0400 (EDT)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Mar 08 2019 10:24:05 GMT-0500 (Eastern Standard Time)
                     </footer>
                 </div>
             </td>

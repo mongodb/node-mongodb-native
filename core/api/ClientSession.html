@@ -138,6 +138,8 @@
             
                 <li data-name="ClientSession#startTransaction"><a href="ClientSession.html#startTransaction">startTransaction</a></li>
             
+                <li data-name="ClientSession#withTransaction"><a href="ClientSession.html#withTransaction">withTransaction</a></li>
+            
             </ul>
             <ul class="events itemMembers">
             
@@ -203,8 +205,6 @@
             
             <span class="subtitle">Methods</span>
             
-                <li data-name="Connection#connect"><a href="Connection.html#connect">connect</a></li>
-            
                 <li data-name="Connection#destroy"><a href="Connection.html#destroy">destroy</a></li>
             
                 <li data-name="Connection#isConnected"><a href="Connection.html#isConnected">isConnected</a></li>
@@ -227,6 +227,8 @@
                 <li data-name="Connection#event:connect"><a href="Connection.html#event:connect">connect</a></li>
             
                 <li data-name="Connection#event:error"><a href="Connection.html#event:error">error</a></li>
+            
+                <li data-name="Connection#event:message"><a href="Connection.html#event:message">message</a></li>
             
                 <li data-name="Connection#event:parseError"><a href="Connection.html#event:parseError">parseError</a></li>
             
@@ -598,8 +600,6 @@
             
                 <li data-name="Mongos#lastIsMaster"><a href="Mongos.html#lastIsMaster">lastIsMaster</a></li>
             
-                <li data-name="Mongos#logout"><a href="Mongos.html#logout">logout</a></li>
-            
                 <li data-name="Mongos#remove"><a href="Mongos.html#remove">remove</a></li>
             
                 <li data-name="Mongos#selectServer"><a href="Mongos.html#selectServer">selectServer</a></li>
@@ -805,8 +805,6 @@
             
                 <li data-name="ReplSet#lastIsMaster"><a href="ReplSet.html#lastIsMaster">lastIsMaster</a></li>
             
-                <li data-name="ReplSet#logout"><a href="ReplSet.html#logout">logout</a></li>
-            
                 <li data-name="ReplSet#remove"><a href="ReplSet.html#remove">remove</a></li>
             
                 <li data-name="ReplSet#selectServer"><a href="ReplSet.html#selectServer">selectServer</a></li>
@@ -899,8 +897,6 @@
                 <li data-name="Server#isDestroyed"><a href="Server.html#isDestroyed">isDestroyed</a></li>
             
                 <li data-name="Server#lastIsMaster"><a href="Server.html#lastIsMaster">lastIsMaster</a></li>
-            
-                <li data-name="Server#logout"><a href="Server.html#logout">logout</a></li>
             
                 <li data-name="Server#remove"><a href="Server.html#remove">remove</a></li>
             
@@ -1167,7 +1163,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_sessions.js.html">lib/sessions.js</a>, <a href="lib_sessions.js.html#line224">line 224</a>
+            <a href="lib_sessions.js.html">lib/sessions.js</a>, <a href="lib_sessions.js.html#line225">line 225</a>
         </div>
         
     </div>
@@ -1299,7 +1295,7 @@ promise is returned if no callback is provided
     
         
         <div class="tag-source">
-            <a href="lib_sessions.js.html">lib/sessions.js</a>, <a href="lib_sessions.js.html#line137">line 137</a>
+            <a href="lib_sessions.js.html">lib/sessions.js</a>, <a href="lib_sessions.js.html#line138">line 138</a>
         </div>
         
     </div>
@@ -1415,7 +1411,7 @@ promise is returned if no callback is provided
     
         
         <div class="tag-source">
-            <a href="lib_sessions.js.html">lib/sessions.js</a>, <a href="lib_sessions.js.html#line203">line 203</a>
+            <a href="lib_sessions.js.html">lib/sessions.js</a>, <a href="lib_sessions.js.html#line204">line 204</a>
         </div>
         
     </div>
@@ -1547,7 +1543,7 @@ promise is returned if no callback is provided
     
         
         <div class="tag-source">
-            <a href="lib_sessions.js.html">lib/sessions.js</a>, <a href="lib_sessions.js.html#line108">line 108</a>
+            <a href="lib_sessions.js.html">lib/sessions.js</a>, <a href="lib_sessions.js.html#line109">line 109</a>
         </div>
         
     </div>
@@ -1700,7 +1696,7 @@ promise is returned if no callback is provided
     
         
         <div class="tag-source">
-            <a href="lib_sessions.js.html">lib/sessions.js</a>, <a href="lib_sessions.js.html#line153">line 153</a>
+            <a href="lib_sessions.js.html">lib/sessions.js</a>, <a href="lib_sessions.js.html#line154">line 154</a>
         </div>
         
     </div>
@@ -1825,7 +1821,7 @@ if the sessions are equal
     
         
         <div class="tag-source">
-            <a href="lib_sessions.js.html">lib/sessions.js</a>, <a href="lib_sessions.js.html#line164">line 164</a>
+            <a href="lib_sessions.js.html">lib/sessions.js</a>, <a href="lib_sessions.js.html#line165">line 165</a>
         </div>
         
     </div>
@@ -1896,7 +1892,7 @@ if the sessions are equal
     
         
         <div class="tag-source">
-            <a href="lib_sessions.js.html">lib/sessions.js</a>, <a href="lib_sessions.js.html#line171">line 171</a>
+            <a href="lib_sessions.js.html">lib/sessions.js</a>, <a href="lib_sessions.js.html#line172">line 172</a>
         </div>
         
     </div>
@@ -1972,7 +1968,7 @@ this session is currently in a transaction or not
     
         
         <div class="tag-source">
-            <a href="lib_sessions.js.html">lib/sessions.js</a>, <a href="lib_sessions.js.html#line180">line 180</a>
+            <a href="lib_sessions.js.html">lib/sessions.js</a>, <a href="lib_sessions.js.html#line181">line 181</a>
         </div>
         
     </div>
@@ -2077,6 +2073,158 @@ this session is currently in a transaction or not
     
 </dd>
 
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="withTransaction">
+            
+            withTransaction<span class="signature">(fn, <span class="optional">options</span>)</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_sessions.js.html">lib/sessions.js</a>, <a href="lib_sessions.js.html#line267">line 267</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Runs a provided lambda within a transaction, retrying either the commit operation<br>or entire transaction as needed (and when the error permits) to better ensure that<br>the transaction can complete successfully.</p>
+<p>IMPORTANT: This method requires the user to return a Promise, all lambdas that do not<br>return a Promise will result in undefined behavior.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>fn</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#WithTransactionCallback">WithTransactionCallback</a></span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                    
+                        
+                    
+                
+                </td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#TransactionOptions">TransactionOptions</a></span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Optional settings for the transaction</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
         </dl>
     
     
@@ -2092,7 +2240,7 @@ this session is currently in a transaction or not
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Oct 23 2018 10:56:03 GMT-0400 (EDT)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Mar 08 2019 10:24:10 GMT-0500 (Eastern Standard Time)
                     </footer>
                 </div>
             </td>

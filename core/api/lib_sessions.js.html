@@ -138,6 +138,8 @@
             
                 <li data-name="ClientSession#startTransaction"><a href="ClientSession.html#startTransaction">startTransaction</a></li>
             
+                <li data-name="ClientSession#withTransaction"><a href="ClientSession.html#withTransaction">withTransaction</a></li>
+            
             </ul>
             <ul class="events itemMembers">
             
@@ -203,8 +205,6 @@
             
             <span class="subtitle">Methods</span>
             
-                <li data-name="Connection#connect"><a href="Connection.html#connect">connect</a></li>
-            
                 <li data-name="Connection#destroy"><a href="Connection.html#destroy">destroy</a></li>
             
                 <li data-name="Connection#isConnected"><a href="Connection.html#isConnected">isConnected</a></li>
@@ -227,6 +227,8 @@
                 <li data-name="Connection#event:connect"><a href="Connection.html#event:connect">connect</a></li>
             
                 <li data-name="Connection#event:error"><a href="Connection.html#event:error">error</a></li>
+            
+                <li data-name="Connection#event:message"><a href="Connection.html#event:message">message</a></li>
             
                 <li data-name="Connection#event:parseError"><a href="Connection.html#event:parseError">parseError</a></li>
             
@@ -598,8 +600,6 @@
             
                 <li data-name="Mongos#lastIsMaster"><a href="Mongos.html#lastIsMaster">lastIsMaster</a></li>
             
-                <li data-name="Mongos#logout"><a href="Mongos.html#logout">logout</a></li>
-            
                 <li data-name="Mongos#remove"><a href="Mongos.html#remove">remove</a></li>
             
                 <li data-name="Mongos#selectServer"><a href="Mongos.html#selectServer">selectServer</a></li>
@@ -805,8 +805,6 @@
             
                 <li data-name="ReplSet#lastIsMaster"><a href="ReplSet.html#lastIsMaster">lastIsMaster</a></li>
             
-                <li data-name="ReplSet#logout"><a href="ReplSet.html#logout">logout</a></li>
-            
                 <li data-name="ReplSet#remove"><a href="ReplSet.html#remove">remove</a></li>
             
                 <li data-name="ReplSet#selectServer"><a href="ReplSet.html#selectServer">selectServer</a></li>
@@ -899,8 +897,6 @@
                 <li data-name="Server#isDestroyed"><a href="Server.html#isDestroyed">isDestroyed</a></li>
             
                 <li data-name="Server#lastIsMaster"><a href="Server.html#lastIsMaster">lastIsMaster</a></li>
-            
-                <li data-name="Server#logout"><a href="Server.html#logout">logout</a></li>
             
                 <li data-name="Server#remove"><a href="Server.html#remove">remove</a></li>
             
@@ -1093,6 +1089,7 @@ const MongoNetworkError = require('./error').MongoNetworkError;
 const MongoWriteConcernError = require('./error').MongoWriteConcernError;
 const Transaction = require('./transactions').Transaction;
 const TxnState = require('./transactions').TxnState;
+const isPromiseLike = require('./utils').isPromiseLike;
 
 function assertAlive(session, callback) {
   if (session.serverSession == null) {
@@ -1325,6 +1322,121 @@ class ClientSession extends EventEmitter {
   toBSON() {
     throw new Error('ClientSession cannot be serialized to BSON.');
   }
+
+  /**
+   * A user provided function to be run within a transaction
+   *
+   * @callback WithTransactionCallback
+   * @param {ClientSession} session The parent session of the transaction running the operation. This should be passed into each operation within the lambda.
+   * @returns {Promise} The resulting Promise of operations run within this transaction
+   */
+
+  /**
+   * Runs a provided lambda within a transaction, retrying either the commit operation
+   * or entire transaction as needed (and when the error permits) to better ensure that
+   * the transaction can complete successfully.
+   *
+   * IMPORTANT: This method requires the user to return a Promise, all lambdas that do not
+   * return a Promise will result in undefined behavior.
+   *
+   * @param {WithTransactionCallback} fn
+   * @param {TransactionOptions} [options] Optional settings for the transaction
+   */
+  withTransaction(fn, options) {
+    const startTime = Date.now();
+    return attemptTransaction(this, startTime, fn, options);
+  }
+}
+
+const MAX_WITH_TRANSACTION_TIMEOUT = 120000;
+const UNSATISFIABLE_WRITE_CONCERN_CODE = 100;
+const UNKNOWN_REPL_WRITE_CONCERN_CODE = 79;
+const NON_DETERMINISTIC_WRITE_CONCERN_ERRORS = new Set([
+  'CannotSatisfyWriteConcern',
+  'UnknownReplWriteConcern',
+  'UnsatisfiableWriteConcern'
+]);
+
+function hasNotTimedOut(startTime, max) {
+  return Date.now() - startTime &lt; max;
+}
+
+function isUnknownTransactionCommitResult(err) {
+  return (
+    !NON_DETERMINISTIC_WRITE_CONCERN_ERRORS.has(err.codeName) &amp;&amp;
+    err.code !== UNSATISFIABLE_WRITE_CONCERN_CODE &amp;&amp;
+    err.code !== UNKNOWN_REPL_WRITE_CONCERN_CODE
+  );
+}
+
+function attemptTransactionCommit(session, startTime, fn, options) {
+  return session.commitTransaction().catch(err => {
+    if (err instanceof MongoError &amp;&amp; hasNotTimedOut(startTime, MAX_WITH_TRANSACTION_TIMEOUT)) {
+      if (err.hasErrorLabel('UnknownTransactionCommitResult')) {
+        return attemptTransactionCommit(session, startTime, fn, options);
+      }
+
+      if (err.hasErrorLabel('TransientTransactionError')) {
+        return attemptTransaction(session, startTime, fn, options);
+      }
+    }
+
+    throw err;
+  });
+}
+
+const USER_EXPLICIT_TXN_END_STATES = new Set([
+  TxnState.NO_TRANSACTION,
+  TxnState.TRANSACTION_COMMITTED,
+  TxnState.TRANSACTION_ABORTED
+]);
+
+function userExplicitlyEndedTransaction(session) {
+  return USER_EXPLICIT_TXN_END_STATES.has(session.transaction.state);
+}
+
+function attemptTransaction(session, startTime, fn, options) {
+  session.startTransaction(options);
+
+  let promise;
+  try {
+    promise = fn(session);
+  } catch (err) {
+    promise = Promise.reject(err);
+  }
+
+  if (!isPromiseLike(promise)) {
+    session.abortTransaction();
+    throw new TypeError('Function provided to `withTransaction` must return a Promise');
+  }
+
+  return promise
+    .then(() => {
+      if (userExplicitlyEndedTransaction(session)) {
+        return;
+      }
+
+      return attemptTransactionCommit(session, startTime, fn, options);
+    })
+    .catch(err => {
+      function maybeRetryOrThrow(err) {
+        if (
+          err instanceof MongoError &amp;&amp;
+          err.hasErrorLabel('TransientTransactionError') &amp;&amp;
+          hasNotTimedOut(startTime, MAX_WITH_TRANSACTION_TIMEOUT)
+        ) {
+          return attemptTransaction(session, startTime, fn, options);
+        }
+
+        throw err;
+      }
+
+      if (session.transaction.isActive) {
+        return session.abortTransaction().then(() => maybeRetryOrThrow(err));
+      }
+
+      return maybeRetryOrThrow(err);
+    });
 }
 
 function endTransaction(session, commandName, callback) {
@@ -1382,10 +1494,19 @@ function endTransaction(session, commandName, callback) {
   const command = { [commandName]: 1 };
 
   // apply a writeConcern if specified
+  let writeConcern;
   if (session.transaction.options.writeConcern) {
-    Object.assign(command, { writeConcern: session.transaction.options.writeConcern });
+    writeConcern = Object.assign({}, session.transaction.options.writeConcern);
   } else if (session.clientOptions &amp;&amp; session.clientOptions.w) {
-    Object.assign(command, { writeConcern: { w: session.clientOptions.w } });
+    writeConcern = { w: session.clientOptions.w };
+  }
+
+  if (txnState === TxnState.TRANSACTION_COMMITTED) {
+    writeConcern = Object.assign({ wtimeout: 10000 }, writeConcern, { w: 'majority' });
+  }
+
+  if (writeConcern) {
+    Object.assign(command, { writeConcern });
   }
 
   function commandHandler(e, r) {
@@ -1407,7 +1528,12 @@ function endTransaction(session, commandName, callback) {
           e.errorLabels = [];
         }
 
-        e.errorLabels.push('UnknownTransactionCommitResult');
+        if (isUnknownTransactionCommitResult(e)) {
+          e.errorLabels.push('UnknownTransactionCommitResult');
+
+          // per txns spec, must unpin session in this case
+          session.transaction.unpinServer();
+        }
       }
     } else {
       session.transaction.transition(TxnState.TRANSACTION_ABORTED);
@@ -1421,9 +1547,23 @@ function endTransaction(session, commandName, callback) {
     return commandName === 'commitTransaction' ? err : null;
   }
 
+  if (commandName === 'commitTransaction' &amp;&amp; session.transaction.recoveryToken) {
+    command.recoveryToken = session.transaction.recoveryToken;
+  }
+
   // send the command
   session.topology.command('admin.$cmd', command, { session }, (err, reply) => {
     if (err &amp;&amp; isRetryableError(err)) {
+      // SPEC-1185: apply majority write concern when retrying commitTransaction
+      if (command.commitTransaction) {
+        // per txns spec, must unpin session in this case
+        session.transaction.unpinServer();
+
+        command.writeConcern = Object.assign({ wtimeout: 10000 }, command.writeConcern, {
+          w: 'majority'
+        });
+      }
+
       return session.topology.command('admin.$cmd', command, { session }, (_err, _reply) =>
         commandHandler(transactionError(_err), _reply)
       );
@@ -1549,7 +1689,7 @@ module.exports = {
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Oct 23 2018 10:56:03 GMT-0400 (EDT)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Mar 08 2019 10:24:10 GMT-0500 (Eastern Standard Time)
                     </footer>
                 </div>
             </td>

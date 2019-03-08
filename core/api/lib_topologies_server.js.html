@@ -138,6 +138,8 @@
             
                 <li data-name="ClientSession#startTransaction"><a href="ClientSession.html#startTransaction">startTransaction</a></li>
             
+                <li data-name="ClientSession#withTransaction"><a href="ClientSession.html#withTransaction">withTransaction</a></li>
+            
             </ul>
             <ul class="events itemMembers">
             
@@ -203,8 +205,6 @@
             
             <span class="subtitle">Methods</span>
             
-                <li data-name="Connection#connect"><a href="Connection.html#connect">connect</a></li>
-            
                 <li data-name="Connection#destroy"><a href="Connection.html#destroy">destroy</a></li>
             
                 <li data-name="Connection#isConnected"><a href="Connection.html#isConnected">isConnected</a></li>
@@ -227,6 +227,8 @@
                 <li data-name="Connection#event:connect"><a href="Connection.html#event:connect">connect</a></li>
             
                 <li data-name="Connection#event:error"><a href="Connection.html#event:error">error</a></li>
+            
+                <li data-name="Connection#event:message"><a href="Connection.html#event:message">message</a></li>
             
                 <li data-name="Connection#event:parseError"><a href="Connection.html#event:parseError">parseError</a></li>
             
@@ -598,8 +600,6 @@
             
                 <li data-name="Mongos#lastIsMaster"><a href="Mongos.html#lastIsMaster">lastIsMaster</a></li>
             
-                <li data-name="Mongos#logout"><a href="Mongos.html#logout">logout</a></li>
-            
                 <li data-name="Mongos#remove"><a href="Mongos.html#remove">remove</a></li>
             
                 <li data-name="Mongos#selectServer"><a href="Mongos.html#selectServer">selectServer</a></li>
@@ -805,8 +805,6 @@
             
                 <li data-name="ReplSet#lastIsMaster"><a href="ReplSet.html#lastIsMaster">lastIsMaster</a></li>
             
-                <li data-name="ReplSet#logout"><a href="ReplSet.html#logout">logout</a></li>
-            
                 <li data-name="ReplSet#remove"><a href="ReplSet.html#remove">remove</a></li>
             
                 <li data-name="ReplSet#selectServer"><a href="ReplSet.html#selectServer">selectServer</a></li>
@@ -899,8 +897,6 @@
                 <li data-name="Server#isDestroyed"><a href="Server.html#isDestroyed">isDestroyed</a></li>
             
                 <li data-name="Server#lastIsMaster"><a href="Server.html#lastIsMaster">lastIsMaster</a></li>
-            
-                <li data-name="Server#logout"><a href="Server.html#logout">logout</a></li>
             
                 <li data-name="Server#remove"><a href="Server.html#remove">remove</a></li>
             
@@ -1090,11 +1086,9 @@ var inherits = require('util').inherits,
   debugOptions = require('../connection/utils').debugOptions,
   retrieveBSON = require('../connection/utils').retrieveBSON,
   Pool = require('../connection/pool'),
-  Query = require('../connection/commands').Query,
   MongoError = require('../error').MongoError,
   MongoNetworkError = require('../error').MongoNetworkError,
-  TwoSixWireProtocolSupport = require('../wireprotocol/2_6_support'),
-  ThreeTwoWireProtocolSupport = require('../wireprotocol/3_2_support'),
+  wireProtocol = require('../wireprotocol'),
   BasicCursor = require('../cursor'),
   sdam = require('./shared'),
   createClientInfo = require('./shared').createClientInfo,
@@ -1104,57 +1098,6 @@ var inherits = require('util').inherits,
   relayEvents = require('../utils').relayEvents;
 
 const collationNotSupported = require('../utils').collationNotSupported;
-
-function getSaslSupportedMechs(options) {
-  if (!options) {
-    return {};
-  }
-
-  const authArray = options.auth || [];
-  const authMechanism = authArray[0] || options.authMechanism;
-  const authSource = authArray[1] || options.authSource || options.dbName || 'admin';
-  const user = authArray[2] || options.user;
-
-  if (typeof authMechanism === 'string' &amp;&amp; authMechanism.toUpperCase() !== 'DEFAULT') {
-    return {};
-  }
-
-  if (!user) {
-    return {};
-  }
-
-  return { saslSupportedMechs: `${authSource}.${user}` };
-}
-
-function getDefaultAuthMechanism(ismaster) {
-  if (ismaster) {
-    // If ismaster contains saslSupportedMechs, use scram-sha-256
-    // if it is available, else scram-sha-1
-    if (Array.isArray(ismaster.saslSupportedMechs)) {
-      return ismaster.saslSupportedMechs.indexOf('SCRAM-SHA-256') >= 0
-        ? 'scram-sha-256'
-        : 'scram-sha-1';
-    }
-
-    // Fallback to legacy selection method. If wire version >= 3, use scram-sha-1
-    if (ismaster.maxWireVersion >= 3) {
-      return 'scram-sha-1';
-    }
-  }
-
-  // Default for wireprotocol &lt; 3
-  return 'mongocr';
-}
-
-function extractIsMasterError(err, result) {
-  if (err) {
-    return err;
-  }
-
-  if (result &amp;&amp; result.result &amp;&amp; result.result.ok === 0) {
-    return new MongoError(result.result);
-  }
-}
 
 // Used for filtering out fields for loggin
 var debugFields = [
@@ -1172,7 +1115,6 @@ var debugFields = [
   'connectionTimeout',
   'checkServerIdentity',
   'socketTimeout',
-  'singleBufferSerializtion',
   'ssl',
   'ca',
   'crl',
@@ -1307,9 +1249,6 @@ var Server = function(options) {
   this.monitoringProcessId = null;
   // Initial connection
   this.initialConnect = true;
-  // Wire protocol handler, default to oldest known protocol handler
-  // this gets changed when the first ismaster is called.
-  this.wireProtocolHandler = new TwoSixWireProtocolSupport();
   // Default type
   this._type = 'server';
   // Set the client info
@@ -1385,20 +1324,6 @@ Object.defineProperty(Server.prototype, 'name', {
   }
 });
 
-function isSupportedServer(response) {
-  return response &amp;&amp; typeof response.maxWireVersion === 'number' &amp;&amp; response.maxWireVersion >= 2;
-}
-
-function configureWireProtocolHandler(self, ismaster) {
-  // 3.2 wire protocol handler
-  if (ismaster.maxWireVersion >= 4) {
-    return new ThreeTwoWireProtocolSupport();
-  }
-
-  // default to 2.6 wire protocol handler
-  return new TwoSixWireProtocolSupport();
-}
-
 function disconnectHandler(self, type, ns, cmd, options, callback) {
   // Topology is not connected, save the call in the provided store to be
   // Executed at some point when the handler deems it's reconnected
@@ -1426,16 +1351,13 @@ function monitoringProcess(self) {
     // Emit monitoring Process event
     self.emit('monitoring', self);
     // Perform ismaster call
-    // Query options
-    var queryOptions = { numberToSkip: 0, numberToReturn: -1, checkKeys: false, slaveOk: true };
-    // Create a query instance
-    var query = new Query(self.s.bson, 'admin.$cmd', { ismaster: true }, queryOptions);
     // Get start time
     var start = new Date().getTime();
 
     // Execute the ismaster query
-    self.s.pool.write(
-      query,
+    self.command(
+      'admin.$cmd',
+      { ismaster: true },
       {
         socketTimeout:
           typeof self.s.options.connectionTimeout !== 'number'
@@ -1443,7 +1365,7 @@ function monitoringProcess(self) {
             : self.s.options.connectionTimeout,
         monitoring: true
       },
-      function(err, result) {
+      (err, result) => {
         // Set initial lastIsMasterMS
         self.lastIsMasterMS = new Date().getTime() - start;
         if (self.s.pool.isDestroyed()) return;
@@ -1459,7 +1381,7 @@ function monitoringProcess(self) {
 }
 
 var eventHandler = function(self, event) {
-  return function(err) {
+  return function(err, conn) {
     // Log information of received information if in info mode
     if (self.s.logger.isInfo()) {
       var object = err instanceof MongoError ? JSON.stringify(err) : {};
@@ -1470,126 +1392,67 @@ var eventHandler = function(self, event) {
 
     // Handle connect event
     if (event === 'connect') {
-      // Issue an ismaster command at connect
-      // Query options
-      var queryOptions = { numberToSkip: 0, numberToReturn: -1, checkKeys: false, slaveOk: true };
-      // Create a query instance
-      var compressors =
-        self.s.compression &amp;&amp; self.s.compression.compressors ? self.s.compression.compressors : [];
-      var query = new Query(
-        self.s.bson,
-        'admin.$cmd',
-        Object.assign(
-          { ismaster: true, client: self.clientInfo, compression: compressors },
-          getSaslSupportedMechs(self.s.options)
-        ),
-        queryOptions
-      );
-      // Get start time
-      var start = new Date().getTime();
-      // Execute the ismaster query
-      self.s.pool.write(
-        query,
-        {
-          socketTimeout: self.s.options.connectionTimeout || 2000
-        },
-        function(err, result) {
-          // Set initial lastIsMasterMS
-          self.lastIsMasterMS = new Date().getTime() - start;
+      self.initialConnect = false;
+      self.ismaster = conn.ismaster;
+      self.lastIsMasterMS = conn.lastIsMasterMS;
+      if (conn.agreedCompressor) {
+        self.s.pool.options.agreedCompressor = conn.agreedCompressor;
+      }
 
-          const serverError = extractIsMasterError(err, result);
+      if (conn.zlibCompressionLevel) {
+        self.s.pool.options.zlibCompressionLevel = conn.zlibCompressionLevel;
+      }
 
-          if (serverError) {
-            self.destroy();
-            return self.emit('error', serverError);
-          }
+      if (conn.ismaster.$clusterTime) {
+        const $clusterTime = conn.ismaster.$clusterTime;
+        self.clusterTime = $clusterTime;
+      }
 
-          if (!isSupportedServer(result.result)) {
-            self.destroy();
-            const latestSupportedVersion = '2.6';
-            const message =
-              'Server at ' +
-              self.s.options.host +
-              ':' +
-              self.s.options.port +
-              ' reports wire version ' +
-              (result.result.maxWireVersion || 0) +
-              ', but this version of Node.js Driver requires at least 2 (MongoDB' +
-              latestSupportedVersion +
-              ').';
-            return self.emit('error', new MongoError(message), self);
-          }
+      // It's a proxy change the type so
+      // the wireprotocol will send $readPreference
+      if (self.ismaster.msg === 'isdbgrid') {
+        self._type = 'mongos';
+      }
 
-          // Determine whether the server is instructing us to use a compressor
-          if (result.result &amp;&amp; result.result.compression) {
-            for (var i = 0; i &lt; self.s.compression.compressors.length; i++) {
-              if (result.result.compression.indexOf(self.s.compression.compressors[i]) > -1) {
-                self.s.pool.options.agreedCompressor = self.s.compression.compressors[i];
-                break;
-              }
+      // Have we defined self monitoring
+      if (self.s.monitoring) {
+        self.monitoringProcessId = setTimeout(monitoringProcess(self), self.s.monitoringInterval);
+      }
+
+      // Emit server description changed if something listening
+      sdam.emitServerDescriptionChanged(self, {
+        address: self.name,
+        arbiters: [],
+        hosts: [],
+        passives: [],
+        type: sdam.getTopologyType(self)
+      });
+
+      if (!self.s.inTopology) {
+        // Emit topology description changed if something listening
+        sdam.emitTopologyDescriptionChanged(self, {
+          topologyType: 'Single',
+          servers: [
+            {
+              address: self.name,
+              arbiters: [],
+              hosts: [],
+              passives: [],
+              type: sdam.getTopologyType(self)
             }
+          ]
+        });
+      }
 
-            if (self.s.compression.zlibCompressionLevel) {
-              self.s.pool.options.zlibCompressionLevel = self.s.compression.zlibCompressionLevel;
-            }
-          }
+      // Log the ismaster if available
+      if (self.s.logger.isInfo()) {
+        self.s.logger.info(
+          f('server %s connected with ismaster [%s]', self.name, JSON.stringify(self.ismaster))
+        );
+      }
 
-          // Ensure no error emitted after initial connect when reconnecting
-          self.initialConnect = false;
-          // Save the ismaster
-          self.ismaster = result.result;
-
-          // It's a proxy change the type so
-          // the wireprotocol will send $readPreference
-          if (self.ismaster.msg === 'isdbgrid') {
-            self._type = 'mongos';
-          }
-          // Add the correct wire protocol handler
-          self.wireProtocolHandler = configureWireProtocolHandler(self, self.ismaster);
-          // Have we defined self monitoring
-          if (self.s.monitoring) {
-            self.monitoringProcessId = setTimeout(
-              monitoringProcess(self),
-              self.s.monitoringInterval
-            );
-          }
-
-          // Emit server description changed if something listening
-          sdam.emitServerDescriptionChanged(self, {
-            address: self.name,
-            arbiters: [],
-            hosts: [],
-            passives: [],
-            type: sdam.getTopologyType(self)
-          });
-
-          if (!self.s.inTopology) {
-            // Emit topology description changed if something listening
-            sdam.emitTopologyDescriptionChanged(self, {
-              topologyType: 'Single',
-              servers: [
-                {
-                  address: self.name,
-                  arbiters: [],
-                  hosts: [],
-                  passives: [],
-                  type: sdam.getTopologyType(self)
-                }
-              ]
-            });
-          }
-
-          // Log the ismaster if available
-          if (self.s.logger.isInfo()) {
-            self.s.logger.info(
-              f('server %s connected with ismaster [%s]', self.name, JSON.stringify(self.ismaster))
-            );
-          }
-
-          // Emit connect
-          self.emit('connect', self);
-        }
-      );
+      // Emit connect
+      self.emit('connect', self);
     } else if (
       event === 'error' ||
       event === 'parseError' ||
@@ -1671,8 +1534,6 @@ var eventHandler = function(self, event) {
 
 /**
  * Initiate server connect
- * @method
- * @param {array} [options.auth=null] Array of auth options to apply on connect
  */
 Server.prototype.connect = function(options) {
   var self = this;
@@ -1712,12 +1573,17 @@ Server.prototype.connect = function(options) {
     address: self.name
   });
 
-  // Connect with optional auth settings
-  if (options.auth) {
-    self.s.pool.connect.apply(self.s.pool, options.auth);
-  } else {
-    self.s.pool.connect();
-  }
+  self.s.pool.connect();
+};
+
+/**
+ * Authenticate the topology.
+ * @method
+ * @param {MongoCredentials} credentials The credentials for authentication we are using
+ * @param {authResultCallback} callback A callback function
+ */
+Server.prototype.auth = function(credentials, callback) {
+  callback(null, null);
 };
 
 /**
@@ -1837,33 +1703,7 @@ Server.prototype.command = function(ns, cmd, options, callback) {
     return callback(new MongoError(`server ${this.name} does not support collation`));
   }
 
-  // Are we executing against a specific topology
-  var topology = options.topology || {};
-  // Create the query object
-  var query = self.wireProtocolHandler.command(self.s.bson, ns, cmd, {}, topology, options);
-  if (query instanceof MongoError) {
-    return callback(query, null);
-  }
-
-  // Set slave OK of the query
-  query.slaveOk = options.readPreference ? options.readPreference.slaveOk() : false;
-
-  // Write options
-  var writeOptions = {
-    raw: typeof options.raw === 'boolean' ? options.raw : false,
-    promoteLongs: typeof options.promoteLongs === 'boolean' ? options.promoteLongs : true,
-    promoteValues: typeof options.promoteValues === 'boolean' ? options.promoteValues : true,
-    promoteBuffers: typeof options.promoteBuffers === 'boolean' ? options.promoteBuffers : false,
-    command: true,
-    monitoring: typeof options.monitoring === 'boolean' ? options.monitoring : false,
-    fullResult: typeof options.fullResult === 'boolean' ? options.fullResult : false,
-    requestId: query.requestId,
-    socketTimeout: typeof options.socketTimeout === 'number' ? options.socketTimeout : null,
-    session: options.session || null
-  };
-
-  // Write the operation to the pool
-  self.s.pool.write(query, writeOptions, callback);
+  wireProtocol.command(self, ns, cmd, options, callback);
 };
 
 /**
@@ -1894,7 +1734,7 @@ Server.prototype.insert = function(ns, ops, options, callback) {
   ops = Array.isArray(ops) ? ops : [ops];
 
   // Execute write
-  return self.wireProtocolHandler.insert(self.s.pool, ns, self.s.bson, ops, options, callback);
+  return wireProtocol.insert(self, ns, ops, options, callback);
 };
 
 /**
@@ -1929,7 +1769,7 @@ Server.prototype.update = function(ns, ops, options, callback) {
   // Setup the docs as an array
   ops = Array.isArray(ops) ? ops : [ops];
   // Execute write
-  return self.wireProtocolHandler.update(self.s.pool, ns, self.s.bson, ops, options, callback);
+  return wireProtocol.update(self, ns, ops, options, callback);
 };
 
 /**
@@ -1964,7 +1804,7 @@ Server.prototype.remove = function(ns, ops, options, callback) {
   // Setup the docs as an array
   ops = Array.isArray(ops) ? ops : [ops];
   // Execute write
-  return self.wireProtocolHandler.remove(self.s.pool, ns, self.s.bson, ops, options, callback);
+  return wireProtocol.remove(self, ns, ops, options, callback);
 };
 
 /**
@@ -1994,52 +1834,6 @@ Server.prototype.cursor = function(ns, cmd, options) {
 };
 
 /**
- * Logout from a database
- * @method
- * @param {string} db The db we are logging out from
- * @param {authResultCallback} callback A callback function
- */
-Server.prototype.logout = function(dbName, callback) {
-  this.s.pool.logout(dbName, callback);
-};
-
-/**
- * Authenticate using a specified mechanism
- * @method
- * @param {string} mechanism The Auth mechanism we are invoking
- * @param {string} db The db we are invoking the mechanism against
- * @param {...object} param Parameters for the specific mechanism
- * @param {authResultCallback} callback A callback function
- */
-Server.prototype.auth = function(mechanism, db) {
-  var self = this;
-
-  if (mechanism === 'default') {
-    mechanism = getDefaultAuthMechanism(self.ismaster);
-  }
-
-  // Slice all the arguments off
-  var args = Array.prototype.slice.call(arguments, 0);
-  // Set the mechanism
-  args[0] = mechanism;
-  // Get the callback
-  var callback = args[args.length - 1];
-
-  // If we are not connected or have a disconnectHandler specified
-  if (disconnectHandler(self, 'auth', db, args, {}, callback)) {
-    return;
-  }
-
-  // Do not authenticate if we are an arbiter
-  if (this.lastIsMaster() &amp;&amp; this.lastIsMaster().arbiterOnly) {
-    return callback(null, true);
-  }
-
-  // Apply the arguments to the pool
-  self.s.pool.auth.apply(self.s.pool, args);
-};
-
-/**
  * Compare two server instances
  * @method
  * @param {Server} server Server to compare equality against
@@ -2062,6 +1856,10 @@ Server.prototype.connections = function() {
 
 /**
  * Selects a server
+ * @method
+ * @param {function} selector Unused
+ * @param {ReadPreference} [options.readPreference] Unused
+ * @param {ClientSession} [options.session] Unused
  * @return {Server}
  */
 Server.prototype.selectServer = function(selector, options, callback) {
@@ -2233,7 +2031,7 @@ module.exports = Server;
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Oct 23 2018 10:56:03 GMT-0400 (EDT)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Mar 08 2019 10:24:10 GMT-0500 (Eastern Standard Time)
                     </footer>
                 </div>
             </td>

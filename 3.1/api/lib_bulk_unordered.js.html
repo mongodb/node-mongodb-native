@@ -469,6 +469,8 @@
             
                 <li data-name="ClientSession#startTransaction"><a href="ClientSession.html#startTransaction">startTransaction</a></li>
             
+                <li data-name="ClientSession#withTransaction"><a href="ClientSession.html#withTransaction">withTransaction</a></li>
+            
             </ul>
             <ul class="events itemMembers">
             
@@ -883,6 +885,8 @@
                 <li data-name="Db#addUser"><a href="Db.html#addUser">addUser</a></li>
             
                 <li data-name="Db#admin"><a href="Db.html#admin">admin</a></li>
+            
+                <li data-name="Db#aggregate"><a href="Db.html#aggregate">aggregate</a></li>
             
                 <li data-name="Db#collection"><a href="Db.html#collection">collection</a></li>
             
@@ -1557,8 +1561,6 @@
             
                 <li data-name="MongoClient#isConnected"><a href="MongoClient.html#isConnected">isConnected</a></li>
             
-                <li data-name="MongoClient#logout"><a href="MongoClient.html#logout">logout</a></li>
-            
                 <li data-name="MongoClient#startSession"><a href="MongoClient.html#startSession">startSession</a></li>
             
                 <li data-name="MongoClient#watch"><a href="MongoClient.html#watch">watch</a></li>
@@ -2110,6 +2112,7 @@ const executeOperation = utils.executeOperation;
 const MongoWriteConcernError = require('mongodb-core').MongoWriteConcernError;
 const handleMongoWriteConcernError = require('./common').handleMongoWriteConcernError;
 const bson = common.bson;
+const isPromiseLike = require('../utils').isPromiseLike;
 
 /**
  * Add to internal list of Operations
@@ -2138,6 +2141,8 @@ function addToOperationsList(bulkOperation, docType, document) {
     bulkOperation.s.currentBatch = bulkOperation.s.currentRemoveBatch;
   }
 
+  const maxKeySize = bulkOperation.s.maxKeySize;
+
   // Create a new batch object if we don't have a current one
   if (bulkOperation.s.currentBatch == null)
     bulkOperation.s.currentBatch = new Batch(docType, bulkOperation.s.currentIndex);
@@ -2145,7 +2150,8 @@ function addToOperationsList(bulkOperation, docType, document) {
   // Check if we need to create a new batch
   if (
     bulkOperation.s.currentBatch.size + 1 >= bulkOperation.s.maxWriteBatchSize ||
-    bulkOperation.s.currentBatch.sizeBytes + bsonSize >= bulkOperation.s.maxBatchSizeBytes ||
+    bulkOperation.s.currentBatch.sizeBytes + maxKeySize + bsonSize >=
+      bulkOperation.s.maxBatchSizeBytes ||
     bulkOperation.s.currentBatch.batchType !== docType
   ) {
     // Save the batch to the execution stack
@@ -2158,11 +2164,11 @@ function addToOperationsList(bulkOperation, docType, document) {
   // We have an array of documents
   if (Array.isArray(document)) {
     throw toError('operation passed in cannot be an Array');
-  } else {
-    bulkOperation.s.currentBatch.operations.push(document);
-    bulkOperation.s.currentBatch.originalIndexes.push(bulkOperation.s.currentIndex);
-    bulkOperation.s.currentIndex = bulkOperation.s.currentIndex + 1;
   }
+
+  bulkOperation.s.currentBatch.operations.push(document);
+  bulkOperation.s.currentBatch.originalIndexes.push(bulkOperation.s.currentIndex);
+  bulkOperation.s.currentIndex = bulkOperation.s.currentIndex + 1;
 
   // Save back the current Batch to the right type
   if (docType === common.INSERT) {
@@ -2178,8 +2184,8 @@ function addToOperationsList(bulkOperation, docType, document) {
   }
 
   // Update current batch size
-  bulkOperation.s.currentBatch.size = bulkOperation.s.currentBatch.size + 1;
-  bulkOperation.s.currentBatch.sizeBytes = bulkOperation.s.currentBatch.sizeBytes + bsonSize;
+  bulkOperation.s.currentBatch.size += 1;
+  bulkOperation.s.currentBatch.sizeBytes += maxKeySize + bsonSize;
 
   // Return bulkOperation
   return bulkOperation;
@@ -2221,6 +2227,10 @@ class UnorderedBulkOperation extends BulkOperationBase {
    */
   execute(_writeConcern, options, callback) {
     const ret = this.bulkExecute(_writeConcern, options, callback);
+    if (isPromiseLike(ret)) {
+      return ret;
+    }
+
     options = ret.options;
     callback = ret.callback;
 
@@ -2267,9 +2277,18 @@ function executeBatch(bulkOperation, batch, options, callback) {
  */
 function executeBatches(bulkOperation, options, callback) {
   let numberOfCommandsToExecute = bulkOperation.s.batches.length;
+  let hasErrored = false;
   // Execute over all the batches
   for (let i = 0; i &lt; bulkOperation.s.batches.length; i++) {
     executeBatch(bulkOperation, bulkOperation.s.batches[i], options, function(err) {
+      if (hasErrored) {
+        return;
+      }
+
+      if (err) {
+        hasErrored = true;
+        return handleCallback(callback, err);
+      }
       // Count down the number of commands left to execute
       numberOfCommandsToExecute = numberOfCommandsToExecute - 1;
 
@@ -2308,7 +2327,7 @@ module.exports.Bulk = UnorderedBulkOperation;
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Oct 23 2018 10:55:58 GMT-0400 (EDT)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Mar 08 2019 10:24:05 GMT-0500 (Eastern Standard Time)
                     </footer>
                 </div>
             </td>

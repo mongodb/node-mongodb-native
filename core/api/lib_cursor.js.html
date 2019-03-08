@@ -138,6 +138,8 @@
             
                 <li data-name="ClientSession#startTransaction"><a href="ClientSession.html#startTransaction">startTransaction</a></li>
             
+                <li data-name="ClientSession#withTransaction"><a href="ClientSession.html#withTransaction">withTransaction</a></li>
+            
             </ul>
             <ul class="events itemMembers">
             
@@ -203,8 +205,6 @@
             
             <span class="subtitle">Methods</span>
             
-                <li data-name="Connection#connect"><a href="Connection.html#connect">connect</a></li>
-            
                 <li data-name="Connection#destroy"><a href="Connection.html#destroy">destroy</a></li>
             
                 <li data-name="Connection#isConnected"><a href="Connection.html#isConnected">isConnected</a></li>
@@ -227,6 +227,8 @@
                 <li data-name="Connection#event:connect"><a href="Connection.html#event:connect">connect</a></li>
             
                 <li data-name="Connection#event:error"><a href="Connection.html#event:error">error</a></li>
+            
+                <li data-name="Connection#event:message"><a href="Connection.html#event:message">message</a></li>
             
                 <li data-name="Connection#event:parseError"><a href="Connection.html#event:parseError">parseError</a></li>
             
@@ -598,8 +600,6 @@
             
                 <li data-name="Mongos#lastIsMaster"><a href="Mongos.html#lastIsMaster">lastIsMaster</a></li>
             
-                <li data-name="Mongos#logout"><a href="Mongos.html#logout">logout</a></li>
-            
                 <li data-name="Mongos#remove"><a href="Mongos.html#remove">remove</a></li>
             
                 <li data-name="Mongos#selectServer"><a href="Mongos.html#selectServer">selectServer</a></li>
@@ -805,8 +805,6 @@
             
                 <li data-name="ReplSet#lastIsMaster"><a href="ReplSet.html#lastIsMaster">lastIsMaster</a></li>
             
-                <li data-name="ReplSet#logout"><a href="ReplSet.html#logout">logout</a></li>
-            
                 <li data-name="ReplSet#remove"><a href="ReplSet.html#remove">remove</a></li>
             
                 <li data-name="ReplSet#selectServer"><a href="ReplSet.html#selectServer">selectServer</a></li>
@@ -899,8 +897,6 @@
                 <li data-name="Server#isDestroyed"><a href="Server.html#isDestroyed">isDestroyed</a></li>
             
                 <li data-name="Server#lastIsMaster"><a href="Server.html#lastIsMaster">lastIsMaster</a></li>
-            
-                <li data-name="Server#logout"><a href="Server.html#logout">logout</a></li>
             
                 <li data-name="Server#remove"><a href="Server.html#remove">remove</a></li>
             
@@ -1089,9 +1085,9 @@ const MongoNetworkError = require('./error').MongoNetworkError;
 const mongoErrorContextSymbol = require('./error').mongoErrorContextSymbol;
 const f = require('util').format;
 const collationNotSupported = require('./utils').collationNotSupported;
-
-var BSON = retrieveBSON(),
-  Long = BSON.Long;
+const wireProtocol = require('./wireprotocol');
+const BSON = retrieveBSON();
+const Long = BSON.Long;
 
 /**
  * This is a cursor results callback
@@ -1187,7 +1183,8 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
     batchSize: options.batchSize || cmd.batchSize || 1000,
     currentLimit: 0,
     // Result field name if not a cursor (contains the array of results)
-    transforms: options.transforms
+    transforms: options.transforms,
+    raw: options.raw || (cmd &amp;&amp; cmd.raw)
   };
 
   if (typeof options.session === 'object') {
@@ -1291,129 +1288,9 @@ var handleCallback = function(callback, err, result) {
 };
 
 // Internal methods
-Cursor.prototype._find = function(callback) {
-  var self = this;
-
-  if (self.logger.isDebug()) {
-    self.logger.debug(
-      f(
-        'issue initial query [%s] with flags [%s]',
-        JSON.stringify(self.cmd),
-        JSON.stringify(self.query)
-      )
-    );
-  }
-
-  var queryCallback = function(err, r) {
-    if (err) return callback(err);
-
-    // Get the raw message
-    var result = r.message;
-
-    // Query failure bit set
-    if (result.queryFailure) {
-      return callback(new MongoError(result.documents[0]), null);
-    }
-
-    // Check if we have a command cursor
-    if (
-      Array.isArray(result.documents) &amp;&amp;
-      result.documents.length === 1 &amp;&amp;
-      (!self.cmd.find || (self.cmd.find &amp;&amp; self.cmd.virtual === false)) &amp;&amp;
-      (typeof result.documents[0].cursor !== 'string' ||
-        result.documents[0]['$err'] ||
-        result.documents[0]['errmsg'] ||
-        Array.isArray(result.documents[0].result))
-    ) {
-      // We have a an error document return the error
-      if (result.documents[0]['$err'] || result.documents[0]['errmsg']) {
-        return callback(new MongoError(result.documents[0]), null);
-      }
-
-      // We have a cursor document
-      if (result.documents[0].cursor != null &amp;&amp; typeof result.documents[0].cursor !== 'string') {
-        var id = result.documents[0].cursor.id;
-        // If we have a namespace change set the new namespace for getmores
-        if (result.documents[0].cursor.ns) {
-          self.ns = result.documents[0].cursor.ns;
-        }
-        // Promote id to long if needed
-        self.cursorState.cursorId = typeof id === 'number' ? Long.fromNumber(id) : id;
-        self.cursorState.lastCursorId = self.cursorState.cursorId;
-        self.cursorState.operationTime = result.documents[0].operationTime;
-        // If we have a firstBatch set it
-        if (Array.isArray(result.documents[0].cursor.firstBatch)) {
-          self.cursorState.documents = result.documents[0].cursor.firstBatch; //.reverse();
-        }
-
-        // Return after processing command cursor
-        return callback(null, result);
-      }
-
-      if (Array.isArray(result.documents[0].result)) {
-        self.cursorState.documents = result.documents[0].result;
-        self.cursorState.cursorId = Long.ZERO;
-        return callback(null, result);
-      }
-    }
-
-    // Otherwise fall back to regular find path
-    self.cursorState.cursorId = result.cursorId;
-    self.cursorState.documents = result.documents;
-    self.cursorState.lastCursorId = result.cursorId;
-
-    // Transform the results with passed in transformation method if provided
-    if (self.cursorState.transforms &amp;&amp; typeof self.cursorState.transforms.query === 'function') {
-      self.cursorState.documents = self.cursorState.transforms.query(result);
-    }
-
-    // Return callback
-    callback(null, result);
-  };
-
-  // Options passed to the pool
-  var queryOptions = {};
-
-  // If we have a raw query decorate the function
-  if (self.options.raw || self.cmd.raw) {
-    // queryCallback.raw = self.options.raw || self.cmd.raw;
-    queryOptions.raw = self.options.raw || self.cmd.raw;
-  }
-
-  // Do we have documentsReturnedIn set on the query
-  if (typeof self.query.documentsReturnedIn === 'string') {
-    // queryCallback.documentsReturnedIn = self.query.documentsReturnedIn;
-    queryOptions.documentsReturnedIn = self.query.documentsReturnedIn;
-  }
-
-  // Add promote Long value if defined
-  if (typeof self.cursorState.promoteLongs === 'boolean') {
-    queryOptions.promoteLongs = self.cursorState.promoteLongs;
-  }
-
-  // Add promote values if defined
-  if (typeof self.cursorState.promoteValues === 'boolean') {
-    queryOptions.promoteValues = self.cursorState.promoteValues;
-  }
-
-  // Add promote values if defined
-  if (typeof self.cursorState.promoteBuffers === 'boolean') {
-    queryOptions.promoteBuffers = self.cursorState.promoteBuffers;
-  }
-
-  if (typeof self.cursorState.session === 'object') {
-    queryOptions.session = self.cursorState.session;
-  }
-
-  // Write the initial command out
-  self.server.s.pool.write(self.query, queryOptions, queryCallback);
-};
-
 Cursor.prototype._getmore = function(callback) {
   if (this.logger.isDebug())
     this.logger.debug(f('schedule getMore call for query [%s]', JSON.stringify(this.query)));
-  // Determine if it's a raw query
-  var raw = this.options.raw || this.cmd.raw;
 
   // Set the current batchSize
   var batchSize = this.cursorState.batchSize;
@@ -1424,20 +1301,7 @@ Cursor.prototype._getmore = function(callback) {
     batchSize = this.cursorState.limit - this.cursorState.currentLimit;
   }
 
-  // Default pool
-  var pool = this.server.s.pool;
-
-  // We have a wire protocol handler
-  this.server.wireProtocolHandler.getMore(
-    this.bson,
-    this.ns,
-    this.cursorState,
-    batchSize,
-    raw,
-    pool,
-    this.options,
-    callback
-  );
+  wireProtocol.getMore(this.server, this.ns, this.cursorState, batchSize, this.options, callback);
 };
 
 /**
@@ -1546,10 +1410,7 @@ Cursor.prototype.kill = function(callback) {
     return;
   }
 
-  // Default pool
-  var pool = this.server.s.pool;
-  // Execute command
-  this.server.wireProtocolHandler.killCursor(this.bson, this.ns, this.cursorState, pool, callback);
+  wireProtocol.killCursors(this.server, this.ns, this.cursorState, callback);
 };
 
 /**
@@ -1673,42 +1534,7 @@ var nextFunction = function(self, callback) {
     return initializeCursor(self, callback);
   }
 
-  // If we don't have a cursorId execute the first query
-  if (self.cursorState.cursorId == null) {
-    // Check if pool is dead and return if not possible to
-    // execute the query against the db
-    if (isConnectionDead(self, callback)) return;
-
-    // Check if topology is destroyed
-    if (self.topology.isDestroyed())
-      return callback(
-        new MongoNetworkError('connection destroyed, not possible to instantiate cursor')
-      );
-
-    // query, cmd, options, cursorState, callback
-    self._find(function(err) {
-      if (err) return handleCallback(callback, err, null);
-
-      if (self.cursorState.cursorId &amp;&amp; self.cursorState.cursorId.isZero() &amp;&amp; self._endSession) {
-        self._endSession();
-      }
-
-      if (
-        self.cursorState.documents.length === 0 &amp;&amp;
-        self.cursorState.cursorId &amp;&amp;
-        self.cursorState.cursorId.isZero() &amp;&amp;
-        !self.cmd.tailable &amp;&amp;
-        !self.cmd.awaitData
-      ) {
-        return setCursorNotified(self, callback);
-      }
-
-      nextFunction(self, callback);
-    });
-  } else if (
-    self.cursorState.limit > 0 &amp;&amp;
-    self.cursorState.currentLimit >= self.cursorState.limit
-  ) {
+  if (self.cursorState.limit > 0 &amp;&amp; self.cursorState.currentLimit >= self.cursorState.limit) {
     // Ensure we kill the cursor on the server
     self.kill();
     // Set cursor in dead and notified state
@@ -1858,51 +1684,154 @@ function initializeCursor(cursor, callback) {
     }
   }
 
-  return cursor.topology.selectServer(cursor.options, (err, server) => {
+  // Very explicitly choose what is passed to selectServer
+  const serverSelectOptions = {};
+  if (cursor.cursorState.session) {
+    serverSelectOptions.session = cursor.cursorState.session;
+  }
+  if (cursor.options.readPreference) {
+    serverSelectOptions.readPreference = cursor.options.readPreference;
+  }
+
+  return cursor.topology.selectServer(serverSelectOptions, (err, server) => {
     if (err) {
-      // Handle the error and add object to next method call
-      if (cursor.disconnectHandler != null) {
-        return cursor.disconnectHandler.addObjectAndMethod(
-          'cursor',
-          cursor,
-          'next',
-          [callback],
-          callback
-        );
+      const disconnectHandler = cursor.disconnectHandler;
+      if (disconnectHandler != null) {
+        return disconnectHandler.addObjectAndMethod('cursor', cursor, 'next', [callback], callback);
       }
 
       return callback(err);
     }
 
     cursor.server = server;
-
-    // Set as init
     cursor.cursorState.init = true;
-
-    // error if collation not supported
     if (collationNotSupported(cursor.server, cursor.cmd)) {
       return callback(new MongoError(`server ${cursor.server.name} does not support collation`));
     }
 
-    try {
-      cursor.query = cursor.server.wireProtocolHandler.command(
-        cursor.bson,
+    function done() {
+      if (
+        cursor.cursorState.cursorId &amp;&amp;
+        cursor.cursorState.cursorId.isZero() &amp;&amp;
+        cursor._endSession
+      ) {
+        cursor._endSession();
+      }
+
+      if (
+        cursor.cursorState.documents.length === 0 &amp;&amp;
+        cursor.cursorState.cursorId &amp;&amp;
+        cursor.cursorState.cursorId.isZero() &amp;&amp;
+        !cursor.cmd.tailable &amp;&amp;
+        !cursor.cmd.awaitData
+      ) {
+        return setCursorNotified(cursor, callback);
+      }
+
+      nextFunction(cursor, callback);
+    }
+
+    // NOTE: this is a special internal method for cloning a cursor, consider removing
+    if (cursor.cursorState.cursorId != null) {
+      return done();
+    }
+
+    const queryCallback = (err, r) => {
+      if (err) return callback(err);
+
+      const result = r.message;
+      if (result.queryFailure) {
+        return callback(new MongoError(result.documents[0]), null);
+      }
+
+      // Check if we have a command cursor
+      if (
+        Array.isArray(result.documents) &amp;&amp;
+        result.documents.length === 1 &amp;&amp;
+        (!cursor.cmd.find || (cursor.cmd.find &amp;&amp; cursor.cmd.virtual === false)) &amp;&amp;
+        (typeof result.documents[0].cursor !== 'string' ||
+          result.documents[0]['$err'] ||
+          result.documents[0]['errmsg'] ||
+          Array.isArray(result.documents[0].result))
+      ) {
+        // We have an error document, return the error
+        if (result.documents[0]['$err'] || result.documents[0]['errmsg']) {
+          return callback(new MongoError(result.documents[0]), null);
+        }
+
+        // We have a cursor document
+        if (result.documents[0].cursor != null &amp;&amp; typeof result.documents[0].cursor !== 'string') {
+          var id = result.documents[0].cursor.id;
+          // If we have a namespace change set the new namespace for getmores
+          if (result.documents[0].cursor.ns) {
+            cursor.ns = result.documents[0].cursor.ns;
+          }
+          // Promote id to long if needed
+          cursor.cursorState.cursorId = typeof id === 'number' ? Long.fromNumber(id) : id;
+          cursor.cursorState.lastCursorId = cursor.cursorState.cursorId;
+          cursor.cursorState.operationTime = result.documents[0].operationTime;
+          // If we have a firstBatch set it
+          if (Array.isArray(result.documents[0].cursor.firstBatch)) {
+            cursor.cursorState.documents = result.documents[0].cursor.firstBatch; //.reverse();
+          }
+
+          // Return after processing command cursor
+          return done(result);
+        }
+
+        if (Array.isArray(result.documents[0].result)) {
+          cursor.cursorState.documents = result.documents[0].result;
+          cursor.cursorState.cursorId = Long.ZERO;
+          return done(result);
+        }
+      }
+
+      // Otherwise fall back to regular find path
+      const cursorId = result.cursorId || 0;
+      cursor.cursorState.cursorId = Long.fromNumber(cursorId);
+      cursor.cursorState.documents = result.documents;
+      cursor.cursorState.lastCursorId = result.cursorId;
+
+      // Transform the results with passed in transformation method if provided
+      if (
+        cursor.cursorState.transforms &amp;&amp;
+        typeof cursor.cursorState.transforms.query === 'function'
+      ) {
+        cursor.cursorState.documents = cursor.cursorState.transforms.query(result);
+      }
+
+      // Return callback
+      done(result);
+    };
+
+    if (cursor.logger.isDebug()) {
+      cursor.logger.debug(
+        `issue initial query [${JSON.stringify(cursor.cmd)}] with flags [${JSON.stringify(
+          cursor.query
+        )}]`
+      );
+    }
+
+    if (cursor.cmd.find != null) {
+      wireProtocol.query(
+        cursor.server,
         cursor.ns,
         cursor.cmd,
         cursor.cursorState,
-        cursor.topology,
-        cursor.options
+        cursor.options,
+        queryCallback
       );
 
-      if (cursor.query instanceof MongoError) {
-        return callback(cursor.query);
-      }
-
-      // call `nextFunction` again now that we are initialized
-      nextFunction(cursor, callback);
-    } catch (err) {
-      return callback(err);
+      return;
     }
+
+    cursor.query = wireProtocol.command(
+      cursor.server,
+      cursor.ns,
+      cursor.cmd,
+      cursor.options,
+      queryCallback
+    );
   });
 }
 
@@ -1926,7 +1855,7 @@ module.exports = Cursor;
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Oct 23 2018 10:56:03 GMT-0400 (EDT)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Mar 08 2019 10:24:10 GMT-0500 (Eastern Standard Time)
                     </footer>
                 </div>
             </td>

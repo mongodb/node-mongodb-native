@@ -138,6 +138,8 @@
             
                 <li data-name="ClientSession#startTransaction"><a href="ClientSession.html#startTransaction">startTransaction</a></li>
             
+                <li data-name="ClientSession#withTransaction"><a href="ClientSession.html#withTransaction">withTransaction</a></li>
+            
             </ul>
             <ul class="events itemMembers">
             
@@ -203,8 +205,6 @@
             
             <span class="subtitle">Methods</span>
             
-                <li data-name="Connection#connect"><a href="Connection.html#connect">connect</a></li>
-            
                 <li data-name="Connection#destroy"><a href="Connection.html#destroy">destroy</a></li>
             
                 <li data-name="Connection#isConnected"><a href="Connection.html#isConnected">isConnected</a></li>
@@ -227,6 +227,8 @@
                 <li data-name="Connection#event:connect"><a href="Connection.html#event:connect">connect</a></li>
             
                 <li data-name="Connection#event:error"><a href="Connection.html#event:error">error</a></li>
+            
+                <li data-name="Connection#event:message"><a href="Connection.html#event:message">message</a></li>
             
                 <li data-name="Connection#event:parseError"><a href="Connection.html#event:parseError">parseError</a></li>
             
@@ -598,8 +600,6 @@
             
                 <li data-name="Mongos#lastIsMaster"><a href="Mongos.html#lastIsMaster">lastIsMaster</a></li>
             
-                <li data-name="Mongos#logout"><a href="Mongos.html#logout">logout</a></li>
-            
                 <li data-name="Mongos#remove"><a href="Mongos.html#remove">remove</a></li>
             
                 <li data-name="Mongos#selectServer"><a href="Mongos.html#selectServer">selectServer</a></li>
@@ -805,8 +805,6 @@
             
                 <li data-name="ReplSet#lastIsMaster"><a href="ReplSet.html#lastIsMaster">lastIsMaster</a></li>
             
-                <li data-name="ReplSet#logout"><a href="ReplSet.html#logout">logout</a></li>
-            
                 <li data-name="ReplSet#remove"><a href="ReplSet.html#remove">remove</a></li>
             
                 <li data-name="ReplSet#selectServer"><a href="ReplSet.html#selectServer">selectServer</a></li>
@@ -899,8 +897,6 @@
                 <li data-name="Server#isDestroyed"><a href="Server.html#isDestroyed">isDestroyed</a></li>
             
                 <li data-name="Server#lastIsMaster"><a href="Server.html#lastIsMaster">lastIsMaster</a></li>
-            
-                <li data-name="Server#logout"><a href="Server.html#logout">logout</a></li>
             
                 <li data-name="Server#remove"><a href="Server.html#remove">remove</a></li>
             
@@ -1100,10 +1096,7 @@ const SessionMixins = require('./shared').SessionMixins;
 const isRetryableWritesSupported = require('./shared').isRetryableWritesSupported;
 const relayEvents = require('../utils').relayEvents;
 const isRetryableError = require('../error').isRetryableError;
-
-const defaultAuthProviders = require('../auth/defaultAuthProviders').defaultAuthProviders;
-
-var BSON = retrieveBSON();
+const BSON = retrieveBSON();
 
 //
 // States
@@ -1159,7 +1152,6 @@ var handlers = ['connect', 'close', 'error', 'timeout', 'parseError'];
  * @param {boolean} [options.noDelay=true] TCP Connection no delay
  * @param {number} [options.connectionTimeout=10000] TCP Connection timeout setting
  * @param {number} [options.socketTimeout=0] TCP Socket timeout setting
- * @param {boolean} [options.singleBufferSerializtion=true] Serialize into single buffer, trade of peak memory for serialization speed
  * @param {boolean} [options.ssl=false] Use SSL for connection
  * @param {boolean|function} [options.checkServerIdentity=true] Ensure we check server identify during SSL, set to false to disable checking. Only works for Node 0.12.x or higher. You can pass in a boolean or your own checkServerIdentity override function.
  * @param {Buffer} [options.ca] SSL Certificate store binary buffer
@@ -1273,9 +1265,7 @@ var ReplSet = function(seedlist, options) {
     // Are we running in debug mode
     debug: typeof options.debug === 'boolean' ? options.debug : false,
     // Client info
-    clientInfo: createClientInfo(options),
-    // Authentication context
-    authenticationContexts: []
+    clientInfo: createClientInfo(options)
   };
 
   // Add handler for topology change
@@ -1299,9 +1289,6 @@ var ReplSet = function(seedlist, options) {
     );
   }
 
-  // All the authProviders
-  this.authProviders = options.authProviders || defaultAuthProviders(this.s.bson);
-
   // Add forwarding of events from state handler
   var types = ['joined', 'left'];
   types.forEach(function(x) {
@@ -1320,8 +1307,6 @@ var ReplSet = function(seedlist, options) {
   // Disconnected state
   this.state = DISCONNECTED;
   this.haTimeoutId = null;
-  // Are we authenticating
-  this.authenticating = false;
   // Last ismaster
   this.ismaster = null;
   // Contains the intervalId
@@ -1383,50 +1368,40 @@ function connectNewServers(self, servers, callback) {
         return this.destroy({ force: true });
       }
 
-      if (event === 'connect' &amp;&amp; !self.authenticating) {
+      if (event === 'connect') {
         // Destroyed
         if (self.state === DESTROYED || self.state === UNREFERENCED) {
           return _self.destroy({ force: true });
         }
 
-        // Do we have authentication contexts that need to be applied
-        applyAuthenticationContexts(self, _self, function() {
-          // Destroy the instance
-          if (self.state === DESTROYED || self.state === UNREFERENCED) {
-            return _self.destroy({ force: true });
+        // Update the state
+        var result = self.s.replicaSetState.update(_self);
+        // Update the state with the new server
+        if (result) {
+          // Primary lastIsMaster store it
+          if (_self.lastIsMaster() &amp;&amp; _self.lastIsMaster().ismaster) {
+            self.ismaster = _self.lastIsMaster();
           }
 
-          // Update the state
-          var result = self.s.replicaSetState.update(_self);
-          // Update the state with the new server
-          if (result) {
-            // Primary lastIsMaster store it
-            if (_self.lastIsMaster() &amp;&amp; _self.lastIsMaster().ismaster) {
-              self.ismaster = _self.lastIsMaster();
-            }
-
-            // Remove the handlers
-            for (var i = 0; i &lt; handlers.length; i++) {
-              _self.removeAllListeners(handlers[i]);
-            }
-
-            // Add stable state handlers
-            _self.on('error', handleEvent(self, 'error'));
-            _self.on('close', handleEvent(self, 'close'));
-            _self.on('timeout', handleEvent(self, 'timeout'));
-            _self.on('parseError', handleEvent(self, 'parseError'));
-
-            // Enalbe the monitoring of the new server
-            monitorServer(_self.lastIsMaster().me, self, {});
-
-            // Rexecute any stalled operation
-            rexecuteOperations(self);
-          } else {
-            _self.destroy({ force: true });
+          // Remove the handlers
+          for (let i = 0; i &lt; handlers.length; i++) {
+            _self.removeAllListeners(handlers[i]);
           }
-        });
-      } else if (event === 'connect' &amp;&amp; self.authenticating) {
-        this.destroy({ force: true });
+
+          // Add stable state handlers
+          _self.on('error', handleEvent(self, 'error'));
+          _self.on('close', handleEvent(self, 'close'));
+          _self.on('timeout', handleEvent(self, 'timeout'));
+          _self.on('parseError', handleEvent(self, 'parseError'));
+
+          // Enalbe the monitoring of the new server
+          monitorServer(_self.lastIsMaster().me, self, {});
+
+          // Rexecute any stalled operation
+          rexecuteOperations(self);
+        } else {
+          _self.destroy({ force: true });
+        }
       } else if (event === 'error') {
         error = err;
       }
@@ -1457,7 +1432,6 @@ function connectNewServers(self, servers, callback) {
         Object.assign({}, self.s.options, {
           host: _server.split(':')[0],
           port: parseInt(_server.split(':')[1], 10),
-          authProviders: self.authProviders,
           reconnect: false,
           monitoring: false,
           parent: self,
@@ -1808,40 +1782,6 @@ function handleEvent(self, event) {
   };
 }
 
-function applyAuthenticationContexts(self, server, callback) {
-  if (self.s.authenticationContexts.length === 0) {
-    return callback();
-  }
-
-  // Do not apply any auth contexts if it's an arbiter
-  if (server.lastIsMaster() &amp;&amp; server.lastIsMaster().arbiterOnly) {
-    return callback();
-  }
-
-  // Copy contexts to ensure no modificiation in the middle of
-  // auth process.
-  var authContexts = self.s.authenticationContexts.slice(0);
-
-  // Apply one of the contexts
-  function applyAuth(authContexts, server, callback) {
-    if (authContexts.length === 0) return callback();
-    // Get the first auth context
-    var authContext = authContexts.shift();
-    // Copy the params
-    var customAuthContext = authContext.slice(0);
-    // Push our callback handler
-    customAuthContext.push(function(/* err */) {
-      applyAuth(authContexts, server, callback);
-    });
-
-    // Attempt authentication
-    server.auth.apply(server, customAuthContext);
-  }
-
-  // Apply all auth contexts
-  applyAuth(authContexts, server, callback);
-}
-
 function shouldTriggerConnect(self) {
   const isConnecting = self.state === CONNECTING;
   const hasPrimary = self.s.replicaSetState.hasPrimary();
@@ -1880,67 +1820,59 @@ function handleInitialConnectEvent(self, event) {
 
     // Check the type of server
     if (event === 'connect') {
-      // Do we have authentication contexts that need to be applied
-      applyAuthenticationContexts(self, _this, function() {
-        // Destroy the instance
-        if (self.state === DESTROYED || self.state === UNREFERENCED) {
-          return _this.destroy({ force: true });
+      // Update the state
+      var result = self.s.replicaSetState.update(_this);
+      if (result === true) {
+        // Primary lastIsMaster store it
+        if (_this.lastIsMaster() &amp;&amp; _this.lastIsMaster().ismaster) {
+          self.ismaster = _this.lastIsMaster();
         }
 
-        // Update the state
-        var result = self.s.replicaSetState.update(_this);
-        if (result === true) {
-          // Primary lastIsMaster store it
-          if (_this.lastIsMaster() &amp;&amp; _this.lastIsMaster().ismaster) {
-            self.ismaster = _this.lastIsMaster();
-          }
-
-          // Debug log
-          if (self.s.logger.isDebug()) {
-            self.s.logger.debug(
-              f(
-                'handleInitialConnectEvent %s from server %s in replset with id %s has state [%s]',
-                event,
-                _this.name,
-                self.id,
-                JSON.stringify(self.s.replicaSetState.set)
-              )
-            );
-          }
-
-          // Remove the handlers
-          for (var i = 0; i &lt; handlers.length; i++) {
-            _this.removeAllListeners(handlers[i]);
-          }
-
-          // Add stable state handlers
-          _this.on('error', handleEvent(self, 'error'));
-          _this.on('close', handleEvent(self, 'close'));
-          _this.on('timeout', handleEvent(self, 'timeout'));
-          _this.on('parseError', handleEvent(self, 'parseError'));
-
-          // Do we have a primary or primaryAndSecondary
-          if (shouldTriggerConnect(self)) {
-            // We are connected
-            self.state = CONNECTED;
-
-            // Set initial connect state
-            self.initialConnectState.connect = true;
-            // Emit connect event
-            process.nextTick(function() {
-              self.emit('connect', self);
-            });
-
-            topologyMonitor(self, {});
-          }
-        } else if (result instanceof MongoError) {
-          _this.destroy({ force: true });
-          self.destroy({ force: true });
-          return self.emit('error', result);
-        } else {
-          _this.destroy({ force: true });
+        // Debug log
+        if (self.s.logger.isDebug()) {
+          self.s.logger.debug(
+            f(
+              'handleInitialConnectEvent %s from server %s in replset with id %s has state [%s]',
+              event,
+              _this.name,
+              self.id,
+              JSON.stringify(self.s.replicaSetState.set)
+            )
+          );
         }
-      });
+
+        // Remove the handlers
+        for (let i = 0; i &lt; handlers.length; i++) {
+          _this.removeAllListeners(handlers[i]);
+        }
+
+        // Add stable state handlers
+        _this.on('error', handleEvent(self, 'error'));
+        _this.on('close', handleEvent(self, 'close'));
+        _this.on('timeout', handleEvent(self, 'timeout'));
+        _this.on('parseError', handleEvent(self, 'parseError'));
+
+        // Do we have a primary or primaryAndSecondary
+        if (shouldTriggerConnect(self)) {
+          // We are connected
+          self.state = CONNECTED;
+
+          // Set initial connect state
+          self.initialConnectState.connect = true;
+          // Emit connect event
+          process.nextTick(function() {
+            self.emit('connect', self);
+          });
+
+          topologyMonitor(self, {});
+        }
+      } else if (result instanceof MongoError) {
+        _this.destroy({ force: true });
+        self.destroy({ force: true });
+        return self.emit('error', result);
+      } else {
+        _this.destroy({ force: true });
+      }
     } else {
       // Emit failure to connect
       self.emit('failed', this);
@@ -2035,20 +1967,19 @@ function emitSDAMEvent(self, event, description) {
 
 /**
  * Initiate server connect
- * @method
- * @param {array} [options.auth=null] Array of auth options to apply on connect
  */
 ReplSet.prototype.connect = function(options) {
   var self = this;
   // Add any connect level options to the internal state
   this.s.connectOptions = options || {};
+
   // Set connecting state
   stateTransition(this, CONNECTING);
+
   // Create server instances
   var servers = this.s.seedlist.map(function(x) {
     return new Server(
-      Object.assign({}, self.s.options, x, {
-        authProviders: self.authProviders,
+      Object.assign({}, self.s.options, x, options, {
         reconnect: false,
         monitoring: false,
         parent: self,
@@ -2081,6 +2012,16 @@ ReplSet.prototype.connect = function(options) {
 };
 
 /**
+ * Authenticate the topology.
+ * @method
+ * @param {MongoCredentials} credentials The credentials for authentication we are using
+ * @param {authResultCallback} callback A callback function
+ */
+ReplSet.prototype.auth = function(credentials, callback) {
+  callback(null, null);
+};
+
+/**
  * Destroy the server connection
  * @param {boolean} [options.force=false] Force destroy the pool
  * @method
@@ -2093,8 +2034,6 @@ ReplSet.prototype.destroy = function(options) {
   if (this.haTimeoutId) clearTimeout(this.haTimeoutId);
   // Destroy the replicaset
   this.s.replicaSetState.destroy(options);
-  // Clear out authentication contexts
-  this.s.authenticationContexts = [];
 
   // Destroy all connecting servers
   this.s.connectingServers.forEach(function(x) {
@@ -2173,10 +2112,6 @@ ReplSet.prototype.connections = function() {
 ReplSet.prototype.isConnected = function(options) {
   options = options || {};
 
-  // If we are authenticating signal not connected
-  // To avoid interleaving of operations
-  if (this.authenticating) return false;
-
   // If we specified a read preference check if we are connected to something
   // than can satisfy this
   if (options.readPreference &amp;&amp; options.readPreference.equals(ReadPreference.secondary)) {
@@ -2217,6 +2152,7 @@ ReplSet.prototype.isDestroyed = function() {
  * @method
  * @param {function} selector Unused
  * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
+ * @param {ClientSession} [options.session] Unused
  * @param {function} callback
  */
 ReplSet.prototype.selectServer = function(selector, options, callback) {
@@ -2464,181 +2400,6 @@ ReplSet.prototype.command = function(ns, cmd, options, callback) {
 };
 
 /**
- * Authenticate using a specified mechanism
- * @method
- * @param {string} mechanism The Auth mechanism we are invoking
- * @param {string} db The db we are invoking the mechanism against
- * @param {...object} param Parameters for the specific mechanism
- * @param {authResultCallback} callback A callback function
- */
-ReplSet.prototype.auth = function(mechanism, db) {
-  var allArgs = Array.prototype.slice.call(arguments, 0).slice(0);
-  var self = this;
-  var args = Array.prototype.slice.call(arguments, 2);
-  var callback = args.pop();
-  var currentContextIndex = 0;
-
-  // If we don't have the mechanism fail
-  if (this.authProviders[mechanism] == null &amp;&amp; mechanism !== 'default') {
-    return callback(new MongoError(f('auth provider %s does not exist', mechanism)));
-  }
-
-  // Are we already authenticating, throw
-  if (this.authenticating) {
-    return callback(new MongoError('authentication or logout allready in process'));
-  }
-
-  // Topology is not connected, save the call in the provided store to be
-  // Executed at some point when the handler deems it's reconnected
-  if (!this.isConnected() &amp;&amp; self.s.disconnectHandler != null) {
-    if (!self.s.replicaSetState.hasPrimary() &amp;&amp; !self.s.options.secondaryOnlyConnectionAllowed) {
-      return self.s.disconnectHandler.add('auth', db, allArgs, {}, callback);
-    } else if (
-      !self.s.replicaSetState.hasSecondary() &amp;&amp;
-      self.s.options.secondaryOnlyConnectionAllowed
-    ) {
-      return self.s.disconnectHandler.add('auth', db, allArgs, {}, callback);
-    }
-  }
-
-  // Set to authenticating
-  this.authenticating = true;
-  // All errors
-  var errors = [];
-
-  // Get all the servers
-  var servers = this.s.replicaSetState.allServers();
-  // No servers return
-  if (servers.length === 0) {
-    this.authenticating = false;
-    callback(null, true);
-  }
-
-  // Authenticate
-  function auth(server) {
-    // Arguments without a callback
-    var argsWithoutCallback = [mechanism, db].concat(args.slice(0));
-    // Create arguments
-    var finalArguments = argsWithoutCallback.concat([
-      function(err) {
-        count = count - 1;
-        // Save all the errors
-        if (err) errors.push({ name: server.name, err: err });
-        // We are done
-        if (count === 0) {
-          // Auth is done
-          self.authenticating = false;
-
-          // Return the auth error
-          if (errors.length) {
-            // Remove the entry from the stored authentication contexts
-            self.s.authenticationContexts.splice(currentContextIndex, 0);
-            // Return error
-            return callback(
-              new MongoError({
-                message: 'authentication fail',
-                errors: errors
-              }),
-              false
-            );
-          }
-
-          // Successfully authenticated session
-          callback(null, self);
-        }
-      }
-    ]);
-
-    if (!server.lastIsMaster().arbiterOnly) {
-      // Execute the auth only against non arbiter servers
-      server.auth.apply(server, finalArguments);
-    } else {
-      // If we are authenticating against an arbiter just ignore it
-      finalArguments.pop()(null);
-    }
-  }
-
-  // Get total count
-  var count = servers.length;
-
-  // Save current context index
-  currentContextIndex = this.s.authenticationContexts.length;
-
-  // Store the auth context and return the last index
-  this.s.authenticationContexts.push([mechanism, db].concat(args.slice(0)));
-
-  // Authenticate against all servers
-  while (servers.length > 0) {
-    auth(servers.shift());
-  }
-};
-
-/**
- * Logout from a database
- * @method
- * @param {string} db The db we are logging out from
- * @param {authResultCallback} callback A callback function
- */
-ReplSet.prototype.logout = function(dbName, callback) {
-  var self = this;
-  // Are we authenticating or logging out, throw
-  if (this.authenticating) {
-    throw new MongoError('authentication or logout allready in process');
-  }
-
-  // Ensure no new members are processed while logging out
-  this.authenticating = true;
-
-  // Remove from all auth providers (avoid any reaplication of the auth details)
-  var providers = Object.keys(this.authProviders);
-  for (var i = 0; i &lt; providers.length; i++) {
-    this.authProviders[providers[i]].logout(dbName);
-  }
-
-  // Clear out any contexts associated with the db
-  self.s.authenticationContexts = self.s.authenticationContexts.filter(function(context) {
-    return context[1] !== dbName;
-  });
-
-  // Now logout all the servers
-  var servers = this.s.replicaSetState.allServers();
-  var count = servers.length;
-  if (count === 0) return callback();
-  var errors = [];
-
-  function logoutServer(_server, cb) {
-    _server.logout(dbName, function(err) {
-      if (err) errors.push({ name: _server.name, err: err });
-      cb();
-    });
-  }
-
-  // Execute logout on all server instances
-  for (i = 0; i &lt; servers.length; i++) {
-    logoutServer(servers[i], function() {
-      count = count - 1;
-
-      if (count === 0) {
-        // Do not block new operations
-        self.authenticating = false;
-        // If we have one or more errors
-        if (errors.length)
-          return callback(
-            new MongoError({
-              message: f('logout failed against db %s', dbName),
-              errors: errors
-            }),
-            false
-          );
-
-        // No errors
-        callback();
-      }
-    });
-  }
-};
-
-/**
  * Get a new cursor
  * @method
  * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
@@ -2812,7 +2573,7 @@ module.exports = ReplSet;
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Oct 23 2018 10:56:03 GMT-0400 (EDT)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Mar 08 2019 10:24:10 GMT-0500 (Eastern Standard Time)
                     </footer>
                 </div>
             </td>
