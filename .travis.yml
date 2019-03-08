@@ -1,6 +1,9 @@
-dist: xenial 
+dist: xenial
 language: node_js
-cache: yarn
+
+cache:
+  directories:
+    - /home/travis/.mongodb/versions
 
 jobs:
   include:
