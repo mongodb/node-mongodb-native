@@ -4,8 +4,6 @@ const SYMBOL_DOES_NOT_EXIST = Symbol('[[assert does not exist]]');
 const SYMBOL_DOES_EXIST = Symbol('[[assert does exist]]');
 const SYMBOL_IGNORE = Symbol('[[ignore]]');
 
-const EJSON = require('mongodb-extjson');
-
 function valIs42(input) {
   return input === 42 || input === '42';
 }
@@ -40,7 +38,7 @@ function generateMatchAndDiffSpecialCase(key, expectedObj, actualObj, metadata) 
   if (key === 'lsid' && typeof expected === 'string') {
     // Case lsid - assert that session matches session in session data
     const sessionData = metadata.sessionData;
-    const lsid = JSON.parse(EJSON.stringify(sessionData[expected] && sessionData[expected].id));
+    const lsid = sessionData[expected];
     return generateMatchAndDiff(lsid, actual, metadata);
   } else if (key === 'getMore' && expectedIs42) {
     // cursorid - explicitly ignore 42 values
@@ -134,11 +132,6 @@ function matchSpec(chai, utils) {
     const sessionData = utils.flag(this, 'transactionTestRunnerSessionData');
 
     const result = generateMatchAndDiff(expected, actual, { sessionData });
-
-    if (!result.match) {
-      console.log('fizzz');
-      console.dir(actual, { depth: 6 });
-    }
 
     chai.Assertion.prototype.assert.call(
       this,
