@@ -4,7 +4,9 @@ language: node_js
 cache:
   directories:
     - /home/travis/.mongodb/versions
-
+branches:
+  only: 
+    - master
 jobs:
   include:
     - stage: standalone
