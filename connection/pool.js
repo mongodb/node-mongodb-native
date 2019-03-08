@@ -7,7 +7,6 @@ const MongoNetworkError = require('../error').MongoNetworkError;
 const MongoWriteConcernError = require('../error').MongoWriteConcernError;
 const Logger = require('./logger');
 const f = require('util').format;
-const Query = require('./commands').Query;
 const Msg = require('./msg').Msg;
 const CommandResult = require('./command_result');
 const MESSAGE_HEADER_SIZE = require('../wireprotocol/shared').MESSAGE_HEADER_SIZE;
@@ -16,10 +15,10 @@ const opcodes = require('../wireprotocol/shared').opcodes;
 const compress = require('../wireprotocol/compression').compress;
 const compressorIDs = require('../wireprotocol/compression').compressorIDs;
 const uncompressibleCommands = require('../wireprotocol/compression').uncompressibleCommands;
-const resolveClusterTime = require('../topologies/shared').resolveClusterTime;
 const apm = require('./apm');
 const Buffer = require('safe-buffer').Buffer;
 const connect = require('./connect');
+const updateSessionFromResponse = require('../sessions').updateSessionFromResponse;
 
 var DISCONNECTED = 'disconnected';
 var CONNECTING = 'connecting';
@@ -28,15 +27,6 @@ var DESTROYING = 'destroying';
 var DESTROYED = 'destroyed';
 
 var _id = 0;
-
-function hasSessionSupport(topology) {
-  if (topology == null) return false;
-  if (topology.description) {
-    return topology.description.maxWireVersion >= 6;
-  }
-
-  return topology.ismaster == null ? false : topology.ismaster.maxWireVersion >= 6;
-}
 
 /**
  * Creates a new Pool instance
@@ -428,25 +418,15 @@ function messageHandler(self) {
         return handleOperationCallback(self, workItem.cb, new MongoError(err));
       }
 
-      // Look for clusterTime, operationTime, and recoveryToken and update them if necessary
       if (message.documents[0]) {
-        const session = workItem.session;
         const document = message.documents[0];
+        const session = workItem.session;
+        if (session) {
+          updateSessionFromResponse(session, document);
+        }
+
         if (document.$clusterTime) {
-          const $clusterTime = document.$clusterTime;
-          self.topology.clusterTime = $clusterTime;
-
-          if (session != null) {
-            resolveClusterTime(session, $clusterTime);
-          }
-        }
-
-        if (document.operationTime && session && session.supports.causalConsistency) {
-          session.advanceOperationTime(message.documents[0].operationTime);
-        }
-
-        if (document.recoveryToken && session && session.inTransaction()) {
-          session.transaction._recoveryToken = document.recoveryToken;
+          self.topology.clusterTime = document.$clusterTime;
         }
       }
 
@@ -897,54 +877,6 @@ Pool.prototype.write = function(command, options, cb) {
 
   // Get the requestId
   operation.requestId = command.requestId;
-
-  if (hasSessionSupport(this.topology)) {
-    let sessionOptions = {};
-    if (this.topology.clusterTime) {
-      sessionOptions = { $clusterTime: this.topology.clusterTime };
-    }
-
-    if (operation.session) {
-      // TODO: reenable when sessions development is complete
-      // if (operation.session.topology !== this.topology) {
-      //   return cb(
-      //     new MongoError('Sessions may only be used with the client they were created from')
-      //   );
-      // }
-
-      if (operation.session.hasEnded) {
-        return cb(new MongoError('Use of expired sessions is not permitted'));
-      }
-
-      if (
-        operation.session.clusterTime &&
-        operation.session.clusterTime.clusterTime.greaterThan(
-          sessionOptions.$clusterTime.clusterTime
-        )
-      ) {
-        sessionOptions.$clusterTime = operation.session.clusterTime;
-      }
-
-      sessionOptions.lsid = operation.session.id;
-
-      // update the `lastUse` of the acquired ServerSession
-      operation.session.serverSession.lastUse = Date.now();
-    }
-
-    // decorate the commands with session-specific details
-    let commandDocument = command;
-    if (command instanceof Query) {
-      commandDocument = command.query;
-    } else if (command instanceof Msg) {
-      commandDocument = command.command;
-    }
-
-    if (commandDocument.$query) {
-      commandDocument = commandDocument.$query;
-    }
-
-    Object.assign(commandDocument, sessionOptions);
-  }
 
   // If command monitoring is enabled we need to modify the callback here
   if (self.options.monitorCommands) {

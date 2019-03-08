@@ -160,4 +160,8 @@ class Transaction {
   }
 }
 
-module.exports = { TxnState, Transaction };
+function isTransactionCommand(command) {
+  return !!(command.commitTransaction || command.abortTransaction);
+}
+
+module.exports = { TxnState, Transaction, isTransactionCommand };

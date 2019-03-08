@@ -2,14 +2,12 @@
 
 const Query = require('../connection/commands').Query;
 const Msg = require('../connection/msg').Msg;
-const retrieveBSON = require('../connection/utils').retrieveBSON;
 const MongoError = require('../error').MongoError;
 const getReadPreference = require('./shared').getReadPreference;
-const BSON = retrieveBSON();
-const ReadPreference = require('../topologies/read_preference');
-const TxnState = require('../transactions').TxnState;
 const isSharded = require('./shared').isSharded;
 const databaseNamespace = require('./shared').databaseNamespace;
+const isTransactionCommand = require('../transactions').isTransactionCommand;
+const applySession = require('../sessions').applySession;
 
 function command(server, ns, cmd, options, callback) {
   if (typeof options === 'function') (callback = options), (options = {});
@@ -25,7 +23,27 @@ function command(server, ns, cmd, options, callback) {
   const shouldUseOpMsg = supportsOpMsg(server);
   const session = options.session;
 
+  let clusterTime = server.clusterTime;
   let finalCmd = Object.assign({}, cmd);
+  if (hasSessionSupport(server) && session) {
+    if (
+      session.clusterTime &&
+      session.clusterTime.clusterTime.greaterThan(clusterTime.clusterTime)
+    ) {
+      clusterTime = session.clusterTime;
+    }
+
+    const err = applySession(session, finalCmd, options);
+    if (err) {
+      return callback(err);
+    }
+  }
+
+  // if we have a known cluster time, gossip it
+  if (clusterTime) {
+    finalCmd.$clusterTime = clusterTime;
+  }
+
   if (
     isSharded(server) &&
     !shouldUseOpMsg &&
@@ -36,11 +54,6 @@ function command(server, ns, cmd, options, callback) {
       $query: finalCmd,
       $readPreference: readPreference.toJSON()
     };
-  }
-
-  const err = decorateWithSessionsData(finalCmd, session, options);
-  if (err) {
-    return callback(err);
   }
 
   const commandOptions = Object.assign(
@@ -84,6 +97,15 @@ function command(server, ns, cmd, options, callback) {
   }
 }
 
+function hasSessionSupport(topology) {
+  if (topology == null) return false;
+  if (topology.description) {
+    return topology.description.maxWireVersion >= 6;
+  }
+
+  return topology.ismaster == null ? false : topology.ismaster.maxWireVersion >= 6;
+}
+
 function supportsOpMsg(topologyOrServer) {
   const description = topologyOrServer.ismaster
     ? topologyOrServer.ismaster
@@ -94,73 +116,6 @@ function supportsOpMsg(topologyOrServer) {
   }
 
   return description.maxWireVersion >= 6 && description.__nodejs_mock_server__ == null;
-}
-
-function isTransactionCommand(command) {
-  return !!(command.commitTransaction || command.abortTransaction);
-}
-
-/**
- * Optionally decorate a command with sessions specific keys
- *
- * @param {Object} command the command to decorate
- * @param {ClientSession} session the session tracking transaction state
- * @param {Object} [options] Optional settings passed to calling operation
- * @return {MongoError|null} An error, if some error condition was met
- */
-function decorateWithSessionsData(command, session, options) {
-  if (!session) {
-    return;
-  }
-
-  // first apply non-transaction-specific sessions data
-  const serverSession = session.serverSession;
-  const inTransaction = session.inTransaction() || isTransactionCommand(command);
-  const isRetryableWrite = options.willRetryWrite;
-
-  if (serverSession.txnNumber && (isRetryableWrite || inTransaction)) {
-    command.txnNumber = BSON.Long.fromNumber(serverSession.txnNumber);
-  }
-
-  // now attempt to apply transaction-specific sessions data
-  if (!inTransaction) {
-    if (session.transaction.state !== TxnState.NO_TRANSACTION) {
-      session.transaction.transition(TxnState.NO_TRANSACTION);
-    }
-
-    // for causal consistency
-    if (session.supports.causalConsistency && session.operationTime) {
-      command.readConcern = command.readConcern || {};
-      Object.assign(command.readConcern, { afterClusterTime: session.operationTime });
-    }
-
-    return;
-  }
-
-  if (options.readPreference && !options.readPreference.equals(ReadPreference.primary)) {
-    return new MongoError(
-      `Read preference in a transaction must be primary, not: ${options.readPreference.mode}`
-    );
-  }
-
-  // `autocommit` must always be false to differentiate from retryable writes
-  command.autocommit = false;
-
-  if (session.transaction.state === TxnState.STARTING_TRANSACTION) {
-    session.transaction.transition(TxnState.TRANSACTION_IN_PROGRESS);
-    command.startTransaction = true;
-
-    const readConcern =
-      session.transaction.options.readConcern || session.clientOptions.readConcern;
-    if (readConcern) {
-      command.readConcern = readConcern;
-    }
-
-    if (session.supports.causalConsistency && session.operationTime) {
-      command.readConcern = command.readConcern || {};
-      Object.assign(command.readConcern, { afterClusterTime: session.operationTime });
-    }
-  }
 }
 
 module.exports = command;

@@ -12,6 +12,9 @@ const MongoWriteConcernError = require('./error').MongoWriteConcernError;
 const Transaction = require('./transactions').Transaction;
 const TxnState = require('./transactions').TxnState;
 const isPromiseLike = require('./utils').isPromiseLike;
+const ReadPreference = require('./topologies/read_preference');
+const isTransactionCommand = require('./transactions').isTransactionCommand;
+const resolveClusterTime = require('./topologies/shared').resolveClusterTime;
 
 function assertAlive(session, callback) {
   if (session.serverSession == null) {
@@ -125,6 +128,7 @@ class ClientSession extends EventEmitter {
 
     // release the server session back to the pool
     this.sessionPool.release(this.serverSession);
+    this.serverSession = null;
 
     // spec indicates that we should ignore all errors for `endSessions`
     if (typeof callback === 'function') callback(null, null);
@@ -595,9 +599,95 @@ class ServerSessionPool {
   }
 }
 
+/**
+ * Optionally decorate a command with sessions specific keys
+ *
+ * @param {ClientSession} session the session tracking transaction state
+ * @param {Object} command the command to decorate
+ * @param {Object} topology the topology for tracking the cluster time
+ * @param {Object} [options] Optional settings passed to calling operation
+ * @return {MongoError|null} An error, if some error condition was met
+ */
+function applySession(session, command, options) {
+  const serverSession = session.serverSession;
+  if (serverSession == null) {
+    // TODO: merge this with `assertAlive`, did not want to throw a try/catch here
+    return new MongoError('Cannot use a session that has ended');
+  }
+
+  // mark the last use of this session, and apply the `lsid`
+  serverSession.lastUse = Date.now();
+  command.lsid = serverSession.id;
+
+  // first apply non-transaction-specific sessions data
+  const inTransaction = session.inTransaction() || isTransactionCommand(command);
+  const isRetryableWrite = options.willRetryWrite;
+
+  if (serverSession.txnNumber && (isRetryableWrite || inTransaction)) {
+    command.txnNumber = BSON.Long.fromNumber(serverSession.txnNumber);
+  }
+
+  // now attempt to apply transaction-specific sessions data
+  if (!inTransaction) {
+    if (session.transaction.state !== TxnState.NO_TRANSACTION) {
+      session.transaction.transition(TxnState.NO_TRANSACTION);
+    }
+
+    // TODO: the following should only be applied to read operation per spec.
+    // for causal consistency
+    if (session.supports.causalConsistency && session.operationTime) {
+      command.readConcern = command.readConcern || {};
+      Object.assign(command.readConcern, { afterClusterTime: session.operationTime });
+    }
+
+    return;
+  }
+
+  if (options.readPreference && !options.readPreference.equals(ReadPreference.primary)) {
+    return new MongoError(
+      `Read preference in a transaction must be primary, not: ${options.readPreference.mode}`
+    );
+  }
+
+  // `autocommit` must always be false to differentiate from retryable writes
+  command.autocommit = false;
+
+  if (session.transaction.state === TxnState.STARTING_TRANSACTION) {
+    session.transaction.transition(TxnState.TRANSACTION_IN_PROGRESS);
+    command.startTransaction = true;
+
+    const readConcern =
+      session.transaction.options.readConcern || session.clientOptions.readConcern;
+    if (readConcern) {
+      command.readConcern = readConcern;
+    }
+
+    if (session.supports.causalConsistency && session.operationTime) {
+      command.readConcern = command.readConcern || {};
+      Object.assign(command.readConcern, { afterClusterTime: session.operationTime });
+    }
+  }
+}
+
+function updateSessionFromResponse(session, document) {
+  if (document.$clusterTime) {
+    resolveClusterTime(session, document.$clusterTime);
+  }
+
+  if (document.operationTime && session && session.supports.causalConsistency) {
+    session.advanceOperationTime(document.operationTime);
+  }
+
+  if (document.recoveryToken && session && session.inTransaction()) {
+    session.transaction._recoveryToken = document.recoveryToken;
+  }
+}
+
 module.exports = {
   ClientSession,
   ServerSession,
   ServerSessionPool,
-  TxnState
+  TxnState,
+  applySession,
+  updateSessionFromResponse
 };
