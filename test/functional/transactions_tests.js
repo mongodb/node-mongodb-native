@@ -100,16 +100,14 @@ class TransactionsTestContext {
 
     this.appliedFailPoints = [];
 
-    // cleanup
-    if (context.testClient) {
-      cleanupPromises.push(
-        context.testClient.close().then(() => {
+    return Promise.all(cleanupPromises).then(() => {
+      // cleanup
+      if (context.testClient) {
+        return context.testClient.close().then(() => {
           delete context.testClient;
-        })
-      );
-    }
-
-    return Promise.all(cleanupPromises);
+        });
+      }
+    });
   }
 
   targetedFailPoint(options) {
