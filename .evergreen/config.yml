@@ -110,6 +110,7 @@ functions:
           ${PROJECT_DIRECTORY}/.evergreen/install-dependencies.sh
   run atlas tests:
     - command: shell.exec
+      type: test
       params:
         working_dir: src
         silent: true

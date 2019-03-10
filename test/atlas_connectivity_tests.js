@@ -31,6 +31,7 @@ function runConnectionTest(config) {
     .then(() => console.log(`${config.name} passed`))
     .catch(e => {
       console.log(`${config.name} failed`);
+      console.dir({ e });
       throw e;
     });
 }
