@@ -6,7 +6,7 @@ const yaml = require('js-yaml');
 
 const MONGODB_VERSIONS = ['latest', '4.0', '3.6', '3.4', '3.2', '3.0', '2.6'];
 const NODE_VERSIONS = ['dubnium', 'carbon', 'boron', 'argon'];
-const TOPOLOGIES = ['server', 'replica_set', 'sharded_cluster'];
+const TOPOLOGIES = ['server', 'replicaset', 'sharded'];
 const OPERATING_SYSTEMS = [
   {
     name: 'linux-64-amzn-test',

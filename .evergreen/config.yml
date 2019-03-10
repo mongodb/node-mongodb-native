@@ -139,26 +139,26 @@ tasks:
         vars:
           VERSION: latest
           TOPOLOGY: server
-  - name: test-latest-replica_set
+  - name: test-latest-replicaset
     tags:
       - latest
-      - replica_set
+      - replicaset
     commands:
       - func: install dependencies
       - func: run tests
         vars:
           VERSION: latest
-          TOPOLOGY: replica_set
-  - name: test-latest-sharded_cluster
+          TOPOLOGY: replicaset
+  - name: test-latest-sharded
     tags:
       - latest
-      - sharded_cluster
+      - sharded
     commands:
       - func: install dependencies
       - func: run tests
         vars:
           VERSION: latest
-          TOPOLOGY: sharded_cluster
+          TOPOLOGY: sharded
   - name: test-4.0-server
     tags:
       - '4.0'
@@ -169,26 +169,26 @@ tasks:
         vars:
           VERSION: '4.0'
           TOPOLOGY: server
-  - name: test-4.0-replica_set
+  - name: test-4.0-replicaset
     tags:
       - '4.0'
-      - replica_set
+      - replicaset
     commands:
       - func: install dependencies
       - func: run tests
         vars:
           VERSION: '4.0'
-          TOPOLOGY: replica_set
-  - name: test-4.0-sharded_cluster
+          TOPOLOGY: replicaset
+  - name: test-4.0-sharded
     tags:
       - '4.0'
-      - sharded_cluster
+      - sharded
     commands:
       - func: install dependencies
       - func: run tests
         vars:
           VERSION: '4.0'
-          TOPOLOGY: sharded_cluster
+          TOPOLOGY: sharded
   - name: test-3.6-server
     tags:
       - '3.6'
@@ -199,26 +199,26 @@ tasks:
         vars:
           VERSION: '3.6'
           TOPOLOGY: server
-  - name: test-3.6-replica_set
+  - name: test-3.6-replicaset
     tags:
       - '3.6'
-      - replica_set
+      - replicaset
     commands:
       - func: install dependencies
       - func: run tests
         vars:
           VERSION: '3.6'
-          TOPOLOGY: replica_set
-  - name: test-3.6-sharded_cluster
+          TOPOLOGY: replicaset
+  - name: test-3.6-sharded
     tags:
       - '3.6'
-      - sharded_cluster
+      - sharded
     commands:
       - func: install dependencies
       - func: run tests
         vars:
           VERSION: '3.6'
-          TOPOLOGY: sharded_cluster
+          TOPOLOGY: sharded
   - name: test-3.4-server
     tags:
       - '3.4'
@@ -229,26 +229,26 @@ tasks:
         vars:
           VERSION: '3.4'
           TOPOLOGY: server
-  - name: test-3.4-replica_set
+  - name: test-3.4-replicaset
     tags:
       - '3.4'
-      - replica_set
+      - replicaset
     commands:
       - func: install dependencies
       - func: run tests
         vars:
           VERSION: '3.4'
-          TOPOLOGY: replica_set
-  - name: test-3.4-sharded_cluster
+          TOPOLOGY: replicaset
+  - name: test-3.4-sharded
     tags:
       - '3.4'
-      - sharded_cluster
+      - sharded
     commands:
       - func: install dependencies
       - func: run tests
         vars:
           VERSION: '3.4'
-          TOPOLOGY: sharded_cluster
+          TOPOLOGY: sharded
   - name: test-3.2-server
     tags:
       - '3.2'
@@ -259,26 +259,26 @@ tasks:
         vars:
           VERSION: '3.2'
           TOPOLOGY: server
-  - name: test-3.2-replica_set
+  - name: test-3.2-replicaset
     tags:
       - '3.2'
-      - replica_set
+      - replicaset
     commands:
       - func: install dependencies
       - func: run tests
         vars:
           VERSION: '3.2'
-          TOPOLOGY: replica_set
-  - name: test-3.2-sharded_cluster
+          TOPOLOGY: replicaset
+  - name: test-3.2-sharded
     tags:
       - '3.2'
-      - sharded_cluster
+      - sharded
     commands:
       - func: install dependencies
       - func: run tests
         vars:
           VERSION: '3.2'
-          TOPOLOGY: sharded_cluster
+          TOPOLOGY: sharded
   - name: test-3.0-server
     tags:
       - '3.0'
@@ -289,26 +289,26 @@ tasks:
         vars:
           VERSION: '3.0'
           TOPOLOGY: server
-  - name: test-3.0-replica_set
+  - name: test-3.0-replicaset
     tags:
       - '3.0'
-      - replica_set
+      - replicaset
     commands:
       - func: install dependencies
       - func: run tests
         vars:
           VERSION: '3.0'
-          TOPOLOGY: replica_set
-  - name: test-3.0-sharded_cluster
+          TOPOLOGY: replicaset
+  - name: test-3.0-sharded
     tags:
       - '3.0'
-      - sharded_cluster
+      - sharded
     commands:
       - func: install dependencies
       - func: run tests
         vars:
           VERSION: '3.0'
-          TOPOLOGY: sharded_cluster
+          TOPOLOGY: sharded
   - name: test-2.6-server
     tags:
       - '2.6'
@@ -319,26 +319,26 @@ tasks:
         vars:
           VERSION: '2.6'
           TOPOLOGY: server
-  - name: test-2.6-replica_set
+  - name: test-2.6-replicaset
     tags:
       - '2.6'
-      - replica_set
+      - replicaset
     commands:
       - func: install dependencies
       - func: run tests
         vars:
           VERSION: '2.6'
-          TOPOLOGY: replica_set
-  - name: test-2.6-sharded_cluster
+          TOPOLOGY: replicaset
+  - name: test-2.6-sharded
     tags:
       - '2.6'
-      - sharded_cluster
+      - sharded
     commands:
       - func: install dependencies
       - func: run tests
         vars:
           VERSION: '2.6'
-          TOPOLOGY: sharded_cluster
+          TOPOLOGY: sharded
   - name: test-atlas-connectivity
     tags:
       - atlas-connect
@@ -355,26 +355,26 @@ buildvariants:
       NODE_LTS_NAME: dubnium
     tasks: &ref_0
       - test-latest-server
-      - test-latest-replica_set
-      - test-latest-sharded_cluster
+      - test-latest-replicaset
+      - test-latest-sharded
       - test-4.0-server
-      - test-4.0-replica_set
-      - test-4.0-sharded_cluster
+      - test-4.0-replicaset
+      - test-4.0-sharded
       - test-3.6-server
-      - test-3.6-replica_set
-      - test-3.6-sharded_cluster
+      - test-3.6-replicaset
+      - test-3.6-sharded
       - test-3.4-server
-      - test-3.4-replica_set
-      - test-3.4-sharded_cluster
+      - test-3.4-replicaset
+      - test-3.4-sharded
       - test-3.2-server
-      - test-3.2-replica_set
-      - test-3.2-sharded_cluster
+      - test-3.2-replicaset
+      - test-3.2-sharded
       - test-3.0-server
-      - test-3.0-replica_set
-      - test-3.0-sharded_cluster
+      - test-3.0-replicaset
+      - test-3.0-sharded
       - test-2.6-server
-      - test-2.6-replica_set
-      - test-2.6-sharded_cluster
+      - test-2.6-replicaset
+      - test-2.6-sharded
       - test-atlas-connectivity
   - name: linux-64-amzn-test-carbon
     display_name: Amazon Linux (Enterprise) Node Carbon
@@ -521,20 +521,20 @@ buildvariants:
       NODE_LTS_NAME: dubnium
     tasks: &ref_1
       - test-latest-server
-      - test-latest-replica_set
-      - test-latest-sharded_cluster
+      - test-latest-replicaset
+      - test-latest-sharded
       - test-4.0-server
-      - test-4.0-replica_set
-      - test-4.0-sharded_cluster
+      - test-4.0-replicaset
+      - test-4.0-sharded
       - test-3.6-server
-      - test-3.6-replica_set
-      - test-3.6-sharded_cluster
+      - test-3.6-replicaset
+      - test-3.6-sharded
       - test-3.4-server
-      - test-3.4-replica_set
-      - test-3.4-sharded_cluster
+      - test-3.4-replicaset
+      - test-3.4-sharded
       - test-3.2-server
-      - test-3.2-replica_set
-      - test-3.2-sharded_cluster
+      - test-3.2-replicaset
+      - test-3.2-sharded
       - test-atlas-connectivity
   - name: ubuntu-16.04-carbon
     display_name: Ubuntu 16.04 Node Carbon
@@ -609,17 +609,17 @@ buildvariants:
       NODE_LTS_NAME: dubnium
     tasks: &ref_2
       - test-latest-server
-      - test-latest-replica_set
-      - test-latest-sharded_cluster
+      - test-latest-replicaset
+      - test-latest-sharded
       - test-4.0-server
-      - test-4.0-replica_set
-      - test-4.0-sharded_cluster
+      - test-4.0-replicaset
+      - test-4.0-sharded
       - test-3.6-server
-      - test-3.6-replica_set
-      - test-3.6-sharded_cluster
+      - test-3.6-replicaset
+      - test-3.6-sharded
       - test-3.4-server
-      - test-3.4-replica_set
-      - test-3.4-sharded_cluster
+      - test-3.4-replicaset
+      - test-3.4-sharded
       - test-atlas-connectivity
   - name: debian81-test-carbon
     display_name: Debian 8.1 Node Carbon
