@@ -45,8 +45,8 @@ class MongoCredentials {
     options = options || {};
     this.username = options.username;
     this.password = options.password;
-    this.source = options.source;
-    this.mechanism = options.mechanism;
+    this.source = options.source || options.db;
+    this.mechanism = options.mechanism || 'default';
     this.mechanismProperties = options.mechanismProperties;
   }
 
