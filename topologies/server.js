@@ -505,7 +505,7 @@ Server.prototype.connect = function(options) {
  * @param {authResultCallback} callback A callback function
  */
 Server.prototype.auth = function(credentials, callback) {
-  callback(null, null);
+  if (typeof callback === 'function') callback(null, null);
 };
 
 /**

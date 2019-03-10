@@ -607,7 +607,7 @@ Pool.prototype.connect = function() {
  * @param {authResultCallback} callback A callback function
  */
 Pool.prototype.auth = function(credentials, callback) {
-  callback(null, null);
+  if (typeof callback === 'function') callback(null, null);
 };
 
 /**
@@ -615,7 +615,7 @@ Pool.prototype.auth = function(credentials, callback) {
  * @param {authResultCallback} callback A callback function
  */
 Pool.prototype.logout = function(dbName, callback) {
-  callback(null, null);
+  if (typeof callback === 'function') callback(null, null);
 };
 
 /**
