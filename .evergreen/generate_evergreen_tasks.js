@@ -163,6 +163,9 @@ TASKS.push({
   tags: ['atlas-connect'],
   commands: [
     {
+      func: 'install dependencies'
+    },
+    {
       func: 'run atlas tests',
       vars: {
         VERSION: 'latest'

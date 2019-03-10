@@ -139,6 +139,7 @@ functions:
 
   "run atlas tests":
     - command: shell.exec
+      type: test
       params:
         working_dir: "src"
         silent: true
