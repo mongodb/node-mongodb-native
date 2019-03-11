@@ -948,19 +948,29 @@ ReplSet.prototype.auth = function(credentials, callback) {
  * @param {boolean} [options.force=false] Force destroy the pool
  * @method
  */
-ReplSet.prototype.destroy = function(options) {
+ReplSet.prototype.destroy = function(options, callback) {
   options = options || {};
-  // Transition state
-  stateTransition(this, DESTROYED);
+
+  let destroyCount = this.s.connectingServers.length + 1; // +1 for the callback from `replicaSetState.destroy`
+  const serverDestroyed = () => {
+    destroyCount--;
+    if (destroyCount > 0) {
+      return;
+    }
+
+    // Emit toplogy closing event
+    emitSDAMEvent(this, 'topologyClosed', { topologyId: this.id });
+
+    // Transition state
+    stateTransition(this, DESTROYED);
+
+    if (typeof callback === 'function') {
+      callback(null, null);
+    }
+  };
+
   // Clear out any monitoring process
   if (this.haTimeoutId) clearTimeout(this.haTimeoutId);
-  // Destroy the replicaset
-  this.s.replicaSetState.destroy(options);
-
-  // Destroy all connecting servers
-  this.s.connectingServers.forEach(function(x) {
-    x.destroy(options);
-  });
 
   // Clear out all monitoring
   for (var i = 0; i < this.intervalIds.length; i++) {
@@ -970,8 +980,18 @@ ReplSet.prototype.destroy = function(options) {
   // Reset list of intervalIds
   this.intervalIds = [];
 
-  // Emit toplogy closing event
-  emitSDAMEvent(this, 'topologyClosed', { topologyId: this.id });
+  if (destroyCount === 0) {
+    serverDestroyed();
+    return;
+  }
+
+  // Destroy the replicaset
+  this.s.replicaSetState.destroy(options, serverDestroyed);
+
+  // Destroy all connecting servers
+  this.s.connectingServers.forEach(function(x) {
+    x.destroy(options, serverDestroyed);
+  });
 };
 
 /**

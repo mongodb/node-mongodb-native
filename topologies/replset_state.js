@@ -116,31 +116,43 @@ ReplSetState.prototype.allServers = function(options) {
   return servers;
 };
 
-ReplSetState.prototype.destroy = function(options) {
-  // Destroy all sockets
-  if (this.primary) this.primary.destroy(options);
-  this.secondaries.forEach(function(x) {
-    x.destroy(options);
-  });
-  this.arbiters.forEach(function(x) {
-    x.destroy(options);
-  });
-  this.passives.forEach(function(x) {
-    x.destroy(options);
-  });
-  this.ghosts.forEach(function(x) {
-    x.destroy(options);
-  });
-  // Clear out the complete state
-  this.secondaries = [];
-  this.arbiters = [];
-  this.passives = [];
-  this.ghosts = [];
-  this.unknownServers = [];
-  this.set = {};
-  this.primary = null;
-  // Emit the topology changed
-  emitTopologyDescriptionChanged(this);
+ReplSetState.prototype.destroy = function(options, callback) {
+  const serversToDestroy = this.secondaries
+    .concat(this.arbiters)
+    .concat(this.passives)
+    .concat(this.ghosts);
+  if (this.primary) serversToDestroy.push(this.primary);
+
+  let serverCount = serversToDestroy.length;
+  const serverDestroyed = () => {
+    serverCount--;
+    if (serverCount > 0) {
+      return;
+    }
+
+    // Clear out the complete state
+    this.secondaries = [];
+    this.arbiters = [];
+    this.passives = [];
+    this.ghosts = [];
+    this.unknownServers = [];
+    this.set = {};
+    this.primary = null;
+
+    // Emit the topology changed
+    emitTopologyDescriptionChanged(this);
+
+    if (typeof callback === 'function') {
+      callback(null, null);
+    }
+  };
+
+  if (serverCount === 0) {
+    serverDestroyed();
+    return;
+  }
+
+  serversToDestroy.forEach(server => server.destroy(options, serverDestroyed));
 };
 
 ReplSetState.prototype.remove = function(server, options) {
