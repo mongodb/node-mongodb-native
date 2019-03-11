@@ -61,7 +61,7 @@ describe('Sessions', function() {
           const doc = request.document;
           if (doc.ismaster) {
             request.reply(mock.DEFAULT_ISMASTER_36);
-          } else if (doc.count) {
+          } else if (doc.count || doc.endSessions) {
             request.reply({ ok: 1 });
           }
         });
