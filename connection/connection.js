@@ -193,21 +193,34 @@ class Connection extends EventEmitter {
    * Destroy connection
    * @method
    */
-  destroy() {
+  destroy(options, callback) {
+    if (typeof options === 'function') {
+      callback = options;
+      options = {};
+    }
+
+    options = Object.assign({ force: false }, options);
+
     if (connectionAccounting) {
       deleteConnection(this.id);
     }
 
-    if (this.socket) {
-      // Catch posssible exception thrown by node 0.10.x
-      try {
-        this.socket.end();
-      } catch (err) {} // eslint-disable-line
-
-      this.socket.destroy();
+    if (this.socket == null) {
+      this.destroyed = true;
+      return;
     }
 
-    this.destroyed = true;
+    if (options.force) {
+      this.socket.destroy();
+      this.destroyed = true;
+      if (typeof callback === 'function') callback(null, null);
+      return;
+    }
+
+    this.socket.end(err => {
+      this.destroyed = true;
+      if (typeof callback === 'function') callback(err, null);
+    });
   }
 
   /**
