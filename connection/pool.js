@@ -635,34 +635,53 @@ Pool.prototype.unref = function() {
 var events = ['error', 'close', 'timeout', 'parseError', 'connect', 'message'];
 
 // Destroy the connections
-function destroy(self, connections) {
-  // Destroy all connections
-  connections.forEach(function(c) {
-    // Remove all listeners
-    for (var i = 0; i < events.length; i++) {
-      c.removeAllListeners(events[i]);
+function destroy(self, connections, options, callback) {
+  let connectionCount = connections.length;
+  function connectionDestroyed() {
+    connectionCount--;
+    if (connectionCount > 0) {
+      return;
     }
-    // Destroy connection
-    c.destroy();
+
+    // Zero out all connections
+    self.inUseConnections = [];
+    self.availableConnections = [];
+    self.connectingConnections = 0;
+
+    // Set state to destroyed
+    stateTransition(self, DESTROYED);
+    if (typeof callback === 'function') {
+      callback(null, null);
+    }
+  }
+
+  if (connectionCount === 0) {
+    connectionDestroyed();
+    return;
+  }
+
+  // Destroy all connections
+  connections.forEach(conn => {
+    for (var i = 0; i < events.length; i++) {
+      conn.removeAllListeners(events[i]);
+    }
+
+    conn.destroy(options, connectionDestroyed);
   });
-
-  // Zero out all connections
-  self.inUseConnections = [];
-  self.availableConnections = [];
-  self.connectingConnections = 0;
-
-  // Set state to destroyed
-  stateTransition(self, DESTROYED);
 }
 
 /**
  * Destroy pool
  * @method
  */
-Pool.prototype.destroy = function(force) {
+Pool.prototype.destroy = function(force, callback) {
   var self = this;
   // Do not try again if the pool is already dead
-  if (this.state === DESTROYED || self.state === DESTROYING) return;
+  if (this.state === DESTROYED || self.state === DESTROYING) {
+    if (typeof callback === 'function') callback(null, null);
+    return;
+  }
+
   // Set state to destroyed
   stateTransition(this, DESTROYING);
 
@@ -681,7 +700,7 @@ Pool.prototype.destroy = function(force) {
     }
 
     // Destroy the topology
-    return destroy(self, connections);
+    return destroy(self, connections, { force: true }, callback);
   }
 
   // Clear out the reconnect if set
@@ -712,7 +731,7 @@ Pool.prototype.destroy = function(force) {
         }
       }
 
-      destroy(self, connections);
+      destroy(self, connections, { force: false }, callback);
       // } else if (self.queue.length > 0 && !this.reconnectId) {
     } else {
       // Ensure we empty the queue
