@@ -802,8 +802,11 @@ var listeners = ['close', 'error', 'timeout', 'parseError', 'connect'];
  * @param {boolean} [options.emitDestroy=false] Emit destroy event on destroy
  * @param {boolean} [options.force=false] Force destroy the pool
  */
-Server.prototype.destroy = function(options) {
-  if (this._destroyed) return;
+Server.prototype.destroy = function(options, callback) {
+  if (this._destroyed) {
+    if (typeof callback === 'function') callback(null, null);
+    return;
+  }
 
   options = options || {};
   var self = this;
@@ -819,6 +822,7 @@ Server.prototype.destroy = function(options) {
   // No pool, return
   if (!self.s.pool) {
     this._destroyed = true;
+    if (typeof callback === 'function') callback(null, null);
     return;
   }
 
@@ -854,7 +858,7 @@ Server.prototype.destroy = function(options) {
   }
 
   // Destroy the pool
-  this.s.pool.destroy(options.force);
+  this.s.pool.destroy(options.force, callback);
   this._destroyed = true;
 };
 
