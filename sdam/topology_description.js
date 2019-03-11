@@ -2,11 +2,13 @@
 const ServerType = require('./server_description').ServerType;
 const ServerDescription = require('./server_description').ServerDescription;
 const ReadPreference = require('../topologies/read_preference');
+const WIRE_CONSTANTS = require('../wireprotocol/constants');
 
 // contstants related to compatability checks
-const MIN_SUPPORTED_SERVER_VERSION = '2.6';
-const MIN_SUPPORTED_WIRE_VERSION = 2;
-const MAX_SUPPORTED_WIRE_VERSION = 5;
+const MIN_SUPPORTED_SERVER_VERSION = WIRE_CONSTANTS.MIN_SUPPORTED_SERVER_VERSION;
+const MAX_SUPPORTED_SERVER_VERSION = WIRE_CONSTANTS.MAX_SUPPORTED_SERVER_VERSION;
+const MIN_SUPPORTED_WIRE_VERSION = WIRE_CONSTANTS.MIN_SUPPORTED_WIRE_VERSION;
+const MAX_SUPPORTED_WIRE_VERSION = WIRE_CONSTANTS.MAX_SUPPORTED_WIRE_VERSION;
 
 // An enumeration of topology types we know about
 const TopologyType = {
@@ -66,7 +68,7 @@ class TopologyDescription {
         this.compatible = false;
         this.compatibilityError = `Server at ${serverDescription.address} requires wire version ${
           serverDescription.minWireVersion
-        }, but this version of the driver only supports up to ${MAX_SUPPORTED_WIRE_VERSION}.`;
+        }, but this version of the driver only supports up to ${MAX_SUPPORTED_WIRE_VERSION} (MongoDB ${MAX_SUPPORTED_SERVER_VERSION})`;
       }
 
       if (serverDescription.maxWireVersion < MIN_SUPPORTED_WIRE_VERSION) {

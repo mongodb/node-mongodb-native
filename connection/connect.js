@@ -6,6 +6,11 @@ const Query = require('./commands').Query;
 const createClientInfo = require('../topologies/shared').createClientInfo;
 const MongoError = require('../error').MongoError;
 const defaultAuthProviders = require('../auth/defaultAuthProviders').defaultAuthProviders;
+const WIRE_CONSTANTS = require('../wireprotocol/constants');
+const MAX_SUPPORTED_WIRE_VERSION = WIRE_CONSTANTS.MAX_SUPPORTED_WIRE_VERSION;
+const MAX_SUPPORTED_SERVER_VERSION = WIRE_CONSTANTS.MAX_SUPPORTED_SERVER_VERSION;
+const MIN_SUPPORTED_WIRE_VERSION = WIRE_CONSTANTS.MIN_SUPPORTED_WIRE_VERSION;
+const MIN_SUPPORTED_SERVER_VERSION = WIRE_CONSTANTS.MIN_SUPPORTED_SERVER_VERSION;
 let AUTH_PROVIDERS;
 
 function connect(options, callback) {
@@ -44,10 +49,6 @@ function connect(options, callback) {
   });
 }
 
-function isSupportedServer(ismaster) {
-  return ismaster && typeof ismaster.maxWireVersion === 'number' && ismaster.maxWireVersion >= 2;
-}
-
 function getSaslSupportedMechs(options) {
   if (!(options && options.credentials)) {
     return {};
@@ -69,6 +70,34 @@ function getSaslSupportedMechs(options) {
   }
 
   return { saslSupportedMechs: `${authSource}.${user}` };
+}
+
+function checkSupportedServer(ismaster, options) {
+  const serverVersionHighEnough =
+    ismaster &&
+    typeof ismaster.maxWireVersion === 'number' &&
+    ismaster.maxWireVersion >= MIN_SUPPORTED_WIRE_VERSION;
+  const serverVersionLowEnough =
+    ismaster &&
+    typeof ismaster.minWireVersion === 'number' &&
+    ismaster.minWireVersion <= MAX_SUPPORTED_WIRE_VERSION;
+
+  if (serverVersionHighEnough) {
+    if (serverVersionLowEnough) {
+      return null;
+    }
+
+    const message = `Server at ${options.host}:${options.port} reports minimum wire version ${
+      ismaster.minWireVersion
+    }, but this version of the Node.js Driver requires at most ${MAX_SUPPORTED_WIRE_VERSION} (MongoDB ${MAX_SUPPORTED_SERVER_VERSION})`;
+    return new MongoError(message);
+  }
+
+  const message = `Server at ${options.host}:${
+    options.port
+  } reports maximum wire version ${ismaster.maxWireVersion ||
+    0}, but this version of the Node.js Driver requires at least ${MIN_SUPPORTED_WIRE_VERSION} (MongoDB ${MIN_SUPPORTED_SERVER_VERSION})`;
+  return new MongoError(message);
 }
 
 function performInitialHandshake(conn, options, callback) {
@@ -98,23 +127,9 @@ function performInitialHandshake(conn, options, callback) {
       return;
     }
 
-    if (!isSupportedServer(ismaster)) {
-      const latestSupportedVersion = '2.6';
-      const latestSupportedMaxWireVersion = 2;
-      const message =
-        'Server at ' +
-        options.host +
-        ':' +
-        options.port +
-        ' reports wire version ' +
-        (ismaster.maxWireVersion || 0) +
-        ', but this version of the Node.js Driver requires at least ' +
-        latestSupportedMaxWireVersion +
-        ' (MongoDB' +
-        latestSupportedVersion +
-        ').';
-
-      callback(new MongoError(message), null);
+    const supportedServerErr = checkSupportedServer(ismaster, options);
+    if (supportedServerErr) {
+      callback(supportedServerErr, null);
       return;
     }
 
