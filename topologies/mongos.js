@@ -254,10 +254,10 @@ function emitSDAMEvent(self, event, description) {
 }
 
 const SERVER_EVENTS = ['serverDescriptionChanged', 'error', 'close', 'timeout', 'parseError'];
-function destroyServer(server, options) {
+function destroyServer(server, options, callback) {
   options = options || {};
   SERVER_EVENTS.forEach(event => server.removeAllListeners(event));
-  server.destroy(options);
+  server.destroy(options, callback);
 }
 
 /**
@@ -808,32 +808,43 @@ Mongos.prototype.unref = function() {
  * @param {boolean} [options.force=false] Force destroy the pool
  * @method
  */
-Mongos.prototype.destroy = function(options) {
-  var self = this;
-  // Transition state
-  stateTransition(this, DESTROYED);
-  // Get all proxies
-  var proxies = this.connectedProxies.concat(this.connectingProxies);
-  // Clear out any monitoring process
-  if (this.haTimeoutId) clearTimeout(this.haTimeoutId);
+Mongos.prototype.destroy = function(options, callback) {
+  if (this.haTimeoutId) {
+    clearTimeout(this.haTimeoutId);
+  }
+
+  const proxies = this.connectedProxies.concat(this.connectingProxies);
+  let serverCount = proxies.length;
+  const serverDestroyed = () => {
+    serverCount--;
+    if (serverCount > 0) {
+      return;
+    }
+
+    emitTopologyDescriptionChanged(this);
+    emitSDAMEvent(this, 'topologyClosed', { topologyId: this.id });
+    stateTransition(this, DESTROYED);
+    if (typeof callback === 'function') {
+      callback(null, null);
+    }
+  };
+
+  if (serverCount === 0) {
+    serverDestroyed();
+    return;
+  }
 
   // Destroy all connecting servers
-  proxies.forEach(function(server) {
+  proxies.forEach(server => {
     // Emit the sdam event
-    self.emit('serverClosed', {
-      topologyId: self.id,
+    this.emit('serverClosed', {
+      topologyId: this.id,
       address: server.name
     });
 
-    destroyServer(server, options);
-
-    // Move to list of disconnectedProxies
-    moveServerFrom(self.connectedProxies, self.disconnectedProxies, server);
+    destroyServer(server, options, serverDestroyed);
+    moveServerFrom(this.connectedProxies, this.disconnectedProxies, server);
   });
-  // Emit the final topology change
-  emitTopologyDescriptionChanged(self);
-  // Emit toplogy closing event
-  emitSDAMEvent(this, 'topologyClosed', { topologyId: this.id });
 };
 
 /**
