@@ -239,39 +239,42 @@ function generateTopologyTests(testSuites, testContext) {
   testSuites.forEach(testSuite => {
     const suiteName = testSuite.name;
     const topologies = parseTopologies(testSuite.topology);
-    const minServerVersion = testSuite.minServerVersion
-      ? `>=${testSuite.minServerVersion}`
-      : '>=3.7.x';
 
     const tests = testSuite.tests;
-    describe(suiteName, {
-      metadata: { requires: { topology: topologies, mongodb: minServerVersion } },
-      test: function() {
-        beforeEach(() => prepareDatabaseForSuite(testSuite, testContext));
-        afterEach(() => testContext.cleanupAfterSuite());
+    topologies.forEach(topology => {
+      const DEFAULT_MIN_SERVER_VERSION = topology === 'sharded' ? '>=4.1.5' : '>=3.7.x';
+      const minServerVersion = testSuite.minServerVersion
+        ? `>=${testSuite.minServerVersion}`
+        : DEFAULT_MIN_SERVER_VERSION;
+      describe(`${suiteName} - ${topology}`, {
+        metadata: { requires: { topology: [topology], mongodb: minServerVersion } },
+        test: function() {
+          beforeEach(() => prepareDatabaseForSuite(testSuite, testContext));
+          afterEach(() => testContext.cleanupAfterSuite());
 
-        tests.forEach(spec => {
-          const maybeSkipIt = shouldSkipTest(spec);
-          maybeSkipIt(spec.description, function() {
-            let testPromise = Promise.resolve();
+          tests.forEach(spec => {
+            const maybeSkipIt = shouldSkipTest(spec);
+            maybeSkipIt(spec.description, function() {
+              let testPromise = Promise.resolve();
 
-            if (spec.failPoint) {
-              testPromise = testPromise.then(() => testContext.enableFailPoint(spec.failPoint));
-            }
+              if (spec.failPoint) {
+                testPromise = testPromise.then(() => testContext.enableFailPoint(spec.failPoint));
+              }
 
-            // run the actual test
-            testPromise = testPromise.then(() =>
-              runTestSuiteTest(this.configuration, spec, testContext)
-            );
+              // run the actual test
+              testPromise = testPromise.then(() =>
+                runTestSuiteTest(this.configuration, spec, testContext)
+              );
 
-            if (spec.failPoint) {
-              testPromise = testPromise.then(() => testContext.disableFailPoint(spec.failPoint));
-            }
+              if (spec.failPoint) {
+                testPromise = testPromise.then(() => testContext.disableFailPoint(spec.failPoint));
+              }
 
-            return testPromise.then(() => validateOutcome(spec, testContext));
+              return testPromise.then(() => validateOutcome(spec, testContext));
+            });
           });
-        });
-      }
+        }
+      });
     });
   });
 }
