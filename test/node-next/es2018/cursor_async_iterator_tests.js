@@ -15,9 +15,16 @@ describe('Cursor Async Iterator Tests', function() {
 
     await collection.deleteMany({});
     await collection.insertMany(docs);
+    await client.close();
   });
 
-  after(() => client.close());
+  beforeEach(async function() {
+    client = this.configuration.newClient();
+    await client.connect();
+    collection = client.db(this.configuration.db).collection('async_cursor_tests');
+  });
+
+  afterEach(() => client.close());
 
   it('should be able to use a for-await loop on a find command cursor', {
     metadata: { requires: { node: '>=10.5.0' } },
