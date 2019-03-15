@@ -1,10 +1,9 @@
 'use strict';
 
-const fs = require('fs');
-const path = require('path');
-const version = process.version;
-
 function loadTests() {
+  const fs = require('fs');
+  const path = require('path');
+
   const directory = path.resolve.apply(path, arguments);
   fs
     .readdirSync(directory)
@@ -13,28 +12,28 @@ function loadTests() {
     .forEach(x => require(x));
 }
 
-let supportES2017 = false;
-try {
-  new Function('return (async function foo() {})();')();
-  supportES2017 = true;
-} catch (e) {
-  supportES2017 = false;
-}
+describe('ES2017', function() {
+  let supportES2017 = false;
+  try {
+    new Function('return (async function foo() {})();')();
+    supportES2017 = true;
+  } catch (e) {
+    supportES2017 = false;
+  }
 
-const supportES2018 = !!Symbol.asyncIterator;
+  if (supportES2017) {
+    loadTests(__dirname, '..', 'examples');
+  } else {
+    it.skip('skipping ES2017 tests due to insufficient node version', function() {});
+  }
+});
 
-if (supportES2017) {
-  loadTests(__dirname, '..', 'examples');
-} else {
-  console.warn(
-    `Warning: Current Node Version ${version} is not high enough to support running examples`
-  );
-}
+describe('ES2018', function() {
+  const supportES2018 = !!Symbol.asyncIterator;
 
-if (supportES2018) {
-  loadTests(__dirname, '..', 'node-next', 'es2018');
-} else {
-  console.warn(
-    `Warning: Current Node Version ${version} is not high enough to support running es2018 tests`
-  );
-}
+  if (supportES2018) {
+    loadTests(__dirname, '..', 'node-next', 'es2018');
+  } else {
+    it.skip('skipping ES2018 tests due to insufficient node version', function() {});
+  }
+});
