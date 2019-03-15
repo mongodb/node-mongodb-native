@@ -25,6 +25,11 @@ describe('URI Options (spec)', function() {
               parse(test.uri, {}, (err, result) => {
                 if (test.valid === true) {
                   expect(err).to.not.exist;
+                  if (test.options.compressors != null) {
+                    result.options.compressors = result.options.compression.compressors;
+                    result.options.zlibCompressionLevel =
+                      result.options.compression.zlibCompressionLevel;
+                  }
                   expect(result.options).to.containSubset(test.options);
                 } else {
                   expect(err).to.be.an.instanceof(MongoParseError);
