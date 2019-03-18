@@ -5,20 +5,9 @@ var f = require('util').format;
 const expect = require('chai').expect;
 
 describe('ReadConcern', function() {
-  before(function(done) {
+  before(function() {
     var configuration = this.configuration;
-    setupDatabase(configuration).then(function() {
-      configuration.restart({ purge: false, kill: true }, function() {
-        done();
-      });
-    });
-  });
-
-  after(function(done) {
-    var configuration = this.configuration;
-    configuration.restart({ purge: false, kill: true }, function() {
-      done();
-    });
+    return setupDatabase(configuration);
   });
 
   it('Should set local readConcern on db level', {
