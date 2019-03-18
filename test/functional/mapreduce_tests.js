@@ -361,7 +361,7 @@ describe('MapReduce', function() {
     metadata: {
       requires: {
         topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'],
-        mongodb: '>= 3.2'
+        mongodb: '>= 3.4'
       }
     },
 
