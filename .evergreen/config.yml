@@ -129,16 +129,16 @@ pre:
 post:
   - func: cleanup
 tasks:
-  - name: test-latest-server
+  - name: test-latest-single
     tags:
       - latest
-      - server
+      - single
     commands:
       - func: install dependencies
       - func: run tests
         vars:
           VERSION: latest
-          TOPOLOGY: server
+          TOPOLOGY: single
   - name: test-latest-replicaset
     tags:
       - latest
@@ -159,16 +159,16 @@ tasks:
         vars:
           VERSION: latest
           TOPOLOGY: sharded
-  - name: test-4.0-server
+  - name: test-4.0-single
     tags:
       - '4.0'
-      - server
+      - single
     commands:
       - func: install dependencies
       - func: run tests
         vars:
           VERSION: '4.0'
-          TOPOLOGY: server
+          TOPOLOGY: single
   - name: test-4.0-replicaset
     tags:
       - '4.0'
@@ -189,16 +189,16 @@ tasks:
         vars:
           VERSION: '4.0'
           TOPOLOGY: sharded
-  - name: test-3.6-server
+  - name: test-3.6-single
     tags:
       - '3.6'
-      - server
+      - single
     commands:
       - func: install dependencies
       - func: run tests
         vars:
           VERSION: '3.6'
-          TOPOLOGY: server
+          TOPOLOGY: single
   - name: test-3.6-replicaset
     tags:
       - '3.6'
@@ -219,16 +219,16 @@ tasks:
         vars:
           VERSION: '3.6'
           TOPOLOGY: sharded
-  - name: test-3.4-server
+  - name: test-3.4-single
     tags:
       - '3.4'
-      - server
+      - single
     commands:
       - func: install dependencies
       - func: run tests
         vars:
           VERSION: '3.4'
-          TOPOLOGY: server
+          TOPOLOGY: single
   - name: test-3.4-replicaset
     tags:
       - '3.4'
@@ -249,16 +249,16 @@ tasks:
         vars:
           VERSION: '3.4'
           TOPOLOGY: sharded
-  - name: test-3.2-server
+  - name: test-3.2-single
     tags:
       - '3.2'
-      - server
+      - single
     commands:
       - func: install dependencies
       - func: run tests
         vars:
           VERSION: '3.2'
-          TOPOLOGY: server
+          TOPOLOGY: single
   - name: test-3.2-replicaset
     tags:
       - '3.2'
@@ -279,16 +279,16 @@ tasks:
         vars:
           VERSION: '3.2'
           TOPOLOGY: sharded
-  - name: test-3.0-server
+  - name: test-3.0-single
     tags:
       - '3.0'
-      - server
+      - single
     commands:
       - func: install dependencies
       - func: run tests
         vars:
           VERSION: '3.0'
-          TOPOLOGY: server
+          TOPOLOGY: single
   - name: test-3.0-replicaset
     tags:
       - '3.0'
@@ -309,16 +309,16 @@ tasks:
         vars:
           VERSION: '3.0'
           TOPOLOGY: sharded
-  - name: test-2.6-server
+  - name: test-2.6-single
     tags:
       - '2.6'
-      - server
+      - single
     commands:
       - func: install dependencies
       - func: run tests
         vars:
           VERSION: '2.6'
-          TOPOLOGY: server
+          TOPOLOGY: single
   - name: test-2.6-replicaset
     tags:
       - '2.6'
@@ -354,25 +354,25 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: dubnium
     tasks: &ref_0
-      - test-latest-server
+      - test-latest-single
       - test-latest-replicaset
       - test-latest-sharded
-      - test-4.0-server
+      - test-4.0-single
       - test-4.0-replicaset
       - test-4.0-sharded
-      - test-3.6-server
+      - test-3.6-single
       - test-3.6-replicaset
       - test-3.6-sharded
-      - test-3.4-server
+      - test-3.4-single
       - test-3.4-replicaset
       - test-3.4-sharded
-      - test-3.2-server
+      - test-3.2-single
       - test-3.2-replicaset
       - test-3.2-sharded
-      - test-3.0-server
+      - test-3.0-single
       - test-3.0-replicaset
       - test-3.0-sharded
-      - test-2.6-server
+      - test-2.6-single
       - test-2.6-replicaset
       - test-2.6-sharded
       - test-atlas-connectivity
@@ -520,19 +520,19 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: dubnium
     tasks: &ref_1
-      - test-latest-server
+      - test-latest-single
       - test-latest-replicaset
       - test-latest-sharded
-      - test-4.0-server
+      - test-4.0-single
       - test-4.0-replicaset
       - test-4.0-sharded
-      - test-3.6-server
+      - test-3.6-single
       - test-3.6-replicaset
       - test-3.6-sharded
-      - test-3.4-server
+      - test-3.4-single
       - test-3.4-replicaset
       - test-3.4-sharded
-      - test-3.2-server
+      - test-3.2-single
       - test-3.2-replicaset
       - test-3.2-sharded
       - test-atlas-connectivity
@@ -608,16 +608,16 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: dubnium
     tasks: &ref_2
-      - test-latest-server
+      - test-latest-single
       - test-latest-replicaset
       - test-latest-sharded
-      - test-4.0-server
+      - test-4.0-single
       - test-4.0-replicaset
       - test-4.0-sharded
-      - test-3.6-server
+      - test-3.6-single
       - test-3.6-replicaset
       - test-3.6-sharded
-      - test-3.4-server
+      - test-3.4-single
       - test-3.4-replicaset
       - test-3.4-sharded
       - test-atlas-connectivity
