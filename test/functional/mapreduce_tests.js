@@ -359,7 +359,10 @@ describe('MapReduce', function() {
    */
   it('shouldSaveDataToDifferentDbFromMapreduce', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: {
+        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'],
+        mongodb: '>= 3.2'
+      }
     },
 
     // The actual test we wish to run
