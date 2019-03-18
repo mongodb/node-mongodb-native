@@ -63,10 +63,6 @@ class ReplicaSetEnvironment extends EnvironmentBase {
       genReplsetConfig(31004, { arbiter: true })
     ];
 
-    this.manager = new ReplSetManager('mongod', this.nodes, {
-      replSet: 'rs'
-    });
-
     // Do we have 3.2+
     const version = discoverResult.version.join('.');
     if (semver.satisfies(version, '>=3.2.0')) {
@@ -75,6 +71,10 @@ class ReplicaSetEnvironment extends EnvironmentBase {
         return x;
       });
     }
+
+    this.manager = new ReplSetManager('mongod', this.nodes, {
+      replSet: 'rs'
+    });
   }
 }
 
