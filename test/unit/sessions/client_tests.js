@@ -32,8 +32,7 @@ describe('Sessions', function() {
             client.startSession();
           }).to.throw(/Current topology does not support sessions/);
 
-          client.close();
-          done();
+          client.close(done);
         });
       }
     });
@@ -62,8 +61,7 @@ describe('Sessions', function() {
           expect(session).to.exist;
 
           session.endSession({ skipCommand: true });
-          client.close();
-          done();
+          client.close(done);
         });
       }
     });
