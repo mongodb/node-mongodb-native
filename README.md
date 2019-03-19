@@ -40,11 +40,12 @@ Core Server (i.e. SERVER) project are **public**.
 
 Change history can be found in [`HISTORY.md`](HISTORY.md).
 
-# Compatibility
+### Compatibility
 
-Compatibility with MongoDB can be found [here](https://docs.mongodb.com/ecosystem/drivers/driver-compatibility-reference/#reference-compatibility-mongodb-node).
+For version compatibility matrices, please refer to the following links:
 
-Compatibility with NodeJS can be found [here](https://docs.mongodb.com/ecosystem/drivers/driver-compatibility-reference/#reference-compatibility-language-node).
+ * [MongoDB](https://docs.mongodb.com/ecosystem/drivers/driver-compatibility-reference/#reference-compatibility-mongodb-node)
+ * [NodeJS](https://docs.mongodb.com/ecosystem/drivers/driver-compatibility-reference/#reference-compatibility-language-node)
 
 # Installation
 
