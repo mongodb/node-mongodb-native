@@ -115,7 +115,8 @@ const genConfigNode = (port, options) => {
       options: {
         bind_ip: 'localhost',
         port: port,
-        dbpath: `${__dirname}/../db/${port}`
+        dbpath: `${__dirname}/../db/${port}`,
+        setParameter: ['enableTestCommands=1']
       }
     },
     options
@@ -126,7 +127,7 @@ const genConfigNode = (port, options) => {
  *
  */
 class ShardedEnvironment extends EnvironmentBase {
-  constructor() {
+  constructor(discoverResult) {
     super();
 
     this.host = 'localhost';
@@ -140,6 +141,9 @@ class ShardedEnvironment extends EnvironmentBase {
       return new Mongos([new Server(host, port, options)], options);
     };
 
+    const version =
+      discoverResult && discoverResult.version ? discoverResult.version.join('.') : null;
+    this.server37631WorkaroundNeeded = semver.satisfies(version, '3.6.x');
     this.manager = new ShardingManager({
       mongod: 'mongod',
       mongos: 'mongos'
@@ -157,11 +161,7 @@ class ShardedEnvironment extends EnvironmentBase {
     ];
 
     const configOptions = this.options && this.options.config ? this.options.config : {};
-    const configNodes = [
-      genConfigNode(35000, configOptions),
-      genConfigNode(35001, configOptions),
-      genConfigNode(35002, configOptions)
-    ];
+    const configNodes = [genConfigNode(35000, configOptions)];
 
     let proxyNodes = [
       {

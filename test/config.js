@@ -35,6 +35,11 @@ class NativeConfiguration extends ConfigurationBase {
         console.log('[purge the directories]');
         return self.manager.start();
       })
+      .then(() => {
+        if (this.environment.server37631WorkaroundNeeded) {
+          return this.server37631Workaround();
+        }
+      })
       .then(function() {
         console.log('[started the topology]');
         return client.connect();
@@ -117,6 +122,26 @@ class NativeConfiguration extends ConfigurationBase {
 
   writeConcernMax() {
     return Object.assign({}, this.options.writeConcernMax || { w: 1 });
+  }
+
+  server37631Workaround() {
+    console.log('[applying SERVER-37631 workaround]');
+    const configServers = this.manager.configurationServers.managers;
+    const proxies = this.manager.proxies;
+
+    const configServersPromise = configServers.reduce((result, server) => {
+      return result.then(() =>
+        server.executeCommand('admin.$cmd', { refreshLogicalSessionCacheNow: 1 })
+      );
+    }, Promise.resolve());
+
+    return configServersPromise.then(() => {
+      return proxies.reduce((promise, proxy) => {
+        return promise.then(() =>
+          proxy.executeCommand('admin.$cmd', { refreshLogicalSessionCacheNow: 1 })
+        );
+      }, Promise.resolve());
+    });
   }
 }
 
