@@ -42,7 +42,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -126,7 +128,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -209,7 +213,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -260,7 +266,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -315,7 +323,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -373,7 +383,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -431,7 +443,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -492,7 +506,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -532,7 +548,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -587,7 +605,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -645,7 +665,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -700,7 +722,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -751,7 +775,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -800,7 +826,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -862,7 +890,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -941,7 +971,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -997,7 +1029,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -1049,7 +1083,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -1074,204 +1110,6 @@ describe('Operation (Generators)', function() {
         });
         test.equal(1, docs.results.length);
         client.close();
-      });
-      // END
-    }
-  });
-
-  /**
-   * A whole lot of different ways to execute the group command using a Generator and the co module.
-   *
-   * @example-class Collection
-   * @example-method group
-   * @ignore
-   */
-  it('shouldCorrectlyExecuteGroupFunctionWithGenerators', {
-    metadata: { requires: { generators: true, topology: ['single'] } },
-
-    // The actual test we wish to run
-    test: function() {
-      var configuration = this.configuration;
-      var co = require('co'),
-        Code = configuration.require.Code;
-
-      return co(function*() {
-        // Connect
-        var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
-          .connect();
-        var db = client.db(configuration.db);
-        // LINE var MongoClient = require('mongodb').MongoClient,
-        // LINE   co = require('co');
-        // LINE   test = require('assert');
-        // LINE
-        // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
-        // LINE   var db = client.db('test');
-        // REPLACE configuration.writeConcernMax() WITH {w:1}
-        // BEGIN
-
-        // Create a test collection
-        var collection = db.collection('test_group_with_generators');
-
-        // Perform a simple group by on an empty collection
-        var results = yield collection.group(
-          [],
-          {},
-          { count: 0 },
-          'function (obj, prev) { prev.count++; }'
-        );
-        test.deepEqual([], results);
-
-        // Trigger some inserts on the collection
-        yield collection.insertMany([{ a: 2 }, { b: 5 }, { a: 1 }], { w: 1 });
-
-        // Perform a group count
-        results = yield collection.group(
-          [],
-          {},
-          { count: 0 },
-          'function (obj, prev) { prev.count++; }'
-        );
-        test.equal(3, results[0].count);
-
-        // Perform a group count using the eval method
-        results = yield collection.group(
-          [],
-          {},
-          { count: 0 },
-          'function (obj, prev) { prev.count++; }',
-          false
-        );
-        test.equal(3, results[0].count);
-
-        // Group with a conditional
-        results = yield collection.group(
-          [],
-          { a: { $gt: 1 } },
-          { count: 0 },
-          'function (obj, prev) { prev.count++; }'
-        );
-        // Results
-        test.equal(1, results[0].count);
-
-        // Group with a conditional using the EVAL method
-        results = yield collection.group(
-          [],
-          { a: { $gt: 1 } },
-          { count: 0 },
-          'function (obj, prev) { prev.count++; }',
-          false
-        );
-        // Results
-        test.equal(1, results[0].count);
-
-        // Insert some more test data
-        yield collection.insertMany([{ a: 2 }, { b: 3 }], { w: 1 });
-
-        // Do a Group by field a
-        results = yield collection.group(
-          ['a'],
-          {},
-          { count: 0 },
-          'function (obj, prev) { prev.count++; }'
-        );
-        // Results
-        test.equal(2, results[0].a);
-        test.equal(2, results[0].count);
-        test.equal(null, results[1].a);
-        test.equal(2, results[1].count);
-        test.equal(1, results[2].a);
-        test.equal(1, results[2].count);
-
-        // Do a Group by field a
-        results = yield collection.group(
-          { a: true },
-          {},
-          { count: 0 },
-          function(obj, prev) {
-            prev.count++;
-          },
-          true
-        );
-
-        // Results
-        test.equal(2, results[0].a);
-        test.equal(2, results[0].count);
-        test.equal(null, results[1].a);
-        test.equal(2, results[1].count);
-        test.equal(1, results[2].a);
-        test.equal(1, results[2].count);
-
-        try {
-          // Correctly handle illegal function
-          results = yield collection.group([], {}, {}, '5 ++ 5');
-        } catch (err) {
-          test.ok(err.message != null);
-
-          // Use a function to select the keys used to group by
-          var keyf = function(doc) {
-            return { a: doc.a };
-          };
-
-          results = yield collection.group(
-            keyf,
-            { a: { $gt: 0 } },
-            { count: 0, value: 0 },
-            function(obj, prev) {
-              prev.count++;
-              prev.value += obj.a;
-            },
-            true
-          );
-
-          // Results
-          results.sort(function(a, b) {
-            return b.count - a.count;
-          });
-
-          test.equal(2, results[0].count);
-          test.equal(2, results[0].a);
-          test.equal(4, results[0].value);
-          test.equal(1, results[1].count);
-          test.equal(1, results[1].a);
-          test.equal(1, results[1].value);
-
-          // Use a Code object to select the keys used to group by
-          keyf = new Code(function(doc) {
-            return { a: doc.a };
-          });
-
-          results = yield collection.group(
-            keyf,
-            { a: { $gt: 0 } },
-            { count: 0, value: 0 },
-            function(obj, prev) {
-              prev.count++;
-              prev.value += obj.a;
-            },
-            true
-          );
-
-          // Results
-          results.sort(function(a, b) {
-            return b.count - a.count;
-          });
-          test.equal(2, results[0].count);
-          test.equal(2, results[0].a);
-          test.equal(4, results[0].value);
-          test.equal(1, results[1].count);
-          test.equal(1, results[1].a);
-          test.equal(1, results[1].value);
-
-          try {
-            yield collection.group([], {}, {}, '5 ++ 5', false);
-          } catch (err) {
-            test.ok(err.message != null);
-
-            client.close();
-          }
-        }
       });
       // END
     }
@@ -1303,7 +1141,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -1370,7 +1210,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -1435,7 +1277,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -1524,7 +1368,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -1612,7 +1458,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -1661,7 +1509,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -1719,7 +1569,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -1780,7 +1632,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -1839,7 +1693,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -1883,7 +1739,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -1933,7 +1791,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -1984,7 +1844,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -2048,7 +1910,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -2096,7 +1960,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -2129,7 +1995,7 @@ describe('Operation (Generators)', function() {
   it('Should correctly execute parallelCollectionScan with multiple cursors with Generators', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { generators: true, mongodb: '>2.5.5', topology: ['single'] } },
+    metadata: { requires: { generators: true, mongodb: '>2.5.5 <=4.1.0', topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -2147,7 +2013,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -2209,7 +2077,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -2266,7 +2136,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -2315,7 +2187,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -2361,7 +2235,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -2466,7 +2342,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -2511,7 +2389,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -2571,7 +2451,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -2622,7 +2504,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -2673,7 +2557,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -2730,7 +2616,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -2780,7 +2668,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -2835,9 +2725,16 @@ describe('Operation (Generators)', function() {
 
     // The actual test we wish to run
     test: function() {
-      var configuration = this.configuration;
-      var co = require('co');
+      const configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // The new topology type has loose concepts of 'closing' and 'opening' a client. It will
+        // simply attempt here to retry the connection and reconnect, so this is a bad test for
+        // the driver in that configuration.
 
+        return this.skip();
+      }
+
+      var co = require('co');
       return co(function*() {
         // Connect
         var client = yield configuration
@@ -2849,7 +2746,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -2871,167 +2770,6 @@ describe('Operation (Generators)', function() {
         } catch (err) {
           client.close();
         }
-      });
-      // END
-    }
-  });
-
-  /**
-   * A whole bunch of examples on how to use eval on the server with a Generator and the co module.
-   *
-   * @example-class Db
-   * @example-method eval
-   * @ignore
-   */
-  it('shouldCorrectlyExecuteEvalFunctionsWithGenerators', {
-    metadata: { requires: { generators: true, topology: ['single'] } },
-
-    // The actual test we wish to run
-    test: function() {
-      var configuration = this.configuration;
-      var co = require('co'),
-        Code = configuration.require.Code,
-        ReadPreference = configuration.require.ReadPreference;
-
-      return co(function*() {
-        // Connect
-        var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
-          .connect();
-        var db = client.db(configuration.db);
-        // LINE var MongoClient = require('mongodb').MongoClient,
-        // LINE   co = require('co');
-        // LINE   test = require('assert');
-        // LINE
-        // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
-        // LINE   var db = client.db('test');
-        // REPLACE configuration.writeConcernMax() WITH {w:1}
-        // BEGIN
-        var numberOfTests = 10;
-
-        var tests_done = function() {
-          numberOfTests = numberOfTests - 1;
-
-          if (numberOfTests === 0) {
-            client.close();
-          }
-        };
-
-        // Evaluate a function on the server with the parameter 3 passed in
-        var result = yield db.eval('function (x) {return x;}', [3]);
-        test.equal(3, result);
-        tests_done();
-
-        // Evaluate a function on the server with the parameter 3 passed in no lock aquired for eval
-        // on server
-        result = yield db.eval('function (x) {return x;}', [3], { nolock: true });
-        test.equal(3, result);
-        tests_done();
-
-        // Evaluate a function on the server that writes to a server collection
-        result = yield db.eval('function (x) {db.test_eval_with_generators.save({y:x});}', [5], {
-          readPreference: ReadPreference.PRIMARY
-        });
-
-        yield new Promise(resolve => setTimeout(resolve, 1000));
-
-        // Locate the entry
-        var collection = db.collection('test_eval_with_generators');
-        var item = yield collection.findOne();
-        test.equal(5, item.y);
-        tests_done();
-
-        // Evaluate a function with 2 parameters passed in
-        result = yield db.eval('function (x, y) {return x + y;}', [2, 3]);
-        test.equal(5, result);
-        tests_done();
-
-        // Evaluate a function with no parameters passed in
-        result = yield db.eval('function () {return 5;}');
-        test.equal(5, result);
-        tests_done();
-
-        // Evaluate a statement
-        result = yield db.eval('2 + 3;');
-        test.equal(5, result);
-        tests_done();
-
-        // Evaluate a statement using the code object
-        result = yield db.eval(new Code('2 + 3;'));
-        test.equal(5, result);
-        tests_done();
-
-        // Evaluate a statement using the code object including a scope
-        result = yield db.eval(new Code('return i;', { i: 2 }));
-        test.equal(2, result);
-        tests_done();
-
-        // Evaluate a statement using the code object including a scope
-        result = yield db.eval(new Code('i + 3;', { i: 2 }));
-        test.equal(5, result);
-        tests_done();
-
-        try {
-          // Evaluate an illegal statement
-          yield db.eval('5 ++ 5;');
-        } catch (err) {
-          test.ok(err instanceof Error);
-          test.ok(err.message != null);
-          tests_done();
-        }
-      });
-      // END
-    }
-  });
-
-  /**
-   * Defining and calling a system level javascript function (NOT recommended, http://www.mongodb.org/display/DOCS/Server-side+Code+Execution) using a Generator and the co module.
-   *
-   * @example-class Db
-   * @example-method eval
-   * @ignore
-   */
-  it('shouldCorrectlyDefineSystemLevelFunctionAndExecuteFunctionWithGenerators', {
-    metadata: { requires: { generators: true, topology: ['single'] } },
-
-    // The actual test we wish to run
-    test: function() {
-      var configuration = this.configuration;
-      var co = require('co'),
-        Code = configuration.require.Code;
-
-      return co(function*() {
-        // Connect
-        var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
-          .connect();
-        var db = client.db(configuration.db);
-        // LINE var MongoClient = require('mongodb').MongoClient,
-        // LINE   co = require('co');
-        // LINE   test = require('assert');
-        // LINE
-        // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
-        // LINE   var db = client.db('test');
-        // REPLACE configuration.writeConcernMax() WITH {w:1}
-        // BEGIN
-
-        // Clean out the collection
-        yield db.collection('system.js').deleteMany({}, configuration.writeConcernMax());
-
-        // Define a system level function
-        yield db
-          .collection('system.js')
-          .insertOne(
-            { _id: 'echo', value: new Code('function(x) { return x; }') },
-            configuration.writeConcernMax()
-          );
-
-        var result = yield db.eval('echo(5)');
-        test.equal(5, result);
-
-        client.close();
       });
       // END
     }
@@ -3065,7 +2803,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -3118,7 +2858,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -3158,7 +2900,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -3186,8 +2930,7 @@ describe('Operation (Generators)', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var co = require('co'),
-        MongoClient = configuration.require.MongoClient;
+      var co = require('co');
 
       return co(function*() {
         // Connect
@@ -3200,7 +2943,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -3209,9 +2954,11 @@ describe('Operation (Generators)', function() {
         yield db.addUser('user', 'name');
 
         // Authenticate
-        var client2 = yield MongoClient.connect(
+        var client2 = configuration.newClient(
           'mongodb://user:name@localhost:27017/' + configuration.db
         );
+
+        yield client2.connect();
         client2.close();
 
         // Remove the user from the db
@@ -3219,7 +2966,8 @@ describe('Operation (Generators)', function() {
 
         try {
           // Authenticate
-          yield MongoClient.connect('mongodb://user:name@localhost:27017/admin');
+          const client = configuration.newClient('mongodb://user:name@localhost:27017/admin');
+          yield client.connect();
           test.ok(false);
         } catch (err) {} // eslint-disable-line
 
@@ -3255,7 +3003,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -3301,7 +3051,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -3358,7 +3110,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -3396,7 +3150,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -3467,7 +3223,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -3527,7 +3285,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -3587,7 +3347,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -3652,7 +3414,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -3691,7 +3455,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -3752,7 +3518,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -3795,7 +3563,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -3839,7 +3609,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -3913,7 +3685,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -3974,7 +3748,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -4024,7 +3800,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -4067,7 +3845,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -4112,7 +3892,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -4159,7 +3941,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -4203,7 +3987,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -4254,7 +4040,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -4314,7 +4102,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -4364,7 +4154,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -4413,7 +4205,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -4474,7 +4268,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -4524,7 +4320,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -4588,7 +4386,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -4648,7 +4448,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -4763,7 +4565,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -4814,7 +4618,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -4887,7 +4693,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -4946,7 +4754,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -5000,7 +4810,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -5057,7 +4869,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -5117,7 +4931,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -5184,7 +5000,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -5244,7 +5062,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -5297,7 +5117,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -5360,7 +5182,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -5423,7 +5247,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -5489,7 +5315,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -5541,7 +5369,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -5644,7 +5474,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -5712,7 +5544,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -5770,7 +5604,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -5823,7 +5659,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -5897,7 +5735,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -5967,7 +5807,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -6043,7 +5885,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -6084,7 +5928,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -6125,7 +5971,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -6167,7 +6015,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -6214,7 +6064,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -6258,7 +6110,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -6304,7 +6158,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -6367,7 +6223,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -6412,7 +6270,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -6467,7 +6327,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
@@ -6522,7 +6384,9 @@ describe('Operation (Generators)', function() {
         // LINE   test = require('assert');
         // LINE
         // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE   yield client.connect();
+        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN

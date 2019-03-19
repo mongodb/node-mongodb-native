@@ -53,30 +53,24 @@ describe('Decimal128', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
       var Domain = require('domain');
       var domainInstance = Domain.create();
 
-      MongoClient.connect(
-        configuration.url(),
-        {
-          domainsEnabled: true
-        },
-        function(err, client) {
-          test.ok(!err);
-          var db = client.db(configuration.db);
-          var collection = db.collection('test');
-          domainInstance.run(function() {
-            collection.count({}, function(err) {
-              test.ok(!err);
-              test.ok(domainInstance === process.domain);
-              domainInstance.exit();
-              client.close();
-              done();
-            });
+      const client = configuration.newClient({}, { domainsEnabled: true });
+      client.connect(function(err, client) {
+        test.ok(!err);
+        var db = client.db(configuration.db);
+        var collection = db.collection('test');
+        domainInstance.run(function() {
+          collection.count({}, function(err) {
+            test.ok(!err);
+            test.ok(domainInstance === process.domain);
+            domainInstance.exit();
+            client.close();
+            done();
           });
-        }
-      );
+        });
+      });
     }
   });
 
@@ -128,9 +122,14 @@ describe('Decimal128', function() {
       var Domain = require('domain');
       var domainInstance = Domain.create();
       var configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // The unified topology does not use a store
+        return this.skip();
+      }
+
       var client = configuration.newClient(
-        { w: 0, bufferMaxEntries: 0 },
-        { poolSize: 1, auto_reconnect: true, domainsEnabled: true }
+        { w: 0 },
+        { poolSize: 1, auto_reconnect: true, domainsEnabled: true, bufferMaxEntries: 0 }
       );
 
       client.connect(function(err, client) {
@@ -167,9 +166,14 @@ describe('Decimal128', function() {
       var Domain = require('domain');
       var domainInstance = Domain.create();
       var configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // The unified topology does not use a store
+        return this.skip();
+      }
+
       var client = configuration.newClient(
-        { w: 1, bufferMaxEntries: 0 },
-        { poolSize: 1, auto_reconnect: true, domainsEnabled: true }
+        { w: 1 },
+        { poolSize: 1, auto_reconnect: true, domainsEnabled: true, bufferMaxEntries: 0 }
       );
 
       client.connect(function(err, client) {

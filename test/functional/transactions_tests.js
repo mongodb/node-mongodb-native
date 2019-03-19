@@ -1,17 +1,17 @@
 'use strict';
 
 const Promise = require('bluebird');
-const mongodb = require('../..');
-const MongoClient = mongodb.MongoClient;
 const path = require('path');
 const fs = require('fs');
 const chai = require('chai');
 const expect = chai.expect;
 const EJSON = require('mongodb-extjson');
-
-// mlaunch init --replicaset --arbiter  --name rs --hostname localhost --port 31000 --setParameter enableTestCommands=1 --binarypath /Users/mbroadst/Downloads/mongodb-osx-x86_64-enterprise-4.1.0-158-g3d62f3c/bin
+const core = require('mongodb-core');
+const sessions = core.Sessions;
+const environments = require('../environments');
 
 chai.use(require('chai-subset'));
+chai.use(require('../match_transaction_spec').default);
 chai.config.includeStack = true;
 chai.config.showDiff = true;
 chai.config.truncateThreshold = 0;
@@ -21,49 +21,6 @@ function isPlainObject(value) {
 }
 
 process.on('unhandledRejection', err => console.dir(err));
-
-/**
- * Finds placeholder values in a deeply nested object.
- *
- * NOTE: This also mutates the object, by removing the values for comparison
- *
- * @param {Object} input the object to find placeholder values in
- */
-function findPlaceholders(value, parent) {
-  return Object.keys(value).reduce((result, key) => {
-    if (isPlainObject(value[key])) {
-      return result.concat(
-        findPlaceholders(value[key], [value, key]).map(x => {
-          if (x.path.startsWith('$')) {
-            x.path = key;
-          } else {
-            x.path = `${key}.${x.path}`;
-          }
-
-          return x;
-        })
-      );
-    }
-
-    if (value[key] === null) {
-      delete value[key];
-      result.push({ path: key, type: null });
-    } else if (value[key] === 42 || value[key] === '42') {
-      if (key.startsWith('$number') || value[key] === 42) {
-        result.push({ path: key, type: 'number' });
-      } else {
-        result.push({ path: key, type: 'string' });
-      }
-
-      // NOTE: fix this, it just passes the current examples
-      delete parent[0][parent[1]];
-    } else if (value[key] === '') {
-      result.push({ path: key, type: 'string' });
-    }
-
-    return result;
-  }, []);
-}
 
 function translateClientOptions(options) {
   Object.keys(options).forEach(key => {
@@ -76,72 +33,258 @@ function translateClientOptions(options) {
   return options;
 }
 
-// Main test runner
-describe('Transactions (spec)', function() {
-  const testContext = {
-    dbName: 'transaction-tests',
-    collectionName: 'test'
-  };
-
-  const testSuites = fs
-    .readdirSync(`${__dirname}/spec/transactions`)
+function gatherTestSuites(specPath) {
+  return fs
+    .readdirSync(specPath)
     .filter(x => x.indexOf('.json') !== -1)
     .map(x =>
-      Object.assign(JSON.parse(fs.readFileSync(`${__dirname}/spec/transactions/${x}`)), {
+      Object.assign(JSON.parse(fs.readFileSync(`${specPath}/${x}`)), {
         name: path.basename(x, '.json')
       })
     );
+}
 
-  after(() => testContext.sharedClient.close());
-  before(function() {
-    // create a shared client for admin tasks
-    const config = this.configuration;
-    testContext.url = `mongodb://${config.host}:${config.port}/${testContext.dbName}?replicaSet=${
-      config.replicasetName
-    }`;
+function resolveConnectionString(configuration, spec) {
+  const isShardedEnvironment = configuration.environment instanceof environments.sharded;
+  const useMultipleMongoses = spec && !!spec.useMultipleMongoses;
 
-    testContext.sharedClient = new MongoClient(testContext.url);
-    return testContext.sharedClient.connect();
+  return isShardedEnvironment && !useMultipleMongoses
+    ? `mongodb://${configuration.host}:${configuration.port}/${configuration.db}`
+    : configuration.url();
+}
+
+class TransactionsTestContext {
+  constructor() {
+    this.url = null;
+    this.sharedClient = null;
+    this.failPointClients = [];
+    this.appliedFailPoints = [];
+  }
+
+  runForAllClients(fn) {
+    const allClients = [this.sharedClient].concat(this.failPointClients);
+    return Promise.all(allClients.map(fn));
+  }
+
+  runFailPointCmd(fn) {
+    return this.failPointClients.length
+      ? Promise.all(this.failPointClients.map(fn))
+      : fn(this.sharedClient);
+  }
+
+  setup(config) {
+    this.sharedClient = config.newClient(
+      resolveConnectionString(config, { useMultipleMongoses: true })
+    );
+
+    if (config.options && config.options.proxies) {
+      this.failPointClients = config.options.proxies.map(proxy =>
+        config.newClient(`mongodb://${proxy.host}:${proxy.port}/`)
+      );
+    }
+
+    return this.runForAllClients(client => client.connect());
+  }
+
+  teardown() {
+    this.runForAllClients(client => client.close());
+  }
+
+  cleanupAfterSuite() {
+    const context = this;
+
+    // clean up applied failpoints
+    const cleanupPromises = this.appliedFailPoints.map(failPoint => {
+      return context.disableFailPoint(failPoint);
+    });
+
+    this.appliedFailPoints = [];
+
+    return Promise.all(cleanupPromises).then(() => {
+      // cleanup
+      if (context.testClient) {
+        return context.testClient.close().then(() => {
+          delete context.testClient;
+        });
+      }
+    });
+  }
+
+  targetedFailPoint(options) {
+    const session = options.session;
+    const failPoint = options.failPoint;
+    expect(session.transaction.isPinned).to.be.true;
+
+    return new Promise((resolve, reject) => {
+      const server = session.transaction.server;
+      server.command(`admin.$cmd`, failPoint, err => {
+        if (err) return reject(err);
+
+        this.appliedFailPoints.push(failPoint);
+        resolve();
+      });
+    });
+  }
+
+  assertSessionPinned(options) {
+    expect(options).to.have.property('session');
+
+    const session = options.session;
+    expect(session.transaction.isPinned).to.be.true;
+  }
+
+  assertSessionUnpinned(options) {
+    expect(options).to.have.property('session');
+
+    const session = options.session;
+    expect(session.transaction.isPinned).to.be.false;
+  }
+
+  enableFailPoint(failPoint) {
+    return this.runFailPointCmd(client => {
+      return client.db(this.dbName).executeDbAdminCommand(failPoint);
+    });
+  }
+
+  disableFailPoint(failPoint) {
+    return this.runFailPointCmd(client => {
+      return client.db(this.dbName).executeDbAdminCommand({
+        configureFailPoint: failPoint.configureFailPoint,
+        mode: 'off'
+      });
+    });
+  }
+}
+
+// Main test runner
+describe('Transactions', function() {
+  const testContext = new TransactionsTestContext();
+
+  [
+    { name: 'spec tests', specPath: `${__dirname}/spec/transactions` },
+    {
+      name: 'withTransaction spec tests',
+      specPath: `${__dirname}/spec/transactions/convenient-api`
+    }
+  ].forEach(suiteSpec => {
+    describe(suiteSpec.name, function() {
+      const testSuites = gatherTestSuites(suiteSpec.specPath);
+      after(() => testContext.teardown());
+      before(function() {
+        return testContext.setup(this.configuration);
+      });
+
+      generateTopologyTests(testSuites, testContext);
+    });
   });
 
-  testSuites.forEach(testSuite => {
-    describe(testSuite.name, {
-      metadata: { requires: { topology: ['replicaset', 'mongos'], mongodb: '>=3.7.x' } },
-      test: function() {
-        beforeEach(() => prepareDatabaseForSuite(testSuite, testContext));
-        afterEach(() => cleanupAfterSuite(testContext));
+  describe('withTransaction', function() {
+    let session, sessionPool;
+    beforeEach(() => {
+      const topology = new core.Server();
+      sessionPool = new sessions.ServerSessionPool(topology);
+      session = new sessions.ClientSession(topology, sessionPool);
+    });
 
-        testSuite.tests.forEach(testData => {
-          const maybeSkipIt = testData.skipReason ? it.skip : it;
-          maybeSkipIt(testData.description, function() {
-            let testPromise = Promise.resolve();
+    afterEach(() => {
+      sessionPool.endAllPooledSessions();
+    });
 
-            if (testData.failPoint) {
-              testPromise = testPromise.then(() =>
-                enableFailPoint(testData.failPoint, testContext)
-              );
-            }
+    it('should provide a useful error if a Promise is not returned', {
+      metadata: { requires: { topology: ['replicaset', 'sharded'], mongodb: '>=4.1.5' } },
+      test: function(done) {
+        function fnThatDoesntReturnPromise() {
+          return false;
+        }
 
-            // run the actual test
-            testPromise = testPromise.then(() => runTestSuiteTest(testData, testContext));
+        expect(() => session.withTransaction(fnThatDoesntReturnPromise)).to.throw(
+          /must return a Promise/
+        );
 
-            if (testData.failPoint) {
-              testPromise = testPromise.then(() =>
-                disableFailPoint(testData.failPoint, testContext)
-              );
-            }
-
-            return testPromise;
-          });
-        });
+        session.endSession(done);
       }
     });
   });
 });
 
+function parseTopologies(topologies) {
+  if (topologies == null) {
+    return ['replicaset', 'mongos'];
+  }
+
+  const idx = topologies.indexOf('single');
+  if (idx !== -1) {
+    topologies.splice(idx, 1);
+  }
+
+  return topologies;
+}
+
+function shouldSkipTest(spec) {
+  const SKIP_TESTS = [
+    // commitTransaction retry seems to be swallowed by mongos in these three cases
+    'commitTransaction retry succeeds on new mongos',
+    'commitTransaction retry fails on new mongos',
+    'unpin after transient error within a transaction and commit'
+  ];
+
+  if (spec.skipReason || SKIP_TESTS.indexOf(spec.description) !== -1) {
+    return it.skip;
+  }
+
+  return it;
+}
+
+function generateTopologyTests(testSuites, testContext) {
+  testSuites.forEach(testSuite => {
+    const suiteName = testSuite.name;
+    const topologies = parseTopologies(testSuite.topology);
+
+    const tests = testSuite.tests;
+    topologies.forEach(topology => {
+      const DEFAULT_MIN_SERVER_VERSION = topology === 'sharded' ? '>=4.1.5' : '>=3.7.x';
+      const minServerVersion = testSuite.minServerVersion
+        ? `>=${testSuite.minServerVersion}`
+        : DEFAULT_MIN_SERVER_VERSION;
+      describe(`${suiteName} - ${topology}`, {
+        metadata: { requires: { topology: [topology], mongodb: minServerVersion } },
+        test: function() {
+          beforeEach(() => prepareDatabaseForSuite(testSuite, testContext));
+          afterEach(() => testContext.cleanupAfterSuite());
+
+          tests.forEach(spec => {
+            const maybeSkipIt = shouldSkipTest(spec);
+            maybeSkipIt(spec.description, function() {
+              let testPromise = Promise.resolve();
+
+              if (spec.failPoint) {
+                testPromise = testPromise.then(() => testContext.enableFailPoint(spec.failPoint));
+              }
+
+              // run the actual test
+              testPromise = testPromise.then(() =>
+                runTestSuiteTest(this.configuration, spec, testContext)
+              );
+
+              if (spec.failPoint) {
+                testPromise = testPromise.then(() => testContext.disableFailPoint(spec.failPoint));
+              }
+
+              return testPromise.then(() => validateOutcome(spec, testContext));
+            });
+          });
+        }
+      });
+    });
+  });
+}
+
 // Test runner helpers
 function prepareDatabaseForSuite(suite, context) {
-  const db = context.sharedClient.db();
+  context.dbName = suite.database_name;
+  context.collectionName = suite.collection_name;
+
+  const db = context.sharedClient.db(context.dbName);
   const coll = db.collection(context.collectionName);
 
   return db
@@ -160,68 +303,72 @@ function prepareDatabaseForSuite(suite, context) {
     });
 }
 
-function cleanupAfterSuite(context) {
-  if (context.testClient) {
-    return context.testClient.close().then(() => {
-      delete context.testClient;
-    });
+function parseSessionOptions(options) {
+  const result = Object.assign({}, options);
+  if (result.defaultTransactionOptions && result.defaultTransactionOptions.readPreference) {
+    result.defaultTransactionOptions.readPreference = normalizeReadPreference(
+      result.defaultTransactionOptions.readPreference.mode
+    );
   }
-}
 
-function enableFailPoint(failPoint, testContext) {
-  return testContext.sharedClient.db(testContext.dbName).executeDbAdminCommand(failPoint);
-}
-
-function disableFailPoint(failPoint, testContext) {
-  return testContext.sharedClient.db(testContext.dbName).executeDbAdminCommand({
-    configureFailPoint: failPoint.configureFailPoint,
-    mode: 'off'
-  });
+  return result;
 }
 
 let displayCommands = false;
-function runTestSuiteTest(testData, context) {
+function runTestSuiteTest(configuration, spec, context) {
   const commandEvents = [];
   const clientOptions = translateClientOptions(
-    Object.assign({ monitorCommands: true }, testData.clientOptions)
+    Object.assign({ monitorCommands: true }, spec.clientOptions)
   );
 
-  // test-specific client options
+  // test-specific client optionss
   clientOptions.autoReconnect = false;
   clientOptions.haInterval = 100;
 
-  return MongoClient.connect(context.url, clientOptions).then(client => {
+  const url = resolveConnectionString(configuration, spec);
+  const client = configuration.newClient(url, clientOptions);
+  return client.connect().then(client => {
     context.testClient = client;
     client.on('commandStarted', event => {
       if (event.databaseName === context.dbName || isTransactionCommand(event.commandName)) {
         commandEvents.push(event);
-      }
 
-      // very useful for debugging
-      if (displayCommands) {
-        console.dir(event, { depth: 5 });
+        // very useful for debugging
+        if (displayCommands) {
+          console.dir(event, { depth: 5 });
+        }
       }
     });
 
-    const sessionOptions = Object.assign({}, testData.transactionOptions);
+    const sessionOptions = Object.assign({}, spec.transactionOptions);
 
-    testData.sessionOptions = testData.sessionOptions || {};
-    const database = client.db();
+    spec.sessionOptions = spec.sessionOptions || {};
+    const database = client.db(context.dbName);
     const session0 = client.startSession(
-      Object.assign({}, sessionOptions, testData.sessionOptions.session0)
+      Object.assign({}, sessionOptions, parseSessionOptions(spec.sessionOptions.session0))
     );
     const session1 = client.startSession(
-      Object.assign({}, sessionOptions, testData.sessionOptions.session1)
+      Object.assign({}, sessionOptions, parseSessionOptions(spec.sessionOptions.session1))
     );
+
+    const savedSessionData = {
+      session0: JSON.parse(EJSON.stringify(session0.id)),
+      session1: JSON.parse(EJSON.stringify(session1.id))
+    };
 
     // enable to see useful APM debug information at the time of actual test run
     // displayCommands = true;
 
-    const operationContext = { database, session0, session1 };
+    const operationContext = {
+      database,
+      session0,
+      session1,
+      testRunner: context
+    };
 
     let testPromise = Promise.resolve();
     return testPromise
-      .then(() => testOperations(client, testData, operationContext))
+      .then(() => testOperations(spec, operationContext))
       .catch(err => {
         // If the driver throws an exception / returns an error while executing this series
         // of operations, store the error message.
@@ -231,35 +378,37 @@ function runTestSuiteTest(testData, context) {
         session0.endSession();
         session1.endSession();
 
-        return validateExpectations(commandEvents, testData, context, operationContext);
+        return validateExpectations(commandEvents, spec, savedSessionData);
       });
   });
 }
 
-function validateExpectations(commandEvents, testData, testContext, operationContext) {
-  const session0 = operationContext.session0;
-  const session1 = operationContext.session1;
+function validateOutcome(testData, testContext) {
+  if (testData.outcome) {
+    if (testData.outcome.collection) {
+      // use the client without transactions to verify
+      return testContext.sharedClient
+        .db(testContext.dbName)
+        .collection(testContext.collectionName)
+        .find({}, { readPreference: 'primary', readConcern: { level: 'local' } })
+        .toArray()
+        .then(docs => {
+          expect(docs).to.eql(testData.outcome.collection.data);
+        });
+    }
+  }
+  return Promise.resolve();
+}
 
-  if (
-    testData.expectations &&
-    Array.isArray(testData.expectations) &&
-    testData.expectations.length > 0
-  ) {
+function validateExpectations(commandEvents, spec, savedSessionData) {
+  if (spec.expectations && Array.isArray(spec.expectations) && spec.expectations.length > 0) {
     const actualEvents = normalizeCommandShapes(commandEvents);
-    const rawExpectedEvents = testData.expectations.map(x =>
-      linkSessionData(x.command_started_event, { session0, session1 })
-    );
-
-    const expectedEventPlaceholders = rawExpectedEvents.map(event =>
-      findPlaceholders(event.command)
-    );
-
+    const rawExpectedEvents = spec.expectations.map(x => x.command_started_event);
     const expectedEvents = normalizeCommandShapes(rawExpectedEvents);
     expect(actualEvents).to.have.length(expectedEvents.length);
 
     expectedEvents.forEach((expected, idx) => {
       const actual = actualEvents[idx];
-      const placeHolders = expectedEventPlaceholders[idx]; // eslint-disable-line
 
       expect(actual.commandName).to.equal(expected.commandName);
       expect(actual.databaseName).to.equal(expected.databaseName);
@@ -267,54 +416,12 @@ function validateExpectations(commandEvents, testData, testContext, operationCon
       const actualCommand = actual.command;
       const expectedCommand = expected.command;
 
-      // handle validation of placeholder values
-      // placeHolders.forEach(placeholder => {
-      //   const parsedActual = EJSON.parse(JSON.stringify(actualCommand), {
-      //     relaxed: true
-      //   });
-
-      //   if (placeholder.type === null) {
-      //     expect(parsedActual).to.not.have.all.nested.property(placeholder.path);
-      //   } else if (placeholder.type === 'string') {
-      //     expect(parsedActual).nested.property(placeholder.path).to.exist;
-      //     expect(parsedActual)
-      //       .nested.property(placeholder.path)
-      //       .to.have.length.greaterThan(0);
-      //   } else if (placeholder.type === 'number') {
-      //     expect(parsedActual).nested.property(placeholder.path).to.exist;
-      //     expect(parsedActual)
-      //       .nested.property(placeholder.path)
-      //       .to.be.greaterThan(0);
-      //   }
-      // });
-
-      // compare the command
-      expect(actualCommand).to.containSubset(expectedCommand);
+      expect(actualCommand)
+        .withSessionData(savedSessionData)
+        .to.matchTransactionSpec(expectedCommand);
     });
   }
-
-  if (testData.outcome) {
-    if (testData.outcome.collection) {
-      // use the client without transactions to verify
-      return testContext.sharedClient
-        .db()
-        .collection(testContext.collectionName)
-        .find({})
-        .toArray()
-        .then(docs => {
-          expect(docs).to.eql(testData.outcome.collection.data);
-        });
-    }
-  }
 }
-
-function linkSessionData(command, context) {
-  const session = context[command.command.lsid];
-  const result = Object.assign({}, command);
-  result.command.lsid = JSON.parse(EJSON.stringify(session.id));
-  return result;
-}
-
 function normalizeCommandShapes(commands) {
   return commands.map(command =>
     JSON.parse(
@@ -356,6 +463,12 @@ function isTransactionCommand(command) {
   return ['startTransaction', 'commitTransaction', 'abortTransaction'].indexOf(command) !== -1;
 }
 
+function isTestRunnerCommand(command) {
+  return (
+    ['targetedFailPoint', 'assertSessionPinned', 'assertSessionUnpinned'].indexOf(command) !== -1
+  );
+}
+
 function extractBulkRequests(requests) {
   return requests.map(request => ({ [request.name]: request.arguments }));
 }
@@ -365,19 +478,33 @@ function translateOperationName(operationName) {
   return operationName;
 }
 
+function normalizeReadPreference(mode) {
+  return mode.charAt(0).toLowerCase() + mode.substr(1);
+}
+
 /**
  *
  * @param {Object} operation the operation definition from the spec test
  * @param {Object} obj the object to call the operation on
  * @param {Object} context a context object containing sessions used for the test
+ * @param {Object} [options] Optional settings
+ * @param {Boolean} [options.swallowOperationErrors] Generally we want to observe operation errors, validate them against our expectations, and then swallow them. In cases like `withTransaction` we want to use the same `testOperations` to build the lambda, and in those cases it is not desireable to swallow the errors, since we need to test this behavior.
  */
-function testOperation(operation, obj, context) {
+function testOperation(operation, obj, context, options) {
+  options = options || { swallowOperationErrors: true };
   const opOptions = {};
   const args = [];
   const operationName = translateOperationName(operation.name);
 
   if (operation.arguments) {
     Object.keys(operation.arguments).forEach(key => {
+      if (key === 'callback') {
+        args.push(() =>
+          testOperations(operation.arguments.callback, context, { swallowOperationErrors: false })
+        );
+        return;
+      }
+
       if (['filter', 'fieldName', 'document', 'documents', 'pipeline'].indexOf(key) !== -1) {
         return args.unshift(operation.arguments[key]);
       }
@@ -399,14 +526,14 @@ function testOperation(operation, obj, context) {
       if (key === 'options') {
         Object.assign(opOptions, operation.arguments[key]);
         if (opOptions.readPreference) {
-          opOptions.readPreference = opOptions.readPreference.mode.toLowerCase();
+          opOptions.readPreference = normalizeReadPreference(opOptions.readPreference.mode);
         }
 
         return;
       }
 
       if (key === 'readPreference') {
-        opOptions[key] = operation.arguments[key].mode.toLowerCase();
+        opOptions[key] = normalizeReadPreference(operation.arguments[key].mode);
         return;
       }
 
@@ -414,7 +541,11 @@ function testOperation(operation, obj, context) {
     });
   }
 
-  if (args.length === 0 && !isTransactionCommand(operationName)) {
+  if (
+    args.length === 0 &&
+    !isTransactionCommand(operationName) &&
+    !isTestRunnerCommand(operationName)
+  ) {
     args.push({});
   }
 
@@ -458,12 +589,13 @@ function testOperation(operation, obj, context) {
           const errorLabelsOmit = result.errorLabelsOmit;
 
           if (errorLabelsContain) {
+            expect(err).to.have.property('errorLabels');
             expect(err.errorLabels).to.include.members(errorLabelsContain);
           }
 
           if (errorLabelsOmit) {
             if (err.errorLabels && Array.isArray(err.errorLabels) && err.errorLabels.length !== 0) {
-              expect(err.errorLabels).to.not.include.members(errorLabelsOmit);
+              expect(errorLabelsOmit).to.not.include.members(err.errorLabels);
             }
           }
 
@@ -473,6 +605,10 @@ function testOperation(operation, obj, context) {
 
           if (errorCodeName) {
             expect(err.codeName).to.equal(errorCodeName);
+          }
+
+          if (!options.swallowOperationErrors) {
+            throw err;
           }
         });
     }
@@ -490,7 +626,7 @@ function convertCollectionOptions(options) {
   const result = {};
   Object.keys(options).forEach(key => {
     if (key === 'readPreference') {
-      result[key] = options[key].mode.toLowerCase();
+      result[key] = normalizeReadPreference(options[key].mode);
     } else {
       result[key] = options[key];
     }
@@ -499,7 +635,8 @@ function convertCollectionOptions(options) {
   return result;
 }
 
-function testOperations(client, testData, operationContext) {
+function testOperations(testData, operationContext, options) {
+  options = options || { swallowOperationErrors: true };
   return testData.operations.reduce((combined, operation) => {
     return combined.then(() => {
       if (operation.object === 'collection') {
@@ -512,7 +649,12 @@ function testOperations(client, testData, operationContext) {
         );
       }
 
-      return testOperation(operation, operationContext[operation.object], operationContext);
+      return testOperation(
+        operation,
+        operationContext[operation.object],
+        operationContext,
+        options
+      );
     });
   }, Promise.resolve());
 }

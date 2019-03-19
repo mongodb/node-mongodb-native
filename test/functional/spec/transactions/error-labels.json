@@ -1,4 +1,8 @@
 {
+  "topology": [
+    "replicaset",
+    "sharded"
+  ],
   "database_name": "transaction-tests",
   "collection_name": "test",
   "data": [],
@@ -25,7 +29,6 @@
             ]
           },
           "result": {
-            "errorCodeName": "DuplicateKey",
             "errorLabelsOmit": [
               "TransientTransactionError",
               "UnknownTransactionCommitResult"
@@ -595,6 +598,7 @@
                   }
                 }
               ],
+              "cursor": {},
               "readConcern": null,
               "lsid": "session0",
               "txnNumber": {
@@ -746,7 +750,10 @@
               },
               "startTransaction": null,
               "autocommit": false,
-              "writeConcern": null
+              "writeConcern": {
+                "w": "majority",
+                "wtimeout": 10000
+              }
             },
             "command_name": "commitTransaction",
             "database_name": "admin"
@@ -762,7 +769,10 @@
               },
               "startTransaction": null,
               "autocommit": false,
-              "writeConcern": null
+              "writeConcern": {
+                "w": "majority",
+                "wtimeout": 10000
+              }
             },
             "command_name": "commitTransaction",
             "database_name": "admin"
@@ -878,7 +888,10 @@
               },
               "startTransaction": null,
               "autocommit": false,
-              "writeConcern": null
+              "writeConcern": {
+                "w": "majority",
+                "wtimeout": 10000
+              }
             },
             "command_name": "commitTransaction",
             "database_name": "admin"
@@ -894,7 +907,10 @@
               },
               "startTransaction": null,
               "autocommit": false,
-              "writeConcern": null
+              "writeConcern": {
+                "w": "majority",
+                "wtimeout": 10000
+              }
             },
             "command_name": "commitTransaction",
             "database_name": "admin"
@@ -1023,7 +1039,8 @@
               "startTransaction": null,
               "autocommit": false,
               "writeConcern": {
-                "w": "majority"
+                "w": "majority",
+                "wtimeout": 10000
               }
             },
             "command_name": "commitTransaction",
@@ -1041,7 +1058,8 @@
               "startTransaction": null,
               "autocommit": false,
               "writeConcern": {
-                "w": "majority"
+                "w": "majority",
+                "wtimeout": 10000
               }
             },
             "command_name": "commitTransaction",
@@ -1171,7 +1189,8 @@
               "startTransaction": null,
               "autocommit": false,
               "writeConcern": {
-                "w": "majority"
+                "w": "majority",
+                "wtimeout": 10000
               }
             },
             "command_name": "commitTransaction",
@@ -1305,7 +1324,8 @@
               "startTransaction": null,
               "autocommit": false,
               "writeConcern": {
-                "w": "majority"
+                "w": "majority",
+                "wtimeout": 10000
               }
             },
             "command_name": "commitTransaction",

@@ -2,7 +2,6 @@
 
 const mock = require('mongodb-mock-server');
 const expect = require('chai').expect;
-const MongoClient = require('../../lib/mongo_client');
 
 describe('db.listCollections', function() {
   const testHarness = {};
@@ -59,7 +58,8 @@ describe('db.listCollections', function() {
     }
   ].forEach(config => {
     function testFn(done) {
-      const client = new MongoClient(`mongodb://${testHarness.server.uri()}/test`, {
+      const configuration = this.configuration;
+      const client = configuration.newClient(`mongodb://${testHarness.server.uri()}/test`, {
         monitorCommands: true
       });
 

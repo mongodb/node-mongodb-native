@@ -1,76 +1,56 @@
 'use strict';
-var test = require('./shared').assert;
-var setupDatabase = require('./shared').setupDatabase;
-var co = require('co');
-var mock = require('mongodb-mock-server');
+const setupDatabase = require('./shared').setupDatabase;
+const mock = require('mongodb-mock-server');
 const expect = require('chai').expect;
 
-var defaultFields = {
-  ismaster: true,
-  maxBsonObjectSize: 16777216,
-  maxMessageSizeBytes: 48000000,
-  maxWriteBatchSize: 1000,
-  localTime: new Date(),
-  maxWireVersion: 5,
-  minWireVersion: 0,
-  ok: 1
-};
-
+const testContext = {};
 describe('Collation', function() {
   before(function() {
     return setupDatabase(this.configuration);
   });
 
   afterEach(() => mock.cleanup());
+  beforeEach(() => {
+    return mock.createServer().then(mockServer => (testContext.server = mockServer));
+  });
 
   it('Successfully pass through collation to findAndModify command', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
-    test: function(done) {
-      var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient;
+    test: function() {
+      const configuration = this.configuration;
+      const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
+      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
 
-      // Primary server states
-      var primary = [Object.assign({}, defaultFields)];
+      let commandResult;
+      testContext.server.setMessageHandler(request => {
+        var doc = request.document;
+        if (doc.ismaster) {
+          request.reply(primary[0]);
+        } else if (doc.findAndModify) {
+          commandResult = doc;
+          request.reply({ ok: 1, result: {} });
+        } else if (doc.endSessions) {
+          request.reply({ ok: 1 });
+        }
+      });
 
-      co(function*() {
-        const singleServer = yield mock.createServer();
-        singleServer.setMessageHandler(request => {
-          var doc = request.document;
-          if (doc.ismaster) {
-            request.reply(primary[0]);
-          } else if (doc.findAndModify) {
-            commandResult = doc;
-            request.reply({ ok: 1, result: {} });
-          } else if (doc.endSessions) {
-            request.reply({ ok: 1 });
-          }
-        });
+      return client.connect().then(() => {
+        const db = client.db(configuration.db);
 
-        var commandResult = null;
-
-        // Connect to the mocks
-        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
-          test.equal(null, err);
-          var db = client.db(configuration.db);
-
-          // Simple findAndModify command returning the new document
-          db
-            .collection('test')
-            .findAndModify(
-              { a: 1 },
-              [['a', 1]],
-              { $set: { b1: 1 } },
-              { new: true, collation: { caseLevel: true } },
-              function(err) {
-                test.equal(null, err);
-                test.deepEqual({ caseLevel: true }, commandResult.collation);
-
-                client.close();
-                done();
-              }
-            );
-        });
+        return db
+          .collection('test')
+          .findAndModify(
+            { a: 1 },
+            [['a', 1]],
+            { $set: { b1: 1 } },
+            { new: true, collation: { caseLevel: true } }
+          )
+          .then(() => {
+            expect(commandResult).to.have.property('collation');
+            expect(commandResult.collation).to.eql({ caseLevel: true });
+            return client.close();
+          });
       });
     }
   });
@@ -78,43 +58,35 @@ describe('Collation', function() {
   it('Successfully pass through collation to count command', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
-    test: function(done) {
-      var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient;
+    test: function() {
+      const configuration = this.configuration;
+      const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
+      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
 
-      // Primary server states
-      var primary = [Object.assign({}, defaultFields)];
+      let commandResult;
+      testContext.server.setMessageHandler(request => {
+        const doc = request.document;
+        if (doc.ismaster) {
+          request.reply(primary[0]);
+        } else if (doc.count) {
+          commandResult = doc;
+          request.reply({ ok: 1, result: { n: 1 } });
+        } else if (doc.endSessions) {
+          request.reply({ ok: 1 });
+        }
+      });
 
-      co(function*() {
-        const singleServer = yield mock.createServer();
-        singleServer.setMessageHandler(request => {
-          var doc = request.document;
-          if (doc.ismaster) {
-            request.reply(primary[0]);
-          } else if (doc.count) {
-            commandResult = doc;
-            request.reply({ ok: 1, result: { n: 1 } });
-          } else if (doc.endSessions) {
-            request.reply({ ok: 1 });
-          }
-        });
+      return client.connect().then(() => {
+        const db = client.db(configuration.db);
 
-        var commandResult = null;
-
-        // Connect to the mocks
-        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
-          test.equal(null, err);
-          var db = client.db(configuration.db);
-
-          // Simple findAndModify command returning the new document
-          db.collection('test').count({}, { collation: { caseLevel: true } }, function(err) {
-            test.equal(null, err);
-            test.deepEqual({ caseLevel: true }, commandResult.collation);
-
-            client.close();
-            done();
+        return db
+          .collection('test')
+          .estimatedDocumentCount({ collation: { caseLevel: true } })
+          .then(() => {
+            expect(commandResult).to.have.property('collation');
+            expect(commandResult.collation).to.eql({ caseLevel: true });
+            return client.close();
           });
-        });
       });
     }
   });
@@ -122,50 +94,37 @@ describe('Collation', function() {
   it('Successfully pass through collation to aggregation command', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
-    test: function(done) {
-      var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient;
+    test: function() {
+      const configuration = this.configuration;
+      const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
+      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
 
-      // Primary server states
-      var primary = [Object.assign({}, defaultFields)];
+      let commandResult;
+      testContext.server.setMessageHandler(request => {
+        const doc = request.document;
+        if (doc.ismaster) {
+          request.reply(primary[0]);
+        } else if (doc.aggregate) {
+          commandResult = doc;
+          request.reply({ ok: 1 });
+        } else if (doc.endSessions) {
+          request.reply({ ok: 1 });
+        }
+      });
 
-      co(function*() {
-        const singleServer = yield mock.createServer();
-
-        // Primary state machine
-        singleServer.setMessageHandler(request => {
-          var doc = request.document;
-          if (doc.ismaster) {
-            request.reply(primary[0]);
-          } else if (doc.aggregate) {
-            commandResult = doc;
-            request.reply({ ok: 1 });
-          } else if (doc.endSessions) {
-            request.reply({ ok: 1 });
-          }
-        });
-
-        var commandResult = null;
-
-        // Connect to the mocks
-        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
-          test.equal(null, err);
-          var db = client.db(configuration.db);
-
-          // Simple findAndModify command returning the new document
-          db
-            .collection('test')
-            .aggregate([{ $match: {} }, { $out: 'readConcernCollectionAggregate1Output' }], {
-              collation: { caseLevel: true }
-            })
-            .toArray(function(err) {
-              test.equal(null, err);
-              test.deepEqual({ caseLevel: true }, commandResult.collation);
-
-              client.close();
-              done();
-            });
-        });
+      return client.connect().then(() => {
+        const db = client.db(configuration.db);
+        return db
+          .collection('test')
+          .aggregate([{ $match: {} }, { $out: 'readConcernCollectionAggregate1Output' }], {
+            collation: { caseLevel: true }
+          })
+          .toArray()
+          .then(() => {
+            expect(commandResult).to.have.property('collation');
+            expect(commandResult.collation).to.eql({ caseLevel: true });
+            return client.close();
+          });
       });
     }
   });
@@ -173,104 +132,79 @@ describe('Collation', function() {
   it('Successfully pass through collation to distinct command', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
-    test: function(done) {
-      var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient;
+    test: function() {
+      const configuration = this.configuration;
+      const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
+      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
 
-      // Primary server states
-      var primary = [Object.assign({}, defaultFields)];
+      let commandResult;
+      testContext.server.setMessageHandler(request => {
+        var doc = request.document;
+        if (doc.ismaster) {
+          request.reply(primary[0]);
+        } else if (doc.distinct) {
+          commandResult = doc;
+          request.reply({ ok: 1 });
+        } else if (doc.endSessions) {
+          request.reply({ ok: 1 });
+        }
+      });
 
-      co(function*() {
-        const singleServer = yield mock.createServer();
+      return client.connect().then(() => {
+        const db = client.db(configuration.db);
 
-        // Primary state machine
-        singleServer.setMessageHandler(request => {
-          var doc = request.document;
-          if (doc.ismaster) {
-            request.reply(primary[0]);
-          } else if (doc.distinct) {
-            commandResult = doc;
-            request.reply({ ok: 1 });
-          } else if (doc.endSessions) {
-            request.reply({ ok: 1 });
-          }
-        });
-
-        var commandResult = null;
-
-        // Connect to the mocks
-        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
-          test.equal(null, err);
-          var db = client.db(configuration.db);
-
-          // Simple findAndModify command returning the new document
-          db
-            .collection('test')
-            .distinct('a', {}, { collation: { caseLevel: true } }, function(err) {
-              test.equal(null, err);
-              test.deepEqual({ caseLevel: true }, commandResult.collation);
-
-              client.close();
-              done();
-            });
-        });
+        return db
+          .collection('test')
+          .distinct('a', {}, { collation: { caseLevel: true } })
+          .then(() => {
+            expect(commandResult).to.have.property('collation');
+            expect(commandResult.collation).to.eql({ caseLevel: true });
+            return client.close();
+          });
       });
     }
   });
 
   it('Successfully pass through collation to group command', {
-    metadata: { requires: { generators: true, topology: 'single' } },
+    metadata: { requires: { generators: true, topology: 'single', mongodb: '<=4.1.0' } },
 
-    test: function(done) {
-      var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient;
+    test: function() {
+      const configuration = this.configuration;
+      const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
+      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
 
-      // Primary server states
-      var primary = [Object.assign({}, defaultFields)];
+      let commandResult;
+      testContext.server.setMessageHandler(request => {
+        var doc = request.document;
+        if (doc.ismaster) {
+          request.reply(primary[0]);
+        } else if (doc.group) {
+          commandResult = doc;
+          request.reply({ ok: 1 });
+        } else if (doc.endSessions) {
+          request.reply({ ok: 1 });
+        }
+      });
 
-      co(function*() {
-        const singleServer = yield mock.createServer();
+      return client.connect().then(() => {
+        const db = client.db(configuration.db);
 
-        // Primary state machine
-        singleServer.setMessageHandler(request => {
-          var doc = request.document;
-          if (doc.ismaster) {
-            request.reply(primary[0]);
-          } else if (doc.group) {
-            commandResult = doc;
-            request.reply({ ok: 1 });
-          } else if (doc.endSessions) {
-            request.reply({ ok: 1 });
-          }
-        });
-
-        var commandResult = null;
-
-        // Connect to the mocks
-        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
-          test.equal(null, err);
-          var db = client.db(configuration.db);
-
-          // Simple findAndModify command returning the new document
-          db
-            .collection('test')
-            .group(
-              [],
-              { a: { $gt: 1 } },
-              { count: 0 },
-              'function (obj, prev) { prev.count++; }',
-              'function (obj, prev) { prev.count++; }',
-              true,
-              { collation: { caseLevel: true } },
-              function(err) {
-                test.equal(null, err);
-                test.deepEqual({ caseLevel: true }, commandResult.collation);
-
-                client.close();
-                done();
-              }
-            );
-        });
+        return db
+          .collection('test')
+          .group(
+            [],
+            { a: { $gt: 1 } },
+            { count: 0 },
+            'function (obj, prev) { prev.count++; }',
+            'function (obj, prev) { prev.count++; }',
+            true,
+            { collation: { caseLevel: true } }
+          )
+          .then(() => {
+            expect(commandResult).to.have.property('collation');
+            expect(commandResult.collation).to.eql({ caseLevel: true });
+            return client.close();
+          });
       });
     }
   });
@@ -278,58 +212,41 @@ describe('Collation', function() {
   it('Successfully pass through collation to mapreduce command', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
-    test: function(done) {
-      var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient,
-        Code = configuration.require.Code;
+    test: function() {
+      const configuration = this.configuration;
+      const Code = configuration.require.Code;
+      const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
+      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
 
-      // Primary server states
-      var primary = [Object.assign({}, defaultFields)];
+      let commandResult;
+      testContext.server.setMessageHandler(request => {
+        var doc = request.document;
+        if (doc.ismaster) {
+          request.reply(primary[0]);
+        } else if (doc.mapreduce) {
+          commandResult = doc;
+          request.reply({ ok: 1, result: 'tempCollection' });
+        } else if (doc.endSessions) {
+          request.reply({ ok: 1 });
+        }
+      });
 
-      co(function*() {
-        const singleServer = yield mock.createServer();
+      return client.connect().then(() => {
+        const db = client.db(configuration.db);
+        const map = new Code('function() { emit(this.user_id, 1); }');
+        const reduce = new Code('function(k,vals) { return 1; }');
 
-        // Primary state machine
-        singleServer.setMessageHandler(request => {
-          var doc = request.document;
-          if (doc.ismaster) {
-            request.reply(primary[0]);
-          } else if (doc.mapreduce) {
-            commandResult = doc;
-            request.reply({ ok: 1, result: 'tempCollection' });
-          } else if (doc.endSessions) {
-            request.reply({ ok: 1 });
-          }
-        });
-
-        var commandResult = null;
-
-        // Connect to the mocks
-        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
-          test.equal(null, err);
-          var db = client.db(configuration.db);
-
-          // String functions
-          var map = new Code('function() { emit(this.user_id, 1); }');
-          var reduce = new Code('function(k,vals) { return 1; }');
-
-          // db.collection('test').mapReduce({
-          db.collection('test').mapReduce(
-            map,
-            reduce,
-            {
-              out: { replace: 'tempCollection' },
-              collation: { caseLevel: true }
-            },
-            function(err) {
-              test.equal(null, err);
-              test.deepEqual({ caseLevel: true }, commandResult.collation);
-
-              client.close();
-              done();
-            }
-          );
-        });
+        return db
+          .collection('test')
+          .mapReduce(map, reduce, {
+            out: { replace: 'tempCollection' },
+            collation: { caseLevel: true }
+          })
+          .then(() => {
+            expect(commandResult).to.have.property('collation');
+            expect(commandResult.collation).to.eql({ caseLevel: true });
+            return client.close();
+          });
       });
     }
   });
@@ -337,45 +254,35 @@ describe('Collation', function() {
   it('Successfully pass through collation to remove command', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
-    test: function(done) {
-      var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient;
+    test: function() {
+      const configuration = this.configuration;
+      const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
+      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
 
-      // Primary server states
-      var primary = [Object.assign({}, defaultFields)];
+      let commandResult;
+      testContext.server.setMessageHandler(request => {
+        var doc = request.document;
+        if (doc.ismaster) {
+          request.reply(primary[0]);
+        } else if (doc.delete) {
+          commandResult = doc;
+          request.reply({ ok: 1 });
+        } else if (doc.endSessions) {
+          request.reply({ ok: 1 });
+        }
+      });
 
-      co(function*() {
-        const singleServer = yield mock.createServer();
-
-        // Primary state machine
-        singleServer.setMessageHandler(request => {
-          var doc = request.document;
-          if (doc.ismaster) {
-            request.reply(primary[0]);
-          } else if (doc.delete) {
-            commandResult = doc;
-            request.reply({ ok: 1 });
-          } else if (doc.endSessions) {
-            request.reply({ ok: 1 });
-          }
-        });
-
-        var commandResult = null;
-
-        // Connect to the mocks
-        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
-          test.equal(null, err);
-          var db = client.db(configuration.db);
-
-          // Simple findAndModify command returning the new document
-          db.collection('test').deleteMany({}, { collation: { caseLevel: true } }, function(err) {
-            test.equal(null, err);
-            test.deepEqual({ caseLevel: true }, commandResult.deletes[0].collation);
-
-            client.close();
-            done();
+      return client.connect().then(() => {
+        const db = client.db(configuration.db);
+        return db
+          .collection('test')
+          .deleteMany({}, { collation: { caseLevel: true } })
+          .then(() => {
+            expect(commandResult.deletes).to.have.length.at.least(1);
+            expect(commandResult.deletes[0]).to.have.property('collation');
+            expect(commandResult.deletes[0].collation).to.eql({ caseLevel: true });
+            return client.close();
           });
-        });
       });
     }
   });
@@ -383,49 +290,37 @@ describe('Collation', function() {
   it('Successfully pass through collation to update command', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
-    test: function(done) {
-      var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient;
+    test: function() {
+      const configuration = this.configuration;
+      const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
+      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
 
-      // Primary server states
-      var primary = [Object.assign({}, defaultFields)];
+      let commandResult;
+      testContext.server.setMessageHandler(request => {
+        const doc = request.document;
+        if (doc.ismaster) {
+          request.reply(primary[0]);
+        } else if (doc.update) {
+          commandResult = doc;
+          request.reply({ ok: 1 });
+        } else if (doc.endSessions) {
+          request.reply({ ok: 1 });
+        }
+      });
 
-      co(function*() {
-        const singleServer = yield mock.createServer();
+      return client.connect().then(() => {
+        const db = client.db(configuration.db);
 
-        // Primary state machine
-        singleServer.setMessageHandler(request => {
-          var doc = request.document;
-          if (doc.ismaster) {
-            request.reply(primary[0]);
-          } else if (doc.update) {
-            commandResult = doc;
-            request.reply({ ok: 1 });
-          } else if (doc.endSessions) {
-            request.reply({ ok: 1 });
-          }
-        });
+        return db
+          .collection('test')
+          .updateOne({ a: 1 }, { $set: { b: 1 } }, { collation: { caseLevel: true } })
+          .then(() => {
+            expect(commandResult.updates).to.have.length.at.least(1);
+            expect(commandResult.updates[0]).to.have.property('collation');
+            expect(commandResult.updates[0].collation).to.eql({ caseLevel: true });
 
-        var commandResult = null;
-
-        // Connect to the mocks
-        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
-          test.equal(null, err);
-          var db = client.db(configuration.db);
-
-          // Simple findAndModify command returning the new document
-          db
-            .collection('test')
-            .updateOne({ a: 1 }, { $set: { b: 1 } }, { collation: { caseLevel: true } }, function(
-              err
-            ) {
-              test.equal(null, err);
-              test.deepEqual({ caseLevel: true }, commandResult.updates[0].collation);
-
-              client.close();
-              done();
-            });
-        });
+            return client.close();
+          });
       });
     }
   });
@@ -433,201 +328,152 @@ describe('Collation', function() {
   it('Successfully pass through collation to find command via options', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
-    test: function(done) {
-      var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient;
+    test: function() {
+      const configuration = this.configuration;
+      const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
+      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
 
-      // Primary server states
-      var primary = [Object.assign({}, defaultFields)];
+      let commandResult;
+      testContext.server.setMessageHandler(request => {
+        const doc = request.document;
+        if (doc.ismaster) {
+          request.reply(primary[0]);
+        } else if (doc.find) {
+          commandResult = doc;
+          request.reply({ ok: 1 });
+        } else if (doc.endSessions) {
+          request.reply({ ok: 1 });
+        }
+      });
 
-      co(function*() {
-        const singleServer = yield mock.createServer();
+      return client.connect().then(() => {
+        const db = client.db(configuration.db);
 
-        // Primary state machine
-        singleServer.setMessageHandler(request => {
-          var doc = request.document;
-          if (doc.ismaster) {
-            request.reply(primary[0]);
-          } else if (doc.find) {
-            commandResult = doc;
-            request.reply({ ok: 1 });
-          } else if (doc.endSessions) {
-            request.reply({ ok: 1 });
-          }
-        });
-
-        var commandResult = null;
-
-        // Connect to the mocks
-        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
-          test.equal(null, err);
-          var db = client.db(configuration.db);
-
-          // Simple findAndModify command returning the new document
-          db
-            .collection('test')
-            .find({ a: 1 }, { collation: { caseLevel: true } })
-            .toArray(function(err) {
-              test.equal(null, err);
-              test.deepEqual({ caseLevel: true }, commandResult.collation);
-
-              client.close();
-              done();
-            });
-        });
+        return db
+          .collection('test')
+          .find({ a: 1 }, { collation: { caseLevel: true } })
+          .toArray()
+          .then(() => {
+            expect(commandResult).to.have.property('collation');
+            expect(commandResult.collation).to.eql({ caseLevel: true });
+            return client.close();
+          });
       });
     }
   });
 
   it('Successfully pass through collation to find command via cursor', {
     metadata: { requires: { generators: true, topology: 'single' } },
+    test: function() {
+      const configuration = this.configuration;
+      const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
+      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
 
-    test: function(done) {
-      var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient;
+      let commandResult;
+      testContext.server.setMessageHandler(request => {
+        const doc = request.document;
+        if (doc.ismaster) {
+          request.reply(primary[0]);
+        } else if (doc.find) {
+          commandResult = doc;
+          request.reply({ ok: 1 });
+        } else if (doc.endSessions) {
+          request.reply({ ok: 1 });
+        }
+      });
 
-      // Primary server states
-      var primary = [Object.assign({}, defaultFields)];
+      return client.connect().then(() => {
+        const db = client.db(configuration.db);
 
-      co(function*() {
-        const singleServer = yield mock.createServer();
+        return db
+          .collection('test')
+          .find({ a: 1 })
+          .collation({ caseLevel: true })
+          .toArray()
+          .then(() => {
+            expect(commandResult).to.have.property('collation');
+            expect(commandResult.collation).to.eql({ caseLevel: true });
 
-        // Primary state machine
-        singleServer.setMessageHandler(request => {
-          var doc = request.document;
-          if (doc.ismaster) {
-            request.reply(primary[0]);
-          } else if (doc.find) {
-            commandResult = doc;
-            request.reply({ ok: 1 });
-          } else if (doc.endSessions) {
-            request.reply({ ok: 1 });
-          }
-        });
-
-        var commandResult = null;
-
-        // Connect to the mocks
-        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
-          test.equal(null, err);
-          var db = client.db(configuration.db);
-
-          // Simple findAndModify command returning the new document
-          db
-            .collection('test')
-            .find({ a: 1 })
-            .collation({ caseLevel: true })
-            .toArray(function(err) {
-              test.equal(null, err);
-              test.deepEqual({ caseLevel: true }, commandResult.collation);
-
-              client.close();
-              done();
-            });
-        });
+            return client.close();
+          });
       });
     }
   });
 
   it('Successfully pass through collation to findOne', {
     metadata: { requires: { generators: true, topology: 'single' } },
+    test: function() {
+      const configuration = this.configuration;
+      const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
+      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
 
-    test: function(done) {
-      var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient;
+      let commandResult;
+      testContext.server.setMessageHandler(request => {
+        const doc = request.document;
+        if (doc.ismaster) {
+          request.reply(primary[0]);
+        } else if (doc.find) {
+          commandResult = doc;
+          request.reply({ ok: 1 });
+        } else if (doc.endSessions) {
+          request.reply({ ok: 1 });
+        }
+      });
 
-      // Primary server states
-      var primary = [Object.assign({}, defaultFields)];
+      return client.connect().then(() => {
+        const db = client.db(configuration.db);
 
-      co(function*() {
-        const singleServer = yield mock.createServer();
+        return db
+          .collection('test')
+          .findOne({ a: 1 }, { collation: { caseLevel: true } })
+          .then(() => {
+            expect(commandResult).to.have.property('collation');
+            expect(commandResult.collation).to.eql({ caseLevel: true });
 
-        // Primary state machine
-        singleServer.setMessageHandler(request => {
-          var doc = request.document;
-          if (doc.ismaster) {
-            request.reply(primary[0]);
-          } else if (doc.find) {
-            commandResult = doc;
-            request.reply({ ok: 1 });
-          } else if (doc.endSessions) {
-            request.reply({ ok: 1 });
-          }
-        });
-
-        var commandResult = null;
-
-        // Connect to the mocks
-        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
-          test.equal(null, err);
-          var db = client.db(configuration.db);
-
-          // Simple findAndModify command returning the new document
-          db
-            .collection('test')
-            .findOne({ a: 1 }, { collation: { caseLevel: true } }, function(err) {
-              test.equal(null, err);
-              test.deepEqual({ caseLevel: true }, commandResult.collation);
-
-              client.close();
-              done();
-            });
-        });
+            return client.close();
+          });
       });
     }
   });
 
   it('Successfully pass through collation to createCollection', {
     metadata: { requires: { generators: true, topology: 'single' } },
+    test: function() {
+      const configuration = this.configuration;
+      const Long = configuration.require.Long;
+      const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
+      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
 
-    test: function(done) {
-      var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient,
-        Long = configuration.require.Long;
-
-      // Primary server states
-      var primary = [Object.assign({}, defaultFields)];
-
-      co(function*() {
-        const singleServer = yield mock.createServer();
-
-        // Primary state machine
-        singleServer.setMessageHandler(request => {
-          var doc = request.document;
-          if (doc.ismaster) {
-            request.reply(primary[0]);
-          } else if (doc.listCollections) {
-            request.reply({
-              ok: 1,
-              cursor: {
-                id: Long.fromNumber(0),
-                ns: 'test.cmd$.listCollections',
-                firstBatch: []
-              }
-            });
-          } else if (doc.create) {
-            commandResult = doc;
-            request.reply({ ok: 1 });
-          } else if (doc.endSessions) {
-            request.reply({ ok: 1 });
-          }
-        });
-
-        var commandResult = null;
-
-        // Connect to the mocks
-        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
-          test.equal(null, err);
-          var db = client.db(configuration.db);
-
-          // Simple findAndModify command returning the new document
-          db.createCollection('test', { collation: { caseLevel: true } }, function(err) {
-            test.equal(null, err);
-            test.deepEqual({ caseLevel: true }, commandResult.collation);
-
-            client.close();
-            done();
+      let commandResult;
+      testContext.server.setMessageHandler(request => {
+        const doc = request.document;
+        if (doc.ismaster) {
+          request.reply(primary[0]);
+        } else if (doc.listCollections) {
+          request.reply({
+            ok: 1,
+            cursor: {
+              id: Long.fromNumber(0),
+              ns: 'test.cmd$.listCollections',
+              firstBatch: []
+            }
           });
+        } else if (doc.create) {
+          commandResult = doc;
+          request.reply({ ok: 1 });
+        } else if (doc.endSessions) {
+          request.reply({ ok: 1 });
+        }
+      });
+
+      return client.connect().then(() => {
+        const db = client.db(configuration.db);
+
+        return db.createCollection('test', { collation: { caseLevel: true } }).then(() => {
+          expect(commandResult).to.have.property('collation');
+          expect(commandResult.collation).to.eql({ caseLevel: true });
+
+          return client.close();
         });
       });
     }
@@ -636,125 +482,102 @@ describe('Collation', function() {
   it('Fail due to no support for collation', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
-    test: function(done) {
-      var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient;
+    test: function() {
+      const configuration = this.configuration;
+      const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
+      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER, { maxWireVersion: 4 })];
 
-      // Primary server states
-      var primary = [Object.assign({}, defaultFields, { maxWireVersion: 4 })];
+      testContext.server.setMessageHandler(request => {
+        const doc = request.document;
+        if (doc.ismaster) {
+          request.reply(primary[0]);
+        } else if (doc.find) {
+          request.reply({ ok: 1 });
+        } else if (doc.endSessions) {
+          request.reply({ ok: 1 });
+        }
+      });
 
-      co(function*() {
-        const singleServer = yield mock.createServer();
+      return client.connect().then(() => {
+        const db = client.db(configuration.db);
 
-        // Primary state machine
-        singleServer.setMessageHandler(request => {
-          var doc = request.document;
-          if (doc.ismaster) {
-            request.reply(primary[0]);
-          } else if (doc.find) {
-            request.reply({ ok: 1 });
-          } else if (doc.endSessions) {
-            request.reply({ ok: 1 });
-          }
-        });
-
-        // Connect to the mocks
-        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
-          test.equal(null, err);
-          var db = client.db(configuration.db);
-
-          // Simple findAndModify command returning the new document
-          db
-            .collection('test')
-            .findOne({ a: 1 }, { collation: { caseLevel: true } }, function(err) {
-              test.equal(`server ${singleServer.uri()} does not support collation`, err.message);
-              singleServer.destroy();
-              client.close();
-              done();
-            });
-        });
+        return db
+          .collection('test')
+          .findOne({ a: 1 }, { collation: { caseLevel: true } })
+          .then(() => Promise.reject('this test should fail'))
+          .catch(err => {
+            expect(err).to.exist;
+            expect(err.message).to.match(/topology does not support collation/);
+            return client.close();
+          });
       });
     }
   });
 
   it('Fail command due to no support for collation', {
     metadata: { requires: { generators: true, topology: 'single' } },
+    test: function() {
+      const configuration = this.configuration;
+      const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
+      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER, { maxWireVersion: 4 })];
 
-    test: function(done) {
-      var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient;
+      testContext.server.setMessageHandler(request => {
+        var doc = request.document;
+        if (doc.ismaster) {
+          request.reply(primary[0]);
+        } else if (doc.find) {
+          request.reply({ ok: 1 });
+        } else if (doc.endSessions) {
+          request.reply({ ok: 1 });
+        }
+      });
 
-      // Primary server states
-      var primary = [Object.assign({}, defaultFields, { maxWireVersion: 4 })];
+      return client.connect().then(() => {
+        const db = client.db(configuration.db);
 
-      co(function*() {
-        const singleServer = yield mock.createServer();
+        return db
+          .command({ count: 'test', query: {}, collation: { caseLevel: true } })
+          .then(() => Promise.reject('should not succeed'))
+          .catch(err => {
+            expect(err).to.exist;
+            expect(err.message).to.equal(
+              `server ${testContext.server.uri()} does not support collation`
+            );
 
-        // Primary state machine
-        singleServer.setMessageHandler(request => {
-          var doc = request.document;
-          if (doc.ismaster) {
-            request.reply(primary[0]);
-          } else if (doc.find) {
-            request.reply({ ok: 1 });
-          } else if (doc.endSessions) {
-            request.reply({ ok: 1 });
-          }
-        });
-
-        // Connect to the mocks
-        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
-          test.equal(null, err);
-          var db = client.db(configuration.db);
-
-          // Simple findAndModify command returning the new document
-          db.command({ count: 'test', query: {}, collation: { caseLevel: true } }, function(err) {
-            test.equal(`server ${singleServer.uri()} does not support collation`, err.message);
-
-            client.close();
-            done();
+            return client.close();
           });
-        });
       });
     }
   });
 
   it('Successfully pass through collation to bulkWrite command', {
     metadata: { requires: { generators: true, topology: 'single' } },
+    test: function() {
+      const configuration = this.configuration;
+      const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
+      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
 
-    test: function(done) {
-      var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient;
+      let commandResult;
+      testContext.server.setMessageHandler(request => {
+        const doc = request.document;
+        if (doc.ismaster) {
+          request.reply(primary[0]);
+        } else if (doc.update) {
+          commandResult = doc;
+          request.reply({ ok: 1 });
+        } else if (doc.delete) {
+          request.reply({ ok: 1 });
+        } else if (doc.endSessions) {
+          request.reply({ ok: 1 });
+        }
+      });
 
-      // Primary server states
-      var primary = [Object.assign({}, defaultFields)];
+      return client.connect().then(() => {
+        const db = client.db(configuration.db);
 
-      co(function*() {
-        const singleServer = yield mock.createServer();
-
-        // Primary state machine
-        singleServer.setMessageHandler(request => {
-          var doc = request.document;
-          if (doc.ismaster) {
-            request.reply(primary[0]);
-          } else if (doc.update) {
-            commandResult = doc;
-            request.reply({ ok: 1 });
-          } else if (doc.delete) {
-            request.reply({ ok: 1 });
-          } else if (doc.endSessions) {
-            request.reply({ ok: 1 });
-          }
-        });
-
-        var commandResult = null;
-
-        // Connect to the mocks
-        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
-          test.equal(null, err);
-          var db = client.db(configuration.db);
-
-          db.collection('test').bulkWrite(
+        return db
+          .collection('test')
+          .bulkWrite(
             [
               {
                 updateOne: {
@@ -766,53 +589,45 @@ describe('Collation', function() {
               },
               { deleteOne: { q: { c: 1 } } }
             ],
-            { ordered: true },
-            function(err) {
-              test.equal(null, err);
-              test.ok(commandResult);
-              test.deepEqual({ caseLevel: true }, commandResult.updates[0].collation);
+            { ordered: true }
+          )
+          .then(() => {
+            expect(commandResult).to.exist;
+            expect(commandResult).to.have.property('updates');
+            expect(commandResult.updates).to.have.length.at.least(1);
+            expect(commandResult.updates[0]).to.have.property('collation');
+            expect(commandResult.updates[0].collation).to.eql({ caseLevel: true });
 
-              client.close();
-              done();
-            }
-          );
-        });
+            return client.close();
+          });
       });
     }
   });
 
   it('Successfully fail bulkWrite due to unsupported collation', {
     metadata: { requires: { generators: true, topology: 'single' } },
+    test: function() {
+      const configuration = this.configuration;
+      const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
+      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER, { maxWireVersion: 4 })];
 
-    test: function(done) {
-      var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient;
+      testContext.server.setMessageHandler(request => {
+        const doc = request.document;
+        if (doc.ismaster) {
+          request.reply(primary[0]);
+        } else if (doc.update) {
+          request.reply({ ok: 1 });
+        } else if (doc.endSessions) {
+          request.reply({ ok: 1 });
+        }
+      });
 
-      // Primary server states
-      var primary = [Object.assign({}, defaultFields, { maxWireVersion: 4 })];
+      return client.connect().then(() => {
+        const db = client.db(configuration.db);
 
-      co(function*() {
-        const singleServer = yield mock.createServer();
-
-        // Primary state machine
-        singleServer.setMessageHandler(request => {
-          var doc = request.document;
-
-          if (doc.ismaster) {
-            request.reply(primary[0]);
-          } else if (doc.update) {
-            request.reply({ ok: 1 });
-          } else if (doc.endSessions) {
-            request.reply({ ok: 1 });
-          }
-        });
-
-        // Connect to the mocks
-        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
-          test.equal(null, err);
-          var db = client.db(configuration.db);
-
-          db.collection('test').bulkWrite(
+        return db
+          .collection('test')
+          .bulkWrite(
             [
               {
                 updateOne: {
@@ -824,191 +639,52 @@ describe('Collation', function() {
               },
               { deleteOne: { q: { c: 1 } } }
             ],
-            { ordered: true },
-            function(err) {
-              test.ok(err);
-              test.equal('server/primary/mongos does not support collation', err.message);
-
-              client.close();
-              done();
-            }
-          );
-        });
-      });
-    }
-  });
-
-  it('Successfully fail bulkWrite due to unsupported collation using replset', {
-    metadata: { requires: { generators: true, topology: 'single' } },
-
-    test: function(done) {
-      var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient,
-        ObjectId = configuration.require.ObjectId;
-
-      var electionIds = [new ObjectId(), new ObjectId()];
-      var rsFields = Object.assign({}, defaultFields, {
-        setName: 'rs',
-        setVersion: 1,
-        electionId: electionIds[0],
-        maxWireVersion: 4,
-        hosts: ['localhost:32000', 'localhost:32001', 'localhost:32002'],
-        arbiters: ['localhost:32002']
-      });
-
-      // Primary server states
-      var primary = [
-        Object.assign(
-          {
-            ismaster: true,
-            secondary: false,
-            me: 'localhost:32000',
-            primary: 'localhost:32000',
-            tags: { loc: 'ny' }
-          },
-          rsFields
-        )
-      ];
-
-      // Primary server states
-      var firstSecondary = [
-        Object.assign(
-          {
-            ismaster: false,
-            secondary: true,
-            me: 'localhost:32001',
-            primary: 'localhost:32000',
-            tags: { loc: 'sf' }
-          },
-          rsFields
-        )
-      ];
-
-      // Primary server states
-      var arbiter = [
-        Object.assign(
-          {
-            ismaster: false,
-            secondary: false,
-            arbiterOnly: true,
-            me: 'localhost:32002',
-            primary: 'localhost:32000'
-          },
-          rsFields
-        )
-      ];
-
-      co(function*() {
-        const primaryServer = yield mock.createServer();
-        const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
-        const arbiterServer = yield mock.createServer(32002, 'localhost');
-
-        primaryServer.setMessageHandler(request => {
-          var doc = request.document;
-          if (doc.ismaster) {
-            request.reply(primary[0]);
-          }
-        });
-
-        firstSecondaryServer.setMessageHandler(request => {
-          var doc = request.document;
-          if (doc.ismaster) {
-            request.reply(firstSecondary[0]);
-          } else if (doc.endSessions) {
-            request.reply({ ok: 1 });
-          }
-        });
-
-        arbiterServer.setMessageHandler(request => {
-          var doc = request.document;
-          if (doc.ismaster) {
-            request.reply(arbiter[0]);
-          } else if (doc.endSessions) {
-            request.reply({ ok: 1 });
-          }
-        });
-
-        setTimeout(() => {
-          // Connect to the mocks
-          MongoClient.connect(
-            'mongodb://localhost:32000,localhost:32001/test?replicaSet=rs',
-            function(err, client) {
-              test.equal(null, err);
-              var db = client.db(configuration.db);
-
-              db.collection('test').bulkWrite(
-                [
-                  {
-                    updateOne: {
-                      q: { a: 2 },
-                      u: { $set: { a: 2 } },
-                      upsert: true,
-                      collation: { caseLevel: true }
-                    }
-                  },
-                  { deleteOne: { q: { c: 1 } } }
-                ],
-                { ordered: true },
-                function(err) {
-                  test.ok(err);
-                  test.equal('server/primary/mongos does not support collation', err.message);
-
-                  client.close();
-                  done();
-                }
-              );
-            }
-          );
-        }, 500);
+            { ordered: true }
+          )
+          .then(() => Promise.reject('should not succeed'))
+          .catch(err => {
+            expect(err).to.exist;
+            expect(err.message).to.equal('server/primary/mongos does not support collation');
+          })
+          .then(() => client.close());
       });
     }
   });
 
   it('Successfully create index with collation', {
     metadata: { requires: { generators: true, topology: 'single' } },
+    test: function() {
+      const configuration = this.configuration;
+      const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
+      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
 
-    test: function(done) {
-      var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient;
+      let commandResult;
+      testContext.server.setMessageHandler(request => {
+        const doc = request.document;
+        if (doc.ismaster) {
+          request.reply(primary[0]);
+        } else if (doc.createIndexes) {
+          commandResult = doc;
+          request.reply({ ok: 1 });
+        } else if (doc.endSessions) {
+          request.reply({ ok: 1 });
+        }
+      });
 
-      // Primary server states
-      var primary = [Object.assign({}, defaultFields)];
+      return client.connect().then(() => {
+        const db = client.db(configuration.db);
 
-      co(function*() {
-        const singleServer = yield mock.createServer();
-        singleServer.setMessageHandler(request => {
-          var doc = request.document;
-          if (doc.ismaster) {
-            request.reply(primary[0]);
-          } else if (doc.createIndexes) {
-            commandResult = doc;
-            request.reply({ ok: 1 });
-          } else if (doc.endSessions) {
-            request.reply({ ok: 1 });
-          }
-        });
-
-        var commandResult = null;
-
-        // Connect to the mocks
-        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
-          test.equal(null, err);
-          var db = client.db(configuration.db);
-
-          // Simple findAndModify command returning the new document
-          db
-            .collection('test')
-            .createIndex({ a: 1 }, { collation: { caseLevel: true } }, function(err) {
-              test.equal(null, err);
-              test.deepEqual(commandResult, {
-                createIndexes: 'test',
-                indexes: [{ name: 'a_1', key: { a: 1 }, collation: { caseLevel: true } }]
-              });
-
-              client.close();
-              done();
+        return db
+          .collection('test')
+          .createIndex({ a: 1 }, { collation: { caseLevel: true } })
+          .then(() => {
+            expect(commandResult).to.eql({
+              createIndexes: 'test',
+              indexes: [{ name: 'a_1', key: { a: 1 }, collation: { caseLevel: true } }]
             });
-        });
+
+            return client.close();
+          });
       });
     }
   });
@@ -1016,44 +692,34 @@ describe('Collation', function() {
   it('Fail to create index with collation due to no capabilities', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
-    test: function(done) {
-      var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient;
+    test: function() {
+      const configuration = this.configuration;
+      const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
+      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER, { maxWireVersion: 4 })];
 
-      // Primary server states
-      var primary = [Object.assign({}, defaultFields, { maxWireVersion: 4 })];
+      testContext.server.setMessageHandler(request => {
+        const doc = request.document;
+        if (doc.ismaster) {
+          request.reply(primary[0]);
+        } else if (doc.createIndexes) {
+          request.reply({ ok: 1 });
+        } else if (doc.endSessions) {
+          request.reply({ ok: 1 });
+        }
+      });
 
-      co(function*() {
-        const singleServer = yield mock.createServer();
+      return client.connect().then(() => {
+        const db = client.db(configuration.db);
 
-        // Primary state machine
-        singleServer.setMessageHandler(request => {
-          var doc = request.document;
-          if (doc.ismaster) {
-            request.reply(primary[0]);
-          } else if (doc.createIndexes) {
-            request.reply({ ok: 1 });
-          } else if (doc.endSessions) {
-            request.reply({ ok: 1 });
-          }
-        });
-
-        // Connect to the mocks
-        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
-          test.equal(null, err);
-          var db = client.db(configuration.db);
-
-          // Simple findAndModify command returning the new document
-          db
-            .collection('test')
-            .createIndex({ a: 1 }, { collation: { caseLevel: true } }, function(err) {
-              test.ok(err);
-              test.equal('server/primary/mongos does not support collation', err.message);
-
-              client.close();
-              done();
-            });
-        });
+        return db
+          .collection('test')
+          .createIndex({ a: 1 }, { collation: { caseLevel: true } })
+          .then(() => Promise.reject('should not succeed'))
+          .catch(err => {
+            expect(err).to.exist;
+            expect(err.message).to.equal('server/primary/mongos does not support collation');
+          })
+          .then(() => client.close());
       });
     }
   });
@@ -1061,44 +727,33 @@ describe('Collation', function() {
   it('Fail to create indexs with collation due to no capabilities', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
-    test: function(done) {
-      var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient;
+    test: function() {
+      const configuration = this.configuration;
+      const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
+      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER, { maxWireVersion: 4 })];
 
-      // Primary server states
-      var primary = [Object.assign({}, defaultFields, { maxWireVersion: 4 })];
+      testContext.server.setMessageHandler(request => {
+        const doc = request.document;
+        if (doc.ismaster) {
+          request.reply(primary[0]);
+        } else if (doc.createIndexes) {
+          request.reply({ ok: 1 });
+        } else if (doc.endSessions) {
+          request.reply({ ok: 1 });
+        }
+      });
 
-      co(function*() {
-        const singleServer = yield mock.createServer();
+      return client.connect().then(() => {
+        const db = client.db(configuration.db);
 
-        // Primary state machine
-        singleServer.setMessageHandler(request => {
-          var doc = request.document;
-          if (doc.ismaster) {
-            request.reply(primary[0]);
-          } else if (doc.createIndexes) {
-            request.reply({ ok: 1 });
-          } else if (doc.endSessions) {
-            request.reply({ ok: 1 });
-          }
-        });
-
-        // Connect to the mocks
-        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
-          test.equal(null, err);
-          var db = client.db(configuration.db);
-
-          // Simple findAndModify command returning the new document
-          db
-            .collection('test')
-            .createIndexes([{ key: { a: 1 }, collation: { caseLevel: true } }], function(err) {
-              test.ok(err);
-              test.equal('server/primary/mongos does not support collation', err.message);
-
-              client.close();
-              done();
-            });
-        });
+        return db
+          .collection('test')
+          .createIndexes([{ key: { a: 1 }, collation: { caseLevel: true } }])
+          .then(() => Promise.reject('should not succeed'))
+          .catch(err => {
+            expect(err.message).to.equal('server/primary/mongos does not support collation');
+            return client.close();
+          });
       });
     }
   });
@@ -1109,7 +764,7 @@ describe('Collation', function() {
       const configuration = this.configuration;
       const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
 
-      client.connect(function(err, client) {
+      client.connect().then(() => {
         const db = client.db(configuration.db);
         const docs = [{ _id: 0, name: 'foo' }, { _id: 1, name: 'Foo' }];
         const collation = { locale: 'en_US', strength: 2 };
@@ -1141,41 +796,30 @@ describe('Collation', function() {
   it('Should correctly create index with collation', {
     metadata: { requires: { topology: 'single', mongodb: '>=3.3.12' } },
 
-    test: function(done) {
-      var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient;
+    test: function() {
+      const configuration = this.configuration;
+      const client = configuration.newClient();
 
-      // Connect to the mocks
-      MongoClient.connect(configuration.url(), function(err, client) {
-        test.equal(null, err);
-        var db = client.db(configuration.db);
+      return client.connect().then(() => {
+        const db = client.db(configuration.db);
+        const col = db.collection('collation_test');
 
-        var col = db.collection('collation_test');
-        // Create collation index
-        col.createIndexes(
-          [
+        return col
+          .createIndexes([
             {
               key: { a: 1 },
               collation: { locale: 'nn' },
               name: 'collation_test'
             }
-          ],
-          function(err) {
-            test.equal(null, err);
-
-            col.listIndexes().toArray(function(err, r) {
-              var indexes = r.filter(function(i) {
-                return i.name === 'collation_test';
-              });
-
-              test.equal(1, indexes.length);
-              test.ok(indexes[0].collation);
-
-              client.close();
-              done();
-            });
-          }
-        );
+          ])
+          .then(() => col.listIndexes().toArray())
+          .then(r => {
+            const indexes = r.filter(i => i.name === 'collation_test');
+            expect(indexes).to.have.length(1);
+            expect(indexes[0]).to.have.property('collation');
+            expect(indexes[0].collation).to.exist;
+            return client.close();
+          });
       });
     }
   });
@@ -1183,29 +827,22 @@ describe('Collation', function() {
   it('Should correctly create collection with collation', {
     metadata: { requires: { topology: 'single', mongodb: '>=3.3.12' } },
 
-    test: function(done) {
-      var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient;
+    test: function() {
+      const configuration = this.configuration;
+      const client = configuration.newClient();
 
-      // Connect to the mocks
-      MongoClient.connect(configuration.url(), function(err, client) {
-        test.equal(null, err);
-        var db = client.db(configuration.db);
+      return client.connect().then(() => {
+        const db = client.db(configuration.db);
 
-        // Simple findAndModify command returning the new document
-        db.createCollection('collation_test2', { collation: { locale: 'nn' } }, function(err) {
-          test.equal(null, err);
-
-          db.listCollections({ name: 'collation_test2' }).toArray(function(err, collections) {
-            test.equal(null, err);
-            test.equal(1, collections.length);
-            test.equal('collation_test2', collections[0].name);
-            test.ok(collections[0].options.collation);
-
-            client.close();
-            done();
+        return db
+          .createCollection('collation_test2', { collation: { locale: 'nn' } })
+          .then(() => db.listCollections({ name: 'collation_test2' }).toArray())
+          .then(collections => {
+            expect(collections).to.have.length(1);
+            expect(collections[0].name).to.equal('collation_test2');
+            expect(collections[0].options.collation).to.exist;
+            return client.close();
           });
-        });
       });
     }
   });

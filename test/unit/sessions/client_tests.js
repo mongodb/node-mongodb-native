@@ -1,6 +1,5 @@
 'use strict';
 
-const MongoClient = require('../../..').MongoClient;
 const expect = require('chai').expect;
 const mock = require('mongodb-mock-server');
 
@@ -26,14 +25,14 @@ describe('Sessions', function() {
           }
         });
 
-        MongoClient.connect(`mongodb://${test.server.uri()}/test`, function(err, client) {
+        const client = this.configuration.newClient(`mongodb://${test.server.uri()}/test`);
+        client.connect(function(err, client) {
           expect(err).to.not.exist;
           expect(() => {
             client.startSession();
           }).to.throw(/Current topology does not support sessions/);
 
-          client.close();
-          done();
+          client.close(done);
         });
       }
     });
@@ -55,14 +54,14 @@ describe('Sessions', function() {
           }
         });
 
-        MongoClient.connect(`mongodb://${test.server.uri()}/test`, function(err, client) {
+        const client = this.configuration.newClient(`mongodb://${test.server.uri()}/test`);
+        client.connect(function(err, client) {
           expect(err).to.not.exist;
           let session = client.startSession();
           expect(session).to.exist;
 
           session.endSession({ skipCommand: true });
-          client.close();
-          done();
+          client.close(done);
         });
       }
     });

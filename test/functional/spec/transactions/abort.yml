@@ -1,3 +1,4 @@
+topology: [replicaset, sharded]
 database_name: &database_name "transaction-tests"
 collection_name: &collection_name "test"
 
@@ -297,7 +298,9 @@ tests:
           document:
             _id: 1
         result:
-          errorCodeName: DuplicateKey
+          # Don't assert on errorCodeName because (after SERVER-38583) the
+          # DuplicateKey is reported in writeErrors, not as a top-level
+          # command error.
           errorLabelsOmit: ["TransientTransactionError", "UnknownTransactionCommitResult"]
       # Make sure the server aborted the transaction.
       - name: insertOne

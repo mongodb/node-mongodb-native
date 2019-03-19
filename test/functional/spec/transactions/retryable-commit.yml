@@ -1,3 +1,4 @@
+topology: [replicaset, sharded]
 database_name: &database_name "transaction-tests"
 collection_name: &collection_name "test"
 
@@ -72,7 +73,8 @@ tests:
               $numberLong: "1"
             startTransaction:
             autocommit: false
-            writeConcern:
+            # commitTransaction applies w:majority on retries
+            writeConcern: { w: majority, wtimeout: 10000 }
           command_name: commitTransaction
           database_name: admin
       - command_started_event:
@@ -83,7 +85,99 @@ tests:
               $numberLong: "1"
             startTransaction:
             autocommit: false
+            writeConcern: { w: majority, wtimeout: 10000 }
+          command_name: commitTransaction
+          database_name: admin
+
+    outcome:
+      collection:
+        data:
+          - _id: 1
+
+  - description: commitTransaction applies majority write concern on retries
+
+    clientOptions:
+      retryWrites: false
+
+    failPoint:
+      configureFailPoint: failCommand
+      mode: { times: 2 }
+      data:
+          failCommands: ["commitTransaction"]
+          closeConnection: true
+
+    operations:
+      - name: startTransaction
+        object: session0
+        arguments:
+          options:
+            writeConcern: { w: 2, j: true, wtimeout: 5000 }
+      - name: insertOne
+        object: collection
+        arguments:
+          session: session0
+          document:
+            _id: 1
+        result:
+          insertedId: 1
+      # First call to commit fails after a single retry attempt.
+      - name: commitTransaction
+        object: session0
+        result:
+          errorLabelsContain: ["UnknownTransactionCommitResult"]
+          errorLabelsOmit: ["TransientTransactionError"]
+      # Second call to commit succeeds because the failpoint was disabled.
+      - name: commitTransaction
+        object: session0
+
+    expectations:
+      - command_started_event:
+          command:
+            insert: *collection_name
+            documents:
+              - _id: 1
+            ordered: true
+            readConcern:
+            lsid: session0
+            txnNumber:
+              $numberLong: "1"
+            startTransaction: true
+            autocommit: false
             writeConcern:
+          command_name: insert
+          database_name: *database_name
+      - command_started_event:
+          command:
+            commitTransaction: 1
+            lsid: session0
+            txnNumber:
+              $numberLong: "1"
+            startTransaction:
+            autocommit: false
+            writeConcern: { w: 2, j: true, wtimeout: 5000 }
+          command_name: commitTransaction
+          database_name: admin
+      - command_started_event:
+          command:
+            commitTransaction: 1
+            lsid: session0
+            txnNumber:
+              $numberLong: "1"
+            startTransaction:
+            autocommit: false
+            # commitTransaction applies w:majority on retries
+            writeConcern:  { w: majority, j: true, wtimeout: 5000 }
+          command_name: commitTransaction
+          database_name: admin
+      - command_started_event:
+          command:
+            commitTransaction: 1
+            lsid: session0
+            txnNumber:
+              $numberLong: "1"
+            startTransaction:
+            autocommit: false
+            writeConcern: { w: majority, j: true, wtimeout: 5000 }
           command_name: commitTransaction
           database_name: admin
 
@@ -274,7 +368,8 @@ tests:
               $numberLong: "1"
             startTransaction:
             autocommit: false
-            writeConcern:
+            # commitTransaction applies w:majority on retries
+            writeConcern: { w: majority, wtimeout: 10000 }
           command_name: commitTransaction
           database_name: admin
 
@@ -342,7 +437,8 @@ tests:
               $numberLong: "1"
             startTransaction:
             autocommit: false
-            writeConcern:
+            # commitTransaction applies w:majority on retries
+            writeConcern: { w: majority, wtimeout: 10000 }
           command_name: commitTransaction
           database_name: admin
 
@@ -410,7 +506,8 @@ tests:
               $numberLong: "1"
             startTransaction:
             autocommit: false
-            writeConcern:
+            # commitTransaction applies w:majority on retries
+            writeConcern: { w: majority, wtimeout: 10000 }
           command_name: commitTransaction
           database_name: admin
 
@@ -478,7 +575,8 @@ tests:
               $numberLong: "1"
             startTransaction:
             autocommit: false
-            writeConcern:
+            # commitTransaction applies w:majority on retries
+            writeConcern: { w: majority, wtimeout: 10000 }
           command_name: commitTransaction
           database_name: admin
 
@@ -487,7 +585,7 @@ tests:
         data:
           - _id: 1
 
-  - description: commitTransaction succeeds after InterruptedDueToReplStateChange
+  - description: commitTransaction succeeds after InterruptedDueToStepDown 
 
     failPoint:
       configureFailPoint: failCommand
@@ -546,7 +644,8 @@ tests:
               $numberLong: "1"
             startTransaction:
             autocommit: false
-            writeConcern:
+            # commitTransaction applies w:majority on retries
+            writeConcern: { w: majority, wtimeout: 10000 }
           command_name: commitTransaction
           database_name: admin
 
@@ -614,7 +713,8 @@ tests:
               $numberLong: "1"
             startTransaction:
             autocommit: false
-            writeConcern:
+            # commitTransaction applies w:majority on retries
+            writeConcern: { w: majority, wtimeout: 10000 }
           command_name: commitTransaction
           database_name: admin
 
@@ -682,7 +782,8 @@ tests:
               $numberLong: "1"
             startTransaction:
             autocommit: false
-            writeConcern:
+            # commitTransaction applies w:majority on retries
+            writeConcern: { w: majority, wtimeout: 10000 }
           command_name: commitTransaction
           database_name: admin
 
@@ -750,7 +851,8 @@ tests:
               $numberLong: "1"
             startTransaction:
             autocommit: false
-            writeConcern:
+            # commitTransaction applies w:majority on retries
+            writeConcern: { w: majority, wtimeout: 10000 }
           command_name: commitTransaction
           database_name: admin
 
@@ -818,7 +920,8 @@ tests:
               $numberLong: "1"
             startTransaction:
             autocommit: false
-            writeConcern:
+            # commitTransaction applies w:majority on retries
+            writeConcern: { w: majority, wtimeout: 10000 }
           command_name: commitTransaction
           database_name: admin
 
@@ -886,7 +989,8 @@ tests:
               $numberLong: "1"
             startTransaction:
             autocommit: false
-            writeConcern:
+            # commitTransaction applies w:majority on retries
+            writeConcern: { w: majority, wtimeout: 10000 }
           command_name: commitTransaction
           database_name: admin
 
@@ -954,7 +1058,8 @@ tests:
               $numberLong: "1"
             startTransaction:
             autocommit: false
-            writeConcern:
+            # commitTransaction applies w:majority on retries
+            writeConcern: { w: majority, wtimeout: 10000 }
           command_name: commitTransaction
           database_name: admin
 
@@ -1022,7 +1127,8 @@ tests:
               $numberLong: "1"
             startTransaction:
             autocommit: false
-            writeConcern:
+            # commitTransaction applies w:majority on retries
+            writeConcern: { w: majority, wtimeout: 10000 }
           command_name: commitTransaction
           database_name: admin
 
@@ -1096,8 +1202,8 @@ tests:
               $numberLong: "1"
             startTransaction:
             autocommit: false
-            writeConcern:
-              w: majority
+            # commitTransaction applies w:majority on retries
+            writeConcern: { w: majority, wtimeout: 10000 }
           command_name: commitTransaction
           database_name: admin
 
@@ -1106,7 +1212,7 @@ tests:
         data:
           - _id: 1
 
-  - description: commitTransaction succeeds after WriteConcernError InterruptedDueToReplStateChange
+  - description: commitTransaction succeeds after WriteConcernError InterruptedDueToStepDown 
 
     failPoint:
       configureFailPoint: failCommand
@@ -1171,8 +1277,8 @@ tests:
               $numberLong: "1"
             startTransaction:
             autocommit: false
-            writeConcern:
-              w: majority
+            # commitTransaction applies w:majority on retries
+            writeConcern: { w: majority, wtimeout: 10000 }
           command_name: commitTransaction
           database_name: admin
 
@@ -1246,8 +1352,8 @@ tests:
               $numberLong: "1"
             startTransaction:
             autocommit: false
-            writeConcern:
-              w: majority
+            # commitTransaction applies w:majority on retries
+            writeConcern: { w: majority, wtimeout: 10000 }
           command_name: commitTransaction
           database_name: admin
 
@@ -1321,8 +1427,8 @@ tests:
               $numberLong: "1"
             startTransaction:
             autocommit: false
-            writeConcern:
-              w: majority
+            # commitTransaction applies w:majority on retries
+            writeConcern: { w: majority, wtimeout: 10000 }
           command_name: commitTransaction
           database_name: admin
 

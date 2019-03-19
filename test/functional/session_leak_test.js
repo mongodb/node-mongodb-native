@@ -8,9 +8,16 @@ const ServerSessionPool = core.Sessions.ServerSessionPool;
 
 const sandbox = sinon.createSandbox();
 let activeSessions, pooledSessions, activeSessionsBeforeClose;
-const sessionId = session => JSON.parse(JSON.stringify(session.id));
 function getSessionLeakMetadata(currentTest) {
   return (currentTest.metadata && currentTest.metadata.sessions) || {};
+}
+
+function dumpSessionInfo(which, sessions) {
+  console.log(which);
+  sessions.forEach(session => {
+    console.log(` >> ${JSON.stringify(session.id)}`);
+    console.log(session.trace);
+  });
 }
 
 beforeEach('Session Leak Before Each - Set up clean test environment', () => {
@@ -28,14 +35,15 @@ beforeEach('Session Leak Before Each - setup session tracking', function() {
   const _acquire = ServerSessionPool.prototype.acquire;
   sandbox.stub(ServerSessionPool.prototype, 'acquire').callsFake(function() {
     const session = _acquire.apply(this, arguments);
-    activeSessions.add(sessionId(session.id));
+    session.trace = new Error().stack;
+    activeSessions.add(session);
     return session;
   });
 
   const _release = ServerSessionPool.prototype.release;
   sandbox.stub(ServerSessionPool.prototype, 'release').callsFake(function(session) {
-    activeSessions.delete(sessionId(session.id));
-    pooledSessions.add(sessionId(session.id));
+    activeSessions.delete(session);
+    pooledSessions.add(session);
 
     return _release.apply(this, arguments);
   });
@@ -50,7 +58,7 @@ beforeEach('Session Leak Before Each - setup session tracking', function() {
     const _endSessions = topology.prototype.endSessions;
     sandbox.stub(topology.prototype, 'endSessions').callsFake(function(sessions) {
       sessions = Array.isArray(sessions) ? sessions : [sessions];
-      sessions.forEach(session => pooledSessions.delete(sessionId(session)));
+      sessions.forEach(session => pooledSessions.delete(session));
       return _endSessions.apply(this, arguments);
     });
   });
@@ -71,21 +79,36 @@ afterEach('Session Leak After Each - ensure no leaks', function() {
   }
 
   try {
+    if (activeSessionsBeforeClose.size) {
+      dumpSessionInfo('active sessions before `close`', activeSessionsBeforeClose);
+    }
+
     expect(
       activeSessionsBeforeClose.size,
       `test is leaking ${activeSessionsBeforeClose.size} active sessions while running client`
     ).to.equal(0);
+
+    if (activeSessions.size) {
+      dumpSessionInfo('active sessions', activeSessions);
+    }
 
     expect(
       activeSessions.size,
       `client close failed to clean up ${activeSessions.size} active sessions`
     ).to.equal(0);
 
+    if (pooledSessions.size) {
+      dumpSessionInfo('pooled sessions', pooledSessions);
+    }
+
     expect(
       pooledSessions.size,
       `client close failed to clean up ${pooledSessions.size} pooled sessions`
     ).to.equal(0);
   } catch (e) {
+    activeSessions.clear();
+    pooledSessions.clear();
+    activeSessionsBeforeClose.clear();
     this.test.error(e);
   }
 });

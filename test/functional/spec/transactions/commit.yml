@@ -1,3 +1,4 @@
+topology: [replicaset, sharded]
 database_name: &database_name "transaction-tests"
 collection_name: &collection_name "test"
 
@@ -204,7 +205,8 @@ tests:
               $numberLong: "1"
             startTransaction:
             autocommit: false
-            writeConcern:
+            # commitTransaction applies w:majority on retries
+            writeConcern: { w: majority, wtimeout: 10000 }
           command_name: commitTransaction
           database_name: admin
       - command_started_event:
@@ -215,7 +217,7 @@ tests:
               $numberLong: "1"
             startTransaction:
             autocommit: false
-            writeConcern:
+            writeConcern: { w: majority, wtimeout: 10000 }
           command_name: commitTransaction
           database_name: admin
 
@@ -225,7 +227,6 @@ tests:
           - _id: 1
 
   - description: write concern error on commit
-
     operations:
       - name: startTransaction
         object: session0

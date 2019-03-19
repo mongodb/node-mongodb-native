@@ -1,7 +1,6 @@
 'use strict';
 
 const setupDatabase = require('../functional/shared').setupDatabase;
-const MongoClient = require('../../lib/mongo_client');
 
 describe('examples(transactions):', function() {
   let client;
@@ -19,7 +18,7 @@ describe('examples(transactions):', function() {
   });
 
   beforeEach(async function() {
-    client = await MongoClient.connect(this.configuration.url());
+    client = await this.configuration.newClient().connect();
     await client.db('hr').dropDatabase();
     await client.db('hr').createCollection('employees');
     await client.db('reporting').dropDatabase();
@@ -42,7 +41,7 @@ describe('examples(transactions):', function() {
           console.log('Transaction aborted. Caught exception during transaction.');
 
           // If transient error, retry the whole transaction
-          if (error.errorLabels && error.errorLabels.indexOf('TransientTransactionError') < 0) {
+          if (error.errorLabels && error.errorLabels.indexOf('TransientTransactionError') >= 0) {
             console.log('TransientTransactionError, retrying transaction ...');
             await runTransactionWithRetry(txnFunc, client, session);
           } else {
@@ -55,7 +54,8 @@ describe('examples(transactions):', function() {
       async function updateEmployeeInfo(client, session) {
         session.startTransaction({
           readConcern: { level: 'snapshot' },
-          writeConcern: { w: 'majority' }
+          writeConcern: { w: 'majority' },
+          readPreference: 'primary'
         });
 
         const employeesCollection = client.db('hr').collection('employees');
@@ -99,7 +99,7 @@ describe('examples(transactions):', function() {
         } catch (error) {
           if (
             error.errorLabels &&
-            error.errorLabels.indexOf('UnknownTransactionCommitResult') < 0
+            error.errorLabels.indexOf('UnknownTransactionCommitResult') >= 0
           ) {
             console.log('UnknownTransactionCommitResult, retrying commit operation ...');
             await commitWithRetry(session);
@@ -114,7 +114,8 @@ describe('examples(transactions):', function() {
       async function updateEmployeeInfo(client, session) {
         session.startTransaction({
           readConcern: { level: 'snapshot' },
-          writeConcern: { w: 'majority' }
+          writeConcern: { w: 'majority' },
+          readPreference: 'primary'
         });
 
         const employeesCollection = client.db('hr').collection('employees');
@@ -156,7 +157,7 @@ describe('examples(transactions):', function() {
         } catch (error) {
           if (
             error.errorLabels &&
-            error.errorLabels.indexOf('UnknownTransactionCommitResult') < 0
+            error.errorLabels.indexOf('UnknownTransactionCommitResult') >= 0
           ) {
             console.log('UnknownTransactionCommitResult, retrying commit operation ...');
             await commitWithRetry(session);
@@ -174,7 +175,7 @@ describe('examples(transactions):', function() {
           console.log('Transaction aborted. Caught exception during transaction.');
 
           // If transient error, retry the whole transaction
-          if (error.errorLabels && error.errorLabels.indexOf('TransientTransactionError') < 0) {
+          if (error.errorLabels && error.errorLabels.indexOf('TransientTransactionError') >= 0) {
             console.log('TransientTransactionError, retrying transaction ...');
             await runTransactionWithRetry(txnFunc, client, session);
           } else {
@@ -186,7 +187,8 @@ describe('examples(transactions):', function() {
       async function updateEmployeeInfo(client, session) {
         session.startTransaction({
           readConcern: { level: 'snapshot' },
-          writeConcern: { w: 'majority' }
+          writeConcern: { w: 'majority' },
+          readPreference: 'primary'
         });
 
         const employeesCollection = client.db('hr').collection('employees');

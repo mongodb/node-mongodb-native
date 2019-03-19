@@ -9,6 +9,45 @@ describe('Authentication', function() {
     return setupDatabase(this.configuration);
   });
 
+  it('should still work for auth when using new url parser and no database is in url', {
+    metadata: { requires: { topology: ['single'] } },
+    test: function(done) {
+      const configuration = this.configuration;
+      const username = 'testUser';
+      const password = 'pencil';
+      const AUTH_URL = configuration.url(username, password).replace(configuration.db, '');
+
+      const noop = () => undefined;
+      const returnNothing = fn => fn().then(noop);
+      const tap = fn => e => returnNothing(fn).then(() => e, () => e);
+
+      const controllerClient = configuration.newClient();
+
+      controllerClient
+        .connect()
+        .then(() => {
+          const controllerClientCleanup = tap(() => controllerClient.close());
+          const admin = controllerClient.db('admin');
+          return admin
+            .addUser(username, password)
+            .then(() => {
+              const client = configuration.newClient(AUTH_URL, { useNewUrlParser: true });
+
+              const removeUser = tap(() => admin.removeUser(username));
+              const clientCleanup = tap(() => client.close());
+
+              return client
+                .connect()
+                .then(() => undefined)
+                .then(clientCleanup, clientCleanup)
+                .then(removeUser, removeUser);
+            })
+            .then(controllerClientCleanup, controllerClientCleanup);
+        })
+        .then(done, done);
+    }
+  });
+
   /**
    * Fail due to illegal authentication mechanism
    *
@@ -109,9 +148,8 @@ describe('Authentication', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
 
+      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection(
@@ -123,7 +161,11 @@ describe('Authentication', function() {
           adminDb.addUser('admin', 'admin', configuration.writeConcernMax(), function(err) {
             test.equal(null, err);
 
-            MongoClient.connect('mongodb://admin:admin@localhost:27017/admin', function(err) {
+            const validationClient = configuration.newClient(
+              'mongodb://admin:admin@localhost:27017/admin'
+            );
+
+            validationClient.connect(function(err) {
               test.equal(null, err);
 
               adminDb.validateCollection(
@@ -156,7 +198,6 @@ describe('Authentication', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
       var client = configuration.newClient({ w: 1 }, { poolSize: 1 });
 
       // DOC_LINE var client = new MongoClient(new Server('localhost', 27017));
@@ -180,7 +221,7 @@ describe('Authentication', function() {
             test.ok(result != null);
             client.close();
 
-            client = new MongoClient('mongodb://admin15:admin15@localhost:27017/admin');
+            client = configuration.newClient('mongodb://admin15:admin15@localhost:27017/admin');
             client.once('authenticated', function() {
               done();
             });

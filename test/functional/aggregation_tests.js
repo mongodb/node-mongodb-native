@@ -25,7 +25,7 @@ describe('Aggregation', function() {
         databaseName = this.configuration.db;
 
       // LINE var MongoClient = require('mongodb').MongoClient;
-      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+      // LINE const client = new MongoClient('mongodb://localhost:27017/test');
       // REPLACE this.configuration.writeConcernMax() WITH {w:1}
       // REMOVE-LINE test.
       // BEGIN
@@ -71,7 +71,8 @@ describe('Aggregation', function() {
                   _id: { tags: '$tags' },
                   authors: { $addToSet: '$author' }
                 }
-              }
+              },
+              { $sort: { _id: -1 } }
             ],
             function(err, cursor) {
               expect(err).to.be.null;
@@ -91,6 +92,43 @@ describe('Aggregation', function() {
         });
       });
       // END
+    }
+  });
+
+  it('should correctly execute db.aggregate() with $currentOp', {
+    metadata: {
+      requires: {
+        mongodb: '>=4.0.0',
+        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
+      }
+    },
+
+    test: function(done) {
+      const client = this.configuration.newClient({ w: 1 }, { poolSize: 1 });
+
+      client.connect(function(err, client) {
+        expect(err).to.not.exist;
+
+        const db = client.db('admin');
+        db.aggregate([{ $currentOp: { localOps: true } }], (err, cursor) => {
+          expect(err).to.not.exist;
+
+          cursor.toArray((err, result) => {
+            expect(err).to.not.exist;
+
+            const aggregateOperation = result.filter(op => op.command && op.command.aggregate)[0];
+            expect(aggregateOperation.command.aggregate).to.equal(1);
+            expect(aggregateOperation.command.pipeline).to.eql([
+              { $currentOp: { localOps: true } }
+            ]);
+            expect(aggregateOperation.command.cursor).to.deep.equal({});
+            expect(aggregateOperation.command['$db']).to.equal('admin');
+
+            client.close();
+            done();
+          });
+        });
+      });
     }
   });
 
@@ -117,7 +155,7 @@ describe('Aggregation', function() {
         databaseName = this.configuration.db;
 
       // LINE var MongoClient = require('mongodb').MongoClient;
-      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+      // LINE const client = new MongoClient('mongodb://localhost:27017/test');
       // REPLACE this.configuration.writeConcernMax() WITH {w:1}
       // REMOVE-LINE test.
       // BEGIN
@@ -153,19 +191,22 @@ describe('Aggregation', function() {
           // Execute aggregate, notice the pipeline is expressed as function call parameters
           // instead of an Array.
           collection.aggregate(
-            {
-              $project: {
-                author: 1,
-                tags: 1
-              }
-            },
-            { $unwind: '$tags' },
-            {
-              $group: {
-                _id: { tags: '$tags' },
-                authors: { $addToSet: '$author' }
-              }
-            },
+            [
+              {
+                $project: {
+                  author: 1,
+                  tags: 1
+                }
+              },
+              { $unwind: '$tags' },
+              {
+                $group: {
+                  _id: { tags: '$tags' },
+                  authors: { $addToSet: '$author' }
+                }
+              },
+              { $sort: { _id: -1 } }
+            ],
             function(err, cursor) {
               expect(err).to.be.null;
 
@@ -210,7 +251,7 @@ describe('Aggregation', function() {
         databaseName = this.configuration.db;
 
       // LINE var MongoClient = require('mongodb').MongoClient;
-      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+      // LINE const client = new MongoClient('mongodb://localhost:27017/test');
       // REPLACE this.configuration.writeConcernMax() WITH {w:1}
       // REMOVE-LINE test.
       // BEGIN
@@ -246,19 +287,22 @@ describe('Aggregation', function() {
           // Execute aggregate, notice the pipeline is expressed as function call parameters
           // instead of an Array.
           collection.aggregate(
-            {
-              $project: {
-                author: 1,
-                tags: 1
-              }
-            },
-            { $unwind: '$tags' },
-            {
-              $group: {
-                _id: { tags: '$tags' },
-                authors: { $addToSet: '$author' }
-              }
-            },
+            [
+              {
+                $project: {
+                  author: 1,
+                  tags: 1
+                }
+              },
+              { $unwind: '$tags' },
+              {
+                $group: {
+                  _id: { tags: '$tags' },
+                  authors: { $addToSet: '$author' }
+                }
+              },
+              { $sort: { _id: -1 } }
+            ],
             function(err, cursor) {
               expect(err).to.be.null;
 
@@ -303,7 +347,7 @@ describe('Aggregation', function() {
         databaseName = this.configuration.db;
 
       // LINE var MongoClient = require('mongodb').MongoClient;
-      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+      // LINE const client = new MongoClient('mongodb://localhost:27017/test');
       // REPLACE this.configuration.writeConcernMax() WITH {w:1}
       // REMOVE-LINE test.
       // BEGIN
@@ -388,7 +432,7 @@ describe('Aggregation', function() {
         databaseName = this.configuration.db;
 
       // LINE var MongoClient = require('mongodb').MongoClient;
-      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+      // LINE const client = new MongoClient('mongodb://localhost:27017/test');
       // REPLACE this.configuration.writeConcernMax() WITH {w:1}
       // REMOVE-LINE test.
       // BEGIN
@@ -478,7 +522,7 @@ describe('Aggregation', function() {
         databaseName = this.configuration.db;
 
       // LINE var MongoClient = require('mongodb').MongoClient;
-      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+      // LINE const client = new MongoClient('mongodb://localhost:27017/test');
       // REPLACE this.configuration.writeConcernMax() WITH {w:1}
       // REMOVE-LINE test.
       // BEGIN
@@ -524,7 +568,8 @@ describe('Aggregation', function() {
                   _id: { tags: '$tags' },
                   authors: { $addToSet: '$author' }
                 }
-              }
+              },
+              { $sort: { _id: -1 } }
             ],
             {
               cursor: { batchSize: 1 }
@@ -572,7 +617,7 @@ describe('Aggregation', function() {
         databaseName = this.configuration.db;
 
       // LINE var MongoClient = require('mongodb').MongoClient;
-      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+      // LINE const client = new MongoClient('mongodb://localhost:27017/test');
       // REPLACE this.configuration.writeConcernMax() WITH {w:1}
       // REMOVE-LINE test.
       // BEGIN
@@ -664,7 +709,7 @@ describe('Aggregation', function() {
         databaseName = this.configuration.db;
 
       // LINE var MongoClient = require('mongodb').MongoClient;
-      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+      // LINE const client = new MongoClient('mongodb://localhost:27017/test');
       // REPLACE this.configuration.writeConcernMax() WITH {w:1}
       // REMOVE-LINE test.
       // BEGIN
@@ -710,7 +755,8 @@ describe('Aggregation', function() {
                   _id: { tags: '$tags' },
                   authors: { $addToSet: '$author' }
                 }
-              }
+              },
+              { $sort: { _id: -1 } }
             ],
             {
               allowDiskUse: true
@@ -1068,7 +1114,8 @@ describe('Aggregation', function() {
                     _id: { tags: '$tags' },
                     authors: { $addToSet: '$author' }
                   }
-                }
+                },
+                { $sort: { _id: -1 } }
               ],
               {
                 cursor: { batchSize: 1 },
@@ -1305,6 +1352,73 @@ describe('Aggregation', function() {
         });
       });
       // DOC_END
+    }
+  });
+
+  it('should not send a batchSize for aggregations with an out stage', {
+    metadata: { requires: { topology: ['single', 'replicaset'] } },
+    test: function(done) {
+      const databaseName = this.configuration.db;
+      const client = this.configuration.newClient(this.configuration.writeConcernMax(), {
+        poolSize: 1,
+        monitorCommands: true
+      });
+
+      let err;
+      let coll1;
+      let coll2;
+      const events = [];
+
+      client.on('commandStarted', e => {
+        if (e.commandName === 'aggregate') {
+          events.push(e);
+        }
+      });
+
+      client
+        .connect()
+        .then(() => {
+          coll1 = client.db(databaseName).collection('coll1');
+          coll2 = client.db(databaseName).collection('coll2');
+
+          return Promise.all([coll1.remove({}), coll2.remove({})]);
+        })
+        .then(() => {
+          const docs = Array.from({ length: 10 }).map(() => ({ a: 1 }));
+
+          return coll1.insertMany(docs);
+        })
+        .then(() => {
+          return Promise.all(
+            [
+              coll1.aggregate([{ $out: 'coll2' }]),
+              coll1.aggregate([{ $out: 'coll2' }], { batchSize: 0 }),
+              coll1.aggregate([{ $out: 'coll2' }], { batchSize: 1 }),
+              coll1.aggregate([{ $out: 'coll2' }], { batchSize: 30 }),
+              coll1.aggregate([{ $match: { a: 1 } }, { $out: 'coll2' }]),
+              coll1.aggregate([{ $match: { a: 1 } }, { $out: 'coll2' }], { batchSize: 0 }),
+              coll1.aggregate([{ $match: { a: 1 } }, { $out: 'coll2' }], { batchSize: 1 }),
+              coll1.aggregate([{ $match: { a: 1 } }, { $out: 'coll2' }], { batchSize: 30 })
+            ].map(cursor => cursor.toArray())
+          );
+        })
+        .then(() => {
+          expect(events)
+            .to.be.an('array')
+            .with.a.lengthOf(8);
+          events.forEach(event => {
+            expect(event).to.have.property('commandName', 'aggregate');
+            expect(event)
+              .to.have.property('command')
+              .that.has.property('cursor')
+              .that.does.not.have.property('batchSize');
+          });
+        })
+        .catch(_err => {
+          err = _err;
+        })
+        .then(() => client.close())
+        .then(() => done(err));
     }
   });
 });

@@ -16,12 +16,18 @@ describe('MongoClient Options', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var connect = configuration.require;
+      const configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // skipped for direct legacy variable inspection
+        return this.skip();
+      }
 
-      connect(
-        configuration.url(),
-        { autoReconnect: true, poolSize: 4 },
+      const client = configuration.newClient(configuration.url(), {
+        autoReconnect: true,
+        poolSize: 4
+      });
+
+      client.connect(
         connectionTester(configuration, 'testConnectServerOptions', function(client) {
           test.ok(client.topology.poolSize >= 1);
           test.equal(4, client.topology.s.coreTopology.s.pool.size);
@@ -41,12 +47,18 @@ describe('MongoClient Options', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var connect = configuration.require;
+      const configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // skipped for direct legacy variable inspection
+        return this.skip();
+      }
 
-      connect(
-        configuration.url(),
-        { autoReconnect: true, poolSize: 4 },
+      const client = configuration.newClient(configuration.url(), {
+        autoReconnect: true,
+        poolSize: 4
+      });
+
+      client.connect(
         connectionTester(configuration, 'testConnectServerOptions', function(client) {
           test.ok(client.topology.poolSize >= 1);
           test.equal(4, client.topology.s.coreTopology.s.pool.size);

@@ -1568,7 +1568,6 @@ describe('GridFS', function() {
                     test.equal('llo world!', chunk.toString());
                   });
 
-                  stream.on('readable', function() {});
                   stream.on('end', function() {
                     client.close();
                     done();
@@ -3671,12 +3670,12 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient,
-        GridStore = configuration.require.GridStore,
+      var GridStore = configuration.require.GridStore,
         fs = require('fs');
 
       // Use connect method to connect to the Server
-      MongoClient.connect(configuration.url(), { sslValidate: false }, function(err, client) {
+      const client = configuration.newClient({}, { sslValidate: false });
+      client.connect(function(err, client) {
         expect(err).to.not.exist;
         var db = client.db(configuration.db);
 
@@ -3716,11 +3715,11 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient,
-        GridStore = configuration.require.GridStore;
+      var GridStore = configuration.require.GridStore;
 
       // Use connect method to connect to the Server
-      MongoClient.connect(configuration.url(), { sslValidate: false }, function(err, client) {
+      const client = configuration.newClient({}, { sslValidate: false });
+      client.connect(function(err, client) {
         expect(err).to.not.exist;
         var db = client.db(configuration.db);
 
@@ -3786,12 +3785,12 @@ describe('GridFS', function() {
       // The actual test we wish to run
       test: function(done) {
         var configuration = this.configuration;
-        var MongoClient = configuration.require.MongoClient,
-          GridStore = configuration.require.GridStore,
+        var GridStore = configuration.require.GridStore,
           ObjectID = configuration.require.ObjectID;
 
         var id = new ObjectID();
-        MongoClient.connect(configuration.url(), { sslValidate: false }, function(err, client) {
+        const client = configuration.newClient({}, { sslValidate: false });
+        client.connect(function(err, client) {
           expect(err).to.not.exist;
           var db = client.db(configuration.db);
 
@@ -3869,15 +3868,15 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient,
-        GridStore = configuration.require.GridStore,
+      var GridStore = configuration.require.GridStore,
         ObjectID = configuration.require.ObjectID;
 
       // Create a test buffer
       var buffer = Buffer.alloc(200033);
 
       // Use connect method to connect to the Server
-      MongoClient.connect(configuration.url(), { sslValidate: false }, function(err, client) {
+      const client = configuration.newClient({}, { sslValidate: false });
+      client.connect(function(err, client) {
         expect(err).to.not.exist;
         var db = client.db(configuration.db);
 

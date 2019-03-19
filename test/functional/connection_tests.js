@@ -41,7 +41,12 @@ describe('Connection', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
+      const configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // skipped for direct legacy variable inspection
+        return this.skip();
+      }
+
       var client = configuration.newClient(
         { w: 1 },
         { poolSize: 1, host: '/tmp/mongodb-27017.sock', monitoring: false }
@@ -128,14 +133,12 @@ describe('Connection', function() {
       var configuration = this.configuration;
       var client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: true });
 
-      client.on('open', function(client) {
+      client.connect().then(() => {
         test.equal('js', client.topology.parserType);
 
         client.close();
         done();
       });
-
-      client.connect();
     }
   });
 
@@ -255,11 +258,10 @@ describe('Connection', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var connect = configuration.require;
+      const configuration = this.configuration;
+      const client = configuration.newClient();
 
-      connect(
-        configuration.url(),
+      client.connect(
         connectionTester(configuration, 'testConnectNoOptions', function(client) {
           client.close();
           done();
@@ -276,12 +278,18 @@ describe('Connection', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var connect = configuration.require;
+      const configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // skipped for direct legacy variable inspection
+        return this.skip();
+      }
 
-      connect(
-        configuration.url(),
-        { auto_reconnect: true, poolSize: 4 },
+      const client = configuration.newClient(configuration.url(), {
+        auto_reconnect: true,
+        poolSize: 4
+      });
+
+      client.connect(
         connectionTester(configuration, 'testConnectServerOptions', function(client) {
           test.ok(client.topology.poolSize >= 1);
           test.equal(4, client.topology.s.coreTopology.s.pool.size);
@@ -301,16 +309,19 @@ describe('Connection', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var connect = configuration.require;
+      const configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // skipped for direct legacy variable inspection
+        return this.skip();
+      }
 
-      connect(
-        configuration.url(),
-        {
-          auto_reconnect: true,
-          poolSize: 4,
-          native_parser: process.env['TEST_NATIVE'] != null
-        },
+      const client = configuration.newClient(configuration.url(), {
+        auto_reconnect: true,
+        poolSize: 4,
+        native_parser: process.env['TEST_NATIVE'] != null
+      });
+
+      client.connect(
         connectionTester(configuration, 'testConnectAllOptions', function(client) {
           test.ok(client.topology.poolSize >= 1);
           test.equal(4, client.topology.s.coreTopology.s.pool.size);
@@ -331,12 +342,13 @@ describe('Connection', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var connect = configuration.require;
       var user = 'testConnectGoodAuth',
         password = 'password';
 
+      const setupClient = configuration.newClient();
+
       // First add a user.
-      connect(configuration.url(), function(err, client) {
+      setupClient.connect(function(err, client) {
         test.equal(err, null);
         var db = client.db(configuration.db);
 
@@ -348,8 +360,8 @@ describe('Connection', function() {
       });
 
       function restOfTest() {
-        connect(
-          configuration.url(user, password),
+        const testClient = configuration.newClient(configuration.url(user, password));
+        testClient.connect(
           connectionTester(configuration, 'testConnectGoodAuth', function(client) {
             client.close();
             done();
@@ -368,12 +380,12 @@ describe('Connection', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var connect = configuration.require;
       var user = 'testConnectGoodAuthAsOption',
         password = 'password';
 
       // First add a user.
-      connect(configuration.url(), function(err, client) {
+      const setupClient = configuration.newClient();
+      setupClient.connect(function(err, client) {
         test.equal(err, null);
         var db = client.db(configuration.db);
 
@@ -386,9 +398,13 @@ describe('Connection', function() {
 
       function restOfTest() {
         var opts = { auth: { user: user, password: password } };
-        connect(
+
+        const testClient = configuration.newClient(
           configuration.url('baduser', 'badpassword'),
-          opts,
+          opts
+        );
+
+        testClient.connect(
           connectionTester(configuration, 'testConnectGoodAuthAsOption', function(client) {
             client.close();
             done();
@@ -407,9 +423,9 @@ describe('Connection', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var connect = configuration.require;
+      const client = configuration.newClient(configuration.url('slithy', 'toves'));
 
-      connect(configuration.url('slithy', 'toves'), function(err, client) {
+      client.connect(function(err, client) {
         expect(err).to.exist;
         expect(client).to.not.exist;
         done();
@@ -425,11 +441,11 @@ describe('Connection', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var connect = configuration.require;
+      const configuration = this.configuration;
+      const client = configuration.newClient('mangodb://localhost:27017/test?safe=false');
 
       test.throws(function() {
-        connect('mangodb://localhost:27017/test?safe=false', function() {
+        client.connect(function() {
           test.ok(false, 'Bad URL!');
         });
       });
@@ -461,7 +477,11 @@ describe('Connection', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
+      const configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // The unified topology deprecates autoReconnect, this test depends on the `reconnect` event
+        return this.skip();
+      }
 
       var client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: true });
       client.connect(function(err, client) {

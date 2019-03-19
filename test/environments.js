@@ -63,10 +63,6 @@ class ReplicaSetEnvironment extends EnvironmentBase {
       genReplsetConfig(31004, { arbiter: true })
     ];
 
-    this.manager = new ReplSetManager('mongod', this.nodes, {
-      replSet: 'rs'
-    });
-
     // Do we have 3.2+
     const version = discoverResult.version.join('.');
     if (semver.satisfies(version, '>=3.2.0')) {
@@ -75,6 +71,10 @@ class ReplicaSetEnvironment extends EnvironmentBase {
         return x;
       });
     }
+
+    this.manager = new ReplSetManager('mongod', this.nodes, {
+      replSet: 'rs'
+    });
   }
 }
 
@@ -131,7 +131,7 @@ class ShardedEnvironment extends EnvironmentBase {
 
     this.host = 'localhost';
     this.port = 51000;
-    this.url = 'mongodb://%slocalhost:51000/integration_tests';
+    this.url = 'mongodb://%slocalhost:51000,localhost:51001/integration_tests';
     this.writeConcernMax = { w: 'majority', wtimeout: 30000 };
     this.topology = function(host, port, options) {
       options = options || {};
@@ -156,13 +156,6 @@ class ShardedEnvironment extends EnvironmentBase {
       genShardedConfig(31012, { arbiter: true }, shardOptions)
     ];
 
-    // second set of nodes
-    const nodes2 = [
-      genShardedConfig(31020, { tags: { loc: 'ny' } }, shardOptions),
-      genShardedConfig(31021, { tags: { loc: 'sf' } }, shardOptions),
-      genShardedConfig(31022, { arbiter: true }, shardOptions)
-    ];
-
     const configOptions = this.options && this.options.config ? this.options.config : {};
     const configNodes = [
       genConfigNode(35000, configOptions),
@@ -174,12 +167,14 @@ class ShardedEnvironment extends EnvironmentBase {
       {
         bind_ip: 'localhost',
         port: 51000,
-        configdb: 'localhost:35000,localhost:35001,localhost:35002'
+        configdb: 'localhost:35000,localhost:35001,localhost:35002',
+        setParameter: ['enableTestCommands=1']
       },
       {
         bind_ip: 'localhost',
         port: 51001,
-        configdb: 'localhost:35000,localhost:35001,localhost:35002'
+        configdb: 'localhost:35000,localhost:35001,localhost:35002',
+        setParameter: ['enableTestCommands=1']
       }
     ];
 
@@ -195,10 +190,11 @@ class ShardedEnvironment extends EnvironmentBase {
       return x;
     });
 
-    Promise.all([
-      this.manager.addShard(nodes1, { replSet: 'rs1' }),
-      this.manager.addShard(nodes2, { replSet: 'rs2' })
-    ])
+    this.proxies = proxyNodes.map(proxy => {
+      return { host: proxy.bind_ip, port: proxy.port };
+    });
+
+    Promise.all([this.manager.addShard(nodes1, { replSet: 'rs1' })])
       .then(() => this.manager.addConfigurationServers(configNodes, { replSet: 'rs3' }))
       .then(() => this.manager.addProxies(proxyNodes, { binary: 'mongos' }))
       .then(() => callback())

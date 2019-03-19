@@ -3,6 +3,8 @@ const test = require('./shared').assert,
   setupDatabase = require('./shared').setupDatabase,
   expect = require('chai').expect;
 
+const MongoError = require('../../index').MongoError;
+
 describe('Bulk', function() {
   before(function() {
     return setupDatabase(this.configuration);
@@ -1512,5 +1514,97 @@ describe('Bulk', function() {
       .then(function() {
         client.close();
       });
+  });
+
+  it('should properly account for array key size in bulk unordered inserts', function(done) {
+    const client = this.configuration.newClient({ w: 1 }, { monitorCommands: true });
+    const documents = new Array(20000).fill('').map(() => ({
+      arr: new Array(19).fill('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+    }));
+
+    let db;
+
+    client
+      .connect()
+      // NOTE: Hack to get around unrelated strange error in bulkWrites for right now.
+      .then(() => {
+        db = client.db(this.configuration.db);
+        return db.dropCollection('doesnt_matter').catch(() => {});
+      })
+      .then(() => {
+        return db.createCollection('doesnt_matter');
+      })
+      .then(() => {
+        const coll = db.collection('doesnt_matter');
+
+        coll.insert(documents, { ordered: false }, err => {
+          client.close(() => {
+            done(err);
+          });
+        });
+      });
+  });
+
+  it('should properly account for array key size in bulk ordered inserts', function(done) {
+    const client = this.configuration.newClient();
+    const documents = new Array(20000).fill('').map(() => ({
+      arr: new Array(19).fill('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+    }));
+
+    let db;
+
+    client
+      .connect()
+      // NOTE: Hack to get around unrelated strange error in bulkWrites for right now.
+      .then(() => {
+        db = client.db(this.configuration.db);
+        return db.dropCollection('doesnt_matter').catch(() => {});
+      })
+      .then(() => {
+        return db.createCollection('doesnt_matter');
+      })
+      .then(() => {
+        const coll = db.collection('doesnt_matter');
+
+        coll.insert(documents, { ordered: false }, err => {
+          client.close(() => {
+            done(err);
+          });
+        });
+      });
+  });
+
+  function testPropagationOfBulkWriteError(bulk) {
+    return bulk.execute().then(
+      err => {
+        expect(err).to.be.an.instanceOf(MongoError);
+      },
+      err => {
+        expect(err).to.be.an.instanceOf(MongoError);
+        expect(err).to.not.be.an.instanceOf(TypeError);
+        expect(err.driver).to.equal(true);
+        expect(err.name).to.equal('MongoError');
+      }
+    );
+  }
+
+  it('should propagate the proper error from executing an empty ordered batch', function() {
+    const client = this.configuration.newClient();
+
+    return client.connect().then(() => {
+      const collection = client.db(this.configuration.db).collection('doesnt_matter');
+
+      return testPropagationOfBulkWriteError(collection.initializeOrderedBulkOp());
+    });
+  });
+
+  it('should propagate the proper error from executing an empty unordered batch', function() {
+    const client = this.configuration.newClient();
+
+    return client.connect().then(() => {
+      const collection = client.db(this.configuration.db).collection('doesnt_matter');
+
+      return testPropagationOfBulkWriteError(collection.initializeUnorderedBulkOp());
+    });
   });
 });

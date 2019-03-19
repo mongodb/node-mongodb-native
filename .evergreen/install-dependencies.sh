@@ -5,7 +5,7 @@ set -o errexit  # Exit the script with error if any of the commands fail
 NODE_LTS_NAME=${NODE_LTS_NAME:-carbon}
 NODE_ARTIFACTS_PATH="${PROJECT_DIRECTORY}/node-artifacts"
 NPM_CACHE_DIR="${NODE_ARTIFACTS_PATH}/npm"
-NPM_TMP_DIR="${NODE_ARTIFATS_PATH}/tmp"
+NPM_TMP_DIR="${NODE_ARTIFACTS_PATH}/tmp"
 
 # this needs to be explicitly exported for the nvm install below
 export NVM_DIR="${NODE_ARTIFACTS_PATH}/nvm"
@@ -26,7 +26,11 @@ devdir=${NPM_CACHE_DIR}/.node-gyp
 init-module=${NPM_CACHE_DIR}/.npm-init.js
 cache=${NPM_CACHE_DIR}
 tmp=${NPM_TMP_DIR}
+registry=https://registry.npmjs.org
 EOT
+
+# NOTE: registry was overridden to not use artifactory, remove the `registry` line when
+#       BUILD-6774 is resolved.
 
 # install node dependencies
 npm install

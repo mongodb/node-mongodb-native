@@ -3,10 +3,8 @@
 const expect = require('chai').expect;
 const sinon = require('sinon');
 const ScramSHA256 = require('mongodb-core').ScramSHA256;
-const MongoError = require('mongodb-core').MongoError;
 const setupDatabase = require('./shared').setupDatabase;
 const withClient = require('./shared').withClient;
-const MongoClient = require('../../lib/mongo_client');
 
 describe('SCRAM-SHA-256 auth', function() {
   const test = {};
@@ -81,13 +79,15 @@ describe('SCRAM-SHA-256 auth', function() {
         metadata: { requires: { mongodb: '>=3.7.3' } },
         test: function() {
           const options = {
-            user: user.username,
-            password: user.password,
+            auth: {
+              user: user.username,
+              password: user.password
+            },
             authMechanism: mechanism,
             authSource: this.configuration.db
           };
 
-          return withClient(this.configuration.newClient(options), client => {
+          return withClient(this.configuration.newClient({}, options), client => {
             return client.db(this.configuration.db).stats();
           });
         }
@@ -105,7 +105,7 @@ describe('SCRAM-SHA-256 auth', function() {
             password
           )}authMechanism=${mechanism}`;
 
-          const client = new MongoClient(url);
+          const client = this.configuration.newClient(url);
 
           return withClient(client, client => {
             return client.db(this.configuration.db).stats();
@@ -118,12 +118,14 @@ describe('SCRAM-SHA-256 auth', function() {
       metadata: { requires: { mongodb: '>=3.7.3' } },
       test: function() {
         const options = {
-          user: user.username,
-          password: user.password,
+          auth: {
+            user: user.username,
+            password: user.password
+          },
           authSource: this.configuration.db
         };
 
-        return withClient(this.configuration.newClient(options), client => {
+        return withClient(this.configuration.newClient({}, options), client => {
           return client.db(this.configuration.db).stats();
         });
       }
@@ -136,7 +138,7 @@ describe('SCRAM-SHA-256 auth', function() {
         const password = encodeURIComponent(user.password);
         const url = makeConnectionString(this.configuration, username, password);
 
-        const client = new MongoClient(url);
+        const client = this.configuration.newClient(url);
 
         return withClient(client, client => {
           return client.db(this.configuration.db).stats();
@@ -151,15 +153,17 @@ describe('SCRAM-SHA-256 auth', function() {
     metadata: { requires: { mongodb: '>=3.7.3' } },
     test: function() {
       const options = {
-        user: userMap.both.username,
-        password: userMap.both.password,
+        auth: {
+          user: userMap.both.username,
+          password: userMap.both.password
+        },
         authSource: this.configuration.db
       };
 
       test.sandbox.spy(ScramSHA256.prototype, 'auth');
 
-      return withClient(this.configuration.newClient(options), () => {
-        expect(ScramSHA256.prototype.auth.calledOnce).to.equal(true);
+      return withClient(this.configuration.newClient({}, options), () => {
+        expect(ScramSHA256.prototype.auth.called).to.equal(true);
       });
     }
   });
@@ -170,16 +174,18 @@ describe('SCRAM-SHA-256 auth', function() {
     metadata: { requires: { mongodb: '>=3.7.3' } },
     test: function() {
       const options = {
-        user: userMap.sha256.username,
-        password: userMap.sha256.password,
+        auth: {
+          user: userMap.sha256.username,
+          password: userMap.sha256.password
+        },
         authSource: this.configuration.db,
         authMechanism: 'SCRAM-SHA-1'
       };
 
       return withClient(
-        this.configuration.newClient(options),
-        () => Promise.reject('This request should have failed to authenticate'),
-        err => expect(err).to.not.be.null
+        this.configuration.newClient({}, options),
+        () => Promise.reject(new Error('This request should have failed to authenticate')),
+        err => expect(err).to.match(/Authentication failed/)
       );
     }
   });
@@ -192,22 +198,26 @@ describe('SCRAM-SHA-256 auth', function() {
     metadata: { requires: { mongodb: '>=3.7.3' } },
     test: function() {
       const noUsernameOptions = {
-        user: 'roth',
-        password: 'pencil',
+        auth: {
+          user: 'roth',
+          password: 'pencil'
+        },
         authSource: 'admin'
       };
 
       const badPasswordOptions = {
-        user: 'both',
-        password: 'pencil',
+        auth: {
+          user: 'both',
+          password: 'pencil'
+        },
         authSource: 'admin'
       };
 
       const getErrorMsg = options =>
         withClient(
-          this.configuration.newClient(options),
-          () => Promise.reject('This request should have failed to authenticate'),
-          err => expect(err).to.be.an.instanceof(MongoError)
+          this.configuration.newClient({}, options),
+          () => Promise.reject(new Error('This request should have failed to authenticate')),
+          err => expect(err).to.match(/Authentication failed/)
         );
 
       return Promise.all([getErrorMsg(noUsernameOptions), getErrorMsg(badPasswordOptions)]);

@@ -297,7 +297,13 @@ describe('Cursor', function() {
       client.connect((err, client) => {
         const db = client.db(configuration.db);
 
-        const internalClientCursor = sinon.spy(client.topology.s.coreTopology, 'cursor');
+        let internalClientCursor;
+        if (configuration.usingUnifiedTopology()) {
+          internalClientCursor = sinon.spy(client.topology, 'cursor');
+        } else {
+          internalClientCursor = sinon.spy(client.topology.s.coreTopology, 'cursor');
+        }
+
         const expectedReadPreference = new ReadPreference(ReadPreference.SECONDARY);
 
         const cursor = db.collection('countTEST').find({ qty: { $gt: 4 } });
@@ -4541,16 +4547,19 @@ describe('Cursor', function() {
     const configuration = this.configuration;
     const ReadPreference = this.configuration.require.ReadPreference;
     const client = configuration.newClient(
-      { w: 1, readPreference: ReadPreference.secondary },
-      { poolSize: 1, auto_reconnect: false }
+      { w: 1, readPreference: ReadPreference.SECONDARY },
+      { poolSize: 1, auto_reconnect: false, connectWithNoPrimary: true }
     );
 
     client.connect(function(err, client) {
+      expect(err).to.not.exist;
+
       const db = client.db(configuration.db);
       let collection, cursor, spy;
       const close = e => cursor.close(() => client.close(() => done(e)));
 
       Promise.resolve()
+        .then(() => new Promise(resolve => setTimeout(() => resolve(), 500)))
         .then(() => db.createCollection('test_count_readPreference'))
         .then(() => (collection = db.collection('test_count_readPreference')))
         .then(() => collection.find())

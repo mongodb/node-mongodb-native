@@ -1,3 +1,146 @@
+# Change Log
+
+All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+<a name="3.1.13"></a>
+## [3.1.13](https://github.com/mongodb/node-mongodb-native/compare/v3.1.12...v3.1.13) (2019-01-23)
+
+
+### Bug Fixes
+
+* restore ability to webpack by removing `makeLazyLoader` ([050267d](https://github.com/mongodb/node-mongodb-native/commit/050267d))
+* **bulk:** honor ignoreUndefined in initializeUnorderedBulkOp ([e806be4](https://github.com/mongodb/node-mongodb-native/commit/e806be4))
+* **changeStream:** properly handle changeStream event mid-close ([#1902](https://github.com/mongodb/node-mongodb-native/issues/1902)) ([5ad9fa9](https://github.com/mongodb/node-mongodb-native/commit/5ad9fa9))
+* **db_ops:** ensure we async resolve errors in createCollection ([210c71d](https://github.com/mongodb/node-mongodb-native/commit/210c71d))
+
+
+
+<a name="3.1.12"></a>
+## [3.1.12](https://github.com/mongodb/node-mongodb-native/compare/v3.1.11...v3.1.12) (2019-01-16)
+
+
+### Features
+
+* **core:** update to mongodb-core v3.1.11 ([9bef6e7](https://github.com/mongodb/node-mongodb-native/commit/9bef6e7))
+
+
+
+<a name="3.1.11"></a>
+## [3.1.11](https://github.com/mongodb/node-mongodb-native/compare/v3.1.10...v3.1.11) (2019-01-15)
+
+
+### Bug Fixes
+
+* **bulk:** fix error propagation in empty bulk.execute ([a3adb3f](https://github.com/mongodb/node-mongodb-native/commit/a3adb3f))
+* **bulk:** make sure that any error in bulk write is propagated ([bedc2d2](https://github.com/mongodb/node-mongodb-native/commit/bedc2d2))
+* **bulk:** properly calculate batch size for bulk writes ([aafe71b](https://github.com/mongodb/node-mongodb-native/commit/aafe71b))
+* **operations:** do not call require in a hot path ([ff82ff4](https://github.com/mongodb/node-mongodb-native/commit/ff82ff4))
+
+
+
+<a name="3.1.10"></a>
+## [3.1.10](https://github.com/mongodb/node-mongodb-native/compare/v3.1.9...v3.1.10) (2018-11-16)
+
+
+### Bug Fixes
+
+* **auth:** remember to default to admin database ([c7dec28](https://github.com/mongodb/node-mongodb-native/commit/c7dec28))
+
+
+### Features
+
+* **core:** update to mongodb-core v3.1.9 ([bd3355b](https://github.com/mongodb/node-mongodb-native/commit/bd3355b))
+
+
+
+<a name="3.1.9"></a>
+## [3.1.9](https://github.com/mongodb/node-mongodb-native/compare/v3.1.8...v3.1.9) (2018-11-06)
+
+
+### Bug Fixes
+
+* **db:** move db constants to other file to avoid circular ref ([#1858](https://github.com/mongodb/node-mongodb-native/issues/1858)) ([239036f](https://github.com/mongodb/node-mongodb-native/commit/239036f))
+* **estimated-document-count:** support options other than maxTimeMs ([36c3c7d](https://github.com/mongodb/node-mongodb-native/commit/36c3c7d))
+
+
+### Features
+
+* **core:** update to mongodb-core v3.1.8 ([80d7c79](https://github.com/mongodb/node-mongodb-native/commit/80d7c79))
+
+
+
+<a name="3.1.8"></a>
+## [3.1.8](https://github.com/mongodb/node-mongodb-native/compare/v3.1.7...v3.1.8) (2018-10-10)
+
+
+### Bug Fixes
+
+* **connect:** use reported default databse from new uri parser ([811f8f8](https://github.com/mongodb/node-mongodb-native/commit/811f8f8))
+
+
+### Features
+
+* **core:** update to mongodb-core v3.1.7 ([dbfc905](https://github.com/mongodb/node-mongodb-native/commit/dbfc905))
+
+
+
+<a name="3.1.7"></a>
+## [3.1.7](https://github.com/mongodb/node-mongodb-native/compare/v3.1.6...v3.1.7) (2018-10-09)
+
+
+### Features
+
+* **core:** update mongodb-core to v3.1.6 ([61b054e](https://github.com/mongodb/node-mongodb-native/commit/61b054e))
+
+
+
+<a name="3.1.6"></a>
+## [3.1.6](https://github.com/mongodb/node-mongodb-native/compare/v3.1.5...v3.1.6) (2018-09-15)
+
+
+### Features
+
+* **core:** update to core v3.1.5 ([c5f823d](https://github.com/mongodb/node-mongodb-native/commit/c5f823d))
+
+
+
+<a name="3.1.5"></a>
+## [3.1.5](https://github.com/mongodb/node-mongodb-native/compare/v3.1.4...v3.1.5) (2018-09-14)
+
+
+### Bug Fixes
+
+* **cursor:** allow `$meta` based sort when passing an array to `sort()` ([f93a8c3](https://github.com/mongodb/node-mongodb-native/commit/f93a8c3))
+* **utils:** only set retryWrites to true for valid operations ([3b725ef](https://github.com/mongodb/node-mongodb-native/commit/3b725ef))
+
+
+### Features
+
+* **core:** bump core to v3.1.4 ([805d58a](https://github.com/mongodb/node-mongodb-native/commit/805d58a))
+
+
+
+<a name="3.1.4"></a>
+## [3.1.4](https://github.com/mongodb/node-mongodb-native/compare/v3.1.3...v3.1.4) (2018-08-25)
+
+
+### Bug Fixes
+
+* **buffer:** use safe-buffer polyfill to maintain compatibility ([327da95](https://github.com/mongodb/node-mongodb-native/commit/327da95))
+* **change-stream:** properly support resumablity in stream mode ([c43a34b](https://github.com/mongodb/node-mongodb-native/commit/c43a34b))
+* **connect:** correct replacement of topology on connect callback ([918a1e0](https://github.com/mongodb/node-mongodb-native/commit/918a1e0))
+* **cursor:** remove deprecated notice on forEach ([a474158](https://github.com/mongodb/node-mongodb-native/commit/a474158))
+* **url-parser:** bail early on validation when using domain socket ([3cb3da3](https://github.com/mongodb/node-mongodb-native/commit/3cb3da3))
+
+
+### Features
+
+* **client-ops:** allow bypassing creation of topologies on connect ([fe39b93](https://github.com/mongodb/node-mongodb-native/commit/fe39b93))
+* **core:** update mongodb-core to 3.1.3 ([a029047](https://github.com/mongodb/node-mongodb-native/commit/a029047))
+* **test:** use connection strings for all calls to `newClient` ([1dac18f](https://github.com/mongodb/node-mongodb-native/commit/1dac18f))
+
+
+
 <a name="3.1.3"></a>
 ## [3.1.3](https://github.com/mongodb/node-mongodb-native/compare/v3.1.2...v3.1.3) (2018-08-13)
 
@@ -14,7 +157,7 @@
 
 ### Bug Fixes
 
-* **aggregte:** support user-provided `batchSize` ([ad10dee](https://github.com/mongodb/node-mongodb-native/commit/ad10dee))
+* **aggregate:** support user-provided `batchSize` ([ad10dee](https://github.com/mongodb/node-mongodb-native/commit/ad10dee))
 * **buffer:** replace deprecated Buffer constructor ([759dd85](https://github.com/mongodb/node-mongodb-native/commit/759dd85))
 * **bulk:** fixing retryable writes for mass-change ops ([0604036](https://github.com/mongodb/node-mongodb-native/commit/0604036))
 * **bulk:** handle MongoWriteConcernErrors ([12ff392](https://github.com/mongodb/node-mongodb-native/commit/12ff392))
@@ -85,7 +228,7 @@
 
 ### Bug Fixes
 
-* **aggregte:** support user-provided `batchSize` ([ad10dee](https://github.com/mongodb/node-mongodb-native/commit/ad10dee))
+* **aggregate:** support user-provided `batchSize` ([ad10dee](https://github.com/mongodb/node-mongodb-native/commit/ad10dee))
 * **bulk:** fixing retryable writes for mass-change ops ([0604036](https://github.com/mongodb/node-mongodb-native/commit/0604036))
 * **bulk:** handle MongoWriteConcernErrors ([12ff392](https://github.com/mongodb/node-mongodb-native/commit/12ff392))
 * **change_stream:** do not check isGetMore if error[mongoErrorContextSymbol] is undefined ([#1720](https://github.com/mongodb/node-mongodb-native/issues/1720)) ([844c2c8](https://github.com/mongodb/node-mongodb-native/commit/844c2c8))

@@ -1,4 +1,8 @@
 {
+  "topology": [
+    "replicaset",
+    "sharded"
+  ],
   "database_name": "transaction-tests",
   "collection_name": "test",
   "data": [],
@@ -105,7 +109,10 @@
               },
               "startTransaction": null,
               "autocommit": false,
-              "writeConcern": null
+              "writeConcern": {
+                "w": "majority",
+                "wtimeout": 10000
+              }
             },
             "command_name": "commitTransaction",
             "database_name": "admin"
@@ -121,7 +128,166 @@
               },
               "startTransaction": null,
               "autocommit": false,
+              "writeConcern": {
+                "w": "majority",
+                "wtimeout": 10000
+              }
+            },
+            "command_name": "commitTransaction",
+            "database_name": "admin"
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "commitTransaction applies majority write concern on retries",
+      "clientOptions": {
+        "retryWrites": false
+      },
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 2
+        },
+        "data": {
+          "failCommands": [
+            "commitTransaction"
+          ],
+          "closeConnection": true
+        }
+      },
+      "operations": [
+        {
+          "name": "startTransaction",
+          "object": "session0",
+          "arguments": {
+            "options": {
+              "writeConcern": {
+                "w": 2,
+                "j": true,
+                "wtimeout": 5000
+              }
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "collection",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 1
+            }
+          },
+          "result": {
+            "insertedId": 1
+          }
+        },
+        {
+          "name": "commitTransaction",
+          "object": "session0",
+          "result": {
+            "errorLabelsContain": [
+              "UnknownTransactionCommitResult"
+            ],
+            "errorLabelsOmit": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "name": "commitTransaction",
+          "object": "session0"
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "insert": "test",
+              "documents": [
+                {
+                  "_id": 1
+                }
+              ],
+              "ordered": true,
+              "readConcern": null,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": true,
+              "autocommit": false,
               "writeConcern": null
+            },
+            "command_name": "insert",
+            "database_name": "transaction-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "commitTransaction": 1,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": null,
+              "autocommit": false,
+              "writeConcern": {
+                "w": 2,
+                "j": true,
+                "wtimeout": 5000
+              }
+            },
+            "command_name": "commitTransaction",
+            "database_name": "admin"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "commitTransaction": 1,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": null,
+              "autocommit": false,
+              "writeConcern": {
+                "w": "majority",
+                "j": true,
+                "wtimeout": 5000
+              }
+            },
+            "command_name": "commitTransaction",
+            "database_name": "admin"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "commitTransaction": 1,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": null,
+              "autocommit": false,
+              "writeConcern": {
+                "w": "majority",
+                "j": true,
+                "wtimeout": 5000
+              }
             },
             "command_name": "commitTransaction",
             "database_name": "admin"
@@ -421,7 +587,10 @@
               },
               "startTransaction": null,
               "autocommit": false,
-              "writeConcern": null
+              "writeConcern": {
+                "w": "majority",
+                "wtimeout": 10000
+              }
             },
             "command_name": "commitTransaction",
             "database_name": "admin"
@@ -526,7 +695,10 @@
               },
               "startTransaction": null,
               "autocommit": false,
-              "writeConcern": null
+              "writeConcern": {
+                "w": "majority",
+                "wtimeout": 10000
+              }
             },
             "command_name": "commitTransaction",
             "database_name": "admin"
@@ -631,7 +803,10 @@
               },
               "startTransaction": null,
               "autocommit": false,
-              "writeConcern": null
+              "writeConcern": {
+                "w": "majority",
+                "wtimeout": 10000
+              }
             },
             "command_name": "commitTransaction",
             "database_name": "admin"
@@ -736,7 +911,10 @@
               },
               "startTransaction": null,
               "autocommit": false,
-              "writeConcern": null
+              "writeConcern": {
+                "w": "majority",
+                "wtimeout": 10000
+              }
             },
             "command_name": "commitTransaction",
             "database_name": "admin"
@@ -754,7 +932,7 @@
       }
     },
     {
-      "description": "commitTransaction succeeds after InterruptedDueToReplStateChange",
+      "description": "commitTransaction succeeds after InterruptedDueToStepDown",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -841,7 +1019,10 @@
               },
               "startTransaction": null,
               "autocommit": false,
-              "writeConcern": null
+              "writeConcern": {
+                "w": "majority",
+                "wtimeout": 10000
+              }
             },
             "command_name": "commitTransaction",
             "database_name": "admin"
@@ -946,7 +1127,10 @@
               },
               "startTransaction": null,
               "autocommit": false,
-              "writeConcern": null
+              "writeConcern": {
+                "w": "majority",
+                "wtimeout": 10000
+              }
             },
             "command_name": "commitTransaction",
             "database_name": "admin"
@@ -1051,7 +1235,10 @@
               },
               "startTransaction": null,
               "autocommit": false,
-              "writeConcern": null
+              "writeConcern": {
+                "w": "majority",
+                "wtimeout": 10000
+              }
             },
             "command_name": "commitTransaction",
             "database_name": "admin"
@@ -1156,7 +1343,10 @@
               },
               "startTransaction": null,
               "autocommit": false,
-              "writeConcern": null
+              "writeConcern": {
+                "w": "majority",
+                "wtimeout": 10000
+              }
             },
             "command_name": "commitTransaction",
             "database_name": "admin"
@@ -1261,7 +1451,10 @@
               },
               "startTransaction": null,
               "autocommit": false,
-              "writeConcern": null
+              "writeConcern": {
+                "w": "majority",
+                "wtimeout": 10000
+              }
             },
             "command_name": "commitTransaction",
             "database_name": "admin"
@@ -1366,7 +1559,10 @@
               },
               "startTransaction": null,
               "autocommit": false,
-              "writeConcern": null
+              "writeConcern": {
+                "w": "majority",
+                "wtimeout": 10000
+              }
             },
             "command_name": "commitTransaction",
             "database_name": "admin"
@@ -1471,7 +1667,10 @@
               },
               "startTransaction": null,
               "autocommit": false,
-              "writeConcern": null
+              "writeConcern": {
+                "w": "majority",
+                "wtimeout": 10000
+              }
             },
             "command_name": "commitTransaction",
             "database_name": "admin"
@@ -1576,7 +1775,10 @@
               },
               "startTransaction": null,
               "autocommit": false,
-              "writeConcern": null
+              "writeConcern": {
+                "w": "majority",
+                "wtimeout": 10000
+              }
             },
             "command_name": "commitTransaction",
             "database_name": "admin"
@@ -1693,7 +1895,8 @@
               "startTransaction": null,
               "autocommit": false,
               "writeConcern": {
-                "w": "majority"
+                "w": "majority",
+                "wtimeout": 10000
               }
             },
             "command_name": "commitTransaction",
@@ -1712,7 +1915,7 @@
       }
     },
     {
-      "description": "commitTransaction succeeds after WriteConcernError InterruptedDueToReplStateChange",
+      "description": "commitTransaction succeeds after WriteConcernError InterruptedDueToStepDown",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -1811,7 +2014,8 @@
               "startTransaction": null,
               "autocommit": false,
               "writeConcern": {
-                "w": "majority"
+                "w": "majority",
+                "wtimeout": 10000
               }
             },
             "command_name": "commitTransaction",
@@ -1929,7 +2133,8 @@
               "startTransaction": null,
               "autocommit": false,
               "writeConcern": {
-                "w": "majority"
+                "w": "majority",
+                "wtimeout": 10000
               }
             },
             "command_name": "commitTransaction",
@@ -2047,7 +2252,8 @@
               "startTransaction": null,
               "autocommit": false,
               "writeConcern": {
-                "w": "majority"
+                "w": "majority",
+                "wtimeout": 10000
               }
             },
             "command_name": "commitTransaction",

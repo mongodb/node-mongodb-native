@@ -130,6 +130,7 @@ functions:
 
   "install dependencies":
     - command: shell.exec
+      type: setup
       params:
         working_dir: "src"
         script: |
@@ -138,6 +139,7 @@ functions:
 
   "run atlas tests":
     - command: shell.exec
+      type: test
       params:
         working_dir: "src"
         silent: true
@@ -151,7 +153,6 @@ pre:
   # - func: "windows fix"
   - func: "fix absolute paths"
   - func: "make files executable"
-  - func: "install dependencies"
 
 post:
   - func: "cleanup"

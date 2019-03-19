@@ -41,7 +41,7 @@ describe('Max Staleness', function() {
     });
   });
 
-  it('should correctly set maxStalenessSeconds on Mongos query using MongoClient.connect', {
+  it('should correctly set maxStalenessSeconds on Mongos query on connect', {
     metadata: {
       requires: {
         generators: true,
@@ -50,30 +50,30 @@ describe('Max Staleness', function() {
     },
 
     test: function(done) {
-      var self = this,
-        MongoClient = self.configuration.require.MongoClient;
-
-      MongoClient.connect(
-        `mongodb://${test.server.uri()}/test?readPreference=secondary&maxStalenessSeconds=250`,
-        function(err, client) {
-          expect(err).to.not.exist;
-          var db = client.db(self.configuration.db);
-
-          db
-            .collection('test')
-            .find({})
-            .toArray(function(err) {
-              expect(err).to.not.exist;
-              expect(test.checkCommand).to.eql({
-                $query: { find: 'test', filter: {}, returnKey: false, showRecordId: false },
-                $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
-              });
-
-              client.close();
-              done();
-            });
-        }
+      var self = this;
+      const configuration = this.configuration;
+      const client = configuration.newClient(
+        `mongodb://${test.server.uri()}/test?readPreference=secondary&maxStalenessSeconds=250`
       );
+
+      client.connect(function(err, client) {
+        expect(err).to.not.exist;
+        var db = client.db(self.configuration.db);
+
+        db
+          .collection('test')
+          .find({})
+          .toArray(function(err) {
+            expect(err).to.not.exist;
+            expect(test.checkCommand).to.eql({
+              $query: { find: 'test', filter: {}, returnKey: false, showRecordId: false },
+              $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
+            });
+
+            client.close();
+            done();
+          });
+      });
     }
   });
 
@@ -86,11 +86,12 @@ describe('Max Staleness', function() {
     },
 
     test: function(done) {
-      var self = this,
-        MongoClient = self.configuration.require.MongoClient,
-        ReadPreference = self.configuration.require.ReadPreference;
+      var self = this;
+      const configuration = this.configuration;
+      const ReadPreference = self.configuration.require.ReadPreference;
 
-      MongoClient.connect(`mongodb://${test.server.uri()}/test`, function(err, client) {
+      const client = configuration.newClient(`mongodb://${test.server.uri()}/test`);
+      client.connect(function(err, client) {
         expect(err).to.not.exist;
 
         // Get a db with a new readPreference
@@ -126,11 +127,12 @@ describe('Max Staleness', function() {
       },
 
       test: function(done) {
-        var self = this,
-          MongoClient = self.configuration.require.MongoClient,
-          ReadPreference = self.configuration.require.ReadPreference;
+        var self = this;
+        const configuration = this.configuration;
+        const ReadPreference = self.configuration.require.ReadPreference;
 
-        MongoClient.connect(`mongodb://${test.server.uri()}/test`, function(err, client) {
+        const client = configuration.newClient(`mongodb://${test.server.uri()}/test`);
+        client.connect(function(err, client) {
           expect(err).to.not.exist;
           var db = client.db(self.configuration.db);
 
@@ -164,11 +166,12 @@ describe('Max Staleness', function() {
     },
 
     test: function(done) {
-      var self = this,
-        MongoClient = self.configuration.require.MongoClient,
-        ReadPreference = self.configuration.require.ReadPreference;
+      var self = this;
+      const configuration = this.configuration;
+      const ReadPreference = self.configuration.require.ReadPreference;
 
-      MongoClient.connect(`mongodb://${test.server.uri()}/test`, function(err, client) {
+      const client = configuration.newClient(`mongodb://${test.server.uri()}/test`);
+      client.connect(function(err, client) {
         expect(err).to.not.exist;
         var db = client.db(self.configuration.db);
         var readPreference = new ReadPreference('secondary', null, { maxStalenessSeconds: 250 });

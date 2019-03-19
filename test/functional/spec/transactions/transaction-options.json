@@ -1,4 +1,8 @@
 {
+  "topology": [
+    "replicaset",
+    "sharded"
+  ],
   "database_name": "transaction-tests",
   "collection_name": "test",
   "data": [],
@@ -959,7 +963,7 @@
       }
     },
     {
-      "description": "readConcern local in startTransaction options",
+      "description": "readConcern snapshot in startTransaction options",
       "sessionOptions": {
         "session0": {
           "defaultTransactionOptions": {
@@ -1159,6 +1163,7 @@
           },
           "result": {
             "deletedCount": 0,
+            "insertedCount": 1,
             "insertedIds": {
               "0": 1
             },

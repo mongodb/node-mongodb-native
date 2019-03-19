@@ -271,24 +271,9 @@ describe.skip('ReplSet (Failover)', function() {
 
     test: function(done) {
       var configuration = this.configuration;
-      var ReplSet = configuration.require.ReplSet,
-        MongoClient = configuration.require.MongoClient,
-        Server = configuration.require.Server;
-
       var manager = configuration.manager;
+      const client = configuration.newClient({}, { w: 1, tag: 'Application', poolSize: 1 });
 
-      // Replica configuration
-      var replSet = new ReplSet(
-        [
-          new Server(configuration.host, configuration.port),
-          new Server(configuration.host, configuration.port + 1),
-          new Server(configuration.host, configuration.port + 2)
-        ],
-        { rs_name: configuration.replicasetName, tag: 'Application', poolSize: 1 }
-      );
-
-      // Get a new instance
-      var client = new MongoClient(replSet, { w: 1 });
       client.on('fullsetup', function(client) {
         var db = client.db(configuration.db);
         // Drop collection on replicaset
@@ -398,27 +383,18 @@ describe.skip('ReplSet (Failover)', function() {
     test: function(done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
-        ReadPreference = mongo.ReadPreference,
-        MongoClient = configuration.require.MongoClient,
-        ReplSet = mongo.ReplSet,
-        Server = mongo.Server;
-
+        ReadPreference = mongo.ReadPreference;
       var manager = configuration.manager;
-
-      // Replica configuration
-      var replSet = new ReplSet(
-        [
-          new Server(configuration.host, configuration.port),
-          new Server(configuration.host, configuration.port + 1),
-          new Server(configuration.host, configuration.port + 2)
-        ],
-        { rs_name: configuration.replicasetName, tag: 'Application', poolSize: 1 }
+      var client = configuration.newClient(
+        {},
+        {
+          w: 0,
+          readPreference: ReadPreference.PRIMARY_PREFERRED,
+          tag: 'Application',
+          poolSize: 1
+        }
       );
 
-      var client = new MongoClient(replSet, {
-        w: 0,
-        readPreference: ReadPreference.PRIMARY_PREFERRED
-      });
       client.on('fullsetup', function(client) {
         var p_db = client.db(configuration.db);
         var collection = p_db.collection('notempty');
@@ -467,7 +443,6 @@ describe.skip('ReplSet (Failover)', function() {
     test: function(done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
-        MongoClient = mongo.MongoClient,
         ReadPreference = mongo.ReadPreference;
 
       var manager = configuration.manager;
@@ -480,62 +455,58 @@ describe.skip('ReplSet (Failover)', function() {
       );
 
       // Connect using the MongoClient
-      MongoClient.connect(
-        url,
-        {
-          replSet: {
-            //set replset check interval to be much smaller than our querying interval
-            haInterval: 50,
-            socketOptions: {
-              connectTimeoutMS: 500
-            }
+      const client = configuration.newClient(url, {
+        replSet: {
+          //set replset check interval to be much smaller than our querying interval
+          haInterval: 50,
+          socketOptions: {
+            connectTimeoutMS: 500
           }
-        },
-        function(err, client) {
+        }
+      });
+
+      client.connect(function(err, client) {
+        test.equal(null, err);
+        var db = client.db(configuration.db);
+
+        db.collection('replicaset_readpref_test').insert({ testfield: 123 }, function(err) {
           test.equal(null, err);
-          var db = client.db(configuration.db);
 
-          db.collection('replicaset_readpref_test').insert({ testfield: 123 }, function(err) {
+          db.collection('replicaset_readpref_test').findOne({}, function(err, result) {
             test.equal(null, err);
+            test.equal(result.testfield, 123);
 
-            db.collection('replicaset_readpref_test').findOne({}, function(err, result) {
-              test.equal(null, err);
-              test.equal(result.testfield, 123);
-
-              // wait five seconds, then kill 2 of the 3 nodes that are up.
-              setTimeout(function() {
-                manager.secondaries().then(function(secondaries) {
-                  secondaries[0].stop().then(function() {
-                    // Shut down primary server
-                    manager.primary().then(function(primary) {
-                      // Stop the primary
-                      primary.stop().then(function() {});
-                    });
+            // wait five seconds, then kill 2 of the 3 nodes that are up.
+            setTimeout(function() {
+              manager.secondaries().then(function(secondaries) {
+                secondaries[0].stop().then(function() {
+                  // Shut down primary server
+                  manager.primary().then(function(primary) {
+                    // Stop the primary
+                    primary.stop().then(function() {});
                   });
                 });
-              }, 5000);
+              });
+            }, 5000);
 
-              // we should be able to continue querying for a full minute
-              var counter = 0;
-              var intervalid = setInterval(function() {
-                if (counter++ >= 30) {
-                  clearInterval(intervalid);
-                  client.close();
-                  return restartAndDone(configuration, done);
-                }
+            // we should be able to continue querying for a full minute
+            var counter = 0;
+            var intervalid = setInterval(function() {
+              if (counter++ >= 30) {
+                clearInterval(intervalid);
+                client.close();
+                return restartAndDone(configuration, done);
+              }
 
-                db
-                  .collection('replicaset_readpref_test')
-                  .findOne({}, { readPreference: ReadPreference.SECONDARY_PREFERRED }, function(
-                    err
-                  ) {
-                    test.equal(null, err);
-                  });
-              }, 1000);
-            });
+              db
+                .collection('replicaset_readpref_test')
+                .findOne({}, { readPreference: ReadPreference.SECONDARY_PREFERRED }, function(err) {
+                  test.equal(null, err);
+                });
+            }, 1000);
           });
-        }
-      );
+        });
+      });
     }
   });
 
@@ -550,7 +521,6 @@ describe.skip('ReplSet (Failover)', function() {
       test: function(done) {
         var configuration = this.configuration;
         var mongo = configuration.require,
-          MongoClient = mongo.MongoClient,
           ReadPreference = mongo.ReadPreference;
 
         var manager = configuration.manager;
@@ -563,7 +533,8 @@ describe.skip('ReplSet (Failover)', function() {
           configuration.replicasetName
         );
 
-        MongoClient.connect(url, { readPreference: ReadPreference.NEAREST }, function(err, client) {
+        const client = configuration.newClient(url, { readPreference: ReadPreference.NEAREST });
+        client.connect(function(err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 

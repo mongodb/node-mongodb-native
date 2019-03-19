@@ -1,3 +1,4 @@
+topology: [replicaset, sharded]
 database_name: &database_name "transaction-tests"
 collection_name: &collection_name "test"
 
@@ -140,6 +141,122 @@ tests:
           - _id: 3
           - _id: 4
           - _id: 5
+
+  # This test proves that the driver uses "session1" correctly in operations
+  # and APM expectations.
+  - description: insert with session1
+
+    operations:
+      - name: startTransaction
+        object: session1
+      - name: insertOne
+        object: collection
+        arguments:
+          session: session1
+          document:
+            _id: 1
+        result:
+          insertedId: 1
+      - name: insertMany
+        object: collection
+        arguments:
+          documents:
+            - _id: 2
+            - _id: 3
+          session: session1
+        result:
+          insertedIds: {0: 2, 1: 3}
+      - name: commitTransaction
+        object: session1
+      - name: startTransaction
+        object: session1
+      - name: insertOne
+        object: collection
+        arguments:
+          session: session1
+          document:
+            _id: 4
+        result:
+          insertedId: 4
+      - name: abortTransaction
+        object: session1
+
+    expectations:
+      - command_started_event:
+          command:
+            insert: *collection_name
+            documents:
+              - _id: 1
+            ordered: true
+            readConcern:
+            lsid: session1
+            txnNumber:
+              $numberLong: "1"
+            startTransaction: true
+            autocommit: false
+            writeConcern:
+          command_name: insert
+          database_name: *database_name
+      - command_started_event:
+          command:
+            insert: *collection_name
+            documents:
+              - _id: 2
+              - _id: 3
+            ordered: true
+            lsid: session1
+            txnNumber:
+              $numberLong: "1"
+            startTransaction:
+            autocommit: false
+            writeConcern:
+          command_name: insert
+          database_name: *database_name
+      - command_started_event:
+          command:
+            commitTransaction: 1
+            lsid: session1
+            txnNumber:
+              $numberLong: "1"
+            startTransaction:
+            autocommit: false
+            writeConcern:
+          command_name: commitTransaction
+          database_name: admin
+      - command_started_event:
+          command:
+            insert: *collection_name
+            documents:
+              - _id: 4
+            ordered: true
+            readConcern:
+              afterClusterTime: 42
+            lsid: session1
+            txnNumber:
+              $numberLong: "2"
+            startTransaction: true
+            autocommit: false
+            writeConcern:
+          command_name: insert
+          database_name: *database_name
+      - command_started_event:
+          command:
+            abortTransaction: 1
+            lsid: session1
+            txnNumber:
+              $numberLong: "2"
+            startTransaction:
+            autocommit: false
+            writeConcern:
+          command_name: abortTransaction
+          database_name: admin
+
+    outcome:
+      collection:
+        data:
+          - _id: 1
+          - _id: 2
+          - _id: 3
 
   # This test proves that the driver parses the collectionOptions writeConcern.
   - description: collection writeConcern without transaction
