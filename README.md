@@ -40,6 +40,12 @@ Core Server (i.e. SERVER) project are **public**.
 
 Change history can be found in [`HISTORY.md`](HISTORY.md).
 
+# Compatibility
+
+Compatibility with MongoDB can be found [here](https://docs.mongodb.com/ecosystem/drivers/driver-compatibility-reference/#reference-compatibility-mongodb-node).
+
+Compatibility with NodeJS can be found [here](https://docs.mongodb.com/ecosystem/drivers/driver-compatibility-reference/#reference-compatibility-language-node).
+
 # Installation
 
 The recommended way to get started using the Node.js 3.0 driver is by using the `npm` (Node Package Manager) to install the dependency in your project.
