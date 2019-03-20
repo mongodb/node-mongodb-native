@@ -1,3 +1,5 @@
+# NOTE: THE 2.X VERSION OF THE DRIVER IS DEPRECATED, AND IS NO LONGER SUPPORTED. YOU CAN FIND THE LATEST VERSION OF THE DRIVER [HERE](https://github.com/mongodb/node-mongodb-native/)
+
 [![NPM](https://nodei.co/npm/mongodb.png?downloads=true&downloadRank=true)](https://nodei.co/npm/mongodb/) [![NPM](https://nodei.co/npm-dl/mongodb.png?months=6&height=3)](https://nodei.co/npm/mongodb/)
 
 [![Build Status](https://secure.travis-ci.org/mongodb/node-mongodb-native.svg?branch=2.1)](http://travis-ci.org/mongodb/node-mongodb-native)
