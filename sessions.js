@@ -473,7 +473,11 @@ function endTransaction(session, commandName, callback) {
     return commandName === 'commitTransaction' ? err : null;
   }
 
-  if (commandName === 'commitTransaction' && session.transaction.recoveryToken) {
+  if (
+    commandName === 'commitTransaction' &&
+    session.transaction.recoveryToken &&
+    supportsRecoveryToken(session)
+  ) {
     command.recoveryToken = session.transaction.recoveryToken;
   }
 
@@ -497,6 +501,11 @@ function endTransaction(session, commandName, callback) {
 
     commandHandler(transactionError(err), reply);
   });
+}
+
+function supportsRecoveryToken(session) {
+  const topology = session.topology;
+  return !!topology.s.options.useRecoveryToken;
 }
 
 /**
