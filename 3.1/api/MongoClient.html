@@ -469,8 +469,6 @@
             
                 <li data-name="ClientSession#startTransaction"><a href="ClientSession.html#startTransaction">startTransaction</a></li>
             
-                <li data-name="ClientSession#withTransaction"><a href="ClientSession.html#withTransaction">withTransaction</a></li>
-            
             </ul>
             <ul class="events itemMembers">
             
@@ -885,8 +883,6 @@
                 <li data-name="Db#addUser"><a href="Db.html#addUser">addUser</a></li>
             
                 <li data-name="Db#admin"><a href="Db.html#admin">admin</a></li>
-            
-                <li data-name="Db#aggregate"><a href="Db.html#aggregate">aggregate</a></li>
             
                 <li data-name="Db#collection"><a href="Db.html#collection">collection</a></li>
             
@@ -1560,6 +1556,8 @@
                 <li data-name="MongoClient#db"><a href="MongoClient.html#db">db</a></li>
             
                 <li data-name="MongoClient#isConnected"><a href="MongoClient.html#isConnected">isConnected</a></li>
+            
+                <li data-name="MongoClient#logout"><a href="MongoClient.html#logout">logout</a></li>
             
                 <li data-name="MongoClient#startSession"><a href="MongoClient.html#startSession">startSession</a></li>
             
@@ -4427,7 +4425,7 @@ MongoClient instance
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line348">line 348</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line363">line 363</a>
         </div>
         
     </div>
@@ -6644,7 +6642,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line185">line 185</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line200">line 200</a>
         </div>
         
     </div>
@@ -6938,7 +6936,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line228">line 228</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line243">line 243</a>
         </div>
         
     </div>
@@ -7192,7 +7190,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line270">line 270</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line285">line 285</a>
         </div>
         
     </div>
@@ -7409,6 +7407,220 @@ Promise if no callback passed
             
 <dt>
     <div class="nameContainer">
+        <h4 class="name" id="logout">
+            
+            logout<span class="signature">(<span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line181">line 181</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Logout user from server, fire off on all connections and remove all auth info</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Optional settings.</p>
+                
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>dbName</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Logout against different database than current.</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+            </td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Db~resultCallback</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>The command result callback</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+
+
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
         <h4 class="name" id="startSession">
             
             startSession<span class="signature">(<span class="optional">options</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="ClientSession.html">ClientSession</a>}</span>
@@ -7416,7 +7628,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line366">line 366</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line381">line 381</a>
         </div>
         
     </div>
@@ -7548,7 +7760,7 @@ newly established session
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line434">line 434</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line449">line 449</a>
         </div>
         
     </div>
@@ -8011,7 +8223,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line389">line 389</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line404">line 404</a>
         </div>
         
     </div>
@@ -8315,7 +8527,7 @@ ChangeStream instance.
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Mar 08 2019 10:24:05 GMT-0500 (Eastern Standard Time)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Mar 21 2019 10:24:18 GMT-0400 (EDT)
                     </footer>
                 </div>
             </td>

@@ -469,8 +469,6 @@
             
                 <li data-name="ClientSession#startTransaction"><a href="ClientSession.html#startTransaction">startTransaction</a></li>
             
-                <li data-name="ClientSession#withTransaction"><a href="ClientSession.html#withTransaction">withTransaction</a></li>
-            
             </ul>
             <ul class="events itemMembers">
             
@@ -885,8 +883,6 @@
                 <li data-name="Db#addUser"><a href="Db.html#addUser">addUser</a></li>
             
                 <li data-name="Db#admin"><a href="Db.html#admin">admin</a></li>
-            
-                <li data-name="Db#aggregate"><a href="Db.html#aggregate">aggregate</a></li>
             
                 <li data-name="Db#collection"><a href="Db.html#collection">collection</a></li>
             
@@ -1561,6 +1557,8 @@
             
                 <li data-name="MongoClient#isConnected"><a href="MongoClient.html#isConnected">isConnected</a></li>
             
+                <li data-name="MongoClient#logout"><a href="MongoClient.html#logout">logout</a></li>
+            
                 <li data-name="MongoClient#startSession"><a href="MongoClient.html#startSession">startSession</a></li>
             
                 <li data-name="MongoClient#watch"><a href="MongoClient.html#watch">watch</a></li>
@@ -2121,7 +2119,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line133">line 133</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line132">line 132</a>
         </div>
         
     </div>
@@ -3270,7 +3268,7 @@ Db instance.
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line827">line 827</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line781">line 781</a>
         </div>
         
     </div>
@@ -3721,7 +3719,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line310">line 310</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line271">line 271</a>
         </div>
         
     </div>
@@ -3794,780 +3792,6 @@ the new Admin db instance
             
 <dt>
     <div class="nameContainer">
-        <h4 class="name" id="aggregate">
-            
-            aggregate<span class="signature">(<span class="optional">pipeline</span>, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null|<a href="AggregationCursor.html">AggregationCursor</a>}</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line290">line 290</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Execute an aggregation framework pipeline against the database, needs MongoDB &gt;= 3.6</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		<th>Default</th>
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>pipeline</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-            
-            
-                <td class="default">
-                
-                    []
-                
-                </td>
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>Array containing all the aggregation framework commands for the execution.</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>options</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-            
-            
-                <td class="default">
-                
-                </td>
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>Optional settings.</p>
-                
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		<th>Default</th>
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>readPreference</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">ReadPreference</span>
-|
-
-<span class="param-type">string</span>
-
-
-            
-            </td>
-            
-            
-                <td class="default">
-                
-                </td>
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>cursor</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-            
-            
-                <td class="default">
-                
-                </td>
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>Return the query as cursor, on 2.6 &gt; it returns as a real cursor on pre 2.6 it returns as an emulated cursor.</p>
-                
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>batchSize</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>The batchSize for the cursor</p></td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-            </td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>explain</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-            
-            
-                <td class="default">
-                
-                    false
-                
-                </td>
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>Explain returns the aggregation execution plan (requires mongodb 2.6 &gt;).</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>allowDiskUse</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-            
-            
-                <td class="default">
-                
-                    false
-                
-                </td>
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>allowDiskUse lets the server know if it can use disk to store temporary results for the aggregation (requires mongodb 2.6 &gt;).</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>maxTimeMS</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-            
-            
-                <td class="default">
-                
-                </td>
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>maxTimeMS specifies a cumulative time limit in milliseconds for processing operations on the cursor. MongoDB interrupts the operation at the earliest following interrupt point.</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>bypassDocumentValidation</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-            
-            
-                <td class="default">
-                
-                    false
-                
-                </td>
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>Allow driver to bypass schema validation in MongoDB 3.2 or higher.</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>raw</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-            
-            
-                <td class="default">
-                
-                    false
-                
-                </td>
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>Return document results as raw BSON buffers.</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>promoteLongs</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-            
-            
-                <td class="default">
-                
-                    true
-                
-                </td>
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>Promotes Long values to number if they fit inside the 53 bits resolution.</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>promoteValues</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-            
-            
-                <td class="default">
-                
-                    true
-                
-                </td>
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>Promotes BSON values to native types where possible, set to false to only receive wrapper types.</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>promoteBuffers</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-            
-            
-                <td class="default">
-                
-                    false
-                
-                </td>
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>Promotes Binary BSON values to native Node Buffers.</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>collation</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-            
-            
-                <td class="default">
-                
-                </td>
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>Specify collation (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields).</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>comment</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-            
-            
-                <td class="default">
-                
-                </td>
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>Add a comment to an aggregation command</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>hint</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-|
-
-<span class="param-type">object</span>
-
-
-            
-            </td>
-            
-            
-                <td class="default">
-                
-                </td>
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>Add an index selection hint to an aggregation command</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>session</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type"><a href="ClientSession.html">ClientSession</a></span>
-
-
-            
-            </td>
-            
-            
-                <td class="default">
-                
-                </td>
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>optional session to use for this operation</p></td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-            </td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>callback</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type"><a href="Database.html#~aggregationCallback">Database~aggregationCallback</a></span>
-
-
-            
-            </td>
-            
-            
-                <td class="default">
-                
-                </td>
-            
-            
-            <td class="description last">
-                
-                    
-                    
-                        
-                    
-                
-                <p>The command result callback</p></td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-
-
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
         <h4 class="name" id="collection">
             
             collection<span class="signature">(name, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="Collection.html">Collection</a>}</span>
@@ -4575,7 +3799,7 @@ the new Admin db instance
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line362">line 362</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line316">line 316</a>
         </div>
         
     </div>
@@ -5169,7 +4393,7 @@ the new Collection instance if not in strict mode
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line705">line 705</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line659">line 659</a>
         </div>
         
     </div>
@@ -5383,7 +4607,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line260">line 260</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line259">line 259</a>
         </div>
         
     </div>
@@ -5658,7 +4882,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line466">line 466</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line420">line 420</a>
         </div>
         
     </div>
@@ -6638,7 +5862,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line758">line 758</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line712">line 712</a>
         </div>
         
     </div>
@@ -7372,7 +6596,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line649">line 649</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line603">line 603</a>
         </div>
         
     </div>
@@ -7614,7 +6838,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line675">line 675</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line629">line 629</a>
         </div>
         
     </div>
@@ -7828,7 +7052,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line794">line 794</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line748">line 748</a>
         </div>
         
     </div>
@@ -8530,7 +7754,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line604">line 604</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line558">line 558</a>
         </div>
         
     </div>
@@ -8847,7 +8071,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line722">line 722</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line676">line 676</a>
         </div>
         
     </div>
@@ -9122,7 +8346,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line911">line 911</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line865">line 865</a>
         </div>
         
     </div>
@@ -9443,7 +8667,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line520">line 520</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line474">line 474</a>
         </div>
         
     </div>
@@ -9778,7 +9002,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line893">line 893</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line847">line 847</a>
         </div>
         
     </div>
@@ -9992,7 +9216,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line846">line 846</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line800">line 800</a>
         </div>
         
     </div>
@@ -10347,7 +9571,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line625">line 625</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line579">line 579</a>
         </div>
         
     </div>
@@ -10659,7 +9883,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line862">line 862</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line816">line 816</a>
         </div>
         
     </div>
@@ -10901,7 +10125,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line491">line 491</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line445">line 445</a>
         </div>
         
     </div>
@@ -11145,7 +10369,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line922">line 922</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line876">line 876</a>
         </div>
         
     </div>
@@ -11216,7 +10440,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line942">line 942</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line896">line 896</a>
         </div>
         
     </div>
@@ -11685,7 +10909,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line316">line 316</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line277">line 277</a>
         </div>
         
     </div>
@@ -11830,7 +11054,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line965">line 965</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line919">line 919</a>
         </div>
         
     </div>
@@ -11912,7 +11136,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line985">line 985</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line939">line 939</a>
         </div>
         
     </div>
@@ -11994,7 +11218,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1012">line 1012</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line966">line 966</a>
         </div>
         
     </div>
@@ -12080,7 +11304,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1003">line 1003</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line957">line 957</a>
         </div>
         
     </div>
@@ -12162,7 +11386,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line974">line 974</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line928">line 928</a>
         </div>
         
     </div>
@@ -12248,7 +11472,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line994">line 994</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line948">line 948</a>
         </div>
         
     </div>
@@ -12330,7 +11554,7 @@ ChangeStream instance.
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Mar 08 2019 10:24:05 GMT-0500 (Eastern Standard Time)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Mar 21 2019 10:24:18 GMT-0400 (EDT)
                     </footer>
                 </div>
             </td>

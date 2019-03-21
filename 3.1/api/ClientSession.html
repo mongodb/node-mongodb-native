@@ -469,8 +469,6 @@
             
                 <li data-name="ClientSession#startTransaction"><a href="ClientSession.html#startTransaction">startTransaction</a></li>
             
-                <li data-name="ClientSession#withTransaction"><a href="ClientSession.html#withTransaction">withTransaction</a></li>
-            
             </ul>
             <ul class="events itemMembers">
             
@@ -885,8 +883,6 @@
                 <li data-name="Db#addUser"><a href="Db.html#addUser">addUser</a></li>
             
                 <li data-name="Db#admin"><a href="Db.html#admin">admin</a></li>
-            
-                <li data-name="Db#aggregate"><a href="Db.html#aggregate">aggregate</a></li>
             
                 <li data-name="Db#collection"><a href="Db.html#collection">collection</a></li>
             
@@ -1561,6 +1557,8 @@
             
                 <li data-name="MongoClient#isConnected"><a href="MongoClient.html#isConnected">isConnected</a></li>
             
+                <li data-name="MongoClient#logout"><a href="MongoClient.html#logout">logout</a></li>
+            
                 <li data-name="MongoClient#startSession"><a href="MongoClient.html#startSession">startSession</a></li>
             
                 <li data-name="MongoClient#watch"><a href="MongoClient.html#watch">watch</a></li>
@@ -2185,7 +2183,7 @@
     
         
         <div class="tag-source">
-            <a href="node_modules_mongodb-core_lib_sessions.js.html">node_modules/mongodb-core/lib/sessions.js</a>, <a href="node_modules_mongodb-core_lib_sessions.js.html#line225">line 225</a>
+            <a href="node_modules_mongodb-core_lib_sessions.js.html">node_modules/mongodb-core/lib/sessions.js</a>, <a href="node_modules_mongodb-core_lib_sessions.js.html#line224">line 224</a>
         </div>
         
     </div>
@@ -2317,7 +2315,7 @@ promise is returned if no callback is provided
     
         
         <div class="tag-source">
-            <a href="node_modules_mongodb-core_lib_sessions.js.html">node_modules/mongodb-core/lib/sessions.js</a>, <a href="node_modules_mongodb-core_lib_sessions.js.html#line138">line 138</a>
+            <a href="node_modules_mongodb-core_lib_sessions.js.html">node_modules/mongodb-core/lib/sessions.js</a>, <a href="node_modules_mongodb-core_lib_sessions.js.html#line137">line 137</a>
         </div>
         
     </div>
@@ -2433,7 +2431,7 @@ promise is returned if no callback is provided
     
         
         <div class="tag-source">
-            <a href="node_modules_mongodb-core_lib_sessions.js.html">node_modules/mongodb-core/lib/sessions.js</a>, <a href="node_modules_mongodb-core_lib_sessions.js.html#line204">line 204</a>
+            <a href="node_modules_mongodb-core_lib_sessions.js.html">node_modules/mongodb-core/lib/sessions.js</a>, <a href="node_modules_mongodb-core_lib_sessions.js.html#line203">line 203</a>
         </div>
         
     </div>
@@ -2565,7 +2563,7 @@ promise is returned if no callback is provided
     
         
         <div class="tag-source">
-            <a href="node_modules_mongodb-core_lib_sessions.js.html">node_modules/mongodb-core/lib/sessions.js</a>, <a href="node_modules_mongodb-core_lib_sessions.js.html#line109">line 109</a>
+            <a href="node_modules_mongodb-core_lib_sessions.js.html">node_modules/mongodb-core/lib/sessions.js</a>, <a href="node_modules_mongodb-core_lib_sessions.js.html#line108">line 108</a>
         </div>
         
     </div>
@@ -2718,7 +2716,7 @@ promise is returned if no callback is provided
     
         
         <div class="tag-source">
-            <a href="node_modules_mongodb-core_lib_sessions.js.html">node_modules/mongodb-core/lib/sessions.js</a>, <a href="node_modules_mongodb-core_lib_sessions.js.html#line154">line 154</a>
+            <a href="node_modules_mongodb-core_lib_sessions.js.html">node_modules/mongodb-core/lib/sessions.js</a>, <a href="node_modules_mongodb-core_lib_sessions.js.html#line153">line 153</a>
         </div>
         
     </div>
@@ -2843,7 +2841,7 @@ if the sessions are equal
     
         
         <div class="tag-source">
-            <a href="node_modules_mongodb-core_lib_sessions.js.html">node_modules/mongodb-core/lib/sessions.js</a>, <a href="node_modules_mongodb-core_lib_sessions.js.html#line165">line 165</a>
+            <a href="node_modules_mongodb-core_lib_sessions.js.html">node_modules/mongodb-core/lib/sessions.js</a>, <a href="node_modules_mongodb-core_lib_sessions.js.html#line164">line 164</a>
         </div>
         
     </div>
@@ -2914,7 +2912,7 @@ if the sessions are equal
     
         
         <div class="tag-source">
-            <a href="node_modules_mongodb-core_lib_sessions.js.html">node_modules/mongodb-core/lib/sessions.js</a>, <a href="node_modules_mongodb-core_lib_sessions.js.html#line172">line 172</a>
+            <a href="node_modules_mongodb-core_lib_sessions.js.html">node_modules/mongodb-core/lib/sessions.js</a>, <a href="node_modules_mongodb-core_lib_sessions.js.html#line171">line 171</a>
         </div>
         
     </div>
@@ -2990,7 +2988,7 @@ this session is currently in a transaction or not
     
         
         <div class="tag-source">
-            <a href="node_modules_mongodb-core_lib_sessions.js.html">node_modules/mongodb-core/lib/sessions.js</a>, <a href="node_modules_mongodb-core_lib_sessions.js.html#line181">line 181</a>
+            <a href="node_modules_mongodb-core_lib_sessions.js.html">node_modules/mongodb-core/lib/sessions.js</a>, <a href="node_modules_mongodb-core_lib_sessions.js.html#line180">line 180</a>
         </div>
         
     </div>
@@ -3095,158 +3093,6 @@ this session is currently in a transaction or not
     
 </dd>
 
-        
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="withTransaction">
-            
-            withTransaction<span class="signature">(fn, <span class="optional">options</span>)</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="node_modules_mongodb-core_lib_sessions.js.html">node_modules/mongodb-core/lib/sessions.js</a>, <a href="node_modules_mongodb-core_lib_sessions.js.html#line267">line 267</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Runs a provided lambda within a transaction, retrying either the commit operation<br>or entire transaction as needed (and when the error permits) to better ensure that<br>the transaction can complete successfully.</p>
-<p>IMPORTANT: This method requires the user to return a Promise, all lambdas that do not<br>return a Promise will result in undefined behavior.</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>fn</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type"><a href="global.html#WithTransactionCallback">WithTransactionCallback</a></span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                    
-                    
-                        
-                    
-                
-                </td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>options</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type"><a href="global.html#TransactionOptions">TransactionOptions</a></span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>Optional settings for the transaction</p></td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
         </dl>
     
     
@@ -3262,7 +3108,7 @@ this session is currently in a transaction or not
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Mar 08 2019 10:24:05 GMT-0500 (Eastern Standard Time)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Mar 21 2019 10:24:18 GMT-0400 (EDT)
                     </footer>
                 </div>
             </td>

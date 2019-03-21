@@ -469,8 +469,6 @@
             
                 <li data-name="ClientSession#startTransaction"><a href="ClientSession.html#startTransaction">startTransaction</a></li>
             
-                <li data-name="ClientSession#withTransaction"><a href="ClientSession.html#withTransaction">withTransaction</a></li>
-            
             </ul>
             <ul class="events itemMembers">
             
@@ -885,8 +883,6 @@
                 <li data-name="Db#addUser"><a href="Db.html#addUser">addUser</a></li>
             
                 <li data-name="Db#admin"><a href="Db.html#admin">admin</a></li>
-            
-                <li data-name="Db#aggregate"><a href="Db.html#aggregate">aggregate</a></li>
             
                 <li data-name="Db#collection"><a href="Db.html#collection">collection</a></li>
             
@@ -1561,6 +1557,8 @@
             
                 <li data-name="MongoClient#isConnected"><a href="MongoClient.html#isConnected">isConnected</a></li>
             
+                <li data-name="MongoClient#logout"><a href="MongoClient.html#logout">logout</a></li>
+            
                 <li data-name="MongoClient#startSession"><a href="MongoClient.html#startSession">startSession</a></li>
             
                 <li data-name="MongoClient#watch"><a href="MongoClient.html#watch">watch</a></li>
@@ -2104,6 +2102,7 @@ const deprecate = require('util').deprecate;
 const deprecateOptions = require('./utils').deprecateOptions;
 const checkCollectionName = require('./utils').checkCollectionName;
 const ObjectID = require('mongodb-core').BSON.ObjectID;
+const AggregationCursor = require('./aggregation_cursor');
 const MongoError = require('mongodb-core').MongoError;
 const toError = require('./utils').toError;
 const normalizeHintField = require('./utils').normalizeHintField;
@@ -2118,10 +2117,10 @@ const unordered = require('./bulk/unordered');
 const ordered = require('./bulk/ordered');
 const ChangeStream = require('./change_stream');
 const executeOperation = require('./utils').executeOperation;
+const applyWriteConcern = require('./utils').applyWriteConcern;
 const resolveReadPreference = require('./utils').resolveReadPreference;
 
 // Operations
-const aggregate = require('./operations/aggregate').aggregate;
 const bulkWrite = require('./operations/collection_ops').bulkWrite;
 const checkForAtomicOperators = require('./operations/collection_ops').checkForAtomicOperators;
 const count = require('./operations/collection_ops').count;
@@ -3533,7 +3532,7 @@ Collection.prototype.countDocuments = function(query, options, callback) {
 };
 
 /**
- * The distinct command returns a list of distinct values for the given key across a collection.
+ * The distinct command returns returns a list of distinct values for the given key across a collection.
  * @method
  * @param {string} key Field of the document to find distinct values for.
  * @param {object} query The query for filtering the set of documents to which we apply the distinct filter.
@@ -3832,7 +3831,97 @@ Collection.prototype.aggregate = function(pipeline, options, callback) {
     pipeline = args;
   }
 
-  return aggregate(this.s.db, this, pipeline, options, callback);
+  // Ignore readConcern option
+  let ignoreReadConcern = false;
+
+  // Build the command
+  const command = { aggregate: this.s.name, pipeline: pipeline };
+
+  // If out was specified
+  if (typeof options.out === 'string') {
+    pipeline.push({ $out: options.out });
+    // Ignore read concern
+    ignoreReadConcern = true;
+  } else if (pipeline.length > 0 &amp;&amp; pipeline[pipeline.length - 1]['$out']) {
+    ignoreReadConcern = true;
+  }
+
+  // Decorate command with writeConcern if out has been specified
+  if (
+    pipeline.length > 0 &amp;&amp;
+    pipeline[pipeline.length - 1]['$out'] &amp;&amp;
+    this.s.topology.capabilities().commandsTakeWriteConcern
+  ) {
+    applyWriteConcern(command, { db: this.s.db, collection: this }, options);
+  }
+
+  // Have we specified collation
+  try {
+    decorateWithCollation(command, this, options);
+  } catch (err) {
+    if (typeof callback === 'function') return callback(err, null);
+    throw err;
+  }
+
+  // If we have bypassDocumentValidation set
+  if (options.bypassDocumentValidation === true) {
+    command.bypassDocumentValidation = options.bypassDocumentValidation;
+  }
+
+  // Do we have a readConcern specified
+  if (!ignoreReadConcern) {
+    decorateWithReadConcern(command, this, options);
+  }
+
+  // If we have allowDiskUse defined
+  if (options.allowDiskUse) command.allowDiskUse = options.allowDiskUse;
+  if (typeof options.maxTimeMS === 'number') command.maxTimeMS = options.maxTimeMS;
+
+  // If we are giving a hint
+  if (options.hint) command.hint = options.hint;
+
+  options = Object.assign({}, options);
+  // Ensure we have the right read preference inheritance
+  options.readPreference = resolveReadPreference(options, { db: this.s.db, collection: this });
+
+  // If explain has been specified add it
+  if (options.explain) {
+    if (command.readConcern || command.writeConcern) {
+      throw toError('"explain" cannot be used on an aggregate call with readConcern/writeConcern');
+    }
+    command.explain = options.explain;
+  }
+
+  if (typeof options.comment === 'string') command.comment = options.comment;
+
+  // Validate that cursor options is valid
+  if (options.cursor != null &amp;&amp; typeof options.cursor !== 'object') {
+    throw toError('cursor options must be an object');
+  }
+
+  options.cursor = options.cursor || {};
+  if (options.batchSize) options.cursor.batchSize = options.batchSize;
+  command.cursor = options.cursor;
+
+  // promiseLibrary
+  options.promiseLibrary = this.s.promiseLibrary;
+
+  // Set the AggregationCursor constructor
+  options.cursorFactory = AggregationCursor;
+  if (typeof callback !== 'function') {
+    if (!this.s.topology.capabilities()) {
+      throw new MongoError('cannot connect to server');
+    }
+
+    // Allow disk usage command
+    if (typeof options.allowDiskUse === 'boolean') command.allowDiskUse = options.allowDiskUse;
+    if (typeof options.maxTimeMS === 'number') command.maxTimeMS = options.maxTimeMS;
+
+    // Execute the cursor
+    return this.s.topology.cursor(this.s.namespace, command, options);
+  }
+
+  return handleCallback(callback, null, this.s.topology.cursor(this.s.namespace, command, options));
 };
 
 /**
@@ -3883,7 +3972,7 @@ Collection.prototype.watch = function(pipeline, options) {
  * @param {Collection~parallelCollectionScanCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
-Collection.prototype.parallelCollectionScan = deprecate(function(options, callback) {
+Collection.prototype.parallelCollectionScan = function(options, callback) {
   if (typeof options === 'function') (callback = options), (options = { numCursors: 1 });
   // Set number of cursors to 1
   options.numCursors = options.numCursors || 1;
@@ -3903,7 +3992,7 @@ Collection.prototype.parallelCollectionScan = deprecate(function(options, callba
   return executeOperation(this.s.topology, parallelCollectionScan, [this, options, callback], {
     skipSessions: true
   });
-}, 'parallelCollectionScan is deprecated in MongoDB v4.1');
+};
 
 /**
  * Execute a geo search using a geo haystack index on a collection.
@@ -4116,7 +4205,7 @@ module.exports = Collection;
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Mar 08 2019 10:24:05 GMT-0500 (Eastern Standard Time)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Mar 21 2019 10:24:17 GMT-0400 (EDT)
                     </footer>
                 </div>
             </td>
