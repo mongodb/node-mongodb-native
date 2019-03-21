@@ -38,7 +38,7 @@ The following example demonstrates how to connect to a replica set and monitor a
 const MongoClient = require('mongodb').MongoClient;
 
 const url = 'mongodb://localhost:31000,localhost:31001/?replicaSet=rs';
-const client = new MongoClient();
+const client = new MongoClient(url);
 
 client.on('serverDescriptionChanged', function(event) {
   console.log('received serverDescriptionChanged');
