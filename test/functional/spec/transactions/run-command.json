@@ -267,7 +267,7 @@
           "arguments": {
             "options": {
               "readPreference": {
-                "mode": "secondary"
+                "mode": "Secondary"
               }
             }
           }

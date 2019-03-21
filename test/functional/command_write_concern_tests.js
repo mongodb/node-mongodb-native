@@ -30,7 +30,6 @@ describe('Command Write Concern', function() {
 
     test: function(done) {
       var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient,
         ObjectId = configuration.require.ObjectId;
 
       var electionIds = [new ObjectId(), new ObjectId()];
@@ -112,27 +111,28 @@ describe('Command Write Concern', function() {
         });
 
         var commandResult = null;
-        MongoClient.connect(
-          'mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs',
-          function(err, client) {
-            test.equal(null, err);
-            var db = client.db(configuration.db);
-
-            db
-              .collection('test')
-              .aggregate([{ $match: {} }, { $out: 'readConcernCollectionAggregate1Output' }], {
-                w: 2,
-                wtimeout: 1000
-              })
-              .toArray(function(err) {
-                test.equal(null, err);
-                test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
-
-                client.close();
-                done();
-              });
-          }
+        const client = configuration.newClient(
+          'mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs'
         );
+
+        client.connect(function(err, client) {
+          test.equal(null, err);
+          var db = client.db(configuration.db);
+
+          db
+            .collection('test')
+            .aggregate([{ $match: {} }, { $out: 'readConcernCollectionAggregate1Output' }], {
+              w: 2,
+              wtimeout: 1000
+            })
+            .toArray(function(err) {
+              test.equal(null, err);
+              test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
+
+              client.close();
+              done();
+            });
+        });
       });
     }
   });
@@ -147,7 +147,6 @@ describe('Command Write Concern', function() {
 
     test: function(done) {
       var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient,
         ObjectId = configuration.require.ObjectId,
         Long = configuration.require.Long;
 
@@ -242,21 +241,22 @@ describe('Command Write Concern', function() {
         var commandResult = null;
 
         // Connect to the mocks
-        MongoClient.connect(
-          'mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs',
-          function(err, client) {
-            test.equal(null, err);
-            var db = client.db(configuration.db);
-
-            db.createCollection('test_collection_methods', { w: 2, wtimeout: 1000 }, function(err) {
-              test.equal(null, err);
-              test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
-
-              client.close();
-              done();
-            });
-          }
+        const client = configuration.newClient(
+          'mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs'
         );
+
+        client.connect(function(err, client) {
+          test.equal(null, err);
+          var db = client.db(configuration.db);
+
+          db.createCollection('test_collection_methods', { w: 2, wtimeout: 1000 }, function(err) {
+            test.equal(null, err);
+            test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
+
+            client.close();
+            done();
+          });
+        });
       });
     }
   });
@@ -271,7 +271,6 @@ describe('Command Write Concern', function() {
 
     test: function(done) {
       var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient,
         ObjectId = configuration.require.ObjectId;
 
       var electionIds = [new ObjectId(), new ObjectId()];
@@ -356,29 +355,30 @@ describe('Command Write Concern', function() {
         var commandResult = null;
 
         // Connect to the mocks
-        MongoClient.connect(
-          'mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs',
-          function(err, client) {
-            test.equal(null, err);
-            var db = client.db(configuration.db);
-
-            db.collection('indexOptionDefault').createIndex(
-              { a: 1 },
-              {
-                indexOptionDefaults: true,
-                w: 2,
-                wtimeout: 1000
-              },
-              function(err) {
-                test.equal(null, err);
-                test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
-
-                client.close();
-                done();
-              }
-            );
-          }
+        const client = configuration.newClient(
+          'mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs'
         );
+
+        client.connect(function(err, client) {
+          test.equal(null, err);
+          var db = client.db(configuration.db);
+
+          db.collection('indexOptionDefault').createIndex(
+            { a: 1 },
+            {
+              indexOptionDefaults: true,
+              w: 2,
+              wtimeout: 1000
+            },
+            function(err) {
+              test.equal(null, err);
+              test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
+
+              client.close();
+              done();
+            }
+          );
+        });
       });
     }
   });
@@ -393,7 +393,6 @@ describe('Command Write Concern', function() {
 
     test: function(done) {
       var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient,
         ObjectId = configuration.require.ObjectId;
 
       var electionIds = [new ObjectId(), new ObjectId()];
@@ -477,27 +476,28 @@ describe('Command Write Concern', function() {
         var commandResult = null;
 
         // Connect to the mocks
-        MongoClient.connect(
-          'mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs',
-          function(err, client) {
-            test.equal(null, err);
-            var db = client.db(configuration.db);
-
-            db.collection('indexOptionDefault').drop(
-              {
-                w: 2,
-                wtimeout: 1000
-              },
-              function(err) {
-                test.equal(null, err);
-                test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
-
-                client.close();
-                done();
-              }
-            );
-          }
+        const client = configuration.newClient(
+          'mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs'
         );
+
+        client.connect(function(err, client) {
+          test.equal(null, err);
+          var db = client.db(configuration.db);
+
+          db.collection('indexOptionDefault').drop(
+            {
+              w: 2,
+              wtimeout: 1000
+            },
+            function(err) {
+              test.equal(null, err);
+              test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
+
+              client.close();
+              done();
+            }
+          );
+        });
       });
     }
   });
@@ -512,7 +512,6 @@ describe('Command Write Concern', function() {
 
     test: function(done) {
       var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient,
         ObjectId = configuration.require.ObjectId;
 
       var electionIds = [new ObjectId(), new ObjectId()];
@@ -596,27 +595,28 @@ describe('Command Write Concern', function() {
         var commandResult = null;
 
         // Connect to the mocks
-        MongoClient.connect(
-          'mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs',
-          function(err, client) {
-            test.equal(null, err);
-            var db = client.db(configuration.db);
-
-            db.dropDatabase(
-              {
-                w: 2,
-                wtimeout: 1000
-              },
-              function(err) {
-                test.equal(null, err);
-                test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
-
-                client.close();
-                done();
-              }
-            );
-          }
+        const client = configuration.newClient(
+          'mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs'
         );
+
+        client.connect(function(err, client) {
+          test.equal(null, err);
+          var db = client.db(configuration.db);
+
+          db.dropDatabase(
+            {
+              w: 2,
+              wtimeout: 1000
+            },
+            function(err) {
+              test.equal(null, err);
+              test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
+
+              client.close();
+              done();
+            }
+          );
+        });
       });
     }
   });
@@ -631,7 +631,6 @@ describe('Command Write Concern', function() {
 
     test: function(done) {
       var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient,
         ObjectId = configuration.require.ObjectId;
 
       var electionIds = [new ObjectId(), new ObjectId()];
@@ -715,27 +714,28 @@ describe('Command Write Concern', function() {
         var commandResult = null;
 
         // Connect to the mocks
-        MongoClient.connect(
-          'mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs',
-          function(err, client) {
-            test.equal(null, err);
-            var db = client.db(configuration.db);
-
-            db.collection('test').dropIndexes(
-              {
-                w: 2,
-                wtimeout: 1000
-              },
-              function(err) {
-                test.equal(null, err);
-                test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
-
-                client.close();
-                done();
-              }
-            );
-          }
+        const client = configuration.newClient(
+          'mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs'
         );
+
+        client.connect(function(err, client) {
+          test.equal(null, err);
+          var db = client.db(configuration.db);
+
+          db.collection('test').dropIndexes(
+            {
+              w: 2,
+              wtimeout: 1000
+            },
+            function(err) {
+              test.equal(null, err);
+              test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
+
+              client.close();
+              done();
+            }
+          );
+        });
       });
     }
   });
@@ -750,7 +750,6 @@ describe('Command Write Concern', function() {
 
     test: function(done) {
       var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient,
         ObjectId = configuration.require.ObjectId,
         Code = configuration.require.Code;
 
@@ -835,35 +834,36 @@ describe('Command Write Concern', function() {
         var commandResult = null;
 
         // Connect to the mocks
-        MongoClient.connect(
-          'mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs',
-          function(err, client) {
-            test.equal(null, err);
-            var db = client.db(configuration.db);
-
-            // String functions
-            var map = new Code('function() { emit(this.user_id, 1); }');
-            var reduce = new Code('function(k,vals) { return 1; }');
-
-            // db.collection('test').mapReduce({
-            db.collection('test').mapReduce(
-              map,
-              reduce,
-              {
-                out: { replace: 'tempCollection' },
-                w: 2,
-                wtimeout: 1000
-              },
-              function(err) {
-                test.equal(null, err);
-                test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
-
-                client.close();
-                done();
-              }
-            );
-          }
+        const client = configuration.newClient(
+          'mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs'
         );
+
+        client.connect(function(err, client) {
+          test.equal(null, err);
+          var db = client.db(configuration.db);
+
+          // String functions
+          var map = new Code('function() { emit(this.user_id, 1); }');
+          var reduce = new Code('function(k,vals) { return 1; }');
+
+          // db.collection('test').mapReduce({
+          db.collection('test').mapReduce(
+            map,
+            reduce,
+            {
+              out: { replace: 'tempCollection' },
+              w: 2,
+              wtimeout: 1000
+            },
+            function(err) {
+              test.equal(null, err);
+              test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
+
+              client.close();
+              done();
+            }
+          );
+        });
       });
     }
   });
@@ -878,7 +878,6 @@ describe('Command Write Concern', function() {
 
     test: function(done) {
       var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient,
         ObjectId = configuration.require.ObjectId;
 
       var electionIds = [new ObjectId(), new ObjectId()];
@@ -962,21 +961,22 @@ describe('Command Write Concern', function() {
         var commandResult = null;
 
         // Connect to the mocks
-        MongoClient.connect(
-          'mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs',
-          function(err, client) {
-            test.equal(null, err);
-            var db = client.db(configuration.db);
-
-            db.admin().addUser('kay:kay', 'abc123', { w: 2, wtimeout: 1000 }, function(err) {
-              test.equal(null, err);
-              test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
-
-              client.close();
-              done();
-            });
-          }
+        const client = configuration.newClient(
+          'mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs'
         );
+
+        client.connect(function(err, client) {
+          test.equal(null, err);
+          var db = client.db(configuration.db);
+
+          db.admin().addUser('kay:kay', 'abc123', { w: 2, wtimeout: 1000 }, function(err) {
+            test.equal(null, err);
+            test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
+
+            client.close();
+            done();
+          });
+        });
       });
     }
   });
@@ -991,7 +991,6 @@ describe('Command Write Concern', function() {
 
     test: function(done) {
       var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient,
         ObjectId = configuration.require.ObjectId;
 
       var electionIds = [new ObjectId(), new ObjectId()];
@@ -1075,21 +1074,22 @@ describe('Command Write Concern', function() {
         var commandResult = null;
 
         // Connect to the mocks
-        MongoClient.connect(
-          'mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs',
-          function(err, client) {
-            test.equal(null, err);
-            var db = client.db(configuration.db);
-
-            db.admin().removeUser('kay:kay', { w: 2, wtimeout: 1000 }, function(err) {
-              test.equal(null, err);
-              test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
-
-              client.close();
-              done();
-            });
-          }
+        const client = configuration.newClient(
+          'mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs'
         );
+
+        client.connect(function(err, client) {
+          test.equal(null, err);
+          var db = client.db(configuration.db);
+
+          db.admin().removeUser('kay:kay', { w: 2, wtimeout: 1000 }, function(err) {
+            test.equal(null, err);
+            test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
+
+            client.close();
+            done();
+          });
+        });
       });
     }
   });
@@ -1104,7 +1104,6 @@ describe('Command Write Concern', function() {
 
     test: function(done) {
       var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient,
         ObjectId = configuration.require.ObjectId;
 
       var electionIds = [new ObjectId(), new ObjectId()];
@@ -1188,30 +1187,31 @@ describe('Command Write Concern', function() {
         var commandResult = null;
 
         // Connect to the mocks
-        MongoClient.connect(
-          'mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs',
-          function(err, client) {
-            test.equal(null, err);
-            var db = client.db(configuration.db);
-
-            // Simple findAndModify command returning the new document
-            db
-              .collection('test')
-              .findAndModify(
-                { a: 1 },
-                [['a', 1]],
-                { $set: { b1: 1 } },
-                { new: true, w: 2, wtimeout: 1000 },
-                function(err) {
-                  test.equal(null, err);
-                  test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
-
-                  client.close();
-                  done();
-                }
-              );
-          }
+        const client = configuration.newClient(
+          'mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs'
         );
+
+        client.connect(function(err, client) {
+          test.equal(null, err);
+          var db = client.db(configuration.db);
+
+          // Simple findAndModify command returning the new document
+          db
+            .collection('test')
+            .findAndModify(
+              { a: 1 },
+              [['a', 1]],
+              { $set: { b1: 1 } },
+              { new: true, w: 2, wtimeout: 1000 },
+              function(err) {
+                test.equal(null, err);
+                test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
+
+                client.close();
+                done();
+              }
+            );
+        });
       });
     }
   });

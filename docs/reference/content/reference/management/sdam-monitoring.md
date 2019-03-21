@@ -85,7 +85,7 @@ client.on('topologyDescriptionChanged', function(event) {
   console.log(JSON.stringify(event, null, 2));
 });
 
-client.connect(url, function(err, client) {
+client.connect(function(err, client) {
   if(err) throw err;
 });
 ```

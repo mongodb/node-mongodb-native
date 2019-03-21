@@ -487,7 +487,7 @@ tests:
         data:
           - _id: 1
 
-  - description: commitTransaction succeeds after InterruptedDueToReplStateChange
+  - description: commitTransaction succeeds after InterruptedDueToStepDown 
 
     failPoint:
       configureFailPoint: failCommand
@@ -1106,7 +1106,7 @@ tests:
         data:
           - _id: 1
 
-  - description: commitTransaction succeeds after WriteConcernError InterruptedDueToReplStateChange
+  - description: commitTransaction succeeds after WriteConcernError InterruptedDueToStepDown 
 
     failPoint:
       configureFailPoint: failCommand

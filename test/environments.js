@@ -131,7 +131,7 @@ class ShardedEnvironment extends EnvironmentBase {
 
     this.host = 'localhost';
     this.port = 51000;
-    this.url = 'mongodb://%slocalhost:51000/integration_tests';
+    this.url = 'mongodb://%slocalhost:51000,localhost:51001/integration_tests';
     this.writeConcernMax = { w: 'majority', wtimeout: 30000 };
     this.topology = function(host, port, options) {
       options = options || {};
@@ -269,5 +269,10 @@ module.exports = {
   // informational aliases
   kerberos: SingleEnvironment,
   ldap: SingleEnvironment,
-  sni: SingleEnvironment
+  sni: SingleEnvironment,
+
+  // for compatability with evergreen template
+  server: SingleEnvironment,
+  replica_set: ReplicaSetEnvironment,
+  sharded_cluster: ShardedEnvironment
 };

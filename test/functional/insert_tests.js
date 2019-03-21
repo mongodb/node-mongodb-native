@@ -3,7 +3,8 @@ const test = require('./shared').assert,
   setupDatabase = require('./shared').setupDatabase,
   Script = require('vm'),
   expect = require('chai').expect,
-  normalizedFunctionString = require('bson/lib/bson/parser/utils').normalizedFunctionString;
+  normalizedFunctionString = require('bson/lib/bson/parser/utils').normalizedFunctionString,
+  Buffer = require('safe-buffer').Buffer;
 
 /**
  * Module for parsing an ISO 8601 formatted string into a Date object.
@@ -1443,19 +1444,13 @@ describe('Insert', function() {
         );
 
         // Upsert a new doc
-        collection.update({ a: 1 }, { a: 1 }, { upsert: true, w: 1, fullResult: true }, function(
-          err,
-          result
-        ) {
+        collection.update({ a: 1 }, { a: 1 }, { upsert: true, w: 1 }, function(err, result) {
           if (result.result.updatedExisting) test.equal(false, result.result.updatedExisting);
           test.equal(1, result.result.n);
           test.ok(result.result.upserted != null);
 
           // Upsert an existing doc
-          collection.update({ a: 1 }, { a: 1 }, { upsert: true, w: 1, fullResult: true }, function(
-            err,
-            result
-          ) {
+          collection.update({ a: 1 }, { a: 1 }, { upsert: true, w: 1 }, function(err, result) {
             if (result.updatedExisting) test.equal(true, result.updatedExisting);
             test.equal(1, result.result.n);
             client.close();
@@ -1567,11 +1562,11 @@ describe('Insert', function() {
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
         db.createCollection('shouldAttempToForceBsonSize', function(err, collection) {
-          // var doc = {a:1, b:new Binary(new Buffer(16777216)/5)}
+          // var doc = {a:1, b:new Binary(Buffer.alloc(16777216)/5)}
           var doc = [
-            { a: 1, b: new Binary(new Buffer(16777216 / 3)) },
-            { a: 1, b: new Binary(new Buffer(16777216 / 3)) },
-            { a: 1, b: new Binary(new Buffer(16777216 / 3)) }
+            { a: 1, b: new Binary(Buffer.alloc(16777216 / 3)) },
+            { a: 1, b: new Binary(Buffer.alloc(16777216 / 3)) },
+            { a: 1, b: new Binary(Buffer.alloc(16777216 / 3)) }
           ];
 
           collection.insert(doc, configuration.writeConcernMax(), function(err, result) {
@@ -1782,7 +1777,7 @@ describe('Insert', function() {
           symbol: new Symbol('abcdefghijkl'),
           objid: new ObjectID('abcdefghijkl'),
           double: new Double(1),
-          binary: new Binary(new Buffer('hello world')),
+          binary: new Binary(Buffer.from('hello world')),
           minkey: new MinKey(),
           maxkey: new MaxKey(),
           code: new Code('function () {}', { a: 55 })
@@ -1804,7 +1799,7 @@ describe('Insert', function() {
                 test.equal(null, err);
                 test.equal(1, doc.double);
 
-                collection.findOne({ binary: new Binary(new Buffer('hello world')) }, function(
+                collection.findOne({ binary: new Binary(Buffer.from('hello world')) }, function(
                   err,
                   doc
                 ) {
@@ -1872,7 +1867,7 @@ describe('Insert', function() {
           symbol: new Symbol('abcdefghijkl'),
           objid: new ObjectID('abcdefghijkl'),
           double: new Double(1),
-          binary: new Binary(new Buffer('hello world')),
+          binary: new Binary(Buffer.from('hello world')),
           minkey: new MinKey(),
           maxkey: new MaxKey(),
           code: new Code('function () {}', { a: 55 })
@@ -1894,7 +1889,7 @@ describe('Insert', function() {
                 test.equal(null, err);
                 test.equal(1, doc.double);
 
-                collection.findOne({ binary: new Binary(new Buffer('hello world')) }, function(
+                collection.findOne({ binary: new Binary(Buffer.from('hello world')) }, function(
                   err,
                   doc
                 ) {
@@ -2095,7 +2090,7 @@ describe('Insert', function() {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
-        var k = new Buffer(15);
+        var k = Buffer.alloc(15);
         for (var i = 0; i < 15; i++) k[i] = 0;
 
         k.write('hello');
@@ -2611,8 +2606,9 @@ describe('Insert', function() {
         var db = client.db(configuration.db);
         // Get collection
         var col = db.collection('insertManyMultipleWriteErrors2');
-        col.drop(function(err, r) {
-          expect(r).to.not.exist;
+        col.drop(function(/*err, r*/) {
+          // TODO: reenable once SERVER-36317 is resolved
+          // expect(r).to.not.exist;
 
           // Create unique index
           col.createIndex({ a: 1 }, { unique: true }, function(err, r) {
@@ -2652,8 +2648,9 @@ describe('Insert', function() {
         var db = client.db(configuration.db);
         // Get collection
         var col = db.collection('insertManyMultipleWriteErrors3');
-        col.drop(function(err, r) {
-          expect(r).to.not.exist;
+        col.drop(function(/*err, r*/) {
+          // TODO: reenable once SERVER-36317 is resolved
+          // expect(r).to.not.exist;
 
           // Create unique index
           col.createIndex({ a: 1 }, { unique: true }, function(err, r) {

@@ -10,7 +10,8 @@ describe('Reconnect', function() {
   /**
    * @ignore
    */
-  it('Should correctly stop reconnection attempts after limit reached', {
+  // NOTE: skipped for use of topology manager
+  it.skip('Should correctly stop reconnection attempts after limit reached', {
     metadata: { requires: { topology: ['single'] }, ignore: { travis: true } },
 
     // The actual test we wish to run
@@ -47,57 +48,54 @@ describe('Reconnect', function() {
   /**
    * @ignore
    */
-  it('Should correctly recover when bufferMaxEntries: -1 and multiple restarts', {
+  // NOTE: skipped for use of topology manager
+  it.skip('Should correctly recover when bufferMaxEntries: -1 and multiple restarts', {
     metadata: { requires: { topology: ['single'] }, ignore: { travis: true } },
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
-
-      MongoClient.connect(
-        'mongodb://localhost:27017/test',
-        {
-          db: { native_parser: true, bufferMaxEntries: -1 },
-          server: {
-            poolSize: 20,
-            socketOptions: { autoReconnect: true, keepAlive: true, keepAliveInitialDelay: 50 },
-            reconnectTries: 1000,
-            reconnectInterval: 1000
-          }
-        },
-        function(err, client) {
-          var db = client.db(configuration.db);
-          var col = db.collection('t');
-          var count = 1;
-
-          var execute = function() {
-            if (!done) {
-              col.insertOne({ a: 1, count: count }, function(err) {
-                test.equal(null, err);
-                count = count + 1;
-
-                col.findOne({}, function(err) {
-                  test.equal(null, err);
-                  setTimeout(execute, 500);
-                });
-              });
-            } else {
-              col.insertOne({ a: 1, count: count }, function(err) {
-                test.equal(null, err);
-
-                col.findOne({}, function(err) {
-                  test.equal(null, err);
-                  client.close();
-                  done();
-                });
-              });
-            }
-          };
-
-          setTimeout(execute, 500);
+      const configuration = this.configuration;
+      const client = configuration.newClient('mongodb://localhost:27017/test', {
+        db: { native_parser: true, bufferMaxEntries: -1 },
+        server: {
+          poolSize: 20,
+          socketOptions: { autoReconnect: true, keepAlive: true, keepAliveInitialDelay: 50 },
+          reconnectTries: 1000,
+          reconnectInterval: 1000
         }
-      );
+      });
+
+      client.connect(function(err, client) {
+        var db = client.db(configuration.db);
+        var col = db.collection('t');
+        var count = 1;
+
+        var execute = function() {
+          if (!done) {
+            col.insertOne({ a: 1, count: count }, function(err) {
+              test.equal(null, err);
+              count = count + 1;
+
+              col.findOne({}, function(err) {
+                test.equal(null, err);
+                setTimeout(execute, 500);
+              });
+            });
+          } else {
+            col.insertOne({ a: 1, count: count }, function(err) {
+              test.equal(null, err);
+
+              col.findOne({}, function(err) {
+                test.equal(null, err);
+                client.close();
+                done();
+              });
+            });
+          }
+        };
+
+        setTimeout(execute, 500);
+      });
 
       var count = 2;
 

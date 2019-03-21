@@ -211,7 +211,7 @@ The application should print **Connected successfully to server** to the console
 ### Insert a Document
 
 Add to **app.js** the following function which uses the **insertMany**
-method to add three documents to the **documents** collection.  
+method to add three documents to the **documents** collection.
 
 ```js
 const insertDocuments = function(db, callback) {
@@ -354,7 +354,7 @@ const updateDocument = function(db, callback) {
     assert.equal(1, result.result.n);
     console.log("Updated the document with the field a equal to 2");
     callback(result);
-  });  
+  });
 }
 ```
 
@@ -399,7 +399,7 @@ const removeDocument = function(db, callback) {
     assert.equal(1, result.result.n);
     console.log("Removed the document with the field a equal to 3");
     callback(result);
-  });    
+  });
 }
 ```
 
@@ -484,3 +484,10 @@ For more detailed information, see the [tutorials](docs/reference/content/tutori
  * [MongoDB Documentation](http://mongodb.org)
  * [Read about Schemas](http://learnmongodbthehardway.com)
  * [Star us on GitHub](https://github.com/mongodb/node-mongodb-native)
+
+## License
+
+[Apache 2.0](LICENSE.md)
+
+© 2009-2012 Christian Amor Kvalheim  
+© 2012-present MongoDB [Contributors](CONTRIBUTORS.md)

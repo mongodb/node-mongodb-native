@@ -27,11 +27,15 @@ describe('Custom PK', function() {
         return new ObjectID('aaaaaaaaaaaa');
       };
 
-      var client = configuration.newClient({
-        w: 1,
-        poolSize: 1,
-        pkFactory: CustomPKFactory
-      });
+      var client = configuration.newClient(
+        {
+          w: 1,
+          poolSize: 1
+        },
+        {
+          pkFactory: CustomPKFactory
+        }
+      );
 
       client.connect(function(err, client) {
         var db = client.db(configuration.db);

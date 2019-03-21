@@ -5,28 +5,50 @@ cache: yarn
 
 jobs:
   include:
-    - stage: tests
+    - stage: standalone
       node_js: 4
       env: MONGODB_VERSION=2.6.x
-    - stage: tests
+    - stage: standalone
       node_js: 4
       env: MONGODB_VERSION=3.0.x
-    - stage: tests
+    - stage: standalone
       node_js: 4
       env: MONGODB_VERSION=3.2.x
-    - stage: tests
+    - stage: standalone
       node_js: 4
       env: MONGODB_VERSION=3.4.x
-    - stage: tests
+    - stage: standalone
       node_js: 4
       env: MONGODB_VERSION=3.6.x
+    - stage: standalone
+      node_js: 4
+      env: MONGODB_VERSION=4.0.x
 
-    - stage: tests
+    - stage: standalone
       node_js: 6
-      env: MONGODB_VERSION=3.6.x
-    - stage: tests
+      env: MONGODB_VERSION=4.0.x
+    - stage: standalone
       node_js: 8
-      env: MONGODB_VERSION=3.6.x
-    - stage: tests
+      env: MONGODB_VERSION=4.0.x
+    - stage: standalone
       node_js: 10
-      env: MONGODB_VERSION=3.6.x
+      env: MONGODB_VERSION=4.0.x
+
+    - stage: replicaset
+      node_js: 4
+      env:
+        - MONGODB_VERSION=4.0.x
+        - MONGODB_ENVIRONMENT=replicaset
+    - stage: sharded
+      node_js: 4
+      env:
+        - MONGODB_VERSION=4.0.x
+        - MONGODB_ENVIRONMENT=sharded
+
+  allow_failures:
+    - env:
+        - MONGODB_VERSION=4.0.x
+        - MONGODB_ENVIRONMENT=replicaset
+    - env:
+        - MONGODB_VERSION=4.0.x
+        - MONGODB_ENVIRONMENT=sharded

@@ -184,6 +184,7 @@
           },
           "result": {
             "deletedCount": 4,
+            "insertedCount": 6,
             "insertedIds": {
               "0": 1,
               "3": 3,
