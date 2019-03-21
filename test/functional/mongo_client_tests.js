@@ -812,14 +812,14 @@ describe('MongoClient', function() {
     // The actual test we wish to run
     test: function(done) {
       const configuration = this.configuration;
-      const url = `mongodb://${configuration.host}:${configuration.port}/?compressors=snappy`;
+      const url = `mongodb://${configuration.host}:${configuration.port}/?compressors=zlib`;
       const client = configuration.newClient(url, { useNewUrlParser: true });
 
       client.connect(function(err, client) {
         const db = client.db('integration_tests');
         db.collection('new_mongo_client_collection').insertOne({ a: 1 }, (err, r) => {
           expect(err).to.not.exist;
-          expect(r.message.fromCompressed).to.be.true;
+          expect(r.connection.options.compression).to.deep.equal({ compressors: ['zlib'] });
           client.close();
           done();
         });
