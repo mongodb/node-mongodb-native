@@ -100,7 +100,14 @@ function checkSupportedServer(ismaster, options) {
   return new MongoError(message);
 }
 
-function performInitialHandshake(conn, options, callback) {
+function performInitialHandshake(conn, options, _callback) {
+  const callback = function(err, ret) {
+    if (err && conn) {
+      conn.destroy();
+    }
+    _callback(err, ret);
+  };
+
   let compressors = [];
   if (options.compression && options.compression.compressors) {
     compressors = options.compression.compressors;
@@ -229,7 +236,7 @@ function parseSslOptions(family, options) {
   return result;
 }
 
-function makeConnection(family, options, callback) {
+function makeConnection(family, options, _callback) {
   const useSsl = typeof options.ssl === 'boolean' ? options.ssl : false;
   const keepAlive = typeof options.keepAlive === 'boolean' ? options.keepAlive : true;
   let keepAliveInitialDelay =
@@ -246,6 +253,13 @@ function makeConnection(family, options, callback) {
   }
 
   let socket;
+  const callback = function(err, ret) {
+    if (err && socket) {
+      socket.destroy();
+    }
+    _callback(err, ret);
+  };
+
   try {
     if (useSsl) {
       socket = tls.connect(parseSslOptions(family, options));
