@@ -155,7 +155,7 @@ function performInitialHandshake(conn, options, callback) {
     conn.lastIsMasterMS = new Date().getTime() - start;
 
     const credentials = options.credentials;
-    if (credentials) {
+    if (!ismaster.arbiterOnly && credentials) {
       credentials.resolveAuthMechanism(ismaster);
       authenticate(conn, credentials, callback);
       return;
