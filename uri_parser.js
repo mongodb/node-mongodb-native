@@ -197,10 +197,17 @@ const CASE_TRANSLATION = {
   serverselectiontimeoutms: 'serverSelectionTimeoutMS',
   serverselectiontryonce: 'serverSelectionTryOnce',
   heartbeatfrequencyms: 'heartbeatFrequencyMS',
-  appname: 'appName',
   retrywrites: 'retryWrites',
   uuidrepresentation: 'uuidRepresentation',
-  zlibcompressionlevel: 'zlibCompressionLevel'
+  zlibcompressionlevel: 'zlibCompressionLevel',
+  tlsallowinvalidcertificates: 'tlsAllowInvalidCertificates',
+  tlsallowinvalidhostnames: 'tlsAllowInvalidHostnames',
+  tlsinsecure: 'tlsInsecure',
+  tlscafile: 'tlsCAFile',
+  tlscertificatekeyfile: 'tlsCertificateKeyFile',
+  tlscertificatekeyfilepassword: 'tlsCertificateKeyFilePassword',
+  wtimeout: 'wTimeoutMS',
+  j: 'journal'
 };
 
 /**
@@ -225,6 +232,7 @@ function applyConnectionStringOption(obj, key, value, options) {
   } else if (key === 'appname') {
     value = decodeURIComponent(value);
   } else if (key === 'readconcernlevel') {
+    obj['readConcernLevel'] = value;
     key = 'readconcern';
     value = { level: value };
   }
@@ -256,18 +264,16 @@ function applyConnectionStringOption(obj, key, value, options) {
     throw new MongoParseError('zlibCompressionLevel must be an integer between -1 and 9');
   }
 
-  // special cases
-  if (key === 'compressors' || key === 'zlibcompressionlevel') {
-    obj.compression = obj.compression || {};
-    obj = obj.compression;
-  }
-
   if (key === 'authmechanismproperties') {
     if (typeof value.SERVICE_NAME === 'string') obj.gssapiServiceName = value.SERVICE_NAME;
     if (typeof value.SERVICE_REALM === 'string') obj.gssapiServiceRealm = value.SERVICE_REALM;
     if (typeof value.CANONICALIZE_HOST_NAME !== 'undefined') {
       obj.gssapiCanonicalizeHostName = value.CANONICALIZE_HOST_NAME;
     }
+  }
+
+  if (key === 'readpreferencetags' && Array.isArray(value)) {
+    value = splitArrayOfMultipleReadPreferenceTags(value);
   }
 
   // set the actual value
@@ -286,6 +292,20 @@ const USERNAME_REQUIRED_MECHANISMS = new Set([
   'SCRAM-SHA-1',
   'SCRAM-SHA-256'
 ]);
+
+function splitArrayOfMultipleReadPreferenceTags(value) {
+  const parsedTags = [];
+
+  for (let i = 0; i < value.length; i++) {
+    parsedTags[i] = {};
+    value[i].split(',').forEach(individualTag => {
+      const splitTag = individualTag.split(':');
+      parsedTags[i][splitTag[0]] = splitTag[1];
+    });
+  }
+
+  return parsedTags;
+}
 
 /**
  * Modifies the parsed connection string object taking into account expectations we
@@ -364,6 +384,8 @@ function parseQueryString(query, options) {
   const result = {};
   let parsedQueryString = qs.parse(query);
 
+  checkTLSOptions(parsedQueryString);
+
   for (const key in parsedQueryString) {
     const value = parsedQueryString[key];
     if (value === '' || value == null) {
@@ -382,6 +404,66 @@ function parseQueryString(query, options) {
   }
 
   return Object.keys(result).length ? result : null;
+}
+
+/**
+ * Checks a query string for invalid tls options according to the URI options spec.
+ *
+ * @param {string} queryString The query string to check
+ * @throws {MongoParseError}
+ */
+function checkTLSOptions(queryString) {
+  const queryStringKeys = Object.keys(queryString);
+  if (
+    queryStringKeys.indexOf('tlsInsecure') !== -1 &&
+    (queryStringKeys.indexOf('tlsAllowInvalidCertificates') !== -1 ||
+      queryStringKeys.indexOf('tlsAllowInvalidHostnames') !== -1)
+  ) {
+    throw new MongoParseError(
+      'The `tlsInsecure` option cannot be used with `tlsAllowInvalidCertificates` or `tlsAllowInvalidHostnames`.'
+    );
+  }
+
+  const tlsValue = assertTlsOptionsAreEqual('tls', queryString, queryStringKeys);
+  const sslValue = assertTlsOptionsAreEqual('ssl', queryString, queryStringKeys);
+
+  if (tlsValue != null && sslValue != null) {
+    if (tlsValue !== sslValue) {
+      throw new MongoParseError('All values of `tls` and `ssl` must be the same.');
+    }
+  }
+}
+
+/**
+ * Checks a query string to ensure all tls/ssl options are the same.
+ *
+ * @param {string} key The key (tls or ssl) to check
+ * @param {string} queryString The query string to check
+ * @throws {MongoParseError}
+ * @return The value of the tls/ssl option
+ */
+function assertTlsOptionsAreEqual(optionName, queryString, queryStringKeys) {
+  const queryStringHasTLSOption = queryStringKeys.indexOf(optionName) !== -1;
+
+  let optionValue;
+  if (Array.isArray(queryString[optionName])) {
+    optionValue = queryString[optionName][0];
+  } else {
+    optionValue = queryString[optionName];
+  }
+
+  if (queryStringHasTLSOption) {
+    if (Array.isArray(queryString[optionName])) {
+      const firstValue = queryString[optionName][0];
+      queryString[optionName].forEach(tlsValue => {
+        if (tlsValue !== firstValue) {
+          throw new MongoParseError('All values of ${optionName} must be the same.');
+        }
+      });
+    }
+  }
+
+  return optionValue;
 }
 
 const PROTOCOL_MONGODB = 'mongodb';
