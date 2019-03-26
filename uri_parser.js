@@ -264,6 +264,12 @@ function applyConnectionStringOption(obj, key, value, options) {
     throw new MongoParseError('zlibCompressionLevel must be an integer between -1 and 9');
   }
 
+  // special cases
+  if (key === 'compressors' || key === 'zlibcompressionlevel') {
+    obj.compression = obj.compression || {};
+    obj = obj.compression;
+  }
+
   if (key === 'authmechanismproperties') {
     if (typeof value.SERVICE_NAME === 'string') obj.gssapiServiceName = value.SERVICE_NAME;
     if (typeof value.SERVICE_REALM === 'string') obj.gssapiServiceRealm = value.SERVICE_REALM;
