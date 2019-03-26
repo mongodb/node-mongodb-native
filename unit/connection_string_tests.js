@@ -100,8 +100,11 @@ describe('Connection String', function() {
       'mongodb://localhost/?compressors=zlib&zlibCompressionLevel=4',
       (err, result) => {
         expect(err).to.not.exist;
-        expect(result.options.compressors).to.eql(['zlib']);
-        expect(result.options.zlibCompressionLevel).to.equal(4);
+        expect(result.options).to.have.property('compression');
+        expect(result.options.compression).to.eql({
+          compressors: ['zlib'],
+          zlibCompressionLevel: 4
+        });
 
         done();
       }
