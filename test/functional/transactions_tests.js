@@ -324,6 +324,7 @@ function runTestSuiteTest(configuration, spec, context) {
   // test-specific client optionss
   clientOptions.autoReconnect = false;
   clientOptions.haInterval = 100;
+  clientOptions.useRecoveryToken = true;
 
   const url = resolveConnectionString(configuration, spec);
   const client = configuration.newClient(url, clientOptions);

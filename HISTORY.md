@@ -2,6 +2,56 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="3.2.2"></a>
+## [3.2.2](https://github.com/mongodb/node-mongodb-native/compare/v3.2.1...v3.2.2) (2019-03-22)
+
+
+### Bug Fixes
+
+* **asyncIterator:** stronger guard against importing async generator ([e0826fb](https://github.com/mongodb/node-mongodb-native/commit/e0826fb))
+
+
+### Features
+
+* update to mongodb-core v3.2.2 ([868cfc3](https://github.com/mongodb/node-mongodb-native/commit/868cfc3))
+
+
+
+<a name="3.2.1"></a>
+## [3.2.1](https://github.com/mongodb/node-mongodb-native/compare/v3.2.0...v3.2.1) (2019-03-21)
+
+
+### Features
+
+* **core:** update to mongodb-core v3.2.1 ([30b0100](https://github.com/mongodb/node-mongodb-native/commit/30b0100))
+
+
+
+<a name="3.2.0"></a>
+# [3.2.0](https://github.com/mongodb/node-mongodb-native/compare/v3.1.13...v3.2.0) (2019-03-21)
+
+
+### Bug Fixes
+
+* **aggregate:** do not send batchSize for aggregation with $out ([ddb8d90](https://github.com/mongodb/node-mongodb-native/commit/ddb8d90))
+* **bulkWrite:** always count undefined values in bson size for bulk ([436d340](https://github.com/mongodb/node-mongodb-native/commit/436d340))
+* **db_ops:** rename db to add user on ([79931af](https://github.com/mongodb/node-mongodb-native/commit/79931af))
+* **mongo_client_ops:** only skip authentication if no authMechanism is specified ([3b6957d](https://github.com/mongodb/node-mongodb-native/commit/3b6957d))
+* **mongo-client:** ensure close callback is called with client ([f39e881](https://github.com/mongodb/node-mongodb-native/commit/f39e881))
+
+
+### Features
+
+* **core:** pin to mongodb-core v3.2.0 ([22af15a](https://github.com/mongodb/node-mongodb-native/commit/22af15a))
+* **Cursor:** adds support for AsyncIterator in cursors ([b972c1e](https://github.com/mongodb/node-mongodb-native/commit/b972c1e))
+* **db:** add database-level aggregation ([b629b21](https://github.com/mongodb/node-mongodb-native/commit/b629b21))
+* **mongo-client:** remove deprecated `logout` and print warning ([542859d](https://github.com/mongodb/node-mongodb-native/commit/542859d))
+* **topology-base:** support passing callbacks to `close` method ([7c111e0](https://github.com/mongodb/node-mongodb-native/commit/7c111e0))
+* **transactions:** support pinning mongos for sharded txns ([3886127](https://github.com/mongodb/node-mongodb-native/commit/3886127))
+* **unified-sdam:** backport unified SDAM to master for v3.2.0 ([79f33ca](https://github.com/mongodb/node-mongodb-native/commit/79f33ca))
+
+
+
 <a name="3.1.13"></a>
 ## [3.1.13](https://github.com/mongodb/node-mongodb-native/compare/v3.1.12...v3.1.13) (2019-01-23)
 
@@ -219,6 +269,19 @@ All notable changes to this project will be documented in this file. See [standa
 ### Reverts
 
 * **collection:** reverting collection-mapping features ([7298c76](https://github.com/mongodb/node-mongodb-native/commit/7298c76)), closes [#1698](https://github.com/mongodb/node-mongodb-native/issues/1698) [mongodb/js-bson#253](https://github.com/mongodb/js-bson/issues/253)
+
+
+
+<a name="3.1.1"></a>
+## [3.1.1](https://github.com/mongodb/node-mongodb-native/compare/v3.1.0...v3.1.1) (2018-07-05)
+
+
+### Bug Fixes
+
+* **client-ops:** return transform map to map rather than function ([b8b4bfa](https://github.com/mongodb/node-mongodb-native/commit/b8b4bfa))
+* **collection:** correctly shallow clone passed in options ([2e6c4fa](https://github.com/mongodb/node-mongodb-native/commit/2e6c4fa))
+* **collection:** countDocuments throws error when query doesn't match docs ([4e83556](https://github.com/mongodb/node-mongodb-native/commit/4e83556))
+* **server:** remove unnecessary print statement ([20e11b3](https://github.com/mongodb/node-mongodb-native/commit/20e11b3))
 
 
 

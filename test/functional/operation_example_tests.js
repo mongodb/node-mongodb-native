@@ -1,9 +1,12 @@
 'use strict';
-const test = require('./shared').assert,
-  setupDatabase = require('./shared').setupDatabase,
-  f = require('util').format,
-  expect = require('chai').expect,
-  Buffer = require('safe-buffer').Buffer;
+const test = require('./shared').assert;
+const setupDatabase = require('./shared').setupDatabase;
+const f = require('util').format;
+const Buffer = require('safe-buffer').Buffer;
+
+const chai = require('chai');
+const expect = chai.expect;
+chai.use(require('chai-subset'));
 
 describe('Operation Examples', function() {
   before(function() {
@@ -5135,11 +5138,7 @@ describe('Operation Examples', function() {
         // List all the available databases
         adminDb.listDatabases({ nameOnly: 1 }, function(err, dbs) {
           expect(err).to.not.exist;
-          expect(dbs.databases).to.include.deep.members([
-            {
-              name: 'admin'
-            }
-          ]);
+          expect(dbs.databases).to.containSubset([{ name: 'admin' }]);
 
           client.close();
           done();

@@ -5,24 +5,13 @@ var f = require('util').format;
 const expect = require('chai').expect;
 
 describe('ReadConcern', function() {
-  before(function(done) {
+  before(function() {
     var configuration = this.configuration;
-    setupDatabase(configuration).then(function() {
-      configuration.restart({ purge: false, kill: true }, function() {
-        done();
-      });
-    });
-  });
-
-  after(function(done) {
-    var configuration = this.configuration;
-    configuration.restart({ purge: false, kill: true }, function() {
-      done();
-    });
+    return setupDatabase(configuration);
   });
 
   it('Should set local readConcern on db level', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>= 2.4.X' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2' } },
 
     test: function(done) {
       var listener = require('../..').instrument(function(err) {
@@ -68,7 +57,7 @@ describe('ReadConcern', function() {
   });
 
   it('Should set majority readConcern on db level', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.1.7' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2' } },
 
     test: function(done) {
       var listener = require('../..').instrument(function(err) {
@@ -114,7 +103,7 @@ describe('ReadConcern', function() {
   });
 
   it('Should set local readConcern at collection level', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>= 2.4.X' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2' } },
 
     test: function(done) {
       var listener = require('../..').instrument(function(err) {
@@ -157,7 +146,7 @@ describe('ReadConcern', function() {
   });
 
   it('Should set majority readConcern at collection level', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.1.7' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2' } },
 
     test: function(done) {
       var listener = require('../..').instrument(function(err) {
@@ -203,7 +192,7 @@ describe('ReadConcern', function() {
   });
 
   it('Should set local readConcern using MongoClient', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>= 2.4.X' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2' } },
 
     test: function(done) {
       var configuration = this.configuration;
@@ -251,7 +240,7 @@ describe('ReadConcern', function() {
   });
 
   it('Should set majority readConcern using MongoClient', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.1.7' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2' } },
 
     test: function(done) {
       var configuration = this.configuration;
@@ -299,7 +288,7 @@ describe('ReadConcern', function() {
   });
 
   it('Should set majority readConcern using MongoClient with options', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.1.7' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2' } },
 
     test: function(done) {
       var configuration = this.configuration;
@@ -382,7 +371,8 @@ describe('ReadConcern', function() {
 
         // Execute find
         collection.find().toArray(function(err) {
-          test.equal(null, err);
+          expect(err).to.exist;
+
           listener.uninstrument();
           client.close();
           done();
@@ -392,7 +382,7 @@ describe('ReadConcern', function() {
   });
 
   it('Should set majority readConcern aggregate command', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2.0' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2' } },
 
     test: function(done) {
       var listener = require('../..').instrument(function(err) {
@@ -445,7 +435,7 @@ describe('ReadConcern', function() {
   });
 
   it('Should set majority readConcern aggregate command but ignore due to out', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2.0' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2' } },
 
     test: function(done) {
       var listener = require('../..').instrument(function(err) {
@@ -511,7 +501,7 @@ describe('ReadConcern', function() {
   });
 
   it('Should set majority readConcern mapReduce command but be ignored', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2.0' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2' } },
 
     test: function(done) {
       var listener = require('../..').instrument(function(err) {
@@ -575,7 +565,7 @@ describe('ReadConcern', function() {
   });
 
   it('Should set majority readConcern distinct command', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2.0' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2' } },
 
     test: function(done) {
       var listener = require('../..').instrument(function(err) {
@@ -642,7 +632,7 @@ describe('ReadConcern', function() {
   });
 
   it('Should set majority readConcern count command', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2.0' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2' } },
 
     test: function(done) {
       var listener = require('../..').instrument(function(err) {
@@ -709,7 +699,7 @@ describe('ReadConcern', function() {
   });
 
   it('Should set majority readConcern group command', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.2.0 <=4.1.0' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.2 <=4.1.0' } },
 
     test: function(done) {
       var listener = require('../..').instrument(function(err) {
@@ -782,7 +772,7 @@ describe('ReadConcern', function() {
   });
 
   it('Should set majority readConcern parallelCollectionScan command', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2.0 <=4.1.0' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2 <=4.1.0' } },
 
     test: function(done) {
       var listener = require('../..').instrument(function(err) {
@@ -849,7 +839,7 @@ describe('ReadConcern', function() {
   });
 
   it('Should set majority readConcern geoSearch command', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2.0' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2' } },
 
     test: function(done) {
       var listener = require('../..').instrument(function(err) {
