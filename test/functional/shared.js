@@ -36,7 +36,8 @@ function setupDatabase(configuration, dbsToClean) {
             .then(() => client.db(dbName).dropDatabase({ writeConcern: { w: 1 } })),
         Promise.resolve()
       )
-    );
+    )
+    .then(() => client.close(), () => client.close());
 }
 
 function makeCleanupFn(client) {
