@@ -27,10 +27,13 @@ describe('Change Streams', function() {
     const configuration = this.configuration;
     const client = configuration.newClient();
 
-    return client.connect().then(() => {
-      const db = client.db('integration_tests');
-      return db.createCollection('test');
-    });
+    return client
+      .connect()
+      .then(() => {
+        const db = client.db('integration_tests');
+        return db.createCollection('test');
+      })
+      .then(() => client.close(), () => client.close());
   });
 
   it('Should create a Change Stream on a collection and emit `change` events', {
