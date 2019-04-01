@@ -225,7 +225,8 @@ function shouldSkipTest(spec) {
     // commitTransaction retry seems to be swallowed by mongos in these three cases
     'commitTransaction retry succeeds on new mongos',
     'commitTransaction retry fails on new mongos',
-    'unpin after transient error within a transaction and commit'
+    'unpin after transient error within a transaction and commit',
+    'count'
   ];
 
   if (spec.skipReason || SKIP_TESTS.indexOf(spec.description) !== -1) {
