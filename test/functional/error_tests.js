@@ -290,7 +290,7 @@ describe.skip('Errors', function() {
             .collection('throwerrorduringoperation')
             .find()
             .toArray(function() {
-                err = a; // eslint-disable-line
+              err = a; // eslint-disable-line
             });
         });
       });
