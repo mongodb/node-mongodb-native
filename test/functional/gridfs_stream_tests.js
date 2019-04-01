@@ -1042,6 +1042,10 @@ describe('GridFS Stream', function() {
 
     // The actual test we wish to run
     test: function(done) {
+      if (typeof stream.pipeline !== 'function') {
+        this.skip();
+      }
+
       const configuration = this.configuration;
       const GridFSBucket = configuration.require.GridFSBucket;
 
@@ -1060,10 +1064,10 @@ describe('GridFS Stream', function() {
           const downloadStream = bucket.openDownloadStreamByName('test', range);
           const outputStream = fs.createWriteStream('output');
           stream.pipeline(downloadStream, outputStream, err => {
-            expect(err).to.be.null;
+            expect(err).to.not.exist;
             client.close();
             fs.stat('output', (err, stats) => {
-              expect(err).to.be.null;
+              expect(err).to.not.exist;
               expect(range.end - range.start).to.equal(stats.size);
               done();
             });
