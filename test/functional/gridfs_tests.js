@@ -229,7 +229,7 @@ describe('GridFS', function() {
             gridStore.close(function(err) {
               expect(err).to.not.exist;
 
-              // Assert that we have overwriten the data
+              // Assert that we have overwritten the data
               GridStore.read(db, 'test_gs_read_length', 5, function(err, data) {
                 expect(err).to.not.exist;
                 test.equal('hello', data.toString());
@@ -268,7 +268,7 @@ describe('GridFS', function() {
             gridStore.close(function(err) {
               expect(err).to.not.exist;
 
-              // Assert that we have overwriten the data
+              // Assert that we have overwritten the data
               GridStore.read(db, 'test_gs_read_with_offset', 5, 7, function(err, data) {
                 expect(err).to.not.exist;
                 test.equal('world', data.toString());
@@ -641,7 +641,7 @@ describe('GridFS', function() {
             expect(err).to.not.exist;
             gridStore.close(function(err) {
               expect(err).to.not.exist;
-              // Assert that we have overwriten the data
+              // Assert that we have overwritten the data
               GridStore.read(db, 'test_gs_working_field_read', function(err, fileData) {
                 expect(err).to.not.exist;
                 test.equal(data.length, fileData.length);
@@ -897,7 +897,7 @@ describe('GridFS', function() {
             gridStore.close(function(err) {
               expect(err).to.not.exist;
 
-              // Assert that we have overwriten the data
+              // Assert that we have overwritten the data
               GridStore.read(db, 'test_gs_weird_bug', function(err, fileData) {
                 expect(err).to.not.exist;
                 test.equal(data.length, fileData.length);
@@ -2499,7 +2499,7 @@ describe('GridFS', function() {
                   gridStore2.close(function(err) {
                     expect(err).to.not.exist;
 
-                    // Assert that we have overwriten the data
+                    // Assert that we have overwritten the data
                     GridStore.read(db, 'test_gs_overwrite', function(err, data) {
                       expect(err).to.not.exist;
                       test.equal('overwrite', data.toString());
@@ -2890,7 +2890,7 @@ describe('GridFS', function() {
             gridStore.close(function(err) {
               expect(err).to.not.exist;
 
-              // Assert that we have overwriten the data
+              // Assert that we have overwritten the data
               GridStore.read(db, 'test_gs_check_high_bits', function(err, fileData) {
                 expect(err).to.not.exist;
                 // change testvalue into a string like "0,1,2,...,255"

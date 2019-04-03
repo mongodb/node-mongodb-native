@@ -2365,7 +2365,7 @@ describe('Operation (Promises)', function() {
             test.ok(err.message.length > 0);
 
             // Attemp to rename the first collection to a name that does not exist
-            // this will be succesful
+            // this will be successful
             return collection1.rename('test_rename_collection3_with_promise');
           })
           .then(function(collection2) {
@@ -3800,7 +3800,7 @@ describe('Operation (Promises)', function() {
         // Use the admin database for the operation
         var adminDb = db.admin();
 
-        // Retrive the build information for the MongoDB instance
+        // Retrieve the build information for the MongoDB instance
         return adminDb.buildInfo().then(function(info) {
           test.ok(info);
           client.close();
@@ -3840,7 +3840,7 @@ describe('Operation (Promises)', function() {
         // Use the admin database for the operation
         var adminDb = db.admin();
 
-        // Retrive the build information using the admin command
+        // Retrieve the build information using the admin command
         return adminDb.command({ buildInfo: 1 }).then(function(info) {
           test.ok(info);
           client.close();
@@ -3889,7 +3889,7 @@ describe('Operation (Promises)', function() {
             // Use the admin database for the operation
             var adminDb = client.db('admin');
 
-            // Retrive the profiling level
+            // Retrieve the profiling level
             return adminDb.profilingLevel();
           })
           .then(function(level) {
@@ -3944,7 +3944,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(level) {
             test.ok(level);
-            // Retrive the profiling level and verify that it's set to slow_only
+            // Retrieve the profiling level and verify that it's set to slow_only
             return adminDb.profilingLevel();
           })
           .then(function(level) {
@@ -3955,7 +3955,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(level) {
             test.ok(level);
-            // Retrive the profiling level and verify that it's set to off
+            // Retrieve the profiling level and verify that it's set to off
             return adminDb.profilingLevel();
           })
           .then(function(level) {
@@ -3966,7 +3966,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(level) {
             test.ok(level);
-            // Retrive the profiling level and verify that it's set to all
+            // Retrieve the profiling level and verify that it's set to all
             return adminDb.profilingLevel();
           })
           .then(function(level) {
@@ -4039,7 +4039,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(level) {
             test.ok(level);
-            // Retrive the profiling information
+            // Retrieve the profiling information
             return db.profilingInfo();
           })
           .then(function(infos) {
@@ -4323,7 +4323,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(result) {
             test.ok(result);
-            // Retrive the server Info
+            // Retrieve the server Info
             return adminDb.serverStatus();
           })
           .then(function(info) {
