@@ -2302,7 +2302,7 @@ describe('Operation (Generators)', function() {
           test.ok(err.message.length > 0);
 
           // Attemp to rename the first collection to a name that does not exist
-          // this will be succesful
+          // this will be successful
           collection2 = yield collection1.rename('test_rename_collection3_with_generators');
           test.equal('test_rename_collection3_with_generators', collection2.collectionName);
 
@@ -3528,7 +3528,7 @@ describe('Operation (Generators)', function() {
         // Use the admin database for the operation
         var adminDb = db.admin();
 
-        // Retrive the build information for the MongoDB instance
+        // Retrieve the build information for the MongoDB instance
         yield adminDb.buildInfo();
 
         client.close();
@@ -3573,7 +3573,7 @@ describe('Operation (Generators)', function() {
         // Use the admin database for the operation
         var adminDb = db.admin();
 
-        // Retrive the build information using the admin command
+        // Retrieve the build information using the admin command
         yield adminDb.command({ buildInfo: 1 });
 
         client.close();
@@ -3626,21 +3626,21 @@ describe('Operation (Generators)', function() {
         // Set the profiling level to only profile slow queries
         yield db.setProfilingLevel('slow_only');
 
-        // Retrive the profiling level and verify that it's set to slow_only
+        // Retrieve the profiling level and verify that it's set to slow_only
         var level = yield db.profilingLevel();
         test.equal('slow_only', level);
 
         // Turn profiling off
         yield db.setProfilingLevel('off');
 
-        // Retrive the profiling level and verify that it's set to off
+        // Retrieve the profiling level and verify that it's set to off
         level = yield db.profilingLevel();
         test.equal('off', level);
 
         // Set the profiling level to log all queries
         yield db.setProfilingLevel('all');
 
-        // Retrive the profiling level and verify that it's set to all
+        // Retrieve the profiling level and verify that it's set to all
         level = yield db.profilingLevel();
         test.equal('all', level);
 
@@ -3708,7 +3708,7 @@ describe('Operation (Generators)', function() {
         // Turn off profiling
         yield db.setProfilingLevel('off');
 
-        // Retrive the profiling information
+        // Retrieve the profiling information
         var infos = yield db.profilingInfo();
         test.ok(infos.constructor === Array);
         test.ok(infos.length >= 1);
@@ -4004,7 +4004,7 @@ describe('Operation (Generators)', function() {
         // Use the admin database for the operation
         var adminDb = db.admin();
 
-        // Retrive the server Info
+        // Retrieve the server Info
         var info = yield adminDb.serverStatus();
         test.ok(info != null);
 
@@ -4057,7 +4057,7 @@ describe('Operation (Generators)', function() {
         // Use the admin database for the operation
         var adminDb = db.admin();
 
-        // Retrive the server Info, returns error if we are not
+        // Retrieve the server Info, returns error if we are not
         // running a replicaset
         yield adminDb.replSetGetStatus();
 

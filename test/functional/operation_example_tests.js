@@ -3088,7 +3088,7 @@ describe('Operation Examples', function() {
                 test.ok(err.message.length > 0);
 
                 // Attemp to rename the first collection to a name that does not exist
-                // this will be succesful
+                // this will be successful
                 collection1.rename('test_rename_collection3', function(err, collection2) {
                   test.equal('test_rename_collection3', collection2.collectionName);
 
@@ -4698,7 +4698,7 @@ describe('Operation Examples', function() {
         // Use the admin database for the operation
         var adminDb = db.admin();
 
-        // Retrive the build information for the MongoDB instance
+        // Retrieve the build information for the MongoDB instance
         adminDb.buildInfo(function(err, info) {
           test.ok(info);
           test.equal(null, err);
@@ -4740,7 +4740,7 @@ describe('Operation Examples', function() {
 
         // Use the admin database for the operation
         var adminDb = db.admin();
-        // Retrive the build information using the admin command
+        // Retrieve the build information using the admin command
         adminDb.command({ buildInfo: 1 }, function(err, info) {
           test.ok(info);
           test.equal(null, err);
@@ -4792,7 +4792,7 @@ describe('Operation Examples', function() {
           // Use the admin database for the operation
           var adminDb = client.db('admin');
 
-          // Retrive the profiling level
+          // Retrieve the profiling level
           adminDb.profilingLevel(function(err, level) {
             test.ok(level);
             test.equal(null, err);
@@ -4859,7 +4859,7 @@ describe('Operation Examples', function() {
                 test.ok(level);
                 test.equal(null, err);
 
-                // Retrive the profiling information
+                // Retrieve the profiling information
                 db.profilingInfo(function(err, infos) {
                   test.equal(null, err);
                   test.ok(infos.constructor === Array);
@@ -5186,7 +5186,7 @@ describe('Operation Examples', function() {
           // Use the admin database for the operation
           var adminDb = db.admin();
 
-          // Retrive the server Info
+          // Retrieve the server Info
           adminDb.serverStatus(function(err, info) {
             test.equal(null, err);
             test.ok(info != null);
@@ -5238,7 +5238,7 @@ describe('Operation Examples', function() {
           // Use the admin database for the operation
           var adminDb = db.admin();
 
-          // Retrive the server Info, returns error if we are not
+          // Retrieve the server Info, returns error if we are not
           // running a replicaset
           adminDb.replSetGetStatus(function(err, info) {
             test.ok(info);
@@ -6533,7 +6533,7 @@ describe('Operation Examples', function() {
       var objectId = new ObjectID();
       // Get the generation time
       var generationTime = objectId.generationTime;
-      // Add 1000 miliseconds to the generation time
+      // Add 1000 milliseconds to the generation time
       objectId.generationTime = generationTime + 1000;
 
       // Create a timestamp
