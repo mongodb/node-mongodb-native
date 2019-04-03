@@ -508,7 +508,7 @@ const dbName = 'myproject';
     // Use the admin database for the operation
     const adminDb = db.admin();
 
-    // Retrive the build information using the admin command
+    // Retrieve the build information using the admin command
     await adminDb.command({buildInfo:1})
   } catch (err) {
     console.log(err.stack);
