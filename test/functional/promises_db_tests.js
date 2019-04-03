@@ -117,7 +117,7 @@ describe('Promises (Db)', function() {
     }
   });
 
-  it('Should correctly createCollecton using Promise', {
+  it('Should correctly createCollection using Promise', {
     metadata: {
       requires: {
         topology: ['single']
@@ -324,7 +324,7 @@ describe('Promises (Db)', function() {
     }
   });
 
-  it('Should correctly execute creatIndex using Promise', {
+  it('Should correctly execute createIndex using Promise', {
     metadata: {
       requires: {
         topology: ['single']

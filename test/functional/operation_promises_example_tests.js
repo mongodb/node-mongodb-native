@@ -1468,7 +1468,7 @@ describe('Operation (Promises)', function() {
    * @example-method indexes
    * @ignore
    */
-  it('shouldCorrectlyRetriveACollectionsIndexesWithPromises', {
+  it('shouldCorrectlyRetrieveACollectionsIndexesWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
@@ -1980,7 +1980,7 @@ describe('Operation (Promises)', function() {
    * @example-method options
    * @ignore
    */
-  it('shouldCorrectlyRetriveCollectionOptionsWithPromises', {
+  it('shouldCorrectlyRetrieveCollectionOptionsWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run

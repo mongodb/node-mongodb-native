@@ -783,7 +783,7 @@ describe('APM', function() {
     }
   });
 
-  it('should correcly decorate the apm result for aggregation with cursorId', {
+  it('should correctly decorate the apm result for aggregation with cursorId', {
     metadata: { requires: { topology: ['single', 'replicaset'], mongodb: '>=3.0.0' } },
 
     // The actual test we wish to run
@@ -836,7 +836,7 @@ describe('APM', function() {
     }
   });
 
-  it('should correcly decorate the apm result for listCollections with cursorId', {
+  it('should correctly decorate the apm result for listCollections with cursorId', {
     metadata: { requires: { topology: ['single', 'replicaset'], mongodb: '>=3.0.0' } },
     test: function() {
       const self = this;
