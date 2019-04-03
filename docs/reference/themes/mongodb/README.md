@@ -40,7 +40,7 @@ Handy [markdown cheat sheet](https://github.com/adam-p/markdown-here/wiki/Markdo
 
 To create new content run: `hugo new <contentFileName>.md`  and the new file will created in the `./content` directory and marked as a `draft`.
 
-Its a good idea to group similar content together by placing it in a directory which can also be done by the `new` command eg: `hugo new tutorial/newTutorial.md`
+It's a good idea to group similar content together by placing it in a directory which can also be done by the `new` command eg: `hugo new tutorial/newTutorial.md`
 
 ### Menus
 Menu configuration generally goes in the content
