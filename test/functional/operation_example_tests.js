@@ -2153,7 +2153,7 @@ describe('Operation Examples', function() {
    * @example-method indexes
    * @ignore
    */
-  it('shouldCorrectlyRetriveACollectionsIndexes', {
+  it('shouldCorrectlyRetrieveACollectionsIndexes', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
@@ -2704,7 +2704,7 @@ describe('Operation Examples', function() {
    * @example-method options
    * @ignore
    */
-  it('shouldCorrectlyRetriveCollectionOptions', {
+  it('shouldCorrectlyRetrieveCollectionOptions', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },

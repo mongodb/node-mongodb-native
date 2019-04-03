@@ -1439,7 +1439,7 @@ describe('Operation (Generators)', function() {
    * @example-method indexes
    * @ignore
    */
-  it('shouldCorrectlyRetriveACollectionsIndexesWithGenerators', {
+  it('shouldCorrectlyRetrieveACollectionsIndexesWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
     // The actual test we wish to run
@@ -1941,7 +1941,7 @@ describe('Operation (Generators)', function() {
    * @example-method options
    * @ignore
    */
-  it('shouldCorrectlyRetriveCollectionOptionsWithGenerators', {
+  it('shouldCorrectlyRetrieveCollectionOptionsWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
     // The actual test we wish to run

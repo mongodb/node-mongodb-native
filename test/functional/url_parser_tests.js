@@ -594,7 +594,7 @@ describe('Url Parser', function() {
    * @ignore
    */
   it(
-    'should throw an error when parsing mongodb://localhost/?compressors=foo, where foo is an unsuported compressor',
+    'should throw an error when parsing mongodb://localhost/?compressors=foo, where foo is an unsupported compressor',
     {
       metadata: {
         requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
@@ -635,7 +635,7 @@ describe('Url Parser', function() {
   /**
    * @ignore
    */
-  it('should log when unsuported options are used in url', {
+  it('should log when unsupported options are used in url', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
