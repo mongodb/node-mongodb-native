@@ -2481,7 +2481,7 @@ describe('Insert', function() {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
-        var col = db.collection('shouldCorreclyAllowforMoreThanAThousandDocsInsert', {
+        var col = db.collection('shouldCorrectlyAllowforMoreThanAThousandDocsInsert', {
           serializeFunctions: true
         });
         var docs = [];
