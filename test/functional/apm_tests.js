@@ -950,7 +950,7 @@ describe('APM', function() {
       expect(event.commandName).to.equal(expected.command_name);
     }
 
-    function validateExpecations(expectation, results) {
+    function validateExpectations(expectation, results) {
       if (expectation.command_started_event) {
         validateCommandStartedEvent(expectation.command_started_event, results.starts.shift());
       } else if (expectation.command_succeeded_event) {
@@ -1070,7 +1070,7 @@ describe('APM', function() {
               .catch(() => {} /* ignore */)
               .then(() =>
                 test.expectations.forEach(expectation =>
-                  validateExpecations(expectation, monitoringResults)
+                  validateExpectations(expectation, monitoringResults)
                 )
               );
           }
@@ -1084,7 +1084,7 @@ describe('APM', function() {
             .catch(() => {} /* ignore */)
             .then(() =>
               test.expectations.forEach(expectation =>
-                validateExpecations(expectation, monitoringResults)
+                validateExpectations(expectation, monitoringResults)
               )
             );
         });
