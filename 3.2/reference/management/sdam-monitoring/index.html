@@ -2175,7 +2175,7 @@ joining or leaving a replica set.</p>
 <pre><code class="language-js">const MongoClient = require('mongodb').MongoClient;
 
 const url = 'mongodb://localhost:31000,localhost:31001/?replicaSet=rs';
-const client = new MongoClient();
+const client = new MongoClient(url);
 
 client.on('serverDescriptionChanged', function(event) {
   console.log('received serverDescriptionChanged');
