@@ -301,6 +301,15 @@ function prepareDatabaseForSuite(suite, context) {
       if (suite.data && Array.isArray(suite.data) && suite.data.length > 0) {
         return coll.insert(suite.data, { w: 'majority' });
       }
+    })
+    .then(() => {
+      return context.runForAllClients(client => {
+        return client
+          .db(context.dbName)
+          .collection(context.collectionName)
+          .distinct('x')
+          .catch(() => {});
+      });
     });
 }
 
