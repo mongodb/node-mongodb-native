@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="3.2.3"></a>
+## [3.2.3](https://github.com/mongodb/node-mongodb-native/compare/v3.2.2...v3.2.3) (2019-04-05)
+
+
+### Bug Fixes
+
+* **aggregation:** fix field name typo ([4235d04](https://github.com/mongodb/node-mongodb-native/commit/4235d04))
+* **async:** rewrote asyncGenerator in node < 10 syntax ([49c8cef](https://github.com/mongodb/node-mongodb-native/commit/49c8cef))
+* **bulkWrite:** fix issue with bulkWrite continuing w/ callback ([2a4a42c](https://github.com/mongodb/node-mongodb-native/commit/2a4a42c))
+* **docs:** correctly document that default for `sslValidate` is false ([1f8e7fa](https://github.com/mongodb/node-mongodb-native/commit/1f8e7fa))
+
+
+### Features
+
+* update to mongodb-core v3.2.3 ([1c5357a](https://github.com/mongodb/node-mongodb-native/commit/1c5357a))
+
+
+
 <a name="3.2.2"></a>
 ## [3.2.2](https://github.com/mongodb/node-mongodb-native/compare/v3.2.1...v3.2.2) (2019-03-22)
 
