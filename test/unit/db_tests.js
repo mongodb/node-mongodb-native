@@ -7,10 +7,17 @@ const sinon = require('sinon');
 class MockTopology extends EventEmitter {
   constructor() {
     super();
+    this.s = {
+      promiseLibrary: Promise
+    };
   }
 
   capabilities() {
     return {};
+  }
+
+  hasSessionSupport() {
+    return false;
   }
 }
 
