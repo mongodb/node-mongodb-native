@@ -1065,11 +1065,12 @@ describe('GridFS Stream', function() {
           const outputStream = fs.createWriteStream('output');
           stream.pipeline(downloadStream, outputStream, err => {
             expect(err).to.not.exist;
-            client.close();
-            fs.stat('output', (err, stats) => {
-              expect(err).to.not.exist;
-              expect(range.end - range.start).to.equal(stats.size);
-              done();
+            client.close(() => {
+              fs.stat('output', (err, stats) => {
+                expect(err).to.be.null;
+                expect(range.end - range.start).to.equal(stats.size);
+                done();
+              });
             });
           });
         });
