@@ -7,7 +7,7 @@ cache:
 branches:
   only: 
     - master
-    - command-refactor
+    - next
 jobs:
   include:
     - stage: standalone
