@@ -1517,7 +1517,7 @@ describe('Bulk', function() {
   });
 
   it('should properly account for array key size in bulk unordered inserts', function(done) {
-    const client = this.configuration.newClient({ w: 1 }, { monitorCommands: true });
+    const client = this.configuration.newClient();
     const documents = new Array(20000).fill('').map(() => ({
       arr: new Array(19).fill('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
     }));
@@ -1537,7 +1537,7 @@ describe('Bulk', function() {
       .then(() => {
         const coll = db.collection('doesnt_matter');
 
-        coll.insert(documents, { ordered: false }, err => {
+        coll.insertMany(documents, { ordered: false }, err => {
           client.close(() => {
             done(err);
           });
@@ -1566,7 +1566,7 @@ describe('Bulk', function() {
       .then(() => {
         const coll = db.collection('doesnt_matter');
 
-        coll.insert(documents, { ordered: false }, err => {
+        coll.insertMany(documents, { ordered: true }, err => {
           client.close(() => {
             done(err);
           });

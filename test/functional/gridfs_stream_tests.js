@@ -1,5 +1,6 @@
 'use strict';
 
+const stream = require('stream');
 const crypto = require('crypto'),
   EJSON = require('mongodb-extjson'),
   fs = require('fs'),
@@ -1030,6 +1031,47 @@ describe('GridFS Stream', function() {
             test.equal(stream.s.cursor, null);
             client.close();
             done();
+          });
+        });
+      });
+    }
+  });
+
+  it('should use chunkSize for download', {
+    metadata: { requires: { topology: ['single'] } },
+
+    // The actual test we wish to run
+    test: function(done) {
+      if (typeof stream.pipeline !== 'function') {
+        this.skip();
+      }
+
+      const configuration = this.configuration;
+      const GridFSBucket = configuration.require.GridFSBucket;
+
+      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      client.connect(function(err, client) {
+        const db = client.db(configuration.db);
+        const bucket = new GridFSBucket(db, { bucketName: 'gridfs' });
+
+        const uploadStream = bucket.openUploadStream('test');
+        uploadStream.end(Buffer.alloc(40 * 1024 * 1024), err => {
+          expect(err).to.be.null;
+          const range = {
+            start: 35191617,
+            end: 35192831
+          };
+          const downloadStream = bucket.openDownloadStreamByName('test', range);
+          const outputStream = fs.createWriteStream('output');
+          stream.pipeline(downloadStream, outputStream, err => {
+            expect(err).to.not.exist;
+            client.close(() => {
+              fs.stat('output', (err, stats) => {
+                expect(err).to.be.null;
+                expect(range.end - range.start).to.equal(stats.size);
+                done();
+              });
+            });
           });
         });
       });
