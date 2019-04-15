@@ -8,7 +8,8 @@ data:
 
 tests:
   - description: causal consistency
-
+    clientOptions:
+      retryWrites: false
     operations:
       # Update a document without a transaction.
       - &updateOne
@@ -89,7 +90,8 @@ tests:
             count: 2
 
   - description: causal consistency disabled
-
+    clientOptions:
+      retryWrites: false
     sessionOptions:
       session0:
         causalConsistency: false

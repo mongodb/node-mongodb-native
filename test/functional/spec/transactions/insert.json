@@ -429,6 +429,9 @@
     },
     {
       "description": "collection writeConcern without transaction",
+      "clientOptions": {
+        "retryWrites": false
+      },
       "operations": [
         {
           "name": "insertOne",
