@@ -672,6 +672,9 @@
     },
     {
       "description": "reset session state commit",
+      "clientOptions": {
+        "retryWrites": false
+      },
       "operations": [
         {
           "name": "startTransaction",
@@ -791,6 +794,9 @@
     },
     {
       "description": "reset session state abort",
+      "clientOptions": {
+        "retryWrites": false
+      },
       "operations": [
         {
           "name": "startTransaction",

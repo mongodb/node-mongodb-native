@@ -438,7 +438,8 @@ tests:
         data: []
 
   - description: reset session state commit
-
+    clientOptions:
+      retryWrites: false
     operations:
       - name: startTransaction
         object: session0
@@ -516,7 +517,8 @@ tests:
           - _id: 2
 
   - description: reset session state abort
-
+    clientOptions:
+      retryWrites: false
     operations:
       - name: startTransaction
         object: session0
