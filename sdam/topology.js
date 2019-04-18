@@ -23,6 +23,7 @@ const ClientSession = require('../sessions').ClientSession;
 const createClientInfo = require('../topologies/shared').createClientInfo;
 const MongoError = require('../error').MongoError;
 const resolveClusterTime = require('../topologies/shared').resolveClusterTime;
+const SrvPoller = require('./srv_polling').SrvPoller;
 
 // Global state
 let globalTopologyCounter = 0;
@@ -149,6 +150,29 @@ class Topology extends EventEmitter {
 
     // add client info
     this.s.clientInfo = createClientInfo(options);
+
+    if (options.srvHost) {
+      this.s.srvPoller =
+        options.srvPoller ||
+        new SrvPoller({
+          heartbeatFrequencyMS: this.s.heartbeatFrequencyMS,
+          srvHost: options.srvHost, // TODO: GET THIS
+          logger: options.logger,
+          loggerLevel: options.loggerLevel
+        });
+      this.s.detectTopologyDescriptionChange = ev => {
+        const previousType = ev.previousDescription.type;
+        const newType = ev.newDescription.type;
+
+        if (previousType !== TopologyType.Sharded && newType === TopologyType.Sharded) {
+          this.s.handleSrvPolling = srvPollingHandler(this);
+          this.s.srvPoller.on('srvRecordDiscovery', this.s.handleSrvPolling);
+          this.s.srvPoller.start();
+        }
+      };
+
+      this.on('topologyDescriptionChanged', this.s.detectTopologyDescriptionChange);
+    }
   }
 
   /**
@@ -251,6 +275,19 @@ class Topology extends EventEmitter {
     if (this.s.sessionPool) {
       this.s.sessions.forEach(session => session.endSession());
       this.s.sessionPool.endAllPooledSessions();
+    }
+
+    if (this.s.srvPoller) {
+      this.s.srvPoller.stop();
+      if (this.s.handleSrvPolling) {
+        this.s.srvPoller.removeListener('srvRecordDiscovery', this.s.handleSrvPolling);
+        delete this.s.handleSrvPolling;
+      }
+    }
+
+    if (this.s.detectTopologyDescriptionChange) {
+      this.removeListener('topologyDescriptionChanged', this.s.detectTopologyDescriptionChange);
+      delete this.s.detectTopologyDescriptionChange;
     }
 
     const servers = this.s.servers;
@@ -813,7 +850,7 @@ function connectServers(topology, serverDescriptions) {
 
 function updateServers(topology, incomingServerDescription) {
   // update the internal server's description
-  if (topology.s.servers.has(incomingServerDescription.address)) {
+  if (incomingServerDescription && topology.s.servers.has(incomingServerDescription.address)) {
     const server = topology.s.servers.get(incomingServerDescription.address);
     server.s.description = incomingServerDescription;
   }
@@ -965,6 +1002,28 @@ function translateReadPreference(options) {
   }
 
   return options;
+}
+
+function srvPollingHandler(topology) {
+  return function handleSrvPolling(ev) {
+    const previousTopologyDescription = topology.s.description;
+    topology.s.description = topology.s.description.updateFromSrvPollingEvent(ev);
+    if (topology.s.description === previousTopologyDescription) {
+      // Nothing changed, so return
+      return;
+    }
+
+    updateServers(topology);
+
+    topology.emit(
+      'topologyDescriptionChanged',
+      new monitoring.TopologyDescriptionChangedEvent(
+        topology.s.id,
+        previousTopologyDescription,
+        topology.s.description
+      )
+    );
+  };
 }
 
 /**

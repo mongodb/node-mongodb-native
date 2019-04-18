@@ -107,7 +107,14 @@ function parseSrvConnectionString(uri, options, callback) {
       result.search = qs.stringify(result.query);
 
       const finalString = URL.format(result);
-      parseConnectionString(finalString, options, callback);
+      parseConnectionString(finalString, options, (err, ret) => {
+        if (err) {
+          callback(err);
+          return;
+        }
+
+        callback(null, Object.assign({}, ret, { srvHost: lookupAddress }));
+      });
     });
   });
 }

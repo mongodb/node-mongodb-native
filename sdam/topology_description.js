@@ -94,6 +94,41 @@ class TopologyDescription {
   }
 
   /**
+   * Returns a new TopologyDescription based on the SrvPollingEvent
+   * @param {SrvPollingEvent} ev The event
+   */
+  updateFromSrvPollingEvent(ev) {
+    const newAddresses = ev.addresses();
+    const serverDescriptions = new Map(this.servers);
+    for (const server of this.servers) {
+      if (newAddresses.has(server[0])) {
+        newAddresses.delete(server[0]);
+      } else {
+        serverDescriptions.delete(server[0]);
+      }
+    }
+
+    if (serverDescriptions.size === this.servers.size && newAddresses.size === 0) {
+      return this;
+    }
+
+    for (const address of newAddresses) {
+      serverDescriptions.set(address, new ServerDescription(address));
+    }
+
+    return new TopologyDescription(
+      this.type,
+      serverDescriptions,
+      this.setName,
+      this.maxSetVersion,
+      this.maxElectionId,
+      this.commonWireVersion,
+      this.options,
+      null
+    );
+  }
+
+  /**
    * Returns a copy of this description updated with a given ServerDescription
    *
    * @param {ServerDescription} serverDescription
