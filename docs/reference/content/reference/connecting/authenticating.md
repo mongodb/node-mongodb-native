@@ -144,7 +144,7 @@ var principal = "drivers@KERBEROS.EXAMPLE.COM";
 var urlEncodedPrincipal = encodeURIComponent(principal);
 
 // Let's write the actual connection code
-MongoClient.connect(format("mongodb://%s@%s/kerberos?authMechanism=GSSAPI&gssapiServiceName=mongodb", urlEncodedPrincipal, server), function(err, db) {
+MongoClient.connect(f("mongodb://%s@%s/kerberos?authMechanism=GSSAPI&gssapiServiceName=mongodb", urlEncodedPrincipal, server), function(err, db) {
   assert.equal(null, err);
 
   db.close();
@@ -173,7 +173,7 @@ var user = "ldap-user";
 var pass = "ldap-password";
 
 // Url
-var url = format("mongodb://%s:%s@%s/test?authMechanism=PLAIN&maxPoolSize=1", user, pass, server);
+var url = f("mongodb://%s:%s@%s/test?authMechanism=PLAIN&maxPoolSize=1", user, pass, server);
 
 // Let's write the actual connection code
 MongoClient.connect(url, function(err, db) {
