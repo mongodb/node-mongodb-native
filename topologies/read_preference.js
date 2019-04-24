@@ -104,6 +104,34 @@ const VALID_MODES = [
 ];
 
 /**
+ * Construct a ReadPreference given an options object.
+ *
+ * @param {object} options The options object from which to extract the read preference.
+ * @return {ReadPreference}
+ */
+ReadPreference.fromOptions = function(options) {
+  const readPreference = options.readPreference;
+  const readPreferenceTags = options.readPreferenceTags;
+
+  if (readPreference == null) {
+    return null;
+  }
+
+  if (typeof readPreference === 'string') {
+    return new ReadPreference(readPreference, readPreferenceTags);
+  } else if (!(readPreference instanceof ReadPreference) && typeof readPreference === 'object') {
+    const mode = readPreference.mode || readPreference.preference;
+    if (mode && typeof mode === 'string') {
+      return new ReadPreference(mode, readPreference.tags, {
+        maxStalenessSeconds: readPreference.maxStalenessSeconds
+      });
+    }
+  }
+
+  return readPreference;
+};
+
+/**
  * Validate if a mode is legal
  *
  * @method
