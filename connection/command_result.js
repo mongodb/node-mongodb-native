@@ -19,7 +19,9 @@ var CommandResult = function(result, connection, message) {
  * @return {object}
  */
 CommandResult.prototype.toJSON = function() {
-  return this.result;
+  let result = Object.assign({}, this, this.result);
+  delete result.message;
+  return result;
 };
 
 /**
