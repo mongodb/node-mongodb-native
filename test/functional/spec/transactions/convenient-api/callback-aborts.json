@@ -1,10 +1,25 @@
 {
+  "runOn": [
+    {
+      "minServerVersion": "4.0",
+      "topology": [
+        "replicaset"
+      ]
+    },
+    {
+      "minServerVersion": "4.1.8",
+      "topology": [
+        "sharded"
+      ]
+    }
+  ],
   "database_name": "withTransaction-tests",
   "collection_name": "test",
   "data": [],
   "tests": [
     {
       "description": "withTransaction succeeds if callback aborts",
+      "useMultipleMongoses": true,
       "operations": [
         {
           "name": "withTransaction",
@@ -84,6 +99,7 @@
     },
     {
       "description": "withTransaction succeeds if callback aborts with no ops",
+      "useMultipleMongoses": true,
       "operations": [
         {
           "name": "withTransaction",
@@ -109,6 +125,7 @@
     },
     {
       "description": "withTransaction still succeeds if callback aborts and runs extra op",
+      "useMultipleMongoses": true,
       "operations": [
         {
           "name": "withTransaction",
