@@ -474,7 +474,7 @@ function endTransaction(session, commandName, callback) {
   }
 
   if (
-    commandName === 'commitTransaction' &&
+    // Assumption here that commandName is "commitTransaction" or "abortTransaction"
     session.transaction.recoveryToken &&
     supportsRecoveryToken(session)
   ) {
