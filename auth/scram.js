@@ -177,7 +177,8 @@ class ScramSHA extends AuthProvider {
         return callback(tmpError, null);
       }
 
-      const dict = parsePayload(r.payload.value());
+      const payload = Buffer.isBuffer(r.payload) ? new Binary(r.payload) : r.payload;
+      const dict = parsePayload(payload.value());
       const iterations = parseInt(dict.i, 10);
       const salt = dict.s;
       const rnonce = dict.r;
@@ -198,7 +199,7 @@ class ScramSHA extends AuthProvider {
 
       const clientKey = HMAC(cryptoMethod, saltedPassword, 'Client Key');
       const storedKey = H(cryptoMethod, clientKey);
-      const authMessage = [firstBare, r.payload.value().toString('base64'), withoutProof].join(',');
+      const authMessage = [firstBare, payload.value().toString('base64'), withoutProof].join(',');
 
       const clientSignature = HMAC(cryptoMethod, storedKey, authMessage);
       const clientProof = `p=${xor(clientKey, clientSignature)}`;
