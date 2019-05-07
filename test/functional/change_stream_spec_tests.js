@@ -44,7 +44,7 @@ describe('Change Stream Spec', function() {
           const sDB = specData.database_name;
           const sColl = specData.collection_name;
           const configuration = this.configuration;
-          return Promise.all(ALL_DBS.map(db => gc.db(db).dropDatabase()))
+          return Promise.all(ALL_DBS.map(db => gc.db(db).dropDatabase({ w: 'majority' })))
             .then(() => gc.db(sDB).createCollection(sColl))
             .then(() => gc.db(specData.database2_name).createCollection(specData.collection2_name))
             .then(() => configuration.newClient({}, { monitorCommands: true }).connect())
