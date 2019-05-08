@@ -134,7 +134,14 @@ describe('CRUD spec', function() {
         if (resultName === 'upsertedId') {
           expect(result[resultName]._id).to.containSubset(outcome.result[resultName]);
         } else {
-          expect(result[resultName]).to.containSubset(outcome.result[resultName]);
+          try {
+            expect(result[resultName]).to.containSubset(outcome.result[resultName]);
+          } catch (e) {
+            console.log(resultName);
+            console.log(result);
+            console.log(outcome.result);
+            throw e;
+          }
         }
       });
 
