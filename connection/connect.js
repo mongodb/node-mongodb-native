@@ -5,6 +5,7 @@ const Connection = require('./connection');
 const Query = require('./commands').Query;
 const createClientInfo = require('../topologies/shared').createClientInfo;
 const MongoError = require('../error').MongoError;
+const MongoNetworkError = require('../error').MongoNetworkError;
 const defaultAuthProviders = require('../auth/defaultAuthProviders').defaultAuthProviders;
 const WIRE_CONSTANTS = require('../wireprotocol/constants');
 const MAX_SUPPORTED_WIRE_VERSION = WIRE_CONSTANTS.MAX_SUPPORTED_WIRE_VERSION;
@@ -283,7 +284,7 @@ function makeConnection(family, options, _callback) {
       if (err == null || err === false) err = true;
       errorEvents.forEach(event => socket.removeAllListeners(event));
       socket.removeListener('connect', connectHandler);
-      callback(err, eventName);
+      callback(new MongoNetworkError(err.message), eventName);
     };
   }
 
