@@ -7,6 +7,7 @@ const expect = require('chai').expect;
 const connect = require('../../../lib/connection/connect');
 const MongoCredentials = require('../../../lib/auth/mongo_credentials').MongoCredentials;
 const genClusterTime = require('./common').genClusterTime;
+const MongoNetworkError = require('../../../lib/error').MongoNetworkError;
 
 describe('Connect Tests', function() {
   const test = {};
@@ -88,6 +89,13 @@ describe('Connect Tests', function() {
       }
 
       done(err);
+    });
+  });
+
+  it('should emit `MongoNetworkError` for network errors', function(done) {
+    connect({ host: 'non-existent', port: 27018 }, err => {
+      expect(err).to.be.instanceOf(MongoNetworkError);
+      done();
     });
   });
 });
