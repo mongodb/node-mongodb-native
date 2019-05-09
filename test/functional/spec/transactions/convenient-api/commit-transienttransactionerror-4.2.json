@@ -1,7 +1,20 @@
 {
+  "runOn": [
+    {
+      "minServerVersion": "4.1.6",
+      "topology": [
+        "replicaset"
+      ]
+    },
+    {
+      "minServerVersion": "4.1.8",
+      "topology": [
+        "sharded"
+      ]
+    }
+  ],
   "database_name": "withTransaction-tests",
   "collection_name": "test",
-  "minServerVersion": "4.1.6",
   "data": [],
   "tests": [
     {

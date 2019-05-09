@@ -29,9 +29,9 @@ describe('examples(change-stream):', function() {
     metadata: { requires: { topology: ['replicaset'], mongodb: '>=3.6.0' } },
     test: async function() {
       await db.collection('inventory').insertOne({ a: 1 });
-      setTimeout(async function() {
+      const interval = setInterval(async function() {
         await db.collection('inventory').insertOne({ a: 1 });
-      }, 250);
+      }, 500);
 
       // Start Changestream Example 1
       const collection = db.collection('inventory');
@@ -48,6 +48,7 @@ describe('examples(change-stream):', function() {
 
       await changeStream.close();
       await changeStreamIterator.close();
+      clearInterval(interval);
 
       expect(next)
         .to.have.property('operationType')

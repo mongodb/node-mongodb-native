@@ -1,3 +1,11 @@
+runOn:
+    -
+        minServerVersion: "4.0"
+        topology: ["replicaset"]
+    -
+        minServerVersion: "4.1.8"
+        topology: ["sharded"]
+
 database_name: &database_name "withTransaction-tests"
 collection_name: &collection_name "test"
 
@@ -6,6 +14,7 @@ data: []
 tests:
   -
     description: withTransaction commits after callback returns
+    useMultipleMongoses: true
     operations:
       -
         name: withTransaction
@@ -86,6 +95,7 @@ tests:
     # withTransaction only examines the session's state, it should commit that
     # second transaction after the callback returns.
     description: withTransaction commits after callback returns (second transaction)
+    useMultipleMongoses: true
     operations:
       -
         name: withTransaction

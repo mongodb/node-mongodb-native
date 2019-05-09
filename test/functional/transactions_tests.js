@@ -220,6 +220,23 @@ function parseTopologies(topologies) {
   return topologies;
 }
 
+function parseRunOn(runOn) {
+  return runOn.map(config => {
+    const topology = parseTopologies(config.topology);
+    const version = [];
+    if (config.minServerVersion) {
+      version.push(`>= ${config.minServerVersion}`);
+    }
+    if (config.maxServerVersion) {
+      version.push(`<= ${config.maxServerVersion}`);
+    }
+
+    const mongodb = version.join(' ');
+
+    return { topology, mongodb };
+  });
+}
+
 function shouldSkipTest(spec) {
   const SKIP_TESTS = [
     // commitTransaction retry seems to be swallowed by mongos in these three cases
@@ -238,22 +255,17 @@ function shouldSkipTest(spec) {
 
 function generateTopologyTests(testSuites, testContext) {
   testSuites.forEach(testSuite => {
-    const suiteName = testSuite.name;
-    const topologies = parseTopologies(testSuite.topology);
+    const environmentRequirementList = parseRunOn(testSuite.runOn);
 
-    const tests = testSuite.tests;
-    topologies.forEach(topology => {
-      const DEFAULT_MIN_SERVER_VERSION = topology === 'sharded' ? '>=4.1.5' : '>=3.7.x';
-      const minServerVersion = testSuite.minServerVersion
-        ? `>=${testSuite.minServerVersion}`
-        : DEFAULT_MIN_SERVER_VERSION;
-      describe(`${suiteName} - ${topology}`, {
-        metadata: { requires: { topology: [topology], mongodb: minServerVersion } },
+    environmentRequirementList.forEach(requires => {
+      const suiteName = `${testSuite.name} - ${requires.topology.join()}`;
+      describe(suiteName, {
+        metadata: { requires },
         test: function() {
           beforeEach(() => prepareDatabaseForSuite(testSuite, testContext));
           afterEach(() => testContext.cleanupAfterSuite());
 
-          tests.forEach(spec => {
+          testSuite.tests.forEach(spec => {
             const maybeSkipIt = shouldSkipTest(spec);
             maybeSkipIt(spec.description, function() {
               let testPromise = Promise.resolve();
