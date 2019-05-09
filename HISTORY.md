@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="3.2.4"></a>
+## [3.2.4](https://github.com/mongodb/node-mongodb-native/compare/v3.2.2...v3.2.4) (2019-05-08)
+
+
+### Bug Fixes
+
+* **aggregation:** fix field name typo ([4235d04](https://github.com/mongodb/node-mongodb-native/commit/4235d04))
+* **async:** rewrote asyncGenerator in node < 10 syntax ([49c8cef](https://github.com/mongodb/node-mongodb-native/commit/49c8cef))
+* **BulkOp:** run unordered bulk ops in serial ([f548bd7](https://github.com/mongodb/node-mongodb-native/commit/f548bd7))
+* **bulkWrite:** fix issue with bulkWrite continuing w/ callback ([2a4a42c](https://github.com/mongodb/node-mongodb-native/commit/2a4a42c))
+* **docs:** correctly document that default for `sslValidate` is false ([1f8e7fa](https://github.com/mongodb/node-mongodb-native/commit/1f8e7fa))
+* **gridfs-stream:** honor chunk size ([9eeb114](https://github.com/mongodb/node-mongodb-native/commit/9eeb114))
+* **unified-topology:** only clone pool size if provided ([8dc2416](https://github.com/mongodb/node-mongodb-native/commit/8dc2416))
+
+
+### Features
+
+* update to mongodb-core v3.2.3 ([1c5357a](https://github.com/mongodb/node-mongodb-native/commit/1c5357a))
+* **core:** update to mongodb-core v3.2.4 ([2059260](https://github.com/mongodb/node-mongodb-native/commit/2059260))
+* **lib:** implement executeOperationV2 ([67d4edf](https://github.com/mongodb/node-mongodb-native/commit/67d4edf))
+
+
+
 <a name="3.2.3"></a>
 ## [3.2.3](https://github.com/mongodb/node-mongodb-native/compare/v3.2.2...v3.2.3) (2019-04-05)
 

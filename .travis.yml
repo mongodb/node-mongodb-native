@@ -5,7 +5,7 @@ cache:
   directories:
     - /home/travis/.mongodb/versions
 branches:
-  only: 
+  only:
     - master
     - next
 jobs:
@@ -50,7 +50,30 @@ jobs:
         - MONGODB_VERSION=4.0.x
         - MONGODB_ENVIRONMENT=sharded
 
+    # basic smoke test of the unified topology
+    - stage: unified
+      node_js: 4
+      env:
+        - MONGODB_VERSION=4.0.x
+        - MONGODB_UNIFIED_TOPOLOGY=1
+    - stage: unified
+      node_js: 4
+      env:
+        - MONGODB_VERSION=4.0.x
+        - MONGODB_UNIFIED_TOPOLOGY=1
+        - MONGODB_ENVIRONMENT=replicaset
+    - stage: unified
+      node_js: 4
+      env:
+        - MONGODB_VERSION=4.0.x
+        - MONGODB_UNIFIED_TOPOLOGY=1
+        - MONGODB_ENVIRONMENT=sharded
+
   allow_failures:
     - env:
         - MONGODB_VERSION=4.0.x
+        - MONGODB_ENVIRONMENT=sharded
+    - env:
+        - MONGODB_VERSION=4.0.x
+        - MONGODB_UNIFIED_TOPOLOGY=1
         - MONGODB_ENVIRONMENT=sharded
