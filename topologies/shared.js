@@ -4,6 +4,7 @@ const os = require('os');
 const f = require('util').format;
 const ReadPreference = require('./read_preference');
 const Buffer = require('safe-buffer').Buffer;
+const TopologyType = require('../sdam/topology_description').TopologyType;
 
 /**
  * Emit event if it exists
@@ -398,6 +399,20 @@ const SessionMixins = {
   }
 };
 
+function topologyType(topology) {
+  if (topology.description) {
+    return topology.description.type;
+  }
+
+  if (topology.type === 'mongos') {
+    return TopologyType.Sharded;
+  } else if (topology.type === 'replset') {
+    return TopologyType.ReplicaSetWithPrimary;
+  }
+
+  return TopologyType.Single;
+}
+
 const RETRYABLE_WIRE_VERSION = 6;
 
 /**
@@ -412,6 +427,10 @@ const isRetryableWritesSupported = function(topology) {
   }
 
   if (!topology.logicalSessionTimeoutMinutes) {
+    return false;
+  }
+
+  if (topologyType(topology) === TopologyType.Single) {
     return false;
   }
 
