@@ -862,7 +862,7 @@ describe.skip('ReplSet (Connection)', function() {
   });
 
   var waitForPrimary = function(count, config, options, callback) {
-    var ReplSet = require('mongodb-core').ReplSet;
+    var ReplSet = require('../../lib/core').ReplSet;
     if (count === 0) return callback(new Error('could not connect'));
     // Attempt to connect
     var server = new ReplSet(config, options);

@@ -1,13 +1,14 @@
 'use strict';
-var Mongos = require('../../../../lib/topologies/mongos'),
-  expect = require('chai').expect,
-  mock = require('mongodb-mock-server'),
-  genClusterTime = require('../common').genClusterTime;
+const expect = require('chai').expect;
+const mock = require('mongodb-mock-server');
+const genClusterTime = require('../common').genClusterTime;
+const sessionCleanupHandler = require('../common').sessionCleanupHandler;
 
-const sessions = require('../../../../lib/sessions');
-const ServerSessionPool = sessions.ServerSessionPool;
-const ClientSession = sessions.ClientSession;
-const ReadPreference = require('../../../../lib/topologies/read_preference');
+const core = require('../../../../lib/core');
+const ServerSessionPool = core.Sessions.ServerSessionPool;
+const ClientSession = core.Sessions.ClientSession;
+const ReadPreference = core.ReadPreference;
+const Mongos = core.Mongos;
 
 const test = {};
 describe('Sessions (Mongos)', function() {
@@ -213,6 +214,8 @@ describe('Sessions (Mongos)', function() {
           };
           const pool = new ServerSessionPool(mongos);
           const session = new ClientSession(mongos, pool);
+          done = sessionCleanupHandler(session, pool, done);
+
           const readPreference = new ReadPreference('primaryPreferred');
 
           const cursor = mongos.cursor('testdb.testcollection', findCommand, {

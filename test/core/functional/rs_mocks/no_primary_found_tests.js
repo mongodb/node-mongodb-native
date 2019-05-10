@@ -1,8 +1,12 @@
 'use strict';
 const co = require('co');
-const Connection = require('../../../../lib/connection/connection');
 const mock = require('mongodb-mock-server');
 const ConnectionSpy = require('../shared').ConnectionSpy;
+
+const core = require('../../../../lib/core');
+const Connection = core.Connection;
+const ReplSet = core.ReplSet;
+const ObjectId = core.BSON.ObjectId;
 
 let test = {};
 describe('ReplSet No Primary Found (mocks)', function() {
@@ -27,9 +31,6 @@ describe('ReplSet No Primary Found (mocks)', function() {
     },
 
     test: function(done) {
-      var ReplSet = this.configuration.mongo.ReplSet,
-        ObjectId = this.configuration.mongo.BSON.ObjectId;
-
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,

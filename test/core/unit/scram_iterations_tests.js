@@ -2,9 +2,9 @@
 
 const expect = require('chai').expect;
 const mock = require('mongodb-mock-server');
-const Server = require('../../../lib/topologies/server');
+const Server = require('../../../lib/core/topologies/server');
 const Buffer = require('safe-buffer').Buffer;
-const MongoCredentials = require('../../../lib/auth/mongo_credentials').MongoCredentials;
+const MongoCredentials = require('../../../lib/core/auth/mongo_credentials').MongoCredentials;
 
 describe('SCRAM Iterations Tests', function() {
   const test = {};

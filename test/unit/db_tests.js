@@ -12,12 +12,20 @@ class MockTopology extends EventEmitter {
     };
   }
 
+  isDestroyed() {
+    return false;
+  }
+
   capabilities() {
     return {};
   }
 
   hasSessionSupport() {
     return false;
+  }
+
+  command(namespace, command, options, callback) {
+    callback(null, { ok: 1 });
   }
 }
 

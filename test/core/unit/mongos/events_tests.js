@@ -1,7 +1,7 @@
 'use strict';
 
 const expect = require('chai').expect;
-const Mongos = require('../../../../lib/topologies/mongos');
+const Mongos = require('../../../../lib/core/topologies/mongos');
 const mock = require('mongodb-mock-server');
 const MongosFixture = require('../common').MongosFixture;
 

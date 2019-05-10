@@ -4,8 +4,8 @@ const chai = require('chai');
 const expect = chai.expect;
 const bson = require('bson');
 const sinon = require('sinon');
-const Pool = require('../../../lib/connection/pool.js');
-const wireProtocol = require('../../../lib/wireprotocol');
+const Pool = require('../../../lib/core/connection/pool.js');
+const wireProtocol = require('../../../lib/core/wireprotocol');
 
 describe('WireProtocol', function() {
   it('should only set bypassDocumentValidation to true if explicitly set by user to true', function() {

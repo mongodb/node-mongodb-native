@@ -1,11 +1,11 @@
 'use strict';
 
-const Pool = require('../../../lib/connection/pool');
+const Pool = require('../../../lib/core/connection/pool');
 const BSON = require('bson');
-const apm = require('../../../lib/connection/apm');
+const apm = require('../../../lib/core/connection/apm');
 const expect = require('chai').expect;
 
-const commands = require('../../../lib/connection/commands');
+const commands = require('../../../lib/core/connection/commands');
 const Query = commands.Query;
 const KillCursor = commands.KillCursor;
 const GetMore = commands.GetMore;

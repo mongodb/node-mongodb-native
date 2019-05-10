@@ -1,7 +1,10 @@
 'use strict';
-var expect = require('chai').expect,
-  co = require('co'),
-  mock = require('mongodb-mock-server');
+const expect = require('chai').expect;
+const co = require('co');
+const mock = require('mongodb-mock-server');
+
+const core = require('../../../../lib/core');
+const Mongos = core.Mongos;
 
 describe('Mongos Proxy Failover (mocks)', function() {
   afterEach(() => mock.cleanup());
@@ -15,8 +18,6 @@ describe('Mongos Proxy Failover (mocks)', function() {
     },
 
     test: function(done) {
-      var Mongos = this.configuration.mongo.Mongos;
-
       // Default message fields
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         msg: 'isdbgrid'
@@ -88,8 +89,6 @@ describe('Mongos Proxy Failover (mocks)', function() {
     },
 
     test: function(done) {
-      var Mongos = this.configuration.mongo.Mongos;
-
       // Current index for the ismaster
       var currentStep = 0;
 
@@ -185,8 +184,6 @@ describe('Mongos Proxy Failover (mocks)', function() {
     },
 
     test: function(done) {
-      var Mongos = this.configuration.mongo.Mongos;
-
       // Current index for the ismaster
       var currentStep = 0;
 

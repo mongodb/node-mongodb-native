@@ -1,12 +1,17 @@
 'use strict';
-var expect = require('chai').expect,
-  co = require('co'),
-  mock = require('mongodb-mock-server');
+const expect = require('chai').expect;
+const co = require('co');
+const mock = require('mongodb-mock-server');
+
+const core = require('../../../../lib/core');
+const Logger = core.Logger;
+const Mongos = core.Mongos;
+const ObjectId = core.BSON.ObjectId;
 
 describe('Mongos Mixed Seed List (mocks)', function() {
   afterEach(() => mock.cleanup());
 
-  it('Should correctly print warning when non mongos proxy passed in seed list', {
+  it.skip('Should correctly print warning when non mongos proxy passed in seed list', {
     metadata: {
       requires: {
         generators: true,
@@ -15,10 +20,6 @@ describe('Mongos Mixed Seed List (mocks)', function() {
     },
 
     test: function(done) {
-      var Mongos = this.configuration.mongo.Mongos,
-        ObjectId = this.configuration.mongo.BSON.ObjectId,
-        Logger = this.configuration.mongo.Logger;
-
       // Contain mock server
       var mongos1 = null;
       var mongos2 = null;
@@ -72,22 +73,19 @@ describe('Mongos Mixed Seed List (mocks)', function() {
           size: 1
         });
 
-        var logger = Logger.currentLogger();
+        const logger = Logger.currentLogger();
         Logger.setCurrentLogger(function(msg, state) {
           expect(state.type).to.equal('warn');
           expect(state.message).to.equal(
-            'expected mongos proxy, but found replicaset member mongod for server localhost:52006'
+            `expected mongos proxy, but found replicaset member mongod for server ${mongos2.uri()}`
           );
-        });
 
-        // Add event listeners
-        server.once('connect', function() {
           Logger.setCurrentLogger(logger);
-
           server.destroy();
           done();
         });
 
+        // Add event listeners
         server.on('error', done);
         server.connect();
       });
@@ -103,10 +101,6 @@ describe('Mongos Mixed Seed List (mocks)', function() {
     },
 
     test: function(done) {
-      var Mongos = this.configuration.mongo.Mongos,
-        Logger = this.configuration.mongo.Logger,
-        ObjectId = this.configuration.mongo.BSON.ObjectId;
-
       // Contain mock server
       var mongos1 = null;
       var mongos2 = null;

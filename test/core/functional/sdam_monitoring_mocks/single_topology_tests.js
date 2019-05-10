@@ -40,13 +40,11 @@ describe.skip('Single SDAM Monitoring (mocks)', function() {
       });
 
       // Attempt to connect
-      server = config.newTopology(
-        Object.assign({}, mockServer.address(), {
-          connectionTimeout: 3000,
-          socketTimeout: 1000,
-          size: 1
-        })
-      );
+      server = config.newTopology(mockServer.address().host, mockServer.address().port, {
+        connectionTimeout: 3000,
+        socketTimeout: 1000,
+        size: 1
+      });
 
       // Results
       var flags = [];
@@ -179,13 +177,11 @@ describe.skip('Single SDAM Monitoring (mocks)', function() {
       });
 
       // Attempt to connect
-      server = config.newTopology(
-        Object.assign({}, mockServer.address(), {
-          connectionTimeout: 3000,
-          socketTimeout: 1000,
-          size: 1
-        })
-      );
+      server = config.newTopology(mockServer.address().host, mockServer.address().port, {
+        connectionTimeout: 3000,
+        socketTimeout: 1000,
+        size: 1
+      });
 
       // Results
       var flags = [];

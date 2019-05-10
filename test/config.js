@@ -3,6 +3,8 @@ const ConfigurationBase = require('mongodb-test-runner').ConfigurationBase;
 const f = require('util').format;
 const url = require('url');
 const qs = require('querystring');
+const core = require('../lib/core');
+
 class NativeConfiguration extends ConfigurationBase {
   constructor(environment) {
     super(environment);
@@ -16,12 +18,17 @@ class NativeConfiguration extends ConfigurationBase {
     }
   }
 
-  defaultTopology(serverHost, serverPort, serverOpts, _mongo) {
-    return new _mongo.Server(serverHost, serverPort, serverOpts || {});
-  }
-
   usingUnifiedTopology() {
     return !!process.env.MONGODB_UNIFIED_TOPOLOGY;
+  }
+
+  defaultTopology(host, port, serverOptions) {
+    const options = Object.assign({}, { host, port }, serverOptions);
+    if (this.usingUnifiedTopology()) {
+      return new core.Topology(options);
+    }
+
+    return new core.Server(options);
   }
 
   start(callback) {
@@ -106,6 +113,41 @@ class NativeConfiguration extends ConfigurationBase {
     });
 
     return new this.mongo.MongoClient(connectionString, serverOptions);
+  }
+
+  newTopology(host, port, options) {
+    host = host || 'localhost';
+    port = port || 27017;
+    options = options || {};
+    return this.topology(host, port, options);
+  }
+
+  newConnection(host, port, options, callback) {
+    if (typeof options === 'function') {
+      callback = options;
+      options = {};
+    }
+
+    var server = this.topology(host, port, options);
+    var errorHandler = function(err) {
+      callback(err);
+    };
+
+    // Set up connect
+    server.once('connect', function() {
+      server.removeListener('error', errorHandler);
+      callback(null, server);
+    });
+
+    server.once('error', errorHandler);
+
+    // Connect
+    try {
+      server.connect();
+    } catch (err) {
+      server.removeListener('error', errorHandler);
+      callback(err);
+    }
   }
 
   url(username, password) {

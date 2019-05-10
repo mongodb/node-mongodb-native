@@ -1,9 +1,9 @@
 'use strict';
 
 const expect = require('chai').expect;
-const MongoError = require('../../../lib/error').MongoError;
+const MongoError = require('../../../lib/core/error').MongoError;
 const mock = require('mongodb-mock-server');
-const Server = require('../../../lib/topologies/server');
+const Server = require('../../../lib/core/topologies/server');
 const Long = require('bson').Long;
 
 const test = {};

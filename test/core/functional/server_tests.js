@@ -4,10 +4,13 @@ const f = require('util').format;
 const locateAuthMethod = require('./shared').locateAuthMethod;
 const executeCommand = require('./shared').executeCommand;
 const Bson = require('bson');
-const Connection = require('../../../lib/connection/connection');
 const mock = require('mongodb-mock-server');
 const Buffer = require('safe-buffer').Buffer;
-const MongoCredentials = require('../../../lib/auth/mongo_credentials').MongoCredentials;
+
+const core = require('../../../lib/core');
+const ReadPreference = core.ReadPreference;
+const MongoCredentials = core.MongoCredentials;
+const Connection = core.Connection;
 
 describe('Server tests', function() {
   it('should correctly connect server to single instance', {
@@ -15,9 +18,7 @@ describe('Server tests', function() {
 
     test: function(done) {
       const config = this.configuration;
-      var server = config.newTopology({
-        host: this.configuration.host,
-        port: this.configuration.port,
+      var server = config.newTopology(this.configuration.host, this.configuration.port, {
         bson: new Bson()
       });
 
@@ -37,9 +38,7 @@ describe('Server tests', function() {
 
     test: function(done) {
       const config = this.configuration;
-      var server = config.newTopology({
-        host: this.configuration.host,
-        port: this.configuration.port,
+      var server = config.newTopology(this.configuration.host, this.configuration.port, {
         bson: new Bson()
       });
 
@@ -65,9 +64,7 @@ describe('Server tests', function() {
 
     test: function(done) {
       const config = this.configuration;
-      var server = config.newTopology({
-        host: this.configuration.host,
-        port: this.configuration.port,
+      var server = config.newTopology(this.configuration.host, this.configuration.port, {
         bson: new Bson()
       });
 
@@ -100,9 +97,7 @@ describe('Server tests', function() {
 
     test: function(done) {
       const config = this.configuration;
-      var server = config.newTopology({
-        host: this.configuration.host,
-        port: this.configuration.port,
+      var server = config.newTopology(this.configuration.host, this.configuration.port, {
         bson: new Bson()
       });
 
@@ -136,12 +131,8 @@ describe('Server tests', function() {
       metadata: { requires: { topology: 'single' } },
 
       test: function(done) {
-        var ReadPreference = this.configuration.mongo.ReadPreference;
-
         const config = this.configuration;
-        var server = config.newTopology({
-          host: this.configuration.host,
-          port: this.configuration.port,
+        var server = config.newTopology(this.configuration.host, this.configuration.port, {
           bson: new Bson(),
           compression: { compressors: ['snappy', 'zlib'] }
         });
@@ -176,9 +167,7 @@ describe('Server tests', function() {
 
     test: function(done) {
       const config = this.configuration;
-      var server = config.newTopology({
-        host: this.configuration.host,
-        port: this.configuration.port,
+      var server = config.newTopology(this.configuration.host, this.configuration.port, {
         bson: new Bson()
       });
 
@@ -216,9 +205,7 @@ describe('Server tests', function() {
 
     test: function(done) {
       const config = this.configuration;
-      var server = config.newTopology({
-        host: this.configuration.host,
-        port: this.configuration.port,
+      var server = config.newTopology(this.configuration.host, this.configuration.port, {
         bson: new Bson()
       });
 
@@ -256,9 +243,7 @@ describe('Server tests', function() {
 
     test: function(done) {
       const config = this.configuration;
-      var server = config.newTopology({
-        host: this.configuration.host,
-        port: this.configuration.port,
+      var server = config.newTopology(this.configuration.host, this.configuration.port, {
         bson: new Bson()
       });
 
@@ -297,9 +282,7 @@ describe('Server tests', function() {
 
     test: function(done) {
       const config = this.configuration;
-      var server = config.newTopology({
-        host: this.configuration.host,
-        port: this.configuration.port,
+      var server = config.newTopology(this.configuration.host, this.configuration.port, {
         bson: new Bson()
       });
 
@@ -344,9 +327,7 @@ describe('Server tests', function() {
       var testDone = false;
 
       const config = this.configuration;
-      var server = config.newTopology({
-        host: this.configuration.host,
-        port: this.configuration.port,
+      var server = config.newTopology(this.configuration.host, this.configuration.port, {
         bson: new Bson()
       });
 
@@ -431,11 +412,8 @@ describe('Server tests', function() {
     },
 
     test: function(done) {
-      var ReadPreference = this.configuration.mongo.ReadPreference;
       const config = this.configuration;
-      var server = config.newTopology({
-        host: this.configuration.host,
-        port: this.configuration.port,
+      var server = config.newTopology(this.configuration.host, this.configuration.port, {
         reconnect: true,
         size: 1,
         reconnectInterval: 50
@@ -512,10 +490,7 @@ describe('Server tests', function() {
         return this.skip();
       }
 
-      var ReadPreference = this.configuration.require.ReadPreference;
-      var server = config.newTopology({
-        host: this.configuration.host,
-        port: this.configuration.port,
+      var server = config.newTopology(this.configuration.host, this.configuration.port, {
         reconnect: false,
         size: 1
       });
@@ -585,9 +560,7 @@ describe('Server tests', function() {
 
       manager.stop('SIGINT').then(function() {
         // Attempt to connect while server is down
-        var server = config.newTopology({
-          host: self.configuration.host,
-          port: self.configuration.port,
+        var server = config.newTopology(this.configuration.host, this.configuration.port, {
           reconnect: true,
           reconnectTries: 2,
           size: 1,
@@ -624,12 +597,8 @@ describe('Server tests', function() {
     },
 
     test: function(done) {
-      var ReadPreference = this.configuration.require.ReadPreference;
-
       const config = this.configuration;
-      var server = config.newTopology({
-        host: this.configuration.host,
-        port: this.configuration.port,
+      var server = config.newTopology(this.configuration.host, this.configuration.port, {
         reconnect: true,
         size: 1,
         reconnectInterval: 50
@@ -697,9 +666,7 @@ describe('Server tests', function() {
     test: function(done) {
       var self = this;
       const config = this.configuration;
-      var server = config.newTopology({
-        host: this.configuration.host,
-        port: this.configuration.port,
+      var server = config.newTopology(this.configuration.host, this.configuration.port, {
         reconnect: true,
         reconnectTries: 2,
         size: 50,
@@ -751,9 +718,7 @@ describe('Server tests', function() {
     // The actual test we wish to run
     test: function(done) {
       const config = this.configuration;
-      var server = config.newTopology({
-        host: this.configuration.host,
-        port: this.configuration.port,
+      var server = config.newTopology(this.configuration.host, this.configuration.port, {
         size: 10,
         bson: new Bson()
       });
@@ -823,9 +788,7 @@ describe('Server tests', function() {
       const config = this.configuration;
 
       try {
-        config.newTopology({
-          host: this.configuration.host,
-          port: this.configuration.port,
+        config.newTopology(this.configuration.host, this.configuration.port, {
           bson: new Bson(),
           compression: { compressors: ['notACompressor', 'alsoNotACompressor', 'snappy'] }
         });
@@ -873,9 +836,7 @@ describe('Server tests', function() {
                 expect(cmdErr).to.not.exist;
                 expect(r).to.exist;
 
-                var server = config.newTopology({
-                  host: self.configuration.host,
-                  port: self.configuration.port,
+                var server = config.newTopology(this.configuration.host, this.configuration.port, {
                   bson: new Bson(),
                   compression: { compressors: ['snappy', 'zlib'] }
                 });
@@ -951,9 +912,7 @@ describe('Server tests', function() {
                 expect(cmdErr).to.not.exist;
                 expect(r).to.exist;
 
-                var server = config.newTopology({
-                  host: self.configuration.host,
-                  port: self.configuration.port,
+                var server = config.newTopology(this.configuration.host, this.configuration.port, {
                   bson: new Bson(),
                   compression: { compressors: ['snappy', 'zlib'] }
                 });
@@ -986,10 +945,8 @@ describe('Server tests', function() {
           return this.skip();
         }
 
-        var server = config.newTopology({
-          host: this.configuration.host,
-          port: this.configuration.port,
-          bson: new Bson(),
+        var server = config.newTopology(this.configuration.host, this.configuration.port, {
+          bson: new sBson(),
           compression: {
             compressors: ['snappy', 'zlib']
           }
@@ -1039,7 +996,7 @@ describe('Server tests', function() {
         });
 
         const config = this.configuration;
-        var client = config.newTopology(server.address());
+        var client = config.newTopology(server.address().host, server.address().port);
         client.on('error', error => {
           let err;
           try {
@@ -1066,8 +1023,7 @@ describe('Server tests', function() {
 
     test: function(done) {
       const config = this.configuration;
-      var server = config.newTopology({
-        host: 'doesntexist',
+      var server = config.newTopology('doesntexist', 12345, {
         bson: new Bson(),
         reconnectTries: 0
       });

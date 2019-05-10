@@ -1,10 +1,10 @@
 'use strict';
 const EventEmitter = require('events');
-const Pool = require('../../../lib/connection/pool');
+const Pool = require('../../../lib/core/connection/pool');
 const f = require('util').format;
 const bson = require('bson');
-const Query = require('../../../lib/connection/commands').Query;
-const ReadPreference = require('../../../lib/topologies/read_preference');
+const Query = require('../../../lib/core/connection/commands').Query;
+const ReadPreference = require('../../../lib/core/topologies/read_preference');
 
 function executeCommand(configuration, db, cmd, options, cb) {
   // Optional options
@@ -51,10 +51,10 @@ function executeCommand(configuration, db, cmd, options, cb) {
 }
 
 function locateAuthMethod(configuration, cb) {
-  var Pool = require('../../../lib/connection/pool'),
+  var Pool = require('../../../lib/core/connection/pool'),
     bson = require('bson'),
     f = require('util').format,
-    Query = require('../../../lib/connection/commands').Query;
+    Query = require('../../../lib/core/connection/commands').Query;
 
   // Set up operations
   var db = 'admin';

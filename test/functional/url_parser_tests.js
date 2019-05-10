@@ -645,6 +645,7 @@ describe('Url Parser', function() {
         Logger = self.configuration.require.Logger,
         logged = false;
 
+      const logger = Logger.currentLogger();
       Logger.setCurrentLogger(function(msg, context) {
         expect(msg).to.exist;
         expect(msg).to.contain('not supported');
@@ -665,14 +666,14 @@ describe('Url Parser', function() {
               expect(logged).to.be.true;
               parse('mongodb://localhost/db?uuidRepresentation=1', {}, function() {
                 expect(logged).to.be.true;
+
+                Logger.setCurrentLogger(logger);
                 done();
               });
             });
           });
         });
       });
-
-      Logger.reset();
     }
   });
 

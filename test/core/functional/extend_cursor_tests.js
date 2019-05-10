@@ -1,8 +1,9 @@
 'use strict';
 
-var expect = require('chai').expect,
-  inherits = require('util').inherits,
-  f = require('util').format;
+const expect = require('chai').expect;
+const inherits = require('util').inherits;
+const f = require('util').format;
+const CoreCursor = require('../../../lib/core/cursor');
 
 describe('Extend cursor tests', function() {
   it('should correctly extend the cursor with custom implementation', {
@@ -13,11 +14,10 @@ describe('Extend cursor tests', function() {
     test: function(done) {
       var self = this;
       const config = this.configuration;
-      var Cursor = this.configuration.mongo.Cursor;
 
       // Create an extended cursor that adds a toArray function
       var ExtendedCursor = function() {
-        Cursor.apply(this, Array.prototype.slice.call(arguments, 0));
+        CoreCursor.apply(this, Array.prototype.slice.call(arguments, 0));
         var extendedCursorSelf = this;
 
         // Resolve all the next
@@ -42,12 +42,10 @@ describe('Extend cursor tests', function() {
       };
 
       // Extend the Cursor
-      inherits(ExtendedCursor, Cursor);
+      inherits(ExtendedCursor, CoreCursor);
 
       // Attempt to connect, adding a custom cursor creator
-      var server = config.newTopology({
-        host: this.configuration.host,
-        port: this.configuration.port,
+      var server = config.newTopology(this.configuration.host, this.configuration.port, {
         cursorFactory: ExtendedCursor
       });
 

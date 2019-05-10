@@ -1,6 +1,9 @@
 'use strict';
 
-var expect = require('chai').expect;
+const expect = require('chai').expect;
+const core = require('../../../lib/core');
+const ReplSet = core.ReplSet;
+const Mongos = core.Mongos;
 
 /**************************************************************************
  *
@@ -26,9 +29,7 @@ describe('Server operation example tests', function() {
       const config = this.configuration;
 
       // Attempt to connect
-      var server = config.newTopology({
-        host: this.configuration.host,
-        port: this.configuration.port,
+      var server = config.newTopology(this.configuration.host, this.configuration.port, {
         reconnect: true,
         reconnectInterval: 50
       });
@@ -82,9 +83,7 @@ describe('Server operation example tests', function() {
       const config = this.configuration;
 
       // Attempt to connect
-      var server = config.newTopology({
-        host: this.configuration.host,
-        port: this.configuration.port,
+      var server = config.newTopology(this.configuration.host, this.configuration.port, {
         reconnect: true,
         reconnectInterval: 50
       });
@@ -157,9 +156,7 @@ describe('Server operation example tests', function() {
       const config = this.configuration;
 
       // Attempt to connect
-      var server = config.newTopology({
-        host: this.configuration.host,
-        port: this.configuration.port,
+      var server = config.newTopology(this.configuration.host, this.configuration.port, {
         reconnect: true,
         reconnectInterval: 50
       });
@@ -232,9 +229,7 @@ describe('Server operation example tests', function() {
       const config = this.configuration;
 
       // Attempt to connect
-      var server = config.newTopology({
-        host: this.configuration.host,
-        port: this.configuration.port,
+      var server = config.newTopology(this.configuration.host, this.configuration.port, {
         reconnect: true,
         reconnectInterval: 50
       });
@@ -300,9 +295,7 @@ describe('Server operation example tests', function() {
       const config = this.configuration;
 
       // Attempt to connect
-      var server = config.newTopology({
-        host: this.configuration.host,
-        port: this.configuration.port,
+      var server = config.newTopology(this.configuration.host, this.configuration.port, {
         reconnect: true,
         reconnectInterval: 50
       });
@@ -352,8 +345,6 @@ describe('Replset operation example tests', function() {
     },
 
     test: function(done) {
-      var ReplSet = this.configuration.require.ReplSet;
-
       var config = [
         {
           host: this.configuration.host,
@@ -414,8 +405,6 @@ describe('Replset operation example tests', function() {
     },
 
     test: function(done) {
-      var ReplSet = this.configuration.require.ReplSet;
-
       var config = [
         {
           host: this.configuration.host,
@@ -495,8 +484,6 @@ describe('Replset operation example tests', function() {
     },
 
     test: function(done) {
-      var ReplSet = this.configuration.require.ReplSet;
-
       var config = [
         {
           host: this.configuration.host,
@@ -576,8 +563,6 @@ describe('Replset operation example tests', function() {
     },
 
     test: function(done) {
-      var ReplSet = this.configuration.require.ReplSet;
-
       var config = [
         {
           host: this.configuration.host,
@@ -650,8 +635,6 @@ describe('Replset operation example tests', function() {
     },
 
     test: function(done) {
-      var ReplSet = this.configuration.require.ReplSet;
-
       var config = [
         {
           host: this.configuration.host,
@@ -711,8 +694,6 @@ describe.skip('Mongos operation example tests', function() {
     },
 
     test: function(done) {
-      var Mongos = this.configuration.require.Mongos;
-
       // Attempt to connect
       var server = new Mongos([
         {
@@ -761,8 +742,6 @@ describe.skip('Mongos operation example tests', function() {
     },
 
     test: function(done) {
-      var Mongos = this.configuration.require.Mongos;
-
       // Attempt to connect
       var server = new Mongos([
         {
@@ -830,8 +809,6 @@ describe.skip('Mongos operation example tests', function() {
     },
 
     test: function(done) {
-      var Mongos = this.configuration.require.Mongos;
-
       // Attempt to connect
       var server = new Mongos([
         {
@@ -899,8 +876,6 @@ describe.skip('Mongos operation example tests', function() {
     },
 
     test: function(done) {
-      var Mongos = this.configuration.require.Mongos;
-
       // Attempt to connect
       var server = new Mongos([
         {
@@ -961,8 +936,6 @@ describe.skip('Mongos operation example tests', function() {
     },
 
     test: function(done) {
-      var Mongos = this.configuration.require.Mongos;
-
       // Attempt to connect
       var server = new Mongos([
         {

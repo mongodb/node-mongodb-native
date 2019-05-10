@@ -1,8 +1,11 @@
 'use strict';
 
-var expect = require('chai').expect,
-  Bson = require('bson'),
-  Mongos = require('../../../lib/topologies/mongos');
+const expect = require('chai').expect;
+
+const core = require('../../../lib/core');
+const BSON = core.BSON;
+const Mongos = core.Mongos;
+const ReplSet = core.ReplSet;
 
 describe('Client metadata tests', function() {
   it('should correctly pass the configuration settings to server', {
@@ -10,12 +13,14 @@ describe('Client metadata tests', function() {
 
     test: function(done) {
       // Attempt to connect
-      var server = this.configuration.newTopology({
-        host: this.configuration.host,
-        port: this.configuration.port,
-        bson: new Bson(),
-        appname: 'My application name'
-      });
+      var server = this.configuration.newTopology(
+        this.configuration.host,
+        this.configuration.port,
+        {
+          bson: new BSON(),
+          appname: 'My application name'
+        }
+      );
 
       expect(server.clientInfo.application.name).to.equal('My application name');
       done();
@@ -27,10 +32,8 @@ describe('Client metadata tests', function() {
     metadata: { requires: { topology: 'replicaset' } },
 
     test: function(done) {
-      var self = this;
-
-      var ReplSet = this.configuration.mongo.ReplSet,
-        manager = this.configuration.manager;
+      const self = this;
+      const manager = this.configuration.manager;
 
       // Get the primary server
       manager.primary().then(function(_manager) {

@@ -1,9 +1,16 @@
 'use strict';
-var expect = require('chai').expect,
-  co = require('co'),
-  Connection = require('../../../../lib/connection/connection'),
-  mock = require('mongodb-mock-server'),
-  ConnectionSpy = require('../shared').ConnectionSpy;
+const expect = require('chai').expect;
+const co = require('co');
+const mock = require('mongodb-mock-server');
+const ConnectionSpy = require('../shared').ConnectionSpy;
+
+const core = require('../../../../lib/core');
+const Connection = core.Connection;
+const MongoError = core.MongoError;
+const ReplSet = core.ReplSet;
+const ObjectId = core.BSON.ObjectId;
+const ReadPreference = core.ReadPreference;
+const Long = core.BSON.Long;
 
 let test = {};
 describe('ReplSet Read Preferences (mocks)', function() {
@@ -28,11 +35,6 @@ describe('ReplSet Read Preferences (mocks)', function() {
     },
 
     test: function(done) {
-      var ReplSet = this.configuration.mongo.ReplSet,
-        ObjectId = this.configuration.mongo.BSON.ObjectId,
-        ReadPreference = this.configuration.mongo.ReadPreference,
-        Long = this.configuration.mongo.BSON.Long;
-
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
@@ -168,11 +170,6 @@ describe('ReplSet Read Preferences (mocks)', function() {
     },
 
     test: function(done) {
-      var ReplSet = this.configuration.mongo.ReplSet,
-        ObjectId = this.configuration.mongo.BSON.ObjectId,
-        ReadPreference = this.configuration.mongo.ReadPreference,
-        Long = this.configuration.mongo.BSON.Long;
-
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
@@ -307,11 +304,6 @@ describe('ReplSet Read Preferences (mocks)', function() {
     },
 
     test: function(done) {
-      var ReplSet = this.configuration.mongo.ReplSet,
-        ObjectId = this.configuration.mongo.BSON.ObjectId,
-        ReadPreference = this.configuration.mongo.ReadPreference,
-        Long = this.configuration.mongo.BSON.Long;
-
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
@@ -480,12 +472,6 @@ describe('ReplSet Read Preferences (mocks)', function() {
     },
 
     test: function(done) {
-      var ReplSet = this.configuration.mongo.ReplSet,
-        ObjectId = this.configuration.mongo.BSON.ObjectId,
-        ReadPreference = this.configuration.mongo.ReadPreference,
-        Long = this.configuration.mongo.BSON.Long,
-        MongoError = this.configuration.mongo.MongoError;
-
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
@@ -638,11 +624,6 @@ describe('ReplSet Read Preferences (mocks)', function() {
     },
 
     test: function(done) {
-      var ReplSet = this.configuration.mongo.ReplSet,
-        ObjectId = this.configuration.mongo.BSON.ObjectId,
-        ReadPreference = this.configuration.mongo.ReadPreference,
-        Long = this.configuration.mongo.BSON.Long;
-
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
@@ -813,11 +794,6 @@ describe('ReplSet Read Preferences (mocks)', function() {
     },
 
     test: function(done) {
-      var ReplSet = this.configuration.mongo.ReplSet,
-        ObjectId = this.configuration.mongo.BSON.ObjectId,
-        ReadPreference = this.configuration.mongo.ReadPreference,
-        Long = this.configuration.mongo.BSON.Long;
-
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
@@ -958,11 +934,6 @@ describe('ReplSet Read Preferences (mocks)', function() {
     },
 
     test: function(done) {
-      var ReplSet = this.configuration.mongo.ReplSet,
-        ObjectId = this.configuration.mongo.BSON.ObjectId,
-        ReadPreference = this.configuration.mongo.ReadPreference,
-        Long = this.configuration.mongo.BSON.Long;
-
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
@@ -1106,11 +1077,6 @@ describe('ReplSet Read Preferences (mocks)', function() {
       },
 
       test: function(done) {
-        var ReplSet = this.configuration.mongo.ReplSet,
-          ObjectId = this.configuration.mongo.BSON.ObjectId,
-          ReadPreference = this.configuration.mongo.ReadPreference,
-          Long = this.configuration.mongo.BSON.Long;
-
         var electionIds = [new ObjectId(), new ObjectId()];
         var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
           setName: 'rs',
@@ -1197,11 +1163,6 @@ describe('ReplSet Read Preferences (mocks)', function() {
     },
 
     test: function(done) {
-      var ReplSet = this.configuration.mongo.ReplSet,
-        ObjectId = this.configuration.mongo.BSON.ObjectId,
-        ReadPreference = this.configuration.mongo.ReadPreference,
-        Long = this.configuration.mongo.BSON.Long;
-
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',

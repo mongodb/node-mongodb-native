@@ -1,13 +1,13 @@
 'use strict';
 const path = require('path');
 const fs = require('fs');
-const Topology = require('../../../lib/sdam/topology');
-const Server = require('../../../lib/sdam/server');
-const ServerDescription = require('../../../lib/sdam/server_description').ServerDescription;
-const ServerType = require('../../../lib/sdam/server_description').ServerType;
-const ServerSelectors = require('../../../lib/sdam/server_selectors');
-const MongoTimeoutError = require('../../../lib/error').MongoTimeoutError;
-const ReadPreference = require('../../../lib/topologies/read_preference');
+const Topology = require('../../../lib/core/sdam/topology');
+const Server = require('../../../lib/core/sdam/server');
+const ServerDescription = require('../../../lib/core/sdam/server_description').ServerDescription;
+const ServerType = require('../../../lib/core/sdam/server_description').ServerType;
+const ServerSelectors = require('../../../lib/core/sdam/server_selectors');
+const MongoTimeoutError = require('../../../lib/core/error').MongoTimeoutError;
+const ReadPreference = require('../../../lib/core/topologies/read_preference');
 const EJSON = require('mongodb-extjson');
 
 const sinon = require('sinon');
@@ -270,7 +270,7 @@ function executeServerSelectionTest(testDefinition, options, testDone) {
     }
   }
 
-  // default to serverSelectionTimeoutMS of `0` for unit tests
+  // default to serverSelectionTimeoutMS of `100` for unit tests
   topology.selectServer(selector, { serverSelectionTimeoutMS: 100 }, (err, server) => {
     // are we expecting an error?
     if (testDefinition.error) {

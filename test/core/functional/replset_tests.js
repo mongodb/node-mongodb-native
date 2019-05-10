@@ -1,9 +1,13 @@
 'use strict';
 
-var expect = require('chai').expect,
-  f = require('util').format,
-  Connection = require('../../../lib/connection/connection'),
-  ReplSet = require('../../../lib/topologies/replset');
+const expect = require('chai').expect;
+const f = require('util').format;
+
+const core = require('../../../lib/core');
+const Connection = core.Connection;
+const Server = core.Server;
+const ReplSet = core.ReplSet;
+const ReadPreference = core.ReadPreference;
 
 var restartAndDone = function(configuration, done) {
   configuration.manager.restart(9, { waitMS: 2000 }).then(function() {
@@ -481,9 +485,7 @@ describe.skip('A replica set', function() {
 
     test: function(done) {
       var self = this;
-      var Server = this.configuration.mongo.Server,
-        ReadPreference = this.configuration.require.ReadPreference,
-        manager = this.configuration.manager;
+      const manager = this.configuration.manager;
 
       // Get the primary server
       manager.primary().then(function(_manager) {

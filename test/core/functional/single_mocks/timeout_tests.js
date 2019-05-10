@@ -65,13 +65,11 @@ describe('Single Timeout (mocks)', function() {
           stopRespondingPrimary = true;
         }, 5000);
 
-        var replset = config.newTopology(
-          Object.assign({}, server.address(), {
-            connectionTimeout: 5000,
-            socketTimeout: 1000,
-            size: 1
-          })
-        );
+        var replset = config.newTopology(server.address().host, server.address().port, {
+          connectionTimeout: 5000,
+          socketTimeout: 1000,
+          size: 1
+        });
 
         // Not done
         var finished = false;
@@ -159,13 +157,11 @@ describe('Single Timeout (mocks)', function() {
           }
         });
 
-        var server = config.newTopology(
-          Object.assign({}, mockServer.address(), {
-            connectionTimeout: 3000,
-            socketTimeout: 2000,
-            size: 1
-          })
-        );
+        var server = config.newTopology(server.address().host, server.address().port, {
+          connectionTimeout: 3000,
+          socketTimeout: 2000,
+          size: 1
+        });
 
         var docs = [];
         // Create big insert message
@@ -299,13 +295,11 @@ describe('Single Timeout (mocks)', function() {
             }
           });
 
-          var server = config.newTopology(
-            Object.assign({}, mockServer.address(), {
-              connectionTimeout: 2000,
-              socketTimeout: 1000,
-              size: 1
-            })
-          );
+          var server = config.newTopology(mockServer.address().host, mockServer.address().port, {
+            connectionTimeout: 2000,
+            socketTimeout: 1000,
+            size: 1
+          });
 
           // Add event listeners
           server.once('connect', function() {

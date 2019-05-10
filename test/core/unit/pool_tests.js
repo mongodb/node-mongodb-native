@@ -2,8 +2,8 @@
 
 const expect = require('chai').expect;
 const mock = require('mongodb-mock-server');
-const Server = require('../../../lib/topologies/server');
-const MongoWriteConcernError = require('../../../lib/error').MongoWriteConcernError;
+const Server = require('../../../lib/core/topologies/server');
+const MongoWriteConcernError = require('../../../lib/core/error').MongoWriteConcernError;
 const sinon = require('sinon');
 
 const test = {};
@@ -42,6 +42,7 @@ describe('Pool (unit)', function() {
         expect(err).to.exist;
         expect(result).to.not.exist;
         expect(err).to.be.instanceOf(MongoWriteConcernError);
+        client.destroy();
         done();
       });
     });
@@ -71,6 +72,7 @@ describe('Pool (unit)', function() {
         expect(query.slaveOk).to.be.false;
 
         client.s.pool.write.restore();
+        client.destroy();
         done();
       });
     });

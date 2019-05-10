@@ -1,11 +1,13 @@
 'use strict';
 
 const expect = require('chai').expect;
-const ReplSet = require('../../../../lib/topologies/replset');
 const mock = require('mongodb-mock-server');
 const ReplSetFixture = require('../common').ReplSetFixture;
-const ClientSession = require('../../../../lib/sessions').ClientSession;
-const ServerSessionPool = require('../../../../lib/sessions').ServerSessionPool;
+
+const core = require('../../../../lib/core');
+const ReplSet = core.ReplSet;
+const ClientSession = core.Sessions.ClientSession;
+const ServerSessionPool = core.Sessions.ServerSessionPool;
 
 describe('Transaction Feature Decoration', function() {
   let test;
@@ -84,9 +86,15 @@ describe('Transaction Feature Decoration', function() {
             }
           );
 
+          const sessionPool = new ServerSessionPool(replSet);
+          const session = new ClientSession(replSet, sessionPool, {}, {});
+
           function shutdown(err) {
             replSet.destroy();
-            done(err);
+            session.endSession(() => {
+              sessionPool.endAllPooledSessions();
+              done(err);
+            });
           }
 
           test.primaryServer.setMessageHandler(request => {
@@ -113,8 +121,7 @@ describe('Transaction Feature Decoration', function() {
             }
           });
 
-          const sessionPool = new ServerSessionPool(replSet);
-
+          replSet.on('error', shutdown);
           replSet.on('connect', () => {
             const options = {};
 
@@ -123,8 +130,7 @@ describe('Transaction Feature Decoration', function() {
             }
 
             if (config.session) {
-              options.session = new ClientSession(replSet, sessionPool, {}, {});
-
+              options.session = session;
               if (config.transaction) {
                 options.session.startTransaction();
               }
@@ -132,8 +138,6 @@ describe('Transaction Feature Decoration', function() {
 
             replSet[config.fnName](ns, config.arg, options, noop);
           });
-
-          replSet.on('error', shutdown);
 
           replSet.connect();
         }

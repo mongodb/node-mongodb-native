@@ -1,8 +1,13 @@
 'use strict';
 const co = require('co');
-const Connection = require('../../../../lib/connection/connection');
 const mock = require('mongodb-mock-server');
 const ConnectionSpy = require('../shared').ConnectionSpy;
+
+const core = require('../../../../lib/core');
+const Connection = core.Connection;
+const ReplSet = core.ReplSet;
+const ObjectId = core.BSON.ObjectId;
+const ReadPreference = core.ReadPreference;
 
 let test = {};
 describe('ReplSet Operations (mocks)', function() {
@@ -27,9 +32,6 @@ describe('ReplSet Operations (mocks)', function() {
     },
 
     test: function(done) {
-      var ReplSet = this.configuration.mongo.ReplSet,
-        ObjectId = this.configuration.mongo.BSON.ObjectId;
-
       var currentIsMasterIndex = 0;
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
@@ -98,10 +100,6 @@ describe('ReplSet Operations (mocks)', function() {
       },
 
       test: function(done) {
-        var ReplSet = this.configuration.mongo.ReplSet,
-          ObjectId = this.configuration.mongo.BSON.ObjectId,
-          ReadPreference = this.configuration.mongo.ReadPreference;
-
         var currentIsMasterIndex = 0;
         var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
           setName: 'rs',

@@ -3,14 +3,14 @@
 var expect = require('chai').expect,
   locateAuthMethod = require('./shared').locateAuthMethod,
   executeCommand = require('./shared').executeCommand,
-  Pool = require('../../../lib/connection/pool'),
-  Connection = require('../../../lib/connection/connection'),
-  Query = require('../../../lib/connection/commands').Query,
+  Pool = require('../../../lib/core/connection/pool'),
+  Connection = require('../../../lib/core/connection/connection'),
+  Query = require('../../../lib/core/connection/commands').Query,
   Bson = require('bson'),
   mock = require('mongodb-mock-server'),
   ConnectionSpy = require('./shared').ConnectionSpy;
 
-const MongoCredentials = require('../../../lib/auth/mongo_credentials').MongoCredentials;
+const MongoCredentials = require('../../../lib/core/auth/mongo_credentials').MongoCredentials;
 
 const test = {};
 describe('Pool tests', function() {

@@ -1,6 +1,6 @@
 'use strict';
 var expect = require('chai').expect,
-  ReplSet = require('../../../../lib/topologies/replset'),
+  ReplSet = require('../../../../lib/core/topologies/replset'),
   mock = require('mongodb-mock-server'),
   genClusterTime = require('../common').genClusterTime,
   ReplSetFixture = require('../common').ReplSetFixture;

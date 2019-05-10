@@ -1,10 +1,13 @@
 'use strict';
-var expect = require('chai').expect,
-  Mongos = require('../../../../lib/topologies/mongos'),
-  mock = require('mongodb-mock-server'),
-  MongosFixture = require('../common').MongosFixture,
-  ClientSession = require('../../../../lib/sessions').ClientSession,
-  ServerSessionPool = require('../../../../lib/sessions').ServerSessionPool;
+const expect = require('chai').expect;
+const mock = require('mongodb-mock-server');
+const MongosFixture = require('../common').MongosFixture;
+const sessionCleanupHandler = require('../common').sessionCleanupHandler;
+
+const core = require('../../../../lib/core');
+const ClientSession = core.Sessions.ClientSession;
+const ServerSessionPool = core.Sessions.ServerSessionPool;
+const Mongos = core.Mongos;
 
 const test = new MongosFixture();
 describe('Retryable Writes (Mongos)', function() {
@@ -24,6 +27,7 @@ describe('Retryable Writes (Mongos)', function() {
 
       const sessionPool = new ServerSessionPool(topology);
       const session = new ClientSession(topology, sessionPool);
+      done = sessionCleanupHandler(session, sessionPool, done);
 
       let command = null;
       const messageHandler = () => {
@@ -72,6 +76,7 @@ describe('Retryable Writes (Mongos)', function() {
 
       const sessionPool = new ServerSessionPool(mongos);
       const session = new ClientSession(mongos, sessionPool);
+      done = sessionCleanupHandler(session, sessionPool, done);
 
       let command = null,
         insertCount = 0;
@@ -103,8 +108,6 @@ describe('Retryable Writes (Mongos)', function() {
           expect(err).to.not.exist;
           expect(command).to.have.property('txnNumber');
           expect(command.txnNumber).to.eql(1);
-
-          mongos.destroy();
           done();
         });
       });
@@ -127,6 +130,7 @@ describe('Retryable Writes (Mongos)', function() {
 
       const sessionPool = new ServerSessionPool(mongos);
       const session = new ClientSession(mongos, sessionPool);
+      done = sessionCleanupHandler(session, sessionPool, done);
 
       let command = null,
         insertCount = 0;
@@ -158,8 +162,10 @@ describe('Retryable Writes (Mongos)', function() {
           expect(command).to.have.property('txnNumber');
           expect(command.txnNumber).to.eql(1);
 
-          mongos.destroy();
-          done();
+          session.endSession(() => {
+            mongos.destroy();
+            done();
+          });
         });
       });
 

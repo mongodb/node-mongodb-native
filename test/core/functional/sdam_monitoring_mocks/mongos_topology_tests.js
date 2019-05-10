@@ -1,7 +1,10 @@
 'use strict';
-var expect = require('chai').expect,
-  co = require('co'),
-  mock = require('mongodb-mock-server');
+const expect = require('chai').expect;
+const co = require('co');
+const mock = require('mongodb-mock-server');
+
+const core = require('../../../../lib/core');
+const Mongos = core.Mongos;
 
 describe.skip('Mongos SDAM Monitoring (mocks)', function() {
   it('SDAM Monitoring Should correctly connect to two proxies', {
@@ -13,8 +16,6 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
     },
 
     test: function(done) {
-      var Mongos = this.configuration.mongo.Mongos;
-
       // Contain mock server
       var mongos1 = null;
       var mongos2 = null;
@@ -216,8 +217,6 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
     },
 
     test: function(done) {
-      var Mongos = this.configuration.mongo.Mongos;
-
       // Contain mock server
       var mongos1 = null;
       var mongos2 = null;
@@ -406,8 +405,6 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
     },
 
     test: function(done) {
-      var Mongos = this.configuration.mongo.Mongos;
-
       // Contain mock server
       var mongos1 = null;
       var mongos2 = null;

@@ -3,9 +3,9 @@
 const expect = require('chai').expect;
 const path = require('path');
 const fs = require('fs');
-const Mongos = require('../../../lib/topologies/mongos');
-const ReadPreference = require('../../../lib/topologies/read_preference');
-const Server = require('../../../lib/topologies/server');
+const Mongos = require('../../../lib/core/topologies/mongos');
+const ReadPreference = require('../../../lib/core/topologies/read_preference');
+const Server = require('../../../lib/core/topologies/server');
 
 describe('Mongos server selection tests', function() {
   var specPath = `${__dirname}/../spec/server-selection/server_selection/Sharded/read`;

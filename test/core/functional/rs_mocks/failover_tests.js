@@ -1,9 +1,14 @@
 'use strict';
-var expect = require('chai').expect,
-  co = require('co'),
-  Connection = require('../../../../lib/connection/connection'),
-  mock = require('mongodb-mock-server'),
-  ConnectionSpy = require('../shared').ConnectionSpy;
+const expect = require('chai').expect;
+const co = require('co');
+const mock = require('mongodb-mock-server');
+const ConnectionSpy = require('../shared').ConnectionSpy;
+
+const core = require('../../../../lib/core');
+const Connection = core.Connection;
+const Server = core.Server;
+const ReplSet = core.ReplSet;
+const ObjectId = core.BSON.ObjectId;
 
 let test = {};
 describe('ReplSet Failover (mocks)', function() {
@@ -28,10 +33,6 @@ describe('ReplSet Failover (mocks)', function() {
     },
 
     test: function(done) {
-      var ReplSet = this.configuration.mongo.ReplSet,
-        Server = this.configuration.mongo.Server,
-        ObjectId = this.configuration.mongo.BSON.ObjectId;
-
       var currentIsMasterIndex = 0;
       var electionIds = [new ObjectId(0), new ObjectId(1)];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
@@ -239,10 +240,6 @@ describe('ReplSet Failover (mocks)', function() {
     },
 
     test: function(done) {
-      var ReplSet = this.configuration.mongo.ReplSet,
-        Server = this.configuration.mongo.Server,
-        ObjectId = this.configuration.mongo.BSON.ObjectId;
-
       var currentIsMasterIndex = 0;
       var electionIds = [new ObjectId(0), new ObjectId(1)];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {

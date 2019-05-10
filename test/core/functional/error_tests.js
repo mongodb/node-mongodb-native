@@ -38,7 +38,7 @@ describe('Error tests', function() {
     },
 
     test: function(done) {
-      var MongoError = require('../../../lib/error.js').MongoError;
+      var MongoError = require('../../../lib/core/error.js').MongoError;
 
       var errorMessage = 'A test error';
       var err = new MongoError(errorMessage);
@@ -56,7 +56,7 @@ describe('Error tests', function() {
     },
 
     test: function(done) {
-      var MongoError = require('../../../lib/error.js').MongoError;
+      var MongoError = require('../../../lib/core/error.js').MongoError;
 
       var errorMessage = 'A test error';
       var err = new MongoError(new Error(errorMessage));
@@ -74,7 +74,7 @@ describe('Error tests', function() {
     },
 
     test: function(done) {
-      var MongoError = require('../../../lib/error.js').MongoError;
+      var MongoError = require('../../../lib/core/error.js').MongoError;
 
       var errorMessage = 'A test error';
       var err = new MongoError({ message: errorMessage, someData: 12345 });
@@ -93,7 +93,7 @@ describe('Error tests', function() {
     },
 
     test: function(done) {
-      var errors = require('../../../lib/error');
+      var errors = require('../../../lib/core/error');
 
       var errorMessage = 'A test error';
       var err = new errors.MongoNetworkError(errorMessage);

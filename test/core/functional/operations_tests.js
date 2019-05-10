@@ -4,8 +4,11 @@ const expect = require('chai').expect;
 const f = require('util').format;
 const mock = require('mongodb-mock-server');
 const ConnectionSpy = require('./shared').ConnectionSpy;
-const Connection = require('../../../lib/connection/connection');
 const setupDatabase = require('./shared').setupDatabase;
+
+const core = require('../../../lib/core');
+const ReadPreference = core.ReadPreference;
+const Connection = core.Connection;
 
 const test = {};
 describe('Operation tests', function() {
@@ -46,7 +49,6 @@ describe('Operation tests', function() {
     },
 
     test: function(done) {
-      var ReadPreference = this.configuration.mongo.ReadPreference;
       const config = this.configuration;
       const server = config.newTopology();
 

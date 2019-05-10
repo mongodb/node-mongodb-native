@@ -1,12 +1,15 @@
 'use strict';
 
-const Server = require('../../..').Server,
-  mock = require('mongodb-mock-server'),
-  expect = require('chai').expect,
-  ServerSessionPool = require('../../../lib/sessions').ServerSessionPool,
-  ServerSession = require('../../../lib/sessions').ServerSession,
-  ClientSession = require('../../../lib/sessions').ClientSession,
-  genClusterTime = require('./common').genClusterTime;
+const mock = require('mongodb-mock-server');
+const expect = require('chai').expect;
+const genClusterTime = require('./common').genClusterTime;
+const sessionCleanupHandler = require('./common').sessionCleanupHandler;
+
+const core = require('../../../lib/core');
+const Server = core.Server;
+const ServerSessionPool = core.Sessions.ServerSessionPool;
+const ServerSession = core.Sessions.ServerSession;
+const ClientSession = core.Sessions.ClientSession;
 
 let test = {};
 describe('Sessions', function() {
@@ -30,22 +33,28 @@ describe('Sessions', function() {
 
     it('should default to `null` for `clusterTime`', {
       metadata: { requires: { topology: 'single' } },
-      test: function() {
+      test: function(done) {
         const client = new Server();
         const sessionPool = new ServerSessionPool(client);
         const session = new ClientSession(client, sessionPool);
+        done = sessionCleanupHandler(session, sessionPool, done);
+
         expect(session.clusterTime).to.not.exist;
+        done();
       }
     });
 
     it('should set the internal clusterTime to `initialClusterTime` if provided', {
       metadata: { requires: { topology: 'single' } },
-      test: function() {
+      test: function(done) {
         const clusterTime = genClusterTime(Date.now());
         const client = new Server();
         const sessionPool = new ServerSessionPool(client);
         const session = new ClientSession(client, sessionPool, { initialClusterTime: clusterTime });
+        done = sessionCleanupHandler(session, sessionPool, done);
+
         expect(session.clusterTime).to.eql(clusterTime);
+        done();
       }
     });
   });
@@ -94,10 +103,14 @@ describe('Sessions', function() {
       metadata: { requires: { topology: 'single' } },
       test: function(done) {
         const pool = new ServerSessionPool(test.client);
+        done = sessionCleanupHandler(null, pool, done);
         expect(pool.sessions).to.have.length(0);
+
         const session = pool.acquire();
         expect(session).to.exist;
         expect(pool.sessions).to.have.length(0);
+        pool.release(session);
+
         done();
       }
     });
@@ -108,11 +121,13 @@ describe('Sessions', function() {
       test: function(done) {
         const oldSession = new ServerSession();
         const pool = new ServerSessionPool(test.client);
+        done = sessionCleanupHandler(null, pool, done);
         pool.sessions.push(oldSession);
 
         const session = pool.acquire();
         expect(session).to.exist;
         expect(session).to.eql(oldSession);
+        pool.release(session);
 
         done();
       }
@@ -126,11 +141,13 @@ describe('Sessions', function() {
         oldSession.lastUse = new Date(Date.now() - 30 * 60 * 1000).getTime(); // add 30min
 
         const pool = new ServerSessionPool(test.client);
+        done = sessionCleanupHandler(null, pool, done);
         pool.sessions.push(oldSession);
 
         const session = pool.acquire();
         expect(session).to.exist;
         expect(session).to.not.eql(oldSession);
+        pool.release(session);
 
         done();
       }
@@ -147,6 +164,7 @@ describe('Sessions', function() {
         });
 
         const pool = new ServerSessionPool(test.client);
+        done = sessionCleanupHandler(null, pool, done);
         pool.sessions = pool.sessions.concat(oldSessions);
 
         pool.release(newSession);
@@ -164,6 +182,8 @@ describe('Sessions', function() {
         session.lastUse = new Date(Date.now() - 9.5 * 60 * 1000).getTime(); // add 9.5min
 
         const pool = new ServerSessionPool(test.client);
+        done = sessionCleanupHandler(null, pool, done);
+
         pool.release(session);
         expect(pool.sessions).to.have.length(0);
         done();
@@ -174,6 +194,7 @@ describe('Sessions', function() {
       metadata: { requires: { topology: 'single' } },
       test: function(done) {
         const pool = new ServerSessionPool(test.client);
+        done = sessionCleanupHandler(null, pool, done);
 
         const sessionA = new ServerSession();
         const sessionB = new ServerSession();
@@ -186,6 +207,9 @@ describe('Sessions', function() {
 
         expect(sessionC.id).to.eql(sessionB.id);
         expect(sessionD.id).to.eql(sessionA.id);
+
+        pool.release(sessionC);
+        pool.release(sessionD);
         done();
       }
     });

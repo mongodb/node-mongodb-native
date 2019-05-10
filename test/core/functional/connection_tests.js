@@ -3,7 +3,7 @@
 const bson = require('bson');
 const expect = require('chai').expect;
 const mock = require('mongodb-mock-server');
-const Connection = require('../../../lib/connection/connection');
+const Connection = require('../../../lib/core/connection/connection');
 
 describe('Connection', function() {
   const noop = () => {};

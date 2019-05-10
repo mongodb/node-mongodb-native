@@ -1,7 +1,11 @@
 'use strict';
-var expect = require('chai').expect,
-  co = require('co'),
-  mock = require('mongodb-mock-server');
+const expect = require('chai').expect;
+const co = require('co');
+const mock = require('mongodb-mock-server');
+
+const core = require('../../../../lib/core');
+const ReplSet = core.ReplSet;
+const ObjectId = core.BSON.ObjectId;
 
 describe.skip('ReplSet SDAM Monitoring (mocks)', function() {
   afterEach(() => mock.cleanup());
@@ -15,9 +19,6 @@ describe.skip('ReplSet SDAM Monitoring (mocks)', function() {
     },
 
     test: function(done) {
-      var ReplSet = this.configuration.mongo.ReplSet,
-        ObjectId = this.configuration.mongo.BSON.ObjectId;
-
       // Contain mock server
       var primaryServer = null;
       var firstSecondaryServer = null;

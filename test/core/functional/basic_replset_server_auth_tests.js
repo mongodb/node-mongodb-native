@@ -4,10 +4,10 @@ var expect = require('chai').expect,
   f = require('util').format,
   locateAuthMethod = require('./shared').locateAuthMethod,
   executeCommand = require('./shared').executeCommand,
-  ReplSet = require('../../../lib/topologies/replset'),
-  Connection = require('../../../lib/connection/connection');
+  ReplSet = require('../../../lib/core/topologies/replset'),
+  Connection = require('../../../lib/core/connection/connection');
 
-const MongoCredentials = require('../../../lib/auth/mongo_credentials').MongoCredentials;
+const MongoCredentials = require('../../../lib/core/auth/mongo_credentials').MongoCredentials;
 
 var setUp = function(configuration, options, callback) {
   var ReplSetManager = require('mongodb-topology-manager').ReplSet;

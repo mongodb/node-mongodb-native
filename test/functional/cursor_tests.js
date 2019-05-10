@@ -5,8 +5,10 @@ const fs = require('fs');
 const expect = require('chai').expect;
 const Long = require('bson').Long;
 const sinon = require('sinon');
-const ReadPreference = require('mongodb-core').ReadPreference;
 const Buffer = require('safe-buffer').Buffer;
+
+const core = require('../../lib/core');
+const ReadPreference = core.ReadPreference;
 
 describe('Cursor', function() {
   before(function() {
@@ -4545,7 +4547,6 @@ describe('Cursor', function() {
 
   it('should apply parent read preference to count command', function(done) {
     const configuration = this.configuration;
-    const ReadPreference = this.configuration.require.ReadPreference;
     const client = configuration.newClient(
       { w: 1, readPreference: ReadPreference.SECONDARY },
       { poolSize: 1, auto_reconnect: false, connectWithNoPrimary: true }

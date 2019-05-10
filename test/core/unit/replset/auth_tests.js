@@ -1,10 +1,10 @@
 'use strict';
 
-const ReplSet = require('../../../../lib/topologies/replset');
+const ReplSet = require('../../../../lib/core/topologies/replset');
 const mock = require('mongodb-mock-server');
 const ReplSetFixture = require('../common').ReplSetFixture;
-const ReadPreference = require('../../../../lib/topologies/read_preference');
-const MongoCredentials = require('../../../../lib/auth/mongo_credentials').MongoCredentials;
+const ReadPreference = require('../../../../lib/core/topologies/read_preference');
+const MongoCredentials = require('../../../../lib/core/auth/mongo_credentials').MongoCredentials;
 
 describe('Auth (ReplSet)', function() {
   let test;

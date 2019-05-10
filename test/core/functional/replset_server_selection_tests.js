@@ -3,9 +3,9 @@
 var expect = require('chai').expect,
   f = require('util').format,
   fs = require('fs'),
-  ReplSetState = require('../../../lib/topologies/replset_state'),
-  MongoError = require('../../../lib/error').MongoError,
-  ReadPreference = require('../../../lib/topologies/read_preference');
+  ReplSetState = require('../../../lib/core/topologies/replset_state'),
+  MongoError = require('../../../lib/core/error').MongoError,
+  ReadPreference = require('../../../lib/core/topologies/read_preference');
 
 describe('A replicaset with no primary', function() {
   before(function() {
@@ -86,10 +86,10 @@ function executeEntry(config, file, path) {
     replset.topologyType = topologyDescription.type;
     // For each server add them to the state
     topologyDescription.servers.forEach(function(s) {
-      var server = config.newTopology({
-        host: s.address.split(':')[0],
-        port: parseInt(s.address.split(':')[1], 10)
-      });
+      var server = config.newTopology(
+        s.address.split(':')[0],
+        parseInt(s.address.split(':')[1], 10)
+      );
 
       // Add additional information
       if (s.avg_rtt_ms) server.lastIsMasterMS = s.avg_rtt_ms;

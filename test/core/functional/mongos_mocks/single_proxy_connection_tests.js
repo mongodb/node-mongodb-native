@@ -1,8 +1,13 @@
 'use strict';
-var expect = require('chai').expect,
-  f = require('util').format,
-  co = require('co'),
-  mock = require('mongodb-mock-server');
+const expect = require('chai').expect;
+const f = require('util').format;
+const co = require('co');
+const mock = require('mongodb-mock-server');
+
+const core = require('../../../../lib/core');
+const Mongos = core.Mongos;
+const ObjectId = core.BSON.ObjectId;
+const Long = core.BSON.Long;
 
 describe('Mongos Single Proxy Connection (mocks)', function() {
   afterEach(() => mock.cleanup());
@@ -16,8 +21,6 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
     },
 
     test: function(done) {
-      var Mongos = this.configuration.mongo.Mongos;
-
       // Current index for the ismaster
       var currentStep = 0;
       // Primary stop responding
@@ -103,10 +106,6 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
     },
 
     test: function(done) {
-      var Mongos = this.configuration.mongo.Mongos,
-        Long = this.configuration.mongo.BSON.Long,
-        ObjectId = this.configuration.mongo.BSON.ObjectId;
-
       // Default message fields
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         msg: 'isdbgrid'

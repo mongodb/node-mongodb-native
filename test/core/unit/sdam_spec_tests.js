@@ -3,11 +3,11 @@ const fs = require('fs');
 const path = require('path');
 const chai = require('chai');
 const expect = chai.expect;
-const Topology = require('../../../lib/sdam/topology');
-const Server = require('../../../lib/sdam/server');
-const ServerDescription = require('../../../lib/sdam/server_description').ServerDescription;
-const monitoring = require('../../../lib/sdam/monitoring');
-const parse = require('../../../lib/uri_parser');
+const Topology = require('../../../lib/core/sdam/topology');
+const Server = require('../../../lib/core/sdam/server');
+const ServerDescription = require('../../../lib/core/sdam/server_description').ServerDescription;
+const monitoring = require('../../../lib/core/sdam/monitoring');
+const parse = require('../../../lib/core/uri_parser');
 chai.use(require('chai-subset'));
 const sinon = require('sinon');
 

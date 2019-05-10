@@ -1,10 +1,13 @@
 'use strict';
-var expect = require('chai').expect,
-  ReplSet = require('../../../../lib/topologies/replset'),
-  mock = require('mongodb-mock-server'),
-  ReplSetFixture = require('../common').ReplSetFixture,
-  ClientSession = require('../../../../lib/sessions').ClientSession,
-  ServerSessionPool = require('../../../../lib/sessions').ServerSessionPool;
+const expect = require('chai').expect;
+const mock = require('mongodb-mock-server');
+const ReplSetFixture = require('../common').ReplSetFixture;
+const sessionCleanupHandler = require('../common').sessionCleanupHandler;
+
+const core = require('../../../../lib/core');
+const ClientSession = core.Sessions.ClientSession;
+const ServerSessionPool = core.Sessions.ServerSessionPool;
+const ReplSet = core.ReplSet;
 
 const test = new ReplSetFixture();
 describe('Retryable Writes (ReplSet)', function() {
@@ -27,6 +30,7 @@ describe('Retryable Writes (ReplSet)', function() {
 
       const sessionPool = new ServerSessionPool(replset);
       const session = new ClientSession(replset, sessionPool);
+      done = sessionCleanupHandler(session, sessionPool, done);
 
       let command = null;
       test.primaryServer.setMessageHandler(request => {
@@ -74,6 +78,7 @@ describe('Retryable Writes (ReplSet)', function() {
 
       const sessionPool = new ServerSessionPool(replset);
       const session = new ClientSession(replset, sessionPool);
+      done = sessionCleanupHandler(session, sessionPool, done);
 
       let command = null,
         insertCount = 0;
@@ -129,6 +134,7 @@ describe('Retryable Writes (ReplSet)', function() {
 
       const sessionPool = new ServerSessionPool(replset);
       const session = new ClientSession(replset, sessionPool);
+      done = sessionCleanupHandler(session, sessionPool, done);
 
       let command = null,
         insertCount = 0;

@@ -4,7 +4,7 @@ const expect = require('chai').expect,
   f = require('util').format,
   fs = require('fs'),
   ObjectId = require('bson').ObjectId,
-  ReplSetState = require('../../../lib/topologies/replset_state');
+  ReplSetState = require('../../../lib/core/topologies/replset_state');
 
 describe('ReplicaSet state', function() {
   const path = f('%s/../spec/server-discovery-and-monitoring/rs', __dirname);

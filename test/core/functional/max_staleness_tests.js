@@ -4,10 +4,10 @@ const expect = require('chai').expect,
   p = require('path'),
   f = require('util').format,
   fs = require('fs'),
-  Server = require('../../../lib/topologies/server'),
-  ReplSetState = require('../../../lib/topologies/replset_state'),
-  MongoError = require('../../../lib/error').MongoError,
-  ReadPreference = require('../../../lib/topologies/read_preference');
+  Server = require('../../../lib/core/topologies/server'),
+  ReplSetState = require('../../../lib/core/topologies/replset_state'),
+  MongoError = require('../../../lib/core/error').MongoError,
+  ReadPreference = require('../../../lib/core/topologies/read_preference');
 
 const rsWithPrimaryPath = f('%s/../spec/max-staleness/ReplicaSetWithPrimary', __dirname);
 const rsWithoutPrimaryPath = f('%s/../spec/max-staleness/ReplicaSetNoPrimary', __dirname);

@@ -1,9 +1,13 @@
 'use strict';
-var expect = require('chai').expect,
-  co = require('co'),
-  Connection = require('../../../../lib/connection/connection'),
-  mock = require('mongodb-mock-server'),
-  ConnectionSpy = require('../shared').ConnectionSpy;
+const expect = require('chai').expect;
+const co = require('co');
+const mock = require('mongodb-mock-server');
+const ConnectionSpy = require('../shared').ConnectionSpy;
+
+const core = require('../../../../lib/core');
+const Connection = core.Connection;
+const ReplSet = core.ReplSet;
+const ObjectId = core.BSON.ObjectId;
 
 let test = {};
 describe('ReplSet Connection Tests (mocks)', function() {
@@ -28,9 +32,6 @@ describe('ReplSet Connection Tests (mocks)', function() {
     },
 
     test: function(done) {
-      var ReplSet = this.configuration.mongo.ReplSet,
-        ObjectId = this.configuration.mongo.BSON.ObjectId;
-
       var electionIds = [new ObjectId(), new ObjectId()];
 
       // Default message fields
@@ -156,9 +157,6 @@ describe('ReplSet Connection Tests (mocks)', function() {
       },
 
       test: function(done) {
-        var ReplSet = this.configuration.mongo.ReplSet,
-          ObjectId = this.configuration.mongo.BSON.ObjectId;
-
         var electionIds = [new ObjectId(), new ObjectId()];
         var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
           setName: 'rs',
@@ -274,9 +272,6 @@ describe('ReplSet Connection Tests (mocks)', function() {
     },
 
     test: function(done) {
-      var ReplSet = this.configuration.mongo.ReplSet,
-        ObjectId = this.configuration.mongo.BSON.ObjectId;
-
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
@@ -385,9 +380,6 @@ describe('ReplSet Connection Tests (mocks)', function() {
     },
 
     test: function(done) {
-      var ReplSet = this.configuration.mongo.ReplSet,
-        ObjectId = this.configuration.mongo.BSON.ObjectId;
-
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
@@ -456,9 +448,6 @@ describe('ReplSet Connection Tests (mocks)', function() {
       },
 
       test: function(done) {
-        var ReplSet = this.configuration.mongo.ReplSet,
-          ObjectId = this.configuration.mongo.BSON.ObjectId;
-
         var electionIds = [new ObjectId(), new ObjectId()];
         var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
           setName: 'rs',
@@ -561,9 +550,6 @@ describe('ReplSet Connection Tests (mocks)', function() {
       },
 
       test: function(done) {
-        var ReplSet = this.configuration.mongo.ReplSet,
-          ObjectId = this.configuration.mongo.BSON.ObjectId;
-
         var electionIds = [new ObjectId(), new ObjectId()];
         var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
           setName: 'rs',
@@ -687,9 +673,6 @@ describe('ReplSet Connection Tests (mocks)', function() {
     },
 
     test: function(done) {
-      var ReplSet = this.configuration.mongo.ReplSet,
-        ObjectId = this.configuration.mongo.BSON.ObjectId;
-
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
@@ -797,9 +780,6 @@ describe('ReplSet Connection Tests (mocks)', function() {
     },
 
     test: function(done) {
-      var ReplSet = this.configuration.mongo.ReplSet,
-        ObjectId = this.configuration.mongo.BSON.ObjectId;
-
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
@@ -896,9 +876,6 @@ describe('ReplSet Connection Tests (mocks)', function() {
       },
 
       test: function(done) {
-        var ReplSet = this.configuration.mongo.ReplSet,
-          ObjectId = this.configuration.mongo.BSON.ObjectId;
-
         var electionIds = [new ObjectId(), new ObjectId()];
         var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
           setName: 'rs',
@@ -1017,9 +994,6 @@ describe('ReplSet Connection Tests (mocks)', function() {
     },
 
     test: function(done) {
-      var ReplSet = this.configuration.mongo.ReplSet,
-        ObjectId = this.configuration.mongo.BSON.ObjectId;
-
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
@@ -1112,9 +1086,6 @@ describe('ReplSet Connection Tests (mocks)', function() {
       },
 
       test: function(done) {
-        var ReplSet = this.configuration.mongo.ReplSet,
-          ObjectId = this.configuration.mongo.BSON.ObjectId;
-
         var electionIds = [new ObjectId(), new ObjectId()];
         var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
           setName: 'rs',
@@ -1226,9 +1197,6 @@ describe('ReplSet Connection Tests (mocks)', function() {
       },
 
       test: function(done) {
-        var ReplSet = this.configuration.mongo.ReplSet,
-          ObjectId = this.configuration.mongo.BSON.ObjectId;
-
         var electionIds = [new ObjectId(), new ObjectId()];
         var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
           setName: 'rs',

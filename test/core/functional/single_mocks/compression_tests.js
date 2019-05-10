@@ -28,14 +28,12 @@ describe('Single Compression (mocks)', function() {
           request.reply(serverResponse);
         });
 
-        const client = config.newTopology(
-          Object.assign({}, server.address(), {
-            connectionTimeout: 5000,
-            socketTimeout: 1000,
-            size: 1,
-            compression: { compressors: ['snappy', 'zlib'], zlibCompressionLevel: -1 }
-          })
-        );
+        const client = config.newTopology(server.address().host, server.address().port, {
+          connectionTimeout: 5000,
+          socketTimeout: 1000,
+          size: 1,
+          compression: { compressors: ['snappy', 'zlib'], zlibCompressionLevel: -1 }
+        });
 
         client.on('connect', function() {
           client.destroy();
@@ -94,14 +92,12 @@ describe('Single Compression (mocks)', function() {
           });
 
           // Attempt to connect
-          var client = config.newTopology(
-            Object.assign({}, server.address(), {
-              connectionTimeout: 5000,
-              socketTimeout: 1000,
-              size: 1,
-              compression: { compressors: ['snappy', 'zlib'] }
-            })
-          );
+          var client = config.newTopology(server.address().host, server.address().port, {
+            connectionTimeout: 5000,
+            socketTimeout: 1000,
+            size: 1,
+            compression: { compressors: ['snappy', 'zlib'] }
+          });
 
           // Connect and try inserting, updating, and removing
           // All outbound messages from the driver will be uncompressed
@@ -188,14 +184,12 @@ describe('Single Compression (mocks)', function() {
             currentStep++;
           });
 
-          var client = config.newTopology(
-            Object.assign({}, server.address(), {
-              connectionTimeout: 5000,
-              socketTimeout: 1000,
-              size: 1,
-              compression: { compressors: ['snappy', 'zlib'] }
-            })
-          );
+          var client = config.newTopology(server.address().host, server.address().port, {
+            connectionTimeout: 5000,
+            socketTimeout: 1000,
+            size: 1,
+            compression: { compressors: ['snappy', 'zlib'] }
+          });
 
           // Connect and try inserting, updating, and removing
           // All outbound messages from the driver (after initial connection) will be OP_COMPRESSED using snappy
@@ -284,14 +278,12 @@ describe('Single Compression (mocks)', function() {
           });
 
           // Attempt to connect
-          var client = config.newTopology(
-            Object.assign({}, server.address(), {
-              connectionTimeout: 5000,
-              socketTimeout: 1000,
-              size: 1,
-              compression: { compressors: ['snappy', 'zlib'] }
-            })
-          );
+          var client = config.newTopology(server.address().host, server.address().port, {
+            connectionTimeout: 5000,
+            socketTimeout: 1000,
+            size: 1,
+            compression: { compressors: ['snappy', 'zlib'] }
+          });
 
           // Connect and try inserting, updating, and removing
           // All outbound messages from the driver (after initial connection) will be OP_COMPRESSED using zlib
@@ -370,14 +362,12 @@ describe('Single Compression (mocks)', function() {
           currentStep++;
         });
 
-        var client = config.newTopology(
-          Object.assign({}, server.address(), {
-            connectionTimeout: 5000,
-            socketTimeout: 1000,
-            size: 1,
-            compression: { compressors: ['snappy', 'zlib'] }
-          })
-        );
+        var client = config.newTopology(server.address().host, server.address().port, {
+          connectionTimeout: 5000,
+          socketTimeout: 1000,
+          size: 1,
+          compression: { compressors: ['snappy', 'zlib'] }
+        });
 
         // Connect and try some commands, checking that uncompressible commands are indeed not compressed
         client.on('connect', function(_server) {
