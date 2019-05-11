@@ -157,7 +157,7 @@ describe('Single Timeout (mocks)', function() {
           }
         });
 
-        var server = config.newTopology(server.address().host, server.address().port, {
+        var server = config.newTopology(mockServer.address().host, mockServer.address().port, {
           connectionTimeout: 3000,
           socketTimeout: 2000,
           size: 1

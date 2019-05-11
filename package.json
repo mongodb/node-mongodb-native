@@ -29,7 +29,6 @@
   },
   "devDependencies": {
     "bluebird": "3.5.0",
-    "bson": "^1.0.4",
     "chai": "^4.1.1",
     "chai-subset": "^1.6.0",
     "co": "4.6.0",
@@ -47,6 +46,7 @@
     "semver": "^5.5.0",
     "sinon": "^4.3.0",
     "sinon-chai": "^3.2.0",
+    "snappy": "^6.1.2",
     "standard-version": "^4.4.0",
     "worker-farm": "^1.5.0",
     "wtfnode": "^0.8.0"

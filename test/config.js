@@ -23,6 +23,9 @@ class NativeConfiguration extends ConfigurationBase {
   }
 
   defaultTopology(host, port, serverOptions) {
+    host = host || 'localhost';
+    port = port || 27017;
+
     const options = Object.assign({}, { host, port }, serverOptions);
     if (this.usingUnifiedTopology()) {
       return new core.Topology(options);
@@ -116,8 +119,6 @@ class NativeConfiguration extends ConfigurationBase {
   }
 
   newTopology(host, port, options) {
-    host = host || 'localhost';
-    port = port || 27017;
     options = options || {};
     return this.topology(host, port, options);
   }
