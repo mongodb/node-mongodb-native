@@ -554,9 +554,8 @@ describe('Server tests', function() {
     },
 
     test: function(done) {
-      var self = this;
       const config = this.configuration;
-      var manager = this.configuration.manager;
+      const manager = this.configuration.manager;
 
       manager.stop('SIGINT').then(function() {
         // Attempt to connect while server is down
@@ -946,7 +945,7 @@ describe('Server tests', function() {
         }
 
         var server = config.newTopology(this.configuration.host, this.configuration.port, {
-          bson: new sBson(),
+          bson: new Bson(),
           compression: {
             compressors: ['snappy', 'zlib']
           }
