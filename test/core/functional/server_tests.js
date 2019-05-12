@@ -404,15 +404,14 @@ describe('Server tests', function() {
   });
 
   it('should correctly reconnect to server with automatic reconnect enabled', {
-    metadata: {
-      requires: {
-        topology: 'single',
-        os: '!darwin' // remove os restriction when SERVER-32477 is resolved
-      }
-    },
-
+    metadata: { requires: { topology: 'single' } },
     test: function(done) {
       const config = this.configuration;
+      if (config.usingUnifiedTopology()) {
+        // The new SDAM layer always reconnects, so this test is no longer relevant
+        return this.skip();
+      }
+
       var server = config.newTopology(this.configuration.host, this.configuration.port, {
         reconnect: true,
         size: 1,
@@ -588,15 +587,14 @@ describe('Server tests', function() {
   });
 
   it('should correctly place new connections in available list on reconnect', {
-    metadata: {
-      requires: {
-        topology: 'single',
-        os: '!darwin' // remove os restriction when SERVER-32477 is resolved
-      }
-    },
-
+    metadata: { requires: { topology: 'single' } },
     test: function(done) {
       const config = this.configuration;
+      if (config.usingUnifiedTopology()) {
+        // The new SDAM layer always reconnects, so this test is no longer relevant
+        return this.skip();
+      }
+
       var server = config.newTopology(this.configuration.host, this.configuration.port, {
         reconnect: true,
         size: 1,

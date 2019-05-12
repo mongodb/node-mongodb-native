@@ -349,14 +349,14 @@ describe('Cursor tests', function() {
   });
 
   it('Should finish cursor correctly after all sockets to pool destroyed', {
-    metadata: {
-      requires: {
-        topology: ['single'],
-        os: '!darwin' // remove os restriction when SERVER-32477 is resolved
-      }
-    },
-
+    metadata: { requires: { topology: ['single'] } },
     test: function(done) {
+      if (this.configuration.usingUnifiedTopology()) {
+        // This test tries to inspect the connection pool directly on the topology, which
+        // will no longer work with the new Topology type. The test should be reworked.
+        return this.skip();
+      }
+
       const server = this.configuration.newTopology();
       var ns = f('%s.cursor6', this.configuration.db);
       // Add event listeners
