@@ -58,6 +58,13 @@ describe('Sharding (Connection)', function() {
     // The actual test we wish to run
     test: function(done) {
       const configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // the unified topology will attempt to connect to all provided servers if you
+        // want to explicitly call `connect`. Otherwise, it will satisfy the requirements
+        // of this test, and not explicitly fail on an unknown server.
+        return this.skip();
+      }
+
       const host = configuration.host;
       const port = configuration.port;
 

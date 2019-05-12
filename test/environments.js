@@ -136,18 +136,23 @@ class ShardedEnvironment extends EnvironmentBase {
 
     this.host = 'localhost';
     this.port = 51000;
-    this.url = 'mongodb://%slocalhost:51000,localhost:51001/integration_tests';
+
+    // NOTE: only connect to a single shard because there can be consistency issues using
+    //       more, revolving around the inability for shards to keep up-to-date views of
+    //       changes to the world (such as dropping a database).
+    this.url = 'mongodb://%slocalhost:51000/integration_tests';
+
     this.writeConcernMax = { w: 'majority', wtimeout: 30000 };
-    this.topology = (host, port /*, options */) => {
+    this.topology = (host, port, options) => {
       host = host || 'localhost';
       port = port || 51000;
-      // options = options || {};
+      options = options || {};
 
       if (usingUnifiedTopology()) {
-        return new core.Topology([{ host, port }]);
+        return new core.Topology([{ host, port }], options);
       }
 
-      return new core.Mongos([{ host, port }]);
+      return new core.Mongos([{ host, port }], options);
     };
 
     const version =
