@@ -1,0 +1,19 @@
+topology_description:
+  type: Sharded
+  servers:
+  - &1
+    address: g:27017
+    avg_rtt_ms: 5
+    type: Mongos
+  - &2
+    address: h:27017
+    avg_rtt_ms: 35
+    type: Mongos
+operation: read
+read_preference:
+  mode: Primary
+suitable_servers:
+- *1
+- *2
+in_latency_window:
+- *1

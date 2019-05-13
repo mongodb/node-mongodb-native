@@ -2,7 +2,7 @@
 
 const expect = require('chai').expect;
 const sinon = require('sinon');
-const ScramSHA256 = require('mongodb-core').ScramSHA256;
+const ScramSHA256 = require('../../lib/core').ScramSHA256;
 const setupDatabase = require('./shared').setupDatabase;
 const withClient = require('./shared').withClient;
 

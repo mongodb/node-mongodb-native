@@ -2,7 +2,7 @@
 
 const expect = require('chai').expect;
 const sinon = require('sinon');
-const core = require('mongodb-core');
+const core = require('../../lib/core');
 const MongoClient = require('../../lib/mongo_client');
 const ServerSessionPool = core.Sessions.ServerSessionPool;
 

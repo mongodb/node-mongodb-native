@@ -1,7 +1,7 @@
 'use strict';
 
 // Core module
-const core = require('mongodb-core');
+const core = require('./lib/core');
 const Instrumentation = require('./lib/apm');
 
 // Set up the connect function
@@ -19,7 +19,7 @@ connect.Collection = require('./lib/collection');
 connect.Server = require('./lib/topologies/server');
 connect.ReplSet = require('./lib/topologies/replset');
 connect.Mongos = require('./lib/topologies/mongos');
-connect.ReadPreference = require('mongodb-core').ReadPreference;
+connect.ReadPreference = core.ReadPreference;
 connect.GridStore = require('./lib/gridfs/grid_store');
 connect.Chunk = require('./lib/gridfs/chunk');
 connect.Logger = core.Logger;
@@ -28,8 +28,8 @@ connect.CommandCursor = require('./lib/command_cursor');
 connect.Cursor = require('./lib/cursor');
 connect.GridFSBucket = require('./lib/gridfs-stream');
 // Exported to be used in tests not to be used anywhere else
-connect.CoreServer = require('mongodb-core').Server;
-connect.CoreConnection = require('mongodb-core').Connection;
+connect.CoreServer = core.Server;
+connect.CoreConnection = core.Connection;
 
 // BSON types exported
 connect.Binary = core.BSON.Binary;

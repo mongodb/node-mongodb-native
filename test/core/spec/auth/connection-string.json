@@ -1,0 +1,452 @@
+{
+  "tests": [
+    {
+      "description": "should use the default source and mechanism",
+      "uri": "mongodb://user:password@localhost",
+      "hosts": null,
+      "valid": true,
+      "warning": false,
+      "auth": {
+        "username": "user",
+        "password": "password",
+        "db": "admin"
+      },
+      "options": null
+    },
+    {
+      "description": "should use the database when no authSource is specified",
+      "uri": "mongodb://user:password@localhost/foo",
+      "hosts": null,
+      "valid": true,
+      "warning": false,
+      "auth": {
+        "username": "user",
+        "password": "password",
+        "db": "foo"
+      },
+      "options": null
+    },
+    {
+      "description": "should use the authSource when specified",
+      "uri": "mongodb://user:password@localhost/foo?authSource=bar",
+      "hosts": null,
+      "valid": true,
+      "warning": false,
+      "auth": {
+        "username": "user",
+        "password": "password",
+        "db": "bar"
+      },
+      "options": null
+    },
+    {
+      "description": "should recognise the mechanism (GSSAPI)",
+      "uri": "mongodb://user%40DOMAIN.COM@localhost/?authMechanism=GSSAPI",
+      "hosts": null,
+      "valid": true,
+      "warning": false,
+      "auth": {
+        "username": "user@DOMAIN.COM",
+        "password": null,
+        "db": "$external"
+      },
+      "options": {
+        "authmechanism": "GSSAPI"
+      }
+    },
+    {
+      "description": "should ignore the database (GSSAPI)",
+      "uri": "mongodb://user%40DOMAIN.COM@localhost/foo?authMechanism=GSSAPI",
+      "hosts": null,
+      "valid": true,
+      "warning": false,
+      "auth": {
+        "username": "user@DOMAIN.COM",
+        "password": null,
+        "db": "$external"
+      },
+      "options": {
+        "authmechanism": "GSSAPI"
+      }
+    },
+    {
+      "description": "should accept valid authSource (GSSAPI)",
+      "uri": "mongodb://user%40DOMAIN.COM@localhost/?authMechanism=GSSAPI&authSource=$external",
+      "hosts": null,
+      "valid": true,
+      "warning": false,
+      "auth": {
+        "username": "user@DOMAIN.COM",
+        "password": null,
+        "db": "$external"
+      },
+      "options": {
+        "authmechanism": "GSSAPI"
+      }
+    },
+    {
+      "description": "should accept generic mechanism property (GSSAPI)",
+      "uri": "mongodb://user%40DOMAIN.COM@localhost/?authMechanism=GSSAPI&authMechanismProperties=SERVICE_NAME:other,CANONICALIZE_HOST_NAME:true",
+      "hosts": null,
+      "valid": true,
+      "warning": false,
+      "auth": {
+        "username": "user@DOMAIN.COM",
+        "password": null,
+        "db": "$external"
+      },
+      "options": {
+        "authmechanism": "GSSAPI",
+        "authmechanismproperties": {
+          "SERVICE_NAME": "other",
+          "CANONICALIZE_HOST_NAME": true
+        }
+      }
+    },
+    {
+      "description": "should accept the password (GSSAPI)",
+      "uri": "mongodb://user%40DOMAIN.COM:password@localhost/?authMechanism=GSSAPI&authSource=$external",
+      "hosts": null,
+      "valid": true,
+      "warning": false,
+      "auth": {
+        "username": "user@DOMAIN.COM",
+        "password": "password",
+        "db": "$external"
+      },
+      "options": {
+        "authmechanism": "GSSAPI"
+      }
+    },
+    {
+      "description": "may support deprecated gssapiServiceName option (GSSAPI)",
+      "uri": "mongodb://user%40DOMAIN.COM@localhost/?authMechanism=GSSAPI&gssapiServiceName=other",
+      "hosts": null,
+      "valid": true,
+      "warning": false,
+      "auth": {
+        "username": "user@DOMAIN.COM",
+        "password": null,
+        "db": "$external"
+      },
+      "options": {
+        "authmechanism": "GSSAPI",
+        "authmechanismproperties": {
+          "SERVICE_NAME": "other"
+        }
+      }
+    },
+    {
+      "description": "should throw an exception if authSource is invalid (GSSAPI)",
+      "uri": "mongodb://user%40DOMAIN.COM@localhost/?authMechanism=GSSAPI&authSource=foo",
+      "hosts": null,
+      "valid": false,
+      "warning": false,
+      "auth": null,
+      "options": null
+    },
+    {
+      "description": "should throw an exception if no username (GSSAPI)",
+      "uri": "mongodb://localhost/?authMechanism=GSSAPI",
+      "hosts": null,
+      "valid": false,
+      "warning": false,
+      "auth": null,
+      "options": null
+    },
+    {
+      "description": "should recognize the mechanism (MONGODB-CR)",
+      "uri": "mongodb://user:password@localhost/?authMechanism=MONGODB-CR",
+      "hosts": null,
+      "valid": true,
+      "warning": false,
+      "auth": {
+        "username": "user",
+        "password": "password",
+        "db": "admin"
+      },
+      "options": {
+        "authmechanism": "MONGODB-CR"
+      }
+    },
+    {
+      "description": "should use the database when no authSource is specified (MONGODB-CR)",
+      "uri": "mongodb://user:password@localhost/foo?authMechanism=MONGODB-CR",
+      "hosts": null,
+      "valid": true,
+      "warning": false,
+      "auth": {
+        "username": "user",
+        "password": "password",
+        "db": "foo"
+      },
+      "options": {
+        "authmechanism": "MONGODB-CR"
+      }
+    },
+    {
+      "description": "should use the authSource when specified (MONGODB-CR)",
+      "uri": "mongodb://user:password@localhost/foo?authMechanism=MONGODB-CR&authSource=bar",
+      "hosts": null,
+      "valid": true,
+      "warning": false,
+      "auth": {
+        "username": "user",
+        "password": "password",
+        "db": "bar"
+      },
+      "options": {
+        "authmechanism": "MONGODB-CR"
+      }
+    },
+    {
+      "description": "should throw an exception if no username is supplied (MONGODB-CR)",
+      "uri": "mongodb://localhost/?authMechanism=MONGODB-CR",
+      "hosts": null,
+      "valid": false,
+      "warning": false,
+      "auth": null,
+      "options": null
+    },
+    {
+      "description": "should recognize the mechanism (MONGODB-X509)",
+      "uri": "mongodb://CN%3DmyName%2COU%3DmyOrgUnit%2CO%3DmyOrg%2CL%3DmyLocality%2CST%3DmyState%2CC%3DmyCountry@localhost/?authMechanism=MONGODB-X509",
+      "hosts": null,
+      "valid": true,
+      "warning": false,
+      "auth": {
+        "username": "CN=myName,OU=myOrgUnit,O=myOrg,L=myLocality,ST=myState,C=myCountry",
+        "password": null,
+        "db": "$external"
+      },
+      "options": {
+        "authmechanism": "MONGODB-X509"
+      }
+    },
+    {
+      "description": "should ignore the database (MONGODB-X509)",
+      "uri": "mongodb://CN%3DmyName%2COU%3DmyOrgUnit%2CO%3DmyOrg%2CL%3DmyLocality%2CST%3DmyState%2CC%3DmyCountry@localhost/foo?authMechanism=MONGODB-X509",
+      "hosts": null,
+      "valid": true,
+      "warning": false,
+      "auth": {
+        "username": "CN=myName,OU=myOrgUnit,O=myOrg,L=myLocality,ST=myState,C=myCountry",
+        "password": null,
+        "db": "$external"
+      },
+      "options": {
+        "authmechanism": "MONGODB-X509"
+      }
+    },
+    {
+      "description": "should accept valid authSource (MONGODB-X509)",
+      "uri": "mongodb://CN%3DmyName%2COU%3DmyOrgUnit%2CO%3DmyOrg%2CL%3DmyLocality%2CST%3DmyState%2CC%3DmyCountry@localhost/?authMechanism=MONGODB-X509&authSource=$external",
+      "hosts": null,
+      "valid": true,
+      "warning": false,
+      "auth": {
+        "username": "CN=myName,OU=myOrgUnit,O=myOrg,L=myLocality,ST=myState,C=myCountry",
+        "password": null,
+        "db": "$external"
+      },
+      "options": {
+        "authmechanism": "MONGODB-X509"
+      }
+    },
+    {
+      "description": "should recognize the mechanism with no username (MONGODB-X509)",
+      "uri": "mongodb://localhost/?authMechanism=MONGODB-X509",
+      "hosts": null,
+      "valid": true,
+      "warning": false,
+      "auth": {
+        "username": null,
+        "password": null,
+        "db": "$external"
+      },
+      "options": {
+        "authmechanism": "MONGODB-X509"
+      }
+    },
+    {
+      "description": "should throw an exception if supplied a password (MONGODB-X509)",
+      "uri": "mongodb://user:password@localhost/?authMechanism=MONGODB-X509",
+      "hosts": null,
+      "valid": false,
+      "warning": false,
+      "auth": null,
+      "options": null
+    },
+    {
+      "description": "should throw an exception if authSource is invalid (MONGODB-X509)",
+      "uri": "mongodb://CN%3DmyName%2COU%3DmyOrgUnit%2CO%3DmyOrg%2CL%3DmyLocality%2CST%3DmyState%2CC%3DmyCountry@localhost/foo?authMechanism=MONGODB-X509&authSource=bar",
+      "hosts": null,
+      "valid": false,
+      "warning": false,
+      "auth": null,
+      "options": null
+    },
+    {
+      "description": "should recognize the mechanism (PLAIN)",
+      "uri": "mongodb://user:password@localhost/?authMechanism=PLAIN",
+      "hosts": null,
+      "valid": true,
+      "warning": false,
+      "auth": {
+        "username": "user",
+        "password": "password",
+        "db": "$external"
+      },
+      "options": {
+        "authmechanism": "PLAIN"
+      }
+    },
+    {
+      "description": "should use the database when no authSource is specified (PLAIN)",
+      "uri": "mongodb://user:password@localhost/foo?authMechanism=PLAIN",
+      "hosts": null,
+      "valid": true,
+      "warning": false,
+      "auth": {
+        "username": "user",
+        "password": "password",
+        "db": "foo"
+      },
+      "options": {
+        "authmechanism": "PLAIN"
+      }
+    },
+    {
+      "description": "should use the authSource when specified (PLAIN)",
+      "uri": "mongodb://user:password@localhost/foo?authMechanism=PLAIN&authSource=bar",
+      "hosts": null,
+      "valid": true,
+      "warning": false,
+      "auth": {
+        "username": "user",
+        "password": "password",
+        "db": "bar"
+      },
+      "options": {
+        "authmechanism": "PLAIN"
+      }
+    },
+    {
+      "description": "should throw an exception if no username (PLAIN)",
+      "uri": "mongodb://localhost/?authMechanism=PLAIN",
+      "hosts": null,
+      "valid": false,
+      "warning": false,
+      "auth": null,
+      "options": null
+    },
+    {
+      "description": "should recognize the mechanism (SCRAM-SHA-1)",
+      "uri": "mongodb://user:password@localhost/?authMechanism=SCRAM-SHA-1",
+      "hosts": null,
+      "valid": true,
+      "warning": false,
+      "auth": {
+        "username": "user",
+        "password": "password",
+        "db": "admin"
+      },
+      "options": {
+        "authmechanism": "SCRAM-SHA-1"
+      }
+    },
+    {
+      "description": "should use the database when no authSource is specified (SCRAM-SHA-1)",
+      "uri": "mongodb://user:password@localhost/foo?authMechanism=SCRAM-SHA-1",
+      "hosts": null,
+      "valid": true,
+      "warning": false,
+      "auth": {
+        "username": "user",
+        "password": "password",
+        "db": "foo"
+      },
+      "options": {
+        "authmechanism": "SCRAM-SHA-1"
+      }
+    },
+    {
+      "description": "should accept valid authSource (SCRAM-SHA-1)",
+      "uri": "mongodb://user:password@localhost/foo?authMechanism=SCRAM-SHA-1&authSource=bar",
+      "hosts": null,
+      "valid": true,
+      "warning": false,
+      "auth": {
+        "username": "user",
+        "password": "password",
+        "db": "bar"
+      },
+      "options": {
+        "authmechanism": "SCRAM-SHA-1"
+      }
+    },
+    {
+      "description": "should throw an exception if no username (SCRAM-SHA-1)",
+      "uri": "mongodb://localhost/?authMechanism=SCRAM-SHA-1",
+      "hosts": null,
+      "valid": false,
+      "warning": false,
+      "auth": null,
+      "options": null
+    },
+    {
+      "description": "should recognize the mechanism (SCRAM-SHA-256)",
+      "uri": "mongodb://user:password@localhost/?authMechanism=SCRAM-SHA-256",
+      "hosts": null,
+      "valid": true,
+      "warning": false,
+      "auth": {
+        "username": "user",
+        "password": "password",
+        "db": "admin"
+      },
+      "options": {
+        "authmechanism": "SCRAM-SHA-256"
+      }
+    },
+    {
+      "description": "should use the database when no authSource is specified (SCRAM-SHA-256)",
+      "uri": "mongodb://user:password@localhost/foo?authMechanism=SCRAM-SHA-256",
+      "hosts": null,
+      "valid": true,
+      "warning": false,
+      "auth": {
+        "username": "user",
+        "password": "password",
+        "db": "foo"
+      },
+      "options": {
+        "authmechanism": "SCRAM-SHA-256"
+      }
+    },
+    {
+      "description": "should accept valid authSource (SCRAM-SHA-256)",
+      "uri": "mongodb://user:password@localhost/foo?authMechanism=SCRAM-SHA-256&authSource=bar",
+      "hosts": null,
+      "valid": true,
+      "warning": false,
+      "auth": {
+        "username": "user",
+        "password": "password",
+        "db": "bar"
+      },
+      "options": {
+        "authmechanism": "SCRAM-SHA-256"
+      }
+    },
+    {
+      "description": "should throw an exception if no username (SCRAM-SHA-256)",
+      "uri": "mongodb://localhost/?authMechanism=SCRAM-SHA-256",
+      "hosts": null,
+      "valid": false,
+      "warning": false,
+      "auth": null,
+      "options": null
+    }
+  ]
+}

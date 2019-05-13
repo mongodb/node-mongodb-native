@@ -1,6 +1,6 @@
 'use strict';
 
-const Logger = require('mongodb-core').Logger;
+const Logger = require('../../lib/core').Logger;
 const deprecateOptions = require('../../lib/utils').deprecateOptions;
 const chai = require('chai');
 const expect = chai.expect;

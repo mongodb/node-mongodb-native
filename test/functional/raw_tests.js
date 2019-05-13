@@ -3,7 +3,7 @@ var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 var Buffer = require('buffer').Buffer;
 
-var BSON = require('mongodb-core').BSON;
+var BSON = require('../../lib/core').BSON;
 var bson = new BSON([
   BSON.Binary,
   BSON.Code,

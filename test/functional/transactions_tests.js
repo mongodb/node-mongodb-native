@@ -6,7 +6,7 @@ const fs = require('fs');
 const chai = require('chai');
 const expect = chai.expect;
 const EJSON = require('mongodb-extjson');
-const core = require('mongodb-core');
+const core = require('../../lib/core');
 const sessions = core.Sessions;
 const environments = require('../environments');
 

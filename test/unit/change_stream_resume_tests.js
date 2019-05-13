@@ -180,7 +180,7 @@ describe('Change Stream Resume Tests', function() {
 
   configs.forEach(config => {
     it(config.description, {
-      metadata: { requires: { mongodb: '>=3.6.0' } },
+      metadata: { requires: { topology: 'single' } },
       test: function() {
         const configuration = this.configuration;
         test.server.setMessageHandler(makeServerHandler(config));

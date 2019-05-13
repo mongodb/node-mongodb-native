@@ -4,11 +4,7 @@ const f = require('util').format;
 const semver = require('semver');
 const path = require('path');
 const EnvironmentBase = require('mongodb-test-runner').EnvironmentBase;
-
-// topologies
-const Server = require('..').Server;
-const ReplSet = require('..').ReplSet;
-const Mongos = require('..').Mongos;
+const core = require('../lib/core');
 
 // topology managers
 const topologyManagers = require('mongodb-test-runner').topologyManagers;
@@ -30,6 +26,10 @@ const genReplsetConfig = (port, options) => {
   );
 };
 
+function usingUnifiedTopology() {
+  return !!process.env.MONGODB_UNIFIED_TOPOLOGY;
+}
+
 /**
  *
  * @param {*} discoverResult
@@ -44,15 +44,19 @@ class ReplicaSetEnvironment extends EnvironmentBase {
     this.url = 'mongodb://%slocalhost:31000/integration_tests?rs_name=rs';
     this.writeConcernMax = { w: 'majority', wtimeout: 30000 };
     this.replicasetName = 'rs';
-    this.topology = function(host, port, serverOptions) {
+    this.topology = function(host, port, options) {
       host = host || 'localhost';
       port = port || 31000;
-      serverOptions = Object.assign({}, serverOptions);
-      serverOptions.rs_name = 'rs';
-      serverOptions.poolSize = 1;
-      serverOptions.autoReconnect = false;
+      options = Object.assign({}, options);
+      options.replicaSet = 'rs';
+      options.poolSize = 1;
+      options.autoReconnect = false;
 
-      return new ReplSet([new Server(host, port, serverOptions)], serverOptions);
+      if (usingUnifiedTopology()) {
+        return new core.Topology([{ host, port }], options);
+      }
+
+      return new core.ReplSet([{ host, port }], options);
     };
 
     this.nodes = [
@@ -132,13 +136,23 @@ class ShardedEnvironment extends EnvironmentBase {
 
     this.host = 'localhost';
     this.port = 51000;
-    this.url = 'mongodb://%slocalhost:51000,localhost:51001/integration_tests';
-    this.writeConcernMax = { w: 'majority', wtimeout: 30000 };
-    this.topology = function(host, port, options) {
-      options = options || {};
-      options.autoReconnect = false;
 
-      return new Mongos([new Server(host, port, options)], options);
+    // NOTE: only connect to a single shard because there can be consistency issues using
+    //       more, revolving around the inability for shards to keep up-to-date views of
+    //       changes to the world (such as dropping a database).
+    this.url = 'mongodb://%slocalhost:51000/integration_tests';
+
+    this.writeConcernMax = { w: 'majority', wtimeout: 30000 };
+    this.topology = (host, port, options) => {
+      host = host || 'localhost';
+      port = port || 51000;
+      options = options || {};
+
+      if (usingUnifiedTopology()) {
+        return new core.Topology([{ host, port }], options);
+      }
+
+      return new core.Mongos([{ host, port }], options);
     };
 
     const version =
@@ -220,7 +234,7 @@ class SslEnvironment extends EnvironmentBase {
       serverOptions.poolSize = 1;
       serverOptions.ssl = true;
       serverOptions.sslValidate = false;
-      return new Server(host, port, serverOptions);
+      return new core.Server(host, port, serverOptions);
     };
 
     this.manager = new ServerManager('mongod', {
@@ -245,7 +259,7 @@ class AuthEnvironment extends EnvironmentBase {
       port = port || 27017;
       serverOptions = Object.assign({}, serverOptions);
       serverOptions.poolSize = 1;
-      return new Server(host, port, serverOptions);
+      return new core.Server(host, port, serverOptions);
     };
 
     this.manager = new ServerManager('mongod', {

@@ -1,7 +1,7 @@
 'use strict';
 var assert = require('assert');
 var Transform = require('stream').Transform;
-var MongoNetworkError = require('mongodb-core').MongoNetworkError;
+var MongoNetworkError = require('../../lib/core').MongoNetworkError;
 var setupDatabase = require('./shared').setupDatabase;
 var delay = require('./shared').delay;
 var co = require('co');
