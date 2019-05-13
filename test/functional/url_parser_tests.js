@@ -1026,4 +1026,40 @@ describe('Url Parser', function() {
       });
     }
   });
+
+  it('should allow escaped characters in mongodb+srv scheme passwords', {
+    metadata: {
+      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+    },
+    test: function(done) {
+      parse(
+        'mongodb+srv://admin:test%24@test5.test.build.10gen.cc/test?retryWrites=true',
+        {},
+        function(err, object) {
+          expect(err).to.be.null;
+          expect(object.auth.user).to.equal('admin');
+          expect(object.auth.password).to.equal('test$');
+          done();
+        }
+      );
+    }
+  });
+
+  it('should allow escaped characters in mongodb+srv scheme usernames', {
+    metadata: {
+      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+    },
+    test: function(done) {
+      parse(
+        'mongodb+srv://admin$1:test@test5.test.build.10gen.cc/test?retryWrites=true',
+        {},
+        function(err, object) {
+          expect(err).to.be.null;
+          expect(object.auth.user).to.equal('admin$1');
+          expect(object.auth.password).to.equal('test');
+          done();
+        }
+      );
+    }
+  });
 });
