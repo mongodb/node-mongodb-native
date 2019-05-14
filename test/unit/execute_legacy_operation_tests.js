@@ -1,9 +1,9 @@
 'use strict';
 
 const expect = require('chai').expect;
-const executeOperation = require('../../lib/utils').executeOperation;
+const executeLegacyOperation = require('../../lib/utils').executeLegacyOperation;
 
-describe('executeOperation', function() {
+describe('executeLegacyOperation', function() {
   it('should call callback with errors on throw errors, and rethrow error', function() {
     const expectedError = new Error('THIS IS AN ERROR');
     let callbackError, caughtError;
@@ -22,7 +22,7 @@ describe('executeOperation', function() {
     const options = { skipSessions: true };
 
     try {
-      executeOperation(topology, operation, [{}, callback], options);
+      executeLegacyOperation(topology, operation, [{}, callback], options);
     } catch (e) {
       caughtError = e;
     }
@@ -48,7 +48,7 @@ describe('executeOperation', function() {
     const callback = err => (callbackError = err);
     const options = { skipSessions: true };
 
-    executeOperation(topology, operation, [{}, null], options).then(null, callback);
+    executeLegacyOperation(topology, operation, [{}, null], options).then(null, callback);
 
     setTimeout(() => {
       try {
