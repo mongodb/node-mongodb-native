@@ -555,7 +555,7 @@ describe('ReadPreference', function() {
     client.connect((err, client) => {
       const db = client.db(configuration.db);
       expect(db.collection.bind(db, 'test', { readPreference: 'invalid' })).to.throw(
-        'ReadPreference mode is not valid.'
+        'provided mode invalid is an invalid ReadPreference mode'
       );
       client.close();
       done();
