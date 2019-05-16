@@ -1,6 +1,7 @@
 'use strict';
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
+const expect = require('chai').expect;
 
 describe('ReadPreference', function() {
   before(function() {
@@ -545,5 +546,19 @@ describe('ReadPreference', function() {
         done();
       });
     }
+  });
+
+  it('Should throw an error on an invalid readPreference', function(done) {
+    const configuration = this.configuration;
+
+    const client = configuration.newClient();
+    client.connect((err, client) => {
+      const db = client.db(configuration.db);
+      expect(db.collection.bind(db, 'test', { readPreference: 'invalid' })).to.throw(
+        'provided mode invalid is an invalid ReadPreference mode'
+      );
+      client.close();
+      done();
+    });
   });
 });
