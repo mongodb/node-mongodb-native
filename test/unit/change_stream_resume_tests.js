@@ -183,6 +183,10 @@ describe('Change Stream Resume Tests', function() {
       metadata: { requires: { topology: 'single' } },
       test: function() {
         const configuration = this.configuration;
+        if (!configuration.usingUnifiedTopology()) {
+          // These tests take way too long with the non-unified topology, so we will skip them
+          return this.skip();
+        }
         test.server.setMessageHandler(makeServerHandler(config));
         client = configuration.newClient(`mongodb://${test.server.uri()}`, {
           socketTimeoutMS: 300
