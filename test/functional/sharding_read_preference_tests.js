@@ -90,35 +90,17 @@ describe('Sharding (Read Preference)', function() {
         collection.insertOne({ test: 1 }, { w: 'majority', wtimeout: 10000 }, function(err) {
           expect(err).to.not.exist;
 
-          // Set debug level for the driver
-          Logger.setLevel('debug');
+          const findOneFunction = function() {
+            collection.findOne({ test: 1 }, { readPreference: new ReadPreference('notsupported') });
+          };
 
-          let gotMessage = false;
-          // Get the current logger
-          Logger.setCurrentLogger(function(message, options) {
-            if (
-              options.type === 'debug' &&
-              options.className === 'Cursor' &&
-              options.message.indexOf('"mode":"notsupported"') !== -1
-            ) {
-              gotMessage = true;
-            }
-          });
+          expect(findOneFunction).to.throw('Invalid ReadPreference mode notsupported');
 
-          collection.findOne(
-            { test: 1 },
-            { readPreference: new ReadPreference('notsupported') },
-            function(err) {
-              expect(err).to.exist;
-              expect(gotMessage).to.equal(true);
-
-              // Set error level for the driver
-              Logger.setLevel('error');
-              // Close db connection
-              client.close();
-              done();
-            }
-          );
+          // Set error level for the driver
+          Logger.setLevel('error');
+          // Close db connection
+          client.close();
+          done();
         });
       });
     }
