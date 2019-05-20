@@ -324,7 +324,6 @@ describe('Promises (Collection)', function() {
           .execute()
           .then(function(r) {
             test.ok(r);
-            test.deepEqual({ w: 1 }, bulk.s.writeConcern);
 
             client.close();
             done();
@@ -359,7 +358,6 @@ describe('Promises (Collection)', function() {
           .execute()
           .then(function(r) {
             test.ok(r);
-            test.deepEqual({ w: 1 }, bulk.s.writeConcern);
 
             client.close();
             done();
