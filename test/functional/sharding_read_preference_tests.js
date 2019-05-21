@@ -71,62 +71,6 @@ describe('Sharding (Read Preference)', function() {
   /**
    * @ignore
    */
-  it('Should correctly fail a Mongos read using a unsupported read preference', {
-    metadata: { requires: { topology: 'sharded' } },
-
-    // The actual test we wish to run
-    test: function(done) {
-      const configuration = this.configuration;
-
-      // Connect using the mongos connections
-      const client = new MongoClient(configuration.url(), { w: 0 });
-      client.connect(function(err) {
-        expect(err).to.not.exist;
-        const db = client.db(configuration.db);
-
-        // Perform a simple insert into a collection
-        const collection = db.collection('shard_test2');
-        // Insert a simple doc
-        collection.insertOne({ test: 1 }, { w: 'majority', wtimeout: 10000 }, function(err) {
-          expect(err).to.not.exist;
-
-          // Set debug level for the driver
-          Logger.setLevel('debug');
-
-          let gotMessage = false;
-          // Get the current logger
-          Logger.setCurrentLogger(function(message, options) {
-            if (
-              options.type === 'debug' &&
-              options.className === 'Cursor' &&
-              options.message.indexOf('"mode":"notsupported"') !== -1
-            ) {
-              gotMessage = true;
-            }
-          });
-
-          collection.findOne(
-            { test: 1 },
-            { readPreference: new ReadPreference('notsupported') },
-            function(err) {
-              expect(err).to.exist;
-              expect(gotMessage).to.equal(true);
-
-              // Set error level for the driver
-              Logger.setLevel('error');
-              // Close db connection
-              client.close();
-              done();
-            }
-          );
-        });
-      });
-    }
-  });
-
-  /**
-   * @ignore
-   */
   it('Should fail a Mongos secondary read using the read preference and tags that dont exist', {
     metadata: { requires: { topology: 'sharded' } },
 
