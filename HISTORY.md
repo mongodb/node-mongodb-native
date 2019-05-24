@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="3.2.6"></a>
+## [3.2.6](https://github.com/mongodb/node-mongodb-native/compare/v3.2.5...v3.2.6) (2019-05-24)
+
+
+
 <a name="3.2.5"></a>
 ## [3.2.5](https://github.com/mongodb/node-mongodb-native/compare/v3.2.4...v3.2.5) (2019-05-17)
 
