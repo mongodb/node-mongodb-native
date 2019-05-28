@@ -24,9 +24,9 @@ describe('Collection', function() {
     test: function() {
       const db = new Db('fakeDb', new MockTopology());
       const collection = db.collection('test');
-      expect(collection.findOneAndReplace.bind(collection, { a: 1 }, { $set: { a: 14 } })).to.throw(
-        'The replacement document must not contain atomic operators.'
-      );
+      expect(() => {
+        collection.findOneAndReplace({ a: 1 }, { $set: { a: 14 } });
+      }).to.throw('The replacement document must not contain atomic operators.');
     }
   });
 });
