@@ -1899,7 +1899,7 @@ describe('Collection', function() {
     });
   });
 
-  it('should allow an empty replacement document for findOneAndReplace', function(done) {
+  it('should allow an empty replacement document for findOneAndReplace', function() {
     const configuration = this.configuration;
     const client = configuration.newClient({}, { w: 1 });
 
@@ -1913,10 +1913,9 @@ describe('Collection', function() {
         expect(err).to.be.null;
 
         expect(collection.findOneAndReplace.bind(collection, { a: 1 }, {})).to.not.throw();
-
-        client.close();
-        done();
       });
+
+      client.close();
     });
   });
 });
