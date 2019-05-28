@@ -33,6 +33,7 @@ tests:
         outcome:
             result:
                 deletedCount: 0
+                insertedCount: 0
                 insertedIds: {}
                 matchedCount: 3
                 modifiedCount: 3

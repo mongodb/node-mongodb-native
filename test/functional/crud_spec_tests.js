@@ -6,16 +6,19 @@ const chai = require('chai');
 const expect = chai.expect;
 chai.use(require('chai-subset'));
 
-function findScenarios(type) {
+const BulkWriteError = require('../../lib/bulk/common').BulkWriteError;
+
+function findScenarios() {
+  const route = [__dirname, 'spec', 'crud'].concat(Array.from(arguments));
   return fs
-    .readdirSync(path.join(__dirname, 'spec', 'crud', type))
+    .readdirSync(path.join.apply(path, route))
     .filter(x => x.indexOf('json') !== -1)
-    .map(x => [x, fs.readFileSync(path.join(__dirname, 'spec', 'crud', type, x), 'utf8')])
+    .map(x => [x, fs.readFileSync(path.join.apply(path, route.concat([x])), 'utf8')])
     .map(x => [path.basename(x[0], '.json'), JSON.parse(x[1])]);
 }
 
-const readScenarios = findScenarios('read');
-const writeScenarios = findScenarios('write');
+const readScenarios = findScenarios('v1', 'read');
+const writeScenarios = findScenarios('v1', 'write');
 const dbScenarios = findScenarios('db');
 
 const testContext = {};
@@ -127,8 +130,49 @@ describe('CRUD spec', function() {
     });
   });
 
+  function transformBulkWriteResult(result) {
+    const r = {};
+    r.insertedCount = result.nInserted;
+    r.matchedCount = result.nMatched;
+    r.modifiedCount = result.nModified || 0;
+    r.deletedCount = result.nRemoved;
+    r.upsertedCount = result.getUpsertedIds().length;
+    r.upsertedIds = {};
+    r.insertedIds = {};
+
+    // Update the n
+    r.n = r.insertedCount;
+
+    // Inserted documents
+    const inserted = result.getInsertedIds();
+    // Map inserted ids
+    for (let i = 0; i < inserted.length; i++) {
+      r.insertedIds[inserted[i].index] = inserted[i]._id;
+    }
+
+    // Upserted documents
+    const upserted = result.getUpsertedIds();
+    // Map upserted ids
+    for (let i = 0; i < upserted.length; i++) {
+      r.upsertedIds[upserted[i].index] = upserted[i]._id;
+    }
+
+    return r;
+  }
+
   function assertWriteExpectations(collection, outcome) {
     return function(result) {
+      if (outcome.error) {
+        expect(result).to.be.an('error');
+      } else {
+        expect(result).to.not.be.an('error');
+      }
+
+      // TODO: when we fix our bulk write errors, get rid of this
+      if (result instanceof BulkWriteError) {
+        result = transformBulkWriteResult(result.result);
+      }
+
       Object.keys(outcome.result).forEach(resultName => {
         expect(result).to.have.property(resultName);
         if (resultName === 'upsertedId') {
@@ -162,7 +206,7 @@ describe('CRUD spec', function() {
             .find({})
             .toArray()
             .then(collectionResults => {
-              expect(collectionResults).to.containSubset(outcome.result);
+              expect(collectionResults).to.containSubset(outcome.collection.data);
             });
         }
 
@@ -261,13 +305,13 @@ describe('CRUD spec', function() {
   function executeInsertTest(scenarioTest, db, collection) {
     const args = scenarioTest.operation.arguments;
     const documents = args.document || args.documents;
-    let options = Object.assign({}, args);
+    let options = Object.assign({}, args.options);
     delete options.document;
     delete options.documents;
 
-    return collection[scenarioTest.operation.name](documents, options).then(
-      assertWriteExpectations(collection, scenarioTest.outcome)
-    );
+    const asserter = assertWriteExpectations(collection, scenarioTest.outcome);
+
+    return collection[scenarioTest.operation.name](documents, options).then(asserter, asserter);
   }
 
   function executeBulkTest(scenarioTest, db, collection) {
@@ -275,13 +319,16 @@ describe('CRUD spec', function() {
     const operations = args.requests.map(operation => {
       let op = {};
       op[operation.name] = operation['arguments'];
+      if (operation['arguments'].collation) {
+        op.collation = operation['arguments'].collation;
+      }
       return op;
     });
     const options = Object.assign({}, args.options);
 
-    return collection
-      .bulkWrite(operations, options)
-      .then(assertWriteExpectations(collection, scenarioTest.outcome));
+    const asserter = assertWriteExpectations(collection, scenarioTest.outcome);
+
+    return collection.bulkWrite(operations, options).then(asserter, asserter);
   }
 
   function executeReplaceTest(scenarioTest, db, collection) {
@@ -369,7 +416,12 @@ describe('CRUD spec', function() {
     }
 
     return Promise.all(dropPromises)
-      .then(() => (scenario.data ? collection.insertMany(scenario.data) : Promise.resolve()))
+      .then(
+        () =>
+          scenario.data && scenario.data.length
+            ? collection.insertMany(scenario.data)
+            : Promise.resolve()
+      )
       .then(() => {
         switch (scenarioTest.operation.name) {
           case 'aggregate':
