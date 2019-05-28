@@ -1899,7 +1899,7 @@ describe('Collection', function() {
     });
   });
 
-  it('should not allow atomic operators on findOneAndReplace', function(done) {
+  it('should allow an empty replacement document for findOneAndReplace', function(done) {
     const configuration = this.configuration;
     const client = configuration.newClient({}, { w: 1 });
 
@@ -1912,9 +1912,7 @@ describe('Collection', function() {
       collection.insertOne({ a: 1 }, err => {
         expect(err).to.be.null;
 
-        expect(
-          collection.findOneAndReplace.bind(collection, { a: 1 }, { $set: { a: 14 } })
-        ).to.throw('The replacement document must not contain atomic operators.');
+        expect(collection.findOneAndReplace.bind(collection, { a: 1 }, {})).to.not.throw();
 
         client.close();
         done();
