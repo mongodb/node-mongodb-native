@@ -18,9 +18,6 @@ tests:
                 batchSize: 2
 
         outcome:
-            result:
-                - {_id: 2, x: 22}
-                - {_id: 3, x: 33}
             collection:
                 name: "other_test_collection"
                 data:
@@ -39,9 +36,6 @@ tests:
                 batchSize: 0
 
         outcome:
-            result:
-                - {_id: 2, x: 22}
-                - {_id: 3, x: 33}
             collection:
                 name: "other_test_collection"
                 data:

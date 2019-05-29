@@ -97,7 +97,7 @@
     {
       "description": "Deprecated count with skip and limit",
       "operation": {
-        "name": "countDocuments",
+        "name": "count",
         "arguments": {
           "filter": {},
           "skip": 1,
