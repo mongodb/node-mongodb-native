@@ -160,14 +160,14 @@ describe('CRUD spec', function() {
     return r;
   }
 
+  function invert(promise) {
+    return promise.then(() => {
+      throw new Error('Expected operation to throw an error');
+    }, e => e);
+  }
+
   function assertWriteExpectations(collection, outcome) {
     return function(result) {
-      if (outcome.error) {
-        expect(result).to.be.an('error');
-      } else {
-        expect(result).to.not.be.an('error');
-      }
-
       // TODO: when we fix our bulk write errors, get rid of this
       if (result instanceof BulkWriteError) {
         result = transformBulkWriteResult(result.result);
@@ -309,9 +309,14 @@ describe('CRUD spec', function() {
     delete options.document;
     delete options.documents;
 
-    const asserter = assertWriteExpectations(collection, scenarioTest.outcome);
+    let promise = collection[scenarioTest.operation.name](documents, options);
 
-    return collection[scenarioTest.operation.name](documents, options).then(asserter, asserter);
+    const outcome = scenarioTest.outcome;
+    if (outcome.error) {
+      promise = invert(promise);
+    }
+
+    return promise.then(assertWriteExpectations(collection, scenarioTest.outcome));
   }
 
   function executeBulkTest(scenarioTest, db, collection) {
@@ -326,9 +331,14 @@ describe('CRUD spec', function() {
     });
     const options = Object.assign({}, args.options);
 
-    const asserter = assertWriteExpectations(collection, scenarioTest.outcome);
+    let promise = collection.bulkWrite(operations, options);
 
-    return collection.bulkWrite(operations, options).then(asserter, asserter);
+    const outcome = scenarioTest.outcome;
+    if (outcome.error) {
+      promise = invert(promise);
+    }
+
+    return promise.then(assertWriteExpectations(collection, scenarioTest.outcome));
   }
 
   function executeReplaceTest(scenarioTest, db, collection) {
