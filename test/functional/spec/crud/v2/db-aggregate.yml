@@ -1,0 +1,53 @@
+database_name: &database_name "admin"
+
+minServerVersion: '4.0'
+
+tests:
+  -
+    description: "Aggregate with $currentOp"
+    operations:
+      -
+        name: aggregate
+        object: database
+        arguments:
+          pipeline:
+            - $currentOp: { allUsers: false, idleConnections: false, localOps: true }
+            - $match: { command.aggregate: { $eq: 1 } }
+            - $project: { command: 1 }
+            - $project: { command.lsid: 0 }
+        result:
+          -
+            command:
+              aggregate: 1
+              pipeline:
+                - $currentOp: { allUsers: false, idleConnections: false, localOps: true }
+                - $match: { command.aggregate: { $eq: 1 } }
+                - $project: { command: 1 }
+                - $project: { command.lsid: 0 }
+              cursor: {}
+              $db: "admin"
+  -
+    description: "Aggregate with $currentOp and allowDiskUse"
+    operations:
+      -
+        name: aggregate
+        object: database
+        arguments:
+          pipeline:
+            - $currentOp: { allUsers: true, idleConnections: true, localOps: true }
+            - $match: { command.aggregate: {$eq: 1} }
+            - $project: { command: 1 }
+            - $project: { command.lsid: 0 }
+          allowDiskUse: true
+        result:
+          -
+            command:
+              aggregate: 1
+              pipeline:
+                - $currentOp: { allUsers: true, idleConnections: true, localOps: true }
+                - $match: { command.aggregate: { $eq: 1 } }
+                - $project: { command: 1 }
+                - $project: { command.lsid: 0 }
+              allowDiskUse: true
+              cursor: {}
+              $db: "admin"
