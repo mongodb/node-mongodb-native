@@ -205,6 +205,28 @@ describe('Transactions', function() {
       }
     });
   });
+
+  describe('startTransaction', function() {
+    let session, sessionPool;
+    beforeEach(() => {
+      const topology = new core.Mongos();
+      sessionPool = new sessions.ServerSessionPool(topology);
+      session = new sessions.ClientSession(topology, sessionPool);
+    });
+
+    afterEach(() => {
+      sessionPool.endAllPooledSessions();
+    });
+
+    it('should error if transactions are not supported', {
+      metadata: { requires: { topology: ['sharded'], mongodb: '>4.0.0' } },
+      test: function(done) {
+        expect(() => session.startTransaction()).to.throw('Transactions are not supported.');
+
+        session.endSession(done);
+      }
+    });
+  });
 });
 
 function parseTopologies(topologies) {
