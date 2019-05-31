@@ -456,3 +456,79 @@ tests:
             coll: *collection_name
         -
           operationType: invalidate
+  # Test that resume logic works correctly even after consecutive retryable failures of a getMore command,
+  # with no intervening events.  This is ensured by setting the batch size of the change stream to 1,
+  -
+    description: Test consecutive resume
+    minServerVersion: "4.1.7"
+    target: collection
+    topology:
+      - replicaset
+    changeStreamPipeline: []
+    changeStreamOptions: { batchSize: 1}
+    failPoint:
+      configureFailPoint: failCommand
+      mode: {times: 2}
+      data:
+          failCommands: ["getMore"]
+          closeConnection: true
+    operations:
+      -
+        database: *database_name
+        collection: *collection_name
+        name: insertOne
+        arguments:
+          document:
+            x: 1
+      -
+        database: *database_name
+        collection: *collection_name
+        name: insertOne
+        arguments:
+          document:
+            x: 2
+      -
+        database: *database_name
+        collection: *collection_name
+        name: insertOne
+        arguments:
+          document:
+            x: 3
+    expectations:
+      -
+        command_started_event:
+          command:
+            aggregate: *collection_name
+            cursor: {batchSize: 1}
+            pipeline:
+              -
+                $changeStream:
+                  fullDocument: default
+          command_name: aggregate
+          database_name: *database_name
+    result:
+      success:
+        -
+          operationType: insert
+          ns:
+            db: *database_name
+            coll: *collection_name
+          fullDocument:
+            x:
+              $numberInt: "1"
+        -
+          operationType: insert
+          ns:
+            db: *database_name
+            coll: *collection_name
+          fullDocument:
+            x:
+              $numberInt: "2"
+        -
+          operationType: insert
+          ns:
+            db: *database_name
+            coll: *collection_name
+          fullDocument:
+            x:
+              $numberInt: "3"
