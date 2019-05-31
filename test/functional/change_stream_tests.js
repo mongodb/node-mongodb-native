@@ -1773,4 +1773,220 @@ describe('Change Streams', function() {
       }
     });
   });
+
+  describe('4.2 Prose Tests', function() {
+    class MockServerManager {
+      constructor(config, commandIterators) {
+        this.config = config;
+        this.cmdList = new Set(['ismaster', 'endSessions', 'aggregate', 'getMore']);
+        this.database = 'test_db';
+        this.collection = 'test_coll';
+        this.ns = `${this.database}.${this.collection}`;
+        this._timestampCounter = 0;
+        this.cursorId = new this.config.require.Long('9064341847921713401');
+        this.commandIterators = commandIterators;
+        this.promise = this.init();
+      }
+
+      init() {
+        return mock.createServer().then(server => {
+          this.server = server;
+          this.server.setMessageHandler(request => {
+            const doc = request.document;
+
+            const opname = Object.keys(doc)[0];
+            let response = { ok: 0 };
+            if (this.cmdList.has(opname) && this[opname]) {
+              response = this[opname](doc);
+            }
+            request.reply(this.applyOpTime(response));
+          });
+        });
+      }
+
+      ready() {
+        return this.promise;
+      }
+
+      get mongodbURI() {
+        return `mongodb://${this.server.uri()}`;
+      }
+
+      // Handlers for specific commands
+
+      ismaster() {
+        const uri = this.server.uri();
+        return Object.assign({}, mock.DEFAULT_ISMASTER_36, {
+          ismaster: true,
+          secondary: false,
+          me: uri,
+          primary: uri,
+          setName: 'rs',
+          localTime: new Date(),
+          ok: 1,
+          hosts: [uri]
+        });
+      }
+
+      endSessions() {
+        return { ok: 1 };
+      }
+
+      aggregate() {
+        let cursor;
+        try {
+          cursor = this._buildCursor('aggregate', 'firstBatch');
+        } catch (e) {
+          return { ok: 0, errmsg: e.message };
+        }
+
+        return {
+          ok: 1,
+          cursor
+        };
+      }
+
+      getMore() {
+        let cursor;
+        try {
+          cursor = this._buildCursor('getMore', 'nextBatch');
+        } catch (e) {
+          return { ok: 0, errmsg: e.message };
+        }
+        return {
+          ok: 1,
+          cursor,
+          cursorId: this.cursorId
+        };
+      }
+
+      // Helpers
+      timestamp() {
+        return new this.config.require.Timestamp(this._timestampCounter++, Date.now());
+      }
+
+      applyOpTime(obj) {
+        const operationTime = this.timestamp();
+
+        return Object.assign({}, obj, {
+          $clusterTime: { clusterTime: operationTime },
+          operationTime
+        });
+      }
+
+      _buildCursor(type, batchKey) {
+        const config = this.commandIterators[type].next().value;
+        if (!config) {
+          throw new Error('no more config for ' + type);
+        }
+
+        const batch = Array.from({ length: config.numDocuments || 0 }).map(() =>
+          this.changeEvent()
+        );
+        const cursor = {
+          [batchKey]: batch,
+          id: this.cursorId,
+          ns: this.ns
+        };
+        if (config.postBatchResumeToken) {
+          cursor.postBatchResumeToken = this.resumeToken();
+        }
+        return cursor;
+      }
+
+      changeEvent(operationType, fullDocument) {
+        fullDocument = fullDocument || {};
+        return {
+          _id: this.resumeToken(),
+          operationType,
+          ns: {
+            db: this.database,
+            coll: this.collection
+          },
+          fullDocument
+        };
+      }
+
+      resumeToken() {
+        return {
+          ts: this.timestamp(),
+          ns: this.namespace,
+          _id: new this.config.require.ObjectId()
+        };
+      }
+    }
+
+    // For a ChangeStream under these conditions:
+    //   Running against a server >=4.0.7.
+    //   The batch is empty or has been iterated to the last document.
+    // Expected result:
+    //   getResumeToken must return the postBatchResumeToken from the current command response.
+    it('should properly store postBatchResumeToken when batch is empty', function() {
+      const manager = new MockServerManager(this.configuration, {
+        aggregate: (function*() {
+          yield { numDocuments: 0, postBatchResumeToken: true };
+        })(),
+        getMore: (function*() {
+          yield { numDocuments: 1, postBatchResumeToken: false };
+        })()
+      });
+      let client;
+      let changeStream;
+      const commandSucceededEvents = [];
+      const resumeTokenChangedEvents = [];
+
+      function cleanup(err, r) {
+        return Promise.resolve()
+          .then(() => changeStream && changeStream.close())
+          .then(() => client && client.close())
+          .catch()
+          .then(() => {
+            if (err) {
+              throw err;
+            }
+            return r;
+          });
+      }
+
+      return manager
+        .ready()
+        .then(() => {
+          client = this.configuration.newClient(manager.mongodbURI, { monitorCommands: true });
+          return client.connect();
+        })
+        .then(() => {
+          client.on('commandSucceeded', e => {
+            if (e.commandName === 'aggregate' || e.commandName === 'getMore') {
+              commandSucceededEvents.push(e);
+            }
+          });
+          changeStream = client
+            .db(manager.database)
+            .collection(manager.collection)
+            .watch();
+
+          changeStream.on('resumeTokenChanged', e => resumeTokenChangedEvents.push(e));
+          return changeStream.next();
+        })
+        .then(() => cleanup(), err => cleanup(err))
+        .then(() => {
+          expect(commandSucceededEvents).to.have.a.lengthOf(2);
+          expect(resumeTokenChangedEvents).to.have.a.lengthOf(2);
+
+          expect(commandSucceededEvents[0])
+            .to.have.a.nested.property('reply.cursor.postBatchResumeToken')
+            .that.deep.equals(resumeTokenChangedEvents[0].resumeToken);
+          expect(commandSucceededEvents[0])
+            .to.have.a.nested.property('reply.cursor.postBatchResumeToken')
+            .that.does.not.deep.equal(resumeTokenChangedEvents[1].resumeToken);
+
+          expect(commandSucceededEvents[1])
+            .to.have.a.nested.property('reply.cursor.nextBatch[0]._id')
+            .that.does.not.deep.equal(resumeTokenChangedEvents[0].resumeToken);
+          expect(commandSucceededEvents[1])
+            .to.have.a.nested.property('reply.cursor.nextBatch[0]._id')
+            .that.deep.equal(resumeTokenChangedEvents[1].resumeToken);
+        });
+    });
+  });
 });
