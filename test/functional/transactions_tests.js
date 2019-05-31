@@ -207,23 +207,39 @@ describe('Transactions', function() {
   });
 
   describe('startTransaction', function() {
-    let session, sessionPool;
-    beforeEach(() => {
-      const topology = new core.Mongos();
-      sessionPool = new sessions.ServerSessionPool(topology);
-      session = new sessions.ClientSession(topology, sessionPool);
-    });
-
-    afterEach(() => {
-      sessionPool.endAllPooledSessions();
-    });
-
     it('should error if transactions are not supported', {
       metadata: { requires: { topology: ['sharded'], mongodb: '>4.0.0' } },
       test: function(done) {
+         if (this.configuration.usingUnifiedTopology()) {
+          return this.skip();
+        }
+
+        const topology = new core.Mongos();
+        const sessionPool = new sessions.ServerSessionPool(topology);
+        const session = new sessions.ClientSession(topology, sessionPool);
+
         expect(() => session.startTransaction()).to.throw('Transactions are not supported.');
 
         session.endSession(done);
+        sessionPool.endAllPooledSessions();
+      }
+    });
+
+    it('should error if transactions are not supported (unified topology)', {
+      metadata: { requires: { topology: ['sharded'], mongodb: '>4.0.0' } },
+      test: function(done) {
+         if (!this.configuration.usingUnifiedTopology()) {
+          return this.skip();
+        }
+
+        const topology = new core.Topology();
+        const sessionPool = new sessions.ServerSessionPool(topology);
+        const session = new sessions.ClientSession(topology, sessionPool);
+
+        expect(() => session.startTransaction()).to.throw('Transactions are not supported.');
+
+        session.endSession(done);
+        sessionPool.endAllPooledSessions();
       }
     });
   });
