@@ -435,7 +435,7 @@ describe('ReadConcern', function() {
   });
 
   it('Should set majority readConcern aggregate command but ignore due to out', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2 < 4.1' } },
 
     test: function(done) {
       var listener = require('../..').instrument(function(err) {
@@ -497,6 +497,64 @@ describe('ReadConcern', function() {
               });
           });
       });
+    }
+  });
+
+  it('Should set majority readConcern aggregate command against server >= 4.1', {
+    metadata: { requires: { topology: 'replicaset', mongodb: '>= 4.1' } },
+
+    test: function(done) {
+      // Contains all the apm events
+      const started = [];
+      const succeeded = [];
+      // Get a new instance
+      const client = this.configuration.newClient(
+        { w: 1 },
+        { poolSize: 1, readConcern: { level: 'majority' }, monitorCommands: true }
+      );
+
+      client
+        .connect()
+        .then(() => {
+          // Get a collection
+          const collection = client
+            .db(this.configuration.db)
+            .collection('readConcernCollectionAggregate1');
+
+          // Listen to apm events
+          client.on('commandStarted', event => {
+            if (event.commandName === 'aggregate') started.push(event);
+          });
+          client.on('commandSucceeded', event => {
+            if (event.commandName === 'aggregate') succeeded.push(event);
+          });
+
+          // Execute find
+          return collection
+            .aggregate([{ $match: {} }, { $out: 'readConcernCollectionAggregate1Output' }])
+            .toArray()
+            .then(() => {
+              expect(started).to.have.a.lengthOf(1);
+              expect(started[0]).to.have.property('commandName', 'aggregate');
+              expect(succeeded[0]).to.have.property('commandName', 'aggregate');
+              expect(started[0]).to.have.nested.property('command.readConcern.level', 'majority');
+
+              // Execute find
+              return collection
+                .aggregate([{ $match: {} }], { out: 'readConcernCollectionAggregate2Output' })
+                .toArray()
+                .then(() => {
+                  expect(started).to.have.a.lengthOf(2);
+                  expect(started[1]).to.have.property('commandName', 'aggregate');
+                  expect(succeeded[1]).to.have.property('commandName', 'aggregate');
+                  expect(started[1]).to.have.nested.property(
+                    'command.readConcern.level',
+                    'majority'
+                  );
+                });
+            });
+        })
+        .then(() => client.close(done), e => client.close(() => done(e)));
     }
   });
 
