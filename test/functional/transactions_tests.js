@@ -210,7 +210,7 @@ describe('Transactions', function() {
     it('should error if transactions are not supported', {
       metadata: { requires: { topology: ['sharded'], mongodb: '>4.0.0' } },
       test: function(done) {
-         if (this.configuration.usingUnifiedTopology()) {
+        if (this.configuration.usingUnifiedTopology()) {
           return this.skip();
         }
 
@@ -218,7 +218,9 @@ describe('Transactions', function() {
         const sessionPool = new sessions.ServerSessionPool(topology);
         const session = new sessions.ClientSession(topology, sessionPool);
 
-        expect(() => session.startTransaction()).to.throw('Transactions are not supported.');
+        expect(() => session.startTransaction()).to.throw(
+          'Transactions are not supported on sharded clusters in MongoDB < 4.2.'
+        );
 
         session.endSession(done);
         sessionPool.endAllPooledSessions();
@@ -228,7 +230,7 @@ describe('Transactions', function() {
     it('should error if transactions are not supported (unified topology)', {
       metadata: { requires: { topology: ['sharded'], mongodb: '>4.0.0' } },
       test: function(done) {
-         if (!this.configuration.usingUnifiedTopology()) {
+        if (!this.configuration.usingUnifiedTopology()) {
           return this.skip();
         }
 
@@ -236,7 +238,9 @@ describe('Transactions', function() {
         const sessionPool = new sessions.ServerSessionPool(topology);
         const session = new sessions.ClientSession(topology, sessionPool);
 
-        expect(() => session.startTransaction()).to.throw('Transactions are not supported.');
+        expect(() => session.startTransaction()).to.throw(
+          'Transactions are not supported on sharded clusters in MongoDB < 4.2.'
+        );
 
         session.endSession(done);
         sessionPool.endAllPooledSessions();
