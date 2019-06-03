@@ -49,7 +49,7 @@ describe('Database', function() {
   it('should ignore a readPreference for dropDatabase', {
     metadata: { requires: { topology: 'single' } },
     test: function() {
-      sinon.stub(test.utils, 'executeOperation').callsFake((topology, operation, args) => {
+      sinon.stub(test.utils, 'executeLegacyOperation').callsFake((topology, operation, args) => {
         const options = args[args.length - 2];
         expect(options.readPreference).to.equal('primary');
       });
