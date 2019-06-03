@@ -1774,7 +1774,7 @@ describe('Change Streams', function() {
     });
   });
 
-  describe('4.2 Prose Tests', function() {
+  describe('getResumeToken', function() {
     class MockServerManager {
       constructor(config, commandIterators) {
         this.config = config;
@@ -1801,6 +1801,52 @@ describe('Change Streams', function() {
             }
             request.reply(this.applyOpTime(response));
           });
+
+          this.client = this.config.newClient(this.mongodbURI, { monitorCommands: true });
+          return this.client.connect().then(() => {
+            this.apm = { started: [], succeeded: [], failed: [] };
+            [
+              ['commandStared', this.apm.started],
+              ['commandSucceeded', this.apm.succeeded],
+              ['commandFailed', this.apm.failed]
+            ].forEach(opts => {
+              const eventName = opts[0];
+              const target = opts[1];
+
+              this.client.on(eventName, e => {
+                if (e.commandName === 'aggregate' || e.commandName === 'getMore') {
+                  target.push(e);
+                }
+              });
+            });
+          });
+        });
+      }
+
+      makeChangeStream(options) {
+        this.changeStream = this.client
+          .db(this.database)
+          .collection(this.collection)
+          .watch(options);
+        this.resumeTokenChangedEvents = [];
+
+        this.changeStream.on('resumeTokenChanged', e => this.resumeTokenChangedEvents.push(e));
+
+        return this.changeStream;
+      }
+
+      teardown(e) {
+        let promise = Promise.resolve();
+        if (this.changeStream) {
+          promise = promise.then(() => this.changeStream.close()).catch();
+        }
+        if (this.client) {
+          promise = promise.then(() => this.client.close()).catch();
+        }
+        return promise.then(function() {
+          if (e) {
+            throw e;
+          }
         });
       }
 
@@ -1921,72 +1967,533 @@ describe('Change Streams', function() {
     //   The batch is empty or has been iterated to the last document.
     // Expected result:
     //   getResumeToken must return the postBatchResumeToken from the current command response.
-    it('should properly store postBatchResumeToken when batch is empty', function() {
-      const manager = new MockServerManager(this.configuration, {
-        aggregate: (function*() {
-          yield { numDocuments: 0, postBatchResumeToken: true };
-        })(),
-        getMore: (function*() {
-          yield { numDocuments: 1, postBatchResumeToken: false };
-        })()
-      });
-      let client;
-      let changeStream;
-      const commandSucceededEvents = [];
-      const resumeTokenChangedEvents = [];
-
-      function cleanup(err, r) {
-        return Promise.resolve()
-          .then(() => changeStream && changeStream.close())
-          .then(() => client && client.close())
-          .catch()
-          .then(() => {
-            if (err) {
-              throw err;
-            }
-            return r;
-          });
-      }
-
-      return manager
-        .ready()
-        .then(() => {
-          client = this.configuration.newClient(manager.mongodbURI, { monitorCommands: true });
-          return client.connect();
-        })
-        .then(() => {
-          client.on('commandSucceeded', e => {
-            if (e.commandName === 'aggregate' || e.commandName === 'getMore') {
-              commandSucceededEvents.push(e);
-            }
-          });
-          changeStream = client
-            .db(manager.database)
-            .collection(manager.collection)
-            .watch();
-
-          changeStream.on('resumeTokenChanged', e => resumeTokenChangedEvents.push(e));
-          return changeStream.next();
-        })
-        .then(() => cleanup(), err => cleanup(err))
-        .then(() => {
-          expect(commandSucceededEvents).to.have.a.lengthOf(2);
-          expect(resumeTokenChangedEvents).to.have.a.lengthOf(2);
-
-          expect(commandSucceededEvents[0])
-            .to.have.a.nested.property('reply.cursor.postBatchResumeToken')
-            .that.deep.equals(resumeTokenChangedEvents[0].resumeToken);
-          expect(commandSucceededEvents[0])
-            .to.have.a.nested.property('reply.cursor.postBatchResumeToken')
-            .that.does.not.deep.equal(resumeTokenChangedEvents[1].resumeToken);
-
-          expect(commandSucceededEvents[1])
-            .to.have.a.nested.property('reply.cursor.nextBatch[0]._id')
-            .that.does.not.deep.equal(resumeTokenChangedEvents[0].resumeToken);
-          expect(commandSucceededEvents[1])
-            .to.have.a.nested.property('reply.cursor.nextBatch[0]._id')
-            .that.deep.equal(resumeTokenChangedEvents[1].resumeToken);
+    describe('for emptied batch on server >= 4.0.7', function() {
+      it('must return the postBatchResumeToken from the current command response', function() {
+        const manager = new MockServerManager(this.configuration, {
+          aggregate: (function*() {
+            yield { numDocuments: 0, postBatchResumeToken: true };
+          })(),
+          getMore: (function*() {
+            yield { numDocuments: 1, postBatchResumeToken: true };
+          })()
         });
+
+        return manager
+          .ready()
+          .then(() => {
+            return manager.makeChangeStream().next();
+          })
+          .then(() => manager.teardown(), err => manager.teardown(err))
+          .then(() => {
+            const tokens = manager.resumeTokenChangedEvents.map(e => e.resumeToken);
+            const successes = manager.apm.succeeded.map(e => {
+              try {
+                return e.reply.cursor;
+              } catch (e) {
+                return {};
+              }
+            });
+
+            expect(successes).to.have.a.lengthOf(2);
+            expect(successes[0]).to.have.a.property('postBatchResumeToken');
+            expect(successes[1]).to.have.a.property('postBatchResumeToken');
+            expect(successes[1]).to.have.a.nested.property('nextBatch[0]._id');
+
+            expect(tokens).to.have.a.lengthOf(2);
+            expect(tokens[0]).to.deep.equal(successes[0].postBatchResumeToken);
+            expect(tokens[1])
+              .to.deep.equal(successes[1].postBatchResumeToken)
+              .and.to.not.deep.equal(successes[1].nextBatch[0]._id);
+          });
+      });
+    });
+
+    // For a ChangeStream under these conditions:
+    //   Running against a server <4.0.7.
+    //   The batch is empty or has been iterated to the last document.
+    // Expected result:
+    //   getResumeToken must return the _id of the last document returned if one exists.
+    //   getResumeToken must return startAfter from the initial aggregate if the option was specified.
+    //   getResumeToken must return resumeAfter from the initial aggregate if the option was specified.
+    //   If neither the startAfter nor resumeAfter options were specified, the getResumeToken result must be empty.
+    describe('for emptied batch on server <= 4.0.7', function() {
+      it('must return the _id of the last document returned if one exists', function() {
+        const manager = new MockServerManager(this.configuration, {
+          aggregate: (function*() {
+            yield { numDocuments: 0, postBatchResumeToken: false };
+          })(),
+          getMore: (function*() {
+            yield { numDocuments: 1, postBatchResumeToken: false };
+          })()
+        });
+
+        return manager
+          .ready()
+          .then(() => {
+            return manager.makeChangeStream().next();
+          })
+          .then(() => manager.teardown(), err => manager.teardown(err))
+          .then(() => {
+            const tokens = manager.resumeTokenChangedEvents.map(e => e.resumeToken);
+            const successes = manager.apm.succeeded.map(e => {
+              try {
+                return e.reply.cursor;
+              } catch (e) {
+                return {};
+              }
+            });
+
+            expect(successes).to.have.a.lengthOf(2);
+            expect(successes[1]).to.have.a.nested.property('nextBatch[0]._id');
+
+            expect(tokens).to.have.a.lengthOf(1);
+            expect(tokens[0]).to.deep.equal(successes[1].nextBatch[0]._id);
+          });
+      });
+      it('must return startAfter from the initial aggregate if the option was specified', function() {
+        const manager = new MockServerManager(this.configuration, {
+          aggregate: (function*() {
+            yield { numDocuments: 0, postBatchResumeToken: false };
+          })(),
+          getMore: (function*() {
+            yield { numDocuments: 0, postBatchResumeToken: false };
+          })()
+        });
+        let token;
+        const startAfter = manager.resumeToken();
+        const resumeAfter = manager.resumeToken();
+
+        return manager
+          .ready()
+          .then(() => {
+            return new Promise(resolve => {
+              const changeStream = manager.makeChangeStream({ startAfter, resumeAfter });
+              changeStream.once('onGetMore', () => {
+                token = changeStream.getResumeToken();
+                resolve();
+              });
+
+              // Note: this is expected to fail
+              changeStream.next().catch(() => {});
+            });
+          })
+          .then(() => manager.teardown(), err => manager.teardown(err))
+          .then(() => {
+            expect(token)
+              .to.deep.equal(startAfter)
+              .and.to.not.deep.equal(resumeAfter);
+          });
+      });
+      it('must return resumeAfter from the initial aggregate if the option was specified', function() {
+        const manager = new MockServerManager(this.configuration, {
+          aggregate: (function*() {
+            yield { numDocuments: 0, postBatchResumeToken: false };
+          })(),
+          getMore: (function*() {
+            yield { numDocuments: 0, postBatchResumeToken: false };
+          })()
+        });
+        let token;
+        const resumeAfter = manager.resumeToken();
+
+        return manager
+          .ready()
+          .then(() => {
+            return new Promise(resolve => {
+              const changeStream = manager.makeChangeStream({ resumeAfter });
+              changeStream.once('onGetMore', () => {
+                token = changeStream.getResumeToken();
+                resolve();
+              });
+
+              // Note: this is expected to fail
+              changeStream.next().catch(() => {});
+            });
+          })
+          .then(() => manager.teardown(), err => manager.teardown(err))
+          .then(() => {
+            expect(token).to.deep.equal(resumeAfter);
+          });
+      });
+      it('must be empty if neither the startAfter nor resumeAfter options were specified', function() {
+        const manager = new MockServerManager(this.configuration, {
+          aggregate: (function*() {
+            yield { numDocuments: 0, postBatchResumeToken: false };
+          })(),
+          getMore: (function*() {
+            yield { numDocuments: 0, postBatchResumeToken: false };
+          })()
+        });
+        let token;
+
+        return manager
+          .ready()
+          .then(() => {
+            return new Promise(resolve => {
+              const changeStream = manager.makeChangeStream();
+              changeStream.once('onGetMore', () => {
+                token = changeStream.getResumeToken();
+                resolve();
+              });
+
+              // Note: this is expected to fail
+              changeStream.next().catch(() => {});
+            });
+          })
+          .then(() => manager.teardown(), err => manager.teardown(err))
+          .then(() => {
+            expect(token).to.not.exist;
+          });
+      });
+    });
+
+    // For a ChangeStream under these conditions:
+    //   The batch is not empty.
+    //   The batch has been iterated up to but not including the last element.
+    // Expected result:
+    //   getResumeToken must return the _id of the previous document returned.
+    describe('for non-empty batch iterated up to but not including the last element', function() {
+      it('must return the _id of the previous document returned', function() {
+        const manager = new MockServerManager(this.configuration, {
+          aggregate: (function*() {
+            yield { numDocuments: 2, postBatchResumeToken: true };
+          })(),
+          getMore: (function*() {})()
+        });
+
+        return manager
+          .ready()
+          .then(() => {
+            return manager.makeChangeStream().next();
+          })
+          .then(() => manager.teardown(), err => manager.teardown(err))
+          .then(() => {
+            const tokens = manager.resumeTokenChangedEvents.map(e => e.resumeToken);
+            const successes = manager.apm.succeeded.map(e => {
+              try {
+                return e.reply.cursor;
+              } catch (e) {
+                return {};
+              }
+            });
+
+            expect(successes).to.have.a.lengthOf(1);
+            expect(successes[0]).to.have.a.nested.property('firstBatch[0]._id');
+            expect(successes[0]).to.have.a.property('postBatchResumeToken');
+
+            expect(tokens).to.have.a.lengthOf(1);
+            expect(tokens[0])
+              .to.deep.equal(successes[0].firstBatch[0]._id)
+              .and.to.not.deep.equal(successes[0].postBatchResumeToken);
+          });
+      });
+    });
+
+    // For a ChangeStream under these conditions:
+    //   The batch is not empty.
+    //   The batch hasn’t been iterated at all.
+    //   Only the initial aggregate command has been executed.
+    // Expected result:
+    //   getResumeToken must return startAfter from the initial aggregate if the option was specified.
+    //   getResumeToken must return resumeAfter from the initial aggregate if the option was specified.
+    //   If neither the startAfter nor resumeAfter options were specified, the getResumeToken result must be empty.
+    describe('for non-empty non-iterated batch where only the initial aggregate command has been executed', function() {
+      it('must return startAfter from the initial aggregate if the option was specified', function() {
+        const manager = new MockServerManager(this.configuration, {
+          aggregate: (function*() {
+            yield { numDocuments: 0, postBatchResumeToken: false };
+          })(),
+          getMore: (function*() {
+            yield { numDocuments: 0, postBatchResumeToken: false };
+          })()
+        });
+        let token;
+        const startAfter = manager.resumeToken();
+        const resumeAfter = manager.resumeToken();
+
+        return manager
+          .ready()
+          .then(() => {
+            return new Promise(resolve => {
+              const changeStream = manager.makeChangeStream({ startAfter, resumeAfter });
+              changeStream.once('onAggregate', () => {
+                token = changeStream.getResumeToken();
+                resolve();
+              });
+
+              // Note: this is expected to fail
+              changeStream.next().catch(() => {});
+            });
+          })
+          .then(() => manager.teardown(), err => manager.teardown(err))
+          .then(() => {
+            expect(token)
+              .to.deep.equal(startAfter)
+              .and.to.not.deep.equal(resumeAfter);
+          });
+      });
+      it('must return resumeAfter from the initial aggregate if the option was specified', function() {
+        const manager = new MockServerManager(this.configuration, {
+          aggregate: (function*() {
+            yield { numDocuments: 0, postBatchResumeToken: false };
+          })(),
+          getMore: (function*() {
+            yield { numDocuments: 0, postBatchResumeToken: false };
+          })()
+        });
+        let token;
+        const resumeAfter = manager.resumeToken();
+
+        return manager
+          .ready()
+          .then(() => {
+            return new Promise(resolve => {
+              const changeStream = manager.makeChangeStream({ resumeAfter });
+              changeStream.once('onAggregate', () => {
+                token = changeStream.getResumeToken();
+                resolve();
+              });
+
+              // Note: this is expected to fail
+              changeStream.next().catch(() => {});
+            });
+          })
+          .then(() => manager.teardown(), err => manager.teardown(err))
+          .then(() => {
+            expect(token).to.deep.equal(resumeAfter);
+          });
+      });
+      it('must be empty if neither the startAfter nor resumeAfter options were specified', function() {
+        const manager = new MockServerManager(this.configuration, {
+          aggregate: (function*() {
+            yield { numDocuments: 0, postBatchResumeToken: false };
+          })(),
+          getMore: (function*() {
+            yield { numDocuments: 0, postBatchResumeToken: false };
+          })()
+        });
+        let token;
+
+        return manager
+          .ready()
+          .then(() => {
+            return new Promise(resolve => {
+              const changeStream = manager.makeChangeStream();
+              changeStream.once('onAggregate', () => {
+                token = changeStream.getResumeToken();
+                resolve();
+              });
+
+              // Note: this is expected to fail
+              changeStream.next().catch(() => {});
+            });
+          })
+          .then(() => manager.teardown(), err => manager.teardown(err))
+          .then(() => {
+            expect(token).to.not.exist;
+          });
+      });
+    });
+
+    // For a ChangeStream under these conditions:
+    //   Running against a server >=4.0.7.
+    //   The batch is not empty.
+    //   The batch hasn’t been iterated at all.
+    //   The stream has iterated beyond a previous batch and a getMore command has just been executed.
+    // Expected result:
+    //   getResumeToken must return the postBatchResumeToken from the previous command response.
+    describe('for non-empty non-iterated batch where getMore has just been executed against server >=4.0.7', function() {
+      it('must return the postBatchResumeToken from the previous command response', function() {
+        const manager = new MockServerManager(this.configuration, {
+          aggregate: (function*() {
+            yield { numDocuments: 1, postBatchResumeToken: true };
+          })(),
+          getMore: (function*() {
+            yield { numDocuments: 1, postBatchResumeToken: true };
+          })()
+        });
+        let token;
+        const startAfter = manager.resumeToken();
+        const resumeAfter = manager.resumeToken();
+
+        return manager
+          .ready()
+          .then(() => {
+            return manager.makeChangeStream({ startAfter, resumeAfter }).next();
+          })
+          .then(() => {
+            manager.changeStream.once('onGetMore', () => {
+              token = manager.changeStream.getResumeToken();
+            });
+
+            // Note: this is expected to fail
+            return manager.changeStream.next();
+          })
+          .then(() => manager.teardown(), err => manager.teardown(err))
+          .then(() => {
+            const successes = manager.apm.succeeded.map(e => {
+              try {
+                return e.reply.cursor;
+              } catch (e) {
+                return {};
+              }
+            });
+
+            expect(successes).to.have.a.lengthOf(2);
+            expect(successes[0]).to.have.a.property('postBatchResumeToken');
+            expect(successes[0]).to.have.a.nested.property('firstBatch[0]._id');
+
+            expect(token)
+              .to.deep.equal(successes[0].postBatchResumeToken)
+              .and.to.not.deep.equal(successes[0].firstBatch[0]._id)
+              .and.to.not.deep.equal(startAfter)
+              .and.to.not.deep.equal(resumeAfter);
+          });
+      });
+    });
+
+    // For a ChangeStream under these conditions:
+    //   Running against a server <4.0.7.
+    //   The batch is not empty.
+    //   The batch hasn’t been iterated at all.
+    //   The stream has iterated beyond a previous batch and a getMore command has just been executed.
+    // Expected result:
+    //   getResumeToken must return the _id of the previous document returned if one exists.
+    //   getResumeToken must return startAfter from the initial aggregate if the option was specified.
+    //   getResumeToken must return resumeAfter from the initial aggregate if the option was specified.
+    //   If neither the startAfter nor resumeAfter options were specified, the getResumeToken result must be empty.
+    describe('for non-empty non-iterated batch where getMore has just been executed against server < 4.0.7', function() {
+      it('must return the _id of the previous document returned if one exists', function() {
+        const manager = new MockServerManager(this.configuration, {
+          aggregate: (function*() {
+            yield { numDocuments: 1, postBatchResumeToken: false };
+          })(),
+          getMore: (function*() {
+            yield { numDocuments: 1, postBatchResumeToken: false };
+          })()
+        });
+        let token;
+        const startAfter = manager.resumeToken();
+        const resumeAfter = manager.resumeToken();
+
+        return manager
+          .ready()
+          .then(() => {
+            return manager.makeChangeStream({ startAfter, resumeAfter }).next();
+          })
+          .then(() => {
+            manager.changeStream.once('onGetMore', () => {
+              token = manager.changeStream.getResumeToken();
+            });
+
+            // Note: this is expected to fail
+            return manager.changeStream.next();
+          })
+          .then(() => manager.teardown(), err => manager.teardown(err))
+          .then(() => {
+            const successes = manager.apm.succeeded.map(e => {
+              try {
+                return e.reply.cursor;
+              } catch (e) {
+                return {};
+              }
+            });
+
+            expect(successes).to.have.a.lengthOf(2);
+            expect(successes[0]).to.have.a.nested.property('firstBatch[0]._id');
+
+            expect(token)
+              .to.deep.equal(successes[0].firstBatch[0]._id)
+              .and.to.not.deep.equal(startAfter)
+              .and.to.not.deep.equal(resumeAfter);
+          });
+      });
+      it('must return startAfter from the initial aggregate if the option was specified', function() {
+        const manager = new MockServerManager(this.configuration, {
+          aggregate: (function*() {
+            yield { numDocuments: 0, postBatchResumeToken: false };
+          })(),
+          getMore: (function*() {
+            yield { numDocuments: 1, postBatchResumeToken: false };
+          })()
+        });
+        let token;
+        const startAfter = manager.resumeToken();
+        const resumeAfter = manager.resumeToken();
+
+        return manager
+          .ready()
+          .then(() => {
+            const changeStream = manager.makeChangeStream({ startAfter, resumeAfter });
+            changeStream.once('onGetMore', () => {
+              token = changeStream.getResumeToken();
+            });
+
+            // Note: this is expected to fail
+            return changeStream.next();
+          })
+          .then(() => manager.teardown(), err => manager.teardown(err))
+          .then(() => {
+            expect(token)
+              .to.deep.equal(startAfter)
+              .and.to.not.deep.equal(resumeAfter);
+          });
+      });
+      it('must return resumeAfter from the initial aggregate if the option was specified', function() {
+        const manager = new MockServerManager(this.configuration, {
+          aggregate: (function*() {
+            yield { numDocuments: 0, postBatchResumeToken: false };
+          })(),
+          getMore: (function*() {
+            yield { numDocuments: 1, postBatchResumeToken: false };
+          })()
+        });
+        let token;
+        const resumeAfter = manager.resumeToken();
+
+        return manager
+          .ready()
+          .then(() => {
+            const changeStream = manager.makeChangeStream({ resumeAfter });
+            changeStream.once('onGetMore', () => {
+              token = changeStream.getResumeToken();
+            });
+
+            // Note: this is expected to fail
+            return changeStream.next();
+          })
+          .then(() => manager.teardown(), err => manager.teardown(err))
+          .then(() => {
+            expect(token).to.deep.equal(resumeAfter);
+          });
+      });
+      it('must be empty if neither the startAfter nor resumeAfter options were specified', function() {
+        const manager = new MockServerManager(this.configuration, {
+          aggregate: (function*() {
+            yield { numDocuments: 0, postBatchResumeToken: false };
+          })(),
+          getMore: (function*() {
+            yield { numDocuments: 1, postBatchResumeToken: false };
+          })()
+        });
+        let token;
+
+        return manager
+          .ready()
+          .then(() => {
+            const changeStream = manager.makeChangeStream();
+            changeStream.once('onGetMore', () => {
+              token = changeStream.getResumeToken();
+            });
+
+            // Note: this is expected to fail
+            return changeStream.next();
+          })
+          .then(() => manager.teardown(), err => manager.teardown(err))
+          .then(() => {
+            expect(token).to.not.exist;
+          });
+      });
     });
   });
 });
