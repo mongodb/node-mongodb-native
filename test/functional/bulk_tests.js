@@ -938,6 +938,69 @@ describe('Bulk', function() {
   });
 
   it(
+    'should provide descriptive error message for Unordered Batch with duplicate key errors on updates',
+    {
+      metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
+
+      test: function(done) {
+        const configuration = this.configuration;
+        var client = configuration.newClient(configuration.writeConcernMax(), {
+          poolSize: 1
+        });
+
+        client.connect(function(err, client) {
+          var db = client.db(configuration.db);
+          var col = db.collection('err_batch_write_unordered_ops_legacy_6');
+
+          // Write concern
+          var writeConcern = configuration.writeConcernMax();
+          writeConcern.unique = true;
+          writeConcern.sparse = false;
+
+          // Add unique index on b field causing all updates to fail
+          col.ensureIndex({ b: 1 }, writeConcern, function(err) {
+            expect(err).to.not.exist;
+
+            // Initialize the unordered Batch
+            var batch = col.initializeUnorderedBulkOp();
+
+            // Add some operations to be executed in order
+            batch.insert({ a: 1 });
+            batch.find({ a: 1 }).update({ $set: { b: 1 } });
+            batch.insert({ b: 1 });
+            batch.insert({ b: 1 });
+            batch.insert({ b: 1 });
+            batch.insert({ b: 1 });
+
+            // Execute the operations
+            batch.execute(configuration.writeConcernMax(), function(err, result) {
+              expect(err).to.exist;
+              expect(result).to.not.exist;
+
+              // Test basic settings
+              result = err.result;
+              expect(result.nInserted).to.equal(2);
+              expect(result.hasWriteErrors()).to.equal(true);
+              expect(
+                result.getWriteErrorCount() === 4 || result.getWriteErrorCount() === 3
+              ).to.equal(true);
+
+              // Individual error checking
+              var error = result.getWriteErrorAt(0);
+              expect(error.code === 11000 || error.code === 11001).to.equal(true);
+              expect(error.errmsg).to.exist;
+              expect(err.message).to.equal(error.errmsg);
+
+              client.close();
+              done();
+            });
+          });
+        });
+      }
+    }
+  );
+
+  it(
     'should Correctly Execute Unordered Batch of with upserts causing duplicate key errors on updates',
     {
       metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
