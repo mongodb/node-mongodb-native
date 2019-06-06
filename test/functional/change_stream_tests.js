@@ -75,48 +75,60 @@ describe('Change Streams', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
+      const configuration = this.configuration;
       const client = configuration.newClient();
 
       client.connect(function(err, client) {
-        assert.ifError(err);
-        var collection = client.db('integration_tests').collection('docsDataEvent');
-        var changeStream = collection.watch(pipeline);
+        expect(err).to.not.exist;
+        const collection = client.db('integration_tests').collection('docsDataEvent');
+        const changeStream = collection.watch(pipeline);
 
-        let count = 0;
-
-        // Attach first event listener
-        changeStream.on('change', function(change) {
-          if (count === 0) {
-            count += 1;
-            assert.equal(change.operationType, 'insert');
-            assert.equal(change.fullDocument.d, 4);
-            assert.equal(change.ns.db, 'integration_tests');
-            assert.equal(change.ns.coll, 'docsDataEvent');
-            assert.ok(!change.documentKey);
-            assert.equal(
-              change.comment,
-              'The documentKey field has been projected out of this document.'
-            );
-            return;
-          }
-
-          assert.equal(change.operationType, 'update');
-          assert.equal(change.updateDescription.updatedFields.d, 6);
-
-          // Close the change stream
-          changeStream.close(err => client.close(cerr => done(err || cerr)));
-        });
-
-        setTimeout(() => {
+        changeStream._resumeTokenTracker.once('response', () => {
           // Trigger the first database event
-          collection.insert({ d: 4 }, function(err) {
+          collection.insertOne({ d: 4 }, function(err) {
             assert.ifError(err);
             // Trigger the second database event
-            collection.update({ d: 4 }, { $inc: { d: 2 } }, function(err) {
+            collection.updateOne({ d: 4 }, { $inc: { d: 2 } }, function(err) {
               assert.ifError(err);
             });
           });
+        });
+
+        let count = 0;
+
+        const cleanup = _err => {
+          changeStream.removeAllListeners('change');
+          changeStream.close(err => client.close(cerr => done(_err || err || cerr)));
+        };
+
+        // Attach first event listener
+        changeStream.on('change', function(change) {
+          try {
+            if (count === 0) {
+              count += 1;
+              expect(change).to.containSubset({
+                operationType: 'insert',
+                fullDocument: { d: 4 },
+                ns: {
+                  db: 'integration_tests',
+                  coll: 'docsDataEvent'
+                },
+                comment: 'The documentKey field has been projected out of this document.'
+              });
+              expect(change).to.not.have.property('documentKey');
+              return;
+            }
+
+            expect(change).to.containSubset({
+              operationType: 'update',
+              updateDescription: {
+                updatedFields: { d: 6 }
+              }
+            });
+            cleanup();
+          } catch (e) {
+            cleanup(e);
+          }
         });
       });
     }
