@@ -210,41 +210,23 @@ describe('Transactions', function() {
     it('should error if transactions are not supported', {
       metadata: { requires: { topology: ['sharded'], mongodb: '>4.0.0' } },
       test: function(done) {
-        if (this.configuration.usingUnifiedTopology()) {
-          return this.skip();
-        }
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
 
-        const topology = new core.Mongos();
-        const sessionPool = new sessions.ServerSessionPool(topology);
-        const session = new sessions.ClientSession(topology, sessionPool);
+        client.connect((err, client) => {
+          const session = client.startSession();
+          const db = client.db(configuration.db);
+          const coll = db.collection('transaction_error_test');
+          coll.insertOne({ a: 1 }, err => {
+            expect(err).to.not.exist;
+            expect(() => session.startTransaction()).to.throw(
+              'Transactions are not supported on sharded clusters in MongoDB < 4.2.'
+            );
 
-        expect(() => session.startTransaction()).to.throw(
-          'Transactions are not supported on sharded clusters in MongoDB < 4.2.'
-        );
-
-        session.endSession(() => {
-          sessionPool.endAllPooledSessions(done);
-        });
-      }
-    });
-
-    it('should error if transactions are not supported (unified topology)', {
-      metadata: { requires: { topology: ['sharded'], mongodb: '>4.0.0' } },
-      test: function(done) {
-        if (!this.configuration.usingUnifiedTopology()) {
-          return this.skip();
-        }
-
-        const topology = new core.Topology();
-        const sessionPool = new sessions.ServerSessionPool(topology);
-        const session = new sessions.ClientSession(topology, sessionPool);
-
-        expect(() => session.startTransaction()).to.throw(
-          'Transactions are not supported on sharded clusters in MongoDB < 4.2.'
-        );
-
-        session.endSession(() => {
-          sessionPool.endAllPooledSessions(done);
+            session.endSession(() => {
+              client.close(done);
+            });
+          });
         });
       }
     });
