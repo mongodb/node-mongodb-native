@@ -943,7 +943,7 @@ describe('Bulk', function() {
       poolSize: 1
     });
 
-    client.connect(function(err, client) {
+    client.connect((err, client) => {
       const db = client.db(configuration.db);
       const col = db.collection('err_batch_write_unordered_ops_legacy_6');
 
@@ -983,8 +983,7 @@ describe('Bulk', function() {
             expect(error.errmsg).to.exist;
             expect(err.message).to.equal(error.errmsg);
 
-            client.close();
-            done();
+            client.close(done);
           });
         }
       );
