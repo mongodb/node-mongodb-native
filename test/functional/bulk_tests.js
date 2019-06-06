@@ -956,7 +956,7 @@ describe('Bulk', function() {
             unique: true
           }
         ],
-        function(err) {
+        err => {
           expect(err).to.not.exist;
 
           // Initialize the unordered Batch
@@ -967,7 +967,7 @@ describe('Bulk', function() {
           batch.insert({ a: 1 });
 
           // Execute the operations
-          batch.execute(configuration.writeConcernMax(), function(err, result) {
+          batch.execute(configuration.writeConcernMax(), (err, result) => {
             expect(err).to.exist;
             expect(result).to.not.exist;
 
