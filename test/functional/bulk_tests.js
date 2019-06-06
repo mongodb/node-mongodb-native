@@ -937,68 +937,59 @@ describe('Bulk', function() {
     }
   });
 
-  it(
-    'should provide descriptive error message for Unordered Batch with duplicate key errors on updates',
-    {
-      metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
+  it('should provide descriptive error message for unordered batch with duplicate key errors on inserts', function(done) {
+    const configuration = this.configuration;
+    const client = configuration.newClient(configuration.writeConcernMax(), {
+      poolSize: 1
+    });
 
-      test: function(done) {
-        const configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), {
-          poolSize: 1
-        });
+    client.connect(function(err, client) {
+      const db = client.db(configuration.db);
+      const col = db.collection('err_batch_write_unordered_ops_legacy_6');
 
-        client.connect(function(err, client) {
-          var db = client.db(configuration.db);
-          var col = db.collection('err_batch_write_unordered_ops_legacy_6');
+      // Add unique index on a field causing all inserts to fail
+      col.createIndexes(
+        [
+          {
+            name: 'err_batch_write_unordered_ops_legacy_6',
+            key: { a: 1 },
+            unique: true
+          }
+        ],
+        function(err) {
+          expect(err).to.not.exist;
 
-          // Write concern
-          var writeConcern = configuration.writeConcernMax();
-          writeConcern.unique = true;
-          writeConcern.sparse = false;
+          // Initialize the unordered Batch
+          const batch = col.initializeUnorderedBulkOp();
 
-          // Add unique index on b field causing all updates to fail
-          col.ensureIndex({ b: 1 }, writeConcern, function(err) {
-            expect(err).to.not.exist;
+          // Add some operations to be executed in order
+          batch.insert({ a: 1 });
+          batch.insert({ a: 1 });
 
-            // Initialize the unordered Batch
-            var batch = col.initializeUnorderedBulkOp();
+          // Execute the operations
+          batch.execute(configuration.writeConcernMax(), function(err, result) {
+            expect(err).to.exist;
+            expect(result).to.not.exist;
 
-            // Add some operations to be executed in order
-            batch.insert({ a: 1 });
-            batch.find({ a: 1 }).update({ $set: { b: 1 } });
-            batch.insert({ b: 1 });
-            batch.insert({ b: 1 });
-            batch.insert({ b: 1 });
-            batch.insert({ b: 1 });
+            // Test basic settings
+            result = err.result;
+            expect(result.nInserted).to.equal(1);
+            expect(result.hasWriteErrors()).to.equal(true);
+            expect(result.getWriteErrorCount() === 1).to.equal(true);
 
-            // Execute the operations
-            batch.execute(configuration.writeConcernMax(), function(err, result) {
-              expect(err).to.exist;
-              expect(result).to.not.exist;
+            // Individual error checking
+            const error = result.getWriteErrorAt(0);
+            expect(error.code === 11000).to.equal(true);
+            expect(error.errmsg).to.exist;
+            expect(err.message).to.equal(error.errmsg);
 
-              // Test basic settings
-              result = err.result;
-              expect(result.nInserted).to.equal(2);
-              expect(result.hasWriteErrors()).to.equal(true);
-              expect(
-                result.getWriteErrorCount() === 4 || result.getWriteErrorCount() === 3
-              ).to.equal(true);
-
-              // Individual error checking
-              var error = result.getWriteErrorAt(0);
-              expect(error.code === 11000 || error.code === 11001).to.equal(true);
-              expect(error.errmsg).to.exist;
-              expect(err.message).to.equal(error.errmsg);
-
-              client.close();
-              done();
-            });
+            client.close();
+            done();
           });
-        });
-      }
-    }
-  );
+        }
+      );
+    });
+  });
 
   it(
     'should Correctly Execute Unordered Batch of with upserts causing duplicate key errors on updates',
