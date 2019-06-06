@@ -1639,12 +1639,11 @@ describe('Change Streams', function() {
       const dbName = 'integration_tests';
       const collectionName = 'resumeWithStartAtOperationTime';
       const connectOptions = {
-        socketTimeoutMS: 500,
-        validateOptions: true
+        validateOptions: true,
+        monitorCommands: true
       };
 
       let getMoreCounter = 0;
-      let aggregateCounter = 0;
       let changeStream;
       let server;
       let client;
@@ -1660,29 +1659,20 @@ describe('Change Streams', function() {
       function primaryServerHandler(request) {
         try {
           const doc = request.document;
-
           if (doc.ismaster) {
             return request.reply(makeIsMaster(server));
           } else if (doc.aggregate) {
-            if (aggregateCounter++ > 0) {
-              expect(doc).to.have.nested.property('pipeline[0].$changeStream.startAtOperationTime');
-              expect(doc.pipeline[0].$changeStream.startAtOperationTime.equals(OPERATION_TIME)).to
-                .be.ok;
-              expect(doc).to.not.have.nested.property('pipeline[0].$changeStream.resumeAfter');
-            } else {
-              expect(doc).to.not.have.nested.property(
-                'pipeline[0].$changeStream.startAtOperationTime'
-              );
-              expect(doc).to.not.have.nested.property('pipeline[0].$changeStream.resumeAfter');
-            }
             return request.reply(AGGREGATE_RESPONSE);
           } else if (doc.getMore) {
             if (getMoreCounter++ === 0) {
+              request.reply({ ok: 0 });
               return;
             }
 
             request.reply(GET_MORE_RESPONSE);
           } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
+          } else if (doc.killCursors) {
             request.reply({ ok: 1 });
           }
         } catch (e) {
@@ -1690,17 +1680,40 @@ describe('Change Streams', function() {
         }
       }
 
+      const started = [];
+
       mock
         .createServer()
         .then(_server => (server = _server))
         .then(() => server.setMessageHandler(primaryServerHandler))
         .then(() => (client = configuration.newClient(`mongodb://${server.uri()}`, connectOptions)))
         .then(() => client.connect())
+        .then(() => {
+          client.on('commandStarted', e => {
+            if (e.commandName === 'aggregate') {
+              started.push(e);
+            }
+          });
+        })
         .then(() => client.db(dbName))
         .then(db => db.collection(collectionName))
         .then(col => col.watch(pipeline))
         .then(_changeStream => (changeStream = _changeStream))
         .then(() => changeStream.next())
+        .then(() => {
+          const first = started[0].command;
+          expect(first).to.have.nested.property('pipeline[0].$changeStream');
+          const firstStage = first.pipeline[0].$changeStream;
+          expect(firstStage).to.not.have.property('resumeAfter');
+          expect(firstStage).to.not.have.property('startAtOperationTime');
+
+          const second = started[1].command;
+          expect(second).to.have.nested.property('pipeline[0].$changeStream');
+          const secondStage = second.pipeline[0].$changeStream;
+          expect(secondStage).to.not.have.property('resumeAfter');
+          expect(secondStage).to.have.property('startAtOperationTime');
+          expect(secondStage.startAtOperationTime.equals(OPERATION_TIME)).to.be.ok;
+        })
         .then(() => finish(), err => finish(err));
     }
   });
