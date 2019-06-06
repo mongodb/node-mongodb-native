@@ -134,7 +134,7 @@ describe('Change Stream Spec', function() {
   }
 
   function makeTestAPM(test) {
-    const expectedEvents = test.expectations;
+    const expectedEvents = test.expectations || [];
 
     return function testAPM(ctx, events) {
       expectedEvents
@@ -147,6 +147,7 @@ describe('Change Stream Spec', function() {
             );
           }
           const actual = EJSONToJSON(events[idx]);
+          expected = EJSONToJSON(expected);
           assertEquality(actual, expected);
         });
     };
