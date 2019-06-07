@@ -1,6 +1,7 @@
 'use strict';
 var assert = require('assert');
 var Transform = require('stream').Transform;
+const MongoError = require('../../lib/core').MongoError;
 var MongoNetworkError = require('../../lib/core').MongoNetworkError;
 var setupDatabase = require('./shared').setupDatabase;
 var delay = require('./shared').delay;
@@ -35,6 +36,7 @@ describe('Change Streams', function() {
       })
       .then(() => client.close(), () => client.close());
   });
+  afterEach(() => mock.cleanup());
 
   it('Should close the listeners after the cursor is closed', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
@@ -1728,6 +1730,105 @@ describe('Change Streams', function() {
         })
         .then(() => finish(), err => finish(err));
     }
+  });
+
+  it('should not resume when error includes error label NonRetryableChangeStreamError', function() {
+    let server;
+    let client;
+    let changeStream;
+
+    function teardown(e) {
+      return Promise.resolve()
+        .then(() => changeStream && changeStream.close())
+        .catch(() => {})
+        .then(() => client && client.close())
+        .catch(() => {})
+        .then(() => e && Promise.reject(e));
+    }
+
+    const db = 'foobar';
+    const coll = 'foobar';
+    const ns = `${db}.${coll}`;
+
+    let aggregateCount = 0;
+    let getMoreCount = 0;
+
+    function messageHandler(request) {
+      const doc = request.document;
+
+      if (doc.ismaster) {
+        request.reply(
+          Object.assign({}, mock.DEFAULT_ISMASTER_36, {
+            ismaster: true,
+            secondary: false,
+            me: server.uri(),
+            primary: server.uri()
+          })
+        );
+      } else if (doc.aggregate) {
+        aggregateCount += 1;
+        request.reply({
+          ok: 1,
+          cursor: {
+            firstBatch: [],
+            id: 1,
+            ns
+          }
+        });
+      } else if (doc.getMore) {
+        if (getMoreCount === 0) {
+          getMoreCount += 1;
+          request.reply({
+            ok: 0,
+            errorLabels: ['NonRetryableChangeStreamError']
+          });
+        } else {
+          getMoreCount += 1;
+          request.reply({
+            ok: 1,
+            cursor: {
+              nextBatch: [
+                {
+                  _id: {},
+                  operationType: 'insert',
+                  ns: { db, coll },
+                  fullDocument: { a: 1 }
+                }
+              ],
+              id: 1,
+              ns
+            }
+          });
+        }
+      } else {
+        request.reply({ ok: 1 });
+      }
+    }
+
+    return mock
+      .createServer()
+      .then(_server => (server = _server))
+      .then(() => server.setMessageHandler(messageHandler))
+      .then(() => (client = this.configuration.newClient(`mongodb://${server.uri()}`)))
+      .then(() => client.connect())
+      .then(
+        () =>
+          (changeStream = client
+            .db(db)
+            .collection(coll)
+            .watch())
+      )
+      .then(() => changeStream.next())
+      .then(
+        () => Promise.reject('Expected changeStream to not resume'),
+        err => {
+          expect(err).to.be.an.instanceOf(MongoError);
+          expect(err.hasErrorLabel('NonRetryableChangeStreamError')).to.be.true;
+          expect(aggregateCount).to.equal(1);
+          expect(getMoreCount).to.equal(1);
+        }
+      )
+      .then(() => teardown(), teardown);
   });
 
   describe('should properly handle a changeStream event being processed mid-close', function() {
