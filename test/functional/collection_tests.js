@@ -1901,10 +1901,7 @@ describe('Collection', function() {
 
   it('should correctly update with pipeline', {
     metadata: {
-      requires: {
-        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'],
-        mongodb: '>=4.2.0'
-      }
+      requires: { mongodb: '>=4.2.0' }
     },
 
     // The actual test we wish to run
@@ -1923,7 +1920,7 @@ describe('Collection', function() {
             [{ $set: { a: 1 } }, { $set: { b: 1 } }, { $set: { d: 1 } }],
             configuration.writeConcernMax(),
             (err, r) => {
-              expect(err).to.equal(null);
+              expect(err).to.not.exist;
               expect(r.result.n).to.equal(0);
 
               client.close(done);
