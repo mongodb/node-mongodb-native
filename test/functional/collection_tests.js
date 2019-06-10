@@ -1901,7 +1901,10 @@ describe('Collection', function() {
 
   it('should correctly update with pipeline', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: {
+        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'],
+        mongodb: '>=4.2.0'
+      }
     },
 
     // The actual test we wish to run
