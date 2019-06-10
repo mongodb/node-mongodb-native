@@ -1899,7 +1899,7 @@ describe('Collection', function() {
     });
   });
 
-  it('should correctly update with array of docs', {
+  it('should correctly update with pipeline', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
@@ -1914,7 +1914,7 @@ describe('Collection', function() {
       client.connect((err, client) => {
         const db = client.db(configuration.db);
 
-        db.createCollection('test_should_correctly_do_update_with_docs_array', (err, collection) => {
+        db.createCollection('test_should_correctly_do_update_with_pipeline', (err, collection) => {
           collection.updateOne(
             {},
             [{ $set: { a: 1 } }, { $set: { b: 1 } }, { $set: { d: 1 } }],
