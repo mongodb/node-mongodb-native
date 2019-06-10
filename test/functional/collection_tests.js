@@ -1898,4 +1898,36 @@ describe('Collection', function() {
       }
     });
   });
+
+  it('should correctly update with array of docs', {
+    metadata: {
+      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+    },
+
+    // The actual test we wish to run
+    test: function(done) {
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), {
+        poolSize: 1
+      });
+
+      client.connect((err, client) => {
+        const db = client.db(configuration.db);
+
+        db.createCollection('test_should_correctly_do_update_with_docs_array', (err, collection) => {
+          collection.updateOne(
+            {},
+            [{ $set: { a: 1 } }, { $set: { b: 1 } }, { $set: { d: 1 } }],
+            configuration.writeConcernMax(),
+            (err, r) => {
+              expect(err).to.equal(null);
+              expect(r.result.n).to.equal(0);
+
+              client.close(done);
+            }
+          );
+        });
+      });
+    }
+  });
 });
