@@ -7,6 +7,15 @@ title = "Upgrade Guide"
   pre = "<i class='fa fa-cog'></i>"
 +++
 
+# What's new in 3.1
+
+- Support for MongoDB version 4.0
+- Support for Transactions
+- Support for authentication with SCRAM-SHA-256
+- Support for new URL parser (opt in with `useNewUrlParser` option for `MongoClient`)
+
+[Full 3.1 Changes Here](https://github.com/mongodb/node-mongodb-native/blob/3.1/HISTORY.md#310-2018-06-27)
+
 # What's new in 3.0
 
 - Support added for Retryable Writes
