@@ -42,7 +42,6 @@ describe('Change Streams', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      /*
       let closed = false;
       const close = _err => {
         if (closed) {
@@ -71,37 +70,7 @@ describe('Change Streams', function() {
         setTimeout(() => coll.insertOne({ x: 1 }));
         changeStream.on('error', err => close(err));
       });
-      */
-
-
-      const configuration = this.configuration;
-      const client = configuration.newClient();
-      let closed = false;
-      const close = _err => {
-        if (closed) {
-          return;
-        }
-        closed = true;
-        return done(_err);
-      };
-
-      client.connect((err, client) => {
-        const coll = client.db('integration_tests').collection('listenertest');
-        const changeStream = coll.watch();
-        changeStream.on('change', () => {
-          console.log("changeStream.on change")
-          const internalCursor = changeStream.cursor;
-          expect(internalCursor.listenerCount('data')).to.equal(1);
-          // Close the change stream
-          changeStream.close(err => {
-              expect(internalCursor.listenerCount('data')).to.equal(0);
-              close(err)
-          });
-        });
-        setTimeout(() => coll.insertOne({ x: 1 }));
-        changeStream.on('error', err => close(err));
-      });
-  }
+    }
   });
 
   it('Should create a Change Stream on a collection and emit `change` events', {
