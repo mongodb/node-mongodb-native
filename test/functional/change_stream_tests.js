@@ -52,14 +52,13 @@ describe('Change Streams', function() {
       const configuration = this.configuration;
       const client = configuration.newClient();
 
-      client.connect(function(err, client) {
+      client.connect((err, client) => {
         expect(err).to.not.exist;
         const coll = client.db('integration_tests').collection('listenertest');
         const changeStream = coll.watch();
         changeStream.on('change', () => {
           const internalCursor = changeStream.cursor;
           expect(internalCursor.listenerCount('data')).to.equal(1);
-          // Close the change stream
           changeStream.close(err => {
             expect(internalCursor.listenerCount('data')).to.equal(0);
             close(err);
