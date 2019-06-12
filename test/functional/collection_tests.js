@@ -1918,4 +1918,36 @@ describe('Collection', function() {
       client.close();
     });
   });
+
+  it('should correctly update with pipeline', {
+    metadata: {
+      requires: { mongodb: '>=4.2.0' }
+    },
+
+    // The actual test we wish to run
+    test: function(done) {
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), {
+        poolSize: 1
+      });
+
+      client.connect((err, client) => {
+        const db = client.db(configuration.db);
+
+        db.createCollection('test_should_correctly_do_update_with_pipeline', (err, collection) => {
+          collection.updateOne(
+            {},
+            [{ $set: { a: 1 } }, { $set: { b: 1 } }, { $set: { d: 1 } }],
+            configuration.writeConcernMax(),
+            (err, r) => {
+              expect(err).to.not.exist;
+              expect(r.result.n).to.equal(0);
+
+              client.close(done);
+            }
+          );
+        });
+      });
+    }
+  });
 });
