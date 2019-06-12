@@ -57,7 +57,6 @@ describe('Change Streams', function() {
         const coll = client.db('integration_tests').collection('listenertest');
         const changeStream = coll.watch();
         changeStream.on('change', () => {
-          console.log('changeStream.on change');
           const internalCursor = changeStream.cursor;
           expect(internalCursor.listenerCount('data')).to.equal(1);
           // Close the change stream
