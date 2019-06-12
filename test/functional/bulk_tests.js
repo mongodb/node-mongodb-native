@@ -73,6 +73,7 @@ describe('Bulk', function() {
     }
   });
 
+<<<<<<< HEAD
   it('should use arrayFilters for updateOne', function(done) {
     const configuration = this.configuration;
     const client = configuration.newClient({}, { w: 1 });
@@ -94,6 +95,68 @@ describe('Bulk', function() {
         )
       );
     });
+=======
+  it('Should be able to use array filters in unordered operation', {
+    metadata: { //not sure about metadata
+      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+    },
+
+    test: function(done) {
+      var self = this;
+      var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
+        poolSize: 1
+      });
+
+      client.connect(function(err, client) {
+        var db = client.db(self.configuration.db);
+        var bulk = db.collection('batch_write_unordered_ops_1')
+        bulk.insert({ a: 1, b: 2});
+        bulk.insert({ a: 3, b: 4});
+        bulk.find({}).arrayFilters([{a: {"$gt": 2}}]).updateOne({$set: {a: 3}});
+        bulk.execute();
+        bulk.then(() => bulk.find({}).toArray())
+          .then(docs => {
+            expect(docs[0]['a']).to.equal(3);
+            expect(docs[0]['b']).to.equal(2);
+            expect(docs[1]['a']).to.equal(3);
+            expect(docs[1]['b']).to.equal(4);
+          });
+        client.close();
+        done();
+      });
+    }
+  });
+
+  it('Should be able to use array filters in ordered operation', {
+    metadata: { //not sure about metadata
+      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+    },
+
+    test: function(done) {
+      var self = this;
+      var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
+        poolSize: 1
+      });
+
+      client.connect(function(err, client) {
+        var db = client.db(self.configuration.db);
+        var bulk = db.collection('batch_write_ordered_ops_1')
+        bulk.insert({ a: 1, b: 2});
+        bulk.insert({ a: 3, b: 4});
+        bulk.find({}).arrayFilters([{a: {"$gt": 2}}]).updateOne({$set: {a: 3}});
+        bulk.execute();
+        bulk.then(() => bulk.find({}).toArray())
+          .then(docs => {
+            expect(docs[0]['a']).to.equal(3);
+            expect(docs[0]['b']).to.equal(2);
+            expect(docs[1]['a']).to.equal(3);
+            expect(docs[1]['b']).to.equal(4);
+          });
+        client.close();
+        done();
+      });
+    }
+>>>>>>> feat(arryFilter): Ability to use array filters with bulk operations
   });
 
   it('should ignore undefined values in unordered bulk operation if `ignoreUndefined` specified', {
