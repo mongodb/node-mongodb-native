@@ -37,7 +37,6 @@ describe('Change Streams', function() {
   });
 
   it('Should close the listeners after the cursor is closed', {
-
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
 
     // The actual test we wish to run
