@@ -1,4 +1,8 @@
 'use strict';
+<<<<<<< HEAD
+=======
+const f = require('util').format;
+>>>>>>> feat(Update): add the ability to specify a pipeline to an update command (#2017)
 const url = require('url');
 const qs = require('querystring');
 const core = require('../lib/core');
@@ -16,9 +20,12 @@ class NativeConfiguration {
     };
     this.topology = environment.topology || this.defaultTopology;
     this.environment = environment;
+<<<<<<< HEAD
     if (environment.setName) {
       this.replicasetName = environment.setName || 'rs';
     }
+=======
+>>>>>>> feat(Update): add the ability to specify a pipeline to an update command (#2017)
   }
   usingUnifiedTopology() {
     return !!process.env.MONGODB_UNIFIED_TOPOLOGY;

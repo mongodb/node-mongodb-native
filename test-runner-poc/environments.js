@@ -15,9 +15,11 @@ class EnvironmentBase {
   setup(callback) {
     callback();
   }
-  constructor(parsedURI) {
-    this.host = parsedURI.hosts[0].host;
-    this.port = parsedURI.hosts[0].port;
+  constructor(status) {
+    if (status.primary) {
+      this.port = parseInt(status.primary.split(':')[1]);
+      this.host = status.primary.split(':')[0];
+    }
   }
 }
 const genReplsetConfig = (port, options) => {
@@ -55,13 +57,7 @@ class ReplicaSetEnvironment extends EnvironmentBase {
       }
       return new core.ReplSet([{ topologyHost, topologyPort }], options);
     };
-    this.nodes = [
-      genReplsetConfig(this.port, { tags: { loc: 'ny' } }),
-      genReplsetConfig(this.port + 1, { tags: { loc: 'sf' } }),
-      genReplsetConfig(this.port + 2, { tags: { loc: 'sf' } }),
-      genReplsetConfig(this.port + 3, { tags: { loc: 'sf' } }),
-      genReplsetConfig(this.port + 4, { arbiter: true })
-    ];
+
     // Do we have 3.2+
     if (semver.satisfies(version, '>=3.2.0')) {
       this.nodes = this.nodes.map(function(x) {
@@ -71,6 +67,15 @@ class ReplicaSetEnvironment extends EnvironmentBase {
     }
   }
 }
+
+function generateNodesArray(hosts, configFunc){
+  let nodesArray = [];
+  for (let i = 0; i < hosts.length; i++) {
+     nodesArray[i] = configFunc(hosts[i].port || hosts[0].port + i);
+  }
+  return nodesArray;
+}
+
 /**
  *
  */
@@ -130,8 +135,11 @@ class ShardedEnvironment extends EnvironmentBase {
   }
   setup(callback) {
     const shardOptions = this.options && this.options.shard ? this.options.shard : {};
+    // First set of nodes
+    //const nodes1 = generateNodesArray(parsedURI.hosts, genShardedConfig);
+
     const configOptions = this.options && this.options.config ? this.options.config : {};
-    const configNodes = [genConfigNode(35000, configOptions)];
+    //const configNodes = [genConfigNode(35000, configOptions)];
     let proxyNodes = [
       {
         bind_ip: 'localhost',
