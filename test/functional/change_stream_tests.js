@@ -36,6 +36,40 @@ describe('Change Streams', function() {
       .then(() => client.close(), () => client.close());
   });
 
+  it('Should close the listeners after the cursor is closed', {
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+
+    // The actual test we wish to run
+    test: function(done) {
+      let closed = false;
+      const close = _err => {
+        if (closed) {
+          return;
+        }
+        closed = true;
+        return client.close(() => done(_err));
+      };
+      const configuration = this.configuration;
+      const client = configuration.newClient();
+
+      client.connect((err, client) => {
+        expect(err).to.not.exist;
+        const coll = client.db('integration_tests').collection('listenertest');
+        const changeStream = coll.watch();
+        changeStream.on('change', () => {
+          const internalCursor = changeStream.cursor;
+          expect(internalCursor.listenerCount('data')).to.equal(1);
+          changeStream.close(err => {
+            expect(internalCursor.listenerCount('data')).to.equal(0);
+            close(err);
+          });
+        });
+        setTimeout(() => coll.insertOne({ x: 1 }));
+        changeStream.on('error', err => close(err));
+      });
+    }
+  });
+
   it('Should create a Change Stream on a collection and emit `change` events', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
 
