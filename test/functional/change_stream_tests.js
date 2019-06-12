@@ -47,7 +47,7 @@ describe('Change Streams', function() {
           return;
         }
         closed = true;
-        return done(_err);
+        return client.close(() => done(_err));
       };
       const configuration = this.configuration;
       const client = configuration.newClient();
