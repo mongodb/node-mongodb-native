@@ -112,25 +112,4 @@ describe('Errors', function() {
       });
     }
   });
-
-  it('should correctly handle thrown error', function(done) {
-    const configuration = this.configuration;
-    const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-    client.connect((err, client) => {
-      const db = client.db(configuration.db);
-
-      db.createCollection('should_correctly_handle_thrown_error', err => {
-        expect(err).to.not.exist;
-
-        try {
-          db.collection('should_correctly_handle_thrown_error', () => {
-            debug(someUndefinedVariable); // eslint-disable-line
-          });
-        } catch (err) {
-          expect(err).to.exist;
-          client.close(done);
-        }
-      });
-    });
-  });
 });
