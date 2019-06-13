@@ -24,6 +24,7 @@ describe('Errors', function() {
             unique: true
           }
         ],
+        { w: 1 },
         err => {
           expect(err).to.not.exist;
 
@@ -61,6 +62,7 @@ describe('Errors', function() {
                   unique: true
                 }
               ],
+              { w: 1 },
               err => {
                 expect(err).to.not.exist;
                 collection.insertOne({ a: 2 }, { w: 1 }, err => {
