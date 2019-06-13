@@ -32,7 +32,6 @@ describe('Errors', function() {
             expect(err).to.not.exist;
 
             collection.insertOne({ a: 2 }, { w: 1 }, err => {
-              expect(err).to.exist;
               expect(err.code).to.equal(11000);
               client.close(done);
             });
@@ -66,7 +65,6 @@ describe('Errors', function() {
                   expect(err).to.not.exist;
 
                   collection.insertOne({ a: 2 }, { w: 1 }, err => {
-                    expect(err).to.exist;
                     expect(err.code).to.equal(11000);
                     client.close(done);
                   });
@@ -90,7 +88,6 @@ describe('Errors', function() {
         c.insertOne({ a: 2, b: 5 }, { w: 1 }, err => {
           expect(err).to.not.exist;
           c.findOne({ a: 2 }, { fields: { a: 1, b: 0 } }, err => {
-            expect(err).to.exist;
             expect(err.errmsg).to.equal('Projection cannot have a mix of inclusion and exclusion.');
             client.close(done);
           });
@@ -109,7 +106,6 @@ describe('Errors', function() {
         const db = client.db(configuration.db);
         const c = db.collection('test_error_object_should_include_message');
         c.findOne({}, { fields: { a: 1, b: 0 } }, err => {
-          expect(err).to.exist;
           expect(err.errmsg).to.equal('Projection cannot have a mix of inclusion and exclusion.');
           client.close(done);
         });
