@@ -61,8 +61,7 @@ describe('Views', function() {
             expect(commandResult).to.eql({
               create: 'test',
               viewOn: 'users',
-              pipeline: [{ $match: {} }],
-              readConcern: {}
+              pipeline: [{ $match: {} }]
             });
 
             client.close();
