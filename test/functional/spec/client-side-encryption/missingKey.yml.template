@@ -1,0 +1,25 @@
+runOn:
+  - minServerVersion: "4.1.10"
+database_name: &database_name "default"
+collection_name: &collection_name "default"
+
+data: []
+json_schema: {{schema()}}
+key_vault_data: [] # key vault data is empty
+
+tests:
+  - description: "Insert with encryption on a missing key"
+    clientOptions:
+      autoEncryptOpts:
+        kmsProviders:
+          aws: {} # Credentials filled in from environment.
+    operations:
+      - name: insertOne
+        arguments:
+          document: &doc0 { _id: 1, encrypted_string: "string0", random: "abc" }
+        result:
+          errorContains: "did not provide all keys"
+    outcome:
+      collection:
+        # Outcome is checked using a separate MongoClient without auto encryption.
+        data: []

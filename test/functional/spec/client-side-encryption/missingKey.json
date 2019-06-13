@@ -1,0 +1,97 @@
+{
+    "runOn": [
+        {
+            "minServerVersion": "4.1.10"
+        }
+    ],
+    "database_name": "default",
+    "collection_name": "default",
+    "data": [],
+    "json_schema": {
+        "properties": {
+            "encrypted_w_altname": {
+                "encrypt": {
+                    "keyId": "/altname",
+                    "bsonType": "string",
+                    "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+                }
+            },
+            "encrypted_string": {
+                "encrypt": {
+                    "keyId": [
+                        {
+                            "$binary": {
+                                "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                                "subType": "04"
+                            }
+                        }
+                    ],
+                    "bsonType": "string",
+                    "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+                }
+            },
+            "random": {
+                "encrypt": {
+                    "keyId": [
+                        {
+                            "$binary": {
+                                "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                                "subType": "04"
+                            }
+                        }
+                    ],
+                    "bsonType": "string",
+                    "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random"
+                }
+            },
+            "encrypted_string_equivalent": {
+                "encrypt": {
+                    "keyId": [
+                        {
+                            "$binary": {
+                                "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                                "subType": "04"
+                            }
+                        }
+                    ],
+                    "bsonType": "string",
+                    "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+                }
+            }
+        },
+        "bsonType": "object"
+    },
+    "key_vault_data": [],
+    "tests": [
+        {
+            "description": "Insert with encryption on a missing key",
+            "clientOptions": {
+                "autoEncryptOpts": {
+                    "kmsProviders": {
+                        "aws": {}
+                    }
+                }
+            },
+            "operations": [
+                {
+                    "name": "insertOne",
+                    "arguments": {
+                        "document": {
+                            "_id": 1,
+                            "encrypted_string": "string0",
+                            "random": "abc"
+                        }
+                    },
+                    "result": {
+                        "errorContains": "did not provide all keys"
+                    }
+                }
+            ],
+            "outcome": {
+                "collection": {
+                    "data": []
+                }
+            }
+        }
+    ]
+}
