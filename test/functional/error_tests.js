@@ -31,8 +31,11 @@ describe('Errors', function() {
             expect(err).to.not.exist;
 
             collection.insertOne({ a: 2 }, { w: 1 }, err => {
-              expect(err.code).to.exist;
               expect(err).to.exist;
+              expect(err.code).to.equal(11000);
+              expect(err.errmsg).to.equal(
+                'E11000 duplicate key error collection: integration_tests.test_failing_insert_due_to_unique_index index: test_failing_insert_due_to_unique_index dup key: { : 2 }'
+              );
               client.close(done);
             });
           });
@@ -65,6 +68,9 @@ describe('Errors', function() {
 
                   collection.insertOne({ a: 2 }, { w: 1 }, err => {
                     expect(err).to.exist;
+                    expect(err.errmsg).to.equal(
+                      'E11000 duplicate key error collection: integration_tests.test_failing_insert_due_to_unique_index_strict index: test_failing_insert_due_to_unique_index_strict dup key: { : 2 }'
+                    );
                     client.close(done);
                   });
                 });
@@ -86,6 +92,7 @@ describe('Errors', function() {
         expect(err).to.not.exist;
         c.findOne({ a: 2 }, { fields: { a: 1, b: 0 } }, err => {
           expect(err).to.exist;
+          expect(err.errmsg).to.equal('Projection cannot have a mix of inclusion and exclusion.');
           client.close(done);
         });
       });
@@ -101,6 +108,7 @@ describe('Errors', function() {
       const c = db.collection('test_error_object_should_include_message');
       c.findOne({}, { fields: { a: 1, b: 0 } }, err => {
         expect(err).to.exist;
+        expect(err.errmsg).to.equal('Projection cannot have a mix of inclusion and exclusion.');
         client.close(done);
       });
     });
