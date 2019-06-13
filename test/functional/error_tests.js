@@ -35,7 +35,7 @@ describe('Errors', function() {
               expect(err).to.exist;
               expect(err.code).to.equal(11000);
               expect(err.errmsg).to.equal(
-                'E11000 duplicate key error collection: integration_tests.test_failing_insert_due_to_unique_index index: test_failing_insert_due_to_unique_index dup key: { : 2 }'
+                'E11000 duplicate key error collection: integration_tests.test_failing_insert_due_to_unique_index index: test_failing_insert_due_to_unique_index dup key: { a: 2 }'
               );
               client.close(done);
             });
@@ -71,7 +71,7 @@ describe('Errors', function() {
                   collection.insertOne({ a: 2 }, { w: 1 }, err => {
                     expect(err).to.exist;
                     expect(err.errmsg).to.equal(
-                      'E11000 duplicate key error collection: integration_tests.test_failing_insert_due_to_unique_index_strict index: test_failing_insert_due_to_unique_index_strict dup key: { : 2 }'
+                      'E11000 duplicate key error collection: integration_tests.test_failing_insert_due_to_unique_index_strict index: test_failing_insert_due_to_unique_index_strict dup key: { a: 2 }'
                     );
                     client.close(done);
                   });
