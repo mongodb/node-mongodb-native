@@ -1,0 +1,318 @@
+{
+    "runOn": [
+        {
+            "minServerVersion": "4.1.10"
+        }
+    ],
+    "database_name": "default",
+    "collection_name": "default",
+    "data": [
+        {
+            "_id": 1,
+            "encrypted_string": {
+                "$binary": {
+                    "base64": "AQAAAAAAAAAAAAAAAAAAAAACtsdOjHK3CkpNjAAMznkYbeR6Z+yLzCRv4zOb7VfKnJdmU0W5MD8GVODx8K+KuBoCbE1SfGfPgX6NhS/RKpQ12w==",
+                    "subType": "06"
+                }
+            }
+        },
+        {
+            "_id": 2,
+            "encrypted_string": {
+                "$binary": {
+                    "base64": "AQAAAAAAAAAAAAAAAAAAAAAC1ijPpI+oG1mNiFChFAz7heo3R150yDhxZ7nOnPUwDM+aEvPRBuU6rXtgkVt7mgLd2H9rq9iChCAV46YKcpNrFw==",
+                    "subType": "06"
+                }
+            }
+        }
+    ],
+    "json_schema": {
+        "properties": {
+            "encrypted_w_altname": {
+                "encrypt": {
+                    "keyId": "/altname",
+                    "bsonType": "string",
+                    "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+                }
+            },
+            "encrypted_string": {
+                "encrypt": {
+                    "keyId": [
+                        {
+                            "$binary": {
+                                "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                                "subType": "04"
+                            }
+                        }
+                    ],
+                    "bsonType": "string",
+                    "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+                }
+            },
+            "random": {
+                "encrypt": {
+                    "keyId": [
+                        {
+                            "$binary": {
+                                "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                                "subType": "04"
+                            }
+                        }
+                    ],
+                    "bsonType": "string",
+                    "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random"
+                }
+            },
+            "encrypted_string_equivalent": {
+                "encrypt": {
+                    "keyId": [
+                        {
+                            "$binary": {
+                                "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                                "subType": "04"
+                            }
+                        }
+                    ],
+                    "bsonType": "string",
+                    "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+                }
+            }
+        },
+        "bsonType": "object"
+    },
+    "key_vault_data": [
+        {
+            "status": 1,
+            "_id": {
+                "$binary": {
+                    "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                    "subType": "04"
+                }
+            },
+            "masterKey": {
+                "provider": "aws",
+                "key": "arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0",
+                "region": "us-east-1"
+            },
+            "updateDate": {
+                "$date": {
+                    "$numberLong": "1552949630483"
+                }
+            },
+            "keyMaterial": {
+                "$binary": {
+                    "base64": "AQICAHhQNmWG2CzOm1dq3kWLM+iDUZhEqnhJwH9wZVpuZ94A8gF9FSYZL9Ze8TvTA3WBd3nmAAAAwjCBvwYJKoZIhvcNAQcGoIGxMIGuAgEAMIGoBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDLV3GHktEO8AlpsYBwIBEIB7ho0DQF7hEQPRz/8b61AHm2czX53Y9BNu5z+oyGYsoP643M58aTGsaHQzkTaAmGKlZTAEOjJkRJ4gZoabVuv4g6aJqf4k4w8pK7iIgHwMNy4nbUAqOWmqtnKpHZgy6jcFN2DzZzHIi4SNFsCkFc6Aw30ixtvqIDQPAXMW",
+                    "subType": "00"
+                }
+            },
+            "creationDate": {
+                "$date": {
+                    "$numberLong": "1552949630483"
+                }
+            },
+            "keyAltNames": [
+                "altname",
+                "another_altname"
+            ]
+        }
+    ],
+    "tests": [
+        {
+            "description": "updateMany with deterministic encryption",
+            "clientOptions": {
+                "autoEncryptOpts": {
+                    "kmsProviders": {
+                        "aws": {}
+                    }
+                }
+            },
+            "operations": [
+                {
+                    "name": "updateMany",
+                    "arguments": {
+                        "filter": {
+                            "encrypted_string": {
+                                "$in": [
+                                    "string0",
+                                    "string1"
+                                ]
+                            }
+                        },
+                        "update": {
+                            "$set": {
+                                "encrypted_string": "string2",
+                                "random": "abc"
+                            }
+                        }
+                    },
+                    "result": {
+                        "matchedCount": 2,
+                        "modifiedCount": 2,
+                        "upsertedCount": 0
+                    }
+                }
+            ],
+            "expectations": [
+                {
+                    "command_started_event": {
+                        "command": {
+                            "listCollections": 1,
+                            "cursor": {},
+                            "filter": {
+                                "name": "default"
+                            }
+                        },
+                        "command_name": "listCollections"
+                    }
+                },
+                {
+                    "command_started_event": {
+                        "command": {
+                            "listCollections": 1,
+                            "cursor": {},
+                            "filter": {
+                                "name": "datakeys"
+                            },
+                            "$db": "admin"
+                        },
+                        "command_name": "listCollections"
+                    }
+                },
+                {
+                    "command_started_event": {
+                        "command": {
+                            "find": "datakeys",
+                            "filter": {
+                                "$or": [
+                                    {
+                                        "_id": {
+                                            "$in": [
+                                                {
+                                                    "$binary": {
+                                                        "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                                                        "subType": "04"
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "keyAltNames": {
+                                            "$in": []
+                                        }
+                                    }
+                                ]
+                            },
+                            "$db": "admin"
+                        },
+                        "command_name": "find"
+                    }
+                },
+                {
+                    "command_started_event": {
+                        "command": {
+                            "update": "default",
+                            "updates": [
+                                {
+                                    "q": {
+                                        "encrypted_string": {
+                                            "$in": [
+                                                {
+                                                    "$binary": {
+                                                        "base64": "AQAAAAAAAAAAAAAAAAAAAAACtsdOjHK3CkpNjAAMznkYbeR6Z+yLzCRv4zOb7VfKnJdmU0W5MD8GVODx8K+KuBoCbE1SfGfPgX6NhS/RKpQ12w==",
+                                                        "subType": "06"
+                                                    }
+                                                },
+                                                {
+                                                    "$binary": {
+                                                        "base64": "AQAAAAAAAAAAAAAAAAAAAAAC1ijPpI+oG1mNiFChFAz7heo3R150yDhxZ7nOnPUwDM+aEvPRBuU6rXtgkVt7mgLd2H9rq9iChCAV46YKcpNrFw==",
+                                                        "subType": "06"
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "u": {
+                                        "$set": {
+                                            "encrypted_string": {
+                                                "$binary": {
+                                                    "base64": "AQAAAAAAAAAAAAAAAAAAAAACKScltsm9Kw6AsyC/GQ8HZosvXZkixhFqNimPmzaSKu1b0IdTubAjsEG3TAxL5aTsQfT5mtr63hvvXpjMef8jzQ==",
+                                                    "subType": "06"
+                                                }
+                                            },
+                                            "random": {
+                                                "$$type": "binData"
+                                            }
+                                        }
+                                    },
+                                    "multi": true,
+                                    "upsert": false
+                                }
+                            ],
+                            "ordered": true
+                        },
+                        "command_name": "update"
+                    }
+                }
+            ],
+            "outcome": {
+                "collection": {
+                    "data": [
+                        {
+                            "_id": 1,
+                            "encrypted_string": {
+                                "$binary": {
+                                    "base64": "AQAAAAAAAAAAAAAAAAAAAAACKScltsm9Kw6AsyC/GQ8HZosvXZkixhFqNimPmzaSKu1b0IdTubAjsEG3TAxL5aTsQfT5mtr63hvvXpjMef8jzQ==",
+                                    "subType": "06"
+                                }
+                            },
+                            "random": {
+                                "$$type": "binData"
+                            }
+                        },
+                        {
+                            "_id": 2,
+                            "encrypted_string": {
+                                "$binary": {
+                                    "base64": "AQAAAAAAAAAAAAAAAAAAAAACKScltsm9Kw6AsyC/GQ8HZosvXZkixhFqNimPmzaSKu1b0IdTubAjsEG3TAxL5aTsQfT5mtr63hvvXpjMef8jzQ==",
+                                    "subType": "06"
+                                }
+                            },
+                            "random": {
+                                "$$type": "binData"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "description": "updateMany fails when filtering on a random field",
+            "clientOptions": {
+                "autoEncryptOpts": {
+                    "kmsProviders": {
+                        "aws": {}
+                    }
+                }
+            },
+            "operations": [
+                {
+                    "name": "updateMany",
+                    "arguments": {
+                        "filter": {
+                            "random": "abc"
+                        },
+                        "update": {
+                            "$set": {
+                                "encrypted_string": "string1"
+                            }
+                        }
+                    },
+                    "result": {
+                        "errorContains": "Cannot query on fields encrypted with the randomized encryption"
+                    }
+                }
+            ]
+        }
+    ]
+}
