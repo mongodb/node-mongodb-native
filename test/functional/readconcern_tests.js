@@ -60,44 +60,26 @@ describe('ReadConcern', function() {
     metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2' } },
 
     test: function(done) {
-      var listener = require('../..').instrument(function(err) {
-        test.equal(null, err);
-      });
 
       // Contains all the apm events
-      var started = [];
+      let started = [];
       // Get a new instance
-      var configuration = this.configuration;
-      var client = configuration.newClient(
+      let configuration = this.configuration;
+      const client = configuration.newClient(
         { w: 1 },
-        { poolSize: 1, readConcern: { level: 'local' } }
+        { poolSize: 1, readConcern: { level: 'local' }, monitorCommands: true }
       );
 
       client.connect(function(err, client) {
         expect(err).to.not.exist;
 
-        var db = client.db(configuration.db);
+        let db = client.db(configuration.db);
         test.deepEqual({ level: 'local' }, db.s.readConcern);
 
         // Get a collection using createCollection
-        var collection = db.createCollection('readConcernCollection');
+        let collection = db.createCollection('readConcernCollection');
         // Validate readConcern
-        test.deepEqual({ level: 'local' }, collection.s.readConcern);
-        // Perform a find using the readConcern
-        listener.on('started', function(event) {
-          if (event.commandName === 'find') started.push(event);
-        });
-
-        // Execute find
-        collection.find().toArray(function(err) {
-          test.equal(null, err);
-          test.equal(1, started.length);
-          test.deepEqual({ level: 'local' }, started[0].command.readConcern);
-
-          listener.uninstrument();
-          client.close();
-          done();
-        });
+        expect(test).to.deep.equal({ level: 'local' }, collection.s.readConcern);
       });
     }
   });
