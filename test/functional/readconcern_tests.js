@@ -37,6 +37,10 @@ describe('ReadConcern', function() {
         var collection = db.collection('readConcernCollection');
         // Validate readConcern
         test.deepEqual({ level: 'local' }, collection.s.readConcern);
+        // create a collection using createCollection
+        var createdCollection = db.createCollection('readConcernCollection');
+        // validate readConcern
+        test.deepEqual({ level: 'local' }, createdCollection.s.readConcern);
         // Perform a find using the readConcern
         listener.on('started', function(event) {
           if (event.commandName === 'find') started.push(event);
