@@ -10,7 +10,7 @@ describe('ReadConcern', function() {
     return setupDatabase(configuration);
   });
 
-  it('Should set local readConcern on db level', {
+  it('Should set local readConcern on db level when using collection method', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2' } },
 
     test: function(done) {
@@ -37,9 +37,51 @@ describe('ReadConcern', function() {
         var collection = db.collection('readConcernCollection');
         // Validate readConcern
         test.deepEqual({ level: 'local' }, collection.s.readConcern);
-        // create a collection using createCollection
+        // Perform a find using the readConcern
+        listener.on('started', function(event) {
+          if (event.commandName === 'find') started.push(event);
+        });
+
+        // Execute find
+        collection.find().toArray(function(err) {
+          test.equal(null, err);
+          test.equal(1, started.length);
+          test.deepEqual({ level: 'local' }, started[0].command.readConcern);
+
+          listener.uninstrument();
+          client.close();
+          done();
+        });
+      });
+    }
+  });
+
+  it('Should set local readConcern on db level when using createCollection method', {
+    metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2' } },
+
+    test: function(done) {
+      var listener = require('../..').instrument(function(err) {
+        test.equal(null, err);
+      });
+
+      // Contains all the apm events
+      var started = [];
+      // Get a new instance
+      var configuration = this.configuration;
+      var client = configuration.newClient(
+        { w: 1 },
+        { poolSize: 1, readConcern: { level: 'local' } }
+      );
+
+      client.connect(function(err, client) {
+        expect(err).to.not.exist;
+
+        var db = client.db(configuration.db);
+        test.deepEqual({ level: 'local' }, db.s.readConcern);
+
+        // Get a collection using createCollection
         var createdCollection = db.createCollection('readConcernCollection');
-        // validate readConcern
+        // Validate readConcern
         test.deepEqual({ level: 'local' }, createdCollection.s.readConcern);
         // Perform a find using the readConcern
         listener.on('started', function(event) {
