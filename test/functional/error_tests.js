@@ -78,7 +78,7 @@ describe('Errors', function() {
   });
 
   it('should return an error object with message when mixing included and excluded fields', {
-    metadata: { requires: { mongodb: '>3.0.0' } },
+    metadata: { requires: { mongodb: '>3.0' } },
     test: function(done) {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -97,7 +97,7 @@ describe('Errors', function() {
   });
 
   it('should handle error throw in user callback', {
-    metadata: { requires: { mongodb: '>3.0.0' } },
+    metadata: { requires: { mongodb: '>3.0' } },
     test: function(done) {
       const configuration = this.configuration;
       const client = configuration.newClient({ w: 1 }, { poolSize: 1 });
