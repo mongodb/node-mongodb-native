@@ -121,15 +121,15 @@ function generateMatchAndDiff(expected, actual, metadata) {
   );
 }
 
-function matchSpec(chai, utils) {
+function matchMongoSpec(chai, utils) {
   chai.Assertion.addMethod('withSessionData', function(sessionData) {
-    utils.flag(this, 'transactionTestRunnerSessionData', sessionData);
+    utils.flag(this, 'testRunnerSessionData', sessionData);
   });
 
-  chai.Assertion.addMethod('matchTransactionSpec', function(expected) {
+  chai.Assertion.addMethod('matchMongoSpec', function(expected) {
     const actual = utils.flag(this, 'object');
 
-    const sessionData = utils.flag(this, 'transactionTestRunnerSessionData');
+    const sessionData = utils.flag(this, 'testRunnerSessionData');
 
     const result = generateMatchAndDiff(expected, actual, { sessionData });
 
@@ -144,9 +144,9 @@ function matchSpec(chai, utils) {
     );
   });
 
-  chai.assert.matchSpec = function(val, exp, msg) {
-    new chai.Assertion(val, msg).to.matchSpec(exp);
+  chai.assert.matchMongoSpec = function(val, exp, msg) {
+    new chai.Assertion(val, msg).to.matchMongoSpec(exp);
   };
 }
 
-module.exports.default = matchSpec;
+module.exports.default = matchMongoSpec;
