@@ -62,7 +62,7 @@ describe('Views', function() {
               create: 'test',
               viewOn: 'users',
               pipeline: [{ $match: {} }],
-              readConcern:  {}
+              readConcern: {}
             });
 
             client.close();
