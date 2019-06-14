@@ -663,7 +663,6 @@ describe('Bulk', function() {
 
         // Add some operations to be executed in order
         batch.insert({ b: 1, a: 1 });
-        batch.insert({ b: 4, a: 3 });
         batch.insert({ b: 5, a: 1 });
 
         // Execute the operations
@@ -673,7 +672,7 @@ describe('Bulk', function() {
 
           // Basic properties check
           result = err.result;
-          expect(result.nInserted).to.equal(2);
+          expect(result.nInserted).to.equal(1);
           expect(result.hasWriteErrors()).to.equal(true);
           expect(result.getWriteErrorCount()).to.equal(1);
 
