@@ -7,6 +7,15 @@ title = "Upgrade Guide"
   pre = "<i class='fa fa-cog'></i>"
 +++
 
+# What's new in 3.2
+
+- Supports new "Unified Topology" for resolving servers (opt in with `useUnifiedTopology` option for `MongoClient`)
+- Supports `session.withTransaction` helper
+- Supports Asynchronous Iteration (`for await...` syntax) on cursors
+- Supports Database-level Aggregations (`db.aggregate(pipeline, options)`)
+
+[Full 3.2 Changes Here](https://github.com/mongodb/node-mongodb-native/releases/tag/v3.2.1)
+
 # What's new in 3.1
 
 - Support for MongoDB version 4.0
