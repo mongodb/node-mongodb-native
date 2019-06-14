@@ -61,7 +61,7 @@ describe('ReadConcern', function() {
 
     test: function(done) {
       // Get a new instance
-      let configuration = this.configuration;
+      const configuration = this.configuration;
       const client = configuration.newClient(
         { w: 1 },
         { poolSize: 1, readConcern: { level: 'local' }, monitorCommands: true }
@@ -77,6 +77,7 @@ describe('ReadConcern', function() {
         const collection = db.createCollection('readConcernCollection');
         // Validate readConcern
         expect(test).to.deep.equal({ level: 'local' }, collection.s.readConcern);
+        client.close();
         done();
       });
     }
