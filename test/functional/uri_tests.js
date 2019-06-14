@@ -1,6 +1,7 @@
 'use strict';
 
 const expect = require('chai').expect;
+const MongoClient = require('../../index').MongoClient;
 
 describe('URI', function() {
   /**
