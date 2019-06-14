@@ -73,21 +73,25 @@ describe('Bulk', function() {
     }
   });
 
-    it('should use arrayFilters for updateOne', function(done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient({}, { w: 1 });
+  it('should use arrayFilters for updateOne', function(done) {
+    const configuration = this.configuration;
+    const client = configuration.newClient({}, { w: 1 });
 
-      client.connect(function(err, client) {
-        const db = client.db(configuration.db);
-        const collection = db.collection('arrayfilterstest');
-        const docs = [{ a: [ { x: 1 }, { x: 2 }] }, { a: [ { x: 3 }, { x: 4 }] }];
-        const close = e => client.close(() => done(e));
-        collection.insertMany(docs).then(() =>
-          collection.updateMany({}, {}, { arrayFilters: [{ x: { $gte: 1 } }] } (err, data) => {
-            console.log(data);
-            expect(data).to.equal(1);
+    client.connect(function(err, client) {
+      const db = client.db(configuration.db);
+      const collection = db.collection('arrayfilterstest');
+      const docs = [{ a: [{ x: 1 }, { x: 2 }] }, { a: [{ x: 3 }, { x: 4 }] }];
+      const close = e => client.close(() => done(e));
+      collection.insertMany(docs).then(() =>
+        collection.updateMany(
+          {},
+          { $set: { 'a.$[i].x': 5 } },
+          { arrayFilters: [{ 'i.x': 5 }] },
+          (err, data) => {
+            expect(data.matchedCount).to.equal(2);
             close(err);
-        })
+          }
+        )
       );
     });
   });
