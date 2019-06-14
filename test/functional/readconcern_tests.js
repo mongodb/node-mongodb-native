@@ -60,9 +60,6 @@ describe('ReadConcern', function() {
     metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2' } },
 
     test: function(done) {
-
-      // Contains all the apm events
-      let started = [];
       // Get a new instance
       let configuration = this.configuration;
       const client = configuration.newClient(
@@ -80,6 +77,7 @@ describe('ReadConcern', function() {
         let collection = db.createCollection('readConcernCollection');
         // Validate readConcern
         expect(test).to.deep.equal({ level: 'local' }, collection.s.readConcern);
+        done();
       });
     }
   });
