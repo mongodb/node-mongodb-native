@@ -70,11 +70,11 @@ describe('ReadConcern', function() {
       client.connect(function(err, client) {
         expect(err).to.not.exist;
 
-        let db = client.db(configuration.db);
+        const db = client.db(configuration.db);
         test.deepEqual({ level: 'local' }, db.s.readConcern);
 
         // Get a collection using createCollection
-        let collection = db.createCollection('readConcernCollection');
+        const collection = db.createCollection('readConcernCollection');
         // Validate readConcern
         expect(test).to.deep.equal({ level: 'local' }, collection.s.readConcern);
         done();
