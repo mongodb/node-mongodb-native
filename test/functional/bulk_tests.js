@@ -644,99 +644,63 @@ describe('Bulk', function() {
     }
   });
 
-  it('should correctly handle multiple unordered batch API', {
-    metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
+  it('should correctly handle multiple unordered batch API', function(done) {
+    const configuration = this.configuration;
+    const client = configuration.newClient(configuration.writeConcernMax(), {
+      poolSize: 1
+    });
 
-    test: function(done) {
-      var self = this;
-      var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
-      });
+    client.connect((err, client) => {
+      const db = client.db(configuration.db);
+      const col = db.collection('batch_write_unordered_ops_legacy_2');
 
-      client.connect(function(err, client) {
-        var db = client.db(self.configuration.db);
-        var col = db.collection('batch_write_unordered_ops_legacy_2');
+      // Add unique index on b field causing all updates to fail
+      col.ensureIndex({ a: 1 }, { unique: true, sparse: false }, err => {
+        expect(err).to.not.exist;
 
-        // Add unique index on b field causing all updates to fail
-        col.ensureIndex({ a: 1 }, { unique: true, sparse: false }, function(err) {
-          test.equal(err, null);
+        // Initialize the unordered Batch
+        const batch = col.initializeUnorderedBulkOp({ useLegacyOps: true });
 
-          // Initialize the unordered Batch
-          var batch = col.initializeUnorderedBulkOp({ useLegacyOps: true });
+        // Add some operations to be executed in order
+        batch.insert({ b: 1, a: 1 });
+        batch
+          .find({ b: 2 })
+          .upsert()
+          .updateOne({ $set: { a: 1 } });
+        batch
+          .find({ b: 3 })
+          .upsert()
+          .updateOne({ $set: { a: 2 } });
+        batch
+          .find({ b: 2 })
+          .upsert()
+          .updateOne({ $set: { a: 1 } });
+        batch.insert({ b: 4, a: 3 });
+        batch.insert({ b: 5, a: 1 });
 
-          // Add some operations to be executed in order
-          batch.insert({ b: 1, a: 1 });
-          batch
-            .find({ b: 2 })
-            .upsert()
-            .updateOne({ $set: { a: 1 } });
-          batch
-            .find({ b: 3 })
-            .upsert()
-            .updateOne({ $set: { a: 2 } });
-          batch
-            .find({ b: 2 })
-            .upsert()
-            .updateOne({ $set: { a: 1 } });
-          batch.insert({ b: 4, a: 3 });
-          batch.insert({ b: 5, a: 1 });
+        // Execute the operations
+        batch.execute((err, result) => {
+          expect(err).to.exist;
+          expect(result).to.not.exist;
 
-          // Execute the operations
-          batch.execute(function(err, result) {
-            expect(err).to.exist;
-            expect(result).to.not.exist;
+          // Basic properties check
+          result = err.result;
+          expect(result.nInserted).to.equal(2);
+          expect(result.hasWriteErrors()).to.equal(true);
+          expect(result.getWriteErrorCount()).to.equal(1);
 
-            // Basic properties check
-            result = err.result;
-            test.equal(2, result.nInserted);
-            test.equal(true, result.hasWriteErrors());
-            test.ok(3, result.getWriteErrorCount());
+          // Go over the error
+          const error = result.getWriteErrorAt(0);
+          expect(error.code).to.equal(11000);
+          expect(error.errmsg).to.exist;
+          expect(error.getOperation().b).to.equal(5);
+          expect(error.getOperation().a).to.equal(1);
 
-            // Go over all the errors
-            for (var i = 0; i < result.getWriteErrorCount(); i++) {
-              var error = result.getWriteErrorAt(i);
-
-              switch (error.index) {
-                case 1:
-                  test.equal(11000, error.code);
-                  test.ok(error.errmsg != null);
-                  test.equal(2, error.getOperation().q.b);
-                  test.equal(1, error.getOperation().u['$set'].a);
-                  test.equal(false, error.getOperation().multi);
-                  test.equal(true, error.getOperation().upsert);
-                  break;
-                case 3:
-                  test.equal(11000, error.code);
-                  test.ok(error.errmsg != null);
-                  test.equal(2, error.getOperation().q.b);
-                  test.equal(1, error.getOperation().u['$set'].a);
-                  test.equal(false, error.getOperation().multi);
-                  test.equal(true, error.getOperation().upsert);
-                  break;
-                case 2:
-                  test.equal(11000, error.code);
-                  test.ok(error.errmsg != null);
-                  test.equal(5, error.getOperation().b);
-                  test.equal(1, error.getOperation().a);
-                  break;
-                case 5:
-                  test.equal(11000, error.code);
-                  test.ok(error.errmsg != null);
-                  test.equal(5, error.getOperation().b);
-                  test.equal(1, error.getOperation().a);
-                  break;
-                default:
-                  test.ok(false);
-              }
-            }
-
-            // Finish up test
-            client.close();
-            done();
-          });
+          // Finish up test
+          client.close(done);
         });
       });
-    }
+    });
   });
 
   it('should fail due to document being to big for unordered batch', {
