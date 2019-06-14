@@ -663,18 +663,6 @@ describe('Bulk', function() {
 
         // Add some operations to be executed in order
         batch.insert({ b: 1, a: 1 });
-        batch
-          .find({ b: 2 })
-          .upsert()
-          .updateOne({ $set: { a: 1 } });
-        batch
-          .find({ b: 3 })
-          .upsert()
-          .updateOne({ $set: { a: 2 } });
-        batch
-          .find({ b: 2 })
-          .upsert()
-          .updateOne({ $set: { a: 1 } });
         batch.insert({ b: 4, a: 3 });
         batch.insert({ b: 5, a: 1 });
 
