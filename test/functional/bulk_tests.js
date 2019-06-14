@@ -73,11 +73,11 @@ describe('Bulk', function() {
     }
   });
 
-  it('should use arrayFilters for updateOne', function(done) {
+  it('should use arrayFilters for updateMany', function(done) {
     const configuration = this.configuration;
     const client = configuration.newClient({}, { w: 1 });
 
-    client.connect(function(err, client) {
+    client.connect((err, client) => {
       const db = client.db(configuration.db);
       const collection = db.collection('arrayfilterstest');
       const docs = [{ a: [{ x: 1 }, { x: 2 }] }, { a: [{ x: 3 }, { x: 4 }] }];
