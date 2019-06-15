@@ -4,6 +4,13 @@ const SYMBOL_DOES_NOT_EXIST = Symbol('[[assert does not exist]]');
 const SYMBOL_DOES_EXIST = Symbol('[[assert does exist]]');
 const SYMBOL_IGNORE = Symbol('[[ignore]]');
 
+const MONGOCRYPT_TO_EJSON_TYPE_MAP = new Map([
+  ['binData', '$binary'],
+  ['long', ['$numberLong', 'number']]
+]);
+
+const BSON_TO_EJSON_TYPE_MAP = new Map([['Binary', '$binary']]);
+
 function valIs42(input) {
   return input === 42 || input === '42';
 }
@@ -16,6 +23,7 @@ function is42(input) {
 function generateMatchAndDiffSpecialCase(key, expectedObj, actualObj, metadata) {
   const expected = expectedObj[key];
   const actual = actualObj[key];
+
   if (expected === null) {
     if (key === 'readConcern') {
       // HACK: get around NODE-1889
@@ -32,6 +40,37 @@ function generateMatchAndDiffSpecialCase(key, expectedObj, actualObj, metadata) 
       expected: SYMBOL_DOES_NOT_EXIST,
       actual: match ? SYMBOL_DOES_NOT_EXIST : actual
     };
+  }
+
+  if (typeof expected === 'object' && Object.keys(expected)[0] === '$$type') {
+    const expectedType = MONGOCRYPT_TO_EJSON_TYPE_MAP.get(expected.$$type);
+
+    let actualType;
+    if (actual._bsontype) {
+      actualType = BSON_TO_EJSON_TYPE_MAP.get(actual._bsontype);
+    } else {
+      if (typeof actual === 'object' && Object.keys(actual).length) {
+        actualType = Object.keys(actual)[0];
+      } else {
+        actualType = typeof actual;
+      }
+    }
+
+    let match;
+    if (Array.isArray(expectedType)) {
+      // we accept a direct type match, or a typeof match
+      match = expectedType.some(type => {
+        if (type[0] === '$') {
+          return type === actualType;
+        }
+
+        return typeof actual === type;
+      });
+    } else {
+      match = expectedType === actualType;
+    }
+
+    return { match, expected, actual };
   }
 
   const expectedIs42 = is42(expected);
