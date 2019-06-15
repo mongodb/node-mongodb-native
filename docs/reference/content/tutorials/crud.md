@@ -195,7 +195,7 @@ The ``updateOne`` and ``updateMany`` methods exist on the ``Collection`` class a
 {{% myproject-connect %}}
 
   const col = db.collection('updates');
-  // Insert a single document
+  // Insert multiple documents
   col.insertMany([{a:1}, {a:2}, {a:2}], function(err, r) {
     assert.equal(null, err);
     assert.equal(3, r.insertedCount);
@@ -231,7 +231,7 @@ The ``updateOne`` and ``updateMany`` methods exist on the ``Collection`` class a
 
     // Get the updates collection
     const col = db.collection('updates');
-    // Insert a single document
+    // Insert multiple documents
     let r = await col.insertMany([{a:1}, {a:2}, {a:2}]);
     assert.equal(3, r.insertedCount);
 
@@ -280,7 +280,7 @@ The ``deleteOne`` and ``deleteMany`` methods exist on the ``Collection`` class a
 {{% myproject-connect %}}
 
   const col = db.collection('removes');
-  // Insert a single document
+  // Insert multiple documents
   col.insertMany([{a:1}, {a:2}, {a:2}], function(err, r) {
     assert.equal(null, err);
     assert.equal(3, r.insertedCount);
@@ -305,7 +305,7 @@ The ``deleteOne`` and ``deleteMany`` methods exist on the ``Collection`` class a
 
     // Get the removes collection
     const col = db.collection('removes');
-    // Insert a single document
+    // Insert multiple documents
     let r = await col.insertMany([{a:1}, {a:2}, {a:2}]);
     assert.equal(3, r.insertedCount);
 
@@ -347,7 +347,7 @@ methods, the operation takes a write lock for the duration of the operation in o
 {{% myproject-connect %}}
 
   const col = db.collection('findAndModify');
-  // Insert a single document
+  // Insert multiple documents
   col.insert([{a:1}, {a:2}, {a:2}], function(err, r) {
     assert.equal(null, err);
     assert.equal(3, r.result.n);
@@ -376,7 +376,7 @@ methods, the operation takes a write lock for the duration of the operation in o
 
     // Get the findAndModify collection
     const col = db.collection('findAndModify');
-    // Insert a single document
+    // Insert multiple documents
     let r = await col.insert([{a:1}, {a:2}, {a:2}]);
     assert.equal(3, r.result.n);
 
@@ -418,7 +418,7 @@ The ``findOneAndDelete`` function is designed to help remove a document.
 {{% myproject-connect %}}
 
   const col = db.collection('findAndModify');
-  // Insert a single document
+  // Insert multiple documents
   col.insert([{a:1}, {a:2}, {a:2}], function(err, r) {
     assert.equal(null, err);
     assert.equal(3, r.result.n);
@@ -440,7 +440,7 @@ The ``findOneAndDelete`` function is designed to help remove a document.
 
     // Get the findAndModify collection
     const col = db.collection('findAndModify');
-    // Insert a single document
+    // Insert multiple documents
     let r = await col.insert([{a:1}, {a:2}, {a:2}]);
     assert.equal(3, r.result.n);
 
@@ -645,7 +645,7 @@ The following example materializes all the documents from a query using the ``to
 {{% myproject-connect %}}
 
   const col = db.collection('find');
-  // Insert a single document
+  // Insert multiple documents
   col.insertMany([{a:1}, {a:1}, {a:1}], function(err, r) {
     assert.equal(null, err);
     assert.equal(3, r.insertedCount);
@@ -664,7 +664,7 @@ The following example materializes all the documents from a query using the ``to
 
     // Get the collection
     const col = db.collection('find');
-    // Insert a single document
+    // Insert multiple documents
     const r = await col.insertMany([{a:1}, {a:1}, {a:1}]);
     assert.equal(3, r.insertedCount);
 
@@ -719,7 +719,7 @@ The following example uses the ``next`` method.
 {{% myproject-connect %}}
 
   const col = db.collection('find');
-  // Insert a single document
+  // Insert multiple documents
   col.insertMany([{a:1}, {a:1}, {a:1}], function(err, r) {
     assert.equal(null, err);
     assert.equal(3, r.insertedCount);
@@ -742,7 +742,7 @@ much cleaner and easier way to read iteration code.
 
     // Get the collection
     const col = db.collection('find');
-    // Insert a single document
+    // Insert multiple documents
     const r = await col.insertMany([{a:1}, {a:1}, {a:1}]);
     assert.equal(3, r.insertedCount);
 
@@ -771,7 +771,7 @@ The following example uses the ``each`` method.
 {{% myproject-connect %}}
 
   const col = db.collection('find');
-  // Insert a single document
+  // Insert multiple documents
   col.insertMany([{a:1}, {a:1}, {a:1}], function(err, r) {
     assert.equal(null, err);
     assert.equal(3, r.insertedCount);
