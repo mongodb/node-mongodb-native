@@ -15,6 +15,9 @@ before_install:
   - mkdir mongocryptd && tar xzf mongocryptd.tgz -C mongocryptd --strip-components 1
   - mongocryptd/bin/mongocryptd&
 
+before_script:
+  - npm install mongodb-client-encryption
+
 jobs:
   include:
     - stage: standalone
