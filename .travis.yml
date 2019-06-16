@@ -81,6 +81,13 @@ jobs:
         - MONGODB_UNIFIED_TOPOLOGY=1
         - MONGODB_ENVIRONMENT=sharded
 
+    - stage: client-encryption
+      node_js: 4
+      env:
+        - MONGODB_VERSION=latest
+        - MONGODB_UNIFIED_TOPOLOGY=1
+        - MONGODB_ENVIRONMENT=replicaset
+
   allow_failures:
     - env:
         - MONGODB_VERSION=4.0.x
