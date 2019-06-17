@@ -144,7 +144,8 @@
                         "foo": 1
                       }
                     }
-                  ]
+                  ],
+                  "multi": true
                 }
               ]
             },
@@ -198,28 +199,21 @@
         {
           "command_started_event": {
             "command": {
-              "update": "test",
-              "updates": [
+              "findAndModify": "test",
+              "update": [
                 {
-                  "q": {
-                    "_id": 1
-                  },
-                  "u": [
-                    {
-                      "$project": {
-                        "x": 1
-                      }
-                    },
-                    {
-                      "$addFields": {
-                        "foo": 1
-                      }
-                    }
-                  ]
+                  "$project": {
+                    "x": 1
+                  }
+                },
+                {
+                  "$addFields": {
+                    "foo": 1
+                  }
                 }
               ]
             },
-            "command_name": "update",
+            "command_name": "findAndModify",
             "database_name": "crud-tests"
           }
         }
