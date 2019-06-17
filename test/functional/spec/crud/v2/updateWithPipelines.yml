@@ -57,6 +57,7 @@ tests:
               -
                 q: { }
                 u: [ { $project: { x: 1 } }, { $addFields: { foo: 1 } } ]
+                multi: true
           command_name: update
           database_name: *database_name
     outcome:
@@ -76,12 +77,11 @@ tests:
       -
         command_started_event:
           command:
-            update: *collection_name
-            updates:
-              -
-                q: { _id: 1 }
-                u: [ { $project: { x: 1 } }, { $addFields: { foo: 1 } } ]
-          command_name: update
+            findAndModify: *collection_name
+            update:
+              - $project: { x: 1 }
+              - $addFields: { foo: 1 }
+          command_name: findAndModify
           database_name: *database_name
     outcome:
       collection:
