@@ -117,7 +117,12 @@ function shouldSkipTest(spec) {
 
 function generateTopologyTests(testSuites, testContext) {
   testSuites.forEach(testSuite => {
-    const environmentRequirementList = parseRunOn(testSuite.runOn);
+    let runOn = testSuite.runOn;
+    if (!testSuite.runOn) {
+      runOn = [{ minServerVersion: testSuite.minServerVersion }];
+    }
+
+    const environmentRequirementList = parseRunOn(runOn);
 
     environmentRequirementList.forEach(requires => {
       const suiteName = `${testSuite.name} - ${requires.topology.join()}`;
@@ -160,8 +165,11 @@ function prepareDatabaseForSuite(suite, context) {
   context.collectionName = suite.collection_name;
 
   const db = context.sharedClient.db(context.dbName);
-  const coll = db.collection(context.collectionName);
+  if (context.collectionName == null) {
+    return db.admin().command({ killAllSessions: [] });
+  }
 
+  const coll = db.collection(context.collectionName);
   return db
     .admin()
     .command({ killAllSessions: [] })
@@ -308,10 +316,12 @@ function runTestSuiteTest(configuration, spec, context) {
 
 function validateOutcome(testData, testContext) {
   if (testData.outcome && testData.outcome.collection) {
+    const outcomeCollection = testData.outcome.collection.name || testContext.collectionName;
+
     // use the client without transactions to verify
     return testContext.sharedClient
       .db(testContext.dbName)
-      .collection(testContext.collectionName)
+      .collection(outcomeCollection)
       .find({}, { readPreference: 'primary', readConcern: { level: 'local' } })
       .toArray()
       .then(docs => {
@@ -335,8 +345,11 @@ function validateExpectations(commandEvents, spec, savedSessionData) {
   expectedEvents.forEach((expected, idx) => {
     const actual = actualEvents[idx];
 
-    expect(actual.commandName).to.equal(expected.commandName);
-    if (expected.databaseName) {
+    if (expected.commandName != null) {
+      expect(actual.commandName).to.equal(expected.commandName);
+    }
+
+    if (expected.databaseName != null) {
       expect(actual.databaseName).to.equal(expected.databaseName);
     }
 
@@ -501,6 +514,14 @@ function testOperation(operation, obj, context, options) {
   } else {
     // wrap this in a `Promise.try` because some operations might throw
     opPromise = Promise.try(() => obj[operationName].apply(obj, args));
+  }
+
+  if (operation.error) {
+    opPromise = opPromise
+      .then(() => {
+        throw new Error('expected an error!');
+      })
+      .catch(() => {});
   }
 
   if (operation.result) {
