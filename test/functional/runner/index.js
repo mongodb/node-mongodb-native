@@ -117,6 +117,7 @@ function shouldSkipTest(spec) {
 
 function generateTopologyTests(testSuites, testContext) {
   testSuites.forEach(testSuite => {
+    // TODO: remove this when SPEC-1255 is completed
     let runOn = testSuite.runOn;
     if (!testSuite.runOn) {
       runOn = [{ minServerVersion: testSuite.minServerVersion }];
