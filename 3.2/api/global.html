@@ -278,12 +278,18 @@
             </ul>
             <ul class="typedefs itemMembers">
             
+            <span class="subtitle">Typedefs</span>
+            
+                <li data-name="BulkOperationBase~resultCallback"><a href="BulkOperationBase.html#~resultCallback">resultCallback</a></li>
+            
             </ul>
             <ul class="methods itemMembers">
             
             <span class="subtitle">Methods</span>
             
                 <li data-name="BulkOperationBase#bulkExecute"><a href="BulkOperationBase.html#bulkExecute">bulkExecute</a></li>
+            
+                <li data-name="BulkOperationBase#execute"><a href="BulkOperationBase.html#execute">execute</a></li>
             
                 <li data-name="BulkOperationBase#finalOptionsHandler"><a href="BulkOperationBase.html#finalOptionsHandler">finalOptionsHandler</a></li>
             
@@ -1764,16 +1770,24 @@
             </ul>
             <ul class="typedefs itemMembers">
             
-            <span class="subtitle">Typedefs</span>
-            
-                <li data-name="OrderedBulkOperation~resultCallback"><a href="OrderedBulkOperation.html#~resultCallback">resultCallback</a></li>
-            
             </ul>
             <ul class="methods itemMembers">
             
             <span class="subtitle">Methods</span>
             
+                <li data-name="OrderedBulkOperation#bulkExecute"><a href="OrderedBulkOperation.html#bulkExecute">bulkExecute</a></li>
+            
                 <li data-name="OrderedBulkOperation#execute"><a href="OrderedBulkOperation.html#execute">execute</a></li>
+            
+                <li data-name="OrderedBulkOperation#finalOptionsHandler"><a href="OrderedBulkOperation.html#finalOptionsHandler">finalOptionsHandler</a></li>
+            
+                <li data-name="OrderedBulkOperation#find"><a href="OrderedBulkOperation.html#find">find</a></li>
+            
+                <li data-name="OrderedBulkOperation#handleWriteError"><a href="OrderedBulkOperation.html#handleWriteError">handleWriteError</a></li>
+            
+                <li data-name="OrderedBulkOperation#insert"><a href="OrderedBulkOperation.html#insert">insert</a></li>
+            
+                <li data-name="OrderedBulkOperation#raw"><a href="OrderedBulkOperation.html#raw">raw</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -2003,16 +2017,24 @@
             </ul>
             <ul class="typedefs itemMembers">
             
-            <span class="subtitle">Typedefs</span>
-            
-                <li data-name="UnorderedBulkOperation~resultCallback"><a href="UnorderedBulkOperation.html#~resultCallback">resultCallback</a></li>
-            
             </ul>
             <ul class="methods itemMembers">
             
             <span class="subtitle">Methods</span>
             
+                <li data-name="UnorderedBulkOperation#bulkExecute"><a href="UnorderedBulkOperation.html#bulkExecute">bulkExecute</a></li>
+            
                 <li data-name="UnorderedBulkOperation#execute"><a href="UnorderedBulkOperation.html#execute">execute</a></li>
+            
+                <li data-name="UnorderedBulkOperation#finalOptionsHandler"><a href="UnorderedBulkOperation.html#finalOptionsHandler">finalOptionsHandler</a></li>
+            
+                <li data-name="UnorderedBulkOperation#find"><a href="UnorderedBulkOperation.html#find">find</a></li>
+            
+                <li data-name="UnorderedBulkOperation#handleWriteError"><a href="UnorderedBulkOperation.html#handleWriteError">handleWriteError</a></li>
+            
+                <li data-name="UnorderedBulkOperation#insert"><a href="UnorderedBulkOperation.html#insert">insert</a></li>
+            
+                <li data-name="UnorderedBulkOperation#raw"><a href="UnorderedBulkOperation.html#raw">raw</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -2170,7 +2192,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_bulk_ordered.js.html">lib/bulk/ordered.js</a>, <a href="lib_bulk_ordered.js.html#line25">line 25</a>
+            <a href="lib_bulk_ordered.js.html">lib/bulk/ordered.js</a>, <a href="lib_bulk_ordered.js.html#line18">line 18</a>
         </div>
         
     </div>
@@ -2337,7 +2359,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_bulk_unordered.js.html">lib/bulk/unordered.js</a>, <a href="lib_bulk_unordered.js.html#line25">line 25</a>
+            <a href="lib_bulk_unordered.js.html">lib/bulk/unordered.js</a>, <a href="lib_bulk_unordered.js.html#line18">line 18</a>
         </div>
         
     </div>
@@ -2713,515 +2735,6 @@ error, if some error condition was met
             
 <dt>
     <div class="nameContainer">
-        <h4 class="name" id="executeBatch">
-            
-            executeBatch<span class="signature">(bulkOperation, batch, options, callback)</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="lib_bulk_unordered.js.html">lib/bulk/unordered.js</a>, <a href="lib_bulk_unordered.js.html#line154">line 154</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Execute the command</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>bulkOperation</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type"><a href="UnorderedBulkOperation.html">UnorderedBulkOperation</a></span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                </td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>batch</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                </td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>options</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                </td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>callback</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                </td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="executeBatches">
-            
-            executeBatches<span class="signature">(bulkOperation, options, callback)</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="lib_bulk_unordered.js.html">lib/bulk/unordered.js</a>, <a href="lib_bulk_unordered.js.html#line183">line 183</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Execute all the commands</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>bulkOperation</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type"><a href="UnorderedBulkOperation.html">UnorderedBulkOperation</a></span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                </td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>options</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                </td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>callback</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                </td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="executeCommands">
-            
-            executeCommands<span class="signature">(bulkOperation, options, callback)</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="lib_bulk_ordered.js.html">lib/bulk/ordered.js</a>, <a href="lib_bulk_ordered.js.html#line141">line 141</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Execute next write command in a chain</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>bulkOperation</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type"><a href="OrderedBulkOperation.html">OrderedBulkOperation</a></span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                </td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>options</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                </td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>callback</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                </td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
         <h4 class="name" id="handleMongoWriteConcernError">
             
             handleMongoWriteConcernError<span class="signature">(batch, bulkResult, ordered, err, callback)</span>
@@ -3229,7 +2742,7 @@ error, if some error condition was met
     
         
         <div class="tag-source">
-            <a href="lib_bulk_common.js.html">lib/bulk/common.js</a>, <a href="lib_bulk_common.js.html#line496">line 496</a>
+            <a href="lib_bulk_common.js.html">lib/bulk/common.js</a>, <a href="lib_bulk_common.js.html#line519">line 519</a>
         </div>
         
     </div>
@@ -4417,7 +3930,7 @@ resulting Promise of operations run within this transaction
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Apr 09 2019 11:59:15 GMT-0400 (EDT)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Jun 18 2019 09:52:42 GMT-0400 (EDT)
                     </footer>
                 </div>
             </td>
