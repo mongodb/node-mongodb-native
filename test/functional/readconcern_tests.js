@@ -64,21 +64,23 @@ describe('ReadConcern', function() {
       const configuration = this.configuration;
       const client = configuration.newClient(
         { w: 1 },
-        { poolSize: 1, readConcern: { level: 'local' }, monitorCommands: true }
+        { poolSize: 1, readConcern: { level: 'local' } }
       );
-
-      client.connect(function(err, client) {
+      console.log("before connect");
+      client.connect((err, client) => {
+        console.log("connect");
         expect(err).to.not.exist;
-
         const db = client.db(configuration.db);
-        test.deepEqual({ level: 'local' }, db.s.readConcern);
+        expect(db.s.readConern).to.deep.equal({ level: 'local' });
 
         // Get a collection using createCollection
-        const collection = db.createCollection('readConcernCollection');
+        const collection = db.createCollection('readConcernCollection', (err, collection) => {
+          console.log('err: ', err);
+          console.log('collection: ', collection);
+        });
         // Validate readConcern
-        expect(test).to.deep.equal({ level: 'local' }, collection.s.readConcern);
-        client.close();
-        done();
+        expect(collection.s.readConcern).to.deep.equal({ level: 'local' });
+        client.close(done);
       });
     }
   });
