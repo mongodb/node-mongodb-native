@@ -8,6 +8,10 @@ chai.use(require('chai-subset'));
 
 const BulkWriteError = require('../../lib/bulk/common').BulkWriteError;
 
+const TestRunnerContext = require('./runner').TestRunnerContext;
+const gatherTestSuites = require('./runner').gatherTestSuites;
+const generateTopologyTests = require('./runner').generateTopologyTests;
+
 function findScenarios() {
   const route = [__dirname, 'spec', 'crud'].concat(Array.from(arguments));
   return fs
@@ -466,4 +470,15 @@ describe('CRUD spec', function() {
         }
       });
   }
+});
+
+describe('CRUD v2', function() {
+  const testContext = new TestRunnerContext();
+  const testSuites = gatherTestSuites(path.join(__dirname, 'spec', 'crud', 'v2'));
+  after(() => testContext.teardown());
+  before(function() {
+    return testContext.setup(this.configuration);
+  });
+
+  generateTopologyTests(testSuites, testContext);
 });
