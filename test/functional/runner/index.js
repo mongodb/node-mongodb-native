@@ -166,12 +166,7 @@ function prepareDatabaseForSuite(suite, context) {
   context.collectionName = suite.collection_name;
 
   const db = context.sharedClient.db(context.dbName);
-  if (context.collectionName == null) {
-    return db.admin().command({ killAllSessions: [] });
-  }
-
-  const coll = db.collection(context.collectionName);
-  return db
+  const setupPromise = db
     .admin()
     .command({ killAllSessions: [] })
     .catch(err => {
@@ -180,7 +175,14 @@ function prepareDatabaseForSuite(suite, context) {
       }
 
       throw err;
-    })
+    });
+
+  if (context.collectionName == null) {
+    return setupPromise;
+  }
+
+  const coll = db.collection(context.collectionName);
+  return setupPromise
     .then(() => coll.drop({ writeConcern: 'majority' }))
     .catch(err => {
       if (!err.message.match(/ns not found/)) throw err;
@@ -518,11 +520,12 @@ function testOperation(operation, obj, context, options) {
   }
 
   if (operation.error) {
-    opPromise = opPromise
-      .then(() => {
+    opPromise = opPromise.then(
+      () => {
         throw new Error('expected an error!');
-      })
-      .catch(() => {});
+      },
+      () => {}
+    );
   }
 
   if (operation.result) {
@@ -534,11 +537,11 @@ function testOperation(operation, obj, context, options) {
       result.errorLabelsContain ||
       result.errorLabelsOmit
     ) {
-      return opPromise
-        .then(() => {
+      return opPromise.then(
+        () => {
           throw new Error('expected an error!');
-        })
-        .catch(err => {
+        },
+        err => {
           const errorContains = result.errorContains;
           const errorCodeName = result.errorCodeName;
           const errorLabelsContain = result.errorLabelsContain;
@@ -566,7 +569,8 @@ function testOperation(operation, obj, context, options) {
           if (!options.swallowOperationErrors) {
             throw err;
           }
-        });
+        }
+      );
     }
 
     return opPromise.then(opResult => {
