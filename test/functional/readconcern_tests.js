@@ -73,8 +73,6 @@ describe('ReadConcern', function() {
 
         // Get a collection using createCollection
         db.createCollection('readConcernCollection', (err, collection) => {
-          console.log('err: ', err);
-          console.log('collection: ', collection);
           // Validate readConcern
           expect(collection.s.readConcern).to.deep.equal({ level: 'local' });
           client.close(done);
