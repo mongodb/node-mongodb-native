@@ -66,21 +66,19 @@ describe('ReadConcern', function() {
         { w: 1 },
         { poolSize: 1, readConcern: { level: 'local' } }
       );
-      console.log("before connect");
       client.connect((err, client) => {
-        console.log("connect");
         expect(err).to.not.exist;
         const db = client.db(configuration.db);
-        expect(db.s.readConern).to.deep.equal({ level: 'local' });
+        expect(db.s.readConcern).to.deep.equal({ level: 'local' });
 
         // Get a collection using createCollection
-        const collection = db.createCollection('readConcernCollection', (err, collection) => {
+        db.createCollection('readConcernCollection', (err, collection) => {
           console.log('err: ', err);
           console.log('collection: ', collection);
+          // Validate readConcern
+          expect(collection.s.readConcern).to.deep.equal({ level: 'local' });
+          client.close(done);
         });
-        // Validate readConcern
-        expect(collection.s.readConcern).to.deep.equal({ level: 'local' });
-        client.close(done);
       });
     }
   });
