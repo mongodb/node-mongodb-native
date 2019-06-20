@@ -73,27 +73,31 @@ describe('Bulk', function() {
     }
   });
 
-  it('should use arrayFilters for updateMany', function(done) {
-    const configuration = this.configuration;
-    const client = configuration.newClient({}, { w: 1 });
+  it('should use arrayFilters for updateMany', {
+    metadata: { requires: { mongodb: '>=3.6.x' } },
+    test: function(done) {
+      const configuration = this.configuration;
+      const client = configuration.newClient({}, { w: 1 });
 
-    client.connect((err, client) => {
-      const db = client.db(configuration.db);
-      const collection = db.collection('arrayfilterstest');
-      const docs = [{ a: [{ x: 1 }, { x: 2 }] }, { a: [{ x: 3 }, { x: 4 }] }];
-      const close = e => client.close(() => done(e));
-      collection.insertMany(docs).then(() =>
-        collection.updateMany(
-          {},
-          { $set: { 'a.$[i].x': 5 } },
-          { arrayFilters: [{ 'i.x': 5 }] },
-          (err, data) => {
-            expect(data.matchedCount).to.equal(2);
-            close(err);
-          }
-        )
-      );
-    });
+      client.connect((err, client) => {
+        const db = client.db(configuration.db);
+        const collection = db.collection('arrayfilterstest');
+        const docs = [{ a: [{ x: 1 }, { x: 2 }] }, { a: [{ x: 3 }, { x: 4 }] }];
+        const close = e => client.close(() => done(e));
+        collection.insertMany(docs).then(() =>
+          collection.updateMany(
+            {},
+            { $set: { 'a.$[i].x': 5 } },
+            { arrayFilters: [{ 'i.x': 5 }] },
+            (err, data) => {
+              expect(err).to.not.exist;
+              expect(data.matchedCount).to.equal(2);
+              close(err);
+            }
+          )
+        );
+      });
+    }
   });
 
   it('should ignore undefined values in unordered bulk operation if `ignoreUndefined` specified', {
