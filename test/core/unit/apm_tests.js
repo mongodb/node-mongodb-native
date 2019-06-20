@@ -158,4 +158,125 @@ describe('APM tests', function() {
         });
     });
   });
+
+  describe('CommandSucceededEvent', function() {
+    // Only run on single topology since these are unit tests
+    const metadata = { requires: { topology: ['single'] } };
+
+    it('should support not passing command metadata array', metadata, function() {
+      const db = 'test1';
+      const coll = 'testingQuery';
+      const query = new Query(
+        bson,
+        `${db}.${coll}`,
+        {
+          testCmd: 1,
+          fizz: 'buzz',
+          star: 'trek'
+        },
+        {}
+      );
+
+      const started = process.hrtime();
+
+      const commandSucceededEvent = new apm.CommandSucceededEvent(pool, query, null, started);
+
+      expect(commandSucceededEvent).to.have.property('commandName', 'testCmd');
+      expect(commandSucceededEvent).to.have.property('reply', null);
+      expect(commandSucceededEvent)
+        .to.have.property('requestId')
+        .that.is.a('number');
+      expect(commandSucceededEvent)
+        .to.have.property('connectionId')
+        .that.is.a('string');
+      expect(commandSucceededEvent)
+        .to.have.property('duration')
+        .that.is.a('number');
+      expect(commandSucceededEvent)
+        .to.have.property('metadata')
+        .to.deep.equals({});
+    });
+
+    it('should support passing on command metadata array', metadata, function() {
+      const db = 'test1';
+      const coll = 'testingQuery';
+      const query = new Query(
+        bson,
+        `${db}.${coll}`,
+        {
+          testCmd: 1,
+          fizz: 'buzz',
+          star: 'trek'
+        },
+        {}
+      );
+
+      const started = process.hrtime();
+
+      const bsonSerializationData = new apm.BSONSerializationData([], process.hrtime());
+      const commandSucceededEvent = new apm.CommandSucceededEvent(pool, query, null, started, [
+        bsonSerializationData
+      ]);
+
+      expect(commandSucceededEvent).to.have.property('commandName', 'testCmd');
+      expect(commandSucceededEvent).to.have.property('reply', null);
+      expect(commandSucceededEvent)
+        .to.have.property('requestId')
+        .that.is.a('number');
+      expect(commandSucceededEvent)
+        .to.have.property('connectionId')
+        .that.is.a('string');
+      expect(commandSucceededEvent)
+        .to.have.property('duration')
+        .that.is.a('number');
+      expect(commandSucceededEvent)
+        .to.have.property('metadata')
+        .that.is.a('object');
+
+      const metadata = commandSucceededEvent.metadata;
+      expect(metadata)
+        .to.have.property('bsonSerialization')
+        .that.is.a('object');
+      const bsonSerialization = metadata.bsonSerialization;
+      expect(bsonSerialization).to.have.property('buffersLength', 0);
+      expect(bsonSerialization).to.have.property('type', 'bsonSerialization');
+      expect(bsonSerialization)
+        .to.have.property('duration')
+        .that.is.a('number');
+    });
+  });
+
+  describe('BSONSerializationData', function() {
+    // Only run on single topology since these are unit tests
+    const metadata = { requires: { topology: ['single'] } };
+    it('should sum length of all buffers', metadata, function() {
+      const stepData = new apm.BSONSerializationData(
+        [{ length: 1 }, { length: 3 }, { length: 10 }],
+        process.hrtime()
+      );
+
+      expect(stepData).to.have.property('buffersLength', 14);
+    });
+
+    it('should have type "bsonSerialization"', metadata, function() {
+      const stepData = new apm.BSONSerializationData(
+        [{ length: 1 }, { length: 3 }, { length: 10 }],
+        process.hrtime()
+      );
+
+      expect(stepData).to.have.property('type', 'bsonSerialization');
+    });
+
+    it('should calculate duration from start time and current time', metadata, function() {
+      // not mocking process.hrtime, too much work, low reward
+      const stepData = new apm.BSONSerializationData(
+        [{ length: 1 }, { length: 3 }, { length: 10 }],
+        process.hrtime()
+      );
+
+      expect(stepData)
+        .to.have.property('duration')
+        .to.be.below(1);
+    });
+  });
 });
