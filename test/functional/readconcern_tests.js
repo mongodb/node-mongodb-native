@@ -10,7 +10,7 @@ describe('ReadConcern', function() {
     return setupDatabase(configuration);
   });
 
-  it('Should set local readConcern on db level', {
+  it('Should set local readConcern on db level when using collection method', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2' } },
 
     test: function(done) {
@@ -51,6 +51,31 @@ describe('ReadConcern', function() {
           listener.uninstrument();
           client.close();
           done();
+        });
+      });
+    }
+  });
+
+  it('Should set local readConcern on db level when using createCollection method', {
+    metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2' } },
+
+    test: function(done) {
+      // Get a new instance
+      const configuration = this.configuration;
+      const client = configuration.newClient(
+        { w: 1 },
+        { poolSize: 1, readConcern: { level: 'local' } }
+      );
+      client.connect((err, client) => {
+        expect(err).to.not.exist;
+        const db = client.db(configuration.db);
+        expect(db.s.readConcern).to.deep.equal({ level: 'local' });
+
+        // Get a collection using createCollection
+        db.createCollection('readConcernCollection', (err, collection) => {
+          // Validate readConcern
+          expect(collection.s.readConcern).to.deep.equal({ level: 'local' });
+          client.close(done);
         });
       });
     }
