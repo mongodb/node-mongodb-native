@@ -41,7 +41,7 @@ describe('Collection', function() {
             test.equal('test_collection_methods', collection.collectionName);
             // Let's check that the collection was created correctly
             db.listCollections().toArray((err, documents) => {
-              const found = false;
+              let found = false;
               documents.forEach(document => {
                 if (document.name === 'integration_tests_.test_collection_methods') found = true;
               });
@@ -155,9 +155,11 @@ describe('Collection', function() {
                             let found_does_not_exist = false;
 
                             collections.forEach(collection => {
-                              if (collection.collectionName === 'test.spiderman') found_spiderman = true;
+                              if (collection.collectionName === 'test.spiderman')
+                                found_spiderman = true;
                               if (collection.collectionName === 'test.mario') found_mario = true;
-                              if (collection.collectionName === 'does_not_exist') found_does_not_exist = true;
+                              if (collection.collectionName === 'does_not_exist')
+                                found_does_not_exist = true;
                             });
 
                             test.ok(found_spiderman);
@@ -1463,24 +1465,26 @@ describe('Collection', function() {
 
       // The actual test we wish to run
       test: function(done) {
-
         client.connect((err, client) => {
           expect(err).to.not.exist;
-          const db = client.db(configuration.db);
+          const db = client.db(this.configuration.db);
 
-          db.createCollection('test_should_correctly_do_update_with_pipeline', (err, collection) => {
-            collection.updateOne(
-              {},
-              [{ $set: { a: 1 } }, { $set: { b: 1 } }, { $set: { d: 1 } }],
-              configuration.writeConcernMax(),
-              (err, r) => {
-                expect(err).to.not.exist;
-                expect(r.result.n).to.equal(0);
+          db.createCollection(
+            'test_should_correctly_do_update_with_pipeline',
+            (err, collection) => {
+              collection.updateOne(
+                {},
+                [{ $set: { a: 1 } }, { $set: { b: 1 } }, { $set: { d: 1 } }],
+                this.configuration.writeConcernMax(),
+                (err, r) => {
+                  expect(err).to.not.exist;
+                  expect(r.result.n).to.equal(0);
 
-                client.close(done);
-              }
-            );
-          });
+                  client.close(done);
+                }
+              );
+            }
+          );
         });
       }
     });
