@@ -1729,7 +1729,7 @@ describe('Collection', function() {
 
     const metadata = { requires: { topology: ['replicaset'], mongodb: '>=3.6.0' } };
 
-    beforeEach(() => {
+    beforeEach(function() {
       client = this.configuration.newClient({}, { retryWrites: true });
       return client.connect().then(() => {
         db = client.db('test_retry_writes');
@@ -1741,7 +1741,7 @@ describe('Collection', function() {
       });
     });
 
-    afterEach(() => {
+    afterEach(function() {
       return client.close();
     });
 
