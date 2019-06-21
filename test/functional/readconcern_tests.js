@@ -1,8 +1,7 @@
 'use strict';
-const mongo = require('../..'),
-  setupDatabase = require('./shared').setupDatabase,
-  expect = require('chai').expect,
-  f = require('util').format;
+const mongo = require('../..');
+const setupDatabase = require('./shared').setupDatabase;
+const expect = require('chai').expect;
 
 let client;
 let url;
@@ -37,13 +36,13 @@ describe('ReadConcern', function() {
       description: 'Should set local readConcern at collection level',
       level: 'local',
       commandName: 'find',
-      collectionReadConcernLevel: 'local'
+      collectionReadConcern: true
     },
     {
       description: 'Should set majority readConcern at collection level',
       level: 'majority',
       commandName: 'find',
-      collectionReadConcernLevel: 'majority'
+      collectionReadConcern: true
     },
     {
       description: 'Should set local readConcern using MongoClient',
@@ -75,15 +74,18 @@ describe('ReadConcern', function() {
     }
   ];
 
-  function run_tests(i, commandName, level) {
-    expect(info.commands.started).to.have.a.lengthOf(i + 1);
-    expect(info.commands.succeeded).to.have.a.lengthOf(i + 1);
-    expect(info.commands.started[i]).to.have.property('commandName', commandName);
-    expect(info.commands.succeeded[i]).to.have.property('commandName', commandName);
-    if (level !== undefined) {
-      expect(info.commands.started[i]).to.have.nested.property('command.readConcern.level', level);
+  function run_tests(index, commandName, level) {
+    expect(info.commands.started).to.have.a.lengthOf(index + 1);
+    expect(info.commands.succeeded).to.have.a.lengthOf(index + 1);
+    expect(info.commands.started[index]).to.have.property('commandName', commandName);
+    expect(info.commands.succeeded[index]).to.have.property('commandName', commandName);
+    if (level != null) {
+      expect(info.commands.started[index]).to.have.nested.property(
+        'command.readConcern.level',
+        level
+      );
     } else {
-      expect(info.commands.started[i].command.readConcern).to.equal(undefined);
+      expect(info.commands.started[index].command.readConcern).to.be.undefined;
     }
   }
 
@@ -94,26 +96,31 @@ describe('ReadConcern', function() {
       test: function(done) {
         // Get a new instance
         const configuration = this.configuration;
-        client = !test.urlOptions
-          ? configuration.newClient({ w: 1 }, { poolSize: 1, readConcern: { level: test.level } })
-          : null;
+        let options;
 
         if (test.urlReadConcernLevel || test.urlOptions) {
           url = configuration.url();
           if (!test.urlOptions) {
             url =
               url.indexOf('?') !== -1
-                ? f('%s&%s', url, test.urlReadConcernLevel)
-                : f('%s?%s', url, test.urlReadConcernLevel);
+                ? `${url}&${test.urlReadConcernLevel}`
+                : `${url}?${test.urlReadConcernLevel}`;
           } else {
-            const options = {
+            options = {
               readConcern: {
                 level: test.level
               }
             };
-            client = configuration.newClient(url, options);
           }
         }
+
+        client =
+          test.urlOptions != null
+            ? configuration.newClient(url, options)
+            : configuration.newClient(
+                { w: 1 },
+                { poolSize: 1, readConcern: { level: test.level } }
+              );
 
         client.connect((err, client) => {
           expect(err).to.not.exist;
@@ -122,9 +129,9 @@ describe('ReadConcern', function() {
           expect(db.s.readConcern).to.deep.equal({ level: test.level });
 
           // Get a collection
-          const collection = test.collectionReadConcernLevel
+          const collection = test.collectionReadConcern
             ? db.collection('readConcernCollection', {
-                readConcern: { level: test.collectionReadConcernLevel }
+                readConcern: { level: test.level }
               })
             : db.collection('readConcernCollection');
 
@@ -237,7 +244,7 @@ describe('ReadConcern', function() {
           expect(err).to.not.exist;
 
           const db = client.db(configuration.db);
-          expect({ level: test.level }).to.deep.equal(db.s.readConcern);
+          expect(db.s.readConcern).to.deep.equal({ level: test.level });
 
           // Get the collection
           const collection = db.collection('test_distinct_read_concern');
@@ -332,12 +339,12 @@ describe('ReadConcern', function() {
         expect(err).to.not.exist;
 
         const db = client.db(configuration.db);
-        expect({ level: 'majority' }).to.deep.equal(db.s.readConcern);
+        expect(db.s.readConcern).to.deep.equal({ level: 'majority' });
 
         // Get a collection
         const collection = db.collection('readConcernCollectionAggregate1');
         // Validate readConcern
-        expect({ level: 'majority' }).to.deep.equal(collection.s.readConcern);
+        expect(collection.s.readConcern).to.deep.equal({ level: 'majority' });
 
         // Listen to apm events
         info.listener.on('started', event => {
@@ -352,14 +359,14 @@ describe('ReadConcern', function() {
           .aggregate([{ $match: {} }, { $out: 'readConcernCollectionAggregate1Output' }])
           .toArray(err => {
             expect(err).to.not.exist;
-            run_tests(0, 'aggregate', undefined);
+            run_tests(0, 'aggregate');
 
             // Execute find
             collection
               .aggregate([{ $match: {} }], { out: 'readConcernCollectionAggregate2Output' })
               .toArray(err => {
                 expect(err).to.not.exist;
-                run_tests(1, 'aggregate', undefined);
+                run_tests(1, 'aggregate');
                 done();
               });
           });
@@ -429,7 +436,7 @@ describe('ReadConcern', function() {
         expect(err).to.not.exist;
 
         const db = client.db(configuration.db);
-        expect({ level: 'majority' }).to.deep.equal(db.s.readConcern);
+        expect(db.s.readConcern).to.deep.equal({ level: 'majority' });
 
         // Get the collection
         const collection = db.collection('test_map_reduce_read_concern');
@@ -453,7 +460,7 @@ describe('ReadConcern', function() {
             // Execute mapReduce
             collection.mapReduce(map, reduce, { out: { replace: 'tempCollection' } }, err => {
               expect(err).to.not.exist;
-              run_tests(0, 'mapreduce', undefined);
+              run_tests(0, 'mapreduce');
               done();
             });
           }
