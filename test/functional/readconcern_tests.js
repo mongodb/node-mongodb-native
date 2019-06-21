@@ -198,28 +198,32 @@ describe('ReadConcern', function() {
     {
       description: 'Should set majority readConcern distinct command',
       level: 'majority',
-      commandName: 'distinct'
+      commandName: 'distinct',
+      mongodbVersion: '>= 3.2'
     },
     {
       description: 'Should set majority readConcern count command',
       level: 'majority',
-      commandName: 'count'
+      commandName: 'count',
+      mongodbVersion: '>= 3.2'
     },
     {
       description: 'Should set majority readConcern group command',
       level: 'majority',
-      commandName: 'group'
+      commandName: 'group',
+      mongodbVersion: '>= 3.2 <=4.1.0'
     },
     {
       description: 'Should set majority readConcern parallelCollectionScan command',
       level: 'majority',
-      commandName: 'parallelCollectionScan'
+      commandName: 'parallelCollectionScan',
+      mongodbVersion: '>= 3.2 <=4.1.0'
     }
   ];
 
   insertTests.forEach(test => {
     it(test.description, {
-      metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2' } },
+      metadata: { requires: { topology: 'replicaset', mongodb: test.mongodbVersion } },
 
       test: function(done) {
         // Get a new instance
@@ -282,7 +286,7 @@ describe('ReadConcern', function() {
                   done();
                 });
               } else if (test.commandName === 'count') {
-                collection.count({ a: 1 }, err => {
+                collection.estimatedDocumentCount({ a: 1 }, err => {
                   expect(err).to.not.exist;
                   run_tests(0, test.commandName, test.level);
                   done();
