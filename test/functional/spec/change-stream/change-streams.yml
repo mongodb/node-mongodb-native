@@ -32,7 +32,17 @@ tests:
           command_name: aggregate
           database_name: *database_name
     result:
-      success: []
+      success:
+        -
+          _id: "42"
+          documentKey: "42"
+          operationType: insert
+          ns:
+            db: *database_name
+            coll: *collection_name
+          fullDocument:
+            x:
+              $numberInt: "1"
   -
     description: The server returns change stream responses in the specified server response format
     minServerVersion: "3.6.0"

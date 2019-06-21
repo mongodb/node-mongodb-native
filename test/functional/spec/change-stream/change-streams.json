@@ -45,7 +45,22 @@
         }
       ],
       "result": {
-        "success": []
+        "success": [
+          {
+            "_id": "42",
+            "documentKey": "42",
+            "operationType": "insert",
+            "ns": {
+              "db": "change-stream-tests",
+              "coll": "test"
+            },
+            "fullDocument": {
+              "x": {
+                "$numberInt": "1"
+              }
+            }
+          }
+        ]
       }
     },
     {

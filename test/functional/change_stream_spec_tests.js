@@ -116,6 +116,7 @@ describe('Change Stream Spec', function() {
 
       if (result.success) {
         value = EJSONToJSON(value);
+        expect(value).to.have.a.lengthOf(result.success.length);
         assertEquality(value, result.success);
       }
     };

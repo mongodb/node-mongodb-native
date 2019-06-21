@@ -149,7 +149,7 @@ Prose Tests
 The following tests have not yet been automated, but MUST still be tested
 
 #. ``ChangeStream`` must continuously track the last seen ``resumeToken``
-#. ``ChangeStream`` will throw an exception if the server response is missing the resume token (if wire version is < 8)
+#. ``ChangeStream`` will throw an exception if the server response is missing the resume token (if wire version is < 8, this is a driver-side error; for 8+, this is a server-side error)
 #. ``ChangeStream`` will automatically resume one time on a resumable error (including `not master`) with the initial pipeline and options, except for the addition/update of a ``resumeToken``.
 #. ``ChangeStream`` will not attempt to resume on any error encountered while executing an ``aggregate`` command.
 #. ``ChangeStream`` will not attempt to resume after encountering error code 11601 (Interrupted), 136 (CappedPositionLost), or 237 (CursorKilled) while executing a ``getMore`` command.
