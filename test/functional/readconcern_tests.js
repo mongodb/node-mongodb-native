@@ -300,7 +300,7 @@ describe('ReadConcern', function() {
                   }
                 );
               } else if (test.commandName === 'parallelCollectionScan') {
-                collection.parallelCollectionScan({ numCursors: 1 }, function(err) {
+                collection.parallelCollectionScan({ numCursors: 1 }, err => {
                   expect(err).to.not.exist;
                   run_tests(0, test.commandName, test.level);
                   done();
@@ -324,7 +324,7 @@ describe('ReadConcern', function() {
         { poolSize: 1, readConcern: { level: 'majority' } }
       );
 
-      client.connect(function(err, client) {
+      client.connect((err, client) => {
         expect(err).to.not.exist;
 
         const db = client.db(configuration.db);
@@ -336,24 +336,24 @@ describe('ReadConcern', function() {
         expect({ level: 'majority' }).to.deep.equal(collection.s.readConcern);
 
         // Listen to apm events
-        info.listener.on('started', function(event) {
+        info.listener.on('started', event => {
           if (event.commandName === 'aggregate') info.commands.started.push(event);
         });
-        info.listener.on('succeeded', function(event) {
+        info.listener.on('succeeded', event => {
           if (event.commandName === 'aggregate') info.commands.succeeded.push(event);
         });
 
         // Execute find
         collection
           .aggregate([{ $match: {} }, { $out: 'readConcernCollectionAggregate1Output' }])
-          .toArray(function(err) {
+          .toArray(err => {
             expect(err).to.not.exist;
             run_tests(0, 'aggregate', undefined);
 
             // Execute find
             collection
               .aggregate([{ $match: {} }], { out: 'readConcernCollectionAggregate2Output' })
-              .toArray(function(err) {
+              .toArray(err => {
                 expect(err).to.not.exist;
                 run_tests(1, 'aggregate', undefined);
                 done();
@@ -421,7 +421,7 @@ describe('ReadConcern', function() {
         { poolSize: 1, readConcern: { level: 'majority' } }
       );
 
-      client.connect(function(err, client) {
+      client.connect((err, client) => {
         expect(err).to.not.exist;
 
         const db = client.db(configuration.db);
@@ -432,24 +432,22 @@ describe('ReadConcern', function() {
         collection.insertMany(
           [{ user_id: 1 }, { user_id: 2 }],
           configuration.writeConcernMax(),
-          function(err) {
+          err => {
             expect(err).to.not.exist;
             // String functions
             const map = 'function() { emit(this.user_id, 1); }';
             const reduce = 'function(k,vals) { return 1; }';
 
             // Listen to apm events
-            info.listener.on('started', function(event) {
+            info.listener.on('started', event => {
               if (event.commandName === 'mapreduce') info.commands.started.push(event);
             });
-            info.listener.on('succeeded', function(event) {
+            info.listener.on('succeeded', event => {
               if (event.commandName === 'mapreduce') info.commands.succeeded.push(event);
             });
 
             // Execute mapReduce
-            collection.mapReduce(map, reduce, { out: { replace: 'tempCollection' } }, function(
-              err
-            ) {
+            collection.mapReduce(map, reduce, { out: { replace: 'tempCollection' } }, err => {
               expect(err).to.not.exist;
               run_tests(0, 'mapreduce', undefined);
               done();
