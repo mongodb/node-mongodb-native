@@ -38,31 +38,30 @@ describe('Collection', function() {
           const db = client.db(this.configuration.db);
           db.createCollection('test_collection_methods', (err, collection) => {
             // Verify that all the result are correct coming back (should contain the value ok)
-            test.equal('test_collection_methods', collection.collectionName);
+            expect('test_collection_methods').to.equal(collection.collectionName);
             // Let's check that the collection was created correctly
             db.listCollections().toArray((err, documents) => {
               let found = false;
               documents.forEach(document => {
                 if (document.name === 'integration_tests_.test_collection_methods') found = true;
               });
-              test.ok(true, found);
 
               // Rename the collection and check that it's gone
               db.renameCollection('test_collection_methods', 'test_collection_methods2', err => {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 // Drop the collection and check that it's gone
                 db.dropCollection('test_collection_methods2', (err, result) => {
-                  test.equal(true, result);
+                  expect(true).to.equal(result);
                 });
               });
 
               db.createCollection('test_collection_methods3', (err, collection) => {
                 // Verify that all the result are correct coming back (should contain the value ok)
-                test.equal('test_collection_methods3', collection.collectionName);
+                expect('test_collection_methods3').to.equal(collection.collectionName);
 
                 db.createCollection('test_collection_methods4', (err, collection) => {
                   // Verify that all the result are correct coming back (should contain the value ok)
-                  test.equal('test_collection_methods4', collection.collectionName);
+                  expect('test_collection_methods4').to.equal(collection.collectionName);
 
                   // Rename the collection and with the dropTarget boolean, and check to make sure only onen exists.
                   db.renameCollection(
@@ -70,10 +69,10 @@ describe('Collection', function() {
                     'test_collection_methods3',
                     { dropTarget: true },
                     err => {
-                      test.equal(null, err);
+                      expect(err).to.not.exist;
 
                       db.dropCollection('test_collection_methods3', (err, result) => {
-                        test.equal(true, result);
+                        expect(true).to.equal(result);
                         client.close();
                         done();
                       });
@@ -101,16 +100,16 @@ describe('Collection', function() {
           const db1 = client.db('test');
           db1.createCollection('test.game', (err, collection) => {
             // Verify that all the result are correct coming back (should contain the value ok)
-            test.equal('test.game', collection.collectionName);
+            expect('test.game').to.equal(collection.collectionName);
             // Let's check that the collection was created correctly
             db1.listCollections().toArray((err, documents) => {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               let found = false;
               documents.forEach(x => {
                 if (x.name === 'test.game') found = true;
               });
 
-              test.ok(found);
+              expect(found).to.be.true;
               client.close();
               done();
             });
@@ -141,13 +140,13 @@ describe('Collection', function() {
                   { foo: 5 },
                   this.configuration.writeConcernMax(),
                   err => {
-                    test.equal(null, err);
+                    expect(err).to.not.exist;
                     db.collection('test.mario', (err, mario_collection) => {
                       mario_collection.insert(
                         { bar: 0 },
                         this.configuration.writeConcernMax(),
                         err => {
-                          test.equal(null, err);
+                          expect(err).to.not.exist;
                           // Assert collections
                           db.collections((err, collections) => {
                             let found_spiderman = false;
@@ -162,9 +161,9 @@ describe('Collection', function() {
                                 found_does_not_exist = true;
                             });
 
-                            test.ok(found_spiderman);
-                            test.ok(found_mario);
-                            test.ok(!found_does_not_exist);
+                            expect(found_spiderman).to.be.true;
+                            expect(found_mario).to.be.true;
+                            expect(found_does_not_exist).to.be.false;
                             client.close();
                             done();
                           });
@@ -194,7 +193,7 @@ describe('Collection', function() {
           expect(err).to.not.exist;
           const db = client.db(this.configuration.db);
           db.createCollection('test_collection_names', err => {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             db.listCollections().toArray((err, documents) => {
               let found = false;
@@ -208,11 +207,11 @@ describe('Collection', function() {
                   found = true;
               });
 
-              test.ok(found);
+              expect(found).to.be.true;
               // Insert a document in an non-existing collection should create the collection
               const collection = db.collection('test_collection_names2');
               collection.insert({ a: 1 }, this.configuration.writeConcernMax(), err => {
-                test.equal(null, err);
+                expect(err).to.not.exist;
 
                 db.listCollections().toArray((err, documents) => {
                   documents.forEach(document => {
@@ -228,8 +227,8 @@ describe('Collection', function() {
                       found2 = true;
                   });
 
-                  test.ok(found);
-                  test.ok(found2);
+                  expect(found).to.be.true;
+                  expect(found2).to.be.true
 
                   // Let's close the db
                   client.close();
@@ -256,20 +255,15 @@ describe('Collection', function() {
           expect(err).to.not.exist;
           const db = client.db(this.configuration.db);
           db.collection('does-not-exist', { strict: true }, err => {
-            test.ok(err instanceof Error);
-            test.equal(
-              'Collection does-not-exist does not exist. Currently in strict mode.',
-              err.message
-            );
-
+            expect(err instanceof Error).to.be.true;
+            expect('Collection does-not-exist does not exist. Currently in strict mode.').to.equal(err.message);
             db.createCollection('test_strict_access_collection', err => {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               db.collection(
                 'test_strict_access_collection',
                 this.configuration.writeConcernMax(),
                 (err, collection) => {
-                  test.equal(null, err);
-                  test.ok(collection.collectionName);
+                  expect(err).to.not.exist;
                   // Let's close the db
                   client.close();
                   done();
@@ -295,24 +289,20 @@ describe('Collection', function() {
           expect(err).to.not.exist;
           const db = client.db(this.configuration.db);
           db.createCollection('test_strict_create_collection', (err, collection) => {
-            test.equal(null, err);
-            test.equal('test_strict_create_collection', collection.collectionName);
+            expect(err).to.not.exist;
+            expect('test_strict_create_collection').to.equal(collection.collectionName);
 
             // Creating an existing collection should fail
             db.createCollection('test_strict_create_collection', { strict: true }, err => {
-              test.ok(err instanceof Error);
-              test.equal(
-                'Collection test_strict_create_collection already exists. Currently in strict mode.',
-                err.message
-              );
+              expect(err instanceof Error).to.be.true;
+              expect('Collection test_strict_create_collection already exists. Currently in strict mode.').to.equal(err.message);
 
               // Switch out of strict mode and try to re-create collection
               db.createCollection(
                 'test_strict_create_collection',
                 { strict: false },
                 (err, collection) => {
-                  test.equal(null, err);
-                  test.ok(collection.collectionName);
+                  expect(err).to.not.exist;
 
                   // Let's close the db
                   client.close();
@@ -328,7 +318,7 @@ describe('Collection', function() {
     /**
      * @ignore
      */
-    it.skip('should fail to insert due to illegal keys', {
+    it('should fail to insert due to illegal keys', {
       metadata: {
         requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
       },
@@ -344,68 +334,62 @@ describe('Collection', function() {
               [{ hello: 'world' }, { hello: { hello: 'world' } }],
               this.configuration.writeConcernMax(),
               err => {
-                test.equal(null, err);
+                expect(err).to.not.exist;
 
                 // Illegal insert for key
                 collection.insert(
                   { $hello: 'world' },
                   this.configuration.writeConcernMax(),
                   err => {
-                    test.ok(err instanceof Error);
-                    test.equal("key $hello must not start with '$'", err.message);
+                    expect(err instanceof Error).to.be.true;
+                    expect("key $hello must not start with '$'").to.equal(err.message);
 
                     collection.insert(
                       { hello: { $hello: 'world' } },
                       this.configuration.writeConcernMax(),
                       err => {
-                        test.ok(err instanceof Error);
-                        test.equal("key $hello must not start with '$'", err.message);
+                        expect(err instanceof Error).to.be.true;
+                        expect("key $hello must not start with '$'").to.equal(err.message);
 
                         collection.insert(
                           { he$llo: 'world' },
                           this.configuration.writeConcernMax(),
                           err => {
-                            test.equal(null, err);
+                            expect(err).to.not.exist;
 
                             collection.insert(
                               { hello: { hell$o: 'world' } },
                               this.configuration.writeConcernMax(),
                               err => {
-                                test.ok(err == null);
+                                expect(err).to.not.exist;
 
                                 collection.insert(
                                   { '.hello': 'world' },
                                   this.configuration.writeConcernMax(),
                                   err => {
-                                    test.ok(err instanceof Error);
-                                    test.equal("key .hello must not contain '.'", err.message);
+                                    expect(err instanceof Error).to.be.true;
+                                    expect("key .hello must not contain '.'").to.equal(err.message);
 
                                     collection.insert(
                                       { hello: { '.hello': 'world' } },
                                       this.configuration.writeConcernMax(),
                                       err => {
-                                        test.ok(err instanceof Error);
-                                        test.equal("key .hello must not contain '.'", err.message);
+                                        expect(err instanceof Error).to.be.true;
+                                        expect("key .hello must not contain '.'").to.equal(err.message);
 
                                         collection.insert(
                                           { 'hello.': 'world' },
                                           this.configuration.writeConcernMax(),
                                           err => {
-                                            test.ok(err instanceof Error);
-                                            test.equal(
-                                              "key hello. must not contain '.'",
-                                              err.message
-                                            );
+                                            expect(err instanceof Error).to.be.true;
+                                            expect("key hello. must not contain '.'").to.equal(err.message);
 
                                             collection.insert(
                                               { hello: { 'hello.': 'world' } },
                                               this.configuration.writeConcernMax(),
                                               err => {
-                                                test.ok(err instanceof Error);
-                                                test.equal(
-                                                  "key hello. must not contain '.'",
-                                                  err.message
-                                                );
+                                                expect(err instanceof Error).to.be.true;
+                                                expect("key hello. must not contain '.'").to.equal(err.message);
                                                 // Let's close the db
                                                 client.close();
                                                 done();
@@ -446,27 +430,27 @@ describe('Collection', function() {
           expect(err).to.not.exist;
           const db = client.db(this.configuration.db);
           db.collection(5, err => {
-            test.equal('collection name must be a String', err.message);
+            expect('collection name must be a String').to.equal(err.message);
           });
 
           db.collection('', err => {
-            test.equal('collection names cannot be empty', err.message);
+            expect('collection names cannot be empty').to.equal(err.message);
           });
 
           db.collection('te$t', err => {
-            test.equal("collection names must not contain '$'", err.message);
+            expect("collection names must not contain '$'").to.equal(err.message);
           });
 
           db.collection('.test', err => {
-            test.equal("collection names must not start or end with '.'", err.message);
+            expect("collection names must not start or end with '.'").to.equal(err.message);
           });
 
           db.collection('test.', err => {
-            test.equal("collection names must not start or end with '.'", err.message);
+            expect("collection names must not start or end with '.'").to.equal(err.message);
           });
 
           db.collection('test..t', err => {
-            test.equal('collection names cannot be empty', err.message);
+            expect('collection names cannot be empty').to.equal(err.message);
             client.close();
             done();
           });
@@ -514,7 +498,7 @@ describe('Collection', function() {
           const db = client.db(this.configuration.db);
           db.collection('test_multiple_insert_2', (err, collection) => {
             collection.count((err, count) => {
-              test.equal(0, count);
+              expect(count).to.equal(0)
               // Let's close the db
               client.close();
               done();
@@ -540,37 +524,37 @@ describe('Collection', function() {
           db.createCollection('test_save', (err, collection) => {
             const doc = { hello: 'world' };
             collection.save(doc, this.configuration.writeConcernMax(), (err, r) => {
-              test.ok(r.ops[0]._id != null);
+              expect(r.ops[0]._id != null).to.be.true;
 
               collection.count((err, count) => {
-                test.equal(1, count);
+                expect(count).to.equal(1)
 
                 collection.save(r.ops[0], this.configuration.writeConcernMax(), err => {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   collection.count((err, count) => {
-                    test.equal(1, count);
+                    expect(count).to.equal(1)
 
                     collection.findOne((err, doc3) => {
-                      test.equal('world', doc3.hello);
+                      expect('world').to.equal(doc3.hello);
 
                       doc3.hello = 'mike';
 
                       collection.save(doc3, this.configuration.writeConcernMax(), err => {
-                        test.equal(null, err);
+                        expect(err).to.not.exist;
                         collection.count((err, count) => {
-                          test.equal(1, count);
+                          expect(count).to.equal(1)
 
                           collection.findOne((err, doc5) => {
-                            test.equal('mike', doc5.hello);
+                            expect('mike').to.equal(doc5.hello);
 
                             // Save another document
                             collection.save(
                               { hello: 'world' },
                               this.configuration.writeConcernMax(),
                               err => {
-                                test.equal(null, err);
+                                expect(err).to.not.exist;
                                 collection.count((err, count) => {
-                                  test.equal(2, count);
+                                  expect(count).to.equal(2);
                                   // Let's close the db
                                   client.close();
                                   done();
@@ -609,10 +593,10 @@ describe('Collection', function() {
               { x: Long.fromNumber(9223372036854775807) },
               this.configuration.writeConcernMax(),
               err => {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 collection.findOne((err, doc) => {
-                  test.equal(null, err);
-                  test.ok(Long.fromNumber(9223372036854775807).equals(doc.x));
+                  expect(err).to.not.exist;
+                  expect(Long.fromNumber(9223372036854775807)).to.deep.equal(doc.x);
                   // Let's close the db
                   client.close();
                   done();
@@ -642,21 +626,21 @@ describe('Collection', function() {
             (err, collection) => {
               const a = { _id: '1', hello: 'world' };
               collection.save(a, this.configuration.writeConcernMax(), err => {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 collection.count((err, count) => {
-                  test.equal(1, count);
+                  expect(count).to.equal(1)
 
                   collection.findOne((err, doc) => {
-                    test.equal('world', doc.hello);
+                    expect('world').to.equal(doc.hello);
 
                     doc.hello = 'mike';
                     collection.save(doc, this.configuration.writeConcernMax(), err => {
-                      test.equal(null, err);
+                      expect(err).to.not.exist;
                       collection.findOne((err, doc) => {
                         collection.count((err, count) => {
-                          test.equal(1, count);
+                          expect(count).to.equal(1)
 
-                          test.equal('mike', doc.hello);
+                          expect('mike').to.equal(doc.hello);
                           // Let's close the db
                           client.close();
                           done();
@@ -692,8 +676,8 @@ describe('Collection', function() {
             const doc = { _id: id, a: 1 };
 
             collection.update({ _id: id }, doc, this.configuration.writeConcernMax(), (err, r) => {
-              test.equal(null, err);
-              test.equal(0, r.result.n);
+              expect(err).to.not.exist;
+              expect(0).to.equal(r.result.n);
 
               client.close();
               done();
@@ -719,14 +703,11 @@ describe('Collection', function() {
           db.createCollection(
             'test_should_execute_insert_update_delete_safe_mode',
             (err, collection) => {
-              test.equal(
-                'test_should_execute_insert_update_delete_safe_mode',
-                collection.collectionName
-              );
+              expect('test_should_execute_insert_update_delete_safe_mode').to.equal(collection.collectionName);
 
               collection.insert({ i: 1 }, this.configuration.writeConcernMax(), (err, r) => {
-                test.equal(1, r.ops.length);
-                test.ok(r.ops[0]._id.toHexString().length === 24);
+                expect(1).to.equal(r.ops.length);
+                expect(r.ops[0]._id.toHexString().length === 24).to.be.true;
 
                 // Update the record
                 collection.update(
@@ -734,12 +715,12 @@ describe('Collection', function() {
                   { $set: { i: 2 } },
                   this.configuration.writeConcernMax(),
                   err => {
-                    test.equal(null, err);
-                    test.equal(1, r.result.n);
+                    expect(err).to.not.exist;
+                    expect(1).to.equal(r.result.n);
 
                     // Remove safely
                     collection.remove({}, this.configuration.writeConcernMax(), err => {
-                      test.equal(null, err);
+                      expect(err).to.not.exist;
 
                       client.close();
                       done();
@@ -774,7 +755,7 @@ describe('Collection', function() {
 
             //insert new user
             collection.save(doc, this.configuration.writeConcernMax(), err => {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               collection
                 .find({}, { name: 1 })
@@ -788,8 +769,8 @@ describe('Collection', function() {
                     user.pants = 'worn';
 
                     collection.save(user, this.configuration.writeConcernMax(), (err, result) => {
-                      test.equal(null, err);
-                      test.equal(1, result.result.n);
+                      expect(err).to.not.exist;
+                      expect(1).to.equal(result.result.n);
                       client.close();
                       done();
                     });
@@ -819,7 +800,7 @@ describe('Collection', function() {
           db.createCollection('save_error_on_save_test', (err, collection) => {
             // Create unique index for username
             collection.createIndex([['username', 1]], this.configuration.writeConcernMax(), err => {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               const doc = {
                 email: 'email@email.com',
                 encrypted_password: 'password',
@@ -836,18 +817,18 @@ describe('Collection', function() {
               };
               //insert new user
               collection.save(doc, this.configuration.writeConcernMax(), err => {
-                test.equal(null, err);
+                expect(err).to.not.exist;
 
                 collection
                   .find({})
                   .limit(1)
                   .toArray((err, users) => {
-                    test.equal(null, err);
+                    expect(err).to.not.exist;
                     const user = users[0];
                     user.friends.splice(1, 1);
 
                     collection.save(user, err => {
-                      test.equal(null, err);
+                      expect(err).to.not.exist;
 
                       // Update again
                       collection.update(
@@ -855,8 +836,8 @@ describe('Collection', function() {
                         { friends: user.friends },
                         { upsert: true, w: 1 },
                         (err, result) => {
-                          test.equal(null, err);
-                          test.equal(1, result.result.n);
+                          expect(err).to.not.exist;
+                          expect(1).to.equal(result.result.n);
 
                           client.close();
                           done();
@@ -885,19 +866,19 @@ describe('Collection', function() {
           expect(err).to.not.exist;
           const db = client.db(this.configuration.db);
           db.collection('remove_with_no_callback_bug_test', (err, collection) => {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             collection.save({ a: 1 }, this.configuration.writeConcernMax(), err => {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               collection.save({ b: 1 }, this.configuration.writeConcernMax(), err => {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 collection.save({ c: 1 }, this.configuration.writeConcernMax(), err => {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   collection.remove({ a: 1 }, this.configuration.writeConcernMax(), err => {
-                    test.equal(null, err);
+                    expect(err).to.not.exist;
                     // Let's perform a count
                     collection.count((err, count) => {
-                      test.equal(null, err);
-                      test.equal(2, count);
+                      expect(err).to.not.exist;
+                      expect(count).to.equal(2);
                       client.close();
                       done();
                     });
@@ -930,21 +911,21 @@ describe('Collection', function() {
             'shouldCorrectlyCreateTTLCollectionWithIndexUsingEnsureIndex',
             (err, collection) => {
               collection.ensureIndex({ createdAt: 1 }, { expireAfterSeconds: 1, w: 1 }, err => {
-                test.equal(null, err);
+                expect(err).to.not.exist;
 
                 // Insert a document with a date
                 collection.insert(
                   { a: 1, createdAt: new Date() },
                   this.configuration.writeConcernMax(),
                   err => {
-                    test.equal(null, err);
+                    expect(err).to.not.exist;
 
                     collection.indexInformation({ full: true }, (err, indexes) => {
-                      test.equal(null, err);
+                      expect(err).to.not.exist;
 
                       for (let i = 0; i < indexes.length; i++) {
                         if (indexes[i].name === 'createdAt_1') {
-                          test.equal(1, indexes[i].expireAfterSeconds);
+                          expect(1).to.equal(indexes[i].expireAfterSeconds);
                           break;
                         }
                       }
@@ -982,21 +963,21 @@ describe('Collection', function() {
             {},
             (err, collection) => {
               collection.createIndex({ createdAt: 1 }, { expireAfterSeconds: 1, w: 1 }, err => {
-                test.equal(null, err);
+                expect(err).to.not.exist;
 
                 // Insert a document with a date
                 collection.insert(
                   { a: 1, createdAt: new Date() },
                   this.configuration.writeConcernMax(),
                   err => {
-                    test.equal(null, err);
+                    expect(err).to.not.exist;
 
                     collection.indexInformation({ full: true }, (err, indexes) => {
-                      test.equal(null, err);
+                      expect(err).to.not.exist;
 
                       for (let i = 0; i < indexes.length; i++) {
                         if (indexes[i].name === 'createdAt_1') {
-                          test.equal(1, indexes[i].expireAfterSeconds);
+                          expect(1).to.equal(indexes[i].expireAfterSeconds);
                           break;
                         }
                       }
@@ -1031,10 +1012,10 @@ describe('Collection', function() {
           const db = client.db(this.configuration.db);
           db.createCollection('create_index_without_options', {}, (err, collection) => {
             collection.createIndex({ createdAt: 1 }, err => {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               collection.indexInformation({ full: true }, (err, indexes) => {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 const indexNames = indexes.map(i => i.name);
                 expect(indexNames).to.include('createdAt_1');
 
@@ -1063,10 +1044,10 @@ describe('Collection', function() {
           db.createCollection('shouldCorrectlyReadBackDocumentWithNull', {}, (err, collection) => {
             // Insert a document with a date
             collection.insert({ test: null }, this.configuration.writeConcernMax(), err => {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               collection.findOne(err => {
-                test.equal(null, err);
+                expect(err).to.not.exist;
 
                 client.close();
                 done();
@@ -1094,13 +1075,13 @@ describe('Collection', function() {
             try {
               coll.update({}, null, () => {});
             } catch (err) {
-              test.equal('document must be a valid JavaScript object', err.message);
+              expect('document must be a valid JavaScript object').to.equal(err.message);
             }
 
             try {
               coll.update(null, null, () => {});
             } catch (err) {
-              test.equal('selector must be a valid JavaScript object', err.message);
+              expect('selector must be a valid JavaScript object').to.equal(err.message);
             }
 
             client.close();
@@ -1124,10 +1105,10 @@ describe('Collection', function() {
           expect(err).to.not.exist;
           const db = client.db(this.configuration.db);
           db.collection('shouldCorrectlyHandle0asIdForSave').save({ _id: 0 }, err => {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             db.collection('shouldCorrectlyHandle0asIdForSave').save({ _id: 0 }, err => {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               client.close();
               done();
             });
@@ -1152,7 +1133,7 @@ describe('Collection', function() {
           db
             .collection('executeUpdateWithElemMatch')
             .update({ 'item.i': 1 }, { $set: { a: 1 } }, err => {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               client.close();
               done();
@@ -1177,7 +1158,7 @@ describe('Collection', function() {
           db
             .collection('executeUpdateWithElemMatch')
             .update({ item: { $elemMatch: { name: 'my_name' } } }, { $set: { a: 1 } }, err => {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               client.close();
               done();
@@ -1203,11 +1184,11 @@ describe('Collection', function() {
             'shouldFailDueToExistingCollection',
             { strict: true },
             (err, coll) => {
-              test.equal(null, err);
-              test.ok(coll != null);
+              expect(err).to.not.exist;
+              expect(coll != null).to.be.true;
 
               db.createCollection('shouldFailDueToExistingCollection', { strict: true }, err => {
-                test.ok(err != null);
+                expect(err != null).to.be.true;
 
                 client.close();
                 done();
@@ -1235,16 +1216,16 @@ describe('Collection', function() {
           const db = client.db(this.configuration.db);
           // Create a collection
           db.createCollection(testCollection, err => {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             db.listCollections({ name: testCollection }).toArray((err, documents) => {
-              test.equal(null, err);
-              test.equal(documents.length, 1);
+              expect(err).to.not.exist;
+              expect(documents.length).to.equal(1);
               let found = false;
               documents.forEach(document => {
                 if (document.name === testCollection) found = true;
               });
-              test.ok(found);
+              expect(found).to.be.true;
               client.close();
               done();
             });
@@ -1269,23 +1250,23 @@ describe('Collection', function() {
           const db = client.db(this.configuration.db);
           // Create a collection
           db.createCollection(testCollection, err => {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Index name happens to be the same as collection name
             db.createIndex(testCollection, 'collection_124', { w: 1 }, (err, indexName) => {
-              test.equal(null, err);
-              test.equal('collection_124_1', indexName);
+              expect(err).to.not.exist;
+              expect('collection_124_1').to.equal(indexName);
 
               db.listCollections().toArray((err, documents) => {
-                test.equal(null, err);
-                test.ok(documents.length > 1);
+                expect(err).to.not.exist;
+                expect(documents.length > 1).to.be.true;
                 let found = false;
 
                 documents.forEach(document => {
                   if (document.name === testCollection) found = true;
                 });
 
-                test.ok(found);
+                expect(found).to.be.true;
                 client.close();
                 done();
               });
@@ -1307,19 +1288,19 @@ describe('Collection', function() {
       test: function(done) {
         client.connect((err, client) => {
           expect(err).to.not.exist;
-          test.equal(null, err);
+          expect(err).to.not.exist;
           const emptyDb = client.db('listCollectionsDb');
           emptyDb.createCollection('test1', err => {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             emptyDb.createCollection('test2', err => {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               emptyDb.createCollection('test3', err => {
-                test.equal(null, err);
+                expect(err).to.not.exist;
 
                 emptyDb.listCollections().toArray((err, collections) => {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   // By name
                   let names = {};
 
@@ -1327,9 +1308,9 @@ describe('Collection', function() {
                     names[collections[i].name] = collections[i];
                   }
 
-                  test.ok(names['test1'] != null);
-                  test.ok(names['test2'] != null);
-                  test.ok(names['test3'] != null);
+                  expect(names['test1'] != null).to.be.true;
+                  expect(names['test2'] != null).to.be.true;
+                  expect(names['test3'] != null).to.be.true;
 
                   client.close();
                   done();
@@ -1353,19 +1334,19 @@ describe('Collection', function() {
       test: function(done) {
         client.connect((err, client) => {
           expect(err).to.not.exist;
-          test.equal(null, err);
+          expect(err).to.not.exist;
           const emptyDb = client.db('listCollectionsDb');
           emptyDb.createCollection('test1', err => {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             emptyDb.createCollection('test2', err => {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               emptyDb.createCollection('test3', err => {
-                test.equal(null, err);
+                expect(err).to.not.exist;
 
                 emptyDb.listCollections().toArray((err, collections) => {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   // By name
                   let names = {};
 
@@ -1373,9 +1354,9 @@ describe('Collection', function() {
                     names[collections[i].name] = collections[i];
                   }
 
-                  test.ok(names['test1'] != null);
-                  test.ok(names['test2'] != null);
-                  test.ok(names['test3'] != null);
+                  expect(names['test1'] != null).to.be.true;
+                  expect(names['test2'] != null).to.be.true;
+                  expect(names['test3'] != null).to.be.true;
 
                   client.close();
                   done();
@@ -1399,16 +1380,16 @@ describe('Collection', function() {
       test: function(done) {
         client.connect((err, client) => {
           expect(err).to.not.exist;
-          test.equal(null, err);
+          expect(err).to.not.exist;
           const emptyDb = client.db('listCollectionsDb2');
           emptyDb.createCollection('test1', err => {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             emptyDb.createCollection('test.test', err => {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               emptyDb.createCollection('test3', err => {
-                test.equal(null, err);
+                expect(err).to.not.exist;
 
                 emptyDb.collections((err, collections) => {
                   collections = collections.map(collection => {
@@ -1428,7 +1409,7 @@ describe('Collection', function() {
                     }
                   });
 
-                  test.ok(foundCollection);
+                  expect(foundCollection).to.be.true;
                   client.close();
                   done();
                 });
