@@ -13,6 +13,8 @@ describe('Change Stream Spec', function() {
   let ctx;
   let events;
 
+  const TESTS_TO_SKIP = new Set(['Test consecutive resume']);
+
   before(function() {
     const configuration = this.configuration;
     return setupDatabase(configuration).then(() => {
@@ -66,7 +68,8 @@ describe('Change Stream Spec', function() {
         });
 
         specData.tests.forEach(test => {
-          const itFn = test.skip ? it.skip : test.only ? it.only : it;
+          const shouldSkip = test.skip || TESTS_TO_SKIP.has(test.description);
+          const itFn = shouldSkip ? it.skip : test.only ? it.only : it;
           const metadata = generateMetadata(test);
           const testFn = generateTestFn(test);
 
@@ -92,15 +95,27 @@ describe('Change Stream Spec', function() {
   }
 
   function generateTestFn(test) {
+    const configureFailPoint = makeFailPointCommand(test);
     const testFnRunOperations = makeTestFnRunOperations(test);
     const testSuccess = makeTestSuccess(test);
     const testFailure = makeTestFailure(test);
     const testAPM = makeTestAPM(test);
 
     return function testFn() {
-      return testFnRunOperations(ctx)
+      return configureFailPoint(ctx)
+        .then(() => testFnRunOperations(ctx))
         .then(testSuccess, testFailure)
         .then(() => testAPM(ctx, events));
+    };
+  }
+
+  function makeFailPointCommand(test) {
+    if (!test.failPoint) {
+      return () => Promise.resolve();
+    }
+
+    return function(ctx) {
+      return ctx.gc.db('admin').command(test.failPoint);
     };
   }
 
