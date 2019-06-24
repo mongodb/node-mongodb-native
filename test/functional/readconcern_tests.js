@@ -5,18 +5,21 @@ const expect = require('chai').expect;
 
 let client;
 let url;
-const info = { commands: { started: [], succeeded: [] } };
+let listener;
+let started;
+let succeeded;
 
 describe('ReadConcern', function() {
   before(function() {
     return setupDatabase(this.configuration);
   });
 
-  afterEach(() => info.listener.uninstrument());
+  afterEach(() => listener.uninstrument());
 
   beforeEach(function() {
-    info.commands = { started: [], succeeded: [] };
-    info.listener = mongo.instrument(err => expect(err).to.be.null);
+    started = [];
+    succeeded = [];
+    listener = mongo.instrument(err => expect(err).to.be.null);
   });
 
   afterEach(() => client.close());
@@ -28,73 +31,80 @@ describe('ReadConcern', function() {
     };
   }
 
+  function validateTestResults(commandName, level) {
+    expect(started.length).to.equal(succeeded.length);
+    for (var i = 0; i < started.length; i++) {
+      expect(started[i]).to.have.property('commandName', commandName);
+      expect(succeeded[i]).to.have.property('commandName', commandName);
+      if (level != null) {
+        expect(started[i]).to.have.nested.property('command.readConcern.level', level);
+      } else {
+        expect(started[i].command.readConcern).to.be.undefined;
+      }
+    }
+  }
+
   const tests = [
     {
       description: 'Should set local readConcern on db level when using collection method',
       level: 'local',
-      commandName: 'find'
+      commandName: 'find',
+      readConcern: { level: 'local' }
     },
     {
       description: 'Should set majority readConcern on db level',
       level: 'majority',
-      commandName: 'find'
+      commandName: 'find',
+      readConcern: { level: 'majority' }
     },
     {
       description: 'Should set local readConcern at collection level',
       level: 'local',
       commandName: 'find',
-      collectionReadConcern: true
+      collectionReadConcern: true,
+      readConcern: { level: 'local' }
     },
     {
       description: 'Should set majority readConcern at collection level',
       level: 'majority',
       commandName: 'find',
-      collectionReadConcern: true
+      collectionReadConcern: true,
+      readConcern: { level: 'majority' }
     },
     {
       description: 'Should set local readConcern using MongoClient',
       level: 'local',
       commandName: 'find',
-      urlReadConcernLevel: 'readConcernLevel=local'
+      urlReadConcernLevel: 'readConcernLevel=local',
+      readConcern: { level: 'local' }
     },
     {
       description: 'Should set majority readConcern using MongoClient',
       level: 'majority',
       commandName: 'find',
-      urlReadConcernLevel: 'readConcernLevel=majority'
+      urlReadConcernLevel: 'readConcernLevel=majority',
+      readConcern: { level: 'majority' }
     },
     {
       description: 'Should set majority readConcern using MongoClient with options',
       level: 'majority',
       commandName: 'find',
-      urlOptions: 'majority'
+      urlOptions: 'majority',
+      readConcern: { level: 'majority' }
     },
     {
       description: 'Should set majority readConcern aggregate command',
       level: 'majority',
-      commandName: 'aggregate'
+      commandName: 'aggregate',
+      readConcern: { level: 'majority' }
     },
     {
       description: 'Should set majority readConcern geoSearch command',
       level: 'majority',
-      commandName: 'geoSearch'
+      commandName: 'geoSearch',
+      readConcern: { level: 'majority' }
     }
   ];
-
-  function run_tests(index, commandName, level) {
-    expect(info.commands.started).to.have.a.lengthOf(index + 1);
-    expect(info.commands.succeeded).to.have.a.lengthOf(index + 1);
-    expect(info.commands.started[index]).to.have.property('commandName', commandName);
-    expect(info.commands.succeeded[index]).to.have.property('commandName', commandName);
-    if (level != null) {
-      expect(info.commands.started[index]).to.have.nested.property(
-        'command.readConcern.level',
-        level
-      );
-    } else {
-      expect(info.commands.started[index].command.readConcern).to.be.undefined;
-    }
-  }
 
   tests.forEach(test => {
     it(test.description, {
@@ -124,45 +134,37 @@ describe('ReadConcern', function() {
         client =
           test.urlOptions != null
             ? configuration.newClient(url, options)
-            : configuration.newClient(
-                { w: 1 },
-                { poolSize: 1, readConcern: { level: test.level } }
-              );
+            : configuration.newClient({ w: 1 }, { poolSize: 1, readConcern: test.readConcern });
 
         client.connect((err, client) => {
           expect(err).to.not.exist;
 
           const db = client.db(configuration.db);
-          expect(db.s.readConcern).to.deep.equal({ level: test.level });
+          expect(db.readConcern).to.deep.equal(test.readConcern);
 
           // Get a collection
           const collection = test.collectionReadConcern
-            ? db.collection('readConcernCollection', {
-                readConcern: { level: test.level }
-              })
+            ? db.collection('readConcernCollection', test.readConcern)
             : db.collection('readConcernCollection');
 
           // Validate readConcern
-          expect(collection.s.readConcern).to.deep.equal({ level: test.level });
+          expect(collection.readConcern).to.deep.equal(test.readConcern);
 
           // commandMonitoring / listening to events
-          info.listener.on('started', filterForCommands(test.commandName, info.commands.started));
-          info.listener.on(
-            'succeeded',
-            filterForCommands(test.commandName, info.commands.succeeded)
-          );
+          listener.on('started', filterForCommands(test.commandName, started));
+          listener.on('succeeded', filterForCommands(test.commandName, succeeded));
 
           // Execute find
           if (test.commandName === 'find') {
             collection.find().toArray(err => {
               expect(err).to.not.exist;
-              run_tests(0, test.commandName, test.level);
+              validateTestResults(test.commandName, test.level);
               done();
             });
           } else if (test.commandName === 'aggregate') {
             collection.aggregate([{ $match: {} }]).toArray(err => {
               expect(err).to.not.exist;
-              run_tests(0, test.commandName, test.level);
+              validateTestResults(test.commandName, test.level);
               done();
             });
           } else if (test.commandName === 'geoSearch') {
@@ -182,7 +184,7 @@ describe('ReadConcern', function() {
                     { search: { a: 1 }, limit: 1, maxDistance: 100 },
                     err => {
                       expect(err).to.not.exist;
-                      run_tests(0, test.commandName, test.level);
+                      validateTestResults(test.commandName, test.level);
                       done();
                     }
                   );
@@ -200,25 +202,29 @@ describe('ReadConcern', function() {
       description: 'Should set majority readConcern distinct command',
       level: 'majority',
       commandName: 'distinct',
-      mongodbVersion: '>= 3.2'
+      mongodbVersion: '>= 3.2',
+      readConcern: { level: 'majority' }
     },
     {
       description: 'Should set majority readConcern count command',
       level: 'majority',
       commandName: 'count',
-      mongodbVersion: '>= 3.2'
+      mongodbVersion: '>= 3.2',
+      readConcern: { level: 'majority' }
     },
     {
       description: 'Should set majority readConcern group command',
       level: 'majority',
       commandName: 'group',
-      mongodbVersion: '>= 3.2 <=4.1.0'
+      mongodbVersion: '>= 3.2 <=4.1.0',
+      readConcern: { level: 'majority' }
     },
     {
       description: 'Should set majority readConcern parallelCollectionScan command',
       level: 'majority',
       commandName: 'parallelCollectionScan',
-      mongodbVersion: '>= 3.2 <=4.1.0'
+      mongodbVersion: '>= 3.2 <=4.1.0',
+      readConcern: { level: 'majority' }
     }
   ];
 
@@ -229,16 +235,13 @@ describe('ReadConcern', function() {
       test: function(done) {
         // Get a new instance
         const configuration = this.configuration;
-        client = configuration.newClient(
-          { w: 1 },
-          { poolSize: 1, readConcern: { level: test.level } }
-        );
+        client = configuration.newClient({ w: 1 }, { poolSize: 1, readConcern: test.readConcern });
 
         client.connect((err, client) => {
           expect(err).to.not.exist;
 
           const db = client.db(configuration.db);
-          expect(db.s.readConcern).to.deep.equal({ level: test.level });
+          expect(db.readConcern).to.deep.equal(test.readConcern);
 
           // Get the collection
           const collection = db.collection('test_distinct_read_concern');
@@ -258,26 +261,20 @@ describe('ReadConcern', function() {
               expect(err).to.not.exist;
 
               // Listen to apm events
-              info.listener.on(
-                'started',
-                filterForCommands(test.commandName, info.commands.started)
-              );
-              info.listener.on(
-                'succeeded',
-                filterForCommands(test.commandName, info.commands.succeeded)
-              );
+              listener.on('started', filterForCommands(test.commandName, started));
+              listener.on('succeeded', filterForCommands(test.commandName, succeeded));
 
               // Perform a distinct query against the a field
               if (test.commandName === 'distinct') {
                 collection.distinct('a', err => {
                   expect(err).to.not.exist;
-                  run_tests(0, test.commandName, test.level);
+                  validateTestResults(test.commandName, test.level);
                   done();
                 });
               } else if (test.commandName === 'count') {
                 collection.estimatedDocumentCount({ a: 1 }, err => {
                   expect(err).to.not.exist;
-                  run_tests(0, test.commandName, test.level);
+                  validateTestResults(test.commandName, test.level);
                   done();
                 });
               } else if (test.commandName === 'group') {
@@ -288,14 +285,14 @@ describe('ReadConcern', function() {
                   'function (obj, prev) { prev.count++; }',
                   err => {
                     expect(err).to.not.exist;
-                    run_tests(0, test.commandName, test.level);
+                    validateTestResults(test.commandName, test.level);
                     done();
                   }
                 );
               } else if (test.commandName === 'parallelCollectionScan') {
                 collection.parallelCollectionScan({ numCursors: 1 }, err => {
                   expect(err).to.not.exist;
-                  run_tests(0, test.commandName, test.level);
+                  validateTestResults(test.commandName, test.level);
                   done();
                 });
               }
@@ -321,30 +318,30 @@ describe('ReadConcern', function() {
         expect(err).to.not.exist;
 
         const db = client.db(configuration.db);
-        expect(db.s.readConcern).to.deep.equal({ level: 'majority' });
+        expect(db.readConcern).to.deep.equal({ level: 'majority' });
 
         // Get a collection
         const collection = db.collection('readConcernCollectionAggregate1');
         // Validate readConcern
-        expect(collection.s.readConcern).to.deep.equal({ level: 'majority' });
+        expect(collection.readConcern).to.deep.equal({ level: 'majority' });
 
         // Listen to apm events
-        info.listener.on('started', filterForCommands('aggregate', info.commands.started));
-        info.listener.on('succeeded', filterForCommands('aggregate', info.commands.succeeded));
+        listener.on('started', filterForCommands('aggregate', started));
+        listener.on('succeeded', filterForCommands('aggregate', succeeded));
 
         // Execute find
         collection
           .aggregate([{ $match: {} }, { $out: 'readConcernCollectionAggregate1Output' }])
           .toArray(err => {
             expect(err).to.not.exist;
-            run_tests(0, 'aggregate');
+            validateTestResults('aggregate');
 
             // Execute find
             collection
               .aggregate([{ $match: {} }], { out: 'readConcernCollectionAggregate2Output' })
               .toArray(err => {
                 expect(err).to.not.exist;
-                run_tests(1, 'aggregate');
+                validateTestResults('aggregate');
                 done();
               });
           });
@@ -372,22 +369,22 @@ describe('ReadConcern', function() {
             .collection('readConcernCollectionAggregate1');
 
           // Listen to apm events
-          info.listener.on('started', filterForCommands('aggregate', info.commands.started));
-          info.listener.on('succeeded', filterForCommands('aggregate', info.commands.succeeded));
+          listener.on('started', filterForCommands('aggregate', started));
+          listener.on('succeeded', filterForCommands('aggregate', succeeded));
 
           // Execute find
           return collection
             .aggregate([{ $match: {} }, { $out: 'readConcernCollectionAggregate1Output' }])
             .toArray()
             .then(() => {
-              run_tests(0, 'aggregate', 'majority');
+              validateTestResults('aggregate', 'majority');
 
               // Execute find
               return collection
                 .aggregate([{ $match: {} }], { out: 'readConcernCollectionAggregate2Output' })
                 .toArray()
                 .then(() => {
-                  run_tests(1, 'aggregate', 'majority');
+                  validateTestResults('aggregate', 'majority');
                 });
             });
         })
@@ -410,7 +407,7 @@ describe('ReadConcern', function() {
         expect(err).to.not.exist;
 
         const db = client.db(configuration.db);
-        expect(db.s.readConcern).to.deep.equal({ level: 'majority' });
+        expect(db.readConcern).to.deep.equal({ level: 'majority' });
 
         // Get the collection
         const collection = db.collection('test_map_reduce_read_concern');
@@ -424,13 +421,13 @@ describe('ReadConcern', function() {
             const reduce = 'function(k,vals) { return 1; }';
 
             // Listen to apm events
-            info.listener.on('started', filterForCommands('mapreduce', info.commands.started));
-            info.listener.on('succeeded', filterForCommands('mapreduce', info.commands.succeeded));
+            listener.on('started', filterForCommands('mapreduce', started));
+            listener.on('succeeded', filterForCommands('mapreduce', succeeded));
 
             // Execute mapReduce
             collection.mapReduce(map, reduce, { out: { replace: 'tempCollection' } }, err => {
               expect(err).to.not.exist;
-              run_tests(0, 'mapreduce');
+              validateTestResults('mapreduce');
               done();
             });
           }
@@ -451,13 +448,13 @@ describe('ReadConcern', function() {
       client.connect((err, client) => {
         expect(err).to.not.exist;
         const db = client.db(configuration.db);
-        expect(db.s.readConcern).to.deep.equal({ level: 'local' });
+        expect(db.readConcern).to.deep.equal({ level: 'local' });
 
         // Get a collection using createCollection
         db.createCollection('readConcernCollection', (err, collection) => {
           // Validate readConcern
-          expect(collection.s.readConcern).to.deep.equal({ level: 'local' });
-          client.close(done);
+          expect(collection.readConcern).to.deep.equal({ level: 'local' });
+          done();
         });
       });
     }
