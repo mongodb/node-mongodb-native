@@ -21,9 +21,16 @@ describe('ReadConcern', function() {
 
   afterEach(() => client.close());
 
+  function filterForCommands(commands, bag) {
+    commands = Array.isArray(commands) ? commands : [commands];
+    return function(event) {
+      if (commands.indexOf(event.commandName) !== -1) bag.push(event);
+    };
+  }
+
   const tests = [
     {
-      description: 'Should set local readConcern on db level',
+      description: 'Should set local readConcern on db level when using collection method',
       level: 'local',
       commandName: 'find'
     },
@@ -100,7 +107,7 @@ describe('ReadConcern', function() {
 
         if (test.urlReadConcernLevel || test.urlOptions) {
           url = configuration.url();
-          if (!test.urlOptions) {
+          if (test.urlOptions == null) {
             url =
               url.indexOf('?') !== -1
                 ? `${url}&${test.urlReadConcernLevel}`
@@ -139,24 +146,11 @@ describe('ReadConcern', function() {
           expect(collection.s.readConcern).to.deep.equal({ level: test.level });
 
           // commandMonitoring / listening to events
-          info.listener.on('started', event => {
-            if (
-              event.commandName === 'find' ||
-              event.commandName === 'aggregate' ||
-              event.commandName === 'geoSearch'
-            ) {
-              info.commands.started.push(event);
-            }
-          });
-          info.listener.on('succeeded', event => {
-            if (
-              event.commandName === 'find' ||
-              event.commandName === 'aggregate' ||
-              event.commandName === 'geoSearch'
-            ) {
-              info.commands.succeeded.push(event);
-            }
-          });
+          info.listener.on('started', filterForCommands(test.commandName, info.commands.started));
+          info.listener.on(
+            'succeeded',
+            filterForCommands(test.commandName, info.commands.succeeded)
+          );
 
           // Execute find
           if (test.commandName === 'find') {
@@ -264,26 +258,14 @@ describe('ReadConcern', function() {
               expect(err).to.not.exist;
 
               // Listen to apm events
-              info.listener.on('started', event => {
-                if (
-                  event.commandName === 'distinct' ||
-                  event.commandName === 'count' ||
-                  event.commandName === 'group' ||
-                  event.commandName === 'parallelCollectionScan'
-                ) {
-                  info.commands.started.push(event);
-                }
-              });
-              info.listener.on('succeeded', event => {
-                if (
-                  event.commandName === 'distinct' ||
-                  event.commandName === 'count' ||
-                  event.commandName === 'group' ||
-                  event.commandName === 'parallelCollectionScan'
-                ) {
-                  info.commands.succeeded.push(event);
-                }
-              });
+              info.listener.on(
+                'started',
+                filterForCommands(test.commandName, info.commands.started)
+              );
+              info.listener.on(
+                'succeeded',
+                filterForCommands(test.commandName, info.commands.succeeded)
+              );
 
               // Perform a distinct query against the a field
               if (test.commandName === 'distinct') {
@@ -347,12 +329,8 @@ describe('ReadConcern', function() {
         expect(collection.s.readConcern).to.deep.equal({ level: 'majority' });
 
         // Listen to apm events
-        info.listener.on('started', event => {
-          if (event.commandName === 'aggregate') info.commands.started.push(event);
-        });
-        info.listener.on('succeeded', event => {
-          if (event.commandName === 'aggregate') info.commands.succeeded.push(event);
-        });
+        info.listener.on('started', filterForCommands('aggregate', info.commands.started));
+        info.listener.on('succeeded', filterForCommands('aggregate', info.commands.succeeded));
 
         // Execute find
         collection
@@ -394,12 +372,8 @@ describe('ReadConcern', function() {
             .collection('readConcernCollectionAggregate1');
 
           // Listen to apm events
-          client.on('commandStarted', event => {
-            if (event.commandName === 'aggregate') info.commands.started.push(event);
-          });
-          client.on('commandSucceeded', event => {
-            if (event.commandName === 'aggregate') info.commands.succeeded.push(event);
-          });
+          info.listener.on('started', filterForCommands('aggregate', info.commands.started));
+          info.listener.on('succeeded', filterForCommands('aggregate', info.commands.succeeded));
 
           // Execute find
           return collection
@@ -450,12 +424,8 @@ describe('ReadConcern', function() {
             const reduce = 'function(k,vals) { return 1; }';
 
             // Listen to apm events
-            info.listener.on('started', event => {
-              if (event.commandName === 'mapreduce') info.commands.started.push(event);
-            });
-            info.listener.on('succeeded', event => {
-              if (event.commandName === 'mapreduce') info.commands.succeeded.push(event);
-            });
+            info.listener.on('started', filterForCommands('mapreduce', info.commands.started));
+            info.listener.on('succeeded', filterForCommands('mapreduce', info.commands.succeeded));
 
             // Execute mapReduce
             collection.mapReduce(map, reduce, { out: { replace: 'tempCollection' } }, err => {
