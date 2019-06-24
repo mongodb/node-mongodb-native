@@ -1,37 +1,25 @@
 'use strict';
-const mongo = require('../..');
 const setupDatabase = require('./shared').setupDatabase;
 const expect = require('chai').expect;
 
 let client;
 let url;
-let listener;
-let started;
-let succeeded;
+
+function filterForCommands(commands, bag) {
+  commands = Array.isArray(commands) ? commands : [commands];
+  return function(event) {
+    if (commands.indexOf(event.commandName) !== -1) bag.push(event);
+  };
+}
 
 describe('ReadConcern', function() {
   before(function() {
     return setupDatabase(this.configuration);
   });
 
-  afterEach(() => listener.uninstrument());
-
-  beforeEach(function() {
-    started = [];
-    succeeded = [];
-    listener = mongo.instrument(err => expect(err).to.be.null);
-  });
-
   afterEach(() => client.close());
 
-  function filterForCommands(commands, bag) {
-    commands = Array.isArray(commands) ? commands : [commands];
-    return function(event) {
-      if (commands.indexOf(event.commandName) !== -1) bag.push(event);
-    };
-  }
-
-  function validateTestResults(commandName, level) {
+  function validateTestResults(started, succeeded, commandName, level) {
     expect(started.length).to.equal(succeeded.length);
     for (var i = 0; i < started.length; i++) {
       expect(started[i]).to.have.property('commandName', commandName);
@@ -111,6 +99,8 @@ describe('ReadConcern', function() {
       metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2' } },
 
       test: function(done) {
+        var started = [];
+        var succeeded = [];
         // Get a new instance
         const configuration = this.configuration;
         let options;
@@ -150,21 +140,21 @@ describe('ReadConcern', function() {
           // Validate readConcern
           expect(collection.readConcern).to.deep.equal(test.readConcern);
 
-          // commandMonitoring / listening to events
-          listener.on('started', filterForCommands(test.commandName, started));
-          listener.on('succeeded', filterForCommands(test.commandName, succeeded));
+          // commandMonitoring
+          client.on('started', filterForCommands(test.commandName, started));
+          client.on('succeeded', filterForCommands(test.commandName, succeeded));
 
           // Execute find
           if (test.commandName === 'find') {
             collection.find().toArray(err => {
               expect(err).to.not.exist;
-              validateTestResults(test.commandName, test.level);
+              validateTestResults(started, succeeded, test.commandName, test.level);
               done();
             });
           } else if (test.commandName === 'aggregate') {
             collection.aggregate([{ $match: {} }]).toArray(err => {
               expect(err).to.not.exist;
-              validateTestResults(test.commandName, test.level);
+              validateTestResults(started, succeeded, test.commandName, test.level);
               done();
             });
           } else if (test.commandName === 'geoSearch') {
@@ -184,7 +174,7 @@ describe('ReadConcern', function() {
                     { search: { a: 1 }, limit: 1, maxDistance: 100 },
                     err => {
                       expect(err).to.not.exist;
-                      validateTestResults(test.commandName, test.level);
+                      validateTestResults(started, succeeded, test.commandName, test.level);
                       done();
                     }
                   );
@@ -233,6 +223,8 @@ describe('ReadConcern', function() {
       metadata: { requires: { topology: 'replicaset', mongodb: test.mongodbVersion } },
 
       test: function(done) {
+        var started = [];
+        var succeeded = [];
         // Get a new instance
         const configuration = this.configuration;
         client = configuration.newClient({ w: 1 }, { poolSize: 1, readConcern: test.readConcern });
@@ -261,20 +253,20 @@ describe('ReadConcern', function() {
               expect(err).to.not.exist;
 
               // Listen to apm events
-              listener.on('started', filterForCommands(test.commandName, started));
-              listener.on('succeeded', filterForCommands(test.commandName, succeeded));
+              client.on('started', filterForCommands(test.commandName, started));
+              client.on('succeeded', filterForCommands(test.commandName, succeeded));
 
               // Perform a distinct query against the a field
               if (test.commandName === 'distinct') {
                 collection.distinct('a', err => {
                   expect(err).to.not.exist;
-                  validateTestResults(test.commandName, test.level);
+                  validateTestResults(started, succeeded, test.commandName, test.level);
                   done();
                 });
               } else if (test.commandName === 'count') {
                 collection.estimatedDocumentCount({ a: 1 }, err => {
                   expect(err).to.not.exist;
-                  validateTestResults(test.commandName, test.level);
+                  validateTestResults(started, succeeded, test.commandName, test.level);
                   done();
                 });
               } else if (test.commandName === 'group') {
@@ -285,14 +277,14 @@ describe('ReadConcern', function() {
                   'function (obj, prev) { prev.count++; }',
                   err => {
                     expect(err).to.not.exist;
-                    validateTestResults(test.commandName, test.level);
+                    validateTestResults(started, succeeded, test.commandName, test.level);
                     done();
                   }
                 );
               } else if (test.commandName === 'parallelCollectionScan') {
                 collection.parallelCollectionScan({ numCursors: 1 }, err => {
                   expect(err).to.not.exist;
-                  validateTestResults(test.commandName, test.level);
+                  validateTestResults(started, succeeded, test.commandName, test.level);
                   done();
                 });
               }
@@ -307,6 +299,8 @@ describe('ReadConcern', function() {
     metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2 < 4.1' } },
 
     test: function(done) {
+      var started = [];
+      var succeeded = [];
       // Get a new instance
       const configuration = this.configuration;
       client = configuration.newClient(
@@ -326,22 +320,22 @@ describe('ReadConcern', function() {
         expect(collection.readConcern).to.deep.equal({ level: 'majority' });
 
         // Listen to apm events
-        listener.on('started', filterForCommands('aggregate', started));
-        listener.on('succeeded', filterForCommands('aggregate', succeeded));
+        client.on('started', filterForCommands('aggregate', started));
+        client.on('succeeded', filterForCommands('aggregate', succeeded));
 
         // Execute find
         collection
           .aggregate([{ $match: {} }, { $out: 'readConcernCollectionAggregate1Output' }])
           .toArray(err => {
             expect(err).to.not.exist;
-            validateTestResults('aggregate');
+            validateTestResults(started, succeeded, 'aggregate');
 
             // Execute find
             collection
               .aggregate([{ $match: {} }], { out: 'readConcernCollectionAggregate2Output' })
               .toArray(err => {
                 expect(err).to.not.exist;
-                validateTestResults('aggregate');
+                validateTestResults(started, succeeded, 'aggregate');
                 done();
               });
           });
@@ -353,6 +347,8 @@ describe('ReadConcern', function() {
     metadata: { requires: { topology: 'replicaset', mongodb: '>= 4.1' } },
 
     test: function(done) {
+      var started = [];
+      var succeeded = [];
       // Get a new instance
       const configuration = this.configuration;
       client = configuration.newClient(
@@ -369,22 +365,22 @@ describe('ReadConcern', function() {
             .collection('readConcernCollectionAggregate1');
 
           // Listen to apm events
-          listener.on('started', filterForCommands('aggregate', started));
-          listener.on('succeeded', filterForCommands('aggregate', succeeded));
+          client.on('started', filterForCommands('aggregate', started));
+          client.on('succeeded', filterForCommands('aggregate', succeeded));
 
           // Execute find
           return collection
             .aggregate([{ $match: {} }, { $out: 'readConcernCollectionAggregate1Output' }])
             .toArray()
             .then(() => {
-              validateTestResults('aggregate', 'majority');
+              validateTestResults(started, succeeded, 'aggregate', 'majority');
 
               // Execute find
               return collection
                 .aggregate([{ $match: {} }], { out: 'readConcernCollectionAggregate2Output' })
                 .toArray()
                 .then(() => {
-                  validateTestResults('aggregate', 'majority');
+                  validateTestResults(started, succeeded, 'aggregate', 'majority');
                 });
             });
         })
@@ -396,6 +392,8 @@ describe('ReadConcern', function() {
     metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2' } },
 
     test: function(done) {
+      var started = [];
+      var succeeded = [];
       // Get a new instance
       const configuration = this.configuration;
       client = configuration.newClient(
@@ -421,13 +419,13 @@ describe('ReadConcern', function() {
             const reduce = 'function(k,vals) { return 1; }';
 
             // Listen to apm events
-            listener.on('started', filterForCommands('mapreduce', started));
-            listener.on('succeeded', filterForCommands('mapreduce', succeeded));
+            client.on('started', filterForCommands('mapreduce', started));
+            client.on('succeeded', filterForCommands('mapreduce', succeeded));
 
             // Execute mapReduce
             collection.mapReduce(map, reduce, { out: { replace: 'tempCollection' } }, err => {
               expect(err).to.not.exist;
-              validateTestResults('mapreduce');
+              validateTestResults(started, succeeded, 'mapreduce');
               done();
             });
           }
