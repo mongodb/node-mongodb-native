@@ -9,8 +9,6 @@ const delay = require('./shared').delay;
 const expect = chai.expect;
 
 describe('Change Stream Spec', function() {
-  const EJSONToJSON = x => JSON.parse(EJSON.stringify(x));
-
   let globalClient;
   let ctx;
   let events;
@@ -34,7 +32,7 @@ describe('Change Stream Spec', function() {
     .filter(filename => filename.match(/\.json$/))
     .forEach(filename => {
       const specString = fs.readFileSync(`${__dirname}/spec/change-stream/${filename}`, 'utf8');
-      const specData = JSON.parse(specString);
+      const specData = EJSON.parse(specString, { relaxed: true });
 
       const ALL_DBS = [specData.database_name, specData.database2_name];
 
@@ -115,7 +113,6 @@ describe('Change Stream Spec', function() {
       }
 
       if (result.success) {
-        value = EJSONToJSON(value);
         expect(value).to.have.a.lengthOf(result.success.length);
         assertEquality(value, result.success);
       }
@@ -147,9 +144,7 @@ describe('Change Stream Spec', function() {
               `Expected there to be an APM event at index ${idx}, but there was none`
             );
           }
-          const actual = EJSONToJSON(events[idx]);
-          expected = EJSONToJSON(expected);
-          assertEquality(actual, expected);
+          assertEquality(events[idx], expected);
         });
     };
   }
