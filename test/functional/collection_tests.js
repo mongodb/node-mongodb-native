@@ -14,6 +14,9 @@ describe('Collection', function() {
   describe('', function() {
     let client;
     let db;
+    metadata: {
+      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+    };
     beforeEach(function() {
       client = this.configuration.newClient(this.configuration.writeConcernMax(), {
         poolSize: 1
@@ -29,13 +32,7 @@ describe('Collection', function() {
     /**
      * @ignore
      */
-    it('should correctly execute basic collection methods', {
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
-
-      // The actual test we wish to run
-      test: function(done) {
+    it('should correctly execute basic collection methods', function(done) {
         db.createCollection('test_collection_methods', (err, collection) => {
           // Verify that all the result are correct coming back (should contain the value ok)
           expect('test_collection_methods').to.equal(collection.collectionName);
@@ -58,7 +55,13 @@ describe('Collection', function() {
               db.createCollection('test_collection_methods4', (err, collection) => {
                 // Verify that all the result are correct coming back (should contain the value ok)
                 expect('test_collection_methods4').to.equal(collection.collectionName);
-
+                // Let's check that the collection was created correctly
+                db.listCollections().toArray(function(err, documents) {
+                  let found = false;
+                  documents.forEach(doc => {
+                    if (doc.name === 'integration_tests_.test_collection_methods') found = true;
+                  });
+                  expect(found).to.be.true;
                 // Rename the collection and with the dropTarget boolean, and check to make sure only onen exists.
                 db.renameCollection(
                   'test_collection_methods4',
@@ -79,7 +82,7 @@ describe('Collection', function() {
           });
         });
       }
-    });
+    );
     /**
      * @ignore
      */
