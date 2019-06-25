@@ -1,18 +1,11 @@
 'use strict';
 const setupDatabase = require('./shared').setupDatabase;
+const filterForCommands = require('./shared').filterForCommands;
 const expect = require('chai').expect;
 
-let client;
-let url;
-
-function filterForCommands(commands, bag) {
-  commands = Array.isArray(commands) ? commands : [commands];
-  return function(event) {
-    if (commands.indexOf(event.commandName) !== -1) bag.push(event);
-  };
-}
-
 describe('ReadConcern', function() {
+  let client;
+
   before(function() {
     return setupDatabase(this.configuration);
   });
@@ -46,41 +39,6 @@ describe('ReadConcern', function() {
       readConcern: { level: 'majority' }
     },
     {
-      description: 'Should set local readConcern at collection level',
-      level: 'local',
-      commandName: 'find',
-      collectionReadConcern: true,
-      readConcern: { level: 'local' }
-    },
-    {
-      description: 'Should set majority readConcern at collection level',
-      level: 'majority',
-      commandName: 'find',
-      collectionReadConcern: true,
-      readConcern: { level: 'majority' }
-    },
-    {
-      description: 'Should set local readConcern using MongoClient',
-      level: 'local',
-      commandName: 'find',
-      urlReadConcernLevel: 'readConcernLevel=local',
-      readConcern: { level: 'local' }
-    },
-    {
-      description: 'Should set majority readConcern using MongoClient',
-      level: 'majority',
-      commandName: 'find',
-      urlReadConcernLevel: 'readConcernLevel=majority',
-      readConcern: { level: 'majority' }
-    },
-    {
-      description: 'Should set majority readConcern using MongoClient with options',
-      level: 'majority',
-      commandName: 'find',
-      urlOptions: 'majority',
-      readConcern: { level: 'majority' }
-    },
-    {
       description: 'Should set majority readConcern aggregate command',
       level: 'majority',
       commandName: 'aggregate',
@@ -94,6 +52,107 @@ describe('ReadConcern', function() {
     }
   ];
 
+  describe('client-url specific ReadConcern', function() {
+    const urlTests = [
+      {
+        description: 'Should set local readConcern at collection level',
+        level: 'local',
+        commandName: 'find',
+        collectionReadConcern: true,
+        readConcern: { level: 'local' }
+      },
+      {
+        description: 'Should set majority readConcern at collection level',
+        level: 'majority',
+        commandName: 'find',
+        collectionReadConcern: true,
+        readConcern: { level: 'majority' }
+      },
+      {
+        description: 'Should set local readConcern using MongoClient',
+        level: 'local',
+        commandName: 'find',
+        urlReadConcernLevel: 'readConcernLevel=local',
+        readConcern: { level: 'local' }
+      },
+      {
+        description: 'Should set majority readConcern using MongoClient',
+        level: 'majority',
+        commandName: 'find',
+        urlReadConcernLevel: 'readConcernLevel=majority',
+        readConcern: { level: 'majority' }
+      },
+      {
+        description: 'Should set majority readConcern using MongoClient with options',
+        level: 'majority',
+        commandName: 'find',
+        urlOptions: 'majority',
+        readConcern: { level: 'majority' }
+      }
+    ];
+
+    urlTests.forEach(test => {
+      it(test.description, {
+        metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2' } },
+        test: function(done) {
+          var started = [];
+          var succeeded = [];
+          // Get a new instance
+          const configuration = this.configuration;
+          let options;
+          let url;
+
+          if (test.urlReadConcernLevel || test.urlOptions) {
+            url = configuration.url();
+            if (test.urlOptions == null) {
+              url =
+                url.indexOf('?') !== -1
+                  ? `${url}&${test.urlReadConcernLevel}`
+                  : `${url}?${test.urlReadConcernLevel}`;
+            } else {
+              options = {
+                readConcern: {
+                  level: test.level
+                }
+              };
+            }
+          }
+
+          client =
+            test.urlOptions != null
+              ? configuration.newClient(url, options)
+              : configuration.newClient({ w: 1 }, { poolSize: 1, readConcern: test.readConcern });
+
+          client.connect((err, client) => {
+            expect(err).to.not.exist;
+
+            const db = client.db(configuration.db);
+            expect(db.readConcern).to.deep.equal(test.readConcern);
+
+            // Get a collection
+            const collection = test.collectionReadConcern
+              ? db.collection('readConcernCollection', test.readConcern)
+              : db.collection('readConcernCollection');
+
+            // Validate readConcern
+            expect(collection.readConcern).to.deep.equal(test.readConcern);
+
+            // commandMonitoring
+            client.on('started', filterForCommands(test.commandName, started));
+            client.on('succeeded', filterForCommands(test.commandName, succeeded));
+
+            // Execute find
+            collection.find().toArray(err => {
+              expect(err).to.not.exist;
+              validateTestResults(started, succeeded, test.commandName, test.level);
+              done();
+            });
+          });
+        }
+      });
+    });
+  });
+
   tests.forEach(test => {
     it(test.description, {
       metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2' } },
@@ -103,28 +162,7 @@ describe('ReadConcern', function() {
         var succeeded = [];
         // Get a new instance
         const configuration = this.configuration;
-        let options;
-
-        if (test.urlReadConcernLevel || test.urlOptions) {
-          url = configuration.url();
-          if (test.urlOptions == null) {
-            url =
-              url.indexOf('?') !== -1
-                ? `${url}&${test.urlReadConcernLevel}`
-                : `${url}?${test.urlReadConcernLevel}`;
-          } else {
-            options = {
-              readConcern: {
-                level: test.level
-              }
-            };
-          }
-        }
-
-        client =
-          test.urlOptions != null
-            ? configuration.newClient(url, options)
-            : configuration.newClient({ w: 1 }, { poolSize: 1, readConcern: test.readConcern });
+        client = configuration.newClient({ w: 1 }, { poolSize: 1, readConcern: test.readConcern });
 
         client.connect((err, client) => {
           expect(err).to.not.exist;
