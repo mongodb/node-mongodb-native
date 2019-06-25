@@ -151,7 +151,6 @@ describe('ReadConcern', function() {
       {
         description: 'Should set majority readConcern using MongoClient with options',
         level: 'majority',
-        urlOptions: 'majority',
         readConcern: { level: 'majority' }
       }
     ];
@@ -164,35 +163,24 @@ describe('ReadConcern', function() {
           const succeeded = [];
           // Get a new instance
           const configuration = this.configuration;
-          let options;
-          let url;
 
-          if (test.urlReadConcernLevel || test.urlOptions) {
-            url = configuration.url();
-            if (test.urlOptions == null) {
-              url =
-                url.indexOf('?') !== -1
-                  ? `${url}&${test.urlReadConcernLevel}`
-                  : `${url}?${test.urlReadConcernLevel}`;
-            } else {
-              options = {
-                readConcern: {
-                  level: test.level
-                }
-              };
-            }
+          let url = configuration.url();
+          if (test.urlReadConcernLevel != null) {
+            url =
+              url.indexOf('?') !== -1
+                ? `${url}&${test.urlReadConcernLevel}`
+                : `${url}?${test.urlReadConcernLevel}`;
           }
 
           client =
-            test.urlOptions != null
-              ? configuration.newClient(url, options)
-              : configuration.newClient(url);
+            test.urlReadConcernLevel != null
+              ? configuration.newClient(url)
+              : configuration.newClient(url, { readConcern: test.readConcern });
 
           client.connect((err, client) => {
             expect(err).to.not.exist;
 
             const db = client.db(configuration.db);
-            // console.log();
             expect(db.readConcern).to.deep.equal(test.readConcern);
 
             // Get a collection
