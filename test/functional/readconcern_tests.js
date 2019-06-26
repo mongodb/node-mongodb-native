@@ -14,7 +14,7 @@ describe('ReadConcern', function() {
 
   function validateTestResults(started, succeeded, commandName, level) {
     expect(started.length).to.equal(succeeded.length);
-    for (var i = 0; i < started.length; i++) {
+    for (let i = 0; i < started.length; i++) {
       expect(started[i]).to.have.property('commandName', commandName);
       expect(succeeded[i]).to.have.property('commandName', commandName);
       if (level != null) {
@@ -457,10 +457,7 @@ describe('ReadConcern', function() {
     test: function(done) {
       // Get a new instance
       const configuration = this.configuration;
-      const client = configuration.newClient(
-        { w: 1 },
-        { poolSize: 1, readConcern: { level: 'local' } }
-      );
+      client = configuration.newClient({ w: 1 }, { poolSize: 1, readConcern: { level: 'local' } });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         const db = client.db(configuration.db);
