@@ -11,7 +11,7 @@ describe('Collection', function() {
     return setupDatabase(this.configuration);
   });
 
-  describe('(non >2.1.0)', function() {
+  describe('tests with standard configuration', function() {
     let client;
     let db;
     beforeEach(function() {
@@ -928,126 +928,97 @@ describe('Collection', function() {
         );
       });
     });
-  });
-
-  describe('(requires >2.1.0)', function() {
-    let client;
-    let db;
-    const metadata = { requires: { mongodb: '>2.1.0' } };
-    beforeEach(function() {
-      client = this.configuration.newClient(this.configuration.writeConcernMax(), {
-        poolSize: 1
-      });
-      return client.connect().then(client => {
-        db = client.db(this.configuration.db);
-      });
-    });
-    afterEach(function() {
-      client.close();
-    })
 
     /**
      * @ignore
      */
-    it('should correctly create TTL collection with index using createIndex', {
-      metadata,
-      // The actual test we wish to run
-      test: function(done) {
-        db.createCollection(
-          'shouldCorrectlyCreateTTLCollectionWithIndexCreateIndex',
-          {},
-          (err, collection) => {
-            collection.createIndex({ createdAt: 1 }, { expireAfterSeconds: 1, w: 1 }, err => {
-              expect(err).to.not.exist;
-
-              // Insert a document with a date
-              collection.insertOne(
-                { a: 1, createdAt: new Date() },
-                this.configuration.writeConcernMax(),
-                err => {
-                  expect(err).to.not.exist;
-
-                  collection.indexInformation({ full: true }, (err, indexes) => {
-                    expect(err).to.not.exist;
-
-                    for (let i = 0; i < indexes.length; i++) {
-                      if (indexes[i].name === 'createdAt_1') {
-                        expect(1).to.equal(indexes[i].expireAfterSeconds);
-                        break;
-                      }
-                    }
-
-                    done();
-                  });
-                }
-              );
-            });
-          }
-        );
-      }
-    });
-
-    /**
-     * @ignore
-     */
-    it('should correctly create TTL collection with index using ensureIndex', {
-      metadata,
-      // The actual test we wish to run
-      test: function(done) {
-        db.createCollection(
-          'shouldCorrectlyCreateTTLCollectionWithIndexUsingEnsureIndex',
-          (err, collection) => {
-            collection.ensureIndex({ createdAt: 1 }, { expireAfterSeconds: 1, w: 1 }, err => {
-              expect(err).to.not.exist;
-
-              // Insert a document with a date
-              collection.insertOne(
-                { a: 1, createdAt: new Date() },
-                this.configuration.writeConcernMax(),
-                err => {
-                  expect(err).to.not.exist;
-
-                  collection.indexInformation({ full: true }, (err, indexes) => {
-                    expect(err).to.not.exist;
-
-                    for (let i = 0; i < indexes.length; i++) {
-                      if (indexes[i].name === 'createdAt_1') {
-                        expect(1).to.equal(indexes[i].expireAfterSeconds);
-                        break;
-                      }
-                    }
-
-                    done();
-                  });
-                }
-              );
-            });
-          }
-        );
-      }
-    });
-
-    /**
-     * @ignore
-     */
-    it('should support createIndex with no options', {
-      metadata,
-      // The actual test we wish to run
-      test: function(done) {
-        db.createCollection('create_index_without_options', {}, (err, collection) => {
-          collection.createIndex({ createdAt: 1 }, err => {
+    it('should correctly create TTL collection with index using createIndex', function(done) {
+      db.createCollection(
+        'shouldCorrectlyCreateTTLCollectionWithIndexCreateIndex',
+        {},
+        (err, collection) => {
+          collection.createIndex({ createdAt: 1 }, { expireAfterSeconds: 1, w: 1 }, err => {
             expect(err).to.not.exist;
 
-            collection.indexInformation({ full: true }, (err, indexes) => {
-              expect(err).to.not.exist;
-              const indexNames = indexes.map(i => i.name);
-              expect(indexNames).to.include('createdAt_1');
+            // Insert a document with a date
+            collection.insertOne(
+              { a: 1, createdAt: new Date() },
+              this.configuration.writeConcernMax(),
+              err => {
+                expect(err).to.not.exist;
 
-              done();
-            });
+                collection.indexInformation({ full: true }, (err, indexes) => {
+                  expect(err).to.not.exist;
+
+                  for (let i = 0; i < indexes.length; i++) {
+                    if (indexes[i].name === 'createdAt_1') {
+                      expect(1).to.equal(indexes[i].expireAfterSeconds);
+                      break;
+                    }
+                  }
+
+                  done();
+                });
+              }
+            );
+          });
+        }
+      );
+    });
+
+    /**
+     * @ignore
+     */
+    it('should correctly create TTL collection with index using ensureIndex', function(done) {
+      db.createCollection(
+        'shouldCorrectlyCreateTTLCollectionWithIndexUsingEnsureIndex',
+        (err, collection) => {
+          collection.ensureIndex({ createdAt: 1 }, { expireAfterSeconds: 1, w: 1 }, err => {
+            expect(err).to.not.exist;
+
+            // Insert a document with a date
+            collection.insertOne(
+              { a: 1, createdAt: new Date() },
+              this.configuration.writeConcernMax(),
+              err => {
+                expect(err).to.not.exist;
+
+                collection.indexInformation({ full: true }, (err, indexes) => {
+                  expect(err).to.not.exist;
+
+                  for (let i = 0; i < indexes.length; i++) {
+                    if (indexes[i].name === 'createdAt_1') {
+                      expect(1).to.equal(indexes[i].expireAfterSeconds);
+                      break;
+                    }
+                  }
+
+                  done();
+                });
+              }
+            );
+          });
+        }
+      );
+    });
+
+    /**
+     * @ignore
+     */
+    it('should support createIndex with no options', function(done) {
+      db.createCollection('create_index_without_options', {}, (err, collection) => {
+        collection.createIndex({ createdAt: 1 }, err => {
+          expect(err).to.not.exist;
+
+          collection.indexInformation({ full: true }, (err, indexes) => {
+            expect(err).to.not.exist;
+            const indexNames = indexes.map(i => i.name);
+            expect(indexNames).to.include('createdAt_1');
+
+            done();
           });
         });
-      }
+      });
     });
   });
 
