@@ -23,19 +23,22 @@ describe('Collection', function() {
       });
     });
 
+    afterEach(function() {
+      client.close();
+    })
+
     /**
      * @ignore
      */
     it('should correctly execute basic collection methods', function(done) {
       db.createCollection('test_collection_methods', (err, collection) => {
         // Verify that all the result are correct coming back (should contain the value ok)
-        expect('test_collection_methods').to.equal(collection.collectionName);
+        expect(collection.collectionName).to.equal('test_collection_methods');
         // Let's check that the collection was created correctly
         db.listCollections().toArray((err, documents) => {
           expect(err).to.not.exist;
           let found = false;
           documents.forEach(doc => {
-            console.log("doc.name: ",doc.name);
             if (doc.name === 'test_collection_methods') found = true;
           });
           expect(found).to.be.true;
@@ -67,7 +70,7 @@ describe('Collection', function() {
 
                     db.dropCollection('test_collection_methods3', (err, result) => {
                       expect(result).to.be.true;
-                      client.close(done);
+                      done();
                     });
                   }
                 );
@@ -84,7 +87,7 @@ describe('Collection', function() {
     it('should correctly list back collection names containing .', function(done) {
       db.createCollection('test.game', (err, collection) => {
         // Verify that all the result are correct coming back (should contain the value ok)
-        expect('test.game').to.equal(collection.collectionName);
+        expect(collection.collectionName).to.equal('test.game');
         // Let's check that the collection was created correctly
         db.listCollections().toArray((err, documents) => {
           expect(err).to.not.exist;
@@ -94,7 +97,7 @@ describe('Collection', function() {
           });
 
           expect(found).to.be.true;
-          client.close(done);
+          done();
         });
       });
     });
@@ -102,7 +105,7 @@ describe('Collection', function() {
     /**
      * @ignore
      */
-    it('should access to collections', function(done) {
+    it('should correctly access collection names', function(done) {
       // Create two collections
       db.createCollection('test.spiderman', () => {
         db.createCollection('test.mario', () => {
@@ -114,7 +117,7 @@ describe('Collection', function() {
               err => {
                 expect(err).to.not.exist;
                 db.collection('test.mario', (err, mario_collection) => {
-                  mario_collection.insert({ bar: 0 }, this.configuration.writeConcernMax(), err => {
+                  mario_collection.insertOne({ bar: 0 }, this.configuration.writeConcernMax(), err => {
                     expect(err).to.not.exist;
                     // Assert collections
                     db.collections((err, collections) => {
@@ -132,7 +135,7 @@ describe('Collection', function() {
                       expect(found_spiderman).to.be.true;
                       expect(found_mario).to.be.true;
                       expect(found_does_not_exist).to.be.false;
-                      client.close(done);
+                      done();
                     });
                   });
                 });
@@ -165,7 +168,7 @@ describe('Collection', function() {
           expect(found).to.be.true;
           // Insert a document in an non-existing collection should create the collection
           const collection = db.collection('test_collection_names2');
-          collection.insert({ a: 1 }, this.configuration.writeConcernMax(), err => {
+          collection.insertOne({ a: 1 }, this.configuration.writeConcernMax(), err => {
             expect(err).to.not.exist;
 
             db.listCollections().toArray((err, documents) => {
@@ -186,7 +189,7 @@ describe('Collection', function() {
               expect(found2).to.be.true;
 
               // Let's close the db
-              client.close(done);
+              done();
             });
           });
         });
@@ -210,7 +213,7 @@ describe('Collection', function() {
             err => {
               expect(err).to.not.exist;
               // Let's close the db
-              client.close(done);
+              done();
             }
           );
         });
@@ -236,7 +239,7 @@ describe('Collection', function() {
           db.createCollection('test_strict_create_collection', { strict: false }, err => {
             expect(err).to.not.exist;
             // Let's close the db
-            client.close(done);
+            done();
           });
         });
       });
@@ -248,51 +251,51 @@ describe('Collection', function() {
     it('should fail to insert due to illegal keys', function(done) {
       db.createCollection('test_invalid_key_names', (err, collection) => {
         // Legal inserts
-        collection.insert(
+        collection.insertMany(
           [{ hello: 'world' }, { hello: { hello: 'world' } }],
           this.configuration.writeConcernMax(),
           err => {
             expect(err).to.not.exist;
 
             // Illegal insert for key
-            collection.insert({ $hello: 'world' }, this.configuration.writeConcernMax(), err => {
+            collection.insertOne({ $hello: 'world' }, this.configuration.writeConcernMax(), err => {
               expect(err).to.be.an.instanceof(Error);
               expect(err.message).to.equal("key $hello must not start with '$'");
 
-              collection.insert(
+              collection.insertOne(
                 { hello: { $hello: 'world' } },
                 this.configuration.writeConcernMax(),
                 err => {
                   expect(err).to.be.an.instanceof(Error);
                   expect(err.message).to.equal("key $hello must not start with '$'");
 
-                  collection.insert(
+                  collection.insertOne(
                     { he$llo: 'world' },
                     this.configuration.writeConcernMax(),
                     err => {
                       expect(err).to.not.exist;
 
-                      collection.insert(
+                      collection.insertOne(
                         { hello: { hell$o: 'world' } },
                         this.configuration.writeConcernMax(),
                         err => {
                           expect(err).to.not.exist;
 
-                          collection.insert(
+                          collection.insertOne(
                             { '.hello': 'world' },
                             this.configuration.writeConcernMax(),
                             err => {
                               expect(err).to.be.an.instanceof(Error);
                               expect(err.message).to.equal("key .hello must not contain '.'");
 
-                              collection.insert(
+                              collection.insertOne(
                                 { hello: { '.hello': 'world' } },
                                 this.configuration.writeConcernMax(),
                                 err => {
                                   expect(err).to.be.an.instanceof(Error);
                                   expect(err.message).to.equal("key .hello must not contain '.'");
 
-                                  collection.insert(
+                                  collection.insertOne(
                                     { 'hello.': 'world' },
                                     this.configuration.writeConcernMax(),
                                     err => {
@@ -301,7 +304,7 @@ describe('Collection', function() {
                                         "key hello. must not contain '.'"
                                       );
 
-                                      collection.insert(
+                                      collection.insertOne(
                                         { hello: { 'hello.': 'world' } },
                                         this.configuration.writeConcernMax(),
                                         err => {
@@ -310,7 +313,7 @@ describe('Collection', function() {
                                             "key hello. must not contain '.'"
                                           );
                                           // Let's close the db
-                                          client.close(done);
+                                          done();
                                         }
                                       );
                                     }
@@ -357,7 +360,7 @@ describe('Collection', function() {
 
       db.collection('test..t', err => {
         expect(err.message).to.equal('collection names cannot be empty');
-        client.close(done);
+        done();
       });
     });
 
@@ -366,8 +369,9 @@ describe('Collection', function() {
         expect(err).to.not.exist;
 
         db.createCollection('test/../', err => {
-          expect(err).to.exist;
-          client.close(done);
+          expect(err).to.be.instanceof(Error);
+          expect(err.message).to.equal('collection names cannot be empty');
+          done();
         });
       });
     });
@@ -379,7 +383,7 @@ describe('Collection', function() {
         collection.countDocuments((err, count) => {
           expect(count).to.equal(0);
           // Let's close the db
-          client.close(done);
+          done();
         });
       });
     });
@@ -423,7 +427,7 @@ describe('Collection', function() {
                             collection.count((err, count) => {
                               expect(count).to.equal(2);
                               // Let's close the db
-                              client.close(done);
+                              done();
                             });
                           }
                         );
@@ -444,7 +448,7 @@ describe('Collection', function() {
     it('should correctly save document with Long value', function(done) {
       const Long = this.configuration.require.Long;
       db.createCollection('test_save_long', (err, collection) => {
-        collection.insert(
+        collection.insertOne(
           { x: Long.fromNumber(9223372036854775807) },
           this.configuration.writeConcernMax(),
           err => {
@@ -453,7 +457,7 @@ describe('Collection', function() {
               expect(err).to.not.exist;
               expect(doc.x).to.deep.equal(Long.fromNumber(9223372036854775807));
               // Let's close the db
-              client.close(done);
+              done();
             });
           }
         );
@@ -485,7 +489,7 @@ describe('Collection', function() {
 
                       expect(doc.hello).to.equal('mike');
                       // Let's close the db
-                      client.close(done);
+                      done();
                     });
                   });
                 });
@@ -503,13 +507,13 @@ describe('Collection', function() {
       const ObjectID = this.configuration.require.ObjectID;
       db.createCollection('test_should_correctly_do_update_with_no_docs', (err, collection) => {
         const id = new ObjectID(null);
-        const doc = { _id: id, a: 1 };
+        const doc = { $set: { _id: id, a: 1 } };
 
-        collection.update({ _id: id }, doc, this.configuration.writeConcernMax(), (err, r) => {
+        collection.updateOne({ _id: id }, doc, this.configuration.writeConcernMax(), (err, r) => {
           expect(err).to.not.exist;
           expect(r.result.n).to.equal(0);
 
-          client.close(done);
+          done();
         });
       });
     });
@@ -525,12 +529,12 @@ describe('Collection', function() {
             'test_should_execute_insert_update_delete_safe_mode'
           );
 
-          collection.insert({ i: 1 }, this.configuration.writeConcernMax(), (err, r) => {
+          collection.insertOne({ i: 1 }, this.configuration.writeConcernMax(), (err, r) => {
             expect(r.ops.length).to.equal(1);
             expect(r.ops[0]._id.toHexString().length).to.equal(24);
 
             // Update the record
-            collection.update(
+            collection.updateOne(
               { i: 1 },
               { $set: { i: 2 } },
               this.configuration.writeConcernMax(),
@@ -542,7 +546,7 @@ describe('Collection', function() {
                 collection.remove({}, this.configuration.writeConcernMax(), err => {
                   expect(err).to.not.exist;
 
-                  client.close(done);
+                  done();
                 });
               }
             );
@@ -579,7 +583,7 @@ describe('Collection', function() {
                 collection.save(user, this.configuration.writeConcernMax(), (err, result) => {
                   expect(err).to.not.exist;
                   expect(result.result.n).to.equal(1);
-                  client.close(done);
+                  done();
                 });
               }
             });
@@ -626,15 +630,15 @@ describe('Collection', function() {
                   expect(err).to.not.exist;
 
                   // Update again
-                  collection.update(
+                  collection.updateOne(
                     { _id: new ObjectID(user._id.toString()) },
-                    { friends: user.friends },
+                    { $set: { friends: user.friends } },
                     { upsert: true, w: 1 },
                     (err, result) => {
                       expect(err).to.not.exist;
                       expect(result.result.n).to.equal(1);
 
-                      client.close(done);
+                      done();
                     }
                   );
                 });
@@ -662,7 +666,7 @@ describe('Collection', function() {
                 collection.count((err, count) => {
                   expect(err).to.not.exist;
                   expect(count).to.equal(2);
-                  client.close(done);
+                  done();
                 });
               });
             });
@@ -677,13 +681,13 @@ describe('Collection', function() {
     it('should correctly read back document with null', function(done) {
       db.createCollection('shouldCorrectlyReadBackDocumentWithNull', {}, (err, collection) => {
         // Insert a document with a date
-        collection.insert({ test: null }, this.configuration.writeConcernMax(), err => {
+        collection.insertOne({ test: null }, this.configuration.writeConcernMax(), err => {
           expect(err).to.not.exist;
 
           collection.findOne((err, result) => {
             expect(err).to.not.exist;
             expect(result.test).to.not.exist;
-            client.close(done);
+            done();
           });
         });
       });
@@ -706,7 +710,7 @@ describe('Collection', function() {
           expect(err.message).to.equal('selector must be a valid JavaScript object');
         }
 
-        client.close(done);
+        done();
       });
     });
 
@@ -719,7 +723,7 @@ describe('Collection', function() {
 
         db.collection('shouldCorrectlyHandle0asIdForSave').save({ _id: 0 }, err => {
           expect(err).to.not.exist;
-          client.close(done);
+          done();
         });
       });
     });
@@ -730,10 +734,10 @@ describe('Collection', function() {
     it('should correctly execute update with . field in selector', function(done) {
       db
         .collection('executeUpdateWithElemMatch')
-        .update({ 'item.i': 1 }, { $set: { a: 1 } }, (err, r) => {
+        .updateOne({ 'item.i': 1 }, { $set: { a: 1 } }, (err, r) => {
           expect(err).to.not.exist;
           expect(r.result.n).to.equal(0);
-          client.close(done);
+          done();
         });
     });
 
@@ -743,10 +747,10 @@ describe('Collection', function() {
     it('should correctly execute update with elemMatch field in selector', function(done) {
       db
         .collection('executeUpdateWithElemMatch')
-        .update({ item: { $elemMatch: { name: 'my_name' } } }, { $set: { a: 1 } }, (err, r) => {
+        .updateOne({ item: { $elemMatch: { name: 'my_name' } } }, { $set: { a: 1 } }, (err, r) => {
           expect(err).to.not.exist;
           expect(r.result.n).to.equal(0);
-          client.close(done);
+          done();
         });
     });
 
@@ -763,7 +767,7 @@ describe('Collection', function() {
           expect(err.message).to.equal(
             'Collection shouldFailDueToExistingCollection already exists. Currently in strict mode.'
           );
-          client.close(done);
+          done();
         });
       });
     });
@@ -785,7 +789,7 @@ describe('Collection', function() {
             if (document.name === testCollection) found = true;
           });
           expect(found).to.be.true;
-          client.close(done);
+          done();
         });
       });
     });
@@ -814,7 +818,7 @@ describe('Collection', function() {
             });
 
             expect(found).to.be.true;
-            client.close(done);
+            done();
           });
         });
       });
@@ -847,7 +851,7 @@ describe('Collection', function() {
               expect(names['test2']).to.equal(collections[1]);
               expect(names['test3']).to.equal(collections[0]);
 
-              client.close(done);
+              done();
             });
           });
         });
@@ -887,7 +891,7 @@ describe('Collection', function() {
               });
 
               expect(foundCollection).to.be.true;
-              client.close(done);
+              done();
             });
           });
         });
@@ -919,7 +923,7 @@ describe('Collection', function() {
             expect(err).to.not.exist;
             expect(r.result.n).to.equal(0);
 
-            client.close(done);
+            done();
           }
         );
       });
@@ -938,6 +942,9 @@ describe('Collection', function() {
         db = client.db(this.configuration.db);
       });
     });
+    afterEach(function() {
+      client.close();
+    })
 
     /**
      * @ignore
@@ -954,7 +961,7 @@ describe('Collection', function() {
               expect(err).to.not.exist;
 
               // Insert a document with a date
-              collection.insert(
+              collection.insertOne(
                 { a: 1, createdAt: new Date() },
                 this.configuration.writeConcernMax(),
                 err => {
@@ -970,7 +977,7 @@ describe('Collection', function() {
                       }
                     }
 
-                    client.close(done);
+                    done();
                   });
                 }
               );
@@ -994,7 +1001,7 @@ describe('Collection', function() {
               expect(err).to.not.exist;
 
               // Insert a document with a date
-              collection.insert(
+              collection.insertOne(
                 { a: 1, createdAt: new Date() },
                 this.configuration.writeConcernMax(),
                 err => {
@@ -1010,7 +1017,7 @@ describe('Collection', function() {
                       }
                     }
 
-                    client.close(done);
+                    done();
                   });
                 }
               );
@@ -1036,7 +1043,7 @@ describe('Collection', function() {
               const indexNames = indexes.map(i => i.name);
               expect(indexNames).to.include('createdAt_1');
 
-              client.close(done);
+              done();
             });
           });
         });
@@ -1270,7 +1277,7 @@ describe('Collection', function() {
 
         return Promise.resolve()
           .then(() => db.dropDatabase())
-          .then(() => collection.insert({ name: 'foobar' }));
+          .then(() => collection.insertOne({ name: 'foobar' }));
       });
     });
 
@@ -1288,7 +1295,7 @@ describe('Collection', function() {
     it('should succeed with retryWrite=true when using update with multi=true', {
       metadata,
       test: function() {
-        return collection.update(
+        return collection.updateOne(
           { name: 'foobar' },
           { $set: { name: 'fizzbuzz' } },
           { multi: true }
