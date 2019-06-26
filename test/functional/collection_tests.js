@@ -31,8 +31,14 @@ describe('Collection', function() {
         // Verify that all the result are correct coming back (should contain the value ok)
         expect('test_collection_methods').to.equal(collection.collectionName);
         // Let's check that the collection was created correctly
-        db.listCollections().toArray(err => {
+        db.listCollections().toArray((err, documents) => {
           expect(err).to.not.exist;
+          let found = false;
+          documents.forEach(doc => {
+            console.log("doc.name: ",doc.name);
+            if (doc.name === 'test_collection_methods') found = true;
+          });
+          expect(found).to.be.true;
           // Rename the collection and check that it's gone
           db.renameCollection('test_collection_methods', 'test_collection_methods2', err => {
             expect(err).to.not.exist;
@@ -50,10 +56,7 @@ describe('Collection', function() {
               // Verify that all the result are correct coming back (should contain the value ok)
               expect(collection.collectionName).to.equal('test_collection_methods4');
               // Let's check that the collection was created correctly
-              db.listCollections().toArray(function(err, documents) {
-                let found = false;
-                if (documents.name === 'integration_tests_.test_collection_methods') found = true;
-                expect(found).to.be.true;
+              db.listCollections().toArray((err, documents) => {
                 // Rename the collection and with the dropTarget boolean, and check to make sure only onen exists.
                 db.renameCollection(
                   'test_collection_methods4',
