@@ -170,12 +170,10 @@ describe('ReadConcern', function() {
               url.indexOf('?') !== -1
                 ? `${url}&${test.urlReadConcernLevel}`
                 : `${url}?${test.urlReadConcernLevel}`;
+            client = configuration.newClient(url);
+          } else {
+            client = configuration.newClient(url, { readConcern: test.readConcern });
           }
-
-          client =
-            test.urlReadConcernLevel != null
-              ? configuration.newClient(url)
-              : configuration.newClient(url, { readConcern: test.readConcern });
 
           client.connect((err, client) => {
             expect(err).to.not.exist;
