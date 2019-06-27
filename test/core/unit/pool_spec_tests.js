@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const expect = require('chai').expect;
 
-require('chai').use(require('../../match_spec').default);
+require('chai').use(require('../../functional/runner/matcher').default);
 const Pool = require('../../../lib/core/pool').Pool;
 const EventEmitter = require('events').EventEmitter;
 
@@ -305,10 +305,10 @@ describe('Pool Spec Tests', function() {
 
           if (expectedError) {
             if (!actualError) {
-              expect(actualError).to.matchSpec(expectedError);
+              expect(actualError).to.matchMongoSpec(expectedError);
             } else {
               const ae = Object.assign({}, actualError, { message: actualError.message });
-              expect(ae).to.matchSpec(expectedError);
+              expect(ae).to.matchMongoSpec(expectedError);
             }
           } else if (actualError) {
             throw actualError;
@@ -316,7 +316,7 @@ describe('Pool Spec Tests', function() {
 
           expectedEvents.forEach((expected, index) => {
             const actual = actualEvents[index];
-            expect(actual).to.matchSpec(expected);
+            expect(actual).to.matchMongoSpec(expected);
           });
         });
     });

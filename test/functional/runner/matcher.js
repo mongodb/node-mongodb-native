@@ -13,6 +13,8 @@ function is42(input) {
   return valIs42(input) || valIs42(input.$numberInt) || valIs42(input.$numberLong);
 }
 
+const CMAP_42_KEYS = new Set(['connectionId', 'address', 'options']);
+
 function generateMatchAndDiffSpecialCase(key, expectedObj, actualObj, metadata) {
   const expected = expectedObj[key];
   const actual = actualObj[key];
@@ -58,6 +60,14 @@ function generateMatchAndDiffSpecialCase(key, expectedObj, actualObj, metadata) 
   } else if (key === 'recoveryToken' && expectedIs42) {
     // recoveryToken - assert that value exists
     // TODO: assert that value is BSON
+    const match = actual != null;
+    return {
+      match,
+      expected: match ? actual : SYMBOL_DOES_EXIST,
+      actual
+    };
+  } else if (CMAP_42_KEYS.has(key) && expectedIs42) {
+    // CMAP values - assert that value exists
     const match = actual != null;
     return {
       match,
