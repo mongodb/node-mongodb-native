@@ -58,24 +58,20 @@ describe('Collection', function() {
             db.createCollection('test_collection_methods4', (err, collection) => {
               // Verify that all the result are correct coming back (should contain the value ok)
               expect(collection.collectionName).to.equal('test_collection_methods4');
-              // Let's check that the collection was created correctly
-              db.listCollections().toArray(err => {
-                expect(err).to.not.exist;
-                // Rename the collection and with the dropTarget boolean, and check to make sure only onen exists.
-                db.renameCollection(
-                  'test_collection_methods4',
-                  'test_collection_methods3',
-                  { dropTarget: true },
-                  err => {
-                    expect(err).to.not.exist;
+              // Rename the collection and with the dropTarget boolean, and check to make sure only onen exists.
+              db.renameCollection(
+                'test_collection_methods4',
+                'test_collection_methods3',
+                { dropTarget: true },
+                err => {
+                  expect(err).to.not.exist;
 
-                    db.dropCollection('test_collection_methods3', (err, result) => {
-                      expect(result).to.be.true;
-                      done();
-                    });
-                  }
-                );
-              });
+                  db.dropCollection('test_collection_methods3', (err, result) => {
+                    expect(result).to.be.true;
+                    done();
+                  });
+                }
+              );
             });
           });
         });
@@ -870,16 +866,14 @@ describe('Collection', function() {
 
             emptyDb.listCollections().toArray((err, collections) => {
               expect(err).to.not.exist;
-              // By name
-              let names = {};
-
+              let names = [];
               for (let i = 0; i < collections.length; i++) {
-                names[collections[i].name] = collections[i];
+                names.push(collections[i].name);
               }
-              for (let i = 0; i < collections.length; i++) {
-                expect(names[collections[i].name]).to.equal(collections[i]);
-              }
-
+              expect(names.length).to.equal(3);
+              expect(names).to.include('test1');
+              expect(names).to.include('test2');
+              expect(names).to.include('test3');
               done();
             });
           });
