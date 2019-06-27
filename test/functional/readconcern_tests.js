@@ -18,7 +18,7 @@ describe('ReadConcern', function() {
       expect(started[i]).to.have.property('commandName', commandName);
       expect(succeeded[i]).to.have.property('commandName', commandName);
       if (level != null) {
-        expect(started[i]).to.have.nested.property('command.readConcern.level', level);
+        expect(started[i].command.readConcern.level).to.equal(level);
       } else {
         expect(started[i].command.readConcern).to.be.undefined;
       }
@@ -28,37 +28,31 @@ describe('ReadConcern', function() {
   const tests = [
     {
       description: 'Should set local readConcern on db level when using collection method',
-      level: 'local',
       commandName: 'find',
       readConcern: { level: 'local' }
     },
     {
       description: 'Should set majority readConcern on db level',
-      level: 'majority',
       commandName: 'find',
       readConcern: { level: 'majority' }
     },
     {
       description: 'Should set majority readConcern aggregate command',
-      level: 'majority',
       commandName: 'aggregate',
       readConcern: { level: 'majority' }
     },
     {
       description: 'Should set majority readConcern geoSearch command',
-      level: 'majority',
       commandName: 'geoSearch',
       readConcern: { level: 'majority' }
     },
     {
       description: 'Should set local readConcern at collection level',
-      level: 'local',
       commandName: 'find',
       readConcern: { level: 'local' }
     },
     {
       description: 'Should set majority readConcern at collection level',
-      level: 'majority',
       commandName: 'find',
       readConcern: { level: 'majority' }
     }
@@ -73,7 +67,10 @@ describe('ReadConcern', function() {
         const succeeded = [];
         // Get a new instance
         const configuration = this.configuration;
-        client = configuration.newClient({ w: 1 }, { poolSize: 1, readConcern: test.readConcern });
+        client = configuration.newClient(
+          { w: 1 },
+          { poolSize: 1, readConcern: test.readConcern, monitorCommands: true }
+        );
 
         client.connect((err, client) => {
           expect(err).to.not.exist;
@@ -88,20 +85,20 @@ describe('ReadConcern', function() {
           expect(collection.readConcern).to.deep.equal(test.readConcern);
 
           // commandMonitoring
-          client.on('started', filterForCommands(test.commandName, started));
-          client.on('succeeded', filterForCommands(test.commandName, succeeded));
+          client.on('commandStarted', filterForCommands(test.commandName, started));
+          client.on('commandSucceeded', filterForCommands(test.commandName, succeeded));
 
           // Execute find
           if (test.commandName === 'find') {
             collection.find().toArray(err => {
               expect(err).to.not.exist;
-              validateTestResults(started, succeeded, test.commandName, test.level);
+              validateTestResults(started, succeeded, test.commandName, test.readConcern.level);
               done();
             });
           } else if (test.commandName === 'aggregate') {
             collection.aggregate([{ $match: {} }]).toArray(err => {
               expect(err).to.not.exist;
-              validateTestResults(started, succeeded, test.commandName, test.level);
+              validateTestResults(started, succeeded, test.commandName, test.readConcern.level);
               done();
             });
           } else if (test.commandName === 'geoSearch') {
@@ -121,7 +118,12 @@ describe('ReadConcern', function() {
                     { search: { a: 1 }, limit: 1, maxDistance: 100 },
                     err => {
                       expect(err).to.not.exist;
-                      validateTestResults(started, succeeded, test.commandName, test.level);
+                      validateTestResults(
+                        started,
+                        succeeded,
+                        test.commandName,
+                        test.readConcern.level
+                      );
                       done();
                     }
                   );
@@ -138,19 +140,16 @@ describe('ReadConcern', function() {
     const urlTests = [
       {
         description: 'Should set local readConcern using MongoClient',
-        level: 'local',
         urlReadConcernLevel: 'readConcernLevel=local',
         readConcern: { level: 'local' }
       },
       {
         description: 'Should set majority readConcern using MongoClient',
-        level: 'majority',
         urlReadConcernLevel: 'readConcernLevel=majority',
         readConcern: { level: 'majority' }
       },
       {
         description: 'Should set majority readConcern using MongoClient with options',
-        level: 'majority',
         readConcern: { level: 'majority' }
       }
     ];
@@ -170,9 +169,12 @@ describe('ReadConcern', function() {
               url.indexOf('?') !== -1
                 ? `${url}&${test.urlReadConcernLevel}`
                 : `${url}?${test.urlReadConcernLevel}`;
-            client = configuration.newClient(url);
+            client = configuration.newClient(url, { monitorCommands: true });
           } else {
-            client = configuration.newClient(url, { readConcern: test.readConcern });
+            client = configuration.newClient(url, {
+              readConcern: test.readConcern,
+              monitorCommands: true
+            });
           }
 
           client.connect((err, client) => {
@@ -182,21 +184,19 @@ describe('ReadConcern', function() {
             expect(db.readConcern).to.deep.equal(test.readConcern);
 
             // Get a collection
-            const collection = test.collectionReadConcern
-              ? db.collection('readConcernCollection', test.readConcern)
-              : db.collection('readConcernCollection');
+            const collection = db.collection('readConcernCollection');
 
             // Validate readConcern
             expect(collection.readConcern).to.deep.equal(test.readConcern);
 
             // commandMonitoring
-            client.on('started', filterForCommands('find', started));
-            client.on('succeeded', filterForCommands('find', succeeded));
+            client.on('commandStarted', filterForCommands('find', started));
+            client.on('commandSucceeded', filterForCommands('find', succeeded));
 
             // Execute find
             collection.find().toArray(err => {
               expect(err).to.not.exist;
-              validateTestResults(started, succeeded, 'find', test.level);
+              validateTestResults(started, succeeded, 'find', test.readConcern.level);
               done();
             });
           });
@@ -208,28 +208,24 @@ describe('ReadConcern', function() {
   const insertTests = [
     {
       description: 'Should set majority readConcern distinct command',
-      level: 'majority',
       commandName: 'distinct',
       mongodbVersion: '>= 3.2',
       readConcern: { level: 'majority' }
     },
     {
       description: 'Should set majority readConcern count command',
-      level: 'majority',
       commandName: 'count',
       mongodbVersion: '>= 3.2',
       readConcern: { level: 'majority' }
     },
     {
       description: 'Should set majority readConcern group command',
-      level: 'majority',
       commandName: 'group',
       mongodbVersion: '>= 3.2 <=4.1.0',
       readConcern: { level: 'majority' }
     },
     {
       description: 'Should set majority readConcern parallelCollectionScan command',
-      level: 'majority',
       commandName: 'parallelCollectionScan',
       mongodbVersion: '>= 3.2 <=4.1.0',
       readConcern: { level: 'majority' }
@@ -245,7 +241,10 @@ describe('ReadConcern', function() {
         const succeeded = [];
         // Get a new instance
         const configuration = this.configuration;
-        client = configuration.newClient({ w: 1 }, { poolSize: 1, readConcern: test.readConcern });
+        client = configuration.newClient(
+          { w: 1 },
+          { poolSize: 1, readConcern: test.readConcern, monitorCommands: true }
+        );
 
         client.connect((err, client) => {
           expect(err).to.not.exist;
@@ -254,7 +253,7 @@ describe('ReadConcern', function() {
           expect(db.readConcern).to.deep.equal(test.readConcern);
 
           // Get the collection
-          const collection = db.collection('test_distinct_read_concern');
+          const collection = db.collection('readConcernCollection');
 
           // Insert documents to perform distinct against
           collection.insertMany(
@@ -271,20 +270,20 @@ describe('ReadConcern', function() {
               expect(err).to.not.exist;
 
               // Listen to apm events
-              client.on('started', filterForCommands(test.commandName, started));
-              client.on('succeeded', filterForCommands(test.commandName, succeeded));
+              client.on('commandStarted', filterForCommands(test.commandName, started));
+              client.on('commandSucceeded', filterForCommands(test.commandName, succeeded));
 
               // Perform a distinct query against the a field
               if (test.commandName === 'distinct') {
                 collection.distinct('a', err => {
                   expect(err).to.not.exist;
-                  validateTestResults(started, succeeded, test.commandName, test.level);
+                  validateTestResults(started, succeeded, test.commandName, test.readConcern.level);
                   done();
                 });
               } else if (test.commandName === 'count') {
                 collection.estimatedDocumentCount({ a: 1 }, err => {
                   expect(err).to.not.exist;
-                  validateTestResults(started, succeeded, test.commandName, test.level);
+                  validateTestResults(started, succeeded, test.commandName, test.readConcern.level);
                   done();
                 });
               } else if (test.commandName === 'group') {
@@ -295,14 +294,19 @@ describe('ReadConcern', function() {
                   'function (obj, prev) { prev.count++; }',
                   err => {
                     expect(err).to.not.exist;
-                    validateTestResults(started, succeeded, test.commandName, test.level);
+                    validateTestResults(
+                      started,
+                      succeeded,
+                      test.commandName,
+                      test.readConcern.level
+                    );
                     done();
                   }
                 );
               } else if (test.commandName === 'parallelCollectionScan') {
                 collection.parallelCollectionScan({ numCursors: 1 }, err => {
                   expect(err).to.not.exist;
-                  validateTestResults(started, succeeded, test.commandName, test.level);
+                  validateTestResults(started, succeeded, test.commandName, test.readConcern.level);
                   done();
                 });
               }
@@ -323,7 +327,7 @@ describe('ReadConcern', function() {
       const configuration = this.configuration;
       client = configuration.newClient(
         { w: 1 },
-        { poolSize: 1, readConcern: { level: 'majority' } }
+        { poolSize: 1, readConcern: { level: 'majority' }, monitorCommands: true }
       );
 
       client.connect((err, client) => {
@@ -338,8 +342,8 @@ describe('ReadConcern', function() {
         expect(collection.readConcern).to.deep.equal({ level: 'majority' });
 
         // Listen to apm events
-        client.on('started', filterForCommands('aggregate', started));
-        client.on('succeeded', filterForCommands('aggregate', succeeded));
+        client.on('commandStarted', filterForCommands('aggregate', started));
+        client.on('commandSucceeded', filterForCommands('aggregate', succeeded));
 
         // Execute find
         collection
@@ -383,8 +387,8 @@ describe('ReadConcern', function() {
             .collection('readConcernCollectionAggregate1');
 
           // Listen to apm events
-          client.on('started', filterForCommands('aggregate', started));
-          client.on('succeeded', filterForCommands('aggregate', succeeded));
+          client.on('commandStarted', filterForCommands('aggregate', started));
+          client.on('commandSucceeded', filterForCommands('aggregate', succeeded));
 
           // Execute find
           return collection
@@ -416,7 +420,7 @@ describe('ReadConcern', function() {
       const configuration = this.configuration;
       client = configuration.newClient(
         { w: 1 },
-        { poolSize: 1, readConcern: { level: 'majority' } }
+        { poolSize: 1, readConcern: { level: 'majority' }, monitorCommands: true }
       );
 
       client.connect((err, client) => {
@@ -437,8 +441,8 @@ describe('ReadConcern', function() {
             const reduce = 'function(k,vals) { return 1; }';
 
             // Listen to apm events
-            client.on('started', filterForCommands('mapreduce', started));
-            client.on('succeeded', filterForCommands('mapreduce', succeeded));
+            client.on('commandStarted', filterForCommands('mapreduce', started));
+            client.on('commandSucceeded', filterForCommands('mapreduce', succeeded));
 
             // Execute mapReduce
             collection.mapReduce(map, reduce, { out: { replace: 'tempCollection' } }, err => {
