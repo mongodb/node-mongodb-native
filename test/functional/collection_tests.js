@@ -25,7 +25,7 @@ describe('Collection', function() {
 
     afterEach(function() {
       client.close();
-    })
+    });
 
     /**
      * @ignore
@@ -59,7 +59,8 @@ describe('Collection', function() {
               // Verify that all the result are correct coming back (should contain the value ok)
               expect(collection.collectionName).to.equal('test_collection_methods4');
               // Let's check that the collection was created correctly
-              db.listCollections().toArray((err, documents) => {
+              db.listCollections().toArray(err => {
+                expect(err).to.not.exist;
                 // Rename the collection and with the dropTarget boolean, and check to make sure only onen exists.
                 db.renameCollection(
                   'test_collection_methods4',
@@ -96,27 +97,33 @@ describe('Collection', function() {
               err => {
                 expect(err).to.not.exist;
                 db.collection('test.mario', (err, mario_collection) => {
-                  mario_collection.insertOne({ bar: 0 }, this.configuration.writeConcernMax(), err => {
-                    expect(err).to.not.exist;
-                    // Assert collections
-                    db.collections((err, collections) => {
-                      let found_spiderman = false;
-                      let found_mario = false;
-                      let found_does_not_exist = false;
+                  mario_collection.insertOne(
+                    { bar: 0 },
+                    this.configuration.writeConcernMax(),
+                    err => {
+                      expect(err).to.not.exist;
+                      // Assert collections
+                      db.collections((err, collections) => {
+                        let found_spiderman = false;
+                        let found_mario = false;
+                        let found_does_not_exist = false;
 
-                      collections.forEach(collection => {
-                        if (collection.collectionName === 'test.spiderman') found_spiderman = true;
-                        if (collection.collectionName === 'test.mario') found_mario = true;
-                        if (collection.collectionName === 'does_not_exist')
-                          found_does_not_exist = true;
+                        collections.forEach(collection => {
+                          if (collection.collectionName === 'test.spiderman') {
+                            found_spiderman = true;
+                          }
+                          if (collection.collectionName === 'test.mario') found_mario = true;
+                          if (collection.collectionName === 'does_not_exist')
+                            found_does_not_exist = true;
+                        });
+
+                        expect(found_spiderman).to.be.true;
+                        expect(found_mario).to.be.true;
+                        expect(found_does_not_exist).to.be.false;
+                        done();
                       });
-
-                      expect(found_spiderman).to.be.true;
-                      expect(found_mario).to.be.true;
-                      expect(found_does_not_exist).to.be.false;
-                      done();
-                    });
-                  });
+                    }
+                  );
                 });
               }
             );
@@ -714,7 +721,7 @@ describe('Collection', function() {
         filterObject: { item: { $elemMatch: { name: 'my_name' } } },
         updateObject: { $set: { a: 1 } }
       }
-    ]
+    ];
 
     selectorTests.forEach(test => {
       it(test.title, function(done) {
@@ -727,7 +734,6 @@ describe('Collection', function() {
           });
       });
     });
-
 
     const updateTests = [
       {
@@ -747,13 +753,17 @@ describe('Collection', function() {
     updateTests.forEach(test => {
       it(test.title, function(done) {
         db.createCollection(test.collectionName, (err, collection) => {
-          if (test.title == 'should correctly update with no docs') {
+          if (test.title === 'should correctly update with no docs') {
             const ObjectID = this.configuration.require.ObjectID;
             const id = new ObjectID(null);
             test.filterObject._id = id;
             test.updateObject.$set._id = id;
           }
-          collection.updateOne(test.filterObject, test.updateObject, this.configuration.writeConcernMax(), (err, r) => {
+          collection.updateOne(
+            test.filterObject,
+            test.updateObject,
+            this.configuration.writeConcernMax(),
+            (err, r) => {
               expect(err).to.not.exist;
               expect(r.result.n).to.equal(0);
 
@@ -796,7 +806,9 @@ describe('Collection', function() {
     listCollectionsTests.forEach(test => {
       it(test.title, function(done) {
         db.createCollection(test.collectionName, (err, collection) => {
-          if (test.title === 'should correctly list back collection names containing .') expect(collection.collectionName).to.equal(test.collectionName);
+          if (test.title === 'should correctly list back collection names containing .') {
+            expect(collection.collectionName).to.equal(test.collectionName);
+          }
           expect(err).to.not.exist;
           db.listCollections().toArray((err, documents) => {
             expect(err).to.not.exist;
@@ -936,47 +948,55 @@ describe('Collection', function() {
       {
         title: 'should correctly create TTL collection with index using ensureIndex',
         collectionName: 'shouldCorrectlyCreateTTLCollectionWithIndexUsingEnsureIndex'
-      },
+      }
     ];
 
     collectionTTLtests.forEach(test => {
       it(test.title, function(done) {
-        db.createCollection(
-          test.collectionName,
-          (err, collection) => {
-            const errorCallBack = err => {
-              expect(err).to.not.exist;
+        db.createCollection(test.collectionName, (err, collection) => {
+          const errorCallBack = err => {
+            expect(err).to.not.exist;
 
-              // Insert a document with a date
-              collection.insertOne(
-                { a: 1, createdAt: new Date() },
-                this.configuration.writeConcernMax(),
-                err => {
+            // Insert a document with a date
+            collection.insertOne(
+              { a: 1, createdAt: new Date() },
+              this.configuration.writeConcernMax(),
+              err => {
+                expect(err).to.not.exist;
+
+                collection.indexInformation({ full: true }, (err, indexes) => {
                   expect(err).to.not.exist;
 
-                  collection.indexInformation({ full: true }, (err, indexes) => {
-                    expect(err).to.not.exist;
-
-                    for (let i = 0; i < indexes.length; i++) {
-                      if (indexes[i].name === 'createdAt_1') {
-                        expect(1).to.equal(indexes[i].expireAfterSeconds);
-                        break;
-                      }
+                  for (let i = 0; i < indexes.length; i++) {
+                    if (indexes[i].name === 'createdAt_1') {
+                      expect(1).to.equal(indexes[i].expireAfterSeconds);
+                      break;
                     }
+                  }
 
-                    done();
-                  });
-                }
-              );
-            }
-            if (test.title === 'should correctly create TTL collection with index using createIndex') {
-              collection.createIndex({ createdAt: 1 }, { expireAfterSeconds: 1, w: 1 }, errorCallBack);
-            }
-            else if (test.title === 'should correctly create TTL collection with index using ensureIndex') {
-              collection.ensureIndex({ createdAt: 1 }, { expireAfterSeconds: 1, w: 1 }, errorCallBack);
-            }
+                  done();
+                });
+              }
+            );
+          };
+          if (
+            test.title === 'should correctly create TTL collection with index using createIndex'
+          ) {
+            collection.createIndex(
+              { createdAt: 1 },
+              { expireAfterSeconds: 1, w: 1 },
+              errorCallBack
+            );
+          } else if (
+            test.title === 'should correctly create TTL collection with index using ensureIndex'
+          ) {
+            collection.ensureIndex(
+              { createdAt: 1 },
+              { expireAfterSeconds: 1, w: 1 },
+              errorCallBack
+            );
           }
-        );
+        });
       });
     });
 
@@ -1030,10 +1050,11 @@ describe('Collection', function() {
       it(test.title, function(done) {
         const close = e => client.close(() => done(e));
         let thenFunction;
-        if (test.title === 'should correctly perform estimatedDocumentCount on non-matching query') {
+        if (
+          test.title === 'should correctly perform estimatedDocumentCount on non-matching query'
+        ) {
           thenFunction = () => collection.estimatedDocumentCount({ a: 'b' });
-        }
-        else if (test.title === 'should correctly perform countDocuments on non-matching query') {
+        } else if (test.title === 'should correctly perform countDocuments on non-matching query') {
           thenFunction = () => collection.countDocuments({ a: 'b' });
         }
         Promise.resolve()
