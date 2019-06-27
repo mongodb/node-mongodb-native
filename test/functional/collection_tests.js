@@ -376,15 +376,15 @@ describe('Collection', function() {
     it('should correctly execute save', function(done) {
       db.createCollection('test_save', (err, collection) => {
         const doc = { hello: 'world' };
-        collection.save(doc, this.configuration.writeConcernMax(), (err, r) => {
+        collection.insertOne(doc, this.configuration.writeConcernMax(), (err, r) => {
           expect(r.ops[0]._id).to.exist;
 
-          collection.count((err, count) => {
+          collection.countDocuments((err, count) => {
             expect(count).to.equal(1);
 
             collection.save(r.ops[0], this.configuration.writeConcernMax(), err => {
               expect(err).to.not.exist;
-              collection.count((err, count) => {
+              collection.countDocuments((err, count) => {
                 expect(count).to.equal(1);
 
                 collection.findOne((err, doc3) => {
@@ -394,7 +394,7 @@ describe('Collection', function() {
 
                   collection.save(doc3, this.configuration.writeConcernMax(), err => {
                     expect(err).to.not.exist;
-                    collection.count((err, count) => {
+                    collection.countDocuments((err, count) => {
                       expect(count).to.equal(1);
 
                       collection.findOne((err, doc5) => {
@@ -406,7 +406,7 @@ describe('Collection', function() {
                           this.configuration.writeConcernMax(),
                           err => {
                             expect(err).to.not.exist;
-                            collection.count((err, count) => {
+                            collection.countDocuments((err, count) => {
                               expect(count).to.equal(2);
                               // Let's close the db
                               done();
@@ -454,9 +454,9 @@ describe('Collection', function() {
         'test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection',
         (err, collection) => {
           const a = { _id: '1', hello: 'world' };
-          collection.save(a, this.configuration.writeConcernMax(), err => {
+          collection.insertOne(a, this.configuration.writeConcernMax(), err => {
             expect(err).to.not.exist;
-            collection.count((err, count) => {
+            collection.countDocuments((err, count) => {
               expect(count).to.equal(1);
 
               collection.findOne((err, doc) => {
@@ -466,7 +466,7 @@ describe('Collection', function() {
                 collection.save(doc, this.configuration.writeConcernMax(), err => {
                   expect(err).to.not.exist;
                   collection.findOne((err, doc) => {
-                    collection.count((err, count) => {
+                    collection.countDocuments((err, count) => {
                       expect(count).to.equal(1);
 
                       expect(doc.hello).to.equal('mike');
@@ -507,7 +507,7 @@ describe('Collection', function() {
                 expect(r.result.n).to.equal(1);
 
                 // Remove safely
-                collection.remove({}, this.configuration.writeConcernMax(), err => {
+                collection.deleteOne({}, this.configuration.writeConcernMax(), err => {
                   expect(err).to.not.exist;
 
                   done();
@@ -530,7 +530,7 @@ describe('Collection', function() {
         };
 
         //insert new user
-        collection.save(doc, this.configuration.writeConcernMax(), err => {
+        collection.insertOne(doc, this.configuration.writeConcernMax(), err => {
           expect(err).to.not.exist;
 
           collection
@@ -579,7 +579,7 @@ describe('Collection', function() {
             username: 'amit'
           };
           //insert new user
-          collection.save(doc, this.configuration.writeConcernMax(), err => {
+          collection.insertOne(doc, this.configuration.writeConcernMax(), err => {
             expect(err).to.not.exist;
 
             collection
@@ -618,16 +618,16 @@ describe('Collection', function() {
     it('should perform collection remove with no callback', function(done) {
       db.collection('remove_with_no_callback_bug_test', (err, collection) => {
         expect(err).to.not.exist;
-        collection.save({ a: 1 }, this.configuration.writeConcernMax(), err => {
+        collection.insertOne({ a: 1 }, this.configuration.writeConcernMax(), err => {
           expect(err).to.not.exist;
-          collection.save({ b: 1 }, this.configuration.writeConcernMax(), err => {
+          collection.insertOne({ b: 1 }, this.configuration.writeConcernMax(), err => {
             expect(err).to.not.exist;
-            collection.save({ c: 1 }, this.configuration.writeConcernMax(), err => {
+            collection.insertOne({ c: 1 }, this.configuration.writeConcernMax(), err => {
               expect(err).to.not.exist;
-              collection.remove({ a: 1 }, this.configuration.writeConcernMax(), err => {
+              collection.deleteOne({ a: 1 }, this.configuration.writeConcernMax(), err => {
                 expect(err).to.not.exist;
                 // Let's perform a count
-                collection.count((err, count) => {
+                collection.countDocuments((err, count) => {
                   expect(err).to.not.exist;
                   expect(count).to.equal(2);
                   done();
@@ -869,6 +869,7 @@ describe('Collection', function() {
               let names = [];
               for (let i = 0; i < collections.length; i++) {
                 names.push(collections[i].name);
+                console.log('Name of the collection: ', collections[i].name);
               }
               expect(names.length).to.equal(3);
               expect(names).to.include('test1');
@@ -1279,7 +1280,7 @@ describe('Collection', function() {
     it('should succeed with retryWrite=true when using remove without option single', {
       metadata,
       test: function() {
-        return collection.remove({ name: 'foobar' });
+        return collection.deleteOne({ name: 'foobar' });
       }
     });
 
