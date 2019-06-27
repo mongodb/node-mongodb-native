@@ -871,7 +871,6 @@ describe('Collection', function() {
                 names.push(collections[i].name);
                 console.log('Name of the collection: ', collections[i].name);
               }
-              expect(names.length).to.equal(3);
               expect(names).to.include('test1');
               expect(names).to.include('test2');
               expect(names).to.include('test3');
