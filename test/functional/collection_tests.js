@@ -376,7 +376,7 @@ describe('Collection', function() {
     it('should correctly execute save', function(done) {
       db.createCollection('test_save', (err, collection) => {
         const doc = { hello: 'world' };
-        collection.insertOne(doc, this.configuration.writeConcernMax(), (err, r) => {
+        collection.save(doc, this.configuration.writeConcernMax(), (err, r) => {
           expect(r.ops[0]._id).to.exist;
 
           collection.countDocuments((err, count) => {
@@ -454,7 +454,7 @@ describe('Collection', function() {
         'test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection',
         (err, collection) => {
           const a = { _id: '1', hello: 'world' };
-          collection.insertOne(a, this.configuration.writeConcernMax(), err => {
+          collection.save(a, this.configuration.writeConcernMax(), err => {
             expect(err).to.not.exist;
             collection.countDocuments((err, count) => {
               expect(count).to.equal(1);
@@ -530,7 +530,7 @@ describe('Collection', function() {
         };
 
         //insert new user
-        collection.insertOne(doc, this.configuration.writeConcernMax(), err => {
+        collection.save(doc, this.configuration.writeConcernMax(), err => {
           expect(err).to.not.exist;
 
           collection
@@ -579,7 +579,7 @@ describe('Collection', function() {
             username: 'amit'
           };
           //insert new user
-          collection.insertOne(doc, this.configuration.writeConcernMax(), err => {
+          collection.save(doc, this.configuration.writeConcernMax(), err => {
             expect(err).to.not.exist;
 
             collection
@@ -624,7 +624,7 @@ describe('Collection', function() {
             expect(err).to.not.exist;
             collection.insertOne({ c: 1 }, this.configuration.writeConcernMax(), err => {
               expect(err).to.not.exist;
-              collection.deleteOne({ a: 1 }, this.configuration.writeConcernMax(), err => {
+              collection.remove({ a: 1 }, this.configuration.writeConcernMax(), err => {
                 expect(err).to.not.exist;
                 // Let's perform a count
                 collection.countDocuments((err, count) => {
@@ -869,7 +869,6 @@ describe('Collection', function() {
               let names = [];
               for (let i = 0; i < collections.length; i++) {
                 names.push(collections[i].name);
-                console.log('Name of the collection: ', collections[i].name);
               }
               expect(names).to.include('test1');
               expect(names).to.include('test2');
