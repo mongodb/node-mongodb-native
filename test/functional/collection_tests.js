@@ -663,13 +663,13 @@ describe('Collection', function() {
     it('should throw error due to illegal update', function(done) {
       db.createCollection('shouldThrowErrorDueToIllegalUpdate', {}, (err, coll) => {
         try {
-          coll.update({}, null, () => {});
+          coll.updateOne({}, null, () => {});
         } catch (err) {
           expect(err.message).to.equal('document must be a valid JavaScript object');
         }
 
         try {
-          coll.update(null, null, () => {});
+          coll.updateOne(null, null, () => {});
         } catch (err) {
           expect(err.message).to.equal('selector must be a valid JavaScript object');
         }
@@ -702,18 +702,6 @@ describe('Collection', function() {
       {
         title: 'should correctly execute update with elemMatch field in selector',
         collectionName: 'executeUpdateWithElemMatch',
-        filterObject: { item: { $elemMatch: { name: 'my_name' } } },
-        updateObject: { $set: { a: 1 } }
-      },
-      {
-        title: 'should correctly update with no docs',
-        collectionName: 'test_should_correctly_do_update_with_no_docs',
-        filterObject: { item: { $elemMatch: { name: 'my_name' } } },
-        updateObject: { $set: { a: 1 } }
-      },
-      {
-        title: 'should correctly update with pipeline',
-        collectionName: 'test_should_correctly_do_update_with_pipeline',
         filterObject: { item: { $elemMatch: { name: 'my_name' } } },
         updateObject: { $set: { a: 1 } }
       }
@@ -802,10 +790,8 @@ describe('Collection', function() {
     listCollectionsTests.forEach(test => {
       it(test.title, function(done) {
         db.createCollection(test.collectionName, (err, collection) => {
-          if (test.title === 'should correctly list back collection names containing .') {
-            expect(collection.collectionName).to.equal(test.collectionName);
-          }
           expect(err).to.not.exist;
+          expect(collection.collectionName).to.equal(test.collectionName);
           db.listCollections().toArray((err, documents) => {
             expect(err).to.not.exist;
             let found = false;
@@ -1092,7 +1078,7 @@ describe('Collection', function() {
     });
   });
 
-  describe('countDocuments with mock server', () => {
+  describe('countDocuments with mock server', function() {
     let server;
 
     beforeEach(() => {
