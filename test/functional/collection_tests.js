@@ -7,19 +7,21 @@ const mock = require('mongodb-mock-server');
 chai.use(sinonChai);
 
 describe('Collection', function() {
+  let configuration;
   before(function() {
-    return setupDatabase(this.configuration);
+    configuration = this.configuration;
+    return setupDatabase(configuration);
   });
 
-  describe('tests with standard configuration', function() {
+  describe('standard collection tests', function() {
     let client;
     let db;
     beforeEach(function() {
-      client = this.configuration.newClient(this.configuration.writeConcernMax(), {
+      client = configuration.newClient(configuration.writeConcernMax(), {
         poolSize: 1
       });
       return client.connect().then(client => {
-        db = client.db(this.configuration.db);
+        db = client.db(configuration.db);
       });
     });
 
@@ -87,42 +89,34 @@ describe('Collection', function() {
         db.createCollection('test.mario', () => {
           // Insert test documents (creates collections)
           db.collection('test.spiderman', (err, spiderman_collection) => {
-            spiderman_collection.insertOne(
-              { foo: 5 },
-              this.configuration.writeConcernMax(),
-              err => {
-                expect(err).to.not.exist;
-                db.collection('test.mario', (err, mario_collection) => {
-                  mario_collection.insertOne(
-                    { bar: 0 },
-                    this.configuration.writeConcernMax(),
-                    err => {
-                      expect(err).to.not.exist;
-                      // Assert collections
-                      db.collections((err, collections) => {
-                        let found_spiderman = false;
-                        let found_mario = false;
-                        let found_does_not_exist = false;
+            spiderman_collection.insertOne({ foo: 5 }, configuration.writeConcernMax(), err => {
+              expect(err).to.not.exist;
+              db.collection('test.mario', (err, mario_collection) => {
+                mario_collection.insertOne({ bar: 0 }, configuration.writeConcernMax(), err => {
+                  expect(err).to.not.exist;
+                  // Assert collections
+                  db.collections((err, collections) => {
+                    let found_spiderman = false;
+                    let found_mario = false;
+                    let found_does_not_exist = false;
 
-                        collections.forEach(collection => {
-                          if (collection.collectionName === 'test.spiderman') {
-                            found_spiderman = true;
-                          }
-                          if (collection.collectionName === 'test.mario') found_mario = true;
-                          if (collection.collectionName === 'does_not_exist')
-                            found_does_not_exist = true;
-                        });
+                    collections.forEach(collection => {
+                      if (collection.collectionName === 'test.spiderman') {
+                        found_spiderman = true;
+                      }
+                      if (collection.collectionName === 'test.mario') found_mario = true;
+                      if (collection.collectionName === 'does_not_exist')
+                        found_does_not_exist = true;
+                    });
 
-                        expect(found_spiderman).to.be.true;
-                        expect(found_mario).to.be.true;
-                        expect(found_does_not_exist).to.be.false;
-                        done();
-                      });
-                    }
-                  );
+                    expect(found_spiderman).to.be.true;
+                    expect(found_mario).to.be.true;
+                    expect(found_does_not_exist).to.be.false;
+                    done();
+                  });
                 });
-              }
-            );
+              });
+            });
           });
         });
       });
@@ -141,7 +135,7 @@ describe('Collection', function() {
 
           documents.forEach(document => {
             if (
-              document.name === this.configuration.db + '.test_collection_names' ||
+              document.name === configuration.db + '.test_collection_names' ||
               document.name === 'test_collection_names'
             )
               found = true;
@@ -150,18 +144,18 @@ describe('Collection', function() {
           expect(found).to.be.true;
           // Insert a document in an non-existing collection should create the collection
           const collection = db.collection('test_collection_names2');
-          collection.insertOne({ a: 1 }, this.configuration.writeConcernMax(), err => {
+          collection.insertOne({ a: 1 }, configuration.writeConcernMax(), err => {
             expect(err).to.not.exist;
 
             db.listCollections().toArray((err, documents) => {
               documents.forEach(document => {
                 if (
-                  document.name === this.configuration.db + '.test_collection_names2' ||
+                  document.name === configuration.db + '.test_collection_names2' ||
                   document.name === 'test_collection_names2'
                 )
                   found = true;
                 if (
-                  document.name === this.configuration.db + '.test_collection_names' ||
+                  document.name === configuration.db + '.test_collection_names' ||
                   document.name === 'test_collection_names'
                 )
                   found2 = true;
@@ -189,15 +183,11 @@ describe('Collection', function() {
         );
         db.createCollection('test_strict_access_collection', err => {
           expect(err).to.not.exist;
-          db.collection(
-            'test_strict_access_collection',
-            this.configuration.writeConcernMax(),
-            err => {
-              expect(err).to.not.exist;
-              // Let's close the db
-              done();
-            }
-          );
+          db.collection('test_strict_access_collection', configuration.writeConcernMax(), err => {
+            expect(err).to.not.exist;
+            // Let's close the db
+            done();
+          });
         });
       });
     });
@@ -235,51 +225,51 @@ describe('Collection', function() {
         // Legal inserts
         collection.insertMany(
           [{ hello: 'world' }, { hello: { hello: 'world' } }],
-          this.configuration.writeConcernMax(),
+          configuration.writeConcernMax(),
           err => {
             expect(err).to.not.exist;
 
             // Illegal insert for key
-            collection.insertOne({ $hello: 'world' }, this.configuration.writeConcernMax(), err => {
+            collection.insertOne({ $hello: 'world' }, configuration.writeConcernMax(), err => {
               expect(err).to.be.an.instanceof(Error);
               expect(err.message).to.equal("key $hello must not start with '$'");
 
               collection.insertOne(
                 { hello: { $hello: 'world' } },
-                this.configuration.writeConcernMax(),
+                configuration.writeConcernMax(),
                 err => {
                   expect(err).to.be.an.instanceof(Error);
                   expect(err.message).to.equal("key $hello must not start with '$'");
 
                   collection.insertOne(
                     { he$llo: 'world' },
-                    this.configuration.writeConcernMax(),
+                    configuration.writeConcernMax(),
                     err => {
                       expect(err).to.not.exist;
 
                       collection.insertOne(
                         { hello: { hell$o: 'world' } },
-                        this.configuration.writeConcernMax(),
+                        configuration.writeConcernMax(),
                         err => {
                           expect(err).to.not.exist;
 
                           collection.insertOne(
                             { '.hello': 'world' },
-                            this.configuration.writeConcernMax(),
+                            configuration.writeConcernMax(),
                             err => {
                               expect(err).to.be.an.instanceof(Error);
                               expect(err.message).to.equal("key .hello must not contain '.'");
 
                               collection.insertOne(
                                 { hello: { '.hello': 'world' } },
-                                this.configuration.writeConcernMax(),
+                                configuration.writeConcernMax(),
                                 err => {
                                   expect(err).to.be.an.instanceof(Error);
                                   expect(err.message).to.equal("key .hello must not contain '.'");
 
                                   collection.insertOne(
                                     { 'hello.': 'world' },
-                                    this.configuration.writeConcernMax(),
+                                    configuration.writeConcernMax(),
                                     err => {
                                       expect(err).to.be.an.instanceof(Error);
                                       expect(err.message).to.equal(
@@ -288,7 +278,7 @@ describe('Collection', function() {
 
                                       collection.insertOne(
                                         { hello: { 'hello.': 'world' } },
-                                        this.configuration.writeConcernMax(),
+                                        configuration.writeConcernMax(),
                                         err => {
                                           expect(err).to.be.an.instanceof(Error);
                                           expect(err.message).to.equal(
@@ -376,13 +366,13 @@ describe('Collection', function() {
     it('should correctly execute save', function(done) {
       db.createCollection('test_save', (err, collection) => {
         const doc = { hello: 'world' };
-        collection.save(doc, this.configuration.writeConcernMax(), (err, r) => {
+        collection.save(doc, configuration.writeConcernMax(), (err, r) => {
           expect(r.ops[0]._id).to.exist;
 
           collection.countDocuments((err, count) => {
             expect(count).to.equal(1);
 
-            collection.save(r.ops[0], this.configuration.writeConcernMax(), err => {
+            collection.save(r.ops[0], configuration.writeConcernMax(), err => {
               expect(err).to.not.exist;
               collection.countDocuments((err, count) => {
                 expect(count).to.equal(1);
@@ -392,7 +382,7 @@ describe('Collection', function() {
 
                   doc3.hello = 'mike';
 
-                  collection.save(doc3, this.configuration.writeConcernMax(), err => {
+                  collection.save(doc3, configuration.writeConcernMax(), err => {
                     expect(err).to.not.exist;
                     collection.countDocuments((err, count) => {
                       expect(count).to.equal(1);
@@ -403,7 +393,7 @@ describe('Collection', function() {
                         // Save another document
                         collection.save(
                           { hello: 'world' },
-                          this.configuration.writeConcernMax(),
+                          configuration.writeConcernMax(),
                           err => {
                             expect(err).to.not.exist;
                             collection.countDocuments((err, count) => {
@@ -428,11 +418,11 @@ describe('Collection', function() {
      * @ignore
      */
     it('should correctly save document with Long value', function(done) {
-      const Long = this.configuration.require.Long;
+      const Long = configuration.require.Long;
       db.createCollection('test_save_long', (err, collection) => {
         collection.insertOne(
           { x: Long.fromNumber(9223372036854775807) },
-          this.configuration.writeConcernMax(),
+          configuration.writeConcernMax(),
           err => {
             expect(err).to.not.exist;
             collection.findOne((err, doc) => {
@@ -454,7 +444,7 @@ describe('Collection', function() {
         'test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection',
         (err, collection) => {
           const a = { _id: '1', hello: 'world' };
-          collection.save(a, this.configuration.writeConcernMax(), err => {
+          collection.save(a, configuration.writeConcernMax(), err => {
             expect(err).to.not.exist;
             collection.countDocuments((err, count) => {
               expect(count).to.equal(1);
@@ -463,7 +453,7 @@ describe('Collection', function() {
                 expect(doc.hello).to.equal('world');
 
                 doc.hello = 'mike';
-                collection.save(doc, this.configuration.writeConcernMax(), err => {
+                collection.save(doc, configuration.writeConcernMax(), err => {
                   expect(err).to.not.exist;
                   collection.findOne((err, doc) => {
                     collection.countDocuments((err, count) => {
@@ -493,7 +483,7 @@ describe('Collection', function() {
             'test_should_execute_insert_update_delete_safe_mode'
           );
 
-          collection.insertOne({ i: 1 }, this.configuration.writeConcernMax(), (err, r) => {
+          collection.insertOne({ i: 1 }, configuration.writeConcernMax(), (err, r) => {
             expect(r.ops.length).to.equal(1);
             expect(r.ops[0]._id.toHexString().length).to.equal(24);
 
@@ -501,13 +491,13 @@ describe('Collection', function() {
             collection.updateOne(
               { i: 1 },
               { $set: { i: 2 } },
-              this.configuration.writeConcernMax(),
+              configuration.writeConcernMax(),
               err => {
                 expect(err).to.not.exist;
                 expect(r.result.n).to.equal(1);
 
                 // Remove safely
-                collection.deleteOne({}, this.configuration.writeConcernMax(), err => {
+                collection.deleteOne({}, configuration.writeConcernMax(), err => {
                   expect(err).to.not.exist;
 
                   done();
@@ -530,7 +520,7 @@ describe('Collection', function() {
         };
 
         //insert new user
-        collection.save(doc, this.configuration.writeConcernMax(), err => {
+        collection.save(doc, configuration.writeConcernMax(), err => {
           expect(err).to.not.exist;
 
           collection
@@ -544,7 +534,7 @@ describe('Collection', function() {
               } else if (user) {
                 user.pants = 'worn';
 
-                collection.save(user, this.configuration.writeConcernMax(), (err, result) => {
+                collection.save(user, configuration.writeConcernMax(), (err, result) => {
                   expect(err).to.not.exist;
                   expect(result.result.n).to.equal(1);
                   done();
@@ -559,10 +549,10 @@ describe('Collection', function() {
      * @ignore
      */
     it('should correctly save document with nested array', function(done) {
-      const ObjectID = this.configuration.require.ObjectID;
+      const ObjectID = configuration.require.ObjectID;
       db.createCollection('save_error_on_save_test', (err, collection) => {
         // Create unique index for username
-        collection.createIndex([['username', 1]], this.configuration.writeConcernMax(), err => {
+        collection.createIndex([['username', 1]], configuration.writeConcernMax(), err => {
           expect(err).to.not.exist;
           const doc = {
             email: 'email@email.com',
@@ -579,7 +569,7 @@ describe('Collection', function() {
             username: 'amit'
           };
           //insert new user
-          collection.save(doc, this.configuration.writeConcernMax(), err => {
+          collection.save(doc, configuration.writeConcernMax(), err => {
             expect(err).to.not.exist;
 
             collection
@@ -618,13 +608,13 @@ describe('Collection', function() {
     it('should perform collection remove with no callback', function(done) {
       db.collection('remove_with_no_callback_bug_test', (err, collection) => {
         expect(err).to.not.exist;
-        collection.insertOne({ a: 1 }, this.configuration.writeConcernMax(), err => {
+        collection.insertOne({ a: 1 }, configuration.writeConcernMax(), err => {
           expect(err).to.not.exist;
-          collection.insertOne({ b: 1 }, this.configuration.writeConcernMax(), err => {
+          collection.insertOne({ b: 1 }, configuration.writeConcernMax(), err => {
             expect(err).to.not.exist;
-            collection.insertOne({ c: 1 }, this.configuration.writeConcernMax(), err => {
+            collection.insertOne({ c: 1 }, configuration.writeConcernMax(), err => {
               expect(err).to.not.exist;
-              collection.remove({ a: 1 }, this.configuration.writeConcernMax(), err => {
+              collection.remove({ a: 1 }, configuration.writeConcernMax(), err => {
                 expect(err).to.not.exist;
                 // Let's perform a count
                 collection.countDocuments((err, count) => {
@@ -645,7 +635,7 @@ describe('Collection', function() {
     it('should correctly read back document with null', function(done) {
       db.createCollection('shouldCorrectlyReadBackDocumentWithNull', {}, (err, collection) => {
         // Insert a document with a date
-        collection.insertOne({ test: null }, this.configuration.writeConcernMax(), err => {
+        collection.insertOne({ test: null }, configuration.writeConcernMax(), err => {
           expect(err).to.not.exist;
 
           collection.findOne((err, result) => {
@@ -662,17 +652,12 @@ describe('Collection', function() {
      */
     it('should throw error due to illegal update', function(done) {
       db.createCollection('shouldThrowErrorDueToIllegalUpdate', {}, (err, coll) => {
-        try {
-          coll.update({}, null, () => {});
-        } catch (err) {
+        coll.update({}, null, err => {
           expect(err.message).to.equal('document must be a valid JavaScript object');
-        }
-
-        try {
-          coll.update(null, null, () => {});
-        } catch (err) {
+        });
+        coll.update(null, null, err => {
           expect(err.message).to.equal('selector must be a valid JavaScript object');
-        }
+        });
 
         done();
       });
@@ -723,8 +708,8 @@ describe('Collection', function() {
       {
         title: 'should correctly update with no docs',
         collectionName: 'test_should_correctly_do_update_with_no_docs',
-        filterObject: { _id: null },
-        updateObject: { $set: { _id: null, a: 1 } }
+        filterObject: { _id: 1 },
+        updateObject: { $set: { _id: 1, a: 1 } }
       },
       {
         title: 'should correctly update with pipeline',
@@ -737,16 +722,10 @@ describe('Collection', function() {
     updateTests.forEach(test => {
       it(test.title, function(done) {
         db.createCollection(test.collectionName, (err, collection) => {
-          if (test.title === 'should correctly update with no docs') {
-            const ObjectID = this.configuration.require.ObjectID;
-            const id = new ObjectID(null);
-            test.filterObject._id = id;
-            test.updateObject.$set._id = id;
-          }
           collection.updateOne(
             test.filterObject,
             test.updateObject,
-            this.configuration.writeConcernMax(),
+            configuration.writeConcernMax(),
             (err, r) => {
               expect(err).to.not.exist;
               expect(r.result.n).to.equal(0);
@@ -939,7 +918,7 @@ describe('Collection', function() {
             // Insert a document with a date
             collection.insertOne(
               { a: 1, createdAt: new Date() },
-              this.configuration.writeConcernMax(),
+              configuration.writeConcernMax(),
               err => {
                 expect(err).to.not.exist;
 
@@ -948,7 +927,7 @@ describe('Collection', function() {
 
                   for (let i = 0; i < indexes.length; i++) {
                     if (indexes[i].name === 'createdAt_1') {
-                      expect(1).to.equal(indexes[i].expireAfterSeconds);
+                      expect(indexes[i].expireAfterSeconds).to.equal(1);
                       break;
                     }
                   }
@@ -1004,7 +983,6 @@ describe('Collection', function() {
     let db;
     let collection;
     beforeEach(function() {
-      const configuration = this.configuration;
       client = configuration.newClient({}, { w: 1 });
 
       return client.connect().then(client => {
@@ -1130,7 +1108,7 @@ describe('Collection', function() {
       };
 
       testCountDocMock(
-        this.configuration,
+        configuration,
         {
           replyHandler,
           executeCountDocuments,
@@ -1153,7 +1131,7 @@ describe('Collection', function() {
       };
 
       testCountDocMock(
-        this.configuration,
+        configuration,
         {
           replyHandler,
           executeCountDocuments,
@@ -1176,7 +1154,7 @@ describe('Collection', function() {
       };
 
       testCountDocMock(
-        this.configuration,
+        configuration,
         {
           replyHandler,
           executeCountDocuments,
@@ -1206,18 +1184,14 @@ describe('Collection', function() {
 
   it('isCapped should return false for uncapped collections', function(done) {
     testCapped(
-      this.configuration,
-      { config: this.configuration, collName: 'uncapped', opts: { capped: false } },
+      configuration,
+      { config: configuration, collName: 'uncapped', opts: { capped: false } },
       done
     );
   });
 
   it('isCapped should return false for collections instantiated without specifying capped', function(done) {
-    testCapped(
-      this.configuration,
-      { config: this.configuration, collName: 'uncapped2', opts: {} },
-      done
-    );
+    testCapped(configuration, { config: configuration, collName: 'uncapped2', opts: {} }, done);
   });
 
   describe('Retryable Writes on bulk ops', function() {
@@ -1228,7 +1202,7 @@ describe('Collection', function() {
     const metadata = { requires: { topology: ['replicaset'], mongodb: '>=3.6.0' } };
 
     beforeEach(function() {
-      client = this.configuration.newClient({}, { retryWrites: true });
+      client = configuration.newClient({}, { retryWrites: true });
       return client.connect().then(() => {
         db = client.db('test_retry_writes');
         collection = db.collection('tests');
