@@ -3,6 +3,13 @@
 const MongoClient = require('../../').MongoClient;
 const expect = require('chai').expect;
 
+function filterForCommands(commands, bag) {
+  commands = Array.isArray(commands) ? commands : [commands];
+  return function(event) {
+    if (commands.indexOf(event.commandName) !== -1) bag.push(event);
+  };
+}
+
 function connectToDb(url, db, options, callback) {
   if (typeof options === 'function') {
     callback = options;
@@ -106,5 +113,6 @@ module.exports = {
   setupDatabase,
   assert,
   delay,
-  withClient
+  withClient,
+  filterForCommands
 };
