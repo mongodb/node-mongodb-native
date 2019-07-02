@@ -47,7 +47,6 @@ describe('Change Stream Spec', function() {
           return Promise.all(ALL_DBS.map(db => gc.db(db).dropDatabase({ w: 'majority' })))
             .then(() => gc.db(sDB).createCollection(sColl))
             .then(() => gc.db(specData.database2_name).createCollection(specData.collection2_name))
-            .then(() => delay(100))
             .then(() => configuration.newClient({}, { monitorCommands: true }).connect())
             .then(client => {
               ctx = { gc, client };
@@ -64,6 +63,8 @@ describe('Change Stream Spec', function() {
           const client = ctx.client;
           ctx = undefined;
           events = undefined;
+
+          client.removeAllListeners('commandStarted');
 
           return client && client.close();
         });
@@ -165,6 +166,16 @@ describe('Change Stream Spec', function() {
     };
   }
 
+  function allSettled(promises) {
+    let err;
+    return Promise.all(promises.map(p => p.catch(x => (err = err || x)))).then(args => {
+      if (err) {
+        throw err;
+      }
+      return args;
+    });
+  }
+
   function makeTestFnRunOperations(test) {
     const target = test.target;
     const operations = test.operations;
@@ -178,7 +189,7 @@ describe('Change Stream Spec', function() {
       const changeStreamPromise = readAndCloseChangeStream(ctx.changeStream, success.length);
       const operationsPromise = runOperations(ctx.gc, operations);
 
-      return Promise.all([changeStreamPromise, operationsPromise]).then(args => args[0]);
+      return allSettled([changeStreamPromise, operationsPromise]).then(args => args[0]);
     };
   }
 
