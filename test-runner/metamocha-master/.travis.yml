@@ -1,0 +1,13 @@
+sudo: required
+dist: trusty
+language: node_js
+
+node_js:
+  - "4"
+  - "6"
+  - "8"
+
+cache:
+  yarn: true
+  directories:
+    - node_modules
