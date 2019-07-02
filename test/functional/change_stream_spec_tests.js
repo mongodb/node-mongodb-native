@@ -47,6 +47,7 @@ describe('Change Stream Spec', function() {
           return Promise.all(ALL_DBS.map(db => gc.db(db).dropDatabase({ w: 'majority' })))
             .then(() => gc.db(sDB).createCollection(sColl))
             .then(() => gc.db(specData.database2_name).createCollection(specData.collection2_name))
+            .then(() => delay(100))
             .then(() => configuration.newClient({}, { monitorCommands: true }).connect())
             .then(client => {
               ctx = { gc, client };
