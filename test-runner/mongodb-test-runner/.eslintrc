@@ -1,0 +1,26 @@
+{
+  "extends": [
+    "eslint:recommended"
+  ],
+  "env": {
+    "node": true,
+    "mocha": true
+  },
+  "globals": {
+    "Promise": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 2017
+  },
+  "plugins": [
+    "prettier"
+  ],
+  "rules": {
+    "no-console": 0,
+    "prettier/prettier": ["error", {
+      "singleQuote": true,
+      "tabWidth": 2,
+      "printWidth": 100
+    }]
+  }
+}
