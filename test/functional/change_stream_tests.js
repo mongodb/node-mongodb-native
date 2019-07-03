@@ -1272,7 +1272,7 @@ describe('Change Streams', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var fs = require('fs');
+      const stream = require('stream');
       const client = configuration.newClient();
 
       client.connect(function(err, client) {
@@ -1282,29 +1282,31 @@ describe('Change Streams', function() {
         var theCollection = theDatabase.collection('pipeTest');
         var thisChangeStream = theCollection.watch(pipeline);
 
-        var filename = '/tmp/_nodemongodbnative_stream_out.txt';
-        var outStream = fs.createWriteStream(filename);
+        var outStream = new stream.PassThrough({ objectMode: true });
 
         // Make a stream transforming to JSON and piping to the file
         thisChangeStream.stream({ transform: JSON.stringify }).pipe(outStream);
+
+        function close(_err) {
+          thisChangeStream.close(err => client.close(cErr => done(_err || err || cErr)));
+        }
+
+        outStream
+          .on('data', data => {
+            try {
+              var parsedEvent = JSON.parse(data);
+              assert.equal(parsedEvent.fullDocument.a, 1);
+              close();
+            } catch (e) {
+              close(e);
+            }
+          })
+          .on('error', close);
 
         setTimeout(() => {
           theCollection.insert({ a: 1 }, function(err) {
             assert.ifError(err);
           });
-        });
-
-        // Listen for changes to the file
-        var watcher = fs.watch(filename, function(eventType) {
-          assert.equal(eventType, 'change');
-
-          var fileContents = fs.readFileSync(filename, 'utf8');
-          var parsedFileContents = JSON.parse(fileContents);
-          assert.equal(parsedFileContents.fullDocument.a, 1);
-
-          watcher.close();
-
-          thisChangeStream.close(err => client.close(cErr => done(err || cErr)));
         });
       });
     }

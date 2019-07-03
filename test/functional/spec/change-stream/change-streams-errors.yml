@@ -51,3 +51,26 @@ tests:
     result:
       error:
         code: 40324
+  -
+    description: Change Stream should error when _id is projected out
+    minServerVersion: "4.1.11"
+    target: collection
+    topology:
+      - replicaset
+      - sharded
+    changeStreamPipeline:
+      -
+        $project: { _id: 0 }
+    changeStreamOptions: {}
+    operations:
+      -
+        database: *database_name
+        collection: *collection_name
+        name: insertOne
+        arguments:
+          document:
+            z: 3
+    result:
+      error:
+        code: 280
+        errorLabels: [ "NonResumableChangeStreamError" ]

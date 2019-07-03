@@ -9,11 +9,11 @@ const delay = require('./shared').delay;
 const expect = chai.expect;
 
 describe('Change Stream Spec', function() {
-  const EJSONToJSON = x => JSON.parse(EJSON.stringify(x));
-
   let globalClient;
   let ctx;
   let events;
+
+  const TESTS_TO_SKIP = new Set(['Test consecutive resume']);
 
   before(function() {
     const configuration = this.configuration;
@@ -34,7 +34,7 @@ describe('Change Stream Spec', function() {
     .filter(filename => filename.match(/\.json$/))
     .forEach(filename => {
       const specString = fs.readFileSync(`${__dirname}/spec/change-stream/${filename}`, 'utf8');
-      const specData = JSON.parse(specString);
+      const specData = EJSON.parse(specString, { relaxed: true });
 
       const ALL_DBS = [specData.database_name, specData.database2_name];
 
@@ -64,11 +64,14 @@ describe('Change Stream Spec', function() {
           ctx = undefined;
           events = undefined;
 
+          client.removeAllListeners('commandStarted');
+
           return client && client.close();
         });
 
         specData.tests.forEach(test => {
-          const itFn = test.skip ? it.skip : test.only ? it.only : it;
+          const shouldSkip = test.skip || TESTS_TO_SKIP.has(test.description);
+          const itFn = shouldSkip ? it.skip : test.only ? it.only : it;
           const metadata = generateMetadata(test);
           const testFn = generateTestFn(test);
 
@@ -94,15 +97,27 @@ describe('Change Stream Spec', function() {
   }
 
   function generateTestFn(test) {
+    const configureFailPoint = makeFailPointCommand(test);
     const testFnRunOperations = makeTestFnRunOperations(test);
     const testSuccess = makeTestSuccess(test);
     const testFailure = makeTestFailure(test);
     const testAPM = makeTestAPM(test);
 
     return function testFn() {
-      return testFnRunOperations(ctx)
+      return configureFailPoint(ctx)
+        .then(() => testFnRunOperations(ctx))
         .then(testSuccess, testFailure)
         .then(() => testAPM(ctx, events));
+    };
+  }
+
+  function makeFailPointCommand(test) {
+    if (!test.failPoint) {
+      return () => Promise.resolve();
+    }
+
+    return function(ctx) {
+      return ctx.gc.db('admin').command(test.failPoint);
     };
   }
 
@@ -115,7 +130,7 @@ describe('Change Stream Spec', function() {
       }
 
       if (result.success) {
-        value = EJSONToJSON(value);
+        expect(value).to.have.a.lengthOf(result.success.length);
         assertEquality(value, result.success);
       }
     };
@@ -134,7 +149,7 @@ describe('Change Stream Spec', function() {
   }
 
   function makeTestAPM(test) {
-    const expectedEvents = test.expectations;
+    const expectedEvents = test.expectations || [];
 
     return function testAPM(ctx, events) {
       expectedEvents
@@ -146,10 +161,19 @@ describe('Change Stream Spec', function() {
               `Expected there to be an APM event at index ${idx}, but there was none`
             );
           }
-          const actual = EJSONToJSON(events[idx]);
-          assertEquality(actual, expected);
+          assertEquality(events[idx], expected);
         });
     };
+  }
+
+  function allSettled(promises) {
+    let err;
+    return Promise.all(promises.map(p => p.catch(x => (err = err || x)))).then(args => {
+      if (err) {
+        throw err;
+      }
+      return args;
+    });
   }
 
   function makeTestFnRunOperations(test) {
@@ -165,7 +189,7 @@ describe('Change Stream Spec', function() {
       const changeStreamPromise = readAndCloseChangeStream(ctx.changeStream, success.length);
       const operationsPromise = runOperations(ctx.gc, operations);
 
-      return Promise.all([changeStreamPromise, operationsPromise]).then(args => args[0]);
+      return allSettled([changeStreamPromise, operationsPromise]).then(args => args[0]);
     };
   }
 
