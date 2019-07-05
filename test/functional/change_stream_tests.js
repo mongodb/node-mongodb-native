@@ -1271,18 +1271,18 @@ describe('Change Streams', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
+      const configuration = this.configuration;
       const stream = require('stream');
       const client = configuration.newClient();
 
       client.connect(function(err, client) {
         assert.ifError(err);
 
-        var theDatabase = client.db('integration_tests');
-        var theCollection = theDatabase.collection('pipeTest');
-        var thisChangeStream = theCollection.watch(pipeline);
+        const theDatabase = client.db('integration_tests');
+        const theCollection = theDatabase.collection('pipeTest');
+        const thisChangeStream = theCollection.watch(pipeline);
 
-        var outStream = new stream.PassThrough({ objectMode: true });
+        const outStream = new stream.PassThrough({ objectMode: true });
 
         // Make a stream transforming to JSON and piping to the file
         thisChangeStream.stream({ transform: JSON.stringify }).pipe(outStream);
@@ -1294,7 +1294,7 @@ describe('Change Streams', function() {
         outStream
           .on('data', data => {
             try {
-              var parsedEvent = JSON.parse(data);
+              const parsedEvent = JSON.parse(data);
               assert.equal(parsedEvent.fullDocument.a, 1);
               close();
             } catch (e) {
