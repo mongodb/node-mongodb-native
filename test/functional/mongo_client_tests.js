@@ -434,7 +434,7 @@ describe('MongoClient', function() {
       const client = configuration.newClient('user:password@localhost:27017/test');
 
       client.connect(function(err) {
-        test.equal(err.message, 'Invalid schema, expected `mongodb` or `mongodb+srv`');
+        expect(err).to.exist.and.to.have.property('message', 'Invalid connection string');
         done();
       });
     }
