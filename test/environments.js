@@ -3,7 +3,6 @@
 const f = require('util').format;
 const semver = require('semver');
 const path = require('path');
-const EnvironmentBase = require('mongodb-test-runner').EnvironmentBase;
 const core = require('../lib/core');
 
 // topology managers
@@ -11,6 +10,21 @@ const topologyManagers = require('mongodb-test-runner').topologyManagers;
 const ServerManager = topologyManagers.Server;
 const ReplSetManager = topologyManagers.ReplSet;
 const ShardingManager = topologyManagers.Sharded;
+
+/**
+ * Base class for environments in projects that use the test
+ * runner
+ */
+class EnvironmentBase {
+  /**
+   * The default implementation of the environment setup
+   *
+   * @param {*} callback
+   */
+  setup(callback) {
+    callback();
+  }
+}
 
 const genReplsetConfig = (port, options) => {
   return Object.assign(
