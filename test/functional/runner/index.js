@@ -73,11 +73,6 @@ function parseTopologies(topologies) {
     return ['replicaset', 'mongos', 'single'];
   }
 
-  const idx = topologies.indexOf('single');
-  if (idx !== -1) {
-    topologies.splice(idx, 1);
-  }
-
   return topologies;
 }
 
@@ -94,7 +89,6 @@ function parseRunOn(runOn) {
     }
 
     const mongodb = version.join(' ');
-
     return { topology, mongodb };
   });
 }
