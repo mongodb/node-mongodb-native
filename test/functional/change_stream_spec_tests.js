@@ -13,7 +13,7 @@ describe('Change Stream Spec', function() {
   let ctx;
   let events;
 
-  const TESTS_TO_SKIP = new Set(['Test consecutive resume']);
+  const TESTS_TO_SKIP = new Set([]);
 
   before(function() {
     const configuration = this.configuration;
