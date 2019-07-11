@@ -410,6 +410,50 @@ function normalizeReadPreference(mode) {
   return mode.charAt(0).toLowerCase() + mode.substr(1);
 }
 
+function resolveOperationArgs(operationName, operationArgs, context) {
+  const result = [];
+  function pluck(fromObject, toArray, fields) {
+    for (const field of fields) {
+      if (fromObject[field]) toArray.push(fromObject[field]);
+    }
+  }
+
+  // TODO: migrate all operations here
+  if (operationName !== 'distinct') {
+    return;
+  }
+
+  if (operationName === 'distinct') {
+    pluck(operationArgs, result, ['fieldName', 'filter']);
+    if (result.length === 1) result.push({});
+  }
+
+  // compile the options
+  const options = {};
+  if (operationArgs.options) {
+    Object.assign(options, operationArgs.options);
+    if (options.readPreference) {
+      options.readPreference = normalizeReadPreference(options.readPreference.mode);
+    }
+  }
+
+  if (operationArgs.session) {
+    if (isTransactionCommand(operationName)) return;
+    options.session = context[operationArgs.session];
+  }
+
+  result.push(options);
+
+  // determine if there is a callback to add
+  if (operationArgs.callback) {
+    result.push(() =>
+      testOperations(operationArgs.callback, context, { swallowOperationErrors: false })
+    );
+  }
+
+  return result;
+}
+
 /**
  *
  * @param {Object} operation the operation definition from the spec test
@@ -425,52 +469,57 @@ function testOperation(operation, obj, context, options) {
   const operationName = translateOperationName(operation.name);
 
   if (operation.arguments) {
-    Object.keys(operation.arguments).forEach(key => {
-      if (key === 'callback') {
-        args.push(() =>
-          testOperations(operation.arguments.callback, context, { swallowOperationErrors: false })
-        );
-        return;
-      }
+    args = resolveOperationArgs(operationName, operation.arguments, context);
 
-      if (['filter', 'fieldName', 'document', 'documents', 'pipeline'].indexOf(key) !== -1) {
-        return args.unshift(operation.arguments[key]);
-      }
-
-      if ((key === 'map' || key === 'reduce') && operationName === 'mapReduce') {
-        return args.unshift(operation.arguments[key]);
-      }
-
-      if (key === 'command') return args.unshift(operation.arguments[key]);
-      if (key === 'requests') return args.unshift(extractBulkRequests(operation.arguments[key]));
-      if (key === 'update' || key === 'replacement') return args.push(operation.arguments[key]);
-      if (key === 'session') {
-        if (isTransactionCommand(operationName)) return;
-        opOptions.session = context[operation.arguments.session];
-        return;
-      }
-
-      if (key === 'returnDocument') {
-        opOptions.returnOriginal = operation.arguments[key] === 'Before' ? true : false;
-        return;
-      }
-
-      if (key === 'options') {
-        Object.assign(opOptions, operation.arguments[key]);
-        if (opOptions.readPreference) {
-          opOptions.readPreference = normalizeReadPreference(opOptions.readPreference.mode);
+    if (args == null) {
+      args = [];
+      Object.keys(operation.arguments).forEach(key => {
+        if (key === 'callback') {
+          args.push(() =>
+            testOperations(operation.arguments.callback, context, { swallowOperationErrors: false })
+          );
+          return;
         }
 
-        return;
-      }
+        if (['filter', 'fieldName', 'document', 'documents', 'pipeline'].indexOf(key) !== -1) {
+          return args.unshift(operation.arguments[key]);
+        }
 
-      if (key === 'readPreference') {
-        opOptions[key] = normalizeReadPreference(operation.arguments[key].mode);
-        return;
-      }
+        if ((key === 'map' || key === 'reduce') && operationName === 'mapReduce') {
+          return args.unshift(operation.arguments[key]);
+        }
 
-      opOptions[key] = operation.arguments[key];
-    });
+        if (key === 'command') return args.unshift(operation.arguments[key]);
+        if (key === 'requests') return args.unshift(extractBulkRequests(operation.arguments[key]));
+        if (key === 'update' || key === 'replacement') return args.push(operation.arguments[key]);
+        if (key === 'session') {
+          if (isTransactionCommand(operationName)) return;
+          opOptions.session = context[operation.arguments.session];
+          return;
+        }
+
+        if (key === 'returnDocument') {
+          opOptions.returnOriginal = operation.arguments[key] === 'Before' ? true : false;
+          return;
+        }
+
+        if (key === 'options') {
+          Object.assign(opOptions, operation.arguments[key]);
+          if (opOptions.readPreference) {
+            opOptions.readPreference = normalizeReadPreference(opOptions.readPreference.mode);
+          }
+
+          return;
+        }
+
+        if (key === 'readPreference') {
+          opOptions[key] = normalizeReadPreference(operation.arguments[key].mode);
+          return;
+        }
+
+        opOptions[key] = operation.arguments[key];
+      });
+    }
   }
 
   if (
