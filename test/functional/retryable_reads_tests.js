@@ -14,5 +14,7 @@ describe('Retryable Reads', function() {
     return testContext.setup(this.configuration);
   });
 
-  generateTopologyTests(testSuites, testContext);
+  generateTopologyTests(testSuites, testContext, spec => {
+    return !spec.description.match(/distinct/i);
+  });
 });
