@@ -93,23 +93,7 @@ function parseRunOn(runOn) {
   });
 }
 
-function shouldSkipTest(spec) {
-  const SKIP_TESTS = [
-    // commitTransaction retry seems to be swallowed by mongos in these three cases
-    'commitTransaction retry succeeds on new mongos',
-    'commitTransaction retry fails on new mongos',
-    'unpin after transient error within a transaction and commit',
-    'count'
-  ];
-
-  if (spec.skipReason || SKIP_TESTS.indexOf(spec.description) !== -1) {
-    return it.skip;
-  }
-
-  return it;
-}
-
-function generateTopologyTests(testSuites, testContext) {
+function generateTopologyTests(testSuites, testContext, filter) {
   testSuites.forEach(testSuite => {
     // TODO: remove this when SPEC-1255 is completed
     let runOn = testSuite.runOn;
@@ -128,7 +112,11 @@ function generateTopologyTests(testSuites, testContext) {
           afterEach(() => testContext.cleanupAfterSuite());
 
           testSuite.tests.forEach(spec => {
-            const maybeSkipIt = shouldSkipTest(spec);
+            const maybeSkipIt =
+              spec.skipReason || (filter && typeof filter === 'function' && filter(spec))
+                ? it.skip
+                : it;
+
             maybeSkipIt(spec.description, function() {
               let testPromise = Promise.resolve();
 
