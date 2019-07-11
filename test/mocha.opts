@@ -1,0 +1,2 @@
+--ui test/metadata_ui
+--reporter spec

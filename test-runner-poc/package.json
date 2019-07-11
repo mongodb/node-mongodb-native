@@ -1,0 +1,31 @@
+{
+  "name": "test-runner-poc",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "bin": {
+    "test-runner-poc": "./lib/runner.js"
+  },
+  "scripts": {
+    "format": "prettier --print-width 100 --tab-width 2 --single-quote --write lib/**/*.js lib/*.js",
+    "lint": "eslint lib"
+  },
+  "author": "Sam Pal, Rosemary Yin",
+  "license": "ISC",
+  "dependencies": {
+    "semver": "^5.4.1",
+    "yargs": "^8.0.2",
+    "mongodb-topology-manager": "^2.0.0",
+    "mongodb-version-manager": "^1.0.7"
+  },
+  "devDependencies": {
+    "eslint": "^4.3.0",
+    "eslint-plugin-prettier": "^2.2.0",
+    "prettier": "^1.6.1"
+  },
+  "peerOptionalDependencies": {
+    "kerberos": "~0.0",
+    "snappy": "^6.0.0",
+    "bson-ext": "1.0.5"
+  }
+}

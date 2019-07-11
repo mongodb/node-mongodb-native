@@ -7,6 +7,7 @@ const MongoError = require('../../index').MongoError;
 
 describe('Bulk', function() {
   before(function() {
+    console.log("bulk before hook THIS.configuration ",this.configuration);
     return setupDatabase(this.configuration);
   });
 

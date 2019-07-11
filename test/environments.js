@@ -6,7 +6,7 @@ const path = require('path');
 const core = require('../lib/core');
 
 // topology managers
-const topologyManagers = require('mongodb-test-runner').topologyManagers;
+const topologyManagers = require('test-runner-poc').topologyManagers;
 const ServerManager = topologyManagers.Server;
 const ReplSetManager = topologyManagers.ReplSet;
 const ShardingManager = topologyManagers.Sharded;

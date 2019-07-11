@@ -84,7 +84,7 @@ if (!environments.hasOwnProperty(environmentName)) {
   process.exit(1);
   return;
 }
-
+console.log('inside the wrong runner')
 console.log(`[environment: ${environmentName}]`);
 const Environment = environments[environmentName];
 const TestConfiguration = require(configPath);
