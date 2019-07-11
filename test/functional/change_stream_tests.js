@@ -1585,6 +1585,41 @@ describe('Change Streams', function() {
     }
   });
 
+  it('should maintain change stream options on resume', {
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+    test: function(done) {
+      const configuration = this.configuration;
+      const client = configuration.newClient();
+
+      const collectionName = 'resumeAfterKillCursor';
+
+      let db;
+      let coll;
+      let changeStream;
+
+      function close(e) {
+        changeStream.close(() => client.close(() => done(e)));
+      }
+
+      const changeStreamOptions = {
+        fullDocument: 'updateLookup',
+        collation: { maxVariable: 'punct' },
+        maxAwaitTimeMS: 20000,
+        batchSize: 200
+      };
+
+      client
+        .connect()
+        .then(() => (db = client.db('integration_tests')))
+        .then(() => (coll = db.collection(collectionName)))
+        .then(() => (changeStream = coll.watch([], changeStreamOptions)))
+        .then(() => {
+          expect(changeStream.cursor.resumeOptions).to.containSubset(changeStreamOptions);
+        })
+        .then(() => close(), e => close(e));
+    }
+  });
+
   it('Should include a startAtOperationTime field when resuming if no changes have been received', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.7.3' } },
     test: function(done) {
