@@ -33,7 +33,16 @@ function environmentSetup() {
 	//replace with mongodb_uri later
 	const mongoClient = new MongoClient('mongodb://127.0.0.1:27018');
 	let environmentName;
+	let currentVersion;
+	mongoClient.connect(function(err, client) {
+		console.log("connect")
+		client.db('admin').command({buildInfo: true}, function(err, result) {
+			currentVersion = result.version;
+			console.log("Current version in mongoclient.connect ",currentVersion)
+			createFilters(environmentName, currentVersion);
+		})
 
+	});
 	mongoClient.on('topologyDescriptionChanged', function(event) {
 		const informationObject = JSON.parse(JSON.stringify(event, null, 2));
 		const topologyType = informationObject.newDescription.topologyType;
@@ -51,20 +60,22 @@ function environmentSetup() {
 			default:console.warn("Topology type is not recognized.")
 				break;
 		}
+
 		console.log("environment name: ",environmentName)
-		fs.readdirSync(path.join(__dirname, "filters"))
-			.filter(x => x.indexOf("js") !== -1)
-			.forEach(x => {
-				const FilterModule = require(path.join(__dirname, "filters", x));
-				addFilter(new FilterModule({ runtimeTopology: environmentName }));
-			});
-			console.log("filters.length in before ",filters.length)
 	});
-	mongoClient.connect(function(err, client) {
-		console.log("connect")
-		//apply filters
-	});
+
 }
+function createFilters(environmentName, currentVersion) {
+	fs.readdirSync(path.join(__dirname, "filters"))
+		.filter(x => x.indexOf("js") !== -1)
+		.forEach(x => {
+			const FilterModule = require(path.join(__dirname, "filters", x));
+			console.log("currentVersion in runner.js ",currentVersion)
+			addFilter(new FilterModule({ runtimeTopology: environmentName, version: currentVersion}));
+		});
+		console.log("filters.length in before ",filters.length)
+}
+
 
 before(function() {
 

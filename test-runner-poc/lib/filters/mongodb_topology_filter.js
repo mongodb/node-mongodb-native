@@ -1,3 +1,4 @@
+
 'use strict';
 
 /**
@@ -35,7 +36,6 @@ class MongoDBTopologyFilter {
 
     // Check if we have an allowed topology for this test
     for (let i = 0; i < topologies.length; i++) {
-      // console.log('topologies[i] ', topologies[i])
       if (topologies[i] === this.runtimeTopology) return true;
     }
 
