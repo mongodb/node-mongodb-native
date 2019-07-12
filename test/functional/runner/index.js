@@ -113,7 +113,7 @@ function generateTopologyTests(testSuites, testContext, filter) {
 
           testSuite.tests.forEach(spec => {
             const maybeSkipIt =
-              spec.skipReason || (filter && typeof filter === 'function' && filter(spec))
+              spec.skipReason || (filter && typeof filter === 'function' && !filter(spec))
                 ? it.skip
                 : it;
 
