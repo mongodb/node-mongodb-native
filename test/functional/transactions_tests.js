@@ -34,7 +34,7 @@ describe('Transactions', function() {
           'count'
         ];
 
-        return SKIP_TESTS.indexOf(spec.description) !== -1;
+        return SKIP_TESTS.indexOf(spec.description) === -1;
       }
 
       generateTopologyTests(testSuites, testContext, testFilter);
