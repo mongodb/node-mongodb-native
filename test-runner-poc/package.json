@@ -1,0 +1,16 @@
+{
+  "name": "test-runner-poc",
+  "version": "1.0.0",
+  "description": "",
+  "main": "runner.js",
+  "scripts": {
+    "test": "mocha --file lib/runner.js test/crud_tests.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "mocha": "*",
+    "chai": "*",
+    "mongodb": "*"
+  }
+}
