@@ -1,0 +1,2 @@
+--ui ./lib/metadata_ui.js
+--reporter spec
