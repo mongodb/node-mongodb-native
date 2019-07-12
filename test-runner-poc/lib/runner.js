@@ -4,6 +4,7 @@ const path = require("path");
 const f = require('util').format;
 const fs = require("fs");
 const utils = require("mocha").utils;
+require("../../test/metadata_ui")
 const ServerManager = require('mongodb-topology-manager').Server;
 let dbConfig;
 let filters = [];
@@ -116,7 +117,7 @@ before(function() {
 	  process.exit(1);
 	  return;
 	}
-	console.log("envpath: ",envPath)
+
 	const environments = require(envPath);
 	if (!environments.hasOwnProperty(environmentName)) {
 	  console.warn('Invalid environment specified: ' + environmentName);
@@ -133,37 +134,34 @@ before(function() {
 		.filter(x => x.indexOf("js") !== -1)
 		.forEach(x => {
 			const FilterModule = require(path.join(__dirname, "filters", x));
-			addFilter(new FilterModule({ environmentName }));
+			addFilter(new FilterModule({ runtimeTopology: Environment.displayName || environmentName }));
 		});
-
-	const versionCheckManager = new ServerManager();
-  return versionCheckManager.discover().then(function(serverInfo) {
-    const environment = new Environment(serverInfo);
-    const mongoPackage = findMongo(path.dirname(module.filename));
-
-    try {
-      environment.mongo = require(mongoPackage.path);
-    } catch (err) {
-      throw new Error('The test runner must be a dependency of mongodb or mongodb-core');
-    }
-
-    // patch environment based on skip info
-    if (startupOptions.skipStartup) environment.skipStart = true;
-    if (startupOptions.skipShutdown) environment.skipTermination = true;
-
-    environment.setup(err => {
-      if (err) return errorHandler(err);
-
-			dbConfig = new TestConfiguration(environment);
-      dbConfig.start(function(err) {
-        if (err) return errorHandler(err);
-      });
-    });
-  });
+	//
+	// const versionCheckManager = new ServerManager();
+  // return versionCheckManager.discover().then(function(serverInfo) {
+  //   const environment = new Environment(serverInfo);
+  //   const mongoPackage = findMongo(path.dirname(module.filename));
+  //   try {
+  //     environment.mongo = require(mongoPackage.path);
+  //   } catch (err) {
+  //     throw new Error('The test runner must be a dependency of mongodb or mongodb-core');
+  //   }
+	// //patch environment based on skip info
+  //   if (startupOptions.skipStartup) environment.skipStart = true;
+  //   if (startupOptions.skipShutdown) environment.skipTermination = true;
+	//
+  //   environment.setup(err => {
+  //     if (err) return errorHandler(err);
+	// //
+	// 		// dbConfig = new TestConfiguration(environment);
+  //     // dbConfig.start(function(err) {
+  //     //   if (err) return errorHandler(err);
+  //     // });
+  //   });
+  // });
 });
 
 beforeEach(function() {
-	console.log('INSIDE beforeEach')
 	var self = this;
 
 	var called = 0;
@@ -175,12 +173,13 @@ beforeEach(function() {
 	if (filters.length) {
 		filters.forEach(function(filter) {
 			if (typeof filter.beforeStart === "function") {
-				console.log('dbConfig', dbConfig);
-				filter.beforeStart(dbConfig, callback);
+				// console.log('dbConfig', dbConfig);
+				// filter.beforeStart(dbConfig, callback);
 			} else {
 				//applyFilters
-				callback();
+				//callback();
 			}
+			callback();
 		});
 	}
 

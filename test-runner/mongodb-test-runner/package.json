@@ -26,7 +26,7 @@
     "prettier": "^1.6.1"
   },
   "dependencies": {
-    "metamocha": "^1.2.5",
+    "metamocha": "../metamocha",
     "mongodb-topology-manager": "^2.0.0",
     "mongodb-version-manager": "^1.0.7",
     "semver": "^5.4.1",

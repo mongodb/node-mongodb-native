@@ -18,6 +18,7 @@ var MetaMocha = function(opts) {
   this.mocha = new Mocha(mochaOpts);
   this.files = [];
   this.filters = [];
+  console.log('created metamocha object')
 };
 
 MetaMocha.prototype.lookupFiles = function(path, extensions, recursive) {
@@ -92,8 +93,10 @@ MetaMocha.prototype.applyFilters = function() {
  * Run the tests
  */
 MetaMocha.prototype.run = function(configuration, done) {
+  // console.log('INSIDE metamocha.proto.run this ', this)
   // Monkey patch to allow for configuration to be added with the context
   Context.prototype.runnable = function(runnable) {
+
     if (!arguments.length) {
       return this._runnable;
     }
