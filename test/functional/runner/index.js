@@ -419,13 +419,11 @@ function resolveOperationArgs(operationName, operationArgs, context) {
   }
 
   // TODO: migrate all operations here
-  if (operationName !== 'distinct') {
-    return;
-  }
-
   if (operationName === 'distinct') {
     pluck(operationArgs, result, ['fieldName', 'filter']);
     if (result.length === 1) result.push({});
+  } else {
+    return;
   }
 
   // compile the options
