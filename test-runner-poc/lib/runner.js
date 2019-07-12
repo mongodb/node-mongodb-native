@@ -3,6 +3,8 @@
 const path = require("path");
 const fs = require("fs");
 const utils = require("mocha").utils;
+const MongoClient = require('mongodb').MongoClient;
+const MongoClientOptions = require('mongodb').MongoClientOptions;
 
 let filters = [];
 let files = [];
@@ -26,22 +28,47 @@ function addFilter(filter) {
 		filters.push(filter);
 	}
 }
+environmentSetup();
+function environmentSetup() {
+	//replace with mongodb_uri later
+	const mongoClient = new MongoClient('mongodb://127.0.0.1:27018');
+	let environmentName;
+
+	mongoClient.on('topologyDescriptionChanged', function(event) {
+		const informationObject = JSON.parse(JSON.stringify(event, null, 2));
+		const topologyType = informationObject.newDescription.topologyType;
+		const topologyServerType = informationObject.newDescription.servers[0].type;
+		switch (topologyType) {
+			case "Single":
+				if (topologyServerType === 'Standalone') {
+					environmentName = 'single';
+				}
+				else environmentName = 'replicaset'
+				break;
+			case "Sharded":
+				environmentName = 'sharded';
+				break;
+			default:console.warn("Topology type is not recognized.")
+				break;
+		}
+		console.log("environment name: ",environmentName)
+		fs.readdirSync(path.join(__dirname, "filters"))
+			.filter(x => x.indexOf("js") !== -1)
+			.forEach(x => {
+				const FilterModule = require(path.join(__dirname, "filters", x));
+				addFilter(new FilterModule({ runtimeTopology: environmentName }));
+			});
+			console.log("filters.length in before ",filters.length)
+	});
+	mongoClient.connect(function(err, client) {
+		console.log("connect")
+		//apply filters
+	});
+}
 
 before(function() {
 
-	const environmentName = process.env['MONGODB_ENVIRONMENT'];
-
-	console.log(`[environment: ${environmentName}]`);
-
-	//apply filters
-	fs.readdirSync(path.join(__dirname, "filters"))
-		.filter(x => x.indexOf("js") !== -1)
-		.forEach(x => {
-			const FilterModule = require(path.join(__dirname, "filters", x));
-			addFilter(new FilterModule({ runtimeTopology: 'sharded' }));
-		});
-
-});
+})
 
 beforeEach(function() {
 	var self = this;
@@ -54,6 +81,7 @@ beforeEach(function() {
 
 	if (filters.length) {
 		filters.forEach(function(filter) {
+
 			callback();
 		});
 	}
@@ -68,6 +96,7 @@ beforeEach(function() {
 function applyFilters(test) {
 	return filters.every(function(filterFunc) {
 		var res = filterFunc.filter(test);
+		console.log("result: ",res," from filter ",filterFunc)
 		return res;
 	});
 }
