@@ -5,6 +5,7 @@ const fs = require("fs");
 const utils = require("mocha").utils;
 const MongoClient = require('mongodb').MongoClient;
 const MongoClientOptions = require('mongodb').MongoClientOptions;
+let mongoClient;
 
 let filters = [];
 let files = [];
@@ -31,7 +32,7 @@ function addFilter(filter) {
 environmentSetup();
 function environmentSetup() {
 	//replace with mongodb_uri later
-	const mongoClient = new MongoClient('mongodb://127.0.0.1:27018');
+	mongoClient = new MongoClient('mongodb://127.0.0.1:27018');
 	let environmentName;
 	let currentVersion;
 	mongoClient.connect(function(err, client) {
@@ -76,11 +77,6 @@ function createFilters(environmentName, currentVersion) {
 		console.log("filters.length in before ",filters.length)
 }
 
-
-before(function() {
-
-})
-
 beforeEach(function() {
 	var self = this;
 
@@ -111,3 +107,7 @@ function applyFilters(test) {
 		return res;
 	});
 }
+
+after(function() {
+	mongoClient.close();
+})
