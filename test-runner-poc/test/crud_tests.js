@@ -20,16 +20,16 @@ describe('CRUD', function() {
   });
 
   it('should correctly insertMany documents', function(done) {
-    const collection = db.collection('insertManyTest');
+      const collection = db.collection('insertManyTest');
 
-    collection.insertMany([{b: 2}, {c:3}], (err, result) => {
-      expect(err).to.not.exist;
-      expect(result).to.exist;
-      expect(result.insertedCount).to.equal(2);
-      expect(result.ops[0].b).to.equal(2)
-      expect(result.ops[1].c).to.equal(3)
-    })
-    done();
+      collection.insertMany([{b: 2}, {c:3}], (err, result) => {
+        expect(err).to.not.exist;
+        expect(result).to.exist;
+        expect(result.insertedCount).to.equal(2);
+        expect(result.ops[0].b).to.equal(2)
+        expect(result.ops[1].c).to.equal(3)
+      })
+      done();
   });
 
   it('should correctly update documents', function(done) {
@@ -99,8 +99,9 @@ describe('CRUD', function() {
 
 before(function() {
   //TODO replace with URI later
-  client = new MongoClient('mongodb://127.0.0.1:27018')
+  client = new MongoClient('mongodb://127.0.0.1:27018', {w: 1, poolSize: 1});
   client.connect((err) => {
+    console.log("connect in crud tests");
     expect(err).to.not.exist;
     db = client.db('test');
     console.log("db created")
