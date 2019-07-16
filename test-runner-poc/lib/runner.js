@@ -5,10 +5,9 @@ const fs = require("fs");
 const utils = require("mocha").utils;
 const MongoClient = require('mongodb').MongoClient;
 const MongoClientOptions = require('mongodb').MongoClientOptions;
-let mongoClient;
 
+let mongoClient;
 let filters = [];
-let files = [];
 
 function addFilter(filter) {
 	if (typeof filter !== "function" && typeof filter !== "object") {
@@ -29,53 +28,52 @@ function addFilter(filter) {
 		filters.push(filter);
 	}
 }
-environmentSetup();
-function environmentSetup() {
+
+function environmentSetup(done) {
 	//replace with mongodb_uri later
-	mongoClient = new MongoClient('mongodb://127.0.0.1:27018', {w: 1, poolSize: 1});
+	
+	mongoClient = new MongoClient(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27018');
+
 	let environmentName;
 	let currentVersion;
-	mongoClient.connect(function(err, client) {
-		console.log("connect")
-		client.db('admin').command({buildInfo: true}, function(err, result) {
-			currentVersion = result.version;
-			console.log("Current version in mongoclient.connect ",currentVersion)
-			createFilters(environmentName, currentVersion);
-		})
-
-	});
-	mongoClient.on('topologyDescriptionChanged', function(event) {
-		const informationObject = JSON.parse(JSON.stringify(event, null, 2));
-		const topologyType = informationObject.newDescription.topologyType;
-		const topologyServerType = informationObject.newDescription.servers[0].type;
+	mongoClient.connect((err, client) => {
+		let topologyType = mongoClient.topology.type;
 		switch (topologyType) {
-			case "Single":
-				if (topologyServerType === 'Standalone') {
-					environmentName = 'single';
-				}
-				else environmentName = 'replicaset'
+			case "server":
+				environmentName = 'single';
 				break;
-			case "Sharded":
+			case "replset":
+				environmentName = 'replicaset';
+				break;
+			case "mongos":
 				environmentName = 'sharded';
 				break;
-			default:console.warn("Topology type is not recognized.")
+			default:
+				console.warn("Topology type is not recognized.")
 				break;
 		}
 
-		console.log("environment name: ",environmentName)
+		client.db('admin').command({buildInfo: true}, (err, result) => {
+			currentVersion = result.version;
+			createFilters(environmentName, currentVersion);
+			done();
+		});
 	});
-
 }
+
 function createFilters(environmentName, currentVersion) {
 	fs.readdirSync(path.join(__dirname, "filters"))
 		.filter(x => x.indexOf("js") !== -1)
 		.forEach(x => {
 			const FilterModule = require(path.join(__dirname, "filters", x));
-			console.log("currentVersion in runner.js ",currentVersion)
 			addFilter(new FilterModule({ runtimeTopology: environmentName, version: currentVersion}));
 		});
-		console.log("filters.length in before ",filters.length)
 }
+
+
+before(function(done) {
+		environmentSetup(done);
+});
 
 beforeEach(function() {
 	var self = this;
@@ -98,12 +96,12 @@ beforeEach(function() {
 			self.skip();
 		}
 	}
+
 });
 
 function applyFilters(test) {
 	return filters.every(function(filterFunc) {
 		var res = filterFunc.filter(test);
-		console.log("result: ",res," from filter ",filterFunc)
 		return res;
 	});
 }
