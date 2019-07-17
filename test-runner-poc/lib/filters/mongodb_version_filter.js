@@ -20,9 +20,7 @@ class MongoDBVersionFilter {
     const mongoClient = new MongoClient(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27018');
     mongoClient.connect((err, client) => {
       client.db('admin').command({buildInfo: true}, (err, result) => {
-        console.log("version: ",result.version);
         self.version = result.version;
-        console.log(" self.version ",self.version);
         client.close();
         callback();
       });
@@ -32,7 +30,6 @@ class MongoDBVersionFilter {
 
   constructor(options) {
     this.options = options || {};
-    //this.version = options.version || 0;
   }
 
   filter(test) {
@@ -40,7 +37,6 @@ class MongoDBVersionFilter {
     if (!test.metadata) return true;
     if (!test.metadata.requires) return true;
     if (!test.metadata.requires.mongodb) return true;
-    console.log("this.version: ",this.version)
 
     return semver.satisfies(this.version, test.metadata.requires.mongodb);
   }

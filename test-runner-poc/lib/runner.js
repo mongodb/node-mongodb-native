@@ -28,18 +28,10 @@ function addFilter(filter, callback) {
 	} else {
 		filters.push(filter);
 	}
-	// if (typeof filter.initializeFilter === 'function') {
-	// 	console.log('calling initializeFilter function')
-	// 	filter.initializeFilter(callback);
-	// } else {
-	// 	console.log('no initializeFilter function')
-	// 	callback();
-	// }
 }
 
 function environmentSetup(done) {
 	//replace with mongodb_uri later
-
 	mongoClient = new MongoClient(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27018');
 
 	let environmentName;
@@ -62,19 +54,6 @@ function environmentSetup(done) {
 		}
 		createFilters(environmentName);
 		done();
-		/*
-		client.db('admin').command({buildInfo: true}, (err, result) => {
-			currentVersion = result.version;
-			createFilters(environmentName, currentVersion);
-			done();
-		});
-		*/
-		/*
-		.then(()=>{
-			createFilters(environmentName, currentVersion);
-			done();
-		})
-		*/
 
 	});
 }
@@ -84,16 +63,9 @@ function createFilters(environmentName) {
 		.filter(x => x.indexOf("js") !== -1)
 		.forEach(x => {
 			const FilterModule = require(path.join(__dirname, "filters", x));
-			addFilter(new FilterModule({ runtimeTopology: environmentName}), callback);
+			addFilter(new FilterModule({ runtimeTopology: environmentName}));
 		});
-	console.log('done creating filters')
 }
-
-function callback() {
-	initializedFilters += 1;
-	console.log('initializedFilters ', initializedFilters)
-}
-
 
 before(function(done) {
 		environmentSetup(done);
@@ -101,15 +73,7 @@ before(function(done) {
 
 beforeEach(function(done) {
 	var self = this;
-	// initializedFilters = 0;
-
-	var called = 0;
-	function callback() {
-		called += 1;
-		if (called === filters.length) _run();
-	}
-
-	// if (initializedFilters === filters.length) _run();
+	let filtersExecuted = 0;
 
 	if (filters.length) {
 		filters.forEach(function(filter) {
@@ -118,27 +82,23 @@ beforeEach(function(done) {
 			} else {
 				callback();
 			}
-		});
+			function callback() {
+				_run(filter);
+			}
+    });
 	}
 
-	function _run() {
-		console.log('inside run')
-		if (!applyFilters(self.currentTest)) {
+	function _run(filter) {
+		filtersExecuted += 1;
+		if (!filter.filter(self.currentTest)) {
 			self.skip();
 		}
-		done();
+		if (filtersExecuted === filters.length) done();
 	}
-
-
 });
 
-function applyFilters(test) {
-	return filters.every(function(filterFunc) {
-
-		var res = filterFunc.filter(test);
-		console.log('filter: ', filterFunc, 'res ', res)
-		return res;
-	});
+function applyFilter(test, filter) {
+	return filter.filter(test);
 }
 
 after(function() {
