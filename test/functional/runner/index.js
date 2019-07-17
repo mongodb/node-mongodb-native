@@ -391,10 +391,22 @@ function isTransactionCommand(command) {
   return ['startTransaction', 'commitTransaction', 'abortTransaction'].indexOf(command) !== -1;
 }
 
-function isTestRunnerCommand(command) {
-  return (
-    ['targetedFailPoint', 'assertSessionPinned', 'assertSessionUnpinned'].indexOf(command) !== -1
-  );
+function isTestRunnerCommand(context, commandName) {
+  const testRunnerContext = context.testRunner;
+
+  let methods = new Set();
+  let object = testRunnerContext;
+  do {
+    if (object === Object.prototype) {
+      break;
+    }
+
+    Object.getOwnPropertyNames(object)
+      .filter(prop => typeof object[prop] === 'function' && prop !== 'constructor')
+      .map(prop => methods.add(prop));
+  } while ((object = Object.getPrototypeOf(object)));
+
+  return methods.has(commandName);
 }
 
 function extractBulkRequests(requests) {
@@ -523,7 +535,7 @@ function testOperation(operation, obj, context, options) {
   if (
     args.length === 0 &&
     !isTransactionCommand(operationName) &&
-    !isTestRunnerCommand(operationName)
+    !isTestRunnerCommand(context, operationName)
   ) {
     args.push({});
   }
