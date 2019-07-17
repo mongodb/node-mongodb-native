@@ -1,6 +1,10 @@
 'use strict';
 const expect = require('chai').expect;
 const setupDatabase = require('./shared').setupDatabase;
+const path = require('path');
+const TestRunnerContext = require('./runner').TestRunnerContext;
+const gatherTestSuites = require('./runner').gatherTestSuites;
+const generateTopologyTests = require('./runner').generateTopologyTests;
 
 const ignoredCommands = ['ismaster'];
 const test = { commands: { started: [], succeeded: [] } };
@@ -137,5 +141,50 @@ describe('Sessions', function() {
           });
       });
     }
+  });
+
+  describe('spec tests', function() {
+    class SessionSpecTestContext extends TestRunnerContext {
+      assertSessionNotDirty(options) {
+        const session = options.session;
+        expect(session.serverSession.isDirty).to.be.false;
+      }
+
+      assertSessionDirty(options) {
+        const session = options.session;
+        expect(session.serverSession.isDirty).to.be.true;
+      }
+
+      assertSameLsidOnLastTwoCommands() {
+        expect(this.commandEvents).to.have.length.of.at.least(2);
+        const lastTwoCommands = this.commandEvents.slice(-2).map(c => c.command);
+        lastTwoCommands.forEach(command => expect(command).to.have.property('lsid'));
+        expect(lastTwoCommands[0].lsid).to.eql(lastTwoCommands[1].lsid);
+      }
+
+      assertDifferentLsidOnLastTwoCommands() {
+        expect(this.commandEvents).to.have.length.of.at.least(2);
+        const lastTwoCommands = this.commandEvents.slice(-2).map(c => c.command);
+        lastTwoCommands.forEach(command => expect(command).to.have.property('lsid'));
+        expect(lastTwoCommands[0].lsid).to.not.eql(lastTwoCommands[1].lsid);
+      }
+    }
+
+    const testContext = new SessionSpecTestContext();
+    const testSuites = gatherTestSuites(path.join(__dirname, 'spec', 'sessions'));
+
+    let shouldRunTests = false;
+    after(() => testContext.teardown());
+    before(function() {
+      shouldRunTests = this.configuration.usingUnifiedTopology();
+      return testContext.setup(this.configuration);
+    });
+
+    if (!shouldRunTests) {
+      it.skip('sessions spec tests only run against a unified topology');
+      return;
+    }
+
+    generateTopologyTests(testSuites, testContext);
   });
 });
