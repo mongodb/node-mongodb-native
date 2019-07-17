@@ -173,17 +173,16 @@ describe('Sessions', function() {
     const testContext = new SessionSpecTestContext();
     const testSuites = gatherTestSuites(path.join(__dirname, 'spec', 'sessions'));
 
-    let shouldRunTests = false;
     after(() => testContext.teardown());
     before(function() {
-      shouldRunTests = this.configuration.usingUnifiedTopology();
+      if (!this.configuration.usingUnifiedTopology()) {
+        this.test.parent.pending = true; // https://github.com/mochajs/mocha/issues/2683
+        this.skip();
+        return;
+      }
+
       return testContext.setup(this.configuration);
     });
-
-    if (!shouldRunTests) {
-      it.skip('sessions spec tests only run against a unified topology');
-      return;
-    }
 
     generateTopologyTests(testSuites, testContext);
   });
