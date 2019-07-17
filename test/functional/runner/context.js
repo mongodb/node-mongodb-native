@@ -8,6 +8,7 @@ class TestRunnerContext {
     this.sharedClient = null;
     this.failPointClients = [];
     this.appliedFailPoints = [];
+    this.commandEvents = [];
   }
 
   runForAllClients(fn) {

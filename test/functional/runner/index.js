@@ -225,7 +225,7 @@ const IGNORED_COMMANDS = new Set(['ismaster']);
 
 let displayCommands = false;
 function runTestSuiteTest(configuration, spec, context) {
-  const commandEvents = [];
+  context.commandEvents = [];
   const clientOptions = translateClientOptions(
     Object.assign({ monitorCommands: true }, spec.clientOptions)
   );
@@ -247,7 +247,7 @@ function runTestSuiteTest(configuration, spec, context) {
         return;
       }
 
-      commandEvents.push(event);
+      context.commandEvents.push(event);
 
       // very useful for debugging
       if (displayCommands) {
@@ -294,7 +294,7 @@ function runTestSuiteTest(configuration, spec, context) {
         session0.endSession();
         session1.endSession();
 
-        return validateExpectations(commandEvents, spec, savedSessionData);
+        return validateExpectations(context.commandEvents, spec, savedSessionData);
       });
   });
 }
