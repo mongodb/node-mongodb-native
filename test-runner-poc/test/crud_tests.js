@@ -35,7 +35,8 @@ describe('CRUD', function() {
   it('should correctly update documents', function(done) {
     const collection = db.collection('updateTest');
 
-    collection.insertOne({a: 1}).then((result) => {
+    collection.insertOne({a: 1}, (err, result) => {
+      expect(err).to.not.exist;
       expect(result).to.exist;
       expect(result.insertedCount).to.equal(1);
 
@@ -52,7 +53,8 @@ describe('CRUD', function() {
   it('should correctly updateMany documents', function(done) {
     const collection = db.collection('updateManyTest');
 
-    collection.insertMany([{a: 1}, {a: 1}]).then((result) => {
+    collection.insertMany([{a: 1}, {a: 1}], (err, result) => {
+      expect(err).to.not.exist;
       expect(result).to.exist;
       expect(result.insertedCount).to.equal(2);
 
@@ -69,7 +71,8 @@ describe('CRUD', function() {
   it('should correctly delete documents', function(done) {
     const collection = db.collection('deleteTest');
 
-    collection.insertOne({a: 1}).then((result) => {
+    collection.insertOne({a: 1}, (err, result) => {
+      expect(err).to.not.exist;
       expect(result).to.exist;
       expect(result.insertedCount).to.equal(1);
 
@@ -85,7 +88,8 @@ describe('CRUD', function() {
   it('should correctly deleteMany documents', function(done) {
     const collection = db.collection('deleteManyTest');
 
-    collection.insertMany([{a: 1}, {a: 1}, {a: 1}]).then((result) => {
+    collection.insertMany([{a: 1}, {a: 1}, {a: 1}], (err, result) => {
+      expect(err).to.not.exist;
       expect(result).to.exist;
       expect(result.insertedCount).to.equal(3);
 
@@ -101,7 +105,8 @@ describe('CRUD', function() {
   it('should correctly find documents', function(done) {
     const collection = db.collection('findTest');
 
-    collection.insertOne({a: 1}).then((result) => {
+    collection.insertOne({a: 1}, (err, result) => {
+      expect(err).to.not.exist;
       expect(result).to.exist;
       expect(result.insertedCount).to.equal(1);
 
