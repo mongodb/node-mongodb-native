@@ -32,7 +32,7 @@ function addFilter(filter, callback) {
 
 function environmentSetup(done) {
 	//replace with mongodb_uri later
-	mongoClient = new MongoClient(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27018');
+	mongoClient = new MongoClient(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017');
 
 	let environmentName;
 	let currentVersion;

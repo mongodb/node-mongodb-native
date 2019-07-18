@@ -16,13 +16,11 @@ const MongoClient = require('mongodb').MongoClient;
  */
 class MongoDBVersionFilter {
   initializeFilter(callback) {
-    const self = this;
-    const mongoClient = new MongoClient(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27018');
+    const mongoClient = new MongoClient(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017');
     mongoClient.connect((err, client) => {
       client.db('admin').command({buildInfo: true}, (err, result) => {
-        self.version = result.version;
-        client.close();
-        callback();
+        this.version = result.version;
+        client.close(callback);
       });
     })
 
