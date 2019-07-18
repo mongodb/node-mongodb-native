@@ -3,6 +3,7 @@
 var f = require('util').format;
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
+const Db = require('../../lib/db');
 const expect = require('chai').expect;
 
 describe('MongoClient', function() {
@@ -825,5 +826,25 @@ describe('MongoClient', function() {
         });
       });
     }
+  });
+
+  it('should be able to access a database named "constructor"', function() {
+    const client = this.configuration.newClient();
+    let err;
+    return client
+      .connect()
+      .then(() => {
+        const db = client.db('constructor');
+        expect(db).to.not.be.a('function');
+        expect(db).to.be.an.instanceOf(Db);
+      })
+      .catch(_err => (err = _err))
+      .then(() => client.close())
+      .catch(() => {})
+      .then(() => {
+        if (err) {
+          throw err;
+        }
+      });
   });
 });
