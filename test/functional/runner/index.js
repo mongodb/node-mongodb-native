@@ -396,15 +396,13 @@ function isTestRunnerCommand(context, commandName) {
 
   let methods = new Set();
   let object = testRunnerContext;
-  do {
-    if (object === Object.prototype) {
-      break;
-    }
-
+  while (object !== Object.prototype) {
     Object.getOwnPropertyNames(object)
       .filter(prop => typeof object[prop] === 'function' && prop !== 'constructor')
       .map(prop => methods.add(prop));
-  } while ((object = Object.getPrototypeOf(object)));
+
+    object = Object.getPrototypeOf(object);
+  }
 
   return methods.has(commandName);
 }
