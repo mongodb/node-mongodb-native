@@ -5,6 +5,7 @@
   "main": "runner.js",
   "scripts": {
     "test": "mocha --file lib/runner.js test/crud_tests.js",
+    "test-ci": "mocha --file lib/runner.js ../test/functional/crud_spec_tests.js",
     "filter": "mocha --file lib/runner.js test/filter_tests.js"
   },
   "author": "",
