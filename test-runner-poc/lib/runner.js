@@ -17,7 +17,7 @@ let mongoClient;
 let filters = [];
 let initializedFilters = 0;
 
-function addFilter(filter, callback) {
+function addFilter(filter) {
 	if (typeof filter !== "function" && typeof filter !== "object") {
 		throw new Error(
 			"Type of filter must either be a function or an object"
@@ -113,16 +113,15 @@ function createFilters(environmentName) {
 }
 
 before(function(done) {
-		environmentSetup((environment, client, d) => {
-			this.configuration = new TestConfiguration(environment)
-			client.close(d);
-		}, done);
+	environmentSetup((environment, client, d) => {
+		this.configuration = new TestConfiguration(environment)
+		client.close(d);
+	}, done);
 });
 
 beforeEach(function(done) {
 	const self = this;
 	let filtersExecuted = 0;
-
 	if (filters.length) {
 		filters.forEach(function(filter) {
 			if (typeof filter.initializeFilter === 'function') {
@@ -138,6 +137,7 @@ beforeEach(function(done) {
 
 	function _run(filter) {
 		filtersExecuted += 1;
+
 		if (!filter.filter(self.currentTest)) {
 			self.currentTest.parent.pending = true;
 			self.skip();

@@ -472,7 +472,7 @@ describe('CRUD spec', function() {
   }
 });
 
-describe('CRUD v2', function() {
+describe.only('CRUD v2', function() {
   const testContext = new TestRunnerContext();
   const testSuites = gatherTestSuites(path.join(__dirname, 'spec', 'crud', 'v2'));
   after(() => testContext.teardown());
