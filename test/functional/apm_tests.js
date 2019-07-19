@@ -252,7 +252,7 @@ describe('APM', function() {
     metadata: { requires: { topology: ['replicaset'], mongodb: '>=3.0.0' } },
 
     // The actual test we wish to run
-    test: function(done) {
+    test: function() {
       const self = this;
       const ReadPreference = self.configuration.require.ReadPreference;
       const started = [];
@@ -266,10 +266,10 @@ describe('APM', function() {
       client.on('commandStarted', filterForCommands(desiredEvents, started));
       client.on('commandSucceeded', filterForCommands(desiredEvents, succeeded));
 
-      client.connect().then(() => {
+      return client.connect().then(() => {
         const db = client.db(self.configuration.db);
 
-        db
+        return db
           .collection('apm_test_list_collections')
           .insertOne({ a: 1 }, self.configuration.writeConcernMax())
           .then(r => {
@@ -291,8 +291,7 @@ describe('APM', function() {
 
             // Ensure command was not sent to the primary
             expect(started[0].connectionId).to.not.equal(started[1].connectionId);
-            client.close();
-            done();
+            return client.close();
           });
       });
     }
