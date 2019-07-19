@@ -462,6 +462,8 @@ function resolveOperationArgs(operationName, operationArgs, context) {
   return result;
 }
 
+const CURSOR_COMMANDS = new Set(['find', 'aggregate', 'listIndexes']);
+
 /**
  *
  * @param {Object} operation the operation definition from the spec test
@@ -549,7 +551,8 @@ function testOperation(operation, obj, context, options) {
   }
 
   let opPromise;
-  if (operationName === 'find' || operationName === 'aggregate') {
+
+  if (CURSOR_COMMANDS.has(operationName)) {
     // `find` creates a cursor, so we need to call `toArray` on it
     const cursor = obj[operationName].apply(obj, args);
     opPromise = cursor.toArray();
