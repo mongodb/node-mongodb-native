@@ -139,10 +139,14 @@ beforeEach(function(done) {
 		filtersExecuted += 1;
 
 		if (!filter.filter(self.currentTest)) {
-			self.currentTest.parent.pending = true;
+			if (!self.currentTest.parent.parent.root) {
+				self.currentTest.parent.pending = true;
+			}
 			self.skip();
 		}
-		if (filtersExecuted === filters.length) done();
+		if (filtersExecuted === filters.length) {
+			done();
+		}
 	}
 });
 

@@ -120,7 +120,7 @@ describe('CRUD', function() {
   });
   before(function(done) {
       //TODO replace with URI later
-      client = new MongoClient('mongodb://127.0.0.1:27018', {w: 1, poolSize: 1});
+      client = new MongoClient(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017', {w: 1, poolSize: 1});
       client.connect((err) => {
         expect(err).to.not.exist;
         db = client.db('test');
