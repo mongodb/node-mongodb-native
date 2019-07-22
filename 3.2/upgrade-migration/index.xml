@@ -27,9 +27,8 @@ Design differences in 2.x One major change is that the driver has been split int
       <pubDate>Thu, 19 Mar 2015 12:53:35 -0400</pubDate>
       
       <guid>/node-mongodb-native/3.2/upgrade-migration/main/</guid>
-      <description>What&amp;rsquo;s new in 3.0  Support added for Retryable Writes Support added for DNS Seedlists Support added for Change Streams Support added for sessions MongoClient.connect now returns a Client instead of a DB.  Full 3.0 Changes Here
-What&amp;rsquo;s New in 2.3 Key features of the 2.3 driver include:
- Implements Decimal128, a decimal floating-point numbering format that occupies 16 bytes (128 bits). See the CRUD tutorial for an example.</description>
+      <description>What&amp;rsquo;s new in 3.2  Supports new &amp;ldquo;Unified Topology&amp;rdquo; for resolving servers (opt in with useUnifiedTopology option for MongoClient) Supports session.withTransaction helper Supports Asynchronous Iteration (for await... syntax) on cursors Supports Database-level Aggregations (db.aggregate(pipeline, options))  Full 3.2 Changes Here
+What&amp;rsquo;s new in 3.1  Support for MongoDB version 4.0 Support for Transactions Support for authentication with SCRAM-SHA-256 Support for new URL parser (opt in with useNewUrlParser option for MongoClient)  Full 3.</description>
     </item>
     
   </channel>

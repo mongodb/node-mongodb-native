@@ -394,6 +394,10 @@
             </span>
             <ul class="members itemMembers">
             
+            <span class="subtitle">Members</span>
+            
+                <li data-name="ChangeStream#resumeToken"><a href="ChangeStream.html#resumeToken">resumeToken</a></li>
+            
             </ul>
             <ul class="typedefs itemMembers">
             
@@ -436,6 +440,8 @@
                 <li data-name="ChangeStream#event:end"><a href="ChangeStream.html#event:end">end</a></li>
             
                 <li data-name="ChangeStream#event:error"><a href="ChangeStream.html#event:error">error</a></li>
+            
+                <li data-name="ChangeStream#event:resumeTokenChanged"><a href="ChangeStream.html#event:resumeTokenChanged">resumeTokenChanged</a></li>
             
             </ul>
         </li>
@@ -2187,173 +2193,6 @@
     <div class="nameContainer">
         <h4 class="name" id="addToOperationsList">
             
-            addToOperationsList<span class="signature">(bulkOperation, docType, document)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="OrderedBulkOperation.html">OrderedBulkOperation</a>}</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="lib_bulk_ordered.js.html">lib/bulk/ordered.js</a>, <a href="lib_bulk_ordered.js.html#line18">line 18</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Add to internal list of Operations</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>bulkOperation</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type"><a href="OrderedBulkOperation.html">OrderedBulkOperation</a></span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                </td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>docType</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                <p>number indicating the document type</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>document</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                </td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-
-
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="addToOperationsList">
-            
             addToOperationsList<span class="signature">(bulkOperation, docType, document)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="UnorderedBulkOperation.html">UnorderedBulkOperation</a>}</span>
         </h4>
     
@@ -2519,6 +2358,173 @@
             
 <dt>
     <div class="nameContainer">
+        <h4 class="name" id="addToOperationsList">
+            
+            addToOperationsList<span class="signature">(bulkOperation, docType, document)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="OrderedBulkOperation.html">OrderedBulkOperation</a>}</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_bulk_ordered.js.html">lib/bulk/ordered.js</a>, <a href="lib_bulk_ordered.js.html#line18">line 18</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Add to internal list of Operations</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>bulkOperation</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type"><a href="OrderedBulkOperation.html">OrderedBulkOperation</a></span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                </td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>docType</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>number indicating the document type</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>document</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                </td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+
+
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
         <h4 class="name" id="applySession">
             
             applySession<span class="signature">(session, command, topology, <span class="optional">options</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="MongoError.html">MongoError</a>|null}</span>
@@ -2526,7 +2532,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_core_sessions.js.html">lib/core/sessions.js</a>, <a href="lib_core_sessions.js.html#line629">line 629</a>
+            <a href="lib_core_sessions.js.html">lib/core/sessions.js</a>, <a href="lib_core_sessions.js.html#line657">line 657</a>
         </div>
         
     </div>
@@ -2962,6 +2968,125 @@ error, if some error condition was met
     
     <div class="description">
         <p>Determines whether an error is something the driver should attempt to retry</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>error</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type"><a href="MongoError.html">MongoError</a></span>
+|
+
+<span class="param-type">Error</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                </td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="isSDAMUnrecoverableError">
+            
+            isSDAMUnrecoverableError<span class="signature">(error)</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_core_error.js.html">lib/core/error.js</a>, <a href="lib_core_error.js.html#line169">line 169</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Determines whether an error is a &quot;node is recovering&quot; error or a &quot;not master&quot; error for SDAM retryability.<br>See https://github.com/mongodb/specifications/blob/master/source/server-discovery-and-monitoring/server-discovery-and-monitoring.rst#not-master-and-node-is-recovering</p>
     </div>
     
 
@@ -3531,6 +3656,417 @@ error, if some error condition was met
                 
 <dt>
     <div class="nameContainer">
+        <h4 class="name" id="ChangeStreamOptions">ChangeStreamOptions</h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>Options that can be passed to a ChangeStream. Note that startAfter, resumeAfter, and startAtOperationTime are all mutually exclusive, and the server will error if more than one is specified.</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+        <h5 class="subsection-title">Properties:</h5>
+        
+        <dl>
+
+<table class="props">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		<th>Argument</th>
+		
+		
+		
+		<th>Default</th>
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>fullDocument</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+            
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+                    
+                
+                </td>
+            
+            
+            
+                <td class="default">
+                
+                    'default'
+                
+                </td>
+            
+            
+            <td class="description last"><p>Allowed values: ‘default’, ‘updateLookup’. When set to ‘updateLookup’, the change stream will include both a delta describing the changes to the document, as well as a copy of the entire document that was changed from some time after the change occurred.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>maxAwaitTimeMS</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+            
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+                    
+                
+                </td>
+            
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last"><p>The maximum amount of time for the server to wait on new documents to satisfy a change stream query.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>resumeAfter</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#ResumeToken">ResumeToken</a></span>
+
+
+            
+            </td>
+            
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+                    
+                
+                </td>
+            
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last"><p>Allows you to start a changeStream after a specified event. See <a href="https://docs.mongodb.com/master/changeStreams/#resumeafter-for-change-streams">ChangeStream documentation</a>.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>startAfter</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#ResumeToken">ResumeToken</a></span>
+
+
+            
+            </td>
+            
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+                    
+                
+                </td>
+            
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last"><p>Similar to resumeAfter, but will allow you to start after an invalidated event. See <a href="https://docs.mongodb.com/master/changeStreams/#startafter-for-change-streams">ChangeStream documentation</a>.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>startAtOperationTime</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#OperationTime">OperationTime</a></span>
+
+
+            
+            </td>
+            
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+                    
+                
+                </td>
+            
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last"><p>Will start the changeStream after the specified operationTime.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>batchSize</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+            
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+                    
+                
+                </td>
+            
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last"><p>The number of documents to return per batch. See <a href="https://docs.mongodb.com/manual/reference/command/aggregate">aggregation documentation</a>.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>collation</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+                    
+                
+                </td>
+            
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last"><p>Specify collation settings for operation. See <a href="https://docs.mongodb.com/manual/reference/command/aggregate">aggregation documentation</a>.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>readPreference</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">ReadPreference</span>
+
+
+            
+            </td>
+            
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+                    
+                
+                </td>
+            
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last"><p>The read preference. Defaults to the read preference of the database or collection. See <a href="https://docs.mongodb.com/manual/reference/read-preference">read preference documentation</a>.</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table></dl>
+        
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+            
+                
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="OperationTime">OperationTime</h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>Represents a specific point in time on a server. Can be retrieved by using <a href="Db.html#command"><code>Db#command</code></a></p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="https://docs.mongodb.com/manual/reference/method/db.runCommand/#response">https://docs.mongodb.com/manual/reference/method/db.runCommand/#response</a></li>
+        </ul>
+    </dd>
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+            
+                
+<dt>
+    <div class="nameContainer">
         <h4 class="name" id="ReadConcern">ReadConcern<span class="type-signature type object">Object</span> </h4>
     </div>
     
@@ -3683,6 +4219,58 @@ error, if some error condition was met
     <dd class="tag-see">
         <ul>
             <li><a href="https://docs.mongodb.com/manual/reference/read-concern/index.html#read-concern-levels">https://docs.mongodb.com/manual/reference/read-concern/index.html#read-concern-levels</a></li>
+        </ul>
+    </dd>
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+            
+                
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="ResumeToken">ResumeToken</h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>Represents the logical starting point for a new or resuming <a href="ChangeStream.html"><code>ChangeStream</code></a> on the server.</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="https://docs.mongodb.com/master/changeStreams/#change-stream-resume-token">https://docs.mongodb.com/master/changeStreams/#change-stream-resume-token</a></li>
         </ul>
     </dd>
     
@@ -4393,7 +4981,7 @@ resulting Promise of operations run within this transaction
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Jun 18 2019 10:26:12 GMT-0400 (EDT)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Jul 22 2019 10:32:17 GMT-0400 (EDT)
                     </footer>
                 </div>
             </td>

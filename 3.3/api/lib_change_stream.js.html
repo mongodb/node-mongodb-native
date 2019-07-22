@@ -394,6 +394,10 @@
             </span>
             <ul class="members itemMembers">
             
+            <span class="subtitle">Members</span>
+            
+                <li data-name="ChangeStream#resumeToken"><a href="ChangeStream.html#resumeToken">resumeToken</a></li>
+            
             </ul>
             <ul class="typedefs itemMembers">
             
@@ -436,6 +440,8 @@
                 <li data-name="ChangeStream#event:end"><a href="ChangeStream.html#event:end">end</a></li>
             
                 <li data-name="ChangeStream#event:error"><a href="ChangeStream.html#event:error">error</a></li>
+            
+                <li data-name="ChangeStream#event:resumeTokenChanged"><a href="ChangeStream.html#event:resumeTokenChanged">resumeTokenChanged</a></li>
             
             </ul>
         </li>
@@ -2127,8 +2133,14 @@ const isResumableError = require('./error').isResumableError;
 const MongoError = require('./core').MongoError;
 const ReadConcern = require('./read_concern');
 const MongoDBNamespace = require('./utils').MongoDBNamespace;
+const Cursor = require('./cursor');
+const relayEvents = require('./core/utils').relayEvents;
+const maxWireVersion = require('./core/utils').maxWireVersion;
 
-var cursorOptionNames = ['maxAwaitTimeMS', 'collation', 'readPreference'];
+const CHANGE_STREAM_OPTIONS = ['resumeAfter', 'startAfter', 'startAtOperationTime', 'fullDocument'];
+const CURSOR_OPTIONS = ['batchSize', 'maxAwaitTimeMS', 'collation', 'readPreference'].concat(
+  CHANGE_STREAM_OPTIONS
+);
 
 const CHANGE_DOMAIN_TYPES = {
   COLLECTION: Symbol('Collection'),
@@ -2137,25 +2149,44 @@ const CHANGE_DOMAIN_TYPES = {
 };
 
 /**
+ * @typedef ResumeToken
+ * @description Represents the logical starting point for a new or resuming {@link ChangeStream} on the server.
+ * @see https://docs.mongodb.com/master/changeStreams/#change-stream-resume-token
+ */
+
+/**
+ * @typedef OperationTime
+ * @description Represents a specific point in time on a server. Can be retrieved by using {@link Db#command}
+ * @see https://docs.mongodb.com/manual/reference/method/db.runCommand/#response
+ */
+
+/**
+ * @typedef ChangeStreamOptions
+ * @description Options that can be passed to a ChangeStream. Note that startAfter, resumeAfter, and startAtOperationTime are all mutually exclusive, and the server will error if more than one is specified.
+ * @property {string} [fullDocument='default'] Allowed values: ‘default’, ‘updateLookup’. When set to ‘updateLookup’, the change stream will include both a delta describing the changes to the document, as well as a copy of the entire document that was changed from some time after the change occurred.
+ * @property {number} [maxAwaitTimeMS] The maximum amount of time for the server to wait on new documents to satisfy a change stream query.
+ * @property {ResumeToken} [resumeAfter] Allows you to start a changeStream after a specified event. See {@link https://docs.mongodb.com/master/changeStreams/#resumeafter-for-change-streams|ChangeStream documentation}.
+ * @property {ResumeToken} [startAfter] Similar to resumeAfter, but will allow you to start after an invalidated event. See {@link https://docs.mongodb.com/master/changeStreams/#startafter-for-change-streams|ChangeStream documentation}.
+ * @property {OperationTime} [startAtOperationTime] Will start the changeStream after the specified operationTime.
+ * @property {number} [batchSize] The number of documents to return per batch. See {@link https://docs.mongodb.com/manual/reference/command/aggregate|aggregation documentation}.
+ * @property {object} [collation] Specify collation settings for operation. See {@link https://docs.mongodb.com/manual/reference/command/aggregate|aggregation documentation}.
+ * @property {ReadPreference} [readPreference] The read preference. Defaults to the read preference of the database or collection. See {@link https://docs.mongodb.com/manual/reference/read-preference|read preference documentation}.
+ */
+
+/**
  * Creates a new Change Stream instance. Normally created using {@link Collection#watch|Collection.watch()}.
  * @class ChangeStream
  * @since 3.0.0
  * @param {(MongoClient|Db|Collection)} changeDomain The domain against which to create the change stream
  * @param {Array} pipeline An array of {@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents
- * @param {object} [options] Optional settings
- * @param {string} [options.fullDocument='default'] Allowed values: ‘default’, ‘updateLookup’. When set to ‘updateLookup’, the change stream will include both a delta describing the changes to the document, as well as a copy of the entire document that was changed from some time after the change occurred.
- * @param {number} [options.maxAwaitTimeMS] The maximum amount of time for the server to wait on new documents to satisfy a change stream query
- * @param {object} [options.resumeAfter] Specifies the logical starting point for the new change stream. This should be the _id field from a previously returned change stream document.
- * @param {number} [options.batchSize] The number of documents to return per batch. See {@link https://docs.mongodb.com/manual/reference/command/aggregate|aggregation documentation}.
- * @param {object} [options.collation] Specify collation settings for operation. See {@link https://docs.mongodb.com/manual/reference/command/aggregate|aggregation documentation}.
- * @param {ReadPreference} [options.readPreference] The read preference. Defaults to the read preference of the database or collection. See {@link https://docs.mongodb.com/manual/reference/read-preference|read preference documentation}.
+ * @param {ChangeStreamOptions} [options] Optional settings
  * @fires ChangeStream#close
  * @fires ChangeStream#change
  * @fires ChangeStream#end
  * @fires ChangeStream#error
+ * @fires ChangeStream#resumeTokenChanged
  * @return {ChangeStream} a ChangeStream instance.
  */
-
 class ChangeStream extends EventEmitter {
   constructor(changeDomain, pipeline, options) {
     super();
@@ -2191,16 +2222,8 @@ class ChangeStream extends EventEmitter {
       this.options.readPreference = changeDomain.s.readPreference;
     }
 
-    // We need to get the operationTime as early as possible
-    const isMaster = this.topology.lastIsMaster();
-    if (!isMaster) {
-      throw new MongoError('Topology does not have an ismaster yet.');
-    }
-
-    this.operationTime = isMaster.operationTime;
-
     // Create contained Change Stream cursor
-    this.cursor = createChangeStreamCursor(this);
+    this.cursor = createChangeStreamCursor(this, options);
 
     // Listen for any `change` listeners being added to ChangeStream
     this.on('newListener', eventName => {
@@ -2217,6 +2240,15 @@ class ChangeStream extends EventEmitter {
         this.cursor.removeAllListeners('data');
       }
     });
+  }
+
+  /**
+   * @property {ResumeToken} resumeToken
+   * The cached resume token that will be used to resume
+   * after the most recently returned change.
+   */
+  get resumeToken() {
+    return this.cursor.resumeToken;
   }
 
   /**
@@ -2337,13 +2369,114 @@ class ChangeStream extends EventEmitter {
   }
 }
 
-// Create a new change stream cursor based on self's configuration
-var createChangeStreamCursor = function(self) {
-  if (self.resumeToken) {
-    self.options.resumeAfter = self.resumeToken;
+class ChangeStreamCursor extends Cursor {
+  constructor(topology, ns, cmd, options) {
+    // TODO: spread will help a lot here
+    super(topology, ns, cmd, options);
+
+    options = options || {};
+    this._resumeToken = null;
+    this.startAtOperationTime = options.startAtOperationTime;
+
+    if (options.startAfter) {
+      this.resumeToken = options.startAfter;
+    } else if (options.resumeAfter) {
+      this.resumeToken = options.resumeAfter;
+    }
   }
 
-  var changeStreamCursor = buildChangeStreamAggregationCommand(self);
+  set resumeToken(token) {
+    this._resumeToken = token;
+    this.emit('resumeTokenChanged', token);
+  }
+
+  get resumeToken() {
+    return this._resumeToken;
+  }
+
+  get resumeOptions() {
+    const result = {};
+    for (const optionName of CURSOR_OPTIONS) {
+      if (this.options[optionName]) result[optionName] = this.options[optionName];
+    }
+
+    if (this.resumeToken || this.startAtOperationTime) {
+      ['resumeAfter', 'startAfter', 'startAtOperationTime'].forEach(key => delete result[key]);
+
+      if (this.resumeToken) {
+        result.resumeAfter = this.resumeToken;
+      } else if (this.startAtOperationTime &amp;&amp; maxWireVersion(this.server) >= 7) {
+        result.startAtOperationTime = this.startAtOperationTime;
+      }
+    }
+
+    return result;
+  }
+
+  _initializeCursor(callback) {
+    super._initializeCursor((err, result) => {
+      if (err) {
+        callback(err, null);
+        return;
+      }
+
+      const response = result.documents[0];
+
+      if (
+        this.startAtOperationTime == null &amp;&amp;
+        this.resumeAfter == null &amp;&amp;
+        this.startAfter == null &amp;&amp;
+        maxWireVersion(this.server) >= 7
+      ) {
+        this.startAtOperationTime = response.operationTime;
+      }
+
+      const cursor = response.cursor;
+      if (cursor.postBatchResumeToken) {
+        this.cursorState.postBatchResumeToken = cursor.postBatchResumeToken;
+
+        if (cursor.firstBatch.length === 0) {
+          this.resumeToken = cursor.postBatchResumeToken;
+        }
+      }
+
+      this.emit('response');
+      callback(err, result);
+    });
+  }
+
+  _getMore(callback) {
+    super._getMore((err, response) => {
+      if (err) {
+        callback(err, null);
+        return;
+      }
+
+      const cursor = response.cursor;
+      if (cursor.postBatchResumeToken) {
+        this.cursorState.postBatchResumeToken = cursor.postBatchResumeToken;
+
+        if (cursor.nextBatch.length === 0) {
+          this.resumeToken = cursor.postBatchResumeToken;
+        }
+      }
+
+      this.emit('response');
+      callback(err, response);
+    });
+  }
+}
+
+/**
+ * @event ChangeStreamCursor#response
+ * internal event DO NOT USE
+ * @ignore
+ */
+
+// Create a new change stream cursor based on self's configuration
+var createChangeStreamCursor = function(self, options) {
+  const changeStreamCursor = buildChangeStreamAggregationCommand(self, options);
+  relayEvents(changeStreamCursor, self, ['resumeTokenChanged', 'end', 'close']);
 
   /**
    * Fired for each new matching change in the specified namespace. Attaching a `change`
@@ -2365,9 +2498,6 @@ var createChangeStreamCursor = function(self) {
    * @event ChangeStream#close
    * @type {null}
    */
-  changeStreamCursor.on('close', function() {
-    self.emit('close');
-  });
 
   /**
    * Change stream end event
@@ -2375,9 +2505,13 @@ var createChangeStreamCursor = function(self) {
    * @event ChangeStream#end
    * @type {null}
    */
-  changeStreamCursor.on('end', function() {
-    self.emit('end');
-  });
+
+  /**
+   * Emitted each time the change stream stores a new resume token.
+   *
+   * @event ChangeStream#resumeTokenChanged
+   * @type {ResumeToken}
+   */
 
   /**
    * Fired when the stream encounters an error.
@@ -2399,44 +2533,26 @@ var createChangeStreamCursor = function(self) {
   return changeStreamCursor;
 };
 
-function getResumeToken(self) {
-  return self.resumeToken || self.options.resumeAfter;
+function applyKnownOptions(target, source, optionNames) {
+  optionNames.forEach(name => {
+    if (source[name]) {
+      target[name] = source[name];
+    }
+  });
 }
 
-function getStartAtOperationTime(self) {
-  const isMaster = self.topology.lastIsMaster() || {};
-  return (
-    isMaster.maxWireVersion &amp;&amp; isMaster.maxWireVersion >= 7 &amp;&amp; self.options.startAtOperationTime
-  );
-}
-
-var buildChangeStreamAggregationCommand = function(self) {
+var buildChangeStreamAggregationCommand = function(self, options) {
+  options = options || {};
   const topology = self.topology;
   const namespace = self.namespace;
   const pipeline = self.pipeline;
-  const options = self.options;
 
-  var changeStreamStageOptions = {
-    fullDocument: options.fullDocument || 'default'
-  };
-
-  const resumeToken = getResumeToken(self);
-  const startAtOperationTime = getStartAtOperationTime(self);
-  if (resumeToken) {
-    changeStreamStageOptions.resumeAfter = resumeToken;
-  }
-
-  if (startAtOperationTime) {
-    changeStreamStageOptions.startAtOperationTime = startAtOperationTime;
-  }
+  const changeStreamStageOptions = { fullDocument: options.fullDocument || 'default' };
+  applyKnownOptions(changeStreamStageOptions, options, CHANGE_STREAM_OPTIONS);
 
   // Map cursor options
-  var cursorOptions = {};
-  cursorOptionNames.forEach(function(optionName) {
-    if (options[optionName]) {
-      cursorOptions[optionName] = options[optionName];
-    }
-  });
+  const cursorOptions = { cursorFactory: ChangeStreamCursor };
+  applyKnownOptions(cursorOptions, options, CURSOR_OPTIONS);
 
   if (self.type === CHANGE_DOMAIN_TYPES.CLUSTER) {
     changeStreamStageOptions.allChangesForCluster = true;
@@ -2499,17 +2615,13 @@ function processNewChange(args) {
       : changeStream.promiseLibrary.reject(error);
   }
 
+  const cursor = changeStream.cursor;
   const topology = changeStream.topology;
   const options = changeStream.cursor.options;
 
   if (error) {
     if (isResumableError(error) &amp;&amp; !changeStream.attemptingResume) {
       changeStream.attemptingResume = true;
-
-      if (!(getResumeToken(changeStream) || getStartAtOperationTime(changeStream))) {
-        const startAtOperationTime = changeStream.cursor.cursorState.operationTime;
-        changeStream.options = Object.assign({ startAtOperationTime }, changeStream.options);
-      }
 
       // stop listening to all events from old cursor
       ['data', 'close', 'end', 'error'].forEach(event =>
@@ -2523,7 +2635,7 @@ function processNewChange(args) {
       if (eventEmitter) {
         waitForTopologyConnected(topology, { readPreference: options.readPreference }, err => {
           if (err) return changeStream.emit('error', err);
-          changeStream.cursor = createChangeStreamCursor(changeStream);
+          changeStream.cursor = createChangeStreamCursor(changeStream, cursor.resumeOptions);
         });
 
         return;
@@ -2533,7 +2645,7 @@ function processNewChange(args) {
         waitForTopologyConnected(topology, { readPreference: options.readPreference }, err => {
           if (err) return callback(err, null);
 
-          changeStream.cursor = createChangeStreamCursor(changeStream);
+          changeStream.cursor = createChangeStreamCursor(changeStream, cursor.resumeOptions);
           changeStream.next(callback);
         });
 
@@ -2546,7 +2658,9 @@ function processNewChange(args) {
           resolve();
         });
       })
-        .then(() => (changeStream.cursor = createChangeStreamCursor(changeStream)))
+        .then(
+          () => (changeStream.cursor = createChangeStreamCursor(changeStream, cursor.resumeOptions))
+        )
         .then(() => changeStream.next());
     }
 
@@ -2557,9 +2671,8 @@ function processNewChange(args) {
 
   changeStream.attemptingResume = false;
 
-  // Cache the resume token if it is present. If it is not present return an error.
-  if (!change || !change._id) {
-    var noResumeTokenError = new Error(
+  if (change &amp;&amp; !change._id) {
+    const noResumeTokenError = new Error(
       'A change stream document has been received that lacks a resume token (_id).'
     );
 
@@ -2568,7 +2681,12 @@ function processNewChange(args) {
     return changeStream.promiseLibrary.reject(noResumeTokenError);
   }
 
-  changeStream.resumeToken = change._id;
+  // cache the resume token
+  if (cursor.bufferedCount() === 0 &amp;&amp; cursor.cursorState.postBatchResumeToken) {
+    cursor.resumeToken = cursor.cursorState.postBatchResumeToken;
+  } else {
+    cursor.resumeToken = change._id;
+  }
 
   // Return the change
   if (eventEmitter) return changeStream.emit('change', change);
@@ -2594,7 +2712,7 @@ module.exports = ChangeStream;
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Jun 18 2019 10:26:12 GMT-0400 (EDT)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Jul 22 2019 10:32:17 GMT-0400 (EDT)
                     </footer>
                 </div>
             </td>
