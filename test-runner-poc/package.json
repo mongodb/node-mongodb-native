@@ -5,10 +5,13 @@
   "main": "runner.js",
   "scripts": {
     "test": "mocha --file lib/runner.js test/crud_tests.js",
-    "test-ci": "mocha --file lib/runner.js ../test/functional/crud_spec_tests.js",
+    "test-ci": "mocha --timeout 60000 --file lib/runner.js ../test/functional/gridfs_stream_tests.js",
+    "func": "mocha --file lib/runner.js '../test/functional/*_tests.js'",
+    "unit": "mocha --file lib/runner.js '../test/unit/*_tests.js'",
+    "core": "mocha --file lib/runner.js '../test/core/**/*_tests.js'",
     "filter": "mocha --file lib/runner.js test/filter_tests.js"
   },
-  "author": "",
+  "author": "Rosemary Yin and Sam Pal",
   "license": "ISC",
   "dependencies": {
     "mocha": "*",

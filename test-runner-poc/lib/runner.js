@@ -68,12 +68,14 @@ function environmentSetup(environmentCallback, done) {
 			const Environment = environments[environmentName];
 			const environment = new Environment(version)
 
-			const parsedResult = parseConnectionString(mongodb_uri, (err, parsedURI)=>{
-				if (err) console.log(err);
-				environment.url = mongodb_uri;
-				environment.port = parsedURI.hosts[0].port;
-				environment.host = parsedURI.hosts[0].host;
-			})
+			// const parsedResult = parseConnectionString(mongodb_uri, (err, parsedURI)=>{
+			// 	if (err) console.log(err);
+			// 	console.log('environment before: ', environment)
+			// 	// environment.url = mongodb_uri;
+			// 	// environment.port = parsedURI.hosts[0].port;
+			// 	// environment.host = parsedURI.hosts[0].host;
+			// 	console.log('environment after: ', environment)
+			// })
 			try {
 				const mongoPackage = findMongo(path.dirname(module.filename));
 				environment.mongo = require(mongoPackage.path);
