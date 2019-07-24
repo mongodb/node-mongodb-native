@@ -7,9 +7,10 @@ const generateTopologyTests = require('./runner').generateTopologyTests;
 
 const missingAwsConfiguration =
   process.env.AWS_ACCESS_KEY_ID == null || process.env.AWS_SECRET_ACCESS_KEY == null;
+const skipTests = missingAwsConfiguration || process.env.MONGODB_CLIENT_ENCRYPTION == null;
 
 describe('Client Side Encryption', function() {
-  if (missingAwsConfiguration) {
+  if (skipTests) {
     console.log('skipping Client Side Encryption tests due to lack of AWS credentials');
     return;
   }
