@@ -19,7 +19,9 @@ describe('Retryable Reads', function() {
       spec.description.match(/distinct/i) ||
       spec.description.match(/aggregate/i) ||
       spec.description.match(/countDocuments/i) ||
-      spec.description.match(/listIndexes/i)
+      spec.description.match(/listIndexes/i) ||
+      spec.description.match(/listDatabases/i) ||
+      spec.description.match(/listDatabaseNames/i)
     );
   });
 });
