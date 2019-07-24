@@ -5,12 +5,13 @@ collection_name: &collection_name "default"
 
 data: []
 json_schema: {{schema()}}
-key_vault_data: [] # key vault data is empty
+key_vault_data: [{{key()}}]
 
 tests:
   - description: "Insert with encryption on a missing key"
     clientOptions:
       autoEncryptOpts:
+        keyVaultNamespace: "admin.different"
         kmsProviders:
           aws: {} # Credentials filled in from environment.
     operations:
@@ -23,3 +24,27 @@ tests:
       collection:
         # Outcome is checked using a separate MongoClient without auto encryption.
         data: []
+    expectations:
+      # Auto encryption will request the collection info.
+      - command_started_event:
+          command:
+            listCollections: 1
+            cursor: {}
+            filter:
+              name: *collection_name
+          command_name: listCollections
+      - command_started_event:
+          command:
+            listCollections: 1
+            cursor: {}
+            filter:
+              name: "different"
+            $db: admin
+          command_name: listCollections
+      # Then key is fetched from the key vault.
+      - command_started_event:
+          command:
+            find: different
+            filter: {"$or": [{"_id": {"$in": [ {{key()["_id"]}} ] }}, {"keyAltNames": {"$in": []}}]}
+            $db: admin
+          command_name: find

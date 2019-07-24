@@ -5,7 +5,7 @@ collection_name: &collection_name "default"
 
 data:
   - &doc0_encrypted { _id: 1, encrypted_string: {{ciphertext("string0", field="encrypted_string")}} }
-  - &doc1_encrypted { _id: 2, encrypted_string: {{ciphertext("string1", field="encrypted_string")}} }
+  - &doc1_encrypted { _id: 2, encrypted_string: {{ciphertext("string1", field="encrypted_string")}} , random: {{ciphertext("abc", field="random")}} }
 json_schema: {{schema()}}
 key_vault_data: [{{key()}}]
 
@@ -70,7 +70,7 @@ tests:
             { encrypted_string: { $in: [ "string0", "string1" ] } }
         result:
           - { _id: 1, encrypted_string: "string0" }
-          - &doc1 { _id: 2, encrypted_string: "string1" }
+          - &doc1 { _id: 2, encrypted_string: "string1", random: "abc" }
     expectations:
       # Auto encryption will request the collection info.
       - command_started_event:
