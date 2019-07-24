@@ -275,6 +275,7 @@ function runTestSuiteTest(configuration, spec, context) {
     // displayCommands = true;
 
     const operationContext = {
+      client,
       database,
       collectionName: context.collectionName,
       session0,
@@ -413,6 +414,7 @@ function extractBulkRequests(requests) {
 
 function translateOperationName(operationName) {
   if (operationName === 'runCommand') return 'command';
+  if (operationName === 'listDatabaseNames') return 'listDatabases';
   return operationName;
 }
 
@@ -463,6 +465,7 @@ function resolveOperationArgs(operationName, operationArgs, context) {
 }
 
 const CURSOR_COMMANDS = new Set(['find', 'aggregate', 'listIndexes']);
+const ADMIN_COMMANDS = new Set(['listDatabases']);
 
 /**
  *
@@ -548,6 +551,14 @@ function testOperation(operation, obj, context, options) {
     }
 
     args.push(opOptions);
+  }
+
+  if (ADMIN_COMMANDS.has(operationName)) {
+    obj = obj.db().admin();
+  }
+
+  if (operation.name === 'listDatabaseNames') {
+    opOptions.nameOnly = true;
   }
 
   let opPromise;
