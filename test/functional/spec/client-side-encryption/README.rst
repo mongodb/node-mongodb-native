@@ -32,16 +32,16 @@ The spec tests format is an extension of `transactions spec tests <https://githu
 
 The semantics of `$$type` is that any actual value matching the BSON type indicated by the BSON type string is considered a match.
 
-For example, the following matches a command_started_event for an insert of a document where `random` must be of type ``binData``:
-```
-- command_started_event:
-    command:
-      insert: *collection_name
-      documents:
-        - { random: { $$type: "binData" } }
-      ordered: true
-    command_name: insert
-```
+For example, the following matches a command_started_event for an insert of a document where `random` must be of type ``binData``::
+
+  - command_started_event:
+      command:
+        insert: *collection_name
+        documents:
+          - { random: { $$type: "binData" } }
+        ordered: true
+      command_name: insert
+
 
 The values of `$$type` correspond to `these documented string representations of BSON types <https://docs.mongodb.com/manual/reference/bson-types/>`_.
 
@@ -79,9 +79,11 @@ Each YAML file has the following keys:
 
         - ``local`` The local KMS provider.
 
-          - ``key`` A 64 byte local key.
+          - ``key`` A 96 byte local key.
 
       - ``schema_map``: Optional, a map from namespaces to local JSON schemas.
+
+      - ``keyVaultNamespace``: Optional, a namespace to the key vault collection. Defaults to "admin.datakeys".
 
   - ``operations``: Array of documents, each describing an operation to be
     executed. Each document has the following fields:
@@ -125,7 +127,8 @@ Then for each element in ``tests``:
 
 #. Create a MongoClient using ``clientOptions``.
 
-   #. If ``client_side_encryption_opts`` includes ``aws`` as a KMS provider, pass in AWS credentials from the environment.
+   #. If ``autoEncryptOpts`` includes ``aws`` as a KMS provider, pass in AWS credentials from the environment.
+   #. If ``autoEncryptOpts`` does not include ``keyVaultNamespace``, default it to ``admin.datakeys``
    
 #. Create a collection object from the MongoClient, using the ``database_name``
    and ``collection_name`` fields from the YAML file.
@@ -188,79 +191,184 @@ The spec test MUST be run with *and* without auth.
 Prose Tests
 ===========
 
-Tests for the KeyVault type are not included as part of the YAML tests. Tests are described
-as follows.
+Tests for the ClientEncryption type are not included as part of the YAML tests.
 
-#. Test creating a data key with the "local" KMS provider.
+First, perform the setup.
 
-   - Create a `KeyVault` with a "local" KMS provider.
-   - Create a data key with the "local" KMS provider using `KeyVault.createDataKey()`.
-   - Expect a BSON binary with subtype 4 to be returned.
-   - Expect a `findOne` on the key vault collection with `_id` set to the returned binary to return a document.
-   - Expect that document to have "masterKey.provider" set to "local"
+#. Create a MongoClient without encryption enabled (referred to as ``client``).
 
-#. Test creating a data key with the "aws" KMS provider.
+#. Using ``client``, drop the collections ``admin.datakeys`` and ``db.coll``.
 
-   - Create a `KeyVault` with a "aws" KMS provider.
-   - Create a data key with the "aws" KMS provider using `KeyVault.createDataKey()`.
-   - Expect a BSON binary with subtype 4 to be returned.
-   - Expect a `findOne` on the key vault collection with `_id` set to the returned binary to return a document.
-   - Expect that document to have "masterKey.provider" set to "aws"
+#. Create the following:
 
-#. Test explicit encrypt and decrypt with the "local" KMS provider.
+   - A MongoClient configured with auto encryption (referred to as ``client_encrypted``)
+   - A ``ClientEncryption`` object (referred to as ``client_encryption``)
 
-   - Create a `KeyVault` with a "local" KMS provider.
-   - Insert the a key document in to the key vault.
-   - Use `KeyVault.encrypt` to encrypt the value "hello" with the following:
+   Configure both objects with ``aws`` and the ``local`` KMS providers as follows:
 
-     - the algorithm "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
-     - the "local" KMS provider
+   .. code:: javascript
 
-   - Expect the value is equal to a known BSON binary of subtype 6
-   - Use `KeyVault.decrypt` to decrypt the encrypted value
-   - Expect the value is equal to the string "hello"
+      {
+          "aws": { <AWS credentials> },
+          "local": { "key": <base64 decoding of LOCAL_MASTERKEY> }
+      }
 
-#. Test explicit encrypt and decrypt with the "aws" KMS provider.
+   Where LOCAL_MASTERKEY is the following base64:
 
-   - Create a `KeyVault` with a "aws" KMS provider.
-   - Insert the a key document in to the key vault.
-   - Use `KeyVault.encrypt` to encrypt the value "hello" with the following:
+   .. code:: javascript
 
-     - the algorithm "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
-     - the "aws" KMS provider
+      Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk
 
-   - Expect the value is equal to a known BSON binary of subtype 6
-   - Use `KeyVault.decrypt` to decrypt the encrypted value
-   - Expect the value is equal to the string "hello"
+   Configure both objects with ``keyVaultNamespace`` set to ``admin.datakeys``.
 
-#. Test explicit encrypt of invalid values.
+   Configure the ``MongoClient`` with the following ``schema_map``:
 
-   - Create a `KeyVault` with either a "local" or "aws" KMS provider
-   - Use `KeyVault.encrypt` to attempt to encrypt each BSON type with deterministic encryption.
+   .. code:: javascript
 
-     - Expect a `string` to succeed. An exception MUST be thrown.
-     - Expect a `document` to fail. An exception MUST be thrown.
-     - Expect a `null` to fail. An exception MUST be thrown.
-     - Expect a BSON binary subtype 6 to fail. An exception MUST be thrown.
+      {
+        "db.coll": {
+          "bsonType": "object",
+          "properties": {
+            "encrypted_placeholder": {
+              "encrypt": {
+                "keyId": "/placeholder",
+                "bsonType": "string",
+                "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random"
+              }
+            }
+          }
+        }
+      }
 
-   - Use `KeyVault.encrypt` to attempt to encrypt a document using randomized encryption.
+Then, test creating and using data keys from a ``local`` KMS provider:
 
-     - Expect a `document` to succeed.
-     - Expect a BSON binary subtype 6 to fail. An exception MUST be thrown.
-     - Expect a `null` to fail. An exception MUST be thrown.
+#. Call ``client_encryption.createDataKey()`` with the ``local`` KMS provider and keyAltNames set to ``["local_altname"]``.
 
-#. Test explicit encryption with auto decryption.
+   - Expect a BSON binary with subtype 4 to be returned, referred to as ``local_datakey_id``.
+   - Use ``client`` to run a ``find`` on ``admin.datakeys`` by querying with the ``_id`` set to the ``local_datakey_id``.
+   - Expect that exactly one document is returned with the "masterKey.provider" equal to "local".
 
-   - Create a `KeyVault` with either a "local" or "aws" KMS provider
-   - Use `KeyVault.encrypt` to encrypt a value.
-   - Create a document, setting some field to the value.
-   - Insert the document into a collection.
-   - Find the document. Verify both the value matches the originally set value.
+#. Call ``client_encryption.encrypt()`` with the value "hello local", the algorithm ``AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic``, and the ``key_id`` of ``local_datakey_id``.
+
+   - Expect the return value to be a BSON binary subtype 6, referred to as ``local_encrypted``.
+   - Use ``client_encrypted`` to insert ``{ _id: "local", "value": <local_encrypted> }`` into ``db.coll``.
+   - Use ``client_encrypted`` to run a find querying with ``_id`` of "local" and expect ``value`` to be "hello local".
+
+#. Call ``client_encryption.encrypt()`` with the value "hello local", the algorithm ``AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic``, and the ``key_alt_name`` of ``local_altname``.
+
+   - Expect the return value to be a BSON binary subtype 6. Expect the value to exactly match the value of ``local_encrypted``.
+
+Then, repeat the above tests with the ``aws`` KMS provider:
+
+#. Call ``client_encryption.createDataKey()`` with the ``aws`` KMS provider, keyAltNames set to ``["aws_altname"]``, and ``masterKey`` as follows:
+
+   .. code:: javascript
+
+      {
+        region: "us-east-1",
+        key: "arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0"
+      }
+
+
+   - Expect a BSON binary with subtype 4 to be returned, referred to as ``aws_datakey_id``.
+   - Use ``client`` to run a ``find`` on ``admin.datakeys`` by querying with the ``_id`` set to the ``aws_datakey_id``.
+   - Expect that exactly one document is returned with the "masterKey.provider" equal to "aws".
+
+#. Call ``client_encryption.encrypt()`` with the value "hello aws", the algorithm ``AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic``, and the ``key_id`` of ``aws_datakey_id``.
+
+   - Expect the return value to be a BSON binary subtype 6, referred to as ``aws_encrypted``.
+   - Use ``client_encrypted`` to insert ``{ _id: "aws", "value": <aws_encrypted> }`` into ``db.coll``.
+   - Use ``client_encrypted`` to run a find querying with ``_id`` of "aws" and expect ``value`` to be "hello aws".
+
+#. Call ``client_encryption.encrypt()`` with the value "hello aws", the algorithm ``AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic``, and the ``key_alt_name`` of ``aws_altname``.
+
+   - Expect the return value to be a BSON binary subtype 6. Expect the value to exactly match the value of ``aws_encrypted``.
+
+
+Then, run the following final tests:
 
 #. Test explicit encrypting an auto encrypted field.
 
-   - Create a `KeyVault` with either a "local" or "aws" KMS provider
-   - Create a collection with a JSON Schema specifying an encrypted field.
-   - Use `KeyVault.encrypt` to encrypt a value.
-   - Create a document, setting the auto-encrypted field to the value.
-   - Insert the document. Verify an exception is thrown.
+   - Use ``client_encrypted`` to attempt to insert ``{ "encrypted_placeholder": (local_encrypted) }``
+   - Expect an exception to be thrown, since this is an attempt to auto encrypt an already encrypted value.
+
+
+Corpus Test
+===========
+
+The corpus test exhaustively enumerates all ways to encrypt all BSON value types. Note, the test data includes BSON binary subtype 4 (or standard UUID), which MUST be decoded and encoded as subtype 4. Run the test as follows.
+
+1. Create a MongoClient without encryption enabled (referred to as ``client``).
+
+2. Using ``client``, drop and create the collection ``db.coll`` configured with the included JSON schema `corpus/corpus-schema.json <corpus/corpus-schema.json>`_.
+
+3. Using ``client``, drop the collection ``admin.datakeys``. Insert the documents `corpus/corpus-key-local.json <corpus/corpus-key-local.json>`_ and `corpus/corpus-key-aws.json <corpus/corpus-key-aws.json>`_.
+
+4. Create the following:
+
+   - A MongoClient configured with auto encryption (referred to as ``client_encrypted``)
+   - A ``ClientEncryption`` object (referred to as ``client_encryption``)
+
+   Configure both objects with ``aws`` and the ``local`` KMS providers as follows:
+
+   .. code:: javascript
+
+      {
+          "aws": { <AWS credentials> },
+          "local": { "key": <base64 decoding of LOCAL_MASTERKEY> }
+      }
+
+   Where LOCAL_MASTERKEY is the following base64:
+   
+   .. code:: javascript
+
+      Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk
+
+   Configure both objects with ``keyVaultNamespace`` set to ``admin.datakeys``.
+
+5. Load `corpus/corpus.json <corpus/corpus.json>`_ to a variable named ``corpus``. The corpus contains subdocuments with the following fields:
+
+   - ``kms`` is either ``aws`` or ``local``
+   - ``type`` is a BSON type string `names coming from here <https://docs.mongodb.com/manual/reference/operator/query/type/>`_)
+   - ``algo`` is either ``rand`` or ``det`` for random or deterministic encryption
+   - ``method`` is either ``auto``, for automatic encryption or ``explicit`` for  explicit encryption
+   - ``identifier`` is either ``id`` or ``altname`` for the key identifier
+   - ``allowed`` is a boolean indicating whether the encryption for the given parameters is permitted.
+   - ``value`` is the value to be tested.
+
+   Create a new BSON document, named ``corpus_copied``.
+   Iterate over each field of ``corpus``.
+
+   - If the field name is ``_id``, ``altname_aws`` and ``altname_local``, copy the field to ``corpus_copied``.
+   - If ``method`` is ``auto``, copy the field to ``corpus_copied``.
+   - If ``method`` is ``explicit``, use ``client_encryption`` to explicitly encrypt the value.
+   
+     - Encrypt with the algorithm described by ``algo``.
+     - If ``identifier`` is ``id``
+        - If ``kms`` is ``local`` set the key_id to the UUID with base64 value ``LOCALAAAAAAAAAAAAAAAAA==``.
+        - If ``kms`` is ``aws`` set the key_id to the UUID with base64 value ``AWSAAAAAAAAAAAAAAAAAAA==``.
+     - If ``identifier`` is ``altname``
+        - If ``kms`` is ``local`` set the key_alt_name to "local".
+        - If ``kms`` is ``aws`` set the key_alt_name to "aws".
+     
+     If ``allowed`` is true, copy the field and encrypted value to ``corpus_copied``.
+     If ``allowed`` is false. verify that an exception is thrown. Copy the unencrypted value to to ``corpus_copied``.
+
+
+6. Using ``client_encrypted``, insert ``corpus_copied`` into ``db.coll``.
+
+7. Using ``client_encrypted``, find the inserted document from ``db.coll`` to a variable named ``corpus_decrypted``. Since it should have been automatically decrypted, assert the document exactly matches ``corpus``.
+
+8. Load `corpus/corpus_encrypted.json <corpus/corpus-encrypted.json>`_ to a variable named ``corpus_encrypted_expected``.
+   Using ``client`` find the inserted document from ``db.coll`` to a variable named ``corpus_encrypted_actual``.
+
+   Iterate over each field of ``corpus_encrypted_expected`` and check the following:
+
+   - If the ``algo`` is ``det``, that the value exactly matches all fields in ``corpus_encrypted_actual`` with the same ``kms``, ``type``, and ``algo``.
+   - If the ``algo`` is ``rand`` and ``allowed`` is true, that the value does not match any fields in ``corpus_encrypted_actual`` with the same ``kms`` and ``type``.
+   - If the ``method`` is ``auto`` or ``explicit``, decrypt the value with ``client_encryption`` and validate the value exactly matches the corresponding field of ``corpus``.
+   - If the ``allowed`` is false, validate the value exactly matches the corresponding field of ``corpus``.
+
+9. Repeat steps 1-8 with a local JSON schema. I.e. amend step 4 to configure the schema on ``client_encrypted`` and ``client_encryption`` with the ``schema_map`` option.
+
+   

@@ -14,18 +14,6 @@ key_vault_data: [{{key()}}]
 # tests will fail. But it's also easy enough to remove these tests when that happens.
 
 tests:
-  - description: "$expr unconditionally fails"
-    clientOptions:
-      autoEncryptOpts:
-        kmsProviders:
-          aws: {} # Credentials filled in from environment.
-    operations:
-      - name: find
-        arguments:
-          filter:
-            { $expr: { $eq: [1, 1] } }
-        result:
-          errorContains: "Unsupported match expression operator for encryption"
   - description: "$text unconditionally fails"
     clientOptions:
       autoEncryptOpts:

@@ -59,7 +59,7 @@ keys = {
         },
         "keyMaterial": {
             "$binary": {
-                "base64": "AQICAHhQNmWG2CzOm1dq3kWLM+iDUZhEqnhJwH9wZVpuZ94A8gF9FSYZL9Ze8TvTA3WBd3nmAAAAwjCBvwYJKoZIhvcNAQcGoIGxMIGuAgEAMIGoBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDLV3GHktEO8AlpsYBwIBEIB7ho0DQF7hEQPRz/8b61AHm2czX53Y9BNu5z+oyGYsoP643M58aTGsaHQzkTaAmGKlZTAEOjJkRJ4gZoabVuv4g6aJqf4k4w8pK7iIgHwMNy4nbUAqOWmqtnKpHZgy6jcFN2DzZzHIi4SNFsCkFc6Aw30ixtvqIDQPAXMW",
+                "base64": "AQICAHhQNmWG2CzOm1dq3kWLM+iDUZhEqnhJwH9wZVpuZ94A8gEqnsxXlR51T5EbEVezUqqKAAAAwjCBvwYJKoZIhvcNAQcGoIGxMIGuAgEAMIGoBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDHa4jo6yp0Z18KgbUgIBEIB74sKxWtV8/YHje5lv5THTl0HIbhSwM6EqRlmBiFFatmEWaeMk4tO4xBX65eq670I5TWPSLMzpp8ncGHMmvHqRajNBnmFtbYxN3E3/WjxmdbOOe+OXpnGJPcGsftc7cB2shRfA4lICPnE26+oVNXT6p0Lo20nY5XC7jyCO",
                 "subType": "00"
             }
         },
@@ -70,6 +70,33 @@ keys = {
         },
         "keyAltNames": ["altname", "another_altname"]
     },
+    "different_id": {
+        "status": 1,
+        "_id": {
+            "$binary": {
+                "base64": "BBBBBBBBBBBBBBBBBBBBBB==",
+                "subType": "04"
+            }
+        },
+        "masterKey": master_keys["aws"],
+        "updateDate": {
+            "$date": {
+                "$numberLong": "1552949630483"
+            }
+        },
+        "keyMaterial": {
+            "$binary": {
+                "base64": "AQICAHhQNmWG2CzOm1dq3kWLM+iDUZhEqnhJwH9wZVpuZ94A8gF9FSYZL9Ze8TvTA3WBd3nmAAAAwjCBvwYJKoZIhvcNAQcGoIGxMIGuAgEAMIGoBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDLV3GHktEO8AlpsYBwIBEIB7ho0DQF7hEQPRz/8b61AHm2czX53Y9BNu5z+oyGYsoP643M58aTGsaHQzkTaAmGKlZTAEOjJkRJ4gZoabVuv4g6aJqf4k4w8pK7iIgHwMNy4nbUAqOWmqtnKpHZgy6jcFN2DzZzHIi4SNFsCkFc6Aw30ixtvqIDQPAXMW",
+                "subType": "00"
+            }
+        },
+        "creationDate": {
+            "$date": {
+                "$numberLong": "1552949630483"
+            }
+        },
+        "keyAltNames": []
+    },
     "local": {
         "_id": {
             "$binary": {
@@ -79,7 +106,7 @@ keys = {
         },
         "keyMaterial": {
             "$binary": {
-                "base64": "db27rshiqK4Jqhb2xnwK4RfdFb9JuKeUe6xt5aYQF4o62tS75b7B4wxVN499gND9UVLUbpVKoyUoaZAeA895OENP335b8n8OwchcTFqS44t+P3zmhteYUQLIWQXaIgon7gEgLeJbaDHmSXS6/7NbfDDFlB37N7BP/2hx1yCOTN6NG/8M1ppw3LYT3CfP6EfXVEttDYtPbJpbb7nBVlxD7w==",
+                "base64": r"Ce9HSz/HKKGkIt4uyy+jDuKGA+rLC2cycykMo6vc8jXxqa1UVDYHWq1r+vZKbnnSRBfB981akzRKZCFpC05CTyFqDhXv6OnMjpG97OZEREGIsHEYiJkBW0jJJvfLLgeLsEpBzsro9FztGGXASxyxFRZFhXvHxyiLOKrdWfs7X1O/iK3pEoHMx6uSNSfUOgbebLfIqW7TO++iQS5g1xovXA==",
                 "subType": "00"
             }
         },
@@ -97,7 +124,7 @@ schemas = {
                 "encrypt": {
                     "keyId": "/altname",
                     "bsonType": "string",
-                    "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+                    "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random"
                 }
             },
             "encrypted_string": {
@@ -227,7 +254,7 @@ ciphertexts = [
         "plaintext": "string0",
         "data": {
             "$binary": {
-                "base64": "AQAAAAAAAAAAAAAAAAAAAAACtsdOjHK3CkpNjAAMznkYbeR6Z+yLzCRv4zOb7VfKnJdmU0W5MD8GVODx8K+KuBoCbE1SfGfPgX6NhS/RKpQ12w==",
+                "base64": "AQAAAAAAAAAAAAAAAAAAAAACwj+3zkv2VM+aTfk60RqhXq6a/77WlLwu/BxXFkL7EppGsju/m8f0x5kBDD3EZTtGALGXlym5jnpZAoSIkswHoA==",
                 "subType": "06"
             }
         }
@@ -238,7 +265,7 @@ ciphertexts = [
         "plaintext": "string1",
         "data": {
             "$binary": {
-                "base64": "AQAAAAAAAAAAAAAAAAAAAAAC1ijPpI+oG1mNiFChFAz7heo3R150yDhxZ7nOnPUwDM+aEvPRBuU6rXtgkVt7mgLd2H9rq9iChCAV46YKcpNrFw==",
+                "base64": "AQAAAAAAAAAAAAAAAAAAAAACDdw4KFz3ZLquhsbt7RmDjD0N67n0uSXx7IGnQNCLeIKvot6s/ouI21Eo84IOtb6lhwUNPlSEBNY0/hbszWAKJg==",
                 "subType": "06"
             }
         }
@@ -249,7 +276,7 @@ ciphertexts = [
         "plaintext": "string2",
         "data": {
             "$binary": {
-                "base64": "AQAAAAAAAAAAAAAAAAAAAAACKScltsm9Kw6AsyC/GQ8HZosvXZkixhFqNimPmzaSKu1b0IdTubAjsEG3TAxL5aTsQfT5mtr63hvvXpjMef8jzQ==",
+                "base64": "AQAAAAAAAAAAAAAAAAAAAAACQ76HWOut3DZtQuV90hp1aaCpZn95vZIaWmn+wrBehcEtcFwyJlBdlyzDzZTWPZCPgiFq72Wvh6Y7VbpU9NAp3A==",
                 "subType": "06"
             }
         }
@@ -260,7 +287,7 @@ ciphertexts = [
         "plaintext": "string0",
         "data": {
             "$binary": {
-                "base64": "AQAAAAAAAAAAAAAAAAAAAAACKWM29kOcLsfSLfJJ3SSmLr+wgrTtpu1lads1NzDz80AjMyrstw/GMdCuzX+AS+JS84Si2cT1WPMemTkBdVdGAw==",
+                "base64": "AQAAAAAAAAAAAAAAAAAAAAACV/+zJmpqMU47yxS/xIVAviGi7wHDuFwaULAixEAoIh0xHz73UYOM3D8D44gcJn67EROjbz4ITpYzzlCJovDL0Q==",
                 "subType": "06"
             }
         }
@@ -271,7 +298,7 @@ ciphertexts = [
         "plaintext": "test",
         "data": {
             "$binary": {
-                "base64": "AQAAAAAAAAAAAAAAAAAAAAAHIwWYUBoGNSA7MnAqobBNVYee0mqtNZF1AQiTvXkR1B9a6XXEJR32Ttbbe2PLR/us/dmcne84BEYSq8h+j26lIA==",
+                "base64": "AQAAAAAAAAAAAAAAAAAAAAAHmkTPqvzfHMWpvS1mEsrjOxVQ2dyihEgIFWD5E0eNEsiMBQsC0GuvjdqYRL5DHLFI1vKuGek7EYYp0Qyii/tHqA==",
                 "subType": "06"
             }
         }
@@ -282,7 +309,7 @@ ciphertexts = [
         "plaintext": "test",
         "data": {
             "$binary": {
-                "base64": "AQAAAAAAAAAAAAAAAAAAAAAOEpZwd/k1BQjT1owTq9NgQAoANKKQFbpfwDllEyFxjehyN/pTt1Rav51OAgbA5Bgg90Zpcvd0kHhA/S40bHZxXw==",
+                "base64": "AQAAAAAAAAAAAAAAAAAAAAAOOmvDmWjcuKsSCO7U/7t9HJ8eI73B6wduyMbdkvn7n7V4uTJes/j+BTtneSdyG2JHKHGkevWAJSIU2XoO66BSXw==",
                 "subType": "06"
             }
         }
@@ -293,7 +320,7 @@ ciphertexts = [
         "plaintext": "test",
         "data": {
             "$binary": {
-                "base64": "AQAAAAAAAAAAAAAAAAAAAAAQWPxV7BQ88Q5vW9HnPheOJyN29G/M7hhnCFmKL4oa+yzSPJhy4Xyxdbn4U80RXvDQMNz03ij5zbXFgrLz8BJIpg==",
+                "base64": "AQAAAAAAAAAAAAAAAAAAAAAQPNXJVXMEjGZnftMuf2INKufXCtQIRHdw5wTgn6QYt3ejcoAXyiwI4XIUizkpsob494qpt2in4tWeiO7b9zkA8Q==",
                 "subType": "06"
             }
         }
@@ -304,7 +331,7 @@ ciphertexts = [
         "plaintext": "test",
         "data": {
             "$binary": {
-                "base64": "AQAAAAAAAAAAAAAAAAAAAAASHSS/JTyJK5d4CErUaVyI4F/Tl00a6J7KdTfgzXQKGhxKVupFpaanbuEvMOUiMbQfaWD4kv+uHrJxdm1Oyl46cg==",
+                "base64": "AQAAAAAAAAAAAAAAAAAAAAACKWM29kOcLsfSLfJJ3SSmLr+wgrTtpu1lads1NzDz80AjMyrstw/GMdCuzX+AS+JS84Si2cT1WPMemTkBdVdGAw==",
                 "subType": "06"
             }
         }
@@ -315,7 +342,7 @@ ciphertexts = [
         "plaintext": "test",
         "data": {
             "$binary": {
-                "base64": "AQAAAAAAAAAAAAAAAAAAAAAF22b7ESSyoBVv1Igu5PRd0Ya/WZ4QPWzB1D/HZ4dmA/Zl7+FunNK5jnG2AjYxfdijpskLfjFSclvuolPwTiTrig==",
+                "base64": "AQAAAAAAAAAAAAAAAAAAAAAFB/KHZQHaHHo8fctcl7v6kR+sLkJoTRx2cPSSck9ya+nbGROSeFhdhDRHaCzhV78fDEqnMDSVPNi+ZkbaIh46GQ==",
                 "subType": "06"
             }
         }
@@ -326,7 +353,7 @@ ciphertexts = [
         "plaintext": "test",
         "data": {
             "$binary": {
-                "base64": "AQAAAAAAAAAAAAAAAAAAAAANRHRbeR9tKL4SzZmgcMZXiGNBk/Kb7CKG72rAnwywbq45V3Upy2kK9royiRQR9Gwqm/3Idw5U86Zp/kXdQuzXng==",
+                "base64": "AQAAAAAAAAAAAAAAAAAAAAANrvMgJkTKWGMc9wt3E2RBR2Hu5gL9p+vIIdHe9FcOm99t1W480/oX1Gnd87ON3B399DuFaxi/aaIiQSo7gTX6Lw==",
                 "subType": "06"
             }
         }
@@ -337,7 +364,7 @@ ciphertexts = [
         "plaintext": "test",
         "data": {
             "$binary": {
-                "base64": "AQAAAAAAAAAAAAAAAAAAAAARlcbjVBI9YtvKM/ZuonWoF3mXV9C8LuYRNh0CM9nKjkmAMoIZTtqfhWM78hS1UORnUwcnZT+YuuO3QjuVDy8Esw==",
+                "base64": "AQAAAAAAAAAAAAAAAAAAAAARJHaM4Gq3MpDTdBasBsEolQaOmxJQU1wsZVaSFAOLpEh1QihDglXI95xemePFMKhg+KNpFg7lw1ChCs2Wn/c26Q==",
                 "subType": "06"
             }
         }
@@ -348,7 +375,7 @@ ciphertexts = [
         "plaintext": "test",
         "data": {
             "$binary": {
-                "base64": "AQAAAAAAAAAAAAAAAAAAAAALsSf4Z6nvjeVO7+AXjuYYamWMg/z8+W1HYdOaZfWuH24sCKSc1hvFm72acUJx77mTzQ8Ap94rzYMk1/FF7wbB/A==",
+                "base64": "AQAAAAAAAAAAAAAAAAAAAAALVnxM4UqGhqf5eXw6nsS08am3YJrTf1EvjKitT8tyyMAbHsICIU3GUjuC7EBofCHbusvgo7pDyaClGostFz44nA==",
                 "subType": "06"
             }
         }
@@ -359,7 +386,7 @@ ciphertexts = [
         "plaintext": "test",
         "data": {
             "$binary": {
-                "base64": "AQAAAAAAAAAAAAAAAAAAAAAMowf5nUEkdLoNHUa+xRaBpKZItT4x+u/29ZESu+jQoCcA/V42/nev8UVBnVNfEpQPos39HeuwieVBeK02V8iqDZEbWXWmzRKNw3YNU6GZafw=",
+                "base64": "AQAAAAAAAAAAAAAAAAAAAAACKWM29kOcLsfSLfJJ3SSmLr+wgrTtpu1lads1NzDz80AjMyrstw/GMdCuzX+AS+JS84Si2cT1WPMemTkBdVdGAw==",
                 "subType": "06"
             }
         }
@@ -370,11 +397,22 @@ ciphertexts = [
         "plaintext": "test",
         "data": {
             "$binary": {
-                "base64": "AQAAAAAAAAAAAAAAAAAAAAAJipr5TW6wma9Z0Xa90u+w4hcRLeEE99BNy45oyzM07NaO42g5lLzbqyIkSO1q3dIbqIHd1hJ4s3a53bUjrh+2lQ==",
+                "base64": "AQAAAAAAAAAAAAAAAAAAAAAJ5sN7u6l97+DswfKTqZAijSTSOo5htinGKQKUD7pHNJYlLXGOkB4glrCu7ibu0g3344RHQ5yUp4YxMEa8GD+Snw==",
                 "subType": "06"
             }
         }
-    }
+    },
+    {
+        "schema": "basic",
+        "field": "random",
+        "plaintext": "abc",
+        "data": {
+            "$binary": {
+                "base64": "AgAAAAAAAAAAAAAAAAAAAAACyfp+lXvKOi7f5vh6ZsCijLEaXFKq1X06RmyS98ZvmMQGixTw8HM1f/bGxZjGwvYwjXOkIEb7Exgb8p2KCDI5TQ==",
+                "subType": "06"
+            }
+        }
+    },
 ]
 
 
@@ -409,7 +447,7 @@ def ciphertext(plaintext, field, schema="basic"):
 
 def local_provider():
     return {
-        "key": {"$binary": {"base64": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "subType": "00"}}
+        "key": {"$binary": {"base64": "Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk", "subType": "00"}}
     }
 
 
