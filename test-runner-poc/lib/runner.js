@@ -66,16 +66,7 @@ function environmentSetup(environmentCallback, done) {
 		client.db('admin').command({buildInfo: true}, (err, result) => {
 			const version = result.version;
 			const Environment = environments[environmentName];
-			const environment = new Environment(version)
-
-			// const parsedResult = parseConnectionString(mongodb_uri, (err, parsedURI)=>{
-			// 	if (err) console.log(err);
-			// 	console.log('environment before: ', environment)
-			// 	// environment.url = mongodb_uri;
-			// 	// environment.port = parsedURI.hosts[0].port;
-			// 	// environment.host = parsedURI.hosts[0].host;
-			// 	console.log('environment after: ', environment)
-			// })
+			const environment = new Environment(version);
 			try {
 				const mongoPackage = findMongo(path.dirname(module.filename));
 				environment.mongo = require(mongoPackage.path);
@@ -154,6 +145,5 @@ beforeEach(function(done) {
 });
 
 after(function(done) {
-	console.log('in after all');
 	mongoClient.close(done);
 })
