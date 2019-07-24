@@ -9,6 +9,7 @@ var co = require('co');
 var mock = require('mongodb-mock-server');
 const chai = require('chai');
 const expect = chai.expect;
+const sinon = require('sinon');
 
 chai.use(require('chai-subset'));
 
@@ -1874,6 +1875,45 @@ describe('Change Streams', function() {
         }
       )
       .then(() => teardown(), teardown);
+  });
+
+  it('should emit close event after error event', {
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+    test: function(done) {
+      const configuration = this.configuration;
+      const client = configuration.newClient();
+      const closeSpy = sinon.spy();
+
+      client.connect(function(err, client) {
+        expect(err).to.not.exist;
+
+        const db = client.db('integration_tests');
+        const coll = db.collection('event_test');
+        const changeStream = coll.watch([{ $project: { _id: false } }]);
+
+        changeStream.on('change', () => {
+          assert.ok(false);
+        });
+
+        changeStream.on('error', err => {
+          expect(err).to.exist;
+          changeStream.close(() => {
+            expect(closeSpy.calledOnce).to.be.true;
+            client.close(done);
+          });
+        });
+
+        changeStream.on('close', closeSpy);
+
+        // Trigger the first database event
+        setTimeout(() => {
+          coll.insertOne({ a: 1 }, (err, result) => {
+            expect(err).to.not.exist;
+            expect(result.insertedCount).to.equal(1);
+          });
+        });
+      });
+    }
   });
 
   describe('should properly handle a changeStream event being processed mid-close', function() {
