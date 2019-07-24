@@ -45,7 +45,7 @@ tests:
           command:
             insert: *collection_name
             documents:
-              - &doc0_encrypted { _id: 1, encrypted_w_altname: {{ciphertext("string0", field="encrypted_string")}}, altname: "altname" }
+              - &doc0_encrypted { _id: 1, encrypted_w_altname: { $$type: "binData" }, altname: "altname" }
             ordered: true
           command_name: insert
     outcome:
