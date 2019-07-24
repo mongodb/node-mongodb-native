@@ -5,7 +5,7 @@
   "main": "runner.js",
   "scripts": {
     "test": "mocha --file lib/runner.js test/crud_tests.js",
-    "test-ci": "mocha --timeout 60000 --file lib/runner.js ../test/functional/view_tests.js",
+    "test-crud": "mocha --timeout 60000 --file lib/runner.js ../test/functional/view_tests.js",
     "func": "mocha --timeout 60000 --file lib/runner.js '../test/functional/*.js'",
     "unit": "mocha --file lib/runner.js '../test/unit/*_tests.js'",
     "core": "mocha --file lib/runner.js '../test/core/**/*_tests.js'",

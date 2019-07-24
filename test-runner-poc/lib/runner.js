@@ -1,13 +1,12 @@
-"use strict";
+'use strict';
 
-const path = require("path");
-const fs = require("fs");
-const utils = require("mocha").utils;
+const path = require('path');
+const fs = require('fs');
+const utils = require('mocha').utils;
 const MongoClient = require('mongodb').MongoClient;
-const f = require('util').format;
-const parseConnectionString = require("../../lib/core/uri_parser");
+const parseConnectionString = require('../../lib/core/uri_parser');
 
-const testPath = path.join(path.join(process.cwd(), "../"), 'test');
+const testPath = path.join(path.join(process.cwd(), '../'), 'test');
 const configPath = path.join(testPath, 'config.js');
 const envPath = path.join(testPath, 'environments.js');
 const environments = require(envPath);
@@ -18,19 +17,19 @@ let filters = [];
 let initializedFilters = 0;
 
 function addFilter(filter) {
-	if (typeof filter !== "function" && typeof filter !== "object") {
+	if (typeof filter !== 'function' && typeof filter !== 'object') {
 		throw new Error(
-			"Type of filter must either be a function or an object"
+			'Type of filter must either be a function or an object'
 		);
 	}
 	if (
-		typeof filter === "object" &&
-		(!filter.filter || typeof filter.filter !== "function")
+		typeof filter === 'object' &&
+		(!filter.filter || typeof filter.filter !== 'function')
 	) {
-		throw new Error("Object filters must have a function named filter");
+		throw new Error('Object filters must have a function named filter');
 	}
 
-	if (typeof filter === "function") {
+	if (typeof filter === 'function') {
 		filters.push({ filter: filter });
 	} else {
 		filters.push(filter);
@@ -38,8 +37,8 @@ function addFilter(filter) {
 }
 
 function findMongo(packagePath) {
-  if (fs.existsSync(f('%s/package.json', packagePath))) {
-    const obj = JSON.parse(fs.readFileSync(f('%s/package.json', packagePath)));
+	if (fs.existsSync(packagePath + '/package.json')) {
+		const obj = JSON.parse(fs.readFileSync(packagePath + '/package.json'));
     if (obj.name && (obj.name === 'mongodb-core' || obj.name === 'mongodb')) {
       return {
         path: packagePath,
@@ -62,7 +61,7 @@ function environmentSetup(environmentCallback, done) {
 	let environmentName;
 	let currentVersion;
 	mongoClient.connect((err, client) => {
-		if(err) console.log(err)
+		if (err) console.log(err)
 		client.db('admin').command({buildInfo: true}, (err, result) => {
 			const version = result.version;
 			const Environment = environments[environmentName];
@@ -71,24 +70,24 @@ function environmentSetup(environmentCallback, done) {
 				const mongoPackage = findMongo(path.dirname(module.filename));
 				environment.mongo = require(mongoPackage.path);
 			} catch (err) {
-				console.log("err: ",err)
+				console.log('err: ',err)
 				throw new Error('The test runner must be a dependency of mongodb or mongodb-core');
 			}
 			environmentCallback(environment, client, done)
 		});
 		let topologyType = mongoClient.topology.type;
 		switch (topologyType) {
-			case "server":
+			case 'server':
 				environmentName = 'single';
 				break;
-			case "replset":
+			case 'replset':
 				environmentName = 'replicaset';
 				break;
-			case "mongos":
+			case 'mongos':
 				environmentName = 'sharded';
 				break;
 			default:
-				console.warn("Topology type is not recognized.")
+				console.warn('Topology type is not recognized.')
 				break;
 		}
 		createFilters(environmentName);
@@ -97,10 +96,10 @@ function environmentSetup(environmentCallback, done) {
 }
 
 function createFilters(environmentName) {
-	fs.readdirSync(path.join(__dirname, "filters"))
-		.filter(x => x.indexOf("js") !== -1)
+	fs.readdirSync(path.join(__dirname, 'filters'))
+		.filter(x => x.indexOf('js') !== -1)
 		.forEach(x => {
-			const FilterModule = require(path.join(__dirname, "filters", x));
+			const FilterModule = require(path.join(__dirname, 'filters', x));
 			addFilter(new FilterModule({ runtimeTopology: environmentName}));
 		});
 }

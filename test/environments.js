@@ -168,8 +168,6 @@ class ShardedEnvironment extends EnvironmentBase {
       return new core.Mongos([{ host, port }], options);
     };
 
-    //const version =
-   //   discoverResult && discoverResult.version ? discoverResult.version.join('.') : null;
     this.server37631WorkaroundNeeded = semver.satisfies(version, '3.6.x');
     this.manager = new ShardingManager({
       mongod: 'mongod',
