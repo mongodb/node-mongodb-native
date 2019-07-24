@@ -571,7 +571,7 @@ function testOperation(operation, obj, context, options) {
     const result = operation.result;
 
     if (
-      result.errorContains ||
+      result.errorContains != null ||
       result.errorCodeName ||
       result.errorLabelsContain ||
       result.errorLabelsOmit
