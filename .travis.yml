@@ -87,6 +87,7 @@ jobs:
         - MONGODB_VERSION=latest
         - MONGODB_UNIFIED_TOPOLOGY=1
         - MONGODB_ENVIRONMENT=replicaset
+        - MONGODB_CLIENT_ENCRYPTION=1
 
   allow_failures:
     - env:
