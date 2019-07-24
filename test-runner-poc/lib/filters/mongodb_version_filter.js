@@ -34,6 +34,7 @@ class MongoDBVersionFilter {
 
   filter(test) {
     if (this.options.skip) return true;
+    if (!test) return true;
     if (!test.metadata) return true;
     if (!test.metadata.requires) return true;
     if (!test.metadata.requires.mongodb) return true;

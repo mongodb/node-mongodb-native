@@ -142,7 +142,8 @@ beforeEach(function(done) {
 
 		if (!filter.filter(self.currentTest)) {
 			if (!self.currentTest.parent.parent.root) {
-				self.currentTest.parent.pending = true;
+				// self.currentTest.parent.pending = true; <-- this makes apm_tests skip when they should not
+				self.currentTest.parent._beforeEach = [];
 			}
 			self.skip();
 		}
@@ -152,6 +153,7 @@ beforeEach(function(done) {
 	}
 });
 
-after(function() {
-	mongoClient.close();
+after(function(done) {
+	console.log('in after all');
+	mongoClient.close(done);
 })
