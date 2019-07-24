@@ -112,6 +112,7 @@ before(function(done) {
 });
 
 beforeEach(function(done) {
+	// Assigned this to a new variable called self in order to preserve context and access tests within the _run function.
 	const self = this;
 	let filtersExecuted = 0;
 	if (filters.length) {
