@@ -17,9 +17,6 @@ before_install:
   - wget https://s3.amazonaws.com/mciuploads/libmongocrypt/ubuntu1604/master/1c6c72377582ebcd8402f6f15fff5c3143b46741/libmongocrypt.tar.gz
   - sudo tar -xzf libmongocrypt.tar.gz -C /usr/local
 
-before_script:
-  - npm install mongodb-client-encryption
-
 jobs:
   include:
     - stage: standalone
@@ -88,6 +85,8 @@ jobs:
         - MONGODB_UNIFIED_TOPOLOGY=1
         - MONGODB_ENVIRONMENT=replicaset
         - MONGODB_CLIENT_ENCRYPTION=1
+      before_script:
+        - npm install mongodb-client-encryption
 
   allow_failures:
     - env:
