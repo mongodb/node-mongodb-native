@@ -415,6 +415,7 @@ function extractBulkRequests(requests) {
 function translateOperationName(operationName) {
   if (operationName === 'runCommand') return 'command';
   if (operationName === 'listDatabaseNames') return 'listDatabases';
+  if (operationName === 'listCollectionNames') return 'listCollections';
   return operationName;
 }
 
@@ -464,7 +465,7 @@ function resolveOperationArgs(operationName, operationArgs, context) {
   return result;
 }
 
-const CURSOR_COMMANDS = new Set(['find', 'aggregate', 'listIndexes']);
+const CURSOR_COMMANDS = new Set(['find', 'aggregate', 'listIndexes', 'listCollections']);
 const ADMIN_COMMANDS = new Set(['listDatabases']);
 
 /**
@@ -557,7 +558,7 @@ function testOperation(operation, obj, context, options) {
     obj = obj.db().admin();
   }
 
-  if (operation.name === 'listDatabaseNames') {
+  if (operation.name === 'listDatabaseNames' || operation.name === 'listCollectionNames') {
     opOptions.nameOnly = true;
   }
 
