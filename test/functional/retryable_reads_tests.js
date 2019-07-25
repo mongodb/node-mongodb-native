@@ -21,7 +21,9 @@ describe('Retryable Reads', function() {
       spec.description.match(/countDocuments/i) ||
       spec.description.match(/listIndexes/i) ||
       spec.description.match(/listDatabases/i) ||
-      spec.description.match(/listDatabaseNames/i)
+      spec.description.match(/listDatabaseNames/i) ||
+      spec.description.match(/listCollections/i) ||
+      spec.description.match(/listCollectionNames/i)
     );
   });
 });
