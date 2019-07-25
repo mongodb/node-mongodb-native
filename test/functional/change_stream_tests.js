@@ -1889,10 +1889,13 @@ describe('Change Streams', function() {
 
         const db = client.db('integration_tests');
         const coll = db.collection('event_test');
+
+        // This will cause an error because the _id will be projected out, which causes the following error:
+        // "A change stream document has been received that lacks a resume token (_id)."
         const changeStream = coll.watch([{ $project: { _id: false } }]);
 
-        changeStream.on('change', () => {
-          assert.ok(false);
+        changeStream.on('change', changeDoc => {
+          expect(changeDoc).to.be.null;
         });
 
         changeStream.on('error', err => {
