@@ -18,8 +18,8 @@ class NodeVersionFilter {
   }
 
   filter(test) {
-    if (! (test.metadata && test.metadata.requires && test.metadata.requires.node) ) {
-        return true;
+    if (!(test.metadata && test.metadata.requires && test.metadata.requires.node)) {
+      return true;
     }
     // Return if this is a valid method
     return semver.satisfies(this.version, test.metadata.requires.node);

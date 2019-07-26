@@ -1,3 +1,4 @@
+'use strict';
 var expect = require('chai').expect;
 
 describe('test-level metadata', {
@@ -14,26 +15,28 @@ describe('test-level metadata', {
 
     // Metadata as 2nd parameter
     it('should appear when specified as the 2nd parameter', () => {
-      var test = it('should split on a delimiter, with metadata as 2nd parameter',
-        { requires: {topology: 'sharded'} }, () => {
+      var test = it(
+        'should split on a delimiter, with metadata as 2nd parameter',
+        { requires: { topology: 'sharded' } },
+        () => {
           var parts = '1,2,3'.split(',');
           expect(parts).to.eql(['1', '2', '3']);
-        });
-      expect(test.metadata).to.eql({requires: {topology: 'sharded'}});
+        }
+      );
+      expect(test.metadata).to.eql({ requires: { topology: 'sharded' } });
     });
-
 
     // Integra-style metadata
     it('should appear when sending an Integra-style object', () => {
       var test = it('should split on a delimiter, with metadata presented Integra-style', {
-        metadata: { requires: { topology: [ 'sharded' ] } },
+        metadata: { requires: { topology: ['sharded'] } },
 
         test: function() {
           var parts = '1,2,3'.split(',');
           expect(parts).to.eql(['1', '2', '3']);
         }
       });
-      expect(test.metadata).to.eql({ requires: { topology: [ 'sharded' ] } });
+      expect(test.metadata).to.eql({ requires: { topology: ['sharded'] } });
     });
   }
 });
@@ -43,7 +46,7 @@ describe('suite-level metadata', {
   metadata: { requires: { topology: 'sharded' } },
 
   tests: function() {
-    it('should appear on tests that don\'t specify their own metadata', () => {
+    it("should appear on tests that don't specify their own metadata", () => {
       var test;
       describe('metadata suite', {
         metadata: { requires: { topology: 'sharded' } },
@@ -83,11 +86,14 @@ describe('suite-level metadata', {
         metadata: { requires: { topology: 'sharded' } },
 
         tests: function() {
-          test = it('should split on a delimiter, with suite metadata overwritten',
-            { requires: { topology: 'sharded'} }, function() {
+          test = it(
+            'should split on a delimiter, with suite metadata overwritten',
+            { requires: { topology: 'sharded' } },
+            function() {
               var parts = '1,2,3'.split(',');
               expect(parts).to.eql(['1', '2', '3']);
-            });
+            }
+          );
         }
       });
       expect(test.metadata).to.eql({ requires: { topology: 'sharded' } });
@@ -97,7 +103,7 @@ describe('suite-level metadata', {
 
 // Validating input
 describe('tests and suites', () => {
-  it('should error if the first parameter isn\'t a string', () => {
+  it("should error if the first parameter isn't a string", () => {
     var badTest = function() {
       it(0, () => {
         var parts = '1,2,3'.split(',');
@@ -111,7 +117,7 @@ describe('tests and suites', () => {
     expect(badSuite).to.throw();
   });
 
-  it('should error if the second parameter isn\'t a function or an object', () => {
+  it("should error if the second parameter isn't a function or an object", () => {
     var badTest = function() {
       it('should fail', 'no function');
     };
@@ -122,7 +128,7 @@ describe('tests and suites', () => {
     expect(badSuite).to.throw();
   });
 
-  it('should error if, when given a third argument, the second argument isn\'t an object or the third argument isn\'t a function', () => {
+  it("should error if, when given a third argument, the second argument isn't an object or the third argument isn't a function", () => {
     var firstBadTest = function() {
       it('should fail once', 'no object', () => {});
     };
@@ -184,10 +190,10 @@ describe('tests and suites', () => {
 
   it('should throw an error if they are alone but have incorrect numbers of arguments', () => {
     var onlyTestWithMultipleArgs = function() {
-      it.only('should fail because there\'s four arguments', { a: 1 }, () => {}, 'extra argument');
+      it.only("should fail because there's four arguments", { a: 1 }, () => {}, 'extra argument');
     };
     var onlySuiteWithOneArg = function() {
-      describe.only('should fail because there\'s only one argument');
+      describe.only("should fail because there's only one argument");
     };
     expect(onlyTestWithMultipleArgs).to.throw();
     expect(onlySuiteWithOneArg).to.throw();

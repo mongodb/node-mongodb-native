@@ -17,7 +17,7 @@ class OSFilter {
   }
 
   filter(test) {
-    if (! (test.metadata && test.metadata.requires && test.metadata.requires.os) ) {
+    if (!(test.metadata && test.metadata.requires && test.metadata.requires.os)) {
       return true;
     }
 

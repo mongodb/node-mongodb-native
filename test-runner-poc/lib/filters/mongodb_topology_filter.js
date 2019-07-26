@@ -1,4 +1,3 @@
-
 'use strict';
 const MongoClient = require('mongodb').MongoClient;
 
@@ -13,26 +12,25 @@ const MongoClient = require('mongodb').MongoClient;
  * }
  */
 class MongoDBTopologyFilter {
-
   initializeFilter(callback) {
     const mongoClient = new MongoClient(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017');
     mongoClient.connect((err, client) => {
       if (err) throw new Error(err);
       let topologyType = mongoClient.topology.type;
-  		switch (topologyType) {
-  			case 'server':
-  				this.runtimeTopology = 'single';
-  				break;
-  			case 'replset':
-  				this.runtimeTopology = 'replicaset';
-  				break;
-  			case 'mongos':
-  				this.runtimeTopology = 'sharded';
-  				break;
-  			default:
-  				console.warn('Topology type is not recognized.')
-  				break;
-  		}
+      switch (topologyType) {
+        case 'server':
+          this.runtimeTopology = 'single';
+          break;
+        case 'replset':
+          this.runtimeTopology = 'replicaset';
+          break;
+        case 'mongos':
+          this.runtimeTopology = 'sharded';
+          break;
+        default:
+          console.warn('Topology type is not recognized.');
+          break;
+      }
       client.close(callback);
     });
   }
@@ -41,7 +39,7 @@ class MongoDBTopologyFilter {
   }
 
   filter(test) {
-    if (! (test.metadata && test.metadata.requires && test.metadata.requires.topology) ) {
+    if (!(test.metadata && test.metadata.requires && test.metadata.requires.topology)) {
       return true;
     }
 

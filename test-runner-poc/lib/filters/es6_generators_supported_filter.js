@@ -1,9 +1,8 @@
 'use strict';
 
 class ES6GeneratorsSupportedFilter {
-
   filter(test) {
-    if (! (test.metadata && test.metadata.requires && test.metadata.requires.generators) ) {
+    if (!(test.metadata && test.metadata.requires && test.metadata.requires.generators)) {
       return true;
     }
 
