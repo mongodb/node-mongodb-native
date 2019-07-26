@@ -1,9 +1,6 @@
 'use strict';
 
 class ES6PromisesSupportedFilter {
-  beforeStart(object, callback) {
-    callback();
-  }
 
   filter(test) {
     if (!test.metadata) return true;
