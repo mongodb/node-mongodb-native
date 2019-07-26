@@ -1191,7 +1191,6 @@ describe('GridFS Stream', function() {
                   var result = testSpec.assert.result;
                   if (!result) {
                     // test.ok(false);
-
                     // We need to abort in order to close the underlying cursor,
                     // and by extension the implicit session used for the cursor.
                     // This is only necessary if the cursor is not exhausted

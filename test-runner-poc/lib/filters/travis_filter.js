@@ -16,9 +16,9 @@ class TravisFilter {
   }
 
   filter(test) {
-    if (!test.metadata) return true;
-    if (!test.metadata.ignore) return true;
-    if (!test.metadata.ignore.travis) return true;
+    if (! (test.metadata && test.metadata.ignore && test.metadata.ignore.travis) ) {
+      return true;
+    }
     if (process.env[this.name] !== null && test.metadata.ignore.travis === true) return false;
     return true;
   }

@@ -3,9 +3,10 @@
 class ES6GeneratorsSupportedFilter {
 
   filter(test) {
-    if (!test.metadata) return true;
-    if (!test.metadata.requires) return true;
-    if (!test.metadata.requires.generators) return true;
+    if (! (test.metadata && test.metadata.requires && test.metadata.requires.generators) ) {
+      return true;
+    }
+
     let check = false;
 
     try {

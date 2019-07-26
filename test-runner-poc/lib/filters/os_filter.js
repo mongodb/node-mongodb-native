@@ -17,9 +17,9 @@ class OSFilter {
   }
 
   filter(test) {
-    if (!test.metadata) return true;
-    if (!test.metadata.requires) return true;
-    if (!test.metadata.requires.os) return true;
+    if (! (test.metadata && test.metadata.requires && test.metadata.requires.os) ) {
+      return true;
+    }
 
     // Get the os
     const os = test.metadata.requires.os;

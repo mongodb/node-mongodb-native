@@ -41,9 +41,9 @@ class MongoDBTopologyFilter {
   }
 
   filter(test) {
-    if (!test.metadata) return true;
-    if (!test.metadata.requires) return true;
-    if (!test.metadata.requires.topology) return true;
+    if (! (test.metadata && test.metadata.requires && test.metadata.requires.topology) ) {
+      return true;
+    }
 
     // If we have a single topology convert to single item array
     let topologies = null;
