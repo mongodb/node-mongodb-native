@@ -23,7 +23,6 @@ class MongoDBVersionFilter {
         client.close(callback);
       });
     })
-
   }
 
   constructor(options) {

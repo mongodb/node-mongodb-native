@@ -12,6 +12,9 @@ const envPath = path.join(testPath, 'environments.js');
 const environments = require(envPath);
 const TestConfiguration = require(configPath);
 
+var wtf = require('wtfnode');
+const mock = require('mongodb-mock-server');
+
 let mongoClient;
 let filters = [];
 let initializedFilters = 0;
@@ -54,8 +57,8 @@ function findMongo(packagePath) {
   return findMongo(path.dirname(packagePath));
 }
 
-function environmentSetup(environmentCallback, done) {
-	const mongodb_uri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017';
+function environmentSetup(environmentCallback) {
+	const mongodb_uri = process.env.MONGODB_URI || 'mongodb://localhost:27017';
 	mongoClient = new MongoClient(mongodb_uri);
 
 	let environmentName;
@@ -65,7 +68,16 @@ function environmentSetup(environmentCallback, done) {
 		client.db('admin').command({buildInfo: true}, (err, result) => {
 			const version = result.version;
 			const Environment = environments[environmentName];
+
 			const environment = new Environment(version);
+
+			const parsedResult = (environmentName !== 'single') ? parseConnectionString(mongodb_uri, (err, parsedURI) => {
+				if (err) console.log(err);
+				environment.url = mongodb_uri + '/integration_tests';
+				environment.port = parsedURI.hosts[0].port;
+				environment.host = parsedURI.hosts[0].host;
+			}) : undefined;
+
 			try {
 				const mongoPackage = findMongo(path.dirname(module.filename));
 				environment.mongo = require(mongoPackage.path);
@@ -73,8 +85,9 @@ function environmentSetup(environmentCallback, done) {
 				console.log('err: ',err)
 				throw new Error('The test runner must be a dependency of mongodb or mongodb-core');
 			}
-			environmentCallback(environment, client, done)
+			environmentCallback(environment, client);
 		});
+
 		let topologyType = mongoClient.topology.type;
 		switch (topologyType) {
 			case 'server':
@@ -90,6 +103,9 @@ function environmentSetup(environmentCallback, done) {
 				console.warn('Topology type is not recognized.')
 				break;
 		}
+
+		console.log('ENVIRONMENT ', environmentName);
+
 		createFilters(environmentName);
 
 	});
@@ -105,10 +121,10 @@ function createFilters(environmentName) {
 }
 
 before(function(done) {
-	environmentSetup((environment, client, d) => {
+	environmentSetup((environment, client) => {
 		this.configuration = new TestConfiguration(environment)
-		client.close(d);
-	}, done);
+		client.close(done);
+	});
 });
 
 beforeEach(function(done) {
@@ -144,6 +160,11 @@ beforeEach(function(done) {
 	}
 });
 
+afterEach(() => mock.cleanup());
+
 after(function(done) {
-	mongoClient.close(done);
+	mongoClient.close(() => {
+			wtf.dump();
+			done();
+	});
 })
