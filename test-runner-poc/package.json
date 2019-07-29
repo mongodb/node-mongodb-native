@@ -7,8 +7,9 @@
     "test": "mocha --file lib/runner.js test/crud_tests.js",
     "test-crud": "mocha --file lib/runner.js ../test/functional/crud_spec_tests.js",
     "test-view": "mocha --timeout 60000 --file lib/runner.js ../test/functional/view_tests.js",
-    "single": "mocha --file lib/runner.js $1",
+    "hanging": "./functional_hanging.sh",
     "func": "mocha --timeout 60000 --file lib/runner.js '../test/functional/*.js'",
+    "yikes": "mocha --timeout 60000 --file lib/runner.js '../test/functional/yikes/*.js'",
     "unit": "mocha --file lib/runner.js '../test/unit/*_tests.js'",
     "core": "mocha --file lib/runner.js '../test/core/**/*_tests.js'",
     "filter": "mocha --file lib/runner.js test/filter_tests.js"

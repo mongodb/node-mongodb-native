@@ -10,7 +10,6 @@ describe('Causal Consistency', function() {
     return setupDatabase(this.configuration);
   });
 
-  afterEach(() => test.listener.uninstrument());
   beforeEach(function() {
     test.commands = { started: [], succeeded: [] };
     test.listener = mongo.instrument(err => expect(err).to.be.null);
@@ -21,11 +20,17 @@ describe('Causal Consistency', function() {
     test.listener.on('succeeded', event => {
       if (ignoredCommands.indexOf(event.commandName) === -1) test.commands.succeeded.push(event);
     });
-
+    if (test.client) {
+      test.client.close();
+    }
     test.client = this.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
     return test.client.connect();
   });
-  afterEach(() => test.client.close());
+
+  afterEach(() => {
+    test.listener.uninstrument();
+    test.client.close();
+  });
 
   it('should not send `afterClusterTime` on first read operation in a causal session', {
     metadata: {

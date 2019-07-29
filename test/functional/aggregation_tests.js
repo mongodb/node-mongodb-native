@@ -2,6 +2,7 @@
 var expect = require('chai').expect;
 
 describe('Aggregation', function() {
+
   /**
    * Correctly call the aggregation framework using a pipeline in an Array.
    *
@@ -84,8 +85,7 @@ describe('Aggregation', function() {
                 expect(result[1]._id.tags).to.equal('fun');
                 expect(result[1].authors).to.eql(['bob']);
 
-                client.close();
-                done();
+                client.close(done);
               });
             }
           );
@@ -124,8 +124,7 @@ describe('Aggregation', function() {
             expect(aggregateOperation.command.cursor).to.deep.equal({});
             expect(aggregateOperation.command['$db']).to.equal('admin');
 
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -217,8 +216,7 @@ describe('Aggregation', function() {
                 expect(result[1]._id.tags).to.equal('fun');
                 expect(result[1].authors).to.eql(['bob']);
 
-                client.close();
-                done();
+                client.close(done);
               });
             }
           );
@@ -313,8 +311,8 @@ describe('Aggregation', function() {
                 expect(result[1]._id.tags).to.equal('fun');
                 expect(result[1].authors).to.eql(['bob']);
 
-                client.close();
-                done();
+                client.close(done);
+
               });
             }
           );
@@ -400,8 +398,8 @@ describe('Aggregation', function() {
             expect(err).to.be.null;
             expect(result).to.exist;
 
-            client.close();
-            done();
+            client.close(done);
+
           });
         });
       });
@@ -490,8 +488,8 @@ describe('Aggregation', function() {
             expect(err).to.be.null;
             expect(result.stages).to.have.length(4);
 
-            client.close();
-            done();
+            client.close(done);
+
           });
         });
       });
@@ -585,8 +583,8 @@ describe('Aggregation', function() {
             // Since cursor will not be "exhausted", since batchSize is 1,
             // we need to manually call close on the cursor
             cursor.close();
-            client.close();
-            done();
+            client.close(done);
+
           });
         });
       });
@@ -675,8 +673,8 @@ describe('Aggregation', function() {
                 expect(err).to.be.null;
                 expect(results).to.be.empty;
 
-                client.close();
-                done();
+                client.close(done);
+
               });
             }
           );
@@ -771,8 +769,8 @@ describe('Aggregation', function() {
                 expect(results[1]._id.tags).to.equal('fun');
                 expect(results[1].authors).to.eql(['bob']);
 
-                client.close();
-                done();
+                client.close(done);
+
               });
             }
           );
@@ -829,8 +827,8 @@ describe('Aggregation', function() {
                 expect(err).to.be.null;
                 expect(docs[0].total).to.equal(3);
 
-                client.close();
-                done();
+                client.close(done);
+
               });
           });
         });
@@ -892,8 +890,8 @@ describe('Aggregation', function() {
                       expect(err).to.be.null;
                       expect(count).to.be.greaterThan(0);
 
-                      client.close();
-                      done();
+                      client.close(done);
+
                     }
                   );
               });
@@ -976,8 +974,7 @@ describe('Aggregation', function() {
               }
             );
           } catch (err) {
-            client.close();
-            return done();
+            return client.close(done);
           }
 
           // should never happen
@@ -1177,8 +1174,8 @@ describe('Aggregation', function() {
                   // Return the command
                   db.command = cmd;
                   cursor.close();
-                  client.close();
-                  done();
+                  client.close(done);
+
                 }
               );
             });
@@ -1222,7 +1219,7 @@ describe('Aggregation', function() {
         collection.aggregate([{ $project: { _id: 1 } }], { comment }, function(err, r) {
           expect(err).to.be.null;
           expect(r).to.not.be.null;
-          done();
+          client.close(done);
         });
       });
     }
@@ -1292,8 +1289,8 @@ describe('Aggregation', function() {
             expect(err).to.be.null;
             expect(result.b).to.equal(1);
 
-            client.close();
-            done();
+            client.close(done);
+
           });
         });
       });
@@ -1346,8 +1343,8 @@ describe('Aggregation', function() {
             expect(err).to.be.null;
             expect(result).to.equal(true);
 
-            client.close();
-            done();
+            client.close(done);
+
           });
         });
       });

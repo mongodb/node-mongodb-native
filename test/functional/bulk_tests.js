@@ -5,7 +5,7 @@ const test = require('./shared').assert,
 
 const MongoError = require('../../index').MongoError;
 
-describe('Bulk', function() {
+describe.only('Bulk', function() {
   before(function() {
     return setupDatabase(this.configuration);
   });
@@ -1625,7 +1625,9 @@ describe('Bulk', function() {
     return client.connect().then(() => {
       const collection = client.db(this.configuration.db).collection('doesnt_matter');
 
-      return testPropagationOfBulkWriteError(collection.initializeOrderedBulkOp());
+      return testPropagationOfBulkWriteError(collection.initializeOrderedBulkOp()).then(() => {
+        client.close();
+      });
     });
   });
 
@@ -1635,7 +1637,9 @@ describe('Bulk', function() {
     return client.connect().then(() => {
       const collection = client.db(this.configuration.db).collection('doesnt_matter');
 
-      return testPropagationOfBulkWriteError(collection.initializeUnorderedBulkOp());
+      return testPropagationOfBulkWriteError(collection.initializeUnorderedBulkOp()).then(() => {
+        client.close();
+      });
     });
   });
 });

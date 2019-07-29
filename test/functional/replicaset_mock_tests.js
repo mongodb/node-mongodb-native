@@ -3,9 +3,16 @@ var expect = require('chai').expect,
   mock = require('mongodb-mock-server'),
   ObjectId = require('bson').ObjectId;
 
+var wtf = require('wtfnode');
+
 const test = {};
 describe('ReplSet (mocks)', function() {
-  afterEach(() => mock.cleanup());
+  afterEach(() => {
+    console.log("aftereach")
+    mock.cleanup();
+
+  });
+  after(() => wtf.dump())
   beforeEach(() => {
     // Default message fields
     const defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
@@ -23,8 +30,8 @@ describe('ReplSet (mocks)', function() {
 
     // Primary server states
     const serverIsMaster = [Object.assign({}, defaultFields), Object.assign({}, defaultRSFields)];
-
     return Promise.all([mock.createServer(), mock.createServer()]).then(servers => {
+      console.log("beforeach")
       test.mongos1 = servers[0];
       test.mongos2 = servers[1];
 
@@ -76,12 +83,11 @@ describe('ReplSet (mocks)', function() {
         `mongodb://${test.mongos1.uri()},${test.mongos2.uri()}/test`
       );
       client.connect(function(err, client) {
-        Logger.setCurrentLogger(logger);
-        Logger.reset();
         expect(err).to.not.exist;
+        //Logger.setCurrentLogger(logger);
+        Logger.reset();
 
-        client.close();
-        done();
+        client.close(done);
       });
     }
   });
@@ -136,8 +142,7 @@ describe('ReplSet (mocks)', function() {
           'seed list contains no mongos proxies, replicaset connections requires the parameter replicaSet to be supplied in the URI or options object, mongodb://server:port/db?replicaSet=name'
         );
 
-        client.close();
-        done();
+        client.close(done);
       });
     }
   });
@@ -166,8 +171,7 @@ describe('ReplSet (mocks)', function() {
         expect(client.topology.s.coreTopology.s.options.connectionTimeout).to.equal(15000);
         expect(client.topology.s.coreTopology.s.options.socketTimeout).to.equal(120000);
 
-        client.close();
-        done();
+        client.close(done);
       });
     }
   });

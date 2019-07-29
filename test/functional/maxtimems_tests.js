@@ -118,6 +118,7 @@ describe('Unicode', function() {
               err,
               result
             ) {
+              if (err) client.close();
               test.equal(null, err);
               test.equal(1, result.ok);
 
@@ -135,8 +136,7 @@ describe('Unicode', function() {
                     ) {
                       test.equal(null, err);
                       test.equal(1, result.ok);
-                      client.close();
-                      done();
+                      client.close(done);
                     });
                 });
             });

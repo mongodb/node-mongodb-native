@@ -182,6 +182,7 @@ describe('Authentication', function() {
                   });
                 }
               );
+              validationClient.close();
             });
           });
         });
@@ -233,6 +234,7 @@ describe('Authentication', function() {
             });
           });
         });
+        client.close();
       });
       // DOC_END
     }

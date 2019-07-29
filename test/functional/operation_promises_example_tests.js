@@ -6998,7 +6998,8 @@ describe('Operation (Promises)', function() {
       return client
         .connect()
         .then(() => client.db('hr').createCollection('employees'))
-        .then(() => client.db('reporting').createCollection('events'));
+        .then(() => client.db('reporting').createCollection('events'))
+        .then(() => client.close());
     });
 
     // Start Transactions Intro Example 1

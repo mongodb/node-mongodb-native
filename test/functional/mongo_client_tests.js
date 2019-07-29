@@ -43,8 +43,7 @@ describe('MongoClient', function() {
             test.ok(err.message.indexOf('0') !== -1);
 
             // Let's close the db
-            client.close();
-            done();
+            client.close(done);
           });
         };
 
@@ -92,8 +91,8 @@ describe('MongoClient', function() {
             test.ok(err.message.indexOf('0') !== -1);
 
             // Let's close the db
-            client.close();
-            done();
+            client.close(done);
+
           });
         };
 
@@ -155,8 +154,8 @@ describe('MongoClient', function() {
         test.equal(10, db.s.options.numberOfRetries);
         test.equal(0, db.s.options.bufferMaxEntries);
 
-        client.close();
-        done();
+        client.close(done);
+
       });
     }
   });
@@ -198,8 +197,8 @@ describe('MongoClient', function() {
         test.equal(true, db.s.topology.s.clonedOptions.keepAlive);
         test.equal(100, db.s.topology.s.clonedOptions.keepAliveInitialDelay);
 
-        client.close();
-        done();
+        client.close(done);
+
       });
     }
   });
@@ -253,8 +252,8 @@ describe('MongoClient', function() {
         test.equal(true, db.s.topology.s.clonedOptions.keepAlive);
         test.equal(100, db.s.topology.s.clonedOptions.keepAliveInitialDelay);
 
-        client.close();
-        done();
+        client.close(done);
+
       });
     }
   });
@@ -304,8 +303,8 @@ describe('MongoClient', function() {
         test.equal(true, db.s.topology.s.clonedOptions.keepAlive);
         test.equal(100, db.s.topology.s.clonedOptions.keepAliveInitialDelay);
 
-        client.close();
-        done();
+        client.close(done);
+
       });
     }
   });
@@ -336,8 +335,8 @@ describe('MongoClient', function() {
         test.equal(1, client.topology.connections().length);
         test.equal(100, client.topology.s.coreTopology.s.pool.size);
 
-        client.close();
-        done();
+        client.close(done);
+
       });
     }
   });
@@ -369,7 +368,7 @@ describe('MongoClient', function() {
           test.equal(360000, connections[i].socketTimeout);
         }
 
-        client.close();
+        client.close(done);
 
         const secondClient = configuration.newClient(url, {
           connectTimeoutMS: 15000,
@@ -387,8 +386,7 @@ describe('MongoClient', function() {
             test.equal(30000, connections[i].socketTimeout);
           }
 
-          secondClient.close();
-          done();
+          secondClient.close(done);
         });
       });
     }
@@ -414,8 +412,8 @@ describe('MongoClient', function() {
       client.connect(function(err, client) {
         test.ok(client.topology.connections().length >= 1);
 
-        client.close();
-        done();
+        client.close(done);
+
       });
     }
   });
@@ -435,7 +433,7 @@ describe('MongoClient', function() {
 
       client.connect(function(err) {
         test.equal(err.message, 'Invalid schema, expected `mongodb` or `mongodb+srv`');
-        done();
+        client.close(done);
       });
     }
   });
@@ -457,7 +455,7 @@ describe('MongoClient', function() {
 
       client.connect(function(err) {
         test.equal(err.message, 'Invalid connection string');
-        done();
+        client.close(done);
       });
     }
   });
@@ -476,8 +474,7 @@ describe('MongoClient', function() {
       const client = configuration.newClient('mongodb://localhost:27088/test');
       client.connect(function(err) {
         test.ok(err != null);
-
-        done();
+        client.close(done);
       });
     }
   });
@@ -491,7 +488,7 @@ describe('MongoClient', function() {
       const client = configuration.newClient('mongodb://%2Ftmp%2Fmongodb-27017.sock/test');
       client.connect(function(err) {
         test.equal(null, err);
-        done();
+        client.close(done);
       });
     }
   });
@@ -510,8 +507,7 @@ describe('MongoClient', function() {
       const client = configuration.newClient('mongodb://test.does.not.exist.com:80/test');
       client.connect(function(err) {
         test.ok(err != null);
-
-        done();
+        client.close(done);
       });
     }
   });
@@ -551,8 +547,8 @@ describe('MongoClient', function() {
             test.equal(false, x.keepAlive);
           });
 
-          secondClient.close();
-          done();
+          secondClient.close(done);
+
         });
       });
     }
@@ -576,8 +572,7 @@ describe('MongoClient', function() {
           test.equal(true, x.keepAlive);
         });
 
-        client.close();
-        done();
+        client.close(done);
       });
     }
   });
@@ -595,7 +590,7 @@ describe('MongoClient', function() {
       const client = configuration.newClient('mongodb://unknownhost:36363/ddddd');
       client.connect(function(err) {
         test.ok(err != null);
-        done();
+        client.close(done);
       });
     }
   });
@@ -623,7 +618,7 @@ describe('MongoClient', function() {
       const client = configuration.newClient(url);
       client.connect(function(err) {
         test.ok(err != null);
-        done();
+        client.close(done);
       });
     }
   });
@@ -650,8 +645,7 @@ describe('MongoClient', function() {
         test.equal(null, err);
         test.equal('hello world', client.topology.clientInfo.application.name);
 
-        client.close();
-        done();
+        client.close(done);
       });
     }
   });
@@ -672,9 +666,8 @@ describe('MongoClient', function() {
       client.connect(function(err, db) {
         test.equal(null, err);
         test.equal('hello world', db.topology.clientInfo.application.name);
-
         db.close();
-        done();
+        client.close(done);
       });
     }
   });
@@ -709,8 +702,7 @@ describe('MongoClient', function() {
           test.equal(0, db.s.topology.s.options.socketTimeout);
         }
 
-        client.close();
-        done();
+        client.close(done);
       });
     }
   });
@@ -737,8 +729,7 @@ describe('MongoClient', function() {
         test.equal(120000, client.topology.s.coreTopology.s.options.socketTimeout);
         test.equal(15000, client.topology.s.coreTopology.s.options.connectionTimeout);
 
-        client.close();
-        done();
+        client.close(done);
       });
     }
   });
@@ -769,8 +760,8 @@ describe('MongoClient', function() {
             test.equal(null, err);
             test.ok(r);
 
-            mongoclient.close();
-            done();
+            mongoclient.close(done);
+
           });
       });
     }
@@ -795,8 +786,8 @@ describe('MongoClient', function() {
           .then(function(r) {
             test.ok(r);
 
-            mongoclient.close();
-            done();
+            mongoclient.close(done);
+
           });
       });
     }
@@ -820,8 +811,8 @@ describe('MongoClient', function() {
         db.collection('new_mongo_client_collection').insertOne({ a: 1 }, (err, r) => {
           expect(err).to.not.exist;
           expect(r.connection.options.compression).to.deep.equal({ compressors: ['zlib'] });
-          client.close();
-          done();
+          client.close(done);
+
         });
       });
     }
