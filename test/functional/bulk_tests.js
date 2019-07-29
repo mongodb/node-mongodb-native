@@ -5,7 +5,7 @@ const test = require('./shared').assert,
 
 const MongoError = require('../../index').MongoError;
 
-describe.only('Bulk', function() {
+describe('Bulk', function() {
   before(function() {
     return setupDatabase(this.configuration);
   });
