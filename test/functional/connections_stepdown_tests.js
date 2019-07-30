@@ -118,7 +118,7 @@ describe('Connections survive primary step down', function() {
   });
 
   it('Not Master - Reset Connection Pool', {
-    metadata: { requires: { mongodb: '<=4.0.0', topology: 'replicaset' } },
+    metadata: { requires: { mongodb: '4.0.x', topology: 'replicaset' } },
     test: function() {
       const db = client.db('step-down');
       let numberOfConnections;
@@ -141,29 +141,27 @@ describe('Connections survive primary step down', function() {
                 mode: { times: 1 },
                 data: { failCommands: ['insert'], errorCode: 10107 }
               })
-              .then(() => {
-                collection
-                  .insertOne({ test: 1 })
-                  .catch(err => expect(err.code).to.equal(10107))
-                  .then(() =>
-                    db.executeDbAdminCommand({ configureFailPoint: 'failCommand', mode: 'off' })
+              .then(() =>
+                collection.insertOne({ test: 1 }).catch(err => expect(err.code).to.equal(10107))
+              )
+              .then(() =>
+                db.executeDbAdminCommand({ configureFailPoint: 'failCommand', mode: 'off' })
+              )
+              .then(() =>
+                db
+                  .admin()
+                  .serverStatus()
+                  .then(result =>
+                    expect(result.connections.totalCreated).to.equal(numberOfConnections + 1)
                   )
-                  .then(() =>
-                    db
-                      .admin()
-                      .serverStatus()
-                      .then(result =>
-                        expect(result.connections.totalCreated).to.equal(numberOfConnections + 1)
-                      )
-                  );
-              })
+              )
           )
         );
     }
   });
 
   it('Shutdown in progress - Reset Connection Pool', {
-    metadata: { requires: { topology: 'replicaset' } },
+    metadata: { requires: { mongodb: '>=4.0.0', topology: 'replicaset' } },
     test: function() {
       const db = client.db('step-down');
       let numberOfConnections;
@@ -206,7 +204,7 @@ describe('Connections survive primary step down', function() {
   });
 
   it('Interrupted at shutdown - Reset Connection Pool', {
-    metadata: { requires: { topology: 'replicaset' } },
+    metadata: { requires: { mongodb: '>=4.0.0', topology: 'replicaset' } },
     test: function() {
       const db = client.db('step-down');
       let numberOfConnections;
