@@ -18,8 +18,7 @@ class MongoDBTopologyFilter {
       if (err) {
         callback(err);
         return;
-      };
-
+      }
       let topologyType = mongoClient.topology.type;
       console.log("topology filter topology type: ",topologyType)
       switch (topologyType) {
