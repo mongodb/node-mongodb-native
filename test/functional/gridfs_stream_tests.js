@@ -410,7 +410,6 @@ describe('GridFS Stream', function() {
             test.ok(gotData >= 1 && gotData <= 3);
             test.equal(str, 'pache');
             client.close(done);
-            // done();
           });
         });
 
