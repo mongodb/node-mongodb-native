@@ -42,7 +42,6 @@ function environmentSetup(environmentCallback) {
     createFilters(environmentParser);
 
     function environmentParser(environmentName, version) {
-      console.log('environmentName ', environmentName);
       const Environment = environments[environmentName];
       const environment = new Environment(version);
       environmentName !== 'single'
@@ -88,12 +87,10 @@ function createFilters(callback) {
     function _increment() {
       topology = topology || filter.runtimeTopology;
       version = version || filter.mongoVersion;
-      console.log("Filter: ",filter," topology: ",topology," filter.runtimeTopology ",filter.runtimeTopology)
       filtersInitialized += 1;
       addFilter(filter);
 
       if (filtersInitialized === filterFiles.length) {
-        console.log("Create filters' topology: ",topology)
         callback(topology, version);
       }
     }
