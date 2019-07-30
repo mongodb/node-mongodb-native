@@ -3,16 +3,12 @@ var expect = require('chai').expect,
   mock = require('mongodb-mock-server'),
   ObjectId = require('bson').ObjectId;
 
-var wtf = require('wtfnode');
-
 const test = {};
 describe('ReplSet (mocks)', function() {
-  afterEach(() => {
-    console.log("aftereach")
-    mock.cleanup();
-
+  afterEach((done) => {
+    mock.cleanup(done);
   });
-  after(() => wtf.dump())
+
   beforeEach(() => {
     // Default message fields
     const defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
@@ -31,7 +27,6 @@ describe('ReplSet (mocks)', function() {
     // Primary server states
     const serverIsMaster = [Object.assign({}, defaultFields), Object.assign({}, defaultRSFields)];
     return Promise.all([mock.createServer(), mock.createServer()]).then(servers => {
-      console.log("beforeach")
       test.mongos1 = servers[0];
       test.mongos2 = servers[1];
 
@@ -70,7 +65,7 @@ describe('ReplSet (mocks)', function() {
     test: function(done) {
       var configuration = this.configuration;
       var Logger = configuration.require.Logger;
-      var logger = Logger.currentLogger();
+      var logger = Logger.currentLogger;
       Logger.setLevel('warn');
       Logger.setCurrentLogger(function(msg, state) {
         expect(state.type).to.equal('warn');
@@ -84,7 +79,7 @@ describe('ReplSet (mocks)', function() {
       );
       client.connect(function(err, client) {
         expect(err).to.not.exist;
-        //Logger.setCurrentLogger(logger);
+        Logger.setCurrentLogger(logger);
         Logger.reset();
 
         client.close(done);
