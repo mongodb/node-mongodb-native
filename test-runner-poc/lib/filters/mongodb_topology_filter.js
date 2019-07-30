@@ -18,10 +18,8 @@ class MongoDBTopologyFilter {
       if (err) {
         callback(err);
         return;
-      };
-
+      }
       let topologyType = mongoClient.topology.type;
-      console.log("topology filter topology type: ",topologyType)
       switch (topologyType) {
         case 'server':
           if (client.topology.s.coreTopology.ismaster.hosts) this.runtimeTopology = 'replicaset';
@@ -34,12 +32,11 @@ class MongoDBTopologyFilter {
           console.warn('Topology type is not recognized.');
           break;
       }
-      console.log("This (inside initialize filter): ",this)
       client.close(callback);
     });
   }
+
   constructor() {
-    console.log("constructor")
     this.runtimeTopology = 'single';
   }
 
