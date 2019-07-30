@@ -71,7 +71,7 @@ describe('Transactions', function() {
 
   describe('startTransaction', function() {
     it('should error if transactions are not supported', {
-      metadata: { requires: { topology: ['sharded'], mongodb: '>4.0.0' } },
+      metadata: { requires: { topology: ['sharded'], mongodb: '4.0.x' } },
       test: function(done) {
         const configuration = this.configuration;
         const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
