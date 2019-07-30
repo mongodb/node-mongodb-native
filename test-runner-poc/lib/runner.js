@@ -39,15 +39,15 @@ function environmentSetup(environmentCallback) {
   mongoClient.connect((err, client) => {
     if (err) throw new Error(err);
 
-    createFilters(callback);
+    createFilters(environmentParser);
 
-    function callback(environmentName, version) {
+    function environmentParser(environmentName, version) {
       console.log('environmentName ', environmentName);
       const Environment = environments[environmentName];
       const environment = new Environment(version);
       environmentName !== 'single'
         ? parseConnectionString(mongodb_uri, (err, parsedURI) => {
-            if (err) console.log(err);
+            if (err) throw new Error(err);
             environment.url = mongodb_uri + '/integration_tests';
             environment.port = parsedURI.hosts[0].port;
             environment.host = parsedURI.hosts[0].host;
@@ -87,6 +87,7 @@ function createFilters(callback) {
     topology = topology || filter.runtimeTopology;
     version = version || filter.mongoVersion;
 
+    //Makes sure to wait for all the filters to be initialized and added before calling the callback
     function _increment() {
       filtersInitialized += 1;
       addFilter(filter);
