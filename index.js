@@ -10,6 +10,7 @@ const connect = require('./lib/mongo_client').connect;
 // Expose error class
 connect.MongoError = core.MongoError;
 connect.MongoNetworkError = core.MongoNetworkError;
+connect.MongoTimeoutError = core.MongoTimeoutError;
 
 // Actual driver classes exported
 connect.Admin = require('./lib/admin');
