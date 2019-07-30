@@ -27,9 +27,14 @@ describe('Causal Consistency', function() {
     return test.client.connect();
   });
 
-  afterEach(() => {
+  afterEach((done) => {
     test.listener.uninstrument();
-    test.client.close();
+    test.client.close(done);
+  });
+  
+  after((done) => {
+    test.listener.uninstrument();
+    test.client.close(done);
   });
 
   it('should not send `afterClusterTime` on first read operation in a causal session', {
