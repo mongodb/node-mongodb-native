@@ -84,15 +84,16 @@ function createFilters(callback) {
       _increment();
     }
 
-    topology = topology || filter.runtimeTopology;
-    version = version || filter.mongoVersion;
-
     //Makes sure to wait for all the filters to be initialized and added before calling the callback
     function _increment() {
+      topology = topology || filter.runtimeTopology;
+      version = version || filter.mongoVersion;
+      console.log("Filter: ",filter," topology: ",topology," filter.runtimeTopology ",filter.runtimeTopology)
       filtersInitialized += 1;
       addFilter(filter);
 
       if (filtersInitialized === filterFiles.length) {
+        console.log("Create filters' topology: ",topology)
         callback(topology, version);
       }
     }

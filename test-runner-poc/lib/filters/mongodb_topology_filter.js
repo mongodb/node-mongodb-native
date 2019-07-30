@@ -15,14 +15,17 @@ class MongoDBTopologyFilter {
   initializeFilter(callback) {
     const mongoClient = new MongoClient(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017');
     mongoClient.connect((err, client) => {
-      if (err) throw new Error(err);
+      if (err) {
+        callback(err);
+        return;
+      };
+      
       let topologyType = mongoClient.topology.type;
+      console.log("topology filter topology type: ",topologyType)
       switch (topologyType) {
         case 'server':
-          this.runtimeTopology = 'single';
-          break;
-        case 'replset':
-          this.runtimeTopology = 'replicaset';
+          if (client.topology.s.coreTopology.ismaster.hosts) this.runtimeTopology = 'replicaset';
+          else this.runtimeTopology = 'single';
           break;
         case 'mongos':
           this.runtimeTopology = 'sharded';
@@ -31,10 +34,12 @@ class MongoDBTopologyFilter {
           console.warn('Topology type is not recognized.');
           break;
       }
+      console.log("This (inside initialize filter): ",this)
       client.close(callback);
     });
   }
   constructor() {
+    console.log("constructor")
     this.runtimeTopology = 'single';
   }
 
