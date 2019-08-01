@@ -35,7 +35,7 @@ function addFilter(filter) {
 function environmentSetup(environmentCallback) {
   const mongodb_uri = process.env.MONGODB_URI || 'mongodb://localhost:27017';
   mongoClient = new MongoClient(mongodb_uri);
-
+  // we love travis
   mongoClient.connect((err, client) => {
     if (err) throw new Error(err);
 
