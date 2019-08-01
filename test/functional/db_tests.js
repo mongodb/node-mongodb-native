@@ -406,7 +406,9 @@ describe('Db', function() {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         try {
-          client.connect(function() {client.close()});
+          client.connect(function() {
+            client.close();
+          });
           test.ok(false);
         } catch (err) {
           client.close(done);

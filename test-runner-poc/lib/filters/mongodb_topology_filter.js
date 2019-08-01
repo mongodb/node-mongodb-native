@@ -20,6 +20,7 @@ class MongoDBTopologyFilter {
         return;
       }
       let topologyType = mongoClient.topology.type;
+      console.log('ISMASTER: ', client.topology.s.coreTopology.ismaster);
       switch (topologyType) {
         case 'server':
           if (client.topology.s.coreTopology.ismaster.hosts) this.runtimeTopology = 'replicaset';

@@ -2,7 +2,6 @@
 var expect = require('chai').expect;
 
 describe('Aggregation', function() {
-
   /**
    * Correctly call the aggregation framework using a pipeline in an Array.
    *
@@ -312,7 +311,6 @@ describe('Aggregation', function() {
                 expect(result[1].authors).to.eql(['bob']);
 
                 client.close(done);
-
               });
             }
           );
@@ -399,7 +397,6 @@ describe('Aggregation', function() {
             expect(result).to.exist;
 
             client.close(done);
-
           });
         });
       });
@@ -489,7 +486,6 @@ describe('Aggregation', function() {
             expect(result.stages).to.have.length(4);
 
             client.close(done);
-
           });
         });
       });
@@ -584,7 +580,6 @@ describe('Aggregation', function() {
             // we need to manually call close on the cursor
             cursor.close();
             client.close(done);
-
           });
         });
       });
@@ -674,7 +669,6 @@ describe('Aggregation', function() {
                 expect(results).to.be.empty;
 
                 client.close(done);
-
               });
             }
           );
@@ -770,7 +764,6 @@ describe('Aggregation', function() {
                 expect(results[1].authors).to.eql(['bob']);
 
                 client.close(done);
-
               });
             }
           );
@@ -828,7 +821,6 @@ describe('Aggregation', function() {
                 expect(docs[0].total).to.equal(3);
 
                 client.close(done);
-
               });
           });
         });
@@ -891,7 +883,6 @@ describe('Aggregation', function() {
                       expect(count).to.be.greaterThan(0);
 
                       client.close(done);
-
                     }
                   );
               });
@@ -1175,7 +1166,6 @@ describe('Aggregation', function() {
                   db.command = cmd;
                   cursor.close();
                   client.close(done);
-
                 }
               );
             });
@@ -1290,7 +1280,6 @@ describe('Aggregation', function() {
             expect(result.b).to.equal(1);
 
             client.close(done);
-
           });
         });
       });
@@ -1344,7 +1333,6 @@ describe('Aggregation', function() {
             expect(result).to.equal(true);
 
             client.close(done);
-
           });
         });
       });

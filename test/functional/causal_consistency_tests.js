@@ -27,12 +27,12 @@ describe('Causal Consistency', function() {
     return test.client.connect();
   });
 
-  afterEach((done) => {
+  afterEach(done => {
     test.listener.uninstrument();
     test.client.close(done);
   });
-  
-  after((done) => {
+
+  after(done => {
     test.listener.uninstrument();
     test.client.close(done);
   });

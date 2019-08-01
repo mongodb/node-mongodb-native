@@ -9,10 +9,15 @@ describe('Cursor Streams', function() {
       poolSize: 1
     });
 
-    return client.connect().then(function() {
-      var db = client.db(dbName);
-      return db.dropDatabase();
-    }).then(() => {client.close()});
+    return client
+      .connect()
+      .then(function() {
+        var db = client.db(dbName);
+        return db.dropDatabase();
+      })
+      .then(() => {
+        client.close();
+      });
   });
 
   it('should stream documents with pause and resume for fetching', {

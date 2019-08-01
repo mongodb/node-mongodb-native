@@ -25,7 +25,7 @@ class MongoDBVersionFilter {
       });
     });
   }
-  
+
   filter(test) {
     if (!(test && test.metadata && test.metadata.requires && test.metadata.requires.mongodb)) {
       return true;

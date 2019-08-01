@@ -92,7 +92,6 @@ describe('MongoClient', function() {
 
             // Let's close the db
             client.close(done);
-
           });
         };
 
@@ -155,7 +154,6 @@ describe('MongoClient', function() {
         test.equal(0, db.s.options.bufferMaxEntries);
 
         client.close(done);
-
       });
     }
   });
@@ -198,7 +196,6 @@ describe('MongoClient', function() {
         test.equal(100, db.s.topology.s.clonedOptions.keepAliveInitialDelay);
 
         client.close(done);
-
       });
     }
   });
@@ -253,7 +250,6 @@ describe('MongoClient', function() {
         test.equal(100, db.s.topology.s.clonedOptions.keepAliveInitialDelay);
 
         client.close(done);
-
       });
     }
   });
@@ -304,7 +300,6 @@ describe('MongoClient', function() {
         test.equal(100, db.s.topology.s.clonedOptions.keepAliveInitialDelay);
 
         client.close(done);
-
       });
     }
   });
@@ -336,7 +331,6 @@ describe('MongoClient', function() {
         test.equal(100, client.topology.s.coreTopology.s.pool.size);
 
         client.close(done);
-
       });
     }
   });
@@ -413,7 +407,6 @@ describe('MongoClient', function() {
         test.ok(client.topology.connections().length >= 1);
 
         client.close(done);
-
       });
     }
   });
@@ -548,7 +541,6 @@ describe('MongoClient', function() {
           });
 
           secondClient.close(done);
-
         });
       });
     }
@@ -761,7 +753,6 @@ describe('MongoClient', function() {
             test.ok(r);
 
             mongoclient.close(done);
-
           });
       });
     }
@@ -787,7 +778,6 @@ describe('MongoClient', function() {
             test.ok(r);
 
             mongoclient.close(done);
-
           });
       });
     }
@@ -812,7 +802,6 @@ describe('MongoClient', function() {
           expect(err).to.not.exist;
           expect(r.connection.options.compression).to.deep.equal({ compressors: ['zlib'] });
           client.close(done);
-
         });
       });
     }

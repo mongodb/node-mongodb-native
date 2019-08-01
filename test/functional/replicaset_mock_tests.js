@@ -5,7 +5,7 @@ var expect = require('chai').expect,
 
 const test = {};
 describe('ReplSet (mocks)', function() {
-  afterEach((done) => {
+  afterEach(done => {
     mock.cleanup(done);
   });
 

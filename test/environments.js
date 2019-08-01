@@ -54,7 +54,7 @@ class ReplicaSetEnvironment extends EnvironmentBase {
 
     this.host = 'localhost';
     this.port = 31000;
-    this.setName = 'rs';
+    this.setName = 'replset';
     this.url = 'mongodb://%slocalhost:31000/integration_tests?rs_name=rs';
     this.writeConcernMax = { w: 'majority', wtimeout: 30000 };
     this.replicasetName = 'rs';
