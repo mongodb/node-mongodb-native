@@ -37,7 +37,7 @@ function environmentSetup(environmentCallback) {
   mongoClient = new MongoClient(mongodb_uri);
 
   mongoClient.connect((err, client) => {
-    if (err) throw new Error(err);
+    if (err) throw err;
 
     createFilters(environmentParser);
 
@@ -89,9 +89,11 @@ function createFilters(callback) {
 
     //Makes sure to wait for all the filters to be initialized and added before calling the callback
     function _increment() {
+      //as filters finish executing initializeFilter, this will increase
       filtersInitialized += 1;
       addFilter(filter);
 
+      //after all filters have been initialized, further environment handling is able to begin
       if (filtersInitialized === filterFiles.length) {
         callback(topology, version);
       }

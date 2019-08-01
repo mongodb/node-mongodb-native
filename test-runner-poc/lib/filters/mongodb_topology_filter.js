@@ -15,10 +15,7 @@ class MongoDBTopologyFilter {
   initializeFilter(callback) {
     const mongoClient = new MongoClient(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017');
     mongoClient.connect((err, client) => {
-      if (err) {
-        callback(err);
-        return;
-      }
+      if (err) return callback(err);
       let topologyType = mongoClient.topology.type;
       switch (topologyType) {
         case 'server':
