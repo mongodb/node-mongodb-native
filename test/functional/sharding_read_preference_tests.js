@@ -19,9 +19,12 @@ describe('Sharding (Read Preference)', function() {
     // The actual test we wish to run
     test: function(done) {
       const configuration = this.configuration;
+      const host = configuration.host;
+      const port = configuration.port;
 
+      const url = `mongodb://${host}:${port}/sharded_test_db?w=1`;
       // Connect using the mongos connections
-      var client = new MongoClient(configuration.url(), { w: 0, monitorCommands: true });
+      var client = new MongoClient(url, { w: 0, monitorCommands: true });
       client.connect(function(err) {
         expect(err).to.not.exist;
         const db = client.db(configuration.db);
@@ -77,9 +80,12 @@ describe('Sharding (Read Preference)', function() {
     // The actual test we wish to run
     test: function(done) {
       const configuration = this.configuration;
+      const host = configuration.host;
+      const port = configuration.port;
 
+      const url = `mongodb://${host}:${port}/sharded_test_db?w=1`;
       // Connect using the mongos connections
-      const client = new MongoClient(configuration.url(), { w: 0 });
+      const client = new MongoClient(url, { w: 0 });
       client.connect(function(err) {
         expect(err).to.not.exist;
         const db = client.db(configuration.db);
