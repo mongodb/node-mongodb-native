@@ -25,13 +25,36 @@ describe('examples(change-stream):', function() {
     db = undefined;
   });
 
+  class Looper {
+    constructor(lambda, interval) {
+      this._run = false;
+      this._lambda = lambda;
+      this._interval = interval || 50;
+    }
+
+    async _go() {
+      this._run = true;
+      while (this._run) {
+        await new Promise(r => setTimeout(r, this._interval));
+        await this._lambda();
+      }
+    }
+
+    run() {
+      this._p = this._go().catch(() => {});
+    }
+
+    stop() {
+      this._run = false;
+      return this._p;
+    }
+  }
+
   it('Open A Change Stream', {
     metadata: { requires: { topology: ['replicaset'], mongodb: '>=3.6.0' } },
     test: async function() {
-      await db.collection('inventory').insertOne({ a: 1 });
-      const interval = setInterval(async function() {
-        await db.collection('inventory').insertOne({ a: 1 });
-      }, 500);
+      const looper = new Looper(() => db.collection('inventory').insertOne({ a: 1 }));
+      looper.run();
 
       // Start Changestream Example 1
       const collection = db.collection('inventory');
@@ -48,7 +71,7 @@ describe('examples(change-stream):', function() {
 
       await changeStream.close();
       await changeStreamIterator.close();
-      clearInterval(interval);
+      await looper.stop();
 
       expect(next)
         .to.have.property('operationType')
@@ -60,9 +83,10 @@ describe('examples(change-stream):', function() {
     metadata: { requires: { topology: ['replicaset'], mongodb: '>=3.6.0' } },
     test: async function() {
       await db.collection('inventory').insertOne({ a: 1, b: 2 });
-      setTimeout(async function() {
-        await db.collection('inventory').updateOne({ a: 1 }, { $set: { a: 2 } });
-      }, 250);
+      const looper = new Looper(() =>
+        db.collection('inventory').updateOne({ a: 1 }, { $set: { a: 2 } })
+      );
+      looper.run();
 
       // Start Changestream Example 2
       const collection = db.collection('inventory');
@@ -79,6 +103,7 @@ describe('examples(change-stream):', function() {
 
       await changeStream.close();
       await changeStreamIterator.close();
+      await looper.stop();
 
       expect(next)
         .to.have.property('operationType')
@@ -92,10 +117,11 @@ describe('examples(change-stream):', function() {
   it('Resume a Change Stream', {
     metadata: { requires: { topology: ['replicaset'], mongodb: '>=3.6.0' } },
     test: async function() {
-      setTimeout(async function() {
+      const looper = new Looper(async () => {
         await db.collection('inventory').insertOne({ a: 1 });
         await db.collection('inventory').insertOne({ b: 2 });
-      }, 250);
+      });
+      looper.run();
 
       // Start Changestream Example 3
       const collection = db.collection('inventory');
@@ -126,6 +152,7 @@ describe('examples(change-stream):', function() {
 
       await newChangeStreamIterator.close();
       await newChangeStream.close();
+      await looper.stop();
 
       expect(change1).to.have.nested.property('fullDocument.a', 1);
       expect(change2).to.have.nested.property('fullDocument.b', 2);
@@ -135,9 +162,10 @@ describe('examples(change-stream):', function() {
   it('Modify Change Stream Output', {
     metadata: { requires: { topology: ['replicaset'], mongodb: '>=3.6.0' } },
     test: async function() {
-      setTimeout(async function() {
+      const looper = new Looper(async () => {
         await db.collection('inventory').insertOne({ username: 'alice' });
-      }, 250);
+      });
+      looper.run();
 
       // Start Changestream Example 4
       const pipeline = [
@@ -159,6 +187,7 @@ describe('examples(change-stream):', function() {
 
       await changeStream.close();
       await changeStreamIterator.close();
+      await looper.stop();
 
       expect(next).to.have.nested.property('fullDocument.username', 'alice');
       expect(next).to.have.property('newField', 'this is an added field!');
