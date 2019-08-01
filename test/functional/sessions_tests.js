@@ -180,10 +180,19 @@ describe('Sessions', function() {
         this.skip();
         return;
       }
-
       return testContext.setup(this.configuration);
     });
 
-    generateTopologyTests(testSuites, testContext);
+    function testFilter(spec) {
+      const SKIP_TESTS = [
+        // These two tests need to run against multiple mongoses
+        'Dirty explicit session is discarded',
+        'Dirty implicit session is discarded (write)'
+      ];
+
+      return SKIP_TESTS.indexOf(spec.description) === -1;
+    }
+
+    generateTopologyTests(testSuites, testContext, testFilter);
   });
 });
