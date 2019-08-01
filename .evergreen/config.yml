@@ -159,6 +159,36 @@ tasks:
         vars:
           VERSION: latest
           TOPOLOGY: sharded
+  - name: test-4.2-single
+    tags:
+      - '4.2'
+      - single
+    commands:
+      - func: install dependencies
+      - func: run tests
+        vars:
+          VERSION: '4.2'
+          TOPOLOGY: single
+  - name: test-4.2-replicaset
+    tags:
+      - '4.2'
+      - replicaset
+    commands:
+      - func: install dependencies
+      - func: run tests
+        vars:
+          VERSION: '4.2'
+          TOPOLOGY: replicaset
+  - name: test-4.2-sharded
+    tags:
+      - '4.2'
+      - sharded
+    commands:
+      - func: install dependencies
+      - func: run tests
+        vars:
+          VERSION: '4.2'
+          TOPOLOGY: sharded
   - name: test-4.0-single
     tags:
       - '4.0'
@@ -348,15 +378,12 @@ tasks:
         vars:
           VERSION: latest
 buildvariants:
-  - name: linux-64-amzn-test-dubnium
-    display_name: Amazon Linux (Enterprise) Node Dubnium
-    run_on: linux-64-amzn-test
+  - name: archlinux-test-dubnium
+    display_name: Archlinux Node Dubnium
+    run_on: archlinux-test
     expansions:
       NODE_LTS_NAME: dubnium
     tasks: &ref_0
-      - test-latest-single
-      - test-latest-replicaset
-      - test-latest-sharded
       - test-4.0-single
       - test-4.0-replicaset
       - test-4.0-sharded
@@ -375,70 +402,21 @@ buildvariants:
       - test-2.6-single
       - test-2.6-replicaset
       - test-2.6-sharded
-      - test-atlas-connectivity
-  - name: linux-64-amzn-test-carbon
-    display_name: Amazon Linux (Enterprise) Node Carbon
-    run_on: linux-64-amzn-test
+  - name: archlinux-test-carbon
+    display_name: Archlinux Node Carbon
+    run_on: archlinux-test
     expansions:
       NODE_LTS_NAME: carbon
     tasks: *ref_0
-  - name: linux-64-amzn-test-boron
-    display_name: Amazon Linux (Enterprise) Node Boron
-    run_on: linux-64-amzn-test
+  - name: archlinux-test-boron
+    display_name: Archlinux Node Boron
+    run_on: archlinux-test
     expansions:
       NODE_LTS_NAME: boron
     tasks: *ref_0
-  - name: linux-64-amzn-test-argon
-    display_name: Amazon Linux (Enterprise) Node Argon
-    run_on: linux-64-amzn-test
-    expansions:
-      NODE_LTS_NAME: argon
-    tasks: *ref_0
-  - name: ubuntu-14.04-dubnium
-    display_name: Ubuntu 14.04 Node Dubnium
-    run_on: ubuntu1404-test
-    expansions:
-      NODE_LTS_NAME: dubnium
-    tasks: *ref_0
-  - name: ubuntu-14.04-carbon
-    display_name: Ubuntu 14.04 Node Carbon
-    run_on: ubuntu1404-test
-    expansions:
-      NODE_LTS_NAME: carbon
-    tasks: *ref_0
-  - name: ubuntu-14.04-boron
-    display_name: Ubuntu 14.04 Node Boron
-    run_on: ubuntu1404-test
-    expansions:
-      NODE_LTS_NAME: boron
-    tasks: *ref_0
-  - name: ubuntu-14.04-argon
-    display_name: Ubuntu 14.04 Node Argon
-    run_on: ubuntu1404-test
-    expansions:
-      NODE_LTS_NAME: argon
-    tasks: *ref_0
-  - name: rhel70-dubnium
-    display_name: RHEL 7.0 Node Dubnium
-    run_on: rhel70-small
-    expansions:
-      NODE_LTS_NAME: dubnium
-    tasks: *ref_0
-  - name: rhel70-carbon
-    display_name: RHEL 7.0 Node Carbon
-    run_on: rhel70-small
-    expansions:
-      NODE_LTS_NAME: carbon
-    tasks: *ref_0
-  - name: rhel70-boron
-    display_name: RHEL 7.0 Node Boron
-    run_on: rhel70-small
-    expansions:
-      NODE_LTS_NAME: boron
-    tasks: *ref_0
-  - name: rhel70-argon
-    display_name: RHEL 7.0 Node Argon
-    run_on: rhel70-small
+  - name: archlinux-test-argon
+    display_name: Archlinux Node Argon
+    run_on: archlinux-test
     expansions:
       NODE_LTS_NAME: argon
     tasks: *ref_0
@@ -481,63 +459,148 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: argon
     tasks: *ref_1
-  - name: archlinux-test-dubnium
-    display_name: Archlinux Node Dubnium
-    run_on: archlinux-test
+  - name: debian81-test-dubnium
+    display_name: Debian 8.1 Node Dubnium
+    run_on: debian81-test
     expansions:
       NODE_LTS_NAME: dubnium
-    tasks: *ref_0
-  - name: archlinux-test-carbon
-    display_name: Archlinux Node Carbon
-    run_on: archlinux-test
+    tasks: &ref_2
+      - test-4.0-single
+      - test-4.0-replicaset
+      - test-4.0-sharded
+      - test-3.6-single
+      - test-3.6-replicaset
+      - test-3.6-sharded
+      - test-3.4-single
+      - test-3.4-replicaset
+      - test-3.4-sharded
+  - name: debian81-test-carbon
+    display_name: Debian 8.1 Node Carbon
+    run_on: debian81-test
     expansions:
       NODE_LTS_NAME: carbon
-    tasks: *ref_0
-  - name: archlinux-test-boron
-    display_name: Archlinux Node Boron
-    run_on: archlinux-test
+    tasks: *ref_2
+  - name: debian81-test-boron
+    display_name: Debian 8.1 Node Boron
+    run_on: debian81-test
     expansions:
       NODE_LTS_NAME: boron
-    tasks: *ref_0
-  - name: archlinux-test-argon
-    display_name: Archlinux Node Argon
-    run_on: archlinux-test
+    tasks: *ref_2
+  - name: debian81-test-argon
+    display_name: Debian 8.1 Node Argon
+    run_on: debian81-test
     expansions:
       NODE_LTS_NAME: argon
-    tasks: *ref_0
+    tasks: *ref_2
+  - name: linux-64-amzn-test-dubnium
+    display_name: Amazon Linux (Enterprise) Node Dubnium
+    run_on: linux-64-amzn-test
+    expansions:
+      NODE_LTS_NAME: dubnium
+    tasks: *ref_1
+  - name: linux-64-amzn-test-carbon
+    display_name: Amazon Linux (Enterprise) Node Carbon
+    run_on: linux-64-amzn-test
+    expansions:
+      NODE_LTS_NAME: carbon
+    tasks: *ref_1
+  - name: linux-64-amzn-test-boron
+    display_name: Amazon Linux (Enterprise) Node Boron
+    run_on: linux-64-amzn-test
+    expansions:
+      NODE_LTS_NAME: boron
+    tasks: *ref_1
+  - name: linux-64-amzn-test-argon
+    display_name: Amazon Linux (Enterprise) Node Argon
+    run_on: linux-64-amzn-test
+    expansions:
+      NODE_LTS_NAME: argon
+    tasks: *ref_1
   - name: macos-1012-dubnium
     display_name: macOS 10.12 Node Dubnium
     run_on: macos-1012
     expansions:
       NODE_LTS_NAME: dubnium
-    tasks: *ref_0
+    tasks: &ref_3
+      - test-latest-single
+      - test-latest-replicaset
+      - test-latest-sharded
+      - test-4.2-single
+      - test-4.2-replicaset
+      - test-4.2-sharded
+      - test-4.0-single
+      - test-4.0-replicaset
+      - test-4.0-sharded
+      - test-3.6-single
+      - test-3.6-replicaset
+      - test-3.6-sharded
+      - test-3.4-single
+      - test-3.4-replicaset
+      - test-3.4-sharded
+      - test-3.2-single
+      - test-3.2-replicaset
+      - test-3.2-sharded
+      - test-3.0-single
+      - test-3.0-replicaset
+      - test-3.0-sharded
+      - test-2.6-single
+      - test-2.6-replicaset
+      - test-2.6-sharded
+      - test-atlas-connectivity
   - name: macos-1012-carbon
     display_name: macOS 10.12 Node Carbon
     run_on: macos-1012
     expansions:
       NODE_LTS_NAME: carbon
-    tasks: *ref_0
+    tasks: *ref_3
   - name: macos-1012-boron
     display_name: macOS 10.12 Node Boron
     run_on: macos-1012
     expansions:
       NODE_LTS_NAME: boron
-    tasks: *ref_0
+    tasks: *ref_3
   - name: macos-1012-argon
     display_name: macOS 10.12 Node Argon
     run_on: macos-1012
     expansions:
       NODE_LTS_NAME: argon
-    tasks: *ref_0
-  - name: ubuntu-16.04-dubnium
-    display_name: Ubuntu 16.04 Node Dubnium
-    run_on: ubuntu1604-test
+    tasks: *ref_3
+  - name: rhel70-dubnium
+    display_name: RHEL 7.0 Node Dubnium
+    run_on: rhel70-small
     expansions:
       NODE_LTS_NAME: dubnium
-    tasks: &ref_2
+    tasks: *ref_3
+  - name: rhel70-carbon
+    display_name: RHEL 7.0 Node Carbon
+    run_on: rhel70-small
+    expansions:
+      NODE_LTS_NAME: carbon
+    tasks: *ref_3
+  - name: rhel70-boron
+    display_name: RHEL 7.0 Node Boron
+    run_on: rhel70-small
+    expansions:
+      NODE_LTS_NAME: boron
+    tasks: *ref_3
+  - name: rhel70-argon
+    display_name: RHEL 7.0 Node Argon
+    run_on: rhel70-small
+    expansions:
+      NODE_LTS_NAME: argon
+    tasks: *ref_3
+  - name: rhel71-power8-test-dubnium
+    display_name: RHEL 7.1 (POWER8) Node Dubnium
+    run_on: rhel71-power8-test
+    expansions:
+      NODE_LTS_NAME: dubnium
+    tasks: &ref_4
       - test-latest-single
       - test-latest-replicaset
       - test-latest-sharded
+      - test-4.2-single
+      - test-4.2-replicaset
+      - test-4.2-sharded
       - test-4.0-single
       - test-4.0-replicaset
       - test-4.0-sharded
@@ -551,81 +614,108 @@ buildvariants:
       - test-3.2-replicaset
       - test-3.2-sharded
       - test-atlas-connectivity
-  - name: ubuntu-16.04-carbon
-    display_name: Ubuntu 16.04 Node Carbon
-    run_on: ubuntu1604-test
-    expansions:
-      NODE_LTS_NAME: carbon
-    tasks: *ref_2
-  - name: ubuntu-16.04-boron
-    display_name: Ubuntu 16.04 Node Boron
-    run_on: ubuntu1604-test
-    expansions:
-      NODE_LTS_NAME: boron
-    tasks: *ref_2
-  - name: ubuntu-16.04-argon
-    display_name: Ubuntu 16.04 Node Argon
-    run_on: ubuntu1604-test
-    expansions:
-      NODE_LTS_NAME: argon
-    tasks: *ref_2
-  - name: suse12-x86-64-test-dubnium
-    display_name: SUSE 12 (x86_64) Node Dubnium
-    run_on: suse12-test
-    expansions:
-      NODE_LTS_NAME: dubnium
-    tasks: *ref_2
-  - name: suse12-x86-64-test-carbon
-    display_name: SUSE 12 (x86_64) Node Carbon
-    run_on: suse12-test
-    expansions:
-      NODE_LTS_NAME: carbon
-    tasks: *ref_2
-  - name: suse12-x86-64-test-boron
-    display_name: SUSE 12 (x86_64) Node Boron
-    run_on: suse12-test
-    expansions:
-      NODE_LTS_NAME: boron
-    tasks: *ref_2
-  - name: suse12-x86-64-test-argon
-    display_name: SUSE 12 (x86_64) Node Argon
-    run_on: suse12-test
-    expansions:
-      NODE_LTS_NAME: argon
-    tasks: *ref_2
-  - name: rhel71-power8-test-dubnium
-    display_name: RHEL 7.1 (POWER8) Node Dubnium
-    run_on: rhel71-power8-test
-    expansions:
-      NODE_LTS_NAME: dubnium
-    tasks: *ref_2
   - name: rhel71-power8-test-carbon
     display_name: RHEL 7.1 (POWER8) Node Carbon
     run_on: rhel71-power8-test
     expansions:
       NODE_LTS_NAME: carbon
-    tasks: *ref_2
+    tasks: *ref_4
   - name: rhel71-power8-test-boron
     display_name: RHEL 7.1 (POWER8) Node Boron
     run_on: rhel71-power8-test
     expansions:
       NODE_LTS_NAME: boron
-    tasks: *ref_2
+    tasks: *ref_4
   - name: rhel71-power8-test-argon
     display_name: RHEL 7.1 (POWER8) Node Argon
     run_on: rhel71-power8-test
     expansions:
       NODE_LTS_NAME: argon
-    tasks: *ref_2
-  - name: debian81-test-dubnium
-    display_name: Debian 8.1 Node Dubnium
-    run_on: debian81-test
+    tasks: *ref_4
+  - name: suse12-x86-64-test-dubnium
+    display_name: SUSE 12 (x86_64) Node Dubnium
+    run_on: suse12-test
     expansions:
       NODE_LTS_NAME: dubnium
-    tasks: &ref_3
+    tasks: *ref_4
+  - name: suse12-x86-64-test-carbon
+    display_name: SUSE 12 (x86_64) Node Carbon
+    run_on: suse12-test
+    expansions:
+      NODE_LTS_NAME: carbon
+    tasks: *ref_4
+  - name: suse12-x86-64-test-boron
+    display_name: SUSE 12 (x86_64) Node Boron
+    run_on: suse12-test
+    expansions:
+      NODE_LTS_NAME: boron
+    tasks: *ref_4
+  - name: suse12-x86-64-test-argon
+    display_name: SUSE 12 (x86_64) Node Argon
+    run_on: suse12-test
+    expansions:
+      NODE_LTS_NAME: argon
+    tasks: *ref_4
+  - name: ubuntu-14.04-dubnium
+    display_name: Ubuntu 14.04 Node Dubnium
+    run_on: ubuntu1404-test
+    expansions:
+      NODE_LTS_NAME: dubnium
+    tasks: *ref_0
+  - name: ubuntu-14.04-carbon
+    display_name: Ubuntu 14.04 Node Carbon
+    run_on: ubuntu1404-test
+    expansions:
+      NODE_LTS_NAME: carbon
+    tasks: *ref_0
+  - name: ubuntu-14.04-boron
+    display_name: Ubuntu 14.04 Node Boron
+    run_on: ubuntu1404-test
+    expansions:
+      NODE_LTS_NAME: boron
+    tasks: *ref_0
+  - name: ubuntu-14.04-argon
+    display_name: Ubuntu 14.04 Node Argon
+    run_on: ubuntu1404-test
+    expansions:
+      NODE_LTS_NAME: argon
+    tasks: *ref_0
+  - name: ubuntu-16.04-dubnium
+    display_name: Ubuntu 16.04 Node Dubnium
+    run_on: ubuntu1604-test
+    expansions:
+      NODE_LTS_NAME: dubnium
+    tasks: *ref_4
+  - name: ubuntu-16.04-carbon
+    display_name: Ubuntu 16.04 Node Carbon
+    run_on: ubuntu1604-test
+    expansions:
+      NODE_LTS_NAME: carbon
+    tasks: *ref_4
+  - name: ubuntu-16.04-boron
+    display_name: Ubuntu 16.04 Node Boron
+    run_on: ubuntu1604-test
+    expansions:
+      NODE_LTS_NAME: boron
+    tasks: *ref_4
+  - name: ubuntu-16.04-argon
+    display_name: Ubuntu 16.04 Node Argon
+    run_on: ubuntu1604-test
+    expansions:
+      NODE_LTS_NAME: argon
+    tasks: *ref_4
+  - name: ubuntu1604-arm64-small-dubnium
+    display_name: Ubuntu 16.04 (ARM64) Node Dubnium
+    run_on: ubuntu1604-arm64-small
+    expansions:
+      NODE_LTS_NAME: dubnium
+    tasks: &ref_5
       - test-latest-single
       - test-latest-replicaset
       - test-latest-sharded
+      - test-4.2-single
+      - test-4.2-replicaset
+      - test-4.2-sharded
       - test-4.0-single
       - test-4.0-replicaset
       - test-4.0-sharded
@@ -636,69 +726,45 @@ buildvariants:
       - test-3.4-replicaset
       - test-3.4-sharded
       - test-atlas-connectivity
-  - name: debian81-test-carbon
-    display_name: Debian 8.1 Node Carbon
-    run_on: debian81-test
-    expansions:
-      NODE_LTS_NAME: carbon
-    tasks: *ref_3
-  - name: debian81-test-boron
-    display_name: Debian 8.1 Node Boron
-    run_on: debian81-test
-    expansions:
-      NODE_LTS_NAME: boron
-    tasks: *ref_3
-  - name: debian81-test-argon
-    display_name: Debian 8.1 Node Argon
-    run_on: debian81-test
-    expansions:
-      NODE_LTS_NAME: argon
-    tasks: *ref_3
-  - name: ubuntu1604-arm64-small-dubnium
-    display_name: Ubuntu 16.04 (ARM64) Node Dubnium
-    run_on: ubuntu1604-arm64-small
-    expansions:
-      NODE_LTS_NAME: dubnium
-    tasks: *ref_3
   - name: ubuntu1604-arm64-small-carbon
     display_name: Ubuntu 16.04 (ARM64) Node Carbon
     run_on: ubuntu1604-arm64-small
     expansions:
       NODE_LTS_NAME: carbon
-    tasks: *ref_3
+    tasks: *ref_5
   - name: ubuntu1604-arm64-small-boron
     display_name: Ubuntu 16.04 (ARM64) Node Boron
     run_on: ubuntu1604-arm64-small
     expansions:
       NODE_LTS_NAME: boron
-    tasks: *ref_3
+    tasks: *ref_5
   - name: ubuntu1604-arm64-small-argon
     display_name: Ubuntu 16.04 (ARM64) Node Argon
     run_on: ubuntu1604-arm64-small
     expansions:
       NODE_LTS_NAME: argon
-    tasks: *ref_3
+    tasks: *ref_5
   - name: ubuntu1604-power8-test-dubnium
     display_name: Ubuntu 16.04 (POWER8) Node Dubnium
     run_on: ubuntu1604-power8-test
     expansions:
       NODE_LTS_NAME: dubnium
-    tasks: *ref_3
+    tasks: *ref_2
   - name: ubuntu1604-power8-test-carbon
     display_name: Ubuntu 16.04 (POWER8) Node Carbon
     run_on: ubuntu1604-power8-test
     expansions:
       NODE_LTS_NAME: carbon
-    tasks: *ref_3
+    tasks: *ref_2
   - name: ubuntu1604-power8-test-boron
     display_name: Ubuntu 16.04 (POWER8) Node Boron
     run_on: ubuntu1604-power8-test
     expansions:
       NODE_LTS_NAME: boron
-    tasks: *ref_3
+    tasks: *ref_2
   - name: ubuntu1604-power8-test-argon
     display_name: Ubuntu 16.04 (POWER8) Node Argon
     run_on: ubuntu1604-power8-test
     expansions:
       NODE_LTS_NAME: argon
-    tasks: *ref_3
+    tasks: *ref_2
