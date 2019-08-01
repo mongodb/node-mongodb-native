@@ -137,10 +137,13 @@ class ShardedEnvironment extends EnvironmentBase {
     this.host = 'localhost';
     this.port = 51000;
 
-    // NOTE: only connect to a single shard because there can be consistency issues using
-    //       more, revolving around the inability for shards to keep up-to-date views of
-    //       changes to the world (such as dropping a database).
-    this.url = 'mongodb://%slocalhost:51000/integration_tests';
+    // TODO: we used to only connect to a single shard here b/c of consistency issues
+    // revolving around the inability for shards to keep up-to-date views of
+    // changes to the world (such as dropping a database). However, b/c the unified
+    // topology treats a single shard like a Single topology instead of a Sharded
+    // topology, we need to use multiple shards as much as possible to ensure that
+    // we get sharded test coverage (looking at you transactions tests!)
+    this.url = 'mongodb://%slocalhost:51000,localhost:51001/integration_tests';
 
     this.writeConcernMax = { w: 'majority', wtimeout: 30000 };
     this.topology = (host, port, options) => {

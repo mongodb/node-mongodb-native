@@ -221,7 +221,7 @@ function parseSessionOptions(options) {
   return result;
 }
 
-const IGNORED_COMMANDS = new Set(['ismaster']);
+const IGNORED_COMMANDS = new Set(['ismaster', 'configureFailPoint']);
 
 let displayCommands = false;
 function runTestSuiteTest(configuration, spec, context) {
