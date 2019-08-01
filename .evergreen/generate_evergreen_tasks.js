@@ -5,60 +5,57 @@ const fs = require('fs');
 const yaml = require('js-yaml');
 
 const LATEST_EFFECTIVE_VERSION = '5.0';
-const MONGODB_VERSIONS = ['latest', '4.0', '3.6', '3.4', '3.2', '3.0', '2.6'];
+const MONGODB_VERSIONS = ['latest', '4.2', '4.0', '3.6', '3.4', '3.2', '3.0', '2.6'];
 const NODE_VERSIONS = ['dubnium', 'carbon', 'boron', 'argon'];
 const TOPOLOGIES = ['single', 'replicaset', 'sharded'];
 const OPERATING_SYSTEMS = [
+  // ArchLinux
   {
-    name: 'linux-64-amzn-test',
-    display_name: 'Amazon Linux (Enterprise)',
-    run_on: 'linux-64-amzn-test'
+    name: 'archlinux-test',
+    display_name: 'Archlinux',
+    run_on: 'archlinux-test',
+    mongoVersion: '<4.2',
+    auth: false
   },
-  {
-    name: 'ubuntu-14.04',
-    display_name: 'Ubuntu 14.04',
-    run_on: 'ubuntu1404-test'
-  },
-  {
-    name: 'rhel70',
-    display_name: 'RHEL 7.0',
-    run_on: 'rhel70-small'
-  },
-
-  // OSes that support versions of MongoDB>=2.6 and <4.0
+  // Debian
   {
     name: 'debian71-test',
     display_name: 'Debian 7.1',
     run_on: 'debian71-test',
     mongoVersion: '<4.0'
   },
-
-  // OSes that support versions of MongoDB without SSL.
   {
-    name: 'archlinux-test',
-    display_name: 'Archlinux',
-    run_on: 'archlinux-test',
-    auth: false
+    name: 'debian81-test',
+    display_name: 'Debian 8.1',
+    run_on: 'debian81-test',
+    mongoVersion: '>=3.4 <4.2'
   },
+  // TODO: once we know how to test debian 9.x
+  // {
+  //   name: 'debian91-test',
+  //   display_name: 'Debian 9.1',
+  //   run_on: 'debian91-test',
+  //   mongoVersion: '>=4.0'
+  // },
+  // Amazon Linux
+  {
+    name: 'linux-64-amzn-test',
+    display_name: 'Amazon Linux (Enterprise)',
+    run_on: 'linux-64-amzn-test',
+    mongoVersion: '<4.0'
+  },
+  // macos
   {
     name: 'macos-1012',
     display_name: 'macOS 10.12',
     run_on: 'macos-1012',
     auth: false
   },
-
-  // >= 3.2
+  // rhel
   {
-    name: 'ubuntu-16.04',
-    display_name: 'Ubuntu 16.04',
-    run_on: 'ubuntu1604-test',
-    mongoVersion: '>=3.2'
-  },
-  {
-    name: 'suse12-x86-64-test',
-    display_name: 'SUSE 12 (x86_64)',
-    run_on: 'suse12-test',
-    mongoVersion: '>=3.2'
+    name: 'rhel70',
+    display_name: 'RHEL 7.0',
+    run_on: 'rhel70-small'
   },
   {
     name: 'rhel71-power8-test',
@@ -66,21 +63,26 @@ const OPERATING_SYSTEMS = [
     run_on: 'rhel71-power8-test',
     mongoVersion: '>=3.2'
   },
-
-  // >= 3.4
+  //suse
   {
-    name: 'debian81-test',
-    display_name: 'Debian 8.1',
-    run_on: 'debian81-test',
-    mongoVersion: '>=3.4'
+    name: 'suse12-x86-64-test',
+    display_name: 'SUSE 12 (x86_64)',
+    run_on: 'suse12-test',
+    mongoVersion: '>=3.2'
   },
-  // reenable when these are actually running 7.2, or we release a 7.4 rpm
-  // {
-  //   name: 'rhel72-zseries-test',
-  //   display_name: 'RHEL 7.2 (zSeries)',
-  //   run_on: 'rhel72-zseries-test',
-  //   mongoVersion: '>=3.4'
-  // },
+  // Ubuntu
+  {
+    name: 'ubuntu-14.04',
+    display_name: 'Ubuntu 14.04',
+    run_on: 'ubuntu1404-test',
+    mongoVersion: '<4.2'
+  },
+  {
+    name: 'ubuntu-16.04',
+    display_name: 'Ubuntu 16.04',
+    run_on: 'ubuntu1604-test',
+    mongoVersion: '>=3.2'
+  },
   {
     name: 'ubuntu1604-arm64-small',
     display_name: 'Ubuntu 16.04 (ARM64)',
@@ -91,8 +93,16 @@ const OPERATING_SYSTEMS = [
     name: 'ubuntu1604-power8-test',
     display_name: 'Ubuntu 16.04 (POWER8)',
     run_on: 'ubuntu1604-power8-test',
-    mongoVersion: '>=3.4'
+    mongoVersion: '>=3.4 <4.2'
   }
+
+  // reenable when these are actually running 7.2, or we release a 7.4 rpm
+  // {
+  //   name: 'rhel72-zseries-test',
+  //   display_name: 'RHEL 7.2 (zSeries)',
+  //   run_on: 'rhel72-zseries-test',
+  //   mongoVersion: '>=3.4'
+  // },
 
   // Windows. reenable this when nvm supports windows, or we settle on an alternative tool
   // {
