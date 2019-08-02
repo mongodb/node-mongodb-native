@@ -40,26 +40,26 @@ function environmentSetup(environmentCallback) {
     function environmentParser(environmentName, version) {
       console.log('environmentName ', environmentName);
       const Environment = environments[environmentName];
-      const environment = new Environment(version);
 
+      let host, port;
       parseConnectionString(mongodb_uri, (err, parsedURI) => {
         if (err) throw new Error(err);
-        environment.port = parsedURI.hosts[0].port;
-        environment.host = parsedURI.hosts[0].host;
-        environment.url = mongodb_uri;
-      });
-      if (environmentName !== 'single') environment.url += '/integration_tests';
+        port = parsedURI.hosts[0].port;
+        host = parsedURI.hosts[0].host;
 
-      try {
-        const mongoPackage = {
-          path: path.resolve(process.cwd(), '..'),
-          package: 'mongodb'
-        };
-        environment.mongo = require(mongoPackage.path);
-      } catch (err) {
-        throw new Error('The test runner must be a dependency of mongodb or mongodb-core');
-      }
-      environmentCallback(environment, client);
+        const environment = new Environment(host, port, version);
+
+        try {
+          const mongoPackage = {
+            path: path.resolve(process.cwd(), '..'),
+            package: 'mongodb'
+          };
+          environment.mongo = require(mongoPackage.path);
+        } catch (err) {
+          throw new Error('The test runner must be a dependency of mongodb or mongodb-core');
+        }
+        environmentCallback(environment, client);
+      });
     }
   });
 }
