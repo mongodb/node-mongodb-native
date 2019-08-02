@@ -20,7 +20,6 @@ class ConfigurationBase {
       return { w: 1 };
     };
   }
-
 }
 
 class NativeConfiguration extends ConfigurationBase {
@@ -39,6 +38,18 @@ class NativeConfiguration extends ConfigurationBase {
   }
   usingUnifiedTopology() {
     return !!process.env.MONGODB_UNIFIED_TOPOLOGY;
+  }
+
+  defaultTopology(host, port, serverOptions) {
+    host = host || 'localhost';
+    port = port || 27017;
+
+    const options = Object.assign({}, { host, port }, serverOptions);
+    if (this.usingUnifiedTopology()) {
+      return new core.Topology(options);
+    }
+
+    return new core.Server(options);
   }
 
   newClient(dbOptions, serverOptions) {
