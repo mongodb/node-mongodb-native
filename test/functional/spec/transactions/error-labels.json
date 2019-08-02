@@ -1564,6 +1564,400 @@
           ]
         }
       }
+    },
+    {
+      "description": "do not add unknown commit label to MaxTimeMSExpired inside transactions",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "aggregate"
+          ],
+          "errorCode": 50
+        }
+      },
+      "operations": [
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 1
+            }
+          },
+          "result": {
+            "insertedId": 1
+          }
+        },
+        {
+          "name": "aggregate",
+          "object": "collection",
+          "arguments": {
+            "pipeline": [
+              {
+                "$project": {
+                  "_id": 1
+                }
+              }
+            ],
+            "maxTimeMS": 60000,
+            "session": "session0"
+          },
+          "result": {
+            "errorLabelsOmit": [
+              "UnknownTransactionCommitResult",
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "name": "abortTransaction",
+          "object": "session0"
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "insert": "test",
+              "documents": [
+                {
+                  "_id": 1
+                }
+              ],
+              "ordered": true,
+              "readConcern": null,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": true,
+              "autocommit": false,
+              "writeConcern": null
+            },
+            "command_name": "insert",
+            "database_name": "transaction-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "aggregate": "test",
+              "pipeline": [
+                {
+                  "$project": {
+                    "_id": 1
+                  }
+                }
+              ],
+              "cursor": {},
+              "readConcern": null,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "autocommit": false,
+              "maxTimeMS": 60000
+            },
+            "command_name": "aggregate",
+            "database_name": "transaction-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "abortTransaction": 1,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": null,
+              "autocommit": false,
+              "writeConcern": null
+            },
+            "command_name": "abortTransaction",
+            "database_name": "admin"
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": []
+        }
+      }
+    },
+    {
+      "description": "add unknown commit label to MaxTimeMSExpired",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "commitTransaction"
+          ],
+          "errorCode": 50
+        }
+      },
+      "operations": [
+        {
+          "name": "startTransaction",
+          "object": "session0",
+          "arguments": {
+            "options": {
+              "writeConcern": {
+                "w": "majority"
+              },
+              "maxCommitTimeMS": 60000
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "collection",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 1
+            }
+          },
+          "result": {
+            "insertedId": 1
+          }
+        },
+        {
+          "name": "commitTransaction",
+          "object": "session0",
+          "result": {
+            "errorLabelsContain": [
+              "UnknownTransactionCommitResult"
+            ],
+            "errorLabelsOmit": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "name": "commitTransaction",
+          "object": "session0"
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "insert": "test",
+              "documents": [
+                {
+                  "_id": 1
+                }
+              ],
+              "ordered": true,
+              "readConcern": null,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": true,
+              "autocommit": false,
+              "writeConcern": null
+            },
+            "command_name": "insert",
+            "database_name": "transaction-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "commitTransaction": 1,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": null,
+              "autocommit": false,
+              "writeConcern": {
+                "w": "majority"
+              },
+              "maxTimeMS": 60000
+            },
+            "command_name": "commitTransaction",
+            "database_name": "admin"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "commitTransaction": 1,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": null,
+              "autocommit": false,
+              "writeConcern": {
+                "w": "majority",
+                "wtimeout": 10000
+              },
+              "maxTimeMS": 60000
+            },
+            "command_name": "commitTransaction",
+            "database_name": "admin"
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "add unknown commit label to writeConcernError MaxTimeMSExpired",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "commitTransaction"
+          ],
+          "writeConcernError": {
+            "code": 50,
+            "errmsg": "operation exceeded time limit"
+          }
+        }
+      },
+      "operations": [
+        {
+          "name": "startTransaction",
+          "object": "session0",
+          "arguments": {
+            "options": {
+              "writeConcern": {
+                "w": "majority"
+              },
+              "maxCommitTimeMS": 60000
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "collection",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 1
+            }
+          },
+          "result": {
+            "insertedId": 1
+          }
+        },
+        {
+          "name": "commitTransaction",
+          "object": "session0",
+          "result": {
+            "errorLabelsContain": [
+              "UnknownTransactionCommitResult"
+            ],
+            "errorLabelsOmit": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "name": "commitTransaction",
+          "object": "session0"
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "insert": "test",
+              "documents": [
+                {
+                  "_id": 1
+                }
+              ],
+              "ordered": true,
+              "readConcern": null,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": true,
+              "autocommit": false,
+              "writeConcern": null
+            },
+            "command_name": "insert",
+            "database_name": "transaction-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "commitTransaction": 1,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": null,
+              "autocommit": false,
+              "writeConcern": {
+                "w": "majority"
+              },
+              "maxTimeMS": 60000
+            },
+            "command_name": "commitTransaction",
+            "database_name": "admin"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "commitTransaction": 1,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": null,
+              "autocommit": false,
+              "writeConcern": {
+                "w": "majority",
+                "wtimeout": 10000
+              },
+              "maxTimeMS": 60000
+            },
+            "command_name": "commitTransaction",
+            "database_name": "admin"
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 1
+            }
+          ]
+        }
+      }
     }
   ]
 }

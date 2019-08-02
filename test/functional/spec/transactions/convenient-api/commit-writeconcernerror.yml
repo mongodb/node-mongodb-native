@@ -193,3 +193,24 @@ tests:
     expectations: *expectations_without_retries
     # failCommand with writeConcernError still applies the write operation(s)
     outcome: *outcome
+
+  -
+    description: commitTransaction is not retried after MaxTimeMSExpired error
+    failPoint:
+      configureFailPoint: failCommand
+      mode: { times: 1 }
+      data:
+          failCommands: ["commitTransaction"]
+          writeConcernError:
+            code: 50
+            codeName: MaxTimeMSExpired
+            errmsg: "operation exceeded time limit"
+    operations:
+      - <<: *operation
+        result:
+          errorCodeName: MaxTimeMSExpired
+          errorLabelsContain: ["UnknownTransactionCommitResult"]
+          errorLabelsOmit: ["TransientTransactionError"]
+    expectations: *expectations_without_retries
+    # failCommand with writeConcernError still applies the write operation(s)
+    outcome: *outcome
