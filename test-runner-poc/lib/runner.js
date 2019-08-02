@@ -47,6 +47,42 @@ function environmentSetup(environmentCallback) {
   });
 }
 
+function environmentSetup(environmentCallback) {
+  const mongodb_uri = process.env.MONGODB_URI || 'mongodb://localhost:27017';
+  mongoClient = new MongoClient(mongodb_uri);
+
+  mongoClient.connect((err, client) => {
+    if (err) throw new Error(err);
+
+    createFilters(environmentParser);
+
+    function environmentParser(environmentName, version) {
+      console.log('environmentName ', environmentName);
+      const Environment = environments[environmentName];
+      const environment = new Environment(version);
+
+      parseConnectionString(mongodb_uri, (err, parsedURI) => {
+        if (err) throw new Error(err);
+        environment.port = parsedURI.hosts[0].port;
+        environment.host = parsedURI.hosts[0].host;
+        environment.url = mongodb_uri;
+      });
+      if (environmentName !== 'single') environment.url += '/integration_tests';
+
+      try {
+        const mongoPackage = {
+          path: path.resolve(process.cwd(), '..'),
+          package: 'mongodb'
+        };
+        environment.mongo = require(mongoPackage.path);
+      } catch (err) {
+        throw new Error('The test runner must be a dependency of mongodb or mongodb-core');
+      }
+      environmentCallback(environment, client);
+    }
+  });
+}
+
 function createFilters(callback) {
   let filtersInitialized = 0;
   const filterFiles = fs.readdirSync(path.join(__dirname, 'filters'));
