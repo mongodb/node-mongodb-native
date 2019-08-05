@@ -1,5 +1,9 @@
 'use strict';
+<<<<<<< HEAD
 const MongoClient = require('../../../index').MongoClient;
+=======
+const MongoClient = require('mongodb').MongoClient;
+>>>>>>> remove unnecessary functions and properties from config, update runner to a new version
 /**
  * Filter for the MongoDB toopology required for the test
  *
@@ -16,9 +20,17 @@ class MongoDBTopologyFilter {
     const mongoClient = new MongoClient(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017');
     mongoClient.connect((err, client) => {
       if (err) {
+<<<<<<< HEAD
         return callback(err);
       }
       const topologyType = mongoClient.topology.type;
+=======
+        callback(err);
+        return;
+      }
+      console.log("client.topology.s.coreTopology.ismaster.hosts ",client.topology.s.coreTopology.ismaster)
+      let topologyType = mongoClient.topology.type;
+>>>>>>> remove unnecessary functions and properties from config, update runner to a new version
       switch (topologyType) {
         case 'server':
           if (client.topology.s.coreTopology.ismaster.hosts) this.runtimeTopology = 'replicaset';
