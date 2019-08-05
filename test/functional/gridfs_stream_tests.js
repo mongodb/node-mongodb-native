@@ -1143,6 +1143,7 @@ describe('GridFS Stream', function() {
         metadata: { requires: { topology: ['single'] } },
 
         test: function(done) {
+          if (!testSpec.assert.result) this.skip();
           var configuration = this.configuration;
           var GridFSBucket = configuration.require.GridFSBucket;
 
@@ -1188,9 +1189,8 @@ describe('GridFS Stream', function() {
 
                 download.on('end', function() {
                   var result = testSpec.assert.result;
-                  if (result) {
-                    expect(result).to.exist;
-                    test.equal(res.toString('hex'), result.$hex);
+                  if (!result) {
+                    test.ok(false);
 
                     // We need to abort in order to close the underlying cursor,
                     // and by extension the implicit session used for the cursor.
@@ -1198,10 +1198,16 @@ describe('GridFS Stream', function() {
                     download.abort();
                     client.close();
                     done();
-                  } else {
-                    download.abort();
-                    client.close();
                   }
+
+                  test.equal(res.toString('hex'), result.$hex);
+
+                  // We need to abort in order to close the underlying cursor,
+                  // and by extension the implicit session used for the cursor.
+                  // This is only necessary if the cursor is not exhausted
+                  download.abort();
+                  client.close();
+                  done();
                 });
               };
 
