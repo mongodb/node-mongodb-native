@@ -1,5 +1,5 @@
 'use strict';
-
+const MongoClient = require('mongodb').MongoClient;
 /**
  * Filter for the MongoDB toopology required for the test
  *
@@ -11,8 +11,34 @@
  * }
  */
 class MongoDBTopologyFilter {
+
+  initializeFilter(callback) {
+    const mongoClient = new MongoClient(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017');
+    mongoClient.connect((err, client) => {
+      if (err) {
+        callback(err);
+        return;
+      }
+      console.log("client.topology.s.coreTopology.ismaster.hosts ",client.topology.s.coreTopology.ismaster)
+      let topologyType = mongoClient.topology.type;
+      switch (topologyType) {
+        case 'server':
+          if (client.topology.s.coreTopology.ismaster.hosts) this.runtimeTopology = 'replicaset';
+          else this.runtimeTopology = 'single';
+          break;
+        case 'mongos':
+          this.runtimeTopology = 'sharded';
+          break;
+        default:
+          console.warn('Topology type is not recognized.');
+          break;
+      }
+      client.close(callback);
+    });
+  }
+
   constructor(options) {
-    this.runtimeTopology = options.runtimeTopology || 'single';
+    this.runtimeTopology = 'single';
   }
 
   filter(test) {

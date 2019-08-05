@@ -2,11 +2,10 @@
 
 const path = require("path");
 const fs = require("fs");
-const utils = require("mocha").utils;
-
+const MongoClient = require('mongodb').MongoClient;
 const environments = require('../environments');
 const TestConfiguration = require('../config');
-
+const parseConnectionString = require('../../lib/core/uri_parser');
 const mock = require('mongodb-mock-server');
 
 let mongoClient;
@@ -14,23 +13,19 @@ let filters = [];
 let files = [];
 
 function addFilter(filter) {
-	if (typeof filter !== "function" && typeof filter !== "object") {
-		throw new Error(
-			"Type of filter must either be a function or an object"
-		);
-	}
-	if (
-		typeof filter === "object" &&
-		(!filter.filter || typeof filter.filter !== "function")
-	) {
-		throw new Error("Object filters must have a function named filter");
-	}
-
-	if (typeof filter === "function") {
-		filters.push({ filter: filter });
-	} else {
-		filters.push(filter);
-	}
+  switch (typeof filter) {
+    case 'function':
+      filters.push({ filter: filter });
+      break;
+    case 'object':
+      if (!filter.filter || typeof filter.filter !== 'function') {
+        throw new Error('Object filters must have a function named filter');
+      }
+      filters.push(filter);
+      break;
+    default:
+      throw new Error('Type of filter must either be a function or an object');
+  }
 }
 
 function environmentSetup(environmentCallback) {
@@ -75,45 +70,67 @@ function createFilters(callback) {
 
   let topology, version;
 
-	const environmentName = process.env['MONGODB_ENVIRONMENT'];
+  filterFiles.filter(x => x.indexOf('js') !== -1).forEach(x => {
+    const FilterModule = require(path.join(__dirname, 'filters', x));
+    const filter = new FilterModule();
 
-	console.log(`[environment: ${environmentName}]`);
+    if (typeof filter.initializeFilter === 'function') {
+      filter.initializeFilter(_increment);
+    } else {
+      _increment();
+    }
 
-	//apply filters
-	fs.readdirSync(path.join(__dirname, "filters"))
-		.filter(x => x.indexOf("js") !== -1)
-		.forEach(x => {
-			const FilterModule = require(path.join(__dirname, "filters", x));
-			addFilter(new FilterModule({ runtimeTopology: 'sharded' }));
-		});
+    //Makes sure to wait for all the filters to be initialized and added before calling the callback
+    function _increment() {
+      topology = topology || filter.runtimeTopology;
+      version = version || filter.mongoVersion;
+      filtersInitialized += 1;
+      addFilter(filter);
 
-});
-
-beforeEach(function() {
-	var self = this;
-
-	var called = 0;
-	function callback() {
-		called += 1;
-		if (called === filters.length) _run();
-	}
-
-	if (filters.length) {
-		filters.forEach(function(filter) {
-			callback();
-		});
-	}
-
-	function _run() {
-		if (!applyFilters(self.currentTest)) {
-			self.skip();
-		}
-	}
-});
-
-function applyFilters(test) {
-	return filters.every(function(filterFunc) {
-		var res = filterFunc.filter(test);
-		return res;
-	});
+      if (filtersInitialized === filterFiles.length) {
+        callback(topology, version);
+      }
+    }
+  });
 }
+
+before(function(done) {
+  environmentSetup((environment, client) => {
+    this.configuration = new TestConfiguration(environment);
+    client.close(done);
+  });
+});
+
+beforeEach(function(done) {
+  // Assigned this to a new variable called self in order to preserve context and access tests within the _run function.
+  const self = this;
+  let filtersExecuted = 0;
+  if (filters.length) {
+    filters.forEach(function(filter) {
+      _run(filter);
+    });
+  }
+
+  function _run(filter) {
+    filtersExecuted += 1;
+
+    if (!filter.filter(self.currentTest)) {
+      if (!self.currentTest.parent.parent.root) {
+        // self.currentTest.parent.pending = true; <-- this makes apm_tests skip when they should not
+        self.currentTest.parent._beforeEach = [];
+      }
+      self.skip();
+    }
+    if (filtersExecuted === filters.length) {
+      done();
+    }
+  }
+});
+
+afterEach(() => mock.cleanup());
+
+after(function(done) {
+  mongoClient.close(() => {
+    done();
+  });
+});

@@ -10,11 +10,7 @@ class ConfigurationBase {
     this.host = options.host || 'localhost';
     this.port = options.port || 27017;
     this.db = options.db || 'integration_tests';
-    this.manager = options.manager;
     this.mongo = options.mongo;
-    this.skipStart = typeof options.skipStart === 'boolean' ? options.skipStart : false;
-    this.skipTermination =
-      typeof options.skipTermination === 'boolean' ? options.skipTermination : false;
     this.setName = options.setName || 'rs';
     this.require = this.mongo;
     this.writeConcern = function() {
@@ -22,44 +18,6 @@ class ConfigurationBase {
     };
   }
 
-  stop(callback) {
-    if (this.skipTermination) return callback();
-    // Stop the servers
-    this.manager
-      .stop()
-      .then(function() {
-        callback(null);
-      })
-      .catch(function(err) {
-        callback(err, null);
-      });
-  }
-
-  restart(opts, callback) {
-    if (typeof opts === 'function') {
-      callback = opts;
-      opts = { purge: true, kill: true };
-    }
-    if (this.skipTermination) return callback();
-
-    // Stop the servers
-    this.manager
-      .restart()
-      .then(function() {
-        callback(null);
-      })
-      .catch(function(err) {
-        callback(err, null);
-      });
-  }
-
-  setup(callback) {
-    callback();
-  }
-
-  teardown(callback) {
-    callback();
-  }
 }
 
 class NativeConfiguration extends ConfigurationBase {
@@ -77,54 +35,6 @@ class NativeConfiguration extends ConfigurationBase {
 
   usingUnifiedTopology() {
     return !!process.env.MONGODB_UNIFIED_TOPOLOGY;
-  }
-
-  defaultTopology(host, port, serverOptions) {
-    host = host || 'localhost';
-    port = port || 27017;
-
-    const options = Object.assign({}, { host, port }, serverOptions);
-    if (this.usingUnifiedTopology()) {
-      return new core.Topology(options);
-    }
-
-    return new core.Server(options);
-  }
-
-  start(callback) {
-    const self = this;
-    if (this.skipStart) return callback();
-
-    const client = this.newClient({}, { host: self.host, port: self.port });
-    this.manager
-      .purge()
-      .then(function() {
-        console.log('[purge the directories]');
-        return self.manager.start();
-      })
-      .then(() => {
-        if (this.environment.server37631WorkaroundNeeded) {
-          return this.server37631Workaround();
-        }
-      })
-      .then(function() {
-        console.log('[started the topology]');
-        return client.connect();
-      })
-      .then(function() {
-        console.log('[get connection to topology]');
-        return client.db(self.db).dropDatabase();
-      })
-      .then(function() {
-        console.log('[dropped database]');
-        return client.close();
-      })
-      .then(function() {
-        callback(null);
-      })
-      .catch(function(err) {
-        callback(err, null);
-      });
   }
 
   newClient(dbOptions, serverOptions) {
@@ -214,10 +124,6 @@ class NativeConfiguration extends ConfigurationBase {
     // Fall back
     const auth = username && password ? f('%s:%s@', username, password) : '';
     return f(url, auth);
-  }
-
-  writeConcern() {
-    return Object.assign({}, this.options.writeConcern || { w: 1 });
   }
 
   writeConcernMax() {
