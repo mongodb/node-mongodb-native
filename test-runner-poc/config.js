@@ -6,27 +6,18 @@ const f = require('util').format;
 const url = require('url');
 const qs = require('querystring');
 const core = require('../lib/core');
-
-class ConfigurationBase {
-  constructor(options) {
-    this.options = options || {};
-    this.host = options.host || 'localhost';
-    this.port = options.port || 27017;
-    this.db = options.db || 'integration_tests';
-    this.mongo = options.mongo;
-    this.setName = options.setName || 'rs';
+class NativeConfiguration {
+  constructor(environment) {
+    this.options = environment || {};
+    this.host = environment.host || 'localhost';
+    this.port = environment.port || 27017;
+    this.db = environment.db || 'integration_tests';
+    this.mongo = environment.mongo;
+    this.setName = environment.setName || 'rs';
     this.require = this.mongo;
     this.writeConcern = function() {
       return { w: 1 };
     };
-  }
-}
-
-class NativeConfiguration extends ConfigurationBase {
-  constructor(environment) {
-    super(environment);
-
-    this.type = 'native';
     this.topology = environment.topology || this.defaultTopology;
     this.environment = environment;
 <<<<<<< HEAD
@@ -101,7 +92,6 @@ class NativeConfiguration extends ConfigurationBase {
     const auth = username && password ? `${username}:${password}@` : '';
     return `${url} ${auth}`;
   }
-
   writeConcernMax() {
     return Object.assign({}, this.options.writeConcernMax || { w: 1 });
   }

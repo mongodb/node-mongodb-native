@@ -1,4 +1,8 @@
 'use strict';
+<<<<<<< HEAD
+=======
+const f = require('util').format;
+>>>>>>> address feedback and refactor unnecessary functions
 const semver = require('semver');
 const path = require('path');
 const core = require('../lib/core');
@@ -75,7 +79,6 @@ function generateNodesArray(hosts, configFunc){
   }
   return nodesArray;
 }
-
 /**
  *
  */
