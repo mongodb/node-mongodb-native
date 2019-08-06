@@ -32,10 +32,6 @@ describe('Causal Consistency', function() {
     test.client.close(done);
   });
 
-  after(done => {
-    test.client.close(done);
-  });
-
   it('should not send `afterClusterTime` on first read operation in a causal session', {
     metadata: {
       requires: { topology: ['replicaset'], mongodb: '>3.6.0-rc0' },
