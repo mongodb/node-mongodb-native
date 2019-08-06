@@ -1,5 +1,5 @@
 'use strict';
-const MongoClient = require('mongodb').MongoClient;
+const MongoClient = require('../../../index').MongoClient;
 /**
  * Filter for the MongoDB toopology required for the test
  *
@@ -19,7 +19,6 @@ class MongoDBTopologyFilter {
         callback(err);
         return;
       }
-      console.log("client.topology.s.coreTopology.ismaster.hosts ",client.topology.s.coreTopology.ismaster)
       let topologyType = mongoClient.topology.type;
       switch (topologyType) {
         case 'server':

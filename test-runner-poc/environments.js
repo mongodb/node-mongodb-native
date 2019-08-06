@@ -1,6 +1,9 @@
 'use strict';
+<<<<<<< HEAD
 
 const f = require('util').format;
+=======
+>>>>>>> incorporate feedback about requires
 const semver = require('semver');
 const path = require('path');
 const core = require('../lib/core');
