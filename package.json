@@ -61,7 +61,7 @@
   },
   "scripts": {
     "atlas": "node ./test/atlas_connectivity_tests.js",
-    "test": "npm run lint-test-runner-poc && cd test-runner-poc && npm install && npm run func",
+    "test": "npm run lint-test-runner-poc && cd test-runner-poc && npm run func",
     "test-old": "npm run lint && mongodb-test-runner -t 60000 test/core test/unit test/functional",
     "coverage": "istanbul cover mongodb-test-runner -- -t 60000 test/core test/unit test/functional",
     "lint": "eslint lib test",
