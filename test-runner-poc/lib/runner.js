@@ -13,19 +13,14 @@ let filters = [];
 let files = [];
 
 function addFilter(filter) {
-  switch (typeof filter) {
-    case 'function':
-      filters.push({ filter: filter });
-      break;
-    case 'object':
-      if (!filter.filter || typeof filter.filter !== 'function') {
-        throw new Error('Object filters must have a function named filter');
-      }
-      filters.push(filter);
-      break;
-    default:
-      throw new Error('Type of filter must either be a function or an object');
+  if (typeof filter !== 'object') {
+    throw new Error('Type of filter must be an object');
   }
+  if (!filter.filter || typeof filter.filter !== 'function') {
+    throw new Error('Object filters must have a function named filter');
+  }
+  filters.push(filter);
+
 }
 
 function environmentSetup(environmentCallback) {
