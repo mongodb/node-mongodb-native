@@ -122,8 +122,8 @@ beforeEach(function(done) {
     filtersExecuted += 1;
 
     if (!filter.filter(self.currentTest)) {
+      //Prevents tests that should be skipped from still running a beforeEach. The if statement ensures that it doesn't skip a rootlevel beforeEach
       if (!self.currentTest.parent.parent.root) {
-        // self.currentTest.parent.pending = true; <-- this makes apm_tests skip when they should not
         self.currentTest.parent._beforeEach = [];
       }
       self.skip();
@@ -137,7 +137,5 @@ beforeEach(function(done) {
 afterEach(() => mock.cleanup());
 
 after(function(done) {
-  mongoClient.close(() => {
-    done();
-  });
+  mongoClient.close(done);
 });
