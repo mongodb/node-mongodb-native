@@ -19,10 +19,9 @@ function addFilter(filter) {
   filters.push(filter);
 
 }
-function environmentSetup(environmentCallback) {
+function environmentSetup(environmentCallback, done) {
   const mongodb_uri = process.env.MONGODB_URI || 'mongodb://localhost:27017';
   mongoClient = new MongoClient(mongodb_uri);
-
   mongoClient.connect((err, client) => {
     if (err) {
       return environmentCallback(err);
@@ -38,27 +37,8 @@ function environmentSetup(environmentCallback) {
         }
         const environment = new Environment(parsedURI, version);
         environment.mongo = require('../../index');
-        client.close(() => environmentCallback(err, environment));
-      });
-    }
-  });
-}
-function environmentSetup(environmentCallback, done) {
-  const mongodb_uri = process.env.MONGODB_URI || 'mongodb://localhost:27017';
-  mongoClient = new MongoClient(mongodb_uri);
-  mongoClient.connect((err, client) => {
-    if (err) environmentCallback(err);
-    createFilters(environmentParser);
-    function environmentParser(environmentName, version) {
-      console.log('environmentName ', environmentName);
-      const Environment = environments[environmentName];
-      let host, port;
-      parseConnectionString(mongodb_uri, (err, parsedURI) => {
-        if (err) environmentCallback(err);
-        const environment = new Environment(parsedURI, version);
-        environment.mongo = require('../../index');
         environmentCallback(err, environment);
-        client.close(done);
+        client.close(() => environmentCallback(err, environment));
       });
     }
   });
