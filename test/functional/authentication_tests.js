@@ -218,6 +218,7 @@ describe('Authentication', function() {
 
           // Add the new user to the admin database
           adminDb.addUser('admin15', 'admin15', function(err, result) {
+            if (err) client.close();
             test.equal(null, err);
             test.ok(result != null);
             client.close();
@@ -234,7 +235,6 @@ describe('Authentication', function() {
             });
           });
         });
-        client.close();
       });
       // DOC_END
     }

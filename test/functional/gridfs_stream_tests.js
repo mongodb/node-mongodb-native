@@ -1143,6 +1143,7 @@ describe('GridFS Stream', function() {
         metadata: { requires: { topology: ['single'] } },
 
         test: function(done) {
+          if (!testSpec.assert.result) this.skip();
           var configuration = this.configuration;
           var GridFSBucket = configuration.require.GridFSBucket;
 

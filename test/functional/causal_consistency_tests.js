@@ -33,7 +33,6 @@ describe('Causal Consistency', function() {
   });
 
   after(done => {
-    test.listener.uninstrument();
     test.client.close(done);
   });
 
