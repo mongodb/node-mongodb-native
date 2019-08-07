@@ -29,7 +29,6 @@ function environmentSetup(environmentCallback, done) {
     createFilters(environmentParser);
 
     function environmentParser(environmentName, version) {
-      console.log('environmentName ', environmentName);
       const Environment = environments[environmentName];
       parseConnectionString(mongodb_uri, (err, parsedURI) => {
         if (err) {

@@ -32,11 +32,14 @@ class MongoDBTopologyFilter {
           if (client.topology.s.coreTopology.ismaster.hosts) this.runtimeTopology = 'replicaset';
           else this.runtimeTopology = 'single';
           break;
+        case 'replset':
+          this.runtimeTopology = 'replicaset';
+          break;
         case 'mongos':
           this.runtimeTopology = 'sharded';
           break;
         default:
-          console.warn('Topology type is not recognized.');
+          console.warn('Topology type of ',topologyType,' is not recognized.');
           break;
       }
       client.close(callback);
