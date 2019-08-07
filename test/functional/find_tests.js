@@ -546,6 +546,7 @@ describe('Find', function() {
 
                 // Let's test usage of the $where statement
                 collection.find({ $where: new Code('this.a > 2') }).count(function(err, count) {
+                  if (err) console.dir({ err });
                   test.equal(null, err);
                   test.equal(1, count);
 
@@ -1211,13 +1212,13 @@ describe('Find', function() {
         var db = client.db(configuration.db);
         db.createCollection('timeoutFalse', function(err, collection) {
           collection.find({}, { timeout: false }, function(err, cursor) {
-            test.equal(false, cursor.s.cmd.noCursorTimeout);
+            test.equal(false, cursor.cmd.noCursorTimeout);
 
             collection.find({}, { timeout: true }, function(err, cursor) {
-              test.equal(true, cursor.s.cmd.noCursorTimeout);
+              test.equal(true, cursor.cmd.noCursorTimeout);
 
               collection.find({}, {}, function(err, cursor) {
-                test.ok(!cursor.s.cmd.noCursorTimeout);
+                test.ok(!cursor.cmd.noCursorTimeout);
 
                 client.close();
                 done();
@@ -3105,7 +3106,7 @@ describe('Find', function() {
           test.equal(null, err);
           // Ensure correct insertion testing via the cursor and the count function
           var cursor = collection.find({ c: undefined });
-          test.equal(true, cursor.s.options.ignoreUndefined);
+          test.equal(true, cursor.options.ignoreUndefined);
 
           cursor.toArray(function(err, documents) {
             test.equal(2, documents.length);
