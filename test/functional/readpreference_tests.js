@@ -541,7 +541,7 @@ describe('ReadPreference', function() {
         var db = client.db(configuration.db);
         test.equal(null, err);
         var cursor = db.collection('test', { readPreference: SecondaryPreferred }).listIndexes();
-        test.equal(cursor.s.options.readPreference.mode, 'secondaryPreferred');
+        test.equal(cursor.options.readPreference.mode, 'secondaryPreferred');
         client.close();
         done();
       });
