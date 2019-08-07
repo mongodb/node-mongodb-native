@@ -10,8 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "mocha": "*",
     "chai": "*",
+    "mocha": "^6.2.0",
     "mongodb": "*"
   }
 }
