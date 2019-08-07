@@ -4565,7 +4565,7 @@ describe('Cursor', function() {
         .then(() => (collection = db.collection('test_count_readPreference')))
         .then(() => collection.find())
         .then(_cursor => (cursor = _cursor))
-        .then(() => (spy = sinon.spy(cursor.s.topology, 'command')))
+        .then(() => (spy = sinon.spy(cursor.topology, 'command')))
         .then(() => cursor.count())
         .then(() =>
           expect(spy.firstCall.args[2])
