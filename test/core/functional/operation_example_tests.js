@@ -260,7 +260,7 @@ describe('Server operation example tests', function() {
             });
 
             // Get the first document
-            cursor.next(function(cursorErr, doc) {
+            cursor._next(function(cursorErr, doc) {
               expect(cursorErr).to.be.null;
               expect(doc.a).to.equal(1);
 
@@ -603,7 +603,7 @@ describe('Replset operation example tests', function() {
             });
 
             // Get the first document
-            cursor.next(function(cursorErr, doc) {
+            cursor._next(function(cursorErr, doc) {
               expect(cursorErr).to.be.null;
               expect(doc.a).to.equal(1);
 
@@ -905,7 +905,7 @@ describe.skip('Mongos operation example tests', function() {
             });
 
             // Get the first document
-            cursor.next(function(cursorErr, doc) {
+            cursor._next(function(cursorErr, doc) {
               expect(cursorErr).to.be.null;
               expect(doc.a).to.equal(1);
 

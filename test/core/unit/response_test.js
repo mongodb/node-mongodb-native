@@ -51,7 +51,7 @@ describe('Response', function() {
         const cursor = client.cursor('test.test', { find: 'test' });
 
         // Execute next
-        cursor.next(function(err) {
+        cursor._next(function(err) {
           expect(err).to.exist;
           expect(err).to.be.instanceof(MongoError);
           expect(err.message).to.equal(errdoc.errmsg);

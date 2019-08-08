@@ -568,7 +568,7 @@ describe.skip('A replica set', function() {
             );
             cursor.setCursorLimit(1);
             // Execute next
-            cursor.next(queryCountDecrement);
+            cursor._next(queryCountDecrement);
           }
         });
 

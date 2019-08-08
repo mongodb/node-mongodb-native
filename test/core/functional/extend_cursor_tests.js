@@ -1,9 +1,8 @@
 'use strict';
 
 const expect = require('chai').expect;
-const inherits = require('util').inherits;
 const f = require('util').format;
-const CoreCursor = require('../../../lib/core/cursor');
+const CoreCursor = require('../../../lib/core/cursor').CoreCursor;
 
 describe('Extend cursor tests', function() {
   it('should correctly extend the cursor with custom implementation', {
@@ -16,33 +15,32 @@ describe('Extend cursor tests', function() {
       const config = this.configuration;
 
       // Create an extended cursor that adds a toArray function
-      var ExtendedCursor = function() {
-        CoreCursor.apply(this, Array.prototype.slice.call(arguments, 0));
-        var extendedCursorSelf = this;
+      class ExtendedCursor extends CoreCursor {
+        constructor(topology, ns, cmd, options) {
+          super(topology, ns, cmd, options);
+          var extendedCursorSelf = this;
 
-        // Resolve all the next
-        var getAllNexts = function(items, callback) {
-          extendedCursorSelf.next(function(err, item) {
-            if (err) return callback(err);
-            if (item === null) return callback(null, null);
-            items.push(item);
-            getAllNexts(items, callback);
-          });
-        };
+          // Resolve all the next
+          var getAllNexts = function(items, callback) {
+            extendedCursorSelf._next(function(err, item) {
+              if (err) return callback(err);
+              if (item === null) return callback(null, null);
+              items.push(item);
+              getAllNexts(items, callback);
+            });
+          };
 
-        // Adding a toArray function to the cursor
-        this.toArray = function(callback) {
-          var items = [];
+          // Adding a toArray function to the cursor
+          this.toArray = function(callback) {
+            var items = [];
 
-          getAllNexts(items, function(err) {
-            if (err) return callback(err, null);
-            callback(null, items);
-          });
-        };
-      };
-
-      // Extend the Cursor
-      inherits(ExtendedCursor, CoreCursor);
+            getAllNexts(items, function(err) {
+              if (err) return callback(err, null);
+              callback(null, items);
+            });
+          };
+        }
+      }
 
       // Attempt to connect, adding a custom cursor creator
       var server = config.newTopology(this.configuration.host, this.configuration.port, {

@@ -42,7 +42,7 @@ describe('A server', function() {
               });
 
               // Execute next
-              cursor.next(function(nextErr, d) {
+              cursor._next(function(nextErr, d) {
                 expect(nextErr).to.be.null;
                 expect(d.b).to.be.undefined;
 
@@ -102,7 +102,7 @@ describe('A server', function() {
               });
 
               // Execute next
-              cursor.next(function(nextErr, d) {
+              cursor._next(function(nextErr, d) {
                 expect(nextErr).to.be.null;
                 expect(d.b).to.be.undefined;
 
