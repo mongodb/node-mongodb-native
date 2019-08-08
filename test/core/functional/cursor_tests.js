@@ -38,13 +38,13 @@ describe('Cursor tests', function() {
             });
 
             // Execute next
-            cursor.next(function(nextCursorErr, nextCursorD) {
+            cursor._next(function(nextCursorErr, nextCursorD) {
               expect(nextCursorErr).to.be.null;
               expect(nextCursorD.a).to.equal(1);
               expect(cursor.bufferedCount()).to.equal(1);
 
               // Kill the cursor
-              cursor.next(function(killCursorErr, killCursorD) {
+              cursor._next(function(killCursorErr, killCursorD) {
                 expect(killCursorErr).to.be.null;
                 expect(killCursorD.a).to.equal(2);
                 expect(cursor.bufferedCount()).to.equal(0);
@@ -93,7 +93,7 @@ describe('Cursor tests', function() {
             });
 
             // Execute next
-            cursor.next(function(nextCursorErr, nextCursorD) {
+            cursor._next(function(nextCursorErr, nextCursorD) {
               expect(nextCursorErr).to.be.null;
               expect(nextCursorD.a).to.equal(1);
               expect(cursor.bufferedCount()).to.equal(4);
@@ -102,7 +102,7 @@ describe('Cursor tests', function() {
               cursor.readBufferedDocuments(cursor.bufferedCount());
 
               // Get the next item
-              cursor.next(function(secondCursorErr, secondCursorD) {
+              cursor._next(function(secondCursorErr, secondCursorD) {
                 expect(secondCursorErr).to.be.null;
                 expect(secondCursorD).to.be.null;
 
@@ -147,16 +147,16 @@ describe('Cursor tests', function() {
             var cursor = _server.cursor(ns, { find: ns, query: {}, batchSize: 5 });
 
             // Execute next
-            cursor.next(function(nextCursorErr, nextCursorD) {
+            cursor._next(function(nextCursorErr, nextCursorD) {
               expect(nextCursorErr).to.be.null;
               expect(nextCursorD.a).to.equal(1);
 
               // Get the next item
-              cursor.next(function(secondCursorErr, secondCursorD) {
+              cursor._next(function(secondCursorErr, secondCursorD) {
                 expect(secondCursorErr).to.be.null;
                 expect(secondCursorD).to.be.null;
 
-                cursor.next(function(thirdCursorErr, thirdCursorD) {
+                cursor._next(function(thirdCursorErr, thirdCursorD) {
                   expect(thirdCursorErr).to.be.ok;
                   expect(thirdCursorD).to.be.undefined;
                   // Destroy the server connection
@@ -201,16 +201,16 @@ describe('Cursor tests', function() {
             var cursor = _server.cursor(ns, { find: ns, query: {}, batchSize: 2 });
 
             // Execute next
-            cursor.next(function(nextCursorErr, nextCursorD) {
+            cursor._next(function(nextCursorErr, nextCursorD) {
               expect(nextCursorErr).to.be.null;
               expect(nextCursorD.a).to.equal(1);
 
               // Get the next item
-              cursor.next(function(secondCursorErr, secondCursorD) {
+              cursor._next(function(secondCursorErr, secondCursorD) {
                 expect(secondCursorErr).to.be.null;
                 expect(secondCursorD.a).to.equal(2);
 
-                cursor.next(function(thirdCursorErr, thirdCursorD) {
+                cursor._next(function(thirdCursorErr, thirdCursorD) {
                   expect(thirdCursorErr).to.be.null;
                   expect(thirdCursorD.a).to.equal(3);
                   // Destroy the server connection
@@ -255,19 +255,19 @@ describe('Cursor tests', function() {
             var cursor = _server.cursor(ns, { find: ns, query: {}, batchSize: 2 });
 
             // Execute next
-            cursor.next(function(nextCursorErr, nextCursorD) {
+            cursor._next(function(nextCursorErr, nextCursorD) {
               expect(nextCursorErr).to.be.null;
               expect(nextCursorD.a).to.equal(1);
 
               // Get the next item
-              cursor.next(function(secondCursorErr, secondCursorD) {
+              cursor._next(function(secondCursorErr, secondCursorD) {
                 expect(secondCursorErr).to.be.null;
                 expect(secondCursorD.a).to.equal(2);
 
                 // Kill cursor
                 cursor.kill(function() {
                   // Should error out
-                  cursor.next(function(thirdCursorErr, thirdCursorD) {
+                  cursor._next(function(thirdCursorErr, thirdCursorD) {
                     expect(thirdCursorErr).to.not.exist;
                     expect(thirdCursorD).to.not.exist;
 
@@ -316,18 +316,18 @@ describe('Cursor tests', function() {
             var cursor = _server.cursor(ns, { find: ns, query: {}, batchSize: 2 });
 
             // Execute next
-            cursor.next(function(nextCursorErr, nextCursorD) {
+            cursor._next(function(nextCursorErr, nextCursorD) {
               expect(nextCursorErr).to.be.null;
               expect(nextCursorD.a).to.equal(1);
 
               // Get the next item
-              cursor.next(function(secondCursorErr, secondCursorD) {
+              cursor._next(function(secondCursorErr, secondCursorD) {
                 expect(secondCursorErr).to.be.null;
                 expect(secondCursorD.a).to.equal(2);
 
                 self.configuration.manager.restart(false).then(function() {
                   // Should error out
-                  cursor.next(function(thirdCursorErr, thirdCursorD) {
+                  cursor._next(function(thirdCursorErr, thirdCursorD) {
                     expect(thirdCursorErr).to.be.ok;
                     expect(thirdCursorD).to.be.undefined;
 
@@ -377,18 +377,18 @@ describe('Cursor tests', function() {
             var cursor = _server.cursor(ns, { find: ns, query: {}, batchSize: 2 });
 
             // Execute next
-            cursor.next(function(nextCursorErr, nextCursorD) {
+            cursor._next(function(nextCursorErr, nextCursorD) {
               expect(nextCursorErr).to.be.null;
               expect(nextCursorD.a).to.equal(1);
 
               // Get the next item
-              cursor.next(function(secondCursorErr, secondCursorD) {
+              cursor._next(function(secondCursorErr, secondCursorD) {
                 expect(secondCursorErr).to.be.null;
                 expect(secondCursorD.a).to.equal(2);
 
                 // Should be able to continue cursor after reconnect
                 _server.once('reconnect', function() {
-                  cursor.next(function(thirdCursorErr, thirdCursorD) {
+                  cursor._next(function(thirdCursorErr, thirdCursorD) {
                     expect(thirdCursorErr).to.be.null;
                     expect(thirdCursorD.a).to.equal(3);
 
@@ -448,7 +448,7 @@ describe('Cursor tests', function() {
             var cursor = _server.cursor(ns, { find: ns, query: {}, batchSize: 2 });
 
             // Execute next
-            cursor.next(function(nextCursorErr, nextCursorD) {
+            cursor._next(function(nextCursorErr, nextCursorD) {
               expect(nextCursorErr).to.be.null;
               expect(nextCursorD.a).to.equal(1);
 
@@ -520,7 +520,7 @@ describe('Cursor tests', function() {
   //           });
 
   //           // Execute next
-  //           cursor.next(function(err) {
+  //           cursor._next(function(err) {
   //             expect(err).to.exist;
 
   //             cursor = server.cursor(ns, {
@@ -529,7 +529,7 @@ describe('Cursor tests', function() {
   //               batchSize: 1
   //             });
 
-  //             cursor.next(function(err) {
+  //             cursor._next(function(err) {
   //               expect(err).to.exist;
   //               done();
   //             });

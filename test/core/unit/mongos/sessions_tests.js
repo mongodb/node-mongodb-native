@@ -223,7 +223,7 @@ describe('Sessions (Mongos)', function() {
             readPreference
           });
 
-          cursor.next(() => {});
+          cursor._next(() => {});
         });
 
         mongos.connect();

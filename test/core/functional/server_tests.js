@@ -349,7 +349,7 @@ describe('Server tests', function() {
               });
 
               // Execute next
-              cursor.next(function() {
+              cursor._next(function() {
                 setTimeout(execute, 500);
               });
             });
@@ -366,7 +366,7 @@ describe('Server tests', function() {
               });
 
               // Execute next
-              cursor.next(function(cursorErr, d) {
+              cursor._next(function(cursorErr, d) {
                 expect(err).to.be.null;
                 expect(d).to.exist;
                 server.destroy();
@@ -752,7 +752,7 @@ describe('Server tests', function() {
           );
 
           function callNext(_cursor) {
-            _cursor.next(function(cursorErr, doc) {
+            _cursor._next(function(cursorErr, doc) {
               expect(cursorErr).to.not.exist;
               if (!doc) {
                 return done();

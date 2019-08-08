@@ -206,7 +206,7 @@
 //       });
 
 //       var nextObject = function() {
-//         cursor.next(function(err, doc) {
+//         cursor._next(function(err, doc) {
 //           if(err) {
 //             console.dir(err)
 //             process.exit(0)
@@ -222,7 +222,7 @@
 //       // var intervalId = setInterval(function() {
 //       //   console.log("------------------------------------------ next start");
 
-//       //   cursor.next(function(err, doc) {
+//       //   cursor._next(function(err, doc) {
 //       //     console.log("------------------------------------------ next end");
 //       //     console.dir(doc);
 //       //   });
@@ -237,13 +237,13 @@
 //       }, 1000);
 
 //       // // Execute next
-//       // cursor.next(function(err, d) {
+//       // cursor._next(function(err, d) {
 //       //   test.equal(null, err);
 //       //   test.equal(1, d.a);
 //       //   test.equal(1, cursor.bufferedCount());
 
 //       //   // Kill the cursor
-//       //   cursor.next(function(err, d) {
+//       //   cursor._next(function(err, d) {
 //       //     test.equal(null, err);
 //       //     test.equal(2, d.a);
 //       //     test.equal(0, cursor.bufferedCount());

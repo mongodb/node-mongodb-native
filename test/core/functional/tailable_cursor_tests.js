@@ -47,13 +47,13 @@ describe('Tailable cursor tests', function() {
                 });
 
                 // Execute next
-                cursor.next(function(cursorErr, cursorD) {
+                cursor._next(function(cursorErr, cursorD) {
                   expect(cursorErr).to.be.null;
                   expect(cursorD).to.exist;
 
                   var s = new Date();
 
-                  cursor.next(function() {
+                  cursor._next(function() {
                     var e = new Date();
                     expect(e.getTime() - s.getTime()).to.be.at.least(300);
 
