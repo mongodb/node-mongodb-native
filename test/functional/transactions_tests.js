@@ -155,7 +155,9 @@ describe('Transactions', function() {
                     db.executeDbAdminCommand(
                       { configureFailPoint: 'failCommand', mode: 'off' },
                       () => {
-                        client.close(done);
+                        session.endSession(() => {
+                          client.close(done);
+                        });
                       }
                     );
                   });
