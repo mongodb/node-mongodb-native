@@ -134,33 +134,34 @@ describe('Transactions', function() {
         client.connect((err, client) => {
           const session = client.startSession();
           const db = client.db(configuration.db);
-          const coll = db.collection('transaction_error_test');
-
-          session.startTransaction();
-          coll.insertOne({ a: 1 }, { session }, err => {
+          db.createCollection('transaction_error_test', (err, coll) => {
             expect(err).to.not.exist;
-            expect(session.inTransaction()).to.be.true;
+            session.startTransaction();
+            coll.insertOne({ a: 1 }, { session }, err => {
+              expect(err).to.not.exist;
+              expect(session.inTransaction()).to.be.true;
 
-            db.executeDbAdminCommand(
-              {
-                configureFailPoint: 'failCommand',
-                mode: { times: 2 },
-                data: { failCommands: ['commitTransaction'], closeConnection: true }
-              },
-              () => {
-                expect(session.inTransaction()).to.be.true;
-                session.commitTransaction(err => {
-                  expect(err).to.exist;
-                  expect(err.errorLabels).to.deep.equal(['UnknownTransactionCommitResult']);
-                  db.executeDbAdminCommand(
-                    { configureFailPoint: 'failCommand', mode: 'off' },
-                    () => {
-                      client.close(done);
-                    }
-                  );
-                });
-              }
-            );
+              db.executeDbAdminCommand(
+                {
+                  configureFailPoint: 'failCommand',
+                  mode: { times: 2 },
+                  data: { failCommands: ['commitTransaction'], closeConnection: true }
+                },
+                () => {
+                  expect(session.inTransaction()).to.be.true;
+                  session.commitTransaction(err => {
+                    expect(err).to.exist;
+                    expect(err.errorLabels).to.deep.equal(['UnknownTransactionCommitResult']);
+                    db.executeDbAdminCommand(
+                      { configureFailPoint: 'failCommand', mode: 'off' },
+                      () => {
+                        client.close(done);
+                      }
+                    );
+                  });
+                }
+              );
+            });
           });
         });
       }
