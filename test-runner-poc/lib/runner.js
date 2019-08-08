@@ -22,14 +22,15 @@ function addFilter(filter) {
   filters.push(filter);
 
 }
-
 function environmentSetup(environmentCallback) {
   const mongodb_uri = process.env.MONGODB_URI || 'mongodb://localhost:27017';
   mongoClient = new MongoClient(mongodb_uri);
 
   mongoClient.connect((err, client) => {
-    if (err) throw new Error(err);
-
+    if (err) {
+      environmentCallback(err);
+      return;
+    }
     createFilters(environmentParser);
 
     function environmentParser(environmentName, version) {
@@ -38,22 +39,13 @@ function environmentSetup(environmentCallback) {
 
       let host, port;
       parseConnectionString(mongodb_uri, (err, parsedURI) => {
-        if (err) throw new Error(err);
-        port = parsedURI.hosts[0].port;
-        host = parsedURI.hosts[0].host;
-
-        const environment = new Environment(host, port, version);
-
-        try {
-          const mongoPackage = {
-            path: path.resolve(process.cwd(), '..'),
-            package: 'mongodb'
-          };
-          environment.mongo = require(mongoPackage.path);
-        } catch (err) {
-          throw new Error('The test runner must be a dependency of mongodb or mongodb-core');
+        if (err) {
+          environmentCallback(err);
+          return;
         }
-        environmentCallback(environment, client);
+        const environment = new Environment(parsedURI, version);
+        environment.mongo = require('../../index');
+        client.close(() => environmentCallback(err, environment));
       });
     }
   });
@@ -90,9 +82,13 @@ function createFilters(callback) {
 }
 
 before(function(done) {
-  environmentSetup((environment, client) => {
-    this.configuration = new TestConfiguration(environment);
-    client.close(done);
+  environmentSetup((err, environment) => {
+    if (err) {
+      done(err);
+    } else {
+      this.configuration = new TestConfiguration(environment);
+      done();
+    }
   });
 });
 
