@@ -74,7 +74,7 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
           );
 
           // Execute next
-          cursor.next(function(err, d) {
+          cursor._next(function(err, d) {
             expect(err).to.not.exist;
             expect(d).to.be.null;
             expect(command).to.have.keys(['$query', '$readPreference']);
@@ -153,7 +153,7 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
           );
 
           // Execute next
-          cursor.next(function(err, d) {
+          cursor._next(function(err, d) {
             expect(err).to.be.null;
             expect(d).to.be.null;
             expect(command).to.have.keys(['$query', '$readPreference']);
@@ -225,7 +225,7 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
           );
 
           // Execute next
-          cursor.next(function(err, d) {
+          cursor._next(function(err, d) {
             expect(err).to.be.null;
             expect(d).to.be.null;
             expect(command).to.have.keys(['$query', '$readPreference']);

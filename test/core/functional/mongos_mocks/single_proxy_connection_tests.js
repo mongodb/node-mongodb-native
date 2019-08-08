@@ -166,11 +166,11 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
           });
 
           // Execute next
-          cursor.next(function(err, d) {
+          cursor._next(function(err, d) {
             expect(err).to.not.exist;
             expect(d).to.exist;
 
-            cursor.next(function(_err, _d) {
+            cursor._next(function(_err, _d) {
               expect(_err).to.not.exist;
               expect(_d).to.exist;
 

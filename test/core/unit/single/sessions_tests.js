@@ -406,11 +406,11 @@ describe('Sessions (Single)', function() {
         );
 
         // Execute next
-        cursor.next(function(err) {
+        cursor._next(function(err) {
           expect(err).to.not.exist;
           expect(commands[0].lsid).to.eql(session.id);
 
-          cursor.next(function(err) {
+          cursor._next(function(err) {
             expect(err).to.not.exist;
             expect(commands[1].lsid).to.eql(session.id);
 
@@ -482,7 +482,7 @@ describe('Sessions (Single)', function() {
         );
 
         // Execute next
-        cursor.next(function(err) {
+        cursor._next(function(err) {
           expect(err).to.not.exist;
 
           cursor.kill(err => {

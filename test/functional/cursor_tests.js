@@ -3399,8 +3399,8 @@ describe('Cursor', function() {
 
         db.collection('myCollection').find({}, function(error, cursor) {
           test.equal(null, err);
-          test.equal('myCollection', cursor.s.namespace.collection);
-          test.equal('integration_tests', cursor.s.namespace.db);
+          test.equal('myCollection', cursor.namespace.collection);
+          test.equal('integration_tests', cursor.namespace.db);
 
           client.close();
           done();

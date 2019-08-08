@@ -148,12 +148,12 @@ describe('Operation tests', function() {
               );
 
               // Execute next
-              cursor.next(function(cursorErr, cursorD) {
+              cursor._next(function(cursorErr, cursorD) {
                 expect(cursorErr).to.be.null;
                 expect(cursorD.a).to.equal(1);
 
                 // Execute next
-                cursor.next(function(secondCursorErr, secondCursorD) {
+                cursor._next(function(secondCursorErr, secondCursorD) {
                   expect(secondCursorErr).to.be.null;
                   expect(secondCursorD).to.be.null;
                   // Destroy the server connection
@@ -213,12 +213,12 @@ describe('Operation tests', function() {
               );
 
               // Execute next
-              cursor.next(function(cursorErr, cursorD) {
+              cursor._next(function(cursorErr, cursorD) {
                 expect(cursorErr).to.be.null;
                 expect(cursorD.a).to.equal(2);
 
                 // Execute next
-                cursor.next(function(secondCursorErr, secondCursorD) {
+                cursor._next(function(secondCursorErr, secondCursorD) {
                   expect(secondCursorErr).to.be.null;
                   expect(secondCursorD).to.be.null;
                   // Destroy the server connection
@@ -276,7 +276,7 @@ describe('Operation tests', function() {
               );
 
               // Execute next
-              cursor.next(function(cursorErr, cursorD) {
+              cursor._next(function(cursorErr, cursorD) {
                 expect(cursorErr).to.be.null;
                 expect(cursorD.a).to.equal(1);
                 expect(cursorD.result[0].c).to.equal(1);
@@ -332,16 +332,16 @@ describe('Operation tests', function() {
             });
 
             // Execute next
-            cursor.next(function(cursorErr, cursorD) {
+            cursor._next(function(cursorErr, cursorD) {
               expect(cursorErr).to.be.null;
               expect(cursorD.a).to.equal(1);
 
               // Execute next
-              cursor.next(function(secondCursorErr, secondCursorD) {
+              cursor._next(function(secondCursorErr, secondCursorD) {
                 expect(secondCursorErr).to.be.null;
                 expect(secondCursorD.a).to.equal(2);
 
-                cursor.next(function(thirdCursorErr, thirdCursorD) {
+                cursor._next(function(thirdCursorErr, thirdCursorD) {
                   expect(thirdCursorErr).to.be.null;
                   expect(thirdCursorD.a).to.equal(3);
 
@@ -404,16 +404,16 @@ describe('Operation tests', function() {
                 );
 
                 // Execute next
-                cursor.next(function(cursorErr, cursorD) {
+                cursor._next(function(cursorErr, cursorD) {
                   expect(cursorErr).to.be.null;
                   expect(cursorD.a).to.equal(1);
 
                   // Execute next
-                  cursor.next(function(secondCursorErr, secondCursorD) {
+                  cursor._next(function(secondCursorErr, secondCursorD) {
                     expect(secondCursorErr).to.be.null;
                     expect(secondCursorD.a).to.equal(2);
 
-                    cursor.next(function(thirdCursorErr, thirdCursorD) {
+                    cursor._next(function(thirdCursorErr, thirdCursorD) {
                       expect(thirdCursorErr).to.be.null;
                       expect(thirdCursorD.a).to.equal(3);
 
@@ -470,13 +470,13 @@ describe('Operation tests', function() {
             });
 
             // Execute next
-            cursor.next(function(cursorErr, cursorD) {
+            cursor._next(function(cursorErr, cursorD) {
               expect(cursorErr).to.be.null;
               expect(cursorD.a).to.equal(1);
 
               // Kill the cursor
               cursor.kill(function() {
-                cursor.next(function(secondCursorErr, secondCursorD) {
+                cursor._next(function(secondCursorErr, secondCursorD) {
                   expect(secondCursorErr).to.not.exist;
                   expect(secondCursorD).to.not.exist;
                   // Destroy the server connection
@@ -529,13 +529,13 @@ describe('Operation tests', function() {
             });
 
             // Execute next
-            cursor.next(function(cursorErr, cursorD) {
+            cursor._next(function(cursorErr, cursorD) {
               expect(cursorErr).to.be.null;
               expect(cursorD.a).to.equal(1);
 
               // Kill the cursor
               cursor.kill(function() {
-                cursor.next(function(secondCursorErr, secondCursorD) {
+                cursor._next(function(secondCursorErr, secondCursorD) {
                   expect(secondCursorErr).to.not.exist;
                   expect(secondCursorD).to.not.exist;
                   // Destroy the server connection

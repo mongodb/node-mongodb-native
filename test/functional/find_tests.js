@@ -546,7 +546,6 @@ describe('Find', function() {
 
                 // Let's test usage of the $where statement
                 collection.find({ $where: new Code('this.a > 2') }).count(function(err, count) {
-                  if (err) console.dir({ err });
                   test.equal(null, err);
                   test.equal(1, count);
 
