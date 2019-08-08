@@ -81,7 +81,8 @@
               "startTransaction": true,
               "autocommit": false,
               "readConcern": null,
-              "writeConcern": null
+              "writeConcern": null,
+              "maxTimeMS": null
             },
             "command_name": "insert",
             "database_name": "transaction-tests"
@@ -98,7 +99,8 @@
               "startTransaction": null,
               "autocommit": false,
               "readConcern": null,
-              "writeConcern": null
+              "writeConcern": null,
+              "maxTimeMS": null
             },
             "command_name": "commitTransaction",
             "database_name": "admin"
@@ -123,7 +125,8 @@
               "readConcern": {
                 "afterClusterTime": 42
               },
-              "writeConcern": null
+              "writeConcern": null,
+              "maxTimeMS": null
             },
             "command_name": "insert",
             "database_name": "transaction-tests"
@@ -140,7 +143,8 @@
               "startTransaction": null,
               "autocommit": false,
               "readConcern": null,
-              "writeConcern": null
+              "writeConcern": null,
+              "maxTimeMS": null
             },
             "command_name": "abortTransaction",
             "database_name": "admin"
@@ -227,7 +231,8 @@
               "readConcern": {
                 "level": "local"
               },
-              "writeConcern": null
+              "writeConcern": null,
+              "maxTimeMS": null
             },
             "command_name": "insert",
             "database_name": "transaction-tests"
@@ -246,7 +251,8 @@
               "readConcern": null,
               "writeConcern": {
                 "w": 1
-              }
+              },
+              "maxTimeMS": null
             },
             "command_name": "commitTransaction",
             "database_name": "admin"
@@ -272,7 +278,8 @@
                 "level": "local",
                 "afterClusterTime": 42
               },
-              "writeConcern": null
+              "writeConcern": null,
+              "maxTimeMS": null
             },
             "command_name": "insert",
             "database_name": "transaction-tests"
@@ -291,7 +298,8 @@
               "readConcern": null,
               "writeConcern": {
                 "w": 1
-              }
+              },
+              "maxTimeMS": null
             },
             "command_name": "abortTransaction",
             "database_name": "admin"
@@ -318,7 +326,8 @@
             },
             "writeConcern": {
               "w": 1
-            }
+            },
+            "maxCommitTimeMS": 60000
           }
         }
       },
@@ -405,7 +414,8 @@
               "readConcern": null,
               "writeConcern": {
                 "w": 1
-              }
+              },
+              "maxTimeMS": 60000
             },
             "command_name": "commitTransaction",
             "database_name": "admin"
@@ -481,7 +491,8 @@
             },
             "writeConcern": {
               "w": 1
-            }
+            },
+            "maxCommitTimeMS": 30000
           }
         }
       },
@@ -496,7 +507,8 @@
               },
               "writeConcern": {
                 "w": "majority"
-              }
+              },
+              "maxCommitTimeMS": 60000
             }
           }
         },
@@ -569,7 +581,8 @@
               "readConcern": {
                 "level": "snapshot"
               },
-              "writeConcern": null
+              "writeConcern": null,
+              "maxTimeMS": null
             },
             "command_name": "insert",
             "database_name": "transaction-tests"
@@ -588,7 +601,8 @@
               "readConcern": null,
               "writeConcern": {
                 "w": "majority"
-              }
+              },
+              "maxTimeMS": 60000
             },
             "command_name": "commitTransaction",
             "database_name": "admin"
@@ -614,7 +628,8 @@
                 "level": "snapshot",
                 "afterClusterTime": 42
               },
-              "writeConcern": null
+              "writeConcern": null,
+              "maxTimeMS": null
             },
             "command_name": "insert",
             "database_name": "transaction-tests"
@@ -633,7 +648,8 @@
               "readConcern": null,
               "writeConcern": {
                 "w": "majority"
-              }
+              },
+              "maxTimeMS": null
             },
             "command_name": "abortTransaction",
             "database_name": "admin"
@@ -664,7 +680,8 @@
             },
             "writeConcern": {
               "w": "majority"
-            }
+            },
+            "maxCommitTimeMS": 60000
           }
         }
       },
@@ -732,7 +749,8 @@
               "readConcern": {
                 "level": "snapshot"
               },
-              "writeConcern": null
+              "writeConcern": null,
+              "maxTimeMS": null
             },
             "command_name": "insert",
             "database_name": "transaction-tests"
@@ -751,7 +769,8 @@
               "readConcern": null,
               "writeConcern": {
                 "w": "majority"
-              }
+              },
+              "maxTimeMS": 60000
             },
             "command_name": "commitTransaction",
             "database_name": "admin"
@@ -777,7 +796,8 @@
                 "level": "snapshot",
                 "afterClusterTime": 42
               },
-              "writeConcern": null
+              "writeConcern": null,
+              "maxTimeMS": null
             },
             "command_name": "insert",
             "database_name": "transaction-tests"
@@ -796,7 +816,8 @@
               "readConcern": null,
               "writeConcern": {
                 "w": "majority"
-              }
+              },
+              "maxTimeMS": null
             },
             "command_name": "abortTransaction",
             "database_name": "admin"

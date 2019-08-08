@@ -423,6 +423,106 @@
           ]
         }
       }
+    },
+    {
+      "description": "commit is not retried after MaxTimeMSExpired error",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "commitTransaction"
+          ],
+          "errorCode": 50
+        }
+      },
+      "operations": [
+        {
+          "name": "withTransaction",
+          "object": "session0",
+          "arguments": {
+            "callback": {
+              "operations": [
+                {
+                  "name": "insertOne",
+                  "object": "collection",
+                  "arguments": {
+                    "session": "session0",
+                    "document": {
+                      "_id": 1
+                    }
+                  },
+                  "result": {
+                    "insertedId": 1
+                  }
+                }
+              ]
+            },
+            "options": {
+              "maxCommitTimeMS": 60000
+            }
+          },
+          "result": {
+            "errorCodeName": "MaxTimeMSExpired",
+            "errorLabelsContain": [
+              "UnknownTransactionCommitResult"
+            ],
+            "errorLabelsOmit": [
+              "TransientTransactionError"
+            ]
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "insert": "test",
+              "documents": [
+                {
+                  "_id": 1
+                }
+              ],
+              "ordered": true,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": true,
+              "autocommit": false,
+              "readConcern": null,
+              "writeConcern": null
+            },
+            "command_name": "insert",
+            "database_name": "withTransaction-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "commitTransaction": 1,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "autocommit": false,
+              "maxTimeMS": 60000,
+              "readConcern": null,
+              "startTransaction": null,
+              "writeConcern": null
+            },
+            "command_name": "commitTransaction",
+            "database_name": "admin"
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": []
+        }
+      }
     }
   ]
 }
