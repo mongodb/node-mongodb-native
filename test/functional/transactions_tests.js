@@ -135,36 +135,63 @@ describe('Transactions', function() {
           const session = client.startSession();
           const db = client.db(configuration.db);
           const coll = db.collection('transaction_error_test');
-          expect(err).to.not.exist;
+
           session.startTransaction();
+          coll.insertOne({ a: 1 }, { session }, err => {
+            expect(err).to.not.exist;
+            expect(session.inTransaction()).to.be.true;
 
-          coll.insertOne({ a: 1 }, err => {
-            expect(err).to.be.null;
-            coll.insertOne({ a: 2 }, { session }, err => {
-              expect(err).to.not.exist;
-              expect(session.inTransaction()).to.be.true;
-
-              db.executeDbAdminCommand(
-                {
-                  configureFailPoint: 'failCommand',
-                  mode: { times: 1 },
-                  data: { failCommands: ['abortTransaction'], closeConnection: true }
-                },
-                () => {
-                  expect(session.inTransaction()).to.be.true;
-                  session.abortTransaction(err => {
-                    expect(err).to.exist;
-                    db.executeDbAdminCommand(
-                      { configureFailPoint: 'failCommand', mode: 'off' },
-                      () => {
-                        client.close(done);
-                      }
-                    );
-                  });
-                }
-              );
-            });
+            db.executeDbAdminCommand(
+              {
+                configureFailPoint: 'failCommand',
+                mode: { times: 2 },
+                data: { failCommands: ['commitTransaction'], closeConnection: true }
+              },
+              () => {
+                expect(session.inTransaction()).to.be.true;
+                session.commitTransaction(err => {
+                  expect(err).to.exist;
+                  expect(err.errorLabels).to.deep.equal(['UnknownTransactionCommitResult']);
+                  db.executeDbAdminCommand(
+                    { configureFailPoint: 'failCommand', mode: 'off' },
+                    () => {
+                      client.close(done);
+                    }
+                  );
+                });
+              }
+            );
           });
+        });
+      }
+    });
+
+    it('should not have a TransientTransactionError label outside of a transaction', {
+      metadata: { requires: { topology: 'replicaset', mongodb: '>=4.0.0' } },
+      test: function(done) {
+        const configuration = this.configuration;
+        const client = configuration.newClient({ w: 1 }, { useUnifiedTopology: true });
+
+        client.connect((err, client) => {
+          const db = client.db(configuration.db);
+          const coll = db.collection('transaction_error_test1');
+
+          db.executeDbAdminCommand(
+            {
+              configureFailPoint: 'failCommand',
+              mode: 'alwaysOn',
+              data: { failCommands: ['insert'], closeConnection: true }
+            },
+            () => {
+              coll.insertOne({ a: 1 }, err => {
+                expect(err).to.exist;
+                expect(err.errorLabels).to.not.exist;
+                db.executeDbAdminCommand({ configureFailPoint: 'failCommand', mode: 'off' }, () => {
+                  client.close(done);
+                });
+              });
+            }
+          );
         });
       }
     });
