@@ -11,7 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "chai": "*",
-    "mocha": "^6.2.0",
+    "mocha": "*",
     "mongodb": "*"
   }
 }
