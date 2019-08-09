@@ -1,7 +1,7 @@
 "use strict";
 const path = require("path");
 const fs = require("fs");
-const MongoClient = require('mongodb').MongoClient;
+const MongoClient = require('../../index.js').MongoClient;
 const environments = require('../environments');
 const TestConfiguration = require('../config');
 const parseConnectionString = require('../../lib/core/uri_parser');
@@ -19,6 +19,8 @@ function addFilter(filter) {
   filters.push(filter);
 
 }
+
+
 function environmentSetup(environmentCallback, done) {
   const mongodb_uri = process.env.MONGODB_URI || 'mongodb://localhost:27017';
   mongoClient = new MongoClient(mongodb_uri);
