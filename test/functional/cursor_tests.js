@@ -297,6 +297,7 @@ describe('Cursor', function() {
       const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
 
       client.connect((err, client) => {
+        expect(err).to.not.exist;
         const db = client.db(configuration.db);
 
         let internalClientCursor;
@@ -311,7 +312,9 @@ describe('Cursor', function() {
         const cursor = db.collection('countTEST').find({ qty: { $gt: 4 } });
         cursor.count(true, { readPreference: ReadPreference.SECONDARY }, err => {
           expect(err).to.be.null;
-          expect(internalClientCursor.getCall(0).args[2])
+
+          const operation = internalClientCursor.getCall(0).args[0];
+          expect(operation.options)
             .to.have.nested.property('readPreference')
             .that.deep.equals(expectedReadPreference);
           client.close();
