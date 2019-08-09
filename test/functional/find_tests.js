@@ -36,6 +36,7 @@ describe('Find', function() {
 
             // Ensure correct insertion testing via the cursor and the count function
             collection.find().toArray(function(err, documents) {
+              expect(err).to.not.exist;
               test.equal(2, documents.length);
 
               collection.count(function(err, count) {
