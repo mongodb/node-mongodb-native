@@ -3746,7 +3746,6 @@ describe('Operation (Promises)', function() {
         ],
         { rs_name: configuration.replicasetName }
       );
-
       var client = new MongoClient(replSet, { w: 0 });
       return client.connect().then(function() {
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -5138,7 +5137,7 @@ describe('Operation (Promises)', function() {
         // REMOVE-LINE done();
         // BEGIN
         // Read in the content of a file
-        var data = fs.readFileSync('./test/functional/data/iya_logo_final_bw.jpg');
+        var data = fs.readFileSync('../data/iya_logo_final_bw.jpg');
 
         // Create two new files
         var gs = new GridStore(db, 'test', 'w');
