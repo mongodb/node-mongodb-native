@@ -1355,7 +1355,7 @@ describe('Aggregation', function() {
     }
   });
 
-  it.only('should not send a batchSize for aggregations with an out stage', {
+  it('should not send a batchSize for aggregations with an out stage', {
     metadata: { requires: { topology: ['single', 'replicaset'] } },
     test: function(done) {
       const databaseName = this.configuration.db;

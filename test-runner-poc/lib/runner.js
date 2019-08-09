@@ -36,10 +36,25 @@ function environmentSetup(environmentCallback, done) {
         if (err) {
           return environmentCallback(err);
         }
-        const environment = new Environment(parsedURI, version);
-        environment.mongo = require('../../index');
-        environmentCallback(err, environment);
-        client.close(() => environmentCallback(err, environment));
+        client.db('admin').command({ isMaster: 1 }, (err, result) => {
+          if (err) {
+            environmentCallback(err);
+          }
+          for (let i = 0; i < result.hosts.length; i++) {
+            if (result.ismaster) {
+              const environment = new Environment(result, version);
+              environment.mongo = require('../../index');
+              environmentCallback(err, environment);
+              return client.close(done);
+            } else if (i === result.hosts.length - 1) {
+              return environmentParser(environmentName, version)
+            }
+          }
+          const environment = new Environment(parsedURI, version);
+          environment.mongo = require('../../index');
+          environmentCallback(err, environment);
+          client.close(() => environmentCallback(err, environment));
+        });
       });
     }
   });
