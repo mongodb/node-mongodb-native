@@ -709,41 +709,25 @@ buildvariants:
     run_on: ubuntu1604-arm64-small
     expansions:
       NODE_LTS_NAME: dubnium
-    tasks: &ref_5
-      - test-latest-single
-      - test-latest-replicaset
-      - test-latest-sharded
-      - test-4.2-single
-      - test-4.2-replicaset
-      - test-4.2-sharded
-      - test-4.0-single
-      - test-4.0-replicaset
-      - test-4.0-sharded
-      - test-3.6-single
-      - test-3.6-replicaset
-      - test-3.6-sharded
-      - test-3.4-single
-      - test-3.4-replicaset
-      - test-3.4-sharded
-      - test-atlas-connectivity
+    tasks: *ref_2
   - name: ubuntu1604-arm64-small-carbon
     display_name: Ubuntu 16.04 (ARM64) Node Carbon
     run_on: ubuntu1604-arm64-small
     expansions:
       NODE_LTS_NAME: carbon
-    tasks: *ref_5
+    tasks: *ref_2
   - name: ubuntu1604-arm64-small-boron
     display_name: Ubuntu 16.04 (ARM64) Node Boron
     run_on: ubuntu1604-arm64-small
     expansions:
       NODE_LTS_NAME: boron
-    tasks: *ref_5
+    tasks: *ref_2
   - name: ubuntu1604-arm64-small-argon
     display_name: Ubuntu 16.04 (ARM64) Node Argon
     run_on: ubuntu1604-arm64-small
     expansions:
       NODE_LTS_NAME: argon
-    tasks: *ref_5
+    tasks: *ref_2
   - name: ubuntu1604-power8-test-dubnium
     display_name: Ubuntu 16.04 (POWER8) Node Dubnium
     run_on: ubuntu1604-power8-test
@@ -768,3 +752,34 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: argon
     tasks: *ref_2
+  - name: ubuntu1804-arm64-test-dubnium
+    display_name: Ubuntu 18.04 (ARM64) Node Dubnium
+    run_on: ubuntu1804-arm64-test
+    expansions:
+      NODE_LTS_NAME: dubnium
+    tasks: &ref_5
+      - test-latest-single
+      - test-latest-replicaset
+      - test-latest-sharded
+      - test-4.2-single
+      - test-4.2-replicaset
+      - test-4.2-sharded
+      - test-atlas-connectivity
+  - name: ubuntu1804-arm64-test-carbon
+    display_name: Ubuntu 18.04 (ARM64) Node Carbon
+    run_on: ubuntu1804-arm64-test
+    expansions:
+      NODE_LTS_NAME: carbon
+    tasks: *ref_5
+  - name: ubuntu1804-arm64-test-boron
+    display_name: Ubuntu 18.04 (ARM64) Node Boron
+    run_on: ubuntu1804-arm64-test
+    expansions:
+      NODE_LTS_NAME: boron
+    tasks: *ref_5
+  - name: ubuntu1804-arm64-test-argon
+    display_name: Ubuntu 18.04 (ARM64) Node Argon
+    run_on: ubuntu1804-arm64-test
+    expansions:
+      NODE_LTS_NAME: argon
+    tasks: *ref_5
