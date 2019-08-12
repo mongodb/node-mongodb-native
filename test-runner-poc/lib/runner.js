@@ -20,7 +20,6 @@ function addFilter(filter) {
 
 }
 
-
 function environmentSetup(environmentCallback, done) {
   const mongodb_uri = process.env.MONGODB_URI || 'mongodb://localhost:27017';
   mongoClient = new MongoClient(mongodb_uri);
@@ -32,29 +31,28 @@ function environmentSetup(environmentCallback, done) {
 
     function environmentParser(environmentName, version) {
       const Environment = environments[environmentName];
-      parseConnectionString(mongodb_uri, (err, parsedURI) => {
-        if (err) {
-          return environmentCallback(err);
-        }
-        client.db('admin').command({ isMaster: 1 }, (err, result) => {
-          if (err) {
-            environmentCallback(err);
-          }
+
+      function callEnvironmentCallback(result, version, err) {
+        const environment = new Environment(result, version);
+        environment.mongo = require('../../index');
+        environmentCallback(err, environment);
+        return client.close(done);
+      }
+
+      client.db('admin').command({ isMaster: 1, }, (err, result) => {
+        if (err) environmentCallback(err)
+        if (result.hosts) {
           for (let i = 0; i < result.hosts.length; i++) {
             if (result.ismaster) {
-              const environment = new Environment(result, version);
-              environment.mongo = require('../../index');
-              environmentCallback(err, environment);
-              return client.close(done);
+              return callEnvironmentCallback(result, version, err);
             } else if (i === result.hosts.length - 1) {
               return environmentParser(environmentName, version)
             }
           }
-          const environment = new Environment(parsedURI, version);
-          environment.mongo = require('../../index');
-          environmentCallback(err, environment);
-          client.close(() => environmentCallback(err, environment));
-        });
+        }
+        else {
+          return callEnvironmentCallback(result, version, err);
+        }
       });
     }
   });

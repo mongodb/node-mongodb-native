@@ -4,7 +4,7 @@ const setupDatabase = require('./shared').setupDatabase;
 const f = require('util').format;
 const Buffer = require('safe-buffer').Buffer;
 
-const path = require('path')
+const path = require('path');
 
 const chai = require('chai');
 const expect = chai.expect;
@@ -7038,7 +7038,9 @@ describe('Operation Examples', function() {
         // BEGIN
         var db = client.db(configuration.db);
         // Read in the content of a file
-        var data = fs.readFileSync(path.join(process.cwd(), '../test/functional/data/iya_logo_final_bw.jpg'));
+        var data = fs.readFileSync(
+          path.join(process.cwd(), '../test/functional/data/iya_logo_final_bw.jpg')
+        );
         // Create a new file
         var gs = new GridStore(db, 'test', 'w');
         // Open the file

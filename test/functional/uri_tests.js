@@ -180,7 +180,7 @@ describe('URI', function() {
         if (err) console.dir(err);
         expect(err).to.not.exist;
         expect(client).to.exist;
-        expect(client.s.options.replicaSet).to.exist.and.equal(config.replicasetName);
+        expect(client.s.options.replicaSet).to.exist.and.equal(String(config.replicasetName));
         done();
       });
     }

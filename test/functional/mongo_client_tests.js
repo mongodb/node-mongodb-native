@@ -219,13 +219,12 @@ describe('MongoClient', function() {
         // skipped for direct legacy variable inspection
         return this.skip();
       }
-
-      var url = configuration.url().replace('rs_name=rs', 'rs_name=rs1');
-      const client = configuration.newClient(url, {
+      const replicaSetName = this.configuration.options.setName;
+      const client = configuration.newClient(this.configuration.options.url, {
         replSet: {
           ha: false,
           haInterval: 10000,
-          replicaSet: 'rs',
+          replicaSet: replicaSetName,
           secondaryAcceptableLatencyMS: 100,
           connectWithNoPrimary: true,
           poolSize: 1,
@@ -238,13 +237,13 @@ describe('MongoClient', function() {
           }
         }
       });
-
       client.connect(function(err, client) {
+        expect(err).to.not.exist;
         var db = client.db(configuration.db);
 
         test.equal(false, db.s.topology.s.clonedOptions.ha);
         test.equal(10000, db.s.topology.s.clonedOptions.haInterval);
-        test.equal('rs', db.s.topology.s.clonedOptions.setName);
+        test.equal(replicaSetName, db.s.topology.s.clonedOptions.setName);
         test.equal(100, db.s.topology.s.clonedOptions.acceptableLatency);
         test.equal(true, db.s.topology.s.clonedOptions.secondaryOnlyConnectionAllowed);
         test.equal(1, db.s.topology.s.clonedOptions.size);
@@ -615,11 +614,12 @@ describe('MongoClient', function() {
         // this is no longer relevant with the unified topology
         return this.skip();
       }
-
       var url = configuration
         .url()
-        .replace('rs_name=rs', '')
-        .replace('localhost:31000', 'localhost:31000,localhost:31001');
+        .replace('rs_name='+this.configuration.options.setName, '')
+        .replace(this.configuration.options.host+':'+this.configuration.options.port,
+          this.configuration.options.host+':'+this.configuration.options.port+',' +
+          this.configuration.options.host+':'+parseInt(this.configuration.options.port)+1);
 
       const client = configuration.newClient(url);
       client.connect(function(err) {

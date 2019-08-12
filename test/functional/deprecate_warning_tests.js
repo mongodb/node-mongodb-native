@@ -4,6 +4,7 @@ const chai = require('chai');
 const expect = chai.expect;
 const sinon = require('sinon');
 const sinonChai = require('sinon-chai');
+const path = require('path')
 require('mocha-sinon');
 chai.use(sinonChai);
 
@@ -23,8 +24,9 @@ describe('Deprecation Warnings', function() {
   it('node --no-deprecation flag should suppress all deprecation warnings', {
     metadata: { requires: { node: '>=6.0.0' } },
     test: function(done) {
+      const fileLocation = path.join(process.cwd(), '../test/tools/deprecate_warning_test_program.js');
       exec(
-        'node --no-deprecation ./test/tools/deprecate_warning_test_program.js',
+        'node --no-deprecation ' + fileLocation,
         (err, stdout, stderr) => {
           expect(err).to.be.null;
           expect(stdout).to.be.empty;
@@ -38,8 +40,9 @@ describe('Deprecation Warnings', function() {
   it('node --trace-deprecation flag should print stack trace to stderr', {
     metadata: { requires: { node: '>=6.0.0' } },
     test: function(done) {
+      const fileLocation = path.join(process.cwd(), '../test/tools/deprecate_warning_test_program.js');
       exec(
-        'node --trace-deprecation ./test/tools/deprecate_warning_test_program.js',
+        'node --trace-deprecation ' + fileLocation,
         (err, stdout, stderr) => {
           expect(err).to.be.null;
           expect(stdout).to.be.empty;

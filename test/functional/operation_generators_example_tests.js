@@ -2,6 +2,7 @@
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 var Buffer = require('safe-buffer').Buffer;
+const path = require('path');
 
 /**************************************************************************
  *
@@ -4700,7 +4701,9 @@ describe('Operation (Generators)', function() {
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
         // Read in the content of a file
-        var data = fs.readFileSync(path.join(process.cwd(), '../test/functional/data/iya_logo_final_bw.jpg'));
+        var data = fs.readFileSync(
+          path.join(process.cwd(), '../test/functional/data/iya_logo_final_bw.jpg')
+        );
         // Create a new file
         var gs = new GridStore(db, 'test', 'w');
         // Open the file
