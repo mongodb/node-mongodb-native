@@ -66,7 +66,7 @@ describe('Change Stream Spec', function() {
 
           client.removeAllListeners('commandStarted');
 
-          return client && client.close();
+          return client && client.close(true);
         });
 
         specData.tests.forEach(test => {
