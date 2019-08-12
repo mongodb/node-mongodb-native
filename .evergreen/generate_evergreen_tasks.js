@@ -87,13 +87,19 @@ const OPERATING_SYSTEMS = [
     name: 'ubuntu1604-arm64-small',
     display_name: 'Ubuntu 16.04 (ARM64)',
     run_on: 'ubuntu1604-arm64-small',
-    mongoVersion: '>=3.4'
+    mongoVersion: '>=3.4 <4.2'
   },
   {
     name: 'ubuntu1604-power8-test',
     display_name: 'Ubuntu 16.04 (POWER8)',
     run_on: 'ubuntu1604-power8-test',
     mongoVersion: '>=3.4 <4.2'
+  },
+  {
+    name: 'ubuntu1804-arm64-test',
+    display_name: 'Ubuntu 18.04 (ARM64)',
+    run_on: 'ubuntu1804-arm64-test',
+    mongoVersion: '>=4.2'
   }
 
   // reenable when these are actually running 7.2, or we release a 7.4 rpm
