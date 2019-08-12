@@ -616,10 +616,18 @@ describe('MongoClient', function() {
       }
       var url = configuration
         .url()
-        .replace('rs_name='+this.configuration.options.setName, '')
-        .replace(this.configuration.options.host+':'+this.configuration.options.port,
-          this.configuration.options.host+':'+this.configuration.options.port+',' +
-          this.configuration.options.host+':'+parseInt(this.configuration.options.port)+1);
+        .replace('rs_name=' + this.configuration.options.setName, '')
+        .replace(
+          this.configuration.options.host + ':' + this.configuration.options.port,
+          this.configuration.options.host +
+            ':' +
+            this.configuration.options.port +
+            ',' +
+            this.configuration.options.host +
+            ':' +
+            parseInt(this.configuration.options.port) +
+            1
+        );
 
       const client = configuration.newClient(url);
       client.connect(function(err) {
