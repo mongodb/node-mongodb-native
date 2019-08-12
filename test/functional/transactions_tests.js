@@ -36,7 +36,9 @@ describe('Transactions', function() {
           'increment txnNumber',
           // There is something wrong with the distinct command in the runner:
           // it is not failing properly
-          'add transient label to connection errors'
+          'add transient label to connection errors',
+          // Skipping this until SPEC-1320 is resolved
+          'remain pinned after non-transient error on commit'
         ];
 
         return SKIP_TESTS.indexOf(spec.description) === -1;
