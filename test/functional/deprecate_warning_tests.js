@@ -4,7 +4,6 @@ const chai = require('chai');
 const expect = chai.expect;
 const sinon = require('sinon');
 const sinonChai = require('sinon-chai');
-const path = require('path');
 require('mocha-sinon');
 chai.use(sinonChai);
 
@@ -24,51 +23,49 @@ describe('Deprecation Warnings', function() {
   it('node --no-deprecation flag should suppress all deprecation warnings', {
     metadata: { requires: { node: '>=6.0.0' } },
     test: function(done) {
-      const fileLocation = path.join(
-        process.cwd(),
-        '../test/tools/deprecate_warning_test_program.js'
+      exec(
+        'node --no-deprecation ./test/tools/deprecate_warning_test_program.js',
+        (err, stdout, stderr) => {
+          expect(err).to.be.null;
+          expect(stdout).to.be.empty;
+          expect(stderr).to.be.empty;
+          done();
+        }
       );
-      exec('node --no-deprecation ' + fileLocation, (err, stdout, stderr) => {
-        expect(err).to.be.null;
-        expect(stdout).to.be.empty;
-        expect(stderr).to.be.empty;
-        done();
-      });
     }
   });
 
   it('node --trace-deprecation flag should print stack trace to stderr', {
     metadata: { requires: { node: '>=6.0.0' } },
     test: function(done) {
-      const fileLocation = path.join(
-        process.cwd(),
-        '../test/tools/deprecate_warning_test_program.js'
+      exec(
+        'node --trace-deprecation ./test/tools/deprecate_warning_test_program.js',
+        (err, stdout, stderr) => {
+          expect(err).to.be.null;
+          expect(stdout).to.be.empty;
+          expect(stderr).to.not.be.empty;
+
+          // split stderr into separate lines, trimming the first line to just the warning message
+          const split = stderr.split('\n');
+          const warning = split
+            .shift()
+            .split(')')[1]
+            .trim();
+
+          // ensure warning message matches expected
+          expect(warning).to.equal(
+            'DeprecationWarning: testDeprecationFlags option [maxScan]' + defaultMessage
+          );
+
+          // ensure each following line is from the stack trace, i.e. 'at config.deprecatedOptions.forEach.deprecatedOption'
+          split.pop();
+          split.forEach(s => {
+            expect(s.trim()).to.match(/^at/);
+          });
+
+          done();
+        }
       );
-      exec('node --trace-deprecation ' + fileLocation, (err, stdout, stderr) => {
-        expect(err).to.be.null;
-        expect(stdout).to.be.empty;
-        expect(stderr).to.not.be.empty;
-
-        // split stderr into separate lines, trimming the first line to just the warning message
-        const split = stderr.split('\n');
-        const warning = split
-          .shift()
-          .split(')')[1]
-          .trim();
-
-        // ensure warning message matches expected
-        expect(warning).to.equal(
-          'DeprecationWarning: testDeprecationFlags option [maxScan]' + defaultMessage
-        );
-
-        // ensure each following line is from the stack trace, i.e. 'at config.deprecatedOptions.forEach.deprecatedOption'
-        split.pop();
-        split.forEach(s => {
-          expect(s.trim()).to.match(/^at/);
-        });
-
-        done();
-      });
     }
   });
 

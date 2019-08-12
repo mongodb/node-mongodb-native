@@ -7,8 +7,7 @@ const crypto = require('crypto'),
   test = require('./shared').assert,
   setupDatabase = require('./shared').setupDatabase,
   expect = require('chai').expect,
-  Buffer = require('safe-buffer').Buffer,
-  path = require('path');
+  Buffer = require('safe-buffer').Buffer;
 
 describe('GridFS Stream', function() {
   before(function() {
