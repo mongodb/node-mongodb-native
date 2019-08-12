@@ -3,7 +3,7 @@
 const chai = require('chai');
 const expect = chai.expect;
 
-describe('Connections survive primary step down', function() {
+describe.skip('Connections survive primary step down', function() {
   let client;
 
   beforeEach(function() {
