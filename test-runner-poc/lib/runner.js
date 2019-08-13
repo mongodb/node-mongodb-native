@@ -28,8 +28,7 @@ function environmentSetup(environmentCallback) {
 
   mongoClient.connect((err, client) => {
     if (err) {
-      environmentCallback(err);
-      return;
+      return environmentCallback(err);
     }
     createFilters(environmentParser);
 
@@ -40,8 +39,7 @@ function environmentSetup(environmentCallback) {
       let host, port;
       parseConnectionString(mongodb_uri, (err, parsedURI) => {
         if (err) {
-          environmentCallback(err);
-          return;
+          return environmentCallback(err);
         }
         const environment = new Environment(parsedURI, version);
         environment.mongo = require('../../index');
