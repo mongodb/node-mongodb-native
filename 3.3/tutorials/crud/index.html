@@ -1960,7 +1960,7 @@ client.connect(function(err, client) {
   const db = client.db(dbName);
 
   const col = db.collection('updates');
-  // Insert a single document
+  // Insert multiple documents
   col.insertMany([{a:1}, {a:2}, {a:2}], function(err, r) {
     assert.equal(null, err);
     assert.equal(3, r.insertedCount);
@@ -2010,7 +2010,7 @@ const client = new MongoClient(url);
 
     // Get the updates collection
     const col = db.collection('updates');
-    // Insert a single document
+    // Insert multiple documents
     let r = await col.insertMany([{a:1}, {a:2}, {a:2}]);
     assert.equal(3, r.insertedCount);
 
@@ -2110,7 +2110,7 @@ client.connect(function(err, client) {
   const db = client.db(dbName);
 
   const col = db.collection('removes');
-  // Insert a single document
+  // Insert multiple documents
   col.insertMany([{a:1}, {a:2}, {a:2}], function(err, r) {
     assert.equal(null, err);
     assert.equal(3, r.insertedCount);
@@ -2149,7 +2149,7 @@ const client = new MongoClient(url);
 
     // Get the removes collection
     const col = db.collection('removes');
-    // Insert a single document
+    // Insert multiple documents
     let r = await col.insertMany([{a:1}, {a:2}, {a:2}]);
     assert.equal(3, r.insertedCount);
 
@@ -2237,7 +2237,7 @@ client.connect(function(err, client) {
   const db = client.db(dbName);
 
   const col = db.collection('findAndModify');
-  // Insert a single document
+  // Insert multiple documents
   col.insert([{a:1}, {a:2}, {a:2}], function(err, r) {
     assert.equal(null, err);
     assert.equal(3, r.result.n);
@@ -2280,7 +2280,7 @@ const client = new MongoClient(url);
 
     // Get the findAndModify collection
     const col = db.collection('findAndModify');
-    // Insert a single document
+    // Insert multiple documents
     let r = await col.insert([{a:1}, {a:2}, {a:2}]);
     assert.equal(3, r.result.n);
 
@@ -2383,7 +2383,7 @@ client.connect(function(err, client) {
   const db = client.db(dbName);
 
   const col = db.collection('findAndModify');
-  // Insert a single document
+  // Insert multiple documents
   col.insert([{a:1}, {a:2}, {a:2}], function(err, r) {
     assert.equal(null, err);
     assert.equal(3, r.result.n);
@@ -2419,7 +2419,7 @@ const client = new MongoClient(url);
 
     // Get the findAndModify collection
     const col = db.collection('findAndModify');
-    // Insert a single document
+    // Insert multiple documents
     let r = await col.insert([{a:1}, {a:2}, {a:2}]);
     assert.equal(3, r.result.n);
 
@@ -2765,7 +2765,7 @@ client.connect(function(err, client) {
   const db = client.db(dbName);
 
   const col = db.collection('find');
-  // Insert a single document
+  // Insert multiple documents
   col.insertMany([{a:1}, {a:1}, {a:1}], function(err, r) {
     assert.equal(null, err);
     assert.equal(3, r.insertedCount);
@@ -2798,7 +2798,7 @@ const client = new MongoClient(url);
 
     // Get the collection
     const col = db.collection('find');
-    // Insert a single document
+    // Insert multiple documents
     const r = await col.insertMany([{a:1}, {a:1}, {a:1}]);
     assert.equal(3, r.insertedCount);
 
@@ -2868,7 +2868,7 @@ client.connect(function(err, client) {
   const db = client.db(dbName);
 
   const col = db.collection('find');
-  // Insert a single document
+  // Insert multiple documents
   col.insertMany([{a:1}, {a:1}, {a:1}], function(err, r) {
     assert.equal(null, err);
     assert.equal(3, r.insertedCount);
@@ -2905,7 +2905,7 @@ const client = new MongoClient(url);
 
     // Get the collection
     const col = db.collection('find');
-    // Insert a single document
+    // Insert multiple documents
     const r = await col.insertMany([{a:1}, {a:1}, {a:1}]);
     assert.equal(3, r.insertedCount);
 
@@ -2950,7 +2950,7 @@ client.connect(function(err, client) {
   const db = client.db(dbName);
 
   const col = db.collection('find');
-  // Insert a single document
+  // Insert multiple documents
   col.insertMany([{a:1}, {a:1}, {a:1}], function(err, r) {
     assert.equal(null, err);
     assert.equal(3, r.insertedCount);

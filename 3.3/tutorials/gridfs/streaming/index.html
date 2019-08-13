@@ -1858,7 +1858,7 @@ const dbName = 'test';
 
 const client = new mongodb.MongoClient(uri);
 
-client.connect(unction(error) {
+client.connect(function(error) {
   assert.ifError(error);
 
   const db = client.db(dbName);

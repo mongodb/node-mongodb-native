@@ -38,7 +38,7 @@
       
       <guid>/node-mongodb-native/3.3/reference/ecmascriptnext/connecting/</guid>
       <description>Connecting The MongoClient connection method returns a Promise if no callback is passed to it. Below is an example using the async/await commands.
-const MongoClient = require(&#39;mongodb&#39;).MongoClient; const assert = require(&#39;assert&#39;); (async function() { // Connection URL const url = &#39;mongodb://localhost:27017/myproject&#39;; // Database Name const dbName = &#39;myproject&#39;; const client = new MongoClient(url); try { // Use connect method to connect to the Server await client.connect(); const db = client.</description>
+const MongoClient = require(&#39;mongodb&#39;).MongoClient; const assert = require(&#39;assert&#39;); (async function() { // Connection URL const url = &#39;mongodb://localhost:27017/myproject&#39;; // Database Name const dbName = &#39;myproject&#39;; const client = new MongoClient(url, { useNewUrlParser: true }); try { // Use connect method to connect to the Server await client.</description>
     </item>
     
     <item>

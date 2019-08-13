@@ -2134,7 +2134,6 @@ const checkCollectionName = require('./utils').checkCollectionName;
 const ObjectID = require('./core').BSON.ObjectID;
 const MongoError = require('./core').MongoError;
 const toError = require('./utils').toError;
-const handleCallback = require('./utils').handleCallback;
 const normalizeHintField = require('./utils').normalizeHintField;
 const decorateCommand = require('./utils').decorateCommand;
 const decorateWithCollation = require('./utils').decorateWithCollation;
@@ -2150,18 +2149,16 @@ const WriteConcern = require('./write_concern');
 const ReadConcern = require('./read_concern');
 const MongoDBNamespace = require('./utils').MongoDBNamespace;
 const AggregationCursor = require('./aggregation_cursor');
+const CommandCursor = require('./command_cursor');
 
 // Operations
 const checkForAtomicOperators = require('./operations/collection_ops').checkForAtomicOperators;
-const count = require('./operations/collection_ops').count;
 const ensureIndex = require('./operations/collection_ops').ensureIndex;
-const findAndModify = require('./operations/collection_ops').findAndModify;
-const findAndRemove = require('./operations/collection_ops').findAndRemove;
 const group = require('./operations/collection_ops').group;
 const parallelCollectionScan = require('./operations/collection_ops').parallelCollectionScan;
-const removeDocuments = require('./operations/collection_ops').removeDocuments;
+const removeDocuments = require('./operations/common_functions').removeDocuments;
 const save = require('./operations/collection_ops').save;
-const updateDocuments = require('./operations/collection_ops').updateDocuments;
+const updateDocuments = require('./operations/common_functions').updateDocuments;
 
 const AggregateOperation = require('./operations/aggregate');
 const BulkWriteOperation = require('./operations/bulk_write');
@@ -2175,7 +2172,9 @@ const DropCollectionOperation = require('./operations/drop').DropCollectionOpera
 const DropIndexOperation = require('./operations/drop_index');
 const DropIndexesOperation = require('./operations/drop_indexes');
 const EstimatedDocumentCountOperation = require('./operations/estimated_document_count');
+const FindOperation = require('./operations/find');
 const FindOneOperation = require('./operations/find_one');
+const FindAndModifyOperation = require('./operations/find_and_modify');
 const FindOneAndDeleteOperation = require('./operations/find_one_and_delete');
 const FindOneAndReplaceOperation = require('./operations/find_one_and_replace');
 const FindOneAndUpdateOperation = require('./operations/find_one_and_update');
@@ -2557,10 +2556,18 @@ Collection.prototype.find = deprecateOptions(
       throw err;
     }
 
-    // TODO: pass object cursor
-    const cursor = this.s.topology.cursor(this.s.namespace.toString(), findCommand, newOptions);
+    const cursor = this.s.topology.cursor(
+      new FindOperation(this, this.s.namespace, findCommand, newOptions),
+      newOptions
+    );
 
-    return typeof callback === 'function' ? handleCallback(callback, null, cursor) : cursor;
+    // TODO: remove this when NODE-2074 is resolved
+    if (typeof callback === 'function') {
+      callback(null, cursor);
+      return;
+    }
+
+    return cursor;
   }
 );
 
@@ -3383,9 +3390,13 @@ Collection.prototype.reIndex = function(options, callback) {
  * @return {CommandCursor}
  */
 Collection.prototype.listIndexes = function(options) {
-  const listIndexesOperation = new ListIndexesOperation(this, options);
+  const cursor = new CommandCursor(
+    this.s.topology,
+    new ListIndexesOperation(this, options),
+    options
+  );
 
-  return listIndexesOperation.execute();
+  return cursor;
 };
 
 /**
@@ -3492,9 +3503,16 @@ Collection.prototype.count = deprecate(function(query, options, callback) {
   query = args.length ? args.shift() || {} : {};
   options = args.length ? args.shift() || {} : {};
 
-  return executeLegacyOperation(this.s.topology, count, [this, query, options, callback]);
+  if (typeof options === 'function') (callback = options), (options = {});
+  options = options || {};
+
+  return executeOperation(
+    this.s.topology,
+    new EstimatedDocumentCountOperation(this, query, options),
+    callback
+  );
 }, 'collection.count is deprecated, and will be removed in a future version.' +
-  ' Use collection.countDocuments or collection.estimatedDocumentCount instead');
+  ' Use Collection.countDocuments or Collection.estimatedDocumentCount instead');
 
 /**
  * Gets an estimate of the count of documents in a collection using collection metadata.
@@ -3619,7 +3637,7 @@ Collection.prototype.stats = function(options, callback) {
 
 /**
  * @typedef {Object} Collection~findAndModifyWriteOpResult
- * @property {object} value Document returned from findAndModify command.
+ * @property {object} value Document returned from the `findAndModify` command. If no documents were found, `value` will be `null` by default (`returnOriginal: true`), even if a document was upserted; if `returnOriginal` was false, the upserted document will be returned in that case.
  * @property {object} lastErrorObject The raw lastErrorObject returned from the command.
  * @property {Number} ok Is 1 if the command executed correctly.
  */
@@ -3682,6 +3700,13 @@ Collection.prototype.findOneAndReplace = function(filter, replacement, options, 
     throw toError('filter parameter must be an object');
   if (replacement == null || typeof replacement !== 'object')
     throw toError('replacement parameter must be an object');
+
+  // Check that there are no atomic operators
+  const keys = Object.keys(replacement);
+
+  if (keys[0] &amp;&amp; keys[0][0] === '$') {
+    throw toError('The replacement document must not contain atomic operators.');
+  }
 
   const findOneAndReplaceOperation = new FindOneAndReplaceOperation(
     this,
@@ -3775,14 +3800,11 @@ function _findAndModify(query, sort, doc, options, callback) {
   // Force read preference primary
   options.readPreference = ReadPreference.PRIMARY;
 
-  return executeLegacyOperation(this.s.topology, findAndModify, [
-    this,
-    query,
-    sort,
-    doc,
-    options,
+  return executeOperation(
+    this.s.topology,
+    new FindAndModifyOperation(this, query, sort, doc, options),
     callback
-  ]);
+  );
 }
 
 /**
@@ -3805,13 +3827,14 @@ Collection.prototype.findAndRemove = deprecate(function(query, sort, options, ca
   sort = args.length ? args.shift() || [] : [];
   options = args.length ? args.shift() || {} : {};
 
-  return executeLegacyOperation(this.s.topology, findAndRemove, [
-    this,
-    query,
-    sort,
-    options,
+  // Add the remove option
+  options.remove = true;
+
+  return executeOperation(
+    this.s.topology,
+    new FindAndModifyOperation(this, query, sort, null, options),
     callback
-  ]);
+  );
 }, 'collection.findAndRemove is deprecated. Use findOneAndDelete instead.');
 
 /**
@@ -3900,7 +3923,7 @@ Collection.prototype.aggregate = function(pipeline, options, callback) {
  * @param {number} [options.batchSize] The number of documents to return per batch. See {@link https://docs.mongodb.com/manual/reference/command/aggregate|aggregation documentation}.
  * @param {object} [options.collation] Specify collation settings for operation. See {@link https://docs.mongodb.com/manual/reference/command/aggregate|aggregation documentation}.
  * @param {ReadPreference} [options.readPreference] The read preference. Defaults to the read preference of the database or collection. See {@link https://docs.mongodb.com/manual/reference/read-preference|read preference documentation}.
- * @param {Timestamp} [options.startAtClusterTime] receive change events that occur after the specified timestamp
+ * @param {Timestamp} [options.startAtOperationTime] receive change events that occur after the specified timestamp
  * @param {ClientSession} [options.session] optional session to use for this operation
  * @return {ChangeStream} a ChangeStream instance.
  */
@@ -4175,7 +4198,7 @@ module.exports = Collection;
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Jul 22 2019 10:32:17 GMT-0400 (EDT)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Aug 13 2019 11:04:15 GMT-0400 (EDT)
                     </footer>
                 </div>
             </td>

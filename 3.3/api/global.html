@@ -2532,7 +2532,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_core_sessions.js.html">lib/core/sessions.js</a>, <a href="lib_core_sessions.js.html#line657">line 657</a>
+            <a href="lib_core_sessions.js.html">lib/core/sessions.js</a>, <a href="lib_core_sessions.js.html#line683">line 683</a>
         </div>
         
     </div>
@@ -3201,7 +3201,8 @@ error, if some error condition was met
 <dd>
     
     <div class="description">
-        <p>Configuration options for a automatic client encryption</p>
+        <p>Configuration options for a automatic client encryption.</p>
+<p><strong>NOTE</strong>: Support for client side encryption is in beta. Backwards-breaking changes may be made before the final release.</p>
     </div>
     
     
@@ -3619,6 +3620,207 @@ error, if some error condition was met
             
             
             <td class="description last"><p>Allows the user to bypass auto encryption, maintaining implicit decryption</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>extraOptions</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+                    
+                
+                </td>
+            
+            
+            
+            
+            <td class="description last"><p>Extra options related to the mongocryptd process</p>
+                <h6>Properties</h6>
+
+<table class="props">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		<th>Argument</th>
+		
+		
+		
+		<th>Default</th>
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>mongocryptURI</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+            
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+                    
+                
+                </td>
+            
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last"><p>A local process the driver communicates with to determine how to encrypt values in a command. Defaults to &quot;mongodb://%2Fvar%2Fmongocryptd.sock&quot; if domain sockets are available or &quot;mongodb://localhost:27020&quot; otherwise</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>mongocryptdBypassSpawn</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+                    
+                
+                </td>
+            
+            
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+            
+            <td class="description last"><p>If true, autoEncryption will not attempt to spawn a mongocryptd before connecting</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>mongocryptdSpawnPath</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+            
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+                    
+                
+                </td>
+            
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last"><p>The path to the mongocryptd executable on the system</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>mongocryptdSpawnArgs</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;string></span>
+
+
+            
+            </td>
+            
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+                    
+                
+                </td>
+            
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last"><p>Command line arguments to use when auto-spawning a mongocryptd</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+            </td>
         </tr>
 	
 	
@@ -4655,7 +4857,7 @@ error, if some error condition was met
     
         
         <div class="tag-source">
-            <a href="lib_core_sessions.js.html">lib/core/sessions.js</a>, <a href="lib_core_sessions.js.html#line261">line 261</a>
+            <a href="lib_core_sessions.js.html">lib/core/sessions.js</a>, <a href="lib_core_sessions.js.html#line262">line 262</a>
         </div>
         
     </div>
@@ -4981,7 +5183,7 @@ resulting Promise of operations run within this transaction
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Jul 22 2019 10:32:17 GMT-0400 (EDT)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Aug 13 2019 11:04:15 GMT-0400 (EDT)
                     </footer>
                 </div>
             </td>
