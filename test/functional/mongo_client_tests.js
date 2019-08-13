@@ -220,7 +220,13 @@ describe('MongoClient', function() {
         return this.skip();
       }
       const replicaSetName = this.configuration.options.setName;
-      const client = configuration.newClient(this.configuration.options.url, {
+      var url = f(
+        'mongodb://127.0.0.1:%s/integration_test_?rs_name=%s',
+        this.configuration.port,
+        replicaSetName
+      );
+      //const client = configuration.newClient(this.configuration.options.url, {
+      const client = configuration.newClient(url, {
         replSet: {
           ha: false,
           haInterval: 10000,
