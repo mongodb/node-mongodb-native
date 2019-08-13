@@ -7,6 +7,18 @@ title = "Upgrade Guide"
   pre = "<i class='fa fa-cog'></i>"
 +++
 
+# What's new in 3.3
+
+- Supports Distributed Transactions
+- Supports On-Demand Materialized Views with the $merge operator
+- Supports Wildcard Indexes
+- Supports Retryable Reads
+- Supports MongoDB Query Language Enhancements.
+- SRV Polling for Sharded Clusters
+- Beta support for MongoDB Client-Side Encryption
+
+[Full 3.3 Changes Here](https://github.com/mongodb/node-mongodb-native/releases/tag/v3.3.0)
+
 # What's new in 3.2
 
 - Supports new "Unified Topology" for resolving servers (opt in with `useUnifiedTopology` option for `MongoClient`)
