@@ -3746,6 +3746,7 @@ describe('Operation (Promises)', function() {
         ],
         { rs_name: configuration.replicasetName }
       );
+
       var client = new MongoClient(replSet, { w: 0 });
       return client.connect().then(function() {
         // LINE var MongoClient = require('mongodb').MongoClient,
