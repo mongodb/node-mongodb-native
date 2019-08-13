@@ -1,8 +1,9 @@
-'use strict';
+#!/bin/bash
 const shell = require('shelljs');
 if (!shell.which('mongo-orchestration')) {
   shell.echo('Warning: please install mongo-orchestration.');
-} else {
+}
+else {
   shell.echo('Path to Mongo-Orchestration:');
   shell.echo(shell.which('mongo-orchestration'));
 }
