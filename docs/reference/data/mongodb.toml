@@ -1,6 +1,6 @@
 # Update versions in config.toml as well
 githubRepo = "node-mongodb-native"
 githubBranch = "master"
-currentVersion = "3.3.0-beta1"
+currentVersion = "3.3"
 highlightTheme = "idea.css"
 apiUrl = "/api"
