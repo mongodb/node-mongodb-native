@@ -2,6 +2,74 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="3.3.0"></a>
+# [3.3.0](https://github.com/mongodb/node-mongodb-native/compare/v3.3.0-alpha1...v3.3.0) (2019-08-13)
+
+
+### Bug Fixes
+
+* **aggregate-operation:** move type assertions to constructor ([25b27ff](https://github.com/mongodb/node-mongodb-native/commit/25b27ff))
+* **autoEncryption:** tear down mongocryptd client when main client closes ([fe2f57e](https://github.com/mongodb/node-mongodb-native/commit/fe2f57e))
+* **autoEncryption:** use new url parser for autoEncryption client ([d3670c2](https://github.com/mongodb/node-mongodb-native/commit/d3670c2))
+* **Bulk:** change BulkWriteError message to first item from writeErrors ([#2013](https://github.com/mongodb/node-mongodb-native/issues/2013)) ([6bcf1e4](https://github.com/mongodb/node-mongodb-native/commit/6bcf1e4))
+* **change_stream:** emit 'close' event if reconnecting failed ([41aba90](https://github.com/mongodb/node-mongodb-native/commit/41aba90))
+* **change_stream:** emit close event after cursor is closed during error ([c2d80b2](https://github.com/mongodb/node-mongodb-native/commit/c2d80b2))
+* **change-streams:** don't copy irrelevant resume options ([f190072](https://github.com/mongodb/node-mongodb-native/commit/f190072))
+* **changestream:** removes all event listeners on close ([30eeeb5](https://github.com/mongodb/node-mongodb-native/commit/30eeeb5))
+* **ChangeStream:** remove startAtOperationTime once we have resumeToken ([8d27e6e](https://github.com/mongodb/node-mongodb-native/commit/8d27e6e))
+* **ClientSessions:** initialize clientOptions and cluster time ([b95d64e](https://github.com/mongodb/node-mongodb-native/commit/b95d64e))
+* **connect:** don't treat 'connect' as an error event ([170a011](https://github.com/mongodb/node-mongodb-native/commit/170a011))
+* **connect:** fixed syntax issue in connect error handler ([ff7166d](https://github.com/mongodb/node-mongodb-native/commit/ff7166d))
+* **connections_stepdown_tests:** use correct version of mongo for tests ([ce2c9af](https://github.com/mongodb/node-mongodb-native/commit/ce2c9af))
+* **createCollection:** Db.createCollection should pass readConcern to new collection ([#2026](https://github.com/mongodb/node-mongodb-native/issues/2026)) ([6145d4b](https://github.com/mongodb/node-mongodb-native/commit/6145d4b))
+* **cursor:** do not truncate an existing Long ([317055b](https://github.com/mongodb/node-mongodb-native/commit/317055b)), closes [mongodb-js/mongodb-core#441](https://github.com/mongodb-js/mongodb-core/issues/441)
+* **distinct:** return full response if `full` option was specified ([95a7d05](https://github.com/mongodb/node-mongodb-native/commit/95a7d05))
+* **MongoClient:** allow Object.prototype items as db names ([dc6fc37](https://github.com/mongodb/node-mongodb-native/commit/dc6fc37))
+* **MongoClient:** only check own properties for valid options ([c9dc717](https://github.com/mongodb/node-mongodb-native/commit/c9dc717))
+* **OpMsg:** cap requestIds at 0x7fffffff ([c0e87d5](https://github.com/mongodb/node-mongodb-native/commit/c0e87d5))
+* **read-operations:** send sessions on all read operations ([4d45c8a](https://github.com/mongodb/node-mongodb-native/commit/4d45c8a))
+* **ReadPreference:** improve ReadPreference error message and remove irrelevant sharding test ([dd34ce4](https://github.com/mongodb/node-mongodb-native/commit/dd34ce4))
+* **ReadPreference:** only allow valid ReadPreference modes ([06bbef2](https://github.com/mongodb/node-mongodb-native/commit/06bbef2))
+* **replset:** correct legacy max staleness calculation ([2eab8aa](https://github.com/mongodb/node-mongodb-native/commit/2eab8aa))
+* **replset:** introduce a fixed-time server selection loop ([cf53299](https://github.com/mongodb/node-mongodb-native/commit/cf53299))
+* **server:** emit "first connect" error if initial connect fails due to ECONNREFUSED ([#2016](https://github.com/mongodb/node-mongodb-native/issues/2016)) ([5a7b15b](https://github.com/mongodb/node-mongodb-native/commit/5a7b15b))
+* **serverSelection:** make sure to pass session to serverSelection ([eb5cc6b](https://github.com/mongodb/node-mongodb-native/commit/eb5cc6b))
+* **sessions:** ensure an error is thrown when attempting sharded transactions ([3a1fdc1](https://github.com/mongodb/node-mongodb-native/commit/3a1fdc1))
+* **topology:** add new error for retryWrites on MMAPv1 ([392f5a6](https://github.com/mongodb/node-mongodb-native/commit/392f5a6))
+* don't check non-unified topologies for session support check ([2bccd3f](https://github.com/mongodb/node-mongodb-native/commit/2bccd3f))
+* maintain internal database name on collection rename ([884d46f](https://github.com/mongodb/node-mongodb-native/commit/884d46f))
+* only check for transaction state if session exists ([360975a](https://github.com/mongodb/node-mongodb-native/commit/360975a))
+* preserve aggregate explain support for legacy servers ([032b204](https://github.com/mongodb/node-mongodb-native/commit/032b204))
+* read concern only supported for `mapReduce` without inline ([51a36f3](https://github.com/mongodb/node-mongodb-native/commit/51a36f3))
+* reintroduce support for 2.6 listIndexes ([c3bfc05](https://github.com/mongodb/node-mongodb-native/commit/c3bfc05))
+* return `executeOperation` for explain, if promise is desired ([b4a7ad7](https://github.com/mongodb/node-mongodb-native/commit/b4a7ad7))
+* validate atomic operations in all update methods ([88bb77e](https://github.com/mongodb/node-mongodb-native/commit/88bb77e))
+* **transactions:** fix error message for attempting sharded ([eb5dfc9](https://github.com/mongodb/node-mongodb-native/commit/eb5dfc9))
+* **transactions:** fix sharded transaction error logic ([083e18a](https://github.com/mongodb/node-mongodb-native/commit/083e18a))
+
+
+### Features
+
+* **Aggregate:** support ReadConcern in aggregates with $out ([21cdcf0](https://github.com/mongodb/node-mongodb-native/commit/21cdcf0))
+* **AutoEncryption:** improve error message for missing mongodb-client-encryption ([583f29f](https://github.com/mongodb/node-mongodb-native/commit/583f29f))
+* **ChangeStream:** adds new resume functionality to ChangeStreams ([9ec9b8f](https://github.com/mongodb/node-mongodb-native/commit/9ec9b8f))
+* **ChangeStreamCursor:** introduce new cursor type for change streams ([8813eb0](https://github.com/mongodb/node-mongodb-native/commit/8813eb0))
+* **cryptdConnectionString:** makes mongocryptd uri configurable ([#2049](https://github.com/mongodb/node-mongodb-native/issues/2049)) ([a487be4](https://github.com/mongodb/node-mongodb-native/commit/a487be4))
+* **eachAsync:** dedupe async iteration with a common helper ([c296f3a](https://github.com/mongodb/node-mongodb-native/commit/c296f3a))
+* **execute-operation:** allow execution with server selection ([36bc1fd](https://github.com/mongodb/node-mongodb-native/commit/36bc1fd))
+* **pool:** add support for resetting the connection pool ([2d1ff40](https://github.com/mongodb/node-mongodb-native/commit/2d1ff40))
+* **sessions:** track dirty state of sessions, drop after use ([f61df16](https://github.com/mongodb/node-mongodb-native/commit/f61df16))
+* add concept of `data-bearing` type to `ServerDescription` ([852e14f](https://github.com/mongodb/node-mongodb-native/commit/852e14f))
+* **transaction:** allow applications to set maxTimeMS for commitTransaction ([b3948aa](https://github.com/mongodb/node-mongodb-native/commit/b3948aa))
+* **Update:** add the ability to specify a pipeline to an update command ([#2017](https://github.com/mongodb/node-mongodb-native/issues/2017)) ([dc1387e](https://github.com/mongodb/node-mongodb-native/commit/dc1387e))
+* add `known`, `data-bearing` filters to `TopologyDescription` ([d0ccb56](https://github.com/mongodb/node-mongodb-native/commit/d0ccb56))
+* perform selection before cursor operation execution if needed ([808cf37](https://github.com/mongodb/node-mongodb-native/commit/808cf37))
+* perform selection before operation execution if needed ([1a25876](https://github.com/mongodb/node-mongodb-native/commit/1a25876))
+* support explain operations in `CommandOperationV2` ([86f5ba5](https://github.com/mongodb/node-mongodb-native/commit/86f5ba5))
+* support operations passed to a `Cursor` or subclass ([b78bb89](https://github.com/mongodb/node-mongodb-native/commit/b78bb89))
+
+
+
 <a name="3.2.7"></a>
 ## [3.2.7](https://github.com/mongodb/node-mongodb-native/compare/v3.2.6...v3.2.7) (2019-06-04)
 
