@@ -50,7 +50,7 @@
     "snappy": "^6.1.2",
     "standard-version": "^4.4.0",
     "worker-farm": "^1.5.0",
-    "wtfnode": "^0.8.0"
+    "shelljs": "*"
   },
   "license": "Apache-2.0",
   "engines": {
@@ -61,7 +61,8 @@
   },
   "scripts": {
     "atlas": "node ./test/atlas_connectivity_tests.js",
-    "test": "test/check_mongo_orchestration_tests.sh && npm run lint && mongodb-test-runner -t 60000 test/core test/unit test/functional",
+    "orchestration": "npm install -g shelljs && node test/check_mongo_orchestration_tests.js",
+    "test": "npm run orchestration && npm run lint && mongodb-test-runner -t 60000 test/core test/unit test/functional",
     "coverage": "istanbul cover mongodb-test-runner -- -t 60000 test/core test/unit test/functional",
     "lint": "eslint lib test",
     "format": "prettier --print-width 100 --tab-width 2 --single-quote --write 'test/**/*.js' 'lib/**/*.js'",
