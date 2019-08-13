@@ -1250,9 +1250,14 @@ describe('Collection', function() {
     });
   });
 
-  it('should allow an empty replacement document for findOneAndReplace', function() {
+  it('should allow an empty replacement document for findOneAndReplace', function(done) {
     const configuration = this.configuration;
     const client = configuration.newClient({}, { w: 1 });
+
+    let finish = err => {
+      finish = () => {};
+      client.close(_err => done(err || _err));
+    };
 
     client.connect((err, client) => {
       expect(err).to.be.null;
@@ -1263,10 +1268,12 @@ describe('Collection', function() {
       collection.insertOne({ a: 1 }, err => {
         expect(err).to.be.null;
 
-        expect(collection.findOneAndReplace.bind(collection, { a: 1 }, {})).to.not.throw();
+        try {
+          collection.findOneAndReplace({ a: 1 }, {}, finish);
+        } catch (e) {
+          finish(e);
+        }
       });
-
-      client.close();
     });
   });
 
