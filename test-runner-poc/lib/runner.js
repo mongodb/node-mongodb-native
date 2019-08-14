@@ -40,7 +40,9 @@ function environmentSetup(environmentCallback, done) {
       }
 
       client.db('admin').command({ isMaster: 1, }, (err, result) => {
-        if (err) environmentCallback(err)
+        if (err) {
+          return environmentCallback(err)
+        }
         if (result.hosts) {
           //This iterates through each host until it finds a primary node (i.e. ismaster is true)
           for (let i = 0; i < result.hosts.length; i++) {

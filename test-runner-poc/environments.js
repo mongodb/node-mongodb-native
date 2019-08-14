@@ -46,7 +46,7 @@ class ReplicaSetEnvironment extends EnvironmentBase {
     this.setName = 'rs';
     this.url = `mongodb://%s${this.host}:${this.port}/integration_tests?rs_name=rs`;
     this.writeConcernMax = { w: 'majority', wtimeout: 30000 };
-    this.replicasetName = 'rs';
+    this.replicasetName = this.setName;
     this.topology = function(topologyHost, topologyPort, options) {
       topologyHost = topologyHost || this.host;
       topologyPort = topologyPort || this.port;

@@ -5138,7 +5138,7 @@ describe('Operation (Promises)', function() {
         // REMOVE-LINE done();
         // BEGIN
         // Read in the content of a file
-        var data = fs.readFileSync('../data/iya_logo_final_bw.jpg');
+        var data = fs.readFileSync('./test/functional/data/iya_logo_final_bw.jpg');
 
         // Create two new files
         var gs = new GridStore(db, 'test', 'w');
