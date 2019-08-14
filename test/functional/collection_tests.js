@@ -1250,31 +1250,34 @@ describe('Collection', function() {
     });
   });
 
-  it('should allow an empty replacement document for findOneAndReplace', function(done) {
-    const configuration = this.configuration;
-    const client = configuration.newClient({}, { w: 1 });
+  it('should allow an empty replacement document for findOneAndReplace', {
+    metadata: { requires: { mongodb: '>=3.0.0' } },
+    test: function(done) {
+      const configuration = this.configuration;
+      const client = configuration.newClient({}, { w: 1 });
 
-    let finish = err => {
-      finish = () => {};
-      client.close(_err => done(err || _err));
-    };
+      let finish = err => {
+        finish = () => {};
+        client.close(_err => done(err || _err));
+      };
 
-    client.connect((err, client) => {
-      expect(err).to.be.null;
-
-      const db = client.db(configuration.db);
-      const collection = db.collection('find_one_and_replace');
-
-      collection.insertOne({ a: 1 }, err => {
+      client.connect((err, client) => {
         expect(err).to.be.null;
 
-        try {
-          collection.findOneAndReplace({ a: 1 }, {}, finish);
-        } catch (e) {
-          finish(e);
-        }
+        const db = client.db(configuration.db);
+        const collection = db.collection('find_one_and_replace');
+
+        collection.insertOne({ a: 1 }, err => {
+          expect(err).to.be.null;
+
+          try {
+            collection.findOneAndReplace({ a: 1 }, {}, finish);
+          } catch (e) {
+            finish(e);
+          }
+        });
       });
-    });
+    }
   });
 
   it('should correctly update with pipeline', {
