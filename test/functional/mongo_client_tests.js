@@ -6,7 +6,7 @@ var setupDatabase = require('./shared').setupDatabase;
 const Db = require('../../lib/db');
 const expect = require('chai').expect;
 
-describe.only('MongoClient', function() {
+describe('MongoClient', function() {
   before(function() {
     return setupDatabase(this.configuration);
   });
@@ -220,8 +220,6 @@ describe.only('MongoClient', function() {
         return this.skip();
       }
       const replicaSetName = configuration.options.setName;
-      console.log('configuration.url() ', configuration.url());
-      console.log('configuration.options.url ', configuration.options.url);
       const url = configuration.url().replace('rs_name=rs', 'rs_name=rs1');
       const client = configuration.newClient(url, {
         replSet: {
