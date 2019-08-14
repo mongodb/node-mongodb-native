@@ -87,7 +87,7 @@ describe('Unicode', function() {
     }
   });
 
-  it('Should Correctly fail with maxTimeMS error', {
+  it.only('Should Correctly fail with maxTimeMS error', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
@@ -135,6 +135,11 @@ describe('Unicode', function() {
                     ) {
                       test.equal(null, err);
                       test.equal(1, result.ok);
+                      console.log(
+                        'this.configuration in Should Correctly fail with maxTimeMS error ',
+                        this.configuration
+                      );
+                      console.log('typeof configuration.url ', typeof configuration.url);
                       client.close();
                       done();
                     });

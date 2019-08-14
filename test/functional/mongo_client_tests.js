@@ -220,7 +220,10 @@ describe('MongoClient', function() {
         return this.skip();
       }
       const replicaSetName = configuration.options.setName;
-      console.log('configuration ', configuration);
+      console.log(
+        'configuration in should correctly pass through extra replicaset options ',
+        configuration
+      );
       console.log('typeof configuration.url ', typeof configuration.url);
       const url = configuration.url().replace('rs_name=rs', 'rs_name=rs1');
       const client = configuration.newClient(url, {
