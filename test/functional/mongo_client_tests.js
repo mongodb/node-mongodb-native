@@ -219,10 +219,11 @@ describe.only('MongoClient', function() {
         // skipped for direct legacy variable inspection
         return this.skip();
       }
-      const replicaSetName = this.configuration.options.setName;
-      console.log('this.configuration.url() ', this.configuration.url());
-      console.log('this.configuration.options.url ', this.configuration.options.url);
-      const client = configuration.newClient(this.configuration.options.url, {
+      const replicaSetName = configuration.options.setName;
+      console.log('configuration.url() ', configuration.url());
+      console.log('configuration.options.url ', configuration.options.url);
+      const url = configuration.url().replace('rs_name=rs', 'rs_name=rs1');
+      const client = configuration.newClient(url, {
         replSet: {
           ha: false,
           haInterval: 10000,
