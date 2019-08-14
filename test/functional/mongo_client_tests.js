@@ -205,7 +205,7 @@ describe('MongoClient', function() {
     }
   });
 
-  it('Should correctly pass through extra replicaset options', {
+  it.only('Should correctly pass through extra replicaset options', {
     metadata: {
       requires: {
         topology: ['replicaset']
@@ -220,6 +220,8 @@ describe('MongoClient', function() {
         return this.skip();
       }
       const replicaSetName = configuration.options.setName;
+      console.log('configuration ', configuration);
+      console.log('typeof configuration.url ', typeof configuration.url);
       const url = configuration.url().replace('rs_name=rs', 'rs_name=rs1');
       const client = configuration.newClient(url, {
         replSet: {
