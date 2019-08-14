@@ -220,7 +220,7 @@ describe.only('MongoClient', function() {
         return this.skip();
       }
       const replicaSetName = this.configuration.options.setName;
-      console.log('this.configuration.options ', this.configuration.options);
+      console.log('this.configuration.url() ', this.configuration.url());
       console.log('this.configuration.options.url ', this.configuration.options.url);
       const client = configuration.newClient(this.configuration.options.url, {
         replSet: {
