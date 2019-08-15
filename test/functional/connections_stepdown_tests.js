@@ -3,13 +3,13 @@
 const chai = require('chai');
 const expect = chai.expect;
 
-describe.skip('Connections survive primary step down', function() {
+describe('Connections survive primary step down', function() {
   let client;
 
   beforeEach(function() {
     client = this.configuration.newClient(
       { w: 1 },
-      { poolSize: 1, retryWrites: false, useUnifiedTopology: true }
+      { poolSize: 1, retryWrites: false, useUnifiedTopology: true, serverSelectionTimeoutMS: 30000 }
     );
     return client.connect();
   });
@@ -61,6 +61,7 @@ describe.skip('Connections survive primary step down', function() {
                           .then(result =>
                             expect(result.connections.totalCreated).to.equal(numberOfConnections)
                           )
+                          .then(() => cursor.close())
                       )
                   );
               })
