@@ -35,8 +35,6 @@ function environmentSetup(environmentCallback) {
     function environmentParser(environmentName, version) {
       console.log('environmentName ', environmentName);
       const Environment = environments[environmentName];
-
-      let host, port;
       parseConnectionString(mongodb_uri, (err, parsedURI) => {
         if (err) {
           return environmentCallback(err);

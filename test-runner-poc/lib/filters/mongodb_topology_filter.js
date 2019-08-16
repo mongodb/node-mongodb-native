@@ -16,10 +16,9 @@ class MongoDBTopologyFilter {
     const mongoClient = new MongoClient(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017');
     mongoClient.connect((err, client) => {
       if (err) {
-        callback(err);
-        return;
+        return callback(err);
       }
-      let topologyType = mongoClient.topology.type;
+      const topologyType = mongoClient.topology.type;
       switch (topologyType) {
         case 'server':
           if (client.topology.s.coreTopology.ismaster.hosts) this.runtimeTopology = 'replicaset';

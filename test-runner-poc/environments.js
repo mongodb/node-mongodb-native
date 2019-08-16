@@ -41,6 +41,7 @@ function usingUnifiedTopology() {
   return !!process.env.MONGODB_UNIFIED_TOPOLOGY;
 }
 
+<<<<<<< HEAD
 /**
  *
  * @param {*} discoverResult
@@ -53,6 +54,13 @@ class ReplicaSetEnvironment extends EnvironmentBase {
     this.port = port;
     this.setName = 'replset';
     this.url = `mongodb://%s${host}:${port}/integration_tests?rs_name=rs`;
+=======
+class ReplicaSetEnvironment extends EnvironmentBase {
+  constructor(parsedURI, version) {
+    super(parsedURI);
+    this.setName = 'rs';
+    this.url = `mongodb://%s${this.host}:${this.port}/integration_tests?rs_name=rs`;
+>>>>>>> address feedback
     this.writeConcernMax = { w: 'majority', wtimeout: 30000 };
     this.replicasetName = 'rs';
     this.topology = function(topologyHost, topologyPort, options) {
@@ -163,6 +171,7 @@ class ShardedEnvironment extends EnvironmentBase {
 
   setup(callback) {
     const shardOptions = this.options && this.options.shard ? this.options.shard : {};
+<<<<<<< HEAD
 
     // First set of nodes
     const nodes1 = [
@@ -171,6 +180,8 @@ class ShardedEnvironment extends EnvironmentBase {
       genShardedConfig(31012, { arbiter: true }, shardOptions)
     ];
 
+=======
+>>>>>>> address feedback
     const configOptions = this.options && this.options.config ? this.options.config : {};
     const configNodes = [genConfigNode(35000, configOptions)];
 
