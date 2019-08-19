@@ -13,7 +13,7 @@ const ClassWithoutLogger = utils.ClassWithoutLogger;
 const ClassWithUndefinedLogger = utils.ClassWithUndefinedLogger;
 const ensureCalledWith = utils.ensureCalledWith;
 
-describe.only('Deprecation Warnings', function() {
+describe('Deprecation Warnings', function() {
   beforeEach(function() {
     this.sinon.stub(console, 'error');
   });

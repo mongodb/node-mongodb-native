@@ -9,7 +9,7 @@ const crypto = require('crypto'),
   expect = require('chai').expect,
   Buffer = require('safe-buffer').Buffer;
 
-describe.only('GridFS Stream', function() {
+describe('GridFS Stream', function() {
   before(function() {
     return setupDatabase(this.configuration);
   });
