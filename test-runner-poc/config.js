@@ -8,6 +8,9 @@ class NativeConfiguration {
     this.host = environment.host || 'localhost';
     this.port = environment.port || 27017;
     this.db = environment.db || 'integration_tests';
+    this.url = () => {
+      return this.options.url || 'mongodb://%slocalhost:27017/' + this.db;
+    }
     this.mongo = environment.mongo;
     this.setName = environment.setName || 'rs';
     this.require = this.mongo;
