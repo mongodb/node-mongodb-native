@@ -19,7 +19,7 @@ class EnvironmentBase {
   constructor(status) {
     if (status.primary) {
       this.port = parseInt(status.primary.split(':')[1]);
-      this.host = status.primary.split(':')[0];
+      this.host = status.primary.split(':')[0].trim();
     }
   }
 }
