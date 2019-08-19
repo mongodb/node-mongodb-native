@@ -9,8 +9,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "mocha": "*",
     "chai": "*",
-    "mongodb": "*"
+    "mocha": "*",
+    "mongodb": "*",
+    "shelljs": "^0.8.3"
   }
 }
