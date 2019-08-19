@@ -205,7 +205,7 @@ describe('MongoClient', function() {
     }
   });
 
-  it('Should correctly pass through extra replicaset options', {
+  it.only('Should correctly pass through extra replicaset options', {
     metadata: {
       requires: {
         topology: ['replicaset']

@@ -85,6 +85,9 @@ class NativeConfiguration {
     const auth = username && password ? `${username}:${password}@` : '';
     return `${url} ${auth}`;
   }
+  url() {
+    return this.options.url || 'mongodb://%slocalhost:27017/' + this.db;
+  }
   writeConcernMax() {
     return Object.assign({}, this.options.writeConcernMax || { w: 1 });
   }
