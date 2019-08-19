@@ -61,7 +61,7 @@
   },
   "scripts": {
     "atlas": "node ./test/atlas_connectivity_tests.js",
-    "orchestration": "npm install -g shelljs && node test/check_mongo_orchestration_tests.js",
+    "orchestration": "node test/check_mongo_orchestration_tests.js",
     "test": "npm run orchestration && npm run lint && mongodb-test-runner -t 60000 test/core test/unit test/functional",
     "coverage": "istanbul cover mongodb-test-runner -- -t 60000 test/core test/unit test/functional",
     "lint": "eslint lib test",
