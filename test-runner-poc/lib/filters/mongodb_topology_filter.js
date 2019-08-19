@@ -1,13 +1,5 @@
 'use strict';
-<<<<<<< HEAD
-<<<<<<< HEAD
 const MongoClient = require('../../../index').MongoClient;
-=======
-const MongoClient = require('mongodb').MongoClient;
->>>>>>> remove unnecessary functions and properties from config, update runner to a new version
-=======
-const MongoClient = require('../../../index').MongoClient;
->>>>>>> incorporate feedback about requires
 /**
  * Filter for the MongoDB toopology required for the test
  *
