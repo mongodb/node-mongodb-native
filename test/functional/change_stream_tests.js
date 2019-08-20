@@ -1485,13 +1485,28 @@ describe('Change Streams', function() {
     }
   });
 
-  it('Should support piping of Change Streams through multiple pipes', {
+  it.only('Should support piping of Change Streams through multiple pipes', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
 
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var crypto = require('crypto');
+
+      const getMethods = (obj) => {
+        let properties = new Set()
+        let currentObj = obj
+        do {
+          Object.getOwnPropertyNames(currentObj).map(item => properties.add(item))
+        } while ((currentObj = Object.getPrototypeOf(currentObj)))
+        return [...properties.keys()].filter(item => typeof obj[item] === 'function')
+      }
+      console.log("configuration methods: ", getMethods(configuration))
+      console.log('configuration.url() ',configuration.url())
+      console.log('configuration.url ',configuration.url)
+
+
+
       const client = configuration.newClient(configuration.url(), {
         poolSize: 1,
         autoReconnect: false

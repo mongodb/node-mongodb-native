@@ -80,7 +80,7 @@ class NativeConfiguration {
     return this.topology(host, port, options);
   }
   url(username, password) {
-    const url = this.options.url || 'mongodb://%slocalhost:27017/' + this.db;
+    const url = this.options.url || 'mongodb://localhost:27017/' + this.db;
     // Fall back
     const auth = username && password ? `${username}:${password}@` : '';
     return `${url} ${auth}`;

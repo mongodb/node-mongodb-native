@@ -44,7 +44,7 @@ class ReplicaSetEnvironment extends EnvironmentBase {
   constructor(parsedURI, version) {
     super(parsedURI);
     this.setName = 'rs';
-    this.url = `mongodb://%s${this.host}:${this.port}/integration_tests?rs_name=rs`;
+    this.url = `mongodb://${this.host}:${this.port}/integration_tests?rs_name=rs`;
     this.writeConcernMax = { w: 'majority', wtimeout: 30000 };
     this.replicasetName = this.setName;
     this.topology = function(topologyHost, topologyPort, options) {
@@ -120,7 +120,7 @@ class ShardedEnvironment extends EnvironmentBase {
     // NOTE: only connect to a single shard because there can be consistency issues using
     //       more, revolving around the inability for shards to keep up-to-date views of
     //       changes to the world (such as dropping a database).
-    this.url = `mongodb://%s${this.host}:${this.port}/integration_tests`;
+    this.url = `mongodb://${this.host}:${this.port}/integration_tests`;
     this.writeConcernMax = { w: 'majority', wtimeout: 30000 };
     this.topology = (topologyHost, topologyPort, options) => {
       topologyHost = topologyHost || this.host;
