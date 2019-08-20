@@ -1,7 +1,7 @@
 'use strict';
 
 const semver = require('semver');
-const path = require('path');
+// const path = require('path');
 const core = require('../lib/core');
 /**
  * Base class for environments in projects that use the test
@@ -23,25 +23,25 @@ class EnvironmentBase {
     }
   }
 }
-const genReplsetConfig = (port, options) => {
-  return Object.assign(
-    {
-      options: {
-        bind_ip: 'localhost',
-        port: port,
-        dbpath: `${__dirname}/../db/${port}`,
-        setParameter: ['enableTestCommands=1']
-      }
-    },
-    options
-  );
-};
+// const genReplsetConfig = (port, options) => {
+//   return Object.assign(
+//     {
+//       options: {
+//         bind_ip: 'localhost',
+//         port: port,
+//         dbpath: `${__dirname}/../db/${port}`,
+//         setParameter: ['enableTestCommands=1']
+//       }
+//     },
+//     options
+//   );
+// };
 function usingUnifiedTopology() {
   return !!process.env.MONGODB_UNIFIED_TOPOLOGY;
 }
 
 class ReplicaSetEnvironment extends EnvironmentBase {
-  constructor(parsedURI, version) {
+  constructor(parsedURI) {
     super(parsedURI);
     this.setName = 'rs';
     this.url = `mongodb://${this.host}:${this.port}/integration_tests?rs_name=rs`;
@@ -70,13 +70,13 @@ class ReplicaSetEnvironment extends EnvironmentBase {
   }
 }
 
-function generateNodesArray(hosts, configFunc){
-  let nodesArray = [];
-  for (let i = 0; i < hosts.length; i++) {
-     nodesArray[i] = configFunc(hosts[i].port || hosts[0].port + i);
-  }
-  return nodesArray;
-}
+// function generateNodesArray(hosts, configFunc) {
+//   let nodesArray = [];
+//   for (let i = 0; i < hosts.length; i++) {
+//     nodesArray[i] = configFunc(hosts[i].port || hosts[0].port + i);
+//   }
+//   return nodesArray;
+// }
 /**
  *
  */
@@ -85,33 +85,33 @@ class SingleEnvironment extends EnvironmentBase {
     super(parsedURI);
   }
 }
-const genShardedConfig = (port, options, shardOptions) => {
-  return Object.assign(
-    {
-      options: {
-        bind_ip: 'localhost',
-        port: port,
-        dbpath: `${__dirname}/../db/${port}`,
-        shardsvr: null
-      }
-    },
-    options,
-    shardOptions
-  );
-};
-const genConfigNode = (port, options) => {
-  return Object.assign(
-    {
-      options: {
-        bind_ip: 'localhost',
-        port: port,
-        dbpath: `${__dirname}/../db/${port}`,
-        setParameter: ['enableTestCommands=1']
-      }
-    },
-    options
-  );
-};
+// const genShardedConfig = (port, options, shardOptions) => {
+//   return Object.assign(
+//     {
+//       options: {
+//         bind_ip: 'localhost',
+//         port: port,
+//         dbpath: `${__dirname}/../db/${port}`,
+//         shardsvr: null
+//       }
+//     },
+//     options,
+//     shardOptions
+//   );
+// };
+// const genConfigNode = (port, options) => {
+//   return Object.assign(
+//     {
+//       options: {
+//         bind_ip: 'localhost',
+//         port: port,
+//         dbpath: `${__dirname}/../db/${port}`,
+//         setParameter: ['enableTestCommands=1']
+//       }
+//     },
+//     options
+//   );
+// };
 /**
  *
  */
@@ -134,12 +134,12 @@ class ShardedEnvironment extends EnvironmentBase {
     };
     this.server37631WorkaroundNeeded = semver.satisfies(version, '3.6.x');
   }
-  setup(callback) {
-    const shardOptions = this.options && this.options.shard ? this.options.shard : {};
+  setup() {
+    //const shardOptions = this.options && this.options.shard ? this.options.shard : {};
     // First set of nodes
     //const nodes1 = generateNodesArray(parsedURI.hosts, genShardedConfig);
 
-    const configOptions = this.options && this.options.config ? this.options.config : {};
+    //const configOptions = this.options && this.options.config ? this.options.config : {};
     //const configNodes = [genConfigNode(35000, configOptions)];
     let proxyNodes = [
       {
