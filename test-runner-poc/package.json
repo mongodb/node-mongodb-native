@@ -4,8 +4,8 @@
   "description": "",
   "main": "runner.js",
   "scripts": {
-    "test": "mocha --file lib/runner.js test/crud_tests.js",
-    "func": "mocha --timeout 60000 --file lib/runner.js ../test/functional/*.js"
+    "test": "npm install && mocha --file lib/runner.js test/crud_tests.js",
+    "func": "npm install && mocha --timeout 60000 --file lib/runner.js ../test/functional/*.js"
   },
   "author": "",
   "license": "ISC",
