@@ -1485,7 +1485,7 @@ describe('Change Streams', function() {
     }
   });
 
-  it.only('Should support piping of Change Streams through multiple pipes', {
+  it('Should support piping of Change Streams through multiple pipes', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
 
     // The actual test we wish to run
