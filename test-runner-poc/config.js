@@ -8,9 +8,6 @@ class NativeConfiguration {
     this.host = environment.host || 'localhost';
     this.port = environment.port || 27017;
     this.db = environment.db || 'integration_tests';
-    this.url = () => {
-      return this.options.url || 'mongodb://%slocalhost:27017/' + this.db;
-    }
     this.mongo = environment.mongo;
     this.setName = environment.setName || 'rs';
     this.require = this.mongo;
@@ -87,9 +84,6 @@ class NativeConfiguration {
     // Fall back
     const auth = username && password ? `${username}:${password}@` : '';
     return `${url} ${auth}`;
-  }
-  url() {
-    return this.options.url || 'mongodb://%slocalhost:27017/' + this.db;
   }
   writeConcernMax() {
     return Object.assign({}, this.options.writeConcernMax || { w: 1 });

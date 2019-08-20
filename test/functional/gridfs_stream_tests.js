@@ -1186,7 +1186,7 @@ describe('GridFS Stream', function() {
                   client.close();
                   done();
                 });
-                //temporary fix to bug in test.
+                //TODO: fix this test for NODE-2096
                 if (testSpec.assert.result) {
                   download.on('end', function() {
                     var result = testSpec.assert.result;
