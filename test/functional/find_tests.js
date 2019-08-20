@@ -3,6 +3,7 @@ const test = require('./shared').assert;
 const setupDatabase = require('./shared').setupDatabase;
 const expect = require('chai').expect;
 const Buffer = require('safe-buffer').Buffer;
+const sinon = require('sinon');
 
 describe('Find', function() {
   before(function() {
@@ -3116,6 +3117,47 @@ describe('Find', function() {
             // Let's close the db
             client.close();
             done();
+          });
+        });
+      });
+    }
+  });
+
+  it('should respect client-level read preference', {
+    metadata: { requires: { topology: ['replicaset'] } },
+
+    test: function(done) {
+      const config = this.configuration;
+      const client = config.newClient({}, { monitorCommands: true, readPreference: 'secondary' });
+
+      if (!config.usingUnifiedTopology()) {
+        this.skip();
+        return;
+      }
+
+      client.connect((err, client) => {
+        expect(err).to.not.exist;
+
+        let selectedServer;
+        const selectServerStub = sinon.stub(client.topology, 'selectServer').callsFake(function() {
+          const args = Array.prototype.slice.call(arguments);
+          const originalCallback = args.pop();
+          args.push((err, server) => {
+            selectedServer = server;
+            originalCallback(err, server);
+          });
+
+          return client.topology.selectServer.wrappedMethod.apply(this, args);
+        });
+
+        const collection = client.db().collection('test_read_preference');
+        collection.find().toArray(err => {
+          expect(err).to.not.exist;
+          expect(selectedServer.description.type).to.eql('RSSecondary');
+
+          client.close(err => {
+            selectServerStub.restore();
+            done(err);
           });
         });
       });
