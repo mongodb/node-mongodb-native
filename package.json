@@ -26,6 +26,7 @@
   "dependencies": {
     "bson": "^1.1.1",
     "require_optional": "^1.0.1",
+    "mocha": "*",
     "safe-buffer": "^5.1.2"
   },
   "devDependencies": {
