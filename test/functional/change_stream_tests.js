@@ -1493,19 +1493,17 @@ describe('Change Streams', function() {
       var configuration = this.configuration;
       var crypto = require('crypto');
 
-      const getMethods = (obj) => {
-        let properties = new Set()
-        let currentObj = obj
+      const getMethods = obj => {
+        let properties = new Set();
+        let currentObj = obj;
         do {
-          Object.getOwnPropertyNames(currentObj).map(item => properties.add(item))
-        } while ((currentObj = Object.getPrototypeOf(currentObj)))
-        return [...properties.keys()].filter(item => typeof obj[item] === 'function')
-      }
-      console.log("configuration methods: ", getMethods(configuration))
-      console.log('configuration.url() ',configuration.url())
-      console.log('configuration.url ',configuration.url)
-
-
+          Object.getOwnPropertyNames(currentObj).map(item => properties.add(item));
+        } while ((currentObj = Object.getPrototypeOf(currentObj)));
+        return [...properties.keys()].filter(item => typeof obj[item] === 'function');
+      };
+      console.log('configuration methods: ', getMethods(configuration));
+      console.log('configuration.url() ', configuration.url());
+      console.log('configuration.url ', configuration.url);
 
       const client = configuration.newClient(configuration.url(), {
         poolSize: 1,
