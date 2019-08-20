@@ -1499,7 +1499,8 @@ describe('Change Streams', function() {
         do {
           Object.getOwnPropertyNames(currentObj).map(item => properties.add(item));
         } while ((currentObj = Object.getPrototypeOf(currentObj)));
-        return [properties.keys()].filter(item => typeof obj[item] === 'function');
+        return Array.from(properties).filter(item => typeof obj[item] === 'function');
+        //return [...properties.keys()].filter(item => typeof obj[item] === 'function');
       };
       console.log('configuration methods: ', getMethods(configuration));
       console.log('configuration.url() ', configuration.url());
