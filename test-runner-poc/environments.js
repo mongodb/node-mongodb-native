@@ -59,13 +59,14 @@ class ReplicaSetEnvironment extends EnvironmentBase {
       return new core.ReplSet([{ topologyHost, topologyPort }], options);
     };
 
+    // Add back once this.nodes is added back.
     // Do we have 3.2+
-    if (semver.satisfies(version, '>=3.2.0')) {
-      this.nodes = this.nodes.map(function(x) {
-        x.options.enableMajorityReadConcern = null;
-        return x;
-      });
-    }
+    // if (semver.satisfies(version, '>=3.2.0')) {
+    //   this.nodes = this.nodes.map(function(x) {
+    //     x.options.enableMajorityReadConcern = null;
+    //     return x;
+    //   });
+    // }
   }
 }
 

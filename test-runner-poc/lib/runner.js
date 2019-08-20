@@ -89,9 +89,13 @@ function createFilters(callback) {
 }
 before(function(done) {
   environmentSetup((err, environment) => {
-    if (err) done(err);
-    this.configuration = new TestConfiguration(environment);
-  }, done);
+    if (err) {
+      done(err);
+    } else {
+      this.configuration = new TestConfiguration(environment);
+      done();
+    }
+  });
 });
 beforeEach(function(done) {
   // Assigned this to a new variable called self in order to preserve context and access tests within the _run function.
