@@ -72,8 +72,8 @@ jobs:
       env:
         - MONGODB_VERSION=4.0.x
         - MONGODB_ENVIRONMENT=replicaset
-        before_script:
-          - mlaunch --init --replicaset --setParameter enableTestCommands=1
+      before_script:
+        - mlaunch --init --replicaset --setParameter enableTestCommands=1
     - stage: replicaset
       node_js: 4
       env:
