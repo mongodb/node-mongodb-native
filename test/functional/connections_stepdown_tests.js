@@ -130,7 +130,7 @@ describe('Connections survive primary step down', function() {
               db.executeDbAdminCommand({ configureFailPoint: 'failCommand', mode: 'off' })
             );
 
-            collection.insertOne({ test: 1 }).catch(err => expect(err.code).to.equal(10107));
+            return collection.insertOne({ test: 1 }).catch(err => expect(err.code).to.equal(10107));
           })
           .then(() => connectionCount(db).then(expectPoolWasCleared(initialConnectionCount)));
       });
@@ -151,6 +151,7 @@ describe('Connections survive primary step down', function() {
             deferred.push(() =>
               db.executeDbAdminCommand({ configureFailPoint: 'failCommand', mode: 'off' })
             );
+
             return collection.insertOne({ test: 1 }).catch(err => expect(err.code).to.equal(91));
           })
           .then(() => connectionCount(db).then(expectPoolWasCleared(initialConnectionCount)));
@@ -172,6 +173,7 @@ describe('Connections survive primary step down', function() {
             deferred.push(() =>
               db.executeDbAdminCommand({ configureFailPoint: 'failCommand', mode: 'off' })
             );
+
             return collection.insertOne({ test: 1 }).catch(err => expect(err.code).to.equal(11600));
           })
           .then(() => connectionCount(db).then(expectPoolWasCleared(initialConnectionCount)));
