@@ -8,10 +8,9 @@ if (!shell.test('-e', 'mongo-orchestration')) {
 } else {
   shell.cd('mongo-orchestration');
 }
-shell.exec('nohup mongo-orchestration start > ./out.log 2> ./err.log < /dev/null &');
+shell.exec('nohup mongo-orchestration start &');
 shell.echo('finished starting mongo-orchestration');
 shell.cd('mongo_orchestration');
-shell.exec('mkdir /home/travis/tmp/');
 
 shell.exec('../scripts/mo configurations/servers/clean.json start');
 shell.echo('trying to run mongo --port 27017:')
