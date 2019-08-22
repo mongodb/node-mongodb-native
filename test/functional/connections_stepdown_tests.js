@@ -4,7 +4,9 @@ const chai = require('chai');
 const expect = chai.expect;
 
 function ignoreNsNotFound(err) {
-  if (!err.message.match(/ns not found/)) throw err;
+  if (!err.message.match(/ns not found/)) {
+    throw err;
+  }
 }
 
 function connectionCount(db) {
