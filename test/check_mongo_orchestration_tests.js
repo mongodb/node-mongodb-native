@@ -8,7 +8,7 @@ if (!shell.test('-e', 'mongo-orchestration')) {
 } else {
   shell.cd('mongo-orchestration');
 }
-shell.exec('nohup mongo-orchestration start --no-daemon &');
+shell.exec('nohup mongo-orchestration start &');
 shell.echo('finished starting mongo-orchestration');
 shell.cd('mongo_orchestration');
 
