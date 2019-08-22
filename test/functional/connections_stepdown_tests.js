@@ -30,7 +30,7 @@ describe('Connections survive primary step down', function() {
   beforeEach(function() {
     client = this.configuration.newClient(
       { w: 1 },
-      { poolSize: 1, retryWrites: false, useUnifiedTopology: true, serverSelectionTimeoutMS: 30000 }
+      { poolSize: 1, retryWrites: false, useUnifiedTopology: true }
     );
 
     return client
