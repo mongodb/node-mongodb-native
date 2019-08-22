@@ -8,7 +8,7 @@ if (!shell.test('-e', 'mongo-orchestration')) {
 } else {
   shell.cd('mongo-orchestration');
 }
-shell.exec('mongo-orchestration start');
+shell.exec('nohup mongo-orchestration start > ./out.log 2> ./err.log < /dev/null &');
 shell.echo('finished starting mongo-orchestration');
 shell.cd('mongo_orchestration');
 //shell.cd('configurations');
