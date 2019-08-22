@@ -23,78 +23,51 @@ jobs:
     - stage: standalone
       node_js: 4
       env: MONGODB_VERSION=2.6.x
-      before_script:
-        - mlaunch --single
     - stage: standalone
       node_js: 4
       env: MONGODB_VERSION=3.0.x
-      before_script:
-        - mlaunch --single
     - stage: standalone
       node_js: 4
       env: MONGODB_VERSION=3.2.x
-      before_script:
-        - mlaunch --single
     - stage: standalone
       node_js: 4
       env: MONGODB_VERSION=3.4.x
-      before_script:
-        - mlaunch --single
     - stage: standalone
       node_js: 4
       env: MONGODB_VERSION=3.6.x
-      before_script:
-        - mlaunch --single
     - stage: standalone
       node_js: 4
       env: MONGODB_VERSION=4.0.x
-      before_script:
-        - mlaunch --single
 
     - stage: standalone
       node_js: 6
       env: MONGODB_VERSION=4.0.x
-      before_script:
-        - mlaunch --single
     - stage: standalone
       node_js: 8
       env: MONGODB_VERSION=4.0.x
-      before_script:
-        - mlaunch --single
     - stage: standalone
       node_js: 10
       env: MONGODB_VERSION=4.0.x
-      before_script:
-        - mlaunch --single
 
     - stage: replicaset
       node_js: 4
       env:
         - MONGODB_VERSION=4.0.x
-        - MONGODB_ENVIRONMENT=replicaset
-      before_script:
-        - mlaunch --init --replicaset --setParameter enableTestCommands=1
     - stage: replicaset
       node_js: 4
       env:
         - MONGODB_VERSION=4.2.x
         - MONGODB_ENVIRONMENT=replicaset
-      before_script:
-        - mlaunch --init --replicaset --setParameter enableTestCommands=1
     - stage: sharded
       node_js: 4
       env:
         - MONGODB_VERSION=4.0.x
         - MONGODB_ENVIRONMENT=sharded
-      before_script:
-        - mlaunch —replicaset --sharded 3
     - stage: sharded
       node_js: 4
       env:
         - MONGODB_VERSION=4.2.x
         - MONGODB_ENVIRONMENT=sharded
-      before_script:
-        - mlaunch —replicaset --sharded 3
 
     # basic smoke test of the unified topology
     - stage: unified
