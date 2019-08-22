@@ -10,4 +10,5 @@ if (!shell.test('-e', 'mongo-orchestration')) {
 }
 shell.cd('mongo_orchestration');
 shell.cd('configurations');
+shell.exec('mkdir /home/travis/tmp/');
 shell.exec('../../scripts/mo servers/clean.json start');
