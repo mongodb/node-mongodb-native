@@ -8,10 +8,14 @@ if (!shell.test('-e', 'mongo-orchestration')) {
 } else {
   shell.cd('mongo-orchestration');
 }
-shell.exec('mongo-orchestration start')
+shell.exec('mongo-orchestration start');
+shell.echo('finished starting mongo-orchestration');
 shell.cd('mongo_orchestration');
 //shell.cd('configurations');
 shell.exec('mkdir /home/travis/tmp/');
 //shell.exec('mkdir /Users/rosemary.yin/tmp')
 
 shell.exec('../scripts/mo configuration/servers/clean.json start');
+shell.echo('trying to run mongo --port 27017:')
+shell.exec('mongo --port 27017')
+shell.echo('finished check mongo orchestration script');
