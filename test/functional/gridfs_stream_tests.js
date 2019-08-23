@@ -420,6 +420,41 @@ describe('GridFS Stream', function() {
     }
   });
 
+  it('should emit close after all chunks are received', {
+    metadata: { requires: { topology: ['single'] } },
+
+    test: function(done) {
+      const configuration = this.configuration;
+      const GridFSBucket = configuration.require.GridFSBucket;
+
+      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      client.connect((err, client) => {
+        expect(err).to.not.exist;
+        const db = client.db(configuration.db);
+        const bucket = new GridFSBucket(db, {
+          bucketName: 'gridfsdownload',
+          chunkSizeBytes: 6000
+        });
+
+        const readStream = fs.createReadStream('./LICENSE.md');
+        const uploadStream = bucket.openUploadStream('teststart.dat');
+        uploadStream.once('finish', function() {
+          const downloadStream = bucket.openDownloadStreamByName('teststart.dat');
+
+          const events = [];
+          downloadStream.on('data', () => events.push('data'));
+          downloadStream.on('close', () => events.push('close'));
+          downloadStream.on('end', () => {
+            expect(events).to.eql(['data', 'data', 'close']);
+            client.close(done);
+          });
+        });
+
+        readStream.pipe(uploadStream);
+      });
+    }
+  });
+
   /**
    * Deleting a file from GridFS
    *
