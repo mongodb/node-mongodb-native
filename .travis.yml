@@ -23,32 +23,32 @@ before_install:
 jobs:
   include:
     - stage: standalone
-      node_js: 4
+      node_js: 6
       env:
         - MONGODB_VERSION=2.6.x
         - MONGODB_ENVIRONMENT=standalone
     - stage: standalone
-      node_js: 4
+      node_js: 6
       env:
         - MONGODB_VERSION=3.0.x
         - MONGODB_ENVIRONMENT=standalone
     - stage: standalone
-      node_js: 4
+      node_js: 6
       env:
         - MONGODB_VERSION=3.2.x
         - MONGODB_ENVIRONMENT=standalone
     - stage: standalone
-      node_js: 4
+      node_js: 6
       env:
         - MONGODB_VERSION=3.4.x
         - MONGODB_ENVIRONMENT=standalone
     - stage: standalone
-      node_js: 4
+      node_js: 6
       env:
         - MONGODB_VERSION=3.6.x
         - MONGODB_ENVIRONMENT=standalone
     - stage: standalone
-      node_js: 4
+      node_js: 6
       env:
         - MONGODB_VERSION=4.0.x
         - MONGODB_ENVIRONMENT=standalone
@@ -70,60 +70,60 @@ jobs:
         - MONGODB_ENVIRONMENT=standalone
 
     - stage: replicaset
-      node_js: 4
+      node_js: 6
       env:
         - MONGODB_VERSION=4.0.x
         - MONGODB_ENVIRONMENT=replicaset
     - stage: replicaset
-      node_js: 4
+      node_js: 6
       env:
         - MONGODB_VERSION=4.2.x
         - MONGODB_ENVIRONMENT=replicaset
     - stage: sharded
-      node_js: 4
+      node_js: 6
       env:
         - MONGODB_VERSION=4.0.x
         - MONGODB_ENVIRONMENT=sharded
     - stage: sharded
-      node_js: 4
+      node_js: 6
       env:
         - MONGODB_VERSION=4.2.x
         - MONGODB_ENVIRONMENT=sharded
 
     # basic smoke test of the unified topology
     - stage: unified
-      node_js: 4
+      node_js: 6
       env:
         - MONGODB_VERSION=4.0.x
         - MONGODB_UNIFIED_TOPOLOGY=1
         - MONGODB_ENVIRONMENT=standalone
     - stage: unified
-      node_js: 4
+      node_js: 6
       env:
         - MONGODB_VERSION=4.0.x
         - MONGODB_UNIFIED_TOPOLOGY=1
         - MONGODB_ENVIRONMENT=replicaset
     - stage: unified
-      node_js: 4
+      node_js: 6
       env:
         - MONGODB_VERSION=4.0.x
         - MONGODB_UNIFIED_TOPOLOGY=1
         - MONGODB_ENVIRONMENT=sharded
     - stage: unified
-      node_js: 4
+      node_js: 6
       env:
         - MONGODB_VERSION=4.2.x
         - MONGODB_UNIFIED_TOPOLOGY=1
         - MONGODB_ENVIRONMENT=replicaset
     - stage: unified
-      node_js: 4
+      node_js: 6
       env:
         - MONGODB_VERSION=4.2.x
         - MONGODB_UNIFIED_TOPOLOGY=1
         - MONGODB_ENVIRONMENT=sharded
 
     - stage: client-encryption
-      node_js: 4
+      node_js: 6
       env:
         - MONGODB_VERSION=latest
         - MONGODB_UNIFIED_TOPOLOGY=1
