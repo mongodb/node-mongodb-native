@@ -1,5 +1,7 @@
 'use strict';
 const shell = require('shelljs');
+shell.echo('mongodb environment variable is: ')
+shell.exec('echo $MONGODB_ENVIRONMENT');
 if (!shell.test('-e', 'mongo-orchestration')) {
   shell.echo('Mongo-orchestration not found. Installing mongo-orchestration.');
   shell.exec('git clone https://github.com/10gen/mongo-orchestration.git');
@@ -13,7 +15,4 @@ shell.echo('finished starting mongo-orchestration');
 shell.cd('mongo_orchestration');
 
 shell.exec('../scripts/mo configurations/servers/clean.json start');
-//shell.echo('trying to run mongo --port 27017:')
-//shell.exec('mongo --port 27017')
-//shell.exec('../scripts/mo configurations/servers/clean.json status');
 shell.echo('finished check mongo orchestration script');
