@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="3.3.1"></a>
+## [3.3.1](https://github.com/mongodb/node-mongodb-native/compare/v3.3.0...v3.3.1) (2019-08-23)
+
+
+### Bug Fixes
+
+* **find:** respect client-level provided read preference ([fec4f15](https://github.com/mongodb/node-mongodb-native/commit/fec4f15))
+* correct inverted defaults for unified topology ([cf598e1](https://github.com/mongodb/node-mongodb-native/commit/cf598e1))
+
+
+
 <a name="3.3.0"></a>
 # [3.3.0](https://github.com/mongodb/node-mongodb-native/compare/v3.3.0-alpha1...v3.3.0) (2019-08-13)
 
