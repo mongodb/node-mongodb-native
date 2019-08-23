@@ -1,4 +1,5 @@
 'use strict';
+const f = require('util').format;
 const url = require('url');
 const qs = require('querystring');
 const core = require('../lib/core');
@@ -20,9 +21,11 @@ class NativeConfiguration {
       this.replicasetName = environment.setName || 'rs';
     }
   }
+
   usingUnifiedTopology() {
     return !!process.env.MONGODB_UNIFIED_TOPOLOGY;
   }
+
   newClient(dbOptions, serverOptions) {
     // support MongoClient contructor form (url, options) for `newClient`
     if (typeof dbOptions === 'string') {
@@ -62,19 +65,24 @@ class NativeConfiguration {
     });
     return new this.mongo.MongoClient(connectionString, serverOptions);
   }
+
   newTopology(host, port, options) {
     options = options || {};
     return this.topology(host, port, options);
   }
+
   url(username, password) {
     const url = this.options.url || 'mongodb://%slocalhost:27017/' + this.db;
+
     // Fall back
-    const auth = username && password ? `${username}:${password}@` : '';
-    return `${url} ${auth}`;
+    const auth = username && password ? f('%s:%s@', username, password) : '';
+    return f(url, auth);
   }
+
   writeConcernMax() {
     return Object.assign({}, this.options.writeConcernMax || { w: 1 });
   }
+
   server37631Workaround() {
     console.log('[applying SERVER-37631 workaround]');
     const configServers = this.manager.configurationServers.managers;

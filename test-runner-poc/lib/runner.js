@@ -102,8 +102,8 @@ beforeEach(function(done) {
     filtersExecuted += 1;
 
     if (!filter.filter(self.currentTest)) {
+      //If we filter out a test, we'd like to ensure that any before hooks are skipped, as long as that hook is not the root hook.
       if (!self.currentTest.parent.parent.root) {
-        // self.currentTest.parent.pending = true; <-- this makes apm_tests skip when they should not
         self.currentTest.parent._beforeEach = [];
       }
       self.skip();

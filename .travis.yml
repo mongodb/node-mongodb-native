@@ -17,7 +17,8 @@ before_install:
   - mongocryptd/bin/mongocryptd&
   - wget https://s3.amazonaws.com/mciuploads/libmongocrypt/ubuntu1604/master/1c6c72377582ebcd8402f6f15fff5c3143b46741/libmongocrypt.tar.gz
   - sudo tar -xzf libmongocrypt.tar.gz -C /usr/local
-  - sudo pip install mongo-orchestration && mongo-orchestration start
+  - sudo pip install mongo-orchestration
+  - mongo-orchestration start
 
 jobs:
   include:
@@ -54,6 +55,7 @@ jobs:
       node_js: 4
       env:
         - MONGODB_VERSION=4.0.x
+        - MONGODB_ENVIRONMENT=replicaset
     - stage: replicaset
       node_js: 4
       env:
