@@ -11,6 +11,10 @@ branches:
     - next
     - test-runner
 
+before_script:
+  - cat /home/travis/tmp/orchestrations/db27017.log
+  - cat /home/travis/build/mongodb/node-mongodb-native/server.log
+
 before_install:
   - wget -O mongocryptd.tgz https://s3.amazonaws.com/mciuploads/mongodb-mongo-v4.2/enterprise-ubuntu1604-64/f92115cad9d2a4c2ddcf3c2c65092dda2fd7147a/binaries/mongo-cryptd-mongodb_mongo_v4.2_enterprise_ubuntu1604_64_f92115cad9d2a4c2ddcf3c2c65092dda2fd7147a_19_06_13_17_31_40.tgz
   - mkdir mongocryptd && tar xzf mongocryptd.tgz -C mongocryptd --strip-components 1
