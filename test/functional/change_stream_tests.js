@@ -543,7 +543,9 @@ describe('Change Streams', function() {
         assert.ifError(err);
 
         var database = client.db('integration_tests');
-        var changeStream = database.collection('invalidateListeners').watch(pipeline);
+        var changeStream = database
+          .collection('invalidateListeners')
+          .watch(pipeline, { batchSize: 1 });
 
         // Attach first event listener
         changeStream.once('change', function(change) {
