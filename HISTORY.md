@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="3.3.2"></a>
+## [3.3.2](https://github.com/mongodb/node-mongodb-native/compare/v3.3.1...v3.3.2) (2019-08-28)
+
+
+### Bug Fixes
+
+* **change-stream:** default to server default batch size ([b3ae4c5](https://github.com/mongodb/node-mongodb-native/commit/b3ae4c5))
+* **execute-operation:** return promise on session support check ([a976c14](https://github.com/mongodb/node-mongodb-native/commit/a976c14))
+* **gridfs-stream:** ensure `close` is emitted after last chunk ([ae94cb9](https://github.com/mongodb/node-mongodb-native/commit/ae94cb9))
+
+
+
 <a name="3.3.1"></a>
 ## [3.3.1](https://github.com/mongodb/node-mongodb-native/compare/v3.3.0...v3.3.1) (2019-08-23)
 
