@@ -49,8 +49,8 @@ describe('Sessions', function() {
         expect(test.commands.started).to.have.length(1);
         expect(test.commands.started[0].commandName).to.equal('endSessions');
         expect(test.commands.started[0].command.endSessions).to.include.deep.members(sessions);
+        expect(client.s.sessions.size).to.equal(0);
 
-        test.equal(client.s.sessions.size, 0);
         done();
       });
     }
