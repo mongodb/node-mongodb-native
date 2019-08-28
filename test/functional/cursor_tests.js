@@ -4369,7 +4369,7 @@ describe('Cursor', function() {
             const cursor = collection.find({});
 
             cursor.next(function() {
-              test.equal(client.topology.s.sessions.length, 0);
+              test.equal(client.topology.s.sessions.size, 0);
               client.close();
               done();
             });
@@ -4410,13 +4410,13 @@ describe('Cursor', function() {
             test.equal(null, err);
             const cursor = collection.find({}, { batchSize: 3 });
             cursor.next(function() {
-              test.equal(client.topology.s.sessions.length, 1);
+              test.equal(client.topology.s.sessions.size, 1);
               cursor.next(function() {
-                test.equal(client.topology.s.sessions.length, 1);
+                test.equal(client.topology.s.sessions.size, 1);
                 cursor.next(function() {
-                  test.equal(client.topology.s.sessions.length, 1);
+                  test.equal(client.topology.s.sessions.size, 1);
                   cursor.next(function() {
-                    test.equal(client.topology.s.sessions.length, 0);
+                    test.equal(client.topology.s.sessions.size, 0);
                     client.close();
                     done();
                   });
