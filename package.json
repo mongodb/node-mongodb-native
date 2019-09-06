@@ -45,6 +45,7 @@
     "mongodb-test-runner": "^1.1.18",
     "prettier": "~1.12.0",
     "semver": "^5.5.0",
+    "shelljs": "^0.8.3",
     "sinon": "^4.3.0",
     "sinon-chai": "^3.2.0",
     "snappy": "^6.1.2",
@@ -61,7 +62,8 @@
   },
   "scripts": {
     "atlas": "node ./test/atlas_connectivity_tests.js",
-    "test": "npm run lint && mongodb-test-runner -t 60000 test/core test/unit test/functional",
+    "orchestration": "node test/check_mongo_orchestration_tests.js",
+    "test": "npm run orchestration && cd test-runner-poc && npm run func && cd .. && npm run lint",
     "coverage": "istanbul cover mongodb-test-runner -- -t 60000 test/core test/unit test/functional",
     "lint": "eslint lib test",
     "format": "prettier --print-width 100 --tab-width 2 --single-quote --write 'test/**/*.js' 'lib/**/*.js'",
