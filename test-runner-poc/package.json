@@ -4,13 +4,15 @@
   "description": "",
   "main": "runner.js",
   "scripts": {
-    "test": "mocha --file lib/runner.js test/crud_tests.js"
+    "test": "npm install && mocha --file lib/runner.js test/crud_tests.js",
+    "func": "npm install && mocha --timeout 60000 --file lib/runner.js ../test/functional/*.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "mocha": "*",
     "chai": "*",
+    "shelljs": "^0.8.3",
     "mongodb": "*"
   }
 }
