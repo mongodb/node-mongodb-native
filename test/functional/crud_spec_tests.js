@@ -8,9 +8,9 @@ chai.use(require('chai-subset'));
 
 const BulkWriteError = require('../../lib/bulk/common').BulkWriteError;
 
-const TestRunnerContext = require('./runner').TestRunnerContext;
-const gatherTestSuites = require('./runner').gatherTestSuites;
-const generateTopologyTests = require('./runner').generateTopologyTests;
+const TestRunnerContext = require('./spec-runner').TestRunnerContext;
+const gatherTestSuites = require('./spec-runner').gatherTestSuites;
+const generateTopologyTests = require('./spec-runner').generateTopologyTests;
 
 function findScenarios() {
   const route = [__dirname, 'spec', 'crud'].concat(Array.from(arguments));
