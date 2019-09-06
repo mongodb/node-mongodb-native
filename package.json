@@ -17,7 +17,7 @@
     "official"
   ],
   "peerOptionalDependencies": {
-    "kerberos": "^1.0.0",
+    "kerberos": "^1.1.0",
     "mongodb-client-encryption": "^1.0.0",
     "mongodb-extjson": "^2.1.2",
     "snappy": "^6.1.1",
