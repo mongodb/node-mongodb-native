@@ -550,7 +550,8 @@ describe('GridFS Stream', function() {
         var id = uploadStream.id;
         var query = { files_id: id };
         uploadStream.write('a', 'utf8', function(error) {
-          test.equal(error, null);
+          expect(error).to.not.exist;
+
           db.collection(CHUNKS_COLL).count(query, function(error, c) {
             test.equal(error, null);
             test.equal(c, 1);
@@ -612,7 +613,8 @@ describe('GridFS Stream', function() {
         var id = uploadStream.id;
         var query = { files_id: id };
         uploadStream.write('a', 'utf8', function(error) {
-          test.equal(error, null);
+          expect(error).to.not.exist;
+
           db.collection(CHUNKS_COLL).count(query, function(error, c) {
             test.equal(error, null);
             test.equal(c, 1);
