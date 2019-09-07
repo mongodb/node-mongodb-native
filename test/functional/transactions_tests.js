@@ -123,4 +123,36 @@ describe('Transactions', function() {
       }
     });
   });
+
+  describe('abortTransaction', function() {
+    it('should wait for transaction to abort when endSession is called on a session', {
+      metadata: { requires: { topology: ['replicaset'], mongodb: '>=4.1.0' } },
+      test: function(done) {
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.url());
+
+        client.connect((err, client) => {
+          expect(err).to.not.exist;
+
+          const session = client.startSession();
+          const db = client.db(configuration.db);
+          const coll = db.collection('transaction_endSessions_test');
+
+          coll.insertOne({ a: 1 }, err => {
+            expect(err).to.not.exist;
+
+            session.startTransaction();
+            coll.insertOne({ a: 1 }, { session }, err => {
+              expect(err).to.not.exist;
+
+              session.endSession(() => {
+                expect(session.inTransaction()).to.be.false;
+                client.close(done);
+              });
+            });
+          });
+        });
+      }
+    });
+  });
 });
