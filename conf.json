@@ -1,5 +1,5 @@
 {
-  "plugins": ["plugins/markdown", "docs/lib/jsdoc/examples_plugin.js"],
+  "plugins": ["plugins/markdown", "docs/lib/jsdoc/examples_plugin.js", "docs/lib/jsdoc/merge_params.js"],
   "source": {
     "include": [
       "lib/admin.js",
