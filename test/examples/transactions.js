@@ -240,12 +240,12 @@ describe('examples(transactions):', function() {
 
       // Prereq: Create collections. CRUD operations in transactions must be on existing collections.
 
-      client
+      await client
         .db('mydb1')
         .collection('foo')
         .insertOne({ abc: 0 }, { w: 'majority' });
 
-      client
+      await client
         .db('mydb2')
         .collection('bar')
         .insertOne({ xyz: 0 }, { w: 'majority' });
