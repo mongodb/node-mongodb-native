@@ -136,6 +136,8 @@
             
                 <li data-name="AggregationCursor#explain"><a href="AggregationCursor.html#explain">explain</a></li>
             
+                <li data-name="AggregationCursor#forEach"><a href="AggregationCursor.html#forEach">forEach</a></li>
+            
                 <li data-name="AggregationCursor#geoNear"><a href="AggregationCursor.html#geoNear">geoNear</a></li>
             
                 <li data-name="AggregationCursor#group"><a href="AggregationCursor.html#group">group</a></li>
@@ -537,6 +539,8 @@
                 <li data-name="Collection~findAndModifyCallback"><a href="Collection.html#~findAndModifyCallback">findAndModifyCallback</a></li>
             
                 <li data-name="Collection~findAndModifyWriteOpResult"><a href="Collection.html#~findAndModifyWriteOpResult">findAndModifyWriteOpResult</a></li>
+            
+                <li data-name="Collection~IndexDefinition"><a href="Collection.html#~IndexDefinition">IndexDefinition</a></li>
             
                 <li data-name="Collection~insertOneWriteOpCallback"><a href="Collection.html#~insertOneWriteOpCallback">insertOneWriteOpCallback</a></li>
             
@@ -2193,12 +2197,12 @@
     <div class="nameContainer">
         <h4 class="name" id="addToOperationsList">
             
-            addToOperationsList<span class="signature">(bulkOperation, docType, document)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="UnorderedBulkOperation.html">UnorderedBulkOperation</a>}</span>
+            addToOperationsList<span class="signature">(bulkOperation, docType, document)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="OrderedBulkOperation.html">OrderedBulkOperation</a>}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_bulk_unordered.js.html">lib/bulk/unordered.js</a>, <a href="lib_bulk_unordered.js.html#line18">line 18</a>
+            <a href="lib_bulk_ordered.js.html">lib/bulk/ordered.js</a>, <a href="lib_bulk_ordered.js.html#line18">line 18</a>
         </div>
         
     </div>
@@ -2246,7 +2250,7 @@
             <td class="type">
             
                 
-<span class="param-type"><a href="UnorderedBulkOperation.html">UnorderedBulkOperation</a></span>
+<span class="param-type"><a href="OrderedBulkOperation.html">OrderedBulkOperation</a></span>
 
 
             
@@ -2360,12 +2364,12 @@
     <div class="nameContainer">
         <h4 class="name" id="addToOperationsList">
             
-            addToOperationsList<span class="signature">(bulkOperation, docType, document)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="OrderedBulkOperation.html">OrderedBulkOperation</a>}</span>
+            addToOperationsList<span class="signature">(bulkOperation, docType, document)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="UnorderedBulkOperation.html">UnorderedBulkOperation</a>}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_bulk_ordered.js.html">lib/bulk/ordered.js</a>, <a href="lib_bulk_ordered.js.html#line18">line 18</a>
+            <a href="lib_bulk_unordered.js.html">lib/bulk/unordered.js</a>, <a href="lib_bulk_unordered.js.html#line18">line 18</a>
         </div>
         
     </div>
@@ -2413,7 +2417,7 @@
             <td class="type">
             
                 
-<span class="param-type"><a href="OrderedBulkOperation.html">OrderedBulkOperation</a></span>
+<span class="param-type"><a href="UnorderedBulkOperation.html">UnorderedBulkOperation</a></span>
 
 
             
@@ -2956,7 +2960,7 @@ error, if some error condition was met
     
         
         <div class="tag-source">
-            <a href="lib_core_error.js.html">lib/core/error.js</a>, <a href="lib_core_error.js.html#line146">line 146</a>
+            <a href="lib_core_error.js.html">lib/core/error.js</a>, <a href="lib_core_error.js.html#line147">line 147</a>
         </div>
         
     </div>
@@ -3070,12 +3074,12 @@ error, if some error condition was met
     <div class="nameContainer">
         <h4 class="name" id="isSDAMUnrecoverableError">
             
-            isSDAMUnrecoverableError<span class="signature">(error)</span>
+            isSDAMUnrecoverableError<span class="signature">(error, server)</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_core_error.js.html">lib/core/error.js</a>, <a href="lib_core_error.js.html#line169">line 169</a>
+            <a href="lib_core_error.js.html">lib/core/error.js</a>, <a href="lib_core_error.js.html#line207">line 207</a>
         </div>
         
     </div>
@@ -3086,7 +3090,7 @@ error, if some error condition was met
     
     
     <div class="description">
-        <p>Determines whether an error is a &quot;node is recovering&quot; error or a &quot;not master&quot; error for SDAM retryability.<br>See https://github.com/mongodb/specifications/blob/master/source/server-discovery-and-monitoring/server-discovery-and-monitoring.rst#not-master-and-node-is-recovering</p>
+        <p>Determines whether SDAM can recover from a given error. If it cannot<br>then the pool will be cleared, and server state will completely reset<br>locally.</p>
     </div>
     
 
@@ -3140,6 +3144,29 @@ error, if some error condition was met
         </tr>
 	
 	
+	
+        <tr>
+            
+                <td class="name"><code>server</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Server.html">Server</a></span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                </td>
+        </tr>
+	
+	
 	</tbody>
 </table>
     
@@ -3164,6 +3191,13 @@ error, if some error condition was met
     
     
     
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="https://github.com/mongodb/specifications/blob/master/source/server-discovery-and-monitoring/server-discovery-and-monitoring.rst#not-master-and-node-is-recovering">https://github.com/mongodb/specifications/blob/master/source/server-discovery-and-monitoring/server-discovery-and-monitoring.rst#not-master-and-node-is-recovering</a></li>
+        </ul>
+    </dd>
     
     
     
@@ -5183,7 +5217,7 @@ resulting Promise of operations run within this transaction
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Aug 13 2019 16:20:45 GMT-0400 (EDT)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Sep 09 2019 14:28:41 GMT-0400 (Eastern Daylight Time)
                     </footer>
                 </div>
             </td>

@@ -136,6 +136,8 @@
             
                 <li data-name="AggregationCursor#explain"><a href="AggregationCursor.html#explain">explain</a></li>
             
+                <li data-name="AggregationCursor#forEach"><a href="AggregationCursor.html#forEach">forEach</a></li>
+            
                 <li data-name="AggregationCursor#geoNear"><a href="AggregationCursor.html#geoNear">geoNear</a></li>
             
                 <li data-name="AggregationCursor#group"><a href="AggregationCursor.html#group">group</a></li>
@@ -537,6 +539,8 @@
                 <li data-name="Collection~findAndModifyCallback"><a href="Collection.html#~findAndModifyCallback">findAndModifyCallback</a></li>
             
                 <li data-name="Collection~findAndModifyWriteOpResult"><a href="Collection.html#~findAndModifyWriteOpResult">findAndModifyWriteOpResult</a></li>
+            
+                <li data-name="Collection~IndexDefinition"><a href="Collection.html#~IndexDefinition">IndexDefinition</a></li>
             
                 <li data-name="Collection~insertOneWriteOpCallback"><a href="Collection.html#~insertOneWriteOpCallback">insertOneWriteOpCallback</a></li>
             
@@ -2401,7 +2405,7 @@ AggregationCursor instance.
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line336">line 336</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line337">line 337</a>
         </div>
         
     </div>
@@ -2477,7 +2481,7 @@ AggregationCursor instance.
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line316">line 316</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line317">line 317</a>
         </div>
         
     </div>
@@ -2684,6 +2688,8 @@ Promise if no callback passed
     
 
     
+        <dt class="important tag-deprecated">Deprecated</dt><dd class="yes-def tag-deprecated"><ul class="dummy"><li>Yes</li></ul></dd>
+    
     
     
     
@@ -2745,7 +2751,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line329">line 329</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line330">line 330</a>
         </div>
         
     </div>
@@ -2860,6 +2866,165 @@ Promise if no callback passed
 <h5>Returns:</h5>
 Promise if no callback passed
 <br />
+
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="forEach">
+            
+            forEach<span class="signature">(iterator, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line361">line 361</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Iterates over all the documents for this cursor using the iterator, callback pattern.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>iterator</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type"><a href="AggregationCursor.html#~iteratorCallback">AggregationCursor~iteratorCallback</a></span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>The iteration callback.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type"><a href="AggregationCursor.html#~endCallback">AggregationCursor~endCallback</a></span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>The end callback.</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    <h5>Throws:</h5>
+    
+            
+
+    <div class="param-desc">
+    
+        
+<span class="param-type"><a href="MongoError.html">MongoError</a></span>
+
+
+    
+    </div>
+
+
+        
+    
+    
+    
+    
+
 
     
     
@@ -3266,7 +3431,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line323">line 323</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line324">line 324</a>
         </div>
         
     </div>
@@ -4773,7 +4938,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line342">line 342</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line343">line 343</a>
         </div>
         
     </div>
@@ -5867,7 +6032,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line354">line 354</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line355">line 355</a>
         </div>
         
     </div>
@@ -5983,7 +6148,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line348">line 348</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line349">line 349</a>
         </div>
         
     </div>
@@ -6710,7 +6875,7 @@ Promise if no callback passed
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Aug 13 2019 16:20:45 GMT-0400 (EDT)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Sep 09 2019 14:28:41 GMT-0400 (Eastern Daylight Time)
                     </footer>
                 </div>
             </td>
