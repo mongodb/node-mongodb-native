@@ -1,5 +1,5 @@
 'use strict';
-const environments = require('../../environments');
+const environments = require('../../../test-runner/environments');
 
 function resolveConnectionString(configuration, spec) {
   const isShardedEnvironment = configuration.environment instanceof environments.sharded;
