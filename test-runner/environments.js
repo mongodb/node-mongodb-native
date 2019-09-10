@@ -6,20 +6,20 @@ const core = require('../lib/core');
  * Base class for environments in projects that use the test
  * runner
  */
-// class EnvironmentBase {
-//   /**
-//    * The default implementation of the environment setup
-//    *
-//    * @param {*} callback
-//    */
-//   setup(callback) {
-//     callback();
-//   }
-//   constructor(parsedURI) {
-//     this.host = parsedURI.hosts[0].host;
-//     this.port = parsedURI.hosts[0].port;
-//   }
-// }
+class EnvironmentBase {
+  /**
+   * The default implementation of the environment setup
+   *
+   * @param {*} callback
+   */
+  setup(callback) {
+    callback();
+  }
+  constructor(parsedURI) {
+    this.host = parsedURI.hosts[0].host;
+    this.port = parsedURI.hosts[0].port;
+  }
+}
 const genReplsetConfig = (port, options) => {
   return Object.assign(
     {
