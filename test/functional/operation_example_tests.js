@@ -4027,7 +4027,8 @@ describe('Operation Examples', function() {
 
                 const oldClient = secondClient;
                 const thirdClient = configuration.newClient(
-                  'mongodb://user:name@localhost:27017/integration_tests'
+                  'mongodb://user:name@localhost:27017/integration_tests',
+                  { serverSelectionTimeoutMS: 10 }
                 );
 
                 // Authenticate

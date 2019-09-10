@@ -993,12 +993,17 @@ describe('Server tests', function() {
         });
 
         const config = this.configuration;
-        var client = config.newTopology(server.address().host, server.address().port);
+        var client = config.newTopology(server.address().host, server.address().port, {
+          serverSelectionTimeoutMS: 10
+        });
+
         client.on('error', error => {
           let err;
           try {
             expect(error).to.be.an.instanceOf(Error);
-            expect(error.message).to.match(/but this version of the Node.js Driver requires/);
+
+            const errorMessage = error.reason ? error.reason.message : error.message;
+            expect(errorMessage).to.match(/but this version of the Node.js Driver requires/);
           } catch (e) {
             err = e;
           }

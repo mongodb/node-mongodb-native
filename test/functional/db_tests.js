@@ -243,7 +243,8 @@ describe('Db', function() {
     test: function(done) {
       var configuration = this.configuration;
       var fs_client = configuration.newClient('mongodb://127.0.0.1:25117/test', {
-        auto_reconnect: false
+        auto_reconnect: false,
+        serverSelectionTimeoutMS: 10
       });
 
       fs_client.connect(function(err) {
@@ -435,7 +436,8 @@ describe('Db', function() {
       var configuration = this.configuration;
       var client = configuration.newClient(`mongodb://127.0.0.1:27088/test`, {
         auto_reconnect: false,
-        poolSize: 4
+        poolSize: 4,
+        serverSelectionTimeoutMS: 10
       });
 
       // Establish connection to db

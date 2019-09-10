@@ -474,7 +474,10 @@ describe('MongoClient', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      const client = configuration.newClient('mongodb://localhost:27088/test');
+      const client = configuration.newClient('mongodb://localhost:27088/test', {
+        serverSelectionTimeoutMS: 10
+      });
+
       client.connect(function(err) {
         test.ok(err != null);
 
@@ -508,7 +511,10 @@ describe('MongoClient', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      const client = configuration.newClient('mongodb://test.does.not.exist.com:80/test');
+      const client = configuration.newClient('mongodb://test.does.not.exist.com:80/test', {
+        serverSelectionTimeoutMS: 10
+      });
+
       client.connect(function(err) {
         test.ok(err != null);
 
@@ -593,7 +599,10 @@ describe('MongoClient', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      const client = configuration.newClient('mongodb://unknownhost:36363/ddddd');
+      const client = configuration.newClient('mongodb://unknownhost:36363/ddddd', {
+        serverSelectionTimeoutMS: 10
+      });
+
       client.connect(function(err) {
         test.ok(err != null);
         done();
