@@ -34,7 +34,7 @@ All cursors in the Node Driver are Node Readable Streams operating in Object Mod
 
 ```js
 // Using the stream API
-const cursor = collection.find({})
+const cursor = collection.find({});
 cursor.pipe(new stream.Writable({
   write: function(doc, _, callback) {
     console.log(doc);
