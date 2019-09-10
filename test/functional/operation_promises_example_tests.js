@@ -3174,7 +3174,8 @@ describe('Operation (Promises)', function() {
 
             // Should error out due to user no longer existing
             const thirdClient = configuration.newClient(
-              'mongodb://user3:name@localhost:27017/integration_tests'
+              'mongodb://user3:name@localhost:27017/integration_tests',
+              { serverSelectionTimeoutMS: 10 }
             );
 
             return thirdClient.connect();

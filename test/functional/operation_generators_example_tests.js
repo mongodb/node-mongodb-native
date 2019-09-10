@@ -2966,7 +2966,10 @@ describe('Operation (Generators)', function() {
 
         try {
           // Authenticate
-          const client = configuration.newClient('mongodb://user:name@localhost:27017/admin');
+          const client = configuration.newClient('mongodb://user:name@localhost:27017/admin', {
+            serverSelectionTimeoutMS: 10
+          });
+
           yield client.connect();
           test.ok(false);
         } catch (err) {} // eslint-disable-line

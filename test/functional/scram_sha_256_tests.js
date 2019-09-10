@@ -179,13 +179,17 @@ describe('SCRAM-SHA-256 auth', function() {
           password: userMap.sha256.password
         },
         authSource: this.configuration.db,
-        authMechanism: 'SCRAM-SHA-1'
+        authMechanism: 'SCRAM-SHA-1',
+        serverSelectionTimeoutMS: 10
       };
 
       return withClient(
         this.configuration.newClient({}, options),
         () => Promise.reject(new Error('This request should have failed to authenticate')),
-        err => expect(err).to.match(/Authentication failed/)
+        err => {
+          const errMessage = err.reason ? err.reason.message : err;
+          expect(errMessage).to.match(/Authentication failed/);
+        }
       );
     }
   });
@@ -202,7 +206,8 @@ describe('SCRAM-SHA-256 auth', function() {
           user: 'roth',
           password: 'pencil'
         },
-        authSource: 'admin'
+        authSource: 'admin',
+        serverSelectionTimeoutMS: 1000
       };
 
       const badPasswordOptions = {
@@ -210,14 +215,18 @@ describe('SCRAM-SHA-256 auth', function() {
           user: 'both',
           password: 'pencil'
         },
-        authSource: 'admin'
+        authSource: 'admin',
+        serverSelectionTimeoutMS: 1000
       };
 
       const getErrorMsg = options =>
         withClient(
           this.configuration.newClient({}, options),
           () => Promise.reject(new Error('This request should have failed to authenticate')),
-          err => expect(err).to.match(/Authentication failed/)
+          err => {
+            const errMessage = err.reason ? err.reason.message : err;
+            expect(errMessage).to.match(/Authentication failed/);
+          }
         );
 
       return Promise.all([getErrorMsg(noUsernameOptions), getErrorMsg(badPasswordOptions)]);
