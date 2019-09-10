@@ -63,7 +63,7 @@
   "scripts": {
     "atlas": "node ./test/atlas_connectivity_tests.js",
     "orchestration": "node test/check_mongo_orchestration_tests.js",
-    "test": "npm run orchestration && cd test-runner-poc && npm run func && cd .. && npm run lint",
+    "test": "npm run orchestration && cd test-runner && npm run func && cd .. && npm run lint",
     "coverage": "istanbul cover mongodb-test-runner -- -t 60000 test/core test/unit test/functional",
     "lint": "eslint lib test",
     "format": "prettier --print-width 100 --tab-width 2 --single-quote --write 'test/**/*.js' 'lib/**/*.js'",
