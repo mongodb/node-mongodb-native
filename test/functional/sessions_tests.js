@@ -56,6 +56,20 @@ describe('Sessions', function() {
     }
   });
 
+  it('endSession should return a Promise if no callback is provided', {
+    metadata: {
+      requires: { topology: ['replicaset'], mongodb: '>3.6.0' }
+    },
+
+    test: function() {
+      const client = test.client;
+      let session = client.startSession();
+      const promise = session.endSession();
+      expect(promise).to.be.instanceOf(Promise);
+      return promise.then(() => client.close());
+    }
+  });
+
   describe('withSession', {
     metadata: { requires: { mongodb: '>3.6.0' } },
     test: function() {
