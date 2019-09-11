@@ -7,6 +7,7 @@ const expect = require('chai').expect;
 describe('mongodb+srv', function() {
   it('should parse a default database', function(done) {
     parseConnectionString('mongodb+srv://test1.test.build.10gen.cc/somedb', (err, result) => {
+      expect(err).to.not.exist;
       expect(result.auth.db).to.eql('somedb');
       done();
     });
