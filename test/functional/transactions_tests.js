@@ -4,9 +4,9 @@ const chai = require('chai');
 const expect = chai.expect;
 const core = require('../../lib/core');
 const sessions = core.Sessions;
-const TestRunnerContext = require('./runner').TestRunnerContext;
-const gatherTestSuites = require('./runner').gatherTestSuites;
-const generateTopologyTests = require('./runner').generateTopologyTests;
+const TestRunnerContext = require('./spec-runner').TestRunnerContext;
+const gatherTestSuites = require('./spec-runner').gatherTestSuites;
+const generateTopologyTests = require('./spec-runner').generateTopologyTests;
 
 describe('Transactions', function() {
   const testContext = new TestRunnerContext();

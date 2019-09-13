@@ -1,9 +1,9 @@
 'use strict';
 
 const path = require('path');
-const TestRunnerContext = require('./runner').TestRunnerContext;
-const gatherTestSuites = require('./runner').gatherTestSuites;
-const generateTopologyTests = require('./runner').generateTopologyTests;
+const TestRunnerContext = require('./spec-runner').TestRunnerContext;
+const gatherTestSuites = require('./spec-runner').gatherTestSuites;
+const generateTopologyTests = require('./spec-runner').generateTopologyTests;
 
 describe('Retryable Reads', function() {
   const testContext = new TestRunnerContext();
