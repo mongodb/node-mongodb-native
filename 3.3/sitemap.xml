@@ -98,6 +98,11 @@
   </url>
   
   <url>
+    <loc>/node-mongodb-native/3.3/reference/cursors/</loc>
+    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/node-mongodb-native/3.3/reference/ecmascriptnext/</loc>
     <lastmod>2015-03-19T12:53:30-04:00</lastmod>
   </url>

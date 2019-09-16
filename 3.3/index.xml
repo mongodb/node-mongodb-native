@@ -216,6 +216,17 @@ const MongoClient = require(&#39;mongodb&#39;).MongoClient; const assert = requi
     </item>
     
     <item>
+      <title>Cursors</title>
+      <link>/node-mongodb-native/3.3/reference/cursors/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/3.3/reference/cursors/</guid>
+      <description>Cursors When a driver executes a read that returns mutliple documents, the server does not immediately return all values that match the query. Instead, the driver creates a Cursor object which fetches the documents in batches.
+Where are cursors used in the driver? The following functions directly return cursors to the user:
+ Collection.prototype.find Collection.prototype.aggregate Collection.prototype.listIndexes Db.prototype.aggregate Db.prototype.listCollections  In addition, many other methods, like Collection.prototype.findOne and Collection.prototype.watch, use cursors in order to return results.</description>
+    </item>
+    
+    <item>
       <title>ECMAScript Next</title>
       <link>/node-mongodb-native/3.3/reference/ecmascriptnext/</link>
       <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>

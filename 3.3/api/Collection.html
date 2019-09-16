@@ -2604,6 +2604,8 @@ Collection instance.
 		<th>Type</th>
 		
 		
+		<th>Default</th>
+		
 		
 		<th class="last">Description</th>
 	</tr>
@@ -2627,6 +2629,12 @@ Collection instance.
             </td>
             
             
+                <td class="default">
+                
+                    1000
+                
+                </td>
+            
             
             <td class="description last">
                 
@@ -2637,7 +2645,7 @@ Collection instance.
                         
                     
                 
-                <p>The batchSize for the cursor</p></td>
+                <p>The number of documents to return per batch. See <a href="https://docs.mongodb.com/manual/reference/command/aggregate">aggregation documentation</a>.</p></td>
         </tr>
 	
 	
@@ -9064,7 +9072,7 @@ Promise if no callback passed.
             
                 <td class="default">
                 
-                    0
+                    1000
                 
                 </td>
             
@@ -11185,7 +11193,7 @@ Promise if no callback passed
             
                 <td class="default">
                 
-                    0
+                    1
                 
                 </td>
             
@@ -17067,6 +17075,8 @@ Promise if no callback passed
 		<th>Type</th>
 		
 		
+		<th>Default</th>
+		
 		
 		<th class="last">Description</th>
 	</tr>
@@ -17089,6 +17099,12 @@ Promise if no callback passed
             
             </td>
             
+            
+                <td class="default">
+                
+                    1000
+                
+                </td>
             
             
             <td class="description last">
@@ -17123,6 +17139,10 @@ Promise if no callback passed
             </td>
             
             
+                <td class="default">
+                
+                </td>
+            
             
             <td class="description last">
                 
@@ -17152,6 +17172,10 @@ Promise if no callback passed
             
             </td>
             
+            
+                <td class="default">
+                
+                </td>
             
             
             <td class="description last">
@@ -18273,6 +18297,8 @@ Promise if no callback passed
             
                 <td class="default">
                 
+                    1000
+                
                 </td>
             
             
@@ -19346,7 +19372,7 @@ Promise if no callback passed
     <div class="nameContainer">
         <h4 class="name" id="replaceOne">
             
-            replaceOne<span class="signature">(filter, doc, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise.&lt;Collection~updatewriteOpResultObject>}</span>
+            replaceOne<span class="signature">(filter, doc, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise.&lt;<a href="Collection.html#~updateWriteOpResult">Collection~updateWriteOpResult</a>>}</span>
         </h4>
     
         
@@ -20978,7 +21004,7 @@ Promise if no callback passed
     <div class="nameContainer">
         <h4 class="name" id="updateMany">
             
-            updateMany<span class="signature">(filter, update, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise.&lt;Collection~updateWriteOpResultObject>}</span>
+            updateMany<span class="signature">(filter, update, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise.&lt;<a href="Collection.html#~updateWriteOpResult">Collection~updateWriteOpResult</a>>}</span>
         </h4>
     
         
@@ -22163,6 +22189,8 @@ Promise if no callback passed
             
             
                 <td class="default">
+                
+                    1000
                 
                 </td>
             
@@ -25101,6 +25129,8 @@ ChangeStream instance.
 		<th>Type</th>
 		
 		
+		<th>Argument</th>
+		
 		
 		
 		
@@ -25125,6 +25155,12 @@ ChangeStream instance.
             
             </td>
             
+            
+                <td class="attributes">
+                
+                    
+                
+                </td>
             
             
             
@@ -25242,6 +25278,12 @@ ChangeStream instance.
             </td>
             
             
+                <td class="attributes">
+                
+                    
+                
+                </td>
+            
             
             
             
@@ -25264,6 +25306,12 @@ ChangeStream instance.
             
             </td>
             
+            
+                <td class="attributes">
+                
+                    
+                
+                </td>
             
             
             
@@ -25288,6 +25336,12 @@ ChangeStream instance.
             </td>
             
             
+                <td class="attributes">
+                
+                    
+                
+                </td>
+            
             
             
             
@@ -25311,6 +25365,12 @@ ChangeStream instance.
             </td>
             
             
+                <td class="attributes">
+                
+                    
+                
+                </td>
+            
             
             
             
@@ -25333,6 +25393,12 @@ ChangeStream instance.
             
             </td>
             
+            
+                <td class="attributes">
+                
+                    
+                
+                </td>
             
             
             
@@ -25404,6 +25470,12 @@ ChangeStream instance.
             </td>
             
             
+                <td class="attributes">
+                
+                    
+                
+                </td>
+            
             
             
             
@@ -25420,17 +25492,25 @@ ChangeStream instance.
             <td class="type">
             
                 
-<span class="param-type">Array</span>
+<span class="param-type">Array.&lt;object></span>
 
 
             
             </td>
             
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+                    
+                
+                </td>
             
             
             
-            <td class="description last"></td>
+            
+            <td class="description last"><p>In a response to <a href="Collection.html#replaceOne"><code>replaceOne</code></a>, contains the new value of the document on the server. This is the same document that was originally passed in, and is only here for legacy purposes.</p></td>
         </tr>
 	
 	
@@ -25754,7 +25834,7 @@ ChangeStream instance.
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Sep 09 2019 14:28:41 GMT-0400 (Eastern Daylight Time)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Sep 16 2019 14:16:43 GMT-0400 (EDT)
                     </footer>
                 </div>
             </td>
