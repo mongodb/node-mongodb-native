@@ -42,7 +42,7 @@ function initializeFilters(client, callback) {
   eachAsync(
     filterFiles,
     (filterName, cb) => {
-      const FilterModule = require(path.join(__dirname, 'filters', filterFiles[i]));
+      const FilterModule = require(path.join(__dirname, 'filters', filterFiles[filterName]));
       const filter = new FilterModule();
 
       if (typeof filter !== 'object') {
