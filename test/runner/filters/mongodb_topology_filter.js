@@ -1,5 +1,5 @@
 'use strict';
-const MongoClient = require('../../../index').MongoClient;
+
 /**
  * Filter for the MongoDB toopology required for the test
  *
@@ -11,32 +11,32 @@ const MongoClient = require('../../../index').MongoClient;
  * }
  */
 class MongoDBTopologyFilter {
-
-  initializeFilter(callback) {
-    const mongoClient = new MongoClient(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017');
-    mongoClient.connect((err, client) => {
-      if (err) {
-        return callback(err);
-      }
-      const topologyType = mongoClient.topology.type;
-      switch (topologyType) {
-        case 'server':
-          if (client.topology.s.coreTopology.ismaster.hosts) this.runtimeTopology = 'replicaset';
-          else this.runtimeTopology = 'single';
-          break;
-        case 'mongos':
-          this.runtimeTopology = 'sharded';
-          break;
-        default:
-          console.warn('Topology type is not recognized.');
-          break;
-      }
-      client.close(callback);
-    });
+  constructor() {
+    this.runtimeTopology = 'single';
   }
 
-  constructor(options) {
-    this.runtimeTopology = 'single';
+  initializeFilter(client, context, callback) {
+    const topologyType = client.topology.type;
+    switch (topologyType) {
+      case 'server':
+        if (client.topology.s.coreTopology.ismaster.hosts) {
+          this.runtimeTopology = 'replicaset';
+        } else {
+          this.runtimeTopology = 'single';
+        }
+
+        break;
+      case 'mongos':
+        this.runtimeTopology = 'sharded';
+        break;
+
+      default:
+        console.warn(`topology type is not recognized: ${topologyType}`);
+        break;
+    }
+
+    context.environmentName = this.runtimeTopology;
+    callback();
   }
 
   filter(test) {
@@ -57,14 +57,7 @@ class MongoDBTopologyFilter {
       );
     }
 
-    // Check if we have an allowed topology for this test
-    for (let i = 0; i < topologies.length; i++) {
-      // console.log('topologies[i] ', topologies[i])
-      if (topologies[i] === this.runtimeTopology) return true;
-    }
-
-    // Do not execute the test
-    return false;
+    return topologies.some(topology => topology === this.runtimeTopology);
   }
 }
 
