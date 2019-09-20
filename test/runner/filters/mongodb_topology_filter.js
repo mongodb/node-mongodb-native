@@ -1,5 +1,7 @@
 'use strict';
 
+const TopologyType = require('../../../lib/core/sdam/topology_description').TopologyType;
+
 /**
  * Filter for the MongoDB toopology required for the test
  *
@@ -11,31 +13,24 @@
  * }
  */
 class MongoDBTopologyFilter {
-  constructor() {
-    this.runtimeTopology = 'single';
-  }
-
   initializeFilter(client, context, callback) {
-    const topologyType = client.topology.type;
-    switch (topologyType) {
-      case 'server':
+    let topologyType = client.topology.type;
+    if (typeof topologyType === 'string') {
+      if (topologyType === 'server') {
         if (client.topology.s.coreTopology.ismaster.hosts) {
-          this.runtimeTopology = 'replicaset';
+          topologyType = TopologyType.ReplicaSetWithPrimary;
         } else {
-          this.runtimeTopology = 'single';
+          topologyType = TopologyType.Single;
         }
-
-        break;
-      case 'mongos':
-        this.runtimeTopology = 'sharded';
-        break;
-
-      default:
-        console.warn(`topology type is not recognized: ${topologyType}`);
-        break;
+      } else if (topologyType === 'mongos') {
+        topologyType = TopologyType.Sharded;
+      } else {
+        callback(new TypeError(`unknown topology type detected: ${topologyType}`));
+      }
     }
 
-    context.environmentName = this.runtimeTopology;
+    context.topologyType = topologyType;
+    this.runtimeTopology = topologyTypeToString(topologyType);
     callback();
   }
 
@@ -44,21 +39,29 @@ class MongoDBTopologyFilter {
     if (!test.metadata.requires) return true;
     if (!test.metadata.requires.topology) return true;
 
-    // If we have a single topology convert to single item array
     let topologies = null;
-
     if (typeof test.metadata.requires.topology === 'string') {
       topologies = [test.metadata.requires.topology];
     } else if (Array.isArray(test.metadata.requires.topology)) {
       topologies = test.metadata.requires.topology;
     } else {
-      throw new Error(
+      throw new TypeError(
         'MongoDBTopologyFilter only supports single string topology or an array of string topologies'
       );
     }
 
     return topologies.some(topology => topology === this.runtimeTopology);
   }
+}
+
+function topologyTypeToString(topologyType) {
+  if (topologyType === TopologyType.ReplicaSetWithPrimary) {
+    return 'replicaset';
+  } else if (topologyType === TopologyType.Sharded) {
+    return 'mongos';
+  }
+
+  return 'single';
 }
 
 module.exports = MongoDBTopologyFilter;
