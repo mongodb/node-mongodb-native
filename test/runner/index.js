@@ -2,34 +2,14 @@
 
 const path = require('path');
 const fs = require('fs');
-const MongoClient = require('mongodb').MongoClient;
-const environments = require('../environments');
-const TestConfiguration = require('../config');
+const MongoClient = require('../..').MongoClient;
+const TestConfiguration = require('./config');
 const parseConnectionString = require('../../lib/core/uri_parser');
 const mock = require('mongodb-mock-server');
-const eachAsync = require('../../lib/utils').eachAsync;
+const eachAsync = require('../../lib/core/utils').eachAsync;
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
 const filters = [];
-
-function initializeEnvironment(context, callback) {
-  const environmentName = context.environmentName;
-  const version = context.version;
-
-  console.log(`[environment: ${environmentName}]`);
-  const Environment = environments[environmentName];
-
-  parseConnectionString(MONGODB_URI, (err, parsedURI) => {
-    if (err) {
-      callback(err);
-      return;
-    }
-
-    const environment = new Environment(parsedURI, version);
-    environment.mongo = require('../../index');
-    callback(null, environment);
-  });
-}
 
 function initializeFilters(client, callback) {
   const filterFiles = fs
@@ -42,7 +22,7 @@ function initializeFilters(client, callback) {
   eachAsync(
     filterFiles,
     (filterName, cb) => {
-      const FilterModule = require(path.join(__dirname, 'filters', filterFiles[filterName]));
+      const FilterModule = require(path.join(__dirname, 'filters', filterName));
       const filter = new FilterModule();
 
       if (typeof filter !== 'object') {
@@ -60,14 +40,14 @@ function initializeFilters(client, callback) {
         cb();
       }
     },
-    () => callback(null, context)
+    err => callback(err, context)
   );
 }
 
-before(function(done) {
+before(function(_done) {
   console.log(`connection string: ${MONGODB_URI}`);
   const client = new MongoClient(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
-  done = client.close(done);
+  const done = err => client.close(err2 => _done(err || err2));
 
   client.connect(err => {
     if (err) {
@@ -81,13 +61,13 @@ before(function(done) {
         return;
       }
 
-      initializeEnvironment(context, (err, environment) => {
+      parseConnectionString(MONGODB_URI, (err, parsedURI) => {
         if (err) {
           done(err);
           return;
         }
 
-        this.configuration = new TestConfiguration(environment);
+        this.configuration = new TestConfiguration(parsedURI, context);
         done();
       });
     });
