@@ -76,7 +76,7 @@ before(function(_done) {
 
 beforeEach(function() {
   for (let i = 0; i < filters.length; ++i) {
-    const filter = filter[i];
+    const filter = filters[i];
     if (!filter.filter(this.currentTest)) {
       // if we filter out a test, we'd like to ensure that any before hooks are skipped, as
       // long as that hook is not the root hook.
