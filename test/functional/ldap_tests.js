@@ -43,8 +43,7 @@ describe('LDAP', function() {
             test.equal(null, err);
             test.equal(true, doc.ldap);
 
-            client.close();
-            done();
+            client.close(done);
           });
       });
     }
@@ -104,8 +103,7 @@ describe('LDAP', function() {
                       test.equal(null, err);
                       test.equal(true, doc.ldap);
 
-                      client.close();
-                      done();
+                      client.close(done);
                     });
                 });
             });

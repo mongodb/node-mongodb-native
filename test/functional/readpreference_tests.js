@@ -45,8 +45,7 @@ describe('ReadPreference', function() {
           test.equal(null, err);
           client.topology.command = command;
 
-          client.close();
-          done();
+          client.close(done);
         });
       });
     }
@@ -92,8 +91,7 @@ describe('ReadPreference', function() {
           test.equal(null, err);
           client.topology.command = command;
 
-          client.close();
-          done();
+          client.close(done);
         });
       });
     }
@@ -139,8 +137,7 @@ describe('ReadPreference', function() {
           function(/* err */) {
             // test.equal(null, err);
             client.topology.command = command;
-            client.close();
-            done();
+            client.close(done);
           }
         );
       });
@@ -195,8 +192,7 @@ describe('ReadPreference', function() {
           // eslint-disable-line
           client.topology.command = command;
 
-          client.close();
-          done();
+          client.close(done);
         });
       });
     }
@@ -250,8 +246,7 @@ describe('ReadPreference', function() {
           collection.mapReduce(map, reduce, { out: 'inline' }, function(/* err */) {
             // test.equal(null, err);
             client.topology.command = command;
-            client.close();
-            done();
+            client.close(done);
           });
         });
       }
@@ -291,8 +286,7 @@ describe('ReadPreference', function() {
         // Perform the map reduce
         collection.mapReduce(map, reduce, { out: { append: 'test' } }, function(err) {
           test.notEqual(err, null);
-          client.close();
-          done();
+          client.close(done);
         });
       });
     }
@@ -353,8 +347,7 @@ describe('ReadPreference', function() {
               test.equal(null, err);
               client.topology.command = command;
 
-              client.close();
-              done();
+              client.close(done);
             });
           }
         );
@@ -398,8 +391,7 @@ describe('ReadPreference', function() {
         collection.stats(function(/* err */) {
           // test.equal(null, err);
           client.topology.command = command;
-          client.close();
-          done();
+          client.close(done);
         });
       });
     }
@@ -447,8 +439,7 @@ describe('ReadPreference', function() {
           db.command({ dbStats: true }, { readPreference: 'secondaryPreferred' }, function(err) {
             test.equal(null, err);
             client.topology.command = command;
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -472,8 +463,7 @@ describe('ReadPreference', function() {
         var mySecondaryPreferred = { mode: 'secondaryPreferred', tags: [] };
         db.command({ dbStats: true }, { readPreference: mySecondaryPreferred }, function(err) {
           test.equal(null, err);
-          client.close();
-          done();
+          client.close(done);
         });
       });
     }
@@ -496,8 +486,7 @@ describe('ReadPreference', function() {
         var mySecondaryPreferred = { mode: 'secondaryPreferred', tags: [] };
         db.listCollections({}, { readPreference: mySecondaryPreferred }).toArray(function(err) {
           test.equal(null, err);
-          client.close();
-          done();
+          client.close(done);
         });
       });
     }
@@ -521,8 +510,7 @@ describe('ReadPreference', function() {
         var cursor = db.collection('test').find({}, { readPreference: mySecondaryPreferred });
         cursor.toArray(function(err) {
           test.equal(null, err);
-          client.close();
-          done();
+          client.close(done);
         });
       });
     }
@@ -542,8 +530,7 @@ describe('ReadPreference', function() {
         test.equal(null, err);
         var cursor = db.collection('test', { readPreference: SecondaryPreferred }).listIndexes();
         test.equal(cursor.options.readPreference.mode, 'secondaryPreferred');
-        client.close();
-        done();
+        client.close(done);
       });
     }
   });
@@ -557,8 +544,8 @@ describe('ReadPreference', function() {
       expect(db.collection.bind(db, 'test', { readPreference: 'invalid' })).to.throw(
         'Invalid read preference mode invalid'
       );
-      client.close();
-      done();
+
+      client.close(done);
     });
   });
 });

@@ -46,8 +46,7 @@ describe('Promote Values', function() {
               test.deepEqual(new Int32(10), doc.int);
               test.deepEqual(new Double(2.2222), doc.double);
 
-              client.close();
-              done();
+              client.close(done);
             });
           }
         );
@@ -89,8 +88,7 @@ describe('Promote Values', function() {
               test.deepEqual(new Int32(10), doc.int);
               test.deepEqual(new Double(2.2222), doc.double);
 
-              client.close();
-              done();
+              client.close(done);
             });
           }
         );
@@ -135,8 +133,7 @@ describe('Promote Values', function() {
                 test.deepEqual(new Int32(10), doc.int);
                 test.deepEqual(new Double(2.2222), doc.double);
 
-                client.close();
-                done();
+                client.close(done);
               });
           }
         );
@@ -181,8 +178,7 @@ describe('Promote Values', function() {
                 test.deepEqual(new Int32(10), doc.int);
                 test.deepEqual(new Double(2.2222), doc.double);
 
-                client.close();
-                done();
+                client.close(done);
               });
           }
         );
@@ -227,8 +223,7 @@ describe('Promote Values', function() {
                 test.deepEqual(new Int32(10), doc.int);
                 test.deepEqual(new Double(2.2222), doc.double);
 
-                client.close();
-                done();
+                client.close(done);
               });
           }
         );
@@ -280,8 +275,7 @@ describe('Promote Values', function() {
             })
             .on('end', function() {
               db.dropCollection('haystack', function() {
-                client.close();
-                done();
+                client.close(done);
               });
             });
         });

@@ -35,8 +35,7 @@ describe('Promises (Collection)', function() {
           .then(function(r) {
             test.equal(1, r.insertedCount);
 
-            client.close();
-            done();
+            client.close(done);
           });
       });
     }
@@ -79,8 +78,7 @@ describe('Promises (Collection)', function() {
               test.equal(1, r.lastErrorObject.n);
               test.equal(1, r.value.b);
 
-              client.close();
-              done();
+              client.close(done);
             })
             .catch(function(err) {
               test.ok(err != null);
@@ -128,8 +126,7 @@ describe('Promises (Collection)', function() {
               test.equal(1, r.lastErrorObject.n);
               test.equal(1, r.value.b);
 
-              client.close();
-              done();
+              client.close(done);
             })
             .catch(function(err) {
               test.ok(err != null);
@@ -179,8 +176,7 @@ describe('Promises (Collection)', function() {
                 test.equal(1, r.lastErrorObject.n);
                 test.equal(1, r.value.b);
 
-                client.close();
-                done();
+                client.close(done);
               })
               .catch(function(err) {
                 test.ok(err != null);
@@ -227,8 +223,7 @@ describe('Promises (Collection)', function() {
           test.equal(null, error);
           test.ok(result != null);
 
-          client.close();
-          done();
+          client.close(done);
         });
     }
   });
@@ -259,8 +254,7 @@ describe('Promises (Collection)', function() {
           .catch(function(e) {
             test.ok(e != null);
 
-            client.close();
-            done();
+            client.close(done);
           });
       });
     }
@@ -292,8 +286,7 @@ describe('Promises (Collection)', function() {
           .catch(function(e) {
             test.ok(e != null);
 
-            client.close();
-            done();
+            client.close(done);
           });
       });
     }
@@ -326,8 +319,7 @@ describe('Promises (Collection)', function() {
             test.ok(r);
             test.deepEqual({ w: 1 }, bulk.s.writeConcern);
 
-            client.close();
-            done();
+            client.close(done);
           })
           .catch(done);
       });
@@ -361,8 +353,7 @@ describe('Promises (Collection)', function() {
             test.ok(r);
             test.deepEqual({ w: 1 }, bulk.s.writeConcern);
 
-            client.close();
-            done();
+            client.close(done);
           })
           .catch(done);
       });

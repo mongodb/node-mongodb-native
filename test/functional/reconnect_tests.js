@@ -87,8 +87,7 @@ describe('Reconnect', function() {
 
               col.findOne({}, function(err) {
                 test.equal(null, err);
-                client.close();
-                done();
+                client.close(done);
               });
             });
           }

@@ -94,7 +94,7 @@ describe('Operation (Generators)', function() {
         // Get all the aggregation results
         docs = yield cursor.toArray();
         test.equal(2, docs.length);
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -181,7 +181,7 @@ describe('Operation (Generators)', function() {
         // Closing cursor to close implicit session,
         // since the cursor is not exhausted
         cursor.close();
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -234,7 +234,7 @@ describe('Operation (Generators)', function() {
         test.equal(1, count);
 
         // Close database
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -291,7 +291,7 @@ describe('Operation (Generators)', function() {
         var explanation = yield collection.find({ a: 2 }).explain();
         test.ok(explanation != null);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -353,7 +353,7 @@ describe('Operation (Generators)', function() {
         docs = yield collection.distinct('b.c');
         test.deepEqual(['a', 'b', 'c'], docs.sort());
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -411,7 +411,7 @@ describe('Operation (Generators)', function() {
         var docs = yield collection.distinct('a', { c: 1 });
         test.deepEqual([5], docs.sort());
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -474,7 +474,7 @@ describe('Operation (Generators)', function() {
         test.equal(false, found);
 
         // Let's close the db
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -516,7 +516,7 @@ describe('Operation (Generators)', function() {
         // Drop the collection
         yield db.collection('dropExample1_with_generators').dropAllIndexes();
         // Let's close the db
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -573,7 +573,7 @@ describe('Operation (Generators)', function() {
         test.equal(undefined, indexInformation.a_1_b_1);
 
         // Close db
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -633,7 +633,7 @@ describe('Operation (Generators)', function() {
         var explanation = yield collection.find({ a: 2 }).explain();
         test.ok(explanation != null);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -690,7 +690,7 @@ describe('Operation (Generators)', function() {
         test.ok(explanation != null);
 
         // Close db
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -743,7 +743,7 @@ describe('Operation (Generators)', function() {
         test.equal(3, docs.length);
 
         // Close the db
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -794,7 +794,7 @@ describe('Operation (Generators)', function() {
         var explain = yield collection.find({}).explain();
         test.ok(explain != null);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -854,7 +854,7 @@ describe('Operation (Generators)', function() {
         test.equal(2, docs[0].b);
 
         // Close db
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -939,7 +939,7 @@ describe('Operation (Generators)', function() {
         test.equal(1, doc.value.f);
 
         // Close the db
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -997,7 +997,7 @@ describe('Operation (Generators)', function() {
         test.equal(null, item);
 
         // Db close
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -1051,7 +1051,7 @@ describe('Operation (Generators)', function() {
         test.equal(2, doc.b);
 
         // Db close
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -1109,7 +1109,7 @@ describe('Operation (Generators)', function() {
           maxDistance: 100
         });
         test.equal(1, docs.results.length);
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -1176,7 +1176,7 @@ describe('Operation (Generators)', function() {
         test.equal(1, result.value);
 
         // Db close
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -1244,7 +1244,7 @@ describe('Operation (Generators)', function() {
         });
 
         test.ok(result.stats != null);
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -1335,7 +1335,7 @@ describe('Operation (Generators)', function() {
         results = yield outCollection.find().toArray();
         test.equal(2, results[0].value);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -1426,7 +1426,7 @@ describe('Operation (Generators)', function() {
         // Find all entries in the map-reduce collection
         results = yield outCollection.find().toArray();
         test.equal(2, results[0].value);
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -1477,7 +1477,7 @@ describe('Operation (Generators)', function() {
         var indexes = yield collection.indexes();
         test.equal(3, indexes.length);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -1535,7 +1535,7 @@ describe('Operation (Generators)', function() {
         result = yield collection.indexExists('c_1');
         test.equal(false, result);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -1600,7 +1600,7 @@ describe('Operation (Generators)', function() {
         test.deepEqual({ a: 1, b: 1 }, indexInformation[1].key);
 
         // Close db
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -1660,7 +1660,7 @@ describe('Operation (Generators)', function() {
         test.deepEqual({ _id: 1 }, indexInformation[0].key);
         test.deepEqual({ a: 1, b: 1 }, indexInformation[1].key);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -1705,7 +1705,7 @@ describe('Operation (Generators)', function() {
 
         var item = yield collection.findOne({ hello: 'world_no_safe' });
         test.equal('world_no_safe', item.hello);
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -1757,7 +1757,7 @@ describe('Operation (Generators)', function() {
         // Fetch the document
         var item = yield collection.findOne({ hello: 'world_safe2' });
         test.equal('world_safe2', item.hello);
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -1810,7 +1810,7 @@ describe('Operation (Generators)', function() {
         // Fetch the document
         var item = yield collection.findOne({ hello: 'world' });
         test.ok('function() {}', item.code);
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -1878,7 +1878,7 @@ describe('Operation (Generators)', function() {
         var count = yield collection.count();
         test.equal(3, count);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -1928,7 +1928,7 @@ describe('Operation (Generators)', function() {
         var capped = yield collection.isCapped();
         test.equal(true, capped);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -1979,7 +1979,7 @@ describe('Operation (Generators)', function() {
         test.equal(true, options.capped);
         test.ok(options.size >= 1024);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -2045,7 +2045,7 @@ describe('Operation (Generators)', function() {
         }
 
         test.equal(docs.length, results.length);
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -2104,7 +2104,7 @@ describe('Operation (Generators)', function() {
         test.deepEqual([['_id', 1]], indexInformation._id_);
         test.deepEqual([['a', 1], ['b', 1]], indexInformation.a_1_b_1);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -2155,7 +2155,7 @@ describe('Operation (Generators)', function() {
         // Fetch all results
         var items = yield collection.find().toArray();
         test.equal(0, items.length);
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -2201,7 +2201,7 @@ describe('Operation (Generators)', function() {
         // Remove all the document
         var r = yield collection.removeOne({ a: 1 }, { w: 1 });
         test.equal(1, r.result.n);
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -2309,7 +2309,7 @@ describe('Operation (Generators)', function() {
           // Ensure that the collection is pointing to the new one
           var count = yield collection2.count();
           test.equal(2, count);
-          client.close();
+          yield client.close();
         }
       });
       // END
@@ -2357,7 +2357,7 @@ describe('Operation (Generators)', function() {
         // Find the saved document
         var item = yield collection.findOne({ hello: 'world' });
         test.equal('world', item && item.hello);
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -2419,7 +2419,7 @@ describe('Operation (Generators)', function() {
         test.equal('world', item.hello);
         test.equal('world2', item.hello2);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -2472,7 +2472,7 @@ describe('Operation (Generators)', function() {
         test.equal(1, item.a);
         test.equal(2, item.b);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -2525,7 +2525,7 @@ describe('Operation (Generators)', function() {
         var item = yield collection.findOne({ a: 1 });
         test.equal(1, item.a);
         test.equal(2, item.b);
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -2584,7 +2584,7 @@ describe('Operation (Generators)', function() {
         test.equal(1, items[1].a);
         test.equal(0, items[1].b);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -2636,7 +2636,7 @@ describe('Operation (Generators)', function() {
         var stats = yield collection.stats();
         test.equal(2, stats.count);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -2701,7 +2701,7 @@ describe('Operation (Generators)', function() {
         test.equal(undefined, indexInformation.a_1_b_1);
         test.equal(undefined, indexInformation.c_1);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -2768,7 +2768,7 @@ describe('Operation (Generators)', function() {
           // Attemp to insert should fail now with correct message 'db closed by application'
           yield collection.insertOne({ a: 2 }, configuration.writeConcernMax());
         } catch (err) {
-          client.close();
+          yield client.close();
         }
       });
       // END
@@ -2826,7 +2826,7 @@ describe('Operation (Generators)', function() {
         items = yield db1.listCollections().toArray();
         test.ok(items.length >= 1);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -2868,7 +2868,7 @@ describe('Operation (Generators)', function() {
         var collections = yield db.collections();
         test.ok(collections.length > 0);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -2911,7 +2911,7 @@ describe('Operation (Generators)', function() {
 
         // Remove the user from the db
         yield db.removeUser('user');
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -2971,7 +2971,7 @@ describe('Operation (Generators)', function() {
           test.ok(false);
         } catch (err) {} // eslint-disable-line
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -3019,7 +3019,7 @@ describe('Operation (Generators)', function() {
 
         // Insert a document in the capped collection
         yield collection.insertOne({ a: 1 }, configuration.writeConcernMax());
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -3078,7 +3078,7 @@ describe('Operation (Generators)', function() {
           .toArray();
         test.equal(0, names.length);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -3118,7 +3118,7 @@ describe('Operation (Generators)', function() {
         // BEGIN
         // Execute ping against the server
         yield db.command({ ping: 1 });
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -3191,7 +3191,7 @@ describe('Operation (Generators)', function() {
           .toArray();
         test.equal(1, names.length);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -3253,7 +3253,7 @@ describe('Operation (Generators)', function() {
         var explanation = yield collection.find({ a: 2 }).explain();
         test.ok(explanation != null);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -3315,7 +3315,7 @@ describe('Operation (Generators)', function() {
         var explanation = yield collection.find({ a: 2 }).explain();
         test.ok(explanation != null);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -3382,7 +3382,7 @@ describe('Operation (Generators)', function() {
         // We should not find the databases
         if (process.env['JENKINS'] == null) test.equal(false, found);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -3423,7 +3423,7 @@ describe('Operation (Generators)', function() {
         var stats = yield db.stats();
         test.ok(stats != null);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -3480,7 +3480,7 @@ describe('Operation (Generators)', function() {
         count = yield multipleColl2.count();
         test.equal(1, count);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -3531,7 +3531,7 @@ describe('Operation (Generators)', function() {
         // Retrieve the build information for the MongoDB instance
         yield adminDb.buildInfo();
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -3576,7 +3576,7 @@ describe('Operation (Generators)', function() {
         // Retrieve the build information using the admin command
         yield adminDb.command({ buildInfo: 1 });
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -3651,7 +3651,7 @@ describe('Operation (Generators)', function() {
           test.ok(err instanceof Error);
           test.equal('Error: illegal profiling level value medium', err.message);
 
-          client.close();
+          yield client.close();
         }
       });
       // END
@@ -3715,7 +3715,7 @@ describe('Operation (Generators)', function() {
         test.ok(infos[0].ts.constructor === Date);
         test.ok(infos[0].millis.constructor === Number);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -3769,7 +3769,7 @@ describe('Operation (Generators)', function() {
         var doc = yield adminDb.validateCollection('test_with_generators');
         test.ok(doc != null);
 
-        client.close();
+        yield client.close();
       });
     }
   });
@@ -3813,7 +3813,7 @@ describe('Operation (Generators)', function() {
         // Ping the server
         yield adminDb.ping();
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -3861,7 +3861,7 @@ describe('Operation (Generators)', function() {
         var result = yield adminDb.removeUser('admin11');
         test.ok(result);
 
-        client.close();
+        yield client.close();
       });
     }
   });
@@ -3909,7 +3909,7 @@ describe('Operation (Generators)', function() {
         var result = yield adminDb.removeUser('admin12');
         test.equal(true, result);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -3955,7 +3955,7 @@ describe('Operation (Generators)', function() {
         var dbs = yield adminDb.listDatabases();
         test.ok(dbs.databases.length > 0);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -4008,7 +4008,7 @@ describe('Operation (Generators)', function() {
         var info = yield adminDb.serverStatus();
         test.ok(info != null);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -4061,7 +4061,7 @@ describe('Operation (Generators)', function() {
         // running a replicaset
         yield adminDb.replSetGetStatus();
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -4120,7 +4120,7 @@ describe('Operation (Generators)', function() {
         test.equal(1, documents.length);
         test.deepEqual([1, 2, 3], documents[0].b);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -4171,7 +4171,7 @@ describe('Operation (Generators)', function() {
         var count = yield collection.find().count();
         test.equal(2, count);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -4234,7 +4234,7 @@ describe('Operation (Generators)', function() {
 
         // Validate the correct number of elements
         test.equal(3, docs.length);
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -4286,7 +4286,7 @@ describe('Operation (Generators)', function() {
 
         // Do normal ascending sort
         yield collection.find().explain();
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -4346,7 +4346,7 @@ describe('Operation (Generators)', function() {
 
         // Close the cursor, this is the same as reseting the query
         yield cursor.close();
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -4414,7 +4414,7 @@ describe('Operation (Generators)', function() {
         result = yield GridStore.exist(db, file._id, 'another_root');
         test.equal(false, result);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -4532,7 +4532,7 @@ describe('Operation (Generators)', function() {
         test.ok(found);
         test.ok(found2);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -4585,7 +4585,7 @@ describe('Operation (Generators)', function() {
         var data = yield GridStore.read(db, 'test_gs_puts_and_readlines');
         test.equal('line one\n', data.toString());
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -4660,7 +4660,7 @@ describe('Operation (Generators)', function() {
         count = yield collection.count();
         test.equal(0, count);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -4721,7 +4721,7 @@ describe('Operation (Generators)', function() {
         // Compare the file content against the orgiinal
         test.equal(data.toString('base64'), data2.toString('base64'));
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -4776,7 +4776,7 @@ describe('Operation (Generators)', function() {
         var result = yield GridStore.exist(db, 'ourexamplefiletowrite.txt');
         test.equal(true, result);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -4835,7 +4835,7 @@ describe('Operation (Generators)', function() {
         var result = yield GridStore.exist(db, fileId);
         test.equal(true, result);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -4897,7 +4897,7 @@ describe('Operation (Generators)', function() {
         test.equal(data.toString('base64'), fileData.toString('base64'));
         test.equal(fileSize, fileData.length);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -4966,7 +4966,7 @@ describe('Operation (Generators)', function() {
         test.equal(data.toString('base64'), fileData.toString('base64'));
         test.equal(fileSize, fileData.length);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -5028,7 +5028,7 @@ describe('Operation (Generators)', function() {
         var fileData = yield GridStore.read(db, fileId);
         test.equal('Hello worldBuffer Hello world', fileData.toString());
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -5083,7 +5083,7 @@ describe('Operation (Generators)', function() {
         // Close the
         yield gridStore.close();
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -5148,7 +5148,7 @@ describe('Operation (Generators)', function() {
         var result = yield GridStore.exist(db, fileId);
         test.equal(false, result);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -5213,7 +5213,7 @@ describe('Operation (Generators)', function() {
         var lines = yield GridStore.readlines(db, fileId);
         test.deepEqual(['line one\n', 'line two\n', 'line three\n'], lines);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -5282,7 +5282,7 @@ describe('Operation (Generators)', function() {
         var lines = yield gridStore.readlines();
         test.deepEqual(['line one\n', 'line two\n', 'line three\n'], lines);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -5336,7 +5336,7 @@ describe('Operation (Generators)', function() {
         var fileData = yield GridStore.read(db, result._id);
         test.equal(data.length, fileData.length);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -5440,7 +5440,7 @@ describe('Operation (Generators)', function() {
         chr = yield gridStore.getc();
         test.equal('o', chr.toString());
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -5511,7 +5511,7 @@ describe('Operation (Generators)', function() {
         var data = yield GridStore.read(db, fileId);
         test.equal('abc', data.toString());
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -5571,7 +5571,7 @@ describe('Operation (Generators)', function() {
         var position = yield gridStore.tell();
         test.equal(5, position);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -5625,7 +5625,7 @@ describe('Operation (Generators)', function() {
         var chr = yield gridStore.getc();
         test.equal('h', chr.toString());
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -5697,7 +5697,7 @@ describe('Operation (Generators)', function() {
         chr = yield gridStore.getc();
         test.equal('h', chr.toString());
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -5774,7 +5774,7 @@ describe('Operation (Generators)', function() {
         test.ok(upsert._id != null);
 
         // Finish up test
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -5847,7 +5847,7 @@ describe('Operation (Generators)', function() {
         test.ok(upsert._id != null);
 
         // Finish up test
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -5896,7 +5896,7 @@ describe('Operation (Generators)', function() {
         var r = yield col.insertOne({ a: 1 });
         test.equal(1, r.insertedCount);
         // Finish up test
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -5939,7 +5939,7 @@ describe('Operation (Generators)', function() {
         var r = yield col.insertMany([{ a: 1 }, { a: 2 }]);
         test.equal(2, r.insertedCount);
         // Finish up test
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -5983,7 +5983,7 @@ describe('Operation (Generators)', function() {
         test.equal(0, r.matchedCount);
         test.equal(1, r.upsertedCount);
         // Finish up test
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -6032,7 +6032,7 @@ describe('Operation (Generators)', function() {
         test.equal(2, r.modifiedCount);
 
         // Finish up test
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -6078,7 +6078,7 @@ describe('Operation (Generators)', function() {
         r = yield col.removeOne({ a: 1 });
         test.equal(1, r.deletedCount);
         // Finish up test
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -6126,7 +6126,7 @@ describe('Operation (Generators)', function() {
         test.equal(2, r.deletedCount);
 
         // Finish up test
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -6191,7 +6191,7 @@ describe('Operation (Generators)', function() {
         test.equal(2, Object.keys(r.upsertedIds).length);
 
         // Ordered bulk operation
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -6238,7 +6238,7 @@ describe('Operation (Generators)', function() {
         test.equal(1, r.lastErrorObject.n);
         test.equal(1, r.value.b);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -6295,7 +6295,7 @@ describe('Operation (Generators)', function() {
         test.equal(1, r.value.b);
         test.equal(1, r.value.c);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -6352,7 +6352,7 @@ describe('Operation (Generators)', function() {
         test.equal(1, r.value.b);
         test.equal(1, r.value.d);
 
-        client.close();
+        yield client.close();
       });
       // END
     }
@@ -6403,7 +6403,7 @@ describe('Operation (Generators)', function() {
         // Insert a document in the capped collection
         yield collection.insertMany(docs, configuration.writeConcernMax());
 
-        yield new Promise(resolve => {
+        yield new Promise((resolve, reject) => {
           var total = 0;
           // Get the cursor
           var cursor = collection
@@ -6420,8 +6420,10 @@ describe('Operation (Generators)', function() {
           });
 
           cursor.on('end', function() {
-            client.close();
-            resolve();
+            client.close(err => {
+              if (err) return reject(err);
+              resolve();
+            });
           });
         });
       });

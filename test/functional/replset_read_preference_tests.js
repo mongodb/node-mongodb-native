@@ -938,8 +938,7 @@ describe.skip('ReplSet (ReadPreference)', function() {
 
           db.listCollections().toArray(function(err) {
             test.equal(null, err);
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });

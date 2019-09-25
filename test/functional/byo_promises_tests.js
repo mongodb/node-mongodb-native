@@ -29,8 +29,7 @@ describe('BYO Promises', function() {
         expect(promise).to.be.an.instanceOf(Promise);
 
         promise.then(function() {
-          client.close();
-          done();
+          client.close(done);
         });
       });
     }

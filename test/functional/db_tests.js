@@ -1,6 +1,7 @@
 'use strict';
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
+const expect = require('chai').expect;
 
 describe('Db', function() {
   before(function() {
@@ -98,14 +99,12 @@ describe('Db', function() {
           coll.findOne({}, null, function() {
             //e - errors b/c findOne needs a query selector
             test.equal(1, count);
-            client.close();
-            done();
+            client.close(done);
           });
         } catch (e) {
           process.nextTick(function() {
             test.equal(1, count);
-            client.close();
-            done();
+            client.close(done);
           });
         }
       });
@@ -140,7 +139,7 @@ describe('Db', function() {
           });
         } catch (e) {
           test.equal(callbackCalled, 1);
-          done();
+          client.close(done);
         }
       });
     }
@@ -179,8 +178,7 @@ describe('Db', function() {
 
             collection.findOne({ name: 'Patty' }, function(err, document) {
               test.equal(r.ops[0]._id.toHexString(), document._id.toHexString());
-              client.close();
-              done();
+              client.close(done);
             });
           });
         };
@@ -194,7 +192,7 @@ describe('Db', function() {
   /**
    * @ignore
    */
-  it('shouldCorrectlyPerformAutomaticConnectWithMaxBufferSize0', {
+  it.skip('shouldCorrectlyPerformAutomaticConnectWithMaxBufferSize0', {
     metadata: { requires: { topology: 'single' } },
 
     // The actual test we wish to run
@@ -220,8 +218,7 @@ describe('Db', function() {
           ) {
             test.ok(err != null);
             test.ok(err.message.indexOf('0') !== -1);
-            client.close();
-            done();
+            client.close(done);
           });
         };
 
@@ -297,8 +294,7 @@ describe('Db', function() {
                       { parent: new DBRef('test_resave_dbref', parent._id) },
                       function(err, child) {
                         test.ok(child != null); //!!!! Main test point!
-                        client.close();
-                        done();
+                        client.close(done);
                       }
                     );
                   });
@@ -358,8 +354,7 @@ describe('Db', function() {
                       test.deepEqual([['_id', 1]], indexInformation._id_);
                       test.deepEqual([['a', 1], ['b', 1]], indexInformation.a_1_b_1);
 
-                      client.close();
-                      done();
+                      client.close(done);
                     });
                   });
                 }
@@ -391,8 +386,7 @@ describe('Db', function() {
           test.equal(null, err);
           test.equal(true, result);
 
-          client.close();
-          done();
+          client.close(done);
         });
       });
     }
@@ -401,7 +395,7 @@ describe('Db', function() {
   /**
    * @ignore
    */
-  it('shouldCorrectlyThrowWhenTryingToReOpenConnection', {
+  it.skip('shouldCorrectlyThrowWhenTryingToReOpenConnection', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
@@ -410,13 +404,14 @@ describe('Db', function() {
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(err => {
+        expect(err).to.not.exist;
+
         try {
           client.connect(function() {});
           test.ok(false);
         } catch (err) {
-          client.close();
-          done();
+          client.close(done);
         }
       });
     }
@@ -444,8 +439,7 @@ describe('Db', function() {
 
         client.connect(function(err) {
           test.ok(err != null);
-          client.close();
-          done();
+          client.close(done);
         });
       });
     }
@@ -472,8 +466,7 @@ describe('Db', function() {
               return c.collectionName;
             });
             test.notEqual(-1, collections.indexOf('node972.test'));
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -513,8 +506,7 @@ describe('Db', function() {
               test.equal(null, err);
               test.equal(1, names.length);
 
-              client.close();
-              done();
+              client.close(done);
             });
           });
         });
@@ -555,8 +547,7 @@ describe('Db', function() {
               test.equal(null, err);
               test.equal(1, names.length);
 
-              client.close();
-              done();
+              client.close(done);
             });
           });
         });
@@ -603,8 +594,7 @@ describe('Db', function() {
                 test.equal(null, err);
                 test.equal(1, names.length);
 
-                client.close();
-                done();
+                client.close(done);
               });
             });
           });
@@ -649,8 +639,7 @@ describe('Db', function() {
               test.equal(null, err);
               test.equal(2, names.length);
 
-              client.close();
-              done();
+              client.close(done);
             });
           });
         });

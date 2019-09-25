@@ -49,9 +49,7 @@ describe('Cursor tests', function() {
                 expect(killCursorD.a).to.equal(2);
                 expect(cursor.bufferedCount()).to.equal(0);
                 // Destroy the server connection
-                _server.destroy();
-                // Finish the test
-                done();
+                _server.destroy(done);
               });
             });
           }
@@ -107,9 +105,7 @@ describe('Cursor tests', function() {
                 expect(secondCursorD).to.be.null;
 
                 // Destroy the server connection
-                _server.destroy();
-                // Finish the test
-                done();
+                _server.destroy(done);
               });
             });
           }
@@ -160,9 +156,7 @@ describe('Cursor tests', function() {
                   expect(thirdCursorErr).to.be.ok;
                   expect(thirdCursorD).to.be.undefined;
                   // Destroy the server connection
-                  _server.destroy();
-                  // Finish the test
-                  done();
+                  _server.destroy(done);
                 });
               });
             });
@@ -214,9 +208,7 @@ describe('Cursor tests', function() {
                   expect(thirdCursorErr).to.be.null;
                   expect(thirdCursorD.a).to.equal(3);
                   // Destroy the server connection
-                  _server.destroy();
-                  // Finish the test
-                  done();
+                  _server.destroy(done);
                 });
               });
             });
@@ -272,9 +264,7 @@ describe('Cursor tests', function() {
                     expect(thirdCursorD).to.not.exist;
 
                     // Destroy the server connection
-                    _server.destroy();
-                    // Finish the test
-                    done();
+                    _server.destroy(done);
                   });
                 });
               });
@@ -332,9 +322,7 @@ describe('Cursor tests', function() {
                     expect(thirdCursorD).to.be.undefined;
 
                     // Destroy the server connection
-                    _server.destroy();
-                    // Finish the test
-                    done();
+                    _server.destroy(done);
                   });
                 });
               });
@@ -393,9 +381,7 @@ describe('Cursor tests', function() {
                     expect(thirdCursorD.a).to.equal(3);
 
                     // Destroy the server connection
-                    _server.destroy();
-                    // Finish the test
-                    done();
+                    _server.destroy(done);
                   });
                 });
 
@@ -463,9 +449,7 @@ describe('Cursor tests', function() {
                   }
 
                   // Destroy the server connection
-                  _server.destroy();
-                  // Finish the test
-                  done();
+                  _server.destroy(done);
                 }, 100);
               });
             });

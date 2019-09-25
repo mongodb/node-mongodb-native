@@ -64,8 +64,7 @@ describe('Find and Modify', function() {
               test.deepEqual({ fsync: 1 }, started[0].command.writeConcern);
 
               listener.uninstrument();
-              client.close();
-              done();
+              client.close(done);
             });
           });
         });
@@ -128,8 +127,7 @@ describe('Find and Modify', function() {
               test.deepEqual({ fsync: 1 }, started[0].command.writeConcern);
 
               listener.uninstrument();
-              client.close();
-              done();
+              client.close(done);
             });
           });
         });
@@ -195,8 +193,7 @@ describe('Find and Modify', function() {
               test.deepEqual({ fsync: true }, started[0].command.writeConcern);
 
               listener.uninstrument();
-              client.close();
-              done();
+              client.close(done);
             });
           });
         });
@@ -224,8 +221,7 @@ describe('Find and Modify', function() {
         collection.findOneAndUpdate({}, { $set: { a: 1 } }, err => {
           expect(err).to.be.null;
 
-          client.close();
-          done();
+          client.close(true, done);
         });
       });
     }

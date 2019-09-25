@@ -136,8 +136,7 @@ describe('CRUD API', function() {
               test.equal(null, err);
               test.ok(result != null);
 
-              client.close();
-              done();
+              client.close(done);
             });
           };
 
@@ -268,8 +267,7 @@ describe('CRUD API', function() {
               test.equal(null, err);
               test.ok(result != null);
 
-              client.close();
-              done();
+              client.close(done);
             });
           };
 
@@ -507,8 +505,7 @@ describe('CRUD API', function() {
                   test.equal(2, r.upsertedCount);
                   test.equal(2, Object.keys(r.upsertedIds).length);
 
-                  client.close();
-                  done();
+                  client.close(done);
                 }
               );
           });
@@ -628,8 +625,7 @@ describe('CRUD API', function() {
                     test.equal(0, r.matchedCount);
                     test.ok(r.upsertedId != null);
 
-                    client.close();
-                    done();
+                    client.close(done);
                   });
               });
           });
@@ -702,8 +698,7 @@ describe('CRUD API', function() {
               test.equal(2, r.result.n);
               test.equal(2, r.deletedCount);
 
-              client.close();
-              done();
+              client.close(done);
             });
           });
         };
@@ -802,8 +797,7 @@ describe('CRUD API', function() {
                 test.equal(1, r.value.b);
                 test.equal(1, r.value.d);
 
-                client.close();
-                done();
+                client.close(done);
               }
             );
           });
@@ -833,8 +827,7 @@ describe('CRUD API', function() {
         db.collection('t6_1').deleteMany({}, function(err) {
           test.equal(null, err);
 
-          client.close();
-          done();
+          client.close(done);
         });
       });
     }
@@ -880,8 +873,7 @@ describe('CRUD API', function() {
                     test.equal(null, err);
                     test.equal(1, result.result.ok);
 
-                    client.close();
-                    done();
+                    client.close(done);
                   });
                 });
               });
@@ -913,8 +905,7 @@ describe('CRUD API', function() {
             test.equal(null, err);
             test.ok(r != null);
 
-            client.close();
-            done();
+            client.close(done);
           });
       });
     }
@@ -938,8 +929,7 @@ describe('CRUD API', function() {
         var collection = db.collection('w0crudoperations');
         collection.insertOne({}, function(err) {
           test.equal(null, err);
-          client.close();
-          done();
+          client.close(done);
         });
 
         // collection.insertOne({a:1});
@@ -983,8 +973,7 @@ describe('CRUD API', function() {
 
         db.collection('t20_1').bulkWrite(ops, { ordered: false, w: 1 }, function(err) {
           test.ok(err !== null);
-          client.close();
-          done();
+          client.close(done);
         });
       });
     }
@@ -1016,8 +1005,7 @@ describe('CRUD API', function() {
 
         db.collection('t20_1').bulkWrite(ops, { ordered: true, w: 1 }, function(err) {
           test.ok(err !== null);
-          client.close();
-          done();
+          client.close(done);
         });
       });
     }
@@ -1044,8 +1032,7 @@ describe('CRUD API', function() {
             expect(err).to.exist;
             expect(r).to.not.exist;
 
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -1081,8 +1068,7 @@ describe('CRUD API', function() {
               expect(err).to.exist;
               expect(r).to.not.exist;
 
-              client.close();
-              done();
+              client.close(done);
             });
           });
         });
@@ -1119,8 +1105,7 @@ describe('CRUD API', function() {
               expect(err).to.exist;
               expect(r).to.not.exist;
 
-              client.close();
-              done();
+              client.close(done);
             });
           });
         });

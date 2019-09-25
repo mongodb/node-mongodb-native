@@ -26,8 +26,7 @@ describe('Connection', function() {
         test.equal(null, err);
 
         client.topology.once('monitoring', function() {
-          client.close();
-          done();
+          client.close(done);
         });
       });
     }
@@ -56,8 +55,7 @@ describe('Connection', function() {
         test.equal(null, err);
         test.equal(false, client.topology.s.coreTopology.s.monitoring);
 
-        client.close();
-        done();
+        client.close(done);
       });
     }
   });
@@ -90,8 +88,7 @@ describe('Connection', function() {
               test.equal(null, err);
               test.equal(1, items.length);
 
-              client.close();
-              done();
+              client.close(done);
             });
         });
       });
@@ -112,8 +109,7 @@ describe('Connection', function() {
       var client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: true });
 
       client.on('open', function() {
-        client.close();
-        done();
+        client.close(done);
       });
 
       client.connect();
@@ -136,8 +132,7 @@ describe('Connection', function() {
       client.connect().then(() => {
         test.equal('js', client.topology.parserType);
 
-        client.close();
-        done();
+        client.close(done);
       });
     }
   });
@@ -156,8 +151,7 @@ describe('Connection', function() {
       var configuration = this.configuration;
       var client = configuration.newClient({ w: 1 }, { poolSize: 2000, auto_reconnect: true });
       client.on('open', function() {
-        client.close();
-        done();
+        client.close(done);
       });
 
       client.connect();
@@ -192,8 +186,7 @@ describe('Connection', function() {
               test.equal(null, err);
               test.equal(1, items.length);
 
-              client.close();
-              done();
+              client.close(done);
             });
         });
       });
@@ -263,8 +256,7 @@ describe('Connection', function() {
 
       client.connect(
         connectionTester(configuration, 'testConnectNoOptions', function(client) {
-          client.close();
-          done();
+          client.close(done);
         })
       );
     }
@@ -294,8 +286,7 @@ describe('Connection', function() {
           test.ok(client.topology.poolSize >= 1);
           test.equal(4, client.topology.s.coreTopology.s.pool.size);
           test.equal(true, client.topology.autoReconnect);
-          client.close();
-          done();
+          client.close(done);
         })
       );
     }
@@ -326,8 +317,7 @@ describe('Connection', function() {
           test.ok(client.topology.poolSize >= 1);
           test.equal(4, client.topology.s.coreTopology.s.pool.size);
           test.equal(true, client.topology.autoReconnect);
-          client.close();
-          done();
+          client.close(done);
         })
       );
     }
@@ -354,8 +344,7 @@ describe('Connection', function() {
 
         db.addUser(user, password, function(err) {
           test.equal(err, null);
-          client.close();
-          restOfTest();
+          client.close(restOfTest);
         });
       });
 
@@ -363,8 +352,7 @@ describe('Connection', function() {
         const testClient = configuration.newClient(configuration.url(user, password));
         testClient.connect(
           connectionTester(configuration, 'testConnectGoodAuth', function(client) {
-            client.close();
-            done();
+            client.close(done);
           })
         );
       }
@@ -391,8 +379,7 @@ describe('Connection', function() {
 
         db.addUser(user, password, function(err) {
           test.equal(err, null);
-          client.close();
-          restOfTest();
+          client.close(restOfTest);
         });
       });
 
@@ -406,8 +393,7 @@ describe('Connection', function() {
 
         testClient.connect(
           connectionTester(configuration, 'testConnectGoodAuthAsOption', function(client) {
-            client.close();
-            done();
+            client.close(done);
           })
         );
       }
@@ -520,8 +506,7 @@ describe('Connection', function() {
                 test.equal(2, dbReconnect);
                 test.equal(2, dbClose);
 
-                client.close();
-                done();
+                client.close(done);
               });
             });
           });

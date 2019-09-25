@@ -58,8 +58,7 @@ describe('Client metadata tests', function() {
             expect(x.clientInfo.platform.split('mongodb-core').length).to.equal(2);
           });
 
-          _server.destroy();
-          done();
+          _server.destroy(done);
         });
 
         server.connect();
@@ -92,8 +91,7 @@ describe('Client metadata tests', function() {
           expect(x.clientInfo.platform.split('mongodb-core').length).to.equal(2);
         });
 
-        server.destroy();
-        done();
+        server.destroy(done);
       });
 
       _server.connect();

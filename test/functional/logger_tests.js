@@ -44,8 +44,7 @@ describe('Logger', function() {
 
           // Clean up
           Logger.reset();
-          client.close();
-          done();
+          client.close(done);
         });
       });
     }
@@ -80,8 +79,7 @@ describe('Logger', function() {
 
           // Clean up
           Logger.reset();
-          client.close();
-          done();
+          client.close(done);
         });
       });
     }
@@ -131,8 +129,7 @@ describe('Logger', function() {
 
             // Clean up
             Logger.reset();
-            client.close();
-            done();
+            client.close(done);
           });
       });
     }
@@ -172,8 +169,7 @@ describe('Logger', function() {
 
             // Clean up
             Logger.reset();
-            client.close();
-            done();
+            client.close(done);
           });
         }
       );

@@ -36,8 +36,7 @@ describe('Promote Buffers', function() {
               test.equal(null, err);
               test.ok(doc.doc instanceof Buffer);
 
-              client.close();
-              done();
+              client.close(done);
             });
           }
         );
@@ -71,8 +70,7 @@ describe('Promote Buffers', function() {
               test.equal(null, err);
               test.ok(doc.doc instanceof Buffer);
 
-              client.close();
-              done();
+              client.close(done);
             });
           }
         );
@@ -109,8 +107,7 @@ describe('Promote Buffers', function() {
                 test.equal(null, err);
                 test.ok(doc.doc instanceof Buffer);
 
-                client.close();
-                done();
+                client.close(done);
               });
           }
         );
@@ -146,8 +143,7 @@ describe('Promote Buffers', function() {
                 test.equal(null, err);
                 test.ok(doc.doc instanceof Buffer);
 
-                client.close();
-                done();
+                client.close(done);
               });
           }
         );
@@ -186,8 +182,7 @@ describe('Promote Buffers', function() {
                 test.equal(null, err);
                 test.ok(doc.doc instanceof Buffer);
 
-                client.close();
-                done();
+                client.close(done);
               });
           }
         );

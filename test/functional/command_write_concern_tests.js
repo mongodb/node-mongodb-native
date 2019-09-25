@@ -129,8 +129,7 @@ describe('Command Write Concern', function() {
               test.equal(null, err);
               test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
 
-              client.close();
-              done();
+              client.close(done);
             });
         });
       });
@@ -253,8 +252,7 @@ describe('Command Write Concern', function() {
             test.equal(null, err);
             test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
 
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -374,8 +372,7 @@ describe('Command Write Concern', function() {
               test.equal(null, err);
               test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
 
-              client.close();
-              done();
+              client.close(done);
             }
           );
         });
@@ -493,8 +490,7 @@ describe('Command Write Concern', function() {
               test.equal(null, err);
               test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
 
-              client.close();
-              done();
+              client.close(done);
             }
           );
         });
@@ -612,8 +608,7 @@ describe('Command Write Concern', function() {
               test.equal(null, err);
               test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
 
-              client.close();
-              done();
+              client.close(done);
             }
           );
         });
@@ -731,8 +726,7 @@ describe('Command Write Concern', function() {
               test.equal(null, err);
               test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
 
-              client.close();
-              done();
+              client.close(done);
             }
           );
         });
@@ -859,8 +853,7 @@ describe('Command Write Concern', function() {
               test.equal(null, err);
               test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
 
-              client.close();
-              done();
+              client.close(done);
             }
           );
         });
@@ -973,8 +966,7 @@ describe('Command Write Concern', function() {
             test.equal(null, err);
             test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
 
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -1086,8 +1078,7 @@ describe('Command Write Concern', function() {
             test.equal(null, err);
             test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
 
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -1207,8 +1198,7 @@ describe('Command Write Concern', function() {
                 test.equal(null, err);
                 test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
 
-                client.close();
-                done();
+                client.close(done);
               }
             );
         });

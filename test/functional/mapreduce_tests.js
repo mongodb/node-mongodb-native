@@ -55,8 +55,7 @@ describe('MapReduce', function() {
                     function(err, results) {
                       test.equal(3, results[0].running_average);
                       test.equal(0.75, results[0].average);
-                      client.close();
-                      done();
+                      client.close(done);
                     }
                   );
                 }
@@ -103,8 +102,7 @@ describe('MapReduce', function() {
 
                   collection.findOne({ _id: 2 }, function(err, result) {
                     test.equal(1, result.value);
-                    client.close();
-                    done();
+                    client.close(done);
                   });
                 });
               });
@@ -147,8 +145,7 @@ describe('MapReduce', function() {
 
               collection.mapReduce(map, reduce, { out: { inline: 1 } }, function(err) {
                 test.ok(err != null);
-                client.close();
-                done();
+                client.close(done);
               });
             }
           );
@@ -199,8 +196,7 @@ describe('MapReduce', function() {
 
                   collection.findOne({ _id: 2 }, function(err, result) {
                     test.equal(1, result.value);
-                    client.close();
-                    done();
+                    client.close(done);
                   });
                 });
               });
@@ -247,8 +243,7 @@ describe('MapReduce', function() {
 
                 collection.findOne({ _id: 2 }, function(err, result) {
                   test.equal(1, result.value);
-                  client.close();
-                  done();
+                  client.close(done);
                 });
               });
             }
@@ -298,8 +293,7 @@ describe('MapReduce', function() {
 
                     collection.findOne({ _id: 3 }, function(err, result) {
                       test.equal(1, result.value);
-                      client.close();
-                      done();
+                      client.close(done);
                     });
                   });
                 }
@@ -343,8 +337,7 @@ describe('MapReduce', function() {
                 { out: { inline: 1 }, query: { user_id: { $gt: 1 } } },
                 function(err) {
                   test.ok(err != null);
-                  client.close();
-                  done();
+                  client.close(done);
                 }
               );
             }
@@ -402,8 +395,7 @@ describe('MapReduce', function() {
                     collection.findOne({ _id: 2 }, function(err, result) {
                       test.equal(1, result.value);
 
-                      client.close();
-                      done();
+                      client.close(done);
                     });
                   });
                 }
@@ -472,8 +464,7 @@ describe('MapReduce', function() {
               collection.group(keys, condition, initial, reduce, true, function(err, r) {
                 test.equal(1, r[0].count);
                 test.equal('smith', r[0]['data.lastname']);
-                client.close();
-                done();
+                client.close(done);
               });
             }
           );
@@ -528,8 +519,7 @@ describe('MapReduce', function() {
                     // During MapReduce
                     test.equal(200, result.value);
 
-                    client.close();
-                    done();
+                    client.close(done);
                   });
                 }
               );

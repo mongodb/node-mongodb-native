@@ -32,8 +32,7 @@ describe('Ignore Undefined', function() {
           collection.findOne(function(err, item) {
             test.equal(1, item.a);
             test.ok(item.b === undefined);
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -82,8 +81,7 @@ describe('Ignore Undefined', function() {
                     collection.findOne({ a: 3 }, function(err, item) {
                       test.equal(3, item.a);
                       test.ok(item.b === undefined);
-                      client.close();
-                      done();
+                      client.close(done);
                     });
                   });
                 });
@@ -146,8 +144,7 @@ describe('Ignore Undefined', function() {
                         collection.findOne({ _id: id }, function(err, item) {
                           test.equal(1, item.a);
                           test.ok(item.b === undefined);
-                          client.close();
-                          done();
+                          client.close(done);
                         });
                       }
                     );

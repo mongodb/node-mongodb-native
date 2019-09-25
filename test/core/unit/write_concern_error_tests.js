@@ -85,8 +85,11 @@ describe('WriteConcernError', function() {
     });
 
     makeAndConnectReplSet((err, replSet) => {
+      // cleanup the server before calling done
+      const cleanup = err => replSet.destroy(err2 => done(err || err2));
+
       if (err) {
-        return done(err);
+        return cleanup(err);
       }
 
       replSet.command('db1', Object.assign({}, RAW_USER_WRITE_CONCERN_CMD), err => {
@@ -102,7 +105,7 @@ describe('WriteConcernError', function() {
         } catch (e) {
           _err = e;
         } finally {
-          done(_err);
+          cleanup(_err);
         }
       });
     });

@@ -66,8 +66,7 @@ describe('Raw', function() {
                 test.ok(Buffer.isBuffer(item));
                 var object = bson.deserialize(item);
                 test.equal(1, object.a);
-                client.close();
-                done();
+                client.close(done);
               });
             });
           });
@@ -114,8 +113,7 @@ describe('Raw', function() {
                 test.ok(Buffer.isBuffer(item));
                 var object = bson.deserialize(item);
                 test.equal(1, object.a);
-                client.close();
-                done();
+                client.close(done);
               });
             });
           });

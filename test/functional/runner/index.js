@@ -240,64 +240,67 @@ function runTestSuiteTest(configuration, spec, context) {
 
   const url = resolveConnectionString(configuration, spec);
   const client = configuration.newClient(url, clientOptions);
-  return client.connect().then(client => {
-    context.testClient = client;
-    client.on('commandStarted', event => {
-      if (IGNORED_COMMANDS.has(event.commandName)) {
-        return;
-      }
+  return client
+    .connect()
+    .then(client => {
+      context.testClient = client;
+      client.on('commandStarted', event => {
+        if (IGNORED_COMMANDS.has(event.commandName)) {
+          return;
+        }
 
-      context.commandEvents.push(event);
+        context.commandEvents.push(event);
 
-      // very useful for debugging
-      if (displayCommands) {
-        console.dir(event, { depth: 5 });
-      }
-    });
-
-    const sessionOptions = Object.assign({}, spec.transactionOptions);
-
-    spec.sessionOptions = spec.sessionOptions || {};
-    const database = client.db(context.dbName);
-    const session0 = client.startSession(
-      Object.assign({}, sessionOptions, parseSessionOptions(spec.sessionOptions.session0))
-    );
-    const session1 = client.startSession(
-      Object.assign({}, sessionOptions, parseSessionOptions(spec.sessionOptions.session1))
-    );
-
-    const savedSessionData = {
-      session0: JSON.parse(EJSON.stringify(session0.id)),
-      session1: JSON.parse(EJSON.stringify(session1.id))
-    };
-
-    // enable to see useful APM debug information at the time of actual test run
-    // displayCommands = true;
-
-    const operationContext = {
-      client,
-      database,
-      collectionName: context.collectionName,
-      session0,
-      session1,
-      testRunner: context
-    };
-
-    let testPromise = Promise.resolve();
-    return testPromise
-      .then(() => testOperations(spec, operationContext))
-      .catch(err => {
-        // If the driver throws an exception / returns an error while executing this series
-        // of operations, store the error message.
-        throw err;
-      })
-      .then(() => {
-        session0.endSession();
-        session1.endSession();
-
-        return validateExpectations(context.commandEvents, spec, savedSessionData);
+        // very useful for debugging
+        if (displayCommands) {
+          console.dir(event, { depth: 5 });
+        }
       });
-  });
+
+      const sessionOptions = Object.assign({}, spec.transactionOptions);
+
+      spec.sessionOptions = spec.sessionOptions || {};
+      const database = client.db(context.dbName);
+      const session0 = client.startSession(
+        Object.assign({}, sessionOptions, parseSessionOptions(spec.sessionOptions.session0))
+      );
+      const session1 = client.startSession(
+        Object.assign({}, sessionOptions, parseSessionOptions(spec.sessionOptions.session1))
+      );
+
+      const savedSessionData = {
+        session0: JSON.parse(EJSON.stringify(session0.id)),
+        session1: JSON.parse(EJSON.stringify(session1.id))
+      };
+
+      // enable to see useful APM debug information at the time of actual test run
+      // displayCommands = true;
+
+      const operationContext = {
+        client,
+        database,
+        collectionName: context.collectionName,
+        session0,
+        session1,
+        testRunner: context
+      };
+
+      let testPromise = Promise.resolve();
+      return testPromise
+        .then(() => testOperations(spec, operationContext))
+        .catch(err => {
+          // If the driver throws an exception / returns an error while executing this series
+          // of operations, store the error message.
+          throw err;
+        })
+        .then(() => {
+          session0.endSession();
+          session1.endSession();
+
+          return validateExpectations(context.commandEvents, spec, savedSessionData);
+        });
+    })
+    .then(() => client.close());
 }
 
 function validateOutcome(testData, testContext) {

@@ -41,8 +41,7 @@ describe('Sharding (Connection)', function() {
             db.collection('replicaset_mongo_client_collection').findOne(err => {
               expect(err).to.not.exist;
 
-              client.close();
-              done();
+              client.close(done);
             });
           });
       });
@@ -76,8 +75,7 @@ describe('Sharding (Connection)', function() {
 
       client.connect(err => {
         expect(err).to.not.exist;
-        client.close();
-        done();
+        client.close(done);
       });
     }
   });
@@ -122,8 +120,7 @@ describe('Sharding (Connection)', function() {
           expect(topology[member]()).to.exist;
         });
 
-        client.close();
-        done();
+        client.close(done);
       });
     }
   });
@@ -155,8 +152,7 @@ describe('Sharding (Connection)', function() {
           expect(server).to.have.nested.property('s.pool.options.reconnectTries', 10);
         });
 
-        client.close();
-        done();
+        client.close(done);
       });
     }
   });

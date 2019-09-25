@@ -34,8 +34,7 @@ describe('Decimal128', function() {
             test.ok(!err);
             test.ok(domainInstance === process.domain);
             domainInstance.exit();
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -66,8 +65,7 @@ describe('Decimal128', function() {
             test.ok(!err);
             test.ok(domainInstance === process.domain);
             domainInstance.exit();
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -101,8 +99,7 @@ describe('Decimal128', function() {
             test.ok(!err);
             test.ok(domainInstance === process.domain);
             domainInstance.exit();
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -143,8 +140,7 @@ describe('Decimal128', function() {
             test.ok(err != null);
             test.ok(process.domain === domainInstance);
             domainInstance.exit();
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -188,8 +184,7 @@ describe('Decimal128', function() {
             test.ok(err != null);
             test.ok(process.domain === domainInstance);
             domainInstance.exit();
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });

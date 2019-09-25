@@ -42,8 +42,7 @@ describe('GridFS', function() {
         test.ok(gs instanceof GridStore);
         test.equal(id, gs.fileId);
         test.equal(filename, gs.filename);
-        client.close();
-        done();
+        client.close(done);
       });
     }
   });
@@ -78,8 +77,7 @@ describe('GridFS', function() {
         test.equal(id, gs.fileId);
         test.equal(filename, gs.filename);
 
-        client.close();
-        done();
+        client.close(done);
       });
     }
   });
@@ -113,8 +111,7 @@ describe('GridFS', function() {
         test.equal(id, gs.fileId);
         test.equal(filename, gs.filename);
 
-        client.close();
-        done();
+        client.close(done);
       });
     }
   });
@@ -147,8 +144,7 @@ describe('GridFS', function() {
               GridStore.read(db, result._id, function(err, data) {
                 expect(err).to.not.exist;
                 test.equal('hello world!', data.toString());
-                client.close();
-                done();
+                client.close(done);
               });
             });
           });
@@ -194,8 +190,7 @@ describe('GridFS', function() {
               GridStore.exist(db, 'foobar', 'another_root', function(err, result) {
                 expect(err).to.not.exist;
                 test.equal(false, result);
-                client.close();
-                done();
+                client.close(done);
               });
             });
           });
@@ -233,8 +228,7 @@ describe('GridFS', function() {
               GridStore.read(db, 'test_gs_read_length', 5, function(err, data) {
                 expect(err).to.not.exist;
                 test.equal('hello', data.toString());
-                client.close();
-                done();
+                client.close(done);
               });
             });
           });
@@ -277,8 +271,7 @@ describe('GridFS', function() {
               GridStore.read(db, 'test_gs_read_with_offset', null, 7, function(err, data) {
                 expect(err).to.not.exist;
                 test.equal('world!', data.toString());
-                client.close();
-                done();
+                client.close(done);
               });
             });
           });
@@ -351,9 +344,7 @@ describe('GridFS', function() {
                         GridStore.read(db, 'test_gs_multi_chunk', function(err, data) {
                           expect(err).to.not.exist;
                           test.equal(512 * 3, data.length);
-                          client.close();
-
-                          done();
+                          client.close(done);
                         });
                       });
                     });
@@ -431,8 +422,7 @@ describe('GridFS', function() {
                               expect(err).to.not.exist;
                               test.equal(0, count);
 
-                              client.close();
-                              done();
+                              client.close(done);
                             });
                           });
                         }
@@ -503,9 +493,7 @@ describe('GridFS', function() {
                               collection.count(function(err, count) {
                                 expect(err).to.not.exist;
                                 test.equal(0, count);
-                                client.close();
-
-                                done();
+                                client.close(done);
                               });
                             });
                           });
@@ -557,8 +545,7 @@ describe('GridFS', function() {
               gridStore2.open(function(err, gridStore2) {
                 expect(err).to.not.exist;
                 test.ok(gridStore2.md5 != null);
-                client.close();
-                done();
+                client.close(done);
               });
             });
           });
@@ -602,8 +589,7 @@ describe('GridFS', function() {
               gridStore2.open(function(err, gridStore2) {
                 expect(err).to.not.exist;
                 test.ok(gridStore2.md5 != null);
-                client.close();
-                done();
+                client.close(done);
               });
             });
           });
@@ -645,8 +631,7 @@ describe('GridFS', function() {
               GridStore.read(db, 'test_gs_working_field_read', function(err, fileData) {
                 expect(err).to.not.exist;
                 test.equal(data.length, fileData.length);
-                client.close();
-                done();
+                client.close(done);
               });
             });
           });
@@ -699,8 +684,7 @@ describe('GridFS', function() {
                 expect(err).to.not.exist;
                 var data = fs.readFileSync('./test/functional/data/test_gs_working_field_read.pdf');
                 test.equal(data.toString('base64'), fileData.toString('base64'));
-                client.close();
-                done();
+                client.close(done);
               });
             });
           });
@@ -771,8 +755,7 @@ describe('GridFS', function() {
                 expect(err).to.not.exist;
                 var data = fs.readFileSync('./test_gs_working_field_read.tmp');
                 test.deepEqual(data, fileData);
-                client.close();
-                done();
+                client.close(done);
               });
             });
           });
@@ -811,7 +794,7 @@ describe('GridFS', function() {
           fs.writeSync(fd, data);
         }
         // Close the file
-        fs.close(fd);
+        fs.closeSync(fd);
         // File Size
         var fileSize = fs.statSync('./test_gs_working_field_read.tmp').size;
 
@@ -861,8 +844,7 @@ describe('GridFS', function() {
             // Execute chunksize larger than file
             executeTest(fileSize + 100, test, function(err) {
               expect(err).to.not.exist;
-              client.close();
-              done();
+              client.close(done);
             });
           });
         });
@@ -901,8 +883,7 @@ describe('GridFS', function() {
               GridStore.read(db, 'test_gs_weird_bug', function(err, fileData) {
                 expect(err).to.not.exist;
                 test.equal(data.length, fileData.length);
-                client.close();
-                done();
+                client.close(done);
               });
             });
           });
@@ -951,8 +932,7 @@ describe('GridFS', function() {
                 gridStore.read(function(err, data2) {
                   expect(err).to.not.exist;
                   test.equal(data.toString('base64'), data2.toString('base64'));
-                  client.close();
-                  done();
+                  client.close(done);
                 });
               });
             });
@@ -1001,8 +981,7 @@ describe('GridFS', function() {
                 gridStore.read(function(err, data2) {
                   expect(err).to.not.exist;
                   test.equal(data.toString('base64'), data2.toString('base64'));
-                  client.close();
-                  done();
+                  client.close(done);
                 });
               });
             });
@@ -1052,8 +1031,7 @@ describe('GridFS', function() {
                 gridStore.read(function(err, data2) {
                   expect(err).to.not.exist;
                   test.equal(data.toString('base64'), data2.toString('base64'));
-                  client.close();
-                  done();
+                  client.close(done);
                 });
               });
             });
@@ -1099,8 +1077,7 @@ describe('GridFS', function() {
                 expect(err).to.not.exist;
                 test.equal(true, result);
 
-                client.close();
-                done();
+                client.close(done);
               });
             });
           });
@@ -1144,8 +1121,7 @@ describe('GridFS', function() {
                 expect(err).to.not.exist;
                 test.equal(true, result);
 
-                client.close();
-                done();
+                client.close(done);
               });
             });
           });
@@ -1187,8 +1163,7 @@ describe('GridFS', function() {
                 expect(err).to.not.exist;
                 test.equal(true, result);
 
-                client.close();
-                done();
+                client.close(done);
               });
             });
           });
@@ -1224,8 +1199,7 @@ describe('GridFS', function() {
         store.open(function(err) {
           expect(err).to.not.exist;
 
-          client.close();
-          done();
+          client.close(done);
         });
       });
     }
@@ -1266,8 +1240,7 @@ describe('GridFS', function() {
               gridStore.open(function(err, gridStore) {
                 expect(err).to.not.exist;
                 test.equal('test_gs_read_length', gridStore.filename);
-                client.close();
-                done();
+                client.close(done);
               });
             });
           });
@@ -1323,8 +1296,7 @@ describe('GridFS', function() {
                     gridStore.read(function(err, data) {
                       expect(err).to.not.exist;
                       test.equal('hello world!', data.toString('utf8'));
-                      client.close();
-                      done();
+                      client.close(done);
                     });
                   });
                 });
@@ -1384,8 +1356,7 @@ describe('GridFS', function() {
                       gridStore.read(function(err, data) {
                         expect(err).to.not.exist;
                         test.equal('<h1>hello world!</h1>', data.toString('utf8'));
-                        client.close();
-                        done();
+                        client.close(done);
                       });
                     });
                   });
@@ -1448,8 +1419,7 @@ describe('GridFS', function() {
                       gridStore.read(function(err, data) {
                         expect(err).to.not.exist;
                         test.equal('<h1>hello world!</h1>', data.toString('utf8'));
-                        client.close();
-                        done();
+                        client.close(done);
                       });
                     });
                   });
@@ -1509,8 +1479,7 @@ describe('GridFS', function() {
                     gridStore.read(function(err, data) {
                       expect(err).to.not.exist;
                       test.equal('hello world!', data.toString('utf8'));
-                      client.close();
-                      done();
+                      client.close(done);
                     });
                   });
                 });
@@ -1569,8 +1538,7 @@ describe('GridFS', function() {
                   });
 
                   stream.on('end', function() {
-                    client.close();
-                    done();
+                    client.close(done);
                   });
                 });
               });
@@ -1631,8 +1599,7 @@ describe('GridFS', function() {
 
                   stream.on('end', function() {
                     test.equal('orld!', data);
-                    client.close();
-                    done();
+                    client.close(done);
                   });
                 });
               });
@@ -1690,8 +1657,7 @@ describe('GridFS', function() {
                         gridStore2.read(5, function(err, data) {
                           expect(err).to.not.exist;
                           test.equal('67890', data.toString());
-                          client.close();
-                          done();
+                          client.close(done);
                         });
                       });
                     });
@@ -1751,8 +1717,7 @@ describe('GridFS', function() {
                         gridStore2.read(5, function(err, data) {
                           expect(err).to.not.exist;
                           test.equal('67890', data.toString());
-                          client.close();
-                          done();
+                          client.close(done);
                         });
                       });
                     });
@@ -1806,8 +1771,7 @@ describe('GridFS', function() {
               gridStore.read(function(err, data) {
                 expect(err).to.not.exist;
                 test.deepEqual(originalData, data);
-                client.close();
-                done();
+                client.close(done);
               });
             });
           });
@@ -1873,8 +1837,7 @@ describe('GridFS', function() {
                 gridStore.write(buffer, function(err) {
                   test.ok(err != null);
 
-                  client.close();
-                  done();
+                  client.close(done);
                 });
               });
             });
@@ -1919,8 +1882,7 @@ describe('GridFS', function() {
               './test/functional/data/test_gs_working_field_read.pdf'
             );
             test.deepEqual(originalData, compareData);
-            client.close();
-            done();
+            client.close(done);
           });
 
           // Pipe out the data
@@ -1964,8 +1926,7 @@ describe('GridFS', function() {
           stream.on('end', function() {
             test.ok(gotData);
 
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -2003,8 +1964,7 @@ describe('GridFS', function() {
             expect(err).to.not.exist;
             var fileData = fs.readFileSync(filepath);
             test.equal(fileData.toString('hex'), gridData.toString('hex'));
-            client.close();
-            done();
+            client.close(done);
           });
         });
 
@@ -2071,8 +2031,7 @@ describe('GridFS', function() {
 
                     stream.on('end', function() {
                       test.equal(15000, endLen);
-                      client.close();
-                      done();
+                      client.close(done);
                     });
                   });
                 });
@@ -2140,8 +2099,7 @@ describe('GridFS', function() {
 
                     stream.on('end', function() {
                       test.equal(15000, endLen);
-                      client.close();
-                      done();
+                      client.close(done);
                     });
                   });
                 });
@@ -2224,8 +2182,7 @@ describe('GridFS', function() {
                         test.equal(streamData[i], data[i]);
                       }
 
-                      client.close();
-                      done();
+                      client.close(done);
                     });
                   });
                 });
@@ -2279,8 +2236,7 @@ describe('GridFS', function() {
                 gs.read(function(err) {
                   test.ok(err != null);
                   gs.close(function() {});
-                  client.close();
-                  done();
+                  client.close(done);
                 });
               });
             }
@@ -2339,8 +2295,7 @@ describe('GridFS', function() {
                     collection.find({ files_id: id }).toArray(function(err, items) {
                       expect(err).to.not.exist;
                       test.equal(1, items.length);
-                      client.close();
-                      done();
+                      client.close(done);
                     });
                   });
                 });
@@ -2399,8 +2354,7 @@ describe('GridFS', function() {
                       collection.find({ files_id: item._id }).toArray(function(err, items) {
                         expect(err).to.not.exist;
                         test.equal(1, items.length);
-                        client.close();
-                        done();
+                        client.close(done);
                       });
                     });
                   });
@@ -2450,8 +2404,7 @@ describe('GridFS', function() {
                   GridStore.read(db, 'test_gs_small_file', function(err, data) {
                     expect(err).to.not.exist;
                     test.equal('hello world!', data.toString());
-                    client.close();
-                    done();
+                    client.close(done);
                   });
                 });
               });
@@ -2503,8 +2456,7 @@ describe('GridFS', function() {
                     GridStore.read(db, 'test_gs_overwrite', function(err, data) {
                       expect(err).to.not.exist;
                       test.equal('overwrite', data.toString());
-                      client.close();
-                      done();
+                      client.close(done);
                     });
                   });
                 });
@@ -2631,8 +2583,7 @@ describe('GridFS', function() {
                                                                   ) {
                                                                     expect(err).to.not.exist;
                                                                     test.equal('o', chr.toString());
-                                                                    client.close();
-                                                                    done();
+                                                                    client.close(done);
                                                                   });
                                                                 }
                                                               );
@@ -2713,8 +2664,7 @@ describe('GridFS', function() {
                     test.equal(gridStore.chunkSize + 1, position);
                     clearTimeout(timeout);
 
-                    client.close();
-                    done();
+                    client.close(done);
                   });
                 });
               });
@@ -2766,8 +2716,7 @@ describe('GridFS', function() {
                       expect(err).to.not.exist;
                       test.equal(0, count);
 
-                      client.close();
-                      done();
+                      client.close(done);
                     });
                   });
                 });
@@ -2810,8 +2759,7 @@ describe('GridFS', function() {
                 expect(err).to.not.exist;
                 gridStore.chunkSize = 42;
                 test.equal(Chunk.DEFAULT_CHUNK_SIZE, gridStore.chunkSize);
-                client.close();
-                done();
+                client.close(done);
               });
             });
           });
@@ -2850,8 +2798,7 @@ describe('GridFS', function() {
             expect(err).to.not.exist;
             gridStore.chunkSize = 42;
             test.equal(Chunk.DEFAULT_CHUNK_SIZE, gridStore.chunkSize);
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -2897,8 +2844,7 @@ describe('GridFS', function() {
                 test.equal(data.toString('hex'), fileData.toString('hex'));
                 // test.equal(Array.prototype.join.call(data),
                 //         Array.prototype.join.call(Buffer.from(fileData, "binary")));
-                client.close();
-                done();
+                client.close(done);
               });
             });
           });
@@ -2938,8 +2884,7 @@ describe('GridFS', function() {
               gridStore2.open(function(err, gridStore) {
                 expect(err).to.not.exist;
                 test.equal(42, gridStore.chunkSize);
-                client.close();
-                done();
+                client.close(done);
               });
             });
           });
@@ -2977,8 +2922,7 @@ describe('GridFS', function() {
               gridStore2.open(function(err, gridStore) {
                 expect(err).to.not.exist;
                 test.equal(42, gridStore.chunkSize);
-                client.close();
-                done();
+                client.close(done);
               });
             });
           });
@@ -3033,8 +2977,7 @@ describe('GridFS', function() {
                     gridStore3.open(function(err, gridStore) {
                       expect(err).to.not.exist;
                       test.equal('d41d8cd98f00b204e9800998ecf8427e', gridStore.md5);
-                      client.close();
-                      done();
+                      client.close(done);
                     });
                   });
                 });
@@ -3099,8 +3042,7 @@ describe('GridFS', function() {
                             originalFileUploadDate.getTime(),
                             gridStore.uploadDate.getTime()
                           );
-                          client.close();
-                          done();
+                          client.close(done);
                         });
                       });
                     });
@@ -3158,8 +3100,7 @@ describe('GridFS', function() {
                     gridStore4.open(function(err, gridStore) {
                       expect(err).to.not.exist;
                       test.equal('text/html', gridStore.contentType);
-                      client.close();
-                      done();
+                      client.close(done);
                     });
                   });
                 });
@@ -3201,8 +3142,7 @@ describe('GridFS', function() {
               gridStore2.open(function(err, gridStore) {
                 expect(err).to.not.exist;
                 test.equal('image/jpg', gridStore.contentType);
-                client.close();
-                done();
+                client.close(done);
               });
             });
           });
@@ -3234,8 +3174,7 @@ describe('GridFS', function() {
         } catch (err) {
           test.ok(err instanceof Error);
           test.equal('Illegal mode x', err.message);
-          client.close();
-          done();
+          client.close(done);
         }
       });
     }
@@ -3282,8 +3221,7 @@ describe('GridFS', function() {
                     gridStore4.open(function(err, gridStore) {
                       expect(err).to.not.exist;
                       test.equal(1, gridStore.metadata.a);
-                      client.close();
-                      done();
+                      client.close(done);
                     });
                   });
                 });
@@ -3326,8 +3264,7 @@ describe('GridFS', function() {
                 gridStore.close(function(err, fo) {
                   expect(err).to.not.exist;
                   test.ok(fo == null);
-                  client.close();
-                  done();
+                  client.close(done);
                 });
               });
             });
@@ -3373,8 +3310,7 @@ describe('GridFS', function() {
           write(numberOfWrites, function() {
             gridStore.close(function(err) {
               expect(err).to.not.exist;
-              client.close();
-              done();
+              client.close(done);
             });
           });
         });
@@ -3432,8 +3368,7 @@ describe('GridFS', function() {
                           GridStore.read(db, 'test_gs_small_write2', function(err, data) {
                             expect(err).to.not.exist;
                             test.equal('hello world!', data.toString('ascii'));
-                            client.close();
-                            done();
+                            client.close(done);
                           });
                         });
                       });
@@ -3490,8 +3425,7 @@ describe('GridFS', function() {
                   gridStore.read(5, function(err, data) {
                     expect(err).to.not.exist;
                     test.equal('world', data.toString('ascii'));
-                    client.close();
-                    done();
+                    client.close(done);
                   });
                 });
               });
@@ -3548,8 +3482,7 @@ describe('GridFS', function() {
                       expect(err).to.not.exist;
                       test.equal(mystr.length, datar.length);
                       test.equal(mystr, datar.toString('ascii'));
-                      client.close();
-                      done();
+                      client.close(done);
                     });
                   });
                 });
@@ -3581,8 +3514,7 @@ describe('GridFS', function() {
         var gridStore = new GridStore(db, '_i_shouldCorrectlyWriteASmallPayload', 'r');
         gridStore.open(function(err) {
           expect(err).to.exist;
-          client.close();
-          done();
+          client.close(done);
         });
       });
     }
@@ -3609,8 +3541,7 @@ describe('GridFS', function() {
         gridStore.open(function(err, gridStore) {
           gridStore.seek(0, function(err) {
             expect(err).to.exist;
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -3649,8 +3580,7 @@ describe('GridFS', function() {
                 expect(err).to.not.exist;
                 test.equal(true, r);
 
-                client.close();
-                done();
+                client.close(done);
               });
             });
           });
@@ -3693,8 +3623,7 @@ describe('GridFS', function() {
             expect(err).to.not.exist;
             var fileData = fs.readFileSync(filename);
             test.equal(fileData.toString('hex'), gridData.toString('hex'));
-            client.close();
-            done();
+            client.close(done);
           });
         });
 
@@ -3757,8 +3686,7 @@ describe('GridFS', function() {
                           expect(err).to.not.exist;
                           test.equal(512 * 4, data.length);
 
-                          client.close();
-                          done();
+                          client.close(done);
                         });
                       });
                     });
@@ -3841,8 +3769,7 @@ describe('GridFS', function() {
                           stream.on('end', function() {
                             test.equal(data.toString('hex'), retrieved);
 
-                            client.close();
-                            done();
+                            client.close(done);
                           });
                         });
                       });
@@ -3893,8 +3820,7 @@ describe('GridFS', function() {
             gridStore.close(function(err) {
               expect(err).to.not.exist;
 
-              client.close();
-              done();
+              client.close(done);
             });
           });
         });
@@ -3951,8 +3877,7 @@ describe('GridFS', function() {
               expect(err).to.not.exist;
 
               listener.uninstrument();
-              client.close();
-              done();
+              client.close(done);
             });
           });
         });

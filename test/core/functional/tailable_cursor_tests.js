@@ -58,9 +58,7 @@ describe('Tailable cursor tests', function() {
                     expect(e.getTime() - s.getTime()).to.be.at.least(300);
 
                     // Destroy the server connection
-                    _server.destroy();
-                    // Finish the test
-                    done();
+                    _server.destroy(done);
                   });
 
                   setTimeout(function() {

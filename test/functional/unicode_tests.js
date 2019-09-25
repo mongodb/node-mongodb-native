@@ -75,8 +75,7 @@ describe('Unicode', function() {
             test.equal(null, err);
             collection.findOne(function(err, doc) {
               test.equal('felixge', doc._id);
-              client.close();
-              done();
+              client.close(done);
             });
           });
         });
@@ -110,8 +109,7 @@ describe('Unicode', function() {
                   if (item != null) {
                     test.equal(test_strings[item.id], item.text);
                   } else {
-                    client.close();
-                    done();
+                    client.close(done);
                   }
                 });
               });
@@ -149,8 +147,7 @@ describe('Unicode', function() {
 
                 collection.find().toArray(function(err, items) {
                   test.equal(object['客家话'], items[0]['客家话']);
-                  client.close();
-                  done();
+                  client.close(done);
                 });
               });
             });
@@ -183,8 +180,7 @@ describe('Unicode', function() {
               .toArray(function(err, items) {
                 test.equal(1, items[0]['šđžčćŠĐŽČĆ']);
                 // Let's close the db
-                client.close();
-                done();
+                client.close(done);
               });
           });
         });
