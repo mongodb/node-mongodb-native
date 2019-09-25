@@ -101,7 +101,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(docs) {
             test.equal(2, docs.length);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -189,7 +189,7 @@ describe('Operation (Promises)', function() {
             // Need to close cursor to close implicit session,
             // since cursor is not exhausted
             cursor.close();
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -241,7 +241,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(count) {
             test.equal(1, count);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -305,7 +305,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(explanation) {
             test.ok(explanation != null);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -367,7 +367,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(docs) {
             test.deepEqual(['a', 'b', 'c'], docs.sort());
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -423,7 +423,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(docs) {
             test.deepEqual([5], docs.sort());
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -484,7 +484,7 @@ describe('Operation (Promises)', function() {
             test.equal(false, found);
 
             // Let's close the db
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -528,7 +528,7 @@ describe('Operation (Promises)', function() {
             test.ok(reply);
 
             // Let's close the db
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -585,7 +585,7 @@ describe('Operation (Promises)', function() {
           .then(function(indexInformation) {
             test.deepEqual([['_id', 1]], indexInformation._id_);
             test.equal(undefined, indexInformation.a_1_b_1);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -652,7 +652,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(explanation) {
             test.ok(explanation != null);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -709,7 +709,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(explanation) {
             test.ok(explanation != null);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -759,7 +759,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(docs) {
             test.equal(3, docs.length);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -809,7 +809,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(docs) {
             test.ok(docs != null);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -869,7 +869,7 @@ describe('Operation (Promises)', function() {
             test.equal(1, docs.length);
             test.equal(undefined, docs[0].a);
             test.equal(2, docs[0].b);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -959,7 +959,7 @@ describe('Operation (Promises)', function() {
           .then(function(doc) {
             test.equal(1, doc.value.d);
             test.equal(1, doc.value.f);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -1017,7 +1017,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(item) {
             test.equal(null, item);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -1071,7 +1071,7 @@ describe('Operation (Promises)', function() {
           .then(function(doc) {
             test.equal(undefined, doc.a);
             test.equal(2, doc.b);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -1131,7 +1131,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(docs) {
             test.equal(1, docs.results.length);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -1198,7 +1198,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(result) {
             test.equal(1, result.value);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -1268,7 +1268,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(result) {
             test.ok(result.stats != null);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -1361,7 +1361,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(results) {
             test.equal(2, results[0].value);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -1454,7 +1454,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(results) {
             test.equal(2, results[0].value);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -1509,7 +1509,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(indexes) {
             test.equal(3, indexes.length);
-            client.close();
+            return client.close();
           });
       });
     }
@@ -1570,7 +1570,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(result) {
             test.equal(false, result);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -1639,7 +1639,7 @@ describe('Operation (Promises)', function() {
           .then(function(indexInformation) {
             test.deepEqual({ _id: 1 }, indexInformation[0].key);
             test.deepEqual({ a: 1, b: 1 }, indexInformation[1].key);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -1700,7 +1700,7 @@ describe('Operation (Promises)', function() {
           .then(function(indexInformation) {
             test.deepEqual({ _id: 1 }, indexInformation[0].key);
             test.deepEqual({ a: 1, b: 1 }, indexInformation[1].key);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -1743,7 +1743,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(item) {
             test.equal('world_no_safe', item.hello);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -1793,7 +1793,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(item) {
             test.equal('world_safe2', item.hello);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -1849,7 +1849,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(item) {
             test.ok('function() {}', item.code);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -1922,7 +1922,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(count) {
             test.equal(3, count);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -1966,7 +1966,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(capped) {
             test.equal(true, capped);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -2011,7 +2011,7 @@ describe('Operation (Promises)', function() {
           .then(function(options) {
             test.equal(true, options.capped);
             test.ok(options.size >= 1024);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -2091,7 +2091,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(results) {
             test.equal(docs.length, results.length);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -2153,7 +2153,7 @@ describe('Operation (Promises)', function() {
           .then(function(indexInformation) {
             test.deepEqual([['_id', 1]], indexInformation._id_);
             test.deepEqual([['a', 1], ['b', 1]], indexInformation.a_1_b_1);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -2204,7 +2204,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(items) {
             test.equal(0, items.length);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -2251,7 +2251,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(r) {
             test.equal(1, r.result.n);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -2428,7 +2428,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(item) {
             test.equal('world', item.hello);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -2493,7 +2493,7 @@ describe('Operation (Promises)', function() {
           .then(function(item) {
             test.equal('world', item.hello);
             test.equal('world2', item.hello2);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -2544,7 +2544,7 @@ describe('Operation (Promises)', function() {
           .then(function(item) {
             test.equal(1, item.a);
             test.equal(2, item.b);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -2592,7 +2592,7 @@ describe('Operation (Promises)', function() {
           .then(function(item) {
             test.equal(1, item.a);
             test.equal(2, item.b);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -2648,7 +2648,7 @@ describe('Operation (Promises)', function() {
             test.equal(0, items[0].b);
             test.equal(1, items[1].a);
             test.equal(0, items[1].b);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -2694,7 +2694,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(stats) {
             test.equal(2, stats.count);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -2762,7 +2762,7 @@ describe('Operation (Promises)', function() {
             test.deepEqual([['_id', 1]], indexInformation._id_);
             test.equal(undefined, indexInformation.a_1_b_1);
             test.equal(undefined, indexInformation.c_1);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -2829,7 +2829,7 @@ describe('Operation (Promises)', function() {
           })
           .catch(function(err) {
             test.ok(err);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -2923,7 +2923,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(items) {
             test.ok(items.length >= 1);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -2968,7 +2968,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(items) {
             test.equal(1, items.length);
-            client.close();
+            return client.close();
           });
       });
     }
@@ -3023,8 +3023,7 @@ describe('Operation (Promises)', function() {
                     { strict: true },
                     function(err) {
                       test.equal(null, err);
-                      client.close();
-                      done();
+                      client.close(done);
                     }
                   );
                 });
@@ -3067,7 +3066,7 @@ describe('Operation (Promises)', function() {
         // Retry to get the collection, should work as it's now created
         return db.collections().then(function(collections) {
           test.ok(collections.length > 0);
-          client.close();
+          return client.close();
         });
       });
       // END
@@ -3113,7 +3112,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(result) {
             test.ok(result);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -3151,7 +3150,9 @@ describe('Operation (Promises)', function() {
           .addUser('user3', 'name')
           .then(function(result) {
             test.ok(result);
-            client.close();
+            return client.close();
+          })
+          .then(() => {
             const secondClient = configuration.newClient(
               'mongodb://user3:name@localhost:27017/integration_tests'
             );
@@ -3182,7 +3183,7 @@ describe('Operation (Promises)', function() {
           })
           .catch(function(err) {
             test.ok(err);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -3231,7 +3232,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(result) {
             test.ok(result);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -3297,7 +3298,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(names) {
             test.equal(0, names.length);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -3335,7 +3336,7 @@ describe('Operation (Promises)', function() {
         // Execute ping against the server
         return db.command({ ping: 1 }).then(function(result) {
           test.ok(result);
-          client.close();
+          return client.close();
         });
       });
       // END
@@ -3416,7 +3417,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(names) {
             test.equal(1, names.length);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -3483,7 +3484,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(explanation) {
             test.ok(explanation != null);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -3550,7 +3551,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(explanation) {
             test.ok(explanation != null);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -3621,7 +3622,7 @@ describe('Operation (Promises)', function() {
             // We should not find the databases
             if (process.env['JENKINS'] == null) test.equal(false, found);
 
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -3655,7 +3656,7 @@ describe('Operation (Promises)', function() {
         // BEGIN
         return db.stats().then(function(stats) {
           test.ok(stats != null);
-          client.close();
+          return client.close();
         });
       });
       // END
@@ -3714,7 +3715,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(count) {
             test.equal(1, count);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -3759,7 +3760,7 @@ describe('Operation (Promises)', function() {
         // REMOVE-LINE restartAndDone
         // REMOVE-LINE done();
         // BEGIN
-        client.close();
+        return client.close();
       });
       // END
     }
@@ -3804,7 +3805,7 @@ describe('Operation (Promises)', function() {
         // Retrieve the build information for the MongoDB instance
         return adminDb.buildInfo().then(function(info) {
           test.ok(info);
-          client.close();
+          return client.close();
         });
       });
       // END
@@ -3844,7 +3845,7 @@ describe('Operation (Promises)', function() {
         // Retrieve the build information using the admin command
         return adminDb.command({ buildInfo: 1 }).then(function(info) {
           test.ok(info);
-          client.close();
+          return client.close();
         });
       });
       // END
@@ -3895,7 +3896,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(level) {
             test.ok(level);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -3979,7 +3980,7 @@ describe('Operation (Promises)', function() {
           .catch(function(err) {
             test.ok(err instanceof Error);
             test.equal('Error: illegal profiling level value medium', err.message);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -4048,7 +4049,7 @@ describe('Operation (Promises)', function() {
             test.ok(infos.length >= 1);
             test.ok(infos[0].ts.constructor === Date);
             test.ok(infos[0].millis.constructor === Number);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -4100,7 +4101,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(doc) {
             test.ok(doc);
-            client.close();
+            return client.close();
           });
       });
     }
@@ -4139,7 +4140,7 @@ describe('Operation (Promises)', function() {
         // Ping the server
         return adminDb.ping().then(function(pingResult) {
           test.ok(pingResult);
-          client.close();
+          return client.close();
         });
       });
       // END
@@ -4186,7 +4187,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(result) {
             test.ok(result);
-            client.close();
+            return client.close();
           });
       });
     }
@@ -4233,7 +4234,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(result) {
             test.equal(true, result);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -4273,7 +4274,7 @@ describe('Operation (Promises)', function() {
         // List all the available databases
         return adminDb.listDatabases().then(function(dbs) {
           test.ok(dbs.databases.length > 0);
-          client.close();
+          return client.close();
         });
       });
       // END
@@ -4334,7 +4335,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(result) {
             test.ok(result);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -4393,7 +4394,7 @@ describe('Operation (Promises)', function() {
           .then(function(documents) {
             test.equal(1, documents.length);
             test.deepEqual([1, 2, 3], documents[0].b);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -4445,7 +4446,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(count) {
             test.equal(2, count);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -4497,7 +4498,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(item) {
             test.equal(1, item.a);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -4549,7 +4550,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(explanation) {
             test.ok(explanation);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -4614,7 +4615,7 @@ describe('Operation (Promises)', function() {
             return cursor.close();
           })
           .then(function() {
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -4667,7 +4668,7 @@ describe('Operation (Promises)', function() {
           .updateOne({ a: 1 }, { $set: { b: 1 } }, { upsert: true })
           .then(function(result) {
             test.equal(1, result.result.n);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -4713,7 +4714,7 @@ describe('Operation (Promises)', function() {
           .updateOne({ a: 1 }, { $set: { b: 1 } }, { upsert: true })
           .then(function(result) {
             test.equal(1, result);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -4756,7 +4757,7 @@ describe('Operation (Promises)', function() {
           .updateOne({ a: 1 }, { $set: { b: 1 } }, { upsert: true })
           .then(function(result) {
             test.equal(1, result.result.n);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -4829,7 +4830,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(result) {
             test.equal(false, result);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -4961,7 +4962,7 @@ describe('Operation (Promises)', function() {
             test.ok(found);
             test.ok(found2);
 
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -5015,7 +5016,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(data) {
             test.equal('line one\n', data.toString());
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -5103,7 +5104,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(count) {
             test.equal(0, count);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -5173,7 +5174,7 @@ describe('Operation (Promises)', function() {
           .then(function(data2) {
             // Compare the file content against the orgiinal
             test.equal(data.toString('base64'), data2.toString('base64'));
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -5229,7 +5230,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(result) {
             test.equal(true, result);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -5288,7 +5289,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(result) {
             test.equal(true, result);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -5349,7 +5350,7 @@ describe('Operation (Promises)', function() {
           .then(function(fileData) {
             test.equal(data.toString('base64'), fileData.toString('base64'));
             test.equal(fileSize, fileData.length);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -5417,7 +5418,7 @@ describe('Operation (Promises)', function() {
           .then(function(fileData) {
             test.equal(data.toString('base64'), fileData.toString('base64'));
             test.equal(fileSize, fileData.length);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -5480,7 +5481,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(fileData) {
             test.equal('Hello worldBuffer Hello world', fileData.toString());
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -5534,7 +5535,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(result) {
             test.ok(result);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -5604,7 +5605,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(result) {
             test.equal(false, result);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -5671,7 +5672,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(lines) {
             test.deepEqual(['line one\n', 'line two\n', 'line three\n'], lines);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -5744,7 +5745,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(lines) {
             test.deepEqual(['line one\n', 'line two\n', 'line three\n'], lines);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -5801,7 +5802,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(fileData) {
             test.equal(data.length, fileData.length);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -5917,8 +5918,7 @@ describe('Operation (Promises)', function() {
                             gridStore.getc().then(function(chr) {
                               test.equal('o', chr.toString());
 
-                              client.close();
-                              done();
+                              client.close(done);
                             });
                           });
                         });
@@ -6009,7 +6009,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(data) {
             test.equal('abc', data.toString());
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -6077,7 +6077,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(position) {
             test.equal(5, position);
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -6136,7 +6136,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(chr) {
             test.equal('h', chr.toString());
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -6224,7 +6224,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(chr) {
             test.equal('h', chr.toString());
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -6298,7 +6298,7 @@ describe('Operation (Promises)', function() {
           test.ok(upsert._id != null);
 
           // Finish up test
-          client.close();
+          return client.close();
         });
       });
       // END
@@ -6368,7 +6368,7 @@ describe('Operation (Promises)', function() {
           test.ok(upsert._id != null);
 
           // Finish up test
-          client.close();
+          return client.close();
         });
       });
       // END
@@ -6414,7 +6414,7 @@ describe('Operation (Promises)', function() {
         return col.insertOne({ a: 1 }).then(function(r) {
           test.equal(1, r.insertedCount);
           // Finish up test
-          client.close();
+          return client.close();
         });
       });
       // END
@@ -6454,7 +6454,7 @@ describe('Operation (Promises)', function() {
         return col.insertMany([{ a: 1 }, { a: 2 }]).then(function(r) {
           test.equal(2, r.insertedCount);
           // Finish up test
-          client.close();
+          return client.close();
         });
       });
       // END
@@ -6495,7 +6495,7 @@ describe('Operation (Promises)', function() {
           test.equal(0, r.matchedCount);
           test.equal(1, r.upsertedCount);
           // Finish up test
-          client.close();
+          return client.close();
         });
       });
       // END
@@ -6549,7 +6549,7 @@ describe('Operation (Promises)', function() {
             }
 
             // Finish up test
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -6596,7 +6596,7 @@ describe('Operation (Promises)', function() {
           .then(function(r) {
             test.equal(1, r.deletedCount);
             // Finish up test
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -6645,7 +6645,7 @@ describe('Operation (Promises)', function() {
             test.equal(2, r.deletedCount);
 
             // Finish up test
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -6708,7 +6708,7 @@ describe('Operation (Promises)', function() {
             test.equal(2, Object.keys(r.upsertedIds).length);
 
             // Ordered bulk operation
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -6741,7 +6741,7 @@ describe('Operation (Promises)', function() {
           .catch(function(err) {
             test.equal(true, err.result.hasWriteErrors());
             // Ordered bulk operation
-            client.close();
+            return client.close();
           });
       });
     }
@@ -6788,7 +6788,7 @@ describe('Operation (Promises)', function() {
             test.equal(1, r.lastErrorObject.n);
             test.equal(1, r.value.b);
 
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -6844,7 +6844,7 @@ describe('Operation (Promises)', function() {
               test.equal(1, r.value.b);
               test.equal(1, r.value.c);
 
-              client.close();
+              return client.close();
             });
         });
       });
@@ -6903,7 +6903,7 @@ describe('Operation (Promises)', function() {
             test.equal(1, r.value.b);
             test.equal(1, r.value.d);
 
-            client.close();
+            return client.close();
           });
       });
       // END
@@ -6982,8 +6982,7 @@ describe('Operation (Promises)', function() {
             cursor.on('end', function() {
               test.ok(new Date().getTime() - s.getTime() > 1000);
 
-              client.close();
-              done();
+              client.close(done);
             });
           });
       });
@@ -6999,7 +6998,8 @@ describe('Operation (Promises)', function() {
       return client
         .connect()
         .then(() => client.db('hr').createCollection('employees'))
-        .then(() => client.db('reporting').createCollection('events'));
+        .then(() => client.db('reporting').createCollection('events'))
+        .then(() => client.close());
     });
 
     // Start Transactions Intro Example 1

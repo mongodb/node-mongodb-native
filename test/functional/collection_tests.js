@@ -26,7 +26,8 @@ describe('Collection', function() {
     });
 
     afterEach(function() {
-      client.close();
+      db = undefined;
+      return client.close();
     });
 
     /**
@@ -890,11 +891,10 @@ describe('Collection', function() {
      */
     it('should provide access to the database name', function() {
       return client
-        .connect()
-        .then(client => client.db('test_db').createCollection('test1'))
+        .db('test_db')
+        .createCollection('test1')
         .then(coll => {
           expect(coll.dbName).to.equal('test_db');
-          return client.close();
         });
     });
 

@@ -1,18 +1,11 @@
 'use strict';
 var expect = require('chai').expect;
 var Buffer = require('safe-buffer').Buffer;
+const setupDatabase = require('./shared').setupDatabase;
 
 describe('Cursor Streams', function() {
   before(function() {
-    var dbName = this.configuration.db;
-    var client = this.configuration.newClient(this.configuration.writeConcernMax(), {
-      poolSize: 1
-    });
-
-    return client.connect().then(function() {
-      var db = client.db(dbName);
-      return db.dropDatabase();
-    });
+    return setupDatabase(this.configuration);
   });
 
   it('should stream documents with pause and resume for fetching', {
@@ -78,8 +71,8 @@ describe('Cursor Streams', function() {
                     } catch (e) {
                       err = e;
                     }
-                    client.close();
-                    done(err);
+
+                    client.close(() => done(err));
                   }, 1000);
                 });
               }
@@ -154,8 +147,8 @@ describe('Cursor Streams', function() {
                     } catch (e) {
                       err = e;
                     }
-                    client.close();
-                    done(err);
+
+                    client.close(err2 => done(err || err2));
                   }, 1000);
                 });
               }
@@ -211,8 +204,7 @@ describe('Cursor Streams', function() {
             stream.on('end', function() {
               expect(counter).to.equal(1000);
               expect(counter2).to.equal(1000);
-              client.close();
-              done();
+              client.close(done);
             });
           });
         });
@@ -268,8 +260,7 @@ describe('Cursor Streams', function() {
                   expect(err).to.not.exist;
                   expect(doc.count).to.equal(2000);
 
-                  client.close();
-                  done();
+                  client.close(done);
                 });
               });
 
@@ -325,8 +316,7 @@ describe('Cursor Streams', function() {
         cursor.on('end', function() {
           expect(error).to.exist;
           expect(streamIsClosed).to.be.true;
-          client.close();
-          done();
+          client.close(done);
         });
 
         cursor.pipe(process.stdout);
@@ -367,8 +357,7 @@ describe('Cursor Streams', function() {
           cursor.on('end', function() {
             expect(received).to.have.length(1000);
 
-            client.close();
-            done();
+            client.close(done);
           });
 
           cursor.on('data', function(d) {

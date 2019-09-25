@@ -98,8 +98,7 @@ describe('ReplSet (Operations)', function() {
 
         executeTests(db, () => {
           // Finish up test
-          client.close();
-          done();
+          client.close(done);
         });
       });
     }
@@ -196,8 +195,7 @@ describe('ReplSet (Operations)', function() {
 
           executeTests(db, () => {
             // Finish up test
-            client.close();
-            done();
+            client.close(done);
           });
         });
       }
@@ -291,8 +289,7 @@ describe('ReplSet (Operations)', function() {
 
         executeTests(db, () => {
           // Finish up test
-          client.close();
-          done();
+          client.close(done);
         });
       });
     }
@@ -397,8 +394,7 @@ describe('ReplSet (Operations)', function() {
 
           executeTests(db, () => {
             // Finish up test
-            client.close();
-            done();
+            client.close(done);
           });
         });
       }
@@ -455,8 +451,7 @@ describe('ReplSet (Operations)', function() {
             { out: { replace: 'replacethiscollection' }, readPreference: ReadPreference.SECONDARY },
             function(err) {
               test.equal(null, err);
-              client.close();
-              done();
+              client.close(done);
             }
           );
         });
@@ -480,8 +475,7 @@ describe('ReplSet (Operations)', function() {
         collection.ensureIndex({ a: 1 }, function(err) {
           test.equal(null, err);
 
-          client.close();
-          done();
+          client.close(done);
         });
       });
     }

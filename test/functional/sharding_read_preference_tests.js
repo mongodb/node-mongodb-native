@@ -62,8 +62,7 @@ describe('Sharding (Read Preference)', function() {
               // Set error level for the driver
               Logger.setLevel('error');
               // Close db connection
-              client.close();
-              done();
+              client.close(done);
             }
           );
         });
@@ -127,8 +126,7 @@ describe('Sharding (Read Preference)', function() {
               // Set error level for the driver
               Logger.setLevel('error');
               // Close db connection
-              client.close();
-              done();
+              client.close(done);
             }
           );
         });
@@ -190,8 +188,7 @@ describe('Sharding (Read Preference)', function() {
               // Set error level for the driver
               Logger.setLevel('error');
               // Close db connection
-              client.close();
-              done();
+              client.close(done);
             }
           );
         });
@@ -220,8 +217,7 @@ describe('Sharding (Read Preference)', function() {
         expect(client).to.exist;
         expect(openCalled).to.equal(true);
 
-        client.close();
-        done();
+        client.close(done);
       });
     }
   });
@@ -283,8 +279,7 @@ describe('Sharding (Read Preference)', function() {
                     function(err, r) {
                       expect(err).to.not.exist;
                       expect(r).to.have.a.lengthOf(3);
-                      client.close();
-                      done();
+                      client.close(done);
                     }
                   );
                 }

@@ -45,8 +45,7 @@ describe('Decimal128', function() {
               test.ok(doc.value instanceof Decimal128);
               test.equal('1', doc.value.toString());
 
-              client.close();
-              done();
+              client.close(done);
             }
           );
         });

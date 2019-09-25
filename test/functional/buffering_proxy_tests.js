@@ -232,10 +232,7 @@ describe.skip('Buffering Proxy', function() {
 
                 setTimeout(function() {
                   test.deepEqual(['insertOne', 'aggregate'].sort(), results.sort());
-
-                  client.close();
-                  // test.deepEqual(['insertOne', 'aggregate', 'count', 'find'], results);
-                  done();
+                  client.close(done);
                 }, 1000);
               }, 1000);
             }, 3000);
@@ -463,11 +460,7 @@ describe.skip('Buffering Proxy', function() {
 
                 setTimeout(function() {
                   test.deepEqual(['count', 'find'].sort(), results.sort());
-
-                  client.close();
-
-                  // test.deepEqual(['count', 'find', 'insertOne', 'aggregate'], results);
-                  done();
+                  client.close(done);
                 }, 1500);
               }, 1000);
             }, 3000);

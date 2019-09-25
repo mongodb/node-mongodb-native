@@ -72,8 +72,7 @@ describe('Insert', function() {
 
           collection.findOne(function(err, item) {
             test.equal(1, item.a);
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -124,8 +123,7 @@ describe('Insert', function() {
             });
             test.equal(2, results.length);
             // Let's close the db
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -159,8 +157,7 @@ describe('Insert', function() {
               function() {
                 collection.find().toArray(function(e, a) {
                   test.equal(3, a.length);
-                  client.close();
-                  done();
+                  client.close(done);
                 });
               }
             );
@@ -216,8 +213,7 @@ describe('Insert', function() {
           collection.findOne({ a: 0 }, function(err, result) {
             test.deepEqual(doc.a, result.a);
             test.deepEqual(doc.b, result.b);
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -296,8 +292,7 @@ describe('Insert', function() {
             test.equal(motherOfAllDocuments.dbref.namespace, doc.dbref.namespace);
             test.equal(motherOfAllDocuments.dbref.oid.toHexString(), doc.dbref.oid.toHexString());
             test.equal(motherOfAllDocuments.dbref.db, doc.dbref.db);
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -362,8 +357,7 @@ describe('Insert', function() {
                         test.equal('Test Account', doc.name);
                         test.equal('somestring', doc.settings.thisOneWorks);
                         test.equal('test', doc.settings.block[0]);
-                        client.close();
-                        done();
+                        client.close(done);
                       });
                     })
                   );
@@ -463,8 +457,7 @@ describe('Insert', function() {
             test.equal(motherOfAllDocuments.dbref.namespace, doc.dbref.namespace);
             test.equal(motherOfAllDocuments.dbref.oid.toHexString(), doc.dbref.oid.toHexString());
             test.equal(motherOfAllDocuments.dbref.db, doc.dbref.db);
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -498,8 +491,7 @@ describe('Insert', function() {
             test.ok(ids);
             collection.findOne({}, function(err, item) {
               test.equal(32222432, item.value);
-              client.close();
-              done();
+              client.close(done);
             });
           }
         );
@@ -535,8 +527,7 @@ describe('Insert', function() {
           // Locate document
           collection.findOne({}, function(err, item) {
             test.equal(2, item.i);
-            client.close();
-            done();
+            client.close(done);
           });
         }, 100);
       });
@@ -575,8 +566,7 @@ describe('Insert', function() {
               test.ok(item.i._bsontype === 'Timestamp');
               test.equal(100, item.i.toInt());
               test.equal(200, item.j);
-              client.close();
-              done();
+              client.close(done);
             });
           }
         );
@@ -611,8 +601,7 @@ describe('Insert', function() {
           collection.findOne({}, function(err, item) {
             test.equal(null, item.i);
 
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -671,8 +660,7 @@ describe('Insert', function() {
           collection.findOne({ _id: result.ops[0]._id }, function(err, object) {
             test.equal(normalizedFunctionString(func), object.z.code);
             test.equal(1, object.i);
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -707,8 +695,7 @@ describe('Insert', function() {
             collection.findOne({ _id: result.ops[0]._id }, function(err, object) {
               test.equal(normalizedFunctionString(func), object.z.code);
               test.equal(1, object.i);
-              client.close();
-              done();
+              client.close(done);
             });
           }
         );
@@ -766,8 +753,7 @@ describe('Insert', function() {
                     collection.find({ _id: binaryUUID }).toArray(function(err, items) {
                       test.equal(null, err);
                       test.equal(items[0].field, '2');
-                      client.close();
-                      done();
+                      client.close(done);
                     });
                   }
                 );
@@ -810,8 +796,7 @@ describe('Insert', function() {
               function(err, r) {
                 test.equal(null, err);
                 test.equal(1, r.result.n);
-                client.close();
-                done();
+                client.close(done);
               }
             );
           }
@@ -871,8 +856,7 @@ describe('Insert', function() {
               test.equal(doc._id.toString(), items[2].ref.oid.toString());
               test.equal(configuration.db_name, items[2].ref.db);
 
-              client.close();
-              done();
+              client.close(done);
             });
           });
         });
@@ -915,8 +899,7 @@ describe('Insert', function() {
 
               collection.count(function(err, count) {
                 test.equal(0, count);
-                client.close();
-                done();
+                client.close(done);
               });
             });
           });
@@ -956,8 +939,7 @@ describe('Insert', function() {
             collection.findOne({ 'addresses.localPart': to }, function(err, doc) {
               test.equal(null, err);
               test.equal(to, doc.addresses.localPart);
-              client.close();
-              done();
+              client.close(done);
             });
           }
         );
@@ -991,8 +973,7 @@ describe('Insert', function() {
           configuration.writeConcernMax(),
           function(err, result) {
             test.equal(0, result.result.n);
-            client.close();
-            done();
+            client.close(done);
           }
         );
       });
@@ -1038,8 +1019,7 @@ describe('Insert', function() {
           collection.findOne(function(err, item) {
             test.ok(err == null);
             test.deepEqual(doc, item);
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -1085,8 +1065,7 @@ describe('Insert', function() {
           collection.findOne(function(err, item) {
             test.ok(err == null);
             test.deepEqual(doc, item);
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -1121,8 +1100,7 @@ describe('Insert', function() {
           test.ok(err != null);
           test.equal(null, result);
 
-          client.close();
-          done();
+          client.close(done);
         });
       });
     }
@@ -1175,8 +1153,7 @@ describe('Insert', function() {
                   { new: true, safe: true, serializeFunctions: true },
                   function(err, result) {
                     test.ok(result.value.f._bsontype === 'Code');
-                    client.close();
-                    done();
+                    client.close(done);
                   }
                 );
               });
@@ -1219,8 +1196,7 @@ describe('Insert', function() {
 
           collection.findOne({ str: 'String' }, function(err, item) {
             test.ok(item.func._bsontype === 'Code');
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -1255,8 +1231,7 @@ describe('Insert', function() {
 
           collection.findOne({ str: 'hello' }, function(err, item) {
             test.ok(item._id instanceof Date);
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -1285,8 +1260,7 @@ describe('Insert', function() {
           r
         ) {
           test.equal(0, r.result.n);
-          client.close();
-          done();
+          client.close(done);
         });
       });
     }
@@ -1339,8 +1313,7 @@ describe('Insert', function() {
                 test.equal(null, err);
                 test.equal('p1_2', item.Prop1);
                 test.equal('s2_2', item.More.Sub2);
-                client.close();
-                done();
+                client.close(done);
               });
             }
           );
@@ -1379,8 +1352,7 @@ describe('Insert', function() {
             test.ok(err != null);
             test.ok(err.result);
 
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -1415,8 +1387,7 @@ describe('Insert', function() {
           collection.findOne({ _id: 0 }, function(err, item) {
             test.equal(0, item._id);
             test.equal('hello', item.test);
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -1453,8 +1424,7 @@ describe('Insert', function() {
           collection.update({ a: 1 }, { a: 1 }, { upsert: true, w: 1 }, function(err, result) {
             if (result.updatedExisting) test.equal(true, result.updatedExisting);
             test.equal(1, result.result.n);
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -1496,8 +1466,7 @@ describe('Insert', function() {
           collection.findOne({ a: 1 }, function(err, doc) {
             test.equal(null, err);
             test.equal(50000, doc.string.length);
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -1535,8 +1504,7 @@ describe('Insert', function() {
           collection.findOne({ c: 1 }, function(err, doc) {
             test.equal(null, err);
             test.deepEqual(1, doc.c);
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -1577,8 +1545,7 @@ describe('Insert', function() {
               test.equal(null, err);
               test.deepEqual(1, doc.a);
 
-              client.close();
-              done();
+              client.close(done);
             });
           });
         });
@@ -1626,8 +1593,7 @@ describe('Insert', function() {
               test.equal(null, err);
               test.equal(1, r.result.n);
 
-              client.close();
-              done();
+              client.close(done);
             }
           );
         });
@@ -1654,12 +1620,10 @@ describe('Insert', function() {
         var collection = db.collection('shouldExecuteInsertWithNoCallbackAndWriteConcern');
         collection.insert({ a: { b: { c: 1 } } }).then(
           () => {
-            client.close();
-            done();
+            client.close(done);
           },
           err => {
-            client.close();
-            done(err);
+            client.close(err2 => done(err || err2));
           }
         );
       });
@@ -1678,8 +1642,7 @@ describe('Insert', function() {
     test: function(done) {
       function cb(err) {
         test.equal(null, err);
-        client.close();
-        done();
+        client.close(done);
       }
 
       var configuration = this.configuration;
@@ -1704,8 +1667,7 @@ describe('Insert', function() {
     test: function(done) {
       function cb(err) {
         test.equal(null, err);
-        client.close();
-        done();
+        client.close(done);
       }
 
       var configuration = this.configuration;
@@ -1730,8 +1692,7 @@ describe('Insert', function() {
     test: function(done) {
       function cb(err) {
         test.equal(null, err);
-        client.close();
-        done();
+        client.close(done);
       }
 
       var configuration = this.configuration;
@@ -1820,8 +1781,7 @@ describe('Insert', function() {
                       ) {
                         test.equal(null, err);
                         test.ok(doc != null);
-                        client.close();
-                        done();
+                        client.close(done);
                       });
                     });
                   });
@@ -1910,8 +1870,7 @@ describe('Insert', function() {
                       ) {
                         test.equal(null, err);
                         test.ok(doc != null);
-                        client.close();
-                        done();
+                        client.close(done);
                       });
                     });
                   });
@@ -1958,8 +1917,7 @@ describe('Insert', function() {
             collection.findOne({ x: d }, function(err, doc) {
               test.equal(null, err);
               test.ok(doc != null);
-              client.close();
-              done();
+              client.close(done);
             });
           });
         });
@@ -1998,8 +1956,7 @@ describe('Insert', function() {
             test.equal(null, err);
             test.equal(Number.POSITIVE_INFINITY, doc.pos);
             test.equal(Number.NEGATIVE_INFINITY, doc.neg);
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -2032,8 +1989,7 @@ describe('Insert', function() {
               .toArray(function(err, items) {
                 test.equal('' + regexp, '' + items[0].b);
                 // Let's close the db
-                client.close();
-                done();
+                client.close(done);
               });
           });
         });
@@ -2069,8 +2025,7 @@ describe('Insert', function() {
               test.equal(null, err);
               test.equal('' + regexp, '' + items[0].b);
               // Let's close the db
-              client.close();
-              done();
+              client.close(done);
             });
         });
       });
@@ -2102,8 +2057,7 @@ describe('Insert', function() {
           test.fail(false);
         } catch (err) {} // eslint-disable-line
 
-        client.close();
-        done();
+        client.close(done);
       });
     }
   });
@@ -2141,8 +2095,7 @@ describe('Insert', function() {
               test.equal(null, err);
               test.ok(doc.doc._bsontype === 'Long');
               test.ok(doc.array[0][0]._bsontype === 'Long');
-              client.close();
-              done();
+              client.close(done);
             });
           }
         );
@@ -2212,8 +2165,7 @@ describe('Insert', function() {
                   var doc = docs.pop();
 
                   test.ok(doc.a._bsontype === 'Long');
-                  client.close();
-                  done();
+                  client.close(done);
                 });
             }
           );
@@ -2252,8 +2204,7 @@ describe('Insert', function() {
                 test.equal(null, err);
                 test.ok('number', typeof doc.doc);
                 test.ok('number', typeof doc.array[0][0]);
-                client.close();
-                done();
+                client.close(done);
               });
           }
         );
@@ -2293,8 +2244,7 @@ describe('Insert', function() {
               test.equal(null, err);
               test.ok(doc.doc._bsontype === 'Long');
               test.ok(doc.array[0][0]._bsontype === 'Long');
-              client.close();
-              done();
+              client.close(done);
             });
           }
         );
@@ -2331,8 +2281,7 @@ describe('Insert', function() {
               test.equal(null, err);
               test.ok('number', typeof doc.doc);
               test.ok('number', typeof doc.array[0][0]);
-              client.close();
-              done();
+              client.close(done);
             });
           }
         );
@@ -2364,8 +2313,7 @@ describe('Insert', function() {
             test.equal(null, err);
             test.ok(doc);
 
-            client.close();
-            done();
+            client.close(done);
           }
         );
       });
@@ -2400,8 +2348,7 @@ describe('Insert', function() {
               test.equal(1, doc.a);
               test.equal(0, doc.b);
 
-              client.close();
-              done();
+              client.close(done);
             });
           });
         });
@@ -2457,8 +2404,7 @@ describe('Insert', function() {
                 col.findOne({ a: 1 }, function(err, doc) {
                   test.equal(null, err);
                   test.equal(trim('function (y){return y;}'), trim(doc.f.code));
-                  client.close();
-                  done();
+                  client.close(done);
                 });
               }
             );
@@ -2503,8 +2449,7 @@ describe('Insert', function() {
             test.equal(null, err);
             test.equal(2000, doc.result.n);
 
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -2541,8 +2486,7 @@ describe('Insert', function() {
                 expect(err.result).to.exist;
                 expect(err.result.getWriteErrors()).to.have.length(2);
 
-                client.close();
-                done();
+                client.close(done);
               }
             );
           });
@@ -2581,8 +2525,7 @@ describe('Insert', function() {
                 expect(err.result).to.exist;
                 expect(err.result.getWriteErrors()).to.have.length(2);
 
-                client.close();
-                done();
+                client.close(done);
               }
             );
           });
@@ -2623,8 +2566,7 @@ describe('Insert', function() {
                 test.ok(err != null);
                 test.ok(err.result);
 
-                client.close();
-                done();
+                client.close(done);
               }
             );
           });
@@ -2665,8 +2607,7 @@ describe('Insert', function() {
                 test.ok(err != null);
                 test.ok(err.result);
 
-                client.close();
-                done();
+                client.close(done);
               }
             );
           });
@@ -2708,8 +2649,7 @@ describe('Insert', function() {
             test.equal(undefined, started[0].command.documents[0]._id);
             listener.uninstrument();
 
-            client.close();
-            done();
+            client.close(done);
           });
       });
     }
@@ -2748,8 +2688,7 @@ describe('Insert', function() {
             test.equal(undefined, started[0].command.documents[0]._id);
 
             listener.uninstrument();
-            client.close();
-            done();
+            client.close(done);
           });
       });
     }
@@ -2788,8 +2727,7 @@ describe('Insert', function() {
             test.equal(undefined, started[0].command.documents[0]._id);
 
             listener.uninstrument();
-            client.close();
-            done();
+            client.close(done);
           });
       });
     }
@@ -2808,8 +2746,7 @@ describe('Insert', function() {
           .insertMany([{}, {}, {}], { ordered: true })
           .then(function(r) {
             test.equal(3, Object.keys(r.insertedIds).length);
-            client.close();
-            done();
+            client.close(done);
           });
       });
     }
@@ -2829,8 +2766,7 @@ describe('Insert', function() {
           .then(function(r) {
             test.equal(null, err);
             test.equal(3, Object.keys(r.insertedIds).length);
-            client.close();
-            done();
+            client.close(done);
           });
       });
     }
@@ -2875,8 +2811,7 @@ describe('Insert', function() {
               test.equal(null, err);
               test.equal('a', v.products[0].suppliers[0].shipments[0].shipment1);
 
-              client.close();
-              done();
+              client.close(done);
             });
         });
       });
@@ -2902,8 +2837,7 @@ describe('Insert', function() {
           expect(jsonResult.insertedId).to.equal(0);
           expect(jsonResult.result).to.deep.equal({ n: 1, ok: 1 });
 
-          client.close();
-          done();
+          client.close(done);
         });
       });
     }

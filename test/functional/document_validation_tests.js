@@ -53,8 +53,7 @@ describe('Document Validation', function() {
                     col.insertMany([{ b: 1 }], { bypassDocumentValidation: true }, function(err) {
                       test.equal(null, err);
 
-                      client.close();
-                      done();
+                      client.close(done);
                     });
                   });
                 });
@@ -132,8 +131,7 @@ describe('Document Validation', function() {
                               function(err) {
                                 test.equal(null, err);
 
-                                client.close();
-                                done();
+                                client.close(done);
                               }
                             );
                           }
@@ -190,8 +188,7 @@ describe('Document Validation', function() {
                   function(err) {
                     test.equal(null, err);
 
-                    client.close();
-                    done();
+                    client.close(done);
                   }
                 );
               });
@@ -252,8 +249,7 @@ describe('Document Validation', function() {
                       function(err) {
                         test.equal(null, err);
 
-                        client.close();
-                        done();
+                        client.close(done);
                       }
                     );
                   }
@@ -339,8 +335,7 @@ describe('Document Validation', function() {
                     cursor.toArray(function(err) {
                       test.equal(null, err);
 
-                      client.close();
-                      done();
+                      client.close(done);
                     });
                   }
                 );
@@ -406,8 +401,7 @@ describe('Document Validation', function() {
                     function(err) {
                       test.equal(null, err);
 
-                      client.close();
-                      done();
+                      client.close(done);
                     }
                   );
                 }

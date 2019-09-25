@@ -70,8 +70,7 @@ describe('Max Staleness', function() {
               $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
             });
 
-            client.close();
-            done();
+            client.close(done);
           });
       });
     }
@@ -109,8 +108,7 @@ describe('Max Staleness', function() {
               $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
             });
 
-            client.close();
-            done();
+            client.close(done);
           });
       });
     }
@@ -149,8 +147,7 @@ describe('Max Staleness', function() {
                 $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
               });
 
-              client.close();
-              done();
+              client.close(done);
             });
         });
       }
@@ -188,8 +185,7 @@ describe('Max Staleness', function() {
               $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
             });
 
-            client.close();
-            done();
+            client.close(done);
           });
       });
     }

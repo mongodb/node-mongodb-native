@@ -177,8 +177,9 @@ describe('Authentication', function() {
                   adminDb.removeUser('admin', function(err) {
                     test.equal(null, err);
 
-                    client.close();
-                    done();
+                    validationClient.close(() => {
+                      client.close(done);
+                    });
                   });
                 }
               );
@@ -192,7 +193,7 @@ describe('Authentication', function() {
   /**
    * @ignore
    */
-  it('should correctly issue authenticated event on successful authentication', {
+  it.skip('should correctly issue authenticated event on successful authentication', {
     metadata: { requires: { topology: 'single' } },
 
     // The actual test we wish to run
@@ -219,17 +220,23 @@ describe('Authentication', function() {
           adminDb.addUser('admin15', 'admin15', function(err, result) {
             test.equal(null, err);
             test.ok(result != null);
-            client.close();
+            client.close(() => {
+              client = configuration.newClient('mongodb://admin15:admin15@localhost:27017/admin');
+              client.once('authenticated', function() {
+                client.close(done);
+              });
 
-            client = configuration.newClient('mongodb://admin15:admin15@localhost:27017/admin');
-            client.once('authenticated', function() {
-              done();
-            });
+              // Authenticate using the newly added user
+              client.connect(function(err, client) {
+                test.equal(null, err);
 
-            // Authenticate using the newly added user
-            client.connect(function(err, client) {
-              test.equal(null, err);
-              client.close();
+                client
+                  .db()
+                  .admin()
+                  .removeUser('admin15', function(err) {
+                    test.equal(null, err);
+                  });
+              });
             });
           });
         });
@@ -443,8 +450,7 @@ describe('Authentication', function() {
               test.ok(err.errmsg != null);
 
               configuration.manager.restart(true).then(function() {
-                client.close();
-                done();
+                client.close(done);
               });
             });
           });
@@ -497,8 +503,7 @@ describe('Authentication', function() {
               test.ok(err.errmsg != null);
 
               configuration.manager.restart(true).then(function() {
-                client.close();
-                done();
+                client.close(done);
               });
             });
           });

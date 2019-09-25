@@ -50,8 +50,7 @@ describe('Remove', function() {
                       test.equal(null, err);
                       test.equal(0, count);
                       // Let's close the db
-                      client.close();
-                      done();
+                      client.close(done);
                     });
                   });
                 });
@@ -98,8 +97,7 @@ describe('Remove', function() {
                 collection.count(function(err, count) {
                   test.equal(0, count);
                   // Let's close the db
-                  client.close();
-                  done();
+                  client.close(done);
                 });
               });
             });
@@ -143,8 +141,7 @@ describe('Remove', function() {
 
                 collection.find({ a: 1 }).count(function(err, result) {
                   test.equal(3, result);
-                  client.close();
-                  done();
+                  client.close(done);
                 });
               });
             });
@@ -176,12 +173,10 @@ describe('Remove', function() {
 
         collection.remove().then(
           () => {
-            client.close();
-            done();
+            client.close(done);
           },
           err => {
-            client.close();
-            done(err);
+            client.close(err2 => done(err || err2));
           }
         );
       });

@@ -41,8 +41,7 @@ describe('Generators', function() {
         }
 
         test.equal(count, 6);
-        client.close();
-        done();
+        client.close(done);
       }).catch(err => {
         done(err);
       });

@@ -28,8 +28,7 @@ describe('Promises (Db)', function() {
       client.connect().then(function(client) {
         test.equal(1, client.topology.connections().length);
 
-        client.close();
-        done();
+        client.close(done);
       });
     }
   });
@@ -46,8 +45,7 @@ describe('Promises (Db)', function() {
       var configuration = this.configuration;
       var client = configuration.newClient({ w: 1 }, { poolSize: 1 });
       client.connect().then(function(client) {
-        client.close();
-        done();
+        client.close(done);
       });
     }
   });
@@ -77,8 +75,7 @@ describe('Promises (Db)', function() {
           .then(function(result) {
             test.ok(result !== null);
 
-            client.close();
-            done();
+            client.close(done);
           });
       });
     }
@@ -141,8 +138,7 @@ describe('Promises (Db)', function() {
           .then(function(col) {
             test.ok(col != null);
 
-            client.close();
-            done();
+            client.close(done);
           })
           .catch(function(err) {
             test.ok(err != null);
@@ -175,8 +171,7 @@ describe('Promises (Db)', function() {
           .then(function(stats) {
             test.ok(stats != null);
 
-            client.close();
-            done();
+            client.close(done);
           });
       });
     }
@@ -212,8 +207,7 @@ describe('Promises (Db)', function() {
             db.dropCollection('promiseCollection2').then(function(r) {
               test.ok(r);
 
-              client.close();
-              done();
+              client.close(done);
             });
           });
         });
@@ -245,8 +239,7 @@ describe('Promises (Db)', function() {
           .then(function(r) {
             test.ok(r);
 
-            client.close();
-            done();
+            client.close(done);
           })
           .catch(function(e) {
             test.ok(e != null);
@@ -284,8 +277,7 @@ describe('Promises (Db)', function() {
             db.collections().then(function(r) {
               test.ok(Array.isArray(r));
 
-              client.close();
-              done();
+              client.close(done);
             });
           });
         });
@@ -317,8 +309,7 @@ describe('Promises (Db)', function() {
           .then(function(r) {
             test.ok(r);
 
-            client.close();
-            done();
+            client.close(done);
           });
       });
     }
@@ -349,8 +340,7 @@ describe('Promises (Db)', function() {
           .then(function(r) {
             test.ok(r != null);
 
-            client.close();
-            done();
+            client.close(done);
           });
       });
     }
@@ -381,8 +371,7 @@ describe('Promises (Db)', function() {
           .then(function(r) {
             test.ok(r != null);
 
-            client.close();
-            done();
+            client.close(done);
           });
       });
     }
@@ -411,8 +400,7 @@ describe('Promises (Db)', function() {
         .then(function(col) {
           test.ok(col.s.options.promiseLibrary != null);
 
-          client.close();
-          done();
+          client.close(done);
         });
     }
   });
