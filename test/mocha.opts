@@ -1,0 +1,4 @@
+  --timeout 60000
+  --file test/runner
+  --ui test/runner/metadata_ui.js
+
