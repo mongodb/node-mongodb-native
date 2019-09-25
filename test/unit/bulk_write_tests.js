@@ -55,9 +55,9 @@ describe('Bulk Writes', function() {
       coll.insert(documents, { ordered: false }, function(err) {
         try {
           expect(err).to.be.an.instanceOf(Error);
-          done();
+          close();
         } catch (e) {
-          done(e);
+          close(e);
         }
       });
     });

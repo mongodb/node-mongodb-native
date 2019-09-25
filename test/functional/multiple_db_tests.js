@@ -116,9 +116,7 @@ describe('Multiple Databases', function() {
                       test.equal(20, item.b);
 
                       test.equal(null, err);
-                      client.close();
-                      second_test_database.close();
-                      done();
+                      second_test_database.close(() => client.close(done));
                     });
                   });
                 });
@@ -150,8 +148,7 @@ describe('Multiple Databases', function() {
         db_instance.collection('counters', function(err, collection) {
           collection.findAndModify({}, {}, { $inc: { db: 1 } }, { new: true }, function(err) {
             test.equal(null, err);
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -175,8 +172,7 @@ describe('Multiple Databases', function() {
           client.db('test');
         }
 
-        client.close();
-        done();
+        client.close(done);
       });
     }
   });

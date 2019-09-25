@@ -21,8 +21,7 @@ describe('SNI', function() {
         },
         function(err, client) {
           test.equal(null, err);
-          client.close();
-          done();
+          client.close(done);
         }
       );
     }
@@ -47,8 +46,7 @@ describe('SNI', function() {
         },
         function(err, client) {
           test.equal(null, err);
-          client.close();
-          done();
+          client.close(done);
         }
       );
     }

@@ -50,7 +50,7 @@ describe('Connections survive primary step down', function() {
   afterEach(function() {
     return Promise.all(deferred.map(d => d())).then(() => {
       deferred = [];
-      client.close();
+      return client.close();
     });
   });
 

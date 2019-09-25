@@ -39,8 +39,7 @@ describe('Unicode', function() {
             .maxTimeMS(50)
             .count(function(err) {
               test.ok(err != null);
-              client.close();
-              done();
+              client.close(done);
             });
         });
       });
@@ -79,8 +78,7 @@ describe('Unicode', function() {
             .maxTimeMS(50)
             .toArray(function(err) {
               test.ok(err != null);
-              client.close();
-              done();
+              client.close(done);
             });
         });
       });
@@ -135,8 +133,7 @@ describe('Unicode', function() {
                     ) {
                       test.equal(null, err);
                       test.equal(1, result.ok);
-                      client.close();
-                      done();
+                      client.close(done);
                     });
                 });
             });

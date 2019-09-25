@@ -38,7 +38,7 @@ describe('CRUD spec', function() {
 
   afterEach(() => {
     if (testContext.client) {
-      testContext.client.close();
+      return testContext.client.close();
     }
   });
 

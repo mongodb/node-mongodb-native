@@ -39,8 +39,7 @@ describe('URI', function() {
               expect(err).to.not.exist;
               expect(result.result.n).to.equal(1);
 
-              client.close();
-              done();
+              client.close(done);
             });
         });
       }
@@ -79,8 +78,7 @@ describe('URI', function() {
               expect(result).to.be.null;
             }
 
-            client.close();
-            done();
+            client.close(done);
           });
       });
     }
@@ -103,8 +101,7 @@ describe('URI', function() {
 
       client.connect(function(err, client) {
         expect(err).to.not.exist;
-        client.close();
-        done();
+        client.close(done);
       });
     }
   });
@@ -120,8 +117,7 @@ describe('URI', function() {
       client.connect((err, client) => {
         var db = client.db(this.configuration.db);
         expect(db.writeConcern.fsync).to.be.true;
-        client.close();
-        done();
+        client.close(done);
       });
     }
   });
@@ -158,9 +154,7 @@ describe('URI', function() {
           aclient.connect(function(err, aclient) {
             expect(err).to.not.exist;
 
-            client.close();
-            aclient.close();
-            done();
+            client.close(() => aclient.close(done));
           });
         });
       });
@@ -181,7 +175,7 @@ describe('URI', function() {
         expect(err).to.not.exist;
         expect(client).to.exist;
         expect(client.s.options.replicaSet).to.exist.and.equal(config.replicasetName);
-        done();
+        client.close(done);
       });
     }
   });

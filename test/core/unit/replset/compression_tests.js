@@ -45,7 +45,7 @@ describe('Compression (ReplSet)', function() {
         expect(data).to.eql(['zlib']);
       });
 
-      done();
+      replSet.destroy(done);
     });
 
     replSet.connect({ compression: { compressors: ['zlib'] } });

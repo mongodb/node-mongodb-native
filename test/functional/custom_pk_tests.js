@@ -46,8 +46,7 @@ describe('Custom PK', function() {
           collection.find({ _id: new ObjectID('aaaaaaaaaaaa') }).toArray(function(err, items) {
             test.equal(1, items.length);
 
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });

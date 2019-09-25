@@ -48,8 +48,7 @@ describe('Find', function() {
                   test.equal(1, documents.length);
                   test.equal(doc1.a, documents[0].a);
                   // Let's close the db
-                  client.close();
-                  done();
+                  client.close(done);
                 });
               });
             });
@@ -98,8 +97,7 @@ describe('Find', function() {
                     test.equal(1, documents.length);
                     test.equal(doc1.a, documents[0].a);
                     // Let's close the db
-                    client.close();
-                    done();
+                    client.close(done);
                   });
                 });
               });
@@ -196,8 +194,7 @@ describe('Find', function() {
                           });
                           test.equal(2, results.length);
                           // Let's close the db
-                          client.close();
-                          done();
+                          client.close(done);
                         });
                     });
                   });
@@ -319,8 +316,7 @@ describe('Find', function() {
                                                     // Fail test if not an error
                                                     test.equal(4, documents.length);
                                                     // Let's close the db
-                                                    client.close();
-                                                    done();
+                                                    client.close(done);
                                                   });
                                               });
                                           });
@@ -383,8 +379,7 @@ describe('Find', function() {
                           collection.find({}, { limit: 99 }).toArray(function(err, documents) {
                             test.equal(4, documents.length);
                             // Let's close the db
-                            client.close();
-                            done();
+                            client.close(done);
                           });
                         });
                       });
@@ -426,8 +421,7 @@ describe('Find', function() {
                 test.equal(null, err);
                 collection.find({ a: 19 }).toArray(function(err, documents) {
                   test.equal(1, documents.length);
-                  client.close();
-                  done();
+                  client.close(done);
                 });
               }
             );
@@ -477,8 +471,7 @@ describe('Find', function() {
                     test.equal(2, documents.length);
                     test.equal('bar', documents[0].b);
                     test.equal('bar2', documents[1].b);
-                    client.close();
-                    done();
+                    client.close(done);
                   });
                 });
               }
@@ -511,8 +504,7 @@ describe('Find', function() {
             collection.find({ a: 1 }, {}).toArray(function(err, documents) {
               test.equal(0, documents.length);
               // Let's close the db
-              client.close();
-              done();
+              client.close(done);
             });
           });
         });
@@ -558,8 +550,7 @@ describe('Find', function() {
                       test.equal(2, count);
 
                       // Let's close the db
-                      client.close();
-                      done();
+                      client.close(done);
                     });
                 });
               });
@@ -623,8 +614,7 @@ describe('Find', function() {
                             collection.find({ a: 1 }).toArray(function(err, items) {
                               test.equal(1, items.length);
                               // Let's close the db
-                              client.close();
-                              done();
+                              client.close(done);
                             });
                           });
                         });
@@ -671,8 +661,7 @@ describe('Find', function() {
               collection.findOne({ _id: new ObjectID(id) }, function(err, doc) {
                 test.equal('mike', doc.hello);
                 // Let's close the db
-                client.close();
-                done();
+                client.close(done);
               });
             });
           });
@@ -714,8 +703,7 @@ describe('Find', function() {
               test.equal('number 1', doc.comments[0].title);
               test.equal('number 2', doc.comments[1].title);
 
-              client.close();
-              done();
+              client.close(done);
             });
           });
         });
@@ -751,9 +739,7 @@ describe('Find', function() {
             ) {
               usercollection.findOne({ a: 0 }, function(err) {
                 test.equal(null, err);
-                p_client.close();
-
-                done();
+                p_client.close(done);
               });
             });
           });
@@ -787,8 +773,7 @@ describe('Find', function() {
               function() {}
             );
           } catch (err) {
-            client.close();
-            done();
+            client.close(done);
           }
         });
       });
@@ -831,8 +816,7 @@ describe('Find', function() {
                     test.equal(24 - idx, doc.a); // checking limit sort object with field select
                   });
 
-                  client.close();
-                  done();
+                  client.close(done);
                 });
             });
           });
@@ -930,8 +914,7 @@ describe('Find', function() {
                                         );
                                         test.equal(5, updated_doc.value.b);
                                         test.equal('undefined', typeof updated_doc.value.a);
-                                        client.close();
-                                        done();
+                                        client.close(done);
                                       }
                                     );
                                   }
@@ -981,8 +964,7 @@ describe('Find', function() {
               function(err, updated_doc) {
                 test.equal(2, Object.keys(updated_doc.value).length);
                 test.equal(1, updated_doc.value.a);
-                client.close();
-                done();
+                client.close(done);
               }
             );
           });
@@ -1032,8 +1014,7 @@ describe('Find', function() {
 
                   collection.findOne({ _id: id }, function(err, item) {
                     test.equal(1, item.meta.visitors);
-                    client.close();
-                    done();
+                    client.close(done);
                   });
                 }
               );
@@ -1077,8 +1058,7 @@ describe('Find', function() {
                   function(err, updated_doc) {
                     test.equal(null, updated_doc);
                     test.ok(err != null);
-                    client.close();
-                    done();
+                    client.close(done);
                   }
                 );
               }
@@ -1111,8 +1091,7 @@ describe('Find', function() {
           ) {
             test.equal(null, updated_doc.value);
             test.ok(err == null || err.errmsg.match('No matching object found'));
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -1147,8 +1126,7 @@ describe('Find', function() {
                   test.equal(null, err);
                   test.equal(1, items.length);
                   test.equal(2, items[0].b);
-                  client.close();
-                  done();
+                  client.close(done);
                 });
             }
           );
@@ -1187,8 +1165,7 @@ describe('Find', function() {
                   test.equal(2, items[0].b);
                   test.equal(3, items[1].c);
                   test.equal(4, items[2].d);
-                  client.close();
-                  done();
+                  client.close(done);
                 });
             }
           );
@@ -1221,8 +1198,7 @@ describe('Find', function() {
               collection.find({}, {}, function(err, cursor) {
                 test.ok(!cursor.cmd.noCursorTimeout);
 
-                client.close();
-                done();
+                client.close(done);
               });
             });
           });
@@ -1268,8 +1244,7 @@ describe('Find', function() {
               function(err, result) {
                 test.equal(2, result.value.a);
                 test.equal(3, result.value.b);
-                p_client.close();
-                done();
+                p_client.close(done);
               }
             );
           });
@@ -1317,8 +1292,7 @@ describe('Find', function() {
                   function(err, result) {
                     test.equal(null, result);
                     test.ok(err.errmsg.match('duplicate key'));
-                    client.close();
-                    done();
+                    client.close(done);
                   }
                 );
               }
@@ -1368,8 +1342,7 @@ describe('Find', function() {
                 test.equal(doc.c.a, item.value.c.a);
                 test.equal(doc.c.b, item.value.c.b);
                 test.equal(100, item.value.c.c);
-                client.close();
-                done();
+                client.close(done);
               }
             );
           });
@@ -1406,8 +1379,7 @@ describe('Find', function() {
             { new: true, fields: { plays: 0, results: 0 }, safe: true },
             function(err) {
               test.equal(null, err);
-              client.close();
-              done();
+              client.close(done);
             }
           );
         });
@@ -1460,8 +1432,7 @@ describe('Find', function() {
                 '133118461172916225',
                 'Returned Id should be equal to 133118461172916225'
               );
-              client.close();
-              done();
+              client.close(done);
             });
           });
         });
@@ -1507,8 +1478,7 @@ describe('Find', function() {
                   test.equal(undefined, item._id);
                   test.equal(1, item.a);
                   test.equal(2, item.c);
-                  p_client.close();
-                  done();
+                  p_client.close(done);
                 });
               });
             });
@@ -1546,8 +1516,7 @@ describe('Find', function() {
                 .project({ comments: { $slice: -5 } })
                 .toArray(function(err, docs) {
                   test.equal(5, docs[0].comments.length);
-                  client.close();
-                  done();
+                  client.close(done);
                 });
             });
           }
@@ -1579,8 +1548,7 @@ describe('Find', function() {
             ) {
               test.equal(null, err);
               test.equal(null, updated_doc.value);
-              client.close();
-              done();
+              client.close(done);
             });
           }
         );
@@ -1648,8 +1616,7 @@ describe('Find', function() {
                   { new: true, safe: true },
                   function(err) {
                     test.equal(null, err);
-                    client.close();
-                    done();
+                    client.close(done);
                   }
                 );
               }
@@ -1697,8 +1664,7 @@ describe('Find', function() {
                 test.equal(null, err);
                 numberOfOperations = numberOfOperations + 1;
                 if (numberOfOperations === 2) {
-                  done();
-                  p_client.close();
+                  p_client.close(done);
                 }
               });
 
@@ -1715,8 +1681,7 @@ describe('Find', function() {
                 test.equal(null, err);
                 numberOfOperations = numberOfOperations + 1;
                 if (numberOfOperations === 2) {
-                  done();
-                  p_client.close();
+                  p_client.close(done);
                 }
               });
           });
@@ -1754,8 +1719,7 @@ describe('Find', function() {
             collection.insert(doc, configuration.writeConcernMax(), function(err) {
               test.equal(null, err);
               collection.findAndModify(q, [], set, opts, function(/* err */) {
-                client.close();
-                done();
+                client.close(done);
               });
             });
           }
@@ -1796,8 +1760,7 @@ describe('Find', function() {
               collection.insert({ _id: id, a: 1 }, configuration.writeConcernMax(), function(err) {
                 test.ok(err !== null);
                 running = false;
-                done();
-                p_client.close();
+                p_client.close(done);
               });
             });
           }, 200);
@@ -1857,9 +1820,8 @@ describe('Find', function() {
             test.equal(null, err);
             cursor.each(function(err, obj) {
               if (obj == null) {
-                p_client.close();
                 test.equal(500, numberOfSteps);
-                done();
+                p_client.close(done);
               } else {
                 numberOfSteps = numberOfSteps + 1;
               }
@@ -1914,8 +1876,7 @@ describe('Find', function() {
                   {},
                   function(err) {
                     test.ok(err !== null);
-                    p_client.close();
-                    done();
+                    p_client.close(done);
                   }
                 );
               });
@@ -1962,8 +1923,7 @@ describe('Find', function() {
               test.equal(null, err);
               test.equal(100, items.length);
 
-              client.close();
-              done();
+              client.close(done);
             });
           });
         });
@@ -1993,8 +1953,7 @@ describe('Find', function() {
 
             col.find({}, { skip: 1, limit: 1, fields: { _id: 1, b: 0 } }).toArray(function(err) {
               test.ok(err instanceof Error);
-              client.close();
-              done();
+              client.close(done);
             });
           }
         );
@@ -2048,8 +2007,7 @@ describe('Find', function() {
                       test.equal(undefined, docs[0].a);
                       test.equal(2, docs[0].b);
 
-                      client.close();
-                      done();
+                      client.close(done);
                     });
                 });
             }
@@ -2095,8 +2053,7 @@ describe('Find', function() {
                   test.equal(undefined, docs[0].a);
                   test.equal(2, docs[0].b);
 
-                  client.close();
-                  done();
+                  client.close(done);
                 });
             }
           );
@@ -2141,8 +2098,7 @@ describe('Find', function() {
               test.equal(null, err);
               test.equal(1000, docs.length);
 
-              client.close();
-              done();
+              client.close(done);
             });
           });
         });
@@ -2188,8 +2144,7 @@ describe('Find', function() {
                 test.equal(null, err);
                 test.equal(10, docs.length);
 
-                client.close();
-                done();
+                client.close(done);
               });
           });
         });
@@ -2247,8 +2202,7 @@ describe('Find', function() {
                 test.equal(null, err);
                 test.equal(docs1.length + docs2.length, docs3.length);
 
-                client.close();
-                done();
+                client.close(done);
               });
             });
           });
@@ -2290,8 +2244,7 @@ describe('Find', function() {
               test.equal(null, err);
               test.equal(docs.length, docs2.length);
 
-              client.close();
-              done();
+              client.close(done);
             });
           });
         });
@@ -2317,8 +2270,7 @@ describe('Find', function() {
           collection.find({}).each(function(err, item) {
             test.equal(null, item);
 
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -2351,8 +2303,7 @@ describe('Find', function() {
                       test.equal(6, item.keywords.length);
 
                       if (i === 0) {
-                        client.close();
-                        done();
+                        client.close(done);
                       }
                     }
                   );
@@ -2401,8 +2352,7 @@ describe('Find', function() {
                       test.equal(null, err);
                       test.equal(10, docs[0].max);
 
-                      client.close();
-                      done();
+                      client.close(done);
                     });
                 });
             }
@@ -2465,8 +2415,8 @@ describe('Find', function() {
                       test.equal(true, cursors[j].isClosed());
                     }
 
-                    client.close();
-                    return done();
+                    client.close(done);
+                    return;
                   }
                 }
               });
@@ -2520,8 +2470,8 @@ describe('Find', function() {
                 test.equal(true, _cursor.isClosed());
                 if (left === 0) {
                   test.equal(docs.length, results.length);
-                  client.close();
-                  return done();
+                  client.close(done);
+                  return;
                 }
               });
             };
@@ -2570,8 +2520,7 @@ describe('Find', function() {
               test.equal(null, err);
               test.ok(result != null);
               test.equal(true, cursors[0].isClosed());
-              client.close();
-              done();
+              client.close(done);
             });
           });
         });
@@ -2618,8 +2567,7 @@ describe('Find', function() {
             cursors[0].on('end', function() {
               test.equal(docs.length, results.length);
               test.equal(true, cursors[0].isClosed());
-              client.close();
-              done();
+              client.close(done);
             });
           });
         });
@@ -2672,7 +2620,8 @@ describe('Find', function() {
               expect(err).to.be.null;
               expect(cursor).to.not.have.nested.property('s.session');
 
-              cursor.close().then(() => client.close().then(() => done()));
+              cursor.close();
+              client.close(done);
             });
           });
         });
@@ -2716,8 +2665,7 @@ describe('Find', function() {
                 .toArray(function(err, items) {
                   test.equal(null, err);
                   test.equal('spam eggs and spam', items[0].s);
-                  client.close();
-                  done();
+                  client.close(done);
                 });
             }
           );
@@ -2744,8 +2692,7 @@ describe('Find', function() {
           test.equal(undefined, options.skip);
           test.equal(undefined, options.limit);
           test.equal('TEST', options.raw);
-          client.close();
-          done();
+          client.close(done);
         });
       });
     }
@@ -2793,8 +2740,7 @@ describe('Find', function() {
                 // We need to close the cursor since it is not exhausted,
                 // and we need to end the implicit session
                 cursors[0].close();
-                client.close();
-                done();
+                client.close(done);
               });
             });
           });
@@ -2843,8 +2789,7 @@ describe('Find', function() {
               // We need to close the cursor since it is not exhausted,
               // and we need to end the implicit session
               cursor.close();
-              client.close();
-              done();
+              client.close(done);
             });
           });
         });
@@ -2882,8 +2827,7 @@ describe('Find', function() {
                 test.equal(1, updated_doc.value.a);
                 test.equal(3, updated_doc.value.b);
 
-                client.close();
-                done();
+                client.close(done);
               }
             );
           });
@@ -2922,8 +2866,7 @@ describe('Find', function() {
                   test.equal(null, err);
                   test.equal(3, documents.length);
                   // Let's close the db
-                  client.close();
-                  done();
+                  client.close(done);
                 });
             }
           );
@@ -2965,8 +2908,7 @@ describe('Find', function() {
                   test.equal(3, documents.length);
 
                   // Let's close the db
-                  client.close();
-                  done();
+                  client.close(done);
                 });
             }
           );
@@ -3008,8 +2950,7 @@ describe('Find', function() {
                   test.deepEqual([{ _id: 1, results: [82, 85, 88] }], documents);
 
                   // Let's close the db
-                  client.close();
-                  done();
+                  client.close(done);
                 });
             }
           );
@@ -3074,8 +3015,7 @@ describe('Find', function() {
                 test.equal(null, err);
                 test.equal(200, documents.length);
                 // Let's close the db
-                client.close();
-                done();
+                client.close(done);
               });
           });
         });
@@ -3115,8 +3055,7 @@ describe('Find', function() {
             listener.uninstrument();
 
             // Let's close the db
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });

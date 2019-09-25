@@ -56,8 +56,7 @@ describe('Indexes', function() {
                     test.deepEqual([['a', 1]], collectionInfo[indexName]);
 
                     // Let's close the db
-                    client.close();
-                    done();
+                    client.close(done);
                   });
                 });
               }
@@ -102,8 +101,7 @@ describe('Indexes', function() {
                   test.deepEqual([['a', -1], ['b', 1], ['c', -1]], collectionInfo[indexName]);
 
                   // Let's close the db
-                  client.close();
-                  done();
+                  client.close(done);
                 });
               }
             );
@@ -157,8 +155,7 @@ describe('Indexes', function() {
                           function(err) {
                             test.ok(err != null);
                             test.equal(11000, err.code);
-                            client.close();
-                            done();
+                            client.close(done);
                           }
                         );
                       }
@@ -214,8 +211,7 @@ describe('Indexes', function() {
                       function(err) {
                         // Assert that we have erros
                         test.ok(err != null);
-                        client.close();
-                        done();
+                        client.close(done);
                       }
                     );
                   }
@@ -258,8 +254,7 @@ describe('Indexes', function() {
 
                   collection.indexInformation(function(err, result) {
                     test.ok(result['a_1'] == null);
-                    client.close();
-                    done();
+                    client.close(done);
                   });
                 });
               }
@@ -302,8 +297,7 @@ describe('Indexes', function() {
 
                 collection.distinct('b.c', function(err, docs) {
                   test.deepEqual(['a', 'b', 'c'], docs.sort());
-                  client.close();
-                  done();
+                  client.close(done);
                 });
               });
             }
@@ -354,8 +348,7 @@ describe('Indexes', function() {
                     test.ok(collectionInfo['a_1'] != null);
                     test.deepEqual([['a', 1]], collectionInfo['a_1']);
                     // Let's close the db
-                    client.close();
-                    done();
+                    client.close(done);
                   });
                 }
               );
@@ -401,8 +394,7 @@ describe('Indexes', function() {
                       collection.indexInformation({ full: true }, function(err, indexInfo) {
                         test.equal(null, err);
                         test.equal(2, indexInfo.length);
-                        client.close();
-                        done();
+                        client.close(done);
                       });
                     });
                 }
@@ -449,8 +441,7 @@ describe('Indexes', function() {
                   test.ok(err.errmsg.indexOf('point not in interval of') !== -1);
                   test.ok(err.errmsg.indexOf('-180') !== -1);
                   test.ok(err.errmsg.indexOf('180') !== -1);
-                  client.close();
-                  done();
+                  client.close(done);
                 });
               });
             });
@@ -499,8 +490,7 @@ describe('Indexes', function() {
                       test.ok(err.errmsg.indexOf('point not in interval of') !== -1);
                       test.ok(err.errmsg.indexOf('0') !== -1);
                       test.ok(err.errmsg.indexOf('1024') !== -1);
-                      client.close();
-                      done();
+                      client.close(done);
                     }
                   );
                 });
@@ -535,8 +525,7 @@ describe('Indexes', function() {
 
             collection.ensureIndex({ a: 1 }, { unique: true, w: 1 }, function(err) {
               test.ok(err != null);
-              client.close();
-              done();
+              client.close(done);
             });
           });
         });
@@ -567,8 +556,7 @@ describe('Indexes', function() {
 
             collection.ensureIndex({ a: 1 }, { unique: true, w: 1 }, function(err) {
               test.ok(err != null);
-              client.close();
-              done();
+              client.close(done);
             });
           });
         });
@@ -602,8 +590,7 @@ describe('Indexes', function() {
 
             collection.insert({ loc: [600, 600] }, configuration.writeConcernMax(), function(err) {
               test.equal(null, err);
-              client.close();
-              done();
+              client.close(done);
             });
           });
         });
@@ -638,8 +625,7 @@ describe('Indexes', function() {
             // Fetch full index information
             collection.indexInformation({ full: false }, function(err, indexInformation) {
               test.ok(indexInformation['myfunky_name'] != null);
-              client.close();
-              done();
+              client.close(done);
             });
           });
         });
@@ -668,8 +654,7 @@ describe('Indexes', function() {
               .collection('indexcontext')
               .ensureIndex(shared.array, { background: true }, function(err) {
                 test.equal(null, err);
-                client.close();
-                done();
+                client.close(done);
               });
           });
       });
@@ -695,8 +680,7 @@ describe('Indexes', function() {
 
           collection.ensureIndex({ a: 1 }, { w: 1, unique: true }, function(err) {
             test.ok(err != null);
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -723,8 +707,7 @@ describe('Indexes', function() {
             collection
               .dropIndex('a_1')
               .then(() => {
-                client.close();
-                done();
+                client.close(done);
               })
               .catch(err => {
                 client.close();
@@ -760,8 +743,7 @@ describe('Indexes', function() {
               collection.find({}, { hint: 'a_1' }).toArray(function(err, docs) {
                 test.equal(null, err);
                 test.equal(1, docs[0].a);
-                client.close();
-                done();
+                client.close(done);
               });
             });
           });
@@ -803,8 +785,7 @@ describe('Indexes', function() {
                     test.equal(indexInformation[i].language_override, 'langua');
                 }
 
-                client.close();
-                done();
+                client.close(done);
               });
             }
           );
@@ -835,8 +816,7 @@ describe('Indexes', function() {
               test.equal(null, err);
               test.equal(2, indexes.length);
 
-              client.close();
-              done();
+              client.close(done);
             });
         });
       });
@@ -865,8 +845,7 @@ describe('Indexes', function() {
               test.equal(null, err);
               test.equal(true, result);
 
-              client.close();
-              done();
+              client.close(done);
             });
         });
       });
@@ -895,8 +874,7 @@ describe('Indexes', function() {
               test.equal(null, err);
               test.equal(2, indexes.length);
 
-              client.close();
-              done();
+              client.close(done);
             });
         });
       });
@@ -934,8 +912,7 @@ describe('Indexes', function() {
                 test.ok(keys['a_1']);
                 test.ok(keys['hello1']);
 
-                client.close();
-                done();
+                client.close(done);
               });
           });
       });
@@ -962,8 +939,7 @@ describe('Indexes', function() {
             test.equal(null, err);
             test.equal('TextIndex', r);
             // Let's close the db
-            client.close();
-            done();
+            client.close(done);
           });
       });
     }
@@ -1008,8 +984,7 @@ describe('Indexes', function() {
             test.equal(null, err);
             test.deepEqual({ a: 1 }, started[0].command.indexes[0].partialFilterExpression);
             listener.uninstrument();
-            client.close();
-            done();
+            client.close(done);
           });
       });
     }
@@ -1042,8 +1017,7 @@ describe('Indexes', function() {
           var msg = "key $exists must not start with '$'";
           test.ok(err.toString().indexOf(msg) === -1);
 
-          client.close();
-          done();
+          client.close(done);
         });
       });
     }
@@ -1122,8 +1096,7 @@ describe('Indexes', function() {
 
             collection.ensureIndex({ 'a.a': 1 }, function(err) {
               test.equal(null, err);
-              client.close();
-              done();
+              client.close(done);
             });
           }
         );
@@ -1153,8 +1126,7 @@ describe('Indexes', function() {
           function(err) {
             test.equal(null, err);
 
-            client.close();
-            done();
+            client.close(done);
           }
         );
       });
@@ -1194,8 +1166,7 @@ describe('Indexes', function() {
               function(err) {
                 test.equal(11000, err.code);
 
-                client.close();
-                done();
+                client.close(done);
               }
             );
           }
@@ -1266,8 +1237,7 @@ describe('Indexes', function() {
             function(err) {
               test.equal(null, err);
 
-              client.close();
-              done();
+              client.close(done);
             }
           );
       });
@@ -1306,8 +1276,7 @@ describe('Indexes', function() {
                 test.ok(err);
                 test.equal(85, err.code);
 
-                client.close();
-                done();
+                client.close(done);
               }
             );
           }
@@ -1342,8 +1311,7 @@ describe('Indexes', function() {
             test.ok(err);
             test.equal(86, err.code);
 
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -1370,8 +1338,7 @@ describe('Indexes', function() {
           .createIndex({ 'accessControl.get': 1 }, { background: true }, function(err) {
             test.equal(null, err);
 
-            client.close();
-            done();
+            client.close(done);
           });
       });
     }

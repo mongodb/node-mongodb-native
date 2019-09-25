@@ -80,8 +80,7 @@ describe('ReplSet (mocks)', function() {
         Logger.reset();
         expect(err).to.not.exist;
 
-        client.close();
-        done();
+        client.close(done);
       });
     }
   });
@@ -136,8 +135,7 @@ describe('ReplSet (mocks)', function() {
           'seed list contains no mongos proxies, replicaset connections requires the parameter replicaSet to be supplied in the URI or options object, mongodb://server:port/db?replicaSet=name'
         );
 
-        client.close();
-        done();
+        client.close(done);
       });
     }
   });
@@ -166,8 +164,7 @@ describe('ReplSet (mocks)', function() {
         expect(client.topology.s.coreTopology.s.options.connectionTimeout).to.equal(15000);
         expect(client.topology.s.coreTopology.s.options.socketTimeout).to.equal(120000);
 
-        client.close();
-        done();
+        client.close(done);
       });
     }
   });

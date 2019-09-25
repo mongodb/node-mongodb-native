@@ -48,8 +48,7 @@ describe.skip('Sharding (Failover)', function() {
                 test.equal(null, err);
                 if (numberOfTicks === 0) {
                   mongos.start().then(function() {
-                    client.close();
-                    done();
+                    client.close(done);
                   });
                 } else {
                   setTimeout(ticker, 1000);
@@ -224,8 +223,7 @@ describe.skip('Sharding (Failover)', function() {
                 db.collection('replicaset_mongo_client_collection').insert({ c: 1 }, function(err) {
                   test.equal(null, err);
                   test.ok(reconnectCalled);
-                  client.close();
-                  done();
+                  client.close(done);
                 });
               });
             });

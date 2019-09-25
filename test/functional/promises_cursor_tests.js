@@ -33,8 +33,7 @@ describe('Promises (Cursor)', function() {
           .collection('insertOne')
           .insertOne({ a: 1 })
           .then(function() {
-            client.close();
-            done();
+            client.close(done);
           });
       });
     }

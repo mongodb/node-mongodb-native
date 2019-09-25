@@ -46,8 +46,7 @@ describe('Kerberos', function() {
             test.equal(null, err);
             test.ok(true, docs[0].kerberos);
 
-            client.close();
-            done();
+            client.close(done);
           });
       });
     }
@@ -85,8 +84,7 @@ describe('Kerberos', function() {
             test.equal(null, err);
             test.ok(true, docs[0].kerberos);
 
-            client.close();
-            done();
+            client.close(done);
           });
       });
     }
@@ -126,8 +124,7 @@ describe('Kerberos', function() {
               test.equal(null, err);
               test.ok(true, docs[0].kerberos);
 
-              client.close();
-              done();
+              client.close(done);
             });
         });
       }
@@ -185,8 +182,7 @@ describe('Kerberos', function() {
                       test.equal(null, err);
                       test.equal(true, doc.kerberos);
 
-                      client.close();
-                      done();
+                      client.close(done);
                     });
                 });
             });
@@ -230,8 +226,7 @@ describe('Kerberos', function() {
             test.equal(null, err);
             test.equal(true, doc.kerberos);
 
-            client.close();
-            done();
+            client.close(done);
           });
       });
     }
@@ -301,8 +296,7 @@ describe('Kerberos', function() {
             test.equal(null, err);
             test.ok(true, docs[0].kerberos);
 
-            client.close();
-            done();
+            client.close(done);
           });
       });
     }
@@ -362,8 +356,7 @@ describe('Kerberos', function() {
                       test.equal(null, err);
                       test.equal(true, doc.kerberos);
 
-                      client.close();
-                      done();
+                      client.close(done);
                     });
                 });
             });
@@ -410,8 +403,7 @@ describe('Kerberos', function() {
             test.equal(null, err);
             test.ok(true, docs[0].kerberos);
 
-            client.close();
-            done();
+            client.close(done);
           });
       });
     }

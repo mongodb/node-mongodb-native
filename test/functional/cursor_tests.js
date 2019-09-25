@@ -58,8 +58,7 @@ describe('Cursor', function() {
 
                   // Let's close the db
                   if (!item) {
-                    client.close();
-                    done();
+                    client.close(done);
                   }
                 });
               });
@@ -104,8 +103,7 @@ describe('Cursor', function() {
                 test.equal(null, err);
 
                 cursor.close();
-                client.close();
-                done();
+                client.close(done);
               });
             }
           );
@@ -146,8 +144,7 @@ describe('Cursor', function() {
               cursor.toArray(function(err) {
                 test.equal(null, err);
 
-                client.close();
-                done();
+                client.close(done);
               });
             }
           );
@@ -186,8 +183,7 @@ describe('Cursor', function() {
               test.ok(explaination != null);
 
               // Let's close the db
-              client.close();
-              done();
+              client.close(done);
             });
           });
         });
@@ -263,8 +259,7 @@ describe('Cursor', function() {
                               test.equal(10, count2);
                               test.equal(count, count2);
                               // Let's close the db
-                              client.close();
-                              done();
+                              client.close(done);
                             });
                           }
                         });
@@ -317,8 +312,7 @@ describe('Cursor', function() {
           expect(operation.options)
             .to.have.nested.property('readPreference')
             .that.deep.equals(expectedReadPreference);
-          client.close();
-          done();
+          client.close(done);
         });
       });
     }
@@ -392,8 +386,7 @@ describe('Cursor', function() {
                               test.equal(10, count2);
                               test.equal(count, count2);
                               // Let's close the db
-                              client.close();
-                              done();
+                              client.close(done);
                             });
                           }
                         });
@@ -451,8 +444,7 @@ describe('Cursor', function() {
             var finished = function() {
               number_of_functions = number_of_functions - 1;
               if (number_of_functions === 0) {
-                client.close();
-                done();
+                client.close(done);
               }
             };
 
@@ -566,8 +558,7 @@ describe('Cursor', function() {
                 cursor.each();
               });
 
-              client.close();
-              done();
+              client.close(done);
             });
           }
 
@@ -618,8 +609,7 @@ describe('Cursor', function() {
 
                 // Let's close the db
                 test.equal(null, err);
-                client.close();
-                done();
+                client.close(done);
               });
           }
 
@@ -673,8 +663,7 @@ describe('Cursor', function() {
                 test.equal(1, items.length);
 
                 // Let's close the db
-                client.close();
-                done();
+                client.close(done);
               });
           }
 
@@ -728,8 +717,7 @@ describe('Cursor', function() {
                 test.equal(5, items.length);
 
                 // Let's close the db
-                client.close();
-                done();
+                client.close(done);
               });
           }
 
@@ -814,8 +802,7 @@ describe('Cursor', function() {
                     test.equal('Cursor is closed', err.message);
                   }
 
-                  client.close();
-                  done();
+                  client.close(done);
                 });
               });
 
@@ -900,8 +887,7 @@ describe('Cursor', function() {
                     test.equal(8, numberEqual);
 
                     // Let's close the db
-                    client.close();
-                    done();
+                    client.close(done);
                   });
               });
             });
@@ -965,8 +951,7 @@ describe('Cursor', function() {
                 test.equal('Cursor is closed', err.message);
               }
 
-              client.close();
-              done();
+              client.close(done);
             });
           });
         });
@@ -1031,8 +1016,7 @@ describe('Cursor', function() {
                   test.equal('Cursor is closed', err.message);
                 }
 
-                client.close();
-                done();
+                client.close(done);
               });
             });
           });
@@ -1123,8 +1107,7 @@ describe('Cursor', function() {
                             test.ok(items == null);
                             test.ok(cursor.isClosed());
 
-                            client.close();
-                            done();
+                            client.close(done);
                           });
                         });
                       });
@@ -1205,8 +1188,7 @@ describe('Cursor', function() {
                         test.ok(items == null);
                         test.ok(cursor.isClosed());
 
-                        client.close();
-                        done();
+                        client.close(done);
                       });
                     });
                   });
@@ -1278,8 +1260,7 @@ describe('Cursor', function() {
                       test.ok(items == null);
                       test.ok(cursor.isClosed());
 
-                      client.close();
-                      done();
+                      client.close(done);
                     });
                   });
                 });
@@ -1341,8 +1322,7 @@ describe('Cursor', function() {
                   test.ok(items == null);
                   test.ok(cursor.isClosed());
 
-                  client.close();
-                  done();
+                  client.close(done);
                 });
               });
             });
@@ -1408,8 +1388,7 @@ describe('Cursor', function() {
                 test.equal(5, numberEqual);
 
                 // Let's close the db
-                client.close();
-                done();
+                client.close(done);
               });
           });
         }
@@ -1478,8 +1457,7 @@ describe('Cursor', function() {
                   test.equal(5, numberEqual);
 
                   // Let's close the db
-                  client.close();
-                  done();
+                  client.close(done);
                 });
             });
           }
@@ -1518,8 +1496,7 @@ describe('Cursor', function() {
             test.equal(null, err);
             test.equal(true, cursor.isClosed());
             // Let's close the db
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -1596,8 +1573,7 @@ describe('Cursor', function() {
                         test.equal(total, total2);
 
                         // Let's close the db
-                        client.close();
-                        done();
+                        client.close(done);
                       });
                     }
                   });
@@ -1683,8 +1659,7 @@ describe('Cursor', function() {
                         test.equal(total, total2);
 
                         // Let's close the db
-                        client.close();
-                        done();
+                        client.close(done);
                       });
                     }
                   });
@@ -1734,8 +1709,7 @@ describe('Cursor', function() {
                 test.equal(null, err);
                 test.equal(true, cursor.isClosed());
                 // Let's close the db
-                client.close();
-                done();
+                client.close(done);
               });
             });
           });
@@ -1777,8 +1751,7 @@ describe('Cursor', function() {
                 test.equal(1, items.length);
                 test.equal(2, items[0].a);
                 test.equal(undefined, items[0].x);
-                client.close();
-                done();
+                client.close(done);
               });
           });
         });
@@ -1816,8 +1789,7 @@ describe('Cursor', function() {
               test.equal(1, items.length);
               test.equal(2, items[0].a);
               test.equal(undefined, items[0].x);
-              client.close();
-              done();
+              client.close(done);
             });
           });
         });
@@ -1876,8 +1848,7 @@ describe('Cursor', function() {
                     test.equal(null, err);
                     test.equal(1000, c);
                     test.equal(1000, total);
-                    client.close();
-                    done();
+                    client.close(done);
                   });
                 }
               });
@@ -1967,8 +1938,7 @@ describe('Cursor', function() {
               test.equal(1, paused);
               test.equal(1, resumed);
               test.strictEqual(stream.isClosed(), true);
-              client.close();
-              done();
+              client.close(done);
             }
           });
         });
@@ -2027,8 +1997,7 @@ describe('Cursor', function() {
                     test.equal(undefined, err);
                     test.strictEqual(0, i);
                     test.strictEqual(true, stream.isClosed());
-                    client.close();
-                    done();
+                    client.close(done);
                   }
                 };
               }
@@ -2091,8 +2060,7 @@ describe('Cursor', function() {
                 test.strictEqual(5, i);
                 test.strictEqual(1, finished);
                 test.strictEqual(true, stream.isClosed());
-                client.close();
-                done();
+                client.close(done);
               }, 150);
             }
           });
@@ -2224,8 +2192,7 @@ describe('Cursor', function() {
                     test.equal(5, i);
                     test.equal(2, finished);
                     test.equal(true, stream.isClosed());
-                    client.close();
-                    done();
+                    client.close(done);
                   }, 150);
                 }
               };
@@ -2299,8 +2266,7 @@ describe('Cursor', function() {
               test.ok(/Bob/.test(contents));
               test.ok(/Joe/.test(contents));
               fs.unlinkSync(filename);
-              client.close();
-              done();
+              client.close(done);
             }
           });
         });
@@ -2427,8 +2393,7 @@ describe('Cursor', function() {
                 // Even though cursor is exhausted, should not close session
                 // // unless cursor is manually closed, due to awaitdata / tailable
                 cursor.close();
-                client.close();
-                done();
+                client.close(done);
               }
             });
           });
@@ -2473,8 +2438,7 @@ describe('Cursor', function() {
             if (err != null) {
               test.ok(called);
               cursor.rewind = rewind;
-              client.close();
-              done();
+              client.close(done);
             }
           });
         });
@@ -2517,8 +2481,7 @@ describe('Cursor', function() {
                 // Even though cursor is exhausted, should not close session
                 // unless cursor is manually closed, due to awaitdata / tailable
                 cursor.close();
-                client.close();
-                done();
+                client.close(done);
               } else {
                 cursor.kill();
               }
@@ -2552,8 +2515,7 @@ describe('Cursor', function() {
               test.ok(err != null);
             });
 
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -2594,8 +2556,7 @@ describe('Cursor', function() {
               if (err != null) {
                 // kill cursor b/c cursor is tailable / awaitable
                 cursor.close();
-                client.close();
-                done();
+                client.close(done);
               } else {
                 cursor.kill();
               }
@@ -2823,8 +2784,7 @@ describe('Cursor', function() {
                     test.equal(null, err);
                     test.ok(result != null);
 
-                    client.close();
-                    done();
+                    client.close(done);
                   });
               });
           });
@@ -2864,8 +2824,7 @@ describe('Cursor', function() {
               test.equal(null, err);
 
               test.equal('camera', result[0].name);
-              client.close();
-              done();
+              client.close(done);
             });
         });
       });
@@ -2901,8 +2860,7 @@ describe('Cursor', function() {
           .find()
           .setReadPreference('secondary');
 
-        client.close();
-        done();
+        client.close(done);
       });
     }
   });
@@ -2955,8 +2913,7 @@ describe('Cursor', function() {
                   test.equal(null, err);
                   if (item == null) {
                     test.equal(30000, total);
-                    client.close();
-                    done();
+                    client.close(done);
                   } else {
                     total++;
                   }
@@ -3018,8 +2975,7 @@ describe('Cursor', function() {
                     test.equal(null, err);
 
                     test.equal(30000, items.length);
-                    client.close();
-                    done();
+                    client.close(done);
                   });
                 }
               });
@@ -3072,8 +3028,7 @@ describe('Cursor', function() {
                 .count(true, function(err, count) {
                   test.equal(null, err);
                   test.equal(10, count);
-                  client.close();
-                  done();
+                  client.close(done);
                 });
             });
         });
@@ -3114,8 +3069,7 @@ describe('Cursor', function() {
 
             // Close cursor b/c we did not exhaust cursor
             cursor.close();
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -3166,8 +3120,7 @@ describe('Cursor', function() {
                 test.equal(null, err);
                 test.equal(100, count);
 
-                client.close();
-                done();
+                client.close(done);
               });
             });
           });
@@ -3232,8 +3185,7 @@ describe('Cursor', function() {
                         test.equal(null, err);
                         test.equal(2, count);
 
-                        client.close();
-                        done();
+                        client.close(done);
                       });
                     });
                   });
@@ -3288,8 +3240,7 @@ describe('Cursor', function() {
                 test.equal(finished, false);
                 finished = true;
 
-                client.close();
-                done();
+                client.close(done);
                 return false;
               }
             });
@@ -3331,8 +3282,7 @@ describe('Cursor', function() {
             test.equal(null, err);
             test.equal('brown', doc.color);
 
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -3374,9 +3324,8 @@ describe('Cursor', function() {
                     test.equal(null, err);
 
                     cursor.next(function(err) {
-                      client.close();
                       test.equal(null, err);
-                      done();
+                      client.close(done);
                     });
                   });
                 });
@@ -3400,13 +3349,12 @@ describe('Cursor', function() {
         var db = client.db(configuration.db);
         test.equal(null, err);
 
-        db.collection('myCollection').find({}, function(error, cursor) {
+        db.collection('myCollection').find({}, function(err, cursor) {
           test.equal(null, err);
           test.equal('myCollection', cursor.namespace.collection);
           test.equal('integration_tests', cursor.namespace.db);
 
-          client.close();
-          done();
+          client.close(done);
         });
       });
     }
@@ -3463,8 +3411,7 @@ describe('Cursor', function() {
               cursor.count(function(err) {
                 test.equal(null, err);
 
-                client.close();
-                done();
+                client.close(done);
               });
             });
           });
@@ -3514,8 +3461,7 @@ describe('Cursor', function() {
             cursor.toArray(function(err) {
               test.equal(null, err);
 
-              client.close();
-              done();
+              client.close(done);
             });
           });
         });
@@ -3573,8 +3519,7 @@ describe('Cursor', function() {
               test.equal(1, x.a);
             });
 
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -3628,8 +3573,7 @@ describe('Cursor', function() {
 
             // Close cursor b/c we did not exhaust cursor
             cursor.close();
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -3683,8 +3627,7 @@ describe('Cursor', function() {
             if (doc) {
               test.equal(1, doc.a);
             } else {
-              client.close();
-              done();
+              client.close(done);
             }
           });
         });
@@ -3742,8 +3685,7 @@ describe('Cursor', function() {
             },
             function(err) {
               test.equal(null, err);
-              client.close();
-              done();
+              client.close(done);
             }
           );
         });
@@ -3798,8 +3740,7 @@ describe('Cursor', function() {
             },
             function(err) {
               test.equal(null, err);
-              client.close();
-              done();
+              client.close(done);
             }
           );
         });
@@ -3845,8 +3786,7 @@ describe('Cursor', function() {
               test.equal(null, err);
               test.equal(2016, docs.length);
 
-              client.close();
-              done();
+              client.close(done);
             });
         });
       });
@@ -3896,8 +3836,7 @@ describe('Cursor', function() {
                 }, 300);
               } else {
                 test.ok(new Date().getTime() - s.getTime() >= 500);
-                client.close();
-                done();
+                client.close(done);
               }
             });
           });
@@ -3942,8 +3881,7 @@ describe('Cursor', function() {
           });
 
           cursor.on('close', function() {
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -3998,8 +3936,7 @@ describe('Cursor', function() {
                   test.equal(null, err);
 
                   test.equal(1, items.length);
-                  client.close();
-                  done();
+                  client.close(done);
                 });
             });
           });
@@ -4061,8 +3998,7 @@ describe('Cursor', function() {
                     test.equal(null, err);
                     test.equal(50, c);
 
-                    client.close();
-                    done();
+                    client.close(done);
                   });
               });
           });
@@ -4114,8 +4050,7 @@ describe('Cursor', function() {
               test.equal(null, err);
               test.ok(cursor.cursorState.cursorId.equals(Long.ZERO));
 
-              client.close();
-              done();
+              client.close(done);
             });
           });
         });
@@ -4164,8 +4099,7 @@ describe('Cursor', function() {
 
             listener.uninstrument();
 
-            client.close();
-            done();
+            client.close(done);
           });
       });
     }
@@ -4217,8 +4151,7 @@ describe('Cursor', function() {
 
             listener.uninstrument();
 
-            client.close();
-            done();
+            client.close(done);
           }
         );
       });
@@ -4294,7 +4227,7 @@ describe('Cursor', function() {
                     expect(response.ok).to.equal(1);
                     expect(response.cursorsKilled[0].equals(longId)).to.be.ok;
                     cursor.close();
-                    client.close();
+                    return client.close();
                   });
                 });
             });
@@ -4370,8 +4303,7 @@ describe('Cursor', function() {
 
             cursor.next(function() {
               test.equal(client.topology.s.sessions.size, 0);
-              client.close();
-              done();
+              client.close(done);
             });
           });
         });
@@ -4417,8 +4349,7 @@ describe('Cursor', function() {
                   test.equal(client.topology.s.sessions.size, 1);
                   cursor.next(function() {
                     test.equal(client.topology.s.sessions.size, 0);
-                    client.close();
-                    done();
+                    client.close(done);
                   });
                 });
               });

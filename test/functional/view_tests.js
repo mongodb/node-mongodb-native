@@ -64,8 +64,7 @@ describe('Views', function() {
               pipeline: [{ $match: {} }]
             });
 
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });

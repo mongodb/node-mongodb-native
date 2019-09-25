@@ -65,8 +65,7 @@ describe('ObjectID', function() {
         var intervalId = setInterval(function() {
           if (number_of_tests_done === 3) {
             clearInterval(intervalId);
-            client.close();
-            done();
+            client.close(done);
           }
         }, 100);
       });
@@ -142,8 +141,7 @@ describe('ObjectID', function() {
             test.equal('' + date, '' + items[0]._id);
 
             // Let's close the db
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -243,8 +241,7 @@ describe('ObjectID', function() {
                 test.equal(compareDate.getMonth(), date2.getMonth());
                 test.equal(compareDate.getHours(), date2.getHours());
                 // Let's close the db
-                client.close();
-                done();
+                client.close(done);
               });
             });
           }, 2000);

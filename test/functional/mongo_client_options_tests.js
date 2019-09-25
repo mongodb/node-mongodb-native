@@ -32,8 +32,7 @@ describe('MongoClient Options', function() {
           test.ok(client.topology.poolSize >= 1);
           test.equal(4, client.topology.s.coreTopology.s.pool.size);
           test.equal(true, client.topology.autoReconnect);
-          client.close();
-          done();
+          client.close(done);
         })
       );
     }
@@ -63,8 +62,7 @@ describe('MongoClient Options', function() {
           test.ok(client.topology.poolSize >= 1);
           test.equal(4, client.topology.s.coreTopology.s.pool.size);
           test.equal(true, client.topology.autoReconnect);
-          client.close();
-          done();
+          client.close(done);
         })
       );
     }

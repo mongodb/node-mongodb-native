@@ -65,8 +65,7 @@ describe('Bulk', function() {
             test.equal(null, error);
 
             // Finish up test
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -216,8 +215,7 @@ describe('Bulk', function() {
             test.equal(true, error.getOperation().upsert);
 
             // Finish up test
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -255,8 +253,7 @@ describe('Bulk', function() {
         } catch (err) {} // eslint-disable-line
 
         // Finish up test
-        client.close();
-        done();
+        client.close(done);
       });
     }
   });
@@ -299,8 +296,7 @@ describe('Bulk', function() {
           test.equal(false, result.hasWriteErrors());
 
           // Finish up test
-          client.close();
-          done();
+          client.close(done);
         });
       });
     }
@@ -353,8 +349,7 @@ describe('Bulk', function() {
                 batch.execute(function(err) {
                   test.ok(err != null);
 
-                  client.close();
-                  done();
+                  client.close(done);
                 });
               });
             });
@@ -412,8 +407,7 @@ describe('Bulk', function() {
               test.ok(error.errmsg != null);
               test.equal(1, error.getOperation().b);
 
-              client.close();
-              done();
+              client.close(done);
             });
           });
         });
@@ -484,8 +478,7 @@ describe('Bulk', function() {
               test.equal(3, ids[1].index);
               test.ok(ids[1]._id != null);
 
-              client.close();
-              done();
+              client.close(done);
             });
           });
         });
@@ -530,8 +523,7 @@ describe('Bulk', function() {
           test.equal(2, upserts[0]._id);
 
           // Finish up test
-          client.close();
-          done();
+          client.close(done);
         });
       });
     }
@@ -554,8 +546,7 @@ describe('Bulk', function() {
           test.equal(err instanceof Error, true);
           test.equal(err.message, 'Invalid Operation, no operations specified');
 
-          client.close();
-          done();
+          client.close(done);
         });
       });
     }
@@ -596,8 +587,7 @@ describe('Bulk', function() {
           test.equal(0, result.nRemoved);
           test.equal(false, result.hasWriteErrors());
 
-          client.close();
-          done();
+          client.close(done);
         });
       });
     }
@@ -663,8 +653,7 @@ describe('Bulk', function() {
             test.equal(null, error);
 
             // Finish up test
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -746,8 +735,7 @@ describe('Bulk', function() {
         } catch (err) {} // eslint-disable-line
 
         // Finish up test
-        client.close();
-        done();
+        client.close(done);
       });
     }
   });
@@ -788,8 +776,7 @@ describe('Bulk', function() {
           test.equal(false, result.hasWriteErrors());
 
           // Finish up test
-          client.close();
-          done();
+          client.close(done);
         });
       });
     }
@@ -848,8 +835,7 @@ describe('Bulk', function() {
               batch.execute(function(err) {
                 test.ok(err != null);
 
-                client.close();
-                done();
+                client.close(done);
               });
             });
           });
@@ -907,8 +893,7 @@ describe('Bulk', function() {
             test.ok(error.code === 11000 || error.code === 11001);
             test.ok(error.errmsg != null);
 
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -1032,8 +1017,7 @@ describe('Bulk', function() {
               test.equal(3, ids[1].index);
               test.ok(ids[1]._id != null);
 
-              client.close();
-              done();
+              client.close(done);
             });
           });
         });
@@ -1076,8 +1060,7 @@ describe('Bulk', function() {
           test.equal(2, upserts[0]._id);
 
           // Finish up test
-          client.close();
-          done();
+          client.close(done);
         });
       });
     }
@@ -1113,8 +1096,7 @@ describe('Bulk', function() {
           test.equal('MongoError: Bulk find operation must specify a selector', e.toString());
         }
 
-        client.close();
-        done();
+        client.close(done);
       });
     }
   });
@@ -1136,8 +1118,7 @@ describe('Bulk', function() {
             test.equal(err instanceof Error, true);
             test.equal(err.message, 'Invalid Operation, no operations specified');
 
-            client.close();
-            done();
+            client.close(done);
           });
       });
     }
@@ -1175,8 +1156,7 @@ describe('Bulk', function() {
           test.equal(0, result.nRemoved);
           test.equal(false, result.hasWriteErrors());
 
-          client.close();
-          done();
+          client.close(done);
         });
       });
     }
@@ -1208,8 +1188,7 @@ describe('Bulk', function() {
           test.ok(err.code != null);
           test.ok(err.errmsg != null);
 
-          client.close();
-          done();
+          client.close(done);
         });
       });
     }
@@ -1247,8 +1226,7 @@ describe('Bulk', function() {
             test.equal(null, err);
             test.equal(5, c);
 
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -1281,8 +1259,7 @@ describe('Bulk', function() {
           test.ok(err.code != null);
           test.ok(err.errmsg != null);
 
-          client.close();
-          done();
+          client.close(done);
         });
       });
     }
@@ -1316,8 +1293,7 @@ describe('Bulk', function() {
           .update({ $set: { b: 1 } });
         test.equal(2, batch.length);
 
-        client.close();
-        done();
+        client.close(done);
       });
     }
   });
@@ -1363,8 +1339,7 @@ describe('Bulk', function() {
           operation.execute(function(err) {
             test.equal(null, err);
 
-            client.close();
-            done();
+            client.close(done);
           });
         });
 
@@ -1424,8 +1399,7 @@ describe('Bulk', function() {
           operation.execute(function(err) {
             test.equal(null, err);
 
-            client.close();
-            done();
+            client.close(done);
           });
         });
 
@@ -1476,8 +1450,7 @@ describe('Bulk', function() {
             test.equal(null, err);
             test.equal(5, c);
 
-            client.close();
-            done();
+            client.close(done);
           });
         });
       });
@@ -1496,8 +1469,7 @@ describe('Bulk', function() {
           db.collection('doesnt_matter').insertMany([], function(err) {
             test.equal(err instanceof Error, true);
             test.equal(err.message, 'Invalid Operation, no operations specified');
-            client.close();
-            done();
+            client.close(done);
           });
         });
       }
@@ -1517,8 +1489,7 @@ describe('Bulk', function() {
           db.collection('doesnt_matter').insertMany([], { ordered: false }, function(err) {
             test.equal(err instanceof Error, true);
             test.equal(err.message, 'Invalid Operation, no operations specified');
-            client.close();
-            done();
+            client.close(done);
           });
         });
       }
@@ -1543,7 +1514,7 @@ describe('Bulk', function() {
         test.equal(err.message, 'Invalid Operation, no operations specified');
       })
       .then(function() {
-        client.close();
+        return client.close();
       });
   });
 
@@ -1622,20 +1593,26 @@ describe('Bulk', function() {
   it('should propagate the proper error from executing an empty ordered batch', function() {
     const client = this.configuration.newClient();
 
-    return client.connect().then(() => {
-      const collection = client.db(this.configuration.db).collection('doesnt_matter');
+    return client
+      .connect()
+      .then(() => {
+        const collection = client.db(this.configuration.db).collection('doesnt_matter');
 
-      return testPropagationOfBulkWriteError(collection.initializeOrderedBulkOp());
-    });
+        return testPropagationOfBulkWriteError(collection.initializeOrderedBulkOp());
+      })
+      .then(() => client.close());
   });
 
   it('should propagate the proper error from executing an empty unordered batch', function() {
     const client = this.configuration.newClient();
 
-    return client.connect().then(() => {
-      const collection = client.db(this.configuration.db).collection('doesnt_matter');
+    return client
+      .connect()
+      .then(() => {
+        const collection = client.db(this.configuration.db).collection('doesnt_matter');
 
-      return testPropagationOfBulkWriteError(collection.initializeUnorderedBulkOp());
-    });
+        return testPropagationOfBulkWriteError(collection.initializeUnorderedBulkOp());
+      })
+      .then(() => client.close());
   });
 });
