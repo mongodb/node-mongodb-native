@@ -91,8 +91,8 @@ class NativeConfiguration {
     // }
 
     // Fall back
-    let dbHost = (serverOptions && serverOptions.host) || 'localhost';
-    const dbPort = (serverOptions && serverOptions.port) || 27017;
+    let dbHost = (serverOptions && serverOptions.host) || this.options.host;
+    const dbPort = (serverOptions && serverOptions.port) || this.options.port;
     if (dbHost.indexOf('.sock') !== -1) {
       dbHost = qs.escape(dbHost);
     }
