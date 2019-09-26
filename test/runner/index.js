@@ -6,6 +6,7 @@ const MongoClient = require('../..').MongoClient;
 const TestConfiguration = require('./config');
 const parseConnectionString = require('../../lib/core/uri_parser');
 const eachAsync = require('../../lib/core/utils').eachAsync;
+const mock = require('mongodb-mock-server');
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
 const filters = [];
@@ -80,6 +81,9 @@ before(function(_done) {
     });
   });
 });
+
+// ensure all mock connections are closed after the suite is run
+after(() => mock.cleanup());
 
 // optionally enable test runner-wide plugins
 require('./plugins/session_leak_checker');
