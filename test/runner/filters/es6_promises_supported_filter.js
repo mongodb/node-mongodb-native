@@ -9,14 +9,13 @@ class ES6PromisesSupportedFilter {
     if (!test.metadata) return true;
     if (!test.metadata.requires) return true;
     if (!test.metadata.requires.promises) return true;
-    let check = false;
 
     try {
       const promise = new Promise(function() {}); // eslint-disable-line
-      check = true;
+      return true;
     } catch (err) {} // eslint-disable-line
 
-    return check;
+    return false;
   }
 }
 
