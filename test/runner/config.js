@@ -9,21 +9,47 @@ const core = require('../../lib/core');
 class NativeConfiguration {
   constructor(parsedURI, context) {
     this.topologyType = context.topologyType;
+    this.options = Object.assign(
+      {
+        host: parsedURI.hosts[0] ? parsedURI.hosts[0].host : 'localhost',
+        port: parsedURI.hosts[0] ? parsedURI.hosts[0].port : 27017,
+        db: parsedURI.auth && parsedURI.auth.db ? parsedURI.auth.db : 'integration_tests'
+      },
+      parsedURI.options
+    );
 
     // this.options = environment || {};
     // this.host = environment.host || 'localhost';
     // this.port = environment.port || 27017;
     // this.db = environment.db || 'integration_tests';
     // this.setName = environment.setName || 'rs';
-    // this.writeConcern = function() {
-    //   return { w: 1 };
-    // };
 
     // this.topology = environment.topology || this.defaultTopology;
     // this.environment = environment;
     // if (environment.setName) {
     //   this.replicasetName = environment.setName || 'rs';
     // }
+
+    this.mongo = this.require = require('../..');
+    this.writeConcern = function() {
+      return { w: 1 };
+    };
+  }
+
+  get host() {
+    return this.options.host;
+  }
+
+  get port() {
+    return this.options.port;
+  }
+
+  set db(_db) {
+    this.options.db = _db;
+  }
+
+  get db() {
+    return this.options.db;
   }
 
   usingUnifiedTopology() {
@@ -31,6 +57,17 @@ class NativeConfiguration {
   }
 
   newClient(dbOptions, serverOptions) {
+    // console.trace('newClient');
+
+    if (typeof dbOptions === 'string') {
+      return new MongoClient(
+        dbOptions,
+        this.usingUnifiedTopology()
+          ? Object.assign({ useUnifiedTopology: true }, serverOptions)
+          : serverOptions
+      );
+    }
+
     // support MongoClient contructor form (url, options) for `newClient`
     if (typeof dbOptions === 'string') {
       return new MongoClient(
@@ -47,21 +84,21 @@ class NativeConfiguration {
       serverOptions.useUnifiedTopology = true;
     }
 
-    // Set up the options
-    const keys = Object.keys(this.options);
-    if (keys.indexOf('sslOnNormalPorts') !== -1) {
-      serverOptions.ssl = true;
-    }
+    // // Set up the options
+    // const keys = Object.keys(this.options);
+    // if (keys.indexOf('sslOnNormalPorts') !== -1) {
+    //   serverOptions.ssl = true;
+    // }
 
     // Fall back
     let dbHost = (serverOptions && serverOptions.host) || 'localhost';
-    const dbPort = (serverOptions && serverOptions.port) || this.options.port || 27017;
+    const dbPort = (serverOptions && serverOptions.port) || 27017;
     if (dbHost.indexOf('.sock') !== -1) {
       dbHost = qs.escape(dbHost);
     }
 
-    if (this.options.setName) {
-      Object.assign(dbOptions, { replicaSet: this.options.setName, auto_reconnect: false });
+    if (this.options.replicaSet) {
+      Object.assign(dbOptions, { replicaSet: this.options.replicaSet, auto_reconnect: false });
     }
 
     const connectionString = url.format({
@@ -95,13 +132,21 @@ class NativeConfiguration {
     return core.Server(host, port, options);
   }
 
-  // url(username, password) {
-  //   const url = this.options.url || 'mongodb://%slocalhost:27017/' + this.db;
+  url(username, password) {
+    const urlObject = {
+      protocol: 'mongodb',
+      slashes: true,
+      hostname: this.options.host,
+      port: this.options.port,
+      pathname: `/${this.options.db}`
+    };
 
-  //   // Fall back
-  //   const auth = username && password ? f('%s:%s@', username, password) : '';
-  //   return f(url, auth);
-  // }
+    if (username || password) {
+      urlObject.auth = password == null ? username : `${username}:${password}`;
+    }
+
+    return url.format(urlObject);
+  }
 
   writeConcernMax() {
     if (this.topologyType !== TopologyType.Single) {
