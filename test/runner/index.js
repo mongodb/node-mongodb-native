@@ -44,6 +44,11 @@ function initializeFilters(client, callback) {
   );
 }
 
+function filterOutTests(suite) {
+  suite.tests = suite.tests.filter(test => filters.every(f => f.filter(test)));
+  suite.suites.forEach(suite => filterOutTests(suite));
+}
+
 before(function(_done) {
   console.log(`connection string: ${MONGODB_URI}`);
   const client = new MongoClient(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -61,6 +66,9 @@ before(function(_done) {
         return;
       }
 
+      // replace this when mocha supports dynamic skipping with `afterEach`
+      filterOutTests(this._runnable.parent);
+
       parseConnectionString(MONGODB_URI, (err, parsedURI) => {
         if (err) {
           done(err);
@@ -73,21 +81,3 @@ before(function(_done) {
     });
   });
 });
-
-beforeEach(function() {
-  for (let i = 0; i < filters.length; ++i) {
-    const filter = filters[i];
-    if (!filter.filter(this.currentTest)) {
-      // if we filter out a test, we'd like to ensure that any before hooks are skipped, as
-      // long as that hook is not the root hook.
-      if (!this.currentTest.parent.parent.root) {
-        this.currentTest.parent._beforeEach = [];
-      }
-
-      this.skip();
-      return;
-    }
-  }
-});
-
-afterEach(() => mock.cleanup());
