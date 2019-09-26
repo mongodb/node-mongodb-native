@@ -9,15 +9,13 @@ class ES6GeneratorsSupportedFilter {
     if (!test.metadata) return true;
     if (!test.metadata.requires) return true;
     if (!test.metadata.requires.generators) return true;
-    let check = false;
 
     try {
       eval('(function *(){})'); // eslint-disable-line
-      check = true;
+      return true;
     } catch (err) {} // eslint-disable-line
 
-    // Do not execute the test
-    return check;
+    return false;
   }
 }
 
