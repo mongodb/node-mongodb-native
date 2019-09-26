@@ -83,3 +83,4 @@ before(function(_done) {
 
 // optionally enable test runner-wide plugins
 require('./plugins/session_leak_checker');
+require('./plugins/client_leak_checker');
