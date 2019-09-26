@@ -5,7 +5,6 @@ const fs = require('fs');
 const MongoClient = require('../..').MongoClient;
 const TestConfiguration = require('./config');
 const parseConnectionString = require('../../lib/core/uri_parser');
-const mock = require('mongodb-mock-server');
 const eachAsync = require('../../lib/core/utils').eachAsync;
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
@@ -81,3 +80,6 @@ before(function(_done) {
     });
   });
 });
+
+// optionally enable test runner-wide plugins
+require('./plugins/session_leak_checker');
