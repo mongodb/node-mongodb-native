@@ -1,5 +1,6 @@
 'use strict';
 
+const topologyType = require('../../../lib/core/topologies/shared').topologyType;
 const TopologyType = require('../../../lib/core/sdam/topology_description').TopologyType;
 
 /**
@@ -14,23 +15,9 @@ const TopologyType = require('../../../lib/core/sdam/topology_description').Topo
  */
 class MongoDBTopologyFilter {
   initializeFilter(client, context, callback) {
-    let topologyType = client.topology.type;
-    if (typeof topologyType === 'string') {
-      if (topologyType === 'server') {
-        if (client.topology.s.coreTopology.ismaster.hosts) {
-          topologyType = TopologyType.ReplicaSetWithPrimary;
-        } else {
-          topologyType = TopologyType.Single;
-        }
-      } else if (topologyType === 'mongos') {
-        topologyType = TopologyType.Sharded;
-      } else {
-        callback(new TypeError(`unknown topology type detected: ${topologyType}`));
-      }
-    }
-
-    context.topologyType = topologyType;
-    this.runtimeTopology = topologyTypeToString(topologyType);
+    let type = topologyType(client.topology);
+    context.topologyType = type;
+    this.runtimeTopology = topologyTypeToString(type);
     callback();
   }
 
