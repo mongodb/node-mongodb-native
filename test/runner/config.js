@@ -18,18 +18,6 @@ class NativeConfiguration {
       parsedURI.options
     );
 
-    // this.options = environment || {};
-    // this.host = environment.host || 'localhost';
-    // this.port = environment.port || 27017;
-    // this.db = environment.db || 'integration_tests';
-    // this.setName = environment.setName || 'rs';
-
-    // this.topology = environment.topology || this.defaultTopology;
-    // this.environment = environment;
-    // if (environment.setName) {
-    //   this.replicasetName = environment.setName || 'rs';
-    // }
-
     this.mongo = this.require = require('../..');
     this.writeConcern = function() {
       return { w: 1 };
@@ -52,13 +40,20 @@ class NativeConfiguration {
     return this.options.db;
   }
 
+  // legacy accessors, consider for removal
+  get replicasetName() {
+    return this.options.replicaSet;
+  }
+
+  get setName() {
+    return this.options.replicaSet;
+  }
+
   usingUnifiedTopology() {
     return !!process.env.MONGODB_UNIFIED_TOPOLOGY;
   }
 
   newClient(dbOptions, serverOptions) {
-    // console.trace('newClient');
-
     if (typeof dbOptions === 'string') {
       return new MongoClient(
         dbOptions,
@@ -133,12 +128,18 @@ class NativeConfiguration {
   }
 
   url(username, password) {
+    const query = {};
+    if (this.options.replicaSet) {
+      Object.assign(query, { replicaSet: this.options.replicaSet, auto_reconnect: false });
+    }
+
     const urlObject = {
       protocol: 'mongodb',
       slashes: true,
       hostname: this.options.host,
       port: this.options.port,
-      pathname: `/${this.options.db}`
+      pathname: `/${this.options.db}`,
+      query
     };
 
     if (username || password) {
