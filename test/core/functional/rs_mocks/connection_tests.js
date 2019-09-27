@@ -358,12 +358,12 @@ describe('ReplSet Connection Tests (mocks)', function() {
         // Joined
         server.on('joined', function() {
           numberOfEvents = numberOfEvents + 1;
-          if (numberOfEvents === 3) validations();
+          if (numberOfEvents === 4) validations();
         });
 
         server.on('failed', function() {
           numberOfEvents = numberOfEvents + 1;
-          if (numberOfEvents === 3) validations();
+          if (numberOfEvents === 4) validations();
         });
 
         server.connect();

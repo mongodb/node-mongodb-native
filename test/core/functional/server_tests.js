@@ -994,7 +994,7 @@ describe('Server tests', function() {
 
         const config = this.configuration;
         var client = config.newTopology(server.address().host, server.address().port);
-        client.on('error', error => {
+        client.once('error', error => {
           let err;
           try {
             expect(error).to.be.an.instanceOf(Error);
