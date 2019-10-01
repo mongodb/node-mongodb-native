@@ -273,7 +273,7 @@ describe('examples(transactions):', function() {
           await coll2.insertOne({ xyz: 999 }, { session });
         }, transactionOptions);
       } finally {
-        session.endSession();
+        await session.endSession();
         await client.close();
       }
       // End Transactions withTxn API Example 1
