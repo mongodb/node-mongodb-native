@@ -1,0 +1,67 @@
+====================================
+MongoDB Node.js Driver Documentation
+====================================
+
+Welcome to the MongoDB Node.js 3.3 driver documentation.
+
+What's New
+----------
+
+The :doc:`whats-new` guide explains the major new features of the driver.
+
+Starting points
+---------------
+
+
+* :doc:`installation-guide`
+* :doc:`quick-start`
+* :doc:`/tutorials/crud`
+* :doc:`/tutorials/connect/index`
+
+Next steps
+----------
+
+
+* `Authentication <{{< relref "tutorials/connect/authenticating.md" >}}>`_
+* `Grid FS <{{< relref "tutorials/gridfs/streaming.md" >}}>`_
+
+Advanced topics
+---------------
+
+Advanced features for the driver.
+
+
+* `SSL <{{< relref "tutorials/connect/ssl.md" >}}>`_
+* `Logging <{{< relref "reference/management/logging.md" >}}>`_
+* `APM <{{< relref "reference/management/apm.md" >}}>`_
+* `Topology monitoring <{{< relref "reference/management/sdam-monitoring.md" >}}>`_
+* `FAQ <{{< relref "reference/faq/index.md" >}}>`_
+
+.. class:: hidden
+
+   .. toctree::
+      :titlesonly:
+
+      installation-guide
+      quick-start
+      whats-new
+      /tutorials/connect/connect
+      /tutorials/connect/authentication
+      /tutorials/connect/ssl
+      /tutorials/collations
+      /tutorials/collections
+      /tutorials/create-indexes
+      /tutorials/crud
+      /tutorials/projections
+      /tutorials/aggregation
+      /tutorials/text-search
+      /tutorials/geospatial-search
+      /tutorials/commands
+      /tutorials/gridfs
+      /connection-settings
+      /management/logging
+      /management/apm
+      /management/sdam-monitoring
+      /cursors
+      /faq
+      /issues-help
