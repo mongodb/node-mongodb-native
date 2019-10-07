@@ -1,7 +1,7 @@
 'use strict';
 
 exports.defineTags = function(dictionary) {
-  dictionary.defineTag('merge-props', {
+  dictionary.defineTag('mergeProps', {
     mustHaveValue: true,
     canHaveName: true,
     onTagged: function(doclet, tag) {
@@ -10,7 +10,7 @@ exports.defineTags = function(dictionary) {
     }
   });
 
-  dictionary.defineTag('merge-params', {
+  dictionary.defineTag('mergeParams', {
     mustHaveValue: true,
     canHaveType: true,
     canHaveName: true,
