@@ -289,15 +289,9 @@
             
             <span class="subtitle">Methods</span>
             
-                <li data-name="BulkOperationBase#bulkExecute"><a href="BulkOperationBase.html#bulkExecute">bulkExecute</a></li>
-            
                 <li data-name="BulkOperationBase#execute"><a href="BulkOperationBase.html#execute">execute</a></li>
             
-                <li data-name="BulkOperationBase#finalOptionsHandler"><a href="BulkOperationBase.html#finalOptionsHandler">finalOptionsHandler</a></li>
-            
                 <li data-name="BulkOperationBase#find"><a href="BulkOperationBase.html#find">find</a></li>
-            
-                <li data-name="BulkOperationBase#handleWriteError"><a href="BulkOperationBase.html#handleWriteError">handleWriteError</a></li>
             
                 <li data-name="BulkOperationBase#insert"><a href="BulkOperationBase.html#insert">insert</a></li>
             
@@ -1785,15 +1779,9 @@
             
             <span class="subtitle">Methods</span>
             
-                <li data-name="OrderedBulkOperation#bulkExecute"><a href="OrderedBulkOperation.html#bulkExecute">bulkExecute</a></li>
-            
                 <li data-name="OrderedBulkOperation#execute"><a href="OrderedBulkOperation.html#execute">execute</a></li>
             
-                <li data-name="OrderedBulkOperation#finalOptionsHandler"><a href="OrderedBulkOperation.html#finalOptionsHandler">finalOptionsHandler</a></li>
-            
                 <li data-name="OrderedBulkOperation#find"><a href="OrderedBulkOperation.html#find">find</a></li>
-            
-                <li data-name="OrderedBulkOperation#handleWriteError"><a href="OrderedBulkOperation.html#handleWriteError">handleWriteError</a></li>
             
                 <li data-name="OrderedBulkOperation#insert"><a href="OrderedBulkOperation.html#insert">insert</a></li>
             
@@ -2032,15 +2020,9 @@
             
             <span class="subtitle">Methods</span>
             
-                <li data-name="UnorderedBulkOperation#bulkExecute"><a href="UnorderedBulkOperation.html#bulkExecute">bulkExecute</a></li>
-            
                 <li data-name="UnorderedBulkOperation#execute"><a href="UnorderedBulkOperation.html#execute">execute</a></li>
             
-                <li data-name="UnorderedBulkOperation#finalOptionsHandler"><a href="UnorderedBulkOperation.html#finalOptionsHandler">finalOptionsHandler</a></li>
-            
                 <li data-name="UnorderedBulkOperation#find"><a href="UnorderedBulkOperation.html#find">find</a></li>
-            
-                <li data-name="UnorderedBulkOperation#handleWriteError"><a href="UnorderedBulkOperation.html#handleWriteError">handleWriteError</a></li>
             
                 <li data-name="UnorderedBulkOperation#insert"><a href="UnorderedBulkOperation.html#insert">insert</a></li>
             
@@ -2300,203 +2282,16 @@ OrderedBulkOperation instance.
             
 <dt>
     <div class="nameContainer inherited">
-        <h4 class="name" id="bulkExecute">
-            
-                <span class="inherited"><a href="BulkOperationBase.html#bulkExecute">inherited</a></span>
-            
-            bulkExecute<span class="signature">(bulk, writeConcern, options, callback)</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="lib_bulk_common.js.html">lib/bulk/common.js</a>, <a href="lib_bulk_common.js.html#line950">line 950</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Execute next write command in a chain</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>bulk</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">class</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                <p>either OrderedBulkOperation or UnorderdBulkOperation</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>writeConcern</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                </td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>options</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                </td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>callback</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                </td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer inherited">
         <h4 class="name" id="execute">
             
                 <span class="inherited"><a href="BulkOperationBase.html#execute">inherited</a></span>
             
-            execute<span class="signature">(<span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            execute<span class="signature">(<span class="optional">_writeConcern</span>, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise|void}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_bulk_common.js.html">lib/bulk/common.js</a>, <a href="lib_bulk_common.js.html#line1001">line 1001</a>
+            <a href="lib_bulk_common.js.html">lib/bulk/common.js</a>, <a href="lib_bulk_common.js.html#line1072">line 1072</a>
         </div>
         
     </div>
@@ -2507,7 +2302,7 @@ OrderedBulkOperation instance.
     
     
     <div class="description">
-        <p>Execute the ordered bulk operation</p>
+        <p>Execute the bulk operation</p>
     </div>
     
 
@@ -2534,6 +2329,36 @@ OrderedBulkOperation instance.
 	</thead>
 	
 	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>_writeConcern</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#WriteConcern">WriteConcern</a></span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Optional write concern. Can also be specified through options.</p></td>
+        </tr>
+	
 	
 	
         <tr>
@@ -2758,7 +2583,7 @@ OrderedBulkOperation instance.
                         
                     
                 
-                <p>The result callback</p></td>
+                <p>A callback that will be invoked when bulkWrite finishes/errors</p></td>
         </tr>
 	
 	
@@ -2870,248 +2695,16 @@ Promise if no callback passed
             
 <dt>
     <div class="nameContainer inherited">
-        <h4 class="name" id="finalOptionsHandler">
-            
-                <span class="inherited"><a href="BulkOperationBase.html#finalOptionsHandler">inherited</a></span>
-            
-            finalOptionsHandler<span class="signature">(config, callback)</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="lib_bulk_common.js.html">lib/bulk/common.js</a>, <a href="lib_bulk_common.js.html#line1022">line 1022</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Handles final options before executing command</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>config</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                
-                
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>options</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                </td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>batch</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                </td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>resultHandler</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                </td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-            </td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>callback</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                </td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer inherited">
         <h4 class="name" id="find">
             
                 <span class="inherited"><a href="BulkOperationBase.html#find">inherited</a></span>
             
-            find<span class="signature">(selector)</span>
+            find<span class="signature">(selector)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="FindOperators.html">FindOperators</a>}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_bulk_common.js.html">lib/bulk/common.js</a>, <a href="lib_bulk_common.js.html#line827">line 827</a>
+            <a href="lib_bulk_common.js.html">lib/bulk/common.js</a>, <a href="lib_bulk_common.js.html#line889">line 889</a>
         </div>
         
     </div>
@@ -3122,7 +2715,7 @@ Promise if no callback passed
     
     
     <div class="description">
-        <p>Initiate a find operation for an update/updateOne/remove/removeOne/replaceOne</p>
+        <p>Builds a find operation for an update/updateOne/delete/deleteOne/replaceOne.<br>Returns a builder object used to complete the definition of the operation.</p>
     </div>
     
 
@@ -3169,7 +2762,7 @@ Promise if no callback passed
             
             <td class="description last">
                 
-                <p>The selector for the bulk operation.</p></td>
+                <p>The selector for the bulk operation. See <a href="https://docs.mongodb.com/manual/reference/command/update/#update-command-q">q documentation</a></p></td>
         </tr>
 	
 	
@@ -3214,184 +2807,57 @@ Promise if no callback passed
     
             
 
-    <div class="param-desc">
-    
-        
+<dl>
+    <dt>
+        <div class="param-desc">
+        <p>if a selector is not specified</p>
+        </div>
+    </dt>
+    <dt>
+        <dl>
+            <dt>
+                Type
+            </dt>
+            <dd>
+                
 <span class="param-type"><a href="MongoError.html">MongoError</a></span>
 
 
-    
-    </div>
-
-
-        
-    
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer inherited">
-        <h4 class="name" id="handleWriteError">
-            
-                <span class="inherited"><a href="BulkOperationBase.html#handleWriteError">inherited</a></span>
-            
-            handleWriteError<span class="signature">(callback, writeResult, self)</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="lib_bulk_common.js.html">lib/bulk/common.js</a>, <a href="lib_bulk_common.js.html#line1107">line 1107</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Handles the write error before executing commands</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>callback</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                </td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>writeResult</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type"><a href="BulkWriteResult.html">BulkWriteResult</a></span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                </td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>self</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">class</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                <p>either OrderedBulkOperation or UnorderdBulkOperation</p></td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+            </dd>
+        </dl>
+    </dt>
 </dl>
 
+
+        
+    
+    
     
     
 
-    
+
+<h5>Returns:</h5>
+helper object with which the write operation can be defined.
+<br />
 
     
     
     
+        <h5>Example</h5>
+        
+
     
+    <pre class="prettyprint"><code><p>const bulkOp = collection.initializeOrderedBulkOp();</p>
+<p>// Add an updateOne to the bulkOp<br>bulkOp.find({ a: 1 }).updateOne({ $set: { b: 2 } });</p>
+<p>// Add an updateMany to the bulkOp<br>bulkOp.find({ c: 3 }).update({ $set: { d: 4 } });</p>
+<p>// Add an upsert<br>bulkOp.find({ e: 5 }).upsert().updateOne({ $set: { f: 6 } });</p>
+<p>// Add a deletion<br>bulkOp.find({ g: 7 }).deleteOne();</p>
+<p>// Add a multi deletion<br>bulkOp.find({ h: 8 }).delete();</p>
+<p>// Add a replaceOne<br>bulkOp.find({ i: 9 }).replaceOne({ j: 10 });</p>
+<p>// Update using a pipeline (requires Mongodb 4.2 or higher)<br>bulk.find({ k: 11, y: { $exists: true }, z: { $exists: true } }).updateOne([<br>  { $set: { total: { $sum: [ '$y', '$z' ] } } }<br>]);</p>
+<p>// All of the ops will now be executed<br>await bulkOp.execute();</p></code></pre>
     
-    
+
     
 </dd>
 
@@ -3403,12 +2869,12 @@ Promise if no callback passed
             
                 <span class="inherited"><a href="BulkOperationBase.html#insert">inherited</a></span>
             
-            insert<span class="signature">(document)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="OrderedBulkOperation.html">OrderedBulkOperation</a>|<a href="UnorderedBulkOperation.html">UnorderedBulkOperation</a>}</span>
+            insert<span class="signature">(document)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="BulkOperationBase.html">BulkOperationBase</a>}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_bulk_common.js.html">lib/bulk/common.js</a>, <a href="lib_bulk_common.js.html#line814">line 814</a>
+            <a href="lib_bulk_common.js.html">lib/bulk/common.js</a>, <a href="lib_bulk_common.js.html#line845">line 845</a>
         </div>
         
     </div>
@@ -3528,8 +2994,20 @@ Promise if no callback passed
     
 
 
+<h5>Returns:</h5>
+reference to self
+<br />
+
     
     
+    
+        <h5>Example</h5>
+        
+
+    
+    <pre class="prettyprint"><code><p>const bulkOp = collection.initializeOrderedBulkOp();<br>// Adds three inserts to the bulkOp.<br>bulkOp<br>  .insert({ a: 1 })<br>  .insert({ b: 2 })<br>  .insert({ c: 3 });<br>await bulkOp.execute();</p></code></pre>
+    
+
     
 </dd>
 
@@ -3541,12 +3019,12 @@ Promise if no callback passed
             
                 <span class="inherited"><a href="BulkOperationBase.html#raw">inherited</a></span>
             
-            raw<span class="signature">(op)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="OrderedBulkOperation.html">OrderedBulkOperation</a>|<a href="UnorderedBulkOperation.html">UnorderedBulkOperation</a>}</span>
+            raw<span class="signature">(op)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="BulkOperationBase.html">BulkOperationBase</a>}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_bulk_common.js.html">lib/bulk/common.js</a>, <a href="lib_bulk_common.js.html#line847">line 847</a>
+            <a href="lib_bulk_common.js.html">lib/bulk/common.js</a>, <a href="lib_bulk_common.js.html#line909">line 909</a>
         </div>
         
     </div>
@@ -3557,7 +3035,7 @@ Promise if no callback passed
     
     
     <div class="description">
-        <p>Raw performs the bulk operation</p>
+        <p>Specifies a raw operation to perform in the bulk write.</p>
     </div>
     
 
@@ -3604,7 +3082,7 @@ Promise if no callback passed
             
             <td class="description last">
                 
-                <p>operation</p></td>
+                <p>The raw operation to perform.</p></td>
         </tr>
 	
 	
@@ -3651,6 +3129,10 @@ Promise if no callback passed
     
 
 
+<h5>Returns:</h5>
+reference to self
+<br />
+
     
     
     
@@ -3671,7 +3153,7 @@ Promise if no callback passed
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Sep 16 2019 15:48:28 GMT-0400 (EDT)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Oct 07 2019 16:49:45 GMT-0400 (EDT)
                     </footer>
                 </div>
             </td>

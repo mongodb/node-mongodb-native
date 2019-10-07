@@ -289,15 +289,9 @@
             
             <span class="subtitle">Methods</span>
             
-                <li data-name="BulkOperationBase#bulkExecute"><a href="BulkOperationBase.html#bulkExecute">bulkExecute</a></li>
-            
                 <li data-name="BulkOperationBase#execute"><a href="BulkOperationBase.html#execute">execute</a></li>
             
-                <li data-name="BulkOperationBase#finalOptionsHandler"><a href="BulkOperationBase.html#finalOptionsHandler">finalOptionsHandler</a></li>
-            
                 <li data-name="BulkOperationBase#find"><a href="BulkOperationBase.html#find">find</a></li>
-            
-                <li data-name="BulkOperationBase#handleWriteError"><a href="BulkOperationBase.html#handleWriteError">handleWriteError</a></li>
             
                 <li data-name="BulkOperationBase#insert"><a href="BulkOperationBase.html#insert">insert</a></li>
             
@@ -1785,15 +1779,9 @@
             
             <span class="subtitle">Methods</span>
             
-                <li data-name="OrderedBulkOperation#bulkExecute"><a href="OrderedBulkOperation.html#bulkExecute">bulkExecute</a></li>
-            
                 <li data-name="OrderedBulkOperation#execute"><a href="OrderedBulkOperation.html#execute">execute</a></li>
             
-                <li data-name="OrderedBulkOperation#finalOptionsHandler"><a href="OrderedBulkOperation.html#finalOptionsHandler">finalOptionsHandler</a></li>
-            
                 <li data-name="OrderedBulkOperation#find"><a href="OrderedBulkOperation.html#find">find</a></li>
-            
-                <li data-name="OrderedBulkOperation#handleWriteError"><a href="OrderedBulkOperation.html#handleWriteError">handleWriteError</a></li>
             
                 <li data-name="OrderedBulkOperation#insert"><a href="OrderedBulkOperation.html#insert">insert</a></li>
             
@@ -2032,15 +2020,9 @@
             
             <span class="subtitle">Methods</span>
             
-                <li data-name="UnorderedBulkOperation#bulkExecute"><a href="UnorderedBulkOperation.html#bulkExecute">bulkExecute</a></li>
-            
                 <li data-name="UnorderedBulkOperation#execute"><a href="UnorderedBulkOperation.html#execute">execute</a></li>
             
-                <li data-name="UnorderedBulkOperation#finalOptionsHandler"><a href="UnorderedBulkOperation.html#finalOptionsHandler">finalOptionsHandler</a></li>
-            
                 <li data-name="UnorderedBulkOperation#find"><a href="UnorderedBulkOperation.html#find">find</a></li>
-            
-                <li data-name="UnorderedBulkOperation#handleWriteError"><a href="UnorderedBulkOperation.html#handleWriteError">handleWriteError</a></li>
             
                 <li data-name="UnorderedBulkOperation#insert"><a href="UnorderedBulkOperation.html#insert">insert</a></li>
             
@@ -2135,7 +2117,7 @@
     WriteError
     </h2>
     
-        <div class="class-description"><p>Create a new WriteError instance (INTERNAL TYPE, do not instantiate directly)</p></div>
+        <div class="class-description"><p>An error that occurred during a BulkWrite on the server.</p></div>
     
 </header>  
 
@@ -2150,12 +2132,12 @@
     <div class="nameContainer">
         <h4 class="name" id="WriteError">
             
-            new WriteError<span class="signature">()</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="WriteConcernError.html">WriteConcernError</a>}</span>
+            new WriteError<span class="signature">()</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_bulk_common.js.html">lib/bulk/common.js</a>, <a href="lib_bulk_common.js.html#line290">line 290</a>
+            <a href="lib_bulk_common.js.html">lib/bulk/common.js</a>, <a href="lib_bulk_common.js.html#line300">line 300</a>
         </div>
         
     </div>
@@ -2164,6 +2146,11 @@
 </dt>
 <dd>
     
+    
+    <div class="description">
+        <p>Create a new WriteError instance</p>
+<p><strong>NOTE:</strong> Internal Type, do not instantiate directly</p>
+    </div>
     
 
     
@@ -2206,15 +2193,6 @@
     
     
     
-    
-    
-    
-
-
-<h5>Returns:</h5>
-WriteConcernError instance
-<br />
-
     
     
     
@@ -2241,12 +2219,16 @@ WriteConcernError instance
             
 <dt>
     <div class="nameContainer">
-        <h4 class="name" id="code">code</h4>
+        <h4 class="name" id="code">code<span class="type-signature type number">number</span> </h4>
     </div>
     
     
 </dt>
 <dd>
+    
+    <div class="description">
+        <p>WriteError code.</p>
+    </div>
     
     
     
@@ -2282,12 +2264,16 @@ WriteConcernError instance
             
 <dt>
     <div class="nameContainer">
-        <h4 class="name" id="errmsg">errmsg</h4>
+        <h4 class="name" id="errmsg">errmsg<span class="type-signature type string">string</span> </h4>
     </div>
     
     
 </dt>
 <dd>
+    
+    <div class="description">
+        <p>WriteError message.</p>
+    </div>
     
     
     
@@ -2323,12 +2309,16 @@ WriteConcernError instance
             
 <dt>
     <div class="nameContainer">
-        <h4 class="name" id="index">index</h4>
+        <h4 class="name" id="index">index<span class="type-signature type number">number</span> </h4>
     </div>
     
     
 </dt>
 <dd>
+    
+    <div class="description">
+        <p>WriteError original bulk operation index.</p>
+    </div>
     
     
     
@@ -2377,7 +2367,7 @@ WriteConcernError instance
     
         
         <div class="tag-source">
-            <a href="lib_bulk_common.js.html">lib/bulk/common.js</a>, <a href="lib_bulk_common.js.html#line320">line 320</a>
+            <a href="lib_bulk_common.js.html">lib/bulk/common.js</a>, <a href="lib_bulk_common.js.html#line338">line 338</a>
         </div>
         
     </div>
@@ -2388,7 +2378,7 @@ WriteConcernError instance
     
     
     <div class="description">
-        <p>Define access methods</p>
+        <p>Returns the underlying operation that caused the error</p>
     </div>
     
 
@@ -2453,7 +2443,7 @@ WriteConcernError instance
     
         
         <div class="tag-source">
-            <a href="lib_bulk_common.js.html">lib/bulk/common.js</a>, <a href="lib_bulk_common.js.html#line327">line 327</a>
+            <a href="lib_bulk_common.js.html">lib/bulk/common.js</a>, <a href="lib_bulk_common.js.html#line345">line 345</a>
         </div>
         
     </div>
@@ -2525,7 +2515,7 @@ WriteConcernError instance
     
         
         <div class="tag-source">
-            <a href="lib_bulk_common.js.html">lib/bulk/common.js</a>, <a href="lib_bulk_common.js.html#line334">line 334</a>
+            <a href="lib_bulk_common.js.html">lib/bulk/common.js</a>, <a href="lib_bulk_common.js.html#line352">line 352</a>
         </div>
         
     </div>
@@ -2601,7 +2591,7 @@ WriteConcernError instance
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Sep 16 2019 15:48:28 GMT-0400 (EDT)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Oct 07 2019 16:49:45 GMT-0400 (EDT)
                     </footer>
                 </div>
             </td>

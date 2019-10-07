@@ -289,15 +289,9 @@
             
             <span class="subtitle">Methods</span>
             
-                <li data-name="BulkOperationBase#bulkExecute"><a href="BulkOperationBase.html#bulkExecute">bulkExecute</a></li>
-            
                 <li data-name="BulkOperationBase#execute"><a href="BulkOperationBase.html#execute">execute</a></li>
             
-                <li data-name="BulkOperationBase#finalOptionsHandler"><a href="BulkOperationBase.html#finalOptionsHandler">finalOptionsHandler</a></li>
-            
                 <li data-name="BulkOperationBase#find"><a href="BulkOperationBase.html#find">find</a></li>
-            
-                <li data-name="BulkOperationBase#handleWriteError"><a href="BulkOperationBase.html#handleWriteError">handleWriteError</a></li>
             
                 <li data-name="BulkOperationBase#insert"><a href="BulkOperationBase.html#insert">insert</a></li>
             
@@ -1785,15 +1779,9 @@
             
             <span class="subtitle">Methods</span>
             
-                <li data-name="OrderedBulkOperation#bulkExecute"><a href="OrderedBulkOperation.html#bulkExecute">bulkExecute</a></li>
-            
                 <li data-name="OrderedBulkOperation#execute"><a href="OrderedBulkOperation.html#execute">execute</a></li>
             
-                <li data-name="OrderedBulkOperation#finalOptionsHandler"><a href="OrderedBulkOperation.html#finalOptionsHandler">finalOptionsHandler</a></li>
-            
                 <li data-name="OrderedBulkOperation#find"><a href="OrderedBulkOperation.html#find">find</a></li>
-            
-                <li data-name="OrderedBulkOperation#handleWriteError"><a href="OrderedBulkOperation.html#handleWriteError">handleWriteError</a></li>
             
                 <li data-name="OrderedBulkOperation#insert"><a href="OrderedBulkOperation.html#insert">insert</a></li>
             
@@ -2032,15 +2020,9 @@
             
             <span class="subtitle">Methods</span>
             
-                <li data-name="UnorderedBulkOperation#bulkExecute"><a href="UnorderedBulkOperation.html#bulkExecute">bulkExecute</a></li>
-            
                 <li data-name="UnorderedBulkOperation#execute"><a href="UnorderedBulkOperation.html#execute">execute</a></li>
             
-                <li data-name="UnorderedBulkOperation#finalOptionsHandler"><a href="UnorderedBulkOperation.html#finalOptionsHandler">finalOptionsHandler</a></li>
-            
                 <li data-name="UnorderedBulkOperation#find"><a href="UnorderedBulkOperation.html#find">find</a></li>
-            
-                <li data-name="UnorderedBulkOperation#handleWriteError"><a href="UnorderedBulkOperation.html#handleWriteError">handleWriteError</a></li>
             
                 <li data-name="UnorderedBulkOperation#insert"><a href="UnorderedBulkOperation.html#insert">insert</a></li>
             
@@ -2395,7 +2377,7 @@ Collection instance.
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1781">line 1781</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1786">line 1786</a>
         </div>
         
     </div>
@@ -3683,7 +3665,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1418">line 1418</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1423">line 1423</a>
         </div>
         
     </div>
@@ -3694,7 +3676,8 @@ Promise if no callback passed
     
     
     <div class="description">
-        <p>Count number of matching documents in the db to a query.</p>
+        <p>An estimated count of matching documents in the db to a query.</p>
+<p><strong>NOTE:</strong> This method has been deprecated, since it does not provide an accurate count of the documents<br>in a collection. To obtain an accurate count of documents in the collection, use <a href="Collection.html#countDocuments"><code>countDocuments</code></a>.<br>To obtain an estimated count of all documents in the collection, use <a href="Collection.html#estimatedDocumentCount"><code>estimatedDocumentCount</code></a>.</p>
     </div>
     
 
@@ -4098,7 +4081,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1485">line 1485</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1490">line 1490</a>
         </div>
         
     </div>
@@ -6218,7 +6201,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1508">line 1508</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1513">line 1513</a>
         </div>
         
     </div>
@@ -8356,7 +8339,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1444">line 1444</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1449">line 1449</a>
         </div>
         
     </div>
@@ -9697,7 +9680,7 @@ Promise if no callback passed.
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1698">line 1698</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1703">line 1703</a>
         </div>
         
     </div>
@@ -10320,7 +10303,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1742">line 1742</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1747">line 1747</a>
         </div>
         
     </div>
@@ -11837,7 +11820,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1583">line 1583</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1588">line 1588</a>
         </div>
         
     </div>
@@ -12169,7 +12152,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1612">line 1612</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1617">line 1617</a>
         </div>
         
     </div>
@@ -12619,7 +12602,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1656">line 1656</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1661">line 1661</a>
         </div>
         
     </div>
@@ -13103,7 +13086,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1920">line 1920</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1925">line 1925</a>
         </div>
         
     </div>
@@ -13520,7 +13503,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1947">line 1947</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1952">line 1952</a>
         </div>
         
     </div>
@@ -13952,7 +13935,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1527">line 1527</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1532">line 1532</a>
         </div>
         
     </div>
@@ -14667,7 +14650,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2088">line 2088</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2093">line 2093</a>
         </div>
         
     </div>
@@ -15024,7 +15007,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2064">line 2064</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2069">line 2069</a>
         </div>
         
     </div>
@@ -17256,7 +17239,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2027">line 2027</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2032">line 2032</a>
         </div>
         
     </div>
@@ -18155,7 +18138,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1880">line 1880</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1885">line 1885</a>
         </div>
         
     </div>
@@ -20189,7 +20172,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1546">line 1546</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1551">line 1551</a>
         </div>
         
     </div>
@@ -21951,7 +21934,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1848">line 1848</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1853">line 1853</a>
         </div>
         
     </div>
@@ -23578,7 +23561,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1563">line 1563</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1568">line 1568</a>
         </div>
         
     </div>
@@ -24693,7 +24676,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1861">line 1861</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1866">line 1866</a>
         </div>
         
     </div>
@@ -25834,7 +25817,7 @@ ChangeStream instance.
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Sep 16 2019 15:48:28 GMT-0400 (EDT)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Oct 07 2019 16:49:44 GMT-0400 (EDT)
                     </footer>
                 </div>
             </td>
