@@ -18,6 +18,7 @@ class MongoDBTopologyFilter {
     let type = topologyType(client.topology);
     context.topologyType = type;
     this.runtimeTopology = topologyTypeToString(type);
+    console.log(`[ topology type: ${this.runtimeTopology} ]`);
     callback();
   }
 
@@ -45,7 +46,7 @@ function topologyTypeToString(topologyType) {
   if (topologyType === TopologyType.ReplicaSetWithPrimary) {
     return 'replicaset';
   } else if (topologyType === TopologyType.Sharded) {
-    return 'mongos';
+    return 'sharded';
   }
 
   return 'single';

@@ -70,7 +70,7 @@ function gatherTestSuites(specPath) {
 
 function parseTopologies(topologies) {
   if (topologies == null) {
-    return ['replicaset', 'mongos', 'single'];
+    return ['replicaset', 'sharded', 'single'];
   }
 
   return topologies;
