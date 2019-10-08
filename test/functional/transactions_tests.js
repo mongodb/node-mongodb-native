@@ -105,7 +105,7 @@ describe('Transactions', function() {
       metadata: { requires: { topology: ['sharded'], mongodb: '>=4.1.0' } },
       test: function(done) {
         const configuration = this.configuration;
-        const client = configuration.newClient(configuration.url());
+        const client = configuration.newClient(configuration.url(), { useUnifiedTopology: true });
 
         client.connect((err, client) => {
           const session = client.startSession();

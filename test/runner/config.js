@@ -1,6 +1,7 @@
 'use strict';
 const url = require('url');
 const qs = require('querystring');
+const util = require('util');
 
 const MongoClient = require('../../lib/mongo_client');
 const TopologyType = require('../../lib/core/sdam/topology_description').TopologyType;
@@ -11,6 +12,7 @@ class NativeConfiguration {
     this.topologyType = context.topologyType;
     this.options = Object.assign(
       {
+        hosts: parsedURI.hosts,
         host: parsedURI.hosts[0] ? parsedURI.hosts[0].host : 'localhost',
         port: parsedURI.hosts[0] ? parsedURI.hosts[0].port : 27017,
         db: parsedURI.auth && parsedURI.auth.db ? parsedURI.auth.db : 'integration_tests'
@@ -79,12 +81,6 @@ class NativeConfiguration {
       serverOptions.useUnifiedTopology = true;
     }
 
-    // // Set up the options
-    // const keys = Object.keys(this.options);
-    // if (keys.indexOf('sslOnNormalPorts') !== -1) {
-    //   serverOptions.ssl = true;
-    // }
-
     // Fall back
     let dbHost = (serverOptions && serverOptions.host) || this.options.host;
     const dbPort = (serverOptions && serverOptions.port) || this.options.port;
@@ -136,17 +132,38 @@ class NativeConfiguration {
       Object.assign(query, { replicaSet: this.options.replicaSet, auto_reconnect: false });
     }
 
+    let multipleHosts;
+    if (this.options.hosts.length > 1) {
+      multipleHosts = this.options.hosts
+        .reduce((built, host) => {
+          built.push(`${host.host}:${host.port}`);
+          return built;
+        }, [])
+        .join(',');
+    }
+
     const urlObject = {
       protocol: 'mongodb',
       slashes: true,
-      hostname: this.options.host,
-      port: this.options.port,
       pathname: `/${this.options.db}`,
       query
     };
 
+    if (multipleHosts) {
+      Object.assign(urlObject, { hostname: '%s' });
+    } else {
+      Object.assign(urlObject, {
+        hostname: this.options.host,
+        port: this.options.port
+      });
+    }
+
     if (username || password) {
       urlObject.auth = password == null ? username : `${username}:${password}`;
+    }
+
+    if (multipleHosts) {
+      return util.format(url.format(urlObject), multipleHosts);
     }
 
     return url.format(urlObject);
