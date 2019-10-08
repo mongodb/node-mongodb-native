@@ -137,7 +137,8 @@ describe('Sharding (Read Preference)', function() {
   /**
    * @ignore
    */
-  it('Should correctly read from a tagged secondary using Mongos', {
+  it.skip('Should correctly read from a tagged secondary using Mongos', {
+    // NOTE: skipped because mongo-orchestration will not set up these tags
     metadata: { requires: { topology: 'sharded' } },
 
     // The actual test we wish to run
