@@ -53,14 +53,22 @@ class TestRunnerContext {
 
     this.appliedFailPoints = [];
 
-    return Promise.all(cleanupPromises).then(() => {
-      // cleanup
-      if (context.testClient) {
-        return context.testClient.close().then(() => {
-          delete context.testClient;
-        });
+    const cleanup = err => {
+      if (Array.isArray(err)) {
+        err = undefined;
       }
-    });
+
+      if (!context.testClient) {
+        if (err) throw err;
+        return;
+      }
+
+      const client = context.testClient;
+      context.testClient = undefined;
+      return err ? client.close().then(() => Promise.reject(err)) : client.close();
+    };
+
+    return Promise.all(cleanupPromises).then(cleanup, cleanup);
   }
 
   targetedFailPoint(options) {
