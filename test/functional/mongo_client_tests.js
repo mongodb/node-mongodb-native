@@ -616,7 +616,7 @@ describe('MongoClient', function() {
 
       var url = configuration
         .url()
-        .replace('rs_name=rs', '')
+        .replace('replicaSet=rs', '')
         .replace('localhost:31000', 'localhost:31000,localhost:31001');
 
       const client = configuration.newClient(url);
