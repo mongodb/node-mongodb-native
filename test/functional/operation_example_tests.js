@@ -6248,7 +6248,7 @@ describe('Operation Examples', function() {
    * @ignore
    */
   it('Should connect to mongos proxies using connectiong string', {
-    metadata: { requires: { topology: 'mongos' } },
+    metadata: { requires: { topology: 'sharded' } },
 
     // The actual test we wish to run
     test: function(done) {
@@ -6281,7 +6281,7 @@ describe('Operation Examples', function() {
           .collection('replicaset_mongo_client_collection')
           .updateOne({ a: 1 }, { $set: { b: 1 } }, { upsert: true }, function(err, result) {
             test.equal(null, err);
-            test.equal(1, result);
+            test.equal(1, result.upsertedCount);
 
             client.close(done);
           });

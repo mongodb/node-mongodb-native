@@ -687,11 +687,7 @@ describe.skip('Mongos operation example tests', function() {
    * @ignore
    */
   it('simple insert into db using Mongos', {
-    metadata: {
-      requires: {
-        topology: 'mongos'
-      }
-    },
+    metadata: { requires: { topology: 'sharded' } },
 
     test: function(done) {
       // Attempt to connect

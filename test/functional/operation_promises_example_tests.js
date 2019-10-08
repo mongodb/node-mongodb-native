@@ -4682,7 +4682,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('Should connect to mongos proxies using connectiong string With Promises', {
-    metadata: { requires: { topology: 'mongos' } },
+    metadata: { requires: { topology: 'sharded' } },
 
     // The actual test we wish to run
     test: function() {
@@ -4713,7 +4713,7 @@ describe('Operation (Promises)', function() {
           .collection('replicaset_mongo_client_collection_with_promise')
           .updateOne({ a: 1 }, { $set: { b: 1 } }, { upsert: true })
           .then(function(result) {
-            test.equal(1, result);
+            test.equal(1, result.upsertedCount);
             return client.close();
           });
       });
