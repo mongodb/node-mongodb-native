@@ -25,7 +25,7 @@ class MockTopology extends EventEmitter {
   }
 
   command(namespace, command, options, callback) {
-    callback(null, { ok: 1 });
+    callback(null, { result: { ok: 1 } });
   }
 }
 
