@@ -8,27 +8,34 @@ let activeClients = [];
 const $newClient = TestConfiguration.prototype.newClient;
 TestConfiguration.prototype.newClient = function() {
   const client = $newClient.apply(this, arguments);
+  client.trace = new Error().stack;
   activeClients.push(client);
+  const closeHandler = () => {
+    activeClients = activeClients.filter(c => c !== client);
+    client.removeListener('close', closeHandler);
+  };
+
+  client.on('close', closeHandler);
   return client;
 };
 
-afterEach(() => {
-  const openClientCount = activeClients.reduce(
-    (count, client) => (client.isConnected() ? count + 1 : count),
-    0
-  );
+after(() => {
+  wtfnode.dump();
+
+  const traces = [];
+  const openClientCount = activeClients.reduce((count, client) => {
+    if (client.isConnected()) {
+      traces.push(client.trace);
+      return count + 1;
+    }
+
+    return count;
+  }, 0);
 
   if (openClientCount > 0) {
     console.log(chalk.red('WARNING:') + ` ${openClientCount} client(s) left open after test`);
+    traces.forEach(trace => console.log(trace));
   }
 
   activeClients = [];
-});
-
-after(() => wtfnode.dump());
-
-require('leaked-handles').set({
-  fullStack: true, // use full stack traces
-  timeout: 30000, // run every 30 seconds instead of 5.
-  debugSockets: true // pretty print tcp thrown exceptions.
 });
