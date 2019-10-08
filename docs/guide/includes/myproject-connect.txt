@@ -9,8 +9,10 @@ const dbName = 'myproject';
 // Create a new MongoClient
 const client = new MongoClient(url);
 
+// BEGIN foobar
 // Use connect method to connect to the Server
 client.connect().then(async function() {
   console.log("Connected successfully to server");
 
   const db = client.db(dbName);
+// END foobar
