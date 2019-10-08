@@ -70,7 +70,7 @@ describe('Mongos SRV Polling', function() {
     }
 
     describe('success', function(done) {
-      it('should emit event, disable haMode, and schedule another poll', function() {
+      it('should emit event, disable haMode, and schedule another poll', function(done) {
         const records = [srvRecord('jalad.tanagra.com'), srvRecord('thebeast.tanagra.com')];
         const poller = new SrvPoller({ srvHost: SRV_HOST });
 
