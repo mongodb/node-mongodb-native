@@ -110,6 +110,9 @@ class NativeConfiguration {
 
   newTopology(host, port, options) {
     options = Object.assign({}, options);
+    host = host || this.options.host;
+    port = port || this.options.port;
+
     if (this.usingUnifiedTopology()) {
       return new core.Topology([{ host, port }], options);
     }
