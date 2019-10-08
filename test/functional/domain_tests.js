@@ -2,7 +2,7 @@
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 
-describe('Decimal128', function() {
+describe('Domains', function() {
   before(function() {
     return setupDatabase(this.configuration);
   });
@@ -140,7 +140,7 @@ describe('Decimal128', function() {
             test.ok(err != null);
             test.ok(process.domain === domainInstance);
             domainInstance.exit();
-            client.close(done);
+            client.close(true, done);
           });
         });
       });
@@ -184,7 +184,7 @@ describe('Decimal128', function() {
             test.ok(err != null);
             test.ok(process.domain === domainInstance);
             domainInstance.exit();
-            client.close(done);
+            client.close(true, done);
           });
         });
       });
