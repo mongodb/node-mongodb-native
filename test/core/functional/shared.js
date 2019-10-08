@@ -155,7 +155,9 @@ function setupDatabase(configuration, dbsToClean) {
       const dropHandler = err => {
         if (err) return reject(err);
         cleanedCount++;
-        if (cleanedCount === dbsToClean.length) resolve();
+        if (cleanedCount === dbsToClean.length) {
+          topology.destroy(resolve);
+        }
       };
 
       dbsToClean.forEach(dbName => {
