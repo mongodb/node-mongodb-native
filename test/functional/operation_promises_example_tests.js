@@ -6981,7 +6981,8 @@ describe('Operation (Promises)', function() {
             cursor.on('end', function() {
               test.ok(new Date().getTime() - s.getTime() > 1000);
 
-              client.close(done);
+              // TODO: forced because the cursor is still open/active
+              client.close(true, done);
             });
           });
       });

@@ -6420,7 +6420,8 @@ describe('Operation (Generators)', function() {
           });
 
           cursor.on('end', function() {
-            client.close(err => {
+            // TODO: forced because the cursor is still open/active
+            client.close(true, err => {
               if (err) return reject(err);
               resolve();
             });
