@@ -638,7 +638,7 @@ describe('MongoClient', function() {
     test: function(done) {
       var configuration = this.configuration;
       var url = configuration.url();
-      if (url.indexOf('replicaSet') !== -1) {
+      if (url.indexOf('rs_name') !== -1) {
         url = f('%s&appname=hello%20world', configuration.url());
       } else {
         url = f('%s?appname=hello%20world', configuration.url());
