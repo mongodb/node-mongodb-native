@@ -3836,7 +3836,9 @@ describe('Cursor', function() {
                 }, 300);
               } else {
                 test.ok(new Date().getTime() - s.getTime() >= 500);
-                client.close(done);
+
+                // TODO: forced because the cursor is still open/active
+                client.close(true, done);
               }
             });
           });

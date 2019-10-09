@@ -9296,7 +9296,8 @@ describe('Operation Examples', function() {
               });
 
               cursor.on('end', function() {
-                client.close(done);
+                // TODO: forced because the cursor is still open/active
+                client.close(true, done);
               });
             });
           }
