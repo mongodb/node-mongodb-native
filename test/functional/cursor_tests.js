@@ -2192,7 +2192,7 @@ describe('Cursor', function() {
                     test.equal(5, i);
                     test.equal(2, finished);
                     test.equal(true, stream.isClosed());
-                    client.close(done);
+                    client.close(true, done);
                   }, 150);
                 }
               };
