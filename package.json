@@ -69,5 +69,8 @@
     "generate-evergreen": "node .evergreen/generate_evergreen_tasks.js",
     "release": "standard-version -i HISTORY.md"
   },
-  "homepage": "https://github.com/mongodb/node-mongodb-native"
+  "homepage": "https://github.com/mongodb/node-mongodb-native",
+  "optionalDependencies": {
+    "saslprep": "^1.0.0"
+  }
 }
