@@ -1,10 +1,6 @@
 dist: xenial
 language: node_js
 
-cache:
-  directories:
-    - /home/travis/.mongodb/versions
-
 branches:
   only:
     - master
@@ -12,141 +8,137 @@ branches:
     - test-runner
 
 before_install:
-  - wget -O mongocryptd.tgz https://s3.amazonaws.com/mciuploads/mongodb-mongo-v4.2/enterprise-ubuntu1604-64/f92115cad9d2a4c2ddcf3c2c65092dda2fd7147a/binaries/mongo-cryptd-mongodb_mongo_v4.2_enterprise_ubuntu1604_64_f92115cad9d2a4c2ddcf3c2c65092dda2fd7147a_19_06_13_17_31_40.tgz
-  - mkdir mongocryptd && tar xzf mongocryptd.tgz -C mongocryptd --strip-components 1
-  - mongocryptd/bin/mongocryptd&
-  - wget https://s3.amazonaws.com/mciuploads/libmongocrypt/ubuntu1604/master/1c6c72377582ebcd8402f6f15fff5c3143b46741/libmongocrypt.tar.gz
-  - sudo tar -xzf libmongocrypt.tar.gz -C /usr/local
-  - sudo pip install mongo-orchestration
-  - mongo-orchestration start
+  # we have to intstall mongo-orchestration ourselves to get around permissions issues in subshells
+  - sudo pip install --upgrade 'git+git://github.com/mongodb/mongo-orchestration@master'
+  - sudo apt-get install -y libsnmp30
+
+  - git clone --depth 1 https://github.com/mongodb-labs/drivers-evergreen-tools
+  - export DRIVERS_TOOLS="${PWD}/drivers-evergreen-tools"
+  - export MONGO_ORCHESTRATION_HOME="$DRIVERS_TOOLS/.evergreen/orchestration"
+  - export MONGODB_BINARIES="$DRIVERS_TOOLS/mongodb/bin"
+
+  # disable ipv6 since its not supported on travis
+  - find ${MONGO_ORCHESTRATION_HOME} -name "*.json" -exec sed -i 's/"ipv6": true/"ipv6": false/g' {} \;
+  - echo "{ \"releases\": { \"default\": \"$MONGODB_BINARIES\" }}" > $MONGO_ORCHESTRATION_HOME/orchestration.config
+  - TOPOLOGY=${MONGODB_ENVIRONMENT} \
+    ${DRIVERS_TOOLS}/.evergreen/run-orchestration.sh
+  - export MONGODB_URI=$(grep -oP '(?<=MONGODB_URI: ")[^"]*' mo-expansion.yml)
+
+after_failure:
+  - tail -n +1 ${MONGO_ORCHESTRATION_HOME}/*.log
 
 jobs:
   include:
     - stage: standalone
       node_js: 6
       env:
-        - MONGODB_VERSION=2.6.x
-        - MONGODB_ENVIRONMENT=standalone
+        - MONGODB_VERSION=2.6
+        - MONGODB_ENVIRONMENT=server
     - stage: standalone
       node_js: 6
       env:
-        - MONGODB_VERSION=3.0.x
-        - MONGODB_ENVIRONMENT=standalone
+        - MONGODB_VERSION=3.0
+        - MONGODB_ENVIRONMENT=server
     - stage: standalone
       node_js: 6
       env:
-        - MONGODB_VERSION=3.2.x
-        - MONGODB_ENVIRONMENT=standalone
+        - MONGODB_VERSION=3.2
+        - MONGODB_ENVIRONMENT=server
     - stage: standalone
       node_js: 6
       env:
-        - MONGODB_VERSION=3.4.x
-        - MONGODB_ENVIRONMENT=standalone
+        - MONGODB_VERSION=3.4
+        - MONGODB_ENVIRONMENT=server
     - stage: standalone
       node_js: 6
       env:
-        - MONGODB_VERSION=3.6.x
-        - MONGODB_ENVIRONMENT=standalone
+        - MONGODB_VERSION=3.6
+        - MONGODB_ENVIRONMENT=server
     - stage: standalone
       node_js: 6
       env:
-        - MONGODB_VERSION=4.0.x
-        - MONGODB_ENVIRONMENT=standalone
+        - MONGODB_VERSION=4.0
+        - MONGODB_ENVIRONMENT=server
 
     - stage: standalone
       node_js: 6
       env:
-        - MONGODB_VERSION=4.0.x
-        - MONGODB_ENVIRONMENT=standalone
+        - MONGODB_VERSION=4.0
+        - MONGODB_ENVIRONMENT=server
     - stage: standalone
       node_js: 8
       env:
-        - MONGODB_VERSION=4.0.x
-        - MONGODB_ENVIRONMENT=standalone
+        - MONGODB_VERSION=4.0
+        - MONGODB_ENVIRONMENT=server
     - stage: standalone
       node_js: 10
       env:
-        - MONGODB_VERSION=4.0.x
-        - MONGODB_ENVIRONMENT=standalone
+        - MONGODB_VERSION=4.0
+        - MONGODB_ENVIRONMENT=server
     - stage: standalone
       node_js: 12
       env:
-        - MONGODB_VERSION=4.0.x
-        - MONGODB_ENVIRONMENT=standalone
+        - MONGODB_VERSION=4.0
+        - MONGODB_ENVIRONMENT=server
 
     - stage: replicaset
       node_js: 6
       env:
-        - MONGODB_VERSION=4.0.x
-        - MONGODB_ENVIRONMENT=replicaset
+        - MONGODB_VERSION=4.0
+        - MONGODB_ENVIRONMENT=replica_set
     - stage: replicaset
       node_js: 6
       env:
-        - MONGODB_VERSION=4.2.x
-        - MONGODB_ENVIRONMENT=replicaset
+        - MONGODB_VERSION=4.2
+        - MONGODB_ENVIRONMENT=replica_set
     - stage: sharded
       node_js: 6
       env:
-        - MONGODB_VERSION=4.0.x
-        - MONGODB_ENVIRONMENT=sharded
+        - MONGODB_VERSION=4.0
+        - MONGODB_ENVIRONMENT=sharded_cluster
     - stage: sharded
       node_js: 6
       env:
-        - MONGODB_VERSION=4.2.x
-        - MONGODB_ENVIRONMENT=sharded
+        - MONGODB_VERSION=4.2
+        - MONGODB_ENVIRONMENT=sharded_cluster
 
     # basic smoke test of the unified topology
     - stage: unified
       node_js: 6
       env:
-        - MONGODB_VERSION=4.0.x
+        - MONGODB_VERSION=4.0
         - MONGODB_UNIFIED_TOPOLOGY=1
-        - MONGODB_ENVIRONMENT=standalone
+        - MONGODB_ENVIRONMENT=server
     - stage: unified
       node_js: 6
       env:
-        - MONGODB_VERSION=4.0.x
+        - MONGODB_VERSION=4.0
         - MONGODB_UNIFIED_TOPOLOGY=1
-        - MONGODB_ENVIRONMENT=replicaset
+        - MONGODB_ENVIRONMENT=replica_set
     - stage: unified
       node_js: 6
       env:
-        - MONGODB_VERSION=4.0.x
+        - MONGODB_VERSION=4.0
         - MONGODB_UNIFIED_TOPOLOGY=1
-        - MONGODB_ENVIRONMENT=sharded
+        - MONGODB_ENVIRONMENT=sharded_cluster
     - stage: unified
       node_js: 6
       env:
-        - MONGODB_VERSION=4.2.x
+        - MONGODB_VERSION=4.2
         - MONGODB_UNIFIED_TOPOLOGY=1
-        - MONGODB_ENVIRONMENT=replicaset
+        - MONGODB_ENVIRONMENT=replica_set
     - stage: unified
       node_js: 6
       env:
-        - MONGODB_VERSION=4.2.x
+        - MONGODB_VERSION=4.2
         - MONGODB_UNIFIED_TOPOLOGY=1
-        - MONGODB_ENVIRONMENT=sharded
-
-    - stage: client-encryption
-      node_js: 6
-      env:
-        - MONGODB_VERSION=latest
-        - MONGODB_UNIFIED_TOPOLOGY=1
-        - MONGODB_ENVIRONMENT=replicaset
-        - MONGODB_CLIENT_ENCRYPTION=1
-      before_script:
-        - npm install mongodb-client-encryption
+        - MONGODB_ENVIRONMENT=sharded_cluster
 
   allow_failures:
     - env:
-        - MONGODB_VERSION=4.0.x
-        - MONGODB_ENVIRONMENT=sharded
+        - MONGODB_VERSION=4.0
+        - MONGODB_ENVIRONMENT=sharded_cluster
     - env:
-        - MONGODB_VERSION=4.0.x
+        - MONGODB_VERSION=4.0
         - MONGODB_UNIFIED_TOPOLOGY=1
-        - MONGODB_ENVIRONMENT=sharded
-    - stage: client-encryption
-
-after_failure:
-  - cat /home/travis/tmp/orchestrations/db27017.log
-  - cat /home/travis/build/mongodb/node-mongodb-native/server.log
+        - MONGODB_ENVIRONMENT=sharded_cluster
