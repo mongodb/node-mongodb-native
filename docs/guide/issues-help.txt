@@ -1,3 +1,59 @@
 =============
 Issues & Help
 =============
+
+Our developer community is vibrant and highly engaged, with wide experience using Node.js with MongoDB.
+Often, the quickest way to get support for
+general questions is through the `mongodb-user google group <http://groups.google.com/group/mongodb-user>`_
+or through `stackoverflow <http://stackoverflow.com/questions/tagged/mongodb+nodejs>`_.
+
+Refer to our `support channels <http://www.mongodb.org/about/support>`_ documentation for more information.
+
+Bugs / Feature Requests
+-----------------------
+
+To report a bug or to request a new feature in the Node.js driver,
+please open a case in our issue management tool, JIRA:
+
+
+* `Create an account and login <https://jira.mongodb.org>`_.
+* Navigate to `the NODE project <https://jira.mongodb.org/browse/NODE>`_.
+* Click **Create Issue**. Provide as much information as possible about the
+  issue and the steps to reproduce it.
+
+Bug reports in JIRA for the Node.js driver and the Core Server (i.e. SERVER) project are **public**.
+
+If you’ve identified a security vulnerability in a driver or any other
+MongoDB project, please report it according to the instructions found in the `Create a Vulnerability Report <http://docs.mongodb.org/manual/tutorial/create-a-vulnerability-report>`_.
+
+Pull Requests
+-------------
+
+We are happy to accept contributions to help improve the driver.
+We will review user contributions to ensure they meet the standards of the codebase.
+Pull requests must pass the travis.ci checks as well as include documentation
+and tests.
+
+To get started check out the source and work on a branch:
+
+.. code-block:: bash
+
+   git clone https://github.com/mongodb/node-mongodb-native.git
+   cd node-mongodb-native
+   npm install
+   git checkout -b myNewFeature
+
+To run the test suite, you must have the ``mongod`` executable in your current
+path. You can run our tests with the following command
+
+.. code-block:: bash
+
+   npm test
+
+This will test against a standalone server. To specify another topology type, you can use the ``-e`` parameter:
+
+.. code-block:: bash
+
+   npm test -- -e single # Tests against a standalone server
+   npm test -- -e replicaset # Tests against a 3-node replicaset
+   npm test -- -e sharded # Tests against a sharded cluster
