@@ -3126,7 +3126,7 @@ describe('Operation (Promises)', function() {
    * @example-method removeUser
    * @ignore
    */
-  it('shouldCorrectlyAddAndRemoveUserWithPromises', {
+  it.skip('shouldCorrectlyAddAndRemoveUserWithPromises', {
     metadata: { requires: { topology: 'single', mongodb: '<=3.4.x' } },
 
     // The actual test we wish to run
