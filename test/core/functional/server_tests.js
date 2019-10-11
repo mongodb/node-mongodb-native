@@ -755,7 +755,8 @@ describe('Server tests', function() {
             _cursor._next(function(cursorErr, doc) {
               expect(cursorErr).to.not.exist;
               if (!doc) {
-                return done();
+                server.destroy(done);
+                return;
               }
 
               expect(doc.int).to.be.an('object');
