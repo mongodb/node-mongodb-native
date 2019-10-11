@@ -12,17 +12,21 @@ before_install:
   - sudo pip install --upgrade 'git+git://github.com/mongodb/mongo-orchestration@master'
   - sudo apt-get install -y libsnmp30
 
+  # drivers-evergreen-tools makes a lot of expectations that sh exists, it does not in travis necessarily
+  - alias sh='bash'
+
   - git clone --depth 1 https://github.com/mongodb-labs/drivers-evergreen-tools
   - export DRIVERS_TOOLS="${PWD}/drivers-evergreen-tools"
   - export MONGO_ORCHESTRATION_HOME="$DRIVERS_TOOLS/.evergreen/orchestration"
   - export MONGODB_BINARIES="$DRIVERS_TOOLS/mongodb/bin"
 
   # disable ipv6 since its not supported on travis
-  - find ${MONGO_ORCHESTRATION_HOME} -name "*.json" -exec sed -i 's/"ipv6": true/"ipv6": false/g' {} \;
-  - echo "{ \"releases\": { \"default\": \"$MONGODB_BINARIES\" }}" > $MONGO_ORCHESTRATION_HOME/orchestration.config
+  - "find ${MONGO_ORCHESTRATION_HOME} -name \"*.json\" -exec sed -i 's/\"ipv6\": true/\"ipv6\": false/g' {} \\;"
+  - "echo \"{ \"releases\": { \"default\": \"$MONGODB_BINARIES\" }}\" > $MONGO_ORCHESTRATION_HOME/orchestration.config"
+
   - TOPOLOGY=${MONGODB_ENVIRONMENT} \
-    ${DRIVERS_TOOLS}/.evergreen/run-orchestration.sh
-  - export MONGODB_URI=$(grep -oP '(?<=MONGODB_URI: ")[^"]*' mo-expansion.yml)
+    sh ${DRIVERS_TOOLS}/.evergreen/run-orchestration.sh
+  - "export MONGODB_URI=$(grep -oP '(?<=MONGODB_URI: \")[^\"]*' mo-expansion.yml)"
 
 after_failure:
   - tail -n +1 ${MONGO_ORCHESTRATION_HOME}/*.log
