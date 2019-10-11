@@ -159,7 +159,7 @@ describe('Sessions (ReplSet)', function() {
       replset.on('joined', type => {
         if (type === 'arbiter') {
           expect(replset.logicalSessionTimeoutMinutes).to.equal(10);
-          done();
+          replset.destroy(done);
         }
       });
 

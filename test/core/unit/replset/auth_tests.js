@@ -27,10 +27,11 @@ describe('Auth (ReplSet)', function() {
       password: 'pencil'
     });
 
+    let timeoutIds = [];
     let finish = err => {
       finish = () => {};
-      replSet.destroy({ force: true });
-      done(err);
+      timeoutIds.forEach(timeoutId => clearTimeout(timeoutId));
+      replSet.destroy({ force: true }, err2 => done(err || err2));
     };
 
     test.primaryServer.setMessageHandler(request => {
@@ -45,7 +46,7 @@ describe('Auth (ReplSet)', function() {
     test.firstSecondaryServer.setMessageHandler(request => {
       const doc = request.document;
       if (doc.ismaster) {
-        setTimeout(() => request.reply(test.firstSecondaryStates[0]), 2000);
+        timeoutIds.push(setTimeout(() => request.reply(test.firstSecondaryStates[0]), 2000));
       } else if (doc.saslStart) {
         finish();
       }
@@ -71,6 +72,8 @@ describe('Auth (ReplSet)', function() {
       rejectUnauthorized: true
     });
 
-    setTimeout(() => finish('replicaset stalled when attempting to authenticate'), 5000);
+    timeoutIds.push(
+      setTimeout(() => finish('replicaset stalled when attempting to authenticate'), 5000)
+    );
   });
 });

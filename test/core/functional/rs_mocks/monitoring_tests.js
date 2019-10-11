@@ -27,7 +27,7 @@ describe('ReplSet Monitoring (mocks)', function() {
     });
   });
 
-  it(
+  it.skip(
     'Should correctly connect to a replicaset where the primary hangs causing monitoring thread to hang',
     {
       metadata: {
@@ -38,6 +38,7 @@ describe('ReplSet Monitoring (mocks)', function() {
       },
 
       test: function(done) {
+        // NOTE: skipped because we now force close connections in these situations
         var electionIds = [new ObjectId(), new ObjectId()];
         var currentIsMasterState = 0;
         var stopRespondingPrimary = false;

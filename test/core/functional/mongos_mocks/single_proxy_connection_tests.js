@@ -84,8 +84,7 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
                 clearInterval(intervalId);
                 expect(r.connection.port).to.equal(server.address().port);
 
-                server.destroy();
-                done();
+                mongos.destroy(done);
               }
             });
           }, 500);
@@ -174,8 +173,7 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
               expect(_err).to.not.exist;
               expect(_d).to.exist;
 
-              server.destroy();
-              done();
+              mongos.destroy(done);
             });
           });
         });

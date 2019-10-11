@@ -190,9 +190,9 @@ describe('Sessions (Mongos)', function() {
                 .to.haveOwnProperty('$query')
                 .to.haveOwnProperty('lsid')
                 .that.is.an('object');
-              done();
+              mongos.destroy({ force: true }, done);
             } catch (e) {
-              done(e);
+              mongos.destroy({ force: true }, err => done(e | err));
             }
           } else {
             done('YOU HAVE FAILED. WE WILL FIND ANOTHER WAY. RELEASING CONTROL');
