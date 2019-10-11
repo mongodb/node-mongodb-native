@@ -123,7 +123,7 @@ class NativeConfiguration {
       return new core.Mongos([{ host, port }], options);
     }
 
-    return core.Server(host, port, options);
+    return new core.Server(Object.assign({ host, port }, options));
   }
 
   url(username, password) {
