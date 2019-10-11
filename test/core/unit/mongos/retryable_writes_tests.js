@@ -108,7 +108,7 @@ describe('Retryable Writes (Mongos)', function() {
           expect(err).to.not.exist;
           expect(command).to.have.property('txnNumber');
           expect(command.txnNumber).to.eql(1);
-          done();
+          mongos.destroy(done);
         });
       });
 
@@ -163,8 +163,7 @@ describe('Retryable Writes (Mongos)', function() {
           expect(command.txnNumber).to.eql(1);
 
           session.endSession(() => {
-            mongos.destroy();
-            done();
+            mongos.destroy(done);
           });
         });
       });
