@@ -19,8 +19,8 @@ before_install:
 
   # disable ipv6 since its not supported on travis
   - "find ${MONGO_ORCHESTRATION_HOME} -name \"*.json\" -exec sed -i 's/\"ipv6\": true/\"ipv6\": false/g' {} \\;"
-  - "find ${MONGO_ORCHESTRATION_HOME} -name \"*.json\" -exec sed -i 's/,::1//g' {} \;"
-  - "find ${MONGO_ORCHESTRATION_HOME} -name \"*.json\" -exec sed -i 's/::1,//g' {} \;"
+  - "find ${MONGO_ORCHESTRATION_HOME} -name \"*.json\" -exec sed -i 's/,::1//g' {} \\;"
+  - "find ${MONGO_ORCHESTRATION_HOME} -name \"*.json\" -exec sed -i 's/::1,//g' {} \\;"
   - "echo \"{ \"releases\": { \"default\": \"$MONGODB_BINARIES\" }}\" > $MONGO_ORCHESTRATION_HOME/orchestration.config"
 
   - export TOPOLOGY=${MONGODB_ENVIRONMENT}
