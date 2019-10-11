@@ -21,8 +21,8 @@ before_install:
   - "find ${MONGO_ORCHESTRATION_HOME} -name \"*.json\" -exec sed -i 's/\"ipv6\": true/\"ipv6\": false/g' {} \\;"
   - "find ${MONGO_ORCHESTRATION_HOME} -name \"*.json\" -exec sed -i 's/,::1//g' {} \\;"
   - "find ${MONGO_ORCHESTRATION_HOME} -name \"*.json\" -exec sed -i 's/::1,//g' {} \\;"
-  - "echo \"{ \"releases\": { \"default\": \"$MONGODB_BINARIES\" }}\" > $MONGO_ORCHESTRATION_HOME/orchestration.config"
 
+  - "echo '{ \"releases\": { \"default\": \"'${MONGODB_BINARIES}'\" } }' > $MONGO_ORCHESTRATION_HOME/orchestration.config"
   - export TOPOLOGY=${MONGODB_ENVIRONMENT}
   - bash ${DRIVERS_TOOLS}/.evergreen/run-orchestration.sh || tail -n +1 ${MONGO_ORCHESTRATION_HOME}/*.log
   - "export MONGODB_URI=$(grep -oP '(?<=MONGODB_URI: \")[^\"]*' mo-expansion.yml)"
