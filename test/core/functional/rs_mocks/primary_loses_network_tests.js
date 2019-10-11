@@ -140,6 +140,7 @@ describe('ReplSet Primary Loses Network (mocks)', function() {
           }
         );
 
+        let intervalId;
         let cleaningUp = false;
         server.on('error', done);
         server.on('left', function(_type) {
@@ -151,8 +152,8 @@ describe('ReplSet Primary Loses Network (mocks)', function() {
                 }
 
                 cleaningUp = true;
-                server.destroy();
-                done();
+                clearInterval(intervalId);
+                server.destroy({ force: true }, done);
               }
             });
           }
@@ -161,7 +162,7 @@ describe('ReplSet Primary Loses Network (mocks)', function() {
         server.on('connect', function(_server) {
           server.__connected = true;
 
-          setInterval(function() {
+          intervalId = setInterval(function() {
             _server.command('system.$cmd', { ismaster: 1 }, function(err) {
               if (err) {
                 // console.error(err);
