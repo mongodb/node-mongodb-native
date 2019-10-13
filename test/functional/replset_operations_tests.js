@@ -459,28 +459,6 @@ describe('ReplSet (Operations)', function() {
     }
   });
 
-  it('Should correctly execute ensureIndex with readPreference primaryPreferred', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>1.7.6' } },
-
-    // The actual test we wish to run
-    test: function(done) {
-      var configuration = this.configuration;
-      const client = configuration.newClient(
-        'mongodb://localhost:31001/integration_test_?replicaSet=rs&readPreference=primaryPreferred'
-      );
-
-      client.connect().then(function(client) {
-        var db = client.db(configuration.db);
-        var collection = db.collection('ensureIndexWithPrimaryPreferred');
-        collection.ensureIndex({ a: 1 }, function(err) {
-          test.equal(null, err);
-
-          client.close(done);
-        });
-      });
-    }
-  });
-
   // NOTE: skipped for use of topology manager
   it.skip('Should Correctly group using replicaset', {
     metadata: { requires: { topology: 'replicaset' } },
