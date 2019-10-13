@@ -201,7 +201,7 @@ describe('MongoClient', function() {
     }
   });
 
-  it('Should correctly pass through extra replicaset options', {
+  it.skip('Should correctly pass through extra replicaset options', {
     metadata: {
       requires: {
         topology: ['replicaset']
@@ -210,6 +210,10 @@ describe('MongoClient', function() {
 
     // The actual test we wish to run
     test: function(done) {
+      // NOTE: skipped because this test is using explicit variable names not used by
+      // mongo-orchestration. This behavior should be unit tested without depending
+      // on the test harness used.
+
       const configuration = this.configuration;
       if (configuration.usingUnifiedTopology()) {
         // skipped for direct legacy variable inspection
@@ -236,6 +240,7 @@ describe('MongoClient', function() {
       });
 
       client.connect(function(err, client) {
+        expect(err).to.not.exist;
         var db = client.db(configuration.db);
 
         test.equal(false, db.s.topology.s.clonedOptions.ha);
@@ -288,6 +293,7 @@ describe('MongoClient', function() {
       );
 
       client.connect(function(err, client) {
+        expect(err).to.not.exist;
         var db = client.db(configuration.db);
 
         test.equal(false, db.s.topology.s.clonedOptions.ha);
@@ -599,7 +605,7 @@ describe('MongoClient', function() {
     }
   });
 
-  it('Should fail to connect due to instances not being mongos proxies', {
+  it.skip('Should fail to connect due to instances not being mongos proxies', {
     metadata: {
       requires: {
         topology: ['replicaset']
@@ -608,6 +614,10 @@ describe('MongoClient', function() {
 
     // The actual test we wish to run
     test: function(done) {
+      // NOTE: skipped because this test is using explicit variable names not used by
+      // mongo-orchestration. This behavior should be unit tested without depending
+      // on the test harness used.
+
       var configuration = this.configuration;
       if (configuration.usingUnifiedTopology()) {
         // this is no longer relevant with the unified topology
@@ -621,6 +631,10 @@ describe('MongoClient', function() {
 
       const client = configuration.newClient(url);
       client.connect(function(err) {
+        if (err == null) {
+          console.dir({ topology: client.topology }, { depth: 5 });
+        }
+
         test.ok(err != null);
         done();
       });

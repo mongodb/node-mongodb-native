@@ -4481,7 +4481,10 @@ describe('Cursor', function() {
     testTransformStream(config, done);
   });
 
-  it('should apply parent read preference to count command', function(done) {
+  it.skip('should apply parent read preference to count command', function(done) {
+    // NOTE: this test is skipped because mongo orchestration does not test sharded clusters
+    // with secondaries. This behavior should be unit tested
+
     const configuration = this.configuration;
     const client = configuration.newClient(
       { w: 1, readPreference: ReadPreference.SECONDARY },

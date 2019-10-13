@@ -13,11 +13,14 @@ describe('Sharding (Read Preference)', function() {
   /**
    * @ignore
    */
-  it('Should correctly perform a Mongos secondary read using the read preferences', {
+  it.skip('Should correctly perform a Mongos secondary read using the read preferences', {
     metadata: { requires: { topology: 'sharded' } },
 
     // The actual test we wish to run
     test: function(done) {
+      // NOTE: this test is skipped because it directly mucks with the connection string, which isn't
+      // guaranteed to be present with mongo-orchestration. This behavior should be unit tested.
+
       const configuration = this.configuration;
       const host = configuration.host;
       const port = configuration.port;
