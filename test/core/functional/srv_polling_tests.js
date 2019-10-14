@@ -69,7 +69,7 @@ describe('Mongos SRV Polling', function() {
       context.sinon.stub(poller, 'parentDomainMismatch');
     }
 
-    describe('success', function(done) {
+    describe('success', function() {
       it('should emit event, disable haMode, and schedule another poll', function(done) {
         const records = [srvRecord('jalad.tanagra.com'), srvRecord('thebeast.tanagra.com')];
         const poller = new SrvPoller({ srvHost: SRV_HOST });
