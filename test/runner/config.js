@@ -109,11 +109,7 @@ class NativeConfiguration {
     host = host || this.options.host;
     port = port || this.options.port;
 
-    let hosts = [{ host, port }];
-    if (this.options.hosts) {
-      hosts = hosts.concat(this.options.hosts);
-    }
-
+    const hosts = host == null ? [].concat(this.options.hosts) : [{ host, port }];
     if (this.usingUnifiedTopology()) {
       return new core.Topology(hosts, options);
     }
