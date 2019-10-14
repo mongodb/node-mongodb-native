@@ -21,7 +21,7 @@ TestConfiguration.prototype.newClient = function() {
 
 function unifiedTopologyIsConnected(client) {
   const topology = client.topology;
-  if (topology == null) {
+  if (topology == null || topology.s.servers == null) {
     return false;
   }
 
