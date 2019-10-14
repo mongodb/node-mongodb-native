@@ -109,18 +109,23 @@ class NativeConfiguration {
     host = host || this.options.host;
     port = port || this.options.port;
 
+    let hosts = [{ host, port }];
+    if (this.options.hosts) {
+      hosts = hosts.concat(this.options.hosts);
+    }
+
     if (this.usingUnifiedTopology()) {
-      return new core.Topology([{ host, port }], options);
+      return new core.Topology(hosts, options);
     }
 
     if (this.topologyType === TopologyType.ReplicaSetWithPrimary) {
       options.poolSize = 1;
       options.autoReconnect = false;
-      return new core.ReplSet([{ host, port }], options);
+      return new core.ReplSet(hosts, options);
     }
 
     if (this.topologyType === TopologyType.Sharded) {
-      return new core.Mongos([{ host, port }], options);
+      return new core.Mongos(hosts, options);
     }
 
     return new core.Server(Object.assign({ host, port }, options));
