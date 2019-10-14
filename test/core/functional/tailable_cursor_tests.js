@@ -2,8 +2,13 @@
 
 var expect = require('chai').expect,
   f = require('util').format;
+const setupDatabase = require('./shared').setupDatabase;
 
 describe('Tailable cursor tests', function() {
+  before(function() {
+    return setupDatabase(this.configuration);
+  });
+
   it('should correctly perform awaitdata', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
