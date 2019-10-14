@@ -1002,13 +1002,13 @@ describe('Server tests', function() {
           let err;
           try {
             expect(error).to.be.an.instanceOf(Error);
-
             const errorMessage = error.reason ? error.reason.message : error.message;
             expect(errorMessage).to.match(/but this version of the Node.js Driver requires/);
           } catch (e) {
             err = e;
           }
-          done(err);
+
+          client.close(err2 => done(err || err2));
         });
 
         client.on('connect', () => {
