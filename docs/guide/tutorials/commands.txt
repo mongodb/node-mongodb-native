@@ -1,3 +1,37 @@
 =================
 Database Commands
 =================
+
+Database commands allow you to perform a wide range of diagnostic and administrative
+tasks with the Node.js driver. For example, the
+:manual:`dbStats </reference/command/dbStats/>` command returns
+storage statistics for a given database. Use the ``command`` function to access
+database commands.
+
+.. code-block:: js
+
+   const { MongoClient } = require('mongodb');
+   const assert = require('assert');
+   
+   // Connection URL
+   const url = 'mongodb://localhost:27017';
+   
+   // Database Name
+   const dbName = 'myproject';
+   
+   // Create a new MongoClient
+   const client = new MongoClient(url);
+   
+   // Use connect method to connect to the Server
+   client.connect().then(async function() {
+     const db = client.db(dbName);
+   
+     try {
+       const results = await db.command({ dbStats: 1 });
+       console.log(results);
+     } finally {
+       await client.close();
+     }
+   });
+
+For a complete list of database commands, see the :manual:`manual </reference/command/>` .
