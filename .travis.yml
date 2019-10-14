@@ -5,7 +5,6 @@ branches:
   only:
     - master
     - next
-    - test-runner
 
 before_install:
   # we have to intstall mongo-orchestration ourselves to get around permissions issues in subshells
