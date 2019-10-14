@@ -7,58 +7,71 @@ const gatherTestSuites = require('./spec-runner').gatherTestSuites;
 const generateTopologyTests = require('./spec-runner').generateTopologyTests;
 
 const ignoredCommands = ['ismaster'];
-const test = { commands: { started: [], succeeded: [] } };
+const test = {
+  commands: { started: [], succeeded: [] },
+  setup: function(config) {
+    this.commands = { started: [], succeeded: [] };
+    this.client = config.newClient(
+      { w: 1 },
+      { poolSize: 1, auto_reconnect: false, monitorCommands: true }
+    );
+
+    this.client.on('commandStarted', event => {
+      if (ignoredCommands.indexOf(event.commandName) === -1) {
+        this.commands.started.push(event);
+      }
+    });
+
+    this.client.on('commandSucceeded', event => {
+      if (ignoredCommands.indexOf(event.commandName) === -1) {
+        this.commands.succeeded.push(event);
+      }
+    });
+
+    return this.client.connect();
+  }
+};
+
 describe('Sessions', function() {
   before(function() {
     return setupDatabase(this.configuration);
   });
 
-  beforeEach(function() {
-    test.commands = { started: [], succeeded: [] };
-
-    test.client = this.configuration.newClient(
-      { w: 1 },
-      { poolSize: 1, auto_reconnect: false, monitorCommands: true }
-    );
-    test.client.on('commandStarted', event => {
-      if (ignoredCommands.indexOf(event.commandName) === -1) {
-        test.commands.started.push(event);
-      }
+  describe('endSessions', function() {
+    beforeEach(function() {
+      return test.setup(this.configuration);
     });
 
-    test.client.on('commandSucceeded', event => {
-      if (ignoredCommands.indexOf(event.commandName) === -1) {
-        test.commands.succeeded.push(event);
+    it('should send endSessions for multiple sessions', {
+      metadata: {
+        requires: { topology: ['single'], mongodb: '>3.6.0' },
+        // Skipping session leak tests b/c these are explicit sessions
+        sessions: { skipLeakTests: true }
+      },
+      test: function(done) {
+        const client = test.client;
+        let sessions = [client.startSession(), client.startSession()].map(s => s.id);
+
+        client.close(err => {
+          expect(err).to.not.exist;
+          expect(test.commands.started).to.have.length(1);
+          expect(test.commands.started[0].commandName).to.equal('endSessions');
+          expect(test.commands.started[0].command.endSessions).to.include.deep.members(sessions);
+          expect(client.s.sessions.size).to.equal(0);
+
+          done();
+        });
       }
     });
-    return test.client.connect();
-  });
-
-  it('should send endSessions for multiple sessions', {
-    metadata: {
-      requires: { topology: ['single'], mongodb: '>3.6.0' },
-      // Skipping session leak tests b/c these are explicit sessions
-      sessions: { skipLeakTests: true }
-    },
-    test: function(done) {
-      const client = test.client;
-      let sessions = [client.startSession(), client.startSession()].map(s => s.id);
-
-      client.close(err => {
-        expect(err).to.not.exist;
-        expect(test.commands.started).to.have.length(1);
-        expect(test.commands.started[0].commandName).to.equal('endSessions');
-        expect(test.commands.started[0].command.endSessions).to.include.deep.members(sessions);
-        expect(client.s.sessions.size).to.equal(0);
-
-        done();
-      });
-    }
   });
 
   describe('withSession', {
     metadata: { requires: { mongodb: '>3.6.0' } },
     test: function() {
+      beforeEach(function() {
+        return test.setup(this.configuration);
+      });
+
       [
         {
           description: 'should support operations that return promises',
