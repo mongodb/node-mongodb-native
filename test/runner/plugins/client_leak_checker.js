@@ -19,12 +19,28 @@ TestConfiguration.prototype.newClient = function() {
   return client;
 };
 
-after(() => {
+function unifiedTopologyIsConnected(client) {
+  const topology = client.topology;
+  if (topology == null) {
+    return false;
+  }
+
+  return Array.from(topology.s.servers).some(
+    server => server.s && server.s.pool && server.s.pool.isConnected()
+  );
+}
+
+after(function() {
   wtfnode.dump();
 
+  const isUnifiedTopology = this.configuration.usingUnifiedTopology;
   const traces = [];
   const openClientCount = activeClients.reduce((count, client) => {
-    if (client.isConnected()) {
+    const isConnected = isUnifiedTopology
+      ? unifiedTopologyIsConnected(client)
+      : client.isConnected();
+
+    if (isConnected) {
       traces.push(client.trace);
       return count + 1;
     }
