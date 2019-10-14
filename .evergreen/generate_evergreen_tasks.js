@@ -7,7 +7,7 @@ const yaml = require('js-yaml');
 const LATEST_EFFECTIVE_VERSION = '5.0';
 const MONGODB_VERSIONS = ['latest', '4.2', '4.0', '3.6', '3.4', '3.2', '3.0', '2.6'];
 const NODE_VERSIONS = ['dubnium', 'carbon', 'boron', 'argon'];
-const TOPOLOGIES = ['single', 'replicaset', 'sharded'];
+const TOPOLOGIES = ['server', 'replica_set', 'sharded_cluster'];
 const OPERATING_SYSTEMS = [
   // ArchLinux
   {
@@ -148,11 +148,14 @@ function makeTask({ mongoVersion, topology }) {
         func: 'install dependencies'
       },
       {
-        func: 'run tests',
+        func: 'bootstrap mongo-orchestration',
         vars: {
           VERSION: mongoVersion,
           TOPOLOGY: topology
         }
+      },
+      {
+        func: 'run tests'
       }
     ]
   };
@@ -192,7 +195,7 @@ const getTaskList = (() => {
     }
 
     const ret = TASKS.filter(task => {
-      const { VERSION } = task.commands[1].vars;
+      const { VERSION } = task.commands.filter(task => !!task.vars)[0].vars;
 
       if (VERSION === 'latest') {
         return semver.satisfies(semver.coerce(LATEST_EFFECTIVE_VERSION), mongoVersion);
@@ -232,4 +235,4 @@ const fileData = yaml.safeLoad(fs.readFileSync(`${__dirname}/config.yml.in`, 'ut
 fileData.tasks = (fileData.tasks || []).concat(TASKS);
 fileData.buildvariants = (fileData.buildvariants || []).concat(BUILD_VARIANTS);
 
-fs.writeFileSync(`${__dirname}/config.yml`, yaml.safeDump(fileData), 'utf8');
+fs.writeFileSync(`${__dirname}/config.yml`, yaml.safeDump(fileData, { lineWidth: 120 }), 'utf8');

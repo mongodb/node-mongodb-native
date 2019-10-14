@@ -43,6 +43,7 @@ functions:
 
            export DRIVERS_TOOLS="$(pwd)/../drivers-tools"
            export PROJECT_DIRECTORY="$(pwd)"
+           export MONGO_ORCHESTRATION_HOME="$DRIVERS_TOOLS/.evergreen/orchestration"
            export MONGODB_BINARIES="$DRIVERS_TOOLS/mongodb/bin"
            export UPLOAD_BUCKET="${project}"
 
@@ -80,7 +81,24 @@ functions:
         script: |
           ${PREPARE_SHELL}
           rm -rf $DRIVERS_TOOLS
-          git clone git://github.com/mongodb-labs/drivers-evergreen-tools.git $DRIVERS_TOOLS
+          if [ "${project}" = "drivers-tools" ]; then
+            # If this was a patch build, doing a fresh clone would not actually test the patch
+            cp -R ${PROJECT_DIRECTORY}/ $DRIVERS_TOOLS
+          else
+            git clone git://github.com/mongodb-labs/drivers-evergreen-tools.git $DRIVERS_TOOLS
+          fi
+          echo "{ \"releases\": { \"default\": \"$MONGODB_BINARIES\" }}" > $MONGO_ORCHESTRATION_HOME/orchestration.config
+
+  "bootstrap mongo-orchestration":
+    - command: shell.exec
+      params:
+        script: |
+          ${PREPARE_SHELL}
+          MONGODB_VERSION=${VERSION} TOPOLOGY=${TOPOLOGY} sh ${DRIVERS_TOOLS}/.evergreen/run-orchestration.sh
+    # run-orchestration generates expansion file with the MONGODB_URI for the cluster
+    - command: expansions.update
+      params:
+        file: mo-expansion.yml
 
   "run tests":
     - command: shell.exec
@@ -89,7 +107,7 @@ functions:
         working_dir: "src"
         script: |
           ${PREPARE_SHELL}
-          MONGODB_VERSION=${VERSION} TOPOLOGY=${TOPOLOGY} AUTH=${AUTH} SSL=${SSL} MONGODB_URI="${MONGODB_URI}" sh ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
+          AUTH=${AUTH} SSL=${SSL} MONGODB_URI="${MONGODB_URI}" sh ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
 
   "cleanup":
     - command: shell.exec
