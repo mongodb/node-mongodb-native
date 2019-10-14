@@ -16,6 +16,7 @@ describe('examples(change-stream):', function() {
     client = await this.configuration.newClient().connect();
     db = client.db(this.configuration.db);
 
+    await db.createCollection('inventory');
     await db.collection('inventory').deleteMany({});
   });
 
