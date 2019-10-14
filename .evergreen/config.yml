@@ -25,6 +25,7 @@ functions:
 
           export DRIVERS_TOOLS="$(pwd)/../drivers-tools"
           export PROJECT_DIRECTORY="$(pwd)"
+          export MONGO_ORCHESTRATION_HOME="$DRIVERS_TOOLS/.evergreen/orchestration"
           export MONGODB_BINARIES="$DRIVERS_TOOLS/mongodb/bin"
           export UPLOAD_BUCKET="${project}"
 
@@ -61,19 +62,32 @@ functions:
 
           rm -rf $DRIVERS_TOOLS
 
-          git clone git://github.com/mongodb-labs/drivers-evergreen-tools.git
-          $DRIVERS_TOOLS
+          if [ "${project}" = "drivers-tools" ]; then
+            # If this was a patch build, doing a fresh clone would not actually test the patch
+            cp -R ${PROJECT_DIRECTORY}/ $DRIVERS_TOOLS
+          else
+            git clone git://github.com/mongodb-labs/drivers-evergreen-tools.git $DRIVERS_TOOLS
+          fi
+
+          echo "{ \"releases\": { \"default\": \"$MONGODB_BINARIES\" }}" >
+          $MONGO_ORCHESTRATION_HOME/orchestration.config
+  bootstrap mongo-orchestration:
+    - command: shell.exec
+      params:
+        script: |
+          ${PREPARE_SHELL}
+          MONGODB_VERSION=${VERSION} TOPOLOGY=${TOPOLOGY} sh ${DRIVERS_TOOLS}/.evergreen/run-orchestration.sh
+    - command: expansions.update
+      params:
+        file: mo-expansion.yml
   run tests:
     - command: shell.exec
       type: test
       params:
         working_dir: src
-        script: >
+        script: |
           ${PREPARE_SHELL}
-
-          MONGODB_VERSION=${VERSION} TOPOLOGY=${TOPOLOGY} AUTH=${AUTH}
-          SSL=${SSL} MONGODB_URI="${MONGODB_URI}" sh
-          ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
+          AUTH=${AUTH} SSL=${SSL} MONGODB_URI="${MONGODB_URI}" sh ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
   cleanup:
     - command: shell.exec
       params:
@@ -91,11 +105,9 @@ functions:
   make files executable:
     - command: shell.exec
       params:
-        script: >
+        script: |
           ${PREPARE_SHELL}
-
-          for i in $(find ${DRIVERS_TOOLS}/.evergreen
-          ${PROJECT_DIRECTORY}/.evergreen -name \*.sh); do
+          for i in $(find ${DRIVERS_TOOLS}/.evergreen ${PROJECT_DIRECTORY}/.evergreen -name \*.sh); do
             chmod +x $i
           done
   install dependencies:
@@ -103,11 +115,9 @@ functions:
       type: setup
       params:
         working_dir: src
-        script: >
+        script: |
           ${PREPARE_SHELL}
-
-          NODE_LTS_NAME=${NODE_LTS_NAME} sh
-          ${PROJECT_DIRECTORY}/.evergreen/install-dependencies.sh
+          NODE_LTS_NAME=${NODE_LTS_NAME} sh ${PROJECT_DIRECTORY}/.evergreen/install-dependencies.sh
   run atlas tests:
     - command: shell.exec
       type: test
@@ -117,9 +127,8 @@ functions:
         script: >
           # DO NOT ECHO WITH XTRACE (which PREPARE_SHELL does)
 
-          NODE_LTS_NAME='${NODE_LTS_NAME}' ATLAS_REPL='${atlas_repl}'
-          ATLAS_SHRD='${atlas_shrd}' ATLAS_FREE='${atlas_free}'
-          ATLAS_TLS11='${atlas_tls11}' ATLAS_TLS12='${atlas_tls12}' sh
+          NODE_LTS_NAME='${NODE_LTS_NAME}' ATLAS_REPL='${atlas_repl}' ATLAS_SHRD='${atlas_shrd}'
+          ATLAS_FREE='${atlas_free}' ATLAS_TLS11='${atlas_tls11}' ATLAS_TLS12='${atlas_tls12}' sh
           ${PROJECT_DIRECTORY}/.evergreen/run-atlas-tests.sh
 pre:
   - func: fetch source
@@ -129,246 +138,270 @@ pre:
 post:
   - func: cleanup
 tasks:
-  - name: test-latest-single
+  - name: test-latest-server
     tags:
       - latest
-      - single
+      - server
     commands:
       - func: install dependencies
-      - func: run tests
+      - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
-          TOPOLOGY: single
-  - name: test-latest-replicaset
+          TOPOLOGY: server
+      - func: run tests
+  - name: test-latest-replica_set
     tags:
       - latest
-      - replicaset
+      - replica_set
     commands:
       - func: install dependencies
-      - func: run tests
+      - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
-          TOPOLOGY: replicaset
-  - name: test-latest-sharded
+          TOPOLOGY: replica_set
+      - func: run tests
+  - name: test-latest-sharded_cluster
     tags:
       - latest
-      - sharded
+      - sharded_cluster
     commands:
       - func: install dependencies
-      - func: run tests
+      - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
-          TOPOLOGY: sharded
-  - name: test-4.2-single
+          TOPOLOGY: sharded_cluster
+      - func: run tests
+  - name: test-4.2-server
     tags:
       - '4.2'
-      - single
+      - server
     commands:
       - func: install dependencies
-      - func: run tests
+      - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.2'
-          TOPOLOGY: single
-  - name: test-4.2-replicaset
+          TOPOLOGY: server
+      - func: run tests
+  - name: test-4.2-replica_set
     tags:
       - '4.2'
-      - replicaset
+      - replica_set
     commands:
       - func: install dependencies
-      - func: run tests
+      - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.2'
-          TOPOLOGY: replicaset
-  - name: test-4.2-sharded
+          TOPOLOGY: replica_set
+      - func: run tests
+  - name: test-4.2-sharded_cluster
     tags:
       - '4.2'
-      - sharded
+      - sharded_cluster
     commands:
       - func: install dependencies
-      - func: run tests
+      - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.2'
-          TOPOLOGY: sharded
-  - name: test-4.0-single
+          TOPOLOGY: sharded_cluster
+      - func: run tests
+  - name: test-4.0-server
     tags:
       - '4.0'
-      - single
+      - server
     commands:
       - func: install dependencies
-      - func: run tests
+      - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.0'
-          TOPOLOGY: single
-  - name: test-4.0-replicaset
+          TOPOLOGY: server
+      - func: run tests
+  - name: test-4.0-replica_set
     tags:
       - '4.0'
-      - replicaset
+      - replica_set
     commands:
       - func: install dependencies
-      - func: run tests
+      - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.0'
-          TOPOLOGY: replicaset
-  - name: test-4.0-sharded
+          TOPOLOGY: replica_set
+      - func: run tests
+  - name: test-4.0-sharded_cluster
     tags:
       - '4.0'
-      - sharded
+      - sharded_cluster
     commands:
       - func: install dependencies
-      - func: run tests
+      - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.0'
-          TOPOLOGY: sharded
-  - name: test-3.6-single
+          TOPOLOGY: sharded_cluster
+      - func: run tests
+  - name: test-3.6-server
     tags:
       - '3.6'
-      - single
+      - server
     commands:
       - func: install dependencies
-      - func: run tests
+      - func: bootstrap mongo-orchestration
         vars:
           VERSION: '3.6'
-          TOPOLOGY: single
-  - name: test-3.6-replicaset
+          TOPOLOGY: server
+      - func: run tests
+  - name: test-3.6-replica_set
     tags:
       - '3.6'
-      - replicaset
+      - replica_set
     commands:
       - func: install dependencies
-      - func: run tests
+      - func: bootstrap mongo-orchestration
         vars:
           VERSION: '3.6'
-          TOPOLOGY: replicaset
-  - name: test-3.6-sharded
+          TOPOLOGY: replica_set
+      - func: run tests
+  - name: test-3.6-sharded_cluster
     tags:
       - '3.6'
-      - sharded
+      - sharded_cluster
     commands:
       - func: install dependencies
-      - func: run tests
+      - func: bootstrap mongo-orchestration
         vars:
           VERSION: '3.6'
-          TOPOLOGY: sharded
-  - name: test-3.4-single
+          TOPOLOGY: sharded_cluster
+      - func: run tests
+  - name: test-3.4-server
     tags:
       - '3.4'
-      - single
+      - server
     commands:
       - func: install dependencies
-      - func: run tests
+      - func: bootstrap mongo-orchestration
         vars:
           VERSION: '3.4'
-          TOPOLOGY: single
-  - name: test-3.4-replicaset
+          TOPOLOGY: server
+      - func: run tests
+  - name: test-3.4-replica_set
     tags:
       - '3.4'
-      - replicaset
+      - replica_set
     commands:
       - func: install dependencies
-      - func: run tests
+      - func: bootstrap mongo-orchestration
         vars:
           VERSION: '3.4'
-          TOPOLOGY: replicaset
-  - name: test-3.4-sharded
+          TOPOLOGY: replica_set
+      - func: run tests
+  - name: test-3.4-sharded_cluster
     tags:
       - '3.4'
-      - sharded
+      - sharded_cluster
     commands:
       - func: install dependencies
-      - func: run tests
+      - func: bootstrap mongo-orchestration
         vars:
           VERSION: '3.4'
-          TOPOLOGY: sharded
-  - name: test-3.2-single
+          TOPOLOGY: sharded_cluster
+      - func: run tests
+  - name: test-3.2-server
     tags:
       - '3.2'
-      - single
+      - server
     commands:
       - func: install dependencies
-      - func: run tests
+      - func: bootstrap mongo-orchestration
         vars:
           VERSION: '3.2'
-          TOPOLOGY: single
-  - name: test-3.2-replicaset
+          TOPOLOGY: server
+      - func: run tests
+  - name: test-3.2-replica_set
     tags:
       - '3.2'
-      - replicaset
+      - replica_set
     commands:
       - func: install dependencies
-      - func: run tests
+      - func: bootstrap mongo-orchestration
         vars:
           VERSION: '3.2'
-          TOPOLOGY: replicaset
-  - name: test-3.2-sharded
+          TOPOLOGY: replica_set
+      - func: run tests
+  - name: test-3.2-sharded_cluster
     tags:
       - '3.2'
-      - sharded
+      - sharded_cluster
     commands:
       - func: install dependencies
-      - func: run tests
+      - func: bootstrap mongo-orchestration
         vars:
           VERSION: '3.2'
-          TOPOLOGY: sharded
-  - name: test-3.0-single
+          TOPOLOGY: sharded_cluster
+      - func: run tests
+  - name: test-3.0-server
     tags:
       - '3.0'
-      - single
+      - server
     commands:
       - func: install dependencies
-      - func: run tests
+      - func: bootstrap mongo-orchestration
         vars:
           VERSION: '3.0'
-          TOPOLOGY: single
-  - name: test-3.0-replicaset
+          TOPOLOGY: server
+      - func: run tests
+  - name: test-3.0-replica_set
     tags:
       - '3.0'
-      - replicaset
+      - replica_set
     commands:
       - func: install dependencies
-      - func: run tests
+      - func: bootstrap mongo-orchestration
         vars:
           VERSION: '3.0'
-          TOPOLOGY: replicaset
-  - name: test-3.0-sharded
+          TOPOLOGY: replica_set
+      - func: run tests
+  - name: test-3.0-sharded_cluster
     tags:
       - '3.0'
-      - sharded
+      - sharded_cluster
     commands:
       - func: install dependencies
-      - func: run tests
+      - func: bootstrap mongo-orchestration
         vars:
           VERSION: '3.0'
-          TOPOLOGY: sharded
-  - name: test-2.6-single
+          TOPOLOGY: sharded_cluster
+      - func: run tests
+  - name: test-2.6-server
     tags:
       - '2.6'
-      - single
+      - server
     commands:
       - func: install dependencies
-      - func: run tests
+      - func: bootstrap mongo-orchestration
         vars:
           VERSION: '2.6'
-          TOPOLOGY: single
-  - name: test-2.6-replicaset
+          TOPOLOGY: server
+      - func: run tests
+  - name: test-2.6-replica_set
     tags:
       - '2.6'
-      - replicaset
+      - replica_set
     commands:
       - func: install dependencies
-      - func: run tests
+      - func: bootstrap mongo-orchestration
         vars:
           VERSION: '2.6'
-          TOPOLOGY: replicaset
-  - name: test-2.6-sharded
+          TOPOLOGY: replica_set
+      - func: run tests
+  - name: test-2.6-sharded_cluster
     tags:
       - '2.6'
-      - sharded
+      - sharded_cluster
     commands:
       - func: install dependencies
-      - func: run tests
+      - func: bootstrap mongo-orchestration
         vars:
           VERSION: '2.6'
-          TOPOLOGY: sharded
+          TOPOLOGY: sharded_cluster
+      - func: run tests
   - name: test-atlas-connectivity
     tags:
       - atlas-connect
@@ -384,24 +417,24 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: dubnium
     tasks: &ref_0
-      - test-4.0-single
-      - test-4.0-replicaset
-      - test-4.0-sharded
-      - test-3.6-single
-      - test-3.6-replicaset
-      - test-3.6-sharded
-      - test-3.4-single
-      - test-3.4-replicaset
-      - test-3.4-sharded
-      - test-3.2-single
-      - test-3.2-replicaset
-      - test-3.2-sharded
-      - test-3.0-single
-      - test-3.0-replicaset
-      - test-3.0-sharded
-      - test-2.6-single
-      - test-2.6-replicaset
-      - test-2.6-sharded
+      - test-4.0-server
+      - test-4.0-replica_set
+      - test-4.0-sharded_cluster
+      - test-3.6-server
+      - test-3.6-replica_set
+      - test-3.6-sharded_cluster
+      - test-3.4-server
+      - test-3.4-replica_set
+      - test-3.4-sharded_cluster
+      - test-3.2-server
+      - test-3.2-replica_set
+      - test-3.2-sharded_cluster
+      - test-3.0-server
+      - test-3.0-replica_set
+      - test-3.0-sharded_cluster
+      - test-2.6-server
+      - test-2.6-replica_set
+      - test-2.6-sharded_cluster
   - name: archlinux-test-carbon
     display_name: Archlinux Node Carbon
     run_on: archlinux-test
@@ -426,21 +459,21 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: dubnium
     tasks: &ref_1
-      - test-3.6-single
-      - test-3.6-replicaset
-      - test-3.6-sharded
-      - test-3.4-single
-      - test-3.4-replicaset
-      - test-3.4-sharded
-      - test-3.2-single
-      - test-3.2-replicaset
-      - test-3.2-sharded
-      - test-3.0-single
-      - test-3.0-replicaset
-      - test-3.0-sharded
-      - test-2.6-single
-      - test-2.6-replicaset
-      - test-2.6-sharded
+      - test-3.6-server
+      - test-3.6-replica_set
+      - test-3.6-sharded_cluster
+      - test-3.4-server
+      - test-3.4-replica_set
+      - test-3.4-sharded_cluster
+      - test-3.2-server
+      - test-3.2-replica_set
+      - test-3.2-sharded_cluster
+      - test-3.0-server
+      - test-3.0-replica_set
+      - test-3.0-sharded_cluster
+      - test-2.6-server
+      - test-2.6-replica_set
+      - test-2.6-sharded_cluster
   - name: debian71-test-carbon
     display_name: Debian 7.1 Node Carbon
     run_on: debian71-test
@@ -465,15 +498,15 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: dubnium
     tasks: &ref_2
-      - test-4.0-single
-      - test-4.0-replicaset
-      - test-4.0-sharded
-      - test-3.6-single
-      - test-3.6-replicaset
-      - test-3.6-sharded
-      - test-3.4-single
-      - test-3.4-replicaset
-      - test-3.4-sharded
+      - test-4.0-server
+      - test-4.0-replica_set
+      - test-4.0-sharded_cluster
+      - test-3.6-server
+      - test-3.6-replica_set
+      - test-3.6-sharded_cluster
+      - test-3.4-server
+      - test-3.4-replica_set
+      - test-3.4-sharded_cluster
   - name: debian81-test-carbon
     display_name: Debian 8.1 Node Carbon
     run_on: debian81-test
@@ -522,30 +555,30 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: dubnium
     tasks: &ref_3
-      - test-latest-single
-      - test-latest-replicaset
-      - test-latest-sharded
-      - test-4.2-single
-      - test-4.2-replicaset
-      - test-4.2-sharded
-      - test-4.0-single
-      - test-4.0-replicaset
-      - test-4.0-sharded
-      - test-3.6-single
-      - test-3.6-replicaset
-      - test-3.6-sharded
-      - test-3.4-single
-      - test-3.4-replicaset
-      - test-3.4-sharded
-      - test-3.2-single
-      - test-3.2-replicaset
-      - test-3.2-sharded
-      - test-3.0-single
-      - test-3.0-replicaset
-      - test-3.0-sharded
-      - test-2.6-single
-      - test-2.6-replicaset
-      - test-2.6-sharded
+      - test-latest-server
+      - test-latest-replica_set
+      - test-latest-sharded_cluster
+      - test-4.2-server
+      - test-4.2-replica_set
+      - test-4.2-sharded_cluster
+      - test-4.0-server
+      - test-4.0-replica_set
+      - test-4.0-sharded_cluster
+      - test-3.6-server
+      - test-3.6-replica_set
+      - test-3.6-sharded_cluster
+      - test-3.4-server
+      - test-3.4-replica_set
+      - test-3.4-sharded_cluster
+      - test-3.2-server
+      - test-3.2-replica_set
+      - test-3.2-sharded_cluster
+      - test-3.0-server
+      - test-3.0-replica_set
+      - test-3.0-sharded_cluster
+      - test-2.6-server
+      - test-2.6-replica_set
+      - test-2.6-sharded_cluster
       - test-atlas-connectivity
   - name: macos-1012-carbon
     display_name: macOS 10.12 Node Carbon
@@ -595,24 +628,24 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: dubnium
     tasks: &ref_4
-      - test-latest-single
-      - test-latest-replicaset
-      - test-latest-sharded
-      - test-4.2-single
-      - test-4.2-replicaset
-      - test-4.2-sharded
-      - test-4.0-single
-      - test-4.0-replicaset
-      - test-4.0-sharded
-      - test-3.6-single
-      - test-3.6-replicaset
-      - test-3.6-sharded
-      - test-3.4-single
-      - test-3.4-replicaset
-      - test-3.4-sharded
-      - test-3.2-single
-      - test-3.2-replicaset
-      - test-3.2-sharded
+      - test-latest-server
+      - test-latest-replica_set
+      - test-latest-sharded_cluster
+      - test-4.2-server
+      - test-4.2-replica_set
+      - test-4.2-sharded_cluster
+      - test-4.0-server
+      - test-4.0-replica_set
+      - test-4.0-sharded_cluster
+      - test-3.6-server
+      - test-3.6-replica_set
+      - test-3.6-sharded_cluster
+      - test-3.4-server
+      - test-3.4-replica_set
+      - test-3.4-sharded_cluster
+      - test-3.2-server
+      - test-3.2-replica_set
+      - test-3.2-sharded_cluster
       - test-atlas-connectivity
   - name: rhel71-power8-test-carbon
     display_name: RHEL 7.1 (POWER8) Node Carbon
@@ -758,12 +791,12 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: dubnium
     tasks: &ref_5
-      - test-latest-single
-      - test-latest-replicaset
-      - test-latest-sharded
-      - test-4.2-single
-      - test-4.2-replicaset
-      - test-4.2-sharded
+      - test-latest-server
+      - test-latest-replica_set
+      - test-latest-sharded_cluster
+      - test-4.2-server
+      - test-4.2-replica_set
+      - test-4.2-sharded_cluster
       - test-atlas-connectivity
   - name: ubuntu1804-arm64-test-carbon
     display_name: Ubuntu 18.04 (ARM64) Node Carbon

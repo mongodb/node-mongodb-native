@@ -11,20 +11,6 @@ set -o errexit  # Exit the script with error if any of the commands fail
 AUTH=${AUTH:-noauth}
 SSL=${SSL:-nossl}
 MONGODB_URI=${MONGODB_URI:-}
-DRIVERS_TOOLS=${DRIVERS_TOOLS:-}
-MONGODB_VERSION=${MONGODB_VERSION:-}
-
-# install MongoDB
-# Functions to fetch MongoDB binaries
-. ${DRIVERS_TOOLS}/.evergreen/download-mongodb.sh
-
-get_distro
-if [ -z "$MONGODB_DOWNLOAD_URL" ]; then
-    get_mongodb_download_url_for "$DISTRO" "$MONGODB_VERSION"
-fi
-# Even though we have the MONGODB_DOWNLOAD_URL, we still call this to get the proper EXTRACT variable
-get_mongodb_download_url_for "$DISTRO"
-download_and_extract "$MONGODB_DOWNLOAD_URL" "$EXTRACT"
 
 # run tests
 echo "Running $AUTH tests over $SSL, connecting to $MONGODB_URI"
@@ -33,4 +19,4 @@ export PATH="/opt/mongodbtoolchain/v2/bin:$PATH"
 NODE_ARTIFACTS_PATH="${PROJECT_DIRECTORY}/node-artifacts"
 export NVM_DIR="${NODE_ARTIFACTS_PATH}/nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-MONGODB_VERSION=${MONGODB_VERSION} MONGODB_ENVIRONMENT=${TOPOLOGY} npm test -- --local
+MONGODB_URI=${MONGODB_URI} npm test
