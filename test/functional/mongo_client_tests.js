@@ -631,10 +631,6 @@ describe('MongoClient', function() {
 
       const client = configuration.newClient(url);
       client.connect(function(err) {
-        if (err == null) {
-          console.dir({ topology: client.topology }, { depth: 5 });
-        }
-
         test.ok(err != null);
         done();
       });
