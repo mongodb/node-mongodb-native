@@ -56,15 +56,6 @@ class NativeConfiguration {
   }
 
   newClient(dbOptions, serverOptions) {
-    if (typeof dbOptions === 'string') {
-      return new MongoClient(
-        dbOptions,
-        this.usingUnifiedTopology()
-          ? Object.assign({ useUnifiedTopology: true }, serverOptions)
-          : serverOptions
-      );
-    }
-
     // support MongoClient contructor form (url, options) for `newClient`
     if (typeof dbOptions === 'string') {
       return new MongoClient(
