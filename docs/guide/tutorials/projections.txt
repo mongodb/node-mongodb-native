@@ -12,7 +12,7 @@ Projection Document
 
 The projection document limits the fields to return for all
 matching documents. The projection document can specify the
-inclusion of fields or the exclusion of field and has the
+inclusion of fields or the exclusion of fields and has the
 following form:
 
 .. code-block:: js
@@ -45,8 +45,7 @@ included automatically unless specifically excluded.
    
    // Create a new MongoClient
    const client = new MongoClient(url);
-   
-   // BEGIN foobar
+
    // Use connect method to connect to the Server
    client.connect().then(async function() {
      console.log("Connected successfully to server");
@@ -54,13 +53,13 @@ included automatically unless specifically excluded.
      const collection = client.db(dbName).collection('restaurants');
 
      try {
-       const results = collection
+       const results = await collection
          .find({ cuisine : 'Brazilian' })
          .project({ name : 1, cuisine : 1 })
          .toArray();
        
        console.log("Found the following records");
-       console.log(docs)
+       console.log(docs);
      } finally {
        await client.close();
      }
@@ -71,13 +70,13 @@ including ``_id``, use the following projection document:
 
 .. code-block:: js
 
-   { 'name' : 1, 'cuisine' : 1, '_id': 0 }
+   { name : 1, cuisine : 1, _id: 0 }
 
 To return all fields *except* the address field, use the following:
 
 .. code-block:: js
 
-   { 'address' : 0 }
+   { address : 0 }
 
 .. warning::
    Both the MongoDB shell and the 2.x version of the Node driver supported
