@@ -1,3 +1,75 @@
 ===========
 Text Search
 ===========
+
+Use the :manual:`$text </reference/operator/query/text/>`
+operator to perform text searches on fields which have a
+:manual:`text index </core/index-text/>` .
+
+To create a text index on a collection, pass a document containing
+the name of the field to be indexed with the value 'text' to the
+``createIndex()`` method.
+
+.. code-block:: js
+
+   const { MongoClient } = require('mongodb');
+   
+   // Connection URL
+   const url = 'mongodb://localhost:27017';
+   
+   // Database Name
+   const dbName = 'myproject';
+   
+   // Create a new MongoClient
+   const client = new MongoClient(url);
+   
+   // Use connect method to connect to the Server
+   client.connect().then(async function() {
+     const db = client.db(dbName);
+     const collection = db.collection('restaurants');
+   
+     try {
+       const results = await collection.createIndex({ name : "text" });
+       console.log(results);
+     } finally {
+       await client.close();
+     }
+   });
+
+The following example assumes that a database called ``test`` has a
+collection called ``restaurants``\ , with a text index on the ``name`` field.
+
+.. raw::html
+
+    <!-- A `sample dataset <https://docs.mongodb.org/getting-started/node/import-data/>`_ is available for download. -->
+    <!-- This link redirects to "http://mongodb.github.io/node-mongodb-native/2.2/quick-start/quick-start/". We should fix this -->
+
+.. code-block:: js
+
+   const { MongoClient } = require('mongodb');
+   
+   // Connection URL
+   const url = 'mongodb://localhost:27017';
+   
+   // Database Name
+   const dbName = 'myproject';
+   
+   // Create a new MongoClient
+   const client = new MongoClient(url);
+   
+   // Use connect method to connect to the Server
+   client.connect().then(async function() {
+     const db = client.db(dbName);
+     const collection = db.collection('restaurants');
+   
+     try {
+       const docs = await collection.find({ '$text': {'$search' : 'Garden' } } ).toArray();
+       console.log("Found the following records");
+       console.log(docs);
+     } finally {
+       await client.close();
+     }
+   });
+
+For more information about the ``$text`` operator and its options, see the
+:manual:`manual entry </reference/operator/query/text/>` .
