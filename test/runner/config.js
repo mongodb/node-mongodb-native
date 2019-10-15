@@ -168,25 +168,6 @@ class NativeConfiguration {
 
     return { w: 1 };
   }
-
-  // server37631Workaround() {
-  //   console.log('[applying SERVER-37631 workaround]');
-  //   const configServers = this.manager.configurationServers.managers;
-  //   const proxies = this.manager.proxies;
-  //   const configServersPromise = configServers.reduce((result, server) => {
-  //     return result.then(() =>
-  //       server.executeCommand('admin.$cmd', { refreshLogicalSessionCacheNow: 1 })
-  //     );
-  //   }, Promise.resolve());
-
-  //   return configServersPromise.then(() => {
-  //     return proxies.reduce((promise, proxy) => {
-  //       return promise.then(() =>
-  //         proxy.executeCommand('admin.$cmd', { refreshLogicalSessionCacheNow: 1 })
-  //       );
-  //     }, Promise.resolve());
-  //   });
-  // }
 }
 
 module.exports = NativeConfiguration;
