@@ -27,11 +27,15 @@ class MongoDBTopologyFilter {
     if (!test.metadata.requires) return true;
     if (!test.metadata.requires.topology) return true;
 
-    let topologies = null;
-    if (typeof test.metadata.requires.topology === 'string') {
-      topologies = [test.metadata.requires.topology];
-    } else if (Array.isArray(test.metadata.requires.topology)) {
-      topologies = test.metadata.requires.topology;
+    const requiredTopology =
+      test.metadata && test.metadata.requires && test.metadata.requires.topology;
+    if (!requiredTopology) return true;
+
+    let topologies;
+    if (typeof requiredTopology === 'string') {
+      topologies = [requiredTopology];
+    } else if (Array.isArray(requiredTopology)) {
+      topologies = requiredTopology;
     } else {
       throw new TypeError(
         'MongoDBTopologyFilter only supports single string topology or an array of string topologies'
