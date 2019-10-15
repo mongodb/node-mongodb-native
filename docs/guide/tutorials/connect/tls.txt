@@ -34,11 +34,11 @@ If the MongoDB instance presents a certificate, to validate the server's certifi
    const fs = require('fs');
 
    // Read the certificate authority
-   const ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
+   const sslCA = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
 
    const client = new MongoClient('mongodb://localhost:27017?ssl=true', {
      sslValidate:true,
-     sslCA:ca
+     sslCA
    });
 
    // Connect validating the returned certificates from the server
@@ -65,12 +65,12 @@ server's SSL certificate(s) matches the hostname(s) provided in the URI connecti
    const fs = require('fs');
 
    // Read the certificate authority
-   const ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
+   const sslCA = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
 
    const client = new MongoClient('mongodb://localhost:27017?ssl=true', {
      sslValidate:true,
      checkServerIdentity:false,
-     sslCA:ca
+     sslCA
    });
 
    // Connect validating the returned certificates from the server
@@ -97,16 +97,16 @@ certificate to the server. To pass the client's certificate as well as to valida
    const fs = require('fs');
 
    // Read the certificates
-   const ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
-   const cert = fs.readFileSync(__dirname + "/ssl/client.pem");
-   const key = fs.readFileSync(__dirname + "/ssl/client.pem");
+   const sslCA = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
+   const sslCert = fs.readFileSync(__dirname + "/ssl/client.pem");
+   const sslKey = fs.readFileSync(__dirname + "/ssl/client.pem");
 
    const client = new MongoClient('mongodb://localhost:27017?ssl=true', {
      sslValidate:true,
-     sslCA:ca,
-     sslKey:key,
-     sslCert:cert,
-     sslPass:'10gen',
+     sslCA,
+     sslCert,
+     sslKey,
+     sslPass:'10gen'
    });
 
    // Connect validating the returned certificates from the server
@@ -130,15 +130,15 @@ a connections options with  the X.509 certificate and other :doc:`TLS/SSL connec
    const fs = require('fs');
 
    // Read the cert and key
-   const cert = fs.readFileSync(__dirname + "/ssl/x509/client.pem");
-   const key = fs.readFileSync(__dirname + "/ssl/x509/client.pem");
+   const sslCert = fs.readFileSync(__dirname + "/ssl/x509/client.pem");
+   const sslKey = fs.readFileSync(__dirname + "/ssl/x509/client.pem");
 
    // User name
    const userName = "CN=client,OU=kerneluser,O=10Gen,L=New York City,ST=New York,C=US";
 
    const client = new MongoClient(`mongodb://${encodeURIComponent(userName)}@server:27017?authMechanism=MONGODB-X509&ssl=true`, {
-     sslKey:key,
-     sslCert:cert,
+     sslCert,
+     sslKey
    });
 
    // Connect using the MONGODB-X509 authentication mechanism
