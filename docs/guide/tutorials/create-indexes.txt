@@ -158,8 +158,7 @@ This example specifies a 2d index on the ``points`` field:
 
    async function create2dIndex(db) {
      // Get the documents collection
-     const collection = db.collection('users');k(result);
-     });
+     const collection = db.collection('users');
 
      // Create the index
      const result = await collection.createIndex({ points : "2d" });
