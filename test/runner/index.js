@@ -26,11 +26,13 @@ function initializeFilters(client, callback) {
       const filter = new FilterModule();
 
       if (typeof filter !== 'object') {
-        throw new TypeError('Type of filter must be an object');
+        cb(new TypeError('Type of filter must be an object'));
+        return;
       }
 
       if (!filter.filter || typeof filter.filter !== 'function') {
-        throw new TypeError('Object filters must have a function named filter');
+        cb(new TypeError('Object filters must have a function named filter'));
+        return;
       }
 
       filters.push(filter);
