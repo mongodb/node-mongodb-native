@@ -1,3 +1,192 @@
 =======
 TLS/SSL
 =======
+
+The Node.js driver supports TLS/SSL connections to MongoDB that support TLS/SSL support.
+
+No Certificate Validation
+-------------------------
+
+If the MongoDB instance does not perform any validation of the certificate chain, include the ``ssl=true`` in the :manual:`URI ConnectionString </reference/connection-string/>` .
+
+.. code-block:: js
+
+   const { MongoClient } = require('mongodb');
+
+   const client = new MongoClient('mongodb://localhost:27017?ssl=true');
+
+   client.connect().then(async function() {
+     await client.close();
+   });
+
+Validate Server Certificate
+---------------------------
+
+If the MongoDB instance presents a certificate, to validate the server's certificate, pass the following when creating a ``MongoClient``\ :
+
+* A :manual:`URI ConnectionString </reference/connection-string/>` that includes ``ssl=true`` setting,
+
+* A connections options with the certificate for the Certificate Authority (\ ``sslCA``\ ) and the ``sslValidate`` setting set to ``true``
+
+.. code-block:: js
+
+   const { MongoClient } = require('mongodb');
+   const fs = require('fs');
+
+   // Read the certificate authority
+   const ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
+
+   const client = new MongoClient('mongodb://localhost:27017?ssl=true', {
+     sslValidate:true,
+     sslCA:ca
+   });
+
+   // Connect validating the returned certificates from the server
+   client.connect().then(async function() {
+     await client.close();
+   });
+
+Disable Hostname Verification
+-----------------------------
+
+By default, the driver ensures that the hostname included in the
+server's SSL certificate(s) matches the hostname(s) provided in the URI connection string. If you need to disable the hostname verification, but otherwise validate the server's certificate, pass to the new ``MongoClient``\ :
+
+
+* 
+  A :manual:`URI ConnectionString </reference/connection-string/>` that includes ``ssl=true`` setting,
+
+* 
+  A connections options with the certificate for the Certificate Authority (\ ``sslCA``\ ) and the ``sslValidate`` setting set to ``true`` but  ``checkServerIdentity`` set to ``false``.
+
+.. code-block:: js
+
+   const { MongoClient } = require('mongodb');
+   const fs = require('fs');
+
+   // Read the certificate authority
+   const ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
+
+   const client = new MongoClient('mongodb://localhost:27017?ssl=true', {
+     sslValidate:true,
+     checkServerIdentity:false,
+     sslCA:ca
+   });
+
+   // Connect validating the returned certificates from the server
+   client.connect().then(async function() {
+     await client.close();
+   });
+
+Validate Server Certificate and Present Valid Certificate
+---------------------------------------------------------
+
+If the MongoDB server performs certificate validation, the client must pass its
+certificate to the server. To pass the client's certificate as well as to validate the server's certificate, pass to the new ``MongoClient``\ :
+
+
+* 
+  A :manual:`URI ConnectionString </reference/connection-string/>` that includes ``ssl=true`` setting,
+
+* 
+  A connections options with the ``sslValidate`` setting set to ``true``\ , the certificate for the Certificate Authority (\ ``sslCA``\ ), the client's certificate (\ ``sslCert``\ ) and private key file (\ ``sslKey``\ ).  If the client's key file is encrypted, include the password (\ ``sslPass``\ ).
+
+.. code-block:: js
+
+   const { MongoClient } = require('mongodb');
+   const fs = require('fs');
+
+   // Read the certificates
+   const ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
+   const cert = fs.readFileSync(__dirname + "/ssl/client.pem");
+   const key = fs.readFileSync(__dirname + "/ssl/client.pem");
+
+   const client = new MongoClient('mongodb://localhost:27017?ssl=true', {
+     sslValidate:true,
+     sslCA:ca,
+     sslKey:key,
+     sslCert:cert,
+     sslPass:'10gen',
+   });
+
+   // Connect validating the returned certificates from the server
+   client.connect().then(async function() {
+     await client.close();
+   });
+
+Connect with X.509
+------------------
+
+:manual:`X.509 </core/security-x.509>` authentication requires the use of TLS/SSL connections with certificate validation. MongoDB uses the X.509 certificate presented during SSL negotiation to authenticate a user whose name is derived from the distinguished name of the X.509 certificate.
+
+To connect using the X.509 authentication mechanism, specify ``MONGODB-X509`` as the mechanism in the :manual:`URI ConnectionString </reference/connection-string/>` , ``ssl=true``\ , and the username. Use ``enodeURIComponent`` to encode the username string.
+
+In addition to the connection string, pass to the new ``MongoClient``
+a connections options with  the X.509 certificate and other :doc:`TLS/SSL connections </tutorials/connect/tls>` options.
+
+.. code-block:: js
+
+   const { MongoClient } = require('mongodb');
+   const fs = require('fs');
+
+   // Read the cert and key
+   const cert = fs.readFileSync(__dirname + "/ssl/x509/client.pem");
+   const key = fs.readFileSync(__dirname + "/ssl/x509/client.pem");
+
+   // User name
+   const userName = "CN=client,OU=kerneluser,O=10Gen,L=New York City,ST=New York,C=US";
+
+   const client = new MongoClient(`mongodb://${encodeURIComponent(userName)}@server:27017?authMechanism=MONGODB-X509&ssl=true`, {
+     sslKey:key,
+     sslCert:cert,
+   });
+
+   // Connect using the MONGODB-X509 authentication mechanism
+   client.connect().then(async function() {
+     await client.close();
+   });
+
+TLS/SSL Options
+---------------
+
+The following TLS/SSL options are available.
+
+.. list-table::
+   :header-rows: 1
+
+   * - Parameter
+     - Type
+     - Default
+     - Description
+   * - ``ssl``
+     - boolean
+     - ``false``
+     - Use tls/ssl connection. See :manual:`tls </reference/connection-string/#urioption.tls>`
+   * - ``sslValidate``
+     - boolean
+     - ``false``
+     - Validate mongod server certificate against ca. Is equivalent to :manual:`tlsInsecure </reference/connection-string/#urioption.tlsInsecure>`
+   * - ``sslCA``
+     - Buffer[]|string[]
+     - 
+     - Array of valid certificates for Certificate Authority either as Buffers or Strings.
+   * - ``sslCRL``
+     - Buffer[]|string[]
+     - 
+     -  Certificate Revocation Lists. See `tls.createSecureContext <https://nodejs.org/dist/latest-v10.x/docs/api/tls.html#tls_tls_createsecurecontext_options>`_
+   * - ``sslCert``
+     - Buffer|string
+     - 
+     - String or buffer containing the client certificate.
+   * - ``sslKey``
+     - Buffer|string
+     - 
+     - String or buffer containing the certificate private key we wish to present
+   * - ``sslPass``
+     - Buffer|string
+     - 
+     - String or buffer containing the client certificate password.
+   * - ``checkServerIdentity``
+     - function/boolean
+     - true
+     - If a function, overrides built-in `tls.checkServerIdentity <https://nodejs.org/dist/latest-v10.x/docs/api/tls.html#tls_tls_checkserveridentity_hostname_cert>`_. See `tls.connect <https://nodejs.org/dist/latest-v10.x/docs/api/tls.html#tls_tls_connect_options_callback>`_. If ``false``, automatically verifies all certificates and servernames.
