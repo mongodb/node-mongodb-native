@@ -2,6 +2,44 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="3.3.3"></a>
+## [3.3.3](https://github.com/mongodb/node-mongodb-native/compare/v3.3.2...v3.3.3) (2019-10-16)
+
+
+### Bug Fixes
+
+* **change_stream:** emit 'close' event if reconnecting failed ([f24c084](https://github.com/mongodb/node-mongodb-native/commit/f24c084))
+* **ChangeStream:** remove startAtOperationTime once we have resumeToken ([362afd8](https://github.com/mongodb/node-mongodb-native/commit/362afd8))
+* **connect:** Switch new Buffer(size) -> Buffer.alloc(size) ([da90c3a](https://github.com/mongodb/node-mongodb-native/commit/da90c3a))
+* **MongoClient:** only check own properties for valid options ([9cde4b9](https://github.com/mongodb/node-mongodb-native/commit/9cde4b9))
+* **mongos:** disconnect proxies which are not mongos instances ([ee53983](https://github.com/mongodb/node-mongodb-native/commit/ee53983))
+* **mongos:** force close servers during reconnect flow ([186263f](https://github.com/mongodb/node-mongodb-native/commit/186263f))
+* **monitoring:** correct spelling mistake for heartbeat event ([21aa117](https://github.com/mongodb/node-mongodb-native/commit/21aa117))
+* **replset:** correct server leak on initial connect ([da39d1e](https://github.com/mongodb/node-mongodb-native/commit/da39d1e))
+* **replset:** destroy primary before removing from replsetstate ([45ac09a](https://github.com/mongodb/node-mongodb-native/commit/45ac09a))
+* **replset:** destroy servers that are removed during SDAM flow ([9ea0190](https://github.com/mongodb/node-mongodb-native/commit/9ea0190))
+* **saslprep:** add in missing saslprep dependency ([41f1165](https://github.com/mongodb/node-mongodb-native/commit/41f1165))
+* **topology:** don't early abort server selection on network errors ([2b6a359](https://github.com/mongodb/node-mongodb-native/commit/2b6a359))
+* **topology:** don't emit server closed event on network error ([194dcf0](https://github.com/mongodb/node-mongodb-native/commit/194dcf0))
+* **topology:** include all BSON types in ctor for bson-ext support ([aa4c832](https://github.com/mongodb/node-mongodb-native/commit/aa4c832))
+* **topology:** respect the `force` parameter for topology close ([d6e8936](https://github.com/mongodb/node-mongodb-native/commit/d6e8936))
+
+### Features
+
+* **Update:** add the ability to specify a pipeline to an update command ([#2017](https://github.com/mongodb/node-mongodb-native/issues/2017)) ([44a4110](https://github.com/mongodb/node-mongodb-native/commit/44a4110))
+* **urlParser:** default useNewUrlParser to true ([52d76e3](https://github.com/mongodb/node-mongodb-native/commit/52d76e3))
+
+<a name="3.2.7"></a>
+## [3.2.7](https://github.com/mongodb/node-mongodb-native/compare/v3.2.6...v3.2.7) (2019-06-04)
+
+
+### Bug Fixes
+
+* **core:** updating core to version 3.2.7 ([2f91466](https://github.com/mongodb/node-mongodb-native/commit/2f91466))
+* **findOneAndReplace:** throw error if atomic operators provided for findOneAndReplace ([6a860a3](https://github.com/mongodb/node-mongodb-native/commit/6a860a3))
+
+
+
 <a name="3.3.2"></a>
 ## [3.3.2](https://github.com/mongodb/node-mongodb-native/compare/v3.3.1...v3.3.2) (2019-08-28)
 
