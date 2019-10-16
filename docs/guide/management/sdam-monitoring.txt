@@ -2,7 +2,7 @@
 SDAM Monitoring
 ===============
 
-The Node.js driver  features SDAM Monitoring events,
+The Node.js driver features SDAM Monitoring events,
 allowing an application or tool to monitor changes in the drivers
 view of a single server, replica set or ``mongos``. This allows an
 application to react to changes of topology, such as a secondary
@@ -118,84 +118,52 @@ serverDescriptionChanged
 
 .. code-block:: js
 
-  {
-    "topologyId": 0,
-    "address": "localhost:27017",
-    "previousDescription": {
-      "address": "localhost:27017",
-      "error": null,
-      "roundTripTime": 0,
-      "lastUpdateTime": 1570830309832,
-      "lastWriteDate": "2019-10-11T21:45:02.000Z",
-      "opTime": {
-        "ts": "6746664774655803393",
-        "t": 16
-      },
-      "type": "RSPrimary",
-      "minWireVersion": 0,
-      "maxWireVersion": 7,
-      "maxBsonObjectSize": 16777216,
-      "maxMessageSizeBytes": 48000000,
-      "maxWriteBatchSize": 100000,
-      "me": "localhost:27017",
-      "hosts": [
-        "localhost:27017"
-      ],
-      "passives": [],
-      "arbiters": [],
-      "tags": [],
-      "setName": "rs",
-      "setVersion": 1,
-      "electionId": "7fffffff0000000000000010",
-      "primary": "localhost:27017",
-      "logicalSessionTimeoutMinutes": 30,
-      "$clusterTime": {
-        "clusterTime": "6746664774655803393",
-        "signature": {
-          "hash": "AAAAAAAAAAAAAAAAAAAAAAAAAAA=",
-          "keyId": 0
-        }
-      }
-    },
-    "newDescription": {
-      "address": "localhost:27017",
-      "error": null,
-      "roundTripTime": 0,
-      "lastUpdateTime": 1570830310333,
-      "lastWriteDate": "2019-10-11T21:45:02.000Z",
-      "opTime": {
-        "ts": "6746664774655803393",
-        "t": 16
-      },
-      "type": "RSPrimary",
-      "minWireVersion": 0,
-      "maxWireVersion": 7,
-      "maxBsonObjectSize": 16777216,
-      "maxMessageSizeBytes": 48000000,
-      "maxWriteBatchSize": 100000,
-      "me": "localhost:27017",
-      "hosts": [
-        "localhost:27017"
-      ],
-      "passives": [],
-      "arbiters": [],
-      "tags": [],
-      "setName": "rs",
-      "setVersion": 1,
-      "electionId": "7fffffff0000000000000010",
-      "primary": "localhost:27017",
-      "logicalSessionTimeoutMinutes": 30,
-      "$clusterTime": {
-        "clusterTime": "6746664774655803393",
-        "signature": {
-          "hash": "AAAAAAAAAAAAAAAAAAAAAAAAAAA=",
-          "keyId": 0
-        }
-      }
-    }
-  }
+  ServerDescriptionChangedEvent {
+     topologyId: 0,
+     address: 'localhost:27017',
+     previousDescription: ServerDescription {
+       address: 'localhost:27017',
+       error: null,
+       roundTripTime: 0,
+       lastUpdateTime: 1571251089030,
+       lastWriteDate: null,
+       opTime: null,
+       type: 'Unknown',
+       minWireVersion: 0,
+       maxWireVersion: 0,
+       hosts: [],
+       passives: [],
+       arbiters: [],
+       tags: []
+     },
+     newDescription: ServerDescription {
+       address: 'localhost:27017',
+       error: null,
+       roundTripTime: 0,
+       lastUpdateTime: 1571251089051,
+       lastWriteDate: 2019-10-16T18:38:07.000Z,
+       opTime: { ts: Timestamp, t: 18 },
+       type: 'RSPrimary',
+       minWireVersion: 0,
+       maxWireVersion: 7,
+       maxBsonObjectSize: 16777216,
+       maxMessageSizeBytes: 48000000,
+       maxWriteBatchSize: 100000,
+       me: 'localhost:27017',
+       hosts: [ 'localhost:27017' ],
+       passives: [],
+       arbiters: [],
+       tags: [],
+       setName: 'rs',
+       setVersion: 1,
+       electionId: ObjectID,
+       primary: 'localhost:27017',
+       logicalSessionTimeoutMinutes: 30,
+       '$clusterTime': ClusterTime
+     }
+   }
 
-The type can be one of the following values.
+The ``type`` of the ``ServerDescription`` can be one of the following values:
 
 .. list-table::
    :header-rows: 1
@@ -226,200 +194,143 @@ serverHeartbeatStarted
 
 .. code-block:: js
 
-   { connectionId: 'localhost:27017' }
+   ServerHeartbeatStartedEvent {
+     connectionId: 'localhost:27017'
+   }
 
 serverHeartbeatSucceeded
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: js
 
-   { durationMS: 20,
-     reply: {
-       setName: "rs", setVersion: 1, electionId: new ObjectId(),
-       maxBsonObjectSize : 16777216, maxMessageSizeBytes : 48000000,
-       maxWriteBatchSize : 1000, localTime : new Date(),
-       maxWireVersion : 4, minWireVersion : 0, ok : 1,
-       hosts: ["localhost:32000", "localhost:32001"],
-       arbiters: ["localhost:32002"]
+   ServerHeartbeatSucceededEvent {
+     duration: 1.939997,
+     reply:{
+       hosts: [ 'localhost:27017' ],
+       setName: 'rs',
+       setVersion: 1,
+       ismaster: true,
+       secondary: false,
+       primary: 'localhost:27017',
+       me: 'localhost:27017',
+       electionId: ObjectID,
+       lastWrite: {
+         opTime: { ts: [Timestamp], t: 18 },
+         lastWriteDate: 2019-10-16T18:38:17.000Z,
+         majorityOpTime: { ts: [Timestamp], t: 18 },
+         majorityWriteDate: 2019-10-16T18:38:17.000Z
+       },
+       maxBsonObjectSize: 16777216,
+       maxMessageSizeBytes: 48000000,
+       maxWriteBatchSize: 100000,
+       localTime: 2019-10-16T18:38:19.589Z,
+       logicalSessionTimeoutMinutes: 30,
+       minWireVersion: 0,
+       maxWireVersion: 7,
+       readOnly: false,
+       ok: 1,
+       operationTime: Timestamp,
+       '$clusterTime': ClusterTime
      },
-     connectionId: 'localhost:27017' }
+     connectionId: 'localhost:27017'
+   }
 
 serverHeartbeatFailed
 ^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: js
 
-   { durationMS: 20,
-     failure: new MongoError('some error'),
-     connectionId: 'localhost:27017' }
+   ServerHeartbeatFailed {
+     duration: 20,
+     failure: MongoError('some error'),
+     connectionId: 'localhost:27017'
+   }
 
 serverOpening
 ^^^^^^^^^^^^^
 
 .. code-block:: js
 
-   { topologyId: 0, name: 'localhost:27017' }
+   ServerOpeningEvent {
+     topologyId: 0,
+     address: 'localhost:27017'
+   }
 
 serverClosed
 ^^^^^^^^^^^^
 
 .. code-block:: js
 
-   { topologyId: 0, name: 'localhost:27017' }
+   ServerClosedEvent {
+     topologyId: 0,
+     address: 'localhost:27017' 
+   }
 
 topologyOpening
 ^^^^^^^^^^^^^^^
 
 .. code-block:: js
 
-   { topologyId: 0 }
+   TopologyOpeningEvent {
+     topologyId: 0
+   }
 
 topologyClosed
 ^^^^^^^^^^^^^^
 
 .. code-block:: js
 
-   { topologyId: 0 }
+   TopologyClosedEvent {
+     topologyId: 0
+   }
 
 topologyDescriptionChanged
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: js
 
-   {
-     "topologyId": 0,
-     "previousDescription": {
-       "type": "ReplicaSetWithPrimary",
-       "setName": "rs",
-       "maxSetVersion": 1,
-       "maxElectionId": null,
-       // Note: this field is a Map of server address to serverDescriptions, which
-       // does not serialize in JSON.stringify(). Check out the serverDescriptions
-       // from the serverDescriptionChanged event above to see the contents
-       "servers": {},
-       "stale": false,
-       "compatible": true,
-       "compatibilityError": null,
-       "logicalSessionTimeoutMinutes": 30,
-       "heartbeatFrequencyMS": 30000,
-       "localThresholdMS": 15,
-       "options": {
-         "localThresholdMS": 15,
-         "serverSelectionTimeoutMS": 10000,
-         "heartbeatFrequencyMS": 30000,
-         "minHeartbeatFrequencyMS": 500,
-         "reconnect": false,
-         "emitError": true,
-         "size": 5,
-         "monitorCommands": false,
-         "socketOptions": {},
-         "read_preference_tags": null,
-         "readPreference": {
-           "mode": "primary"
-         },
-         "useUnifiedTopology": true,
-         "setName": "rs",
-         "dbName": "admin",
-         "servers": [
-           {
-             "host": "localhost",
-             "port": 27017
-           }
-         ],
-         "server_options": {
-           "socketOptions": {}
-         },
-         "db_options": {
-           "read_preference_tags": null,
-           "readPreference": "primary",
-           "useUnifiedTopology": true
-         },
-         "rs_options": {
-           "socketOptions": {},
-           "rs_name": "rs"
-         },
-         "mongos_options": {
-           "socketOptions": {}
-         },
-         "socketTimeout": 360000,
-         "connectionTimeout": 30000,
-         "retryWrites": true,
-         "useRecoveryToken": true,
-         "compression": {
-           "compressors": []
-         }
+   TopologyDescriptionChangedEvent {
+     topologyId: 0,
+     previousDescription: TopologyDescription {
+       type: 'ReplicaSetNoPrimary',
+       setName: null,
+       maxSetVersion: null,
+       maxElectionId: null,
+       servers: Map {
+         'localhost:27017' => ServerDescription
        },
-       "error": null,
-       "commonWireVersion": 7
+       stale: false,
+       compatible: true,
+       compatibilityError: null,
+       logicalSessionTimeoutMinutes: null,
+       heartbeatFrequencyMS: 10000,
+       localThresholdMS: 15,
+       options: Object,
+       error: undefined,
+       commonWireVersion: null
      },
-     "newDescription": {
-       "type": "ReplicaSetWithPrimary",
-       "setName": "rs",
-       "maxSetVersion": 1,
-       "maxElectionId": null,
-       // Note: this field is a Map of server address to serverDescriptions, which
-       // does not serialize in JSON.stringify(). Check out the serverDescriptions
-       // from the serverDescriptionChanged event above to see the contents
-       "servers": {},
-       "stale": false,
-       "compatible": true,
-       "compatibilityError": null,
-       "logicalSessionTimeoutMinutes": 30,
-       "heartbeatFrequencyMS": 30000,
-       "localThresholdMS": 15,
-       "options": {
-         "localThresholdMS": 15,
-         "serverSelectionTimeoutMS": 10000,
-         "heartbeatFrequencyMS": 30000,
-         "minHeartbeatFrequencyMS": 500,
-         "reconnect": false,
-         "emitError": true,
-         "size": 5,
-         "monitorCommands": false,
-         "socketOptions": {},
-         "read_preference_tags": null,
-         "readPreference": {
-           "mode": "primary"
-         },
-         "useUnifiedTopology": true,
-         "setName": "rs",
-         "dbName": "admin",
-         "servers": [
-           {
-             "host": "localhost",
-             "port": 27017
-           }
-         ],
-         "server_options": {
-           "socketOptions": {}
-         },
-         "db_options": {
-           "read_preference_tags": null,
-           "readPreference": "primary",
-           "useUnifiedTopology": true
-         },
-         "rs_options": {
-           "socketOptions": {},
-           "rs_name": "rs"
-         },
-         "mongos_options": {
-           "socketOptions": {}
-         },
-         "socketTimeout": 360000,
-         "connectionTimeout": 30000,
-         "retryWrites": true,
-         "useRecoveryToken": true,
-         "compression": {
-           "compressors": []
-         }
+     newDescription: TopologyDescription {
+       type: 'ReplicaSetWithPrimary',
+       setName: 'rs',
+       maxSetVersion: 1,
+       maxElectionId: null,
+       servers: Map {
+         'localhost:27017' => ServerDescription
        },
-       "error": null,
-       "commonWireVersion": 7
+       stale: false,
+       compatible: true,
+       compatibilityError: null,
+       logicalSessionTimeoutMinutes: 30,
+       heartbeatFrequencyMS: 10000,
+       localThresholdMS: 15,
+       options: Object,
+       error: undefined,
+       commonWireVersion: 7
      }
    }
      
 
-The ``topologyType`` field can be one of the following values:
+The ``type`` field can be one of the following values:
 
 .. list-table::
    :header-rows: 1
