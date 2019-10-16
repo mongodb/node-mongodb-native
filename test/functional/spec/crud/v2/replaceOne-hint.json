@@ -1,0 +1,146 @@
+{
+  "runOn": [
+    {
+      "minServerVersion": "4.2.0"
+    }
+  ],
+  "data": [
+    {
+      "_id": 1,
+      "x": 11
+    },
+    {
+      "_id": 2,
+      "x": 22
+    }
+  ],
+  "collection_name": "test_replaceone_hint",
+  "tests": [
+    {
+      "description": "ReplaceOne with hint string",
+      "operations": [
+        {
+          "object": "collection",
+          "name": "replaceOne",
+          "arguments": {
+            "filter": {
+              "_id": {
+                "$gt": 1
+              }
+            },
+            "replacement": {
+              "x": 111
+            },
+            "hint": "_id_"
+          },
+          "result": {
+            "matchedCount": 1,
+            "modifiedCount": 1,
+            "upsertedCount": 0
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "update": "test_replaceone_hint",
+              "updates": [
+                {
+                  "q": {
+                    "_id": {
+                      "$gt": 1
+                    }
+                  },
+                  "u": {
+                    "x": 111
+                  },
+                  "hint": "_id_"
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 111
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "ReplaceOne with hint document",
+      "operations": [
+        {
+          "object": "collection",
+          "name": "replaceOne",
+          "arguments": {
+            "filter": {
+              "_id": {
+                "$gt": 1
+              }
+            },
+            "replacement": {
+              "x": 111
+            },
+            "hint": {
+              "_id": 1
+            }
+          },
+          "result": {
+            "matchedCount": 1,
+            "modifiedCount": 1,
+            "upsertedCount": 0
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "update": "test_replaceone_hint",
+              "updates": [
+                {
+                  "q": {
+                    "_id": {
+                      "$gt": 1
+                    }
+                  },
+                  "u": {
+                    "x": 111
+                  },
+                  "hint": {
+                    "_id": 1
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 111
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

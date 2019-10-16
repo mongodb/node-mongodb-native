@@ -1,0 +1,250 @@
+{
+  "runOn": [
+    {
+      "minServerVersion": "4.2.0"
+    }
+  ],
+  "data": [
+    {
+      "_id": 1,
+      "x": 11
+    },
+    {
+      "_id": 2,
+      "x": 22
+    },
+    {
+      "_id": 3,
+      "x": 33
+    },
+    {
+      "_id": 4,
+      "x": 44
+    }
+  ],
+  "collection_name": "test_bulkwrite_update_hint",
+  "tests": [
+    {
+      "description": "BulkWrite with update hints",
+      "operations": [
+        {
+          "name": "bulkWrite",
+          "arguments": {
+            "requests": [
+              {
+                "name": "updateOne",
+                "arguments": {
+                  "filter": {
+                    "_id": 1
+                  },
+                  "update": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  },
+                  "hint": "_id_"
+                }
+              },
+              {
+                "name": "updateOne",
+                "arguments": {
+                  "filter": {
+                    "_id": 1
+                  },
+                  "update": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  },
+                  "hint": {
+                    "_id": 1
+                  }
+                }
+              },
+              {
+                "name": "updateMany",
+                "arguments": {
+                  "filter": {
+                    "_id": {
+                      "$lt": 3
+                    }
+                  },
+                  "update": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  },
+                  "hint": "_id_"
+                }
+              },
+              {
+                "name": "updateMany",
+                "arguments": {
+                  "filter": {
+                    "_id": {
+                      "$lt": 3
+                    }
+                  },
+                  "update": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  },
+                  "hint": {
+                    "_id": 1
+                  }
+                }
+              },
+              {
+                "name": "replaceOne",
+                "arguments": {
+                  "filter": {
+                    "_id": 3
+                  },
+                  "replacement": {
+                    "x": 333
+                  },
+                  "hint": "_id_"
+                }
+              },
+              {
+                "name": "replaceOne",
+                "arguments": {
+                  "filter": {
+                    "_id": 4
+                  },
+                  "replacement": {
+                    "x": 444
+                  },
+                  "hint": {
+                    "_id": 1
+                  }
+                }
+              }
+            ],
+            "options": {
+              "ordered": true
+            }
+          },
+          "result": {
+            "deletedCount": 0,
+            "insertedCount": 0,
+            "insertedIds": {},
+            "matchedCount": 8,
+            "modifiedCount": 8,
+            "upsertedCount": 0,
+            "upsertedIds": {}
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "update": "test_bulkwrite_update_hint",
+              "updates": [
+                {
+                  "q": {
+                    "_id": 1
+                  },
+                  "u": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  },
+                  "hint": "_id_"
+                },
+                {
+                  "q": {
+                    "_id": 1
+                  },
+                  "u": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  },
+                  "hint": {
+                    "_id": 1
+                  }
+                },
+                {
+                  "q": {
+                    "_id": {
+                      "$lt": 3
+                    }
+                  },
+                  "u": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  },
+                  "multi": true,
+                  "hint": "_id_"
+                },
+                {
+                  "q": {
+                    "_id": {
+                      "$lt": 3
+                    }
+                  },
+                  "u": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  },
+                  "multi": true,
+                  "hint": {
+                    "_id": 1
+                  }
+                },
+                {
+                  "q": {
+                    "_id": 3
+                  },
+                  "u": {
+                    "x": 333
+                  },
+                  "hint": "_id_"
+                },
+                {
+                  "q": {
+                    "_id": 4
+                  },
+                  "u": {
+                    "x": 444
+                  },
+                  "hint": {
+                    "_id": 1
+                  }
+                }
+              ],
+              "ordered": true
+            }
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "x": 15
+            },
+            {
+              "_id": 2,
+              "x": 24
+            },
+            {
+              "_id": 3,
+              "x": 333
+            },
+            {
+              "_id": 4,
+              "x": 444
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

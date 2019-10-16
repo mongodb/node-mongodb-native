@@ -1,0 +1,154 @@
+{
+  "runOn": [
+    {
+      "minServerVersion": "4.2.0"
+    }
+  ],
+  "data": [
+    {
+      "_id": 1,
+      "x": 11
+    },
+    {
+      "_id": 2,
+      "x": 22
+    }
+  ],
+  "collection_name": "test_updateone_hint",
+  "tests": [
+    {
+      "description": "UpdateOne with hint string",
+      "operations": [
+        {
+          "object": "collection",
+          "name": "updateOne",
+          "arguments": {
+            "filter": {
+              "_id": {
+                "$gt": 1
+              }
+            },
+            "update": {
+              "$inc": {
+                "x": 1
+              }
+            },
+            "hint": "_id_"
+          },
+          "result": {
+            "matchedCount": 1,
+            "modifiedCount": 1,
+            "upsertedCount": 0
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "update": "test_updateone_hint",
+              "updates": [
+                {
+                  "q": {
+                    "_id": {
+                      "$gt": 1
+                    }
+                  },
+                  "u": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  },
+                  "hint": "_id_"
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 23
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "UpdateOne with hint document",
+      "operations": [
+        {
+          "object": "collection",
+          "name": "updateOne",
+          "arguments": {
+            "filter": {
+              "_id": {
+                "$gt": 1
+              }
+            },
+            "update": {
+              "$inc": {
+                "x": 1
+              }
+            },
+            "hint": {
+              "_id": 1
+            }
+          },
+          "result": {
+            "matchedCount": 1,
+            "modifiedCount": 1,
+            "upsertedCount": 0
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "update": "test_updateone_hint",
+              "updates": [
+                {
+                  "q": {
+                    "_id": {
+                      "$gt": 1
+                    }
+                  },
+                  "u": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  },
+                  "hint": {
+                    "_id": 1
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 23
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
