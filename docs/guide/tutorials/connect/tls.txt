@@ -55,7 +55,7 @@ If the MongoDB instance presents a certificate, to validate the server's certifi
    const sslCA = [fs.readFileSync(`${__dirname}/ssl/ca.pem`)];
 
    const client = new MongoClient(url, {
-     sslValidate:true,
+     sslValidate: true,
      sslCA
    });
 
@@ -84,8 +84,8 @@ server's SSL certificate(s) matches the hostname(s) provided in the URI connecti
    const sslCA = [fs.readFileSync(`${__dirname}/ssl/ca.pem`)];
 
    const client = new MongoClient(url, {
-     sslValidate:true,
-     checkServerIdentity:false,
+     sslValidate: true,
+     checkServerIdentity: false,
      sslCA
    });
 
@@ -116,11 +116,11 @@ certificate to the server. To pass the client's certificate as well as to valida
    const sslKey = fs.readFileSync(`${__dirname}/ssl/client.pem`);
 
    const client = new MongoClient(url, {
-     sslValidate:true,
+     sslValidate: true,
      sslCA,
      sslCert,
      sslKey,
-     sslPass:'10gen'
+     sslPass: '10gen'
    });
 
 Connect with X.509
