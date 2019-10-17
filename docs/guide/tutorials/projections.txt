@@ -53,7 +53,7 @@ included automatically unless specifically excluded.
      const collection = client.db(dbName).collection('restaurants');
 
      try {
-       const results = await collection
+       const docs = await collection
          .find({ cuisine : 'Brazilian' })
          .project({ name : 1, cuisine : 1 })
          .toArray();
