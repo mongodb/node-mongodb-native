@@ -60,15 +60,14 @@ For example, you can specify TLS/SSL and authentication setting.
 .. code-block:: js
 
    const { MongoClient } = require('mongodb');
-   const assert = require('assert');
    const fs = require('fs');
 
      // Read the certificate authority
-   const ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
-   const cert = fs.readFileSync(__dirname + "/ssl/client.pem");
+   const ca = [fs.readFileSync(`${__dirname} + /ssl/ca.pem`)];
+   const cert = fs.readFileSync(`${__dirname} + /ssl/client.pem`);
 
    // Connection URL
-   const url = 'mongodb://dave:password@localhost:27017?authMechanism=DEFAULT&authSource=db&ssl=true"';
+   const url = 'mongodb://dave:password@localhost:27017?authMechanism=DEFAULT&authSource=db&ssl=true';
 
    // Create a client, passing in additional options
    const client = new MongoClient(url,  {
@@ -77,11 +76,21 @@ For example, you can specify TLS/SSL and authentication setting.
      sslCert: cert
    });
 
-   // Use connect method to connect to the Server
-   client.connect().then(async function() {
-     console.log("Connected successfully to server");
-     await client.close();
-   });
+   // Function to connect to the server
+   async function run() {
+     try {
+       // Connect the client to the server
+       await client.connect();
+       console.log('Connected successfully to server');
+     } finally {
+       // Ensures that the client will close when you finish/error
+       await client.close();
+     }
+   }
+
+   // Runs your code
+   run();
+
 
 For more information on connecting with authentication and TSL/SSL, see:
 
