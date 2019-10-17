@@ -91,7 +91,7 @@ This example specifies a text index key for the ``comments`` field:
      const result = await collection.createIndex({ comments : "text" });
      console.log(result);
      return result;
-   );
+   };
 
 Create a Hashed Index
 ---------------------
@@ -196,7 +196,7 @@ Create a Partial Index
 
 .. code-block:: js
 
-   async function createPartialIndex(db, callback) {
+   async function createPartialIndex(db) {
      // Get the documents collection
      const collection = db.collection('users');
 
@@ -224,8 +224,8 @@ The driver also supports the helper method ``createIndexes``. Unlike ``createInd
      await collection.createIndexes([
        // Simple index on field firstName
        {
-         key: { firstName: 1 },
-       }
+         key: { firstName: 1 }
+       },
        // wildcard index
        {
          key: { '$**': 1 }
