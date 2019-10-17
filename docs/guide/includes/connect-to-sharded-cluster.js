@@ -1,20 +1,22 @@
 const { MongoClient } = require('mongodb');
-const assert = require('assert');
 
 // Connection URL
 const url = 'mongodb://localhost:50000,localhost:50001';
 
-// Database Name
-const dbName = 'myproject';
-
 // Create a new MongoClient
 const client = new MongoClient(url);
 
-// Use connect method to connect to the Server
-client.connect().then(async function() {
-  console.log("Connected successfully to server");
+// Function to connect to the server and run your code
+async function run() {
+  try {
+    // Connect the client to the server
+    await client.connect();
+    console.log('Connected successfully to server');
+  } finally {
+    // Ensures that the client will close when you finish/error
+    await client.close();
+  }
+}
 
-  const db = client.db(dbName);
-
-  await client.close();
-});
+// Runs your code
+run();
