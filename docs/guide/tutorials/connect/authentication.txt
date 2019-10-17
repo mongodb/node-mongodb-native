@@ -26,16 +26,24 @@ In the following example, the connection string specifies the user ``dave``\ , p
 
    // Connection URL
    const url = `mongodb://${user}:${password}@localhost:27017/?authMechanism=${authMechanism}`;
-
+   
    // Create a new MongoClient
    const client = new MongoClient(url);
-
-   // Use connect method to connect to the Server
-   client.connect().then(async function() {
-     console.log("Connected correctly to server");
-
-     await client.close();
-   });
+   
+   // Function to connect to the server
+   async function run() {
+     try {
+       // Connect the client to the server
+       await client.connect();
+       console.log('Connected successfully to server');
+     } finally {
+       // Ensures that the client will close when you finish/error
+       await client.close();
+     }
+   }
+   
+   // Runs your code
+   run();
 
 SCRAM-SHA-256
 -------------
@@ -59,12 +67,20 @@ In the following example, the connection string specifies the user ``dave``\ , p
    // Create a new MongoClient
    const client = new MongoClient(url);
 
-   // Use connect method to connect to the Server
-   client.connect().then(async function() {
-     console.log("Connected correctly to server");
-
-     await client.close();
-   });
+   // Function to connect to the server
+   async function run() {
+     try {
+       // Connect the client to the server
+       await client.connect();
+       console.log('Connected successfully to server');
+     } finally {
+       // Ensures that the client will close when you finish/error
+       await client.close();
+     }
+   }
+   
+   // Runs your code
+   run();
 
 SCRAM-SHA-1
 -----------
@@ -88,12 +104,20 @@ In the following example, the connection string specifies the user ``dave``\ , p
    // Create a new MongoClient
    const client = new MongoClient(url);
 
-   // Use connect method to connect to the Server
-   client.connect().then(async function() {
-     console.log("Connected correctly to server");
-
-     await client.close();
-   });
+   // Function to connect to the server
+   async function run() {
+     try {
+       // Connect the client to the server
+       await client.connect();
+       console.log('Connected successfully to server');
+     } finally {
+       // Ensures that the client will close when you finish/error
+       await client.close();
+     }
+   }
+   
+   // Runs your code
+   run();
 
 MONGODB-CR
 ----------
@@ -118,12 +142,20 @@ In the following example, the connection string specifies the user ``dave``\ , p
    // Create a new MongoClient
    const client = new MongoClient(url);
 
-   // Use connect method to connect to the Server
-   client.connect().then(async function() {
-     console.log("Connected correctly to server");
-
-     await client.close();
-   });
+   // Function to connect to the server
+   async function run() {
+     try {
+       // Connect the client to the server
+       await client.connect();
+       console.log('Connected successfully to server');
+     } finally {
+       // Ensures that the client will close when you finish/error
+       await client.close();
+     }
+   }
+   
+   // Runs your code
+   run();
 
 .. important::
    If you have :manual:`upgraded the authentication schema </release-notes/3.0-scram/>` from ``MONGODB-CR`` to ``SCRAM-SHA-1``\ , ``MONGODB-CR`` credentials will fail to authenticate.
@@ -145,11 +177,11 @@ In addition to the connection string, pass to the new ``MongoClient`` a connecti
    const fs = require('fs');
 
    // Read the cert and key
-   const cert = fs.readFileSync(__dirname + "/ssl/x509/client.pem");
-   const key = fs.readFileSync(__dirname + "/ssl/x509/client.pem");
+   const cert = fs.readFileSync(`${__dirname}/ssl/x509/client.pem`);
+   const key = fs.readFileSync(`${__dirname}/ssl/x509/client.pem`);
 
    // User name
-   const userName = encodeURIComponent("CN=client,OU=kerneluser,O=10Gen,L=New York City,ST=New York,C=US");
+   const userName = encodeURIComponent('CN=client,OU=kerneluser,O=10Gen,L=New York City,ST=New York,C=US');
    const url = `mongodb://${userName}:${password}@server:27017?authMechanism=MONGODB-X509&ssl=true`;
 
    // Create a new MongoClient
@@ -159,12 +191,20 @@ In addition to the connection string, pass to the new ``MongoClient`` a connecti
      sslValidate: false
    });
 
-   // Use connect method to connect to the Server
-   client.connect().then(async function() {
-     console.log("Connected correctly to server");
-
-     await client.close();
-   });
+   // Function to connect to the server
+   async function run() {
+     try {
+       // Connect the client to the server
+       await client.connect();
+       console.log('Connected successfully to server');
+     } finally {
+       // Ensures that the client will close when you finish/error
+       await client.close();
+     }
+   }
+   
+   // Runs your code
+   run();
 
 For more information on connecting to MongoDB instance, replica set, and sharded cluster with TLS/SSL options, see :doc:`TLS/SSL connections </tutorials/connect/tls>` .
 
@@ -185,20 +225,28 @@ The following example connects to MongoDB using Kerberos for UNIX.
    const { MongoClient } = require('mongodb');
 
    // KDC Server
-   const server = "mongo-server.example.com";
-   const principal = "drivers@KERBEROS.EXAMPLE.COM";
+   const server = 'mongo-server.example.com';
+   const principal = 'drivers@KERBEROS.EXAMPLE.COM';
    const urlEncodedPrincipal = encodeURIComponent(principal);
 
    const url = `mongodb://${urlEncodedPrincipal}@${server}/?authMechanism=GSSAPI&gssapiServiceName=mongodb`;
 
    const client = new MongoClient(url);
 
-   // Let's write the actual connection code
-   client.connect().then(async function() {
-     console.log("Connected correctly to server");
-
-     await client.close();
-   });
+   // Function to connect to the server
+   async function run() {
+     try {
+       // Connect the client to the server
+       await client.connect();
+       console.log('Connected successfully to server');
+     } finally {
+       // Ensures that the client will close when you finish/error
+       await client.close();
+     }
+   }
+   
+   // Runs your code
+   run();
 
 .. note::
    The method refers to the ``GSSAPI`` authentication mechanism instead of ``Kerberos`` because technically the driver authenticates via the :rfc:`GSSAPI <4752>` SASL mechanism.
@@ -215,9 +263,9 @@ To connect using the LDAP authentication mechanism, specify ``authMechanism=PLAI
    const { MongoClient } = require('mongodb');
 
    // LDAP Server
-   const server = "ldap.example.com";
-   const user = "ldap-user";
-   const pass = "ldap-password";
+   const server = 'ldap.example.com';
+   const user = 'ldap-user';
+   const pass = 'ldap-password';
 
    // Url
    const url = `mongodb://${user}:${pass}@${server}?authMechanism=PLAIN&maxPoolSize=1`;
@@ -225,12 +273,20 @@ To connect using the LDAP authentication mechanism, specify ``authMechanism=PLAI
    // Client
    const client = new MongoClient(url);
 
-   // Let's write the actual connection code
-   client.connect().then(async function() {
-     console.log("Connected correctly to server");
-
-     await client.close();
-   });
+   // Function to connect to the server
+   async function run() {
+     try {
+       // Connect the client to the server
+       await client.connect();
+       console.log('Connected successfully to server');
+     } finally {
+       // Ensures that the client will close when you finish/error
+       await client.close();
+     }
+   }
+   
+   // Runs your code
+   run();
 
 .. note::
    The method refers to the ``PLAIN`` authentication mechanism instead of ``LDAP`` because technically the driver authenticates via the :rfc:`PLAIN <4616>` SASL mechanism.
