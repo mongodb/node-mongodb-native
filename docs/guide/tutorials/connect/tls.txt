@@ -13,11 +13,26 @@ If the MongoDB instance does not perform any validation of the certificate chain
 
    const { MongoClient } = require('mongodb');
 
-   const client = new MongoClient('mongodb://localhost:27017?ssl=true');
+   // Connection URL
+   const url = 'mongodb://localhost:27017?ssl=true';
 
-   client.connect().then(async function() {
-     await client.close();
-   });
+   // Create a new MongoClient
+   const client = new MongoClient(url);
+
+   // Function to connect to the server and run your code
+   async function run() {
+     try {
+       // Connect the client to the server
+       await client.connect();
+       console.log('Connected successfully to server');
+     } finally {
+       // Ensures that the client will close when you finish/error
+       await client.close();
+     }
+   }
+
+   // Runs your code
+   run();
 
 Validate Server Certificate
 ---------------------------
@@ -33,17 +48,15 @@ If the MongoDB instance presents a certificate, to validate the server's certifi
    const { MongoClient } = require('mongodb');
    const fs = require('fs');
 
+   // Connection URL
+   const url = 'mongodb://localhost:27017?ssl=true';
+
    // Read the certificate authority
    const sslCA = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
 
-   const client = new MongoClient('mongodb://localhost:27017?ssl=true', {
+   const client = new MongoClient(url, {
      sslValidate:true,
      sslCA
-   });
-
-   // Connect validating the returned certificates from the server
-   client.connect().then(async function() {
-     await client.close();
    });
 
 Disable Hostname Verification
@@ -64,18 +77,16 @@ server's SSL certificate(s) matches the hostname(s) provided in the URI connecti
    const { MongoClient } = require('mongodb');
    const fs = require('fs');
 
+   // Connection URL
+   const url = 'mongodb://localhost:27017?ssl=true';
+
    // Read the certificate authority
    const sslCA = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
 
-   const client = new MongoClient('mongodb://localhost:27017?ssl=true', {
+   const client = new MongoClient(url, {
      sslValidate:true,
      checkServerIdentity:false,
      sslCA
-   });
-
-   // Connect validating the returned certificates from the server
-   client.connect().then(async function() {
-     await client.close();
    });
 
 Validate Server Certificate and Present Valid Certificate
@@ -96,22 +107,20 @@ certificate to the server. To pass the client's certificate as well as to valida
    const { MongoClient } = require('mongodb');
    const fs = require('fs');
 
+   // Connection URL
+   const url = 'mongodb://localhost:27017?ssl=true';
+
    // Read the certificates
    const sslCA = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
    const sslCert = fs.readFileSync(__dirname + "/ssl/client.pem");
    const sslKey = fs.readFileSync(__dirname + "/ssl/client.pem");
 
-   const client = new MongoClient('mongodb://localhost:27017?ssl=true', {
+   const client = new MongoClient(url, {
      sslValidate:true,
      sslCA,
      sslCert,
      sslKey,
      sslPass:'10gen'
-   });
-
-   // Connect validating the returned certificates from the server
-   client.connect().then(async function() {
-     await client.close();
    });
 
 Connect with X.509
@@ -129,21 +138,19 @@ a connections options with  the X.509 certificate and other :doc:`TLS/SSL connec
    const { MongoClient } = require('mongodb');
    const fs = require('fs');
 
+   // User name
+   const userName = "CN=client,OU=kerneluser,O=10Gen,L=New York City,ST=New York,C=US";
+
+   // Connection URL
+   const url = 'mongodb://${encodeURIComponent(userName)}@server:27017?authMechanism=MONGODB-X509&ssl=true';
+
    // Read the cert and key
    const sslCert = fs.readFileSync(__dirname + "/ssl/x509/client.pem");
    const sslKey = fs.readFileSync(__dirname + "/ssl/x509/client.pem");
 
-   // User name
-   const userName = "CN=client,OU=kerneluser,O=10Gen,L=New York City,ST=New York,C=US";
-
-   const client = new MongoClient(`mongodb://${encodeURIComponent(userName)}@server:27017?authMechanism=MONGODB-X509&ssl=true`, {
+   const client = new MongoClient(url, {
      sslCert,
      sslKey
-   });
-
-   // Connect using the MONGODB-X509 authentication mechanism
-   client.connect().then(async function() {
-     await client.close();
    });
 
 TLS/SSL Options
