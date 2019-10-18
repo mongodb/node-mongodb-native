@@ -30,14 +30,30 @@ All cursors in the Node Driver are Node Readable Streams operating in Object Mod
 
 .. code-block:: js
 
-   // Using the stream API
-   const cursor = collection.find({});
-   cursor.pipe(new stream.Writable({
-     write: function(doc, _, callback) {
-       console.log(doc);
-       callback();
+   // defines a transform that calls JSON.stringify on the cursor's output
+   class StringifyStream extends stream.Transform {
+     constructor() {
+       // Need this b/c cursors operate in objectMode
+       super({ objectMode: true });
      }
-   }));
+
+     transform(chunk, _, callback) {
+       // outputs each document as a stringified version, separated by newlines
+       callback(null, `${JSON.stringify(chunk)}\n`);
+     }
+   }
+
+   // Using the stream API to pipe to stdout
+   const cursor1 = collection.find({});
+   cursor1
+     .pipe(new StringifyStream())
+     .pipe(process.stdout);
+   
+   // Using the stream API to pipe to file 'my-output.txt'
+   const cursor2 = collection.find({});
+   cursor2
+     .pipe(new StringifyStream())
+     .pipe(fs.createWriteStream('my-output.txt'));
 
 Event API
 ^^^^^^^^^
@@ -162,3 +178,21 @@ For example, the following loop is likely to produce an error:
    }
 
    const results = await Promise.all(promises);
+
+A cursor can be reaped if it is not used for a while
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If a cursor is inactive for a long enough time (default value of 10 minutes), the server may automatically close the cursor. Attempting to use the cursor after it has been closed can lead to an error. Users should be aware of this if they are performing operations that cause long waits between operations. For example:
+
+.. code-block:: js
+   const cursor = colleciton.find({});
+
+   while (await cursor.hasNext()) {
+     // Some long task that takes a long time (over 10 minutes)
+     await doSomethingThatTakesAWhile();
+
+     console.log(await cursor.next());
+   }
+
+
+In this case, if ``await doSomethingThatTakesAWhile();`` takes more than 10 minutes, the cursor may be reaped on the server, and the subsequent ``await cursor.next()`` call can result in an error.
