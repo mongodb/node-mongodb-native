@@ -43,17 +43,11 @@ To get started check out the source and work on a branch:
    npm install
    git checkout -b myNewFeature
 
-To run the test suite, you must have the ``mongod`` executable in your current
-path. You can run our tests with the following command
+To run the test suite, you must have a server topology running, and provide the URI to the command.
+For example, if you have a single server running at ``"mongodb://localhost:27017"``, you can run the following:
 
 .. code-block:: bash
 
-   npm test
+   MONGODB_URI="mongodb://localhost:27017" npm test
 
-This will test against a standalone server. To specify another topology type, you can use the ``-e`` parameter:
-
-.. code-block:: bash
-
-   npm test -- -e single # Tests against a standalone server
-   npm test -- -e replicaset # Tests against a 3-node replicaset
-   npm test -- -e sharded # Tests against a sharded cluster
+Note that, depending on the type of topology that you are running (standalone, replicaset, etc.), different tests will be run
