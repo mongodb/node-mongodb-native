@@ -22,22 +22,33 @@ The following example demonstrates how to set the logger to ``debug``.
    const dbName = 'myproject';
 
    const client = new MongoClient(url);
-   // Use connect method to connect to the server
-   client.connect().then(async function() {
-     console.log("Connected correctly to server");
 
+   async function main(client) {
      // Set debug level
      Logger.setLevel('debug');
 
-     const db = client.db(dbName);
+     const db = client.db('myproject');
 
-     // Execute command {ismaster:true} against db
+     // Execute command { isMaster: true } against db
+     await db.command({ isMaster: true });
+   }
+
+   // Function to connect to the server and run your code
+   async function run() {
      try {
-       await db.command({ ismaster:true });
+       // Connect the client to the server
+       await client.connect();
+       console.log('Connected successfully to server');
+
+       await main(client);
      } finally {
+       // Ensures that the client will close when you finish/error
        await client.close();
      }
-   });
+   }
+   
+   // Runs your code
+   run();
 
 Filtering On specific classes
 -----------------------------
@@ -47,33 +58,17 @@ demonstrates how to log only the ``Db`` class.
 
 .. code-block:: js
 
-   const { MongoClient, Logger } = require('mongodb');
-
-   // Connection URL
-   const url = 'mongodb://localhost:27017';
-   // Database Name
-   const dbName = 'myproject';
-
-   const client = new MongoClient(url);
-
-   // Use connect method to connect to the server
-   client.connect().then(async function() {
-     console.log("Connected correctly to server");
-
+   async function main(client) {
      // Set debug level
      Logger.setLevel('debug');
      // Only log statements on 'Db' class
      Logger.filter('class', ['Db']);
 
-     const db = client.db(dbName);
+     const db = client.db('myproject');
 
-     // Execute command {ismaster:true} against db
-     try {
-       await db.command({ ismaster:true });
-     } finally {
-       await client.close();
-     }
-   });
+     // Execute command { isMaster: true } against db
+     await db.command({ isMaster: true });
+   }
 
 Driver classes available for filtering:
 
@@ -116,19 +111,7 @@ The following example demonstrates how to define a custom logger.
 
 .. code-block:: js
 
-   const { MongoClient, Logger } = require('mongodb');
-
-   // Connection URL
-   const url = 'mongodb://localhost:27017';
-   // Database Name
-   const dbName = 'myproject';
-
-   const client = new MongoClient(url);
-
-   // Use connect method to connect to the server
-   client.connect().then(async function() {
-     console.log("Connected correctly to server");
-
+   async function main(client) {
      // Set debug level
      Logger.setLevel('debug');
 
@@ -137,12 +120,8 @@ The following example demonstrates how to define a custom logger.
        console.log(msg, context);
      });
 
-     const db = client.db(dbName);
+     const db = client.db('myproject');
 
-     // Execute command {ismaster:true} against db
-     try {
-       await db.command({ ismaster:true });
-     } finally {
-       await client.close();
-     }
-   });
+     // Execute command { isMaster: true } against db
+     await db.command({ isMaster: true });
+   }
