@@ -185,6 +185,7 @@ A cursor can be reaped if it is not used for a while
 If a cursor is inactive for a long enough time (default value of 10 minutes), the server may automatically close the cursor. Attempting to use the cursor after it has been closed can lead to an error. Users should be aware of this if they are performing operations that cause long waits between operations. For example:
 
 .. code-block:: js
+
    const cursor = colleciton.find({});
 
    while (await cursor.hasNext()) {
@@ -193,6 +194,5 @@ If a cursor is inactive for a long enough time (default value of 10 minutes), th
 
      console.log(await cursor.next());
    }
-
 
 In this case, if ``await doSomethingThatTakesAWhile();`` takes more than 10 minutes, the cursor may be reaped on the server, and the subsequent ``await cursor.next()`` call can result in an error.
