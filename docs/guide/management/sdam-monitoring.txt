@@ -58,55 +58,61 @@ The following example demonstrates how to connect to a replica set and monitor a
    const url = 'mongodb://localhost:31000,localhost:31001/?replicaSet=rs';
    const client = new MongoClient(url);
 
-   client.on('serverDescriptionChanged', function(event) {
+   client.on('serverDescriptionChanged', event => {
      console.log('received serverDescriptionChanged');
      console.log(JSON.stringify(event, null, 2));
    });
 
-   client.on('serverHeartbeatStarted', function(event) {
+   client.on('serverHeartbeatStarted', event => {
      console.log('received serverHeartbeatStarted');
      console.log(JSON.stringify(event, null, 2));
    });
 
-   client.on('serverHeartbeatSucceeded', function(event) {
+   client.on('serverHeartbeatSucceeded', event => {
      console.log('received serverHeartbeatSucceeded');
      console.log(JSON.stringify(event, null, 2));
    });
 
-   client.on('serverHeartbeatFailed', function(event) {
+   client.on('serverHeartbeatFailed', event => {
      console.log('received serverHeartbeatFailed');
      console.log(JSON.stringify(event, null, 2));
    });
 
-   client.on('serverOpening', function(event) {
+   client.on('serverOpening', event => {
      console.log('received serverOpening');
      console.log(JSON.stringify(event, null, 2));
    });
 
-   client.on('serverClosed', function(event) {
+   client.on('serverClosed', event => {
      console.log('received serverClosed');
      console.log(JSON.stringify(event, null, 2));
    });
 
-   client.on('topologyOpening', function(event) {
+   client.on('topologyOpening', event => {
      console.log('received topologyOpening');
      console.log(JSON.stringify(event, null, 2));
    });
 
-   client.on('topologyClosed', function(event) {
+   client.on('topologyClosed', event => {
      console.log('received topologyClosed');
      console.log(JSON.stringify(event, null, 2));
    });
 
-   client.on('topologyDescriptionChanged', function(event) {
+   client.on('topologyDescriptionChanged', event => {
      console.log('received topologyDescriptionChanged');
      console.log(JSON.stringify(event, null, 2));
    });
 
-   client.connect().then(async function() {
-     console.log('successfully connected');
-     await client.close();
-   });
+   async function run() {
+     try {
+       await client.connect();
+       console.log('successfully connected');
+     } finally {
+       await client.close();
+     }
+   }
+
+   run();
 
 Example Documents Returned For Each Event Type
 ----------------------------------------------
