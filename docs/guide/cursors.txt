@@ -100,10 +100,10 @@ If you want to perform an operation on each document, you can use the ``forEach`
    const cursor = collection.find({});
    await cursor.forEach(doc => console.log(doc));
 
-Get a single document
-^^^^^^^^^^^^^^^^^^^^^
+Manual Iteration
+^^^^^^^^^^^^^^^^
 
-If you wish to only get a single document, use ``next`` and ``hasNext``.
+If you wish manually iterate the cursor one document at a time, use ``next`` and ``hasNext``.
 
 .. code-block:: js
 
@@ -117,17 +117,6 @@ If you wish to only get a single document, use ``next`` and ``hasNext``.
      }
    }
 
-Count
-^^^^^
-
-If you would like an estimated count of the number of documents the cursor will return, use ``count``
-
-.. code-block:: js
-
-   // Get an estimate of the number of documents in a cursor
-   const cursor = collection.find({});
-   const count = await cursor.count();
-
 Important design considerations
 -------------------------------
 
@@ -137,17 +126,6 @@ Only use one API at a time
 The cursor is designed with the assumption that users will only use one of the above methods to get data. Therefore, when interacting with a cursor, **it is very important to only use one method of interaction at a time**. Using more than one method of interacting with a cursor will lead to undefined behavior.
 
 For example, the following:
-
-.. code-block:: js
-
-   const cursor = collection.find({});
-
-   const countOfDocuments = await cursor.count();
-   const allDocument = await cursor.toArray();
-
-is very likely to trigger an error, as it is attempting both ``count`` and a ``toArray`` on the same cursor.
-
-Similarly, the following:
 
 .. code-block:: js
 
