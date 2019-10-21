@@ -111,7 +111,7 @@ Next you will have to build the project manually to test it. Use any tool you us
 
 .. code-block:: sh
 
-   git clone https://github.com/christkv/kerberos.git
+   git clone https://github.com/mongodb-js/kerberos.git
    cd kerberos
    npm install
    node-gyp rebuild
