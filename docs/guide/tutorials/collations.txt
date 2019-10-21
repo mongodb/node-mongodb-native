@@ -54,7 +54,7 @@ Collation Parameters
    }
 
 The only required parameter is ``locale``\ , which the server parses as
-an `ICU format locale ID <http://userguide.icu-project.org/locale>>`_.
+an `ICU format locale ID <http://userguide.icu-project.org/locale>`_.
 For example, use ``en_US`` to represent US English and ``fr_CA`` to
 represent Canadian French.
 
@@ -75,6 +75,7 @@ inherit the default collation, unless the creation command specifies
 another collation.
 
 .. code-block:: js
+
    const { MongoClient } = require('mongodb');
 
    // Connection URL
