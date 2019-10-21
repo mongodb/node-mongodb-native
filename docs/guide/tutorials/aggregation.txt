@@ -1,3 +1,142 @@
 ===========
 Aggregation
 ===========
+
+Overview
+--------
+
+Aggregation operations process data records and return
+computed results. Aggregation operations group values from
+multiple documents together, and can perform a variety of
+operations on the grouped data to return a single result.
+
+The Aggregation Pipeline
+------------------------
+
+The aggregation pipeline is a framework for data aggregation
+modeled on the concept of data processing pipelines. Documents
+enter a multi-stage pipeline that transforms the documents into
+aggregated results.
+
+For a full explanation and a complete list of pipeline stages
+and operators, see the :manual:`manual </core/aggregation-pipeline/>`
+
+The following example uses the aggregation pipeline on the
+`restaurant <https://docs.mongodb.org/getting-started/node/import-data/>`_ 
+sample dataset to find a list of restaurants located in the Bronx,
+grouped by restaurant category.
+
+.. code-block:: js
+
+   const { MongoClient } = require('mongodb');
+   
+   // Connection URL
+   const url = 'mongodb://localhost:27017';
+   
+   // Create a new MongoClient
+   const client = new MongoClient(url);
+
+   async function main(client) {
+     const collection = client.db('myproject').collection('restaurants');
+
+     const cursor = collection.aggregate([
+       { $match: { borough: 'Bronx' } },
+       { $unwind: '$categories'},
+       { $group: { _id: '$categories', Bronx restaurants: { $sum: 1 } } }
+     ]);
+
+     const documents = await cursor.toArray();
+     console.log(documents);
+   }
+   
+   // Function to connect to the server and run your code
+   async function run() {
+     try {
+       // Connect the client to the server
+       await client.connect();
+       console.log('Connected successfully to server');
+   
+       await main(client);
+     } finally {
+       // Ensures that the client will close when you finish/error
+       await client.close();
+     }
+   }
+   
+   // Runs your code
+   run();
+
+Inside the ``aggregate`` method, the first pipeline stage filters out
+all documents except those in the ``'Bronx'`` borough. The
+second stage unwinds the ``categories`` field, which is an array, and
+treats each item in the array as a separate document. The third stage
+groups the documents by category and adds up the number of matching
+Bronx restaurants.
+
+Single Purpose Aggregation Operations
+-------------------------------------
+
+MongoDB provides helper methods for some aggregation functions,
+including ``countDocuments``, ``estimatedDocumentCount``, and ``distinct``.
+
+
+`\ ``count`` <https://docs.mongodb.com/manual/reference/command/count/>`_\ , 
+`\ ``group`` <https://docs.mongodb.com/manual/reference/command/group/>`_\ , 
+and `\ ``distinct`` <https://docs.mongodb.com/manual/reference/command/distinct/>`_.
+
+countDocuments
+^^^^^^^^^^^^^^
+
+The following example demonstrates how to use the ``countDocuments`` method to
+find the total number of documents which have the exact array
+``[ 'Chinese', 'Seafood' ]`` in the ``categories`` field.
+
+.. code-block:: js
+
+   async function main(client) {
+     const collection = client.db('myproject').collection('restaurants');
+
+     const count = await collection.countDocuments({
+       categories: [ 'Chinese', 'Seafood' ]
+     });
+
+     console.log(count);
+   }
+
+estimatedDocumentCount
+^^^^^^^^^^^^^^^^^^^^^^
+
+If you want a quick, thought not necessarily accurate, count of the
+number of documents in a collection based on collection metadata, you
+can use the method ``estimateDocumentCount``:
+
+.. code-block:: js
+
+   async function main(client) {
+     const collection = client.db('myproject').collection('restaurants');
+
+     const count = await collection.estimatedDocumentCount();
+
+     console.log(count);
+   }
+
+
+Distinct
+^^^^^^^^
+
+The ``distinct`` helper method eliminates results which contain
+values and returns one record for each unique value. It uses
+the :manual:`distinct </reference/command/distinct/>` command.
+
+The following example returns a list of unique values for the
+``categories`` field in the ``restaurants`` collection:
+
+.. code-block:: js
+
+   async function main(client) {
+     const collection = client.db('myproject').collection('restaurants');
+
+     const values = await collection.distinct('categories');
+
+     console.log(values);
+   }
