@@ -91,7 +91,7 @@ another collation.
        collation: { locale: 'fr_CA' }
      });
 
-     console.log('Collection created.);
+     console.log('Collection created.');
    }
 
    // Function to connect to the server and run your code
