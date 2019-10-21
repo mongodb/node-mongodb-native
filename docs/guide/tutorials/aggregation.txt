@@ -79,11 +79,6 @@ Single Purpose Aggregation Operations
 MongoDB provides helper methods for some aggregation functions,
 including ``countDocuments``, ``estimatedDocumentCount``, and ``distinct``.
 
-
-`\ ``count`` <https://docs.mongodb.com/manual/reference/command/count/>`_\ , 
-`\ ``group`` <https://docs.mongodb.com/manual/reference/command/group/>`_\ , 
-and `\ ``distinct`` <https://docs.mongodb.com/manual/reference/command/distinct/>`_.
-
 countDocuments
 ^^^^^^^^^^^^^^
 
