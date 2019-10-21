@@ -39,7 +39,7 @@ bson-ext Module
 
 The ``bson-ext`` module is an alternative **BSON** parser that is written in C++. If you wish to use the ``bson-ext`` module you will need to add the ``bson-ext`` module to your module's dependencies.
 
-.. code-block::
+.. code-block:: sh
 
    npm install bson-ext --save
 
@@ -48,7 +48,7 @@ kerberos Module
 
 If you need to use ``kerberos`` module you will need to add the ``kerberos`` module to your module's dependencies.
 
-.. code-block::
+.. code-block:: sh
 
    npm install kerberos --save
 
@@ -64,7 +64,7 @@ Diagnosing on UNIX
 
 If you don’t have the build essentials it won’t build. In the case of linux you will need gcc and g++, Node.js with all the headers and Python. The easiest way to figure out what’s missing is by trying to build the kerberos project. You can do this by performing the following steps.
 
-.. code-block::
+.. code-block:: sh
 
    git clone https://github.com/mongodb-js/kerberos.git
    cd kerberos
@@ -72,20 +72,20 @@ If you don’t have the build essentials it won’t build. In the case of linux 
 
 If all the steps complete you have the right toolchain installed. If you get ``node-gyp not found`` you need to install it globally by doing:
 
-.. code-block::
+.. code-block:: sh
 
    npm install -g node-gyp
 
 If it compiles correctly, you're ready to proceed. You can now try to install the MongoDB driver with the following command:
 
-.. code-block::
+.. code-block:: sh
 
    cd yourproject
    npm install mongodb --save
 
 If it still fails the next step is to examine the npm log. Re-run the command in verbose mode.
 
-.. code-block::
+.. code-block:: sh
 
    npm --loglevel verbose install mongodb
 
@@ -103,13 +103,13 @@ A compiler toolchain known to work for compiling ``kerberos`` on Windows is the 
 
 Open Visual Studio command prompt. Ensure node.exe is in your path and install node-gyp.
 
-.. code-block::
+.. code-block:: sh
 
    npm install -g node-gyp
 
 Next you will have to build the project manually to test it. Use any tool you use with git and grab the repo.
 
-.. code-block::
+.. code-block:: sh
 
    git clone https://github.com/christkv/kerberos.git
    cd kerberos
