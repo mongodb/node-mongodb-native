@@ -47,17 +47,6 @@ a ``GridFSBucket``.
 
    const client = new MongoClient(uri);
 
-   client.connect().then(async function() {
-     try {
-       const db = client.db(dbName);
-       const bucket = new GridFSBucket(db);
-
-       // Use bucket...
-     } finally {
-       await client.close();
-     }
-   });
-
    async function main(client) {
        const db = client.db('test');
        const bucket = new GridFSBucket(db);
