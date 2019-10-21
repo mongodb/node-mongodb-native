@@ -50,4 +50,9 @@ For example, if you have a single server running at ``"mongodb://localhost:27017
 
    MONGODB_URI="mongodb://localhost:27017" npm test
 
-Note that, depending on the type of topology that you are running (standalone, replicaset, etc.), different tests will be run
+Note that, depending on the type of topology that you are running (standalone, replicaset, etc.), different tests will be run.
+
+.. note::
+
+   There are many tools that can help you with setting up different topologies for local testing.
+   Some examples are `mtools <https://pypi.org/project/mtools/>`_ and `mongo-orchestration <https://pypi.org/project/mongo-orchestration/>`_.
