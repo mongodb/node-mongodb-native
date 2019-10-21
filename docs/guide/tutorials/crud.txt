@@ -124,9 +124,8 @@ when inserting documents with the ``insertMany`` method.
 .. note::
    The Decimal128 data type requires MongoDB server version 3.4 or higher.
 
-.. raw:: html
+.. code-block:: js
 
-   
    const { Long, Decimal128 } = require('mongodb');
    async function main(client) {
      const longValue = new Long(1787);
@@ -395,7 +394,7 @@ Bulk write operations make it easy to write groups of operations together to Mon
 
 The Bulk API handles all the splitting of operations into multiple writes.
 
-There are some important things to keep in mind when using the bulk API and especially the *ordered* bulk API mode. The write commands are single operation type. That means they can only do insert/update and remove. If you f.ex do the following combination of operations:
+There are some important things to keep in mind when using the bulk API and especially the *ordered* bulk API mode. The write commands are single operation type. That means they can only do insert/update and remove. For example, if you add the following combination of operations:
 
 .. code-block:: sh
 
@@ -446,7 +445,7 @@ Read Methods
 
 The main method for querying the database is the ``find`` method.
 
-``find`` returns a ``Cursor`` which allows the user to operate on the data. The *cursor* also implements the `NodeJS Readable Stream interface <https://nodejs.org/dist/latest/docs/api/stream.html#stream_readable_streams>` , allowing the user to pipe the results to other streams. For more information on cursors, see the :doc:`Cursor Guide </cursors>` .
+``find`` returns a ``Cursor`` which allows the user to operate on the data. The *cursor* also implements the `NodeJS Readable Stream interface <https://nodejs.org/dist/latest/docs/api/stream.html#stream_readable_streams>`_ , allowing the user to pipe the results to other streams. For more information on cursors, see the :doc:`Cursor Guide </cursors>` .
 
 The following example materializes all the documents from a query using the ``toArray`` method, but limits the number of returned results to two documents.
 
