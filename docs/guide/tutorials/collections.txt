@@ -84,7 +84,7 @@ least one of three following conditions:
      await db.createCollection('myCollection', {
        validator: {
          $or: [
-           { phone: { $type: 'string' } }
+           { phone: { $type: 'string' } },
            { email: { $regex: /@mongodb\.com$/ } },
            { status: { $in: ['Unknown', 'Incomplete'] } }
          ]
