@@ -42,7 +42,7 @@ grouped by restaurant category.
      const cursor = collection.aggregate([
        { $match: { borough: 'Bronx' } },
        { $unwind: '$categories'},
-       { $group: { _id: '$categories', Bronx restaurants: { $sum: 1 } } }
+       { $group: { _id: '$categories', 'Bronx restaurants': { $sum: 1 } } }
      ]);
 
      const documents = await cursor.toArray();
