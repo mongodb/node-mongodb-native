@@ -4,19 +4,31 @@
 const { MongoClient } = require('../..');
 const arrayStrictEqual = require('../../lib/core/utils').arrayStrictEqual;
 const chalk = require('chalk');
+const argv = require('yargs')
+  .usage('Usage: $0 [options] <connection string>')
+  .demandCommand(1)
+  .help('h')
+  .describe('legacy', 'Use the legacy topology types')
+  .alias('l', 'legacy')
+  .alias('h', 'help').argv;
 
 function print(msg) {
   console.log(`${chalk.white(new Date().toISOString())} ${msg}`);
 }
 
-const uri = process.argv[2];
+const uri = argv._[0];
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
-  useUnifiedTopology: true
+  useUnifiedTopology: !argv.legacy
 });
 
 async function run() {
-  print(`connecting to: ${uri}`);
+  print(
+    `connecting to: ${chalk.bold(uri)} using ${chalk.bold(
+      argv.legacy ? 'legacy' : 'unified'
+    )} topology`
+  );
+
   client.on('serverHeartbeatSucceeded', event =>
     print(
       `${chalk.yellow('heartbeat')} ${chalk.green('succeeded')} host: '${
@@ -35,11 +47,19 @@ async function run() {
 
   // server information
   client.on('serverOpening', event => {
-    print(`${chalk.cyan('server')} [${event.address}] added to topology#${event.topologyId}`);
+    print(
+      `${chalk.cyan('server')} [${event.address}] ${chalk.bold('opening')} in topology#${
+        event.topologyId
+      }`
+    );
   });
 
   client.on('serverClosed', event => {
-    print(`${chalk.cyan('server')} [${event.address}] removed from topology#${event.topologyId}`);
+    print(
+      `${chalk.cyan('server')} [${event.address}] ${chalk.bold('closed')} in topology#${
+        event.topologyId
+      }`
+    );
   });
 
   client.on('serverDescriptionChanged', event => {
