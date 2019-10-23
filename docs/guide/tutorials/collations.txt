@@ -145,7 +145,7 @@ collation. The following query uses the above index:
 
      const docs = await collection
        .find({ city: 'New York' }, { collation: { locale: 'en_US' } })
-       .project(( _id: 0 ))
+       .project({ _id: 0 })
        .toArray();
 
      console.log('Found the following records');
@@ -164,7 +164,7 @@ value than the collation on the index.
 
      const docs = await collection
        .find({ city: 'New York' })
-       .project(( _id: 0 ))
+       .project({ _id: 0 })
        .toArray();
 
      console.log('Found the following records');
@@ -179,7 +179,7 @@ value than the collation on the index.
 
      const docs = await collection
        .find({ city: 'New York' }, { collation: { locale: 'en_US', strength: 2 } })
-       .project(( _id: 0 ))
+       .project({ _id: 0 })
        .toArray();
 
      console.log('Found the following records');
@@ -206,7 +206,7 @@ a German collation with the ``locale`` parameter set to ``de``.
 
      const docs = await collection
        .find({ city: 'New York' }, { collation: { locale: 'de' } })
-       .project(( _id: 0 ))
+       .project({ _id: 0 })
        .sort({ name: 1 })
        .toArray();
      
