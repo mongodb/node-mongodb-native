@@ -167,7 +167,7 @@ describe('Pool tests', function() {
       var pool = new Pool(null, {
         host: this.configuration.host,
         port: this.configuration.port,
-        socketTimeout: 3000,
+        socketTimeout: 500,
         bson: new Bson(),
         reconnect: false
       });
@@ -1139,6 +1139,25 @@ describe('Pool tests', function() {
       });
 
       pool.connect();
+    }
+  });
+
+  it('should support callback mode for connect', {
+    metadata: { requires: { topology: 'single' } },
+    test: function(done) {
+      const pool = new Pool(null, {
+        host: this.configuration.host,
+        port: this.configuration.port,
+        bson: new Bson()
+      });
+
+      pool.on('connect', () => done(new Error('connect was emitted')));
+      pool.connect(err => {
+        expect(err).to.not.exist;
+        setTimeout(() => {
+          pool.destroy(true, done);
+        }, 100); // wait to ensure event is not emitted
+      });
     }
   });
 });
