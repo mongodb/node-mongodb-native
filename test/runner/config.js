@@ -97,9 +97,6 @@ class NativeConfiguration {
 
   newTopology(host, port, options) {
     options = Object.assign({}, options);
-    host = host || this.options.host;
-    port = port || this.options.port;
-
     const hosts = host == null ? [].concat(this.options.hosts) : [{ host, port }];
     if (this.usingUnifiedTopology()) {
       return new core.Topology(hosts, options);
