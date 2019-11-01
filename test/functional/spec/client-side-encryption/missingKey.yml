@@ -19,7 +19,7 @@ tests:
         arguments:
           document: &doc0 { _id: 1, encrypted_string: "string0", random: "abc" }
         result:
-          errorContains: "did not provide all keys"
+          errorContains: "not all keys requested were satisfied"
     outcome:
       collection:
         # Outcome is checked using a separate MongoClient without auto encryption.
@@ -29,14 +29,12 @@ tests:
       - command_started_event:
           command:
             listCollections: 1
-            cursor: {}
             filter:
               name: *collection_name
           command_name: listCollections
       - command_started_event:
           command:
             listCollections: 1
-            cursor: {}
             filter:
               name: "different"
             $db: admin
@@ -47,4 +45,5 @@ tests:
             find: different
             filter: {"$or": [{"_id": {"$in": [ {'$binary': {'base64': 'AAAAAAAAAAAAAAAAAAAAAA==', 'subType': '04'}} ] }}, {"keyAltNames": {"$in": []}}]}
             $db: admin
+            readConcern: { level: "majority" }
           command_name: find

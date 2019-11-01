@@ -28,14 +28,12 @@ tests:
       - command_started_event:
           command:
             listCollections: 1
-            cursor: {}
             filter:
               name: *collection_name
           command_name: listCollections
       - command_started_event:
           command:
             listCollections: 1
-            cursor: {}
             filter:
               name: "datakeys"
             $db: admin
@@ -46,6 +44,7 @@ tests:
             find: datakeys
             filter: {"$or": [{"_id": {"$in": [ {'$binary': {'base64': 'AAAAAAAAAAAAAAAAAAAAAA==', 'subType': '04'}} ] }}, {"keyAltNames": {"$in": []}}]}
             $db: admin
+            readConcern: { level: "majority" }
           command_name: find
       - command_started_event:
           command:
@@ -53,8 +52,6 @@ tests:
             updates:
               - q: { encrypted_string: { $eq: {'$binary': {'base64': 'AQAAAAAAAAAAAAAAAAAAAAACwj+3zkv2VM+aTfk60RqhXq6a/77WlLwu/BxXFkL7EppGsju/m8f0x5kBDD3EZTtGALGXlym5jnpZAoSIkswHoA==', 'subType': '06'}} } }
                 u: { encrypted_string: {'$binary': {'base64': 'AQAAAAAAAAAAAAAAAAAAAAACDdw4KFz3ZLquhsbt7RmDjD0N67n0uSXx7IGnQNCLeIKvot6s/ouI21Eo84IOtb6lhwUNPlSEBNY0/hbszWAKJg==', 'subType': '06'}}, random: { $$type: "binData" } }
-                multi: false
-                upsert: false
             ordered: true
           command_name: update
     outcome:

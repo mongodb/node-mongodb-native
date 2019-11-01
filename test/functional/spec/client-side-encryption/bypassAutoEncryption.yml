@@ -44,6 +44,7 @@ tests:
             find: datakeys
             filter: {"$or": [{"_id": {"$in": [ {'$binary': {'base64': 'AAAAAAAAAAAAAAAAAAAAAA==', 'subType': '04'}} ] }}, {"keyAltNames": {"$in": []}}]}
             $db: admin
+            readConcern: { level: "majority" }
           command_name: find
     outcome:
       collection:
@@ -89,6 +90,7 @@ tests:
             find: datakeys
             filter: {"$or": [{"_id": {"$in": [ {'$binary': {'base64': 'AAAAAAAAAAAAAAAAAAAAAA==', 'subType': '04'}} ] }}, {"keyAltNames": {"$in": []}}]}
             $db: admin
+            readConcern: { level: "majority" }
           command_name: find
     outcome:
       collection:
