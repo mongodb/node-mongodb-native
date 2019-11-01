@@ -22,14 +22,12 @@ tests:
       - command_started_event:
           command:
             listCollections: 1
-            cursor: {}
             filter:
               name: *collection_name
           command_name: listCollections
       - command_started_event:
           command:
             listCollections: 1
-            cursor: {}
             filter:
               name: "datakeys"
             $db: admin
@@ -40,6 +38,7 @@ tests:
             find: datakeys
             filter: {$or: [ { _id: { $in: [] } }, { keyAltNames: { $in: [ "altname" ] } } ] }
             $db: admin
+            readConcern: { level: "majority" }
           command_name: find
       - command_started_event:
           command:
