@@ -22,5 +22,7 @@ describe('Client Side Encryption', function() {
     return testContext.setup(this.configuration);
   });
 
-  generateTopologyTests(testSuites, testContext);
+  generateTopologyTests(testSuites, testContext, spec => {
+    return !spec.description.match(/type=regex/);
+  });
 });
