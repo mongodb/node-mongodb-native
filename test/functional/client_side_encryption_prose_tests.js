@@ -38,12 +38,19 @@ describe(
 
     const noop = () => {};
 
+    let mongodbClientEncryption;
+    function getMongodbClientEncryption() {
+      mongodbClientEncryption =
+        mongodbClientEncryption || require('mongodb-client-encryption')(mongodb);
+      return mongodbClientEncryption;
+    }
+
     describe('Data key and double encryption', function() {
       // Data key and double encryption
       // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       // First, perform the setup.
       beforeEach(function() {
-        const mongodbClientEncryption = require('mongodb-client-encryption')(mongodb);
+        const mongodbClientEncryption = getMongodbClientEncryption();
 
         // #. Create a MongoClient without encryption enabled (referred to as ``client``). Enable command monitoring to listen for command_started events.
         this.client = this.configuration.newClient(
@@ -312,6 +319,149 @@ describe(
                 }
               );
           });
+      });
+    });
+
+    describe('Custom Endpoint', function() {
+      // Data keys created with AWS KMS may specify a custom endpoint to contact (instead of the default endpoint derived from the AWS region).
+
+      beforeEach(function() {
+        // 1. Create a ``ClientEncryption`` object (referred to as ``client_encryption``)
+        //    Configure with ``aws`` KMS providers as follows:
+        //    .. code:: javascript
+        //       {
+        //           "aws": { <AWS credentials> }
+        //       }
+        //    Configure with ``keyVaultNamespace`` set to ``admin.datakeys``, and a default MongoClient as the ``keyVaultClient``.
+        this.client = this.configuration.newClient(
+          {},
+          { useNewUrlParser: true, useUnifiedTopology: true }
+        );
+
+        return this.client.connect().then(() => {
+          const mongodbClientEncryption = getMongodbClientEncryption();
+          this.clientEncryption = new mongodbClientEncryption.ClientEncryption(this.client, {
+            keyVaultNamespace,
+            kmsProviders
+          });
+        });
+      });
+
+      afterEach(function() {
+        return this.client && this.client.close();
+      });
+      const testCases = [
+        {
+          description: 'no custom endpoint',
+          masterKey: {
+            region: 'us-east-1',
+            key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0'
+          },
+          succeed: true
+        },
+        {
+          description: 'custom endpoint',
+          masterKey: {
+            region: 'us-east-1',
+            key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0',
+            endpoint: 'kms.us-east-1.amazonaws.com'
+          },
+          succeed: true
+        },
+        {
+          description: 'custom endpoint with port',
+          masterKey: {
+            region: 'us-east-1',
+            key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0',
+            endpoint: 'kms.us-east-1.amazonaws.com:443'
+          },
+          succeed: true
+        },
+        {
+          description: 'custom endpoint with bad url',
+          masterKey: {
+            region: 'us-east-1',
+            key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0',
+            endpoint: 'kms.us-east-1.amazonaws.com:12345'
+          },
+          succeed: false,
+          errorValidator: err => {
+            expect(err)
+              .to.be.an.instanceOf(Error)
+              .and.to.have.property('message')
+              .that.matches(/KMS request failed/);
+          }
+        },
+        {
+          description: 'custom endpoint that does not match region',
+          masterKey: {
+            region: 'us-east-1',
+            key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0',
+            endpoint: 'kms.us-east-2.amazonaws.com'
+          },
+          succeed: false,
+          errorValidator: err => {
+            //    Expect this to fail with an exception with a message containing the string: "us-east-1"
+            expect(err)
+              .to.be.an.instanceOf(Error)
+              .and.to.have.property('message')
+              .that.matches(/us-east-1/);
+          }
+        },
+        {
+          description: 'custom endpoint with parse error',
+          masterKey: {
+            region: 'us-east-1',
+            key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0',
+            endpoint: 'example.com'
+          },
+          suceed: false,
+          errorValidator: err => {
+            //    Expect this to fail with an exception with a message containing the string: "parse error"
+            expect(err)
+              .to.be.an.instanceOf(Error)
+              .and.to.have.property('message')
+              .that.matches(/parse error/);
+          }
+        }
+      ];
+
+      testCases.forEach(testCase => {
+        it(testCase.description, function() {
+          // 2. Call `client_encryption.createDataKey()` with "aws" as the provider and the following masterKey:
+          // .. code:: javascript
+          //    {
+          //      ...
+          //    }
+          // Expect this to succeed. Use the returned UUID of the key to explicitly encrypt and decrypt the string "test" to validate it works.
+          const masterKey = testCase.masterKey;
+          return this.clientEncryption.createDataKey('aws', { masterKey }).then(
+            keyId => {
+              if (!testCase.succeed) {
+                throw new Error('Expected test case to fail to create data key, but it succeeded');
+              }
+              return this.clientEncryption
+                .encrypt('test', {
+                  keyId,
+                  algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic'
+                })
+                .then(encrypted => this.clientEncryption.decrypt(encrypted))
+                .then(result => {
+                  expect(result).to.equal('test');
+                });
+            },
+            err => {
+              if (testCase.succeed) {
+                throw err;
+              }
+              if (!testCase.errorValidator) {
+                throw new Error('Invalid Error validator');
+              }
+
+              testCase.errorValidator(err);
+            }
+          );
+        });
       });
     });
   }
