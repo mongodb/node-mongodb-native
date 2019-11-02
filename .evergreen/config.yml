@@ -85,9 +85,11 @@ functions:
       type: test
       params:
         working_dir: src
-        script: |
+        script: >
           ${PREPARE_SHELL}
-          AUTH=${AUTH} SSL=${SSL} MONGODB_URI="${MONGODB_URI}" bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
+
+          AUTH=${AUTH} SSL=${SSL} UNIFIED=${UNIFIED} MONGODB_URI="${MONGODB_URI}" bash
+          ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
   cleanup:
     - command: shell.exec
       params:
@@ -171,6 +173,45 @@ tasks:
           VERSION: latest
           TOPOLOGY: sharded_cluster
       - func: run tests
+  - name: test-latest-server-unified
+    tags:
+      - latest
+      - server-unified
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: latest
+          TOPOLOGY: server
+      - func: run tests
+        vars:
+          UNIFIED: 1
+  - name: test-latest-replica_set-unified
+    tags:
+      - latest
+      - replica_set-unified
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: latest
+          TOPOLOGY: replica_set
+      - func: run tests
+        vars:
+          UNIFIED: 1
+  - name: test-latest-sharded_cluster-unified
+    tags:
+      - latest
+      - sharded_cluster-unified
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: latest
+          TOPOLOGY: sharded_cluster
+      - func: run tests
+        vars:
+          UNIFIED: 1
   - name: test-4.2-server
     tags:
       - '4.2'
@@ -204,6 +245,45 @@ tasks:
           VERSION: '4.2'
           TOPOLOGY: sharded_cluster
       - func: run tests
+  - name: test-4.2-server-unified
+    tags:
+      - '4.2'
+      - server-unified
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.2'
+          TOPOLOGY: server
+      - func: run tests
+        vars:
+          UNIFIED: 1
+  - name: test-4.2-replica_set-unified
+    tags:
+      - '4.2'
+      - replica_set-unified
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.2'
+          TOPOLOGY: replica_set
+      - func: run tests
+        vars:
+          UNIFIED: 1
+  - name: test-4.2-sharded_cluster-unified
+    tags:
+      - '4.2'
+      - sharded_cluster-unified
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.2'
+          TOPOLOGY: sharded_cluster
+      - func: run tests
+        vars:
+          UNIFIED: 1
   - name: test-4.0-server
     tags:
       - '4.0'
@@ -237,6 +317,45 @@ tasks:
           VERSION: '4.0'
           TOPOLOGY: sharded_cluster
       - func: run tests
+  - name: test-4.0-server-unified
+    tags:
+      - '4.0'
+      - server-unified
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.0'
+          TOPOLOGY: server
+      - func: run tests
+        vars:
+          UNIFIED: 1
+  - name: test-4.0-replica_set-unified
+    tags:
+      - '4.0'
+      - replica_set-unified
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.0'
+          TOPOLOGY: replica_set
+      - func: run tests
+        vars:
+          UNIFIED: 1
+  - name: test-4.0-sharded_cluster-unified
+    tags:
+      - '4.0'
+      - sharded_cluster-unified
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.0'
+          TOPOLOGY: sharded_cluster
+      - func: run tests
+        vars:
+          UNIFIED: 1
   - name: test-3.6-server
     tags:
       - '3.6'
@@ -270,6 +389,45 @@ tasks:
           VERSION: '3.6'
           TOPOLOGY: sharded_cluster
       - func: run tests
+  - name: test-3.6-server-unified
+    tags:
+      - '3.6'
+      - server-unified
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '3.6'
+          TOPOLOGY: server
+      - func: run tests
+        vars:
+          UNIFIED: 1
+  - name: test-3.6-replica_set-unified
+    tags:
+      - '3.6'
+      - replica_set-unified
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '3.6'
+          TOPOLOGY: replica_set
+      - func: run tests
+        vars:
+          UNIFIED: 1
+  - name: test-3.6-sharded_cluster-unified
+    tags:
+      - '3.6'
+      - sharded_cluster-unified
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '3.6'
+          TOPOLOGY: sharded_cluster
+      - func: run tests
+        vars:
+          UNIFIED: 1
   - name: test-3.4-server
     tags:
       - '3.4'
@@ -303,6 +461,45 @@ tasks:
           VERSION: '3.4'
           TOPOLOGY: sharded_cluster
       - func: run tests
+  - name: test-3.4-server-unified
+    tags:
+      - '3.4'
+      - server-unified
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '3.4'
+          TOPOLOGY: server
+      - func: run tests
+        vars:
+          UNIFIED: 1
+  - name: test-3.4-replica_set-unified
+    tags:
+      - '3.4'
+      - replica_set-unified
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '3.4'
+          TOPOLOGY: replica_set
+      - func: run tests
+        vars:
+          UNIFIED: 1
+  - name: test-3.4-sharded_cluster-unified
+    tags:
+      - '3.4'
+      - sharded_cluster-unified
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '3.4'
+          TOPOLOGY: sharded_cluster
+      - func: run tests
+        vars:
+          UNIFIED: 1
   - name: test-3.2-server
     tags:
       - '3.2'
@@ -336,6 +533,45 @@ tasks:
           VERSION: '3.2'
           TOPOLOGY: sharded_cluster
       - func: run tests
+  - name: test-3.2-server-unified
+    tags:
+      - '3.2'
+      - server-unified
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '3.2'
+          TOPOLOGY: server
+      - func: run tests
+        vars:
+          UNIFIED: 1
+  - name: test-3.2-replica_set-unified
+    tags:
+      - '3.2'
+      - replica_set-unified
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '3.2'
+          TOPOLOGY: replica_set
+      - func: run tests
+        vars:
+          UNIFIED: 1
+  - name: test-3.2-sharded_cluster-unified
+    tags:
+      - '3.2'
+      - sharded_cluster-unified
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '3.2'
+          TOPOLOGY: sharded_cluster
+      - func: run tests
+        vars:
+          UNIFIED: 1
   - name: test-3.0-server
     tags:
       - '3.0'
@@ -369,6 +605,45 @@ tasks:
           VERSION: '3.0'
           TOPOLOGY: sharded_cluster
       - func: run tests
+  - name: test-3.0-server-unified
+    tags:
+      - '3.0'
+      - server-unified
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '3.0'
+          TOPOLOGY: server
+      - func: run tests
+        vars:
+          UNIFIED: 1
+  - name: test-3.0-replica_set-unified
+    tags:
+      - '3.0'
+      - replica_set-unified
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '3.0'
+          TOPOLOGY: replica_set
+      - func: run tests
+        vars:
+          UNIFIED: 1
+  - name: test-3.0-sharded_cluster-unified
+    tags:
+      - '3.0'
+      - sharded_cluster-unified
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '3.0'
+          TOPOLOGY: sharded_cluster
+      - func: run tests
+        vars:
+          UNIFIED: 1
   - name: test-2.6-server
     tags:
       - '2.6'
@@ -402,6 +677,45 @@ tasks:
           VERSION: '2.6'
           TOPOLOGY: sharded_cluster
       - func: run tests
+  - name: test-2.6-server-unified
+    tags:
+      - '2.6'
+      - server-unified
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '2.6'
+          TOPOLOGY: server
+      - func: run tests
+        vars:
+          UNIFIED: 1
+  - name: test-2.6-replica_set-unified
+    tags:
+      - '2.6'
+      - replica_set-unified
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '2.6'
+          TOPOLOGY: replica_set
+      - func: run tests
+        vars:
+          UNIFIED: 1
+  - name: test-2.6-sharded_cluster-unified
+    tags:
+      - '2.6'
+      - sharded_cluster-unified
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '2.6'
+          TOPOLOGY: sharded_cluster
+      - func: run tests
+        vars:
+          UNIFIED: 1
   - name: test-atlas-connectivity
     tags:
       - atlas-connect
@@ -420,21 +734,39 @@ buildvariants:
       - test-4.0-server
       - test-4.0-replica_set
       - test-4.0-sharded_cluster
+      - test-4.0-server-unified
+      - test-4.0-replica_set-unified
+      - test-4.0-sharded_cluster-unified
       - test-3.6-server
       - test-3.6-replica_set
       - test-3.6-sharded_cluster
+      - test-3.6-server-unified
+      - test-3.6-replica_set-unified
+      - test-3.6-sharded_cluster-unified
       - test-3.4-server
       - test-3.4-replica_set
       - test-3.4-sharded_cluster
+      - test-3.4-server-unified
+      - test-3.4-replica_set-unified
+      - test-3.4-sharded_cluster-unified
       - test-3.2-server
       - test-3.2-replica_set
       - test-3.2-sharded_cluster
+      - test-3.2-server-unified
+      - test-3.2-replica_set-unified
+      - test-3.2-sharded_cluster-unified
       - test-3.0-server
       - test-3.0-replica_set
       - test-3.0-sharded_cluster
+      - test-3.0-server-unified
+      - test-3.0-replica_set-unified
+      - test-3.0-sharded_cluster-unified
       - test-2.6-server
       - test-2.6-replica_set
       - test-2.6-sharded_cluster
+      - test-2.6-server-unified
+      - test-2.6-replica_set-unified
+      - test-2.6-sharded_cluster-unified
   - name: archlinux-test-carbon
     display_name: Archlinux Node Carbon
     run_on: archlinux-test
@@ -462,18 +794,33 @@ buildvariants:
       - test-3.6-server
       - test-3.6-replica_set
       - test-3.6-sharded_cluster
+      - test-3.6-server-unified
+      - test-3.6-replica_set-unified
+      - test-3.6-sharded_cluster-unified
       - test-3.4-server
       - test-3.4-replica_set
       - test-3.4-sharded_cluster
+      - test-3.4-server-unified
+      - test-3.4-replica_set-unified
+      - test-3.4-sharded_cluster-unified
       - test-3.2-server
       - test-3.2-replica_set
       - test-3.2-sharded_cluster
+      - test-3.2-server-unified
+      - test-3.2-replica_set-unified
+      - test-3.2-sharded_cluster-unified
       - test-3.0-server
       - test-3.0-replica_set
       - test-3.0-sharded_cluster
+      - test-3.0-server-unified
+      - test-3.0-replica_set-unified
+      - test-3.0-sharded_cluster-unified
       - test-2.6-server
       - test-2.6-replica_set
       - test-2.6-sharded_cluster
+      - test-2.6-server-unified
+      - test-2.6-replica_set-unified
+      - test-2.6-sharded_cluster-unified
   - name: debian71-test-carbon
     display_name: Debian 7.1 Node Carbon
     run_on: debian71-test
@@ -501,12 +848,21 @@ buildvariants:
       - test-4.0-server
       - test-4.0-replica_set
       - test-4.0-sharded_cluster
+      - test-4.0-server-unified
+      - test-4.0-replica_set-unified
+      - test-4.0-sharded_cluster-unified
       - test-3.6-server
       - test-3.6-replica_set
       - test-3.6-sharded_cluster
+      - test-3.6-server-unified
+      - test-3.6-replica_set-unified
+      - test-3.6-sharded_cluster-unified
       - test-3.4-server
       - test-3.4-replica_set
       - test-3.4-sharded_cluster
+      - test-3.4-server-unified
+      - test-3.4-replica_set-unified
+      - test-3.4-sharded_cluster-unified
   - name: debian81-test-carbon
     display_name: Debian 8.1 Node Carbon
     run_on: debian81-test
@@ -558,27 +914,51 @@ buildvariants:
       - test-latest-server
       - test-latest-replica_set
       - test-latest-sharded_cluster
+      - test-latest-server-unified
+      - test-latest-replica_set-unified
+      - test-latest-sharded_cluster-unified
       - test-4.2-server
       - test-4.2-replica_set
       - test-4.2-sharded_cluster
+      - test-4.2-server-unified
+      - test-4.2-replica_set-unified
+      - test-4.2-sharded_cluster-unified
       - test-4.0-server
       - test-4.0-replica_set
       - test-4.0-sharded_cluster
+      - test-4.0-server-unified
+      - test-4.0-replica_set-unified
+      - test-4.0-sharded_cluster-unified
       - test-3.6-server
       - test-3.6-replica_set
       - test-3.6-sharded_cluster
+      - test-3.6-server-unified
+      - test-3.6-replica_set-unified
+      - test-3.6-sharded_cluster-unified
       - test-3.4-server
       - test-3.4-replica_set
       - test-3.4-sharded_cluster
+      - test-3.4-server-unified
+      - test-3.4-replica_set-unified
+      - test-3.4-sharded_cluster-unified
       - test-3.2-server
       - test-3.2-replica_set
       - test-3.2-sharded_cluster
+      - test-3.2-server-unified
+      - test-3.2-replica_set-unified
+      - test-3.2-sharded_cluster-unified
       - test-3.0-server
       - test-3.0-replica_set
       - test-3.0-sharded_cluster
+      - test-3.0-server-unified
+      - test-3.0-replica_set-unified
+      - test-3.0-sharded_cluster-unified
       - test-2.6-server
       - test-2.6-replica_set
       - test-2.6-sharded_cluster
+      - test-2.6-server-unified
+      - test-2.6-replica_set-unified
+      - test-2.6-sharded_cluster-unified
       - test-atlas-connectivity
   - name: macos-1012-carbon
     display_name: macOS 10.12 Node Carbon
@@ -631,21 +1011,39 @@ buildvariants:
       - test-latest-server
       - test-latest-replica_set
       - test-latest-sharded_cluster
+      - test-latest-server-unified
+      - test-latest-replica_set-unified
+      - test-latest-sharded_cluster-unified
       - test-4.2-server
       - test-4.2-replica_set
       - test-4.2-sharded_cluster
+      - test-4.2-server-unified
+      - test-4.2-replica_set-unified
+      - test-4.2-sharded_cluster-unified
       - test-4.0-server
       - test-4.0-replica_set
       - test-4.0-sharded_cluster
+      - test-4.0-server-unified
+      - test-4.0-replica_set-unified
+      - test-4.0-sharded_cluster-unified
       - test-3.6-server
       - test-3.6-replica_set
       - test-3.6-sharded_cluster
+      - test-3.6-server-unified
+      - test-3.6-replica_set-unified
+      - test-3.6-sharded_cluster-unified
       - test-3.4-server
       - test-3.4-replica_set
       - test-3.4-sharded_cluster
+      - test-3.4-server-unified
+      - test-3.4-replica_set-unified
+      - test-3.4-sharded_cluster-unified
       - test-3.2-server
       - test-3.2-replica_set
       - test-3.2-sharded_cluster
+      - test-3.2-server-unified
+      - test-3.2-replica_set-unified
+      - test-3.2-sharded_cluster-unified
       - test-atlas-connectivity
   - name: rhel71-power8-test-carbon
     display_name: RHEL 7.1 (POWER8) Node Carbon
@@ -794,9 +1192,15 @@ buildvariants:
       - test-latest-server
       - test-latest-replica_set
       - test-latest-sharded_cluster
+      - test-latest-server-unified
+      - test-latest-replica_set-unified
+      - test-latest-sharded_cluster-unified
       - test-4.2-server
       - test-4.2-replica_set
       - test-4.2-sharded_cluster
+      - test-4.2-server-unified
+      - test-4.2-replica_set-unified
+      - test-4.2-sharded_cluster-unified
       - test-atlas-connectivity
   - name: ubuntu1804-arm64-test-carbon
     display_name: Ubuntu 18.04 (ARM64) Node Carbon

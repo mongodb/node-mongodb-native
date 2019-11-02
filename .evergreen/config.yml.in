@@ -94,7 +94,7 @@ functions:
       params:
         script: |
           ${PREPARE_SHELL}
-          MONGODB_VERSION=${VERSION} TOPOLOGY=${TOPOLOGY} sh ${DRIVERS_TOOLS}/.evergreen/run-orchestration.sh
+          MONGODB_VERSION=${VERSION} TOPOLOGY=${TOPOLOGY} bash ${DRIVERS_TOOLS}/.evergreen/run-orchestration.sh
     # run-orchestration generates expansion file with the MONGODB_URI for the cluster
     - command: expansions.update
       params:
@@ -107,7 +107,7 @@ functions:
         working_dir: "src"
         script: |
           ${PREPARE_SHELL}
-          AUTH=${AUTH} SSL=${SSL} MONGODB_URI="${MONGODB_URI}" sh ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
+          AUTH=${AUTH} SSL=${SSL} UNIFIED=${UNIFIED} MONGODB_URI="${MONGODB_URI}" bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
 
   "cleanup":
     - command: shell.exec
@@ -153,7 +153,7 @@ functions:
         working_dir: "src"
         script: |
           ${PREPARE_SHELL}
-          NODE_LTS_NAME=${NODE_LTS_NAME} sh ${PROJECT_DIRECTORY}/.evergreen/install-dependencies.sh
+          NODE_LTS_NAME=${NODE_LTS_NAME} bash ${PROJECT_DIRECTORY}/.evergreen/install-dependencies.sh
 
   "run atlas tests":
     - command: shell.exec
@@ -163,7 +163,7 @@ functions:
         silent: true
         script: |
           # DO NOT ECHO WITH XTRACE (which PREPARE_SHELL does)
-          NODE_LTS_NAME='${NODE_LTS_NAME}' ATLAS_REPL='${atlas_repl}' ATLAS_SHRD='${atlas_shrd}' ATLAS_FREE='${atlas_free}' ATLAS_TLS11='${atlas_tls11}' ATLAS_TLS12='${atlas_tls12}' sh ${PROJECT_DIRECTORY}/.evergreen/run-atlas-tests.sh
+          NODE_LTS_NAME='${NODE_LTS_NAME}' ATLAS_REPL='${atlas_repl}' ATLAS_SHRD='${atlas_shrd}' ATLAS_FREE='${atlas_free}' ATLAS_TLS11='${atlas_tls11}' ATLAS_TLS12='${atlas_tls12}' bash ${PROJECT_DIRECTORY}/.evergreen/run-atlas-tests.sh
 
 pre:
   - func: "fetch source"
