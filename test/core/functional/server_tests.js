@@ -995,7 +995,7 @@ describe('Server tests', function() {
 
         const config = this.configuration;
         var client = config.newTopology(server.address().host, server.address().port, {
-          serverSelectionTimeoutMS: 10
+          serverSelectionTimeoutMS: 500
         });
 
         client.on('error', error => {
