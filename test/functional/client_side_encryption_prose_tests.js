@@ -464,5 +464,223 @@ describe(
         });
       });
     });
+
+    describe('BSON size limits and batch splitting', function() {
+      const fs = require('fs');
+      const path = require('path');
+      const EJSON = require('mongodb-extjson');
+      function loadLimits(file) {
+        return EJSON.parse(
+          fs.readFileSync(path.resolve(__dirname, 'spec', 'client-side-encryption', 'limits', file))
+        );
+      }
+
+      const limitsSchema = loadLimits('limits-schema.json');
+      const limitsKey = loadLimits('limits-key.json');
+      const limitsDoc = loadLimits('limits-doc.json');
+
+      before(function() {
+        // First, perform the setup.
+
+        // #. Create a MongoClient without encryption enabled (referred to as ``client``).
+        this.client = this.configuration.newClient(
+          {},
+          { useNewUrlParser: true, useUnifiedTopology: true }
+        );
+
+        this.events = new Set();
+
+        return (
+          this.client
+            .connect()
+            // #. Using ``client``, drop and create the collection ``db.coll`` configured with the included JSON schema `limits/limits-schema.json <../limits/limits-schema.json>`_.
+            .then(() => {
+              return this.client
+                .db(dataDbName)
+                .dropCollection(dataCollName)
+                .catch(noop);
+            })
+            .then(() => {
+              return this.client.db(dataDbName).createCollection(dataCollName, {
+                validator: { $jsonSchema: limitsSchema }
+              });
+            })
+            // #. Using ``client``, drop the collection ``admin.datakeys``. Insert the document `limits/limits-key.json <../limits/limits-key.json>`_
+            .then(() => {
+              return this.client
+                .db(keyVaultDbName)
+                .dropCollection(keyVaultCollName)
+                .catch(noop);
+            })
+            .then(() => {
+              return this.client
+                .db(keyVaultDbName)
+                .collection(keyVaultCollName)
+                .insertOne(limitsKey);
+            })
+        );
+      });
+
+      beforeEach(function() {
+        // #. Create a MongoClient configured with auto encryption (referred to as ``client_encrypted``)
+        //    Configure with the ``local`` KMS provider as follows:
+        //    .. code:: javascript
+        //       { "local": { "key": <base64 decoding of LOCAL_MASTERKEY> } }
+        //    Configure with the ``keyVaultNamespace`` set to ``admin.datakeys``.
+        this.clientEncrypted = this.configuration.newClient(
+          {},
+          {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+            monitorCommands: true,
+            autoEncryption: {
+              keyVaultNamespace,
+              kmsProviders
+            }
+          }
+        );
+        return this.clientEncrypted.connect().then(() => {
+          this.encryptedColl = this.clientEncrypted.db(dataDbName).collection(dataCollName);
+          this.events.clear();
+          this.clientEncrypted.on('commandStarted', e => {
+            if (e.commandName === 'insert') {
+              this.events.add(e);
+            }
+          });
+        });
+      });
+
+      afterEach(function() {
+        if (this.clientEncrypted) {
+          this.clientEncrypted.removeAllListeners('commandStarted');
+          return this.clientEncrypted.close();
+        }
+      });
+
+      after(function() {
+        return this.client && this.client.close();
+      });
+
+      // Using ``client_encrypted`` perform the following operations:
+
+      function repeatedChar(char, length) {
+        return Array.from({ length })
+          .map(() => char)
+          .join('');
+      }
+
+      const testCases = [
+        // #. Insert ``{ "_id": "over_2mib_under_16mib", "unencrypted": <the string "a" repeated 2097152 times> }``.
+        //    Expect this to succeed since this is still under the ``maxBsonObjectSize`` limit.
+        {
+          description: 'should succeed for over_2mib_under_16mib',
+          docs: () => [{ _id: 'over_2mib_under_16mib', unencrypted: repeatedChar('a', 2097152) }],
+          expectedEvents: [{ commandName: 'insert' }]
+        },
+        // #. Insert the document `limits/limits-doc.json <../limits/limits-doc.json>`_ concatenated with ``{ "_id": "encryption_exceeds_2mib", "unencrypted": < the string "a" repeated (2097152 - 2000) times > }``
+        //    Note: limits-doc.json is a 1005 byte BSON document that encrypts to a ~10,000 byte document.
+        //    Expect this to succeed since after encryption this still is below the normal maximum BSON document size.
+        //    Note, before auto encryption this document is under the 2 MiB limit. After encryption it exceeds the 2 MiB limit, but does NOT exceed the 16 MiB limit.
+        {
+          description: 'should succeed for encryption_exceeds_2mib',
+          docs: () => [
+            Object.assign({}, limitsDoc, {
+              _id: 'encryption_exceeds_2mib',
+              unencrypted: repeatedChar('a', 2097152 - 2000)
+            })
+          ],
+          expectedEvents: [{ commandName: 'insert' }]
+        },
+        // #. Bulk insert the following:
+        //    - ``{ "_id": "over_2mib_1", "unencrypted": <the string "a" repeated (2097152) times> }``
+        //    - ``{ "_id": "over_2mib_2", "unencrypted": <the string "a" repeated (2097152) times> }``
+        //    Expect the bulk write to succeed and split after first doc (i.e. two inserts occur). This may be verified using `command monitoring <https://github.com/mongodb/specifications/tree/master/source/command-monitoring/command-monitoring.rst>`_.
+        {
+          description: 'should succeed for bulk over_2mib',
+          docs: () => [
+            { _id: 'over_2mib_1', unencrypted: repeatedChar('a', 2097152) },
+            { _id: 'over_2mib_2', unencrypted: repeatedChar('a', 2097152) }
+          ],
+          expectedEvents: [{ commandName: 'insert' }, { commandName: 'insert' }]
+        },
+        // #. Bulk insert the following:
+        //    - The document `limits/limits-doc.json <../limits/limits-doc.json>`_ concatenated with ``{ "_id": "encryption_exceeds_2mib_1", "unencrypted": < the string "a" repeated (2097152 - 2000) times > }``
+        //    - The document `limits/limits-doc.json <../limits/limits-doc.json>`_ concatenated with ``{ "_id": "encryption_exceeds_2mib_2", "unencrypted": < the string "a" repeated (2097152 - 2000) times > }``
+        //    Expect the bulk write to succeed and split after first doc (i.e. two inserts occur). This may be verified using `command monitoring <https://github.com/mongodb/specifications/tree/master/source/command-monitoring/command-monitoring.rst>`_.
+        {
+          description: 'should succeed for bulk encryption_exceeds_2mib',
+          docs: () => [
+            Object.assign({}, limitsDoc, {
+              _id: 'encryption_exceeds_2mib_1',
+              unencrypted: repeatedChar('a', 2097152 - 2000)
+            }),
+            Object.assign({}, limitsDoc, {
+              _id: 'encryption_exceeds_2mib_2',
+              unencrypted: repeatedChar('a', 2097152 - 2000)
+            })
+          ],
+          expectedEvents: [{ commandName: 'insert' }, { commandName: 'insert' }]
+        },
+        // #. Insert ``{ "_id": "under_16mib", "unencrypted": <the string "a" repeated 16777216 - 2000 times>``.
+        //    Expect this to succeed since this is still (just) under the ``maxBsonObjectSize`` limit.
+        {
+          description: 'should succeed for under_16mib',
+          docs: () => [{ _id: 'under_16mib', unencrypted: repeatedChar('a', 16777216 - 2000) }],
+          expectedEvents: [{ commandName: 'insert' }]
+        },
+        // #. Insert the document `limits/limits-doc.json <../limits/limits-doc.json>`_ concatenated with ``{ "_id": "encryption_exceeds_16mib", "unencrypted": < the string "a" repeated (16777216 - 2000) times > }``
+        //    Expect this to fail since encryption results in a document exceeding the ``maxBsonObjectSize`` limit.
+        {
+          description: 'should fail for encryption_exceeds_16mib',
+          docs: () => [
+            Object.assign({}, limitsDoc, {
+              _id: 'encryption_exceeds_16mib',
+              unencrypted: repeatedChar('a', 16777216 - 2000)
+            })
+          ],
+          error: true
+        }
+      ];
+
+      testCases.forEach(testCase => {
+        it(testCase.description, function() {
+          return this.encryptedColl.insertMany(testCase.docs()).then(
+            () => {
+              if (testCase.error) {
+                throw new Error('Expected this insert to fail, but it succeeded');
+              }
+              const expectedEvents = Array.from(testCase.expectedEvents);
+              const actualEvents = pruneEvents(this.events);
+
+              expect(actualEvents)
+                .to.have.a.lengthOf(expectedEvents.length)
+                .and.to.containSubset(expectedEvents);
+            },
+            err => {
+              if (!testCase.error) {
+                throw err;
+              }
+            }
+          );
+        });
+      });
+
+      function pruneEvents(events) {
+        return Array.from(events).map(event => {
+          // We are pruning out the bunch of repeating As, mostly
+          // b/c an error failure will try to print 2mb of 'a's
+          // and not have a good time.
+          event.command = Object.assign({}, event.command);
+          event.command.documents = event.command.documents.map(doc => {
+            doc = Object.assign({}, doc);
+            if (doc.unencrypted) {
+              doc.unencrypted = "Lots of repeating 'a's";
+            }
+            return doc;
+          });
+          return event;
+        });
+      }
+    });
   }
 );
