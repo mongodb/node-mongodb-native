@@ -12,12 +12,13 @@
  */
 class UnifiedTopologyFilter {
   filter(test) {
-    if (!test.metadata) return true;
-    if (!test.metadata.requires) return true;
-    if (typeof test.metadata.requires.unifiedTopology !== 'boolean') return true;
+    const unifiedTopology =
+      test.metadata && test.metadata.requires && test.metadata.requires.unifiedTopology;
 
-    const requireUnifiedTopology = !!test.metadata.requires.unifiedTopology;
-    return requireUnifiedTopology === !!process.env.MONGODB_UNIFIED_TOPOLOGY;
+    return (
+      typeof unifiedTopology !== 'boolean' ||
+      unifiedTopology === process.env.MONGODB_UNIFIED_TOPOLOGY
+    );
   }
 }
 
