@@ -1160,4 +1160,45 @@ describe('Pool tests', function() {
       });
     }
   });
+
+  it('should support resetting', function(done) {
+    const pool = new Pool(null, {
+      host: this.configuration.host,
+      port: this.configuration.port,
+      bson: new Bson()
+    });
+
+    const isMasterQuery = new Query(
+      new Bson(),
+      'system.$cmd',
+      { ismaster: true },
+      { numberToSkip: 0, numberToReturn: 1 }
+    );
+
+    pool.once('connect', () => {
+      const connections = pool.allConnections().map(conn => conn.id);
+      expect(connections).to.have.length(1);
+
+      pool.write(isMasterQuery, err => {
+        expect(err).to.not.exist;
+
+        pool.reset(err => {
+          expect(err).to.not.exist;
+
+          pool.write(isMasterQuery, err => {
+            expect(err).to.not.exist;
+
+            // verify the previous connection was dropped, and a new connection was created
+            const newConnections = pool.allConnections().map(conn => conn.id);
+            expect(newConnections).to.have.length(1);
+            expect(newConnections[0]).to.not.equal(connections[0]);
+
+            pool.destroy(done);
+          });
+        });
+      });
+    });
+
+    pool.connect();
+  });
 });
