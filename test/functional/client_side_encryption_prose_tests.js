@@ -682,5 +682,75 @@ describe(
         });
       }
     });
+
+    describe('Views are prohibited', function() {
+      before(function() {
+        // First, perform the setup.
+
+        // #. Create a MongoClient without encryption enabled (referred to as ``client``).
+        this.client = this.configuration.newClient(
+          {},
+          { useNewUrlParser: true, useUnifiedTopology: true }
+        );
+
+        return this.client
+          .connect()
+          .then(() => {
+            return this.client
+              .db(dataDbName)
+              .dropCollection(dataCollName)
+              .catch(noop);
+          })
+          .then(() => {
+            return this.client.db(dataDbName).createCollection(dataCollName);
+          })
+          .then(() => {
+            return this.client
+              .db(dataDbName)
+              .createCollection('view', { viewOn: dataCollName, pipeline: [] });
+          });
+      });
+
+      after(function() {
+        return this.client && this.client.close();
+      });
+
+      beforeEach(function() {
+        this.clientEncrypted = this.configuration.newClient(
+          {},
+          {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+            autoEncryption: {
+              keyVaultNamespace,
+              kmsProviders
+            }
+          }
+        );
+
+        return this.clientEncrypted.connect();
+      });
+
+      afterEach(function() {
+        return this.clientEncrypted && this.clientEncrypted.close();
+      });
+
+      it('should error when inserting into a view with autoEncryption', function() {
+        this.clientEncrypted
+          .db(dataDbName)
+          .collection('view')
+          .insertOne({ a: 1 })
+          .then(
+            () => {
+              throw new Error('Expected insert to fail, but it succeeded');
+            },
+            err => {
+              expect(err)
+                .to.have.property('message')
+                .that.matches(/cannot auto encrypt a view/);
+            }
+          );
+      });
+    });
   }
 );
