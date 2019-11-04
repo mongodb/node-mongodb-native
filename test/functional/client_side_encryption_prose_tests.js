@@ -752,5 +752,223 @@ describe(
           );
       });
     });
+
+    // TODO: We cannot implement these tests according to spec b/c the tests require a
+    // connect-less client. So instead we are implementing the tests via APM,
+    // and confirming that the externalClient is firing off keyVault requests during
+    // encrypted operations
+    describe('External Key Vault', function() {
+      const fs = require('fs');
+      const path = require('path');
+      const EJSON = require('mongodb-extjson');
+      function loadExternal(file) {
+        return EJSON.parse(
+          fs.readFileSync(
+            path.resolve(__dirname, 'spec', 'client-side-encryption', 'external', file)
+          )
+        );
+      }
+
+      const externalKey = loadExternal('external-key.json');
+      const externalSchema = loadExternal('external-schema.json');
+
+      beforeEach(function() {
+        this.client = this.configuration.newClient(
+          {},
+          { useNewUrlParser: true, useUnifiedTopology: true }
+        );
+
+        // #. Create a MongoClient without encryption enabled (referred to as ``client``).
+        return (
+          this.client
+            .connect()
+            // #. Using ``client``, drop the collections ``admin.datakeys`` and ``db.coll``.
+            //    Insert the document `external/external-key.json <../external/external-key.json>`_ into ``admin.datakeys``.
+            .then(() => {
+              return this.client
+                .db(dataDbName)
+                .dropCollection(dataCollName)
+                .catch(noop);
+            })
+            .then(() => {
+              return this.client
+                .db(keyVaultDbName)
+                .dropCollection(keyVaultCollName)
+                .catch(noop);
+            })
+            .then(() => {
+              return this.client
+                .db(keyVaultDbName)
+                .collection(keyVaultCollName)
+                .insertOne(externalKey);
+            })
+        );
+      });
+
+      afterEach(function() {
+        return Promise.resolve()
+          .then(() => this.externalClient && this.externalClient.close())
+          .then(() => this.clientEncrypted && this.clientEncrypted.close())
+          .then(() => this.client && this.client.close());
+      });
+
+      function defineTest(withExternalKeyVault) {
+        it(`should work ${
+          withExternalKeyVault ? 'with' : 'without'
+        } external key vault`, function() {
+          const ClientEncryption = getMongodbClientEncryption().ClientEncryption;
+          return (
+            Promise.resolve()
+              .then(() => {
+                //    If ``withExternalKeyVault == true``, configure both objects with an external key vault client. The external client MUST connect to the same
+                //    MongoDB cluster that is being tested against, except it MUST use the username ``fake-user`` and password ``fake-pwd``.
+                this.externalClient = this.configuration.newClient(
+                  // this.configuration.url('fake-user', 'fake-pwd'),
+                  // TODO: Do this properly
+                  {},
+                  { useNewUrlParser: true, useUnifiedTopology: true, monitorCommands: true }
+                );
+
+                this.events = new Set();
+                this.externalClient.on('commandStarted', e => {
+                  if (e.commandName === 'find') {
+                    this.events.add(e);
+                  }
+                });
+                this.externalClient.isSpecial = `you're goddamn right ur special`;
+                return this.externalClient.connect();
+              })
+              // #. Create the following:
+              //    - A MongoClient configured with auto encryption (referred to as ``client_encrypted``)
+              //    - A ``ClientEncryption`` object (referred to as ``client_encryption``)
+              //    Configure both objects with the ``local`` KMS providers as follows:
+              //    .. code:: javascript
+              //       { "local": { "key": <base64 decoding of LOCAL_MASTERKEY> } }
+              //    Configure both objects with ``keyVaultNamespace`` set to ``admin.datakeys``.
+              //    Configure ``client_encrypted`` to use the schema `external/external-schema.json <../external/external-schema.json>`_  for ``db.coll`` by setting a schema map like: ``{ "db.coll": <contents of external-schema.json>}``
+              .then(() => {
+                const options = {
+                  keyVaultNamespace,
+                  kmsProviders
+                };
+
+                if (withExternalKeyVault) {
+                  options.keyVaultClient = this.externalClient;
+                }
+
+                this.clientEncryption = new ClientEncryption(
+                  this.client,
+                  Object.assign({}, options)
+                );
+                this.clientEncrypted = this.configuration.newClient(
+                  {},
+                  {
+                    useNewUrlParser: true,
+                    useUnifiedTopology: true,
+                    autoEncryption: Object.assign({}, options, {
+                      schemaMap: {
+                        'db.coll': externalSchema
+                      }
+                    })
+                  }
+                );
+                return this.clientEncrypted.connect();
+              })
+              .then(() => {
+                // #. Use ``client_encrypted`` to insert the document ``{"encrypted": "test"}`` into ``db.coll``.
+                //    If ``withExternalKeyVault == true``, expect an authentication exception to be thrown. Otherwise, expect the insert to succeed.
+                this.events.clear();
+                return this.clientEncrypted
+                  .db(dataDbName)
+                  .collection(dataCollName)
+                  .insertOne({ encrypted: 'test' })
+                  .then(() => {
+                    if (withExternalKeyVault) {
+                      expect(Array.from(this.events)).to.containSubset([
+                        {
+                          commandName: 'find',
+                          databaseName: keyVaultDbName,
+                          command: { find: keyVaultCollName }
+                        }
+                      ]);
+                    } else {
+                      expect(Array.from(this.events)).to.not.containSubset([
+                        {
+                          commandName: 'find',
+                          databaseName: keyVaultDbName,
+                          command: { find: keyVaultCollName }
+                        }
+                      ]);
+                    }
+                  });
+                // TODO: Do this in the spec-compliant way using bad auth credentials
+                // .then(
+                //   () => {
+                //     if (withExternalKeyVault) {
+                //       throw new Error(
+                //         'expected insert to fail with authentication error, but it passed'
+                //       );
+                //     }
+                //   },
+                //   err => {
+                //     if (!withExternalKeyVault) {
+                //       throw err;
+                //     }
+                //     expect(err).to.be.an.instanceOf(Error);
+                //   }
+                // );
+              })
+              .then(() => {
+                // #. Use ``client_encryption`` to explicitly encrypt the string ``"test"`` with key ID ``LOCALAAAAAAAAAAAAAAAAA==`` and deterministic algorithm.
+                //    If ``withExternalKeyVault == true``, expect an authentication exception to be thrown. Otherwise, expect the insert to succeed.
+                this.events.clear();
+                return this.clientEncryption
+                  .encrypt('test', {
+                    keyId: externalKey._id,
+                    algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic'
+                  })
+                  .then(() => {
+                    if (withExternalKeyVault) {
+                      expect(Array.from(this.events)).to.containSubset([
+                        {
+                          commandName: 'find',
+                          databaseName: keyVaultDbName,
+                          command: { find: keyVaultCollName }
+                        }
+                      ]);
+                    } else {
+                      expect(Array.from(this.events)).to.not.containSubset([
+                        {
+                          commandName: 'find',
+                          databaseName: keyVaultDbName,
+                          command: { find: keyVaultCollName }
+                        }
+                      ]);
+                    }
+                  });
+                // TODO: Do this in the spec-compliant way using bad auth credentials
+                // .then(
+                //   () => {
+                //     if (withExternalKeyVault) {
+                //       throw new Error(
+                //         'expected insert to fail with authentication error, but it passed'
+                //       );
+                //     }
+                //   },
+                //   err => {
+                //     if (!withExternalKeyVault) {
+                //       throw err;
+                //     }
+                //     expect(err).to.be.an.instanceOf(Error);
+                //   }
+                // );
+              })
+          );
+        });
+      }
+      // Run the following tests twice, parameterized by a boolean ``withExternalKeyVault``.
+      defineTest(true);
+      defineTest(false);
+    });
   }
 );
