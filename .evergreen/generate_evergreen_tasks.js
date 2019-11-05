@@ -27,7 +27,8 @@ const OPERATING_SYSTEMS = [
     name: 'debian71-test',
     display_name: 'Debian 7.1',
     run_on: 'debian71-test',
-    mongoVersion: '<4.0'
+    mongoVersion: '<4.0',
+    nodeVersions: ['argon', 'boron']
   },
   {
     name: 'debian81-test',
@@ -47,7 +48,8 @@ const OPERATING_SYSTEMS = [
     name: 'linux-64-amzn-test',
     display_name: 'Amazon Linux (Enterprise)',
     run_on: 'linux-64-amzn-test',
-    mongoVersion: '<4.0'
+    mongoVersion: '<4.0',
+    nodeVersions: ['argon', 'boron']
   },
   // macos
   {
@@ -225,12 +227,12 @@ OPERATING_SYSTEMS.forEach(
     display_name: osDisplayName,
     run_on,
     mongoVersion = '>=2.6',
-    nodeVersion = 'argon'
+    nodeVersions = NODE_VERSIONS
   }) => {
-    const nodeVersions = NODE_VERSIONS.filter(nv => nv >= nodeVersion);
+    const testedNodeVersions = NODE_VERSIONS.filter(version => nodeVersions.includes(version));
     const tasks = getTaskList(mongoVersion);
 
-    nodeVersions.forEach(NODE_LTS_NAME => {
+    testedNodeVersions.forEach(NODE_LTS_NAME => {
       const nodeLtsDisplayName = `Node ${NODE_LTS_NAME[0].toUpperCase()}${NODE_LTS_NAME.substr(1)}`;
       const name = `${osName}-${NODE_LTS_NAME}`;
       const display_name = `${osDisplayName} ${nodeLtsDisplayName}`;
