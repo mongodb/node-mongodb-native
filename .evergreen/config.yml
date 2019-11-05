@@ -785,11 +785,11 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: argon
     tasks: *ref_0
-  - name: debian71-test-dubnium
-    display_name: Debian 7.1 Node Dubnium
+  - name: debian71-test-boron
+    display_name: Debian 7.1 Node Boron
     run_on: debian71-test
     expansions:
-      NODE_LTS_NAME: dubnium
+      NODE_LTS_NAME: boron
     tasks: &ref_1
       - test-3.6-server
       - test-3.6-replica_set
@@ -821,18 +821,6 @@ buildvariants:
       - test-2.6-server-unified
       - test-2.6-replica_set-unified
       - test-2.6-sharded_cluster-unified
-  - name: debian71-test-carbon
-    display_name: Debian 7.1 Node Carbon
-    run_on: debian71-test
-    expansions:
-      NODE_LTS_NAME: carbon
-    tasks: *ref_1
-  - name: debian71-test-boron
-    display_name: Debian 7.1 Node Boron
-    run_on: debian71-test
-    expansions:
-      NODE_LTS_NAME: boron
-    tasks: *ref_1
   - name: debian71-test-argon
     display_name: Debian 7.1 Node Argon
     run_on: debian71-test
@@ -881,18 +869,6 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: argon
     tasks: *ref_2
-  - name: linux-64-amzn-test-dubnium
-    display_name: Amazon Linux (Enterprise) Node Dubnium
-    run_on: linux-64-amzn-test
-    expansions:
-      NODE_LTS_NAME: dubnium
-    tasks: *ref_1
-  - name: linux-64-amzn-test-carbon
-    display_name: Amazon Linux (Enterprise) Node Carbon
-    run_on: linux-64-amzn-test
-    expansions:
-      NODE_LTS_NAME: carbon
-    tasks: *ref_1
   - name: linux-64-amzn-test-boron
     display_name: Amazon Linux (Enterprise) Node Boron
     run_on: linux-64-amzn-test
