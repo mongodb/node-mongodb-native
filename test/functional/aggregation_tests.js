@@ -483,7 +483,8 @@ describe('Aggregation', function() {
           // Iterate over all the items in the cursor
           cursor.explain(function(err, result) {
             expect(err).to.be.null;
-            expect(result.stages).to.have.length(4);
+            expect(result.stages).to.have.lengthOf.at.least(1);
+            expect(result.stages[0]).to.have.key('$cursor');
 
             client.close(done);
           });
