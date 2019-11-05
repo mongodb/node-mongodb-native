@@ -1951,7 +1951,7 @@ describe('Find', function() {
           function(err) {
             test.equal(null, err);
 
-            col.find({}, { skip: 1, limit: 1, fields: { _id: 1, b: 0 } }).toArray(function(err) {
+            col.find({}, { skip: 1, limit: 1, fields: { a: 1, b: 0 } }).toArray(function(err) {
               test.ok(err instanceof Error);
               client.close(done);
             });
