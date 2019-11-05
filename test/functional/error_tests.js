@@ -78,6 +78,11 @@ describe('Errors', function() {
     });
   });
 
+  const PROJECTION_ERRORS = new Set([
+    'Projection cannot have a mix of inclusion and exclusion.',
+    'Cannot do exclusion on field b in inclusion projection'
+  ]);
+
   it('should return an error object with message when mixing included and excluded fields', {
     metadata: { requires: { mongodb: '>3.0' } },
     test: function(done) {
@@ -86,7 +91,7 @@ describe('Errors', function() {
       c.insertOne({ a: 2, b: 5 }, { w: 1 }, err => {
         expect(err).to.not.exist;
         c.findOne({ a: 2 }, { fields: { a: 1, b: 0 } }, err => {
-          expect(err.errmsg).to.equal('Projection cannot have a mix of inclusion and exclusion.');
+          expect(PROJECTION_ERRORS).to.include(err.errmsg);
           done();
         });
       });
@@ -99,7 +104,7 @@ describe('Errors', function() {
       const db = client.db(this.configuration.db);
       const c = db.collection('test_error_object_should_include_message');
       c.findOne({}, { fields: { a: 1, b: 0 } }, err => {
-        expect(err.errmsg).to.equal('Projection cannot have a mix of inclusion and exclusion.');
+        expect(PROJECTION_ERRORS).to.include(err.errmsg);
         done();
       });
     }
