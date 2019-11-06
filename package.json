@@ -64,6 +64,7 @@
   "scripts": {
     "atlas": "node ./test/atlas_connectivity_tests.js",
     "test": "npm run lint && mocha --recursive test/functional test/unit test/core",
+    "test-nolint": "mocha --recursive test/functional test/unit test/core",
     "coverage": "istanbul cover mongodb-test-runner -- -t 60000 test/core test/unit test/functional",
     "lint": "eslint lib test",
     "format": "prettier --print-width 100 --tab-width 2 --single-quote --write 'test/**/*.js' 'lib/**/*.js'",
