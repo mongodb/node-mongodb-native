@@ -21,34 +21,18 @@ describe('Client Side Encryption Prose Tests', function() {
   const keyVaultDbName = 'admin';
   const keyVaultCollName = 'datakeys';
   const keyVaultNamespace = `${keyVaultDbName}.${keyVaultCollName}`;
-  const kmsProviders = {
-    aws: {
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
-    },
-    local: {
-      key: Buffer.from(
-        'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk',
-        'base64'
-      )
-    }
-  };
-
+  const localKey = Buffer.from(
+    'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk',
+    'base64'
+  );
   const noop = () => {};
-
-  let mongodbClientEncryption;
-  function getMongodbClientEncryption() {
-    mongodbClientEncryption =
-      mongodbClientEncryption || require('mongodb-client-encryption')(mongodb);
-    return mongodbClientEncryption;
-  }
 
   describe('Data key and double encryption', function() {
     // Data key and double encryption
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // First, perform the setup.
     beforeEach(function() {
-      const mongodbClientEncryption = getMongodbClientEncryption();
+      const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
 
       // #. Create a MongoClient without encryption enabled (referred to as ``client``). Enable command monitoring to listen for command_started events.
       this.client = this.configuration.newClient(
@@ -115,7 +99,7 @@ describe('Client Side Encryption Prose Tests', function() {
           //   Configure ``client_encryption`` with the ``keyVaultClient`` of the previously created ``client``.
           .then(() => {
             this.clientEncryption = new mongodbClientEncryption.ClientEncryption(this.client, {
-              kmsProviders,
+              kmsProviders: this.configuration.kmsProviders(null, localKey),
               keyVaultNamespace
             });
           })
@@ -127,7 +111,7 @@ describe('Client Side Encryption Prose Tests', function() {
                 useUnifiedTopology: true,
                 autoEncryption: {
                   keyVaultNamespace,
-                  kmsProviders,
+                  kmsProviders: this.configuration.kmsProviders(null, localKey),
                   schemaMap
                 }
               }
@@ -337,10 +321,10 @@ describe('Client Side Encryption Prose Tests', function() {
       );
 
       return this.client.connect().then(() => {
-        const mongodbClientEncryption = getMongodbClientEncryption();
+        const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
         this.clientEncryption = new mongodbClientEncryption.ClientEncryption(this.client, {
           keyVaultNamespace,
-          kmsProviders
+          kmsProviders: this.configuration.kmsProviders('aws')
         });
       });
     });
@@ -533,7 +517,7 @@ describe('Client Side Encryption Prose Tests', function() {
           monitorCommands: true,
           autoEncryption: {
             keyVaultNamespace,
-            kmsProviders
+            kmsProviders: this.configuration.kmsProviders('local', localKey)
           }
         }
       );
@@ -721,7 +705,7 @@ describe('Client Side Encryption Prose Tests', function() {
           useUnifiedTopology: true,
           autoEncryption: {
             keyVaultNamespace,
-            kmsProviders
+            kmsProviders: this.configuration.kmsProviders(null, localKey)
           }
         }
       );
@@ -813,7 +797,7 @@ describe('Client Side Encryption Prose Tests', function() {
         `should work ${withExternalKeyVault ? 'with' : 'without'} external key vault`,
         metadata,
         function() {
-          const ClientEncryption = getMongodbClientEncryption().ClientEncryption;
+          const ClientEncryption = this.configuration.mongodbClientEncryption.ClientEncryption;
           return (
             Promise.resolve()
               .then(() => {
@@ -846,7 +830,7 @@ describe('Client Side Encryption Prose Tests', function() {
               .then(() => {
                 const options = {
                   keyVaultNamespace,
-                  kmsProviders
+                  kmsProviders: this.configuration.kmsProviders('local', localKey)
                 };
 
                 if (withExternalKeyVault) {
