@@ -1,0 +1,41 @@
+'use strict';
+
+const mongodb = require('../../../index');
+/**
+ * Filter for whether or not a test needs / doesn't need Client Side Encryption
+ *
+ * example:
+ * metadata: {
+ *    requires: {
+ *      clientSideEncryption: true|false
+ *    }
+ * }
+ */
+
+class ClientSideEncryptionFilter {
+  initializeFilter(client, context, callback) {
+    const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
+    const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
+    let mongodbClientEncryption;
+    try {
+      mongodbClientEncryption = require('mongodb-client-encryption')(mongodb);
+    } catch (e) {
+      // Do Nothing
+    }
+
+    this.enabled = !!(AWS_ACCESS_KEY_ID && AWS_SECRET_ACCESS_KEY && mongodbClientEncryption);
+
+    // TODO: shove these fields on to the context so they can be reused.
+
+    callback();
+  }
+  filter(test) {
+    const clientSideEncryption =
+      test.metadata && test.metadata.requires && test.metadata.requires.clientSideEncryption;
+
+    const ret = typeof clientSideEncryption !== 'boolean' || clientSideEncryption === this.enabled;
+    return ret;
+  }
+}
+
+module.exports = ClientSideEncryptionFilter;
