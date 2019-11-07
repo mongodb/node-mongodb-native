@@ -10,6 +10,7 @@ const core = require('../../lib/core');
 class NativeConfiguration {
   constructor(parsedURI, context) {
     this.topologyType = context.topologyType;
+    this.clientSideEncryption = context.clientSideEncryption;
     this.options = Object.assign(
       {
         hosts: parsedURI.hosts,
@@ -170,6 +171,27 @@ class NativeConfiguration {
     }
 
     return { w: 1 };
+  }
+
+  // Accessors and methods Client-Side Encryption
+  get mongodbClientEncryption() {
+    return this.clientSideEncryption && this.clientSideEncryption.mongodbClientEncryption;
+  }
+
+  kmsProviders(type, localKey) {
+    const kmsProviders = {};
+    if (typeof type !== 'string' || type === 'aws') {
+      kmsProviders.aws = {
+        accessKeyId: this.clientSideEncryption.AWS_ACCESS_KEY_ID,
+        secretAccessKey: this.clientSideEncryption.AWS_SECRET_ACCESS_KEY
+      };
+    }
+    if (typeof type !== 'string' || type === 'local') {
+      kmsProviders.local = {
+        key: localKey
+      };
+    }
+    return kmsProviders;
   }
 }
 
