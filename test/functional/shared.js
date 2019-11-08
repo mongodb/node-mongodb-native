@@ -10,6 +10,13 @@ function filterForCommands(commands, bag) {
   };
 }
 
+function filterOutCommands(commands, bag) {
+  commands = Array.isArray(commands) ? commands : [commands];
+  return function(event) {
+    if (commands.indexOf(event.commandName) === -1) bag.push(event);
+  };
+}
+
 function connectToDb(url, db, options, callback) {
   if (typeof options === 'function') {
     callback = options;
@@ -108,11 +115,89 @@ var delay = function(timeout) {
   });
 };
 
+function ignoreNsNotFound(err) {
+  if (!err.message.match(/ns not found/)) throw err;
+}
+
+function dropCollection(dbObj, collectionName) {
+  return dbObj.dropCollection(collectionName).catch(ignoreNsNotFound);
+}
+
+/**
+ * A class for listening on specific events
+ *
+ * @example
+ * beforeEach(function() {
+ *   // capture all commandStarted events from client. Get by doing this.commandStarted.events;
+ *   this.commandStarted = new EventCollector(this.client, 'commandStarted');
+ * });
+ * @example
+ * beforeEach(function() {
+ *   // same as above, but only allows 'insert' and 'find' events
+ *   this.commandStarted = new EventCollector(this.client, 'commandStarted', {
+ *     include: ['insert', 'find']
+ *   });
+ * });
+ * @example
+ * beforeEach(function() {
+ *   // same as above, but excludes 'ismaster' events
+ *   this.commandStarted = new EventCollector(this.client, 'commandStarted', {
+ *     exclude: ['ismaster']
+ *   });
+ * });
+ */
+class EventCollector {
+  constructor(client, eventName, options) {
+    this._client = client;
+    this._eventName = eventName;
+
+    this._events = [];
+    this._listener = e => this._events.push(e);
+    this._client.on(this._eventName, this._listener);
+
+    options = options || {};
+    const include = this._buildSet(options.include);
+    if (include.size > 0) {
+      this._include = include;
+    }
+    this._exclude = this._buildSet(options.exclude);
+  }
+
+  _buildSet(input) {
+    if (Array.isArray(input)) {
+      return new Set(input.map(x => x.toLowerCase()));
+    } else if (typeof input === 'string') {
+      return new Set([input.toLowerCase()]);
+    }
+    return new Set();
+  }
+
+  get events() {
+    let events = this._events;
+    if (this._include) {
+      events = events.filter(e => this._include.has(e.commandName.toLowerCase()));
+    }
+    return events.filter(e => !this._exclude.has(e.commandName.toLowerCase()));
+  }
+
+  clear() {
+    this._events = [];
+  }
+
+  teardown() {
+    this._client.off(this._eventName, this._listener);
+  }
+}
+
 module.exports = {
   connectToDb,
   setupDatabase,
   assert,
   delay,
   withClient,
-  filterForCommands
+  filterForCommands,
+  filterOutCommands,
+  ignoreNsNotFound,
+  dropCollection,
+  EventCollector
 };
