@@ -3,28 +3,14 @@
 const instrument = require('../..').instrument;
 const path = require('path');
 const fs = require('fs');
-const setupDatabase = require('./shared').setupDatabase;
+const shared = require('./shared');
+const setupDatabase = shared.setupDatabase;
+const filterForCommands = shared.filterForCommands;
+const filterOutCommands = shared.filterOutCommands;
+const ignoreNsNotFound = shared.ignoreNsNotFound;
 const EJSON = require('mongodb-extjson');
 const chai = require('chai');
 const expect = chai.expect;
-
-function filterForCommands(commands, bag) {
-  commands = Array.isArray(commands) ? commands : [commands];
-  return function(event) {
-    if (commands.indexOf(event.commandName) !== -1) bag.push(event);
-  };
-}
-
-function filterOutCommands(commands, bag) {
-  commands = Array.isArray(commands) ? commands : [commands];
-  return function(event) {
-    if (commands.indexOf(event.commandName) === -1) bag.push(event);
-  };
-}
-
-function ignoreNsNotFound(err) {
-  if (!err.message.match(/ns not found/)) throw err;
-}
 
 describe('APM', function() {
   before(function() {

@@ -1,6 +1,5 @@
 'use strict';
 
-const mongodb = require('../../index');
 const chai = require('chai');
 const expect = chai.expect;
 chai.use(require('chai-subset'));
@@ -21,11 +20,15 @@ describe('Client Side Encryption Prose Tests', function() {
   const keyVaultDbName = 'admin';
   const keyVaultCollName = 'datakeys';
   const keyVaultNamespace = `${keyVaultDbName}.${keyVaultCollName}`;
+
+  const shared = require('./shared');
+  const dropCollection = shared.dropCollection;
+  const EventCollector = shared.EventCollector;
+
   const localKey = Buffer.from(
     'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk',
     'base64'
   );
-  const noop = () => {};
 
   describe('Data key and double encryption', function() {
     // Data key and double encryption
@@ -40,11 +43,8 @@ describe('Client Side Encryption Prose Tests', function() {
         { useNewUrlParser: true, useUnifiedTopology: true, monitorCommands: true }
       );
 
-      this.commandStartedEvents = [];
-      this.client.on('commandStarted', e => {
-        if (!e.ismaster) {
-          this.commandStartedEvents.push(e);
-        }
+      this.commandStartedEvents = new EventCollector(this.client, 'commandStarted', {
+        exclude: ['ismaster']
       });
 
       const schemaMap = {
@@ -66,10 +66,8 @@ describe('Client Side Encryption Prose Tests', function() {
         Promise.resolve()
           .then(() => this.client.connect())
           // #. Using ``client``, drop the collections ``admin.datakeys`` and ``db.coll``.
-          .then(() => this.client.db(dataDbName).dropCollection(dataCollName))
-          .catch(noop)
-          .then(() => this.client.db(keyVaultDbName).dropCollection(keyVaultCollName))
-          .catch(noop)
+          .then(() => dropCollection(this.client.db(dataDbName), dataCollName))
+          .then(() => dropCollection(this.client.db(keyVaultDbName), keyVaultCollName))
           // #. Create the following:
           //   - A MongoClient configured with auto encryption (referred to as ``client_encrypted``)
           //   - A ``ClientEncryption`` object (referred to as ``client_encryption``)
@@ -122,7 +120,10 @@ describe('Client Side Encryption Prose Tests', function() {
     });
 
     afterEach(function() {
-      this.commandStartedEvents = [];
+      if (this.commandStartedEvents) {
+        this.commandStartedEvents.teardown();
+        this.commandStartedEvents = undefined;
+      }
       return Promise.resolve()
         .then(() => this.clientEncrypted && this.clientEncrypted.close())
         .then(() => this.client && this.client.close());
@@ -138,7 +139,7 @@ describe('Client Side Encryption Prose Tests', function() {
           // - Use ``client`` to run a ``find`` on ``admin.datakeys`` by querying with the ``_id`` set to the ``local_datakey_id``.
           // - Expect that exactly one document is returned with the "masterKey.provider" equal to "local".
           // - Check that ``client`` captured a command_started event for the ``insert`` command containing a majority writeConcern.
-          this.commandStartedEvents = [];
+          this.commandStartedEvents.clear();
           return this.clientEncryption
             .createDataKey('local', { keyAltNames: ['local_altname'] })
             .then(result => {
@@ -156,7 +157,7 @@ describe('Client Side Encryption Prose Tests', function() {
               expect(results)
                 .to.have.a.lengthOf(1)
                 .and.to.have.nested.property('0.masterKey.provider', 'local');
-              expect(this.commandStartedEvents).to.containSubset([
+              expect(this.commandStartedEvents.events).to.containSubset([
                 { commandName: 'insert', command: { writeConcern: { w: 'majority' } } }
               ]);
             });
@@ -212,7 +213,7 @@ describe('Client Side Encryption Prose Tests', function() {
           //    - Use ``client`` to run a ``find`` on ``admin.datakeys`` by querying with the ``_id`` set to the ``aws_datakey_id``.
           //    - Expect that exactly one document is returned with the "masterKey.provider" equal to "aws".
           //    - Check that ``client`` captured a command_started event for the ``insert`` command containing a majority writeConcern.
-          this.commandStartedEvents = [];
+          this.commandStartedEvents.clear();
           const masterKey = {
             region: 'us-east-1',
             key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0'
@@ -234,7 +235,7 @@ describe('Client Side Encryption Prose Tests', function() {
               expect(results)
                 .to.have.a.lengthOf(1)
                 .and.to.have.nested.property('0.masterKey.provider', 'aws');
-              expect(this.commandStartedEvents).to.containSubset([
+              expect(this.commandStartedEvents.events).to.containSubset([
                 { commandName: 'insert', command: { writeConcern: { w: 'majority' } } }
               ]);
             });
@@ -470,30 +471,18 @@ describe('Client Side Encryption Prose Tests', function() {
         { useNewUrlParser: true, useUnifiedTopology: true }
       );
 
-      this.events = new Set();
-
       return (
         this.client
           .connect()
           // #. Using ``client``, drop and create the collection ``db.coll`` configured with the included JSON schema `limits/limits-schema.json <../limits/limits-schema.json>`_.
-          .then(() => {
-            return this.client
-              .db(dataDbName)
-              .dropCollection(dataCollName)
-              .catch(noop);
-          })
+          .then(() => dropCollection(this.client.db(dataDbName), dataCollName))
           .then(() => {
             return this.client.db(dataDbName).createCollection(dataCollName, {
               validator: { $jsonSchema: limitsSchema }
             });
           })
           // #. Using ``client``, drop the collection ``admin.datakeys``. Insert the document `limits/limits-key.json <../limits/limits-key.json>`_
-          .then(() => {
-            return this.client
-              .db(keyVaultDbName)
-              .dropCollection(keyVaultCollName)
-              .catch(noop);
-          })
+          .then(() => dropCollection(this.client.db(keyVaultDbName), keyVaultCollName))
           .then(() => {
             return this.client
               .db(keyVaultDbName)
@@ -523,18 +512,18 @@ describe('Client Side Encryption Prose Tests', function() {
       );
       return this.clientEncrypted.connect().then(() => {
         this.encryptedColl = this.clientEncrypted.db(dataDbName).collection(dataCollName);
-        this.events.clear();
-        this.clientEncrypted.on('commandStarted', e => {
-          if (e.commandName === 'insert') {
-            this.events.add(e);
-          }
+        this.commandStartedEvents = new EventCollector(this.clientEncrypted, 'commandStarted', {
+          include: ['insert']
         });
       });
     });
 
     afterEach(function() {
+      if (this.commandStartedEvents) {
+        this.commandStartedEvents.teardown();
+        this.commandStartedEvents = undefined;
+      }
       if (this.clientEncrypted) {
-        this.clientEncrypted.removeAllListeners('commandStarted');
         return this.clientEncrypted.close();
       }
     });
@@ -632,7 +621,7 @@ describe('Client Side Encryption Prose Tests', function() {
               throw new Error('Expected this insert to fail, but it succeeded');
             }
             const expectedEvents = Array.from(testCase.expectedEvents);
-            const actualEvents = pruneEvents(this.events);
+            const actualEvents = pruneEvents(this.commandStartedEvents.events);
 
             expect(actualEvents)
               .to.have.a.lengthOf(expectedEvents.length)
@@ -648,7 +637,7 @@ describe('Client Side Encryption Prose Tests', function() {
     });
 
     function pruneEvents(events) {
-      return Array.from(events).map(event => {
+      return events.map(event => {
         // We are pruning out the bunch of repeating As, mostly
         // b/c an error failure will try to print 2mb of 'a's
         // and not have a good time.
@@ -677,12 +666,7 @@ describe('Client Side Encryption Prose Tests', function() {
 
       return this.client
         .connect()
-        .then(() => {
-          return this.client
-            .db(dataDbName)
-            .dropCollection(dataCollName)
-            .catch(noop);
-        })
+        .then(() => dropCollection(this.client.db(dataDbName), dataCollName))
         .then(() => {
           return this.client.db(dataDbName).createCollection(dataCollName);
         })
@@ -718,7 +702,7 @@ describe('Client Side Encryption Prose Tests', function() {
     });
 
     it('should error when inserting into a view with autoEncryption', metadata, function() {
-      this.clientEncrypted
+      return this.clientEncrypted
         .db(dataDbName)
         .collection('view')
         .insertOne({ a: 1 })
@@ -764,18 +748,8 @@ describe('Client Side Encryption Prose Tests', function() {
           .connect()
           // #. Using ``client``, drop the collections ``admin.datakeys`` and ``db.coll``.
           //    Insert the document `external/external-key.json <../external/external-key.json>`_ into ``admin.datakeys``.
-          .then(() => {
-            return this.client
-              .db(dataDbName)
-              .dropCollection(dataCollName)
-              .catch(noop);
-          })
-          .then(() => {
-            return this.client
-              .db(keyVaultDbName)
-              .dropCollection(keyVaultCollName)
-              .catch(noop);
-          })
+          .then(() => dropCollection(this.client.db(dataDbName), dataCollName))
+          .then(() => dropCollection(this.client.db(keyVaultDbName), keyVaultCollName))
           .then(() => {
             return this.client
               .db(keyVaultDbName)
@@ -786,6 +760,10 @@ describe('Client Side Encryption Prose Tests', function() {
     });
 
     afterEach(function() {
+      if (this.commandStartedEvents) {
+        this.commandStartedEvents.teardown();
+        this.commandStartedEvents = undefined;
+      }
       return Promise.resolve()
         .then(() => this.externalClient && this.externalClient.close())
         .then(() => this.clientEncrypted && this.clientEncrypted.close())
@@ -810,13 +788,13 @@ describe('Client Side Encryption Prose Tests', function() {
                   { useNewUrlParser: true, useUnifiedTopology: true, monitorCommands: true }
                 );
 
-                this.events = new Set();
-                this.externalClient.on('commandStarted', e => {
-                  if (e.commandName === 'find') {
-                    this.events.add(e);
+                this.commandStartedEvents = new EventCollector(
+                  this.externalClient,
+                  'commandStarted',
+                  {
+                    include: ['find']
                   }
-                });
-                this.externalClient.isSpecial = `you're goddamn right ur special`;
+                );
                 return this.externalClient.connect();
               })
               // #. Create the following:
@@ -858,14 +836,14 @@ describe('Client Side Encryption Prose Tests', function() {
               .then(() => {
                 // #. Use ``client_encrypted`` to insert the document ``{"encrypted": "test"}`` into ``db.coll``.
                 //    If ``withExternalKeyVault == true``, expect an authentication exception to be thrown. Otherwise, expect the insert to succeed.
-                this.events.clear();
+                this.commandStartedEvents.clear();
                 return this.clientEncrypted
                   .db(dataDbName)
                   .collection(dataCollName)
                   .insertOne({ encrypted: 'test' })
                   .then(() => {
                     if (withExternalKeyVault) {
-                      expect(Array.from(this.events)).to.containSubset([
+                      expect(this.commandStartedEvents.events).to.containSubset([
                         {
                           commandName: 'find',
                           databaseName: keyVaultDbName,
@@ -873,7 +851,7 @@ describe('Client Side Encryption Prose Tests', function() {
                         }
                       ]);
                     } else {
-                      expect(Array.from(this.events)).to.not.containSubset([
+                      expect(this.commandStartedEvents.events).to.not.containSubset([
                         {
                           commandName: 'find',
                           databaseName: keyVaultDbName,
@@ -902,7 +880,7 @@ describe('Client Side Encryption Prose Tests', function() {
               .then(() => {
                 // #. Use ``client_encryption`` to explicitly encrypt the string ``"test"`` with key ID ``LOCALAAAAAAAAAAAAAAAAA==`` and deterministic algorithm.
                 //    If ``withExternalKeyVault == true``, expect an authentication exception to be thrown. Otherwise, expect the insert to succeed.
-                this.events.clear();
+                this.commandStartedEvents.clear();
                 return this.clientEncryption
                   .encrypt('test', {
                     keyId: externalKey._id,
@@ -910,7 +888,7 @@ describe('Client Side Encryption Prose Tests', function() {
                   })
                   .then(() => {
                     if (withExternalKeyVault) {
-                      expect(Array.from(this.events)).to.containSubset([
+                      expect(this.commandStartedEvents.events).to.containSubset([
                         {
                           commandName: 'find',
                           databaseName: keyVaultDbName,
@@ -918,7 +896,7 @@ describe('Client Side Encryption Prose Tests', function() {
                         }
                       ]);
                     } else {
-                      expect(Array.from(this.events)).to.not.containSubset([
+                      expect(this.commandStartedEvents.events).to.not.containSubset([
                         {
                           commandName: 'find',
                           databaseName: keyVaultDbName,
