@@ -13,15 +13,6 @@ function bufferToStream(buffer) {
   return stream;
 }
 
-function streamToBuffer(stream) {
-  return new Promise((resolve, reject) => {
-    let buffers = [];
-    stream.on('error', reject);
-    stream.on('data', data => buffers.push(data));
-    stream.on('end', () => resolve(Buffer.concat(buffers)));
-  });
-}
-
 describe('Message Stream', function() {
   describe('reading', function() {
     [
@@ -112,7 +103,7 @@ describe('Message Stream', function() {
       messageStream.pipe(writeableStream);
 
       const command = new Msg(bson, 'admin.$cmd', { ismaster: 1 }, {});
-      messageStream.writeMessage(command, null, err => {
+      messageStream.writeCommand(command, null, err => {
         done(err);
       });
     });
