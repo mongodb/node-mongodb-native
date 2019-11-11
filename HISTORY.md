@@ -2,6 +2,38 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="3.3.4"></a>
+## [3.3.4](https://github.com/mongodb/node-mongodb-native/compare/v3.3.3...v3.3.4) (2019-11-11)
+
+
+### Bug Fixes
+
+* **close:** the unified topology emits a close event on close now ([ee0db01](https://github.com/mongodb/node-mongodb-native/commit/ee0db01))
+* **connect:** prevent multiple callbacks in error scenarios ([5f6a787](https://github.com/mongodb/node-mongodb-native/commit/5f6a787))
+* **monitoring:** incorrect states used to determine rescheduling ([ec1e04c](https://github.com/mongodb/node-mongodb-native/commit/ec1e04c))
+* **pool:** don't reset a pool if we'not already connected ([32316e4](https://github.com/mongodb/node-mongodb-native/commit/32316e4))
+* **pool:** only transition to `DISCONNECTED` if reconnect enabled ([43d461e](https://github.com/mongodb/node-mongodb-native/commit/43d461e))
+* **replset:** don't leak servers failing to connect ([f209160](https://github.com/mongodb/node-mongodb-native/commit/f209160))
+* **replset:** use correct `topologyId` for event emission ([19549ff](https://github.com/mongodb/node-mongodb-native/commit/19549ff))
+* **sdam:** `minHeartbeatIntervalMS` => `minHeartbeatFrequencyMS` ([af9fb45](https://github.com/mongodb/node-mongodb-native/commit/af9fb45))
+* **sdam:** don't emit `close` every time a child server closes ([818055a](https://github.com/mongodb/node-mongodb-native/commit/818055a))
+* **sdam:** don't lose servers when they fail monitoring ([8a534bb](https://github.com/mongodb/node-mongodb-native/commit/8a534bb))
+* **sdam:** don't remove unknown servers in topology updates ([1147ebf](https://github.com/mongodb/node-mongodb-native/commit/1147ebf))
+* **sdam:** ignore server errors when closing/closed ([49d7235](https://github.com/mongodb/node-mongodb-native/commit/49d7235))
+* **server:** don't emit error in connect if closing/closed ([62ada2a](https://github.com/mongodb/node-mongodb-native/commit/62ada2a))
+* **server:** ensure state is transitioned to closed on connect fail ([a471707](https://github.com/mongodb/node-mongodb-native/commit/a471707))
+* **topology:** report unified topology as `nodejs` ([d126665](https://github.com/mongodb/node-mongodb-native/commit/d126665))
+* **topology:** set max listeners to infinity for db event relay ([edb1335](https://github.com/mongodb/node-mongodb-native/commit/edb1335))
+
+
+### Features
+
+* **sdam_viz:** add new tool for visualizing driver sdam changes ([738189a](https://github.com/mongodb/node-mongodb-native/commit/738189a))
+* **sdam_viz:** support legacy topologies in sdam_viz tool ([1a5537e](https://github.com/mongodb/node-mongodb-native/commit/1a5537e))
+* **update-hints:** add support for `hint` to all update methods ([720f5e5](https://github.com/mongodb/node-mongodb-native/commit/720f5e5))
+
+
+
 <a name="3.3.3"></a>
 ## [3.3.3](https://github.com/mongodb/node-mongodb-native/compare/v3.3.2...v3.3.3) (2019-10-16)
 
