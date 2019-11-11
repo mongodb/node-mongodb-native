@@ -3,6 +3,7 @@
 const BSON = require('bson');
 const mock = require('mongodb-mock-server');
 const expect = require('chai').expect;
+const EventEmitter = require('events');
 
 const connect = require('../../../lib/core/connection/connect');
 const MongoCredentials = require('../../../lib/core/auth/mongo_credentials').MongoCredentials;
@@ -96,6 +97,63 @@ describe('Connect Tests', function() {
     connect({ host: 'non-existent', port: 27018 }, err => {
       expect(err).to.be.instanceOf(MongoNetworkError);
       done();
+    });
+  });
+
+  describe('runCommand', function() {
+    class MockConnection extends EventEmitter {
+      constructor(conn) {
+        super();
+        this.options = { bson: new BSON() };
+        this.conn = conn;
+      }
+
+      get address() {
+        return 'mocked';
+      }
+
+      setSocketTimeout() {}
+      resetSocketTimeout() {}
+      destroy() {
+        this.conn.destroy();
+      }
+    }
+
+    it('should treat non-Error generating error-like events as errors', function(done) {
+      class ConnectionFailingWithClose extends MockConnection {
+        write() {
+          this.emit('close');
+        }
+      }
+
+      connect(
+        { host: '127.0.0.1', port: 27017, connectionType: ConnectionFailingWithClose },
+        (err, conn) => {
+          expect(err).to.exist;
+          expect(err.message).to.match(/runCommand failed/);
+          expect(conn).to.not.exist;
+          done();
+        }
+      );
+    });
+
+    it('should not crash the application if multiple error-like events are emitted on `runCommand`', function(done) {
+      class ConnectionFailingWithAllEvents extends MockConnection {
+        write() {
+          this.emit('close');
+          this.emit('timeout');
+          this.emit('error');
+        }
+      }
+
+      connect(
+        { host: '127.0.0.1', port: 27017, connectionType: ConnectionFailingWithAllEvents },
+        (err, conn) => {
+          expect(err).to.exist;
+          expect(conn).to.not.exist;
+          done();
+        }
+      );
     });
   });
 });
