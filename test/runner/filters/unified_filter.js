@@ -17,7 +17,7 @@ class UnifiedTopologyFilter {
 
     return (
       typeof unifiedTopology !== 'boolean' ||
-      unifiedTopology === process.env.MONGODB_UNIFIED_TOPOLOGY
+      unifiedTopology === !!process.env.MONGODB_UNIFIED_TOPOLOGY
     );
   }
 }
