@@ -1615,4 +1615,49 @@ describe('Bulk', function() {
       })
       .then(() => client.close());
   });
+
+  it('should preserve order of operation index in unordered bulkWrite', function() {
+    const client = this.configuration.newClient();
+    return client.connect().then(() => {
+      this.defer(() => client.close());
+
+      const coll = client.db().collection('bulk_write_ordering_test');
+      function ignoreNsNotFound(err) {
+        if (!err.message.match(/ns not found/)) throw err;
+      }
+
+      return coll
+        .drop()
+        .catch(ignoreNsNotFound)
+        .then(() => coll.insert(Array.from({ length: 4 }, (_, i) => ({ _id: i, a: i }))))
+        .then(() =>
+          coll
+            .createIndex({ a: 1 }, { unique: true })
+            .then(() =>
+              coll.bulkWrite(
+                [
+                  { insertOne: { _id: 5, a: 0 } },
+                  { updateOne: { filter: { _id: 1 }, update: { $set: { a: 0 } } } },
+                  { insertOne: { _id: 6, a: 0 } },
+                  { updateOne: { filter: { _id: 2 }, update: { $set: { a: 0 } } } }
+                ],
+                { ordered: false }
+              )
+            )
+        )
+        .then(
+          () => {
+            throw new Error('expected a bulk error');
+          },
+          err => {
+            expect(err)
+              .to.have.property('writeErrors')
+              .with.length(2);
+
+            expect(err).to.have.nested.property('writeErrors[0].err.index', 0);
+            expect(err).to.have.nested.property('writeErrors[1].err.index', 2);
+          }
+        );
+    });
+  });
 });
