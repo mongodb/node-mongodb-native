@@ -11,6 +11,10 @@ const connect = require('./lib/mongo_client').connect;
 connect.MongoError = core.MongoError;
 connect.MongoNetworkError = core.MongoNetworkError;
 connect.MongoTimeoutError = core.MongoTimeoutError;
+connect.MongoParseError = core.MongoParseError;
+connect.MongoWriteConcernError = core.MongoWriteConcernError;
+connect.MongoBulkWriteError = require('./lib/bulk/common').BulkWriteError;
+connect.BulkWriteError = connect.MongoBulkWriteError;
 
 // Actual driver classes exported
 connect.Admin = require('./lib/admin');
