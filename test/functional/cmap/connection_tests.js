@@ -14,13 +14,13 @@ describe('Connection', function() {
 
     connect(connectOptions, (err, conn) => {
       expect(err).to.not.exist;
+      this.defer(_done => conn.destroy(_done));
 
       conn.command('admin.$cmd', { ismaster: 1 }, (err, ismaster) => {
         expect(err).to.not.exist;
         expect(ismaster).to.exist;
         expect(ismaster.ok).to.equal(1);
-
-        conn.destroy(done);
+        done();
       });
     });
   });
@@ -33,6 +33,7 @@ describe('Connection', function() {
 
     connect(connectOptions, (err, conn) => {
       expect(err).to.not.exist;
+      this.defer(_done => conn.destroy(_done));
 
       const events = [];
       conn.on('commandStarted', event => events.push(event));
@@ -43,11 +44,8 @@ describe('Connection', function() {
         expect(err).to.not.exist;
         expect(ismaster).to.exist;
         expect(ismaster.ok).to.equal(1);
-
         expect(events).to.have.length(2);
-        console.dir({ events }, { depth: 3 });
-
-        conn.destroy(done);
+        done();
       });
     });
   });
