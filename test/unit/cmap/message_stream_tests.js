@@ -58,8 +58,9 @@ describe('Message Stream', function() {
           msg.parse();
 
           if (test.documents) {
-            expect(msg).to.have.property('documents');
-            expect(msg.documents).to.eql(test.documents);
+            expect(msg)
+              .to.have.property('documents')
+              .that.deep.equals(test.documents);
           }
 
           done();
@@ -71,7 +72,10 @@ describe('Message Stream', function() {
             return;
           }
 
-          expect(err.message).to.equal(error);
+          expect(err)
+            .to.have.property('message')
+            .that.equals(error);
+
           done();
         });
 
