@@ -487,7 +487,7 @@ describe('Client Side Encryption Prose Tests', function() {
             return this.client
               .db(keyVaultDbName)
               .collection(keyVaultCollName)
-              .insertOne(limitsKey);
+              .insertOne(limitsKey, { w: 'majority' });
           })
       );
     });
@@ -754,7 +754,7 @@ describe('Client Side Encryption Prose Tests', function() {
             return this.client
               .db(keyVaultDbName)
               .collection(keyVaultCollName)
-              .insertOne(externalKey);
+              .insertOne(externalKey, { w: 'majority' });
           })
       );
     });
