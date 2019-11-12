@@ -95,5 +95,6 @@ before(function(_done) {
 after(() => mock.cleanup());
 
 // optionally enable test runner-wide plugins
+require('./plugins/deferred');
 require('./plugins/session_leak_checker');
 require('./plugins/client_leak_checker');
