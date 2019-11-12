@@ -7,6 +7,7 @@ const sessions = core.Sessions;
 const TestRunnerContext = require('./spec-runner').TestRunnerContext;
 const gatherTestSuites = require('./spec-runner').gatherTestSuites;
 const generateTopologyTests = require('./spec-runner').generateTopologyTests;
+const MongoNetworkError = require('../../lib/core').MongoNetworkError;
 
 describe('Transactions', function() {
   const testContext = new TestRunnerContext();
@@ -119,6 +120,78 @@ describe('Transactions', function() {
               client.close(done);
             });
           });
+        });
+      }
+    });
+  });
+
+  describe('TransientTransactionError', function() {
+    it('should have a TransientTransactionError label inside of a transaction', {
+      metadata: { requires: { topology: 'replicaset', mongodb: '>=4.0.0' } },
+      test: function(done) {
+        const configuration = this.configuration;
+        const client = configuration.newClient({ w: 1 }, { useUnifiedTopology: true });
+
+        client.connect((err, client) => {
+          const session = client.startSession();
+          const db = client.db(configuration.db);
+          db.createCollection('transaction_error_test', (err, coll) => {
+            expect(err).to.not.exist;
+            session.startTransaction();
+            coll.insertOne({ a: 1 }, { session }, err => {
+              expect(err).to.not.exist;
+              expect(session.inTransaction()).to.be.true;
+
+              db.executeDbAdminCommand(
+                {
+                  configureFailPoint: 'failCommand',
+                  mode: { times: 1 },
+                  data: { failCommands: ['insert'], closeConnection: true }
+                },
+                () => {
+                  expect(session.inTransaction()).to.be.true;
+                  coll.insertOne({ b: 2 }, { session }, err => {
+                    expect(err)
+                      .to.exist.and.to.be.an.instanceof(MongoNetworkError)
+                      .and.to.have.a.property('errorLabels')
+                      .that.includes('TransientTransactionError');
+                    session.endSession(() => client.close(done));
+                  });
+                }
+              );
+            });
+          });
+        });
+      }
+    });
+
+    it('should not have a TransientTransactionError label outside of a transaction', {
+      metadata: { requires: { topology: 'replicaset', mongodb: '>=4.0.0' } },
+      test: function(done) {
+        const configuration = this.configuration;
+        const client = configuration.newClient({ w: 1 }, { useUnifiedTopology: true });
+
+        client.connect((err, client) => {
+          const db = client.db(configuration.db);
+          const coll = db.collection('transaction_error_test1');
+
+          db.executeDbAdminCommand(
+            {
+              configureFailPoint: 'failCommand',
+              mode: 'alwaysOn',
+              data: { failCommands: ['insert'], closeConnection: true }
+            },
+            () => {
+              coll.insertOne({ a: 1 }, err => {
+                expect(err)
+                  .to.exist.and.to.be.an.instanceOf(MongoNetworkError)
+                  .and.to.not.have.a.property('errorLabels');
+                db.executeDbAdminCommand({ configureFailPoint: 'failCommand', mode: 'off' }, () => {
+                  client.close(done);
+                });
+              });
+            }
+          );
         });
       }
     });
