@@ -106,7 +106,7 @@ describe('Message Stream', function() {
       const messageStream = new MessageStream({ bson });
       messageStream.pipe(writeableStream);
 
-      const command = new Msg(bson, 'admin.$cmd', { ismaster: 1 }, {});
+      const command = new Msg(bson, 'admin.$cmd', { ismaster: 1 }, { requestId: 3 });
       messageStream.writeCommand(command, null, err => {
         done(err);
       });
