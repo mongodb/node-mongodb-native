@@ -22,7 +22,7 @@ const kDeferred = Symbol('deferred');
           }
 
           // otherwise assume a Promise is returned
-          action();
+          return action();
         })
       ).then(() => {
         test[kDeferred].clear();
