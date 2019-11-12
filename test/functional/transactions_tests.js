@@ -7,6 +7,7 @@ const sessions = core.Sessions;
 const TestRunnerContext = require('./spec-runner').TestRunnerContext;
 const gatherTestSuites = require('./spec-runner').gatherTestSuites;
 const generateTopologyTests = require('./spec-runner').generateTopologyTests;
+const MongoNetworkError = require('../../lib/core').MongoNetworkError;
 
 describe('Transactions', function() {
   const testContext = new TestRunnerContext();
@@ -144,22 +145,17 @@ describe('Transactions', function() {
               db.executeDbAdminCommand(
                 {
                   configureFailPoint: 'failCommand',
-                  mode: { times: 2 },
-                  data: { failCommands: ['commitTransaction'], closeConnection: true }
+                  mode: { times: 1 },
+                  data: { failCommands: ['insert'], closeConnection: true }
                 },
                 () => {
                   expect(session.inTransaction()).to.be.true;
-                  session.commitTransaction(err => {
-                    expect(err).to.exist;
-                    expect(err.errorLabels).to.deep.equal(['UnknownTransactionCommitResult']);
-                    db.executeDbAdminCommand(
-                      { configureFailPoint: 'failCommand', mode: 'off' },
-                      () => {
-                        session.endSession(() => {
-                          client.close(done);
-                        });
-                      }
-                    );
+                  coll.insertOne({ b: 2 }, { session }, err => {
+                    expect(err)
+                      .to.exist.and.to.be.an.instanceof(MongoNetworkError)
+                      .and.to.have.a.property('errorLabels')
+                      .that.includes('TransientTransactionError');
+                    session.endSession(() => client.close(done));
                   });
                 }
               );
@@ -187,8 +183,9 @@ describe('Transactions', function() {
             },
             () => {
               coll.insertOne({ a: 1 }, err => {
-                expect(err).to.exist;
-                expect(err.errorLabels).to.not.exist;
+                expect(err)
+                  .to.exist.and.to.be.an.instanceOf(MongoNetworkError)
+                  .and.to.not.have.a.property('errorLabels');
                 db.executeDbAdminCommand({ configureFailPoint: 'failCommand', mode: 'off' }, () => {
                   client.close(done);
                 });
