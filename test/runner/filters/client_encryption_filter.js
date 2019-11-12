@@ -25,8 +25,7 @@ class ClientSideEncryptionFilter {
 
     this.enabled = !!(AWS_ACCESS_KEY_ID && AWS_SECRET_ACCESS_KEY && mongodbClientEncryption);
 
-    // TODO: shove these fields on to the context so they can be reused.
-
+    // Adds these fields onto the context so that they can be reused by tests
     context.clientSideEncryption = {
       enabled: this.enabled,
       mongodbClientEncryption,

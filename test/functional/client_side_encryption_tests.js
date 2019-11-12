@@ -23,6 +23,8 @@ describe('Client Side Encryption', function() {
   });
 
   generateTopologyTests(testSuites, testContext, spec => {
+    // Note: we are skipping regex tests b/c we currently deserialize straight to native
+    // regex representation instead of to BSONRegExp.
     return !spec.description.match(/type=regex/);
   });
 });
