@@ -19,7 +19,7 @@ describe('Client Side Encryption Functional', function() {
 
   let mongodbClientEncryption;
   try {
-    mongodbClientEncryption = require('mongodb-client-encryption')(require('../../index'));
+    mongodbClientEncryption = require('mongodb-client-encryption')(require('../../../index'));
   } catch (e) {
     console.log(
       'skipping Client Side Encryption Functional tests due to inability to load mongodb-client-encryption'
@@ -131,7 +131,6 @@ describe('Client Side Encryption Functional', function() {
     ];
 
     testCases.forEach(bsonOptions => {
-
       const name = `should respect bson options ${JSON.stringify(bsonOptions)}`;
 
       it(name, function() {
