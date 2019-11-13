@@ -21,7 +21,7 @@ describe('Client Side Encryption Prose Tests', function() {
   const keyVaultCollName = 'datakeys';
   const keyVaultNamespace = `${keyVaultDbName}.${keyVaultCollName}`;
 
-  const shared = require('./shared');
+  const shared = require('../shared');
   const dropCollection = shared.dropCollection;
   const EventCollector = shared.EventCollector;
 
@@ -454,7 +454,9 @@ describe('Client Side Encryption Prose Tests', function() {
     const EJSON = require('mongodb-extjson');
     function loadLimits(file) {
       return EJSON.parse(
-        fs.readFileSync(path.resolve(__dirname, 'spec', 'client-side-encryption', 'limits', file))
+        fs.readFileSync(
+          path.resolve(__dirname, '..', 'spec', 'client-side-encryption', 'limits', file)
+        )
       );
     }
 
@@ -729,7 +731,9 @@ describe('Client Side Encryption Prose Tests', function() {
     const EJSON = require('mongodb-extjson');
     function loadExternal(file) {
       return EJSON.parse(
-        fs.readFileSync(path.resolve(__dirname, 'spec', 'client-side-encryption', 'external', file))
+        fs.readFileSync(
+          path.resolve(__dirname, '..', 'spec', 'client-side-encryption', 'external', file)
+        )
       );
     }
 
