@@ -35,7 +35,7 @@ describe('Client Side Encryption Corpus', function() {
 
   // TODO: build this into EJSON
   // TODO: make a custom chai assertion for this
-  function toJSONComp(value) {
+  function toComparableExtendedJSON(value) {
     return JSON.parse(EJSON.stringify({ value }, { strict: true }));
   }
 
@@ -100,8 +100,8 @@ describe('Client Side Encryption Corpus', function() {
 
     const expectedValue = expected.value;
     const actualValue = actual.value;
-    const expectedJSON = toJSONComp(expectedValue);
-    const actualJSON = toJSONComp(actualValue);
+    const expectedJSON = toComparableExtendedJSON(expectedValue);
+    const actualJSON = toComparableExtendedJSON(actualValue);
 
     switch (expected.algo) {
       case 'det': {
@@ -127,8 +127,8 @@ describe('Client Side Encryption Corpus', function() {
         const decryptedExpectedValue = results[0];
         const decryptedActualValue = results[1];
 
-        const decryptedExpectedJSON = toJSONComp(decryptedExpectedValue);
-        const decryptedActualJSON = toJSONComp(decryptedActualValue);
+        const decryptedExpectedJSON = toComparableExtendedJSON(decryptedExpectedValue);
+        const decryptedActualJSON = toComparableExtendedJSON(decryptedActualValue);
 
         expect(decryptedActualJSON).to.deep.equal(decryptedExpectedJSON);
       });
@@ -161,7 +161,7 @@ describe('Client Side Encryption Corpus', function() {
 
   after(function() {
     if (client) {
-      return client.close(true);
+      return client.close();
     }
   });
 
@@ -175,11 +175,11 @@ describe('Client Side Encryption Corpus', function() {
           return Promise.resolve()
             .then(() => dataDb.dropCollection(dataCollName))
             .catch(() => {})
-            .then(() => {
-              return dataDb.createCollection(dataCollName, {
+            .then(() =>
+              dataDb.createCollection(dataCollName, {
                 validator: { $jsonSchema: corpusSchema }
-              });
-            });
+              })
+            );
         })
         .then(() => {
           // 4. Create the following:
@@ -222,7 +222,7 @@ describe('Client Side Encryption Corpus', function() {
         });
     });
 
-    afterEach(() => clientEncrypted.close(true));
+    afterEach(() => clientEncrypted.close());
 
     function forEachP(list, fn) {
       return list.reduce((p, item) => {
@@ -288,7 +288,9 @@ describe('Client Side Encryption Corpus', function() {
                     if (field.allowed === true) {
                       corpusCopied[key] = Object.assign({}, field, { value: encryptedValue });
                     } else {
-                      throw new Error('This should have errored');
+                      throw new Error(
+                        `Expected encryption to fail for case ${key} on value ${field.value}`
+                      );
                     }
                   },
                   e => {
@@ -320,7 +322,9 @@ describe('Client Side Encryption Corpus', function() {
             .findOne({ _id: corpusCopied._id }, { promoteLongs: false, promoteValues: false });
         })
         .then(corpusDecrypted => {
-          expect(toJSONComp(corpusDecrypted)).to.deep.equal(toJSONComp(corpus));
+          expect(toComparableExtendedJSON(corpusDecrypted)).to.deep.equal(
+            toComparableExtendedJSON(corpus)
+          );
         })
         .then(() => {
           // 8. Load `corpus/corpus_encrypted.json <../corpus/corpus-encrypted.json>`_ to a variable named ``corpus_encrypted_expected``.
