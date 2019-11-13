@@ -103,9 +103,7 @@ describe('Client Side Encryption Functional', function() {
     afterEach(function() {
       return Promise.resolve()
         .then(() => this.encryptedClient && this.encryptedClient.close())
-        .catch(() => {})
-        .then(() => this.client.close())
-        .catch(() => {});
+        .then(() => this.client.close());
     });
 
     const testCases = [
