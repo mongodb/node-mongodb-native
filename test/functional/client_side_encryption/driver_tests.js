@@ -11,27 +11,18 @@ chai.config.truncateThreshold = 0;
 chai.use(require('chai-subset'));
 
 describe('Client Side Encryption Functional', function() {
-  // See if we can run these tests
-  if (process.env.AWS_ACCESS_KEY_ID == null || process.env.AWS_SECRET_ACCESS_KEY == null) {
-    console.log('skipping Client Side Encryption Corpus tests due to lack of AWS credentials');
-    return;
-  }
-
-  let mongodbClientEncryption;
-  try {
-    mongodbClientEncryption = require('mongodb-client-encryption')(require('../../../index'));
-  } catch (e) {
-    console.log(
-      'skipping Client Side Encryption Functional tests due to inability to load mongodb-client-encryption'
-    );
-    return;
-  }
-
   const dataDbName = 'db';
   const dataCollName = 'coll';
   const keyVaultDbName = 'admin';
   const keyVaultCollName = 'datakeys';
   const keyVaultNamespace = `${keyVaultDbName}.${keyVaultCollName}`;
+
+  const metadata = {
+    requires: {
+      mongodb: '>=4.2.0',
+      clientSideEncryption: true
+    }
+  };
 
   describe('BSON Options', function() {
     beforeEach(function() {
@@ -52,11 +43,8 @@ describe('Client Side Encryption Functional', function() {
       let dataDb;
       let keyVaultDb;
 
-      const kmsProviders = {
-        local: {
-          key: crypto.randomBytes(96)
-        }
-      };
+      const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
+      const kmsProviders = this.configuration.kmsProviders('local', crypto.randomBytes(96));
       return this.client
         .connect()
         .then(() => {
@@ -133,7 +121,7 @@ describe('Client Side Encryption Functional', function() {
     testCases.forEach(bsonOptions => {
       const name = `should respect bson options ${JSON.stringify(bsonOptions)}`;
 
-      it(name, function() {
+      it(name, metadata, function() {
         const data = {
           a: 12,
           b: new BSON.Int32(12),
