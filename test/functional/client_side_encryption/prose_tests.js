@@ -13,7 +13,7 @@ chai.use(require('chai-subset'));
 //   Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk
 
 describe('Client Side Encryption Prose Tests', function() {
-  const metadata = { requires: { clientSideEncryption: true } };
+  const metadata = { requires: { clientSideEncryption: true, mongodb: '>=4.2.0' } };
   const dataDbName = 'db';
   const dataCollName = 'coll';
   const dataNamespace = `${dataDbName}.${dataCollName}`;

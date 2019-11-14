@@ -5,13 +5,21 @@ const TestRunnerContext = require('../spec-runner').TestRunnerContext;
 const gatherTestSuites = require('../spec-runner').gatherTestSuites;
 const generateTopologyTests = require('../spec-runner').generateTopologyTests;
 
-const missingAwsConfiguration =
-  process.env.AWS_ACCESS_KEY_ID == null || process.env.AWS_SECRET_ACCESS_KEY == null;
-const skipTests = missingAwsConfiguration || process.env.MONGODB_CLIENT_ENCRYPTION == null;
-
 describe('Client Side Encryption', function() {
+  // TODO: Replace this with using the filter once the filter works on describe blocks
+  const skipTests =
+    process.env.AWS_ACCESS_KEY_ID == null || process.env.AWS_SECRET_ACCESS_KEY == null;
   if (skipTests) {
-    console.log('skipping Client Side Encryption tests due to lack of AWS credentials');
+    console.log('skipping Client Side Encryption Spec tests due to lack of AWS credentials');
+    return;
+  }
+
+  try {
+    require('mongodb-client-encryption')(require('../../../index'));
+  } catch (e) {
+    console.log(
+      'skipping Client Side Encryption Spec tests due to inability to load mongodb-client-encryption'
+    );
     return;
   }
 

@@ -12,23 +12,14 @@ chai.config.showDiff = true;
 chai.config.truncateThreshold = 0;
 
 describe('Client Side Encryption Corpus', function() {
-  // See if we can run these tests
-  if (process.env.AWS_ACCESS_KEY_ID == null || process.env.AWS_SECRET_ACCESS_KEY == null) {
-    console.log('skipping Client Side Encryption Corpus tests due to lack of AWS credentials');
-    return;
-  }
+  const metadata = {
+    requires: {
+      mongodb: '>=4.2.0',
+      clientSideEncryption: true
+    }
+  };
 
-  let mongodbClientEncryption;
-  try {
-    mongodbClientEncryption = require('mongodb-client-encryption')(require('../../index'));
-  } catch (e) {
-    console.log(
-      'skipping Client Side Encryption Corpus tests due to inability to load mongodb-client-encryption'
-    );
-    return;
-  }
-
-  const corpusDir = path.resolve(__dirname, 'spec', 'client-side-encryption', 'corpus');
+  const corpusDir = path.resolve(__dirname, '..', 'spec', 'client-side-encryption', 'corpus');
   function loadCorpusData(filename) {
     return EJSON.parse(fs.readFileSync(path.resolve(corpusDir, filename), { strict: true }));
   }
@@ -39,20 +30,10 @@ describe('Client Side Encryption Corpus', function() {
     return JSON.parse(EJSON.stringify({ value }, { strict: true }));
   }
 
-  function getCredentials() {
-    return {
-      local: {
-        key: Buffer.from(
-          'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk',
-          'base64'
-        )
-      },
-      aws: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
-      }
-    };
-  }
+  const localKey = Buffer.from(
+    'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk',
+    'base64'
+  );
 
   // Filters out tests that have to do with dbPointer
   // TODO: fix dbpointer and get rid of this.
@@ -168,6 +149,7 @@ describe('Client Side Encryption Corpus', function() {
   function defineCorpusTests(corpus, corpusEncryptedExpected, useClientSideSchema) {
     let clientEncrypted, clientEncryption;
     beforeEach(function() {
+      const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
       return Promise.resolve()
         .then(() => {
           // 2. Using ``client``, drop and create the collection ``db.coll`` configured with the included JSON schema `corpus/corpus-schema.json <../corpus/corpus-schema.json>`_.
@@ -197,7 +179,7 @@ describe('Client Side Encryption Corpus', function() {
           //    Configure both objects with ``keyVaultNamespace`` set to ``admin.datakeys``.
           const autoEncryption = {
             keyVaultNamespace,
-            kmsProviders: getCredentials()
+            kmsProviders: this.configuration.kmsProviders(null, localKey)
           };
           if (useClientSideSchema) {
             autoEncryption.schemaMap = {
@@ -216,7 +198,7 @@ describe('Client Side Encryption Corpus', function() {
           return clientEncrypted.connect().then(() => {
             clientEncryption = new mongodbClientEncryption.ClientEncryption(client, {
               keyVaultNamespace,
-              kmsProviders: getCredentials()
+              kmsProviders: this.configuration.kmsProviders(null, localKey)
             });
           });
         });
@@ -230,128 +212,132 @@ describe('Client Side Encryption Corpus', function() {
       }, Promise.resolve());
     }
 
-    it(`should pass corpus ${useClientSideSchema ? 'with' : 'without'} client schema`, function() {
-      const corpusCopied = {};
-      return Promise.resolve()
-        .then(() => {
-          // 5. Load `corpus/corpus.json <../corpus/corpus.json>`_ to a variable named ``corpus``. The corpus contains subdocuments with the following fields:
-          //
-          //    - ``kms`` is either ``aws`` or ``local``
-          //    - ``type`` is a BSON type string `names coming from here <https://docs.mongodb.com/manual/reference/operator/query/type/>`_)
-          //    - ``algo`` is either ``rand`` or ``det`` for random or deterministic encryption
-          //    - ``method`` is either ``auto``, for automatic encryption or ``explicit`` for  explicit encryption
-          //    - ``identifier`` is either ``id`` or ``altname`` for the key identifier
-          //    - ``allowed`` is a boolean indicating whether the encryption for the given parameters is permitted.
-          //    - ``value`` is the value to be tested.
-          //
-          //    Create a new BSON document, named ``corpus_copied``.
-          //
-          //    Iterate over each field of ``corpus``.
-          //    - If the field name is ``_id``, ``altname_aws`` and ``altname_local``, copy the field to ``corpus_copied``.
-          //    - If ``method`` is ``auto``, copy the field to ``corpus_copied``.
-          //    - If ``method`` is ``explicit``, use ``client_encryption`` to explicitly encrypt the value.
-          //      - Encrypt with the algorithm described by ``algo``.
-          //      - If ``identifier`` is ``id``
-          //        - If ``kms`` is ``local`` set the key_id to the UUID with base64 value ``LOCALAAAAAAAAAAAAAAAAA==``.
-          //        - If ``kms`` is ``aws`` set the key_id to the UUID with base64 value ``AWSAAAAAAAAAAAAAAAAAAA==``.
-          //      - If ``identifier`` is ``altname``
-          //        - If ``kms`` is ``local`` set the key_alt_name to "local".
-          //        - If ``kms`` is ``aws`` set the key_alt_name to "aws".
-          //      If ``allowed`` is true, copy the field and encrypted value to ``corpus_copied``.
-          //      If ``allowed`` is false. verify that an exception is thrown. Copy the unencrypted value to to ``corpus_copied``.
-          return forEachP(Object.keys(corpus), key => {
-            const field = corpus[key];
-            if (copyOverValues.has(key)) {
-              corpusCopied[key] = field;
-              return;
-            }
-            if (field.method === 'auto') {
-              corpusCopied[key] = Object.assign({}, field);
-              return;
-            }
-            if (field.method === 'explicit') {
-              const encryptOptions = {
-                algorithm: algorithmMap.get(field.algo)
-              };
-              if (field.identifier === 'id') {
-                encryptOptions.keyId = identifierMap.get(field.kms);
-              } else if (field.identifier === 'altname') {
-                encryptOptions.keyAltName = keyAltNameMap.get(field.kms);
-              } else {
-                throw new Error('wtf how did u get here?');
+    it(
+      `should pass corpus ${useClientSideSchema ? 'with' : 'without'} client schema`,
+      metadata,
+      function() {
+        const corpusCopied = {};
+        return Promise.resolve()
+          .then(() => {
+            // 5. Load `corpus/corpus.json <../corpus/corpus.json>`_ to a variable named ``corpus``. The corpus contains subdocuments with the following fields:
+            //
+            //    - ``kms`` is either ``aws`` or ``local``
+            //    - ``type`` is a BSON type string `names coming from here <https://docs.mongodb.com/manual/reference/operator/query/type/>`_)
+            //    - ``algo`` is either ``rand`` or ``det`` for random or deterministic encryption
+            //    - ``method`` is either ``auto``, for automatic encryption or ``explicit`` for  explicit encryption
+            //    - ``identifier`` is either ``id`` or ``altname`` for the key identifier
+            //    - ``allowed`` is a boolean indicating whether the encryption for the given parameters is permitted.
+            //    - ``value`` is the value to be tested.
+            //
+            //    Create a new BSON document, named ``corpus_copied``.
+            //
+            //    Iterate over each field of ``corpus``.
+            //    - If the field name is ``_id``, ``altname_aws`` and ``altname_local``, copy the field to ``corpus_copied``.
+            //    - If ``method`` is ``auto``, copy the field to ``corpus_copied``.
+            //    - If ``method`` is ``explicit``, use ``client_encryption`` to explicitly encrypt the value.
+            //      - Encrypt with the algorithm described by ``algo``.
+            //      - If ``identifier`` is ``id``
+            //        - If ``kms`` is ``local`` set the key_id to the UUID with base64 value ``LOCALAAAAAAAAAAAAAAAAA==``.
+            //        - If ``kms`` is ``aws`` set the key_id to the UUID with base64 value ``AWSAAAAAAAAAAAAAAAAAAA==``.
+            //      - If ``identifier`` is ``altname``
+            //        - If ``kms`` is ``local`` set the key_alt_name to "local".
+            //        - If ``kms`` is ``aws`` set the key_alt_name to "aws".
+            //      If ``allowed`` is true, copy the field and encrypted value to ``corpus_copied``.
+            //      If ``allowed`` is false. verify that an exception is thrown. Copy the unencrypted value to to ``corpus_copied``.
+            return forEachP(Object.keys(corpus), key => {
+              const field = corpus[key];
+              if (copyOverValues.has(key)) {
+                corpusCopied[key] = field;
+                return;
+              }
+              if (field.method === 'auto') {
+                corpusCopied[key] = Object.assign({}, field);
+                return;
+              }
+              if (field.method === 'explicit') {
+                const encryptOptions = {
+                  algorithm: algorithmMap.get(field.algo)
+                };
+                if (field.identifier === 'id') {
+                  encryptOptions.keyId = identifierMap.get(field.kms);
+                } else if (field.identifier === 'altname') {
+                  encryptOptions.keyAltName = keyAltNameMap.get(field.kms);
+                } else {
+                  throw new Error('wtf how did u get here?');
+                }
+
+                return Promise.resolve()
+                  .then(() => clientEncryption.encrypt(field.value, encryptOptions))
+                  .then(
+                    encryptedValue => {
+                      if (field.allowed === true) {
+                        corpusCopied[key] = Object.assign({}, field, { value: encryptedValue });
+                      } else {
+                        throw new Error(
+                          `Expected encryption to fail for case ${key} on value ${field.value}`
+                        );
+                      }
+                    },
+                    e => {
+                      if (field.allowed === false) {
+                        corpusCopied[key] = Object.assign({}, field);
+                      } else {
+                        throw e;
+                      }
+                    }
+                  );
               }
 
-              return Promise.resolve()
-                .then(() => clientEncryption.encrypt(field.value, encryptOptions))
-                .then(
-                  encryptedValue => {
-                    if (field.allowed === true) {
-                      corpusCopied[key] = Object.assign({}, field, { value: encryptedValue });
-                    } else {
-                      throw new Error(
-                        `Expected encryption to fail for case ${key} on value ${field.value}`
-                      );
-                    }
-                  },
-                  e => {
-                    if (field.allowed === false) {
-                      corpusCopied[key] = Object.assign({}, field);
-                    } else {
-                      throw e;
-                    }
-                  }
-                );
-            }
-
-            throw new Error('how did u get here?');
-          });
-        })
-        .then(() => {
-          // 6. Using ``client_encrypted``, insert ``corpus_copied`` into ``db.coll``.
-          return clientEncrypted
-            .db(dataDbName)
-            .collection(dataCollName)
-            .insertOne(corpusCopied);
-        })
-        .then(() => {
-          // 7. Using ``client_encrypted``, find the inserted document from ``db.coll`` to a variable named ``corpus_decrypted``.
-          // Since it should have been automatically decrypted, assert the document exactly matches ``corpus``.
-          return clientEncrypted
-            .db(dataDbName)
-            .collection(dataCollName)
-            .findOne({ _id: corpusCopied._id }, { promoteLongs: false, promoteValues: false });
-        })
-        .then(corpusDecrypted => {
-          expect(toComparableExtendedJSON(corpusDecrypted)).to.deep.equal(
-            toComparableExtendedJSON(corpus)
-          );
-        })
-        .then(() => {
-          // 8. Load `corpus/corpus_encrypted.json <../corpus/corpus-encrypted.json>`_ to a variable named ``corpus_encrypted_expected``.
-          //    Using ``client`` find the inserted document from ``db.coll`` to a variable named ``corpus_encrypted_actual``.
-
-          //    Iterate over each field of ``corpus_encrypted_expected`` and check the following:
-
-          //    - If the ``algo`` is ``det``, that the value equals the value of the corresponding field in ``corpus_encrypted_actual``.
-          //    - If the ``algo`` is ``rand`` and ``allowed`` is true, that the value does not equal the value of the corresponding field in ``corpus_encrypted_actual``.
-          //    - If ``allowed`` is true, decrypt the value with ``client_encryption``. Decrypt the value of the corresponding field of ``corpus_encrypted`` and validate that they are both equal.
-          //    - If ``allowed`` is false, validate the value exactly equals the value of the corresponding field of ``corpus`` (neither was encrypted).
-          return client
-            .db(dataDbName)
-            .collection(dataCollName)
-            .findOne({ _id: corpusCopied._id }, { promoteLongs: false, promoteValues: false });
-        })
-        .then(corpusEncryptedActual => {
-          return forEachP(Object.keys(corpusEncryptedExpected), key => {
-            return assertion(
-              clientEncryption,
-              key,
-              corpusEncryptedExpected[key],
-              corpusEncryptedActual[key]
+              throw new Error('how did u get here?');
+            });
+          })
+          .then(() => {
+            // 6. Using ``client_encrypted``, insert ``corpus_copied`` into ``db.coll``.
+            return clientEncrypted
+              .db(dataDbName)
+              .collection(dataCollName)
+              .insertOne(corpusCopied);
+          })
+          .then(() => {
+            // 7. Using ``client_encrypted``, find the inserted document from ``db.coll`` to a variable named ``corpus_decrypted``.
+            // Since it should have been automatically decrypted, assert the document exactly matches ``corpus``.
+            return clientEncrypted
+              .db(dataDbName)
+              .collection(dataCollName)
+              .findOne({ _id: corpusCopied._id }, { promoteLongs: false, promoteValues: false });
+          })
+          .then(corpusDecrypted => {
+            expect(toComparableExtendedJSON(corpusDecrypted)).to.deep.equal(
+              toComparableExtendedJSON(corpus)
             );
+          })
+          .then(() => {
+            // 8. Load `corpus/corpus_encrypted.json <../corpus/corpus-encrypted.json>`_ to a variable named ``corpus_encrypted_expected``.
+            //    Using ``client`` find the inserted document from ``db.coll`` to a variable named ``corpus_encrypted_actual``.
+
+            //    Iterate over each field of ``corpus_encrypted_expected`` and check the following:
+
+            //    - If the ``algo`` is ``det``, that the value equals the value of the corresponding field in ``corpus_encrypted_actual``.
+            //    - If the ``algo`` is ``rand`` and ``allowed`` is true, that the value does not equal the value of the corresponding field in ``corpus_encrypted_actual``.
+            //    - If ``allowed`` is true, decrypt the value with ``client_encryption``. Decrypt the value of the corresponding field of ``corpus_encrypted`` and validate that they are both equal.
+            //    - If ``allowed`` is false, validate the value exactly equals the value of the corresponding field of ``corpus`` (neither was encrypted).
+            return client
+              .db(dataDbName)
+              .collection(dataCollName)
+              .findOne({ _id: corpusCopied._id }, { promoteLongs: false, promoteValues: false });
+          })
+          .then(corpusEncryptedActual => {
+            return forEachP(Object.keys(corpusEncryptedExpected), key => {
+              return assertion(
+                clientEncryption,
+                key,
+                corpusEncryptedExpected[key],
+                corpusEncryptedActual[key]
+              );
+            });
           });
-        });
-    });
+      }
+    );
   }
 
   // Note: You can uncomment the block below to run the corpus for each individial item
