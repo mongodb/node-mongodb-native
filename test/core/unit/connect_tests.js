@@ -130,6 +130,7 @@ describe('Connect Tests', function() {
   );
 
   describe('runCommand', function() {
+    const metadata = { requires: { topology: 'single' } };
     class MockConnection extends EventEmitter {
       constructor(conn) {
         super();
@@ -148,7 +149,7 @@ describe('Connect Tests', function() {
       }
     }
 
-    it('should treat non-Error generating error-like events as errors', function(done) {
+    it('should treat non-Error generating error-like events as errors', metadata, function(done) {
       class ConnectionFailingWithClose extends MockConnection {
         write() {
           this.emit('close');
@@ -166,23 +167,27 @@ describe('Connect Tests', function() {
       );
     });
 
-    it('should not crash the application if multiple error-like events are emitted on `runCommand`', function(done) {
-      class ConnectionFailingWithAllEvents extends MockConnection {
-        write() {
-          this.emit('close');
-          this.emit('timeout');
-          this.emit('error');
+    it(
+      'should not crash the application if multiple error-like events are emitted on `runCommand`',
+      metadata,
+      function(done) {
+        class ConnectionFailingWithAllEvents extends MockConnection {
+          write() {
+            this.emit('close');
+            this.emit('timeout');
+            this.emit('error');
+          }
         }
-      }
 
-      connect(
-        { host: '127.0.0.1', port: 27017, connectionType: ConnectionFailingWithAllEvents },
-        (err, conn) => {
-          expect(err).to.exist;
-          expect(conn).to.not.exist;
-          done();
-        }
-      );
-    });
+        connect(
+          { host: '127.0.0.1', port: 27017, connectionType: ConnectionFailingWithAllEvents },
+          (err, conn) => {
+            expect(err).to.exist;
+            expect(conn).to.not.exist;
+            done();
+          }
+        );
+      }
+    );
   });
 });
