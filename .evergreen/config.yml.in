@@ -104,9 +104,30 @@ functions:
     - command: shell.exec
       type: test
       params:
+        silent: true
+        working_dir: "src"
+        script: |
+          if [ -n "${CLIENT_ENCRYPTION}" ]; then
+            cat <<EOT > prepare_client_encryption.sh
+            export CLIENT_ENCRYPTION=${CLIENT_ENCRYPTION}
+            export AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID}"
+            export AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY}"
+          EOT
+          fi
+    - command: shell.exec
+      type: test
+      params:
         working_dir: "src"
         script: |
           ${PREPARE_SHELL}
+
+          if [ -n "${CLIENT_ENCRYPTION}" ]; then
+            # Disable xtrace (just in case it was accidentally set).
+            set +x
+            . ./prepare_client_encryption.sh
+            rm -f ./prepare_client_encryption.sh
+          fi
+
           AUTH=${AUTH} SSL=${SSL} UNIFIED=${UNIFIED} MONGODB_URI="${MONGODB_URI}" bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
 
   "cleanup":

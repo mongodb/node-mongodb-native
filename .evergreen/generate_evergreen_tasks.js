@@ -88,7 +88,8 @@ const OPERATING_SYSTEMS = [
     name: 'ubuntu-16.04',
     display_name: 'Ubuntu 16.04',
     run_on: 'ubuntu1604-test',
-    mongoVersion: '>=3.2'
+    mongoVersion: '>=3.2',
+    clientEncryption: true
   },
   {
     name: 'ubuntu1604-arm64-small',
@@ -227,7 +228,8 @@ OPERATING_SYSTEMS.forEach(
     display_name: osDisplayName,
     run_on,
     mongoVersion = '>=2.6',
-    nodeVersions = NODE_VERSIONS
+    nodeVersions = NODE_VERSIONS,
+    clientEncryption
   }) => {
     const testedNodeVersions = NODE_VERSIONS.filter(version => nodeVersions.includes(version));
     const tasks = getTaskList(mongoVersion);
@@ -237,6 +239,11 @@ OPERATING_SYSTEMS.forEach(
       const name = `${osName}-${NODE_LTS_NAME}`;
       const display_name = `${osDisplayName} ${nodeLtsDisplayName}`;
       const expansions = { NODE_LTS_NAME };
+
+      if (clientEncryption) {
+        expansions.CLIENT_ENCRYPTION = true;
+      }
+
       BUILD_VARIANTS.push({ name, display_name, run_on, expansions, tasks });
     });
   }
