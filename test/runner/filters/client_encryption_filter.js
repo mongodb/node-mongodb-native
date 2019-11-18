@@ -35,6 +35,7 @@ class ClientSideEncryptionFilter {
 
     callback();
   }
+
   filter(test) {
     const clientSideEncryption =
       test.metadata && test.metadata.requires && test.metadata.requires.clientSideEncryption;

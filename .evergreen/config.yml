@@ -84,9 +84,31 @@ functions:
     - command: shell.exec
       type: test
       params:
+        silent: true
+        working_dir: src
+        script: |
+          if [ -n "${CLIENT_ENCRYPTION}" ]; then
+            cat <<EOT > prepare_client_encryption.sh
+            export CLIENT_ENCRYPTION=${CLIENT_ENCRYPTION}
+            export AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID}"
+            export AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY}"
+          EOT
+          fi
+    - command: shell.exec
+      type: test
+      params:
         working_dir: src
         script: >
           ${PREPARE_SHELL}
+
+
+          if [ -n "${CLIENT_ENCRYPTION}" ]; then
+            # Disable xtrace (just in case it was accidentally set).
+            set +x
+            . ./prepare_client_encryption.sh
+            rm -f ./prepare_client_encryption.sh
+          fi
+
 
           AUTH=${AUTH} SSL=${SSL} UNIFIED=${UNIFIED} MONGODB_URI="${MONGODB_URI}" bash
           ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
@@ -1092,24 +1114,28 @@ buildvariants:
     run_on: ubuntu1604-test
     expansions:
       NODE_LTS_NAME: dubnium
+      CLIENT_ENCRYPTION: true
     tasks: *ref_4
   - name: ubuntu-16.04-carbon
     display_name: Ubuntu 16.04 Node Carbon
     run_on: ubuntu1604-test
     expansions:
       NODE_LTS_NAME: carbon
+      CLIENT_ENCRYPTION: true
     tasks: *ref_4
   - name: ubuntu-16.04-boron
     display_name: Ubuntu 16.04 Node Boron
     run_on: ubuntu1604-test
     expansions:
       NODE_LTS_NAME: boron
+      CLIENT_ENCRYPTION: true
     tasks: *ref_4
   - name: ubuntu-16.04-argon
     display_name: Ubuntu 16.04 Node Argon
     run_on: ubuntu1604-test
     expansions:
       NODE_LTS_NAME: argon
+      CLIENT_ENCRYPTION: true
     tasks: *ref_4
   - name: ubuntu1604-arm64-small-dubnium
     display_name: Ubuntu 16.04 (ARM64) Node Dubnium

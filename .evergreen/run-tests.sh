@@ -21,4 +21,13 @@ export PATH="/opt/mongodbtoolchain/v2/bin:$PATH"
 NODE_ARTIFACTS_PATH="${PROJECT_DIRECTORY}/node-artifacts"
 export NVM_DIR="${NODE_ARTIFACTS_PATH}/nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+# only run FLE tets on hosts we explicitly choose to test on
+if [[ -z "${CLIENT_ENCRYPTION}" ]]; then
+  unset AWS_ACCESS_KEY_ID;
+  unset AWS_SECRET_ACCESS_KEY;
+else
+  npm install mongodb-client-encryption
+fi
+
 MONGODB_UNIFIED_TOPOLOGY=${UNIFIED} MONGODB_URI=${MONGODB_URI} npm test
