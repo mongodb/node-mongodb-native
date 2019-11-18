@@ -8,6 +8,7 @@ branches:
 
 before_install:
   # we have to intstall mongo-orchestration ourselves to get around permissions issues in subshells
+  - sudo apt-get update && sudo apt-get install -y python python-pip
   - sudo pip install --upgrade 'git+git://github.com/mongodb/mongo-orchestration@master'
   - sudo apt-get install -y libsnmp30
 
@@ -82,7 +83,30 @@ jobs:
       env:
         - MONGODB_VERSION=4.0
         - MONGODB_ENVIRONMENT=server
-
+    - stage: standalone
+      os: linux
+      arch: arm64
+      node_js: 8
+      env:
+        - MONGODB_VERSION=4.0
+        - MONGODB_ENVIRONMENT=server
+    
+    - stage: standalone
+      os: linux
+      arch: arm64
+      node_js: 10
+      env:
+        - MONGODB_VERSION=4.0
+        - MONGODB_ENVIRONMENT=server
+    
+    - stage: standalone
+      os: linux
+      arch: arm64
+      node_js: 12
+      env:
+        - MONGODB_VERSION=4.0
+        - MONGODB_ENVIRONMENT=server
+        
     - stage: replicaset
       node_js: 6
       env:
