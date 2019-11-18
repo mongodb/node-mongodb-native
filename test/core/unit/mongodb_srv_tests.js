@@ -45,6 +45,10 @@ describe('mongodb+srv', function() {
                 expect(result.options.ssl).to.equal(test[1].options.ssl);
               }
 
+              if (test[1].options && test[1].options.authSource) {
+                expect(result.options.authsource).to.equal(test[1].options.authSource);
+              }
+
               if (
                 test[1].parsed_options &&
                 test[1].parsed_options.user &&
