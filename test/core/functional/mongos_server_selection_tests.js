@@ -8,7 +8,7 @@ const ReadPreference = require('../../../lib/core/topologies/read_preference');
 const Server = require('../../../lib/core/topologies/server');
 
 describe('Mongos server selection tests', function() {
-  var specPath = `${__dirname}/../spec/server-selection/server_selection/Sharded/read`;
+  var specPath = `${__dirname}/../../spec/server-selection/server_selection/Sharded/read`;
   var entries = fs.readdirSync(specPath).filter(function(x) {
     return x.indexOf('.json') !== -1;
   });
