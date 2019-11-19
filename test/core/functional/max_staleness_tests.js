@@ -9,8 +9,8 @@ const expect = require('chai').expect,
   MongoError = require('../../../lib/core/error').MongoError,
   ReadPreference = require('../../../lib/core/topologies/read_preference');
 
-const rsWithPrimaryPath = f('%s/../spec/max-staleness/ReplicaSetWithPrimary', __dirname);
-const rsWithoutPrimaryPath = f('%s/../spec/max-staleness/ReplicaSetNoPrimary', __dirname);
+const rsWithPrimaryPath = f('%s/../../spec/max-staleness/ReplicaSetWithPrimary', __dirname);
+const rsWithoutPrimaryPath = f('%s/../../spec/max-staleness/ReplicaSetNoPrimary', __dirname);
 
 describe('Max Staleness', function() {
   describe('ReplicaSet without primary', function() {

@@ -1,13 +1,17 @@
 'use strict';
 const path = require('path');
 const fs = require('fs');
-const Topology = require('../../../lib/core/sdam/topology');
-const Server = require('../../../lib/core/sdam/server');
-const ServerDescription = require('../../../lib/core/sdam/server_description').ServerDescription;
-const ServerType = require('../../../lib/core/sdam/server_description').ServerType;
-const ServerSelectors = require('../../../lib/core/sdam/server_selectors');
-const MongoTimeoutError = require('../../../lib/core/error').MongoTimeoutError;
-const ReadPreference = require('../../../lib/core/topologies/read_preference');
+const core = require('../../../../lib/core');
+const Topology = core.Topology;
+const MongoTimeoutError = core.MongoTimeoutError;
+const ReadPreference = core.ReadPreference;
+
+// TODO: these should be from `core` when legacy topologies are removed
+const Server = require('../../../../lib/core/sdam/server');
+const ServerType = require('../../../../lib/core/sdam/server_description').ServerType;
+const ServerDescription = require('../../../../lib/core/sdam/server_description').ServerDescription;
+const ServerSelectors = require('../../../../lib/core/sdam/server_selectors');
+
 const EJSON = require('mongodb-extjson');
 
 const sinon = require('sinon');
@@ -15,7 +19,7 @@ const chai = require('chai');
 const expect = chai.expect;
 chai.use(require('chai-subset'));
 
-const selectionSpecDir = path.join(__dirname, '..', 'spec', 'server-selection', 'server_selection');
+const selectionSpecDir = path.join(__dirname, '../../../spec/server-selection/server_selection');
 function collectSelectionTests(specDir) {
   const testTypes = fs
     .readdirSync(specDir)
@@ -88,7 +92,7 @@ describe('Server Selection (spec)', function() {
   });
 });
 
-const maxStalenessDir = path.join(__dirname, '..', 'spec', 'max-staleness');
+const maxStalenessDir = path.join(__dirname, '../../../spec/max-staleness');
 function collectStalenessTests(specDir) {
   const testTypes = fs
     .readdirSync(specDir)
