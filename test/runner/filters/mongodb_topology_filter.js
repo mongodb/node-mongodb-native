@@ -1,7 +1,7 @@
 'use strict';
 
 const topologyType = require('../../../lib/core/topologies/shared').topologyType;
-const TopologyType = require('../../../lib/core/sdam/topology_description').TopologyType;
+const TopologyType = require('../../../lib/core/sdam/common').TopologyType;
 
 /**
  * Filter for the MongoDB toopology required for the test
