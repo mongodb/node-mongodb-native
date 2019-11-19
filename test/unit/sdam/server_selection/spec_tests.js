@@ -10,7 +10,7 @@ const ReadPreference = core.ReadPreference;
 const Server = require('../../../../lib/core/sdam/server');
 const ServerType = require('../../../../lib/core/sdam/common').ServerType;
 const ServerDescription = require('../../../../lib/core/sdam/server_description');
-const ServerSelectors = require('../../../../lib/core/sdam/server_selectors');
+const ServerSelectors = require('../../../../lib/core/sdam/server_selection');
 
 const EJSON = require('mongodb-extjson');
 
