@@ -8,8 +8,8 @@ const ReadPreference = core.ReadPreference;
 
 // TODO: these should be from `core` when legacy topologies are removed
 const Server = require('../../../../lib/core/sdam/server');
-const ServerType = require('../../../../lib/core/sdam/server_description').ServerType;
-const ServerDescription = require('../../../../lib/core/sdam/server_description').ServerDescription;
+const ServerType = require('../../../../lib/core/sdam/common').ServerType;
+const ServerDescription = require('../../../../lib/core/sdam/server_description');
 const ServerSelectors = require('../../../../lib/core/sdam/server_selectors');
 
 const EJSON = require('mongodb-extjson');

@@ -4,7 +4,7 @@ const qs = require('querystring');
 const util = require('util');
 
 const MongoClient = require('../../lib/mongo_client');
-const TopologyType = require('../../lib/core/sdam/topology_description').TopologyType;
+const TopologyType = require('../../lib/core/sdam/common').TopologyType;
 const core = require('../../lib/core');
 
 class NativeConfiguration {
