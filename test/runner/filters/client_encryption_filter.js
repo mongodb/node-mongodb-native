@@ -18,7 +18,7 @@ class ClientSideEncryptionFilter {
     const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
     let mongodbClientEncryption;
     try {
-      mongodbClientEncryption = require('mongodb-client-encryption')(mongodb);
+      mongodbClientEncryption = require('mongodb-client-encryption').extension(mongodb);
     } catch (e) {
       // Do Nothing
     }

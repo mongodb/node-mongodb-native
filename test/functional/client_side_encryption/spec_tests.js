@@ -15,7 +15,7 @@ describe('Client Side Encryption', function() {
   }
 
   try {
-    require('mongodb-client-encryption')(require('../../../index'));
+    require('mongodb-client-encryption');
   } catch (e) {
     console.log(
       'skipping Client Side Encryption Spec tests due to inability to load mongodb-client-encryption'
