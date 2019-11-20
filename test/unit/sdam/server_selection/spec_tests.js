@@ -7,9 +7,9 @@ const MongoTimeoutError = core.MongoTimeoutError;
 const ReadPreference = core.ReadPreference;
 
 // TODO: these should be from `core` when legacy topologies are removed
-const Server = require('../../../../lib/core/sdam/server');
+const Server = require('../../../../lib/core/sdam/server').Server;
 const ServerType = require('../../../../lib/core/sdam/common').ServerType;
-const ServerDescription = require('../../../../lib/core/sdam/server_description');
+const ServerDescription = require('../../../../lib/core/sdam/server_description').ServerDescription;
 const ServerSelectors = require('../../../../lib/core/sdam/server_selection');
 
 const EJSON = require('mongodb-extjson');
