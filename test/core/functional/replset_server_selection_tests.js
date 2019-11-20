@@ -1,8 +1,8 @@
 'use strict';
 
 var expect = require('chai').expect,
-  f = require('util').format,
   fs = require('fs'),
+  p = require('path'),
   ReplSetState = require('../../../lib/core/topologies/replset_state'),
   MongoError = require('../../../lib/core/error').MongoError,
   ReadPreference = require('../../../lib/core/topologies/read_preference');
@@ -18,9 +18,9 @@ describe('A replicaset with no primary', function() {
 
     test: function(done) {
       const config = this.configuration;
-      var path = f(
-        '%s/../spec/server-selection/server_selection/ReplicaSetNoPrimary/read',
-        __dirname
+      var path = p.resolve(
+        __dirname,
+        '../../spec/server-selection/server_selection/ReplicaSetNoPrimary/read'
       );
       var entries = fs.readdirSync(path).filter(function(x) {
         return x.indexOf('.json') !== -1;
@@ -28,7 +28,7 @@ describe('A replicaset with no primary', function() {
 
       // Execute each of the entries
       entries.forEach(function(x) {
-        executeEntry(config, x, f('%s/%s', path, x));
+        executeEntry(config, x, `${path}/${x}`);
       });
 
       done();
@@ -47,17 +47,18 @@ describe('A replicaset with a primary', function() {
 
     test: function(done) {
       const config = this.configuration;
-      var path = f(
-        '%s/../spec/server-selection/server_selection/ReplicaSetWithPrimary/read',
-        __dirname
+      var path = p.resolve(
+        __dirname,
+        '../../spec/server-selection/server_selection/ReplicaSetWithPrimary/read'
       );
+
       var entries = fs.readdirSync(path).filter(function(x) {
         return x.indexOf('.json') !== -1;
       });
 
       // Execute each of the entries
       entries.forEach(function(x) {
-        executeEntry(config, x, f('%s/%s', path, x));
+        executeEntry(config, x, `${path}/${x}`);
       });
 
       done();

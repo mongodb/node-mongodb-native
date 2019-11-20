@@ -1,7 +1,7 @@
 'use strict';
 const ReadPreference = require('../../../../lib/core/topologies/read_preference');
-const Topology = require('../../../../lib/core/sdam/topology');
-const Server = require('../../../../lib/core/sdam/server');
+const Topology = require('../../../../lib/core/sdam/topology').Topology;
+const Server = require('../../../../lib/core/sdam/server').Server;
 const serverSelection = require('../../../../lib/core/sdam/server_selection');
 const selectServers = serverSelection.selectServers;
 const sc = require('../../../../lib/core/sdam/common');
