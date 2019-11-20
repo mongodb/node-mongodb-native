@@ -20,9 +20,9 @@ describe('selectServers', function() {
   it('should error immediately if timeout exceeds start time', function(done) {
     const topology = new Topology('invalid:27019');
     const start = process.hrtime();
-    start[0] = start[0] - 500;
+    start[0] = start[0] - 1;
 
-    selectServers(topology, ReadPreference.primary, 500, start, err => {
+    selectServers(topology, ReadPreference.primary, 1000, start, err => {
       expect(err).to.exist;
       done();
     });

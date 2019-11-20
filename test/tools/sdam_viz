@@ -90,11 +90,7 @@ async function run() {
   await client.connect();
 
   if (argv.workload) {
-    for (;;) {
-      if (workloadInterrupt) {
-        return;
-      }
-
+    while (!workloadInterrupt) {
       await wait(2000);
 
       try {
