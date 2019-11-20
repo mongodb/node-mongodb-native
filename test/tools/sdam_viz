@@ -8,8 +8,10 @@ const argv = require('yargs')
   .usage('Usage: $0 [options] <connection string>')
   .demandCommand(1)
   .help('h')
+  .describe('workload', 'Simulate a read workload')
   .describe('legacy', 'Use the legacy topology types')
   .alias('l', 'legacy')
+  .alias('w', 'workload')
   .alias('h', 'help').argv;
 
 function print(msg) {
@@ -22,6 +24,7 @@ const client = new MongoClient(uri, {
   useUnifiedTopology: !argv.legacy
 });
 
+let workloadInterrupt = false;
 async function run() {
   print(
     `connecting to: ${chalk.bold(uri)} using ${chalk.bold(
@@ -85,7 +88,32 @@ async function run() {
   });
 
   await client.connect();
+
+  if (argv.workload) {
+    for (;;) {
+      if (workloadInterrupt) {
+        return;
+      }
+
+      await wait(2000);
+
+      try {
+        print('issuing find...');
+        const result = await client
+          .db('test')
+          .collection('test')
+          .find({})
+          .limit(1)
+          .toArray();
+        print(`  > find completed: ${JSON.stringify(result)}`);
+      } catch (e) {
+        print(`  > find failed: ${e.message}`);
+      }
+    }
+  }
 }
+
+const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 function diff(lhs, rhs, fields, comparator) {
   return fields.reduce((diff, field) => {
@@ -141,5 +169,6 @@ function topologyDescriptionDiff(lhs, rhs) {
 
 run().catch(error => console.log('Caught', error));
 process.on('SIGINT', async function() {
+  workloadInterrupt = true;
   await client.close();
 });
