@@ -71,4 +71,19 @@ describe('selectServers', function() {
       });
     });
   });
+
+  it('should disallow selection when the topology is explicitly closed', function(done) {
+    const topology = new Topology('someserver:27019');
+    this.sinon.stub(Server.prototype, 'connect').callsFake(function() {
+      this.emit('connect');
+    });
+
+    topology.close(() => {
+      selectServers(topology, ReadPreference.primary, 2000, process.hrtime(), err => {
+        expect(err).to.exist;
+        expect(err).to.match(/Topology is closed/);
+        done();
+      });
+    });
+  });
 });
