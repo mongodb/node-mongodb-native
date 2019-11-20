@@ -2,15 +2,14 @@
 
 const expect = require('chai').expect,
   p = require('path'),
-  f = require('util').format,
   fs = require('fs'),
   Server = require('../../../lib/core/topologies/server'),
   ReplSetState = require('../../../lib/core/topologies/replset_state'),
   MongoError = require('../../../lib/core/error').MongoError,
   ReadPreference = require('../../../lib/core/topologies/read_preference');
 
-const rsWithPrimaryPath = f('%s/../../spec/max-staleness/ReplicaSetWithPrimary', __dirname);
-const rsWithoutPrimaryPath = f('%s/../../spec/max-staleness/ReplicaSetNoPrimary', __dirname);
+const rsWithPrimaryPath = p.resolve(__dirname, '../../spec/max-staleness/ReplicaSetWithPrimary');
+const rsWithoutPrimaryPath = p.resolve(__dirname, '../../spec/max-staleness/ReplicaSetNoPrimary');
 
 describe('Max Staleness', function() {
   describe('ReplicaSet without primary', function() {
@@ -19,7 +18,7 @@ describe('Max Staleness', function() {
       .filter(x => x.indexOf('.json') !== -1)
       .forEach(x => {
         it(p.basename(x, '.json'), function(done) {
-          executeEntry(f('%s/%s', rsWithoutPrimaryPath, x), done);
+          executeEntry(`${rsWithoutPrimaryPath}/${x}`, done);
         });
       });
   });
@@ -31,7 +30,7 @@ describe('Max Staleness', function() {
       .filter(x => x.indexOf('LongHeartbeat2.jwson') === -1)
       .forEach(x => {
         it(p.basename(x, '.json'), function(done) {
-          executeEntry(f('%s/%s', rsWithPrimaryPath, x), done);
+          executeEntry(`${rsWithPrimaryPath}/${x}`, done);
         });
       });
   });
