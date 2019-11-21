@@ -94,16 +94,16 @@ async function run() {
       await wait(2000);
 
       try {
-        print('issuing find...');
+        print(`${chalk.yellow('workload')} issuing find...`);
         const result = await client
           .db('test')
           .collection('test')
           .find({})
           .limit(1)
           .toArray();
-        print(`  > find completed: ${JSON.stringify(result)}`);
+        print(`${chalk.yellow('workload')} find completed: ${JSON.stringify(result)}`);
       } catch (e) {
-        print(`  > find failed: ${e.message}`);
+        print(`${chalk.yellow('workload')} find failed: ${e.message}`);
       }
     }
   }
