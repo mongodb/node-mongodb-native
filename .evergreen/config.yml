@@ -24,6 +24,8 @@ functions:
           fi
 
           export DRIVERS_TOOLS="$(pwd)/../drivers-tools"
+          export DOCUMENTATION_BUILDER="$(pwd)/learn-mongodb-docs"
+          # export DOCUMENTATION_BUILDER="$(pwd)/../learn-mongodb-docs"
           export PROJECT_DIRECTORY="$(pwd)"
           export MONGO_ORCHESTRATION_HOME="$DRIVERS_TOOLS/.evergreen/orchestration"
           export MONGODB_BINARIES="$DRIVERS_TOOLS/mongodb/bin"
@@ -32,6 +34,7 @@ functions:
           cat <<EOT > expansion.yml
           CURRENT_VERSION: "$CURRENT_VERSION"
           DRIVERS_TOOLS: "$DRIVERS_TOOLS"
+          DOCUMENTATION_BUILDER: "$DOCUMENTATION_BUILDER"
           MONGO_ORCHESTRATION_HOME: "$MONGO_ORCHESTRATION_HOME"
           MONGODB_BINARIES: "$MONGODB_BINARIES"
           UPLOAD_BUCKET: "$UPLOAD_BUCKET"
@@ -40,6 +43,7 @@ functions:
              set -o errexit
              set -o xtrace
              export DRIVERS_TOOLS="$DRIVERS_TOOLS"
+             export DOCUMENTATION_BUILDER="$DOCUMENTATION_BUILDER"
              export MONGO_ORCHESTRATION_HOME="$MONGO_ORCHESTRATION_HOME"
              export MONGODB_BINARIES="$MONGODB_BINARIES"
              export UPLOAD_BUCKET="$UPLOAD_BUCKET"
@@ -154,6 +158,14 @@ functions:
           NODE_LTS_NAME='${NODE_LTS_NAME}' ATLAS_REPL='${atlas_repl}' ATLAS_SHRD='${atlas_shrd}'
           ATLAS_FREE='${atlas_free}' ATLAS_TLS11='${atlas_tls11}' ATLAS_TLS12='${atlas_tls12}' bash
           ${PROJECT_DIRECTORY}/.evergreen/run-atlas-tests.sh
+  build documentation:
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: src
+        script: |
+          ${PREPARE_SHELL}
+          bash ${PROJECT_DIRECTORY}/.evergreen/build-documentation.sh
 pre:
   - func: fetch source
   - func: prepare resources
@@ -746,6 +758,12 @@ tasks:
       - func: run atlas tests
         vars:
           VERSION: latest
+  - name: build-documentation
+    tags:
+      - documentation
+    commands:
+      - func: install dependencies
+      - func: build documentation
 buildvariants:
   - name: archlinux-test-dubnium
     display_name: Archlinux Node Dubnium
@@ -1096,7 +1114,44 @@ buildvariants:
     run_on: ubuntu1404-test
     expansions:
       NODE_LTS_NAME: carbon
-    tasks: *ref_0
+    tasks:
+      - test-4.0-server
+      - test-4.0-replica_set
+      - test-4.0-sharded_cluster
+      - test-4.0-server-unified
+      - test-4.0-replica_set-unified
+      - test-4.0-sharded_cluster-unified
+      - test-3.6-server
+      - test-3.6-replica_set
+      - test-3.6-sharded_cluster
+      - test-3.6-server-unified
+      - test-3.6-replica_set-unified
+      - test-3.6-sharded_cluster-unified
+      - test-3.4-server
+      - test-3.4-replica_set
+      - test-3.4-sharded_cluster
+      - test-3.4-server-unified
+      - test-3.4-replica_set-unified
+      - test-3.4-sharded_cluster-unified
+      - test-3.2-server
+      - test-3.2-replica_set
+      - test-3.2-sharded_cluster
+      - test-3.2-server-unified
+      - test-3.2-replica_set-unified
+      - test-3.2-sharded_cluster-unified
+      - test-3.0-server
+      - test-3.0-replica_set
+      - test-3.0-sharded_cluster
+      - test-3.0-server-unified
+      - test-3.0-replica_set-unified
+      - test-3.0-sharded_cluster-unified
+      - test-2.6-server
+      - test-2.6-replica_set
+      - test-2.6-sharded_cluster
+      - test-2.6-server-unified
+      - test-2.6-replica_set-unified
+      - test-2.6-sharded_cluster-unified
+      - build-documentation
   - name: ubuntu-14.04-boron
     display_name: Ubuntu 14.04 Node Boron
     run_on: ubuntu1404-test

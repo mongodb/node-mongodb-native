@@ -249,6 +249,19 @@ OPERATING_SYSTEMS.forEach(
   }
 );
 
+// Add documentation build:
+TASKS.push({
+  name: 'build-documentation',
+  tags: ['documentation'],
+  commands: [
+    { func: 'install dependencies' },
+    { func: 'build documentation' }
+  ]
+});
+
+const bv = BUILD_VARIANTS.find(variant => variant.name === 'ubuntu-14.04-carbon');
+bv.tasks = bv.tasks.concat(['build-documentation']);
+
 const fileData = yaml.safeLoad(fs.readFileSync(`${__dirname}/config.yml.in`, 'utf8'));
 
 fileData.tasks = (fileData.tasks || []).concat(TASKS);

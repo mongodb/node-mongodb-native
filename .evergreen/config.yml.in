@@ -42,6 +42,8 @@ functions:
            fi
 
            export DRIVERS_TOOLS="$(pwd)/../drivers-tools"
+           export DOCUMENTATION_BUILDER="$(pwd)/learn-mongodb-docs"
+           # export DOCUMENTATION_BUILDER="$(pwd)/../learn-mongodb-docs"
            export PROJECT_DIRECTORY="$(pwd)"
            export MONGO_ORCHESTRATION_HOME="$DRIVERS_TOOLS/.evergreen/orchestration"
            export MONGODB_BINARIES="$DRIVERS_TOOLS/mongodb/bin"
@@ -50,6 +52,7 @@ functions:
            cat <<EOT > expansion.yml
            CURRENT_VERSION: "$CURRENT_VERSION"
            DRIVERS_TOOLS: "$DRIVERS_TOOLS"
+           DOCUMENTATION_BUILDER: "$DOCUMENTATION_BUILDER"
            MONGO_ORCHESTRATION_HOME: "$MONGO_ORCHESTRATION_HOME"
            MONGODB_BINARIES: "$MONGODB_BINARIES"
            UPLOAD_BUCKET: "$UPLOAD_BUCKET"
@@ -58,6 +61,7 @@ functions:
               set -o errexit
               set -o xtrace
               export DRIVERS_TOOLS="$DRIVERS_TOOLS"
+              export DOCUMENTATION_BUILDER="$DOCUMENTATION_BUILDER"
               export MONGO_ORCHESTRATION_HOME="$MONGO_ORCHESTRATION_HOME"
               export MONGODB_BINARIES="$MONGODB_BINARIES"
               export UPLOAD_BUCKET="$UPLOAD_BUCKET"
@@ -185,7 +189,14 @@ functions:
         script: |
           # DO NOT ECHO WITH XTRACE (which PREPARE_SHELL does)
           NODE_LTS_NAME='${NODE_LTS_NAME}' ATLAS_REPL='${atlas_repl}' ATLAS_SHRD='${atlas_shrd}' ATLAS_FREE='${atlas_free}' ATLAS_TLS11='${atlas_tls11}' ATLAS_TLS12='${atlas_tls12}' bash ${PROJECT_DIRECTORY}/.evergreen/run-atlas-tests.sh
-
+  "build documentation":
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: src
+        script: |
+          ${PREPARE_SHELL}
+          bash ${PROJECT_DIRECTORY}/.evergreen/build-documentation.sh
 pre:
   - func: "fetch source"
   - func: "prepare resources"
