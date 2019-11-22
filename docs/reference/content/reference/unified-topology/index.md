@@ -29,6 +29,21 @@ const client = MongoClient('mongodb://localhost:27017', { useUnifiedTopology: tr
 
 ## Behavioral Changes
 
+## Deprecated events and options
+
+The unified topology no longer supports the following events:
+- `reconnect`
+- `reconnectFailed`
+- `attemptReconnect`
+
+It also deprecates the following options passed into the `MongoClient`:
+- `autoReconnect`
+- `reconnectTries`
+- `reconnectInterval`
+- `bufferMaxEntries`
+
+The following sections will go into detail about why tese values are no longer used.
+
 ### `MongoClient.connect`, `isConnected`
 
 The unified topology is the first step in a paradigm shift away from a concept of "connecting" to a MongoDB deployment using a `connect` method. Consider for a moment what it means to be connected to a replica set: do we trigger this state when connected to a primary? A primary and one secondary? When connected to all known nodes? It's unclear whether its possible to answer this without introducing something like a `ReadPreference` parameter to the `connect` method. At this point "connecting" is just one half of "operation execution" - you pass a `ReadPreference` in, and await a selectable server for the operation, now we're connected!
