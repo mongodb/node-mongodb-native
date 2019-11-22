@@ -24,13 +24,13 @@
     "bson-ext": "^2.0.0"
   },
   "dependencies": {
-    "bl": "^4.0.0",
     "bson": "^1.1.1",
     "require_optional": "^1.0.1",
     "safe-buffer": "^5.1.2"
   },
   "devDependencies": {
     "bluebird": "3.5.0",
+    "bl": "^2.2.0",
     "chai": "^4.1.1",
     "chai-subset": "^1.6.0",
     "chalk": "^2.4.2",
