@@ -6,19 +6,10 @@
     <description>Recent content in References on MongoDB Node.js Driver</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 04 Jul 2019 12:53:30 -0400</lastBuildDate>
+    <lastBuildDate>Thu, 19 Mar 2015 14:27:51 -0400</lastBuildDate>
     
 	<atom:link href="/node-mongodb-native/3.3/reference/index.xml" rel="self" type="application/rss+xml" />
     
-    
-    <item>
-      <title>Unified Topology Design</title>
-      <link>/node-mongodb-native/3.3/reference/unified-topology/</link>
-      <pubDate>Thu, 04 Jul 2019 12:53:30 -0400</pubDate>
-      
-      <guid>/node-mongodb-native/3.3/reference/unified-topology/</guid>
-      <description>Unified Topology Design At the time of writing the node driver has seven topology classes, including the newly introduced unified topology. Each legacy topology type from the core module targets a supported topology class: Replica Sets, Sharded Deployments (mongos) and Standalone servers. On top of each of these rests a thin topology wrapper from the &amp;ldquo;native&amp;rdquo; layer which introduces the concept of a &amp;ldquo;disconnect handler&amp;rdquo;, essentially a callback queue for handling naive retryability.</description>
-    </item>
     
     <item>
       <title>Management</title>
