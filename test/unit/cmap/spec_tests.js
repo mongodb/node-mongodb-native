@@ -5,7 +5,7 @@ const path = require('path');
 const expect = require('chai').expect;
 
 require('chai').use(require('../../match_spec').default);
-const ConnectionPool = require('../../../lib/core/cmap').ConnectionPool;
+const ConnectionPool = require('../../../lib/cmap').ConnectionPool;
 const EventEmitter = require('events').EventEmitter;
 
 class Connection {
@@ -68,7 +68,7 @@ class Connection {
   destroy() {}
 }
 
-const events = require('../../../lib/core/cmap/events');
+const events = require('../../../lib/cmap/events');
 
 const ALL_EVENTS = Object.keys(events)
   .map(key => events[key])
