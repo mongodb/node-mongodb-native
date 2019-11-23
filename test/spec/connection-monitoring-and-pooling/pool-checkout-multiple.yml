@@ -23,13 +23,10 @@ operations:
 events:
   - type: ConnectionCheckedOut
     connectionId: 42
-    address: 42
   - type: ConnectionCheckedOut
     connectionId: 42
-    address: 42
   - type: ConnectionCheckedOut
     connectionId: 42
-    address: 42
 ignore:
   - ConnectionCreated
   - ConnectionReady

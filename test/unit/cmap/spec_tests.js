@@ -5,7 +5,7 @@ const path = require('path');
 const expect = require('chai').expect;
 
 require('chai').use(require('../../match_spec').default);
-const Pool = require('../../../lib/pool').Pool;
+const ConnectionPool = require('../../../lib/core/cmap').ConnectionPool;
 const EventEmitter = require('events').EventEmitter;
 
 class Connection {
@@ -68,7 +68,7 @@ class Connection {
   destroy() {}
 }
 
-const events = require('../../../lib/pool/events');
+const events = require('../../../lib/core/cmap/events');
 
 const ALL_EVENTS = Object.keys(events)
   .map(key => events[key])
@@ -91,10 +91,10 @@ function promisify(fn) {
 }
 
 const PROMISIFIED_POOL_FUNCTIONS = {
-  checkOut: promisify(Pool.prototype.checkOut),
-  checkIn: promisify(Pool.prototype.checkIn),
-  clear: promisify(Pool.prototype.clear),
-  close: promisify(Pool.prototype.close)
+  checkOut: promisify(ConnectionPool.prototype.checkOut),
+  checkIn: promisify(ConnectionPool.prototype.checkIn),
+  clear: promisify(ConnectionPool.prototype.clear),
+  close: promisify(ConnectionPool.prototype.close)
 };
 
 function destroyPool(pool) {
@@ -103,7 +103,7 @@ function destroyPool(pool) {
   });
 }
 
-describe('Pool Spec Tests', function() {
+describe('Connection Pool (spec)', function() {
   const threads = new Map();
   const connections = new Map();
   const poolEvents = [];
@@ -125,7 +125,7 @@ describe('Pool Spec Tests', function() {
     const address = 'localhost:27017';
     options = Object.assign({}, options, { Connection, address });
 
-    pool = new Pool(options);
+    pool = new ConnectionPool(options);
     ALL_EVENTS.forEach(ev => {
       pool.on(ev, x => {
         poolEvents.push(x);
@@ -249,7 +249,7 @@ describe('Pool Spec Tests', function() {
     }
   }
 
-  const specPath = path.join(__dirname, '../spec', 'connection-monitoring-and-pooling');
+  const specPath = path.join(__dirname, '../../spec/connection-monitoring-and-pooling');
   const testFiles = fs
     .readdirSync(specPath)
     .filter(x => x.indexOf('.json') !== -1)

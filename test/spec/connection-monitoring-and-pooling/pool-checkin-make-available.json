@@ -18,18 +18,15 @@
   "events": [
     {
       "type": "ConnectionCheckedOut",
-      "connectionId": 1,
-      "address": 42
+      "connectionId": 1
     },
     {
       "type": "ConnectionCheckedIn",
-      "connectionId": 1,
-      "address": 42
+      "connectionId": 1
     },
     {
       "type": "ConnectionCheckedOut",
-      "connectionId": 1,
-      "address": 42
+      "connectionId": 1
     }
   ],
   "ignore": [

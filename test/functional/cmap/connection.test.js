@@ -1,6 +1,6 @@
 'use strict';
 
-const Connection = require('../../../lib/core/cmap/connection');
+const Connection = require('../../../lib/core/cmap/connection').Connection;
 const connect = require('../../../lib/core/connection/connect');
 const expect = require('chai').expect;
 const BSON = require('bson');
