@@ -68,12 +68,18 @@ class Connection {
   destroy() {}
 }
 
-const events = require('../../../lib/cmap/events');
-
-const ALL_EVENTS = Object.keys(events)
-  .map(key => events[key])
-  .filter(Ctor => Ctor.eventType)
-  .map(Ctor => Ctor.eventType);
+const ALL_EVENTS = new Set([
+  'connectionPoolCreated',
+  'connectionPoolClosed',
+  'connectionCreated',
+  'connectionReady',
+  'connectionClosed',
+  'connectionCheckOutStarted',
+  'connectionCheckOutFailed',
+  'connectionCheckedOut',
+  'connectionCheckedIn',
+  'connectionPoolCleared'
+]);
 
 function promisify(fn) {
   return function() {
