@@ -18,8 +18,7 @@
   "events": [
     {
       "type": "ConnectionCheckedOut",
-      "connectionId": 1,
-      "address": 42
+      "connectionId": 1
     },
     {
       "type": "ConnectionPoolCleared",
@@ -27,14 +26,12 @@
     },
     {
       "type": "ConnectionCheckedIn",
-      "connectionId": 1,
-      "address": 42
+      "connectionId": 1
     },
     {
       "type": "ConnectionClosed",
       "connectionId": 1,
-      "reason": "stale",
-      "address": 42
+      "reason": "stale"
     }
   ],
   "ignore": [

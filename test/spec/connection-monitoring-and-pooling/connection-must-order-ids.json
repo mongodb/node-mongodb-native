@@ -12,32 +12,26 @@
   ],
   "events": [
     {
-      "type": "ConnectionCheckOutStarted",
-      "address": 42
+      "type": "ConnectionCheckOutStarted"
     },
     {
       "type": "ConnectionCreated",
-      "connectionId": 1,
-      "address": 42
+      "connectionId": 1
     },
     {
       "type": "ConnectionCheckedOut",
-      "connectionId": 1,
-      "address": 42
+      "connectionId": 1
     },
     {
-      "type": "ConnectionCheckOutStarted",
-      "address": 42
+      "type": "ConnectionCheckOutStarted"
     },
     {
       "type": "ConnectionCreated",
-      "connectionId": 2,
-      "address": 42
+      "connectionId": 2
     },
     {
       "type": "ConnectionCheckedOut",
-      "connectionId": 2,
-      "address": 42
+      "connectionId": 2
     }
   ],
   "ignore": [

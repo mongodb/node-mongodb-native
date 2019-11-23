@@ -39,27 +39,22 @@
   },
   "events": [
     {
-      "type": "ConnectionCheckOutStarted",
-      "address": 42
+      "type": "ConnectionCheckOutStarted"
     },
     {
       "type": "ConnectionCheckedOut",
-      "connectionId": 42,
-      "address": 42
+      "connectionId": 42
     },
     {
-      "type": "ConnectionCheckOutStarted",
-      "address": 42
+      "type": "ConnectionCheckOutStarted"
     },
     {
       "type": "ConnectionCheckOutFailed",
-      "reason": "timeout",
-      "address": 42
+      "reason": "timeout"
     },
     {
       "type": "ConnectionCheckedIn",
-      "connectionId": 42,
-      "address": 42
+      "connectionId": 42
     }
   ],
   "ignore": [

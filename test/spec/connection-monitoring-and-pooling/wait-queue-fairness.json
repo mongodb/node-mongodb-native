@@ -4,7 +4,7 @@
   "description": "must issue Connections to threads in the order that the threads entered the queue",
   "poolOptions": {
     "maxPoolSize": 1,
-    "waitQueueTimeoutMS": 5000
+    "waitQueueTimeoutMS": 1000
   },
   "operations": [
     {
@@ -26,10 +26,6 @@
       "count": 2
     },
     {
-      "name": "wait",
-      "ms": 100
-    },
-    {
       "name": "start",
       "target": "thread2"
     },
@@ -42,10 +38,6 @@
       "name": "waitForEvent",
       "event": "ConnectionCheckOutStarted",
       "count": 3
-    },
-    {
-      "name": "wait",
-      "ms": 100
     },
     {
       "name": "start",
@@ -62,10 +54,6 @@
       "count": 4
     },
     {
-      "name": "wait",
-      "ms": 100
-    },
-    {
       "name": "start",
       "target": "thread4"
     },
@@ -78,10 +66,6 @@
       "name": "waitForEvent",
       "event": "ConnectionCheckOutStarted",
       "count": 5
-    },
-    {
-      "name": "wait",
-      "ms": 100
     },
     {
       "name": "checkIn",
@@ -118,69 +102,55 @@
   ],
   "events": [
     {
-      "type": "ConnectionCheckOutStarted",
-      "address": 42
+      "type": "ConnectionCheckOutStarted"
     },
     {
       "type": "ConnectionCheckedOut",
-      "connectionId": 42,
-      "address": 42
+      "connectionId": 42
     },
     {
-      "type": "ConnectionCheckOutStarted",
-      "address": 42
+      "type": "ConnectionCheckOutStarted"
     },
     {
-      "type": "ConnectionCheckOutStarted",
-      "address": 42
+      "type": "ConnectionCheckOutStarted"
     },
     {
-      "type": "ConnectionCheckOutStarted",
-      "address": 42
+      "type": "ConnectionCheckOutStarted"
     },
     {
-      "type": "ConnectionCheckOutStarted",
-      "address": 42
+      "type": "ConnectionCheckOutStarted"
     },
     {
       "type": "ConnectionCheckedIn",
-      "connectionId": 42,
-      "address": 42
+      "connectionId": 42
     },
     {
       "type": "ConnectionCheckedOut",
-      "connectionId": 42,
-      "address": 42
+      "connectionId": 42
     },
     {
       "type": "ConnectionCheckedIn",
-      "connectionId": 42,
-      "address": 42
+      "connectionId": 42
     },
     {
       "type": "ConnectionCheckedOut",
-      "connectionId": 42,
-      "address": 42
+      "connectionId": 42
     },
     {
       "type": "ConnectionCheckedIn",
-      "connectionId": 42,
-      "address": 42
+      "connectionId": 42
     },
     {
       "type": "ConnectionCheckedOut",
-      "connectionId": 42,
-      "address": 42
+      "connectionId": 42
     },
     {
       "type": "ConnectionCheckedIn",
-      "connectionId": 42,
-      "address": 42
+      "connectionId": 42
     },
     {
       "type": "ConnectionCheckedOut",
-      "connectionId": 42,
-      "address": 42
+      "connectionId": 42
     }
   ],
   "ignore": [
