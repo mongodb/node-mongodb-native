@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="3.3.5"></a>
+## [3.3.5](https://github.com/mongodb/node-mongodb-native/compare/v3.3.4...v3.3.5) (2019-11-26)
+
+
+### Bug Fixes
+
+* **bulk:** use operation index from input to report operation error ([08ee53e](https://github.com/mongodb/node-mongodb-native/commit/08ee53e))
+* **command:** only add TransientTransactionError label when in a transaction ([8bab074](https://github.com/mongodb/node-mongodb-native/commit/8bab074))
+* **connect:** connect with family 0 instead of family 4 ([7a41279](https://github.com/mongodb/node-mongodb-native/commit/7a41279))
+* **cursor:** call `initialize` after session support check ([3b076b3](https://github.com/mongodb/node-mongodb-native/commit/3b076b3))
+* **mongodb+srv:** respect overriding SRV-provided properties ([5ed4c07](https://github.com/mongodb/node-mongodb-native/commit/5ed4c07))
+* **pool:** support a `drain` event for use with unified topology ([3471c28](https://github.com/mongodb/node-mongodb-native/commit/3471c28))
+* **topology:** correct logic for checking for sessions support ([2d976bd](https://github.com/mongodb/node-mongodb-native/commit/2d976bd))
+* **topology:** don't drain iteration timers on server selection ([261f1e5](https://github.com/mongodb/node-mongodb-native/commit/261f1e5))
+
+
+### Features
+
+* support driver info for drivers wrapping the node driver ([d85c4a8](https://github.com/mongodb/node-mongodb-native/commit/d85c4a8))
+
+
+
 <a name="3.3.4"></a>
 ## [3.3.4](https://github.com/mongodb/node-mongodb-native/compare/v3.3.3...v3.3.4) (2019-11-11)
 
