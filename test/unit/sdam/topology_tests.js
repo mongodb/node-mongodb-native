@@ -2,6 +2,7 @@
 const Topology = require('../../../lib/core/sdam/topology').Topology;
 const Server = require('../../../lib/core/sdam/server').Server;
 const ServerDescription = require('../../../lib/core/sdam/server_description').ServerDescription;
+const mock = require('mongodb-mock-server');
 const expect = require('chai').expect;
 const sinon = require('sinon');
 
@@ -67,6 +68,41 @@ describe('Topology (unit)', function() {
       topology.connect(() => {
         expect(topology.shouldCheckForSessionSupport()).to.be.false;
         topology.close(done);
+      });
+    });
+  });
+
+  describe('black holes', function() {
+    let mockServer;
+    beforeEach(() => mock.createServer().then(server => (mockServer = server)));
+    afterEach(() => mock.cleanup());
+
+    it('should time out operations against servers that have been blackholed', function(done) {
+      mockServer.setMessageHandler(request => {
+        const doc = request.document;
+
+        let initialIsMasterSent = false;
+        if (doc.ismaster && !initialIsMasterSent) {
+          request.reply(mock.DEFAULT_ISMASTER_36);
+          initialIsMasterSent = true;
+        } else {
+          // black hole all other operations
+          console.log(`blackholing request: ${JSON.stringify(doc)}`);
+        }
+      });
+
+      const topology = new Topology(mockServer.uri());
+      topology.connect(err => {
+        expect(err).to.not.exist;
+
+        topology.command('admin.$cmd', { ping: 1 }, { socketTimeout: 1500 }, (err, result) => {
+          expect(result).to.not.exist;
+          expect(err).to.exist;
+          expect(err).to.match(/timed out/);
+          console.dir({ err });
+
+          topology.close(done);
+        });
       });
     });
   });
