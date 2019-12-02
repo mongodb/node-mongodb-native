@@ -185,7 +185,7 @@ class EventCollector {
   }
 
   teardown() {
-    this._client.off(this._eventName, this._listener);
+    this._client.removeListener(this._eventName, this._listener);
   }
 }
 
