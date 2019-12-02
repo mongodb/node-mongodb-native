@@ -108,7 +108,9 @@ describe('Transactions', function() {
         const configuration = this.configuration;
         const client = configuration.newClient(configuration.url(), { useUnifiedTopology: true });
 
-        client.connect((err, client) => {
+        client.connect(err => {
+          expect(err).to.not.exist;
+
           const session = client.startSession();
           const db = client.db(configuration.db);
           const coll = db.collection('transaction_error_test');
@@ -116,9 +118,7 @@ describe('Transactions', function() {
             expect(err).to.not.exist;
             expect(() => session.startTransaction()).to.not.throw();
 
-            session.endSession(() => {
-              client.close(done);
-            });
+            session.abortTransaction(() => session.endSession(() => client.close(done)));
           });
         });
       }
@@ -132,11 +132,14 @@ describe('Transactions', function() {
         const configuration = this.configuration;
         const client = configuration.newClient({ w: 1 }, { useUnifiedTopology: true });
 
-        client.connect((err, client) => {
+        client.connect(err => {
+          expect(err).to.not.exist;
+
           const session = client.startSession();
           const db = client.db(configuration.db);
           db.createCollection('transaction_error_test', (err, coll) => {
             expect(err).to.not.exist;
+
             session.startTransaction();
             coll.insertOne({ a: 1 }, { session }, err => {
               expect(err).to.not.exist;
@@ -148,14 +151,17 @@ describe('Transactions', function() {
                   mode: { times: 1 },
                   data: { failCommands: ['insert'], closeConnection: true }
                 },
-                () => {
+                err => {
+                  expect(err).to.not.exist;
                   expect(session.inTransaction()).to.be.true;
+
                   coll.insertOne({ b: 2 }, { session }, err => {
                     expect(err)
                       .to.exist.and.to.be.an.instanceof(MongoNetworkError)
                       .and.to.have.a.property('errorLabels')
                       .that.includes('TransientTransactionError');
-                    session.endSession(() => client.close(done));
+
+                    session.abortTransaction(() => session.endSession(() => client.close(done)));
                   });
                 }
               );
@@ -171,24 +177,24 @@ describe('Transactions', function() {
         const configuration = this.configuration;
         const client = configuration.newClient({ w: 1 }, { useUnifiedTopology: true });
 
-        client.connect((err, client) => {
+        client.connect(err => {
+          expect(err).to.not.exist;
           const db = client.db(configuration.db);
           const coll = db.collection('transaction_error_test1');
 
           db.executeDbAdminCommand(
             {
               configureFailPoint: 'failCommand',
-              mode: 'alwaysOn',
+              mode: { times: 2 },
               data: { failCommands: ['insert'], closeConnection: true }
             },
-            () => {
+            err => {
+              expect(err).to.not.exist;
               coll.insertOne({ a: 1 }, err => {
                 expect(err)
                   .to.exist.and.to.be.an.instanceOf(MongoNetworkError)
                   .and.to.not.have.a.property('errorLabels');
-                db.executeDbAdminCommand({ configureFailPoint: 'failCommand', mode: 'off' }, () => {
-                  client.close(done);
-                });
+                client.close(done);
               });
             }
           );

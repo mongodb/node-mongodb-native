@@ -87,7 +87,6 @@ describe('Topology (unit)', function() {
           initialIsMasterSent = true;
         } else {
           // black hole all other operations
-          console.log(`blackholing request: ${JSON.stringify(doc)}`);
         }
       });
 
