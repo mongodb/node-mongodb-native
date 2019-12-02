@@ -116,9 +116,7 @@ describe('Transactions', function() {
             expect(err).to.not.exist;
             expect(() => session.startTransaction()).to.not.throw();
 
-            session.endSession(() => {
-              client.close(done);
-            });
+            session.abortTransaction(() => session.endSession(() => client.close(done)));
           });
         });
       }
