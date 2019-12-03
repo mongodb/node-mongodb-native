@@ -4,7 +4,7 @@ language: node_js
 branches:
   only:
     - master
-    - next
+    - 3.3 
 
 before_install:
   # we have to intstall mongo-orchestration ourselves to get around permissions issues in subshells
