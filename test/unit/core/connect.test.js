@@ -129,6 +129,19 @@ describe('Connect Tests', function() {
     }
   );
 
+  it('should allow a cancellaton token', function(done) {
+    const cancellationToken = new EventEmitter();
+    setTimeout(() => cancellationToken.emit('cancel'), 100);
+    // set no response handler for mock server, effecively blackhole requests
+
+    connect(test.connectOptions, cancellationToken, (err, conn) => {
+      expect(err).to.exist;
+      expect(err).to.match(/connection establishment was cancelled/);
+      expect(conn).to.not.exist;
+      done();
+    });
+  });
+
   describe('runCommand', function() {
     const metadata = { requires: { topology: 'single' } };
     class MockConnection extends EventEmitter {
