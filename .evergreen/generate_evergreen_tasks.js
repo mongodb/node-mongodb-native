@@ -14,14 +14,6 @@ const TOPOLOGIES = ['server', 'replica_set', 'sharded_cluster'].concat([
 ]);
 
 const OPERATING_SYSTEMS = [
-  // ArchLinux
-  {
-    name: 'archlinux-test',
-    display_name: 'Archlinux',
-    run_on: 'archlinux-test',
-    mongoVersion: '<4.2',
-    auth: false
-  },
   // Debian
   {
     name: 'debian71-test',
