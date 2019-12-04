@@ -69,7 +69,7 @@
     "coverage": "istanbul cover mongodb-test-runner -- -t 60000 test/core test/unit test/functional",
     "lint": "eslint lib test",
     "format": "prettier --print-width 100 --tab-width 2 --single-quote --write 'test/**/*.js' 'lib/**/*.js'",
-    "bench": "node test/driverBench/",
+    "bench": "node test/benchmarks/driverBench/",
     "generate-evergreen": "node .evergreen/generate_evergreen_tasks.js",
     "release": "standard-version -i HISTORY.md"
   },
