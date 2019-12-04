@@ -3,9 +3,9 @@ const url = require('url');
 const qs = require('querystring');
 const util = require('util');
 
-const MongoClient = require('../../lib/mongo_client');
-const TopologyType = require('../../lib/core/sdam/common').TopologyType;
-const core = require('../../lib/core');
+const MongoClient = require('../../../lib/mongo_client');
+const TopologyType = require('../../../lib/core/sdam/common').TopologyType;
+const core = require('../../../lib/core');
 
 class NativeConfiguration {
   constructor(parsedURI, context) {
@@ -21,7 +21,7 @@ class NativeConfiguration {
       parsedURI.options
     );
 
-    this.mongo = this.require = require('../..');
+    this.mongo = this.require = require('../../..');
     this.writeConcern = function() {
       return { w: 1 };
     };
