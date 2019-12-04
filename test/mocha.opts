@@ -1,5 +1,5 @@
   --recursive
   --timeout 60000
-  --file test/runner
-  --ui test/runner/metadata_ui.js
+  --file test/tools/runner
+  --ui test/tools/runner/metadata_ui.js
 
