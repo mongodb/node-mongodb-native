@@ -6,7 +6,7 @@ const mock = require('mongodb-mock-server');
 const genClusterTime = require('../common').genClusterTime;
 
 const Connection = require('../../../../lib/core/connection/connection');
-const ConnectionSpy = require('../../functional/shared').ConnectionSpy;
+const ConnectionSpy = require('../../../functional/shared').ConnectionSpy;
 
 describe.skip('Reconnect (Mongos)', function() {
   const fixture = {};

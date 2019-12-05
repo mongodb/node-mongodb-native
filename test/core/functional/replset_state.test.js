@@ -2,12 +2,13 @@
 
 const expect = require('chai').expect,
   f = require('util').format,
+  p = require('path'),
   fs = require('fs'),
   ObjectId = require('bson').ObjectId,
   ReplSetState = require('../../../lib/core/topologies/replset_state');
 
 describe('ReplicaSet state', function() {
-  const path = f('%s/../spec/server-discovery-and-monitoring/rs', __dirname);
+  const path = p.resolve(__dirname, '../../spec/server-discovery-and-monitoring/rs');
 
   fs
     .readdirSync(path)

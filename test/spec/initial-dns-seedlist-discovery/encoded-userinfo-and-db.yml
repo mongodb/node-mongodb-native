@@ -1,0 +1,15 @@
+uri: "mongodb+srv://b*b%40f3tt%3D:%244to%40L8%3DMC@test3.test.build.10gen.cc/mydb%3F?replicaSet=repl0"
+seeds:
+    - localhost.test.build.10gen.cc:27017
+hosts:
+    - localhost:27017
+    - localhost:27018
+    - localhost:27019
+options:
+    replicaSet: repl0
+    ssl: true
+parsed_options:
+    user: "b*b@f3tt="
+    password: "$4to@L8=MC"
+    db: "mydb?"
+comment: Encoded user, pass, and DB parse correctly
