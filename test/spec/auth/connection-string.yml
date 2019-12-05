@@ -288,10 +288,6 @@ tests:
         valid: true
         credential: ~
     -
-        description: "authSource without username is invalid (default mechanism)"
-        uri: "mongodb://localhost/?authSource=foo"
-        valid: false
-    -
         description: "should throw an exception if no username provided (userinfo implies default mechanism)"
         uri: "mongodb://@localhost.com/"
         valid: false
