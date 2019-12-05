@@ -1,14 +1,12 @@
 'use strict';
 
 const instrument = require('../..').instrument;
-const path = require('path');
-const fs = require('fs');
 const shared = require('./shared');
 const setupDatabase = shared.setupDatabase;
 const filterForCommands = shared.filterForCommands;
 const filterOutCommands = shared.filterOutCommands;
 const ignoreNsNotFound = shared.ignoreNsNotFound;
-const EJSON = require('mongodb-extjson');
+const loadSpecTests = require('../spec').loadSpecTests;
 const chai = require('chai');
 const expect = chai.expect;
 
@@ -1075,43 +1073,34 @@ describe('APM', function() {
         });
     }
 
-    fs
-      .readdirSync(__dirname + '/spec/apm')
-      .filter(x => x.indexOf('.json') !== -1)
-      .map(x =>
-        Object.assign(
-          { title: path.basename(x, '.json') },
-          EJSON.parse(fs.readFileSync(__dirname + '/spec/apm/' + x), { relaxed: true })
-        )
-      )
-      .forEach(scenario => {
-        describe(scenario.title, function() {
-          scenario.tests.forEach(test => {
-            const requirements = { topology: ['single', 'replicaset', 'sharded'] };
-            if (test.ignore_if_server_version_greater_than) {
-              requirements.mongodb = `<${test.ignore_if_server_version_greater_than}`;
-            } else if (test.ignore_if_server_version_less_than) {
-              requirements.mongodb = `>${test.ignore_if_server_version_less_than}`;
-            }
+    loadSpecTests('apm').forEach(scenario => {
+      describe(scenario.name, function() {
+        scenario.tests.forEach(test => {
+          const requirements = { topology: ['single', 'replicaset', 'sharded'] };
+          if (test.ignore_if_server_version_greater_than) {
+            requirements.mongodb = `<${test.ignore_if_server_version_greater_than}`;
+          } else if (test.ignore_if_server_version_less_than) {
+            requirements.mongodb = `>${test.ignore_if_server_version_less_than}`;
+          }
 
-            if (test.ignore_if_topology_type) {
-              requirements.topology = requirements.topology.filter(
-                top => test.ignore_if_topology_type.indexOf(top) < 0
-              );
-            }
+          if (test.ignore_if_topology_type) {
+            requirements.topology = requirements.topology.filter(
+              top => test.ignore_if_topology_type.indexOf(top) < 0
+            );
+          }
 
-            it(test.description, {
-              metadata: { requires: requirements },
-              test: function() {
-                const client = this.configuration.newClient({}, { monitorCommands: true });
-                return client.connect().then(client => {
-                  expect(client).to.exist;
-                  return executeOperation(client, scenario, test).then(() => client.close());
-                });
-              }
-            });
+          it(test.description, {
+            metadata: { requires: requirements },
+            test: function() {
+              const client = this.configuration.newClient({}, { monitorCommands: true });
+              return client.connect().then(client => {
+                expect(client).to.exist;
+                return executeOperation(client, scenario, test).then(() => client.close());
+              });
+            }
           });
         });
       });
+    });
   });
 });

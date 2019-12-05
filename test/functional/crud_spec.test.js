@@ -13,11 +13,11 @@ const gatherTestSuites = require('./spec-runner').gatherTestSuites;
 const generateTopologyTests = require('./spec-runner').generateTopologyTests;
 
 function findScenarios() {
-  const route = [__dirname, 'spec', 'crud'].concat(Array.from(arguments));
+  const route = [__dirname, '..', 'spec', 'crud'].concat(Array.from(arguments));
   return fs
-    .readdirSync(path.join.apply(path, route))
+    .readdirSync(path.resolve.apply(path, route))
     .filter(x => x.indexOf('json') !== -1)
-    .map(x => [x, fs.readFileSync(path.join.apply(path, route.concat([x])), 'utf8')])
+    .map(x => [x, fs.readFileSync(path.resolve.apply(path, route.concat([x])), 'utf8')])
     .map(x => [path.basename(x[0], '.json'), JSON.parse(x[1])]);
 }
 
@@ -474,7 +474,7 @@ describe('CRUD spec', function() {
 
 describe('CRUD v2', function() {
   const testContext = new TestRunnerContext();
-  const testSuites = gatherTestSuites(path.join(__dirname, 'spec', 'crud', 'v2'));
+  const testSuites = gatherTestSuites(path.resolve(__dirname, '../spec/crud/v2'));
   after(() => testContext.teardown());
   before(function() {
     return testContext.setup(this.configuration);

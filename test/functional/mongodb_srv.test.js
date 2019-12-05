@@ -8,9 +8,9 @@ var expect = require('chai').expect;
 
 function getTests() {
   return fs
-    .readdirSync(path.join(__dirname, 'spec/dns-txt-records'))
+    .readdirSync(path.resolve(__dirname, '../spec/dns-txt-records'))
     .filter(x => x.indexOf('json') !== -1)
-    .map(x => [x, fs.readFileSync(path.join(__dirname, 'spec/dns-txt-records', x), 'utf8')])
+    .map(x => [x, fs.readFileSync(path.resolve(__dirname, '../spec/dns-txt-records', x), 'utf8')])
     .map(x => [path.basename(x[0], '.json'), JSON.parse(x[1])]);
 }
 

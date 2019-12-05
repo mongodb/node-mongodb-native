@@ -19,7 +19,7 @@ describe('Client Side Encryption Corpus', function() {
     }
   };
 
-  const corpusDir = path.resolve(__dirname, '..', 'spec', 'client-side-encryption', 'corpus');
+  const corpusDir = path.resolve(__dirname, '../../spec/client-side-encryption/corpus');
   function loadCorpusData(filename) {
     return EJSON.parse(fs.readFileSync(path.resolve(corpusDir, filename), { strict: true }));
   }

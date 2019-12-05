@@ -1,13 +1,12 @@
 'use strict';
 
-const path = require('path');
 const TestRunnerContext = require('./spec-runner').TestRunnerContext;
-const gatherTestSuites = require('./spec-runner').gatherTestSuites;
 const generateTopologyTests = require('./spec-runner').generateTopologyTests;
+const loadSpecTests = require('../spec').loadSpecTests;
 
 describe('Retryable Reads', function() {
   const testContext = new TestRunnerContext();
-  const testSuites = gatherTestSuites(path.join(__dirname, 'spec', 'retryable-reads'));
+  const testSuites = loadSpecTests('retryable-reads');
 
   after(() => testContext.teardown());
   before(function() {

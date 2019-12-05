@@ -1,10 +1,9 @@
 'use strict';
 const expect = require('chai').expect;
 const setupDatabase = require('./shared').setupDatabase;
-const path = require('path');
 const TestRunnerContext = require('./spec-runner').TestRunnerContext;
-const gatherTestSuites = require('./spec-runner').gatherTestSuites;
 const generateTopologyTests = require('./spec-runner').generateTopologyTests;
+const loadSpecTests = require('../spec').loadSpecTests;
 
 const ignoredCommands = ['ismaster'];
 const test = {
@@ -184,7 +183,7 @@ describe('Sessions', function() {
     }
 
     const testContext = new SessionSpecTestContext();
-    const testSuites = gatherTestSuites(path.join(__dirname, 'spec', 'sessions'));
+    const testSuites = loadSpecTests('sessions');
 
     after(() => testContext.teardown());
     before(function() {
