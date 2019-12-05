@@ -199,10 +199,7 @@ describe('Change Stream Spec', function() {
       });
     }
 
-    return changeStreamPromise.then(
-      result => close(null, result),
-      err => close(err)
-    );
+    return changeStreamPromise.then(result => close(null, result), err => close(err));
   }
 
   function runOperations(client, operations) {
