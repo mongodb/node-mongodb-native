@@ -1,27 +1,24 @@
 'use strict';
 
-const fs = require('fs');
-const path = require('path');
 const expect = require('chai').expect;
+const loadSpecTests = require('../spec').loadSpecTests;
 
 describe('Retryable Writes', function() {
   let ctx = {};
 
-  loadTestFiles().forEach(testFileData => {
-    const methodName = testFileData[0];
-    const scenario = testFileData[1];
+  loadSpecTests('retryable-writes').forEach(suite => {
     const topology = ['replicaset'];
-    const mongodb = `>=${scenario.minServerVersion}`;
+    const mongodb = `>=${suite.minServerVersion}`;
 
-    describe(methodName, function() {
-      scenario.tests.forEach(test => {
+    describe(suite.name, function() {
+      suite.tests.forEach(test => {
         it(test.description, {
           metadata: { requires: { topology, mongodb } },
           test: function() {
             // Step 1: Test Setup. Includes a lot of boilerplate stuff
             // like creating a client, dropping and refilling data collections,
             // and enabling failpoints
-            return executeScenarioSetup(scenario, test, this.configuration, ctx).then(() =>
+            return executeScenarioSetup(suite, test, this.configuration, ctx).then(() =>
               // Step 2: Run the test
               executeScenarioTest(test, ctx)
             );
@@ -43,18 +40,6 @@ describe('Retryable Writes', function() {
       .then(() => (ctx = {}));
   });
 });
-
-function loadTestFiles() {
-  return fs
-    .readdirSync(path.join(__dirname, 'spec', 'retryable-writes'))
-    .filter(fileName => fileName.indexOf('.json') !== -1)
-    .map(fileName => [
-      path.basename(fileName, '.json'),
-      JSON.parse(
-        fs.readFileSync(path.join(path.join(__dirname, 'spec', 'retryable-writes'), fileName))
-      )
-    ]);
-}
 
 function executeScenarioSetup(scenario, test, config, ctx) {
   const url = config.url();

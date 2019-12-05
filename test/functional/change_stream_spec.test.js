@@ -1,8 +1,7 @@
 'use strict';
 
-const EJSON = require('mongodb-extjson');
 const chai = require('chai');
-const fs = require('fs');
+const loadSpecTests = require('../spec').loadSpecTests;
 const camelCase = require('lodash.camelcase');
 const setupDatabase = require('./shared').setupDatabase;
 const delay = require('./shared').delay;
@@ -29,56 +28,50 @@ describe('Change Stream Spec', function() {
     return new Promise(r => gc.close(() => r()));
   });
 
-  fs
-    .readdirSync(`${__dirname}/spec/change-stream`)
-    .filter(filename => filename.match(/\.json$/))
-    .forEach(filename => {
-      const specString = fs.readFileSync(`${__dirname}/spec/change-stream/${filename}`, 'utf8');
-      const specData = EJSON.parse(specString, { relaxed: true });
+  loadSpecTests('change-stream').forEach(suite => {
+    const ALL_DBS = [suite.database_name, suite.database2_name];
 
-      const ALL_DBS = [specData.database_name, specData.database2_name];
+    describe(suite.name, () => {
+      beforeEach(function() {
+        const gc = globalClient;
+        const sDB = suite.database_name;
+        const sColl = suite.collection_name;
+        const configuration = this.configuration;
+        return Promise.all(ALL_DBS.map(db => gc.db(db).dropDatabase({ w: 'majority' })))
+          .then(() => gc.db(sDB).createCollection(sColl))
+          .then(() => gc.db(suite.database2_name).createCollection(suite.collection2_name))
+          .then(() => configuration.newClient({}, { monitorCommands: true }).connect())
+          .then(client => {
+            ctx = { gc, client };
+            events = [];
+            const _events = events;
 
-      describe(filename, () => {
-        beforeEach(function() {
-          const gc = globalClient;
-          const sDB = specData.database_name;
-          const sColl = specData.collection_name;
-          const configuration = this.configuration;
-          return Promise.all(ALL_DBS.map(db => gc.db(db).dropDatabase({ w: 'majority' })))
-            .then(() => gc.db(sDB).createCollection(sColl))
-            .then(() => gc.db(specData.database2_name).createCollection(specData.collection2_name))
-            .then(() => configuration.newClient({}, { monitorCommands: true }).connect())
-            .then(client => {
-              ctx = { gc, client };
-              events = [];
-              const _events = events;
+            ctx.database = ctx.client.db(sDB);
+            ctx.collection = ctx.database.collection(sColl);
+            ctx.client.on('commandStarted', e => _events.push(e));
+          });
+      });
 
-              ctx.database = ctx.client.db(sDB);
-              ctx.collection = ctx.database.collection(sColl);
-              ctx.client.on('commandStarted', e => _events.push(e));
-            });
-        });
+      afterEach(function() {
+        const client = ctx.client;
+        ctx = undefined;
+        events = undefined;
 
-        afterEach(function() {
-          const client = ctx.client;
-          ctx = undefined;
-          events = undefined;
+        client.removeAllListeners('commandStarted');
 
-          client.removeAllListeners('commandStarted');
+        return client && client.close(true);
+      });
 
-          return client && client.close(true);
-        });
+      suite.tests.forEach(test => {
+        const shouldSkip = test.skip || TESTS_TO_SKIP.has(test.description);
+        const itFn = shouldSkip ? it.skip : test.only ? it.only : it;
+        const metadata = generateMetadata(test);
+        const testFn = generateTestFn(test);
 
-        specData.tests.forEach(test => {
-          const shouldSkip = test.skip || TESTS_TO_SKIP.has(test.description);
-          const itFn = shouldSkip ? it.skip : test.only ? it.only : it;
-          const metadata = generateMetadata(test);
-          const testFn = generateTestFn(test);
-
-          itFn(test.description, { metadata, test: testFn });
-        });
+        itFn(test.description, { metadata, test: testFn });
       });
     });
+  });
 
   // Fn Generator methods
 
@@ -206,7 +199,10 @@ describe('Change Stream Spec', function() {
       });
     }
 
-    return changeStreamPromise.then(result => close(null, result), err => close(err));
+    return changeStreamPromise.then(
+      result => close(null, result),
+      err => close(err)
+    );
   }
 
   function runOperations(client, operations) {

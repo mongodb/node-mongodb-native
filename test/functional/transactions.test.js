@@ -5,7 +5,7 @@ const expect = chai.expect;
 const core = require('../../lib/core');
 const sessions = core.Sessions;
 const TestRunnerContext = require('./spec-runner').TestRunnerContext;
-const gatherTestSuites = require('./spec-runner').gatherTestSuites;
+const loadSpecTests = require('../spec').loadSpecTests;
 const generateTopologyTests = require('./spec-runner').generateTopologyTests;
 const MongoNetworkError = require('../../lib/core').MongoNetworkError;
 
@@ -13,14 +13,14 @@ describe('Transactions', function() {
   const testContext = new TestRunnerContext();
 
   [
-    { name: 'spec tests', specPath: `${__dirname}/spec/transactions` },
+    { name: 'spec tests', specPath: 'transactions' },
     {
       name: 'withTransaction spec tests',
-      specPath: `${__dirname}/spec/transactions/convenient-api`
+      specPath: 'transactions/convenient-api'
     }
   ].forEach(suiteSpec => {
     describe(suiteSpec.name, function() {
-      const testSuites = gatherTestSuites(suiteSpec.specPath);
+      const testSuites = loadSpecTests(suiteSpec.specPath);
       after(() => testContext.teardown());
       before(function() {
         return testContext.setup(this.configuration);
