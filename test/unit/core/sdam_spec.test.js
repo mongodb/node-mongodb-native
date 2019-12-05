@@ -11,11 +11,11 @@ const parse = require('../../../lib/core/uri_parser');
 chai.use(require('chai-subset'));
 const sinon = require('sinon');
 
-const specDir = path.join(__dirname, '..', 'spec', 'server-discovery-and-monitoring');
+const specDir = path.resolve(__dirname, '../../spec/server-discovery-and-monitoring');
 function collectTests() {
   const testTypes = fs
     .readdirSync(specDir)
-    .filter(d => fs.statSync(path.join(specDir, d)).isDirectory());
+    .filter(d => fs.statSync(path.resolve(specDir, d)).isDirectory());
 
   const tests = {};
   testTypes.forEach(testType => {

@@ -4,6 +4,7 @@ const parseConnectionString = require('../../../lib/core/uri_parser');
 const fs = require('fs');
 const punycode = require('punycode');
 const MongoParseError = require('../../../lib/core/error').MongoParseError;
+const loadSpecTests = require('../../spec').loadSpecTests;
 const chai = require('chai');
 const expect = chai.expect;
 chai.use(require('chai-subset'));
@@ -142,7 +143,7 @@ describe('Connection String', function() {
   });
 
   it('should parse a numeric authSource with variable width', function(done) {
-    parseConnectionString('mongodb://localhost/?authSource=0001', (err, result) => {
+    parseConnectionString('mongodb://test@localhost/?authSource=0001', (err, result) => {
       expect(err).to.not.exist;
       expect(result.options).to.have.property('authSource');
       expect(result.options.authSource).to.equal('0001');
@@ -205,93 +206,80 @@ describe('Connection String', function() {
     });
   });
 
-  function collectTests(path) {
-    return fs
-      .readdirSync(`${__dirname}/${path}`)
-      .filter(x => x.indexOf('.json') !== -1)
-      .map(x => JSON.parse(fs.readFileSync(`${__dirname}/${path}/${x}`)));
-  }
-
   describe('spec tests', function() {
-    const testFiles = collectTests('../spec/connection-string').concat(
-      collectTests('../spec/auth')
-    );
+    const suites = loadSpecTests('connection-string').concat(loadSpecTests('auth'));
 
-    // Execute the tests
-    for (let i = 0; i < testFiles.length; i++) {
-      const testFile = testFiles[i];
-
-      // Get each test
-      for (let j = 0; j < testFile.tests.length; j++) {
-        const test = testFile.tests[j];
-
-        it(test.description, {
-          metadata: { requires: { topology: 'single' } },
-          test: function(done) {
-            if (skipTests.indexOf(test.description) !== -1) {
-              return this.skip();
-            }
-
-            const valid = test.valid;
-            parseConnectionString(test.uri, { caseTranslate: false }, function(err, result) {
-              if (valid === false) {
-                expect(err).to.exist;
-                expect(err).to.be.instanceOf(MongoParseError);
-                expect(result).to.not.exist;
-              } else {
-                expect(err).to.not.exist;
-                expect(result).to.exist;
-
-                // remove data we don't track
-                if (test.auth && test.auth.password === '') {
-                  test.auth.password = null;
-                }
-
-                if (test.hosts != null) {
-                  test.hosts = test.hosts.map(host => {
-                    delete host.type;
-                    host.host = punycode.toASCII(host.host);
-                    return host;
-                  });
-
-                  // remove values that require no validation
-                  test.hosts.forEach(host => {
-                    Object.keys(host).forEach(key => {
-                      if (host[key] == null) delete host[key];
-                    });
-                  });
-
-                  expect(result.hosts).to.containSubset(test.hosts);
-                }
-
-                if (test.auth) {
-                  if (test.auth.db != null) {
-                    expect(result.auth).to.have.property('db');
-                    expect(result.auth.db).to.eql(test.auth.db);
-                  }
-
-                  if (test.auth.username != null) {
-                    expect(result.auth).to.have.property('username');
-                    expect(result.auth.username).to.eql(test.auth.username);
-                  }
-
-                  if (test.auth.password != null) {
-                    expect(result.auth).to.have.property('password');
-                    expect(result.auth.password).to.eql(test.auth.password);
-                  }
-                }
-
-                if (test.options !== null) {
-                  // it's possible we have options which are not explicitly included in the spec test
-                  expect(result.options).to.deep.include(test.options);
-                }
+    suites.forEach(suite => {
+      describe(suite.name, function() {
+        suite.tests.forEach(test => {
+          it(test.description, {
+            metadata: { requires: { topology: 'single' } },
+            test: function(done) {
+              if (skipTests.indexOf(test.description) !== -1) {
+                return this.skip();
               }
 
-              done();
-            });
-          }
+              const valid = test.valid;
+              parseConnectionString(test.uri, { caseTranslate: false }, function(err, result) {
+                if (valid === false) {
+                  expect(err).to.exist;
+                  expect(err).to.be.instanceOf(MongoParseError);
+                  expect(result).to.not.exist;
+                } else {
+                  expect(err).to.not.exist;
+                  expect(result).to.exist;
+
+                  // remove data we don't track
+                  if (test.auth && test.auth.password === '') {
+                    test.auth.password = null;
+                  }
+
+                  if (test.hosts != null) {
+                    test.hosts = test.hosts.map(host => {
+                      delete host.type;
+                      host.host = punycode.toASCII(host.host);
+                      return host;
+                    });
+
+                    // remove values that require no validation
+                    test.hosts.forEach(host => {
+                      Object.keys(host).forEach(key => {
+                        if (host[key] == null) delete host[key];
+                      });
+                    });
+
+                    expect(result.hosts).to.containSubset(test.hosts);
+                  }
+
+                  if (test.auth) {
+                    if (test.auth.db != null) {
+                      expect(result.auth).to.have.property('db');
+                      expect(result.auth.db).to.eql(test.auth.db);
+                    }
+
+                    if (test.auth.username != null) {
+                      expect(result.auth).to.have.property('username');
+                      expect(result.auth.username).to.eql(test.auth.username);
+                    }
+
+                    if (test.auth.password != null) {
+                      expect(result.auth).to.have.property('password');
+                      expect(result.auth.password).to.eql(test.auth.password);
+                    }
+                  }
+
+                  if (test.options != null) {
+                    // it's possible we have options which are not explicitly included in the spec test
+                    expect(result.options).to.deep.include(test.options);
+                  }
+                }
+
+                done();
+              });
+            }
+          });
         });
-      }
-    }
+      });
+    });
   });
 });

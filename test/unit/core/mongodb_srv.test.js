@@ -14,7 +14,7 @@ describe('mongodb+srv', function() {
   });
 
   describe('spec tests', function() {
-    const specPath = path.join(__dirname, '../spec', 'initial-dns-seedlist-discovery');
+    const specPath = path.join(__dirname, '../../spec', 'initial-dns-seedlist-discovery');
     const testFiles = fs
       .readdirSync(specPath)
       .filter(x => x.indexOf('.json') !== -1)

@@ -73,9 +73,14 @@ These YAML and JSON files contain the following fields:
 - ``hosts``: the discovered topology's list of hosts once SDAM completes a scan
 - ``options``: the parsed connection string options as discovered from URI and
   TXT records
+- ``parsed_options``: additional options present in the `Connection String`_
+  URI such as ``Userinfo`` (as ``user`` and ``password``), and ``Auth
+  database`` (as ``auth_database``).
 - ``error``: indicates that the parsing of the URI, or the resolving or
   contents of the SRV or TXT records included errors.
 - ``comment``: a comment to indicate why a test would fail.
+
+.. _`Connection String`: ../../connection-string/connection-string-spec.rst
 
 For each file, create MongoClient initialized with the mongodb+srv connection
 string. You SHOULD verify that the client's initial seed list matches the list of
@@ -83,5 +88,8 @@ seeds. You MUST verify that the set of ServerDescriptions in the client's
 TopologyDescription eventually matches the list of hosts. You MUST verify that
 each of the values of the Connection String Options under ``options`` match the
 Client's parsed value for that option. There may be other options parsed by
-the Client as well, which a test does not verify. You MUST verify that an
-error has been thrown if ``error`` is present.
+the Client as well, which a test does not verify. In ``uri-with-auth`` the URI
+contains a user/password set and additional options are provided in
+``parsed_options`` so that tests can verify authentication is maintained when
+evaluating URIs. You MUST verify that an error has been thrown if ``error`` is
+present.
