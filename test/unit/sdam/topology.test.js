@@ -98,7 +98,6 @@ describe('Topology (unit)', function() {
           expect(result).to.not.exist;
           expect(err).to.exist;
           expect(err).to.match(/timed out/);
-          console.dir({ err });
 
           topology.close(done);
         });
