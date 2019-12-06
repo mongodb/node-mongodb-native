@@ -69,6 +69,13 @@ describe('Mongos SRV Polling', function() {
       context.sinon.stub(poller, 'parentDomainMismatch');
     }
 
+    it('should always return a valid value for `intervalMS`', function() {
+      const poller = new SrvPoller({ srvHost: SRV_HOST });
+      expect(poller)
+        .property('intervalMS')
+        .to.equal(60000);
+    });
+
     describe('success', function() {
       it('should emit event, disable haMode, and schedule another poll', function(done) {
         const records = [srvRecord('jalad.tanagra.com'), srvRecord('thebeast.tanagra.com')];
