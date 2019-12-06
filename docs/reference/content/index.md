@@ -39,7 +39,7 @@ If you'd like to use the MongoDB driver with ESNext features such as Promises an
 
 Advanced features for the driver.
 
-* [SSL]({{< relref "tutorials/connect/ssl.md" >}})
+* [TLS]({{< relref "tutorials/connect/tls.md" >}})
 * [Logging]({{< relref "reference/management/logging.md" >}})
 * [APM]({{< relref "reference/management/apm.md" >}})
 * [Topology monitoring]({{< relref "reference/management/sdam-monitoring.md" >}})

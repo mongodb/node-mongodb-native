@@ -23,7 +23,7 @@ const dbName = 'myproject';
 
 // create a client, passing in additional options
 const client = new MongoClient(url, {
-  poolSize: 10, ssl: true
+  poolSize: 10, tls: true
 });
 
 // Use connect method to connect to the server
@@ -40,12 +40,17 @@ The table below shows all settings and what topology they affect.
 | Option | Affects | Type | Default | Description |
 | :----------| :------------------ | :------ | :------ |:------------- |
 | **poolSize** | Server, ReplicaSet, Mongos | integer | 5 | Set the maximum poolSize for each individual server or proxy connection.|
-| **ssl** | Server, ReplicaSet, Mongos | boolean | false | Use ssl connection |
-| **sslValidate** | Server, ReplicaSet, Mongos | boolean | false | Validate mongod server certificate against ca |
-| **sslCA** | Server, ReplicaSet, Mongos | Array | null | Array of valid certificates either as Buffers or Strings |
-| **sslCert** | Server, ReplicaSet, Mongos | Buffer/String | null | String or buffer containing the certificate we wish to present |
-| **sslKey** | Server, ReplicaSet, Mongos | Buffer/String | null | String or buffer containing the certificate private key we wish to present |
-| **sslPass** | Server, ReplicaSet, Mongos | Buffer/String | null | String or buffer containing the certificate password |
+| **ssl** | Server, ReplicaSet, Mongos | boolean | false | Use ssl connection *deprecated* use `tls` variants |
+| **sslValidate** | Server, ReplicaSet, Mongos | boolean | false | Validate mongod server certificate against ca *deprecated* use `tls` variants |
+| **sslCA** | Server, ReplicaSet, Mongos | Array | null | Array of valid certificates either as Buffers or Strings *deprecated* use `tls` variants |
+| **sslCert** | Server, ReplicaSet, Mongos | Buffer/String | null | String or buffer containing the certificate we wish to present *deprecated* use `tls` variants |
+| **sslKey** | Server, ReplicaSet, Mongos | Buffer/String | null | String or buffer containing the certificate private key we wish to present *deprecated* use `tls` variants |
+| **sslPass** | Server, ReplicaSet, Mongos | Buffer/String | null | String or buffer containing the certificate password *deprecated* use `tls` variants |
+| **tls** | Server, ReplicaSet, Mongos | boolean | false | Enable TLS connections |
+| **tlsinsecure** | Server, ReplicaSet, Mongos | boolean | false | Relax TLS constraints, disabling validation |
+| **tlsCAFile** | Server, ReplicaSet, Mongos | string | null | A path to file with either a single or bundle of certificate authorities to be considered trusted when making a TLS connection |
+| **tlsCertificateKeyFile** | Server, ReplicaSet, Mongos | string | null | A path to the client certificate file or the client private key file; in the case that they both are needed, the files should be concatenated |
+| **tlsCertificateKeyFilePassword** | Server, ReplicaSet, Mongos | string | null | The password to decrypt the client private key to be used for TLS connections |
 | **autoReconnect** | Server | boolean | true | Reconnect on error. |
 | **noDelay** | Server, ReplicaSet, Mongos | boolean | true | TCP Socket NoDelay option. |
 | **keepAlive** | Server, ReplicaSet, Mongos | integer | 30000 | The number of milliseconds to wait before initiating keepAlive on the TCP socket. |

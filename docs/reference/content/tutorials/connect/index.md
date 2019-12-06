@@ -36,7 +36,7 @@ To connect to a [replica set](https://docs.mongodb.org/manual/core/replication-i
 include a seedlist of replica set members and the name of the replica set in the
 [URI connection string](https://docs.mongodb.org/manual/reference/connection-string/).
 
-In the following example, the connection string specifies two of the replica set members running on `localhost:27017` and `localhost:27018` and the name of the replica set (`foo`). 
+In the following example, the connection string specifies two of the replica set members running on `localhost:27017` and `localhost:27018` and the name of the replica set (`foo`).
 
 ```js
 {{% connect-to-replicaset %}}
@@ -69,20 +69,14 @@ For example, you can specify TLS/SSL and authentication setting.
 
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
-const fs = require('fs');
-
-  // Read the certificate authority
-const ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
-const cert = fs.readFileSync(__dirname + "/ssl/client.pem");
 
 // Connection URL
-const url = 'mongodb://dave:password@localhost:27017?authMechanism=DEFAULT&authSource=db&ssl=true"';
+const url = 'mongodb://dave:password@localhost:27017?authMechanism=DEFAULT&authSource=db&tls=true"';
 
 // Create a client, passing in additional options
-const client = new MongoClient(url,  {
-  sslValidate: true,
-  sslCA: ca,
-  sslCert: cert
+const client = new MongoClient(url, {
+  tlsCAFile: `${__dirname}/certs/ca.pem`,
+  tlsCertificateKeyFile: `${__dirname}/certs/client.pem`
 });
 
 // Use connect method to connect to the server
@@ -98,7 +92,7 @@ client.connect(function(err) {
 For more information on connecting with authentication and TSL/SSL, see:
 
 - [Authentication]({{<relref "tutorials/connect/authenticating.md">}}): detailed documentation of the various ways to specify authentication credentials
-- [TLS/SSL]({{<relref "tutorials/connect/ssl.md">}}): Detailed documentation of the various ways to specify the properties of an TLS/SSL connection
+- [TLS/SSL]({{<relref "tutorials/connect/tls.md">}}): Detailed documentation of the various ways to specify the properties of an TLS/SSL connection
 
 For more information on the connection options:
 

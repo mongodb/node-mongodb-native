@@ -29,7 +29,7 @@ To connect to a :manual:`replica set </core/replication-introduction/>` ,
 include a seedlist of replica set members and the name of the replica set in the
 :manual:`URI connection string </reference/connection-string/>` .
 
-In the following example, the connection string specifies two of the replica set members running on ``localhost:27017`` and ``localhost:27018`` and the name of the replica set (\ ``foo``\ ). 
+In the following example, the connection string specifies two of the replica set members running on ``localhost:27017`` and ``localhost:27018`` and the name of the replica set (\ ``foo``\ ).
 
 .. literalinclude:: /includes/connect-to-replicaset.js
    :language: js
@@ -62,18 +62,13 @@ For example, you can specify TLS/SSL and authentication setting.
    const { MongoClient } = require('mongodb');
    const fs = require('fs');
 
-     // Read the certificate authority
-   const ca = [fs.readFileSync(`${__dirname} + /ssl/ca.pem`)];
-   const cert = fs.readFileSync(`${__dirname} + /ssl/client.pem`);
-
    // Connection URL
-   const url = 'mongodb://dave:password@localhost:27017?authMechanism=DEFAULT&authSource=db&ssl=true';
+   const url = 'mongodb://dave:password@localhost:27017?authMechanism=DEFAULT&authSource=db&tls=true';
 
    // Create a client, passing in additional options
    const client = new MongoClient(url,  {
-     sslValidate: true,
-     sslCA: ca,
-     sslCert: cert
+     tlsCAFile: path.resolve(__dirname + '/certs/ca.pem'),
+     tlsCertificateKeyFile: `${__dirname}/certs/client.pem`
    });
 
    // Function to connect to the server
