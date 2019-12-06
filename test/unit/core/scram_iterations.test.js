@@ -65,4 +65,51 @@ describe('SCRAM Iterations Tests', function() {
 
     client.connect();
   });
+
+  it('should error if server digest is invalid', function(_done) {
+    const credentials = new MongoCredentials({
+      mechanism: 'default',
+      source: 'db',
+      username: 'user',
+      password: 'pencil'
+    });
+
+    let done = e => {
+      done = () => {};
+      return _done(e);
+    };
+
+    test.server.setMessageHandler(request => {
+      const doc = request.document;
+      if (doc.ismaster) {
+        return request.reply(Object.assign({}, mock.DEFAULT_ISMASTER));
+      } else if (doc.saslStart) {
+        return request.reply({
+          ok: 1,
+          done: false,
+          payload: Buffer.from(
+            'r=VNnXkRqKflB5+rmfnFiisCWzgDLzez02iRpbvE5mQjMvizb+VkSPRZZ/pDmFzLxq,s=dZTyOb+KZqoeTFdsULiqow==,i=10000'
+          )
+        });
+      } else if (doc.saslContinue) {
+        return request.reply({
+          ok: 1,
+          done: false,
+          payload: Buffer.from('v=bWFsaWNpb3VzbWFsaWNpb3VzVzV')
+        });
+      }
+    });
+
+    const client = new Server(Object.assign({}, test.server.address(), { credentials }));
+    client.on('error', err => {
+      expect(err).to.not.be.null;
+      expect(err)
+        .to.have.property('message')
+        .that.matches(/Server returned an invalid signature/);
+
+      client.destroy(done);
+    });
+
+    client.connect();
+  });
 });
