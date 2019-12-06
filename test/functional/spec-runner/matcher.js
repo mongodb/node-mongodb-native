@@ -103,6 +103,12 @@ function generateMatchAndDiffSpecialCase(key, expectedObj, actualObj, metadata) 
       expected: match ? actual : SYMBOL_DOES_EXIST,
       actual
     };
+  } else if (expectedIs42) {
+    return {
+      match: true,
+      expected: SYMBOL_IGNORE,
+      actual: SYMBOL_IGNORE
+    };
   } else {
     // default
     return generateMatchAndDiff(expected, actual, metadata);

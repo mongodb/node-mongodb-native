@@ -1,15 +1,17 @@
 'use strict';
 const fs = require('fs');
 const path = require('path');
-const chai = require('chai');
-const expect = chai.expect;
 const Topology = require('../../../lib/core/sdam/topology').Topology;
 const Server = require('../../../lib/core/sdam/server').Server;
 const ServerDescription = require('../../../lib/core/sdam/server_description').ServerDescription;
 const monitoring = require('../../../lib/core/sdam/monitoring');
 const parse = require('../../../lib/core/uri_parser');
-chai.use(require('chai-subset'));
 const sinon = require('sinon');
+
+const chai = require('chai');
+chai.use(require('chai-subset'));
+chai.use(require('../../functional/spec-runner/matcher').default);
+const expect = chai.expect;
 
 const specDir = path.resolve(__dirname, '../../spec/server-discovery-and-monitoring');
 function collectTests() {
@@ -115,36 +117,6 @@ function findOmittedFields(expected) {
   return result;
 }
 
-function replacePlaceholders(actual, expected) {
-  Object.keys(expected).forEach(key => {
-    if (expected[key] === 42 || expected[key] === '42') {
-      expect(actual).to.have.any.keys(key);
-      expect(actual[key]).to.exist;
-      actual[key] = expected[key];
-    }
-  });
-
-  return actual;
-}
-
-function convertES6Maps(actual) {
-  ['previousDescription', 'newDescription'].forEach(key => {
-    if (actual[key] && actual[key].servers) {
-      const servers = actual[key].servers;
-      if (servers instanceof Map) {
-        let obj = Object.create(null);
-        for (const serverEntry of servers.entries()) {
-          obj[serverEntry[0]] = serverEntry[1];
-        }
-
-        actual[key].servers = obj;
-      }
-    }
-  });
-
-  return actual;
-}
-
 function normalizeServerDescription(serverDescription) {
   if (serverDescription.type === 'PossiblePrimary') {
     // Some single-threaded drivers care a lot about ordering potential primary
@@ -156,6 +128,26 @@ function normalizeServerDescription(serverDescription) {
   return serverDescription;
 }
 
+function cloneMap(map) {
+  const result = Object.create(null);
+  for (let key of map.keys()) {
+    result[key] = JSON.parse(JSON.stringify(map.get(key)));
+  }
+
+  return result;
+}
+
+function cloneForCompare(event) {
+  const result = JSON.parse(JSON.stringify(event));
+  ['previousDescription', 'newDescription'].forEach(key => {
+    if (event[key] != null && event[key].servers != null) {
+      result[key].servers = cloneMap(event[key].servers);
+    }
+  });
+
+  return result;
+}
+
 function executeSDAMTest(testData, testDone) {
   parse(testData.uri, (err, parsedUri) => {
     if (err) return done(err);
@@ -164,7 +156,7 @@ function executeSDAMTest(testData, testDone) {
     const topology = new Topology(parsedUri.hosts, parsedUri.options);
 
     // listen for SDAM monitoring events
-    const events = [];
+    let events = [];
     [
       'serverOpening',
       'serverClosed',
@@ -234,8 +226,8 @@ function executeSDAMTest(testData, testDone) {
           expect(events).to.have.length(expectedEvents.length);
           for (let i = 0; i < events.length; ++i) {
             const expectedEvent = expectedEvents[i];
-            const actualEvent = convertES6Maps(replacePlaceholders(events[i], expectedEvent));
-            expect(actualEvent).to.containSubset(expectedEvent);
+            const actualEvent = cloneForCompare(events[i]);
+            expect(actualEvent).to.matchMongoSpec(expectedEvent);
           }
 
           return;
@@ -252,6 +244,9 @@ function executeSDAMTest(testData, testDone) {
 
       // remove error handler
       topology.removeListener('error', incompatabilityHandler);
+
+      // reset the captured events for each phase
+      events = [];
     });
 
     topology.close(done);

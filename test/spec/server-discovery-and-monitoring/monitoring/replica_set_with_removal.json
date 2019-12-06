@@ -3,30 +3,7 @@
   "uri": "mongodb://a,b/",
   "phases": [
     {
-      "responses": [
-        [
-          "a:27017",
-          {
-            "ok": 1,
-            "ismaster": true,
-            "setName": "rs",
-            "setVersion": 1,
-            "primary": "a:27017",
-            "hosts": [
-              "a:27017"
-            ],
-            "minWireVersion": 0,
-            "maxWireVersion": 4
-          }
-        ],
-        [
-          "b:27017",
-          {
-            "ok": 1,
-            "ismaster": true
-          }
-        ]
-      ],
+      "responses": [],
       "outcome": {
         "events": [
           {
@@ -73,7 +50,37 @@
               "topologyId": "42",
               "address": "b:27017"
             }
-          },
+          }
+        ]
+      }
+    },
+    {
+      "responses": [
+        [
+          "a:27017",
+          {
+            "ok": 1,
+            "ismaster": true,
+            "setName": "rs",
+            "setVersion": 1,
+            "primary": "a:27017",
+            "hosts": [
+              "a:27017"
+            ],
+            "minWireVersion": 0,
+            "maxWireVersion": 4
+          }
+        ],
+        [
+          "b:27017",
+          {
+            "ok": 1,
+            "ismaster": true
+          }
+        ]
+      ],
+      "outcome": {
+        "events": [
           {
             "server_description_changed_event": {
               "topologyId": "42",

@@ -17,14 +17,17 @@ Format
 
 Each YAML file has the following keys:
 
-- description: Some text.
+- description: A textual description of the test.
 - uri: A connection string.
 - phases: An array of "phase" objects.
+  A phase of the test optionally sends inputs to the client,
+  then tests the client's resulting TopologyDescription.
 
-A "phase" of the test sends inputs to the client, then tests the client's
-resulting TopologyDescription. Each phase object has two keys:
+Each phase object has two keys:
 
-- responses: An array of "response" objects.
+- responses: (optional) An array of "response" objects. If not provided,
+  the test runner should construct the client and perform assertions specified
+  in the outcome object without processing any responses.
 - outcome: An "outcome" object representing the TopologyDescription.
 
 A response is a pair of values:
@@ -37,8 +40,9 @@ A response is a pair of values:
   The empty response `{}` indicates a network error
   when attempting to call "ismaster".
 
-An "outcome" represents the correct TopologyDescription that results from
-processing the responses in the phases so far. It has the following keys:
+In non-monitoring tests, an "outcome" represents the correct
+TopologyDescription that results from processing the responses in the phases
+so far. It has the following keys:
 
 - topologyType: A string like "ReplicaSetNoPrimary".
 - setName: A string with the expected replica set name, or null.
@@ -60,6 +64,16 @@ current TopologyDescription. It has the following keys:
 - minWireVersion: absent or an integer.
 - maxWireVersion: absent or an integer.
 
+In monitoring tests, an "outcome" contains a list of SDAM events that should
+have been published by the client as a result of processing ismaster responses
+in the current phase. Any SDAM events published by the client during its
+construction (that is, prior to processing any of the responses) should be
+combined with the events published during processing of ismaster responses
+of the first phase of the test. A test MAY explicitly verify events published
+during client construction by providing an empty responses array for the
+first phase.
+
+
 Use as unittests
 ----------------
 
@@ -71,7 +85,7 @@ without any network I/O, by parsing ismaster responses from the test file
 and passing them into the driver code. Parts of the client and monitoring
 code may need to be mocked or subclassed to achieve this. `A reference
 implementation for PyMongo 3.x is available here
-<https://github.com/mongodb/mongo-python-driver/blob/3.0-dev/test/test_discovery_and_monitoring.py>`_.
+<https://github.com/mongodb/mongo-python-driver/blob/26d25cd74effc1e7a8d52224eac6c9a95769b371/test/test_discovery_and_monitoring.py>`_.
 
 Initialization
 ~~~~~~~~~~~~~~
@@ -93,6 +107,9 @@ Set the client's initial TopologyType to ReplicaSetNoPrimary.
 (For most clients, parsing a connection string with a "replicaSet" option
 automatically sets the TopologyType to ReplicaSetNoPrimary.)
 
+Set up a listener to collect SDAM events published by the client, including
+events published during client construction.
+
 Test Phases
 ~~~~~~~~~~~
 
@@ -100,12 +117,19 @@ For each phase in the file, parse the "responses" array.
 Pass in the responses in order to the driver code.
 If a response is the empty object `{}`, simulate a network error.
 
-Once all responses are processed, assert that the phase's "outcome" object
+For non-monitoring tests,
+once all responses are processed, assert that the phase's "outcome" object
 is equivalent to the driver's current TopologyDescription.
+
+For monitoring tests, once all responses are processed, assert that the
+events collected so far by the SDAM event listener are equivalent to the
+events specified in the phase.
 
 Some fields such as "logicalSessionTimeoutMinutes" or "compatible" were added
 later and haven't been added to all test files. If these fields are present,
 test that they are equivalent to the fields of the driver's current
 TopologyDescription.
+
+For monitoring tests, clear the list of events collected so far.
 
 Continue until all phases have been executed.

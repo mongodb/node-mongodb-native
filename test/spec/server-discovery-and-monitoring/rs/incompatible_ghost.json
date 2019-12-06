@@ -23,11 +23,6 @@
           {
             "ok": 1,
             "isreplicaset": true,
-            "setName": "rs",
-            "hosts": [
-              "a:27017",
-              "b:27017"
-            ],
             "minWireVersion": 0,
             "maxWireVersion": 1
           }
@@ -41,7 +36,7 @@
           },
           "b:27017": {
             "type": "RSGhost",
-            "setName": "rs"
+            "setName": null
           }
         },
         "topologyType": "ReplicaSetWithPrimary",
