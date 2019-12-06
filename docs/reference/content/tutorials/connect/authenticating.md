@@ -120,13 +120,13 @@ If you have [upgraded the authentication schema]
 
 ## X509
 
-With  [X.509](http://docs.mongodb.org/manual/core/authentication/#x-509-certificate-authentication) mechanism, MongoDB uses the X.509 certificate presented during SSL negotiation to authenticate a user whose name is derived from the distinguished name of the X.509 certificate.
+With  [X.509](http://docs.mongodb.org/manual/core/authentication/#x-509-certificate-authentication) mechanism, MongoDB uses the X.509 certificate presented during TLS negotiation to authenticate a user whose name is derived from the distinguished name of the X.509 certificate.
 
-X.509 authentication requires the use of SSL connections with certificate validation and is available in MongoDB 2.6 and newer.
+X.509 authentication requires the use of TLS connections with certificate validation and is available in MongoDB 2.6 and newer.
 
-To connect using the X.509 authentication mechanism, specify `MONGODB-X509` as the mechanism in the [URI connection string](https://docs.mongodb.org/manual/reference/connection-string/), `ssl=true`, and the username. Use `enodeURIComponent` to encode the username string.
+To connect using the X.509 authentication mechanism, specify `MONGODB-X509` as the mechanism in the [URI connection string](https://docs.mongodb.org/manual/reference/connection-string/), `tls=true`, and the username. Use `enodeURIComponent` to encode the username string.
 
-In addition to the connection string, pass to the new `MongoClient` a connections options for the `server` with  the X.509 certificate and other [TLS/SSL connections]({{< relref "tutorials/connect/ssl.md" >}}) options.
+In addition to the connection string, pass to the new `MongoClient` a connections options for the `server` with  the X.509 certificate and other [TLS/SSL connections]({{< relref "tutorials/connect/tls.md" >}}) options.
 
 
 ```js
@@ -134,18 +134,17 @@ const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
 
 // Read the cert and key
-const cert = fs.readFileSync(__dirname + "/ssl/x509/client.pem");
-const key = fs.readFileSync(__dirname + "/ssl/x509/client.pem");
+const cert = fs.readFileSync();
+const key = fs.readFileSync(__dirname + "/certs/x509/client.pem");
 
 // User name
 const userName = encodeURIComponent("CN=client,OU=kerneluser,O=10Gen,L=New York City,ST=New York,C=US");
-const url = `mongodb://${userName}:${password}@server:27017?authMechanism=MONGODB-X509&ssl=true`;
+const url = `mongodb://${userName}:${password}@server:27017?authMechanism=MONGODB-X509&tls=true`;
 
 // Create a new MongoClient
 const client = new MongoClient(url, {
-  sslKey: key,
-  sslCert: cert,
-  sslValidate: false
+  tlsAllowInvalidHostnames: true,
+  tlsCertificateKeyFile: `${__dirname}/certs/x509/client.pem`,
 });
 
 // Use connect method to connect to the Server
@@ -157,7 +156,7 @@ client.connect(function(err) {
 });
 ```
 
-For more information on connecting to MongoDB instance, replica set, and sharded cluster with TLS/SSL options, see [TLS/SSL connections options]({{< relref "tutorials/connect/ssl.md" >}}).
+For more information on connecting to MongoDB instance, replica set, and sharded cluster with TLS/SSL options, see [TLS/SSL connections options]({{< relref "tutorials/connect/tls.md" >}}).
 
 For more information, refer to the MongoDB manual
 [X.509 tutorial](http://docs.mongodb.org/manual/tutorial/configure-x509-client-authentication/#add-x-509-certificate-subject-as-a-user) for more information about determining the subject name from the certificate.
