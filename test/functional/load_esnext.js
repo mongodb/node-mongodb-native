@@ -5,8 +5,7 @@ function loadTests() {
   const path = require('path');
 
   const directory = path.resolve.apply(path, arguments);
-  fs
-    .readdirSync(directory)
+  fs.readdirSync(directory)
     .filter(filePath => filePath.match(/.*\.js$/))
     .map(filePath => path.resolve(directory, filePath))
     .forEach(x => require(x));

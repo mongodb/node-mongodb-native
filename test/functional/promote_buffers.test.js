@@ -100,8 +100,7 @@ describe('Promote Buffers', function() {
           function(err) {
             test.equal(null, err);
 
-            db
-              .collection('shouldCorrectlyHonorPromoteBuffer3')
+            db.collection('shouldCorrectlyHonorPromoteBuffer3')
               .find()
               .next(function(err, doc) {
                 test.equal(null, err);
@@ -136,8 +135,7 @@ describe('Promote Buffers', function() {
           function(err) {
             test.equal(null, err);
 
-            db
-              .collection('shouldCorrectlyHonorPromoteBuffer4')
+            db.collection('shouldCorrectlyHonorPromoteBuffer4')
               .find({}, { promoteBuffers: true })
               .next(function(err, doc) {
                 test.equal(null, err);
@@ -175,8 +173,7 @@ describe('Promote Buffers', function() {
           function(err) {
             test.equal(null, err);
 
-            db
-              .collection('shouldCorrectlyHonorPromoteBuffer5')
+            db.collection('shouldCorrectlyHonorPromoteBuffer5')
               .aggregate([{ $match: {} }], { promoteBuffers: true })
               .next(function(err, doc) {
                 test.equal(null, err);

@@ -60,8 +60,7 @@ describe('Max Staleness', function() {
         expect(err).to.not.exist;
         var db = client.db(self.configuration.db);
 
-        db
-          .collection('test')
+        db.collection('test')
           .find({})
           .toArray(function(err) {
             expect(err).to.not.exist;
@@ -135,10 +134,9 @@ describe('Max Staleness', function() {
           var db = client.db(self.configuration.db);
 
           // Get a db with a new readPreference
-          db
-            .collection('test', {
-              readPreference: new ReadPreference('secondary', null, { maxStalenessSeconds: 250 })
-            })
+          db.collection('test', {
+            readPreference: new ReadPreference('secondary', null, { maxStalenessSeconds: 250 })
+          })
             .find({})
             .toArray(function(err) {
               expect(err).to.not.exist;
@@ -174,8 +172,7 @@ describe('Max Staleness', function() {
         var readPreference = new ReadPreference('secondary', null, { maxStalenessSeconds: 250 });
 
         // Get a db with a new readPreference
-        db
-          .collection('test')
+        db.collection('test')
           .find({})
           .setReadPreference(readPreference)
           .toArray(function(err) {

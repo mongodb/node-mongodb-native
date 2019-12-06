@@ -10,8 +10,7 @@ const expect = require('chai').expect,
 describe('ReplicaSet state', function() {
   const path = p.resolve(__dirname, '../../spec/server-discovery-and-monitoring/rs');
 
-  fs
-    .readdirSync(path)
+  fs.readdirSync(path)
     .filter(x => x.indexOf('.json') !== -1)
     .forEach(x => {
       var testData = require(f('%s/%s', path, x));

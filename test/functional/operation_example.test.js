@@ -748,7 +748,12 @@ describe('Operation Examples', function() {
         var collection = db.collection('createIndexExample1');
         // Insert a bunch of documents for the index
         collection.insertMany(
-          [{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4 }],
+          [
+            { a: 1, b: 1 },
+            { a: 2, b: 2 },
+            { a: 3, b: 3 },
+            { a: 4, b: 4 }
+          ],
           configuration.writeConcernMax(),
           function(err, result) {
             test.ok(result);
@@ -872,7 +877,12 @@ describe('Operation Examples', function() {
         var collection = db.collection('createIndexExample3');
         // Insert a bunch of documents for the index
         collection.insertMany(
-          [{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4 }],
+          [
+            { a: 1, b: 1 },
+            { a: 2, b: 2 },
+            { a: 3, b: 3 },
+            { a: 4, b: 4 }
+          ],
           { w: 1 },
           function(err, result) {
             test.ok(result);
@@ -1168,7 +1178,12 @@ describe('Operation Examples', function() {
         var collection = db.collection('dropIndexExample1');
         // Insert a bunch of documents for the index
         collection.insertMany(
-          [{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4 }],
+          [
+            { a: 1, b: 1 },
+            { a: 2, b: 2 },
+            { a: 3, b: 3 },
+            { a: 4, b: 4 }
+          ],
           { w: 1 },
           function(err, result) {
             test.ok(result);
@@ -1235,7 +1250,12 @@ describe('Operation Examples', function() {
         var collection = db.collection('ensureIndexExample1');
         // Insert a bunch of documents for the index
         collection.insertMany(
-          [{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4 }],
+          [
+            { a: 1, b: 1 },
+            { a: 2, b: 2 },
+            { a: 3, b: 3 },
+            { a: 4, b: 4 }
+          ],
           configuration.writeConcernMax(),
           function(err, result) {
             test.ok(result);
@@ -1303,7 +1323,12 @@ describe('Operation Examples', function() {
         var collection = db.collection('ensureIndexExample2');
         // Insert a bunch of documents for the index
         collection.insertMany(
-          [{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4 }],
+          [
+            { a: 1, b: 1 },
+            { a: 2, b: 2 },
+            { a: 3, b: 3 },
+            { a: 4, b: 4 }
+          ],
           { w: 1 },
           function(err, result) {
             test.ok(result);
@@ -1476,7 +1501,11 @@ describe('Operation Examples', function() {
         var collection = db.collection('simple_limit_skip_query');
         // Insert a bunch of documents for the testing
         collection.insertMany(
-          [{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }],
+          [
+            { a: 1, b: 1 },
+            { a: 2, b: 2 },
+            { a: 3, b: 3 }
+          ],
           configuration.writeConcernMax(),
           function(err, result) {
             test.ok(result);
@@ -1692,7 +1721,11 @@ describe('Operation Examples', function() {
         var collection = db.collection('simple_limit_skip_find_one_query');
         // Insert a bunch of documents for the testing
         collection.insertMany(
-          [{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }],
+          [
+            { a: 1, b: 1 },
+            { a: 2, b: 2 },
+            { a: 3, b: 3 }
+          ],
           configuration.writeConcernMax(),
           function(err, result) {
             test.ok(result);
@@ -1752,7 +1785,10 @@ describe('Operation Examples', function() {
 
           // Save a new location tagged document
           collection.insertMany(
-            [{ a: 1, loc: [50, 30] }, { a: 1, loc: [30, 50] }],
+            [
+              { a: 1, loc: [50, 30] },
+              { a: 1, loc: [30, 50] }
+            ],
             configuration.writeConcernMax(),
             function(err, result) {
               test.ok(result);
@@ -1958,7 +1994,10 @@ describe('Operation Examples', function() {
 
         // Insert some test documents
         collection.insertMany(
-          [{ user_id: 1, timestamp: new Date() }, { user_id: 2, timestamp: new Date() }],
+          [
+            { user_id: 1, timestamp: new Date() },
+            { user_id: 2, timestamp: new Date() }
+          ],
           { w: 1 },
           function(err, r) {
             test.ok(r);
@@ -2055,7 +2094,10 @@ describe('Operation Examples', function() {
 
         // Insert some test documents
         collection.insertMany(
-          [{ user_id: 1, timestamp: new Date() }, { user_id: 2, timestamp: new Date() }],
+          [
+            { user_id: 1, timestamp: new Date() },
+            { user_id: 2, timestamp: new Date() }
+          ],
           { w: 1 },
           function(err, r) {
             test.ok(r);
@@ -2269,7 +2311,12 @@ describe('Operation Examples', function() {
         var collection = db.collection('more_index_information_test_2');
         // Insert a bunch of documents for the index
         collection.insertMany(
-          [{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4 }],
+          [
+            { a: 1, b: 1 },
+            { a: 2, b: 2 },
+            { a: 3, b: 3 },
+            { a: 4, b: 4 }
+          ],
           configuration.writeConcernMax(),
           function(err, result) {
             test.ok(result);
@@ -2289,7 +2336,13 @@ describe('Operation Examples', function() {
                   indexInformation
                 ) {
                   test.deepEqual([['_id', 1]], indexInformation._id_);
-                  test.deepEqual([['a', 1], ['b', 1]], indexInformation.a_1_b_1);
+                  test.deepEqual(
+                    [
+                      ['a', 1],
+                      ['b', 1]
+                    ],
+                    indexInformation.a_1_b_1
+                  );
 
                   // Fetch full index information
                   collection.indexInformation({ full: true }, function(err, indexInformation) {
@@ -2340,7 +2393,12 @@ describe('Operation Examples', function() {
         var collection = db.collection('more_index_information_test_3');
         // Insert a bunch of documents for the index
         collection.insertMany(
-          [{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4 }],
+          [
+            { a: 1, b: 1 },
+            { a: 2, b: 2 },
+            { a: 3, b: 3 },
+            { a: 4, b: 4 }
+          ],
           { w: 1 },
           function(err, result) {
             test.ok(result);
@@ -2357,7 +2415,13 @@ describe('Operation Examples', function() {
                 // Fetch basic indexInformation for collection
                 collection.indexInformation(function(err, indexInformation) {
                   test.deepEqual([['_id', 1]], indexInformation._id_);
-                  test.deepEqual([['a', 1], ['b', 1]], indexInformation.a_1_b_1);
+                  test.deepEqual(
+                    [
+                      ['a', 1],
+                      ['b', 1]
+                    ],
+                    indexInformation.a_1_b_1
+                  );
 
                   // Fetch full index information
                   collection.indexInformation({ full: true }, function(err, indexInformation) {
@@ -2814,7 +2878,12 @@ describe('Operation Examples', function() {
         var collection = db.collection('shouldCorrectlyForceReindexOnCollection');
         // Insert a bunch of documents for the index
         collection.insertMany(
-          [{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4, c: 4 }],
+          [
+            { a: 1, b: 1 },
+            { a: 2, b: 2 },
+            { a: 3, b: 3 },
+            { a: 4, b: 4, c: 4 }
+          ],
           { w: 1 },
           function(err, result) {
             test.ok(result);
@@ -2836,7 +2905,13 @@ describe('Operation Examples', function() {
                   // Verify that the index is gone
                   collection.indexInformation(function(err, indexInformation) {
                     test.deepEqual([['_id', 1]], indexInformation._id_);
-                    test.deepEqual([['a', 1], ['b', 1]], indexInformation.a_1_b_1);
+                    test.deepEqual(
+                      [
+                        ['a', 1],
+                        ['b', 1]
+                      ],
+                      indexInformation.a_1_b_1
+                    );
 
                     client.close(done);
                   });
@@ -3315,7 +3390,10 @@ describe('Operation Examples', function() {
 
         // Insert a couple of documentations
         collection.insertMany(
-          [{ a: 1, b: 1 }, { a: 1, b: 2 }],
+          [
+            { a: 1, b: 1 },
+            { a: 1, b: 2 }
+          ],
           configuration.writeConcernMax(),
           function(err, result) {
             test.ok(result);
@@ -3428,7 +3506,12 @@ describe('Operation Examples', function() {
         var collection = db.collection('shouldCorrectlyCreateAndDropAllIndex');
         // Insert a bunch of documents for the index
         collection.insertMany(
-          [{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4, c: 4 }],
+          [
+            { a: 1, b: 1 },
+            { a: 2, b: 2 },
+            { a: 3, b: 3 },
+            { a: 4, b: 4, c: 4 }
+          ],
           { w: 1 },
           function(err, result) {
             test.ok(result);
@@ -4095,13 +4178,14 @@ describe('Operation Examples', function() {
                   test.equal(null, err);
 
                   // Verify that the collection is gone
-                  db
-                    .listCollections({ name: 'a_simple_create_drop_collection' })
-                    .toArray(function(err, names) {
-                      test.equal(0, names.length);
+                  db.listCollections({ name: 'a_simple_create_drop_collection' }).toArray(function(
+                    err,
+                    names
+                  ) {
+                    test.equal(0, names.length);
 
-                      client.close(done);
-                    });
+                    client.close(done);
+                  });
                 });
               });
             }
@@ -4212,20 +4296,22 @@ describe('Operation Examples', function() {
                     test.equal(1, count);
 
                     // Verify that the collection is gone
-                    db
-                      .listCollections({ name: 'simple_rename_collection' })
-                      .toArray(function(err, names) {
-                        test.equal(0, names.length);
+                    db.listCollections({ name: 'simple_rename_collection' }).toArray(function(
+                      err,
+                      names
+                    ) {
+                      test.equal(0, names.length);
 
-                        // Verify that the new collection exists
-                        db
-                          .listCollections({ name: 'simple_rename_collection_2' })
-                          .toArray(function(err, names) {
-                            test.equal(1, names.length);
+                      // Verify that the new collection exists
+                      db.listCollections({ name: 'simple_rename_collection_2' }).toArray(function(
+                        err,
+                        names
+                      ) {
+                        test.equal(1, names.length);
 
-                            client.close(done);
-                          });
+                        client.close(done);
                       });
+                    });
                   });
                 }
               );
@@ -4269,7 +4355,12 @@ describe('Operation Examples', function() {
         var collection = db.collection('more_complex_index_test');
         // Insert a bunch of documents for the index
         collection.insertMany(
-          [{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4 }],
+          [
+            { a: 1, b: 1 },
+            { a: 2, b: 2 },
+            { a: 3, b: 3 },
+            { a: 4, b: 4 }
+          ],
           configuration.writeConcernMax(),
           function(err, result) {
             test.ok(result);
@@ -4338,7 +4429,12 @@ describe('Operation Examples', function() {
         var collection = db.collection('more_complex_ensure_index_db_test');
         // Insert a bunch of documents for the index
         collection.insertMany(
-          [{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4 }],
+          [
+            { a: 1, b: 1 },
+            { a: 2, b: 2 },
+            { a: 3, b: 3 },
+            { a: 4, b: 4 }
+          ],
           configuration.writeConcernMax(),
           function(err, result) {
             test.ok(result);
@@ -4405,7 +4501,13 @@ describe('Operation Examples', function() {
         var collection = db.collection('more_index_information_test_1');
         // Insert a bunch of documents for the index
         collection.insertMany(
-          [{ a: 1, b: 1 }, { a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4 }],
+          [
+            { a: 1, b: 1 },
+            { a: 1, b: 1 },
+            { a: 2, b: 2 },
+            { a: 3, b: 3 },
+            { a: 4, b: 4 }
+          ],
           configuration.writeConcernMax(),
           function(err, result) {
             test.ok(result);
@@ -6228,14 +6330,17 @@ describe('Operation Examples', function() {
         test.equal(null, err);
         test.ok(db != null);
 
-        db
-          .collection('replicaset_mongo_client_collection')
-          .updateOne({ a: 1 }, { $set: { b: 1 } }, { upsert: true }, function(err, result) {
+        db.collection('replicaset_mongo_client_collection').updateOne(
+          { a: 1 },
+          { $set: { b: 1 } },
+          { upsert: true },
+          function(err, result) {
             test.equal(null, err);
             test.equal(1, result.result.n);
 
             client.close(done);
-          });
+          }
+        );
       });
       // END
     }
@@ -6277,14 +6382,17 @@ describe('Operation Examples', function() {
         test.equal(null, err);
         test.ok(db != null);
 
-        db
-          .collection('replicaset_mongo_client_collection')
-          .updateOne({ a: 1 }, { $set: { b: 1 } }, { upsert: true }, function(err, result) {
+        db.collection('replicaset_mongo_client_collection').updateOne(
+          { a: 1 },
+          { $set: { b: 1 } },
+          { upsert: true },
+          function(err, result) {
             test.equal(null, err);
             test.equal(1, result.upsertedCount);
 
             client.close(done);
-          });
+          }
+        );
       });
       // END
     }
@@ -6324,14 +6432,17 @@ describe('Operation Examples', function() {
         var db = client.db(configuration.db);
         test.equal(null, err);
 
-        db
-          .collection('mongoclient_test')
-          .updateOne({ a: 1 }, { $set: { b: 1 } }, { upsert: true }, function(err, result) {
+        db.collection('mongoclient_test').updateOne(
+          { a: 1 },
+          { $set: { b: 1 } },
+          { upsert: true },
+          function(err, result) {
             test.equal(null, err);
             test.equal(1, result.result.n);
 
             client.close(done);
-          });
+          }
+        );
       });
       // END
     }

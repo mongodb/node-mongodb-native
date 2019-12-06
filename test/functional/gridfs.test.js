@@ -2806,10 +2806,10 @@ describe('GridFS', function() {
   });
 
   /*
-  * checks if 8 bit values will be preserved in gridstore
-  *
-  * @ignore
-  */
+   * checks if 8 bit values will be preserved in gridstore
+   *
+   * @ignore
+   */
   it('shouldCorrectlyStore8bitValues', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }

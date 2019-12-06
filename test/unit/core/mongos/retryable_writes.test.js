@@ -17,13 +17,16 @@ describe('Retryable Writes (Mongos)', function() {
   it('should add `txnNumber` to write commands where `retryWrites` is true', {
     metadata: { requires: { topology: ['single'] } },
     test: function(done) {
-      const topology = new Mongos(test.servers.map(server => server.address()), {
-        connectionTimeout: 3000,
-        socketTimeout: 0,
-        haInterval: 10000,
-        localThresholdMS: 500,
-        size: 1
-      });
+      const topology = new Mongos(
+        test.servers.map(server => server.address()),
+        {
+          connectionTimeout: 3000,
+          socketTimeout: 0,
+          haInterval: 10000,
+          localThresholdMS: 500,
+          size: 1
+        }
+      );
 
       const sessionPool = new ServerSessionPool(topology);
       const session = new ClientSession(topology, sessionPool);
@@ -66,13 +69,16 @@ describe('Retryable Writes (Mongos)', function() {
   it('should retry write commands where `retryWrites` is true, and not increment `txnNumber`', {
     metadata: { requires: { topology: ['single'] } },
     test: function(done) {
-      const mongos = new Mongos(test.servers.map(server => server.address()), {
-        connectionTimeout: 3000,
-        socketTimeout: 0,
-        haInterval: 10000,
-        localThresholdMS: 500,
-        size: 1
-      });
+      const mongos = new Mongos(
+        test.servers.map(server => server.address()),
+        {
+          connectionTimeout: 3000,
+          socketTimeout: 0,
+          haInterval: 10000,
+          localThresholdMS: 500,
+          size: 1
+        }
+      );
 
       const sessionPool = new ServerSessionPool(mongos);
       const session = new ClientSession(mongos, sessionPool);
@@ -120,13 +126,16 @@ describe('Retryable Writes (Mongos)', function() {
   it('should retry write commands where `retryWrites` is true, and there is a "not master" error', {
     metadata: { requires: { topology: ['single'] } },
     test: function(done) {
-      const mongos = new Mongos(test.servers.map(server => server.address()), {
-        connectionTimeout: 3000,
-        socketTimeout: 0,
-        haInterval: 10000,
-        localThresholdMS: 500,
-        size: 1
-      });
+      const mongos = new Mongos(
+        test.servers.map(server => server.address()),
+        {
+          connectionTimeout: 3000,
+          socketTimeout: 0,
+          haInterval: 10000,
+          localThresholdMS: 500,
+          size: 1
+        }
+      );
 
       const sessionPool = new ServerSessionPool(mongos);
       const session = new ClientSession(mongos, sessionPool);

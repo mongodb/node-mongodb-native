@@ -695,13 +695,15 @@ describe('Collection', function() {
 
     selectorTests.forEach(test => {
       it(test.title, function(done) {
-        db
-          .collection(test.collectionName)
-          .updateOne(test.filterObject, test.updateObject, (err, r) => {
+        db.collection(test.collectionName).updateOne(
+          test.filterObject,
+          test.updateObject,
+          (err, r) => {
             expect(err).to.not.exist;
             expect(r.result.n).to.equal(0);
             done();
-          });
+          }
+        );
       });
     });
 
@@ -1173,8 +1175,7 @@ describe('Collection', function() {
       const db = client.db(configuration.db);
       const close = e => client.close(() => done(e));
 
-      db
-        .createCollection(config.collName, config.opts)
+      db.createCollection(config.collName, config.opts)
         .then(collection => collection.isCapped())
         .then(capped => expect(capped).to.be.false)
         .then(() => close())

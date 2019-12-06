@@ -108,9 +108,14 @@ describe('bypass document validation', function() {
         bypassDocumentValidation: config.actual
       };
 
-      collection.mapReduce(function map() {}, function reduce() {}, options, e => {
-        close(e);
-      });
+      collection.mapReduce(
+        function map() {},
+        function reduce() {},
+        options,
+        e => {
+          close(e);
+        }
+      );
     });
   }
   // map reduce

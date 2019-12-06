@@ -832,7 +832,10 @@ describe('ReplSet Connection Tests (mocks)', function() {
 
         // Attempt to connect
         var server = new ReplSet(
-          [{ host: 'localhost', port: 32000 }, { host: 'localhost', port: 32001 }],
+          [
+            { host: 'localhost', port: 32000 },
+            { host: 'localhost', port: 32001 }
+          ],
           {
             setName: 'rs',
             connectionTimeout: 5000,
@@ -947,7 +950,10 @@ describe('ReplSet Connection Tests (mocks)', function() {
 
           // Attempt to connect
           var server = new ReplSet(
-            [{ host: '127.0.0.1', port: 32002 }, { host: '127.0.0.1', port: 32001 }],
+            [
+              { host: '127.0.0.1', port: 32002 },
+              { host: '127.0.0.1', port: 32001 }
+            ],
             {
               setName: 'rs',
               connectionTimeout: 3000,

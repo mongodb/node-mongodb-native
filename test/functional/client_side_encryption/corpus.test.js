@@ -67,8 +67,14 @@ describe('Client Side Encryption Corpus', function() {
     ['rand', 'AEAD_AES_256_CBC_HMAC_SHA_512-Random'],
     ['det', 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic']
   ]);
-  const identifierMap = new Map([['local', corpusKeyLocal._id], ['aws', corpusKeyAws._id]]);
-  const keyAltNameMap = new Map([['local', 'local'], ['aws', 'aws']]);
+  const identifierMap = new Map([
+    ['local', corpusKeyLocal._id],
+    ['aws', corpusKeyAws._id]
+  ]);
+  const keyAltNameMap = new Map([
+    ['local', 'local'],
+    ['aws', 'aws']
+  ]);
   const copyOverValues = new Set(['_id', 'altname_aws', 'altname_local']);
 
   let client;

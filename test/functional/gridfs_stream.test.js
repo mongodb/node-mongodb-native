@@ -923,12 +923,12 @@ describe('GridFS Stream', function() {
   });
 
   /*
-  * Find all associates files with a bucket
-  *
-  * @example-class GridFSBucket
-  * @example-method find
-  * @ignore
-  */
+   * Find all associates files with a bucket
+   *
+   * @example-class GridFSBucket
+   * @example-method find
+   * @ignore
+   */
   it('find example', {
     metadata: { requires: { topology: ['single'] } },
 
@@ -1129,8 +1129,7 @@ describe('GridFS Stream', function() {
                 var num = data.length;
                 data.forEach(function(data) {
                   var collection = data.insert;
-                  db
-                    .collection(collection)
+                  db.collection(collection)
                     .find({})
                     .toArray(function(error, docs) {
                       test.equal(data.documents.length, docs.length);

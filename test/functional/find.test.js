@@ -228,7 +228,12 @@ describe('Find', function() {
           db.collection('test_find_sorting', function(err, collection) {
             // Insert some test documents
             collection.insert(
-              [{ a: 1, b: 2 }, { a: 2, b: 1 }, { a: 3, b: 2 }, { a: 4, b: 1 }],
+              [
+                { a: 1, b: 2 },
+                { a: 2, b: 1 },
+                { a: 3, b: 2 },
+                { a: 4, b: 1 }
+              ],
               configuration.writeConcernMax(),
               function(err) {
                 test.equal(null, err);
@@ -415,7 +420,10 @@ describe('Find', function() {
           db.collection('test_find_non_quoted_values', function(err, collection) {
             // insert test document
             collection.insert(
-              [{ a: 19, b: 'teststring', c: 59920303 }, { a: '19', b: 'teststring', c: 3984929 }],
+              [
+                { a: 19, b: 'teststring', c: 59920303 },
+                { a: '19', b: 'teststring', c: 3984929 }
+              ],
               configuration.writeConcernMax(),
               function(err) {
                 test.equal(null, err);
@@ -1946,7 +1954,11 @@ describe('Find', function() {
 
         var col = db.collection('bad_field_selection');
         col.insert(
-          [{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }],
+          [
+            { a: 1, b: 1 },
+            { a: 2, b: 2 },
+            { a: 3, b: 3 }
+          ],
           configuration.writeConcernMax(),
           function(err) {
             test.equal(null, err);
@@ -1982,7 +1994,11 @@ describe('Find', function() {
 
           // Insert a bunch of documents for the testing
           collection.insert(
-            [{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }],
+            [
+              { a: 1, b: 1 },
+              { a: 2, b: 2 },
+              { a: 3, b: 3 }
+            ],
             configuration.writeConcernMax(),
             function(err) {
               test.equal(null, err);
@@ -2038,7 +2054,11 @@ describe('Find', function() {
 
           // Insert a bunch of documents for the testing
           collection.insert(
-            [{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }],
+            [
+              { a: 1, b: 1 },
+              { a: 2, b: 2 },
+              { a: 3, b: 3 }
+            ],
             configuration.writeConcernMax(),
             function(err) {
               test.equal(null, err);
@@ -2937,7 +2957,10 @@ describe('Find', function() {
 
           // Insert some test documents
           collection.insert(
-            [{ _id: 1, results: [82, 85, 88] }, { _id: 2, results: [75, 88, 89] }],
+            [
+              { _id: 1, results: [82, 85, 88] },
+              { _id: 2, results: [75, 88, 89] }
+            ],
             configuration.writeConcernMax(),
             function(err) {
               test.equal(null, err);

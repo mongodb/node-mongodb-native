@@ -282,7 +282,12 @@ describe('Operation (Promises)', function() {
         // Insert a bunch of documents for the index
         return collection
           .insertMany(
-            [{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4 }],
+            [
+              { a: 1, b: 1 },
+              { a: 2, b: 2 },
+              { a: 3, b: 3 },
+              { a: 4, b: 4 }
+            ],
             configuration.writeConcernMax()
           )
           .then(function(result) {
@@ -564,7 +569,15 @@ describe('Operation (Promises)', function() {
 
         // Insert a bunch of documents for the index
         return collection
-          .insertMany([{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4 }], { w: 1 })
+          .insertMany(
+            [
+              { a: 1, b: 1 },
+              { a: 2, b: 2 },
+              { a: 3, b: 3 },
+              { a: 4, b: 4 }
+            ],
+            { w: 1 }
+          )
           .then(function(result) {
             test.ok(result);
 
@@ -625,7 +638,12 @@ describe('Operation (Promises)', function() {
         // Insert a bunch of documents for the index
         return collection
           .insertMany(
-            [{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4 }],
+            [
+              { a: 1, b: 1 },
+              { a: 2, b: 2 },
+              { a: 3, b: 3 },
+              { a: 4, b: 4 }
+            ],
             configuration.writeConcernMax()
           )
           .then(function(result) {
@@ -688,7 +706,15 @@ describe('Operation (Promises)', function() {
 
         // Insert a bunch of documents for the index
         return collection
-          .insertMany([{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4 }], { w: 1 })
+          .insertMany(
+            [
+              { a: 1, b: 1 },
+              { a: 2, b: 2 },
+              { a: 3, b: 3 },
+              { a: 4, b: 4 }
+            ],
+            { w: 1 }
+          )
           .then(function(result) {
             test.ok(result);
 
@@ -851,7 +877,11 @@ describe('Operation (Promises)', function() {
         // Insert a bunch of documents for the testing
         return collection
           .insertMany(
-            [{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }],
+            [
+              { a: 1, b: 1 },
+              { a: 2, b: 2 },
+              { a: 3, b: 3 }
+            ],
             configuration.writeConcernMax()
           )
           .then(function(result) {
@@ -1059,7 +1089,11 @@ describe('Operation (Promises)', function() {
         // Insert a bunch of documents for the testing
         return collection
           .insertMany(
-            [{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }],
+            [
+              { a: 1, b: 1 },
+              { a: 2, b: 2 },
+              { a: 3, b: 3 }
+            ],
             configuration.writeConcernMax()
           )
           .then(function(result) {
@@ -1115,7 +1149,10 @@ describe('Operation (Promises)', function() {
 
             // Save a new location tagged document
             return collection.insertMany(
-              [{ a: 1, loc: [50, 30] }, { a: 1, loc: [30, 50] }],
+              [
+                { a: 1, loc: [50, 30] },
+                { a: 1, loc: [30, 50] }
+              ],
               configuration.writeConcernMax()
             );
           })
@@ -1335,7 +1372,10 @@ describe('Operation (Promises)', function() {
         // Insert some test documents
         return collection
           .insertMany(
-            [{ user_id: 1, timestamp: new Date() }, { user_id: 2, timestamp: new Date() }],
+            [
+              { user_id: 1, timestamp: new Date() },
+              { user_id: 2, timestamp: new Date() }
+            ],
             { w: 1 }
           )
           .then(function() {
@@ -1428,7 +1468,10 @@ describe('Operation (Promises)', function() {
         // Insert some test documents
         return collection
           .insertMany(
-            [{ user_id: 1, timestamp: new Date() }, { user_id: 2, timestamp: new Date() }],
+            [
+              { user_id: 1, timestamp: new Date() },
+              { user_id: 2, timestamp: new Date() }
+            ],
             { w: 1 }
           )
           .then(function() {
@@ -1614,7 +1657,12 @@ describe('Operation (Promises)', function() {
         // Insert a bunch of documents for the index
         return collection
           .insertMany(
-            [{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4 }],
+            [
+              { a: 1, b: 1 },
+              { a: 2, b: 2 },
+              { a: 3, b: 3 },
+              { a: 4, b: 4 }
+            ],
             configuration.writeConcernMax()
           )
           .then(function(result) {
@@ -1631,7 +1679,13 @@ describe('Operation (Promises)', function() {
           })
           .then(function(indexInformation) {
             test.deepEqual([['_id', 1]], indexInformation._id_);
-            test.deepEqual([['a', 1], ['b', 1]], indexInformation.a_1_b_1);
+            test.deepEqual(
+              [
+                ['a', 1],
+                ['b', 1]
+              ],
+              indexInformation.a_1_b_1
+            );
 
             // Fetch full index information
             return collection.indexInformation({ full: true });
@@ -1677,7 +1731,15 @@ describe('Operation (Promises)', function() {
 
         // Insert a bunch of documents for the index
         return collection
-          .insertMany([{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4 }], { w: 1 })
+          .insertMany(
+            [
+              { a: 1, b: 1 },
+              { a: 2, b: 2 },
+              { a: 3, b: 3 },
+              { a: 4, b: 4 }
+            ],
+            { w: 1 }
+          )
           .then(function(result) {
             test.ok(result);
 
@@ -1692,7 +1754,13 @@ describe('Operation (Promises)', function() {
           })
           .then(function(indexInformation) {
             test.deepEqual([['_id', 1]], indexInformation._id_);
-            test.deepEqual([['a', 1], ['b', 1]], indexInformation.a_1_b_1);
+            test.deepEqual(
+              [
+                ['a', 1],
+                ['b', 1]
+              ],
+              indexInformation.a_1_b_1
+            );
 
             // Fetch full index information
             return collection.indexInformation({ full: true });
@@ -2129,9 +2197,17 @@ describe('Operation (Promises)', function() {
 
         // Insert a bunch of documents for the index
         return collection
-          .insertMany([{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4, c: 4 }], {
-            w: 1
-          })
+          .insertMany(
+            [
+              { a: 1, b: 1 },
+              { a: 2, b: 2 },
+              { a: 3, b: 3 },
+              { a: 4, b: 4, c: 4 }
+            ],
+            {
+              w: 1
+            }
+          )
           .then(function(result) {
             test.ok(result);
 
@@ -2152,7 +2228,13 @@ describe('Operation (Promises)', function() {
           })
           .then(function(indexInformation) {
             test.deepEqual([['_id', 1]], indexInformation._id_);
-            test.deepEqual([['a', 1], ['b', 1]], indexInformation.a_1_b_1);
+            test.deepEqual(
+              [
+                ['a', 1],
+                ['b', 1]
+              ],
+              indexInformation.a_1_b_1
+            );
             return client.close();
           });
       });
@@ -2630,7 +2712,13 @@ describe('Operation (Promises)', function() {
 
         // Insert a couple of documentations
         return collection
-          .insertMany([{ a: 1, b: 1 }, { a: 1, b: 2 }], configuration.writeConcernMax())
+          .insertMany(
+            [
+              { a: 1, b: 1 },
+              { a: 1, b: 2 }
+            ],
+            configuration.writeConcernMax()
+          )
           .then(function(result) {
             test.ok(result);
 
@@ -2731,9 +2819,17 @@ describe('Operation (Promises)', function() {
         var collection = db.collection('shouldCorrectlyCreateAndDropAllIndex_with_promise');
         // Insert a bunch of documents for the index
         return collection
-          .insertMany([{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4, c: 4 }], {
-            w: 1
-          })
+          .insertMany(
+            [
+              { a: 1, b: 1 },
+              { a: 2, b: 2 },
+              { a: 3, b: 3 },
+              { a: 4, b: 4, c: 4 }
+            ],
+            {
+              w: 1
+            }
+          )
           .then(function(result) {
             test.ok(result);
 
@@ -3014,9 +3110,8 @@ describe('Operation (Promises)', function() {
               test.ok(err);
 
               // Create the collection
-              db
-                .createCollection('test_correctly_access_collections_with_promise')
-                .then(function() {
+              db.createCollection('test_correctly_access_collections_with_promise').then(
+                function() {
                   // Retry to get the collection, should work as it's now created
                   db.collection(
                     'test_correctly_access_collections_with_promise',
@@ -3026,7 +3121,8 @@ describe('Operation (Promises)', function() {
                       client.close(done);
                     }
                   );
-                });
+                }
+              );
             }
           );
         });
@@ -3459,7 +3555,12 @@ describe('Operation (Promises)', function() {
         // Insert a bunch of documents for the index
         return collection
           .insertMany(
-            [{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4 }],
+            [
+              { a: 1, b: 1 },
+              { a: 2, b: 2 },
+              { a: 3, b: 3 },
+              { a: 4, b: 4 }
+            ],
             configuration.writeConcernMax()
           )
           .then(function(result) {
@@ -3526,7 +3627,12 @@ describe('Operation (Promises)', function() {
         // Insert a bunch of documents for the index
         return collection
           .insertMany(
-            [{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4 }],
+            [
+              { a: 1, b: 1 },
+              { a: 2, b: 2 },
+              { a: 3, b: 3 },
+              { a: 4, b: 4 }
+            ],
             configuration.writeConcernMax()
           )
           .then(function(result) {
@@ -3593,7 +3699,13 @@ describe('Operation (Promises)', function() {
         // Insert a bunch of documents for the index
         return collection
           .insertMany(
-            [{ a: 1, b: 1 }, { a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4 }],
+            [
+              { a: 1, b: 1 },
+              { a: 1, b: 1 },
+              { a: 2, b: 2 },
+              { a: 3, b: 3 },
+              { a: 4, b: 4 }
+            ],
             configuration.writeConcernMax()
           )
           .then(function(result) {
@@ -6941,13 +7053,12 @@ describe('Operation (Promises)', function() {
         // Create a capped collection with a maximum of 1000 documents
         var collection;
 
-        db
-          .createCollection('a_simple_collection_2_with_promise', {
-            capped: true,
-            size: 100000,
-            max: 10000,
-            w: 1
-          })
+        db.createCollection('a_simple_collection_2_with_promise', {
+          capped: true,
+          size: 100000,
+          max: 10000,
+          w: 1
+        })
           .then(function(_collection) {
             collection = _collection;
 

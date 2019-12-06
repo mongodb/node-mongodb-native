@@ -51,7 +51,10 @@ function setupDatabase(configuration, dbsToClean) {
         Promise.resolve()
       )
     )
-    .then(() => client.close(), err => client.close(() => Promise.reject(err)));
+    .then(
+      () => client.close(),
+      err => client.close(() => Promise.reject(err))
+    );
 }
 
 function makeCleanupFn(client) {

@@ -276,7 +276,12 @@ describe('Operation (Generators)', function() {
         var collection = db.collection('createIndexExample1_with_generators');
         // Insert a bunch of documents for the index
         yield collection.insertMany(
-          [{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4 }],
+          [
+            { a: 1, b: 1 },
+            { a: 2, b: 2 },
+            { a: 3, b: 3 },
+            { a: 4, b: 4 }
+          ],
           configuration.writeConcernMax()
         );
 
@@ -557,7 +562,12 @@ describe('Operation (Generators)', function() {
         var collection = db.collection('dropIndexExample1_with_generators');
         // Insert a bunch of documents for the index
         yield collection.insertMany(
-          [{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4 }],
+          [
+            { a: 1, b: 1 },
+            { a: 2, b: 2 },
+            { a: 3, b: 3 },
+            { a: 4, b: 4 }
+          ],
           { w: 1 }
         );
 
@@ -614,7 +624,12 @@ describe('Operation (Generators)', function() {
         var collection = db.collection('ensureIndexExample1_with_generators');
         // Insert a bunch of documents for the index
         yield collection.insertMany(
-          [{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4 }],
+          [
+            { a: 1, b: 1 },
+            { a: 2, b: 2 },
+            { a: 3, b: 3 },
+            { a: 4, b: 4 }
+          ],
           configuration.writeConcernMax()
         );
 
@@ -674,7 +689,12 @@ describe('Operation (Generators)', function() {
         var collection = db.collection('ensureIndexExample2_with_generators');
         // Insert a bunch of documents for the index
         yield collection.insertMany(
-          [{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4 }],
+          [
+            { a: 1, b: 1 },
+            { a: 2, b: 2 },
+            { a: 3, b: 3 },
+            { a: 4, b: 4 }
+          ],
           { w: 1 }
         );
 
@@ -837,7 +857,11 @@ describe('Operation (Generators)', function() {
         var collection = db.collection('simple_limit_skip_query_with_generators');
         // Insert a bunch of documents for the testing
         yield collection.insertMany(
-          [{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }],
+          [
+            { a: 1, b: 1 },
+            { a: 2, b: 2 },
+            { a: 3, b: 3 }
+          ],
           configuration.writeConcernMax()
         );
 
@@ -1041,7 +1065,11 @@ describe('Operation (Generators)', function() {
 
         // Insert a bunch of documents for the testing
         yield collection.insertMany(
-          [{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }],
+          [
+            { a: 1, b: 1 },
+            { a: 2, b: 2 },
+            { a: 3, b: 3 }
+          ],
           configuration.writeConcernMax()
         );
 
@@ -1098,7 +1126,10 @@ describe('Operation (Generators)', function() {
 
         // Save a new location tagged document
         yield collection.insertMany(
-          [{ a: 1, loc: [50, 30] }, { a: 1, loc: [30, 50] }],
+          [
+            { a: 1, loc: [50, 30] },
+            { a: 1, loc: [30, 50] }
+          ],
           configuration.writeConcernMax()
         );
 
@@ -1289,7 +1320,10 @@ describe('Operation (Generators)', function() {
 
         // Insert some test documents
         yield collection.insertMany(
-          [{ user_id: 1, timestamp: new Date() }, { user_id: 2, timestamp: new Date() }],
+          [
+            { user_id: 1, timestamp: new Date() },
+            { user_id: 2, timestamp: new Date() }
+          ],
           { w: 1 }
         );
 
@@ -1380,7 +1414,10 @@ describe('Operation (Generators)', function() {
 
         // Insert some test documents
         yield collection.insertMany(
-          [{ user_id: 1, timestamp: new Date() }, { user_id: 2, timestamp: new Date() }],
+          [
+            { user_id: 1, timestamp: new Date() },
+            { user_id: 2, timestamp: new Date() }
+          ],
           { w: 1 }
         );
 
@@ -1580,7 +1617,12 @@ describe('Operation (Generators)', function() {
         var collection = db.collection('more_index_information_test_2_with_generators');
         // Insert a bunch of documents for the index
         yield collection.insertMany(
-          [{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4 }],
+          [
+            { a: 1, b: 1 },
+            { a: 2, b: 2 },
+            { a: 3, b: 3 },
+            { a: 4, b: 4 }
+          ],
           configuration.writeConcernMax()
         );
 
@@ -1592,7 +1634,13 @@ describe('Operation (Generators)', function() {
           'more_index_information_test_2_with_generators'
         );
         test.deepEqual([['_id', 1]], indexInformation._id_);
-        test.deepEqual([['a', 1], ['b', 1]], indexInformation.a_1_b_1);
+        test.deepEqual(
+          [
+            ['a', 1],
+            ['b', 1]
+          ],
+          indexInformation.a_1_b_1
+        );
 
         // Fetch full index information
         indexInformation = yield collection.indexInformation({ full: true });
@@ -1643,7 +1691,12 @@ describe('Operation (Generators)', function() {
         var collection = db.collection('more_index_information_test_3_with_generators');
         // Insert a bunch of documents for the index
         yield collection.insertMany(
-          [{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4 }],
+          [
+            { a: 1, b: 1 },
+            { a: 2, b: 2 },
+            { a: 3, b: 3 },
+            { a: 4, b: 4 }
+          ],
           { w: 1 }
         );
 
@@ -1653,7 +1706,13 @@ describe('Operation (Generators)', function() {
         // Fetch basic indexInformation for collection
         var indexInformation = yield collection.indexInformation();
         test.deepEqual([['_id', 1]], indexInformation._id_);
-        test.deepEqual([['a', 1], ['b', 1]], indexInformation.a_1_b_1);
+        test.deepEqual(
+          [
+            ['a', 1],
+            ['b', 1]
+          ],
+          indexInformation.a_1_b_1
+        );
 
         // Fetch full index information
         indexInformation = yield collection.indexInformation({ full: true });
@@ -2088,7 +2147,12 @@ describe('Operation (Generators)', function() {
         var collection = db.collection('shouldCorrectlyForceReindexOnCollection_with_generators');
         // Insert a bunch of documents for the index
         yield collection.insertMany(
-          [{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4, c: 4 }],
+          [
+            { a: 1, b: 1 },
+            { a: 2, b: 2 },
+            { a: 3, b: 3 },
+            { a: 4, b: 4, c: 4 }
+          ],
           { w: 1 }
         );
 
@@ -2102,7 +2166,13 @@ describe('Operation (Generators)', function() {
         // Verify that the index is gone
         var indexInformation = yield collection.indexInformation();
         test.deepEqual([['_id', 1]], indexInformation._id_);
-        test.deepEqual([['a', 1], ['b', 1]], indexInformation.a_1_b_1);
+        test.deepEqual(
+          [
+            ['a', 1],
+            ['b', 1]
+          ],
+          indexInformation.a_1_b_1
+        );
 
         yield client.close();
       });
@@ -2569,7 +2639,10 @@ describe('Operation (Generators)', function() {
 
         // Insert a couple of documentations
         yield collection.insertMany(
-          [{ a: 1, b: 1 }, { a: 1, b: 2 }],
+          [
+            { a: 1, b: 1 },
+            { a: 1, b: 2 }
+          ],
           configuration.writeConcernMax()
         );
 
@@ -2679,7 +2752,12 @@ describe('Operation (Generators)', function() {
         var collection = db.collection('shouldCorrectlyCreateAndDropAllIndex_with_generators');
         // Insert a bunch of documents for the index
         yield collection.insertMany(
-          [{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4, c: 4 }],
+          [
+            { a: 1, b: 1 },
+            { a: 2, b: 2 },
+            { a: 3, b: 3 },
+            { a: 4, b: 4, c: 4 }
+          ],
           { w: 1 }
         );
 
@@ -3237,7 +3315,12 @@ describe('Operation (Generators)', function() {
         var collection = db.collection('more_complex_index_test_with_generators');
         // Insert a bunch of documents for the index
         yield collection.insertMany(
-          [{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4 }],
+          [
+            { a: 1, b: 1 },
+            { a: 2, b: 2 },
+            { a: 3, b: 3 },
+            { a: 4, b: 4 }
+          ],
           configuration.writeConcernMax()
         );
 
@@ -3299,7 +3382,12 @@ describe('Operation (Generators)', function() {
         var collection = db.collection('more_complex_ensure_index_db_test_with_generators');
         // Insert a bunch of documents for the index
         yield collection.insertMany(
-          [{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4 }],
+          [
+            { a: 1, b: 1 },
+            { a: 2, b: 2 },
+            { a: 3, b: 3 },
+            { a: 4, b: 4 }
+          ],
           configuration.writeConcernMax()
         );
 
@@ -3361,7 +3449,13 @@ describe('Operation (Generators)', function() {
         var collection = db.collection('more_index_information_test_1_with_generators');
         // Insert a bunch of documents for the index
         yield collection.insertMany(
-          [{ a: 1, b: 1 }, { a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4 }],
+          [
+            { a: 1, b: 1 },
+            { a: 1, b: 1 },
+            { a: 2, b: 2 },
+            { a: 3, b: 3 },
+            { a: 4, b: 4 }
+          ],
           configuration.writeConcernMax()
         );
 
@@ -5346,12 +5440,12 @@ describe('Operation (Generators)', function() {
   });
 
   /*
-  * A simple example showing the usage of the seek method using a Generator and the co module.
-  *
-  * @example-class GridStore
-  * @example-method seek
-  * @ignore
-  */
+   * A simple example showing the usage of the seek method using a Generator and the co module.
+   *
+   * @example-class GridStore
+   * @example-method seek
+   * @ignore
+   */
   it('shouldCorrectlySeekWithBufferWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 

@@ -498,11 +498,13 @@ describe.skip('ReplSet (Failover)', function() {
                 return restartAndDone(configuration, done);
               }
 
-              db
-                .collection('replicaset_readpref_test')
-                .findOne({}, { readPreference: ReadPreference.SECONDARY_PREFERRED }, function(err) {
+              db.collection('replicaset_readpref_test').findOne(
+                {},
+                { readPreference: ReadPreference.SECONDARY_PREFERRED },
+                function(err) {
                   test.equal(null, err);
-                });
+                }
+              );
             }, 1000);
           });
         });

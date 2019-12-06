@@ -123,8 +123,7 @@ describe('Promote Values', function() {
           function(err) {
             test.equal(null, err);
 
-            db
-              .collection('shouldCorrectlyHonorPromoteValues')
+            db.collection('shouldCorrectlyHonorPromoteValues')
               .find()
               .next(function(err, doc) {
                 test.equal(null, err);
@@ -168,8 +167,7 @@ describe('Promote Values', function() {
           function(err) {
             test.equal(null, err);
 
-            db
-              .collection('shouldCorrectlyHonorPromoteValues')
+            db.collection('shouldCorrectlyHonorPromoteValues')
               .find({}, { promoteValues: false })
               .next(function(err, doc) {
                 test.equal(null, err);
@@ -213,8 +211,7 @@ describe('Promote Values', function() {
           function(err) {
             test.equal(null, err);
 
-            db
-              .collection('shouldCorrectlyHonorPromoteValues2')
+            db.collection('shouldCorrectlyHonorPromoteValues2')
               .aggregate([{ $match: {} }], { promoteValues: false })
               .next(function(err, doc) {
                 test.equal(null, err);
@@ -262,8 +259,7 @@ describe('Promote Values', function() {
           // change limit from 102 to 101 and this test passes.
           // seems to indicate that the promoteValues flag is used for the
           // initial find, but not for subsequent getMores
-          db
-            .collection('haystack')
+          db.collection('haystack')
             .find({}, { limit: 102, promoteValues: false })
             .on('data', function(doc) {
               test.equal(typeof doc.int, 'object');

@@ -148,13 +148,16 @@ describe('Sessions (ReplSet)', function() {
         }
       });
 
-      const replset = new ReplSet(test.servers.map(s => s.address()), {
-        setName: 'rs',
-        connectionTimeout: 3000,
-        socketTimeout: 0,
-        haInterval: 100,
-        size: 1
-      });
+      const replset = new ReplSet(
+        test.servers.map(s => s.address()),
+        {
+          setName: 'rs',
+          connectionTimeout: 3000,
+          socketTimeout: 0,
+          haInterval: 100,
+          size: 1
+        }
+      );
 
       replset.on('joined', type => {
         if (type === 'arbiter') {

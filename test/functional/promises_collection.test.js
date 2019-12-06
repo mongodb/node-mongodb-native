@@ -29,8 +29,7 @@ describe('Promises (Collection)', function() {
         test.equal(1, client.topology.connections().length);
         var db = client.db(configuration.db);
 
-        db
-          .collection('insertOne')
+        db.collection('insertOne')
           .insertOne({ a: 1 })
           .then(function(r) {
             test.equal(1, r.insertedCount);
@@ -247,8 +246,7 @@ describe('Promises (Collection)', function() {
       const client = configuration.newClient(url);
       client.connect().then(function(client) {
         var db = client.db(configuration.db);
-        db
-          .collection('insertMany_Promise_error')
+        db.collection('insertMany_Promise_error')
           .insertMany({ a: 1 })
           .then(function() {})
           .catch(function(e) {
@@ -279,8 +277,7 @@ describe('Promises (Collection)', function() {
       const client = configuration.newClient(url);
       client.connect().then(function(client) {
         var db = client.db(configuration.db);
-        db
-          .collection('insertOne_Promise_error')
+        db.collection('insertOne_Promise_error')
           .insertOne([{ a: 1 }])
           .then(function() {})
           .catch(function(e) {

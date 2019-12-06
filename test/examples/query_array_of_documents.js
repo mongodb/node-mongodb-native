@@ -20,7 +20,10 @@ describe('examples(query-array-of-documents):', function() {
     await db.collection('inventory').insertMany([
       {
         item: 'journal',
-        instock: [{ warehouse: 'A', qty: 5 }, { warehouse: 'C', qty: 15 }]
+        instock: [
+          { warehouse: 'A', qty: 5 },
+          { warehouse: 'C', qty: 15 }
+        ]
       },
       {
         item: 'notebook',
@@ -28,15 +31,24 @@ describe('examples(query-array-of-documents):', function() {
       },
       {
         item: 'paper',
-        instock: [{ warehouse: 'A', qty: 60 }, { warehouse: 'B', qty: 15 }]
+        instock: [
+          { warehouse: 'A', qty: 60 },
+          { warehouse: 'B', qty: 15 }
+        ]
       },
       {
         item: 'planner',
-        instock: [{ warehouse: 'A', qty: 40 }, { warehouse: 'B', qty: 5 }]
+        instock: [
+          { warehouse: 'A', qty: 40 },
+          { warehouse: 'B', qty: 5 }
+        ]
       },
       {
         item: 'postcard',
-        instock: [{ warehouse: 'B', qty: 15 }, { warehouse: 'C', qty: 35 }]
+        instock: [
+          { warehouse: 'B', qty: 15 },
+          { warehouse: 'C', qty: 35 }
+        ]
       }
     ]);
     // End Example 29

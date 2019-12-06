@@ -2123,52 +2123,49 @@ describe('Insert', function() {
       });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
-        db
-          .collection('shouldCorrectlyHonorPromoteLongFalseNativeBSONWithGetMore')
-          .insertMany(
-            [
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) }
-            ],
-            function(err, doc) {
-              test.equal(null, err);
-              test.ok(doc);
+        db.collection('shouldCorrectlyHonorPromoteLongFalseNativeBSONWithGetMore').insertMany(
+          [
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) }
+          ],
+          function(err, doc) {
+            test.equal(null, err);
+            test.ok(doc);
 
-              db
-                .collection('shouldCorrectlyHonorPromoteLongFalseNativeBSONWithGetMore')
-                .find({})
-                .batchSize(2)
-                .toArray(function(err, docs) {
-                  test.equal(null, err);
-                  var doc = docs.pop();
+            db.collection('shouldCorrectlyHonorPromoteLongFalseNativeBSONWithGetMore')
+              .find({})
+              .batchSize(2)
+              .toArray(function(err, docs) {
+                test.equal(null, err);
+                var doc = docs.pop();
 
-                  test.ok(doc.a._bsontype === 'Long');
-                  client.close(done);
-                });
-            }
-          );
+                test.ok(doc.a._bsontype === 'Long');
+                client.close(done);
+              });
+          }
+        );
       });
     }
   });
@@ -2197,15 +2194,16 @@ describe('Insert', function() {
             test.equal(null, err);
             test.ok(doc);
 
-            db
-              .collection('shouldCorrectlyHonorPromoteLongTrueNativeBSON')
-              .findOne(function(err, doc) {
-                test.equal(null, err);
-                test.equal(null, err);
-                test.ok('number', typeof doc.doc);
-                test.ok('number', typeof doc.array[0][0]);
-                client.close(done);
-              });
+            db.collection('shouldCorrectlyHonorPromoteLongTrueNativeBSON').findOne(function(
+              err,
+              doc
+            ) {
+              test.equal(null, err);
+              test.equal(null, err);
+              test.ok('number', typeof doc.doc);
+              test.ok('number', typeof doc.array[0][0]);
+              client.close(done);
+            });
           }
         );
       });
@@ -2642,8 +2640,7 @@ describe('Insert', function() {
         var db = client.db(configuration.db);
         test.equal(null, err);
 
-        db
-          .collection('apm_test')
+        db.collection('apm_test')
           .insertOne({ a: 1 }, { forceServerObjectId: true })
           .then(function() {
             test.equal(undefined, started[0].command.documents[0]._id);
@@ -2681,8 +2678,7 @@ describe('Insert', function() {
         var db = client.db(configuration.db);
         test.equal(null, err);
 
-        db
-          .collection('apm_test')
+        db.collection('apm_test')
           .insertMany([{ a: 1 }], { forceServerObjectId: true })
           .then(function() {
             test.equal(undefined, started[0].command.documents[0]._id);
@@ -2720,8 +2716,7 @@ describe('Insert', function() {
         var db = client.db(configuration.db);
         test.equal(null, err);
 
-        db
-          .collection('apm_test')
+        db.collection('apm_test')
           .insertMany([{ a: 1 }], { forceServerObjectId: true })
           .then(function() {
             test.equal(undefined, started[0].command.documents[0]._id);
@@ -2741,8 +2736,7 @@ describe('Insert', function() {
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
         test.equal(null, err);
-        db
-          .collection('inserted_ids_test')
+        db.collection('inserted_ids_test')
           .insertMany([{}, {}, {}], { ordered: true })
           .then(function(r) {
             test.equal(3, Object.keys(r.insertedIds).length);
@@ -2760,8 +2754,7 @@ describe('Insert', function() {
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
         test.equal(null, err);
-        db
-          .collection('inserted_ids_test')
+        db.collection('inserted_ids_test')
           .insertMany([{}, {}, {}], { ordered: false })
           .then(function(r) {
             test.equal(null, err);
@@ -2804,8 +2797,7 @@ describe('Insert', function() {
           test.equal(null, err);
           test.ok(r);
 
-          db
-            .collection('sub_documents')
+          db.collection('sub_documents')
             .find({})
             .next(function(err, v) {
               test.equal(null, err);

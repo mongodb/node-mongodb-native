@@ -119,8 +119,7 @@ describe('Command Write Concern', function() {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
-          db
-            .collection('test')
+          db.collection('test')
             .aggregate([{ $match: {} }, { $out: 'readConcernCollectionAggregate1Output' }], {
               w: 2,
               wtimeout: 1000
@@ -1187,20 +1186,18 @@ describe('Command Write Concern', function() {
           var db = client.db(configuration.db);
 
           // Simple findAndModify command returning the new document
-          db
-            .collection('test')
-            .findAndModify(
-              { a: 1 },
-              [['a', 1]],
-              { $set: { b1: 1 } },
-              { new: true, w: 2, wtimeout: 1000 },
-              function(err) {
-                test.equal(null, err);
-                test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
+          db.collection('test').findAndModify(
+            { a: 1 },
+            [['a', 1]],
+            { $set: { b1: 1 } },
+            { new: true, w: 2, wtimeout: 1000 },
+            function(err) {
+              test.equal(null, err);
+              test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
 
-                client.close(done);
-              }
-            );
+              client.close(done);
+            }
+          );
         });
       });
     }

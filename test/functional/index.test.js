@@ -87,7 +87,11 @@ describe('Indexes', function() {
             // Create an index on the collection
             db.createIndex(
               collection.collectionName,
-              [['a', -1], ['b', 1], ['c', -1]],
+              [
+                ['a', -1],
+                ['b', 1],
+                ['c', -1]
+              ],
               configuration.writeConcernMax(),
               function(err, indexName) {
                 test.equal('a_-1_b_1_c_-1', indexName);
@@ -98,7 +102,14 @@ describe('Indexes', function() {
                   // Test
                   test.equal(2, count1);
                   test.ok(collectionInfo[indexName] != null);
-                  test.deepEqual([['a', -1], ['b', 1], ['c', -1]], collectionInfo[indexName]);
+                  test.deepEqual(
+                    [
+                      ['a', -1],
+                      ['b', 1],
+                      ['c', -1]
+                    ],
+                    collectionInfo[indexName]
+                  );
 
                   // Let's close the db
                   client.close(done);
@@ -646,17 +657,17 @@ describe('Indexes', function() {
         var db = client.db(configuration.db);
         var shared = require('./contexts');
 
-        db
-          .collection('indexcontext')
-          .ensureIndex(shared.object, { background: true }, function(err) {
+        db.collection('indexcontext').ensureIndex(shared.object, { background: true }, function(
+          err
+        ) {
+          test.equal(null, err);
+          db.collection('indexcontext').ensureIndex(shared.array, { background: true }, function(
+            err
+          ) {
             test.equal(null, err);
-            db
-              .collection('indexcontext')
-              .ensureIndex(shared.array, { background: true }, function(err) {
-                test.equal(null, err);
-                client.close(done);
-              });
+            client.close(done);
           });
+        });
       });
     }
   });
@@ -809,8 +820,7 @@ describe('Indexes', function() {
           test.equal(null, err);
 
           // Get the list of indexes
-          db
-            .collection('testListIndexes')
+          db.collection('testListIndexes')
             .listIndexes()
             .toArray(function(err, indexes) {
               test.equal(null, err);
@@ -838,8 +848,7 @@ describe('Indexes', function() {
           test.equal(null, err);
 
           // Get the list of indexes
-          db
-            .collection('testListIndexes_2')
+          db.collection('testListIndexes_2')
             .listIndexes()
             .hasNext(function(err, result) {
               test.equal(null, err);
@@ -867,8 +876,7 @@ describe('Indexes', function() {
           test.equal(null, err);
 
           // Get the list of indexes
-          db
-            .collection('ensureIndexWithNestedStyleIndex')
+          db.collection('ensureIndexWithNestedStyleIndex')
             .listIndexes()
             .toArray(function(err, indexes) {
               test.equal(null, err);
@@ -892,14 +900,13 @@ describe('Indexes', function() {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
-        db
-          .collection('createIndexes')
-          .createIndexes([{ key: { a: 1 } }, { key: { b: 1 }, name: 'hello1' }], function(err, r) {
+        db.collection('createIndexes').createIndexes(
+          [{ key: { a: 1 } }, { key: { b: 1 }, name: 'hello1' }],
+          function(err, r) {
             test.equal(null, err);
             test.equal(3, r.numIndexesAfter);
 
-            db
-              .collection('createIndexes')
+            db.collection('createIndexes')
               .listIndexes()
               .toArray(function(err, docs) {
                 test.equal(null, err);
@@ -914,7 +921,8 @@ describe('Indexes', function() {
 
                 client.close(done);
               });
-          });
+          }
+        );
       });
     }
   });
@@ -933,14 +941,15 @@ describe('Indexes', function() {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
-        db
-          .collection('text_index')
-          .createIndex({ '$**': 'text' }, { name: 'TextIndex' }, function(err, r) {
-            test.equal(null, err);
-            test.equal('TextIndex', r);
-            // Let's close the db
-            client.close(done);
-          });
+        db.collection('text_index').createIndex({ '$**': 'text' }, { name: 'TextIndex' }, function(
+          err,
+          r
+        ) {
+          test.equal(null, err);
+          test.equal('TextIndex', r);
+          // Let's close the db
+          client.close(done);
+        });
       });
     }
   });
@@ -978,14 +987,16 @@ describe('Indexes', function() {
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
 
-        db
-          .collection('partialIndexes')
-          .createIndex({ a: 1 }, { partialFilterExpression: { a: 1 } }, function(err) {
+        db.collection('partialIndexes').createIndex(
+          { a: 1 },
+          { partialFilterExpression: { a: 1 } },
+          function(err) {
             test.equal(null, err);
             test.deepEqual({ a: 1 }, started[0].command.indexes[0].partialFilterExpression);
             listener.uninstrument();
             client.close(done);
-          });
+          }
+        );
       });
     }
   });
@@ -1229,17 +1240,15 @@ describe('Indexes', function() {
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
         // insert a doc
-        db
-          .collection('messed_up_index')
-          .createIndex(
-            { temporary: 1, 'store.addressLines': 1, lifecycleStatus: 1 },
-            configuration.writeConcernMax(),
-            function(err) {
-              test.equal(null, err);
+        db.collection('messed_up_index').createIndex(
+          { temporary: 1, 'store.addressLines': 1, lifecycleStatus: 1 },
+          configuration.writeConcernMax(),
+          function(err) {
+            test.equal(null, err);
 
-              client.close(done);
-            }
-          );
+            client.close(done);
+          }
+        );
       });
     }
   });
@@ -1333,13 +1342,15 @@ describe('Indexes', function() {
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
         // insert a doc
-        db
-          .collection('messed_up_index_2')
-          .createIndex({ 'accessControl.get': 1 }, { background: true }, function(err) {
+        db.collection('messed_up_index_2').createIndex(
+          { 'accessControl.get': 1 },
+          { background: true },
+          function(err) {
             test.equal(null, err);
 
             client.close(done);
-          });
+          }
+        );
       });
     }
   });

@@ -84,11 +84,10 @@ describe.skip('ReplSet (ReadPreference)', function() {
           });
 
           // Attempt to perform a read
-          db
-            .collection('somecollection')
-            .findOne({}, { readPreference: new ReadPreference(ReadPreference.NEAREST) }, function(
-              err
-            ) {
+          db.collection('somecollection').findOne(
+            {},
+            { readPreference: new ReadPreference(ReadPreference.NEAREST) },
+            function(err) {
               test.equal(null, err);
 
               // Pick the server
@@ -97,55 +96,50 @@ describe.skip('ReplSet (ReadPreference)', function() {
               });
 
               // Attempt to perform a read
-              db
-                .collection('somecollection')
-                .findOne(
-                  {},
-                  { readPreference: new ReadPreference(ReadPreference.SECONDARY) },
-                  function(err) {
-                    test.equal(null, err);
+              db.collection('somecollection').findOne(
+                {},
+                { readPreference: new ReadPreference(ReadPreference.SECONDARY) },
+                function(err) {
+                  test.equal(null, err);
 
-                    // Pick the server
-                    client.topology.replset.once('pickedServer', function(readPreference, server) {
-                      test.ok(secondaries.indexOf(server.name) !== -1);
-                    });
+                  // Pick the server
+                  client.topology.replset.once('pickedServer', function(readPreference, server) {
+                    test.ok(secondaries.indexOf(server.name) !== -1);
+                  });
 
-                    // Attempt to perform a read
-                    db
-                      .collection('somecollection')
-                      .findOne(
+                  // Attempt to perform a read
+                  db.collection('somecollection').findOne(
+                    {},
+                    { readPreference: new ReadPreference(ReadPreference.SECONDARY_PREFERRED) },
+                    function(err) {
+                      test.equal(null, err);
+
+                      // Pick the server
+                      client.topology.replset.once('pickedServer', function(
+                        readPreference,
+                        server
+                      ) {
+                        test.equal('localhost:31000', server.name);
+                      });
+
+                      // Attempt to perform a read
+                      db.collection('somecollection').findOne(
                         {},
-                        { readPreference: new ReadPreference(ReadPreference.SECONDARY_PREFERRED) },
+                        { readPreference: new ReadPreference(ReadPreference.PRIMARY) },
                         function(err) {
                           test.equal(null, err);
 
-                          // Pick the server
-                          client.topology.replset.once('pickedServer', function(
-                            readPreference,
-                            server
-                          ) {
-                            test.equal('localhost:31000', server.name);
-                          });
-
-                          // Attempt to perform a read
-                          db
-                            .collection('somecollection')
-                            .findOne(
-                              {},
-                              { readPreference: new ReadPreference(ReadPreference.PRIMARY) },
-                              function(err) {
-                                test.equal(null, err);
-
-                                // Close db
-                                client.close();
-                                restartAndDone(done);
-                              }
-                            );
+                          // Close db
+                          client.close();
+                          restartAndDone(done);
                         }
                       );
-                  }
-                );
-            });
+                    }
+                  );
+                }
+              );
+            }
+          );
         });
       });
 
@@ -240,11 +234,19 @@ describe.skip('ReplSet (ReadPreference)', function() {
             viewedServers[server.name] = server.name;
           });
 
-          db
-            .collection('nearest_collection_test', {
+          db.collection('nearest_collection_test', {
+            readPreference: 'nearest'
+          }).findOne({ a: 1 }, function(err) {
+            test.equal(null, err);
+
+            // Pick the server
+            client.topology.replset.once('pickedServer', function(readPreference, server) {
+              viewedServers[server.name] = server.name;
+            });
+
+            db.collection('nearest_collection_test', {
               readPreference: 'nearest'
-            })
-            .findOne({ a: 1 }, function(err) {
+            }).findOne({ a: 1 }, function(err) {
               test.equal(null, err);
 
               // Pick the server
@@ -252,31 +254,17 @@ describe.skip('ReplSet (ReadPreference)', function() {
                 viewedServers[server.name] = server.name;
               });
 
-              db
-                .collection('nearest_collection_test', {
-                  readPreference: 'nearest'
-                })
-                .findOne({ a: 1 }, function(err) {
-                  test.equal(null, err);
+              db.collection('nearest_collection_test', {
+                readPreference: 'nearest'
+              }).findOne({ a: 1 }, function(err) {
+                test.equal(null, err);
+                test.ok(Object.keys(viewedServers).length > 1);
 
-                  // Pick the server
-                  client.topology.replset.once('pickedServer', function(readPreference, server) {
-                    viewedServers[server.name] = server.name;
-                  });
-
-                  db
-                    .collection('nearest_collection_test', {
-                      readPreference: 'nearest'
-                    })
-                    .findOne({ a: 1 }, function(err) {
-                      test.equal(null, err);
-                      test.ok(Object.keys(viewedServers).length > 1);
-
-                      client.close();
-                      restartAndDone(done);
-                    });
-                });
+                client.close();
+                restartAndDone(done);
+              });
             });
+          });
         });
 
         client.connect(function(err) {
@@ -868,39 +856,37 @@ describe.skip('ReplSet (ReadPreference)', function() {
       client.on('fullsetup', function(client) {
         var db = client.db(configuration.db);
 
-        db
-          .collection('direct_secondary_read_test')
-          .insertMany(
-            [{ a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }],
-            configuration.writeConcernMax(),
-            function(err) {
-              test.equal(null, err);
-              client.close();
+        db.collection('direct_secondary_read_test').insertMany(
+          [{ a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }],
+          configuration.writeConcernMax(),
+          function(err) {
+            test.equal(null, err);
+            client.close();
 
-              setTimeout(function() {
-                var url = format(
-                  'mongodb://localhost:%s/integration_test_?readPreference=nearest',
-                  configuration.port + 1
-                );
+            setTimeout(function() {
+              var url = format(
+                'mongodb://localhost:%s/integration_test_?readPreference=nearest',
+                configuration.port + 1
+              );
 
-                // Connect using the MongoClient
-                const client2 = configuration.newClient(url);
-                client2.connect(url, function(err, client2) {
+              // Connect using the MongoClient
+              const client2 = configuration.newClient(url);
+              client2.connect(url, function(err, client2) {
+                test.equal(null, err);
+                var db = client2.db(configuration.db);
+                test.ok(client2.topology instanceof Server);
+
+                db.collection('direct_secondary_read_test').count(function(err, n) {
                   test.equal(null, err);
-                  var db = client2.db(configuration.db);
-                  test.ok(client2.topology instanceof Server);
+                  test.ok(n > 0);
 
-                  db.collection('direct_secondary_read_test').count(function(err, n) {
-                    test.equal(null, err);
-                    test.ok(n > 0);
-
-                    client2.close();
-                    done();
-                  });
+                  client2.close();
+                  done();
                 });
-              }, 1000);
-            }
-          );
+              });
+            }, 1000);
+          }
+        );
       });
 
       client.connect(function(err) {

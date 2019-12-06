@@ -120,8 +120,7 @@ describe('Logger', function() {
         Logger.filter('class', ['Cursor']);
 
         // perform any operation that gets logged
-        db
-          .collection('logging')
+        db.collection('logging')
           .find()
           .toArray(function(err) {
             expect(err).to.not.exist;

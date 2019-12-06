@@ -18,14 +18,15 @@ describe('Disconnect Handler', function() {
         var db = client.db(configuration.db);
 
         configuration.manager.stop(9).then(function() {
-          db
-            .collection('disconnect_handler_tests')
-            .update({ a: 1 }, { $set: { b: 1 } }, function(err, r) {
-              test.equal(null, err);
-              test.equal(0, r.result.n);
+          db.collection('disconnect_handler_tests').update({ a: 1 }, { $set: { b: 1 } }, function(
+            err,
+            r
+          ) {
+            test.equal(null, err);
+            test.equal(0, r.result.n);
 
-              client.close();
-            });
+            client.close();
+          });
 
           setTimeout(function() {
             configuration.manager.restart(9, { waitMS: 5000 }).then(function() {

@@ -333,7 +333,12 @@ describe('Db', function() {
 
           // Insert a bunch of documents for the index
           collection.insert(
-            [{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4, c: 4 }],
+            [
+              { a: 1, b: 1 },
+              { a: 2, b: 2 },
+              { a: 3, b: 3 },
+              { a: 4, b: 4, c: 4 }
+            ],
             configuration.writeConcernMax(),
             function(err) {
               test.equal(null, err);
@@ -353,7 +358,13 @@ describe('Db', function() {
                     // Verify that the index is gone
                     collection.indexInformation(function(err, indexInformation) {
                       test.deepEqual([['_id', 1]], indexInformation._id_);
-                      test.deepEqual([['a', 1], ['b', 1]], indexInformation.a_1_b_1);
+                      test.deepEqual(
+                        [
+                          ['a', 1],
+                          ['b', 1]
+                        ],
+                        indexInformation.a_1_b_1
+                      );
 
                       client.close(done);
                     });

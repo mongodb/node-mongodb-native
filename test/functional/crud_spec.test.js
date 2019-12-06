@@ -165,9 +165,12 @@ describe('CRUD spec', function() {
   }
 
   function invert(promise) {
-    return promise.then(() => {
-      throw new Error('Expected operation to throw an error');
-    }, e => e);
+    return promise.then(
+      () => {
+        throw new Error('Expected operation to throw an error');
+      },
+      e => e
+    );
   }
 
   function assertWriteExpectations(collection, outcome) {
@@ -430,11 +433,10 @@ describe('CRUD spec', function() {
     }
 
     return Promise.all(dropPromises)
-      .then(
-        () =>
-          scenario.data && scenario.data.length
-            ? collection.insertMany(scenario.data)
-            : Promise.resolve()
+      .then(() =>
+        scenario.data && scenario.data.length
+          ? collection.insertMany(scenario.data)
+          : Promise.resolve()
       )
       .then(() => {
         switch (scenarioTest.operation.name) {

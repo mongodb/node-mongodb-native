@@ -19,7 +19,11 @@ describe('Authentication', function() {
 
       const noop = () => undefined;
       const returnNothing = fn => fn().then(noop);
-      const tap = fn => e => returnNothing(fn).then(() => e, () => e);
+      const tap = fn => e =>
+        returnNothing(fn).then(
+          () => e,
+          () => e
+        );
 
       const controllerClient = configuration.newClient();
 
@@ -1560,14 +1564,14 @@ describe('Authentication', function() {
                   var db = client.db(configuration.db);
 
                   // Insert document
-                  db
-                    .collection('authcollectiontest')
-                    .insert({ a: 1 }, { w: 3, wtimeout: 25000 }, function(err) {
+                  db.collection('authcollectiontest').insert(
+                    { a: 1 },
+                    { w: 3, wtimeout: 25000 },
+                    function(err) {
                       test.equal(null, err);
 
                       // Find the document
-                      db
-                        .collection('authcollectiontest')
+                      db.collection('authcollectiontest')
                         .find()
                         .toArray(function(err, docs) {
                           test.equal(1, docs.length);
@@ -1579,7 +1583,8 @@ describe('Authentication', function() {
                             done();
                           });
                         });
-                    });
+                    }
+                  );
                   // });
                 }
               );
@@ -1646,14 +1651,14 @@ describe('Authentication', function() {
                     var db = client.db(configuration.db);
 
                     // Insert document
-                    db
-                      .collection('authcollectiontest1')
-                      .insert({ a: 1 }, { w: 3, wtimeout: 25000 }, function(err) {
+                    db.collection('authcollectiontest1').insert(
+                      { a: 1 },
+                      { w: 3, wtimeout: 25000 },
+                      function(err) {
                         test.equal(null, err);
 
                         // Find the document
-                        db
-                          .collection('authcollectiontest1')
+                        db.collection('authcollectiontest1')
                           .find()
                           .toArray(function(err, docs) {
                             test.equal(null, err);
@@ -1666,7 +1671,8 @@ describe('Authentication', function() {
                               done();
                             });
                           });
-                      });
+                      }
+                    );
                   }
                 );
               });

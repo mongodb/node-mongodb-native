@@ -79,12 +79,14 @@ function executeScenarioTest(test, ctx) {
 
       let result = ctx.collection[test.operation.name].apply(ctx.collection, args);
       if (test.outcome.error) {
-        result = result.then(() => expect(false).to.be.true).catch(err => {
-          expect(err).to.exist;
-          expect(err.message, 'expected operations to fail, but they succeeded').to.not.match(
-            /expected false to be true/
-          );
-        });
+        result = result
+          .then(() => expect(false).to.be.true)
+          .catch(err => {
+            expect(err).to.exist;
+            expect(err.message, 'expected operations to fail, but they succeeded').to.not.match(
+              /expected false to be true/
+            );
+          });
       } else if (test.outcome.result) {
         const expected = transformToFixUpsertedId(test.outcome.result);
         result = result.then(transformToResultValue).then(r => expect(r).to.deep.include(expected));

@@ -106,7 +106,10 @@ describe('ReadConcern', function() {
               expect(err).to.not.exist;
               // Save a new location tagged document
               collection.insertMany(
-                [{ a: 1, loc: [50, 30] }, { a: 1, loc: [30, 50] }],
+                [
+                  { a: 1, loc: [50, 30] },
+                  { a: 1, loc: [30, 50] }
+                ],
                 configuration.writeConcernMax(),
                 err => {
                   expect(err).to.not.exist;
@@ -406,7 +409,10 @@ describe('ReadConcern', function() {
                 });
             });
         })
-        .then(() => client.close(done), e => client.close(() => done(e)));
+        .then(
+          () => client.close(done),
+          e => client.close(() => done(e))
+        );
     }
   });
 

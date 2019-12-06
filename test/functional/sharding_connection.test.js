@@ -31,9 +31,11 @@ describe('Sharding (Connection)', function() {
 
         const db = client.db(configuration.db);
 
-        db
-          .collection('replicaset_mongo_client_collection')
-          .update({ a: 1 }, { b: 1 }, { upsert: true }, (err, result) => {
+        db.collection('replicaset_mongo_client_collection').update(
+          { a: 1 },
+          { b: 1 },
+          { upsert: true },
+          (err, result) => {
             expect(err).to.not.exist;
             expect(result).to.have.nested.property('result.n', 1);
 
@@ -43,7 +45,8 @@ describe('Sharding (Connection)', function() {
 
               client.close(done);
             });
-          });
+          }
+        );
       });
     }
   });

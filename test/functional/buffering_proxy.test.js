@@ -210,16 +210,14 @@ describe.skip('Buffering Proxy', function() {
                 }
               );
 
-              db
-                .collection('test')
+              db.collection('test')
                 .aggregate([{ $match: {} }])
                 .toArray(function(err) {
                   test.equal(null, err);
                   results.push('aggregate');
                 });
 
-              db
-                .collection('test')
+              db.collection('test')
                 .find({})
                 .setReadPreference(new ReadPreference(ReadPreference.SECONDARY))
                 .toArray(function(err) {
@@ -438,16 +436,14 @@ describe.skip('Buffering Proxy', function() {
                 }
               );
 
-              db
-                .collection('test')
+              db.collection('test')
                 .aggregate([{ $match: {} }])
                 .toArray(function(err) {
                   test.equal(null, err);
                   results.push('aggregate');
                 });
 
-              db
-                .collection('test')
+              db.collection('test')
                 .find({})
                 .setReadPreference(new ReadPreference(ReadPreference.SECONDARY))
                 .toArray(function(err) {

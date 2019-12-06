@@ -110,12 +110,9 @@ describe('Unicode', function() {
         col.insert(docs_1, { w: 1 }, function(err) {
           test.equal(null, err);
 
-          db
-            .admin()
-            .command({ configureFailPoint: 'maxTimeAlwaysTimeOut', mode: 'alwaysOn' }, function(
-              err,
-              result
-            ) {
+          db.admin().command(
+            { configureFailPoint: 'maxTimeAlwaysTimeOut', mode: 'alwaysOn' },
+            function(err, result) {
               test.equal(null, err);
               test.equal(1, result.ok);
 
@@ -125,18 +122,17 @@ describe('Unicode', function() {
                 .toArray(function(err) {
                   test.ok(err != null);
 
-                  db
-                    .admin()
-                    .command({ configureFailPoint: 'maxTimeAlwaysTimeOut', mode: 'off' }, function(
-                      err,
-                      result
-                    ) {
+                  db.admin().command(
+                    { configureFailPoint: 'maxTimeAlwaysTimeOut', mode: 'off' },
+                    function(err, result) {
                       test.equal(null, err);
                       test.equal(1, result.ok);
                       client.close(done);
-                    });
+                    }
+                  );
                 });
-            });
+            }
+          );
         });
       });
     }

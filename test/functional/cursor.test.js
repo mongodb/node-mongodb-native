@@ -464,7 +464,10 @@ describe('Cursor', function() {
             test.deepEqual([['a', 'asc']], cursor.sortValue);
             finished();
 
-            cursor = collection.find().sort([['a', -1], ['b', 1]]);
+            cursor = collection.find().sort([
+              ['a', -1],
+              ['b', 1]
+            ]);
             var entries = cursor.sortValue.entries();
             test.deepEqual(['a', -1], entries.next().value);
             test.deepEqual(['b', 1], entries.next().value);
@@ -2848,15 +2851,13 @@ describe('Cursor', function() {
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
         try {
-          db
-            .collection('shouldFailToSetReadPreferenceOnCursor')
+          db.collection('shouldFailToSetReadPreferenceOnCursor')
             .find()
             .setReadPreference('notsecondary');
           test.ok(false);
         } catch (err) {} // eslint-disable-line
 
-        db
-          .collection('shouldFailToSetReadPreferenceOnCursor')
+        db.collection('shouldFailToSetReadPreferenceOnCursor')
           .find()
           .setReadPreference('secondary');
 
@@ -3307,14 +3308,15 @@ describe('Cursor', function() {
         var db = client.db(configuration.db);
         test.equal(null, err);
 
-        db
-          .collection('should_correctly_handle_batchSize_2')
-          .insert([{ x: 1 }, { x: 2 }, { x: 3 }], function(err) {
+        db.collection('should_correctly_handle_batchSize_2').insert(
+          [{ x: 1 }, { x: 2 }, { x: 3 }],
+          function(err) {
             test.equal(null, err);
 
-            db
-              .collection('should_correctly_handle_batchSize_2')
-              .find({}, { batchSize: 2 }, function(error, cursor) {
+            db.collection('should_correctly_handle_batchSize_2').find(
+              {},
+              { batchSize: 2 },
+              function(error, cursor) {
                 test.equal(null, err);
 
                 cursor.next(function(err) {
@@ -3329,8 +3331,10 @@ describe('Cursor', function() {
                     });
                   });
                 });
-              });
-          });
+              }
+            );
+          }
+        );
       });
     }
   });
@@ -4084,8 +4088,7 @@ describe('Cursor', function() {
         var db = client.db(configuration.db);
         test.equal(null, err);
 
-        db
-          .collection('cursor_count_test', { readConcern: { level: 'local' } })
+        db.collection('cursor_count_test', { readConcern: { level: 'local' } })
           .find({ project: '123' })
           .limit(5)
           .skip(5)
@@ -4221,8 +4224,8 @@ describe('Cursor', function() {
                       response.cursorsKilled &&
                       Array.isArray(response.cursorsKilled)
                     ) {
-                      response.cursorsKilled = response.cursorsKilled.map(
-                        id => (typeof id === 'number' ? Long.fromNumber(id) : id)
+                      response.cursorsKilled = response.cursorsKilled.map(id =>
+                        typeof id === 'number' ? Long.fromNumber(id) : id
                       );
                     }
 
@@ -4450,7 +4453,11 @@ describe('Cursor', function() {
   it('transformStream should apply the supplied transformation function to each document in the stream', function(done) {
     const configuration = this.configuration;
     const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
-    const expectedDocs = [{ _id: 0, b: 1, c: 0 }, { _id: 1, b: 1, c: 0 }, { _id: 2, b: 1, c: 0 }];
+    const expectedDocs = [
+      { _id: 0, b: 1, c: 0 },
+      { _id: 1, b: 1, c: 0 },
+      { _id: 2, b: 1, c: 0 }
+    ];
     const config = {
       client: client,
       configuration: configuration,

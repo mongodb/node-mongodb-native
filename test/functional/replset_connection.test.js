@@ -597,9 +597,11 @@ describe.skip('ReplSet (Connection)', function() {
         test.equal(500, client.topology.connections()[0].connectionTimeout);
         test.equal(360000, client.topology.connections()[0].socketTimeout);
 
-        db
-          .collection('replicaset_mongo_client_collection')
-          .update({ a: 1 }, { b: 1 }, { upsert: true }, function(err, result) {
+        db.collection('replicaset_mongo_client_collection').update(
+          { a: 1 },
+          { b: 1 },
+          { upsert: true },
+          function(err, result) {
             test.equal(null, err);
             test.equal(1, result.result.n);
 
@@ -614,7 +616,8 @@ describe.skip('ReplSet (Connection)', function() {
 
               done();
             }, 200);
-          });
+          }
+        );
       });
     }
   });

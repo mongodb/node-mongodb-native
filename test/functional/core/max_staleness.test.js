@@ -13,8 +13,7 @@ const rsWithoutPrimaryPath = p.resolve(__dirname, '../../spec/max-staleness/Repl
 
 describe('Max Staleness', function() {
   describe('ReplicaSet without primary', function() {
-    fs
-      .readdirSync(rsWithoutPrimaryPath)
+    fs.readdirSync(rsWithoutPrimaryPath)
       .filter(x => x.indexOf('.json') !== -1)
       .forEach(x => {
         it(p.basename(x, '.json'), function(done) {
@@ -24,8 +23,7 @@ describe('Max Staleness', function() {
   });
 
   describe('ReplicaSet with primary', function() {
-    fs
-      .readdirSync(rsWithPrimaryPath)
+    fs.readdirSync(rsWithPrimaryPath)
       .filter(x => x.indexOf('.json') !== -1)
       .filter(x => x.indexOf('LongHeartbeat2.jwson') === -1)
       .forEach(x => {

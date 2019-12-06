@@ -29,8 +29,7 @@ describe('Promises (Cursor)', function() {
         var db = client.db(configuration.db);
         test.equal(1, client.topology.connections().length);
 
-        db
-          .collection('insertOne')
+        db.collection('insertOne')
           .insertOne({ a: 1 })
           .then(function() {
             client.close(done);

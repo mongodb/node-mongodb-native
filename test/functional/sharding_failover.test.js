@@ -34,9 +34,11 @@ describe.skip('Sharding (Failover)', function() {
         test.equal(null, err);
         var db = client.db(configuration.db);
 
-        db
-          .collection('replicaset_mongo_client_collection')
-          .update({ a: 1 }, { b: 1 }, { upsert: true }, function(err, result) {
+        db.collection('replicaset_mongo_client_collection').update(
+          { a: 1 },
+          { b: 1 },
+          { upsert: true },
+          function(err, result) {
             test.equal(null, err);
             test.equal(1, result.result.n);
             var numberOfTicks = 10;
@@ -61,7 +63,8 @@ describe.skip('Sharding (Failover)', function() {
             mongos.stop().then(function() {
               setTimeout(ticker, 1000);
             });
-          });
+          }
+        );
       });
     }
   });

@@ -39,8 +39,7 @@ describe('Kerberos', function() {
         test.equal(null, err);
         var db = client.db('kerberos');
 
-        db
-          .collection('test')
+        db.collection('test')
           .find()
           .toArray(function(err, docs) {
             test.equal(null, err);
@@ -77,8 +76,7 @@ describe('Kerberos', function() {
         test.equal(null, err);
         var db = client.db('kerberos');
 
-        db
-          .collection('test')
+        db.collection('test')
           .find()
           .toArray(function(err, docs) {
             test.equal(null, err);
@@ -117,8 +115,7 @@ describe('Kerberos', function() {
           test.equal(null, err);
           var db = client.db('kerberos');
 
-          db
-            .collection('test')
+          db.collection('test')
             .find()
             .toArray(function(err, docs) {
               test.equal(null, err);
@@ -289,8 +286,7 @@ describe('Kerberos', function() {
         test.equal(null, err);
         var db = client.db('kerberos');
 
-        db
-          .collection('test')
+        db.collection('test')
           .find()
           .toArray(function(err, docs) {
             test.equal(null, err);
@@ -396,8 +392,7 @@ describe('Kerberos', function() {
         test.equal(null, err);
         var db = client.db('kerberos');
 
-        db
-          .collection('test')
+        db.collection('test')
           .find()
           .toArray(function(err, docs) {
             test.equal(null, err);

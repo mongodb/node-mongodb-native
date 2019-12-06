@@ -140,7 +140,10 @@ describe('A server', function() {
           // Execute the write
           _server.insert(
             ns,
-            [{ id: objectId, a: 1, b: undefined }, { id: objectId, a: 2, b: 1 }],
+            [
+              { id: objectId, a: 1, b: undefined },
+              { id: objectId, a: 2, b: 1 }
+            ],
             {
               writeConcern: { w: 1 },
               ordered: true
@@ -202,7 +205,10 @@ describe('A server', function() {
           // Execute the write
           _server.insert(
             ns,
-            [{ id: objectId, a: 1, b: undefined }, { id: objectId, a: 2, b: 1 }],
+            [
+              { id: objectId, a: 1, b: undefined },
+              { id: objectId, a: 2, b: 1 }
+            ],
             {
               writeConcern: { w: 1 },
               ordered: true

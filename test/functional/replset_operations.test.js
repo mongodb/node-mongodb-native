@@ -493,7 +493,12 @@ describe('ReplSet (Operations)', function() {
         });
 
         collection.insert(
-          [{ key: 1, x: 10 }, { key: 2, x: 30 }, { key: 1, x: 20 }, { key: 3, x: 20 }],
+          [
+            { key: 1, x: 10 },
+            { key: 2, x: 30 },
+            { key: 1, x: 20 },
+            { key: 3, x: 20 }
+          ],
           configuration.writeConcernMax(),
           function(err) {
             test.equal(null, err);

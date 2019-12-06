@@ -35,7 +35,10 @@ describe('Change Streams', function() {
         const db = client.db('integration_tests');
         return db.createCollection('test');
       })
-      .then(() => client.close(), () => client.close());
+      .then(
+        () => client.close(),
+        () => client.close()
+      );
   });
   afterEach(() => mock.cleanup());
 
@@ -1584,7 +1587,10 @@ describe('Change Streams', function() {
           expect(change).to.have.property('operationType', 'insert');
           expect(change).to.have.nested.property('fullDocument.shaka', 'walls fell');
         })
-        .then(() => close(), e => close(e));
+        .then(
+          () => close(),
+          e => close(e)
+        );
     }
   });
 
@@ -1619,7 +1625,10 @@ describe('Change Streams', function() {
         .then(() => {
           expect(changeStream.cursor.resumeOptions).to.containSubset(changeStreamOptions);
         })
-        .then(() => close(), e => close(e));
+        .then(
+          () => close(),
+          e => close(e)
+        );
     }
   });
 
@@ -1776,7 +1785,10 @@ describe('Change Streams', function() {
           expect(secondStage).to.have.property('startAtOperationTime');
           expect(secondStage.startAtOperationTime.equals(OPERATION_TIME)).to.be.ok;
         })
-        .then(() => finish(), err => finish(err));
+        .then(
+          () => finish(),
+          err => finish(err)
+        );
     }
   });
 
@@ -2237,7 +2249,10 @@ describe('Change Streams', function() {
           .then(() => {
             return manager.makeChangeStream().next();
           })
-          .then(() => manager.teardown(), err => manager.teardown(err))
+          .then(
+            () => manager.teardown(),
+            err => manager.teardown(err)
+          )
           .then(() => {
             const tokens = manager.resumeTokenChangedEvents.map(e => e.resumeToken);
             const successes = manager.apm.succeeded.map(e => {
@@ -2284,7 +2299,10 @@ describe('Change Streams', function() {
         return manager
           .ready()
           .then(() => manager.makeChangeStream().next())
-          .then(() => manager.teardown(), err => manager.teardown(err))
+          .then(
+            () => manager.teardown(),
+            err => manager.teardown(err)
+          )
           .then(() => {
             const tokens = manager.resumeTokenChangedEvents.map(e => e.resumeToken);
             const successes = manager.apm.succeeded.map(e => {
@@ -2333,7 +2351,10 @@ describe('Change Streams', function() {
               changeStream.next().catch(() => {});
             });
           })
-          .then(() => manager.teardown(), err => manager.teardown(err))
+          .then(
+            () => manager.teardown(),
+            err => manager.teardown(err)
+          )
           .then(() => {
             expect(token)
               .to.deep.equal(startAfter)
@@ -2370,7 +2391,10 @@ describe('Change Streams', function() {
               changeStream.next().catch(() => {});
             });
           })
-          .then(() => manager.teardown(), err => manager.teardown(err))
+          .then(
+            () => manager.teardown(),
+            err => manager.teardown(err)
+          )
           .then(() => {
             expect(token).to.deep.equal(resumeAfter);
           });
@@ -2404,7 +2428,10 @@ describe('Change Streams', function() {
               changeStream.next().catch(() => {});
             });
           })
-          .then(() => manager.teardown(), err => manager.teardown(err))
+          .then(
+            () => manager.teardown(),
+            err => manager.teardown(err)
+          )
           .then(() => {
             expect(token).to.not.exist;
           });
@@ -2430,7 +2457,10 @@ describe('Change Streams', function() {
           .then(() => {
             return manager.makeChangeStream().next();
           })
-          .then(() => manager.teardown(), err => manager.teardown(err))
+          .then(
+            () => manager.teardown(),
+            err => manager.teardown(err)
+          )
           .then(() => {
             const tokens = manager.resumeTokenChangedEvents.map(e => e.resumeToken);
             const successes = manager.apm.succeeded.map(e => {
@@ -2489,7 +2519,10 @@ describe('Change Streams', function() {
               changeStream.next().catch(() => {});
             });
           })
-          .then(() => manager.teardown(), err => manager.teardown(err))
+          .then(
+            () => manager.teardown(),
+            err => manager.teardown(err)
+          )
           .then(() => {
             expect(token)
               .to.deep.equal(startAfter)
@@ -2522,7 +2555,10 @@ describe('Change Streams', function() {
               changeStream.next().catch(() => {});
             });
           })
-          .then(() => manager.teardown(), err => manager.teardown(err))
+          .then(
+            () => manager.teardown(),
+            err => manager.teardown(err)
+          )
           .then(() => {
             expect(token).to.deep.equal(resumeAfter);
           });
@@ -2552,7 +2588,10 @@ describe('Change Streams', function() {
               changeStream.next().catch(() => {});
             });
           })
-          .then(() => manager.teardown(), err => manager.teardown(err))
+          .then(
+            () => manager.teardown(),
+            err => manager.teardown(err)
+          )
           .then(() => {
             expect(token).to.not.exist;
           });
@@ -2593,7 +2632,10 @@ describe('Change Streams', function() {
             // Note: this is expected to fail
             return manager.changeStream.next();
           })
-          .then(() => manager.teardown(), err => manager.teardown(err))
+          .then(
+            () => manager.teardown(),
+            err => manager.teardown(err)
+          )
           .then(() => {
             const successes = manager.apm.succeeded.map(e => {
               try {
@@ -2653,7 +2695,10 @@ describe('Change Streams', function() {
             // Note: this is expected to fail
             return manager.changeStream.next();
           })
-          .then(() => manager.teardown(), err => manager.teardown(err))
+          .then(
+            () => manager.teardown(),
+            err => manager.teardown(err)
+          )
           .then(() => {
             const successes = manager.apm.succeeded.map(e => {
               try {
@@ -2700,7 +2745,10 @@ describe('Change Streams', function() {
             // Note: this is expected to fail
             return changeStream.next();
           })
-          .then(() => manager.teardown(), err => manager.teardown(err))
+          .then(
+            () => manager.teardown(),
+            err => manager.teardown(err)
+          )
           .then(() => {
             expect(token)
               .to.deep.equal(startAfter)
@@ -2734,7 +2782,10 @@ describe('Change Streams', function() {
             // Note: this is expected to fail
             return changeStream.next();
           })
-          .then(() => manager.teardown(), err => manager.teardown(err))
+          .then(
+            () => manager.teardown(),
+            err => manager.teardown(err)
+          )
           .then(() => {
             expect(token).to.deep.equal(resumeAfter);
           });
@@ -2765,7 +2816,10 @@ describe('Change Streams', function() {
             // Note: this is expected to fail
             return changeStream.next();
           })
-          .then(() => manager.teardown(), err => manager.teardown(err))
+          .then(
+            () => manager.teardown(),
+            err => manager.teardown(err)
+          )
           .then(() => {
             expect(token).to.not.exist;
           });

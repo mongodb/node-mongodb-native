@@ -139,15 +139,17 @@ function generateMatchAndDiff(expected, actual, metadata) {
       return { match: false, expected, actual };
     }
 
-    return expected.map((val, idx) => generateMatchAndDiff(val, actual[idx], metadata)).reduce(
-      (ret, value) => {
-        ret.match = ret.match && value.match;
-        ret.expected.push(value.expected);
-        ret.actual.push(value.actual);
-        return ret;
-      },
-      { match: true, expected: [], actual: [] }
-    );
+    return expected
+      .map((val, idx) => generateMatchAndDiff(val, actual[idx], metadata))
+      .reduce(
+        (ret, value) => {
+          ret.match = ret.match && value.match;
+          ret.expected.push(value.expected);
+          ret.actual.push(value.actual);
+          return ret;
+        },
+        { match: true, expected: [], actual: [] }
+      );
   }
 
   return Object.keys(expected).reduce(

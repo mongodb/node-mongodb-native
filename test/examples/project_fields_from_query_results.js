@@ -46,7 +46,10 @@ describe('examples(project-fields-from-query):', function() {
         item: 'postcard',
         status: 'A',
         size: { h: 10, w: 15.25, uom: 'cm' },
-        instock: [{ warehouse: 'B', qty: 15 }, { warehouse: 'C', qty: 35 }]
+        instock: [
+          { warehouse: 'B', qty: 15 },
+          { warehouse: 'C', qty: 35 }
+        ]
       }
     ]);
     // End Example 42

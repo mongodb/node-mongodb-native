@@ -766,7 +766,10 @@ describe('Collation', function() {
 
       client.connect().then(() => {
         const db = client.db(configuration.db);
-        const docs = [{ _id: 0, name: 'foo' }, { _id: 1, name: 'Foo' }];
+        const docs = [
+          { _id: 0, name: 'foo' },
+          { _id: 1, name: 'Foo' }
+        ];
         const collation = { locale: 'en_US', strength: 2 };
         let collection, cursor;
         const close = e => cursor.close(() => client.close(() => done(e)));

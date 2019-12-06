@@ -8,7 +8,7 @@ function hrtimeToSeconds(hrtime) {
 
 const PERCENTILES = [10, 25, 50, 75, 95, 98, 99];
 function percentileIndex(percentile, total) {
-  return Math.max(Math.floor(total * percentile / 100 - 1), 0);
+  return Math.max(Math.floor((total * percentile) / 100 - 1), 0);
 }
 
 function timeDoneTask(task, ctx) {

@@ -156,7 +156,10 @@ describe('examples(update-documents):', function() {
         {
           $set: {
             item: 'paper',
-            instock: [{ warehouse: 'A', qty: 60 }, { warehouse: 'B', qty: 40 }]
+            instock: [
+              { warehouse: 'A', qty: 60 },
+              { warehouse: 'B', qty: 40 }
+            ]
           },
           $unset: {
             qty: '',
