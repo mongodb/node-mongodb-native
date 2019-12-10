@@ -155,8 +155,9 @@ Design differences in 2.x One major change is that the driver has been split int
       <pubDate>Thu, 19 Mar 2015 12:53:35 -0400</pubDate>
       
       <guid>/node-mongodb-native/3.4/upgrade-migration/main/</guid>
-      <description>What&amp;rsquo;s new in 3.3  Supports Distributed Transactions Supports On-Demand Materialized Views with the $merge operator Supports Wildcard Indexes Supports Retryable Reads Supports MongoDB Query Language Enhancements. SRV Polling for Sharded Clusters Beta support for MongoDB Client-Side Encryption  Full 3.3 Changes Here
-What&amp;rsquo;s new in 3.2  Supports new &amp;ldquo;Unified Topology&amp;rdquo; for resolving servers (opt in with useUnifiedTopology option for MongoClient) Supports session.withTransaction helper Supports Asynchronous Iteration (for await.</description>
+      <description>What&amp;rsquo;s new in 3.4  MongoDB Client Side Field Level Encryption  Full 3.4 Changes Here
+What&amp;rsquo;s new in 3.3  Supports Distributed Transactions Supports On-Demand Materialized Views with the $merge operator Supports Wildcard Indexes Supports Retryable Reads Supports MongoDB Query Language Enhancements. SRV Polling for Sharded Clusters Beta support for MongoDB Client-Side Encryption  Full 3.3 Changes Here
+What&amp;rsquo;s new in 3.2  Supports new &amp;ldquo;Unified Topology&amp;rdquo; for resolving servers (opt in with useUnifiedTopology option for MongoClient) Supports session.</description>
     </item>
     
     <item>
@@ -412,7 +413,7 @@ GridFS</description>
       <pubDate>Tue, 17 Mar 2015 15:36:56 +0000</pubDate>
       
       <guid>/node-mongodb-native/3.4/</guid>
-      <description>MongoDB Node.js Driver Documentation Welcome to the MongoDB Node.js 3.3 driver documentation.
+      <description>MongoDB Node.js Driver Documentation Welcome to the MongoDB Node.js 3.4 driver documentation.
 What&amp;rsquo;s New The What&amp;rsquo;s New guide explains the major new features of the driver.
 If you are upgrading from the 1.x series of the driver, consult the Upgrading documentation for information on recent changes.
 Starting points  Installing the driver Quick start CRUD operations Connect  Developing with ECMAScript Next If you&amp;rsquo;d like to use the MongoDB driver with ESNext features such as Promises and async/await, here are some good starting points.</description>
