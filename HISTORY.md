@@ -2,6 +2,42 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="3.4.0"></a>
+# [3.4.0](https://github.com/mongodb/node-mongodb-native/compare/v3.3.5...v3.4.0) (2019-12-10)
+
+
+### Bug Fixes
+
+* **bulk:** use operation index from input to report operation error ([f713b13](https://github.com/mongodb/node-mongodb-native/commit/f713b13))
+* **command:** only add TransientTransactionError label when in a transaction ([478d714](https://github.com/mongodb/node-mongodb-native/commit/478d714))
+* **compression:** recalculate opcode after determine OP_COMPRESSED ([022f51b](https://github.com/mongodb/node-mongodb-native/commit/022f51b))
+* **connect:** connect with family 0 instead of family 4 ([db07366](https://github.com/mongodb/node-mongodb-native/commit/db07366))
+* **connection:** timed out connections should not be half closed ([850f4f5](https://github.com/mongodb/node-mongodb-native/commit/850f4f5))
+* **cursor:** call `initialize` after session support check ([e50c51a](https://github.com/mongodb/node-mongodb-native/commit/e50c51a))
+* **encryption:** autoEncryption must error on mongodb < 4.2 ([c274615](https://github.com/mongodb/node-mongodb-native/commit/c274615))
+* **encryption:** do not attempt to merge autoEncryption options ([e27fdf9](https://github.com/mongodb/node-mongodb-native/commit/e27fdf9))
+* **encryption:** encryption uses smaller batch size ([cb78e69](https://github.com/mongodb/node-mongodb-native/commit/cb78e69))
+* **encryption:** respect bypassAutoEncryption ([e927499](https://github.com/mongodb/node-mongodb-native/commit/e927499))
+* **encryption:** respect user bson options when using autoEncryption ([cb7a3f7](https://github.com/mongodb/node-mongodb-native/commit/cb7a3f7))
+* add calculated duration to server as `roundTripTime` ([cb107a8](https://github.com/mongodb/node-mongodb-native/commit/cb107a8))
+* **mongodb+srv:** respect overriding SRV-provided properties ([ea83360](https://github.com/mongodb/node-mongodb-native/commit/ea83360))
+* **pool:** flush workItems after next tick to avoid dupe selection ([3ec49e5](https://github.com/mongodb/node-mongodb-native/commit/3ec49e5))
+* **pool:** support a `drain` event for use with unified topology ([da931ea](https://github.com/mongodb/node-mongodb-native/commit/da931ea))
+* **scram:** verify server digest, ensuring mutual authentication ([806cd62](https://github.com/mongodb/node-mongodb-native/commit/806cd62))
+* **srv-poller:** always provide a valid number for `intervalMS` ([afb125f](https://github.com/mongodb/node-mongodb-native/commit/afb125f))
+* **topology:** correct logic for checking for sessions support ([8d157c8](https://github.com/mongodb/node-mongodb-native/commit/8d157c8))
+* **topology:** don't drain iteration timers on server selection ([fed6a57](https://github.com/mongodb/node-mongodb-native/commit/fed6a57))
+
+
+### Features
+
+* add `MessageStream` for streamed wire protocol messaging ([8c44044](https://github.com/mongodb/node-mongodb-native/commit/8c44044))
+* introduce a modern `Connection` replacement for CMAP ([7890e48](https://github.com/mongodb/node-mongodb-native/commit/7890e48))
+* support connection establishment cancellation ([2014b7b](https://github.com/mongodb/node-mongodb-native/commit/2014b7b))
+* support driver info for drivers wrapping the node driver ([1b6670b](https://github.com/mongodb/node-mongodb-native/commit/1b6670b))
+
+
+
 <a name="3.3.5"></a>
 ## [3.3.5](https://github.com/mongodb/node-mongodb-native/compare/v3.3.4...v3.3.5) (2019-11-26)
 
