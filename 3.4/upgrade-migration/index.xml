@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Upgrade-migrations on MongoDB Node.js Driver</title>
+    <link>/node-mongodb-native/3.4/upgrade-migration/</link>
+    <description>Recent content in Upgrade-migrations on MongoDB Node.js Driver</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 19 Mar 2015 12:53:39 -0400</lastBuildDate>
+    
+	<atom:link href="/node-mongodb-native/3.4/upgrade-migration/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Upgrading to 2.x</title>
+      <link>/node-mongodb-native/3.4/upgrade-migration/upgrading/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:39 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/3.4/upgrade-migration/upgrading/</guid>
+      <description>Migrating Your Application To 2.x There are some key changes in the driver that you should be aware of before migrating your application from version 1.x to 2.x. Some APIs are cleaned up, and some 1.x features have been deprecated.
+Design differences in 2.x One major change is that the driver has been split into two pieces. There is a new mongodb-core that contains the low-level MongoDB APIs while mongodb contains the high-level driver.</description>
+    </item>
+    
+    <item>
+      <title>Upgrade Guide</title>
+      <link>/node-mongodb-native/3.4/upgrade-migration/main/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:35 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/3.4/upgrade-migration/main/</guid>
+      <description>What&amp;rsquo;s new in 3.3  Supports Distributed Transactions Supports On-Demand Materialized Views with the $merge operator Supports Wildcard Indexes Supports Retryable Reads Supports MongoDB Query Language Enhancements. SRV Polling for Sharded Clusters Beta support for MongoDB Client-Side Encryption  Full 3.3 Changes Here
+What&amp;rsquo;s new in 3.2  Supports new &amp;ldquo;Unified Topology&amp;rdquo; for resolving servers (opt in with useUnifiedTopology option for MongoClient) Supports session.withTransaction helper Supports Asynchronous Iteration (for await.</description>
+    </item>
+    
+  </channel>
+</rss>

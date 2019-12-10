@@ -316,6 +316,10 @@
             </ul>
             <ul class="methods itemMembers">
             
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="BulkWriteError#hasErrorLabel"><a href="BulkWriteError.html#hasErrorLabel">hasErrorLabel</a></li>
+            
             </ul>
             <ul class="events itemMembers">
             
@@ -510,6 +514,22 @@
                 
             </span>
             <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="Collection#collectionName"><a href="Collection.html#collectionName">collectionName</a></li>
+            
+                <li data-name="Collection#dbName"><a href="Collection.html#dbName">dbName</a></li>
+            
+                <li data-name="Collection#hint"><a href="Collection.html#hint">hint</a></li>
+            
+                <li data-name="Collection#namespace"><a href="Collection.html#namespace">namespace</a></li>
+            
+                <li data-name="Collection#readConcern"><a href="Collection.html#readConcern">readConcern</a></li>
+            
+                <li data-name="Collection#readPreference"><a href="Collection.html#readPreference">readPreference</a></li>
+            
+                <li data-name="Collection#writeConcern"><a href="Collection.html#writeConcern">writeConcern</a></li>
             
             </ul>
             <ul class="typedefs itemMembers">
@@ -1120,13 +1140,27 @@
             
             <span class="subtitle">Methods</span>
             
-                <li data-name="GridFSBucketReadStream#_read"><a href="GridFSBucketReadStream.html#_read">_read</a></li>
-            
                 <li data-name="GridFSBucketReadStream#abort"><a href="GridFSBucketReadStream.html#abort">abort</a></li>
             
                 <li data-name="GridFSBucketReadStream#end"><a href="GridFSBucketReadStream.html#end">end</a></li>
             
+                <li data-name="GridFSBucketReadStream#pause"><a href="GridFSBucketReadStream.html#pause">pause</a></li>
+            
+                <li data-name="GridFSBucketReadStream#pipe"><a href="GridFSBucketReadStream.html#pipe">pipe</a></li>
+            
+                <li data-name="GridFSBucketReadStream#read"><a href="GridFSBucketReadStream.html#read">read</a></li>
+            
+                <li data-name="GridFSBucketReadStream#resume"><a href="GridFSBucketReadStream.html#resume">resume</a></li>
+            
+                <li data-name="GridFSBucketReadStream#setEncoding"><a href="GridFSBucketReadStream.html#setEncoding">setEncoding</a></li>
+            
                 <li data-name="GridFSBucketReadStream#start"><a href="GridFSBucketReadStream.html#start">start</a></li>
+            
+                <li data-name="GridFSBucketReadStream#unpipe"><a href="GridFSBucketReadStream.html#unpipe">unpipe</a></li>
+            
+                <li data-name="GridFSBucketReadStream#unshift"><a href="GridFSBucketReadStream.html#unshift">unshift</a></li>
+            
+                <li data-name="GridFSBucketReadStream#wrap"><a href="GridFSBucketReadStream.html#wrap">wrap</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -1366,6 +1400,10 @@
             </ul>
             <ul class="typedefs itemMembers">
             
+            <span class="subtitle">Typedefs</span>
+            
+                <li data-name="Logger~loggerCallback"><a href="Logger.html#~loggerCallback">loggerCallback</a></li>
+            
             </ul>
             <ul class="methods itemMembers">
             
@@ -1600,6 +1638,8 @@
             
                 <li data-name="MongoError.create"><a href="MongoError.html#.create">create</a></li>
             
+                <li data-name="MongoError#hasErrorLabel"><a href="MongoError.html#hasErrorLabel">hasErrorLabel</a></li>
+            
             </ul>
             <ul class="events itemMembers">
             
@@ -1619,6 +1659,10 @@
             </ul>
             <ul class="methods itemMembers">
             
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="MongoNetworkError#hasErrorLabel"><a href="MongoNetworkError.html#hasErrorLabel">hasErrorLabel</a></li>
+            
             </ul>
             <ul class="events itemMembers">
             
@@ -1637,6 +1681,10 @@
             
             </ul>
             <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="MongoParseError#hasErrorLabel"><a href="MongoParseError.html#hasErrorLabel">hasErrorLabel</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -1704,6 +1752,10 @@
             </ul>
             <ul class="methods itemMembers">
             
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="MongoTimeoutError#hasErrorLabel"><a href="MongoTimeoutError.html#hasErrorLabel">hasErrorLabel</a></li>
+            
             </ul>
             <ul class="events itemMembers">
             
@@ -1722,6 +1774,10 @@
             
             </ul>
             <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="MongoWriteConcernError#hasErrorLabel"><a href="MongoWriteConcernError.html#hasErrorLabel">hasErrorLabel</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -2170,494 +2226,6 @@
     
     
     
-    
-        <h3 class="subsection-title">Methods</h3>
-        
-        <dl>
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="applySession">
-            
-            applySession<span class="signature">(session, command, topology, <span class="optional">options</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="MongoError.html">MongoError</a>|null}</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="lib_core_sessions.js.html">lib/core/sessions.js</a>, <a href="lib_core_sessions.js.html#line683">line 683</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Optionally decorate a command with sessions specific keys</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>session</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type"><a href="ClientSession.html">ClientSession</a></span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                    
-                    
-                        
-                    
-                
-                <p>the session tracking transaction state</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>command</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                    
-                    
-                        
-                    
-                
-                <p>the command to decorate</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>topology</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                    
-                    
-                        
-                    
-                
-                <p>the topology for tracking the cluster time</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>options</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>Optional settings passed to calling operation</p></td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-
-
-<h5>Returns:</h5>
-error, if some error condition was met
-<br />
-
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="isRetryableError">
-            
-            isRetryableError<span class="signature">(error)</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="lib_core_error.js.html">lib/core/error.js</a>, <a href="lib_core_error.js.html#line149">line 149</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Determines whether an error is something the driver should attempt to retry</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>error</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type"><a href="MongoError.html">MongoError</a></span>
-|
-
-<span class="param-type">Error</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                </td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="isSDAMUnrecoverableError">
-            
-            isSDAMUnrecoverableError<span class="signature">(error, server)</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="lib_core_error.js.html">lib/core/error.js</a>, <a href="lib_core_error.js.html#line209">line 209</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Determines whether SDAM can recover from a given error. If it cannot<br>then the pool will be cleared, and server state will completely reset<br>locally.</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>error</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type"><a href="MongoError.html">MongoError</a></span>
-|
-
-<span class="param-type">Error</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                </td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>server</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type"><a href="Server.html">Server</a></span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                </td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-see">See:</dt>
-    <dd class="tag-see">
-        <ul>
-            <li><a href="https://github.com/mongodb/specifications/blob/master/source/server-discovery-and-monitoring/server-discovery-and-monitoring.rst#not-master-and-node-is-recovering">https://github.com/mongodb/specifications/blob/master/source/server-discovery-and-monitoring/server-discovery-and-monitoring.rst#not-master-and-node-is-recovering</a></li>
-        </ul>
-    </dd>
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
-        </dl>
     
     
     
@@ -4827,7 +4395,7 @@ resulting Promise of operations run within this transaction
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Nov 26 2019 09:24:35 GMT-0500 (Eastern Standard Time)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Dec 10 2019 11:09:26 GMT-0500 (Eastern Standard Time)
                     </footer>
                 </div>
             </td>
