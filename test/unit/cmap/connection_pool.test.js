@@ -3,7 +3,6 @@
 const Promise = require('bluebird');
 const loadSpecTests = require('../../spec').loadSpecTests;
 const ConnectionPool = require('../../../lib/cmap/connection_pool').ConnectionPool;
-const Connection = require('../../../lib/cmap/connection').Connection;
 const EventEmitter = require('events').EventEmitter;
 const mock = require('mongodb-mock-server');
 const BSON = require('bson');
@@ -11,26 +10,6 @@ const BSON = require('bson');
 const chai = require('chai');
 chai.use(require('../../functional/spec-runner/matcher').default);
 const expect = chai.expect;
-
-class MockConnection extends Connection {
-  constructor(stream, options) {
-    super(stream, options);
-
-    this.id = options.id;
-    this.generation = options.generation;
-    this.readyToUse = false;
-    this.lastMadeAvailable = undefined;
-  }
-
-  timeIdle() {
-    return this.readyToUse ? Date.now() - this.lastMadeAvailable : 0;
-  }
-
-  makeReadyToUse() {
-    this.readyToUse = true;
-    this.lastMadeAvailable = Date.now();
-  }
-}
 
 const ALL_POOL_EVENTS = new Set([
   'connectionPoolCreated',
@@ -75,13 +54,7 @@ describe('Connection Pool', function() {
     let pool = undefined;
 
     function createPool(options) {
-      options = Object.assign(
-        {},
-        options,
-        { connectionType: MockConnection, bson: new BSON() },
-        server.address()
-      );
-
+      options = Object.assign({}, options, { bson: new BSON() }, server.address());
       pool = new ConnectionPool(options);
       ALL_POOL_EVENTS.forEach(ev => {
         pool.on(ev, x => {
