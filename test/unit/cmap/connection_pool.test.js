@@ -3,15 +3,18 @@
 const Promise = require('bluebird');
 const loadSpecTests = require('../../spec').loadSpecTests;
 const ConnectionPool = require('../../../lib/cmap/connection_pool').ConnectionPool;
+const Connection = require('../../../lib/cmap/connection').Connection;
 const EventEmitter = require('events').EventEmitter;
+const mock = require('mongodb-mock-server');
+const BSON = require('bson');
 
 const chai = require('chai');
 chai.use(require('../../functional/spec-runner/matcher').default);
 const expect = chai.expect;
 
-class Connection {
-  constructor(options) {
-    options = options || {};
+class MockConnection extends Connection {
+  constructor(stream, options) {
+    super(stream, options);
 
     this.id = options.id;
     this.generation = options.generation;
@@ -26,21 +29,6 @@ class Connection {
   makeReadyToUse() {
     this.readyToUse = true;
     this.lastMadeAvailable = Date.now();
-  }
-
-  connect(callback) {
-    setTimeout(() => callback());
-  }
-
-  destroy(options, callback) {
-    if (typeof options === 'function') {
-      callback = options;
-      options = {};
-    }
-
-    if (typeof callback === 'function') {
-      callback();
-    }
   }
 }
 
@@ -73,6 +61,12 @@ function destroyPool(pool) {
 }
 
 describe('Connection Pool', function() {
+  let server;
+  after(() => mock.cleanup());
+  before(() => {
+    mock.createServer().then(s => (server = s));
+  });
+
   describe('spec tests', function() {
     const threads = new Map();
     const connections = new Map();
@@ -81,8 +75,12 @@ describe('Connection Pool', function() {
     let pool = undefined;
 
     function createPool(options) {
-      const address = 'localhost:27017';
-      options = Object.assign({}, options, { Connection, address });
+      options = Object.assign(
+        {},
+        options,
+        { connectionType: MockConnection, bson: new BSON() },
+        server.address()
+      );
 
       pool = new ConnectionPool(options);
       ALL_POOL_EVENTS.forEach(ev => {
@@ -207,6 +205,17 @@ describe('Connection Pool', function() {
         });
       }
     }
+
+    before(() => {
+      // we aren't testing errors yet, so it's fine for the mock server to just accept
+      // and establish valid connections
+      server.setMessageHandler(request => {
+        const doc = request.document;
+        if (doc.ismaster) {
+          request.reply(mock.DEFAULT_ISMASTER_36);
+        }
+      });
+    });
 
     afterEach(() => {
       const p = pool ? destroyPool(pool) : Promise.resolve();
