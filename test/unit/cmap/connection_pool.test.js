@@ -69,6 +69,7 @@ describe('Connection Pool', function() {
   describe('spec tests', function() {
     const threads = new Map();
     const connections = new Map();
+    const orphans = new Set();
     const poolEvents = [];
     const poolEventsEventEmitter = new EventEmitter();
     let pool = undefined;
@@ -105,11 +106,14 @@ describe('Connection Pool', function() {
         return PROMISIFIED_POOL_FUNCTIONS.checkOut.call(pool).then(connection => {
           if (op.label != null) {
             connections.set(op.label, connection);
+          } else {
+            orphans.add(connection);
           }
         });
       },
       checkIn: function(op) {
         const connection = connections.get(op.connection);
+        connections.delete(op.connection);
         const force = op.force;
 
         if (!connection) {
@@ -218,13 +222,26 @@ describe('Connection Pool', function() {
 
     afterEach(() => {
       const p = pool ? closePool(pool) : Promise.resolve();
-      return p.then(() => {
-        pool = undefined;
-        threads.clear();
-        connections.clear();
-        poolEvents.length = 0;
-        poolEventsEventEmitter.removeAllListeners();
-      });
+      return p
+        .then(() => {
+          const connectionsToDestroy = Array.from(orphans).concat(Array.from(connections.values()));
+          return Promise.each(connectionsToDestroy, conn => {
+            return new Promise((resolve, reject) =>
+              conn.destroy({ force: true }, err => {
+                if (err) return reject(err);
+                resolve();
+              })
+            );
+          });
+        })
+        .then(() => {
+          pool = undefined;
+          threads.clear();
+          connections.clear();
+          orphans.clear();
+          poolEvents.length = 0;
+          poolEventsEventEmitter.removeAllListeners();
+        });
     });
 
     loadSpecTests('connection-monitoring-and-pooling').forEach(test => {
