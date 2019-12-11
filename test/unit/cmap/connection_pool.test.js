@@ -66,7 +66,16 @@ class Connection {
     });
   }
 
-  destroy() {}
+  destroy(options, callback) {
+    if (typeof options === 'function') {
+      callback = options;
+      options = {};
+    }
+
+    if (typeof callback === 'function') {
+      callback();
+    }
+  }
 }
 
 const ALL_POOL_EVENTS = new Set([
