@@ -52,11 +52,10 @@ const PROMISIFIED_POOL_FUNCTIONS = {
   close: Promise.promisify(ConnectionPool.prototype.close)
 };
 
-function destroyPool(pool) {
+function closePool(pool) {
   return new Promise(resolve => {
     ALL_POOL_EVENTS.forEach(ev => pool.removeAllListeners(ev));
-    pool.destroy(resolve);
-    resolve();
+    pool.close(resolve);
   });
 }
 
@@ -218,7 +217,7 @@ describe('Connection Pool', function() {
     });
 
     afterEach(() => {
-      const p = pool ? destroyPool(pool) : Promise.resolve();
+      const p = pool ? closePool(pool) : Promise.resolve();
       return p.then(() => {
         pool = undefined;
         threads.clear();
