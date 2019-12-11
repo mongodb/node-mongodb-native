@@ -92,6 +92,7 @@ const PROMISIFIED_POOL_FUNCTIONS = {
 function destroyPool(pool) {
   return new Promise(resolve => {
     ALL_POOL_EVENTS.forEach(ev => pool.removeAllListeners(ev));
+    pool.destroy(resolve);
     resolve();
   });
 }
