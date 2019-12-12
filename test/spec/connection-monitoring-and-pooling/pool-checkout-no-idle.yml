@@ -17,14 +17,18 @@ events:
     options: 42
   - type: ConnectionCheckedOut
     connectionId: 1
+    address: 42
   - type: ConnectionCheckedIn
     connectionId: 1
+    address: 42
   # In between these, wait so connection becomes idle
   - type: ConnectionClosed
     connectionId: 1
     reason: idle
+    address: 42
   - type: ConnectionCheckedOut
     connectionId: 2
+    address: 42
 ignore:
   - ConnectionReady
   - ConnectionCreated

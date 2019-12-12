@@ -28,29 +28,44 @@ events:
     address: 42
     options: 42
   - type: ConnectionCheckOutStarted
+    address: 42
   - type: ConnectionCreated
     connectionId: 42
+    address: 42
   - type: ConnectionCheckedOut
     connectionId: 42
+    address: 42
   - type: ConnectionCheckOutStarted
+    address: 42
   - type: ConnectionCreated
     connectionId: 42
+    address: 42
   - type: ConnectionCheckedOut
     connectionId: 42
+    address: 42
   - type: ConnectionCheckOutStarted
+    address: 42
   - type: ConnectionCreated
     connectionId: 42
+    address: 42
   - type: ConnectionCheckedOut
     connectionId: 42
+    address: 42
   - type: ConnectionCheckedIn
     connectionId: 42
+    address: 42
   - type: ConnectionCheckOutStarted
+    address: 42
   - type: ConnectionCheckedOut
     connectionId: 42
+    address: 42
   - type: ConnectionCheckOutStarted
+    address: 42
   - type: ConnectionCheckedIn
     connectionId: 42
+    address: 42
   - type: ConnectionCheckedOut
     connectionId: 42
+    address: 42
 ignore:
   - ConnectionReady

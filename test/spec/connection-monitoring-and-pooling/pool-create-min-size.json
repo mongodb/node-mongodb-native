@@ -23,19 +23,23 @@
     },
     {
       "type": "ConnectionCreated",
-      "connectionId": 42
+      "connectionId": 42,
+      "address": 42
     },
     {
       "type": "ConnectionCreated",
-      "connectionId": 42
+      "connectionId": 42,
+      "address": 42
     },
     {
       "type": "ConnectionCreated",
-      "connectionId": 42
+      "connectionId": 42,
+      "address": 42
     },
     {
       "type": "ConnectionCheckedOut",
-      "connectionId": 42
+      "connectionId": 42,
+      "address": 42
     }
   ],
   "ignore": [

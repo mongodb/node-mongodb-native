@@ -10,13 +10,16 @@ operations:
 events:
   - type: ConnectionCheckedOut
     connectionId: 1
+    address: 42
   - type: ConnectionPoolCleared
     address: 42
   - type: ConnectionCheckedIn
     connectionId: 1
+    address: 42
   - type: ConnectionClosed
     connectionId: 1
     reason: stale
+    address: 42
 ignore:
   - ConnectionPoolCreated
   - ConnectionCreated

@@ -26,11 +26,13 @@
     },
     {
       "type": "ConnectionCheckedOut",
-      "connectionId": 1
+      "connectionId": 1,
+      "address": 42
     },
     {
       "type": "ConnectionCheckedIn",
-      "connectionId": 1
+      "connectionId": 1,
+      "address": 42
     },
     {
       "type": "ConnectionPoolCleared",
@@ -39,11 +41,13 @@
     {
       "type": "ConnectionClosed",
       "connectionId": 1,
-      "reason": "stale"
+      "reason": "stale",
+      "address": 42
     },
     {
       "type": "ConnectionCheckedOut",
-      "connectionId": 2
+      "connectionId": 2,
+      "address": 42
     }
   ],
   "ignore": [

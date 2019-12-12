@@ -9,6 +9,7 @@ operations:
 events:
   - type: ConnectionCheckedIn
     connectionId: 42
+    address: 42
 ignore:
   - ConnectionPoolCreated
   - ConnectionCreated
