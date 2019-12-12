@@ -45,6 +45,80 @@ describe('Connection Pool', function() {
     mock.createServer().then(s => (server = s));
   });
 
+  describe('withConnection', function() {
+    it('should manage a connection for a successful operation', function(done) {
+      server.setMessageHandler(request => {
+        const doc = request.document;
+        if (doc.ismaster) {
+          request.reply(mock.DEFAULT_ISMASTER_36);
+        }
+      });
+
+      const pool = new ConnectionPool(Object.assign({ bson: new BSON() }, server.address()));
+      const callback = (err, result) => {
+        expect(err).to.not.exist;
+        expect(result).to.exist;
+        pool.close(done);
+      };
+
+      pool.withConnection((err, conn, cb) => {
+        expect(err).to.not.exist;
+
+        conn.command('$admin.cmd', { ismaster: 1 }, (cmdErr, ismaster) => {
+          expect(cmdErr).to.not.exist;
+          cb(undefined, ismaster);
+        });
+      }, callback);
+    });
+
+    it('should allow user interaction with an error', function(done) {
+      server.setMessageHandler(request => {
+        const doc = request.document;
+        if (doc.ismaster) {
+          request.connection.destroy();
+        }
+      });
+
+      const pool = new ConnectionPool(
+        Object.assign({ bson: new BSON(), waitQueueTimeoutMS: 250 }, server.address())
+      );
+
+      const callback = err => {
+        expect(err).to.exist;
+        expect(err).to.match(/Timed out/);
+        pool.close(done);
+      };
+
+      pool.withConnection((err, conn, cb) => {
+        expect(err).to.exist;
+        expect(err).to.match(/Timed out/);
+        cb(err);
+      }, callback);
+    });
+
+    it('should return an error to the original callback', function(done) {
+      server.setMessageHandler(request => {
+        const doc = request.document;
+        if (doc.ismaster) {
+          request.reply(mock.DEFAULT_ISMASTER_36);
+        }
+      });
+
+      const pool = new ConnectionPool(Object.assign({ bson: new BSON() }, server.address()));
+      const callback = (err, result) => {
+        expect(err).to.exist;
+        expect(result).to.not.exist;
+        expect(err).to.match(/my great error/);
+        pool.close(done);
+      };
+
+      pool.withConnection((err, conn, cb) => {
+        expect(err).to.not.exist;
+        cb(new Error('my great error'));
+      }, callback);
+    });
+  });
+
   describe('spec tests', function() {
     const threads = new Map();
     const connections = new Map();
