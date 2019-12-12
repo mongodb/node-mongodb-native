@@ -24,12 +24,14 @@
   "events": [
     {
       "type": "ConnectionCheckedIn",
-      "connectionId": 2
+      "connectionId": 2,
+      "address": 42
     },
     {
       "type": "ConnectionClosed",
       "connectionId": 2,
-      "reason": "poolClosed"
+      "reason": "poolClosed",
+      "address": 42
     },
     {
       "type": "ConnectionPoolClosed",

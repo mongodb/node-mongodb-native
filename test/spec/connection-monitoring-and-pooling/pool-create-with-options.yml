@@ -18,3 +18,4 @@ events:
       maxIdleTimeMS: 100
 ignore:
   - ConnectionCreated
+  - ConnectionReady

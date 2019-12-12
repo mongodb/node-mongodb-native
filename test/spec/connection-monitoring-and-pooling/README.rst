@@ -154,3 +154,5 @@ The following tests have not yet been automated, but MUST still be tested
 #. All ConnectionPoolOptions MUST be the same for all pools created by a MongoClient
 #. A user MUST be able to specify all ConnectionPoolOptions via a URI string
 #. A user MUST be able to subscribe to Connection Monitoring Events in a manner idiomatic to their language and driver
+#. When a check out attempt fails because connection set up throws an error,
+   assert that a ConnectionCheckOutFailedEvent with reason="connectionError" is emitted.

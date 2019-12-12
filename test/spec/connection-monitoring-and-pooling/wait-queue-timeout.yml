@@ -27,13 +27,18 @@ error:
   message: Timed out while checking out a connection from connection pool
 events:
   - type: ConnectionCheckOutStarted
+    address: 42
   - type: ConnectionCheckedOut
     connectionId: 42
+    address: 42
   - type: ConnectionCheckOutStarted
+    address: 42
   - type: ConnectionCheckOutFailed
     reason: timeout
+    address: 42
   - type: ConnectionCheckedIn
     connectionId: 42
+    address: 42
 ignore:
   - ConnectionCreated
   - ConnectionReady

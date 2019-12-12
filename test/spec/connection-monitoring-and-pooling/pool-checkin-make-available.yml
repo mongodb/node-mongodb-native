@@ -10,10 +10,13 @@ operations:
 events:
   - type: ConnectionCheckedOut
     connectionId: 1
+    address: 42
   - type: ConnectionCheckedIn
     connectionId: 1
+    address: 42
   - type: ConnectionCheckedOut
     connectionId: 1
+    address: 42
 ignore:
   - ConnectionPoolCreated
   - ConnectionCreated

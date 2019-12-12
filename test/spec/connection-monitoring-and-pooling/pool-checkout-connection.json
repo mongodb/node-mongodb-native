@@ -9,11 +9,13 @@
   ],
   "events": [
     {
-      "type": "ConnectionCheckOutStarted"
+      "type": "ConnectionCheckOutStarted",
+      "address": 42
     },
     {
       "type": "ConnectionCheckedOut",
-      "connectionId": 1
+      "connectionId": 1,
+      "address": 42
     }
   ],
   "ignore": [

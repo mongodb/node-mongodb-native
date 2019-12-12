@@ -15,7 +15,8 @@
   "events": [
     {
       "type": "ConnectionCheckedIn",
-      "connectionId": 42
+      "connectionId": 42,
+      "address": 42
     }
   ],
   "ignore": [

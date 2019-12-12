@@ -30,20 +30,24 @@
     },
     {
       "type": "ConnectionCheckedOut",
-      "connectionId": 1
+      "connectionId": 1,
+      "address": 42
     },
     {
       "type": "ConnectionCheckedIn",
-      "connectionId": 1
+      "connectionId": 1,
+      "address": 42
     },
     {
       "type": "ConnectionClosed",
       "connectionId": 1,
-      "reason": "idle"
+      "reason": "idle",
+      "address": 42
     },
     {
       "type": "ConnectionCheckedOut",
-      "connectionId": 2
+      "connectionId": 2,
+      "address": 42
     }
   ],
   "ignore": [

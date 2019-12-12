@@ -3,7 +3,7 @@ style: unit
 description: must issue Connections to threads in the order that the threads entered the queue
 poolOptions:
   maxPoolSize: 1
-  waitQueueTimeoutMS: 1000
+  waitQueueTimeoutMS: 5000
 operations:
     # Check out sole connection in pool
   - name: checkOut
@@ -21,6 +21,10 @@ operations:
   - name: waitForEvent
     event: ConnectionCheckOutStarted
     count: 2
+    # Give thread1 some time to actually enter the wait queue since the
+    # ConnectionCheckOutStarted event is publish beforehand.
+  - name: wait
+    ms: 100
   - name: start
     target: thread2
   - name: checkOut
@@ -29,6 +33,10 @@ operations:
   - name: waitForEvent
     event: ConnectionCheckOutStarted
     count: 3
+    # Give thread2 some time to actually enter the wait queue since the
+    # ConnectionCheckOutStarted event is publish beforehand.
+  - name: wait
+    ms: 100
   - name: start
     target: thread3
   - name: checkOut
@@ -37,6 +45,10 @@ operations:
   - name: waitForEvent
     event: ConnectionCheckOutStarted
     count: 4
+    # Give thread3 some time to actually enter the wait queue since the
+    # ConnectionCheckOutStarted event is publish beforehand.
+  - name: wait
+    ms: 100
   - name: start
     target: thread4
   - name: checkOut
@@ -45,6 +57,10 @@ operations:
   - name: waitForEvent
     event: ConnectionCheckOutStarted
     count: 5
+    # Give thread4 some time to actually enter the wait queue since the
+    # ConnectionCheckOutStarted event is publish beforehand.
+  - name: wait
+    ms: 100
     # From main thread, keep checking in connection and then wait for appropriate thread
     # Test will timeout if threads are not enqueued in proper order
   - name: checkIn
@@ -65,28 +81,42 @@ operations:
     target: thread4
 events:
   - type: ConnectionCheckOutStarted
+    address: 42
   - type: ConnectionCheckedOut
     connectionId: 42
+    address: 42
   - type: ConnectionCheckOutStarted
+    address: 42
   - type: ConnectionCheckOutStarted
+    address: 42
   - type: ConnectionCheckOutStarted
+    address: 42
   - type: ConnectionCheckOutStarted
+    address: 42
   - type: ConnectionCheckedIn
     connectionId: 42
+    address: 42
   - type: ConnectionCheckedOut
     connectionId: 42
+    address: 42
   - type: ConnectionCheckedIn
     connectionId: 42
+    address: 42
   - type: ConnectionCheckedOut
     connectionId: 42
+    address: 42
   - type: ConnectionCheckedIn
     connectionId: 42
+    address: 42
   - type: ConnectionCheckedOut
     connectionId: 42
+    address: 42
   - type: ConnectionCheckedIn
     connectionId: 42
+    address: 42
   - type: ConnectionCheckedOut
     connectionId: 42
+    address: 42
 ignore:
   - ConnectionCreated
   - ConnectionReady
