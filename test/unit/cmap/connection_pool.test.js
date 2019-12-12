@@ -26,7 +26,6 @@ const ALL_POOL_EVENTS = new Set([
 
 const PROMISIFIED_POOL_FUNCTIONS = {
   checkOut: Promise.promisify(ConnectionPool.prototype.checkOut),
-  checkIn: Promise.promisify(ConnectionPool.prototype.checkIn),
   clear: Promise.promisify(ConnectionPool.prototype.clear),
   close: Promise.promisify(ConnectionPool.prototype.close)
 };
@@ -161,13 +160,12 @@ describe('Connection Pool', function() {
       checkIn: function(op) {
         const connection = connections.get(op.connection);
         connections.delete(op.connection);
-        const force = op.force;
 
         if (!connection) {
           throw new Error(`Attempted to release non-existient connection ${op.connection}`);
         }
 
-        return PROMISIFIED_POOL_FUNCTIONS.checkIn.call(pool, connection, force);
+        return pool.checkIn(connection);
       },
       clear: function() {
         return PROMISIFIED_POOL_FUNCTIONS.clear.call(pool);
