@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "style": "unit",
+  "description": "must make valid checked in connection available",
+  "operations": [
+    {
+      "name": "checkOut",
+      "label": "conn"
+    },
+    {
+      "name": "checkIn",
+      "connection": "conn"
+    },
+    {
+      "name": "checkOut"
+    }
+  ],
+  "events": [
+    {
+      "type": "ConnectionCheckedOut",
+      "connectionId": 1,
+      "address": 42
+    },
+    {
+      "type": "ConnectionCheckedIn",
+      "connectionId": 1,
+      "address": 42
+    },
+    {
+      "type": "ConnectionCheckedOut",
+      "connectionId": 1,
+      "address": 42
+    }
+  ],
+  "ignore": [
+    "ConnectionPoolCreated",
+    "ConnectionCreated",
+    "ConnectionReady",
+    "ConnectionCheckOutStarted"
+  ]
+}

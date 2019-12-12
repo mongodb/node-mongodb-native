@@ -1,0 +1,15 @@
+version: 1
+style: unit
+description: must be able to check out a connection
+operations:
+  - name: checkOut
+events:
+  - type: ConnectionCheckOutStarted
+    address: 42
+  - type: ConnectionCheckedOut
+    connectionId: 1
+    address: 42
+ignore:
+  - ConnectionPoolCreated
+  - ConnectionCreated
+  - ConnectionReady

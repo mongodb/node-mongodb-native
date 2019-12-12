@@ -1,0 +1,124 @@
+version: 1
+style: unit
+description: must issue Connections to threads in the order that the threads entered the queue
+poolOptions:
+  maxPoolSize: 1
+  waitQueueTimeoutMS: 5000
+operations:
+    # Check out sole connection in pool
+  - name: checkOut
+    label: conn0
+    # Create 4 threads, have them all queue up for connections
+    # Note: this might become non-deterministic depending on how you
+    # implement your test runner. The goal is for each thread to
+    # have started and begun checkOut before the next thread starts.
+    # The sleep operations should make this more consistent.
+  - name: start
+    target: thread1
+  - name: checkOut
+    thread: thread1
+    label: conn1
+  - name: waitForEvent
+    event: ConnectionCheckOutStarted
+    count: 2
+    # Give thread1 some time to actually enter the wait queue since the
+    # ConnectionCheckOutStarted event is publish beforehand.
+  - name: wait
+    ms: 100
+  - name: start
+    target: thread2
+  - name: checkOut
+    thread: thread2
+    label: conn2
+  - name: waitForEvent
+    event: ConnectionCheckOutStarted
+    count: 3
+    # Give thread2 some time to actually enter the wait queue since the
+    # ConnectionCheckOutStarted event is publish beforehand.
+  - name: wait
+    ms: 100
+  - name: start
+    target: thread3
+  - name: checkOut
+    thread: thread3
+    label: conn3
+  - name: waitForEvent
+    event: ConnectionCheckOutStarted
+    count: 4
+    # Give thread3 some time to actually enter the wait queue since the
+    # ConnectionCheckOutStarted event is publish beforehand.
+  - name: wait
+    ms: 100
+  - name: start
+    target: thread4
+  - name: checkOut
+    thread: thread4
+    label: conn4
+  - name: waitForEvent
+    event: ConnectionCheckOutStarted
+    count: 5
+    # Give thread4 some time to actually enter the wait queue since the
+    # ConnectionCheckOutStarted event is publish beforehand.
+  - name: wait
+    ms: 100
+    # From main thread, keep checking in connection and then wait for appropriate thread
+    # Test will timeout if threads are not enqueued in proper order
+  - name: checkIn
+    connection: conn0
+  - name: waitForThread
+    target: thread1
+  - name: checkIn
+    connection: conn1
+  - name: waitForThread
+    target: thread2
+  - name: checkIn
+    connection: conn2
+  - name: waitForThread
+    target: thread3
+  - name: checkIn
+    connection: conn3
+  - name: waitForThread
+    target: thread4
+events:
+  - type: ConnectionCheckOutStarted
+    address: 42
+  - type: ConnectionCheckedOut
+    connectionId: 42
+    address: 42
+  - type: ConnectionCheckOutStarted
+    address: 42
+  - type: ConnectionCheckOutStarted
+    address: 42
+  - type: ConnectionCheckOutStarted
+    address: 42
+  - type: ConnectionCheckOutStarted
+    address: 42
+  - type: ConnectionCheckedIn
+    connectionId: 42
+    address: 42
+  - type: ConnectionCheckedOut
+    connectionId: 42
+    address: 42
+  - type: ConnectionCheckedIn
+    connectionId: 42
+    address: 42
+  - type: ConnectionCheckedOut
+    connectionId: 42
+    address: 42
+  - type: ConnectionCheckedIn
+    connectionId: 42
+    address: 42
+  - type: ConnectionCheckedOut
+    connectionId: 42
+    address: 42
+  - type: ConnectionCheckedIn
+    connectionId: 42
+    address: 42
+  - type: ConnectionCheckedOut
+    connectionId: 42
+    address: 42
+ignore:
+  - ConnectionCreated
+  - ConnectionReady
+  - ConnectionClosed
+  - ConnectionPoolCreated

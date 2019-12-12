@@ -1,0 +1,27 @@
+version: 1
+style: unit
+description: must destroy checked in connection if it is stale
+operations:
+  - name: checkOut
+    label: conn
+  - name: clear
+  - name: checkIn
+    connection: conn
+events:
+  - type: ConnectionCheckedOut
+    connectionId: 1
+    address: 42
+  - type: ConnectionPoolCleared
+    address: 42
+  - type: ConnectionCheckedIn
+    connectionId: 1
+    address: 42
+  - type: ConnectionClosed
+    connectionId: 1
+    reason: stale
+    address: 42
+ignore:
+  - ConnectionPoolCreated
+  - ConnectionCreated
+  - ConnectionReady
+  - ConnectionCheckOutStarted

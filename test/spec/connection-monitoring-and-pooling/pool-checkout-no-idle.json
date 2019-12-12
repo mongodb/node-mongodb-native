@@ -1,0 +1,58 @@
+{
+  "version": 1,
+  "style": "unit",
+  "description": "must destroy and must not check out an idle connection if found while iterating available connections",
+  "poolOptions": {
+    "maxIdleTimeMS": 10
+  },
+  "operations": [
+    {
+      "name": "checkOut",
+      "label": "conn"
+    },
+    {
+      "name": "checkIn",
+      "connection": "conn"
+    },
+    {
+      "name": "wait",
+      "ms": 50
+    },
+    {
+      "name": "checkOut"
+    }
+  ],
+  "events": [
+    {
+      "type": "ConnectionPoolCreated",
+      "address": 42,
+      "options": 42
+    },
+    {
+      "type": "ConnectionCheckedOut",
+      "connectionId": 1,
+      "address": 42
+    },
+    {
+      "type": "ConnectionCheckedIn",
+      "connectionId": 1,
+      "address": 42
+    },
+    {
+      "type": "ConnectionClosed",
+      "connectionId": 1,
+      "reason": "idle",
+      "address": 42
+    },
+    {
+      "type": "ConnectionCheckedOut",
+      "connectionId": 2,
+      "address": 42
+    }
+  ],
+  "ignore": [
+    "ConnectionReady",
+    "ConnectionCreated",
+    "ConnectionCheckOutStarted"
+  ]
+}

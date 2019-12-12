@@ -1,0 +1,71 @@
+{
+  "version": 1,
+  "style": "unit",
+  "description": "must aggressively timeout threads enqueued longer than waitQueueTimeoutMS",
+  "poolOptions": {
+    "maxPoolSize": 1,
+    "waitQueueTimeoutMS": 20
+  },
+  "operations": [
+    {
+      "name": "checkOut",
+      "label": "conn0"
+    },
+    {
+      "name": "start",
+      "target": "thread1"
+    },
+    {
+      "name": "checkOut",
+      "thread": "thread1"
+    },
+    {
+      "name": "waitForEvent",
+      "event": "ConnectionCheckOutFailed",
+      "count": 1
+    },
+    {
+      "name": "checkIn",
+      "connection": "conn0"
+    },
+    {
+      "name": "waitForThread",
+      "target": "thread1"
+    }
+  ],
+  "error": {
+    "type": "WaitQueueTimeoutError",
+    "message": "Timed out while checking out a connection from connection pool"
+  },
+  "events": [
+    {
+      "type": "ConnectionCheckOutStarted",
+      "address": 42
+    },
+    {
+      "type": "ConnectionCheckedOut",
+      "connectionId": 42,
+      "address": 42
+    },
+    {
+      "type": "ConnectionCheckOutStarted",
+      "address": 42
+    },
+    {
+      "type": "ConnectionCheckOutFailed",
+      "reason": "timeout",
+      "address": 42
+    },
+    {
+      "type": "ConnectionCheckedIn",
+      "connectionId": 42,
+      "address": 42
+    }
+  ],
+  "ignore": [
+    "ConnectionCreated",
+    "ConnectionReady",
+    "ConnectionClosed",
+    "ConnectionPoolCreated"
+  ]
+}
