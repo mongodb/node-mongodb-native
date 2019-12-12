@@ -26,7 +26,6 @@ const ALL_POOL_EVENTS = new Set([
 
 const PROMISIFIED_POOL_FUNCTIONS = {
   checkOut: Promise.promisify(ConnectionPool.prototype.checkOut),
-  clear: Promise.promisify(ConnectionPool.prototype.clear),
   close: Promise.promisify(ConnectionPool.prototype.close)
 };
 
@@ -168,7 +167,7 @@ describe('Connection Pool', function() {
         return pool.checkIn(connection);
       },
       clear: function() {
-        return PROMISIFIED_POOL_FUNCTIONS.clear.call(pool);
+        return pool.clear();
       },
       close: function() {
         return PROMISIFIED_POOL_FUNCTIONS.close.call(pool);
