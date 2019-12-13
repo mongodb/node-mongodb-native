@@ -1660,4 +1660,41 @@ describe('Bulk', function() {
         );
     });
   });
+
+  it('should preserve order of operation index in unordered bulk operation', function() {
+    const client = this.configuration.newClient();
+    return client.connect().then(() => {
+      this.defer(() => client.close());
+
+      const coll = client.db().collection('bulk_op_ordering_test');
+      function ignoreNsNotFound(err) {
+        if (!err.message.match(/ns not found/)) throw err;
+      }
+
+      return coll
+        .drop()
+        .catch(ignoreNsNotFound)
+        .then(() => {
+          const batch = coll.initializeUnorderedBulkOp();
+          batch.insert({ _id: 1, a: 0 });
+          batch.insert({ _id: 1, a: 0 });
+          batch.insert({ _id: 2, a: 0 });
+          batch.insert({ _id: 2, a: 0 });
+          return batch.execute();
+        })
+        .then(
+          () => {
+            throw new Error('expected a bulk error');
+          },
+          err => {
+            expect(err)
+              .to.have.property('writeErrors')
+              .with.length(2);
+
+            expect(err).to.have.nested.property('writeErrors[0].err.index', 1);
+            expect(err).to.have.nested.property('writeErrors[1].err.index', 3);
+          }
+        );
+    });
+  });
 });
