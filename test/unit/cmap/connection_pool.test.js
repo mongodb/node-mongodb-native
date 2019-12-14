@@ -44,6 +44,49 @@ describe('Connection Pool', function() {
     mock.createServer().then(s => (server = s));
   });
 
+  it('should destroy connections which have been closed', function(done) {
+    server.setMessageHandler(request => {
+      const doc = request.document;
+      if (doc.ismaster) {
+        request.reply(mock.DEFAULT_ISMASTER_36);
+      } else {
+        // destroy on any other command
+        request.connection.destroy();
+      }
+    });
+
+    const pool = new ConnectionPool(
+      Object.assign({ bson: new BSON(), maxPoolSize: 1 }, server.address())
+    );
+
+    const events = [];
+    pool.on('connectionClosed', event => events.push(event));
+
+    pool.checkOut((err, conn) => {
+      expect(err).to.not.exist;
+
+      conn.command('admin.$cmd', { ping: 1 }, (err, result) => {
+        expect(err).to.exist;
+        expect(result).to.not.exist;
+
+        pool.checkIn(conn);
+
+        expect(events).to.have.length(1);
+        const closeEvent = events[0];
+        expect(closeEvent)
+          .have.property('reason')
+          .equal('error');
+
+        pool.close(done);
+      });
+    });
+
+    pool.withConnection((err, conn, cb) => {
+      expect(err).to.not.exist;
+      cb();
+    });
+  });
+
   describe('withConnection', function() {
     it('should manage a connection for a successful operation', function(done) {
       server.setMessageHandler(request => {
