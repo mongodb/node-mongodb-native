@@ -6,6 +6,7 @@ const ConnectionPool = require('../../../lib/cmap/connection_pool').ConnectionPo
 const EventEmitter = require('events').EventEmitter;
 const mock = require('mongodb-mock-server');
 const BSON = require('bson');
+const cmapEvents = require('../../../lib/cmap/events');
 
 const chai = require('chai');
 chai.use(require('../../functional/spec-runner/matcher').default);
@@ -114,6 +115,35 @@ describe('Connection Pool', function() {
         expect(err).to.not.exist;
         cb(new Error('my great error'));
       }, callback);
+    });
+
+    it('should still manage a connection if no callback is provided', function(done) {
+      server.setMessageHandler(request => {
+        const doc = request.document;
+        if (doc.ismaster) {
+          request.reply(mock.DEFAULT_ISMASTER_36);
+        }
+      });
+
+      const pool = new ConnectionPool(
+        Object.assign({ bson: new BSON(), maxPoolSize: 1 }, server.address())
+      );
+
+      const events = [];
+      pool.on('connectionCheckedOut', event => events.push(event));
+      pool.on('connectionCheckedIn', event => {
+        events.push(event);
+
+        expect(events).to.have.length(2);
+        expect(events[0]).to.be.instanceOf(cmapEvents.ConnectionCheckedOutEvent);
+        expect(events[1]).to.be.instanceOf(cmapEvents.ConnectionCheckedInEvent);
+        pool.close(done);
+      });
+
+      pool.withConnection((err, conn, cb) => {
+        expect(err).to.not.exist;
+        cb();
+      });
     });
   });
 
