@@ -49,4 +49,19 @@ describe('Connection', function() {
       });
     });
   });
+
+  it('should support socket timeouts', function(done) {
+    const connectOptions = Object.assign({
+      host: '240.0.0.1',
+      connectionType: Connection,
+      bson: new BSON(),
+      connectionTimeout: 500
+    });
+
+    connect(connectOptions, err => {
+      expect(err).to.exist;
+      expect(err).to.match(/timed out/);
+      done();
+    });
+  });
 });
