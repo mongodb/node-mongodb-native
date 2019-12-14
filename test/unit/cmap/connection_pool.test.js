@@ -87,6 +87,31 @@ describe('Connection Pool', function() {
     });
   });
 
+  it('should propagate socket timeouts to connections', function(done) {
+    server.setMessageHandler(request => {
+      const doc = request.document;
+      if (doc.ismaster) {
+        request.reply(mock.DEFAULT_ISMASTER_36);
+      } else {
+        // blackhole other requests
+      }
+    });
+
+    const pool = new ConnectionPool(
+      Object.assign({ bson: new BSON(), maxPoolSize: 1, socketTimeout: 500 }, server.address())
+    );
+
+    pool.withConnection((err, conn, cb) => {
+      conn.command('admin.$cmd', { ping: 1 }, (err, result) => {
+        expect(err).to.exist;
+        expect(result).to.not.exist;
+        expect(err).to.match(/timed out/);
+        cb();
+      });
+    }, () => pool.close(done));
+  });
+
+
   describe('withConnection', function() {
     it('should manage a connection for a successful operation', function(done) {
       server.setMessageHandler(request => {
