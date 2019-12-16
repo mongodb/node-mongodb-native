@@ -101,16 +101,19 @@ describe('Connection Pool', function() {
       Object.assign({ bson: new BSON(), maxPoolSize: 1, socketTimeout: 500 }, server.address())
     );
 
-    pool.withConnection((err, conn, cb) => {
-      conn.command('admin.$cmd', { ping: 1 }, (err, result) => {
-        expect(err).to.exist;
-        expect(result).to.not.exist;
-        expect(err).to.match(/timed out/);
-        cb();
-      });
-    }, () => pool.close(done));
+    pool.withConnection(
+      (err, conn, cb) => {
+        expect(err).to.not.exist;
+        conn.command('admin.$cmd', { ping: 1 }, (err, result) => {
+          expect(err).to.exist;
+          expect(result).to.not.exist;
+          expect(err).to.match(/timed out/);
+          cb();
+        });
+      },
+      () => pool.close(done)
+    );
   });
-
 
   describe('withConnection', function() {
     it('should manage a connection for a successful operation', function(done) {
