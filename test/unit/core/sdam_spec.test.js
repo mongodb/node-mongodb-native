@@ -4,7 +4,7 @@ const path = require('path');
 const Topology = require('../../../lib/core/sdam/topology').Topology;
 const Server = require('../../../lib/core/sdam/server').Server;
 const ServerDescription = require('../../../lib/core/sdam/server_description').ServerDescription;
-const monitoring = require('../../../lib/core/sdam/monitoring');
+const sdamEvents = require('../../../lib/core/sdam/events');
 const parse = require('../../../lib/core/uri_parser');
 const sinon = require('sinon');
 
@@ -97,7 +97,7 @@ function convertOutcomeEvents(events) {
     let eventClass = eventType.replace(/_\w/g, c => c[1].toUpperCase());
     eventClass = eventClass.charAt(0).toUpperCase() + eventClass.slice(1);
     args.unshift(null);
-    const eventConstructor = monitoring[eventClass];
+    const eventConstructor = sdamEvents[eventClass];
     const eventInstance = new (Function.prototype.bind.apply(eventConstructor, args))();
     return eventInstance;
   });

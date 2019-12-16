@@ -4,7 +4,7 @@ const Topology = require('../../../lib/core/sdam/topology').Topology;
 const TopologyDescription = require('../../../lib/core/sdam/topology_description')
   .TopologyDescription;
 const TopologyType = require('../../../lib/core/sdam/common').TopologyType;
-const monitoring = require('../../../lib/core/sdam/monitoring');
+const sdamEvents = require('../../../lib/core/sdam/events');
 const SrvPoller = require('../../../lib/core/sdam/srv_polling').SrvPoller;
 const SrvPollingEvent = require('../../../lib/core/sdam/srv_polling').SrvPollingEvent;
 
@@ -283,7 +283,7 @@ describe('Mongos SRV Polling', function() {
       function emit(prev, current) {
         topology.emit(
           'topologyDescriptionChanged',
-          new monitoring.TopologyDescriptionChangedEvent(topology.s.id, prev, current)
+          new sdamEvents.TopologyDescriptionChangedEvent(topology.s.id, prev, current)
         );
       }
 
