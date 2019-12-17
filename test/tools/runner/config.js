@@ -62,7 +62,7 @@ class NativeConfiguration {
       return new MongoClient(
         dbOptions,
         this.usingUnifiedTopology()
-          ? Object.assign({ useUnifiedTopology: true }, serverOptions)
+          ? Object.assign({ useUnifiedTopology: true, minHeartbeatFrequencyMS: 100 }, serverOptions)
           : serverOptions
       );
     }
@@ -71,6 +71,7 @@ class NativeConfiguration {
     serverOptions = Object.assign({}, { haInterval: 100 }, serverOptions);
     if (this.usingUnifiedTopology()) {
       serverOptions.useUnifiedTopology = true;
+      serverOptions.minHeartbeatFrequencyMS = 100;
     }
 
     // Fall back

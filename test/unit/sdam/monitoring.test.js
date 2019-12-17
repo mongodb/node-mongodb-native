@@ -112,7 +112,7 @@ describe('monitoring', function() {
         done();
       });
 
-      monitor.requestCheck();
+      monitor.connect();
       monitor.once('serverHeartbeatSucceeded', () => {
         monitor.requestCheck();
         monitor.requestCheck();

@@ -43,7 +43,7 @@ describe('selectServers', function() {
 
   it('should schedule monitoring if no suitable server is found', function(done) {
     const topology = new Topology('someserver:27019');
-    const serverMonitor = this.sinon.stub(Server.prototype, 'monitor');
+    const requestCheck = this.sinon.stub(Server.prototype, 'requestCheck');
 
     this.sinon
       .stub(Topology.prototype, 'selectServer')
@@ -62,10 +62,11 @@ describe('selectServers', function() {
         expect(err).to.match(/Server selection timed out/);
         expect(err).to.have.property('reason');
 
-        // expect a call to monitor for initial server creation, and another for the server selection
-        expect(serverMonitor)
+        // When server is created `connect` is called on the monitor. When server selection
+        // occurs `requestCheck` will be called for an immediate check.
+        expect(requestCheck)
           .property('callCount')
-          .to.equal(2);
+          .to.equal(1);
 
         topology.close(done);
       });

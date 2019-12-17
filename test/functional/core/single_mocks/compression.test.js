@@ -68,13 +68,18 @@ describe('Single Compression (mocks)', function() {
 
           server.setMessageHandler(request => {
             var doc = request.document;
-            if (currentStep === 0) {
+            if (doc.ismaster) {
               expect(request.response.documents[0].compression).to.have.members(['snappy', 'zlib']);
               expect(server.isCompressed).to.be.false;
               // Acknowledge connection using OP_COMPRESSED with no compression
               request.reply(serverResponse, { compression: { compressor: 'no_compression' } });
-            } else if (currentStep === 1) {
+              currentStep = 1;
+              return;
+            }
+
+            if (currentStep === 1) {
               expect(server.isCompressed).to.be.false;
+
               // Acknowledge insertion using OP_COMPRESSED with no compression
               request.reply(
                 { ok: 1, n: doc.documents.length, lastOp: new Date() },
@@ -161,12 +166,16 @@ describe('Single Compression (mocks)', function() {
 
           server.setMessageHandler(request => {
             var doc = request.document;
-            if (currentStep === 0) {
+            if (doc.ismaster) {
               expect(request.response.documents[0].compression).to.have.members(['snappy', 'zlib']);
               expect(server.isCompressed).to.be.false;
               // Acknowledge connection using OP_COMPRESSED with snappy
               request.reply(serverResponse, { compression: { compressor: 'snappy' } });
-            } else if (currentStep === 1) {
+              currentStep = 1;
+              return;
+            }
+
+            if (currentStep === 1) {
               expect(server.isCompressed).to.be.true;
               // Acknowledge insertion using OP_COMPRESSED with snappy
               request.reply(
@@ -254,12 +263,16 @@ describe('Single Compression (mocks)', function() {
 
           server.setMessageHandler(request => {
             var doc = request.document;
-            if (currentStep === 0) {
+            if (doc.ismaster) {
               expect(request.response.documents[0].compression).to.have.members(['snappy', 'zlib']);
               expect(server.isCompressed).to.be.false;
               // Acknowledge connection using OP_COMPRESSED with zlib
               request.reply(serverResponse, { compression: { compressor: 'zlib' } });
-            } else if (currentStep === 1) {
+              currentStep = 1;
+              return;
+            }
+
+            if (currentStep === 1) {
               expect(server.isCompressed).to.be.true;
               // Acknowledge insertion using OP_COMPRESSED with zlib
               request.reply(
@@ -345,12 +358,23 @@ describe('Single Compression (mocks)', function() {
         server = yield mock.createServer();
 
         server.setMessageHandler(request => {
-          if (currentStep === 0) {
+          const doc = request.document;
+          if (doc.ismaster) {
+            if (doc.compression == null) {
+              expect(server.isCompressed).to.be.false;
+              request.reply({ ok: 1 }, { compression: { compressor: 'snappy' } });
+              return;
+            }
+
             expect(request.response.documents[0].compression).to.have.members(['snappy', 'zlib']);
             expect(server.isCompressed).to.be.false;
             // Acknowledge connection using OP_COMPRESSED with snappy
             request.reply(serverResponse, { compression: { compressor: 'snappy' } });
-          } else if (currentStep === 1) {
+            currentStep = 1;
+            return;
+          }
+
+          if (currentStep === 1) {
             expect(server.isCompressed).to.be.true;
             // Acknowledge ping using OP_COMPRESSED with snappy
             request.reply({ ok: 1 }, { compression: { compressor: 'snappy' } });
