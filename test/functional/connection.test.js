@@ -19,7 +19,7 @@ describe('Connection', function() {
       var configuration = this.configuration;
       var client = configuration.newClient(
         { w: 1 },
-        { poolSize: 1, host: '/tmp/mongodb-27017.sock' }
+        { poolSize: 1, host: '/tmp/mongodb-27017.sock', heartbeatFrequencyMS: 250 }
       );
 
       client.connect(function(err, client) {

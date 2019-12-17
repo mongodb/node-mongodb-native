@@ -12,7 +12,7 @@ describe('Topology (unit)', function() {
       this.sinon = sinon.sandbox.create();
 
       // these are mocks we want across all tests
-      this.sinon.stub(Server.prototype, 'monitor');
+      this.sinon.stub(Server.prototype, 'requestCheck');
       this.sinon
         .stub(Topology.prototype, 'selectServer')
         .callsFake(function(selector, options, callback) {
