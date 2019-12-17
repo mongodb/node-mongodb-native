@@ -51,7 +51,7 @@
       "outputSourceFiles" : true
     },
     "applicationName": "Node.js MongoDB Driver API",
-    "googleAnalytics": "UA-29229787-1",
+    "googleAnalytics": "UA-7301842-14",
     "openGraph": {
       "title": "MongoDB Driver API for Node.js",
       "type": "website",
