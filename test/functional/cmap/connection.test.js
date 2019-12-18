@@ -16,7 +16,10 @@ describe('Connection', function() {
       expect(err).to.not.exist;
       this.defer(_done => conn.destroy(_done));
 
-      conn.command('admin.$cmd', { ismaster: 1 }, (err, ismaster) => {
+      conn.command('admin.$cmd', { ismaster: 1 }, (err, result) => {
+        // NODE-2382: remove `result.result` when command returns just a raw response
+        const ismaster = result.result;
+
         expect(err).to.not.exist;
         expect(ismaster).to.exist;
         expect(ismaster.ok).to.equal(1);
@@ -40,7 +43,10 @@ describe('Connection', function() {
       conn.on('commandSucceeded', event => events.push(event));
       conn.on('commandFailed', event => events.push(event));
 
-      conn.command('admin.$cmd', { ismaster: 1 }, (err, ismaster) => {
+      conn.command('admin.$cmd', { ismaster: 1 }, (err, result) => {
+        // NODE-2382: remove `result.result` when command returns just a raw response
+        const ismaster = result.result;
+
         expect(err).to.not.exist;
         expect(ismaster).to.exist;
         expect(ismaster.ok).to.equal(1);
