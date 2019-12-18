@@ -35,7 +35,7 @@ describe('selectServers', function() {
     selectServers(topology, ReadPreference.primary, 500, process.hrtime(), err => {
       expect(err).to.exist;
       expect(err).to.match(/Server selection timed out/);
-      expect(err).to.not.have.property('reason');
+      expect(err).to.have.property('reason');
 
       done();
     });
@@ -60,7 +60,7 @@ describe('selectServers', function() {
       selectServers(topology, ReadPreference.primary, 1000, process.hrtime(), err => {
         expect(err).to.exist;
         expect(err).to.match(/Server selection timed out/);
-        expect(err).to.not.have.property('reason');
+        expect(err).to.have.property('reason');
 
         // expect a call to monitor for initial server creation, and another for the server selection
         expect(serverMonitor)
