@@ -4,7 +4,7 @@
   "description": "must aggressively timeout threads enqueued longer than waitQueueTimeoutMS",
   "poolOptions": {
     "maxPoolSize": 1,
-    "waitQueueTimeoutMS": 20
+    "waitQueueTimeoutMS": 50
   },
   "operations": [
     {

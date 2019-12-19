@@ -76,15 +76,18 @@ describe('Connection Pool', function() {
         expect(closeEvent)
           .have.property('reason')
           .equal('error');
-
-        pool.close(done);
       });
     });
 
-    pool.withConnection((err, conn, cb) => {
-      expect(err).to.not.exist;
-      cb();
-    });
+    pool.withConnection(
+      (err, conn, cb) => {
+        expect(err).to.not.exist;
+        cb();
+      },
+      () => {
+        pool.close(done);
+      }
+    );
   });
 
   it('should propagate socket timeouts to connections', function(done) {
@@ -98,7 +101,7 @@ describe('Connection Pool', function() {
     });
 
     const pool = new ConnectionPool(
-      Object.assign({ bson: new BSON(), maxPoolSize: 1, socketTimeout: 500 }, server.address())
+      Object.assign({ bson: new BSON(), maxPoolSize: 1, socketTimeout: 50 }, server.address())
     );
 
     pool.withConnection(
@@ -150,7 +153,7 @@ describe('Connection Pool', function() {
       });
 
       const pool = new ConnectionPool(
-        Object.assign({ bson: new BSON(), waitQueueTimeoutMS: 250 }, server.address())
+        Object.assign({ bson: new BSON(), waitQueueTimeoutMS: 200 }, server.address())
       );
 
       const callback = err => {
@@ -328,6 +331,7 @@ describe('Connection Pool', function() {
         if (this._killed || this._error) {
           return;
         }
+
         this._promise = this._promise
           .then(() => this._runOperation(op))
           .catch(e => (this._error = e));
