@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="3.4.1"></a>
+## [3.4.1](https://github.com/mongodb/node-mongodb-native/compare/v3.4.0...v3.4.1) (2019-12-19)
+
+
+### Bug Fixes
+
+* **bulk:** use original indexes as map for current op index ([20800ac](https://github.com/mongodb/node-mongodb-native/commit/20800ac))
+* always check for network errors during SCRAM conversation ([e46a70e](https://github.com/mongodb/node-mongodb-native/commit/e46a70e))
+
+
+
 <a name="3.4.0"></a>
 # [3.4.0](https://github.com/mongodb/node-mongodb-native/compare/v3.3.5...v3.4.0) (2019-12-10)
 

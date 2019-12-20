@@ -112,4 +112,47 @@ describe('SCRAM Iterations Tests', function() {
 
     client.connect();
   });
+
+  it('should properly handle network errors on `saslContinue`', function(_done) {
+    const credentials = new MongoCredentials({
+      mechanism: 'default',
+      source: 'db',
+      username: 'user',
+      password: 'pencil'
+    });
+
+    let done = e => {
+      done = () => {};
+      return _done(e);
+    };
+
+    test.server.setMessageHandler(request => {
+      const doc = request.document;
+      if (doc.ismaster) {
+        return request.reply(Object.assign({}, mock.DEFAULT_ISMASTER));
+      } else if (doc.saslStart) {
+        return request.reply({
+          ok: 1,
+          done: false,
+          payload: Buffer.from(
+            'r=VNnXkRqKflB5+rmfnFiisCWzgDLzez02iRpbvE5mQjMvizb+VkSPRZZ/pDmFzLxq,s=dZTyOb+KZqoeTFdsULiqow==,i=10000'
+          )
+        });
+      } else if (doc.saslContinue) {
+        request.connection.destroy();
+      }
+    });
+
+    const client = new Server(Object.assign({}, test.server.address(), { credentials }));
+    client.on('error', err => {
+      expect(err).to.not.be.null;
+      expect(err)
+        .to.have.property('message')
+        .that.matches(/failed to connect to server/);
+
+      client.destroy(done);
+    });
+
+    client.connect();
+  });
 });

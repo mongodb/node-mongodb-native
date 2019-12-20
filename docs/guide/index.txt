@@ -2,7 +2,7 @@
 MongoDB Node.js Driver Documentation
 ====================================
 
-Welcome to the MongoDB Node.js 3.3 driver documentation.
+Welcome to the MongoDB Node.js 3.4 driver documentation.
 
 What's New
 ----------
@@ -40,7 +40,7 @@ Advanced features for the driver.
 .. toctree::
   :hidden:
   :glob:
-  
+
   installation-guide
   quick-start
   whats-new

@@ -7,6 +7,13 @@ title = "Upgrade Guide"
   pre = "<i class='fa fa-cog'></i>"
 +++
 
+# What's new in 3.4
+
+- MongoDB Client Side Field Level Encryption
+
+[Full 3.4 Changes Here](https://github.com/mongodb/node-mongodb-native/releases/tag/v3.4.0)
+
+
 # What's new in 3.3
 
 - Supports Distributed Transactions
