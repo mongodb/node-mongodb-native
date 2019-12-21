@@ -14,7 +14,7 @@ describe('URI', function() {
     {
       // Add a tag that our runner can trigger on
       // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: { requires: { topology: 'single' } },
+      metadata: { requires: { topology: 'single', unifiedTopology: false } },
 
       // The actual test we wish to run
       test: function(done) {
