@@ -525,7 +525,10 @@ describe('MongoClient', function() {
    */
   it('correctly connect setting keepAlive to 100', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: {
+        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'],
+        unifiedTopology: false
+      }
     },
 
     // The actual test we wish to run
@@ -566,7 +569,10 @@ describe('MongoClient', function() {
    */
   it('default keepAlive behavior', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: {
+        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'],
+        unifiedTopology: false
+      }
     },
 
     // The actual test we wish to run
@@ -806,11 +812,7 @@ describe('MongoClient', function() {
   });
 
   it('Should use compression from URI', {
-    metadata: {
-      requires: {
-        topology: ['single']
-      }
-    },
+    metadata: { requires: { topology: ['single'], unifiedTopology: false } },
 
     // The actual test we wish to run
     test: function(done) {

@@ -26,7 +26,6 @@ describe('Promises (Collection)', function() {
 
       const client = configuration.newClient(url);
       client.connect().then(function(client) {
-        test.equal(1, client.topology.connections().length);
         var db = client.db(configuration.db);
 
         db.collection('insertOne')

@@ -459,7 +459,7 @@ describe('Connection', function() {
    * @ignore
    */
   it('should correctly reconnect and finish query operation', {
-    metadata: { requires: { topology: 'single' } },
+    metadata: { requires: { topology: 'single', unifiedTopology: false } },
 
     // The actual test we wish to run
     test: function(done) {

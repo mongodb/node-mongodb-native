@@ -16,7 +16,7 @@ describe('Promises (Db)', function() {
     },
 
     // The actual test we wish to run
-    test: function(done) {
+    test: function() {
       var configuration = this.configuration;
       var url = configuration.url();
       url =
@@ -25,11 +25,7 @@ describe('Promises (Db)', function() {
           : f('%s?%s', url, 'maxPoolSize=100');
 
       const client = configuration.newClient(url);
-      client.connect().then(function(client) {
-        test.equal(1, client.topology.connections().length);
-
-        client.close(done);
-      });
+      return client.connect().then(() => client.close());
     }
   });
 
