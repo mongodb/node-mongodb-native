@@ -3718,7 +3718,7 @@ describe('Operation Examples', function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -3732,8 +3732,7 @@ describe('Operation Examples', function() {
         // BEGIN
         // Close the connection with a callback that is optional
         client.close(function(err) {
-          test.equal(null, err);
-
+          expect(err).to.not.exist;
           done();
         });
       });
