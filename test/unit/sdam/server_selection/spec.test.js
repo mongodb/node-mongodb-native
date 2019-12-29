@@ -55,7 +55,9 @@ function collectSelectionTests(specDir) {
 describe('Server Selection (spec)', function() {
   let serverConnect;
   before(() => {
-    serverConnect = sinon.stub(Server.prototype, 'connect');
+    serverConnect = sinon.stub(Server.prototype, 'connect').callsFake(function() {
+      this.s.state = 'connected';
+    });
   });
 
   after(() => {
@@ -119,7 +121,9 @@ function collectStalenessTests(specDir) {
 describe('Max Staleness (spec)', function() {
   let serverConnect;
   before(() => {
-    serverConnect = sinon.stub(Server.prototype, 'connect');
+    serverConnect = sinon.stub(Server.prototype, 'connect').callsFake(function() {
+      this.s.state = 'connected';
+    });
   });
 
   after(() => {

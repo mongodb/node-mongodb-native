@@ -1007,7 +1007,7 @@ describe('Server tests', function() {
             err = e;
           }
 
-          client.destroy(err2 => done(err || err2));
+          client.close(err2 => done(err || err2));
         });
 
         client.on('connect', () => {

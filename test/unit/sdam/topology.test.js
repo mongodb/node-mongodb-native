@@ -16,8 +16,10 @@ describe('Topology (unit)', function() {
       this.sinon
         .stub(Topology.prototype, 'selectServer')
         .callsFake(function(selector, options, callback) {
-          const server = Array.from(this.s.servers.values())[0];
-          callback(null, server);
+          setTimeout(() => {
+            const server = Array.from(this.s.servers.values())[0];
+            callback(null, server);
+          }, 50);
         });
     });
 
@@ -28,6 +30,7 @@ describe('Topology (unit)', function() {
     it('should check for sessions if connected to a single server and has no known servers', function(done) {
       const topology = new Topology('someserver:27019');
       this.sinon.stub(Server.prototype, 'connect').callsFake(function() {
+        this.s.state = 'connected';
         this.emit('connect');
       });
 
@@ -40,12 +43,15 @@ describe('Topology (unit)', function() {
     it('should not check for sessions if connected to a single server', function(done) {
       const topology = new Topology('someserver:27019');
       this.sinon.stub(Server.prototype, 'connect').callsFake(function() {
-        this.emit(
-          'descriptionReceived',
-          new ServerDescription('someserver:27019', { ok: 1, maxWireVersion: 5 })
-        );
-
+        this.s.state = 'connected';
         this.emit('connect');
+
+        setTimeout(() => {
+          this.emit(
+            'descriptionReceived',
+            new ServerDescription('someserver:27019', { ok: 1, maxWireVersion: 5 })
+          );
+        }, 20);
       });
 
       topology.connect(() => {
@@ -57,12 +63,15 @@ describe('Topology (unit)', function() {
     it('should check for sessions if there are no data-bearing nodes', function(done) {
       const topology = new Topology('mongos:27019,mongos:27018,mongos:27017');
       this.sinon.stub(Server.prototype, 'connect').callsFake(function() {
-        this.emit(
-          'descriptionReceived',
-          new ServerDescription(this.name, { ok: 1, msg: 'isdbgrid', maxWireVersion: 5 })
-        );
-
+        this.s.state = 'connected';
         this.emit('connect');
+
+        setTimeout(() => {
+          this.emit(
+            'descriptionReceived',
+            new ServerDescription(this.name, { ok: 1, msg: 'isdbgrid', maxWireVersion: 5 })
+          );
+        }, 20);
       });
 
       topology.connect(() => {
@@ -94,7 +103,7 @@ describe('Topology (unit)', function() {
       topology.connect(err => {
         expect(err).to.not.exist;
 
-        topology.command('admin.$cmd', { ping: 1 }, { socketTimeout: 1500 }, (err, result) => {
+        topology.command('admin.$cmd', { ping: 1 }, { socketTimeout: 250 }, (err, result) => {
           expect(result).to.not.exist;
           expect(err).to.exist;
           expect(err).to.match(/timed out/);

@@ -53,6 +53,7 @@ describe('selectServers', function() {
       });
 
     this.sinon.stub(Server.prototype, 'connect').callsFake(function() {
+      this.s.state = 'connected';
       this.emit('connect');
     });
 
@@ -76,6 +77,7 @@ describe('selectServers', function() {
   it('should disallow selection when the topology is explicitly closed', function(done) {
     const topology = new Topology('someserver:27019');
     this.sinon.stub(Server.prototype, 'connect').callsFake(function() {
+      this.s.state = 'connected';
       this.emit('connect');
     });
 
