@@ -500,29 +500,6 @@ describe('MongoClient', function() {
   /**
    * @ignore
    */
-  it('correctly error out when no socket available on MongoClient `connect` with domain', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    // The actual test we wish to run
-    test: function(done) {
-      var configuration = this.configuration;
-      const client = configuration.newClient('mongodb://test.does.not.exist.com:80/test', {
-        serverSelectionTimeoutMS: 10
-      });
-
-      client.connect(function(err) {
-        test.ok(err != null);
-
-        done();
-      });
-    }
-  });
-
-  /**
-   * @ignore
-   */
   it('correctly connect setting keepAlive to 100', {
     metadata: {
       requires: {

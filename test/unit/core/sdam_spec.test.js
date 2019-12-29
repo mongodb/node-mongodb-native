@@ -37,7 +37,9 @@ function collectTests() {
 describe('Server Discovery and Monitoring (spec)', function() {
   let serverConnect;
   before(() => {
-    serverConnect = sinon.stub(Server.prototype, 'connect');
+    serverConnect = sinon.stub(Server.prototype, 'connect').callsFake(function() {
+      this.s.state = 'connected';
+    });
   });
 
   after(() => {

@@ -674,18 +674,24 @@ describe('Db', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
-        test.equal(null, err);
-        var items = [];
 
-        items.push(1);
-        client.close(function() {
-          test.equal(2, items.length);
-          done();
+      client.connect(function(err, client) {
+        expect(err).to.not.exist;
+
+        // run one command to ensure connections exist, otherwise `close` is near immediate
+        client.db('admin').command({ ping: 1 }, err => {
+          expect(err).to.not.exist;
+
+          var items = [];
+          items.push(1);
+          client.close(function() {
+            expect(items).to.have.length(2);
+            done();
+          });
+
+          items.push(2);
         });
-        items.push(2);
       });
     }
   });
