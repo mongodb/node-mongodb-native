@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const core = require('../../../../lib/core');
 const Topology = core.Topology;
-const MongoTimeoutError = core.MongoTimeoutError;
+const MongoServerSelectionError = core.MongoServerSelectionError;
 const ReadPreference = core.ReadPreference;
 
 // TODO: these should be from `core` when legacy topologies are removed
@@ -275,7 +275,7 @@ function executeServerSelectionTest(testDefinition, options, testDone) {
   }
 
   // default to serverSelectionTimeoutMS of `100` for unit tests
-  topology.selectServer(selector, { serverSelectionTimeoutMS: 100 }, (err, server) => {
+  topology.selectServer(selector, { serverSelectionTimeoutMS: 50 }, (err, server) => {
     // are we expecting an error?
     if (testDefinition.error) {
       if (!err) {
@@ -287,7 +287,7 @@ function executeServerSelectionTest(testDefinition, options, testDone) {
 
     if (err) {
       // this is another expected error case
-      if (expectedServers.length === 0 && err instanceof MongoTimeoutError) return done();
+      if (expectedServers.length === 0 && err instanceof MongoServerSelectionError) return done();
       return done(err);
     }
 
