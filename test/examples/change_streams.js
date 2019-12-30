@@ -129,7 +129,7 @@ describe('examples(change-stream):', function() {
       const changeStream = collection.watch();
 
       let newChangeStream;
-      changeStream.on('change', next => {
+      changeStream.once('change', next => {
         const resumeToken = changeStream.resumeToken;
         changeStream.close();
 
