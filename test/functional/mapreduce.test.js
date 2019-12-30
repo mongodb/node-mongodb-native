@@ -364,44 +364,54 @@ describe('MapReduce', function() {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
+        const outDb = client.db('outputCollectionDb');
 
         // Create a test collection
         db.createCollection('test_map_reduce_functions', function(err, collection) {
-          // Insert some documents to perform map reduce over
-          collection.insert(
-            [{ user_id: 1 }, { user_id: 2 }],
-            configuration.writeConcernMax(),
-            function(err) {
-              test.equal(null, err);
-              // Map function
-              var map = function() {
-                emit(this.user_id, 1); // eslint-disable-line
-              };
-              // Reduce function
-              var reduce = function() {
-                return 1;
-              };
+          // create the output collection
+          outDb.createCollection('tempCollection', err => {
+            test.equal(null, err);
 
-              // Perform the map reduce
-              collection.mapReduce(
-                map,
-                reduce,
-                { out: { replace: 'tempCollection', db: 'outputCollectionDb' } },
-                function(err, collection) {
-                  // Mapreduce returns the temporary collection with the results
-                  collection.findOne({ _id: 1 }, function(err, result) {
-                    test.equal(1, result.value);
+            // Insert some documents to perform map reduce over
+            collection.insert(
+              [{ user_id: 1 }, { user_id: 2 }],
+              configuration.writeConcernMax(),
+              function(err) {
+                test.equal(null, err);
+                // Map function
+                var map = function() {
+                  emit(this.user_id, 1); // eslint-disable-line
+                };
+                // Reduce function
+                var reduce = function() {
+                  return 1;
+                };
 
-                    collection.findOne({ _id: 2 }, function(err, result) {
+                // Perform the map reduce
+                collection.mapReduce(
+                  map,
+                  reduce,
+                  { out: { replace: 'tempCollection', db: 'outputCollectionDb' } },
+                  function(err, collection) {
+                    test.equal(null, err);
+
+                    // Mapreduce returns the temporary collection with the results
+                    collection.findOne({ _id: 1 }, function(err, result) {
+                      test.equal(null, err);
                       test.equal(1, result.value);
 
-                      client.close(done);
+                      collection.findOne({ _id: 2 }, function(err, result) {
+                        test.equal(null, err);
+                        test.equal(1, result.value);
+
+                        client.close(done);
+                      });
                     });
-                  });
-                }
-              );
-            }
-          );
+                  }
+                );
+              }
+            );
+          });
         });
       });
     }
