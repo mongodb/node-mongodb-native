@@ -11,6 +11,7 @@ const connect = require('./lib/mongo_client').connect;
 connect.MongoError = core.MongoError;
 connect.MongoNetworkError = core.MongoNetworkError;
 connect.MongoTimeoutError = core.MongoTimeoutError;
+connect.MongoServerSelectionError = core.MongoServerSelectionError;
 connect.MongoParseError = core.MongoParseError;
 connect.MongoWriteConcernError = core.MongoWriteConcernError;
 connect.MongoBulkWriteError = require('./lib/bulk/common').BulkWriteError;
