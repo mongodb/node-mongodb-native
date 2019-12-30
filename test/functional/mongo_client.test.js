@@ -345,7 +345,8 @@ describe('MongoClient', function() {
   it('Should correctly set MaxPoolSize on replicaset server', {
     metadata: {
       requires: {
-        topology: ['replicaset']
+        topology: ['replicaset'],
+        unifiedTopology: false
       }
     },
 

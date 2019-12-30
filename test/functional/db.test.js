@@ -667,7 +667,8 @@ describe('Db', function() {
     metadata: {
       requires: {
         topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'],
-        mongodb: '>= 2.8.0'
+        mongodb: '>= 2.8.0',
+        unifiedTopology: false
       }
     },
 
