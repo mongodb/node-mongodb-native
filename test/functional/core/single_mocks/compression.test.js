@@ -33,7 +33,7 @@ describe('Single Compression (mocks)', function() {
       });
 
       client.on('connect', function() {
-        client.close(done);
+        client.destroy(done);
       });
 
       client.connect();
@@ -126,7 +126,7 @@ describe('Single Compression (mocks)', function() {
                   expect(___err).to.be.null;
                   expect(___r.result.ok).to.equal(1);
 
-                  client.close(done);
+                  client.destroy(done);
                 });
               });
             });
@@ -220,7 +220,7 @@ describe('Single Compression (mocks)', function() {
                   expect(___err).to.be.null;
                   expect(___r.result.ok).to.equal(1);
 
-                  client.close(done);
+                  client.destroy(done);
                 });
               });
             });
@@ -316,8 +316,7 @@ describe('Single Compression (mocks)', function() {
                   expect(___err).to.be.null;
                   expect(___r.result.ok).to.equal(1);
 
-                  client.close();
-                  done();
+                  client.destroy(done);
                 });
               });
             });
@@ -407,7 +406,7 @@ describe('Single Compression (mocks)', function() {
                 expect(___err).to.be.null;
                 expect(___r.result.ok).to.equal(1);
 
-                client.close(done);
+                client.destroy(done);
               });
             });
           });

@@ -397,7 +397,8 @@ describe('MongoClient', function() {
   it('Should correctly set MaxPoolSize on sharded server', {
     metadata: {
       requires: {
-        topology: ['sharded']
+        topology: ['sharded'],
+        unifiedTopology: false
       }
     },
 
