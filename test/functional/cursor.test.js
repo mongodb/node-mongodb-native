@@ -2148,7 +2148,8 @@ describe('Cursor', function() {
     metadata: {
       requires: {
         mongodb: '<=3.5.0', // NOTE: remove this when SERVER-30576 is resolved
-        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
+        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'],
+        unifiedTopology: false
       }
     },
 
