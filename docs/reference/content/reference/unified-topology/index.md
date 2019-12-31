@@ -69,7 +69,7 @@ We think the ambiguity of what it means to be "connected" can lead to far more p
 
 ### Server Selection
 
-The psuedocode for operation execution looks something like this:
+The pseudocode for operation execution looks something like this:
 
 ```js
 function executeOperation(topology, operation, callback) {
