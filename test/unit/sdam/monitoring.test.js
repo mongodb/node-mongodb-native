@@ -78,8 +78,7 @@ describe('monitoring', function() {
       acceptConnections = true;
     }, 250);
 
-    // set `heartbeatFrequencyMS` to 250ms to force a quick monitoring check, and wait 500ms to validate below
-    const topology = new Topology(mockServer.uri(), { heartbeatFrequencyMS: 250 });
+    const topology = new Topology(mockServer.uri());
     topology.connect(err => {
       expect(err).to.not.exist;
 
