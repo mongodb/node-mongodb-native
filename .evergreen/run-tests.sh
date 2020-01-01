@@ -27,7 +27,7 @@ if [[ -z "${CLIENT_ENCRYPTION}" ]]; then
   unset AWS_ACCESS_KEY_ID;
   unset AWS_SECRET_ACCESS_KEY;
 else
-  npm install mongodb-client-encryption@1.0.0
+  npm install mongodb-client-encryption
 fi
 
 MONGODB_UNIFIED_TOPOLOGY=${UNIFIED} MONGODB_URI=${MONGODB_URI} npm test
