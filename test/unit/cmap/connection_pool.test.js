@@ -250,6 +250,11 @@ describe('Connection Pool', function() {
       return thread;
     }
 
+    function eventType(event) {
+      const eventName = event.constructor.name;
+      return eventName.substring(0, eventName.lastIndexOf('Event'));
+    }
+
     const OPERATION_FUNCTIONS = {
       checkOut: function(op) {
         return PROMISIFIED_POOL_FUNCTIONS.checkOut.call(pool).then(connection => {
@@ -307,7 +312,7 @@ describe('Connection Pool', function() {
         const count = options.count;
         return new Promise(resolve => {
           function run() {
-            if (poolEvents.filter(ev => ev.type === event).length >= count) {
+            if (poolEvents.filter(ev => eventType(ev) === event).length >= count) {
               return resolve();
             }
 
