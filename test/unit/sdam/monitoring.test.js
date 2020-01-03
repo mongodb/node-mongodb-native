@@ -256,5 +256,57 @@ describe('monitoring', function() {
 
       monitor.connect();
     });
+
+    it('should report the most recent error on second monitoring failure', function(done) {
+      let failedCount = 0;
+      let initialConnectCompleted = false;
+      mockServer.setMessageHandler(request => {
+        const doc = request.document;
+        if (doc.ismaster) {
+          if (!initialConnectCompleted) {
+            request.reply(mock.DEFAULT_ISMASTER_36);
+            initialConnectCompleted = true;
+            return;
+          }
+
+          if (failedCount === 0) {
+            failedCount++;
+            request.reply({ ok: 0, errmsg: 'first error message' });
+          } else {
+            failedCount++;
+            request.reply({ ok: 0, errmsg: 'second error message' });
+          }
+        }
+      });
+
+      const server = new MockServer(mockServer.address());
+      const monitor = new Monitor(server, {
+        heartbeatFrequencyMS: 250,
+        minHeartbeatFrequencyMS: 50
+      });
+      this.defer(() => monitor.close());
+
+      let resetRequested = false;
+      monitor.on('resetConnectionPool', () => (resetRequested = true));
+      monitor.on('serverHeartbeatSucceeded', () => {
+        if (server.description.type === ServerType.Unknown) {
+          // this is the first successful heartbeat, set the server type
+          server.description.type = ServerType.Standalone;
+          return;
+        }
+
+        done(new Error('unexpected heartbeat success'));
+      });
+
+      monitor.on('serverHeartbeatFailed', event => {
+        expect(resetRequested).to.be.true;
+        expect(event)
+          .property('failure')
+          .to.match(/second error message/);
+        done();
+      });
+
+      monitor.connect();
+    });
   });
 });
