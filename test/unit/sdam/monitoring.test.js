@@ -237,9 +237,13 @@ describe('monitoring', function() {
       });
       this.defer(() => monitor.close());
 
-      monitor.on('serverHeartbeatFailed', () => done(new Error('unexpected heartbeat failure')));
-
       let resetRequested = false;
+      monitor.on('serverHeartbeatFailed', () => {
+        if (resetRequested) {
+          done(new Error('unexpected heartbeat failure'));
+        }
+      });
+
       monitor.on('resetConnectionPool', () => (resetRequested = true));
       monitor.on('serverHeartbeatSucceeded', () => {
         if (server.description.type === ServerType.Unknown) {
@@ -272,6 +276,59 @@ describe('monitoring', function() {
           if (failedCount === 0) {
             failedCount++;
             request.reply({ ok: 0, errmsg: 'first error message' });
+          } else if (failedCount === 1) {
+            failedCount++;
+            request.reply({ ok: 0, errmsg: 'second error message' });
+          } else {
+            request.reply(mock.DEFAULT_ISMASTER_36);
+          }
+        }
+      });
+
+      const server = new MockServer(mockServer.address());
+      const monitor = new Monitor(server, {
+        heartbeatFrequencyMS: 250,
+        minHeartbeatFrequencyMS: 50
+      });
+      this.defer(() => monitor.close());
+
+      let resetRequested = false;
+      monitor.on('resetConnectionPool', () => (resetRequested = true));
+      monitor.once('serverHeartbeatSucceeded', () => {
+        // this is the first successful heartbeat, set the server type
+        server.description.type = ServerType.Standalone;
+
+        let failureCount = 0;
+        monitor.on('serverHeartbeatFailed', event => {
+          failureCount++;
+          if (failureCount === 2) {
+            expect(resetRequested).to.be.true;
+            expect(event)
+              .property('failure')
+              .to.match(/second error message/);
+            done();
+          }
+        });
+      });
+
+      monitor.connect();
+    });
+
+    it('should report events in the correct order during monitoring failure', function(done) {
+      let failedCount = 0;
+      let initialConnectCompleted = false;
+      mockServer.setMessageHandler(request => {
+        const doc = request.document;
+        if (doc.ismaster) {
+          if (!initialConnectCompleted) {
+            request.reply(mock.DEFAULT_ISMASTER_36);
+            initialConnectCompleted = true;
+            return;
+          }
+
+          if (failedCount === 0) {
+            failedCount++;
+            request.reply({ ok: 0, errmsg: 'first error message' });
           } else {
             failedCount++;
             request.reply({ ok: 0, errmsg: 'second error message' });
@@ -286,24 +343,40 @@ describe('monitoring', function() {
       });
       this.defer(() => monitor.close());
 
-      let resetRequested = false;
-      monitor.on('resetConnectionPool', () => (resetRequested = true));
-      monitor.on('serverHeartbeatSucceeded', () => {
-        if (server.description.type === ServerType.Unknown) {
-          // this is the first successful heartbeat, set the server type
-          server.description.type = ServerType.Standalone;
-          return;
-        }
+      let poolResetRequested = false;
+      let serverResetRequested = false;
+      monitor.on('resetConnectionPool', () => (poolResetRequested = true));
+      monitor.on('resetServer', () => (serverResetRequested = true));
 
-        done(new Error('unexpected heartbeat success'));
-      });
+      const events = [];
+      monitor.once('serverHeartbeatSucceeded', () => {
+        // this is the first successful heartbeat, set the server type
+        server.description.type = ServerType.Standalone;
 
-      monitor.on('serverHeartbeatFailed', event => {
-        expect(resetRequested).to.be.true;
-        expect(event)
-          .property('failure')
-          .to.match(/second error message/);
-        done();
+        monitor.on('serverHeartbeatStarted', event => events.push(event));
+        monitor.on('serverHeartbeatFailed', event => events.push(event));
+        monitor.once('resetServer', err => {
+          expect(poolResetRequested).to.be.true;
+          expect(serverResetRequested).to.be.true;
+          expect(events.map(e => e.constructor.name)).to.eql([
+            'ServerHeartbeatStartedEvent',
+            'ServerHeartbeatFailedEvent',
+            'ServerHeartbeatStartedEvent',
+            'ServerHeartbeatFailedEvent'
+          ]);
+
+          expect(events[1])
+            .property('failure')
+            .to.match(/first error message/);
+          expect(events[3])
+            .property('failure')
+            .to.match(/second error message/);
+          expect(events[3])
+            .property('failure')
+            .to.eql(err);
+
+          done();
+        });
       });
 
       monitor.connect();
