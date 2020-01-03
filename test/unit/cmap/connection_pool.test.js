@@ -441,12 +441,10 @@ describe('Connection Pool', function() {
             const actualEvents = poolEvents.filter(ev => ignoreEvents.indexOf(ev.type) < 0);
 
             if (expectedError) {
-              if (!actualError) {
-                expect(actualError).to.matchMongoSpec(expectedError);
-              } else {
-                const ae = Object.assign({}, actualError, { message: actualError.message });
-                expect(ae).to.matchMongoSpec(expectedError);
-              }
+              expect(actualError).to.exist;
+              expect(actualError)
+                .property('message')
+                .to.equal(expectedError.message);
             } else if (actualError) {
               throw actualError;
             }
