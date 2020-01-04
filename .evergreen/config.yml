@@ -1,6 +1,6 @@
 stepback: true
 command_type: system
-exec_timeout_secs: 500
+exec_timeout_secs: 900
 timeout:
   - command: shell.exec
     params:
