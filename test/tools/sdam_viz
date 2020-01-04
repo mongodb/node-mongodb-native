@@ -57,8 +57,16 @@ async function run() {
 
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-run().catch(error => console.log('Caught', error));
+let exitRequestCount = 0;
 process.on('SIGINT', async function() {
+  exitRequestCount++;
+  if (exitRequestCount > 3) {
+    console.log('force quitting...');
+    process.exit(1);
+  }
+
   workloadInterrupt = true;
   await client.close();
 });
+
+run().catch(error => console.log('Caught', error));
