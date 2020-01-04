@@ -366,7 +366,7 @@ describe('MongoClient', function() {
         var connections = client.topology.connections();
 
         for (var i = 0; i < connections.length; i++) {
-          test.equal(30000, connections[i].connectionTimeout);
+          test.equal(10000, connections[i].connectionTimeout);
           test.equal(360000, connections[i].socketTimeout);
         }
 
