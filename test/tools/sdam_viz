@@ -44,7 +44,7 @@ async function run() {
         const result = await client
           .db('test')
           .collection('test')
-          .find({})
+          .find({}, { socketTimeout: 2000 })
           .limit(1)
           .toArray();
         print(`${chalk.yellow('workload')} find completed: ${JSON.stringify(result)}`);
