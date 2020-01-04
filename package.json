@@ -24,6 +24,7 @@
     "bson-ext": "^2.0.0"
   },
   "dependencies": {
+    "bl": "^2.2.0",
     "bson": "^1.1.1",
     "denque": "^1.4.1",
     "require_optional": "^1.0.1",
@@ -31,7 +32,6 @@
   },
   "devDependencies": {
     "bluebird": "3.5.0",
-    "bl": "^2.2.0",
     "chai": "^4.1.1",
     "chai-subset": "^1.6.0",
     "chalk": "^2.4.2",
