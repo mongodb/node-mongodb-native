@@ -38,4 +38,34 @@ describe('Connection', function() {
       }
     );
   });
+
+  it('should destroy streams which time out', function(done) {
+    server.setMessageHandler(request => {
+      const doc = request.document;
+      if (doc.ismaster) {
+        request.reply(mock.DEFAULT_ISMASTER_36);
+      }
+
+      // blackhole all other requests
+    });
+
+    connect(
+      Object.assign({ bson: new BSON(), connectionType: Connection }, server.address()),
+      (err, conn) => {
+        expect(err).to.not.exist;
+        expect(conn).to.exist;
+
+        conn.command('$admin.cmd', { ping: 1 }, { socketTimeout: 50 }, (err, result) => {
+          expect(err).to.exist;
+          expect(result).to.not.exist;
+
+          expect(conn)
+            .property('stream')
+            .property('destroyed').to.be.true;
+
+          done();
+        });
+      }
+    );
+  });
 });
