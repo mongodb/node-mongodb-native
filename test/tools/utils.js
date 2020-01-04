@@ -3,6 +3,7 @@
 const Logger = require('../../lib/core').Logger;
 const deprecateOptions = require('../../lib/utils').deprecateOptions;
 const arrayStrictEqual = require('../../lib/core/utils').arrayStrictEqual;
+const errorStrictEqual = require('../../lib/core/utils').errorStrictEqual;
 const chalk = require('chalk');
 const chai = require('chai');
 const expect = chai.expect;
@@ -59,7 +60,7 @@ ClassWithUndefinedLogger.prototype.getLogger = function() {
 
 function diff(lhs, rhs, fields, comparator) {
   return fields.reduce((diff, field) => {
-    if (lhs[field] == null || rhs[field] == null) {
+    if ((lhs[field] == null || rhs[field] == null) && field !== 'error') {
       return diff;
     }
 
@@ -88,6 +89,7 @@ function serverDescriptionDiff(lhs, rhs) {
   ];
 
   return diff(lhs, rhs, simpleFields, (x, y) => x === y)
+    .concat(diff(lhs, rhs, ['error'], (x, y) => errorStrictEqual(x, y)))
     .concat(diff(lhs, rhs, arrayFields, (x, y) => arrayStrictEqual(x, y)))
     .concat(diff(lhs, rhs, objectIdFields, (x, y) => x.equals(y)))
     .join(',\n');
