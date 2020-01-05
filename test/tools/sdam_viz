@@ -24,7 +24,6 @@ const client = new MongoClient(uri, {
   useUnifiedTopology: !argv.legacy
 });
 
-let workloadInterrupt = false;
 async function run() {
   print(
     `connecting to: ${chalk.bold(uri)} using ${chalk.bold(
@@ -36,26 +35,37 @@ async function run() {
   await client.connect();
 
   if (argv.workload) {
-    while (!workloadInterrupt) {
-      await wait(2000);
-
-      try {
-        print(`${chalk.yellow('workload')} issuing find...`);
-        const result = await client
-          .db('test')
-          .collection('test')
-          .find({}, { socketTimeout: 2000 })
-          .limit(1)
-          .toArray();
-        print(`${chalk.yellow('workload')} find completed: ${JSON.stringify(result)}`);
-      } catch (e) {
-        print(`${chalk.yellow('workload')} find failed: ${e.message}`);
-      }
-    }
+    scheduleWorkload(client);
   }
 }
 
-const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+let workloadTimer;
+let workloadCounter = 0;
+let workloadInterrupt = false;
+async function scheduleWorkload(client) {
+  if (!workloadInterrupt) {
+    // immediately reschedule work
+    workloadTimer = setTimeout(() => scheduleWorkload(client), 7000);
+  }
+
+  const currentWorkload = workloadCounter++;
+
+  try {
+    print(`${chalk.yellow(`workload#${currentWorkload}`)} issuing find...`);
+    const result = await client
+      .db('test')
+      .collection('test')
+      .find({}, { socketTimeout: 2000 })
+      .limit(1)
+      .toArray();
+
+    print(
+      `${chalk.yellow(`workload#${currentWorkload}`)} find completed: ${JSON.stringify(result)}`
+    );
+  } catch (e) {
+    print(`${chalk.yellow(`workload#${currentWorkload}`)} find failed: ${e.message}`);
+  }
+}
 
 let exitRequestCount = 0;
 process.on('SIGINT', async function() {
@@ -66,6 +76,7 @@ process.on('SIGINT', async function() {
   }
 
   workloadInterrupt = true;
+  clearTimeout(workloadTimer);
   await client.close();
 });
 
