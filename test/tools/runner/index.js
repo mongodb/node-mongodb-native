@@ -98,3 +98,8 @@ after(() => mock.cleanup());
 require('./plugins/deferred');
 require('./plugins/session_leak_checker');
 require('./plugins/client_leak_checker');
+
+// configure mocha and chai
+require('mocha-sinon');
+const chai = require('chai');
+chai.use(require('sinon-chai'));
