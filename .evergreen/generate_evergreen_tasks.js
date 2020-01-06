@@ -81,7 +81,8 @@ const OPERATING_SYSTEMS = [
     display_name: 'Ubuntu 16.04',
     run_on: 'ubuntu1604-test',
     mongoVersion: '>=3.2',
-    clientEncryption: true
+    clientEncryption: true,
+    nodeVersions: ['dubnium', 'carbon', 'boron']
   },
   {
     name: 'ubuntu1604-arm64-small',

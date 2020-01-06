@@ -1106,13 +1106,6 @@ buildvariants:
       NODE_LTS_NAME: boron
       CLIENT_ENCRYPTION: true
     tasks: *ref_3
-  - name: ubuntu-16.04-argon
-    display_name: Ubuntu 16.04 Node Argon
-    run_on: ubuntu1604-test
-    expansions:
-      NODE_LTS_NAME: argon
-      CLIENT_ENCRYPTION: true
-    tasks: *ref_3
   - name: ubuntu1604-arm64-small-dubnium
     display_name: Ubuntu 16.04 (ARM64) Node Dubnium
     run_on: ubuntu1604-arm64-small
