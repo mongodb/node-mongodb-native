@@ -13,6 +13,7 @@ class NativeConfiguration {
     this.clientSideEncryption = context.clientSideEncryption;
     this.options = Object.assign(
       {
+        auth: parsedURI.auth,
         hosts: parsedURI.hosts,
         host: parsedURI.hosts[0] ? parsedURI.hosts[0].host : 'localhost',
         port: parsedURI.hosts[0] ? parsedURI.hosts[0].port : 27017,
@@ -20,6 +21,15 @@ class NativeConfiguration {
       },
       parsedURI.options
     );
+
+    const clientOptions = parsedURI.options;
+    if (clientOptions) {
+      if (clientOptions.caseTranslate) {
+        delete clientOptions.caseTranslate;
+      }
+
+      this.clientOptions = Object.freeze(clientOptions);
+    }
 
     this.mongo = this.require = require('../../..');
     this.writeConcern = function() {
@@ -57,6 +67,8 @@ class NativeConfiguration {
   }
 
   newClient(dbOptions, serverOptions) {
+    serverOptions = Object.assign({}, serverOptions, this.clientOptions);
+
     // support MongoClient contructor form (url, options) for `newClient`
     if (typeof dbOptions === 'string') {
       return new MongoClient(
@@ -85,15 +97,25 @@ class NativeConfiguration {
       Object.assign(dbOptions, { replicaSet: this.options.replicaSet, auto_reconnect: false });
     }
 
-    const connectionString = url.format({
+    const urlOptions = {
       protocol: 'mongodb',
       slashes: true,
       hostname: dbHost,
       port: dbPort,
       query: dbOptions,
       pathname: '/'
-    });
+    };
 
+    if (this.options.auth) {
+      let authSection = this.options.auth.username;
+      if (this.options.auth.password) {
+        authSection = `${authSection}:${this.options.auth.password}`;
+      }
+
+      urlOptions.auth = authSection;
+    }
+
+    const connectionString = url.format(urlOptions);
     return new MongoClient(connectionString, serverOptions);
   }
 
