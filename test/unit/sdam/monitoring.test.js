@@ -59,6 +59,12 @@ describe('monitoring', function() {
   });
 
   it('should recover on error during initial connect', function(done) {
+    // This test should take ~1s because initial server selection fails and an immediate check
+    // is requested. If the behavior of the immediate check is broken, the test will take ~10s
+    // to complete. We want to ensure validation of the immediate check behavior, and therefore
+    // hardcode the test timeout to 2s.
+    this.timeout(2000);
+
     let acceptConnections = false;
     mockServer.setMessageHandler(request => {
       if (!acceptConnections) {

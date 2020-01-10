@@ -180,7 +180,7 @@ describe('SCRAM-SHA-256 auth', function() {
         },
         authSource: this.configuration.db,
         authMechanism: 'SCRAM-SHA-1',
-        serverSelectionTimeoutMS: 2000
+        serverSelectionTimeoutMS: 100
       };
 
       return withClient(
@@ -204,7 +204,7 @@ describe('SCRAM-SHA-256 auth', function() {
           password: 'pencil'
         },
         authSource: 'admin',
-        serverSelectionTimeoutMS: 2000
+        serverSelectionTimeoutMS: 100
       };
 
       const badPasswordOptions = {
@@ -213,7 +213,7 @@ describe('SCRAM-SHA-256 auth', function() {
           password: 'pencil'
         },
         authSource: 'admin',
-        serverSelectionTimeoutMS: 2000
+        serverSelectionTimeoutMS: 100
       };
 
       const getErrorMsg = options =>

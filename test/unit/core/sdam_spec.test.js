@@ -39,6 +39,7 @@ describe('Server Discovery and Monitoring (spec)', function() {
   before(() => {
     serverConnect = sinon.stub(Server.prototype, 'connect').callsFake(function() {
       this.s.state = 'connected';
+      this.emit('connect');
     });
   });
 
@@ -157,6 +158,17 @@ function executeSDAMTest(testData, testDone) {
     // create the topology
     const topology = new Topology(parsedUri.hosts, parsedUri.options);
 
+    // Each test will attempt to connect by doing server selection. We want to make the first
+    // call to `selectServers` call a fake, and then immediately restore the original behavior.
+    let topologySelectServers = sinon
+      .stub(Topology.prototype, 'selectServer')
+      .callsFake(function(selector, options, callback) {
+        topologySelectServers.restore();
+
+        const fakeServer = { s: { state: 'connected' }, removeListener: () => {} };
+        callback(undefined, fakeServer);
+      });
+
     // listen for SDAM monitoring events
     let events = [];
     [
@@ -173,9 +185,6 @@ function executeSDAMTest(testData, testDone) {
       topology.on(eventName, event => events.push(event));
     });
 
-    // connect the topology
-    topology.connect(testData.uri);
-
     function done(err) {
       topology.close(e => testDone(e || err));
     }
@@ -185,72 +194,77 @@ function executeSDAMTest(testData, testDone) {
       throw err;
     };
 
-    testData.phases.forEach(phase => {
-      const incompatibilityExpected = phase.outcome ? !phase.outcome.comptabile : false;
-      if (incompatibilityExpected) {
-        topology.on('error', incompatabilityHandler);
-      }
+    // connect the topology
+    topology.connect(testData.uri, err => {
+      expect(err).to.not.exist;
 
-      // simulate each ismaster response
-      phase.responses.forEach(response =>
-        topology.serverUpdateHandler(new ServerDescription(response[0], response[1]))
-      );
-
-      // then verify the resulting outcome
-      const description = topology.description;
-      Object.keys(phase.outcome).forEach(key => {
-        const outcomeValue = phase.outcome[key];
-        const translatedKey = translateOutcomeKey(key);
-
-        if (key === 'servers') {
-          expect(description).to.include.keys(translatedKey);
-          const expectedServers = outcomeValue;
-          const actualServers = description[translatedKey];
-
-          Object.keys(expectedServers).forEach(serverName => {
-            expect(actualServers).to.include.keys(serverName);
-            const expectedServer = normalizeServerDescription(expectedServers[serverName]);
-            const omittedFields = findOmittedFields(expectedServer);
-
-            const actualServer = actualServers.get(serverName);
-            expect(actualServer).to.deep.include(expectedServer);
-
-            if (omittedFields.length) {
-              expect(actualServer).to.not.have.all.keys(omittedFields);
-            }
-          });
-
-          return;
+      testData.phases.forEach(phase => {
+        const incompatibilityExpected = phase.outcome ? !phase.outcome.comptabile : false;
+        if (incompatibilityExpected) {
+          topology.on('error', incompatabilityHandler);
         }
 
-        if (key === 'events') {
-          const expectedEvents = convertOutcomeEvents(outcomeValue);
-          expect(events).to.have.length(expectedEvents.length);
-          for (let i = 0; i < events.length; ++i) {
-            const expectedEvent = expectedEvents[i];
-            const actualEvent = cloneForCompare(events[i]);
-            expect(actualEvent).to.matchMongoSpec(expectedEvent);
+        // simulate each ismaster response
+        phase.responses.forEach(response =>
+          topology.serverUpdateHandler(new ServerDescription(response[0], response[1]))
+        );
+
+        // then verify the resulting outcome
+        const description = topology.description;
+        Object.keys(phase.outcome).forEach(key => {
+          const outcomeValue = phase.outcome[key];
+          const translatedKey = translateOutcomeKey(key);
+
+          if (key === 'servers') {
+            expect(description).to.include.keys(translatedKey);
+            const expectedServers = outcomeValue;
+            const actualServers = description[translatedKey];
+
+            Object.keys(expectedServers).forEach(serverName => {
+              expect(actualServers).to.include.keys(serverName);
+              const expectedServer = normalizeServerDescription(expectedServers[serverName]);
+              const omittedFields = findOmittedFields(expectedServer);
+
+              const actualServer = actualServers.get(serverName);
+              expect(actualServer).to.deep.include(expectedServer);
+
+              if (omittedFields.length) {
+                expect(actualServer).to.not.have.all.keys(omittedFields);
+              }
+            });
+
+            return;
           }
 
-          return;
-        }
+          if (key === 'events') {
+            const expectedEvents = convertOutcomeEvents(outcomeValue);
+            expect(events).to.have.length(expectedEvents.length);
+            for (let i = 0; i < events.length; ++i) {
+              const expectedEvent = expectedEvents[i];
+              const actualEvent = cloneForCompare(events[i]);
+              expect(actualEvent).to.matchMongoSpec(expectedEvent);
+            }
 
-        if (key === 'compatible' || key === 'setName') {
-          expect(topology.description[key]).to.equal(outcomeValue);
-          return;
-        }
+            return;
+          }
 
-        expect(description).to.include.keys(translatedKey);
-        expect(description[translatedKey]).to.eql(outcomeValue);
+          if (key === 'compatible' || key === 'setName') {
+            expect(topology.description[key]).to.equal(outcomeValue);
+            return;
+          }
+
+          expect(description).to.include.keys(translatedKey);
+          expect(description[translatedKey]).to.eql(outcomeValue);
+        });
+
+        // remove error handler
+        topology.removeListener('error', incompatabilityHandler);
+
+        // reset the captured events for each phase
+        events = [];
       });
 
-      // remove error handler
-      topology.removeListener('error', incompatabilityHandler);
-
-      // reset the captured events for each phase
-      events = [];
+      topology.close(done);
     });
-
-    topology.close(done);
   });
 }
