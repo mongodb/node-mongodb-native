@@ -22,7 +22,7 @@ describe('Client metadata tests', function() {
         }
       );
 
-      expect(server.clientInfo.application.name).to.equal('My application name');
+      expect(server.clientMetadata.application.name).to.equal('My application name');
       done();
     }
   });
@@ -53,9 +53,8 @@ describe('Client metadata tests', function() {
 
         server.on('connect', function(_server) {
           _server.s.replicaSetState.allServers().forEach(function(x) {
-            // console.dir(x.clientInfo)
-            expect(x.clientInfo.application.name).to.equal('My application name');
-            expect(x.clientInfo.platform.split('mongodb-core').length).to.equal(2);
+            expect(x.clientMetadata.application.name).to.equal('My application name');
+            expect(x.clientMetadata.platform.split('mongodb-core').length).to.equal(2);
           });
 
           _server.destroy(done);
@@ -86,9 +85,8 @@ describe('Client metadata tests', function() {
       // Add event listeners
       _server.once('connect', function(server) {
         server.connectedProxies.forEach(function(x) {
-          // console.dir(x.clientInfo)
-          expect(x.clientInfo.application.name).to.equal('My application name');
-          expect(x.clientInfo.platform.split('mongodb-core').length).to.equal(2);
+          expect(x.clientMetadata.application.name).to.equal('My application name');
+          expect(x.clientMetadata.platform.split('mongodb-core').length).to.equal(2);
         });
 
         server.destroy(done);

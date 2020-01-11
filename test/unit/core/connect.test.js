@@ -100,35 +100,6 @@ describe('Connect Tests', function() {
     });
   });
 
-  it(
-    'should report the correct metadata for unified topology',
-    { requires: { unifiedTopology: true, topology: ['single'] } },
-    function(done) {
-      let ismaster;
-      test.server.setMessageHandler(request => {
-        const doc = request.document;
-        const $clusterTime = genClusterTime(Date.now());
-        if (doc.ismaster) {
-          ismaster = doc;
-          request.reply(
-            Object.assign({}, mock.DEFAULT_ISMASTER, {
-              $clusterTime,
-              arbiterOnly: true
-            })
-          );
-        }
-      });
-
-      const topology = this.configuration.newTopology(test.connectOptions);
-      topology.connect(test.connectOptions, err => {
-        expect(err).to.not.exist;
-        const platform = ismaster.client.platform;
-        expect(platform).to.match(/unified/);
-        topology.close(done);
-      });
-    }
-  );
-
   it('should allow a cancellaton token', function(done) {
     const cancellationToken = new EventEmitter();
     setTimeout(() => cancellationToken.emit('cancel'), 500);

@@ -642,7 +642,7 @@ describe('MongoClient', function() {
       const client = configuration.newClient(url);
       client.connect(function(err, client) {
         test.equal(null, err);
-        test.equal('hello world', client.topology.clientInfo.application.name);
+        test.equal('hello world', client.topology.clientMetadata.application.name);
 
         client.close(done);
       });
@@ -664,7 +664,7 @@ describe('MongoClient', function() {
       const client = configuration.newClient(url, { appname: 'hello world' });
       client.connect(err => {
         test.equal(null, err);
-        test.equal('hello world', client.topology.clientInfo.application.name);
+        test.equal('hello world', client.topology.clientMetadata.application.name);
 
         client.close(done);
       });
