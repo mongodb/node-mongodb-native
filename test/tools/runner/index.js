@@ -103,3 +103,7 @@ require('./plugins/client_leak_checker');
 require('mocha-sinon');
 const chai = require('chai');
 chai.use(require('sinon-chai'));
+chai.use(require('../../functional/spec-runner/matcher').default);
+chai.config.includeStack = true;
+chai.config.showDiff = true;
+chai.config.truncateThreshold = 0;
