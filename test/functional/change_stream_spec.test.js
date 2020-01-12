@@ -48,7 +48,9 @@ describe('Change Stream Spec', function() {
 
             ctx.database = ctx.client.db(sDB);
             ctx.collection = ctx.database.collection(sColl);
-            ctx.client.on('commandStarted', e => _events.push(e));
+            ctx.client.on('commandStarted', e => {
+              if (e.commandName !== 'ismaster') _events.push(e);
+            });
           });
       });
 
@@ -124,7 +126,7 @@ describe('Change Stream Spec', function() {
 
       if (result.success) {
         expect(value).to.have.a.lengthOf(result.success.length);
-        assertEquality(value, result.success);
+        expect(value).to.matchMongoSpec(result.success);
       }
     };
   }
@@ -137,7 +139,7 @@ describe('Change Stream Spec', function() {
         throw err;
       }
 
-      assertEquality(err, result.error);
+      expect(err).to.matchMongoSpec(result.error);
     };
   }
 
@@ -154,7 +156,8 @@ describe('Change Stream Spec', function() {
               `Expected there to be an APM event at index ${idx}, but there was none`
             );
           }
-          assertEquality(events[idx], expected);
+
+          expect(events[idx]).to.matchMongoSpec(expected);
         });
     };
   }
@@ -253,42 +256,5 @@ describe('Change Stream Spec', function() {
       }
     }
     return () => target[command].apply(target, args);
-  }
-
-  function assertEquality(actual, expected) {
-    try {
-      _assertEquality(actual, expected);
-    } catch (e) {
-      console.dir(actual, { depth: 999 });
-      console.dir(expected, { depth: 999 });
-      throw e;
-    }
-  }
-
-  function _assertEquality(actual, expected) {
-    try {
-      if (expected === '42' || expected === 42) {
-        expect(actual).to.exist;
-        return;
-      }
-
-      const expectedType =
-        expected && expected.code ? 'error' : Array.isArray(expected) ? 'array' : typeof expected;
-      expect(actual).to.be.a(expectedType);
-
-      if (expected == null) {
-        expect(actual).to.not.exist;
-      } else if (Array.isArray(expected)) {
-        expected.forEach((ex, idx) => _assertEquality(actual[idx], ex));
-      } else if (typeof expected === 'object') {
-        for (let i in expected) {
-          _assertEquality(actual[i], expected[i]);
-        }
-      } else {
-        expect(actual).to.equal(expected);
-      }
-    } catch (e) {
-      throw e;
-    }
   }
 });
