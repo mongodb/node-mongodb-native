@@ -438,7 +438,7 @@ describe('Connection Pool', function() {
           .then(() => mainThread.finish())
           .catch(e => (actualError = e))
           .then(() => {
-            const actualEvents = poolEvents.filter(ev => ignoreEvents.indexOf(ev.type) < 0);
+            const actualEvents = poolEvents.filter(ev => ignoreEvents.indexOf(eventType(ev)) < 0);
 
             if (expectedError) {
               expect(actualError).to.exist;
@@ -451,6 +451,11 @@ describe('Connection Pool', function() {
 
             expectedEvents.forEach((expected, index) => {
               const actual = actualEvents[index];
+              if (expected.type) {
+                expect(actual.constructor.name).to.equal(`${expected.type}Event`);
+                delete expected.type;
+              }
+
               expect(actual).to.matchMongoSpec(expected);
             });
           });
