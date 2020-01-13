@@ -213,15 +213,21 @@ describe('ObjectID', function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
+        test.equal(null, err);
+
         var db = client.db(configuration.db);
         var collection = db.collection('shouldCorrectlyInsertWithObjectId');
         collection.insert({}, { w: 1 }, function(err) {
           test.equal(null, err);
+          const firstCompareDate = new Date();
+
           setTimeout(function() {
             collection.insert({}, { w: 1 }, function(err) {
               test.equal(null, err);
+              const secondCompareDate = new Date();
+
               collection.find().toArray(function(err, items) {
-                var compareDate = new Date();
+                test.equal(null, err);
 
                 // Date 1
                 var date1 = new Date();
@@ -231,15 +237,15 @@ describe('ObjectID', function() {
                 date2.setTime(items[1]._id.generationTime * 1000);
 
                 // Compare
-                test.equal(compareDate.getFullYear(), date1.getFullYear());
-                test.equal(compareDate.getDate(), date1.getDate());
-                test.equal(compareDate.getMonth(), date1.getMonth());
-                test.equal(compareDate.getHours(), date1.getHours());
+                test.equal(firstCompareDate.getFullYear(), date1.getFullYear());
+                test.equal(firstCompareDate.getDate(), date1.getDate());
+                test.equal(firstCompareDate.getMonth(), date1.getMonth());
+                test.equal(firstCompareDate.getHours(), date1.getHours());
 
-                test.equal(compareDate.getFullYear(), date2.getFullYear());
-                test.equal(compareDate.getDate(), date2.getDate());
-                test.equal(compareDate.getMonth(), date2.getMonth());
-                test.equal(compareDate.getHours(), date2.getHours());
+                test.equal(secondCompareDate.getFullYear(), date2.getFullYear());
+                test.equal(secondCompareDate.getDate(), date2.getDate());
+                test.equal(secondCompareDate.getMonth(), date2.getMonth());
+                test.equal(secondCompareDate.getHours(), date2.getHours());
                 // Let's close the db
                 client.close(done);
               });
