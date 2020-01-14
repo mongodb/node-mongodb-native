@@ -2,6 +2,42 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="3.5.0"></a>
+# [3.5.0](https://github.com/mongodb/node-mongodb-native/compare/v3.4.1...v3.5.0) (2020-01-14)
+
+
+### Bug Fixes
+
+* copy `ssl` option to pool connection options ([563ced6](https://github.com/mongodb/node-mongodb-native/commit/563ced6))
+* destroy connections marked as closed on checkIn / checkOut ([2bd17a6](https://github.com/mongodb/node-mongodb-native/commit/2bd17a6))
+* ensure sync errors are thrown, and don't callback twice ([cca5b49](https://github.com/mongodb/node-mongodb-native/commit/cca5b49))
+* ignore connection errors during pool destruction ([b8805dc](https://github.com/mongodb/node-mongodb-native/commit/b8805dc))
+* not all message payloads are arrays of Buffer ([e4df5f4](https://github.com/mongodb/node-mongodb-native/commit/e4df5f4))
+* recover on network error during initial connect ([a13dc68](https://github.com/mongodb/node-mongodb-native/commit/a13dc68))
+* remove servers with me mismatch in `updateRsFromPrimary` ([95a772e](https://github.com/mongodb/node-mongodb-native/commit/95a772e))
+* report the correct platform in client metadata ([35d0274](https://github.com/mongodb/node-mongodb-native/commit/35d0274))
+* reschedule monitoring before emitting heartbeat events ([7fcbeb5](https://github.com/mongodb/node-mongodb-native/commit/7fcbeb5))
+* socket timeout for handshake should be `connectTimeoutMS` ([c83af9a](https://github.com/mongodb/node-mongodb-native/commit/c83af9a))
+* timed out streams should be destroyed on `timeout` event ([5319ff9](https://github.com/mongodb/node-mongodb-native/commit/5319ff9))
+* use remote address for stream identifier ([f13c20b](https://github.com/mongodb/node-mongodb-native/commit/f13c20b))
+* used weighted RTT calculation for server selection ([d446be5](https://github.com/mongodb/node-mongodb-native/commit/d446be5))
+* **execute-operation:** don't swallow synchronous errors ([0a2d4e9](https://github.com/mongodb/node-mongodb-native/commit/0a2d4e9))
+* **gridfs:** make a copy of chunk before writing to server ([b4ec5b8](https://github.com/mongodb/node-mongodb-native/commit/b4ec5b8))
+
+
+### Features
+
+* add a `withConnection` helper to the connection pool ([d59dced](https://github.com/mongodb/node-mongodb-native/commit/d59dced))
+* include `connectionId` for APM with new CMAP connection pool ([9bd360c](https://github.com/mongodb/node-mongodb-native/commit/9bd360c))
+* integrate CMAP connection pool into unified topology ([9dd3939](https://github.com/mongodb/node-mongodb-native/commit/9dd3939))
+* introduce `MongoServerSelectionError` ([0cf7ec9](https://github.com/mongodb/node-mongodb-native/commit/0cf7ec9))
+* introduce a class for tracking stream specific attributes ([f6bf82c](https://github.com/mongodb/node-mongodb-native/commit/f6bf82c))
+* introduce a new `Monitor` type for server monitoring ([2bfe2a1](https://github.com/mongodb/node-mongodb-native/commit/2bfe2a1))
+* relay all CMAP events to MongoClient ([1aea4de](https://github.com/mongodb/node-mongodb-native/commit/1aea4de))
+* support socket timeouts on a per-connection level ([93e8ad0](https://github.com/mongodb/node-mongodb-native/commit/93e8ad0))
+
+
+
 <a name="3.4.1"></a>
 ## [3.4.1](https://github.com/mongodb/node-mongodb-native/compare/v3.4.0...v3.4.1) (2019-12-19)
 
