@@ -107,4 +107,4 @@ The unified topology completely removes the disconnect handler, in favor of the 
 
 The `joined`, `left`, `all`, and `fullsetup` events are no longer emitted by the unified topology, primarily
 because their behavior is duplicated by the pre-existing SDAM monitoring events: `topologyDescriptionChanged`
-and `serverDescriptionChanged`. Please refer to the documentation on [Topology Monitoring]({{<relref "reference/management/sdam-monitoring/index.md">}})
+and `serverDescriptionChanged`. Please refer to the documentation on [Topology Monitoring]({{<relref "reference/management/sdam-monitoring.md">}})
