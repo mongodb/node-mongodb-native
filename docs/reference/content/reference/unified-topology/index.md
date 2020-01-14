@@ -35,6 +35,13 @@ The unified topology no longer supports the following events:
 - `reconnect`
 - `reconnectFailed`
 - `attemptReconnect`
+- `joined`
+- `left`
+- `ping`
+- `ha`
+- `all`
+- `fullsetup`
+- `open`
 
 It also deprecates the following options passed into the `MongoClient`:
 - `autoReconnect`
@@ -95,3 +102,9 @@ The three topology types from the "native" layer (in `lib/topologies`) primarily
   - There is no collaboration with the server to ensure that queued write operations only happen one time. Imagine running an `updateOne` operation which is interrupted by a network error. The operation was successfully sent to the server, but the server response was lost during the interruption, which means the operation is placed in the callback store to be retried. At the same, another microservice allows a user to update the written data. Once the original client is reconnected to the server, it automatically rexecutes the operation and updates the _newer_ data with an _older_ value.
 
 The unified topology completely removes the disconnect handler, in favor of the more robust and consistent [Retryable Reads](https://github.com/mongodb/specifications/blob/master/source/retryable-reads/retryable-reads.rst) and [Retryable Writes](https://github.com/mongodb/specifications/blob/master/source/retryable-writes/retryable-writes.rst) features. Operations now will attempt execution in a server selection loop for up to `serverSelectionTimeoutMS` (default: 30s), and will retry the operation one time in the event of a [retryable error](https://github.com/mongodb/specifications/blob/master/source/retryable-writes/retryable-writes.rst#terms). All errors outside of this loop are returned to the user, since they know best what to do in these scenarios.
+
+### Deprecated monitoring events
+
+The `joined`, `left`, `all`, and `fullsetup` events are no longer emitted by the unified topology, primarily
+because their behavior is duplicated by the pre-existing SDAM monitoring events: `topologyDescriptionChanged`
+and `serverDescriptionChanged`. Please refer to the documentation on [Topology Monitoring]({{<relref "reference/management/sdam-monitoring/index.md">}})
