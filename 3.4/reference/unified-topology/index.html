@@ -2299,7 +2299,14 @@
 <p>The unified topology no longer supports the following events:
 - <code>reconnect</code>
 - <code>reconnectFailed</code>
-- <code>attemptReconnect</code></p>
+- <code>attemptReconnect</code>
+- <code>joined</code>
+- <code>left</code>
+- <code>ping</code>
+- <code>ha</code>
+- <code>all</code>
+- <code>fullsetup</code>
+- <code>open</code></p>
 
 <p>It also deprecates the following options passed into the <code>MongoClient</code>:
 - <code>autoReconnect</code>
@@ -2359,6 +2366,12 @@ await client.close();
 
 <p>The unified topology completely removes the disconnect handler, in favor of the more robust and consistent <a href="https://github.com/mongodb/specifications/blob/master/source/retryable-reads/retryable-reads.rst">Retryable Reads</a> and <a href="https://github.com/mongodb/specifications/blob/master/source/retryable-writes/retryable-writes.rst">Retryable Writes</a> features. Operations now will attempt execution in a server selection loop for up to <code>serverSelectionTimeoutMS</code> (default: 30s), and will retry the operation one time in the event of a <a href="https://github.com/mongodb/specifications/blob/master/source/retryable-writes/retryable-writes.rst#terms">retryable error</a>. All errors outside of this loop are returned to the user, since they know best what to do in these scenarios.</p>
 
+<h3 id="deprecated-monitoring-events">Deprecated monitoring events</h3>
+
+<p>The <code>joined</code>, <code>left</code>, <code>all</code>, and <code>fullsetup</code> events are no longer emitted by the unified topology, primarily
+because their behavior is duplicated by the pre-existing SDAM monitoring events: <code>topologyDescriptionChanged</code>
+and <code>serverDescriptionChanged</code>. Please refer to the documentation on <a href="/node-mongodb-native/3.4/reference/management/sdam-monitoring/">Topology Monitoring</a></p>
+
 
 
 
@@ -2402,6 +2415,7 @@ await client.close();
 </ul></li>
 <li><a href="#server-selection">Server Selection</a></li>
 <li><a href="#disconnecthandler">disconnectHandler</a></li>
+<li><a href="#deprecated-monitoring-events">Deprecated monitoring events</a></li>
 </ul></li>
 </ul></li>
 </ul>
