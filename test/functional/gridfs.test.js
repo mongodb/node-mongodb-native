@@ -1734,7 +1734,7 @@ describe('GridFS', function() {
   /**
    * @ignore
    */
-  it('shouldWriteFileWithMongofilesAndReadWithNodeJS', {
+  it.skip('shouldWriteFileWithMongofilesAndReadWithNodeJS', {
     metadata: { requires: { topology: 'single' } },
 
     // The actual test we wish to run
