@@ -158,13 +158,13 @@ describe('Connection Pool', function() {
 
       const callback = err => {
         expect(err).to.exist;
-        expect(err).to.match(/Timed out/);
+        expect(err).to.match(/closed/);
         pool.close(done);
       };
 
       pool.withConnection((err, conn, cb) => {
         expect(err).to.exist;
-        expect(err).to.match(/Timed out/);
+        expect(err).to.match(/closed/);
         cb(err);
       }, callback);
     });
