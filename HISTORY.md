@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="3.5.1"></a>
+## [3.5.1](https://github.com/mongodb/node-mongodb-native/compare/v3.5.0...v3.5.1) (2020-01-17)
+
+
+### Bug Fixes
+
+* **cmap:** accept all node TLS options as pool options ([5995d1d](https://github.com/mongodb/node-mongodb-native/commit/5995d1d))
+* **cmap:** error wait queue members on failed connection creation ([d13b153](https://github.com/mongodb/node-mongodb-native/commit/d13b153))
+* **connect:** listen to `secureConnect` for tls connections ([f8bdb8d](https://github.com/mongodb/node-mongodb-native/commit/f8bdb8d))
+* **transactions:** use options helper to resolve read preference ([9698a76](https://github.com/mongodb/node-mongodb-native/commit/9698a76))
+* **uri_parser:** TLS uri variants imply `ssl=true` ([c8d182e](https://github.com/mongodb/node-mongodb-native/commit/c8d182e))
+
+
+
 <a name="3.5.0"></a>
 # [3.5.0](https://github.com/mongodb/node-mongodb-native/compare/v3.4.1...v3.5.0) (2020-01-14)
 
