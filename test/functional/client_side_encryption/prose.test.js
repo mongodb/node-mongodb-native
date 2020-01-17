@@ -288,7 +288,7 @@ describe('Client Side Encryption Prose Tests', function() {
             algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic'
           })
         )
-        .then(encrypted => {
+        .then(encrypted =>
           this.clientEncrypted
             .db(dataDbName)
             .collection(dataCollName)
@@ -300,8 +300,8 @@ describe('Client Side Encryption Prose Tests', function() {
               err => {
                 expect(err).to.be.an.instanceOf(Error);
               }
-            );
-        });
+            )
+        );
     });
   });
 
