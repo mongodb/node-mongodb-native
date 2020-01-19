@@ -113,4 +113,84 @@ describe('Topology (unit)', function() {
       });
     });
   });
+
+  describe('error handling', function() {
+    let mockServer;
+    beforeEach(() => mock.createServer().then(server => (mockServer = server)));
+    afterEach(() => mock.cleanup());
+
+    it('should set server to unknown and reset pool on `node is recovering` error', function(done) {
+      mockServer.setMessageHandler(request => {
+        const doc = request.document;
+        if (doc.ismaster) {
+          request.reply(Object.assign({}, mock.DEFAULT_ISMASTER, { maxWireVersion: 9 }));
+        } else if (doc.insert) {
+          request.reply({ ok: 0, message: 'node is recovering', code: 11600 });
+        } else {
+          request.reply({ ok: 1 });
+        }
+      });
+
+      const topology = new Topology(mockServer.uri());
+      topology.connect(err => {
+        expect(err).to.not.exist;
+
+        topology.selectServer('primary', (err, server) => {
+          expect(err).to.not.exist;
+          this.defer(() => topology.close());
+
+          let serverError;
+          server.on('error', err => (serverError = err));
+
+          let poolCleared = false;
+          topology.on('connectionPoolCleared', () => (poolCleared = true));
+
+          server.command('test.test', { insert: { a: 42 } }, (err, result) => {
+            expect(result).to.not.exist;
+            expect(err).to.exist;
+            expect(err).to.eql(serverError);
+            expect(poolCleared).to.be.true;
+            done();
+          });
+        });
+      });
+    });
+
+    it('should set server to unknown and NOT reset pool on stepdown errors', function(done) {
+      mockServer.setMessageHandler(request => {
+        const doc = request.document;
+        if (doc.ismaster) {
+          request.reply(Object.assign({}, mock.DEFAULT_ISMASTER, { maxWireVersion: 9 }));
+        } else if (doc.insert) {
+          request.reply({ ok: 0, message: 'not master' });
+        } else {
+          request.reply({ ok: 1 });
+        }
+      });
+
+      const topology = new Topology(mockServer.uri());
+      topology.connect(err => {
+        expect(err).to.not.exist;
+
+        topology.selectServer('primary', (err, server) => {
+          expect(err).to.not.exist;
+          this.defer(() => topology.close());
+
+          let serverError;
+          server.on('error', err => (serverError = err));
+
+          let poolCleared = false;
+          topology.on('connectionPoolCleared', () => (poolCleared = true));
+
+          server.command('test.test', { insert: { a: 42 } }, (err, result) => {
+            expect(result).to.not.exist;
+            expect(err).to.exist;
+            expect(err).to.eql(serverError);
+            expect(poolCleared).to.be.false;
+            done();
+          });
+        });
+      });
+    });
+  });
 });
