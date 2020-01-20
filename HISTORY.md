@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="3.5.2"></a>
+## [3.5.2](https://github.com/mongodb/node-mongodb-native/compare/v3.5.1...v3.5.2) (2020-01-20)
+
+
+### Bug Fixes
+
+* properly handle err messages in MongoDB 2.6 servers ([0f4ab38](https://github.com/mongodb/node-mongodb-native/commit/0f4ab38))
+* **topology:** always emit SDAM unrecoverable errors ([57f158f](https://github.com/mongodb/node-mongodb-native/commit/57f158f))
+
+
+
 <a name="3.5.1"></a>
 ## [3.5.1](https://github.com/mongodb/node-mongodb-native/compare/v3.5.0...v3.5.1) (2020-01-17)
 
