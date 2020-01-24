@@ -7,6 +7,14 @@ title = "Upgrade Guide"
   pre = "<i class='fa fa-cog'></i>"
 +++
 
+# What's new in 3.5
+
+- CMAP-compliant connection pool
+- Dedicated monitoring connection
+- Server selection error improvements
+
+[Full 3.5 Changes Here](https://github.com/mongodb/node-mongodb-native/releases/tag/v3.5.0)
+
 # What's new in 3.4
 
 - MongoDB Client Side Field Level Encryption
