@@ -192,5 +192,39 @@ describe('Topology (unit)', function() {
         });
       });
     });
+
+    it('should set server to unknown on non-timeout network error', function(done) {
+      mockServer.setMessageHandler(request => {
+        const doc = request.document;
+        if (doc.ismaster) {
+          request.reply(Object.assign({}, mock.DEFAULT_ISMASTER, { maxWireVersion: 9 }));
+        } else if (doc.insert) {
+          request.connection.destroy();
+        } else {
+          request.reply({ ok: 1 });
+        }
+      });
+
+      const topology = new Topology(mockServer.uri());
+      topology.connect(err => {
+        expect(err).to.not.exist;
+
+        topology.selectServer('primary', (err, server) => {
+          expect(err).to.not.exist;
+          this.defer(() => topology.close());
+
+          let serverError;
+          server.on('error', err => (serverError = err));
+
+          server.command('test.test', { insert: { a: 42 } }, (err, result) => {
+            expect(result).to.not.exist;
+            expect(err).to.exist;
+            expect(err).to.eql(serverError);
+            expect(server.description.type).to.equal('Unknown');
+            done();
+          });
+        });
+      });
+    });
   });
 });
