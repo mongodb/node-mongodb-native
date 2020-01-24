@@ -2570,7 +2570,8 @@
 <dd>
     
     <div class="description">
-        <p>The current readConcern of the collection. If not explicitly defined for<br>this collection, will be inherited from the parent DB</p>
+        <p>The current readConcern of the collection. If not explicitly defined for<br>
+this collection, will be inherited from the parent DB</p>
     </div>
     
     
@@ -2615,7 +2616,8 @@
 <dd>
     
     <div class="description">
-        <p>The current readPreference of the collection. If not explicitly defined for<br>this collection, will be inherited from the parent DB</p>
+        <p>The current readPreference of the collection. If not explicitly defined for<br>
+this collection, will be inherited from the parent DB</p>
     </div>
     
     
@@ -2660,7 +2662,8 @@
 <dd>
     
     <div class="description">
-        <p>The current writeConcern of the collection. If not explicitly defined for<br>this collection, will be inherited from the parent DB</p>
+        <p>The current writeConcern of the collection. If not explicitly defined for<br>
+this collection, will be inherited from the parent DB</p>
     </div>
     
     
@@ -3575,14 +3578,16 @@
     <div class="description">
         <p>Perform a bulkWrite operation without a fluent API</p>
 <p>Legal operation types are</p>
-<p> { insertOne: { document: { a: 1 } } }</p>
-<p> { updateOne: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }</p>
-<p> { updateMany: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }</p>
-<p> { updateMany: { filter: {}, update: {$set: {&quot;a.$[i].x&quot;: 5}}, arrayFilters: [{ &quot;i.x&quot;: 5 }]} }</p>
-<p> { deleteOne: { filter: {c:1} } }</p>
-<p> { deleteMany: { filter: {c:1} } }</p>
-<p> { replaceOne: { filter: {c:3}, replacement: {c:4}, upsert:true}}</p>
-<p>If documents passed in do not contain the <strong>_id</strong> field,<br>one will be added to each of the documents missing it by the driver, mutating the document. This behavior<br>can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
+<p>{ insertOne: { document: { a: 1 } } }</p>
+<p>{ updateOne: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }</p>
+<p>{ updateMany: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }</p>
+<p>{ updateMany: { filter: {}, update: {$set: {&quot;a.$[i].x&quot;: 5}}, arrayFilters: [{ &quot;i.x&quot;: 5 }]} }</p>
+<p>{ deleteOne: { filter: {c:1} } }</p>
+<p>{ deleteMany: { filter: {c:1} } }</p>
+<p>{ replaceOne: { filter: {c:3}, replacement: {c:4}, upsert:true}}</p>
+<p>If documents passed in do not contain the <strong>_id</strong> field,<br>
+one will be added to each of the documents missing it by the driver, mutating the document. This behavior<br>
+can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
     </div>
     
 
@@ -4152,7 +4157,9 @@ Promise if no callback passed
     
     <div class="description">
         <p>An estimated count of matching documents in the db to a query.</p>
-<p><strong>NOTE:</strong> This method has been deprecated, since it does not provide an accurate count of the documents<br>in a collection. To obtain an accurate count of documents in the collection, use <a href="Collection.html#countDocuments"><code>countDocuments</code></a>.<br>To obtain an estimated count of all documents in the collection, use <a href="Collection.html#estimatedDocumentCount"><code>estimatedDocumentCount</code></a>.</p>
+<p><strong>NOTE:</strong> This method has been deprecated, since it does not provide an accurate count of the documents<br>
+in a collection. To obtain an accurate count of documents in the collection, use <a href="Collection.html#countDocuments"><code>countDocuments</code></a>.<br>
+To obtain an estimated count of all documents in the collection, use <a href="Collection.html#estimatedDocumentCount"><code>estimatedDocumentCount</code></a>.</p>
     </div>
     
 
@@ -4597,7 +4604,10 @@ Promise if no callback passed
     
     
     <div class="description">
-        <p>Gets the number of documents matching the filter.<br>For a fast count of the total documents in a collection see <a href="Collection.html#estimatedDocumentCount"><code>estimatedDocumentCount</code></a>.<br><strong>Note</strong>: When migrating from <a href="Collection.html#count"><code>count</code></a> to <a href="Collection.html#countDocuments"><code>countDocuments</code></a><br>the following query operators must be replaced:</p>
+        <p>Gets the number of documents matching the filter.<br>
+For a fast count of the total documents in a collection see <a href="Collection.html#estimatedDocumentCount"><code>estimatedDocumentCount</code></a>.<br>
+<strong>Note</strong>: When migrating from <a href="Collection.html#count"><code>count</code></a> to <a href="Collection.html#countDocuments"><code>countDocuments</code></a><br>
+the following query operators must be replaced:</p>
 <table>
 <thead>
 <tr>
@@ -5724,11 +5734,16 @@ Promise if no callback passed
     
     <pre class="prettyprint"><code><p>const collection = client.db('foo').collection('bar');</p>
 <p>await collection.createIndex({ a: 1, b: -1 });</p>
-<p>// Alternate syntax for { c: 1, d: -1 } that ensures order of indexes<br>await collection.createIndex([ [c, 1], [d, -1] ]);</p>
-<p>// Equivalent to { e: 1 }<br>await collection.createIndex('e');</p>
-<p>// Equivalent to { f: 1, g: 1 }<br>await collection.createIndex(['f', 'g'])</p>
-<p>// Equivalent to { h: 1, i: -1 }<br>await collection.createIndex([ { h: 1 }, { i: -1 } ]);</p>
-<p>// Equivalent to { j: 1, k: -1, l: 2d }<br>await collection.createIndex(['j', ['k', -1], { l: '2d' }])</p></code></pre>
+<p>// Alternate syntax for { c: 1, d: -1 } that ensures order of indexes<br>
+await collection.createIndex([ [c, 1], [d, -1] ]);</p>
+<p>// Equivalent to { e: 1 }<br>
+await collection.createIndex('e');</p>
+<p>// Equivalent to { f: 1, g: 1 }<br>
+await collection.createIndex(['f', 'g'])</p>
+<p>// Equivalent to { h: 1, i: -1 }<br>
+await collection.createIndex([ { h: 1 }, { i: -1 } ]);</p>
+<p>// Equivalent to { j: 1, k: -1, l: 2d }<br>
+await collection.createIndex(['j', ['k', -1], { l: '2d' }])</p></code></pre>
     
 
     
@@ -5756,8 +5771,11 @@ Promise if no callback passed
     
     
     <div class="description">
-        <p>Creates multiple indexes in the collection, this method is only supported for<br>MongoDB 2.6 or higher. Earlier version of MongoDB will throw a command not supported<br>error.</p>
-<p><strong>Note</strong>: Unlike <a href="Collection.html#createIndex"><code>createIndex</code></a>, this function takes in raw index specifications.<br>Index specifications are defined <a href="http://docs.mongodb.org/manual/reference/command/createIndexes/">here</a>.</p>
+        <p>Creates multiple indexes in the collection, this method is only supported for<br>
+MongoDB 2.6 or higher. Earlier version of MongoDB will throw a command not supported<br>
+error.</p>
+<p><strong>Note</strong>: Unlike <a href="Collection.html#createIndex"><code>createIndex</code></a>, this function takes in raw index specifications.<br>
+Index specifications are defined <a href="http://docs.mongodb.org/manual/reference/command/createIndexes/">here</a>.</p>
     </div>
     
 
@@ -5979,7 +5997,22 @@ Promise if no callback passed
         
 
     
-    <pre class="prettyprint"><code><p>const collection = client.db('foo').collection('bar');<br>await collection.createIndexes([<br>  // Simple index on field fizz<br>  {<br>    key: { fizz: 1 },<br>  }<br>  // wildcard index<br>  {<br>    key: { '$**': 1 }<br>  },<br>  // named index on darmok and jalad<br>  {<br>    key: { darmok: 1, jalad: -1 }<br>    name: 'tanagra'<br>  }<br>]);</p></code></pre>
+    <pre class="prettyprint"><code><p>const collection = client.db('foo').collection('bar');<br>
+await collection.createIndexes([<br>
+// Simple index on field fizz<br>
+{<br>
+key: { fizz: 1 },<br>
+}<br>
+// wildcard index<br>
+{<br>
+key: { '$**': 1 }<br>
+},<br>
+// named index on darmok and jalad<br>
+{<br>
+key: { darmok: 1, jalad: -1 }<br>
+name: 'tanagra'<br>
+}<br>
+]);</p></code></pre>
     
 
     
@@ -16788,7 +16821,9 @@ Promise if no callback passed
     
     
     <div class="description">
-        <p>Inserts a single document or a an array of documents into MongoDB. If documents passed in do not contain the <strong>_id</strong> field,<br>one will be added to each of the documents missing it by the driver, mutating the document. This behavior<br>can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
+        <p>Inserts a single document or a an array of documents into MongoDB. If documents passed in do not contain the <strong>_id</strong> field,<br>
+one will be added to each of the documents missing it by the driver, mutating the document. This behavior<br>
+can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
     </div>
     
 
@@ -17256,7 +17291,9 @@ Promise if no callback passed
     
     
     <div class="description">
-        <p>Inserts an array of documents into MongoDB. If documents passed in do not contain the <strong>_id</strong> field,<br>one will be added to each of the documents missing it by the driver, mutating the document. This behavior<br>can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
+        <p>Inserts an array of documents into MongoDB. If documents passed in do not contain the <strong>_id</strong> field,<br>
+one will be added to each of the documents missing it by the driver, mutating the document. This behavior<br>
+can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
     </div>
     
 
@@ -17827,7 +17864,9 @@ Promise if no callback passed
     
     
     <div class="description">
-        <p>Inserts a single document into MongoDB. If documents passed in do not contain the <strong>_id</strong> field,<br>one will be added to each of the documents missing it by the driver, mutating the document. This behavior<br>can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
+        <p>Inserts a single document into MongoDB. If documents passed in do not contain the <strong>_id</strong> field,<br>
+one will be added to each of the documents missing it by the driver, mutating the document. This behavior<br>
+can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
     </div>
     
 
@@ -19734,7 +19773,8 @@ Promise if no callback passed
     
     
     <div class="description">
-        <p>Return N number of parallel cursors for a collection allowing parallel reading of entire collection. There are<br>no ordering guarantees for returned results.</p>
+        <p>Return N number of parallel cursors for a collection allowing parallel reading of entire collection. There are<br>
+no ordering guarantees for returned results.</p>
     </div>
     
 
@@ -20065,7 +20105,8 @@ Promise if no callback passed
     
     
     <div class="description">
-        <p>Reindex all indexes on the collection<br>Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground) and will be slow for large collections.</p>
+        <p>Reindex all indexes on the collection<br>
+Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground) and will be slow for large collections.</p>
     </div>
     
 
@@ -21621,7 +21662,8 @@ Promise if no callback passed
     
     
     <div class="description">
-        <p>Save a document. Simple full document replacement function. Not recommended for efficiency, use atomic<br>operators and update instead for more efficient operations.</p>
+        <p>Save a document. Simple full document replacement function. Not recommended for efficiency, use atomic<br>
+operators and update instead for more efficient operations.</p>
     </div>
     
 
@@ -28034,7 +28076,7 @@ ChangeStream instance.
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Jan 14 2020 17:34:07 GMT-0500 (Eastern Standard Time)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Fri Jan 24 2020 07:18:32 GMT-0500 (EST)
                     </footer>
                 </div>
             </td>

@@ -2303,7 +2303,7 @@
     
         
         <div class="tag-source">
-            <a href="node_modules_mongodb-client-encryption_lib_clientEncryption.js.html">node_modules/mongodb-client-encryption/lib/clientEncryption.js</a>, <a href="node_modules_mongodb-client-encryption_lib_clientEncryption.js.html#line62">line 62</a>
+            <a href="node_modules_mongodb-client-encryption_lib_clientEncryption.js.html">node_modules/mongodb-client-encryption/lib/clientEncryption.js</a>, <a href="node_modules_mongodb-client-encryption_lib_clientEncryption.js.html#line93">line 93</a>
         </div>
         
     </div>
@@ -2538,6 +2538,34 @@
     
     
     
+    
+        <h5>Examples</h5>
+        
+
+    
+    <pre class="prettyprint"><code><p>new ClientEncryption(mongoClient, {<br>
+keyVaultNamespace: 'client.encryption',<br>
+kmsProviders: {<br>
+local: {<br>
+key: masterKey // The master key used for encryption/decryption. A 96-byte long Buffer<br>
+}<br>
+}<br>
+});</p></code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code><p>new ClientEncryption(mongoClient, {<br>
+keyVaultNamespace: 'client.encryption',<br>
+kmsProviders: {<br>
+aws: {<br>
+accessKeyId: AWS_ACCESS_KEY,<br>
+secretAccessKey: AWS_SECRET_KEY<br>
+}<br>
+}<br>
+});</p></code></pre>
+    
+
     
 </dd>
 
@@ -2946,22 +2974,43 @@ no callback is provided, returns a Promise that either resolves with <a href="Cl
         
 
     
-    <pre class="prettyprint"><code><p>// Using callbacks to create a local key<br>clientEncryption.createDataKey('local', (err, dataKey) =&gt; {<br>  if (err) {<br>    // This means creating the key failed.<br>  } else {<br>    // key creation succeeded<br>  }<br>});</p></code></pre>
+    <pre class="prettyprint"><code><p>// Using callbacks to create a local key<br>
+clientEncryption.createDataKey('local', (err, dataKey) =&gt; {<br>
+if (err) {<br>
+// This means creating the key failed.<br>
+} else {<br>
+// key creation succeeded<br>
+}<br>
+});</p></code></pre>
     
 
 
     
-    <pre class="prettyprint"><code><p>// Using async/await to create a local key<br>const dataKeyId = await clientEncryption.createDataKey('local');</p></code></pre>
+    <pre class="prettyprint"><code><p>// Using async/await to create a local key<br>
+const dataKeyId = await clientEncryption.createDataKey('local');</p></code></pre>
     
 
 
     
-    <pre class="prettyprint"><code><p>// Using async/await to create an aws key<br>const dataKeyId = await clientEncryption.createDataKey('aws', {<br>  masterKey: {<br>    region: 'us-east-1',<br>    key: 'xxxxxxxxxxxxxx' // CMK ARN here<br>  }<br>});</p></code></pre>
+    <pre class="prettyprint"><code><p>// Using async/await to create an aws key<br>
+const dataKeyId = await clientEncryption.createDataKey('aws', {<br>
+masterKey: {<br>
+region: 'us-east-1',<br>
+key: 'xxxxxxxxxxxxxx' // CMK ARN here<br>
+}<br>
+});</p></code></pre>
     
 
 
     
-    <pre class="prettyprint"><code><p>// Using async/await to create an aws key with a keyAltName<br>const dataKeyId = await clientEncryption.createDataKey('aws', {<br>  masterKey: {<br>    region: 'us-east-1',<br>    key: 'xxxxxxxxxxxxxx' // CMK ARN here<br>  },<br>  keyAltNames: [ 'mySpecialKey' ]<br>});</p></code></pre>
+    <pre class="prettyprint"><code><p>// Using async/await to create an aws key with a keyAltName<br>
+const dataKeyId = await clientEncryption.createDataKey('aws', {<br>
+masterKey: {<br>
+region: 'us-east-1',<br>
+key: 'xxxxxxxxxxxxxx' // CMK ARN here<br>
+},<br>
+keyAltNames: [ 'mySpecialKey' ]<br>
+});</p></code></pre>
     
 
     
@@ -3117,12 +3166,18 @@ no callback is provided, returns a Promise that either resolves with the decrype
         
 
     
-    <pre class="prettyprint"><code><p>// Decrypting value with callback API<br>function decryptMyValue(value, callback) {<br>  clientEncryption.decrypt(value, callback);<br>}</p></code></pre>
+    <pre class="prettyprint"><code><p>// Decrypting value with callback API<br>
+function decryptMyValue(value, callback) {<br>
+clientEncryption.decrypt(value, callback);<br>
+}</p></code></pre>
     
 
 
     
-    <pre class="prettyprint"><code><p>// Decrypting value with async/await API<br>async function decryptMyValue(value) {<br>  return clientEncryption.decrypt(value);<br>}</p></code></pre>
+    <pre class="prettyprint"><code><p>// Decrypting value with async/await API<br>
+async function decryptMyValue(value) {<br>
+return clientEncryption.decrypt(value);<br>
+}</p></code></pre>
     
 
     
@@ -3150,7 +3205,8 @@ no callback is provided, returns a Promise that either resolves with the decrype
     
     
     <div class="description">
-        <p>Explicitly encrypt a provided value. Note that either <code>options.keyId</code> or <code>options.keyAltName</code> must<br>be specified. Specifying both <code>options.keyId</code> and <code>options.keyAltName</code> is considered an error.</p>
+        <p>Explicitly encrypt a provided value. Note that either <code>options.keyId</code> or <code>options.keyAltName</code> must<br>
+be specified. Specifying both <code>options.keyId</code> and <code>options.keyAltName</code> is considered an error.</p>
     </div>
     
 
@@ -3423,17 +3479,33 @@ no callback is provided, returns a Promise that either resolves with the encrypt
         
 
     
-    <pre class="prettyprint"><code><p>// Encryption with callback API<br>function encryptMyData(value, callback) {<br>  clientEncryption.createDataKey('local', (err, keyId) =&gt; {<br>    if (err) {<br>      return callback(err);<br>    }<br>    clientEncryption.encrypt(value, { keyId, algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic' }, callback);<br>  });<br>}</p></code></pre>
+    <pre class="prettyprint"><code><p>// Encryption with callback API<br>
+function encryptMyData(value, callback) {<br>
+clientEncryption.createDataKey('local', (err, keyId) =&gt; {<br>
+if (err) {<br>
+return callback(err);<br>
+}<br>
+clientEncryption.encrypt(value, { keyId, algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic' }, callback);<br>
+});<br>
+}</p></code></pre>
     
 
 
     
-    <pre class="prettyprint"><code><p>// Encryption with async/await api<br>async function encryptMyData(value) {<br>  const keyId = await clientEncryption.createDataKey('local');<br>  return clientEncryption.encrypt(value, { keyId, algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic' });<br>}</p></code></pre>
+    <pre class="prettyprint"><code><p>// Encryption with async/await api<br>
+async function encryptMyData(value) {<br>
+const keyId = await clientEncryption.createDataKey('local');<br>
+return clientEncryption.encrypt(value, { keyId, algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic' });<br>
+}</p></code></pre>
     
 
 
     
-    <pre class="prettyprint"><code><p>// Encryption using a keyAltName<br>async function encryptMyData(value) {<br>  await clientEncryption.createDataKey('local', { keyAltNames: 'mySpecialKey' });<br>  return clientEncryption.encrypt(value, { keyAltName: 'mySpecialKey', algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic' });<br>}</p></code></pre>
+    <pre class="prettyprint"><code><p>// Encryption using a keyAltName<br>
+async function encryptMyData(value) {<br>
+await clientEncryption.createDataKey('local', { keyAltNames: 'mySpecialKey' });<br>
+return clientEncryption.encrypt(value, { keyAltName: 'mySpecialKey', algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic' });<br>
+}</p></code></pre>
     
 
     
@@ -3606,7 +3678,9 @@ no callback is provided, returns a Promise that either resolves with the encrypt
 <dd>
     
     <div class="description">
-        <p>The id of an existing dataKey. Is a bson Binary value.<br>Can be used for <code>ClientEncryption.encrypt</code>, and can be used to directly<br>query for the data key itself against the key vault namespace.</p>
+        <p>The id of an existing dataKey. Is a bson Binary value.<br>
+Can be used for <code>ClientEncryption.encrypt</code>, and can be used to directly<br>
+query for the data key itself against the key vault namespace.</p>
     </div>
     
     
@@ -3950,7 +4024,7 @@ no callback is provided, returns a Promise that either resolves with the encrypt
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Jan 14 2020 17:34:07 GMT-0500 (Eastern Standard Time)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Fri Jan 24 2020 07:18:32 GMT-0500 (EST)
                     </footer>
                 </div>
             </td>

@@ -3148,13 +3148,15 @@ Collection instance.
     <div class="description">
         <p>Perform a bulkWrite operation without a fluent API</p>
 <p>Legal operation types are</p>
-<p> { insertOne: { document: { a: 1 } } }</p>
-<p> { updateOne: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }</p>
-<p> { updateMany: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }</p>
-<p> { deleteOne: { filter: {c:1} } }</p>
-<p> { deleteMany: { filter: {c:1} } }</p>
-<p> { replaceOne: { filter: {c:3}, replacement: {c:4}, upsert:true}}</p>
-<p>If documents passed in do not contain the <strong>_id</strong> field,<br>one will be added to each of the documents missing it by the driver, mutating the document. This behavior<br>can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
+<p>{ insertOne: { document: { a: 1 } } }</p>
+<p>{ updateOne: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }</p>
+<p>{ updateMany: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }</p>
+<p>{ deleteOne: { filter: {c:1} } }</p>
+<p>{ deleteMany: { filter: {c:1} } }</p>
+<p>{ replaceOne: { filter: {c:3}, replacement: {c:4}, upsert:true}}</p>
+<p>If documents passed in do not contain the <strong>_id</strong> field,<br>
+one will be added to each of the documents missing it by the driver, mutating the document. This behavior<br>
+can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
     </div>
     
 
@@ -3618,7 +3620,9 @@ Promise if no callback passed
     
     <div class="description">
         <p>An estimated count of matching documents in the db to a query.</p>
-<p><strong>NOTE:</strong> This method has been deprecated, since it does not provide an accurate count of the documents<br>in a collection. To obtain an accurate count of documents in the collection, use <a href="Collection.html#countDocuments"><code>countDocuments</code></a>.<br>To obtain an estimated count of all documents in the collection, use <a href="Collection.html#estimatedDocumentCount"><code>estimatedDocumentCount</code></a>.</p>
+<p><strong>NOTE:</strong> This method has been deprecated, since it does not provide an accurate count of the documents<br>
+in a collection. To obtain an accurate count of documents in the collection, use <a href="Collection.html#countDocuments"><code>countDocuments</code></a>.<br>
+To obtain an estimated count of all documents in the collection, use <a href="Collection.html#estimatedDocumentCount"><code>estimatedDocumentCount</code></a>.</p>
     </div>
     
 
@@ -4034,7 +4038,8 @@ Promise if no callback passed
     
     <div class="description">
         <p>Gets the number of documents matching the filter.</p>
-<p><strong>Note</strong>: When migrating from <a href="Collection.html#count"><code>count</code></a> to <a href="Collection.html#countDocuments"><code>countDocuments</code></a><br>the following query operators must be replaced:</p>
+<p><strong>Note</strong>: When migrating from <a href="Collection.html#count"><code>count</code></a> to <a href="Collection.html#countDocuments"><code>countDocuments</code></a><br>
+the following query operators must be replaced:</p>
 <table>
 <thead>
 <tr>
@@ -5176,7 +5181,9 @@ Promise if no callback passed
     
     
     <div class="description">
-        <p>Creates multiple indexes in the collection, this method is only supported for<br>MongoDB 2.6 or higher. Earlier version of MongoDB will throw a command not supported<br>error. Index specifications are defined at http://docs.mongodb.org/manual/reference/command/createIndexes/.</p>
+        <p>Creates multiple indexes in the collection, this method is only supported for<br>
+MongoDB 2.6 or higher. Earlier version of MongoDB will throw a command not supported<br>
+error. Index specifications are defined at http://docs.mongodb.org/manual/reference/command/createIndexes/.</p>
     </div>
     
 
@@ -15140,7 +15147,9 @@ Promise if no callback passed
     
     
     <div class="description">
-        <p>Inserts a single document or a an array of documents into MongoDB. If documents passed in do not contain the <strong>_id</strong> field,<br>one will be added to each of the documents missing it by the driver, mutating the document. This behavior<br>can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
+        <p>Inserts a single document or a an array of documents into MongoDB. If documents passed in do not contain the <strong>_id</strong> field,<br>
+one will be added to each of the documents missing it by the driver, mutating the document. This behavior<br>
+can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
     </div>
     
 
@@ -15608,7 +15617,9 @@ Promise if no callback passed
     
     
     <div class="description">
-        <p>Inserts an array of documents into MongoDB. If documents passed in do not contain the <strong>_id</strong> field,<br>one will be added to each of the documents missing it by the driver, mutating the document. This behavior<br>can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
+        <p>Inserts an array of documents into MongoDB. If documents passed in do not contain the <strong>_id</strong> field,<br>
+one will be added to each of the documents missing it by the driver, mutating the document. This behavior<br>
+can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
     </div>
     
 
@@ -16107,7 +16118,9 @@ Promise if no callback passed
     
     
     <div class="description">
-        <p>Inserts a single document into MongoDB. If documents passed in do not contain the <strong>_id</strong> field,<br>one will be added to each of the documents missing it by the driver, mutating the document. This behavior<br>can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
+        <p>Inserts a single document into MongoDB. If documents passed in do not contain the <strong>_id</strong> field,<br>
+one will be added to each of the documents missing it by the driver, mutating the document. This behavior<br>
+can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
     </div>
     
 
@@ -17926,7 +17939,8 @@ Promise if no callback passed
     
     
     <div class="description">
-        <p>Return N number of parallel cursors for a collection allowing parallel reading of entire collection. There are<br>no ordering guarantees for returned results.</p>
+        <p>Return N number of parallel cursors for a collection allowing parallel reading of entire collection. There are<br>
+no ordering guarantees for returned results.</p>
     </div>
     
 
@@ -18255,7 +18269,8 @@ Promise if no callback passed
     
     
     <div class="description">
-        <p>Reindex all indexes on the collection<br>Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground) and will be slow for large collections.</p>
+        <p>Reindex all indexes on the collection<br>
+Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground) and will be slow for large collections.</p>
     </div>
     
 
@@ -19601,7 +19616,8 @@ Promise if no callback passed
     
     
     <div class="description">
-        <p>Save a document. Simple full document replacement function. Not recommended for efficiency, use atomic<br>operators and update instead for more efficient operations.</p>
+        <p>Save a document. Simple full document replacement function. Not recommended for efficiency, use atomic<br>
+operators and update instead for more efficient operations.</p>
     </div>
     
 
@@ -25486,7 +25502,7 @@ ChangeStream instance.
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Jan 14 2020 17:34:21 GMT-0500 (Eastern Standard Time)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Fri Jan 24 2020 07:18:46 GMT-0500 (EST)
                     </footer>
                 </div>
             </td>
