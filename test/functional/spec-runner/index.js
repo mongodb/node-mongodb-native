@@ -673,5 +673,6 @@ function testOperations(testData, operationContext, options) {
 module.exports = {
   TestRunnerContext,
   gatherTestSuites,
-  generateTopologyTests
+  generateTopologyTests,
+  parseRunOn
 };

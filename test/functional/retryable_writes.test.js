@@ -2,42 +2,45 @@
 
 const expect = require('chai').expect;
 const loadSpecTests = require('../spec').loadSpecTests;
+const parseRunOn = require('../functional/spec-runner').parseRunOn;
 
 describe('Retryable Writes', function() {
   let ctx = {};
 
   loadSpecTests('retryable-writes').forEach(suite => {
-    const topology = ['replicaset'];
-    const mongodb = `>=${suite.minServerVersion}`;
+    const environmentRequirementList = parseRunOn(suite.runOn);
+    environmentRequirementList.forEach(requires => {
+      const suiteName = `${suite.name} - ${requires.topology.join()}`;
 
-    describe(suite.name, function() {
-      suite.tests.forEach(test => {
-        it(test.description, {
-          metadata: { requires: { topology, mongodb } },
-          test: function() {
-            // Step 1: Test Setup. Includes a lot of boilerplate stuff
-            // like creating a client, dropping and refilling data collections,
-            // and enabling failpoints
-            return executeScenarioSetup(suite, test, this.configuration, ctx).then(() =>
-              // Step 2: Run the test
-              executeScenarioTest(test, ctx)
-            );
-          }
-        });
+      describe(suiteName, {
+        metadata: { requires },
+        test: function() {
+          // Step 3: Test Teardown. Turn off failpoints, and close client
+          afterEach(function() {
+            if (!ctx.db || !ctx.client) {
+              return;
+            }
+
+            return Promise.resolve()
+              .then(() => (ctx.failPointName ? turnOffFailPoint(ctx.db, ctx.failPointName) : {}))
+              .then(() => ctx.client.close())
+              .then(() => (ctx = {}));
+          });
+
+          suite.tests.forEach(test => {
+            it(test.description, function() {
+              // Step 1: Test Setup. Includes a lot of boilerplate stuff
+              // like creating a client, dropping and refilling data collections,
+              // and enabling failpoints
+              return executeScenarioSetup(suite, test, this.configuration, ctx).then(() =>
+                // Step 2: Run the test
+                executeScenarioTest(test, ctx)
+              );
+            });
+          });
+        }
       });
     });
-  });
-
-  // Step 3: Test Teardown. Turn off failpoints, and close client
-  afterEach(function() {
-    if (!ctx.db || !ctx.client) {
-      return;
-    }
-
-    return Promise.resolve()
-      .then(() => (ctx.failPointName ? turnOffFailPoint(ctx.db, ctx.failPointName) : {}))
-      .then(() => ctx.client.close())
-      .then(() => (ctx = {}));
   });
 });
 
