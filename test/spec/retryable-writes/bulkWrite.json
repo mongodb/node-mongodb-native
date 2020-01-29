@@ -1,17 +1,21 @@
 {
+  "runOn": [
+    {
+      "minServerVersion": "3.6",
+      "topology": [
+        "replicaset"
+      ]
+    }
+  ],
   "data": [
     {
       "_id": 1,
       "x": 11
     }
   ],
-  "minServerVersion": "3.6",
   "tests": [
     {
       "description": "First command is retried",
-      "clientOptions": {
-        "retryWrites": true
-      },
       "failPoint": {
         "configureFailPoint": "onPrimaryTransactionalWrite",
         "mode": {
@@ -82,9 +86,6 @@
     },
     {
       "description": "All commands are retried",
-      "clientOptions": {
-        "retryWrites": true
-      },
       "failPoint": {
         "configureFailPoint": "onPrimaryTransactionalWrite",
         "mode": {
@@ -216,9 +217,6 @@
     },
     {
       "description": "Both commands are retried after their first statement fails",
-      "clientOptions": {
-        "retryWrites": true
-      },
       "failPoint": {
         "configureFailPoint": "onPrimaryTransactionalWrite",
         "mode": {
@@ -298,9 +296,6 @@
     },
     {
       "description": "Second command is retried after its second statement fails",
-      "clientOptions": {
-        "retryWrites": true
-      },
       "failPoint": {
         "configureFailPoint": "onPrimaryTransactionalWrite",
         "mode": {
@@ -380,9 +375,6 @@
     },
     {
       "description": "BulkWrite with unordered execution",
-      "clientOptions": {
-        "retryWrites": true
-      },
       "failPoint": {
         "configureFailPoint": "onPrimaryTransactionalWrite",
         "mode": {
@@ -450,9 +442,6 @@
     },
     {
       "description": "First insertOne is never committed",
-      "clientOptions": {
-        "retryWrites": true
-      },
       "failPoint": {
         "configureFailPoint": "onPrimaryTransactionalWrite",
         "mode": {
@@ -525,9 +514,6 @@
     },
     {
       "description": "Second updateOne is never committed",
-      "clientOptions": {
-        "retryWrites": true
-      },
       "failPoint": {
         "configureFailPoint": "onPrimaryTransactionalWrite",
         "mode": {
@@ -606,9 +592,6 @@
     },
     {
       "description": "Third updateOne is never committed",
-      "clientOptions": {
-        "retryWrites": true
-      },
       "failPoint": {
         "configureFailPoint": "onPrimaryTransactionalWrite",
         "mode": {
@@ -692,9 +675,6 @@
     },
     {
       "description": "Single-document write following deleteMany is retried",
-      "clientOptions": {
-        "retryWrites": true
-      },
       "failPoint": {
         "configureFailPoint": "onPrimaryTransactionalWrite",
         "mode": {
@@ -755,9 +735,6 @@
     },
     {
       "description": "Single-document write following updateMany is retried",
-      "clientOptions": {
-        "retryWrites": true
-      },
       "failPoint": {
         "configureFailPoint": "onPrimaryTransactionalWrite",
         "mode": {

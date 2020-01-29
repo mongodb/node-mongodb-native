@@ -1,4 +1,13 @@
 {
+  "runOn": [
+    {
+      "minServerVersion": "3.6",
+      "topology": [
+        "replicaset",
+        "sharded"
+      ]
+    }
+  ],
   "data": [
     {
       "_id": 1,
@@ -9,13 +18,10 @@
       "x": 22
     }
   ],
-  "minServerVersion": "3.6",
   "tests": [
     {
       "description": "DeleteMany ignores retryWrites",
-      "clientOptions": {
-        "retryWrites": true
-      },
+      "useMultipleMongoses": true,
       "operation": {
         "name": "deleteMany",
         "arguments": {

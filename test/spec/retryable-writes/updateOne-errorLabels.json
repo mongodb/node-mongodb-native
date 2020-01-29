@@ -1,14 +1,9 @@
 {
   "runOn": [
     {
-      "minServerVersion": "4.0",
+      "minServerVersion": "4.3.1",
       "topology": [
-        "replicaset"
-      ]
-    },
-    {
-      "minServerVersion": "4.1.7",
-      "topology": [
+        "replicaset",
         "sharded"
       ]
     }
@@ -25,7 +20,7 @@
   ],
   "tests": [
     {
-      "description": "DeleteOne succeeds after PrimarySteppedDown",
+      "description": "UpdateOne succeeds with RetryableWriteError from server",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -33,25 +28,39 @@
         },
         "data": {
           "failCommands": [
-            "delete"
+            "update"
           ],
-          "errorCode": 189
+          "errorCode": 112,
+          "errorLabels": [
+            "RetryableWriteError"
+          ]
         }
       },
       "operation": {
-        "name": "deleteOne",
+        "name": "updateOne",
         "arguments": {
           "filter": {
             "_id": 1
+          },
+          "update": {
+            "$inc": {
+              "x": 1
+            }
           }
         }
       },
       "outcome": {
         "result": {
-          "deletedCount": 1
+          "matchedCount": 1,
+          "modifiedCount": 1,
+          "upsertedCount": 0
         },
         "collection": {
           "data": [
+            {
+              "_id": 1,
+              "x": 12
+            },
             {
               "_id": 2,
               "x": 22
@@ -61,7 +70,7 @@
       }
     },
     {
-      "description": "DeleteOne succeeds after WriteConcernError ShutdownInProgress",
+      "description": "UpdateOne fails if server does not return RetryableWriteError",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -69,62 +78,29 @@
         },
         "data": {
           "failCommands": [
-            "delete"
+            "update"
           ],
-          "writeConcernError": {
-            "code": 91,
-            "errmsg": "Replication is being shut down"
-          }
+          "errorCode": 11600,
+          "errorLabels": []
         }
       },
       "operation": {
-        "name": "deleteOne",
+        "name": "updateOne",
         "arguments": {
           "filter": {
             "_id": 1
-          }
-        }
-      },
-      "outcome": {
-        "result": {
-          "deletedCount": 1
-        },
-        "collection": {
-          "data": [
-            {
-              "_id": 2,
-              "x": 22
+          },
+          "update": {
+            "$inc": {
+              "x": 1
             }
-          ]
-        }
-      }
-    },
-    {
-      "description": "DeleteOne fails with RetryableWriteError label after two connection failures",
-      "failPoint": {
-        "configureFailPoint": "failCommand",
-        "mode": {
-          "times": 2
-        },
-        "data": {
-          "failCommands": [
-            "delete"
-          ],
-          "closeConnection": true
-        }
-      },
-      "operation": {
-        "name": "deleteOne",
-        "arguments": {
-          "filter": {
-            "_id": 1
           }
         }
       },
       "outcome": {
         "error": true,
         "result": {
-          "errorLabelsContain": [
+          "errorLabelsOmit": [
             "RetryableWriteError"
           ]
         },

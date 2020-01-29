@@ -1,0 +1,44 @@
+runOn:
+    - minServerVersion: "4.3.1"
+      topology: ["replicaset", "sharded"]
+
+data: []
+
+tests:
+    - description: "InsertOne succeeds with RetryableWriteError from server"
+      failPoint:
+          configureFailPoint: failCommand
+          mode: { times: 1 }
+          data:
+              failCommands: ["insert"]
+              errorCode: 112 # WriteConflict, not a retryable error code
+              errorLabels: ["RetryableWriteError"] # Override server behavior: send RetryableWriteError label with non-retryable error code
+      operation:
+          name: "insertOne"
+          arguments:
+              document: { _id: 1, x: 11 }
+      outcome: # Driver retries operation and it succeeds
+          result:
+              insertedId: 1
+          collection:
+              data:
+                  - { _id: 1, x: 11 }
+
+    - description: "InsertOne fails if server does not return RetryableWriteError"
+      failPoint:
+          configureFailPoint: failCommand
+          mode: { times: 1 }
+          data:
+              failCommands: ["insert"]
+              errorCode: 11600 # InterruptedAtShutdown, normally a retryable error code
+              errorLabels: []  # Override server behavior: do not send RetryableWriteError label with retryable code
+      operation:
+          name: "insertOne"
+          arguments:
+              document: { _id: 1, x: 11 }
+      outcome:
+          error: true # Driver does not retry operation because there was no RetryableWriteError label on response
+          result:
+              errorLabelsOmit: ["RetryableWriteError"]
+          collection:
+              data: []

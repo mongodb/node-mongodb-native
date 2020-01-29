@@ -1,9 +1,10 @@
 {
   "runOn": [
     {
-      "minServerVersion": "3.6",
+      "minServerVersion": "4.3.1",
       "topology": [
-        "replicaset"
+        "replicaset",
+        "sharded"
       ]
     }
   ],
@@ -15,11 +16,20 @@
   ],
   "tests": [
     {
-      "description": "InsertMany succeeds after one network error",
+      "description": "InsertMany succeeds with RetryableWriteError from server",
       "failPoint": {
-        "configureFailPoint": "onPrimaryTransactionalWrite",
+        "configureFailPoint": "failCommand",
         "mode": {
           "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "insert"
+          ],
+          "errorCode": 112,
+          "errorLabels": [
+            "RetryableWriteError"
+          ]
         }
       },
       "operation": {
@@ -66,63 +76,18 @@
       }
     },
     {
-      "description": "InsertMany with unordered execution",
+      "description": "InsertMany fails if server does not return RetryableWriteError",
       "failPoint": {
-        "configureFailPoint": "onPrimaryTransactionalWrite",
+        "configureFailPoint": "failCommand",
         "mode": {
           "times": 1
-        }
-      },
-      "operation": {
-        "name": "insertMany",
-        "arguments": {
-          "documents": [
-            {
-              "_id": 2,
-              "x": 22
-            },
-            {
-              "_id": 3,
-              "x": 33
-            }
-          ],
-          "options": {
-            "ordered": false
-          }
-        }
-      },
-      "outcome": {
-        "result": {
-          "insertedIds": {
-            "0": 2,
-            "1": 3
-          }
         },
-        "collection": {
-          "data": [
-            {
-              "_id": 1,
-              "x": 11
-            },
-            {
-              "_id": 2,
-              "x": 22
-            },
-            {
-              "_id": 3,
-              "x": 33
-            }
-          ]
-        }
-      }
-    },
-    {
-      "description": "InsertMany fails after multiple network errors",
-      "failPoint": {
-        "configureFailPoint": "onPrimaryTransactionalWrite",
-        "mode": "alwaysOn",
         "data": {
-          "failBeforeCommitExceptionCode": 1
+          "failCommands": [
+            "insert"
+          ],
+          "errorCode": 11600,
+          "errorLabels": []
         }
       },
       "operation": {
@@ -136,10 +101,6 @@
             {
               "_id": 3,
               "x": 33
-            },
-            {
-              "_id": 4,
-              "x": 44
             }
           ],
           "options": {
@@ -149,6 +110,11 @@
       },
       "outcome": {
         "error": true,
+        "result": {
+          "errorLabelsOmit": [
+            "RetryableWriteError"
+          ]
+        },
         "collection": {
           "data": [
             {

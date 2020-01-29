@@ -1,4 +1,18 @@
 {
+  "runOn": [
+    {
+      "minServerVersion": "4.0",
+      "topology": [
+        "replicaset"
+      ]
+    },
+    {
+      "minServerVersion": "4.1.7",
+      "topology": [
+        "sharded"
+      ]
+    }
+  ],
   "data": [
     {
       "_id": 1,
@@ -9,13 +23,9 @@
       "x": 22
     }
   ],
-  "minServerVersion": "3.99",
   "tests": [
     {
       "description": "InsertOne succeeds after connection failure",
-      "clientOptions": {
-        "retryWrites": true
-      },
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -61,9 +71,6 @@
     },
     {
       "description": "InsertOne succeeds after NotMaster",
-      "clientOptions": {
-        "retryWrites": true
-      },
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -110,9 +117,6 @@
     },
     {
       "description": "InsertOne succeeds after NotMasterOrSecondary",
-      "clientOptions": {
-        "retryWrites": true
-      },
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -159,9 +163,6 @@
     },
     {
       "description": "InsertOne succeeds after NotMasterNoSlaveOk",
-      "clientOptions": {
-        "retryWrites": true
-      },
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -208,9 +209,6 @@
     },
     {
       "description": "InsertOne succeeds after InterruptedDueToReplStateChange",
-      "clientOptions": {
-        "retryWrites": true
-      },
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -257,9 +255,6 @@
     },
     {
       "description": "InsertOne succeeds after InterruptedAtShutdown",
-      "clientOptions": {
-        "retryWrites": true
-      },
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -306,9 +301,6 @@
     },
     {
       "description": "InsertOne succeeds after PrimarySteppedDown",
-      "clientOptions": {
-        "retryWrites": true
-      },
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -355,9 +347,6 @@
     },
     {
       "description": "InsertOne succeeds after ShutdownInProgress",
-      "clientOptions": {
-        "retryWrites": true
-      },
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -404,9 +393,6 @@
     },
     {
       "description": "InsertOne succeeds after HostNotFound",
-      "clientOptions": {
-        "retryWrites": true
-      },
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -453,9 +439,6 @@
     },
     {
       "description": "InsertOne succeeds after HostUnreachable",
-      "clientOptions": {
-        "retryWrites": true
-      },
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -502,9 +485,6 @@
     },
     {
       "description": "InsertOne succeeds after SocketException",
-      "clientOptions": {
-        "retryWrites": true
-      },
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -551,9 +531,6 @@
     },
     {
       "description": "InsertOne succeeds after NetworkTimeout",
-      "clientOptions": {
-        "retryWrites": true
-      },
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -599,10 +576,53 @@
       }
     },
     {
-      "description": "InsertOne fails after Interrupted",
-      "clientOptions": {
-        "retryWrites": true
+      "description": "InsertOne succeeds after ExceededTimeLimit",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "insert"
+          ],
+          "errorCode": 262,
+          "closeConnection": false
+        }
       },
+      "operation": {
+        "name": "insertOne",
+        "arguments": {
+          "document": {
+            "_id": 3,
+            "x": 33
+          }
+        }
+      },
+      "outcome": {
+        "result": {
+          "insertedId": 3
+        },
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "InsertOne fails after Interrupted",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -627,6 +647,11 @@
       },
       "outcome": {
         "error": true,
+        "result": {
+          "errorLabelsOmit": [
+            "RetryableWriteError"
+          ]
+        },
         "collection": {
           "data": [
             {
@@ -643,9 +668,6 @@
     },
     {
       "description": "InsertOne succeeds after WriteConcernError InterruptedAtShutdown",
-      "clientOptions": {
-        "retryWrites": true
-      },
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -694,9 +716,6 @@
     },
     {
       "description": "InsertOne succeeds after WriteConcernError InterruptedDueToReplStateChange",
-      "clientOptions": {
-        "retryWrites": true
-      },
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -745,9 +764,6 @@
     },
     {
       "description": "InsertOne succeeds after WriteConcernError PrimarySteppedDown",
-      "clientOptions": {
-        "retryWrites": true
-      },
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -796,9 +812,6 @@
     },
     {
       "description": "InsertOne succeeds after WriteConcernError ShutdownInProgress",
-      "clientOptions": {
-        "retryWrites": true
-      },
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -847,9 +860,6 @@
     },
     {
       "description": "InsertOne fails after multiple retryable writeConcernErrors",
-      "clientOptions": {
-        "retryWrites": true
-      },
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -876,6 +886,11 @@
       },
       "outcome": {
         "error": true,
+        "result": {
+          "errorLabelsContain": [
+            "RetryableWriteError"
+          ]
+        },
         "collection": {
           "data": [
             {
@@ -896,9 +911,6 @@
     },
     {
       "description": "InsertOne fails after WriteConcernError Interrupted",
-      "clientOptions": {
-        "retryWrites": true
-      },
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -925,6 +937,11 @@
       },
       "outcome": {
         "error": true,
+        "result": {
+          "errorLabelsOmit": [
+            "RetryableWriteError"
+          ]
+        },
         "collection": {
           "data": [
             {
@@ -945,9 +962,6 @@
     },
     {
       "description": "InsertOne fails after WriteConcernError WriteConcernFailed",
-      "clientOptions": {
-        "retryWrites": true
-      },
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -978,6 +992,11 @@
       },
       "outcome": {
         "error": true,
+        "result": {
+          "errorLabelsOmit": [
+            "RetryableWriteError"
+          ]
+        },
         "collection": {
           "data": [
             {
@@ -993,6 +1012,41 @@
               "x": 33
             }
           ]
+        }
+      }
+    },
+    {
+      "description": "InsertOne fails with a RetryableWriteError label after two connection failures",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 2
+        },
+        "data": {
+          "failCommands": [
+            "insert"
+          ],
+          "closeConnection": true
+        }
+      },
+      "operation": {
+        "name": "insertOne",
+        "arguments": {
+          "document": {
+            "_id": 1,
+            "x": 11
+          }
+        }
+      },
+      "outcome": {
+        "error": true,
+        "result": {
+          "errorLabelsContain": [
+            "RetryableWriteError"
+          ]
+        },
+        "collection": {
+          "data": []
         }
       }
     }

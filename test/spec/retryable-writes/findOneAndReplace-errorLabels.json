@@ -1,14 +1,9 @@
 {
   "runOn": [
     {
-      "minServerVersion": "4.0",
+      "minServerVersion": "4.3.1",
       "topology": [
-        "replicaset"
-      ]
-    },
-    {
-      "minServerVersion": "4.1.7",
-      "topology": [
+        "replicaset",
         "sharded"
       ]
     }
@@ -25,7 +20,7 @@
   ],
   "tests": [
     {
-      "description": "FindOneAndReplace succeeds after PrimarySteppedDown",
+      "description": "FindOneAndReplace succeeds with RetryableWriteError from server",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -33,9 +28,12 @@
         },
         "data": {
           "failCommands": [
-            "findAndModify"
+            "findOneAndModify"
           ],
-          "errorCode": 189
+          "errorCode": 112,
+          "errorLabels": [
+            "RetryableWriteError"
+          ]
         }
       },
       "operation": {
@@ -71,7 +69,7 @@
       }
     },
     {
-      "description": "FindOneAndReplace succeeds after WriteConcernError ShutdownInProgress",
+      "description": "FindOneAndReplace fails if server does not return RetryableWriteError",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -79,58 +77,10 @@
         },
         "data": {
           "failCommands": [
-            "findAndModify"
+            "findOneAndModify"
           ],
-          "writeConcernError": {
-            "code": 91,
-            "errmsg": "Replication is being shut down"
-          }
-        }
-      },
-      "operation": {
-        "name": "findOneAndReplace",
-        "arguments": {
-          "filter": {
-            "_id": 1
-          },
-          "replacement": {
-            "_id": 1,
-            "x": 111
-          },
-          "returnDocument": "Before"
-        }
-      },
-      "outcome": {
-        "result": {
-          "_id": 1,
-          "x": 11
-        },
-        "collection": {
-          "data": [
-            {
-              "_id": 1,
-              "x": 111
-            },
-            {
-              "_id": 2,
-              "x": 22
-            }
-          ]
-        }
-      }
-    },
-    {
-      "description": "FindOneAndReplace fails with a RetryableWriteError label after two connection failures",
-      "failPoint": {
-        "configureFailPoint": "failCommand",
-        "mode": {
-          "times": 2
-        },
-        "data": {
-          "failCommands": [
-            "findAndModify"
-          ],
-          "closeConnection": true
+          "errorCode": 11600,
+          "errorLabels": []
         }
       },
       "operation": {
@@ -149,7 +99,7 @@
       "outcome": {
         "error": true,
         "result": {
-          "errorLabelsContain": [
+          "errorLabelsOmit": [
             "RetryableWriteError"
           ]
         },

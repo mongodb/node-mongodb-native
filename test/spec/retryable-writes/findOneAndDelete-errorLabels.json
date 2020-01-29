@@ -1,9 +1,10 @@
 {
   "runOn": [
     {
-      "minServerVersion": "3.6",
+      "minServerVersion": "4.3.1",
       "topology": [
-        "replicaset"
+        "replicaset",
+        "sharded"
       ]
     }
   ],
@@ -19,11 +20,20 @@
   ],
   "tests": [
     {
-      "description": "FindOneAndDelete is committed on first attempt",
+      "description": "FindOneAndDelete succeeds with RetryableWriteError from server",
       "failPoint": {
-        "configureFailPoint": "onPrimaryTransactionalWrite",
+        "configureFailPoint": "failCommand",
         "mode": {
           "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "findAndModify"
+          ],
+          "errorCode": 112,
+          "errorLabels": [
+            "RetryableWriteError"
+          ]
         }
       },
       "operation": {
@@ -55,53 +65,18 @@
       }
     },
     {
-      "description": "FindOneAndDelete is not committed on first attempt",
+      "description": "FindOneAndDelete fails if server does not return RetryableWriteError",
       "failPoint": {
-        "configureFailPoint": "onPrimaryTransactionalWrite",
+        "configureFailPoint": "failCommand",
         "mode": {
           "times": 1
         },
         "data": {
-          "failBeforeCommitExceptionCode": 1
-        }
-      },
-      "operation": {
-        "name": "findOneAndDelete",
-        "arguments": {
-          "filter": {
-            "x": {
-              "$gte": 11
-            }
-          },
-          "sort": {
-            "x": 1
-          }
-        }
-      },
-      "outcome": {
-        "result": {
-          "_id": 1,
-          "x": 11
-        },
-        "collection": {
-          "data": [
-            {
-              "_id": 2,
-              "x": 22
-            }
-          ]
-        }
-      }
-    },
-    {
-      "description": "FindOneAndDelete is never committed",
-      "failPoint": {
-        "configureFailPoint": "onPrimaryTransactionalWrite",
-        "mode": {
-          "times": 2
-        },
-        "data": {
-          "failBeforeCommitExceptionCode": 1
+          "failCommands": [
+            "findAndModify"
+          ],
+          "errorCode": 11600,
+          "errorLabels": []
         }
       },
       "operation": {
@@ -119,6 +94,11 @@
       },
       "outcome": {
         "error": true,
+        "result": {
+          "errorLabelsOmit": [
+            "RetryableWriteError"
+          ]
+        },
         "collection": {
           "data": [
             {

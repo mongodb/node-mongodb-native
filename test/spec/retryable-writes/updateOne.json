@@ -1,4 +1,12 @@
 {
+  "runOn": [
+    {
+      "minServerVersion": "3.6",
+      "topology": [
+        "replicaset"
+      ]
+    }
+  ],
   "data": [
     {
       "_id": 1,
@@ -9,13 +17,9 @@
       "x": 22
     }
   ],
-  "minServerVersion": "3.6",
   "tests": [
     {
       "description": "UpdateOne is committed on first attempt",
-      "clientOptions": {
-        "retryWrites": true
-      },
       "failPoint": {
         "configureFailPoint": "onPrimaryTransactionalWrite",
         "mode": {
@@ -57,9 +61,6 @@
     },
     {
       "description": "UpdateOne is not committed on first attempt",
-      "clientOptions": {
-        "retryWrites": true
-      },
       "failPoint": {
         "configureFailPoint": "onPrimaryTransactionalWrite",
         "mode": {
@@ -104,9 +105,6 @@
     },
     {
       "description": "UpdateOne is never committed",
-      "clientOptions": {
-        "retryWrites": true
-      },
       "failPoint": {
         "configureFailPoint": "onPrimaryTransactionalWrite",
         "mode": {
@@ -147,9 +145,6 @@
     },
     {
       "description": "UpdateOne with upsert is committed on first attempt",
-      "clientOptions": {
-        "retryWrites": true
-      },
       "failPoint": {
         "configureFailPoint": "onPrimaryTransactionalWrite",
         "mode": {
@@ -198,9 +193,6 @@
     },
     {
       "description": "UpdateOne with upsert is not committed on first attempt",
-      "clientOptions": {
-        "retryWrites": true
-      },
       "failPoint": {
         "configureFailPoint": "onPrimaryTransactionalWrite",
         "mode": {
@@ -252,9 +244,6 @@
     },
     {
       "description": "UpdateOne with upsert is never committed",
-      "clientOptions": {
-        "retryWrites": true
-      },
       "failPoint": {
         "configureFailPoint": "onPrimaryTransactionalWrite",
         "mode": {

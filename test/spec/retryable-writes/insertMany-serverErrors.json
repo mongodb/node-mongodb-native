@@ -1,17 +1,27 @@
 {
+  "runOn": [
+    {
+      "minServerVersion": "4.0",
+      "topology": [
+        "replicaset"
+      ]
+    },
+    {
+      "minServerVersion": "4.1.7",
+      "topology": [
+        "sharded"
+      ]
+    }
+  ],
   "data": [
     {
       "_id": 1,
       "x": 11
     }
   ],
-  "minServerVersion": "3.99",
   "tests": [
     {
       "description": "InsertMany succeeds after PrimarySteppedDown",
-      "clientOptions": {
-        "retryWrites": true
-      },
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -69,9 +79,6 @@
     },
     {
       "description": "InsertMany succeeds after WriteConcernError ShutdownInProgress",
-      "clientOptions": {
-        "retryWrites": true
-      },
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -125,6 +132,55 @@
             {
               "_id": 3,
               "x": 33
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "InsertMany fails with a RetryableWriteError label after two connection failures",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 2
+        },
+        "data": {
+          "failCommands": [
+            "insert"
+          ],
+          "closeConnection": true
+        }
+      },
+      "operation": {
+        "name": "insertMany",
+        "arguments": {
+          "documents": [
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ],
+          "options": {
+            "ordered": true
+          }
+        }
+      },
+      "outcome": {
+        "error": true,
+        "result": {
+          "errorLabelsContain": [
+            "RetryableWriteError"
+          ]
+        },
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "x": 11
             }
           ]
         }

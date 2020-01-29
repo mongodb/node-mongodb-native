@@ -1,14 +1,9 @@
 {
   "runOn": [
     {
-      "minServerVersion": "4.0",
+      "minServerVersion": "4.3.1",
       "topology": [
-        "replicaset"
-      ]
-    },
-    {
-      "minServerVersion": "4.1.7",
-      "topology": [
+        "replicaset",
         "sharded"
       ]
     }
@@ -25,7 +20,7 @@
   ],
   "tests": [
     {
-      "description": "ReplaceOne succeeds after PrimarySteppedDown",
+      "description": "ReplaceOne succeeds with RetryableWriteError from server",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -35,7 +30,10 @@
           "failCommands": [
             "update"
           ],
-          "errorCode": 189
+          "errorCode": 112,
+          "errorLabels": [
+            "RetryableWriteError"
+          ]
         }
       },
       "operation": {
@@ -71,7 +69,7 @@
       }
     },
     {
-      "description": "ReplaceOne succeeds after WriteConcernError ShutdownInProgress",
+      "description": "ReplaceOne fails if server does not return RetryableWriteError",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -81,56 +79,8 @@
           "failCommands": [
             "update"
           ],
-          "writeConcernError": {
-            "code": 91,
-            "errmsg": "Replication is being shut down"
-          }
-        }
-      },
-      "operation": {
-        "name": "replaceOne",
-        "arguments": {
-          "filter": {
-            "_id": 1
-          },
-          "replacement": {
-            "_id": 1,
-            "x": 111
-          }
-        }
-      },
-      "outcome": {
-        "result": {
-          "matchedCount": 1,
-          "modifiedCount": 1,
-          "upsertedCount": 0
-        },
-        "collection": {
-          "data": [
-            {
-              "_id": 1,
-              "x": 111
-            },
-            {
-              "_id": 2,
-              "x": 22
-            }
-          ]
-        }
-      }
-    },
-    {
-      "description": "ReplaceOne fails with a RetryableWriteError label after two connection failures",
-      "failPoint": {
-        "configureFailPoint": "failCommand",
-        "mode": {
-          "times": 2
-        },
-        "data": {
-          "failCommands": [
-            "update"
-          ],
-          "closeConnection": true
+          "errorCode": 11600,
+          "errorLabels": []
         }
       },
       "operation": {
@@ -148,7 +98,7 @@
       "outcome": {
         "error": true,
         "result": {
-          "errorLabelsContain": [
+          "errorLabelsOmit": [
             "RetryableWriteError"
           ]
         },

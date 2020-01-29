@@ -1,14 +1,9 @@
 {
   "runOn": [
     {
-      "minServerVersion": "4.0",
+      "minServerVersion": "4.3.1",
       "topology": [
-        "replicaset"
-      ]
-    },
-    {
-      "minServerVersion": "4.1.7",
-      "topology": [
+        "replicaset",
         "sharded"
       ]
     }
@@ -25,7 +20,7 @@
   ],
   "tests": [
     {
-      "description": "BulkWrite succeeds after PrimarySteppedDown",
+      "description": "BulkWrite succeeds with RetryableWriteError from server",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -35,7 +30,10 @@
           "failCommands": [
             "update"
           ],
-          "errorCode": 189
+          "errorCode": 112,
+          "errorLabels": [
+            "RetryableWriteError"
+          ]
         }
       },
       "operation": {
@@ -105,7 +103,7 @@
       }
     },
     {
-      "description": "BulkWrite succeeds after WriteConcernError ShutdownInProgress",
+      "description": "BulkWrite fails if server does not return RetryableWriteError",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -113,92 +111,10 @@
         },
         "data": {
           "failCommands": [
-            "insert"
-          ],
-          "writeConcernError": {
-            "code": 91,
-            "errmsg": "Replication is being shut down"
-          }
-        }
-      },
-      "operation": {
-        "name": "bulkWrite",
-        "arguments": {
-          "requests": [
-            {
-              "name": "deleteOne",
-              "arguments": {
-                "filter": {
-                  "_id": 1
-                }
-              }
-            },
-            {
-              "name": "insertOne",
-              "arguments": {
-                "document": {
-                  "_id": 3,
-                  "x": 33
-                }
-              }
-            },
-            {
-              "name": "updateOne",
-              "arguments": {
-                "filter": {
-                  "_id": 2
-                },
-                "update": {
-                  "$inc": {
-                    "x": 1
-                  }
-                }
-              }
-            }
-          ],
-          "options": {
-            "ordered": true
-          }
-        }
-      },
-      "outcome": {
-        "result": {
-          "deletedCount": 1,
-          "insertedCount": 1,
-          "insertedIds": {
-            "1": 3
-          },
-          "matchedCount": 1,
-          "modifiedCount": 1,
-          "upsertedCount": 0,
-          "upsertedIds": {}
-        },
-        "collection": {
-          "data": [
-            {
-              "_id": 2,
-              "x": 23
-            },
-            {
-              "_id": 3,
-              "x": 33
-            }
-          ]
-        }
-      }
-    },
-    {
-      "description": "BulkWrite fails with a RetryableWriteError label after two connection failures",
-      "failPoint": {
-        "configureFailPoint": "failCommand",
-        "mode": {
-          "times": 2
-        },
-        "data": {
-          "failCommands": [
             "update"
           ],
-          "closeConnection": true
+          "errorCode": 11600,
+          "errorLabels": []
         }
       },
       "operation": {
@@ -244,19 +160,19 @@
       "outcome": {
         "error": true,
         "result": {
-          "errorLabelsContain": [
+          "errorLabelsOmit": [
             "RetryableWriteError"
           ]
         },
         "collection": {
           "data": [
             {
-              "_id": 2,
-              "x": 23
+              "_id": 1,
+              "x": 11
             },
             {
-              "_id": 3,
-              "x": 33
+              "_id": 2,
+              "x": 22
             }
           ]
         }

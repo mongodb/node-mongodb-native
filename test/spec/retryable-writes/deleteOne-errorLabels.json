@@ -1,9 +1,10 @@
 {
   "runOn": [
     {
-      "minServerVersion": "3.6",
+      "minServerVersion": "4.3.1",
       "topology": [
-        "replicaset"
+        "replicaset",
+        "sharded"
       ]
     }
   ],
@@ -19,11 +20,20 @@
   ],
   "tests": [
     {
-      "description": "DeleteOne is committed on first attempt",
+      "description": "DeleteOne succeeds with RetryableWriteError from server",
       "failPoint": {
-        "configureFailPoint": "onPrimaryTransactionalWrite",
+        "configureFailPoint": "failCommand",
         "mode": {
           "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "delete"
+          ],
+          "errorCode": 112,
+          "errorLabels": [
+            "RetryableWriteError"
+          ]
         }
       },
       "operation": {
@@ -49,47 +59,18 @@
       }
     },
     {
-      "description": "DeleteOne is not committed on first attempt",
+      "description": "DeleteOne fails if server does not return RetryableWriteError",
       "failPoint": {
-        "configureFailPoint": "onPrimaryTransactionalWrite",
+        "configureFailPoint": "failCommand",
         "mode": {
           "times": 1
         },
         "data": {
-          "failBeforeCommitExceptionCode": 1
-        }
-      },
-      "operation": {
-        "name": "deleteOne",
-        "arguments": {
-          "filter": {
-            "_id": 1
-          }
-        }
-      },
-      "outcome": {
-        "result": {
-          "deletedCount": 1
-        },
-        "collection": {
-          "data": [
-            {
-              "_id": 2,
-              "x": 22
-            }
-          ]
-        }
-      }
-    },
-    {
-      "description": "DeleteOne is never committed",
-      "failPoint": {
-        "configureFailPoint": "onPrimaryTransactionalWrite",
-        "mode": {
-          "times": 2
-        },
-        "data": {
-          "failBeforeCommitExceptionCode": 1
+          "failCommands": [
+            "delete"
+          ],
+          "errorCode": 11600,
+          "errorLabels": []
         }
       },
       "operation": {
@@ -102,6 +83,11 @@
       },
       "outcome": {
         "error": true,
+        "result": {
+          "errorLabelsOmit": [
+            "RetryableWriteError"
+          ]
+        },
         "collection": {
           "data": [
             {
