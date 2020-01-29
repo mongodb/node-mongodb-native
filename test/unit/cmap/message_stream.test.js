@@ -8,7 +8,12 @@ const expect = require('chai').expect;
 
 function bufferToStream(buffer) {
   const stream = new Readable();
-  stream.push(buffer);
+  if (Array.isArray(buffer)) {
+    buffer.forEach(b => stream.push(b));
+  } else {
+    stream.push(buffer);
+  }
+
   stream.push(null);
   return stream;
 }
@@ -25,6 +30,31 @@ describe('Message Stream', function() {
         documents: [{ ismaster: 1 }]
       },
       {
+        description: 'valid multiple OP_REPLY',
+        expectedMessageCount: 4,
+        data: Buffer.from(
+          '370000000100000001000000010000000000000000000000000000000000000001000000130000001069736d6173746572000100000000' +
+            '370000000100000001000000010000000000000000000000000000000000000001000000130000001069736d6173746572000100000000' +
+            '370000000100000001000000010000000000000000000000000000000000000001000000130000001069736d6173746572000100000000' +
+            '370000000100000001000000010000000000000000000000000000000000000001000000130000001069736d6173746572000100000000',
+          'hex'
+        ),
+        documents: [{ ismaster: 1 }]
+      },
+      {
+        description: 'valid OP_REPLY (partial)',
+        data: [
+          Buffer.from('37', 'hex'),
+          Buffer.from('0000', 'hex'),
+          Buffer.from(
+            '000100000001000000010000000000000000000000000000000000000001000000130000001069736d6173746572000100000000',
+            'hex'
+          )
+        ],
+        documents: [{ ismaster: 1 }]
+      },
+
+      {
         description: 'valid OP_MSG',
         data: Buffer.from(
           '370000000100000000000000dd0700000000000000220000001069736d6173746572000100000002246462000600000061646d696e0000',
@@ -32,6 +62,19 @@ describe('Message Stream', function() {
         ),
         documents: [{ $db: 'admin', ismaster: 1 }]
       },
+      {
+        description: 'valid multiple OP_MSG',
+        expectedMessageCount: 4,
+        data: Buffer.from(
+          '370000000100000000000000dd0700000000000000220000001069736d6173746572000100000002246462000600000061646d696e0000' +
+            '370000000100000000000000dd0700000000000000220000001069736d6173746572000100000002246462000600000061646d696e0000' +
+            '370000000100000000000000dd0700000000000000220000001069736d6173746572000100000002246462000600000061646d696e0000' +
+            '370000000100000000000000dd0700000000000000220000001069736d6173746572000100000002246462000600000061646d696e0000',
+          'hex'
+        ),
+        documents: [{ $db: 'admin', ismaster: 1 }]
+      },
+
       {
         description: 'Invalid message size (negative)',
         data: Buffer.from('ffffffff', 'hex'),
@@ -46,10 +89,13 @@ describe('Message Stream', function() {
       it(test.description, function(done) {
         const bson = new BSON();
         const error = test.error;
+        const expectedMessageCount = test.expectedMessageCount || 1;
         const inputStream = bufferToStream(test.data);
         const messageStream = new MessageStream({ bson });
 
+        let messageCount = 0;
         messageStream.on('message', msg => {
+          messageCount++;
           if (error) {
             done(new Error(`expected error: ${error}`));
             return;
@@ -63,7 +109,9 @@ describe('Message Stream', function() {
               .that.deep.equals(test.documents);
           }
 
-          done();
+          if (messageCount === expectedMessageCount) {
+            done();
+          }
         });
 
         messageStream.on('error', err => {

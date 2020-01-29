@@ -4,8 +4,13 @@ const Connection = require('../../../lib/cmap/connection').Connection;
 const connect = require('../../../lib/core/connection/connect');
 const expect = require('chai').expect;
 const BSON = require('bson');
+const setupDatabase = require('../../functional/shared').setupDatabase;
 
 describe('Connection', function() {
+  before(function() {
+    return setupDatabase(this.configuration);
+  });
+
   it('should execute a command against a server', function(done) {
     const connectOptions = Object.assign(
       { connectionType: Connection, bson: new BSON() },
@@ -69,5 +74,57 @@ describe('Connection', function() {
       expect(err).to.match(/timed out/);
       done();
     });
+  });
+
+  it('should support calling back multiple times on exhaust commands', {
+    metadata: { requires: { mongodb: '>=4.2.0' } },
+    test: function(done) {
+      const ns = `${this.configuration.db}.$cmd`;
+      const connectOptions = Object.assign(
+        { connectionType: Connection, bson: new BSON() },
+        this.configuration.options
+      );
+
+      connect(connectOptions, (err, conn) => {
+        expect(err).to.not.exist;
+        this.defer(_done => conn.destroy(_done));
+
+        const documents = Array.from(Array(10000), (_, idx) => ({
+          test: Math.floor(Math.random() * idx)
+        }));
+
+        conn.command(ns, { insert: 'test', documents }, (err, res) => {
+          expect(err).to.not.exist;
+          expect(res)
+            .nested.property('result.n')
+            .to.equal(documents.length);
+
+          let totalDocumentsRead = 0;
+          conn.command(ns, { find: 'test', batchSize: 100 }, (err, result) => {
+            expect(err).to.not.exist;
+            expect(result).nested.property('result.cursor').to.exist;
+            const cursor = result.result.cursor;
+            totalDocumentsRead += cursor.firstBatch.length;
+
+            conn.command(
+              ns,
+              { getMore: cursor.id, collection: 'test', batchSize: 100 },
+              { exhaustAllowed: true },
+              (err, result) => {
+                expect(err).to.not.exist;
+                expect(result).nested.property('result.cursor').to.exist;
+                const cursor = result.result.cursor;
+                totalDocumentsRead += cursor.nextBatch.length;
+
+                if (cursor.id === 0 || cursor.id.isZero()) {
+                  expect(totalDocumentsRead).to.equal(documents.length);
+                  done();
+                }
+              }
+            );
+          });
+        });
+      });
+    }
   });
 });
