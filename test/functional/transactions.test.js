@@ -35,9 +35,6 @@ describe('Transactions', function() {
           'count',
           // This test needs there to be multiple mongoses
           'increment txnNumber',
-          // There is something wrong with the distinct command in the runner:
-          // it is not failing properly
-          'add transient label to connection errors',
           // Skipping this until SPEC-1320 is resolved
           'remain pinned after non-transient error on commit'
         ];
@@ -156,10 +153,8 @@ describe('Transactions', function() {
                   expect(session.inTransaction()).to.be.true;
 
                   coll.insertOne({ b: 2 }, { session }, err => {
-                    expect(err)
-                      .to.exist.and.to.be.an.instanceof(MongoNetworkError)
-                      .and.to.have.a.property('errorLabels')
-                      .that.includes('TransientTransactionError');
+                    expect(err).to.exist.and.to.be.an.instanceof(MongoNetworkError);
+                    expect(err.hasErrorLabel('TransientTransactionError')).to.be.true;
 
                     session.abortTransaction(() => session.endSession(() => client.close(done)));
                   });
@@ -191,9 +186,7 @@ describe('Transactions', function() {
             err => {
               expect(err).to.not.exist;
               coll.insertOne({ a: 1 }, err => {
-                expect(err)
-                  .to.exist.and.to.be.an.instanceOf(MongoNetworkError)
-                  .and.to.not.have.a.property('errorLabels');
+                expect(err).to.exist.and.to.be.an.instanceOf(MongoNetworkError);
                 client.close(done);
               });
             }

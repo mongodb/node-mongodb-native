@@ -77,7 +77,7 @@ describe('Connection', function() {
   });
 
   it('should support calling back multiple times on exhaust commands', {
-    metadata: { requires: { mongodb: '>=4.2.0' } },
+    metadata: { requires: { mongodb: '>=4.2.0' }, topology: ['single'] },
     test: function(done) {
       const ns = `${this.configuration.db}.$cmd`;
       const connectOptions = Object.assign(

@@ -42,7 +42,7 @@ describe('examples(transactions):', function() {
           console.log('Transaction aborted. Caught exception during transaction.');
 
           // If transient error, retry the whole transaction
-          if (error.errorLabels && error.errorLabels.indexOf('TransientTransactionError') >= 0) {
+          if (error.hasErrorLabel('TransientTransactionError')) {
             console.log('TransientTransactionError, retrying transaction ...');
             await runTransactionWithRetry(txnFunc, client, session);
           } else {
@@ -98,10 +98,7 @@ describe('examples(transactions):', function() {
           await session.commitTransaction();
           console.log('Transaction committed.');
         } catch (error) {
-          if (
-            error.errorLabels &&
-            error.errorLabels.indexOf('UnknownTransactionCommitResult') >= 0
-          ) {
+          if (error.hasErrorLabel('UnknownTransactionCommitResult')) {
             console.log('UnknownTransactionCommitResult, retrying commit operation ...');
             await commitWithRetry(session);
           } else {
@@ -156,10 +153,7 @@ describe('examples(transactions):', function() {
           await session.commitTransaction();
           console.log('Transaction committed.');
         } catch (error) {
-          if (
-            error.errorLabels &&
-            error.errorLabels.indexOf('UnknownTransactionCommitResult') >= 0
-          ) {
+          if (error.hasErrorLabel('UnknownTransactionCommitResult')) {
             console.log('UnknownTransactionCommitResult, retrying commit operation ...');
             await commitWithRetry(session);
           } else {
@@ -176,7 +170,7 @@ describe('examples(transactions):', function() {
           console.log('Transaction aborted. Caught exception during transaction.');
 
           // If transient error, retry the whole transaction
-          if (error.errorLabels && error.errorLabels.indexOf('TransientTransactionError') >= 0) {
+          if (error.hasErrorLabel('TransientTransactionError')) {
             console.log('TransientTransactionError, retrying transaction ...');
             await runTransactionWithRetry(txnFunc, client, session);
           } else {
