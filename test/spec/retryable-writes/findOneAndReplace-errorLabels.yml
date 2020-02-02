@@ -12,7 +12,7 @@ tests:
           configureFailPoint: failCommand
           mode: { times: 1 }
           data:
-              failCommands: ["findOneAndModify"]
+              failCommands: ["findAndModify"]
               errorCode: 112 # WriteConflict, not a retryable error code
               errorLabels: ["RetryableWriteError"] # Override server behavior: send RetryableWriteError label with non-retryable error code
       operation:
@@ -33,7 +33,7 @@ tests:
           configureFailPoint: failCommand
           mode: { times: 1 }
           data:
-              failCommands: ["findOneAndModify"]
+              failCommands: ["findAndModify"]
               errorCode: 11600 # InterruptedAtShutdown, normally a retryable error code
               errorLabels: []  # Override server behavior: do not send RetryableWriteError label with retryable code
       operation:

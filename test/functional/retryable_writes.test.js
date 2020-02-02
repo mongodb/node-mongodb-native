@@ -71,7 +71,11 @@ function executeScenarioSetup(scenario, test, config, ctx) {
         throw err;
       }
     })
-    .then(() => (scenario.data ? ctx.collection.insertMany(scenario.data) : {}))
+    .then(() =>
+      Array.isArray(scenario.data) && scenario.data.length
+        ? ctx.collection.insertMany(scenario.data)
+        : {}
+    )
     .then(() => (test.failPoint ? ctx.db.executeDbAdminCommand(test.failPoint) : {}));
 }
 

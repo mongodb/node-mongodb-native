@@ -28,7 +28,7 @@
         },
         "data": {
           "failCommands": [
-            "findOneAndModify"
+            "findAndModify"
           ],
           "errorCode": 112,
           "errorLabels": [
@@ -77,7 +77,7 @@
         },
         "data": {
           "failCommands": [
-            "findOneAndModify"
+            "findAndModify"
           ],
           "errorCode": 11600,
           "errorLabels": []
