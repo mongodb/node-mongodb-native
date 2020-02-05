@@ -131,12 +131,19 @@ class NativeConfiguration {
 
     let multipleHosts;
     if (this.options.hosts.length > 1) {
-      multipleHosts = this.options.hosts
-        .reduce((built, host) => {
-          built.push(`${host.host}:${host.port}`);
-          return built;
-        }, [])
-        .join(',');
+      // NOTE: The only way to force a sharded topology with the driver is to duplicate
+      //       the host entry. This will eventually be solved by autodetection.
+      if (this.topologyType === TopologyType.Sharded) {
+        const firstHost = this.options.hosts[0];
+        multipleHosts = `${firstHost.host}:${firstHost.port},${firstHost.host}:${firstHost.port}`;
+      } else {
+        multipleHosts = this.options.hosts
+          .reduce((built, host) => {
+            built.push(`${host.host}:${host.port}`);
+            return built;
+          }, [])
+          .join(',');
+      }
     }
 
     const urlObject = {
