@@ -86,7 +86,6 @@ describe('Client metadata tests', function() {
       _server.once('connect', function(server) {
         server.connectedProxies.forEach(function(x) {
           expect(x.clientMetadata.application.name).to.equal('My application name');
-          expect(x.clientMetadata.platform.split('mongodb-core').length).to.equal(2);
         });
 
         server.destroy(done);
