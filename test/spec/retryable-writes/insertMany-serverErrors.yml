@@ -18,6 +18,7 @@ tests:
             data:
                 failCommands: ["insert"]
                 errorCode: 189
+                errorLabels: ["RetryableWriteError"] # SPEC-1565
         operation:
             name: "insertMany"
             arguments:
@@ -43,6 +44,7 @@ tests:
                 writeConcernError:
                     code: 91
                     errmsg: Replication is being shut down
+                    errorLabels: ["RetryableWriteError"] # SPEC-1565
         operation:
             name: "insertMany"
             arguments:

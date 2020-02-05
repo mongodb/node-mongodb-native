@@ -81,6 +81,9 @@
             "insert"
           ],
           "errorCode": 10107,
+          "errorLabels": [
+            "RetryableWriteError"
+          ],
           "closeConnection": false
         }
       },
@@ -127,6 +130,9 @@
             "insert"
           ],
           "errorCode": 13436,
+          "errorLabels": [
+            "RetryableWriteError"
+          ],
           "closeConnection": false
         }
       },
@@ -173,6 +179,9 @@
             "insert"
           ],
           "errorCode": 13435,
+          "errorLabels": [
+            "RetryableWriteError"
+          ],
           "closeConnection": false
         }
       },
@@ -219,6 +228,9 @@
             "insert"
           ],
           "errorCode": 11602,
+          "errorLabels": [
+            "RetryableWriteError"
+          ],
           "closeConnection": false
         }
       },
@@ -265,6 +277,9 @@
             "insert"
           ],
           "errorCode": 11600,
+          "errorLabels": [
+            "RetryableWriteError"
+          ],
           "closeConnection": false
         }
       },
@@ -311,6 +326,9 @@
             "insert"
           ],
           "errorCode": 189,
+          "errorLabels": [
+            "RetryableWriteError"
+          ],
           "closeConnection": false
         }
       },
@@ -357,6 +375,9 @@
             "insert"
           ],
           "errorCode": 91,
+          "errorLabels": [
+            "RetryableWriteError"
+          ],
           "closeConnection": false
         }
       },
@@ -403,6 +424,9 @@
             "insert"
           ],
           "errorCode": 7,
+          "errorLabels": [
+            "RetryableWriteError"
+          ],
           "closeConnection": false
         }
       },
@@ -449,6 +473,9 @@
             "insert"
           ],
           "errorCode": 6,
+          "errorLabels": [
+            "RetryableWriteError"
+          ],
           "closeConnection": false
         }
       },
@@ -495,6 +522,9 @@
             "insert"
           ],
           "errorCode": 9001,
+          "errorLabels": [
+            "RetryableWriteError"
+          ],
           "closeConnection": false
         }
       },
@@ -541,6 +571,9 @@
             "insert"
           ],
           "errorCode": 89,
+          "errorLabels": [
+            "RetryableWriteError"
+          ],
           "closeConnection": false
         }
       },
@@ -587,6 +620,9 @@
             "insert"
           ],
           "errorCode": 262,
+          "errorLabels": [
+            "RetryableWriteError"
+          ],
           "closeConnection": false
         }
       },
@@ -679,7 +715,10 @@
           ],
           "writeConcernError": {
             "code": 11600,
-            "errmsg": "Replication is being shut down"
+            "errmsg": "Replication is being shut down",
+            "errorLabels": [
+              "RetryableWriteError"
+            ]
           }
         }
       },
@@ -727,7 +766,10 @@
           ],
           "writeConcernError": {
             "code": 11602,
-            "errmsg": "Replication is being shut down"
+            "errmsg": "Replication is being shut down",
+            "errorLabels": [
+              "RetryableWriteError"
+            ]
           }
         }
       },
@@ -775,7 +817,10 @@
           ],
           "writeConcernError": {
             "code": 189,
-            "errmsg": "Replication is being shut down"
+            "errmsg": "Replication is being shut down",
+            "errorLabels": [
+              "RetryableWriteError"
+            ]
           }
         }
       },
@@ -823,7 +868,10 @@
           ],
           "writeConcernError": {
             "code": 91,
-            "errmsg": "Replication is being shut down"
+            "errmsg": "Replication is being shut down",
+            "errorLabels": [
+              "RetryableWriteError"
+            ]
           }
         }
       },
