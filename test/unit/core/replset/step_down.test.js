@@ -68,7 +68,8 @@ describe('Step Down (ReplSet)', function() {
           } else {
             return request.reply({
               ok: 0,
-              errmsg: 'not master'
+              errmsg: 'not master',
+              code: 10107
             });
           }
         }

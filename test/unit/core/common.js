@@ -13,7 +13,7 @@ class ReplSetFixture {
 
   setup(options) {
     options = options || {};
-    const ismaster = options.ismaster ? options.ismaster : mock.DEFAULT_ISMASTER;
+    const ismaster = options.ismaster ? options.ismaster : mock.DEFAULT_ISMASTER_36;
 
     return Promise.all([mock.createServer(), mock.createServer(), mock.createServer()]).then(
       servers => {

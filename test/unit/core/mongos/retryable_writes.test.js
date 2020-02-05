@@ -152,7 +152,7 @@ describe('Retryable Writes (Mongos)', function() {
           } else if (doc.insert) {
             insertCount++;
             if (insertCount === 1) {
-              request.reply({ ok: 0, errmsg: 'not master' }); // simulate a stepdown
+              request.reply({ ok: 0, errmsg: 'not master', code: 10107 }); // simulate a stepdown
             } else {
               command = doc;
               request.reply({ ok: 1 });
