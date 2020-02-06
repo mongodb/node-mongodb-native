@@ -139,8 +139,8 @@ describe('Topology (unit)', function() {
           expect(err).to.not.exist;
           this.defer(() => topology.close());
 
-          let serverError;
-          server.on('error', err => (serverError = err));
+          let serverDescription;
+          server.on('descriptionReceived', sd => (serverDescription = sd));
 
           let poolCleared = false;
           topology.on('connectionPoolCleared', () => (poolCleared = true));
@@ -148,7 +148,7 @@ describe('Topology (unit)', function() {
           server.command('test.test', { insert: { a: 42 } }, (err, result) => {
             expect(result).to.not.exist;
             expect(err).to.exist;
-            expect(err).to.eql(serverError);
+            expect(err).to.eql(serverDescription.error);
             expect(poolCleared).to.be.true;
             done();
           });
@@ -176,8 +176,8 @@ describe('Topology (unit)', function() {
           expect(err).to.not.exist;
           this.defer(() => topology.close());
 
-          let serverError;
-          server.on('error', err => (serverError = err));
+          let serverDescription;
+          server.on('descriptionReceived', sd => (serverDescription = sd));
 
           let poolCleared = false;
           topology.on('connectionPoolCleared', () => (poolCleared = true));
@@ -185,7 +185,7 @@ describe('Topology (unit)', function() {
           server.command('test.test', { insert: { a: 42 } }, (err, result) => {
             expect(result).to.not.exist;
             expect(err).to.exist;
-            expect(err).to.eql(serverError);
+            expect(err).to.eql(serverDescription.error);
             expect(poolCleared).to.be.false;
             done();
           });
@@ -213,13 +213,13 @@ describe('Topology (unit)', function() {
           expect(err).to.not.exist;
           this.defer(() => topology.close());
 
-          let serverError;
-          server.on('error', err => (serverError = err));
+          let serverDescription;
+          server.on('descriptionReceived', sd => (serverDescription = sd));
 
           server.command('test.test', { insert: { a: 42 } }, (err, result) => {
             expect(result).to.not.exist;
             expect(err).to.exist;
-            expect(err).to.eql(serverError);
+            expect(err).to.eql(serverDescription.error);
             expect(server.description.type).to.equal('Unknown');
             done();
           });

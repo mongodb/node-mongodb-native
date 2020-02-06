@@ -361,7 +361,7 @@ describe('Mongos SRV Polling', function() {
               });
             });
 
-            srvPoller.trigger(recordSets[1]);
+            process.nextTick(() => srvPoller.trigger(recordSets[1]));
           } catch (e) {
             done(e);
           }
