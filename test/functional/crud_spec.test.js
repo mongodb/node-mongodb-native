@@ -23,7 +23,6 @@ function findScenarios() {
 
 const readScenarios = findScenarios('v1', 'read');
 const writeScenarios = findScenarios('v1', 'write');
-const dbScenarios = findScenarios('db');
 
 const testContext = {};
 describe('CRUD spec', function() {
@@ -96,37 +95,6 @@ describe('CRUD spec', function() {
             metadata,
             test: function() {
               return executeScenario(scenario, scenarioTest, this.configuration, testContext);
-            }
-          });
-        });
-      });
-    });
-  });
-
-  describe('db', function() {
-    dbScenarios.forEach(scenarioData => {
-      const scenarioName = scenarioData[0];
-      const scenario = scenarioData[1];
-      scenario.name = scenarioName;
-      const databaseName = scenarioData[1].database_name;
-
-      const metadata = {
-        requires: {
-          topology: ['single', 'replicaset', 'sharded']
-        }
-      };
-
-      if (scenario.minServerVersion) {
-        metadata.requires.mongodb = `>=${scenario.minServerVersion}`;
-      }
-
-      describe(scenarioName, function() {
-        scenario.tests.forEach(scenarioTest => {
-          it(scenarioTest.description, {
-            metadata,
-            test: function() {
-              const db = testContext.client.db(databaseName);
-              return executeDbAggregateTest(scenarioTest, db);
             }
           });
         });
@@ -397,19 +365,6 @@ describe('CRUD spec', function() {
         : collection[opName](filter, second, options);
 
     return findPromise.then(assertReadExpectations(db, collection, scenarioTest.outcome));
-  }
-
-  function executeDbAggregateTest(scenarioTest, db) {
-    const options = {};
-    if (scenarioTest.operation.arguments.allowDiskUse) {
-      options.allowDiskUse = scenarioTest.operation.arguments.allowDiskUse;
-    }
-
-    const pipeline = scenarioTest.operation.arguments.pipeline;
-    return db
-      .aggregate(pipeline, options)
-      .toArray()
-      .then(assertReadExpectations(db, null, scenarioTest.outcome));
   }
 
   function executeScenario(scenario, scenarioTest, configuration, context) {

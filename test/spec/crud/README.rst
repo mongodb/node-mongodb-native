@@ -14,7 +14,7 @@ that drivers can use to prove their conformance to the CRUD spec.
 
 Running these integration tests will require a running MongoDB server or
 cluster with server versions 2.6.0 or later. Some tests have specific server
-version requirements as noted by ``minServerVersion`` and ``maxServerVersion``.
+version requirements as noted by the ``runOn`` section, if provided.
 
 Subdirectories for Test Formats
 -------------------------------
@@ -39,21 +39,33 @@ Test Format
 
 Each YAML file has the following keys:
 
+- ``runOn`` (optional): An array of server version and/or topology requirements
+  for which the tests can be run. If the test environment satisfies one or more
+  of these requirements, the tests may be executed; otherwise, this file should
+  be skipped. If this field is omitted, the tests can be assumed to have no
+  particular requirements and should be executed. Each element will have some or
+  all of the following fields:
+
+  - ``minServerVersion`` (optional): The minimum server version (inclusive)
+    required to successfully run the tests. If this field is omitted, it should
+    be assumed that there is no lower bound on the required server version.
+
+  - ``maxServerVersion`` (optional): The maximum server version (inclusive)
+    against which the tests can be run successfully. If this field is omitted,
+    it should be assumed that there is no upper bound on the required server
+    version.
+
+  - ``topology`` (optional): An array of server topologies against which the
+    tests can be run successfully. Valid topologies are "single", "replicaset",
+    and "sharded". If this field is omitted, the default is all topologies (i.e.
+    ``["single", "replicaset", "sharded"]``).
+
 - ``collection_name`` (optional): The collection to use for testing.
 
 - ``database_name`` (optional): The database to use for testing.
 
 - ``data`` (optional): The data that should exist in the collection under test before each
   test run.
-
-- ``minServerVersion`` (optional): The minimum server version (inclusive)
-  required to successfully run the test. If this field is not present, it should
-  be assumed that there is no lower bound on the required server version.
-
-- ``maxServerVersion`` (optional): The maximum server version (exclusive)
-  against which this test can run successfully. If this field is not present,
-  it should be assumed that there is no upper bound on the required server
-  version.
 
 - ``tests``: An array of tests that are to be run independently of each other.
   Each test will have some or all of the following fields:
@@ -95,7 +107,7 @@ Each YAML file has the following keys:
       result object if their BulkWriteException (or equivalent) provides access
       to a write result object.
 
-  - ``expectations`` (optional): Array of documents, each describing a 
+  - ``expectations`` (optional): Array of documents, each describing a
     `CommandStartedEvent <../../command-monitoring/command-monitoring.rst#api>`_
     from the
     `Command Monitoring <../../command-monitoring/command-monitoring.rst>`_
@@ -137,9 +149,25 @@ single operation. Notable differences from the current format are as follows:
   defined under the ``tests[i].outcome.error`` and ``tests[i].outcome.result``
   fields.
 
+- Instead of a top-level ``runOn`` field, server requirements are denoted by
+  separate top-level ``minServerVersion`` and ``maxServerVersion`` fields. The
+  minimum server version is an inclusive lower bound for running the test. The
+  maximum server version is an exclusive upper bound for running the test. If a
+  field is not present, it should be assumed that there is no corresponding bound
+  on the required server version.
+
 The legacy format should not conflict with the newer, multi-operation format
 used by other specs (e.g. Transactions). It is possible to create a unified test
 runner capable of executing both formats (as some drivers do).
+
+Error Assertions for Bulk Write Operations
+==========================================
+
+When asserting errors (e.g. ``errorContains``, ``errorCodeName``) for bulk write
+operations, the test harness should inspect the ``writeConcernError`` and/or
+``writeErrors`` properties of the bulk write exception. This may not be needed for
+``errorContains`` if a driver concatenates all write and write concern error
+messages into the bulk write exception's top-level message.
 
 Test Runner Implementation
 ==========================
@@ -155,7 +183,7 @@ Before running the tests:
 For each test file:
 
 - Using ``globalMongoClient``, check that the current server version satisfies
-  the ``minServerVersion`` and ``maxServerVersion`` top-level fields in the test
+  one of the configurations provided in the top-level ``runOn`` field in the test
   file (if applicable). If the
   requirements are not satisifed, the test file should be skipped.
 
@@ -257,6 +285,14 @@ documents *within* the expected result array and actual cursor.
 Note that in the case of result objects for some CRUD operations, ``expected``
 may condition additional, optional fields (see:
 `Optional Fields in Expected Result Objects`_).
+
+Fields that must NOT be present in Actual Documents
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Some command-started events in ``expectations`` include ``null`` values for
+optional fields such as ``allowDiskUse``.
+Tests MUST assert that the actual command **omits** any field that has a
+``null`` value in the expected command.
 
 Optional Fields in Expected Result Objects
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

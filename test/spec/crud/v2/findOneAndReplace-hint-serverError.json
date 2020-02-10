@@ -1,0 +1,123 @@
+{
+  "runOn": [
+    {
+      "minServerVersion": "4.2.0",
+      "maxServerVersion": "4.3.0"
+    }
+  ],
+  "data": [
+    {
+      "_id": 1,
+      "x": 11
+    },
+    {
+      "_id": 2,
+      "x": 22
+    }
+  ],
+  "collection_name": "findOneAndReplace_hint",
+  "tests": [
+    {
+      "description": "FindOneAndReplace with hint string unsupported (server-side error)",
+      "operations": [
+        {
+          "object": "collection",
+          "name": "findOneAndReplace",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "replacement": {
+              "x": 33
+            },
+            "hint": "_id_"
+          },
+          "error": true
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "findAndModify": "findOneAndReplace_hint",
+              "query": {
+                "_id": 1
+              },
+              "update": {
+                "x": 33
+              },
+              "hint": "_id_"
+            }
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "FindOneAndReplace with hint document unsupported (server-side error)",
+      "operations": [
+        {
+          "object": "collection",
+          "name": "findOneAndReplace",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "replacement": {
+              "x": 33
+            },
+            "hint": {
+              "_id": 1
+            }
+          },
+          "error": true
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "findAndModify": "findOneAndReplace_hint",
+              "query": {
+                "_id": 1
+              },
+              "update": {
+                "x": 33
+              },
+              "hint": {
+                "_id": 1
+              }
+            }
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

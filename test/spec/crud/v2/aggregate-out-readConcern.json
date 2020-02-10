@@ -1,4 +1,13 @@
 {
+  "runOn": [
+    {
+      "minServerVersion": "4.1.0",
+      "topology": [
+        "replicaset",
+        "sharded"
+      ]
+    }
+  ],
   "data": [
     {
       "_id": 1,
@@ -13,7 +22,6 @@
       "x": 33
     }
   ],
-  "minServerVersion": "4.1",
   "collection_name": "test_aggregate_out_readconcern",
   "tests": [
     {

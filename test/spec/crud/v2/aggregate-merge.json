@@ -1,4 +1,9 @@
 {
+  "runOn": [
+    {
+      "minServerVersion": "4.1.11"
+    }
+  ],
   "data": [
     {
       "_id": 1,
@@ -13,7 +18,6 @@
       "x": 33
     }
   ],
-  "minServerVersion": "4.2.0",
   "collection_name": "test_aggregate_merge",
   "tests": [
     {

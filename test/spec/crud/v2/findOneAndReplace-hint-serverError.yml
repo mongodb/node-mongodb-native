@@ -1,0 +1,59 @@
+runOn:
+  # These tests assert that the driver does not raise client-side errors and
+  # instead relies on the server to raise an error. Server versions >= 4.1.10
+  # raise errors for unknown findAndModify options (SERVER-40005), but the spec
+  # requires client-side errors for < 4.2. Support for findAndModify hint was
+  # added in 4.3.1 (SERVER-42099), so we'll allow up to 4.3.0 (inclusive).
+  - { minServerVersion: "4.2.0", maxServerVersion: "4.3.0" }
+
+data:
+  - { _id: 1, x: 11 }
+  - { _id: 2, x: 22 }
+
+collection_name: &collection_name 'findOneAndReplace_hint'
+
+tests:
+  -
+    description: "FindOneAndReplace with hint string unsupported (server-side error)"
+    operations:
+      -
+        object: collection
+        name: findOneAndReplace
+        arguments:
+          filter: &filter { _id: 1 }
+          replacement: &replacement { x: 33 }
+          hint: "_id_"
+        error: true
+    expectations:
+      -
+        command_started_event:
+          command:
+            findAndModify: *collection_name
+            query: *filter
+            update: *replacement
+            hint: "_id_"
+    outcome: &outcome
+      collection:
+        data:
+          - { _id: 1, x: 11 }
+          - { _id: 2, x: 22 }
+  -
+    description: "FindOneAndReplace with hint document unsupported (server-side error)"
+    operations:
+      -
+        object: collection
+        name: findOneAndReplace
+        arguments:
+          filter: *filter
+          replacement: *replacement
+          hint: { _id: 1 }
+        error: true
+    expectations:
+      -
+        command_started_event:
+          command:
+            findAndModify: *collection_name
+            query: *filter
+            update: *replacement
+            hint: { _id: 1 }
+    outcome: *outcome

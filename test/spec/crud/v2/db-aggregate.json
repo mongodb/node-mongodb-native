@@ -1,6 +1,10 @@
 {
+  "runOn": [
+    {
+      "minServerVersion": "3.6.0"
+    }
+  ],
   "database_name": "admin",
-  "minServerVersion": "3.6",
   "tests": [
     {
       "description": "Aggregate with $listLocalSessions",
