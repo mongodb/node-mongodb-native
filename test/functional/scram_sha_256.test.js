@@ -168,6 +168,32 @@ describe('SCRAM-SHA-256 auth', function() {
     }
   });
 
+  it('should shorten SCRAM conversations if the server supports it ', {
+    metadata: { requires: { mongodb: '>=4.3.x' } },
+    test: function() {
+      const options = {
+        auth: {
+          user: userMap.both.username,
+          password: userMap.both.password
+        },
+        authSource: this.configuration.db
+      };
+
+      let sendAuthCommandSpy;
+      test.sandbox
+        .stub(ScramSHA256.prototype, '_executeScram')
+        .callsFake(function(sendAuthCommand, connection, credentials, nonce, callback) {
+          const executeScram = ScramSHA256.prototype._executeScram.wrappedMethod;
+          sendAuthCommandSpy = test.sandbox.spy(sendAuthCommand);
+          executeScram.apply(this, [sendAuthCommandSpy, connection, credentials, nonce, callback]);
+        });
+
+      return withClient(this.configuration.newClient({}, options), () => {
+        expect(sendAuthCommandSpy.callCount).to.equal(2);
+      });
+    }
+  });
+
   // Step 3
   // For test users that support only one mechanism, verify that explictly specifying the other mechanism fails.
   it('should fail to connect if incorrect auth mechanism is explicitly specified', {
