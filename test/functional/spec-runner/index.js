@@ -468,6 +468,35 @@ function resolveOperationArgs(operationName, operationArgs, context) {
 const CURSOR_COMMANDS = new Set(['find', 'aggregate', 'listIndexes', 'listCollections']);
 const ADMIN_COMMANDS = new Set(['listDatabases']);
 
+const kOperations = new Map([
+  [
+    'createIndex',
+    (operation, collection /*, context, options */) => {
+      const fieldOrSpec = operation.arguments.keys;
+      return collection.createIndex(fieldOrSpec);
+    }
+  ],
+  [
+    'dropIndex',
+    (operation, collection /*, context, options */) => {
+      const indexName = operation.arguments.name;
+      return collection.dropIndex(indexName);
+    }
+  ],
+  [
+    'mapReduce',
+    (operation, collection /*, context, options */) => {
+      const args = operation.arguments;
+      const map = args.map;
+      const reduce = args.reduce;
+      const options = {};
+      if (args.out) options.out = args.out;
+
+      return collection.mapReduce(map, reduce, options);
+    }
+  ]
+]);
+
 /**
  *
  * @param {Object} operation the operation definition from the spec test
@@ -482,95 +511,101 @@ function testOperation(operation, obj, context, options) {
   let args = [];
   const operationName = translateOperationName(operation.name);
 
-  if (operation.arguments) {
-    args = resolveOperationArgs(operationName, operation.arguments, context);
+  let opPromise;
+  if (kOperations.has(operationName)) {
+    opPromise = kOperations.get(operationName)(operation, obj, context, options);
+  } else {
+    if (operation.arguments) {
+      args = resolveOperationArgs(operationName, operation.arguments, context);
 
-    if (args == null) {
-      args = [];
-      Object.keys(operation.arguments).forEach(key => {
-        if (key === 'callback') {
-          args.push(() =>
-            testOperations(operation.arguments.callback, context, { swallowOperationErrors: false })
-          );
-          return;
-        }
-
-        if (['filter', 'fieldName', 'document', 'documents', 'pipeline'].indexOf(key) !== -1) {
-          return args.unshift(operation.arguments[key]);
-        }
-
-        if ((key === 'map' || key === 'reduce') && operationName === 'mapReduce') {
-          return args.unshift(operation.arguments[key]);
-        }
-
-        if (key === 'command') return args.unshift(operation.arguments[key]);
-        if (key === 'requests') return args.unshift(extractBulkRequests(operation.arguments[key]));
-        if (key === 'update' || key === 'replacement') return args.push(operation.arguments[key]);
-        if (key === 'session') {
-          if (isTransactionCommand(operationName)) return;
-          opOptions.session = context[operation.arguments.session];
-          return;
-        }
-
-        if (key === 'returnDocument') {
-          opOptions.returnOriginal = operation.arguments[key] === 'Before' ? true : false;
-          return;
-        }
-
-        if (key === 'options') {
-          Object.assign(opOptions, operation.arguments[key]);
-          if (opOptions.readPreference) {
-            opOptions.readPreference = normalizeReadPreference(opOptions.readPreference.mode);
+      if (args == null) {
+        args = [];
+        Object.keys(operation.arguments).forEach(key => {
+          if (key === 'callback') {
+            args.push(() =>
+              testOperations(operation.arguments.callback, context, {
+                swallowOperationErrors: false
+              })
+            );
+            return;
           }
 
-          return;
-        }
+          if (['filter', 'fieldName', 'document', 'documents', 'pipeline'].indexOf(key) !== -1) {
+            return args.unshift(operation.arguments[key]);
+          }
 
-        if (key === 'readPreference') {
-          opOptions[key] = normalizeReadPreference(operation.arguments[key].mode);
-          return;
-        }
+          if ((key === 'map' || key === 'reduce') && operationName === 'mapReduce') {
+            return args.unshift(operation.arguments[key]);
+          }
 
-        opOptions[key] = operation.arguments[key];
-      });
+          if (key === 'command') return args.unshift(operation.arguments[key]);
+          if (key === 'requests')
+            return args.unshift(extractBulkRequests(operation.arguments[key]));
+          if (key === 'update' || key === 'replacement') return args.push(operation.arguments[key]);
+          if (key === 'session') {
+            if (isTransactionCommand(operationName)) return;
+            opOptions.session = context[operation.arguments.session];
+            return;
+          }
+
+          if (key === 'returnDocument') {
+            opOptions.returnOriginal = operation.arguments[key] === 'Before' ? true : false;
+            return;
+          }
+
+          if (key === 'options') {
+            Object.assign(opOptions, operation.arguments[key]);
+            if (opOptions.readPreference) {
+              opOptions.readPreference = normalizeReadPreference(opOptions.readPreference.mode);
+            }
+
+            return;
+          }
+
+          if (key === 'readPreference') {
+            opOptions[key] = normalizeReadPreference(operation.arguments[key].mode);
+            return;
+          }
+
+          opOptions[key] = operation.arguments[key];
+        });
+      }
     }
-  }
 
-  if (
-    args.length === 0 &&
-    !isTransactionCommand(operationName) &&
-    !isTestRunnerCommand(context, operationName)
-  ) {
-    args.push({});
-  }
-
-  if (Object.keys(opOptions).length > 0) {
-    // NOTE: this is awful, but in order to provide options for some methods we need to add empty
-    //       query objects.
-    if (operationName === 'distinct') {
+    if (
+      args.length === 0 &&
+      !isTransactionCommand(operationName) &&
+      !isTestRunnerCommand(context, operationName)
+    ) {
       args.push({});
     }
 
-    args.push(opOptions);
-  }
+    if (Object.keys(opOptions).length > 0) {
+      // NOTE: this is awful, but in order to provide options for some methods we need to add empty
+      //       query objects.
+      if (operationName === 'distinct') {
+        args.push({});
+      }
 
-  if (ADMIN_COMMANDS.has(operationName)) {
-    obj = obj.db().admin();
-  }
+      args.push(opOptions);
+    }
 
-  if (operation.name === 'listDatabaseNames' || operation.name === 'listCollectionNames') {
-    opOptions.nameOnly = true;
-  }
+    if (ADMIN_COMMANDS.has(operationName)) {
+      obj = obj.db().admin();
+    }
 
-  let opPromise;
+    if (operation.name === 'listDatabaseNames' || operation.name === 'listCollectionNames') {
+      opOptions.nameOnly = true;
+    }
 
-  if (CURSOR_COMMANDS.has(operationName)) {
-    // `find` creates a cursor, so we need to call `toArray` on it
-    const cursor = obj[operationName].apply(obj, args);
-    opPromise = cursor.toArray();
-  } else {
-    // wrap this in a `Promise.try` because some operations might throw
-    opPromise = Promise.try(() => obj[operationName].apply(obj, args));
+    if (CURSOR_COMMANDS.has(operationName)) {
+      // `find` creates a cursor, so we need to call `toArray` on it
+      const cursor = obj[operationName].apply(obj, args);
+      opPromise = cursor.toArray();
+    } else {
+      // wrap this in a `Promise.try` because some operations might throw
+      opPromise = Promise.try(() => obj[operationName].apply(obj, args));
+    }
   }
 
   if (operation.error) {
