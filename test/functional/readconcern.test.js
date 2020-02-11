@@ -447,13 +447,13 @@ describe('ReadConcern', function() {
             const reduce = 'function(k,vals) { return 1; }';
 
             // Listen to apm events
-            client.on('commandStarted', filterForCommands('mapreduce', started));
-            client.on('commandSucceeded', filterForCommands('mapreduce', succeeded));
+            client.on('commandStarted', filterForCommands('mapReduce', started));
+            client.on('commandSucceeded', filterForCommands('mapReduce', succeeded));
 
             // Execute mapReduce
             collection.mapReduce(map, reduce, { out: { replace: 'tempCollection' } }, err => {
               expect(err).to.not.exist;
-              validateTestResults(started, succeeded, 'mapreduce');
+              validateTestResults(started, succeeded, 'mapReduce');
               done();
             });
           }

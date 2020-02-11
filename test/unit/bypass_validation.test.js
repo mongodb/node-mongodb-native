@@ -79,7 +79,7 @@ describe('bypass document validation', function() {
 
     test.server.setMessageHandler(request => {
       const doc = request.document;
-      if (doc.mapreduce) {
+      if (doc.mapReduce) {
         try {
           expect(doc.bypassDocumentValidation).equal(config.expected);
           request.reply({

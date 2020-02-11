@@ -733,7 +733,7 @@ describe('Command Write Concern', function() {
     }
   });
 
-  it('successfully pass through writeConcern to dropIndexes command', {
+  it('successfully pass through writeConcern to mapReduce command', {
     metadata: {
       requires: {
         generators: true,
@@ -798,7 +798,7 @@ describe('Command Write Concern', function() {
           var doc = request.document;
           if (doc.ismaster) {
             request.reply(primary[0]);
-          } else if (doc.mapreduce) {
+          } else if (doc.mapReduce) {
             commandResult = doc;
             request.reply({ ok: 1, result: 'tempCollection' });
           } else if (doc.endSessions) {

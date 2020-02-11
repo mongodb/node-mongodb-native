@@ -256,7 +256,7 @@ describe('ReadPreference', function() {
   /**
    * @ignore
    */
-  it('Should fail due to not using mapreduce inline with read preference', {
+  it('Should fail due to not using mapReduce inline with read preference', {
     metadata: { requires: { mongodb: '>=2.6.0', topology: ['single', 'ssl'] } },
 
     // The actual test we wish to run

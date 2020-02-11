@@ -209,7 +209,7 @@ describe('Collation', function() {
     }
   });
 
-  it('Successfully pass through collation to mapreduce command', {
+  it('Successfully pass through collation to mapReduce command', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
     test: function() {
@@ -223,7 +223,7 @@ describe('Collation', function() {
         var doc = request.document;
         if (doc.ismaster) {
           request.reply(primary[0]);
-        } else if (doc.mapreduce) {
+        } else if (doc.mapReduce) {
           commandResult = doc;
           request.reply({ ok: 1, result: 'tempCollection' });
         } else if (doc.endSessions) {
