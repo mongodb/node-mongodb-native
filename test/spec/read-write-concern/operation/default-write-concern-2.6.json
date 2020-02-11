@@ -1,0 +1,544 @@
+{
+  "data": [
+    {
+      "_id": 1,
+      "x": 11
+    },
+    {
+      "_id": 2,
+      "x": 22
+    }
+  ],
+  "collection_name": "default_write_concern_coll",
+  "database_name": "default_write_concern_db",
+  "runOn": [
+    {
+      "minServerVersion": "2.6"
+    }
+  ],
+  "tests": [
+    {
+      "description": "DeleteOne omits default write concern",
+      "operations": [
+        {
+          "name": "deleteOne",
+          "object": "collection",
+          "collectionOptions": {
+            "writeConcern": {}
+          },
+          "arguments": {
+            "filter": {}
+          },
+          "result": {
+            "deletedCount": 1
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "delete": "default_write_concern_coll",
+              "deletes": [
+                {
+                  "q": {},
+                  "limit": 1
+                }
+              ],
+              "writeConcern": null
+            }
+          }
+        }
+      ]
+    },
+    {
+      "description": "DeleteMany omits default write concern",
+      "operations": [
+        {
+          "name": "deleteMany",
+          "object": "collection",
+          "collectionOptions": {
+            "writeConcern": {}
+          },
+          "arguments": {
+            "filter": {}
+          },
+          "result": {
+            "deletedCount": 2
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "delete": "default_write_concern_coll",
+              "deletes": [
+                {
+                  "q": {},
+                  "limit": 0
+                }
+              ],
+              "writeConcern": null
+            }
+          }
+        }
+      ]
+    },
+    {
+      "description": "BulkWrite with all models omits default write concern",
+      "operations": [
+        {
+          "name": "bulkWrite",
+          "object": "collection",
+          "collectionOptions": {
+            "writeConcern": {}
+          },
+          "arguments": {
+            "ordered": true,
+            "requests": [
+              {
+                "name": "deleteMany",
+                "arguments": {
+                  "filter": {}
+                }
+              },
+              {
+                "name": "insertOne",
+                "arguments": {
+                  "document": {
+                    "_id": 1
+                  }
+                }
+              },
+              {
+                "name": "updateOne",
+                "arguments": {
+                  "filter": {
+                    "_id": 1
+                  },
+                  "update": {
+                    "$set": {
+                      "x": 1
+                    }
+                  }
+                }
+              },
+              {
+                "name": "insertOne",
+                "arguments": {
+                  "document": {
+                    "_id": 2
+                  }
+                }
+              },
+              {
+                "name": "replaceOne",
+                "arguments": {
+                  "filter": {
+                    "_id": 1
+                  },
+                  "replacement": {
+                    "x": 2
+                  }
+                }
+              },
+              {
+                "name": "insertOne",
+                "arguments": {
+                  "document": {
+                    "_id": 3
+                  }
+                }
+              },
+              {
+                "name": "updateMany",
+                "arguments": {
+                  "filter": {
+                    "_id": 1
+                  },
+                  "update": {
+                    "$set": {
+                      "x": 3
+                    }
+                  }
+                }
+              },
+              {
+                "name": "deleteOne",
+                "arguments": {
+                  "filter": {
+                    "_id": 3
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "name": "default_write_concern_coll",
+          "data": [
+            {
+              "_id": 1,
+              "x": 3
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      },
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "delete": "default_write_concern_coll",
+              "deletes": [
+                {
+                  "q": {},
+                  "limit": 0
+                }
+              ],
+              "writeConcern": null
+            }
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "insert": "default_write_concern_coll",
+              "documents": [
+                {
+                  "_id": 1
+                }
+              ],
+              "writeConcern": null
+            }
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "update": "default_write_concern_coll",
+              "updates": [
+                {
+                  "q": {
+                    "_id": 1
+                  },
+                  "u": {
+                    "$set": {
+                      "x": 1
+                    }
+                  }
+                }
+              ],
+              "writeConcern": null
+            }
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "insert": "default_write_concern_coll",
+              "documents": [
+                {
+                  "_id": 2
+                }
+              ],
+              "writeConcern": null
+            }
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "update": "default_write_concern_coll",
+              "updates": [
+                {
+                  "q": {
+                    "_id": 1
+                  },
+                  "u": {
+                    "x": 2
+                  }
+                }
+              ],
+              "writeConcern": null
+            }
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "insert": "default_write_concern_coll",
+              "documents": [
+                {
+                  "_id": 3
+                }
+              ],
+              "writeConcern": null
+            }
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "update": "default_write_concern_coll",
+              "updates": [
+                {
+                  "q": {
+                    "_id": 1
+                  },
+                  "u": {
+                    "$set": {
+                      "x": 3
+                    }
+                  },
+                  "multi": true
+                }
+              ],
+              "writeConcern": null
+            }
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "delete": "default_write_concern_coll",
+              "deletes": [
+                {
+                  "q": {
+                    "_id": 3
+                  },
+                  "limit": 1
+                }
+              ],
+              "writeConcern": null
+            }
+          }
+        }
+      ]
+    },
+    {
+      "description": "InsertOne and InsertMany omit default write concern",
+      "operations": [
+        {
+          "name": "insertOne",
+          "object": "collection",
+          "collectionOptions": {
+            "writeConcern": {}
+          },
+          "arguments": {
+            "document": {
+              "_id": 3
+            }
+          }
+        },
+        {
+          "name": "insertMany",
+          "object": "collection",
+          "collectionOptions": {
+            "writeConcern": {}
+          },
+          "arguments": {
+            "documents": [
+              {
+                "_id": 4
+              },
+              {
+                "_id": 5
+              }
+            ]
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "name": "default_write_concern_coll",
+          "data": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3
+            },
+            {
+              "_id": 4
+            },
+            {
+              "_id": 5
+            }
+          ]
+        }
+      },
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "insert": "default_write_concern_coll",
+              "documents": [
+                {
+                  "_id": 3
+                }
+              ],
+              "writeConcern": null
+            }
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "insert": "default_write_concern_coll",
+              "documents": [
+                {
+                  "_id": 4
+                },
+                {
+                  "_id": 5
+                }
+              ],
+              "writeConcern": null
+            }
+          }
+        }
+      ]
+    },
+    {
+      "description": "UpdateOne, UpdateMany, and ReplaceOne omit default write concern",
+      "operations": [
+        {
+          "name": "updateOne",
+          "object": "collection",
+          "collectionOptions": {
+            "writeConcern": {}
+          },
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "update": {
+              "$set": {
+                "x": 1
+              }
+            }
+          }
+        },
+        {
+          "name": "updateMany",
+          "object": "collection",
+          "collectionOptions": {
+            "writeConcern": {}
+          },
+          "arguments": {
+            "filter": {
+              "_id": 2
+            },
+            "update": {
+              "$set": {
+                "x": 2
+              }
+            }
+          }
+        },
+        {
+          "name": "replaceOne",
+          "object": "collection",
+          "collectionOptions": {
+            "writeConcern": {}
+          },
+          "arguments": {
+            "filter": {
+              "_id": 2
+            },
+            "replacement": {
+              "x": 3
+            }
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "name": "default_write_concern_coll",
+          "data": [
+            {
+              "_id": 1,
+              "x": 1
+            },
+            {
+              "_id": 2,
+              "x": 3
+            }
+          ]
+        }
+      },
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "update": "default_write_concern_coll",
+              "updates": [
+                {
+                  "q": {
+                    "_id": 1
+                  },
+                  "u": {
+                    "$set": {
+                      "x": 1
+                    }
+                  }
+                }
+              ],
+              "writeConcern": null
+            }
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "update": "default_write_concern_coll",
+              "updates": [
+                {
+                  "q": {
+                    "_id": 2
+                  },
+                  "u": {
+                    "$set": {
+                      "x": 2
+                    }
+                  },
+                  "multi": true
+                }
+              ],
+              "writeConcern": null
+            }
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "update": "default_write_concern_coll",
+              "updates": [
+                {
+                  "q": {
+                    "_id": 2
+                  },
+                  "u": {
+                    "x": 3
+                  }
+                }
+              ],
+              "writeConcern": null
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

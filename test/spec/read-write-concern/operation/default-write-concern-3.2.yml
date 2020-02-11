@@ -1,0 +1,58 @@
+# Test that setting a default write concern does not add a write concern
+# to the command sent over the wire.
+# Test operations that require 3.2+ server, where findAndModify started
+# to accept a write concern.
+
+data:
+  - {_id: 1, x: 11}
+  - {_id: 2, x: 22}
+collection_name: &collection_name default_write_concern_coll
+database_name: &database_name default_write_concern_db
+
+runOn:
+    - minServerVersion: "3.2"
+
+tests:
+  - description: 'findAndModify operations omit default write concern'
+    operations:
+      - name: findOneAndUpdate
+        object: collection
+        collectionOptions: {writeConcern: {}}
+        arguments:
+          filter: {_id: 1}
+          update: {$set: {x: 1}}
+      - name: findOneAndReplace
+        object: collection
+        collectionOptions: {writeConcern: {}}
+        arguments:
+          filter: {_id: 2}
+          replacement: {x: 2}
+      - name: findOneAndDelete
+        object: collection
+        collectionOptions: {writeConcern: {}}
+        arguments:
+          filter: {_id: 2}
+    outcome:
+      collection:
+        name: *collection_name
+        data:
+          - {_id: 1, x: 1}
+    expectations:
+      - command_started_event:
+          command:
+            findAndModify: *collection_name
+            query: {_id: 1}
+            update: {$set: {x: 1}}
+            writeConcern: null
+      - command_started_event:
+          command:
+            findAndModify: *collection_name
+            query: {_id: 2}
+            update: {x: 2}
+            writeConcern: null
+      - command_started_event:
+          command:
+            findAndModify: *collection_name
+            query: {_id: 2}
+            remove: true
+            writeConcern: null

@@ -1,0 +1,125 @@
+{
+  "data": [
+    {
+      "_id": 1,
+      "x": 11
+    },
+    {
+      "_id": 2,
+      "x": 22
+    }
+  ],
+  "collection_name": "default_write_concern_coll",
+  "database_name": "default_write_concern_db",
+  "runOn": [
+    {
+      "minServerVersion": "3.2"
+    }
+  ],
+  "tests": [
+    {
+      "description": "findAndModify operations omit default write concern",
+      "operations": [
+        {
+          "name": "findOneAndUpdate",
+          "object": "collection",
+          "collectionOptions": {
+            "writeConcern": {}
+          },
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "update": {
+              "$set": {
+                "x": 1
+              }
+            }
+          }
+        },
+        {
+          "name": "findOneAndReplace",
+          "object": "collection",
+          "collectionOptions": {
+            "writeConcern": {}
+          },
+          "arguments": {
+            "filter": {
+              "_id": 2
+            },
+            "replacement": {
+              "x": 2
+            }
+          }
+        },
+        {
+          "name": "findOneAndDelete",
+          "object": "collection",
+          "collectionOptions": {
+            "writeConcern": {}
+          },
+          "arguments": {
+            "filter": {
+              "_id": 2
+            }
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "name": "default_write_concern_coll",
+          "data": [
+            {
+              "_id": 1,
+              "x": 1
+            }
+          ]
+        }
+      },
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "findAndModify": "default_write_concern_coll",
+              "query": {
+                "_id": 1
+              },
+              "update": {
+                "$set": {
+                  "x": 1
+                }
+              },
+              "writeConcern": null
+            }
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "findAndModify": "default_write_concern_coll",
+              "query": {
+                "_id": 2
+              },
+              "update": {
+                "x": 2
+              },
+              "writeConcern": null
+            }
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "findAndModify": "default_write_concern_coll",
+              "query": {
+                "_id": 2
+              },
+              "remove": true,
+              "writeConcern": null
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

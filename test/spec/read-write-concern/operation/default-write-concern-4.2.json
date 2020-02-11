@@ -1,0 +1,87 @@
+{
+  "data": [
+    {
+      "_id": 1,
+      "x": 11
+    },
+    {
+      "_id": 2,
+      "x": 22
+    }
+  ],
+  "collection_name": "default_write_concern_coll",
+  "database_name": "default_write_concern_db",
+  "runOn": [
+    {
+      "minServerVersion": "4.2"
+    }
+  ],
+  "tests": [
+    {
+      "description": "Aggregate with $merge omits default write concern",
+      "operations": [
+        {
+          "object": "collection",
+          "databaseOptions": {
+            "writeConcern": {}
+          },
+          "collectionOptions": {
+            "writeConcern": {}
+          },
+          "name": "aggregate",
+          "arguments": {
+            "pipeline": [
+              {
+                "$match": {
+                  "_id": {
+                    "$gt": 1
+                  }
+                }
+              },
+              {
+                "$merge": {
+                  "into": "other_collection_name"
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "aggregate": "default_write_concern_coll",
+              "pipeline": [
+                {
+                  "$match": {
+                    "_id": {
+                      "$gt": 1
+                    }
+                  }
+                },
+                {
+                  "$merge": {
+                    "into": "other_collection_name"
+                  }
+                }
+              ],
+              "writeConcern": null
+            }
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "name": "other_collection_name",
+          "data": [
+            {
+              "_id": 2,
+              "x": 22
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

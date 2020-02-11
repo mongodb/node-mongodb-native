@@ -1,0 +1,95 @@
+# Test that setting a default write concern does not add a write concern
+# to the command sent over the wire.
+# Test operations that require 3.4+ server, where all commands started
+# to accept a write concern.
+
+data:
+  - {_id: 1, x: 11}
+  - {_id: 2, x: 22}
+collection_name: &collection_name default_write_concern_coll
+database_name: &database_name default_write_concern_db
+
+runOn:
+    - minServerVersion: "3.4"
+
+tests:
+  - description: Aggregate with $out omits default write concern
+    operations:
+      - object: collection
+        collectionOptions: {writeConcern: {}}
+        name: aggregate
+        arguments:
+          pipeline: &out_pipeline
+            - $match: {_id: {$gt: 1}}
+            - $out: &other_collection_name "other_collection_name"
+    outcome:
+      collection:
+        name: *other_collection_name
+        data:
+          - {_id: 2, x: 22}
+    expectations:
+      - command_started_event:
+          command:
+            aggregate: *collection_name
+            pipeline: *out_pipeline
+            writeConcern: null
+  - description: RunCommand with a write command omits default write concern (runCommand should never inherit write concern)
+    operations:
+      - object: database
+        databaseOptions: {writeConcern: {}}
+        name: runCommand
+        command_name: delete
+        arguments:
+          command:
+            delete: *collection_name
+            deletes:
+              - {q: {}, limit: 1}
+    expectations:
+      - command_started_event:
+          command:
+            delete: *collection_name
+            deletes:
+              - {q: {}, limit: 1}
+            writeConcern: null
+  - description: CreateIndex and dropIndex omits default write concern 
+    operations:
+      - object: collection
+        collectionOptions: {writeConcern: {}}
+        name: createIndex
+        arguments:
+          keys: {x: 1}
+      - object: collection
+        collectionOptions: {writeConcern: {}}
+        name: dropIndex
+        arguments:
+          name: x_1
+    expectations:
+      - command_started_event:
+          command:
+            createIndexes: *collection_name
+            indexes:
+              - name: x_1
+                key: {x: 1}
+            writeConcern: null
+      - command_started_event:
+          command:
+            dropIndexes: *collection_name
+            index: x_1
+            writeConcern: null
+  - description: MapReduce omits default write concern
+    operations:
+      - name: mapReduce
+        object: collection
+        collectionOptions: {writeConcern: {}}
+        arguments:
+          map: { $code: 'function inc() { return emit(0, this.x + 1) }' }
+          reduce: { $code: 'function sum(key, values) { return values.reduce((acc, x) => acc + x); }' }
+          out: { inline: 1 }
+    expectations:
+      - command_started_event:
+          command:
+            mapReduce: *collection_name
+            map: { $code: 'function inc() { return emit(0, this.x + 1) }' }
+            reduce: { $code: 'function sum(key, values) { return values.reduce((acc, x) => acc + x); }' }
+            out: { inline: 1 }
+            writeConcern: null
