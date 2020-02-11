@@ -152,7 +152,7 @@ function prepareDatabaseForSuite(suite, context) {
     .admin()
     .command({ killAllSessions: [] })
     .catch(err => {
-      if (err.code === 11601) {
+      if (err.code === 11601 || err.message.match(/no such/)) {
         return;
       }
 
@@ -259,17 +259,24 @@ function runTestSuiteTest(configuration, spec, context) {
 
     spec.sessionOptions = spec.sessionOptions || {};
     const database = client.db(context.dbName);
-    const session0 = client.startSession(
-      Object.assign({}, sessionOptions, parseSessionOptions(spec.sessionOptions.session0))
-    );
-    const session1 = client.startSession(
-      Object.assign({}, sessionOptions, parseSessionOptions(spec.sessionOptions.session1))
-    );
 
-    const savedSessionData = {
-      session0: JSON.parse(EJSON.stringify(session0.id)),
-      session1: JSON.parse(EJSON.stringify(session1.id))
-    };
+    let session0, session1;
+    let savedSessionData;
+    try {
+      session0 = client.startSession(
+        Object.assign({}, sessionOptions, parseSessionOptions(spec.sessionOptions.session0))
+      );
+      session1 = client.startSession(
+        Object.assign({}, sessionOptions, parseSessionOptions(spec.sessionOptions.session1))
+      );
+
+      savedSessionData = {
+        session0: JSON.parse(EJSON.stringify(session0.id)),
+        session1: JSON.parse(EJSON.stringify(session1.id))
+      };
+    } catch (err) {
+      // ignore
+    }
 
     // enable to see useful APM debug information at the time of actual test run
     // displayCommands = true;
@@ -292,8 +299,8 @@ function runTestSuiteTest(configuration, spec, context) {
         throw err;
       })
       .then(() => {
-        session0.endSession();
-        session1.endSession();
+        if (session0) session0.endSession();
+        if (session1) session1.endSession();
 
         return validateExpectations(context.commandEvents, spec, savedSessionData);
       });
