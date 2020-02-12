@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="3.5.3"></a>
+## [3.5.3](https://github.com/mongodb/node-mongodb-native/compare/v3.5.2...v3.5.3) (2020-02-12)
+
+
+### Bug Fixes
+
+* **message-stream:** support multiple inbound message packets ([8388443](https://github.com/mongodb/node-mongodb-native/commit/8388443))
+* **server:** non-timeout network errors transition to Unknown state ([fa4b01b](https://github.com/mongodb/node-mongodb-native/commit/fa4b01b))
+
+
+### Features
+
+* **connection:** support exhaust behavior at the transport level ([9ccf268](https://github.com/mongodb/node-mongodb-native/commit/9ccf268))
+
+
+
 <a name="3.5.2"></a>
 ## [3.5.2](https://github.com/mongodb/node-mongodb-native/compare/v3.5.1...v3.5.2) (2020-01-20)
 
