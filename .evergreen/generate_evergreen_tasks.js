@@ -189,6 +189,29 @@ TASKS.push({
   ]
 });
 
+TASKS.push({
+  name: 'aws-auth-test',
+  commands: [
+    { func: 'install dependencies' },
+    {
+      func: 'bootstrap mongo-orchestration',
+      vars: {
+        AUTH: 'auth',
+        ORCHESTRATION_FILE: 'auth-aws.json',
+        TOPOLOGY: 'server'
+      },
+    },
+    { func: 'add aws auth variables to file' },
+    { func: 'run aws auth test with regular aws credentials' },
+    { func: 'run aws auth test with assume role credentials' },
+    { func: 'run aws auth test with aws EC2 credentials' },
+    { func: 'run aws auth test with aws credentials as environment variables' },
+    { func: 'run aws auth test with aws credentials and session token as environment variables' },
+    { func: 'run aws ECS auth test' }
+  ]
+});
+
+
 const BUILD_VARIANTS = [];
 
 const getTaskList = (() => {
@@ -241,6 +264,17 @@ OPERATING_SYSTEMS.forEach(
     });
   }
 );
+
+// special case for MONGODB-AWS authentication
+BUILD_VARIANTS.push({
+  name: 'ubuntu1804-test-mongodb-aws',
+  display_name: 'MONGODB-AWS Auth test',
+  run_on: 'ubuntu1804-test',
+  expansions: {
+    NODE_LTS_NAME: 'carbon'
+  },
+  tasks: ['aws-auth-test']
+})
 
 const fileData = yaml.safeLoad(fs.readFileSync(`${__dirname}/config.yml.in`, 'utf8'));
 

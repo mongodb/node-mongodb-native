@@ -7,12 +7,22 @@ const MongoClient = require('../../../lib/mongo_client');
 const TopologyType = require('../../../lib/core/sdam/common').TopologyType;
 const core = require('../../../lib/core');
 
+function convertToConnStringMap(obj) {
+  let result = [];
+  Object.keys(obj).forEach(key => {
+    result.push(`${key}:${obj[key]}`);
+  });
+
+  return result.join(',');
+}
+
 class NativeConfiguration {
   constructor(parsedURI, context) {
     this.topologyType = context.topologyType;
     this.clientSideEncryption = context.clientSideEncryption;
     this.options = Object.assign(
       {
+        auth: parsedURI.auth,
         hosts: parsedURI.hosts,
         host: parsedURI.hosts[0] ? parsedURI.hosts[0].host : 'localhost',
         port: parsedURI.hosts[0] ? parsedURI.hosts[0].port : 27017,
@@ -81,19 +91,41 @@ class NativeConfiguration {
       dbHost = qs.escape(dbHost);
     }
 
+    if (this.options.authMechanism) {
+      Object.assign(dbOptions, {
+        authMechanism: this.options.authMechanism
+      });
+    }
+
+    if (this.options.authMechanismProperties) {
+      Object.assign(dbOptions, {
+        authMechanismProperties: convertToConnStringMap(this.options.authMechanismProperties)
+      });
+    }
+
     if (this.options.replicaSet) {
       Object.assign(dbOptions, { replicaSet: this.options.replicaSet, auto_reconnect: false });
     }
 
-    const connectionString = url.format({
+    const urlOptions = {
       protocol: 'mongodb',
       slashes: true,
       hostname: dbHost,
       port: dbPort,
       query: dbOptions,
       pathname: '/'
-    });
+    };
 
+    if (this.options.auth) {
+      let auth = this.options.auth.username;
+      if (this.options.auth.password) {
+        auth = `${auth}:${this.options.auth.password}`;
+      }
+
+      urlOptions.auth = auth;
+    }
+
+    const connectionString = url.format(urlOptions);
     return new MongoClient(connectionString, serverOptions);
   }
 
@@ -123,7 +155,9 @@ class NativeConfiguration {
     return new core.Server(Object.assign({ host, port }, options));
   }
 
-  url(username, password) {
+  url(username, password, options) {
+    options = options || {};
+
     const query = {};
     if (this.options.replicaSet) {
       Object.assign(query, { replicaSet: this.options.replicaSet, auto_reconnect: false });
@@ -164,6 +198,20 @@ class NativeConfiguration {
 
     if (username || password) {
       urlObject.auth = password == null ? username : `${username}:${password}`;
+
+      if (options.authMechanism || this.options.authMechanism) {
+        Object.assign(query, {
+          authMechanism: options.authMechanism || this.options.authMechanism
+        });
+      }
+
+      if (options.authMechanismProperties || this.options.authMechanismProperties) {
+        Object.assign(query, {
+          authMechanismProperties: convertToConnStringMap(
+            options.authMechanismProperties || this.options.authMechanismProperties
+          )
+        });
+      }
     }
 
     if (multipleHosts) {
