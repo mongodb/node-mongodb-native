@@ -7,6 +7,7 @@ const ServerDescription = require('../../../lib/core/sdam/server_description').S
 const sdamEvents = require('../../../lib/core/sdam/events');
 const parse = require('../../../lib/core/uri_parser');
 const sinon = require('sinon');
+const EJSON = require('mongodb-extjson');
 
 const chai = require('chai');
 chai.use(require('chai-subset'));
@@ -25,7 +26,10 @@ function collectTests() {
       .readdirSync(path.join(specDir, testType))
       .filter(f => path.extname(f) === '.json')
       .map(f => {
-        const result = JSON.parse(fs.readFileSync(path.join(specDir, testType, f)));
+        const result = EJSON.parse(fs.readFileSync(path.join(specDir, testType, f)), {
+          relaxed: true
+        });
+
         result.type = testType;
         return result;
       });
@@ -226,7 +230,7 @@ function executeSDAMTest(testData, testDone) {
               const omittedFields = findOmittedFields(expectedServer);
 
               const actualServer = actualServers.get(serverName);
-              expect(actualServer).to.deep.include(expectedServer);
+              expect(actualServer).to.matchMongoSpec(expectedServer);
 
               if (omittedFields.length) {
                 expect(actualServer).to.not.have.all.keys(omittedFields);
@@ -254,7 +258,7 @@ function executeSDAMTest(testData, testDone) {
           }
 
           expect(description).to.include.keys(translatedKey);
-          expect(description[translatedKey]).to.eql(outcomeValue);
+          expect(description[translatedKey]).to.eql(outcomeValue, `(key="${translatedKey}")`);
         });
 
         // remove error handler
