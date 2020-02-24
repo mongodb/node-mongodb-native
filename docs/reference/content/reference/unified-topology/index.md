@@ -13,6 +13,7 @@ title = "Unified Topology Design"
 At the time of writing the node driver has seven topology classes, including the newly introduced unified topology. Each legacy topology type from the core module targets a supported topology class: Replica Sets, Sharded Deployments (mongos) and Standalone servers. On top of each of these rests a thin topology wrapper from the "native" layer which introduces the concept of a "disconnect handler", essentially a callback queue for handling naive retryability.
 
 The goal of the unified topology is threefold:
+
   - fully support the drivers Server Discovery and Monitoring, Server Selection and Max Staleness specifications
   - reduce the maintenance burden of supporting the topology layer in the driver by modeling all supported topology types with a single engine
   - remove confusing functionality which could be potentially dangerous for our users
@@ -32,6 +33,7 @@ const client = MongoClient('mongodb://localhost:27017', { useUnifiedTopology: tr
 ## Deprecated events and options
 
 The unified topology no longer supports the following events:
+
 - `reconnect`
 - `reconnectFailed`
 - `attemptReconnect`
@@ -44,12 +46,13 @@ The unified topology no longer supports the following events:
 - `open`
 
 It also deprecates the following options passed into the `MongoClient`:
+
 - `autoReconnect`
 - `reconnectTries`
 - `reconnectInterval`
 - `bufferMaxEntries`
 
-The following sections will go into detail about why tese values are no longer used.
+The following sections will go into detail about why these values are no longer used.
 
 ### `MongoClient.connect`, `isConnected`
 
@@ -98,6 +101,7 @@ The `serverSelection` method above will loop for up to `serverSelectionTimeoutMS
 ### disconnectHandler
 
 The three topology types from the "native" layer (in `lib/topologies`) primarily provide support for a callback store, called the "disconnect handler". Rather than using a server selection loop, the legacy topologies instead place callbacks on this store in cases when no suitable server is available, intending to run the operation at some later time. This callback store also provides a form of naive retryability, however in practice this might lead to unexpected, or even unintended results:
+
   - The callback store is only associated with a single server, so attempts to re-execute an operation are only ever made against the originally selected server. If that server never comes back (it was stepped down, and decommissioned for instance), the operation will sit in limbo.
   - There is no collaboration with the server to ensure that queued write operations only happen one time. Imagine running an `updateOne` operation which is interrupted by a network error. The operation was successfully sent to the server, but the server response was lost during the interruption, which means the operation is placed in the callback store to be retried. At the same, another microservice allows a user to update the written data. Once the original client is reconnected to the server, it automatically rexecutes the operation and updates the _newer_ data with an _older_ value.
 
