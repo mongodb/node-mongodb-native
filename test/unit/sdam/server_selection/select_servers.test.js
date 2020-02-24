@@ -64,4 +64,62 @@ describe('selectServer', function() {
       });
     });
   });
+
+  describe('waitQueue', function() {
+    it('should process all wait queue members, including selection with errors', function(done) {
+      const topology = new Topology('someserver:27019');
+      const selectServer = this.sinon
+        .stub(Topology.prototype, 'selectServer')
+        .callsFake(function(selector, options, callback) {
+          const server = Array.from(this.s.servers.values())[0];
+          selectServer.restore();
+          callback(null, server);
+        });
+
+      this.sinon.stub(Server.prototype, 'connect').callsFake(function() {
+        this.s.state = 'connected';
+        this.emit('connect');
+      });
+
+      const toSelect = 10;
+      let completed = 0;
+      function finish() {
+        completed++;
+        console.log(completed);
+        if (completed === toSelect) done();
+      }
+
+      // methodology:
+      //   - perform 9 server selections, a few with a selector that throws an error
+      //   - ensure each selection immediately returns an empty result (gated by a boolean)
+      //     guaranteeing tha the queue will be full before the last selection
+      //   - make one last selection, but ensure that all selections are no longer blocked from
+      //     returning their value
+      //   - verify that 10 callbacks were called
+
+      topology.connect(err => {
+        expect(err).to.not.exist;
+
+        let preventSelection = true;
+        const anySelector = td => {
+          if (preventSelection) return [];
+          const server = Array.from(td.servers.values())[0];
+          return [server];
+        };
+
+        const failingSelector = () => {
+          if (preventSelection) return [];
+          throw new TypeError('bad news!');
+        };
+
+        preventSelection = true;
+        for (let i = 0; i < toSelect - 1; ++i) {
+          topology.selectServer(i % 5 === 0 ? failingSelector : anySelector, finish);
+        }
+
+        preventSelection = false;
+        topology.selectServer(anySelector, finish);
+      });
+    });
+  });
 });
