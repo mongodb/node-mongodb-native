@@ -45,9 +45,9 @@ const OPERATING_SYSTEMS = [
   },
   // macos
   {
-    name: 'macos-1012',
-    display_name: 'macOS 10.12',
-    run_on: 'macos-1012',
+    name: 'macos-1014',
+    display_name: 'macOS 10.14',
+    run_on: 'macos-1014',
     auth: false
   },
   // rhel
