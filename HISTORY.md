@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="3.5.4"></a>
+## [3.5.4](https://github.com/mongodb/node-mongodb-native/compare/v3.5.3...v3.5.4) (2020-02-25)
+
+
+### Bug Fixes
+
+* **cmap:** don't run min connection thread if no minimum specified ([2d1b713](https://github.com/mongodb/node-mongodb-native/commit/2d1b713))
+* **sdam:** use ObjectId comparison to track maxElectionId ([a1e0849](https://github.com/mongodb/node-mongodb-native/commit/a1e0849))
+* **topology:** ensure selection wait queue is always processed ([bf701d6](https://github.com/mongodb/node-mongodb-native/commit/bf701d6))
+* **topology:** enter `STATE_CLOSING` before draining waitQueue ([494dffb](https://github.com/mongodb/node-mongodb-native/commit/494dffb))
+* don't consume first document when calling `hasNext` on cursor ([bb359a1](https://github.com/mongodb/node-mongodb-native/commit/bb359a1))
+
+
+### Features
+
+* add utility helper for returning promises or using callbacks ([ac9e4c9](https://github.com/mongodb/node-mongodb-native/commit/ac9e4c9))
+
+
+
 <a name="3.5.3"></a>
 ## [3.5.3](https://github.com/mongodb/node-mongodb-native/compare/v3.5.2...v3.5.3) (2020-02-12)
 
