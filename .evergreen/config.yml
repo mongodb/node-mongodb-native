@@ -1027,9 +1027,9 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: argon
     tasks: *ref_0
-  - name: macos-1012-dubnium
-    display_name: macOS 10.12 Node Dubnium
-    run_on: macos-1012
+  - name: macos-1014-dubnium
+    display_name: macOS 10.14 Node Dubnium
+    run_on: macos-1014
     expansions:
       NODE_LTS_NAME: dubnium
     tasks: &ref_2
@@ -1082,21 +1082,21 @@ buildvariants:
       - test-2.6-replica_set-unified
       - test-2.6-sharded_cluster-unified
       - test-atlas-connectivity
-  - name: macos-1012-carbon
-    display_name: macOS 10.12 Node Carbon
-    run_on: macos-1012
+  - name: macos-1014-carbon
+    display_name: macOS 10.14 Node Carbon
+    run_on: macos-1014
     expansions:
       NODE_LTS_NAME: carbon
     tasks: *ref_2
-  - name: macos-1012-boron
-    display_name: macOS 10.12 Node Boron
-    run_on: macos-1012
+  - name: macos-1014-boron
+    display_name: macOS 10.14 Node Boron
+    run_on: macos-1014
     expansions:
       NODE_LTS_NAME: boron
     tasks: *ref_2
-  - name: macos-1012-argon
-    display_name: macOS 10.12 Node Argon
-    run_on: macos-1012
+  - name: macos-1014-argon
+    display_name: macOS 10.14 Node Argon
+    run_on: macos-1014
     expansions:
       NODE_LTS_NAME: argon
     tasks: *ref_2

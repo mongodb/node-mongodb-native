@@ -6,6 +6,7 @@ const expect = require('chai').expect;
 const Long = require('bson').Long;
 const sinon = require('sinon');
 const Buffer = require('safe-buffer').Buffer;
+const Writable = require('stream').Writable;
 
 const core = require('../../lib/core');
 const ReadPreference = core.ReadPreference;
@@ -4371,11 +4372,15 @@ describe('Cursor', function() {
     const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
 
     client.connect(function(err, client) {
+      expect(err).to.not.exist;
       const db = client.db(configuration.db);
       const collection = db.collection('cursor_session_tests2');
 
       const cursor = collection.find();
-      expect(cursor.forEach()).to.exist.and.to.be.an.instanceof(cursor.s.promiseLibrary);
+      const promise = cursor.forEach();
+      expect(promise).to.exist.and.to.be.an.instanceof(cursor.s.promiseLibrary);
+      promise.catch(() => {});
+
       cursor.close(() => client.close(() => done()));
     });
   });
@@ -4521,6 +4526,47 @@ describe('Cursor', function() {
         )
         .then(() => close())
         .catch(e => close(e));
+    });
+  });
+
+  it('should not consume first document on hasNext when streaming', function(done) {
+    const configuration = this.configuration;
+    const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+
+    client.connect(err => {
+      expect(err).to.not.exist;
+      this.defer(() => client.close());
+
+      const collection = client.db().collection('documents');
+      collection.drop(() => {
+        const docs = [{ a: 1 }, { a: 2 }, { a: 3 }];
+        collection.insertMany(docs, err => {
+          expect(err).to.not.exist;
+
+          const cursor = collection.find({}, { sort: { a: 1 } });
+          cursor.hasNext((err, hasNext) => {
+            expect(err).to.not.exist;
+            expect(hasNext).to.be.true;
+
+            const collected = [];
+            const stream = new Writable({
+              objectMode: true,
+              write: (chunk, encoding, next) => {
+                collected.push(chunk);
+                next(undefined, chunk);
+              }
+            });
+
+            cursor.on('close', () => {
+              expect(collected).to.have.length(3);
+              expect(collected).to.eql(docs);
+              done();
+            });
+
+            cursor.pipe(stream);
+          });
+        });
+      });
     });
   });
 });

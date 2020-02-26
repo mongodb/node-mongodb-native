@@ -525,7 +525,10 @@ describe('Find', function() {
    */
   it('shouldCorrectlyPerformFindByWhere', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: {
+        mongodb: '<=4.2.x',
+        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
+      }
     },
 
     // The actual test we wish to run
