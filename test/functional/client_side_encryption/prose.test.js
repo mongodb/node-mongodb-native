@@ -38,10 +38,7 @@ describe('Client Side Encryption Prose Tests', function() {
       const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
 
       // #. Create a MongoClient without encryption enabled (referred to as ``client``). Enable command monitoring to listen for command_started events.
-      this.client = this.configuration.newClient(
-        {},
-        { useNewUrlParser: true, useUnifiedTopology: true, monitorCommands: true }
-      );
+      this.client = this.configuration.newClient({}, { monitorCommands: true });
 
       this.commandStartedEvents = new EventCollector(this.client, 'commandStarted', {
         exclude: ['ismaster']
@@ -105,8 +102,6 @@ describe('Client Side Encryption Prose Tests', function() {
             this.clientEncrypted = this.configuration.newClient(
               {},
               {
-                useNewUrlParser: true,
-                useUnifiedTopology: true,
                 autoEncryption: {
                   keyVaultNamespace,
                   kmsProviders: this.configuration.kmsProviders(null, localKey),
@@ -316,10 +311,7 @@ describe('Client Side Encryption Prose Tests', function() {
       //           "aws": { <AWS credentials> }
       //       }
       //    Configure with ``keyVaultNamespace`` set to ``admin.datakeys``, and a default MongoClient as the ``keyVaultClient``.
-      this.client = this.configuration.newClient(
-        {},
-        { useNewUrlParser: true, useUnifiedTopology: true }
-      );
+      this.client = this.configuration.newClient();
 
       return this.client.connect().then(() => {
         const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
@@ -466,10 +458,7 @@ describe('Client Side Encryption Prose Tests', function() {
       // First, perform the setup.
 
       // #. Create a MongoClient without encryption enabled (referred to as ``client``).
-      this.client = this.configuration.newClient(
-        {},
-        { useNewUrlParser: true, useUnifiedTopology: true }
-      );
+      this.client = this.configuration.newClient();
 
       return (
         this.client
@@ -501,8 +490,6 @@ describe('Client Side Encryption Prose Tests', function() {
       this.clientEncrypted = this.configuration.newClient(
         {},
         {
-          useNewUrlParser: true,
-          useUnifiedTopology: true,
           monitorCommands: true,
           autoEncryption: {
             keyVaultNamespace,
@@ -659,10 +646,7 @@ describe('Client Side Encryption Prose Tests', function() {
       // First, perform the setup.
 
       // #. Create a MongoClient without encryption enabled (referred to as ``client``).
-      this.client = this.configuration.newClient(
-        {},
-        { useNewUrlParser: true, useUnifiedTopology: true }
-      );
+      this.client = this.configuration.newClient();
 
       return this.client
         .connect()
@@ -685,8 +669,6 @@ describe('Client Side Encryption Prose Tests', function() {
       this.clientEncrypted = this.configuration.newClient(
         {},
         {
-          useNewUrlParser: true,
-          useUnifiedTopology: true,
           autoEncryption: {
             keyVaultNamespace,
             kmsProviders: this.configuration.kmsProviders(null, localKey)
@@ -737,10 +719,7 @@ describe('Client Side Encryption Prose Tests', function() {
     const externalSchema = loadExternal('external-schema.json');
 
     beforeEach(function() {
-      this.client = this.configuration.newClient(
-        {},
-        { useNewUrlParser: true, useUnifiedTopology: true }
-      );
+      this.client = this.configuration.newClient();
 
       // #. Create a MongoClient without encryption enabled (referred to as ``client``).
       return (
@@ -785,7 +764,7 @@ describe('Client Side Encryption Prose Tests', function() {
                   // this.configuration.url('fake-user', 'fake-pwd'),
                   // TODO: Do this properly
                   {},
-                  { useNewUrlParser: true, useUnifiedTopology: true, monitorCommands: true }
+                  { monitorCommands: true }
                 );
 
                 this.commandStartedEvents = new EventCollector(
@@ -822,8 +801,6 @@ describe('Client Side Encryption Prose Tests', function() {
                 this.clientEncrypted = this.configuration.newClient(
                   {},
                   {
-                    useNewUrlParser: true,
-                    useUnifiedTopology: true,
                     autoEncryption: Object.assign({}, options, {
                       schemaMap: {
                         'db.coll': externalSchema

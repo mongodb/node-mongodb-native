@@ -35,34 +35,6 @@ describe('Connection', function() {
   /**
    * @ignore
    */
-  it('should correctly disable monitoring for single server connection', {
-    metadata: { requires: { topology: 'single' } },
-
-    // The actual test we wish to run
-    test: function(done) {
-      const configuration = this.configuration;
-      if (configuration.usingUnifiedTopology()) {
-        // skipped for direct legacy variable inspection
-        return this.skip();
-      }
-
-      var client = configuration.newClient(
-        { w: 1 },
-        { poolSize: 1, host: '/tmp/mongodb-27017.sock', monitoring: false }
-      );
-
-      client.connect(function(err, client) {
-        test.equal(null, err);
-        test.equal(false, client.topology.s.coreTopology.s.monitoring);
-
-        client.close(done);
-      });
-    }
-  });
-
-  /**
-   * @ignore
-   */
   it('should correctly connect to server using domain socket', {
     metadata: { requires: { topology: 'single' } },
 
@@ -263,67 +235,6 @@ describe('Connection', function() {
   /**
    * @ignore
    */
-  it('test connect server options', {
-    metadata: { requires: { topology: 'single' } },
-
-    // The actual test we wish to run
-    test: function(done) {
-      const configuration = this.configuration;
-      if (configuration.usingUnifiedTopology()) {
-        // skipped for direct legacy variable inspection
-        return this.skip();
-      }
-
-      const client = configuration.newClient(configuration.url(), {
-        auto_reconnect: true,
-        poolSize: 4
-      });
-
-      client.connect(
-        connectionTester(configuration, 'testConnectServerOptions', function(client) {
-          test.ok(client.topology.poolSize >= 1);
-          test.equal(4, client.topology.s.coreTopology.s.pool.size);
-          test.equal(true, client.topology.autoReconnect);
-          client.close(done);
-        })
-      );
-    }
-  });
-
-  /**
-   * @ignore
-   */
-  it('testConnectAllOptions', {
-    metadata: { requires: { topology: 'single' } },
-
-    // The actual test we wish to run
-    test: function(done) {
-      const configuration = this.configuration;
-      if (configuration.usingUnifiedTopology()) {
-        // skipped for direct legacy variable inspection
-        return this.skip();
-      }
-
-      const client = configuration.newClient(configuration.url(), {
-        auto_reconnect: true,
-        poolSize: 4,
-        native_parser: process.env['TEST_NATIVE'] != null
-      });
-
-      client.connect(
-        connectionTester(configuration, 'testConnectAllOptions', function(client) {
-          test.ok(client.topology.poolSize >= 1);
-          test.equal(4, client.topology.s.coreTopology.s.pool.size);
-          test.equal(true, client.topology.autoReconnect);
-          client.close(done);
-        })
-      );
-    }
-  });
-
-  /**
-   * @ignore
-   */
   it('test connect good auth', {
     metadata: { requires: { topology: 'single' } },
 
@@ -452,69 +363,6 @@ describe('Connection', function() {
       var client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
       test.equal(false, client.isConnected());
       done();
-    }
-  });
-
-  /**
-   * @ignore
-   */
-  it('should correctly reconnect and finish query operation', {
-    metadata: { requires: { topology: 'single', unifiedTopology: false } },
-
-    // The actual test we wish to run
-    test: function(done) {
-      const configuration = this.configuration;
-      if (configuration.usingUnifiedTopology()) {
-        // The unified topology deprecates autoReconnect, this test depends on the `reconnect` event
-        return this.skip();
-      }
-
-      var client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: true });
-      client.connect(function(err, client) {
-        var db = client.db(configuration.db);
-        test.equal(null, err);
-
-        db.collection('test_reconnect').insert({ a: 1 }, function(err) {
-          test.equal(null, err);
-          // Signal db reconnect
-          var dbReconnect = 0;
-          var dbClose = 0;
-
-          db.on('reconnect', function() {
-            ++dbReconnect;
-          });
-
-          db.on('close', function() {
-            ++dbClose;
-          });
-
-          client.topology.once('reconnect', function() {
-            // Await reconnect and re-authentication
-            db.collection('test_reconnect').findOne(function(err, doc) {
-              test.equal(null, err);
-              test.equal(1, doc.a);
-              test.equal(1, dbReconnect);
-              test.equal(1, dbClose);
-
-              // Attempt disconnect again
-              client.topology.connections()[0].destroy();
-
-              // Await reconnect and re-authentication
-              db.collection('test_reconnect').findOne(function(err, doc) {
-                test.equal(null, err);
-                test.equal(1, doc.a);
-                test.equal(2, dbReconnect);
-                test.equal(2, dbClose);
-
-                client.close(done);
-              });
-            });
-          });
-
-          // Force close
-          client.topology.connections()[0].destroy();
-        });
-      });
     }
   });
 });

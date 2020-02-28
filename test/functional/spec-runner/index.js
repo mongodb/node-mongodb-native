@@ -235,9 +235,6 @@ function runTestSuiteTest(configuration, spec, context) {
   clientOptions.haInterval = 100;
   clientOptions.useRecoveryToken = true;
 
-  // TODO: this should be configured by `newClient` and env variables
-  clientOptions.useUnifiedTopology = true;
-
   const url = resolveConnectionString(configuration, spec);
   const client = configuration.newClient(url, clientOptions);
   return client.connect().then(client => {

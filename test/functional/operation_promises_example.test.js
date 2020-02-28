@@ -2872,67 +2872,6 @@ describe('Operation (Promises)', function() {
    *************************************************************************/
 
   /**
-   * An example that shows how to force close a db connection so it cannot be reused using a Promise..
-   *
-   * @example-class Db
-   * @example-method close
-   * @ignore
-   */
-  it('shouldCorrectlyFailOnRetryDueToAppCloseOfDbWithPromises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    // The actual test we wish to run
-    test: function() {
-      const configuration = this.configuration;
-      if (configuration.usingUnifiedTopology()) {
-        // The new topology type has loose concepts of 'closing' and 'opening' a client. It will
-        // simply attempt here to retry the connection and reconnect, so this is a bad test for
-        // the driver in that configuration.
-
-        return this.skip();
-      }
-
-      var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
-      });
-
-      return client.connect().then(function(client) {
-        var db = client.db(configuration.db);
-        // LINE var MongoClient = require('mongodb').MongoClient,
-        // LINE   test = require('assert');
-        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
-        // LINE client.connect().then(() => {
-        // LINE   var db = client.db('test);
-        // REPLACE configuration.writeConcernMax() WITH {w:1}
-        // REMOVE-LINE done();
-        // BEGIN
-
-        // Fetch a collection
-        var collection = db.collection('shouldCorrectlyFailOnRetryDueToAppCloseOfDb_with_promise');
-
-        // Insert a document
-        return collection
-          .insertOne({ a: 1 }, configuration.writeConcernMax())
-          .then(function(result) {
-            test.ok(result);
-            // Force close the connection
-            return client.close(true);
-          })
-          .then(function() {
-            // Attemp to insert should fail now with correct message 'db closed by application'
-            return collection.insertOne({ a: 2 }, configuration.writeConcernMax());
-          })
-          .catch(function(err) {
-            test.ok(err);
-            return client.close();
-          });
-      });
-      // END
-    }
-  });
-
-  /**
    * An example of a simple single server db connection and close function using a Promise.
    *
    * @example-class Db

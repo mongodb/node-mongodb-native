@@ -63,7 +63,7 @@ class NativeConfiguration {
   }
 
   usingUnifiedTopology() {
-    return !!process.env.MONGODB_UNIFIED_TOPOLOGY;
+    return true;
   }
 
   newClient(dbOptions, serverOptions) {
@@ -72,17 +72,17 @@ class NativeConfiguration {
       return new MongoClient(
         dbOptions,
         this.usingUnifiedTopology()
-          ? Object.assign({ useUnifiedTopology: true, minHeartbeatFrequencyMS: 100 }, serverOptions)
+          ? Object.assign({ minHeartbeatFrequencyMS: 100 }, serverOptions)
           : serverOptions
       );
     }
 
     dbOptions = dbOptions || {};
-    serverOptions = Object.assign({}, { haInterval: 100 }, serverOptions);
-    if (this.usingUnifiedTopology()) {
-      serverOptions.useUnifiedTopology = true;
-      serverOptions.minHeartbeatFrequencyMS = 100;
-    }
+    serverOptions = Object.assign(
+      {},
+      { haInterval: 100, minHeartbeatFrequencyMS: 100 },
+      serverOptions
+    );
 
     // Fall back
     let dbHost = (serverOptions && serverOptions.host) || this.options.host;

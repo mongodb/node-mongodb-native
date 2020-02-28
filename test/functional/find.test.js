@@ -3095,11 +3095,6 @@ describe('Find', function() {
       const config = this.configuration;
       const client = config.newClient({}, { monitorCommands: true, readPreference: 'secondary' });
 
-      if (!config.usingUnifiedTopology()) {
-        this.skip();
-        return;
-      }
-
       client.connect((err, client) => {
         expect(err).to.not.exist;
 

@@ -26,7 +26,7 @@ describe('Client Side Encryption Functional', function() {
 
   describe('BSON Options', function() {
     beforeEach(function() {
-      this.client = this.configuration.newClient({}, { useUnifiedTopology: true });
+      this.client = this.configuration.newClient();
 
       const noop = () => {};
       function encryptSchema(keyId, bsonType) {
@@ -77,7 +77,6 @@ describe('Client Side Encryption Functional', function() {
           this.encryptedClient = this.configuration.newClient(
             {},
             {
-              useUnifiedTopology: true,
               autoEncryption: {
                 keyVaultNamespace,
                 kmsProviders

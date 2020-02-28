@@ -139,33 +139,4 @@ describe('ReplSet (mocks)', function() {
       });
     }
   });
-
-  it('Should correctly set socketTimeoutMS and connectTimeoutMS for mongos', {
-    metadata: {
-      requires: {
-        generators: true,
-        topology: 'single'
-      }
-    },
-
-    test: function(done) {
-      const configuration = this.configuration;
-      if (configuration.usingUnifiedTopology()) {
-        // skipped for direct legacy variable inspection
-        return this.skip();
-      }
-
-      const client = configuration.newClient(
-        `mongodb://${test.mongos1.uri()},${test.mongos2.uri()}/test?socketTimeoutMS=120000&connectTimeoutMS=15000`
-      );
-
-      client.connect(function(err, client) {
-        expect(err).to.not.exist;
-        expect(client.topology.s.coreTopology.s.options.connectionTimeout).to.equal(15000);
-        expect(client.topology.s.coreTopology.s.options.socketTimeout).to.equal(120000);
-
-        client.close(done);
-      });
-    }
-  });
 });

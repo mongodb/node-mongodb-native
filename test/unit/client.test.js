@@ -24,7 +24,6 @@ describe('Client (unit)', function() {
     });
 
     const client = this.configuration.newClient(`mongodb://${server.uri()}/`, {
-      useUnifiedTopology: true,
       driverInfo: {
         name: 'mongoose',
         version: '5.7.10',

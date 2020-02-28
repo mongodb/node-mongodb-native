@@ -60,7 +60,7 @@ before(function(_done) {
   //   )} topology`
   // );
 
-  const client = new MongoClient(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+  const client = new MongoClient(MONGODB_URI);
   const done = err => client.close(err2 => _done(err || err2));
 
   client.connect(err => {

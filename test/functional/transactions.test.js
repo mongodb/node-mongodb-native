@@ -103,7 +103,7 @@ describe('Transactions', function() {
       metadata: { requires: { topology: ['sharded'], mongodb: '>=4.1.0' } },
       test: function(done) {
         const configuration = this.configuration;
-        const client = configuration.newClient(configuration.url(), { useUnifiedTopology: true });
+        const client = configuration.newClient(configuration.url());
 
         client.connect(err => {
           expect(err).to.not.exist;
@@ -127,7 +127,7 @@ describe('Transactions', function() {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=4.0.0' } },
       test: function(done) {
         const configuration = this.configuration;
-        const client = configuration.newClient({ w: 1 }, { useUnifiedTopology: true });
+        const client = configuration.newClient({ w: 1 });
 
         client.connect(err => {
           expect(err).to.not.exist;
@@ -170,7 +170,7 @@ describe('Transactions', function() {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=4.0.0' } },
       test: function(done) {
         const configuration = this.configuration;
-        const client = configuration.newClient({ w: 1 }, { useUnifiedTopology: true });
+        const client = configuration.newClient({ w: 1 });
 
         client.connect(err => {
           expect(err).to.not.exist;
