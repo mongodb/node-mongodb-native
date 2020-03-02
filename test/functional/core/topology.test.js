@@ -1,7 +1,7 @@
 'use strict';
 const expect = require('chai').expect;
 
-describe('Topology', { requires: { unifiedTopology: true } }, function() {
+describe('Topology', function() {
   it('should correctly track states of a topology', function(done) {
     const topology = this.configuration.newTopology();
 

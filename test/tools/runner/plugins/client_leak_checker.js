@@ -33,14 +33,9 @@ function unifiedTopologyIsConnected(client) {
 after(function() {
   wtfnode.dump();
 
-  const isUnifiedTopology = this.configuration.usingUnifiedTopology;
   const traces = [];
   const openClientCount = activeClients.reduce((count, client) => {
-    const isConnected = isUnifiedTopology
-      ? unifiedTopologyIsConnected(client)
-      : client.isConnected();
-
-    if (isConnected) {
+    if (unifiedTopologyIsConnected(client)) {
       traces.push(client.trace);
       return count + 1;
     }

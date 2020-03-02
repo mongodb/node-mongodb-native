@@ -1,5 +1,5 @@
 'use strict';
-const ReplSet = require('../../../lib/core/topologies/replset');
+const Topology = require('../../../lib/core').Topology;
 const mock = require('mongodb-mock-server');
 const ReplSetFixture = require('./common').ReplSetFixture;
 const MongoWriteConcernError = require('../../../lib/core/error').MongoWriteConcernError;
@@ -7,14 +7,6 @@ const expect = require('chai').expect;
 
 describe('WriteConcernError', function() {
   let test;
-
-  // mock ops store from node-mongodb-native
-  const mockDisconnectHandler = {
-    add: () => {},
-    execute: () => {},
-    flush: () => {}
-  };
-
   const RAW_USER_WRITE_CONCERN_CMD = {
     createUser: 'foo2',
     pwd: 'pwd',
@@ -44,16 +36,12 @@ describe('WriteConcernError', function() {
   function makeAndConnectReplSet(cb) {
     let invoked = false;
 
-    const replSet = new ReplSet(
+    console.log({
+      uri: `mongodb://${test.primaryServer.uri()},${test.firstSecondaryServer.uri()}/?replicaSet=rs`
+    });
+    const replSet = new Topology(
       [test.primaryServer.address(), test.firstSecondaryServer.address()],
-      {
-        setName: 'rs',
-        haInterval: 10000,
-        connectionTimeout: 3000,
-        disconnectHandler: mockDisconnectHandler,
-        secondaryOnlyConnectionAllowed: true,
-        size: 1
-      }
+      { replicaSet: 'rs' }
     );
 
     replSet.once('error', err => {
@@ -61,14 +49,16 @@ describe('WriteConcernError', function() {
         return;
       }
       invoked = true;
-      cb(err, null);
+      cb(err);
     });
+
     replSet.on('connect', () => {
-      if (invoked || !replSet.s.replicaSetState.hasPrimary()) {
+      if (invoked) {
         return;
       }
+
       invoked = true;
-      cb(null, replSet);
+      cb(undefined, replSet);
     });
 
     replSet.connect();
@@ -86,7 +76,7 @@ describe('WriteConcernError', function() {
 
     makeAndConnectReplSet((err, replSet) => {
       // cleanup the server before calling done
-      const cleanup = err => replSet.destroy(err2 => done(err || err2));
+      const cleanup = err => replSet.close({ force: true }, err2 => done(err || err2));
 
       if (err) {
         return cleanup(err);

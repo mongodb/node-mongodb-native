@@ -223,15 +223,9 @@ describe('APM', function() {
           )
           .then(() => {
             expect(started).to.have.lengthOf(2);
-
-            if (self.configuration.usingUnifiedTopology()) {
-              expect(started[0])
-                .property('address')
-                .to.not.equal(started[1].address);
-            } else {
-              // Ensure command was not sent to the primary
-              expect(started[0].connectionId).to.not.equal(started[1].connectionId);
-            }
+            expect(started[0])
+              .property('address')
+              .to.not.equal(started[1].address);
 
             return client.close();
           });
@@ -279,15 +273,9 @@ describe('APM', function() {
           )
           .then(() => {
             expect(started).to.have.lengthOf(2);
-
-            // Ensure command was not sent to the primary
-            if (self.configuration.usingUnifiedTopology()) {
-              expect(started[0])
-                .property('address')
-                .to.not.equal(started[1].address);
-            } else {
-              expect(started[0].connectionId).to.not.equal(started[1].connectionId);
-            }
+            expect(started[0])
+              .property('address')
+              .to.not.equal(started[1].address);
 
             return client.close();
           });

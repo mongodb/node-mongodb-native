@@ -4,7 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const MongoClient = require('../../..').MongoClient;
 const TestConfiguration = require('./config');
-const parseConnectionString = require('../../../lib/core/uri_parser');
+const parseConnectionString = require('../../../lib/connection_string').parseConnectionString;
 const eachAsync = require('../../../lib/core/utils').eachAsync;
 const mock = require('mongodb-mock-server');
 

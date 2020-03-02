@@ -49,8 +49,8 @@ describe('Transactions', function() {
   describe('withTransaction', function() {
     let session, sessionPool;
     beforeEach(() => {
-      const topology = new core.Server();
-      sessionPool = new sessions.ServerSessionPool(topology);
+      const topology = new core.Topology('localhost:27017');
+      sessionPool = topology.s.sessionPool;
       session = new sessions.ClientSession(topology, sessionPool);
     });
 

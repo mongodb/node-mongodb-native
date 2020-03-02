@@ -24,6 +24,10 @@ class MockTopology extends EventEmitter {
     return false;
   }
 
+  shouldCheckForSessionSupport() {
+    return false;
+  }
+
   command(namespace, command, options, callback) {
     callback(null, { result: { ok: 1 } });
   }

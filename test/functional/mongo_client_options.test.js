@@ -35,27 +35,4 @@ describe('MongoClient Options', function() {
       );
     }
   });
-
-  /**
-   * @ignore
-   */
-  function connectionTester(configuration, testName, callback) {
-    return function(err, client) {
-      test.equal(err, null);
-      var db = client.db(configuration.db);
-
-      db.collection(testName, function(err, collection) {
-        test.equal(err, null);
-
-        collection.insert({ foo: 123 }, { w: 1 }, function(err) {
-          test.equal(err, null);
-          db.dropDatabase(function(err, dropped) {
-            test.equal(err, null);
-            test.ok(dropped);
-            if (callback) return callback(client);
-          });
-        });
-      });
-    };
-  }
 });

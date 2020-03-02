@@ -5,7 +5,6 @@ const fs = require('fs');
 const expect = require('chai').expect;
 const Long = require('bson').Long;
 const sinon = require('sinon');
-const Buffer = require('safe-buffer').Buffer;
 const Writable = require('stream').Writable;
 
 const core = require('../../lib/core');
@@ -296,15 +295,8 @@ describe('Cursor', function() {
         expect(err).to.not.exist;
         const db = client.db(configuration.db);
 
-        let internalClientCursor;
-        if (configuration.usingUnifiedTopology()) {
-          internalClientCursor = sinon.spy(client.topology, 'cursor');
-        } else {
-          internalClientCursor = sinon.spy(client.topology.s.coreTopology, 'cursor');
-        }
-
+        const internalClientCursor = sinon.spy(client.topology, 'cursor');
         const expectedReadPreference = new ReadPreference(ReadPreference.SECONDARY);
-
         const cursor = db.collection('countTEST').find({ qty: { $gt: 4 } });
         cursor.count(true, { readPreference: ReadPreference.SECONDARY }, err => {
           expect(err).to.be.null;

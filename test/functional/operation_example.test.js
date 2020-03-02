@@ -3,6 +3,7 @@ const test = require('./shared').assert;
 const setupDatabase = require('./shared').setupDatabase;
 const f = require('util').format;
 const Buffer = require('safe-buffer').Buffer;
+const Topology = require('../../lib/core').Topology;
 
 const chai = require('chai');
 const expect = chai.expect;
@@ -4601,23 +4602,19 @@ describe('Operation Examples', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var ReplSet = configuration.require.ReplSet,
-        MongoClient = configuration.require.MongoClient,
-        Server = configuration.require.Server;
 
       // Replica configuration
-      var replSet = new ReplSet(
+      var client = new Topology(
         [
-          new Server(configuration.host, configuration.port),
-          new Server(configuration.host, configuration.port + 1),
-          new Server(configuration.host, configuration.port + 2)
+          { host: configuration.host, port: configuration.port },
+          { host: configuration.host, port: configuration.port + 1 },
+          { host: configuration.host, port: configuration.port + 2 }
         ],
-        { rs_name: configuration.replicasetName }
+        { replicaSet: configuration.replicasetName }
       );
 
-      var client = new MongoClient(replSet, { w: 0 });
       client.connect(function(err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');

@@ -5,7 +5,7 @@ const Topology = require('../../../lib/core/sdam/topology').Topology;
 const Server = require('../../../lib/core/sdam/server').Server;
 const ServerDescription = require('../../../lib/core/sdam/server_description').ServerDescription;
 const sdamEvents = require('../../../lib/core/sdam/events');
-const parse = require('../../../lib/core/uri_parser');
+const parse = require('../../../lib/connection_string').parseConnectionString;
 const sinon = require('sinon');
 const EJSON = require('mongodb-extjson');
 

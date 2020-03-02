@@ -62,18 +62,12 @@ class NativeConfiguration {
     return this.options.replicaSet;
   }
 
-  usingUnifiedTopology() {
-    return true;
-  }
-
   newClient(dbOptions, serverOptions) {
     // support MongoClient contructor form (url, options) for `newClient`
     if (typeof dbOptions === 'string') {
       return new MongoClient(
         dbOptions,
-        this.usingUnifiedTopology()
-          ? Object.assign({ minHeartbeatFrequencyMS: 100 }, serverOptions)
-          : serverOptions
+        Object.assign({ minHeartbeatFrequencyMS: 100 }, serverOptions)
       );
     }
 
@@ -138,21 +132,7 @@ class NativeConfiguration {
 
     options = Object.assign({}, options);
     const hosts = host == null ? [].concat(this.options.hosts) : [{ host, port }];
-    if (this.usingUnifiedTopology()) {
-      return new core.Topology(hosts, options);
-    }
-
-    if (this.topologyType === TopologyType.ReplicaSetWithPrimary) {
-      options.poolSize = 1;
-      options.autoReconnect = false;
-      return new core.ReplSet(hosts, options);
-    }
-
-    if (this.topologyType === TopologyType.Sharded) {
-      return new core.Mongos(hosts, options);
-    }
-
-    return new core.Server(Object.assign({ host, port }, options));
+    return new core.Topology(hosts, options);
   }
 
   url(username, password, options) {

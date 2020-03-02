@@ -2,7 +2,7 @@
 
 const expect = require('chai').expect;
 const mock = require('mongodb-mock-server');
-const Server = require('../../../lib/core/topologies/server');
+const Topology = require('../../../lib/core').Topology;
 const Buffer = require('safe-buffer').Buffer;
 const MongoCredentials = require('../../../lib/core/auth/mongo_credentials').MongoCredentials;
 
@@ -48,7 +48,7 @@ describe('SCRAM Iterations Tests', function() {
       }
     });
 
-    const client = new Server(Object.assign({}, test.server.address(), { credentials }));
+    const client = new Topology(test.server.uri(), { credentials });
     client.on('error', err => {
       let testErr;
       try {
@@ -100,7 +100,7 @@ describe('SCRAM Iterations Tests', function() {
       }
     });
 
-    const client = new Server(Object.assign({}, test.server.address(), { credentials }));
+    const client = new Topology(test.server.uri(), { credentials });
     client.on('error', err => {
       expect(err).to.not.be.null;
       expect(err)
@@ -143,12 +143,12 @@ describe('SCRAM Iterations Tests', function() {
       }
     });
 
-    const client = new Server(Object.assign({}, test.server.address(), { credentials }));
+    const client = new Topology(test.server.uri(), { credentials });
     client.on('error', err => {
       expect(err).to.not.be.null;
       expect(err)
         .to.have.property('message')
-        .that.matches(/failed to connect to server/);
+        .that.matches(/connection(.+)closed/);
 
       client.destroy(done);
     });

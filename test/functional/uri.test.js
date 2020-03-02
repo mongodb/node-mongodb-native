@@ -2,7 +2,6 @@
 
 const expect = require('chai').expect;
 const sinon = require('sinon');
-const ReplSet = require('../../lib/topologies/replset');
 const NativeTopology = require('../../lib/topologies/native_topology');
 
 describe('URI', function() {
@@ -150,10 +149,7 @@ describe('URI', function() {
         done();
       }
 
-      const topologyPrototype = this.configuration.usingUnifiedTopology()
-        ? NativeTopology.prototype
-        : ReplSet.prototype;
-
+      const topologyPrototype = NativeTopology.prototype;
       const connectStub = sinon.stub(topologyPrototype, 'connect').callsFake(validateConnect);
       const uri = 'mongodb://some-hostname/test?ssl=true&authMechanism=MONGODB-X509&replicaSet=rs0';
       const client = this.configuration.newClient(uri, { useNewUrlParser: true });

@@ -54,7 +54,7 @@ beforeEach('Session Leak Before Each - setup session tracking', function() {
     return _endAllPooledSessions.apply(this, arguments);
   });
 
-  [core.Server, core.ReplSet, core.Mongos].forEach(topology => {
+  [core.Topology].forEach(topology => {
     const _endSessions = topology.prototype.endSessions;
     sandbox.stub(topology.prototype, 'endSessions').callsFake(function(sessions) {
       sessions = Array.isArray(sessions) ? sessions : [sessions];

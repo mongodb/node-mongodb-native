@@ -166,32 +166,6 @@ describe('Connection', function() {
   /**
    * @ignore
    */
-  it('should fail to connect using non-domain socket with undefined port', {
-    metadata: { requires: { topology: 'single' } },
-
-    // The actual test we wish to run
-    test: function(done) {
-      var configuration = this.configuration,
-        Server = configuration.require.Server,
-        MongoClient = configuration.require.MongoClient;
-
-      var error;
-      try {
-        var client = new MongoClient(new Server('localhost', undefined), { w: 0 });
-        client.connect(function() {});
-      } catch (err) {
-        error = err;
-      }
-
-      test.ok(error instanceof Error);
-      test.ok(/port must be specified/.test(error));
-      done();
-    }
-  });
-
-  /**
-   * @ignore
-   */
   function connectionTester(configuration, testName, callback) {
     return function(err, client) {
       var db = client.db(configuration.db);

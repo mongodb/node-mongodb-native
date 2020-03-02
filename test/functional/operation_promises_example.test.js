@@ -3773,50 +3773,6 @@ describe('Operation (Promises)', function() {
     }
   });
 
-  /**
-   * Simple replicaset connection setup, requires a running replicaset on the correct ports using a Promise.
-   *
-   * @example-class Db
-   * @example-method open
-   * @ignore
-   */
-  it('Should correctly connect with default replicasetNoOption With Promises', {
-    metadata: { requires: { topology: 'replicaset' } },
-
-    // The actual test we wish to run
-    test: function() {
-      var configuration = this.configuration;
-      var ReplSet = configuration.require.ReplSet,
-        MongoClient = configuration.require.MongoClient,
-        Server = configuration.require.Server;
-
-      // Replica configuration
-      var replSet = new ReplSet(
-        [
-          new Server(configuration.host, configuration.port),
-          new Server(configuration.host, configuration.port + 1),
-          new Server(configuration.host, configuration.port + 2)
-        ],
-        { rs_name: configuration.replicasetName }
-      );
-
-      var client = new MongoClient(replSet, { w: 0 });
-      return client.connect().then(function() {
-        // LINE var MongoClient = require('mongodb').MongoClient,
-        // LINE   test = require('assert');
-        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
-        // LINE client.connect().then(() => {
-        // LINE   var db = client.db('test);
-        // REPLACE configuration.writeConcernMax() WITH {w:1}
-        // REMOVE-LINE restartAndDone
-        // REMOVE-LINE done();
-        // BEGIN
-        return client.close();
-      });
-      // END
-    }
-  });
-
   /**************************************************************************
    *
    * ADMIN TESTS

@@ -1,6 +1,6 @@
 'use strict';
 
-const parseConnectionString = require('../../../lib/core/uri_parser');
+const parseConnectionString = require('../../../lib/connection_string').parseConnectionString;
 const punycode = require('punycode');
 const MongoParseError = require('../../../lib/core/error').MongoParseError;
 const loadSpecTests = require('../../spec').loadSpecTests;

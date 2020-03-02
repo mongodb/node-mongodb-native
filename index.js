@@ -22,9 +22,6 @@ connect.Admin = require('./lib/admin');
 connect.MongoClient = require('./lib/mongo_client');
 connect.Db = require('./lib/db');
 connect.Collection = require('./lib/collection');
-connect.Server = require('./lib/topologies/server');
-connect.ReplSet = require('./lib/topologies/replset');
-connect.Mongos = require('./lib/topologies/mongos');
 connect.ReadPreference = core.ReadPreference;
 connect.GridStore = require('./lib/gridfs/grid_store');
 connect.Chunk = require('./lib/gridfs/chunk');
@@ -34,7 +31,6 @@ connect.CommandCursor = require('./lib/command_cursor');
 connect.Cursor = require('./lib/cursor');
 connect.GridFSBucket = require('./lib/gridfs-stream');
 // Exported to be used in tests not to be used anywhere else
-connect.CoreServer = core.Server;
 connect.CoreConnection = core.Connection;
 
 // BSON types exported
