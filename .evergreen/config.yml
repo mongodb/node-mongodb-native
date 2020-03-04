@@ -66,8 +66,7 @@ functions:
             # If this was a patch build, doing a fresh clone would not actually test the patch
             cp -R ${PROJECT_DIRECTORY}/ $DRIVERS_TOOLS
           else
-            # git clone git://github.com/mongodb-labs/drivers-evergreen-tools.git $DRIVERS_TOOLS
-            git clone git://github.com/bazile-clyde/drivers-evergreen-tools.git $DRIVERS_TOOLS
+            git clone git://github.com/mongodb-labs/drivers-evergreen-tools.git $DRIVERS_TOOLS
           fi
 
           echo "{ \"releases\": { \"default\": \"$MONGODB_BINARIES\" }}" >
@@ -323,6 +322,54 @@ functions:
 
           cat setup.js
           mongo --nodb setup.js aws_e2e_ecs.js
+  run-ocsp-test:
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: src
+        script: |
+          ${PREPARE_SHELL}
+
+          UNIFIED=${UNIFIED} \
+          CA_FILE="$DRIVERS_TOOLS/.evergreen/ocsp/rsa/ca.pem" \
+          OCSP_TLS_SHOULD_SUCCEED="${OCSP_TLS_SHOULD_SUCCEED}" \
+          sh ${PROJECT_DIRECTORY}/.evergreen/run-ocsp-tests.sh
+  run-valid-ocsp-server:
+    - command: shell.exec
+      params:
+        script: |
+          cd ${DRIVERS_TOOLS}/.evergreen/ocsp
+          /opt/mongodbtoolchain/v3/bin/python3 -m venv ./venv
+          ./venv/bin/pip3 install asn1crypto oscrypto bottle
+    - command: shell.exec
+      params:
+        background: true
+        script: |
+          cd ${DRIVERS_TOOLS}/.evergreen/ocsp
+          nohup ./venv/bin/python3 ocsp_mock.py \
+            --ca_file rsa/ca.pem \
+            --ocsp_responder_cert rsa/ca.crt \
+            --ocsp_responder_key rsa/ca.key \
+            -p 8100 -v
+  run-revoked-ocsp-server:
+    - command: shell.exec
+      params:
+        script: |
+          cd ${DRIVERS_TOOLS}/.evergreen/ocsp
+          /opt/mongodbtoolchain/v3/bin/python3 -m venv ./venv
+          ./venv/bin/pip3 install asn1crypto oscrypto bottle
+    - command: shell.exec
+      params:
+        background: true
+        script: |
+          cd ${DRIVERS_TOOLS}/.evergreen/ocsp
+          nohup ./venv/bin/python3 ocsp_mock.py \
+            --ca_file rsa/ca.pem \
+            --ocsp_responder_cert rsa/ca.crt \
+            --ocsp_responder_key rsa/ca.key \
+            -p 8100 \
+            -v \
+            --fault revoked
 pre:
   - func: fetch source
   - func: prepare resources
@@ -603,6 +650,102 @@ tasks:
       - func: run atlas tests
         vars:
           VERSION: latest
+  - name: test-ocsp-valid-cert-server-staples
+    tags:
+      - ocsp
+    commands:
+      - func: run-valid-ocsp-server
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple.json
+          VERSION: latest
+          TOPOLOGY: server
+      - func: run-ocsp-test
+        vars:
+          OCSP_TLS_SHOULD_SUCCEED: 1
+  - name: test-ocsp-invalid-cert-server-staples
+    tags:
+      - ocsp
+    commands:
+      - func: run-revoked-ocsp-server
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple.json
+          VERSION: latest
+          TOPOLOGY: server
+      - func: run-ocsp-test
+        vars:
+          OCSP_TLS_SHOULD_SUCCEED: 0
+  - name: test-ocsp-valid-cert-server-does-not-staple
+    tags:
+      - ocsp
+    commands:
+      - func: run-valid-ocsp-server
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          ORCHESTRATION_FILE: rsa-basic-tls-ocsp-disableStapling.json
+          VERSION: latest
+          TOPOLOGY: server
+      - func: run-ocsp-test
+        vars:
+          OCSP_TLS_SHOULD_SUCCEED: 1
+  - name: test-ocsp-invalid-cert-server-does-not-staple
+    tags:
+      - ocsp
+    commands:
+      - func: run-revoked-ocsp-server
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          ORCHESTRATION_FILE: rsa-basic-tls-ocsp-disableStapling.json
+          VERSION: latest
+          TOPOLOGY: server
+      - func: run-ocsp-test
+        vars:
+          OCSP_TLS_SHOULD_SUCCEED: 0
+  - name: test-ocsp-soft-fail
+    tags:
+      - ocsp
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          ORCHESTRATION_FILE: rsa-basic-tls-ocsp-disableStapling.json
+          VERSION: latest
+          TOPOLOGY: server
+      - func: run-ocsp-test
+        vars:
+          OCSP_TLS_SHOULD_SUCCEED: 1
+  - name: test-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
+    tags:
+      - ocsp
+    commands:
+      - func: run-revoked-ocsp-server
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple-disableStapling.json
+          VERSION: latest
+          TOPOLOGY: server
+      - func: run-ocsp-test
+        vars:
+          OCSP_TLS_SHOULD_SUCCEED: 0
+  - name: test-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
+    tags:
+      - ocsp
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple-disableStapling.json
+          VERSION: latest
+          TOPOLOGY: server
+      - func: run-ocsp-test
+        vars:
+          OCSP_TLS_SHOULD_SUCCEED: 0
   - name: aws-auth-test
     commands:
       - func: install dependencies
@@ -652,6 +795,21 @@ buildvariants:
       - test-atlas-connectivity
   - name: macos-1014-dubnium
     display_name: macOS 10.14 Node Dubnium
+      - test-ocsp-valid-cert-server-staples
+      - test-ocsp-invalid-cert-server-staples
+      - test-ocsp-valid-cert-server-does-not-staple
+      - test-ocsp-invalid-cert-server-does-not-staple
+      - test-ocsp-soft-fail
+      - test-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
+      - test-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
+  - name: macos-1014-carbon
+    display_name: macOS 10.14 Node Carbon
+    run_on: macos-1014
+    expansions:
+      NODE_LTS_NAME: carbon
+    tasks: *ref_2
+  - name: macos-1014-boron
+    display_name: macOS 10.14 Node Boron
     run_on: macos-1014
     expansions:
       NODE_LTS_NAME: dubnium
@@ -672,6 +830,81 @@ buildvariants:
     display_name: RHEL 7.0 Node Dubnium
     run_on: rhel70-small
     expansions:
+      NODE_LTS_NAME: argon
+    tasks: *ref_2
+  - name: rhel71-power8-test-dubnium
+    display_name: RHEL 7.1 (POWER8) Node Dubnium
+    run_on: rhel71-power8-test
+    expansions:
+      NODE_LTS_NAME: dubnium
+    tasks: &ref_3
+      - test-latest-server
+      - test-latest-replica_set
+      - test-latest-sharded_cluster
+      - test-latest-server-unified
+      - test-latest-replica_set-unified
+      - test-latest-sharded_cluster-unified
+      - test-4.2-server
+      - test-4.2-replica_set
+      - test-4.2-sharded_cluster
+      - test-4.2-server-unified
+      - test-4.2-replica_set-unified
+      - test-4.2-sharded_cluster-unified
+      - test-4.0-server
+      - test-4.0-replica_set
+      - test-4.0-sharded_cluster
+      - test-4.0-server-unified
+      - test-4.0-replica_set-unified
+      - test-4.0-sharded_cluster-unified
+      - test-3.6-server
+      - test-3.6-replica_set
+      - test-3.6-sharded_cluster
+      - test-3.6-server-unified
+      - test-3.6-replica_set-unified
+      - test-3.6-sharded_cluster-unified
+      - test-3.4-server
+      - test-3.4-replica_set
+      - test-3.4-sharded_cluster
+      - test-3.4-server-unified
+      - test-3.4-replica_set-unified
+      - test-3.4-sharded_cluster-unified
+      - test-3.2-server
+      - test-3.2-replica_set
+      - test-3.2-sharded_cluster
+      - test-3.2-server-unified
+      - test-3.2-replica_set-unified
+      - test-3.2-sharded_cluster-unified
+      - test-atlas-connectivity
+      - test-ocsp-valid-cert-server-staples
+      - test-ocsp-invalid-cert-server-staples
+      - test-ocsp-valid-cert-server-does-not-staple
+      - test-ocsp-invalid-cert-server-does-not-staple
+      - test-ocsp-soft-fail
+      - test-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
+      - test-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
+  - name: rhel71-power8-test-carbon
+    display_name: RHEL 7.1 (POWER8) Node Carbon
+    run_on: rhel71-power8-test
+    expansions:
+      NODE_LTS_NAME: carbon
+    tasks: *ref_3
+  - name: rhel71-power8-test-boron
+    display_name: RHEL 7.1 (POWER8) Node Boron
+    run_on: rhel71-power8-test
+    expansions:
+      NODE_LTS_NAME: boron
+    tasks: *ref_3
+  - name: rhel71-power8-test-argon
+    display_name: RHEL 7.1 (POWER8) Node Argon
+    run_on: rhel71-power8-test
+    expansions:
+      NODE_LTS_NAME: argon
+    tasks: *ref_3
+  - name: suse12-x86-64-test-dubnium
+    display_name: SUSE 12 (x86_64) Node Dubnium
+    run_on: suse12-test
+    expansions:
+>>>>>>> 96e542656... test: add integration tests for OCSP support
       NODE_LTS_NAME: dubnium
     tasks: *ref_0
   - name: rhel70-erbium
@@ -745,6 +978,22 @@ buildvariants:
   - name: ubuntu-18.04-dubnium
     display_name: Ubuntu 18.04 Node Dubnium
     run_on: ubuntu1804-test
+      - test-ocsp-valid-cert-server-staples
+      - test-ocsp-invalid-cert-server-staples
+      - test-ocsp-valid-cert-server-does-not-staple
+      - test-ocsp-invalid-cert-server-does-not-staple
+      - test-ocsp-soft-fail
+      - test-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
+      - test-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
+  - name: ubuntu1804-arm64-test-carbon
+    display_name: Ubuntu 18.04 (ARM64) Node Carbon
+    run_on: ubuntu1804-arm64-test
+    expansions:
+      NODE_LTS_NAME: carbon
+    tasks: *ref_5
+  - name: ubuntu1804-arm64-test-boron
+    display_name: Ubuntu 18.04 (ARM64) Node Boron
+    run_on: ubuntu1804-arm64-test
     expansions:
       NODE_LTS_NAME: dubnium
       CLIENT_ENCRYPTION: true

@@ -85,8 +85,7 @@ functions:
             # If this was a patch build, doing a fresh clone would not actually test the patch
             cp -R ${PROJECT_DIRECTORY}/ $DRIVERS_TOOLS
           else
-            # git clone git://github.com/mongodb-labs/drivers-evergreen-tools.git $DRIVERS_TOOLS
-            git clone git://github.com/bazile-clyde/drivers-evergreen-tools.git $DRIVERS_TOOLS
+            git clone git://github.com/mongodb-labs/drivers-evergreen-tools.git $DRIVERS_TOOLS
           fi
           echo "{ \"releases\": { \"default\": \"$MONGODB_BINARIES\" }}" > $MONGO_ORCHESTRATION_HOME/orchestration.config
 
@@ -359,6 +358,58 @@ functions:
 
           cat setup.js
           mongo --nodb setup.js aws_e2e_ecs.js
+
+  run-ocsp-test:
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: "src"
+        script: |
+          ${PREPARE_SHELL}
+
+          UNIFIED=${UNIFIED} \
+          CA_FILE="$DRIVERS_TOOLS/.evergreen/ocsp/rsa/ca.pem" \
+          OCSP_TLS_SHOULD_SUCCEED="${OCSP_TLS_SHOULD_SUCCEED}" \
+          sh ${PROJECT_DIRECTORY}/.evergreen/run-ocsp-tests.sh
+
+  run-valid-ocsp-server:
+    - command: shell.exec
+      params:
+        script: |
+          cd ${DRIVERS_TOOLS}/.evergreen/ocsp
+          /opt/mongodbtoolchain/v3/bin/python3 -m venv ./venv
+          ./venv/bin/pip3 install asn1crypto oscrypto bottle
+    - command: shell.exec
+      params:
+        background: true
+        script: |
+          cd ${DRIVERS_TOOLS}/.evergreen/ocsp
+          nohup ./venv/bin/python3 ocsp_mock.py \
+            --ca_file rsa/ca.pem \
+            --ocsp_responder_cert rsa/ca.crt \
+            --ocsp_responder_key rsa/ca.key \
+            -p 8100 -v
+
+  run-revoked-ocsp-server:
+    - command: shell.exec
+      params:
+        script: |
+          cd ${DRIVERS_TOOLS}/.evergreen/ocsp
+          /opt/mongodbtoolchain/v3/bin/python3 -m venv ./venv
+          ./venv/bin/pip3 install asn1crypto oscrypto bottle
+    - command: shell.exec
+      params:
+        background: true
+        script: |
+          cd ${DRIVERS_TOOLS}/.evergreen/ocsp
+          nohup ./venv/bin/python3 ocsp_mock.py \
+            --ca_file rsa/ca.pem \
+            --ocsp_responder_cert rsa/ca.crt \
+            --ocsp_responder_key rsa/ca.key \
+            -p 8100 \
+            -v \
+            --fault revoked
+
 
 pre:
   - func: "fetch source"
