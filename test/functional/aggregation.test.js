@@ -1137,7 +1137,6 @@ describe('Aggregation', function() {
               db.command = cmd;
               cursor.close();
               client.close(done);
-
             });
           });
         });
