@@ -324,33 +324,28 @@ describe('ReadPreference', function() {
           return command.apply(db.serverConfig, args);
         };
 
-        collection.aggregate(
-          [
-            {
-              $project: {
-                author: 1,
-                tags: 1
-              }
-            },
-            { $unwind: '$tags' },
-            {
-              $group: {
-                _id: { tags: '$tags' },
-                authors: { $addToSet: '$author' }
-              }
+        const cursor = collection.aggregate([
+          {
+            $project: {
+              author: 1,
+              tags: 1
             }
-          ],
-          function(err, cursor) {
-            test.equal(null, err);
-
-            cursor.toArray(function(err) {
-              test.equal(null, err);
-              client.topology.command = command;
-
-              client.close(done);
-            });
+          },
+          { $unwind: '$tags' },
+          {
+            $group: {
+              _id: { tags: '$tags' },
+              authors: { $addToSet: '$author' }
+            }
           }
-        );
+        ]);
+
+        cursor.toArray(function(err) {
+          test.equal(null, err);
+          client.topology.command = command;
+
+          client.close(done);
+        });
       });
     }
   });
