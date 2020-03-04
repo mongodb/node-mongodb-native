@@ -183,7 +183,7 @@ describe('Db', function() {
           });
         };
 
-        automatic_connect_client.once('close', closeListener);
+        client.once('close', closeListener);
         automatic_connect_client.serverConfig.connections()[0].destroy();
       });
     }

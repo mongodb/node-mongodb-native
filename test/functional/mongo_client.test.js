@@ -49,7 +49,7 @@ describe('MongoClient', function() {
         };
 
         // Add listener to close event
-        db.once('close', closeListener);
+        client.once('close', closeListener);
         // Ensure death of server instance
         client.topology.connections()[0].destroy();
       });
@@ -97,7 +97,7 @@ describe('MongoClient', function() {
         };
 
         // Add listener to close event
-        db.once('close', closeListener);
+        client.once('close', closeListener);
         // Ensure death of server instance
         client.topology.connections()[0].destroy();
       });
