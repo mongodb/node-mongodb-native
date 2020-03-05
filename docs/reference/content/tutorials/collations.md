@@ -361,20 +361,18 @@ results by German phonebook order.
   });
 });
 
-function countNames(db, callback) {
+async function countNames(db, callback) {
   const collection = db.collection( 'names' );
-  collection.aggregate( 
-      [ 
-        { '$group': { '_id': "$first_name", 'nameCount': { '$sum': 1 } } },
-        { '$sort' : { '_id' : 1 } }
-      ], { collation : { locale : 'de@collation=phonebook' } },
-
-      function(err, docs) {
-        assert.equal(err, null);
-        console.log("Found the following records");
-        console.log(docs)
-        callback(docs);
-      }
-  );
+  const cursor = collection.aggregate([ 
+    { '$group': { '_id': "$first_name", 'nameCount': { '$sum': 1 } } },
+    { '$sort' : { '_id' : 1 } }
+  ],
+  {
+    collation : { locale : 'de@collation=phonebook' }
+  })
+  cursor.toArray(function(err, documents) {
+    console.log(documents)
+    callback(documents);
+  });
 }
 ```
