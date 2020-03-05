@@ -556,15 +556,13 @@ describe('Cursor', function() {
           }
 
           function finished() {
-            (function() {
-              const cursor = collection.find();
+            const cursor = collection.find();
 
-              test.throws(function() {
-                cursor.each();
-              });
+            test.throws(function() {
+              cursor.each();
+            });
 
-              client.close(done);
-            })();
+            client.close(done);
           }
 
           insert(function() {
@@ -2775,7 +2773,7 @@ describe('Cursor', function() {
             test.equal(null, err);
 
             collection
-              .find({ _keywords: 'red' }, {}, { explain: true })
+              .find({ _keywords: 'red' })
               .limit(10)
               .toArray(function(err, result) {
                 test.equal(null, err);
@@ -2822,7 +2820,7 @@ describe('Cursor', function() {
           test.equal(null, err);
 
           collection
-            .find({ _keywords: 'red' }, {}, { explain: false })
+            .find({ _keywords: 'red' })
             .limit(10)
             .toArray(function(err, result) {
               test.equal(null, err);
