@@ -860,13 +860,11 @@ describe('Cursor', function() {
           }
 
           function finished() {
-            (function() {
-              const cursor = collection.find();
-              cursor.count(function(err, count) {
-                test.equal(null, err);
-                test.equal(10, count);
-              });
-            })();
+            const cursor = collection.find();
+            cursor.count(function(err, count) {
+              test.equal(null, err);
+              test.equal(10, count);
+            });
 
             (function() {
               const cursor = collection.find();
