@@ -556,14 +556,15 @@ describe('Cursor', function() {
           }
 
           function finished() {
-            collection.find(function(err, cursor) {
-              test.equal(null, err);
+            (function() {
+              const cursor = collection.find();
+
               test.throws(function() {
                 cursor.each();
               });
 
               client.close(done);
-            });
+            })();
           }
 
           insert(function() {
@@ -759,8 +760,8 @@ describe('Cursor', function() {
             test.equal(null, err);
           });
 
-          collection.find(function(err, cursor) {
-            test.equal(null, err);
+          (function() {
+            const cursor = collection.find();
 
             try {
               cursor.limit('not-an-integer');
@@ -774,9 +775,11 @@ describe('Cursor', function() {
             } catch (err) {
               test.equal('limit requires an integer', err.message);
             }
-          });
+          })();
 
-          collection.find(function(err, cursor) {
+          (function() {
+            const cursor = collection.find();
+
             test.equal(null, err);
 
             cursor.close(function(err, cursor) {
@@ -788,8 +791,8 @@ describe('Cursor', function() {
                 test.equal('Cursor is closed', err.message);
               }
 
-              collection.find(function(err, cursor) {
-                test.equal(null, err);
+              (function() {
+                const cursor = collection.find();
 
                 cursor.next(function(err) {
                   test.equal(null, err);
@@ -808,7 +811,7 @@ describe('Cursor', function() {
 
                   client.close(done);
                 });
-              });
+              })();
 
               try {
                 cursor.limit(1);
@@ -817,7 +820,7 @@ describe('Cursor', function() {
                 test.equal('Cursor is closed', err.message);
               }
             });
-          });
+          })();
         });
       });
     }
@@ -859,16 +862,16 @@ describe('Cursor', function() {
           }
 
           function finished() {
-            collection.find(function(err, cursor) {
-              test.equal(null, err);
+            (function() {
+              const cursor = collection.find();
               cursor.count(function(err, count) {
                 test.equal(null, err);
                 test.equal(10, count);
               });
-            });
+            })();
 
-            collection.find(function(err, cursor) {
-              test.equal(null, err);
+            (function() {
+              const cursor = collection.find();
               cursor.toArray(function(err, items) {
                 test.equal(null, err);
                 test.equal(10, items.length);
@@ -894,7 +897,7 @@ describe('Cursor', function() {
                     client.close(done);
                   });
               });
-            });
+            })();
           }
 
           insert(function() {
@@ -1061,58 +1064,56 @@ describe('Cursor', function() {
           collection.insert(docs, configuration.writeConcernMax(), function() {
             test.equal(null, err);
 
-            collection.find({}, { batchSize: batchSize }, function(err, cursor) {
-              test.equal(null, err);
+            const cursor = collection.find({}, { batchSize: batchSize });
 
-              //1st
+            //1st
+            cursor.next(function(err, items) {
+              test.equal(null, err);
+              //cursor.items should contain 1 since nextObject already popped one
+              test.equal(1, cursor.bufferedCount());
+              test.ok(items != null);
+
+              //2nd
               cursor.next(function(err, items) {
                 test.equal(null, err);
-                //cursor.items should contain 1 since nextObject already popped one
-                test.equal(1, cursor.bufferedCount());
+                test.equal(0, cursor.bufferedCount());
                 test.ok(items != null);
 
-                //2nd
+                //test batch size modification on the fly
+                batchSize = 3;
+                cursor.batchSize(batchSize);
+
+                //3rd
                 cursor.next(function(err, items) {
                   test.equal(null, err);
-                  test.equal(0, cursor.bufferedCount());
+                  test.equal(2, cursor.bufferedCount());
                   test.ok(items != null);
 
-                  //test batch size modification on the fly
-                  batchSize = 3;
-                  cursor.batchSize(batchSize);
-
-                  //3rd
+                  //4th
                   cursor.next(function(err, items) {
                     test.equal(null, err);
-                    test.equal(2, cursor.bufferedCount());
+                    test.equal(1, cursor.bufferedCount());
                     test.ok(items != null);
 
-                    //4th
+                    //5th
                     cursor.next(function(err, items) {
                       test.equal(null, err);
-                      test.equal(1, cursor.bufferedCount());
+                      test.equal(0, cursor.bufferedCount());
                       test.ok(items != null);
 
-                      //5th
+                      //6th
                       cursor.next(function(err, items) {
                         test.equal(null, err);
                         test.equal(0, cursor.bufferedCount());
                         test.ok(items != null);
 
-                        //6th
+                        //No more
                         cursor.next(function(err, items) {
                           test.equal(null, err);
-                          test.equal(0, cursor.bufferedCount());
-                          test.ok(items != null);
+                          test.ok(items == null);
+                          test.ok(cursor.isClosed());
 
-                          //No more
-                          cursor.next(function(err, items) {
-                            test.equal(null, err);
-                            test.ok(items == null);
-                            test.ok(cursor.isClosed());
-
-                            client.close(done);
-                          });
+                          client.close(done);
                         });
                       });
                     });
@@ -1159,41 +1160,39 @@ describe('Cursor', function() {
           collection.insert(docs, configuration.writeConcernMax(), function(err) {
             test.equal(null, err);
 
-            collection.find({}, { batchSize: batchSize }, function(err, cursor) {
-              test.equal(null, err);
+            const cursor = collection.find({}, { batchSize: batchSize });
 
-              //1st
+            //1st
+            cursor.next(function(err, items) {
+              test.equal(null, err);
+              test.equal(1, cursor.bufferedCount());
+              test.ok(items != null);
+
+              //2nd
               cursor.next(function(err, items) {
                 test.equal(null, err);
-                test.equal(1, cursor.bufferedCount());
+                test.equal(0, cursor.bufferedCount());
                 test.ok(items != null);
 
-                //2nd
+                //3rd
                 cursor.next(function(err, items) {
                   test.equal(null, err);
-                  test.equal(0, cursor.bufferedCount());
+                  test.equal(1, cursor.bufferedCount());
                   test.ok(items != null);
 
-                  //3rd
+                  //4th
                   cursor.next(function(err, items) {
                     test.equal(null, err);
-                    test.equal(1, cursor.bufferedCount());
+                    test.equal(0, cursor.bufferedCount());
                     test.ok(items != null);
 
-                    //4th
+                    //No more
                     cursor.next(function(err, items) {
                       test.equal(null, err);
-                      test.equal(0, cursor.bufferedCount());
-                      test.ok(items != null);
+                      test.ok(items == null);
+                      test.ok(cursor.isClosed());
 
-                      //No more
-                      cursor.next(function(err, items) {
-                        test.equal(null, err);
-                        test.ok(items == null);
-                        test.ok(cursor.isClosed());
-
-                        client.close(done);
-                      });
+                      client.close(done);
                     });
                   });
                 });
@@ -3116,15 +3115,13 @@ describe('Cursor', function() {
           collection.insert(docs, configuration.writeConcernMax(), function(err) {
             test.equal(null, err);
 
-            collection.find({}, function(err, cursor) {
+            const cursor = collection.find({});
+
+            cursor.count(function(err, count) {
               test.equal(null, err);
+              test.equal(100, count);
 
-              cursor.count(function(err, count) {
-                test.equal(null, err);
-                test.equal(100, count);
-
-                client.close(done);
-              });
+              client.close(done);
             });
           });
         });
@@ -3309,34 +3306,26 @@ describe('Cursor', function() {
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
         test.equal(null, err);
+        const collectionName = 'should_correctly_handle_batchSize_2';
 
-        db.collection('should_correctly_handle_batchSize_2').insert(
-          [{ x: 1 }, { x: 2 }, { x: 3 }],
-          function(err) {
+        db.collection(collectionName).insert([{ x: 1 }, { x: 2 }, { x: 3 }], function(err) {
+          test.equal(null, err);
+
+          const cursor = db.collection(collectionName).find({}, { batchSize: 2 });
+
+          cursor.next(function(err) {
             test.equal(null, err);
 
-            db.collection('should_correctly_handle_batchSize_2').find(
-              {},
-              { batchSize: 2 },
-              function(error, cursor) {
+            cursor.next(function(err) {
+              test.equal(null, err);
+
+              cursor.next(function(err) {
                 test.equal(null, err);
-
-                cursor.next(function(err) {
-                  test.equal(null, err);
-
-                  cursor.next(function(err) {
-                    test.equal(null, err);
-
-                    cursor.next(function(err) {
-                      test.equal(null, err);
-                      client.close(done);
-                    });
-                  });
-                });
-              }
-            );
-          }
-        );
+                client.close(done);
+              });
+            });
+          });
+        });
       });
     }
   });
@@ -3355,13 +3344,11 @@ describe('Cursor', function() {
         var db = client.db(configuration.db);
         test.equal(null, err);
 
-        db.collection('myCollection').find({}, function(err, cursor) {
-          test.equal(null, err);
-          test.equal('myCollection', cursor.namespace.collection);
-          test.equal('integration_tests', cursor.namespace.db);
+        const cursor = db.collection('myCollection').find({});
+        test.equal('myCollection', cursor.namespace.collection);
+        test.equal('integration_tests', cursor.namespace.db);
 
-          client.close(done);
-        });
+        client.close(done);
       });
     }
   });

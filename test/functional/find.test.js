@@ -1200,19 +1200,22 @@ describe('Find', function() {
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
         db.createCollection('timeoutFalse', function(err, collection) {
-          collection.find({}, { timeout: false }, function(err, cursor) {
+          (function() {
+            const cursor = collection.find({}, { timeout: false });
             test.equal(false, cursor.cmd.noCursorTimeout);
 
-            collection.find({}, { timeout: true }, function(err, cursor) {
+            (function() {
+              const cursor = collection.find({}, { timeout: true });
               test.equal(true, cursor.cmd.noCursorTimeout);
 
-              collection.find({}, {}, function(err, cursor) {
+              (function() {
+                const cursor = collection.find({}, {});
                 test.ok(!cursor.cmd.noCursorTimeout);
 
                 client.close(done);
-              });
-            });
-          });
+              })();
+            })();
+          })();
         });
       });
     }
@@ -2710,13 +2713,11 @@ describe('Find', function() {
         var db = client.db(configuration.db);
         var collection = db.collection('shouldNotMutateUserOptions');
         var options = { raw: 'TEST' };
-        collection.find({}, options, function(error) {
-          test.equal(null, error);
-          test.equal(undefined, options.skip);
-          test.equal(undefined, options.limit);
-          test.equal('TEST', options.raw);
-          client.close(done);
-        });
+        collection.find({}, options);
+        test.equal(undefined, options.skip);
+        test.equal(undefined, options.limit);
+        test.equal('TEST', options.raw);
+        client.close(done);
       });
     }
   });
