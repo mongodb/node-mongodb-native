@@ -361,7 +361,7 @@ results by German phonebook order.
   });
 });
 
-async function countNames(db, callback) {
+function countNames(db, callback) {
   const collection = db.collection( 'names' );
   const cursor = collection.aggregate([ 
     { '$group': { '_id': "$first_name", 'nameCount': { '$sum': 1 } } },
