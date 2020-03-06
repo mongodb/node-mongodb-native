@@ -736,7 +736,47 @@ describe('Cursor', function() {
    * @ignore
    * @api private
    */
-  it('shouldCorrectlyReturnErrorsOnIllegalLimitValues', {
+  it('shouldCorrectlyReturnErrorsOnIllegalLimitValuesNotAnInt', {
+    // Add a tag that our runner can trigger on
+    // in this case we are setting that node needs to be higher than 0.10.X to run
+    metadata: {
+      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+    },
+
+    // The actual test we wish to run
+    test: function(done) {
+      var configuration = this.configuration;
+      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      client.connect(function(err, client) {
+        test.equal(null, err);
+
+        var db = client.db(configuration.db);
+        db.createCollection('test_limit_exceptions', function(err, collection) {
+          test.equal(null, err);
+
+          collection.insert({ a: 1 }, configuration.writeConcernMax(), function(err) {
+            test.equal(null, err);
+            const cursor = collection.find();
+
+            try {
+              cursor.limit('not-an-integer');
+            } catch (err) {
+              test.equal('limit requires an integer', err.message);
+            }
+
+            cursor.close();
+            client.close(done);
+          });
+        });
+      });
+    }
+  });
+
+  /**
+   * @ignore
+   * @api private
+   */
+  it('shouldCorrectlyReturnErrorsOnIllegalLimitValuesIsClosedWithinNext', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
@@ -758,67 +798,62 @@ describe('Cursor', function() {
             test.equal(null, err);
           });
 
-          (function() {
-            const cursor = collection.find();
+          const cursor = collection.find();
 
-            try {
-              cursor.limit('not-an-integer');
-            } catch (err) {
-              test.equal('limit requires an integer', err.message);
-            }
-
-            try {
-              cursor.limit('not-an-integer');
-              test.ok(false);
-            } catch (err) {
-              test.equal('limit requires an integer', err.message);
-            }
-          })();
-
-          (function() {
-            const cursor = collection.find();
-
+          cursor.next(function(err) {
             test.equal(null, err);
+            try {
+              cursor.limit(1);
+            } catch (err) {
+              test.equal('Cursor is closed', err.message);
+            }
+            cursor.close();
+            client.close(done);
+          });
+        });
+      });
+    }
+  });
+
+  /**
+   * @ignore
+   * @api private
+   */
+  it('shouldCorrectlyReturnErrorsOnIllegalLimitValuesIsClosedWithinClose', {
+    // Add a tag that our runner can trigger on
+    // in this case we are setting that node needs to be higher than 0.10.X to run
+    metadata: {
+      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+    },
+
+    // The actual test we wish to run
+    test: function(done) {
+      var configuration = this.configuration;
+      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      client.connect(function(err, client) {
+        test.equal(null, err);
+
+        var db = client.db(configuration.db);
+        db.createCollection('test_limit_exceptions', function(err, collection) {
+          test.equal(null, err);
+
+          collection.insert({ a: 1 }, configuration.writeConcernMax(), function(err) {
+            test.equal(null, err);
+
+            const cursor = collection.find();
 
             cursor.close(function(err, cursor) {
               test.equal(null, err);
-
-              try {
-                cursor.limit(1);
-              } catch (err) {
-                test.equal('Cursor is closed', err.message);
-              }
-
-              (function() {
-                const cursor = collection.find();
-
-                cursor.next(function(err) {
-                  test.equal(null, err);
-                  try {
-                    cursor.limit(1);
-                  } catch (err) {
-                    test.equal('Cursor is closed', err.message);
-                  }
-
-                  try {
-                    cursor.limit(1);
-                    test.ok(false);
-                  } catch (err) {
-                    test.equal('Cursor is closed', err.message);
-                  }
-
-                  client.close(done);
-                });
-              })();
-
               try {
                 cursor.limit(1);
                 test.ok(false);
               } catch (err) {
                 test.equal('Cursor is closed', err.message);
               }
+              cursor.close();
+              client.close(done);
             });
-          })();
+          });
         });
       });
     }
