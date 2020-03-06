@@ -2,13 +2,13 @@
 
 const BSON = require('bson');
 const mock = require('mongodb-mock-server');
-const expect = require('chai').expect;
+const { expect } = require('chai');
 const EventEmitter = require('events');
 
 const connect = require('../../../lib/core/connection/connect');
-const MongoCredentials = require('../../../lib/core/auth/mongo_credentials').MongoCredentials;
-const genClusterTime = require('./common').genClusterTime;
-const MongoNetworkError = require('../../../lib/core/error').MongoNetworkError;
+const { MongoCredentials } = require('../../../lib/core/auth/mongo_credentials');
+const { genClusterTime } = require('./common');
+const { MongoNetworkError } = require('../../../lib/error');
 
 describe('Connect Tests', function() {
   const test = {};

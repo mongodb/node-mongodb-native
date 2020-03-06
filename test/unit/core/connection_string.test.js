@@ -1,9 +1,9 @@
 'use strict';
 
-const parseConnectionString = require('../../../lib/connection_string').parseConnectionString;
+const { parseConnectionString } = require('../../../lib/connection_string');
 const punycode = require('punycode');
-const MongoParseError = require('../../../lib/core/error').MongoParseError;
-const loadSpecTests = require('../../spec').loadSpecTests;
+const { MongoParseError } = require('../../../lib/error');
+const { loadSpecTests } = require('../../spec');
 const chai = require('chai');
 const expect = chai.expect;
 chai.use(require('chai-subset'));

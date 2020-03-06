@@ -1,9 +1,9 @@
 'use strict';
-const Topology = require('../../../lib/core').Topology;
+const { Topology } = require('../../../lib/core');
 const mock = require('mongodb-mock-server');
-const ReplSetFixture = require('./common').ReplSetFixture;
-const MongoWriteConcernError = require('../../../lib/core/error').MongoWriteConcernError;
-const expect = require('chai').expect;
+const { ReplSetFixture } = require('./common');
+const { MongoWriteConcernError } = require('../../../lib/error');
+const { expect } = require('chai');
 
 describe('WriteConcernError', function() {
   let test;

@@ -1,10 +1,10 @@
 'use strict';
 
 const expect = require('chai').expect;
-const MongoError = require('../../../lib/core/error').MongoError;
+const { MongoError } = require('../../../lib/error');
 const mock = require('mongodb-mock-server');
-const Topology = require('../../../lib/core').Topology;
-const Long = require('bson').Long;
+const { Topology } = require('../../../lib/core');
+const { Long } = require('bson');
 
 const test = {};
 describe('Response', function() {

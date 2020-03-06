@@ -1,15 +1,11 @@
 'use strict';
 const path = require('path');
 const fs = require('fs');
-const core = require('../../../../lib/core');
-const Topology = core.Topology;
-const MongoServerSelectionError = core.MongoServerSelectionError;
-const ReadPreference = core.ReadPreference;
-
-// TODO: these should be from `core` when legacy topologies are removed
-const Server = require('../../../../lib/core/sdam/server').Server;
-const ServerType = require('../../../../lib/core/sdam/common').ServerType;
-const ServerDescription = require('../../../../lib/core/sdam/server_description').ServerDescription;
+const { Topology, ReadPreference } = require('../../../../lib/core');
+const { MongoServerSelectionError } = require('../../../../lib/error');
+const { Server } = require('../../../../lib/core/sdam/server');
+const { ServerType } = require('../../../../lib/core/sdam/common');
+const { ServerDescription } = require('../../../../lib/core/sdam/server_description');
 const ServerSelectors = require('../../../../lib/core/sdam/server_selection');
 
 const EJSON = require('mongodb-extjson');

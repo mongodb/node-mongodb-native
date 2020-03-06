@@ -1,14 +1,14 @@
 'use strict';
 
 const instrument = require('../..').instrument;
-const shared = require('./shared');
-const setupDatabase = shared.setupDatabase;
-const filterForCommands = shared.filterForCommands;
-const filterOutCommands = shared.filterOutCommands;
-const ignoreNsNotFound = shared.ignoreNsNotFound;
-const loadSpecTests = require('../spec').loadSpecTests;
-const chai = require('chai');
-const expect = chai.expect;
+const {
+  setupDatabase,
+  filterForCommands,
+  filterOutCommands,
+  ignoreNsNotFound
+} = require('./shared');
+const { loadSpecTests } = require('../spec');
+const { expect } = require('chai');
 
 describe('APM', function() {
   before(function() {

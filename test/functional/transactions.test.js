@@ -1,13 +1,11 @@
 'use strict';
 
-const chai = require('chai');
-const expect = chai.expect;
-const core = require('../../lib/core');
-const sessions = core.Sessions;
-const TestRunnerContext = require('./spec-runner').TestRunnerContext;
-const loadSpecTests = require('../spec').loadSpecTests;
-const generateTopologyTests = require('./spec-runner').generateTopologyTests;
-const MongoNetworkError = require('../../lib/core').MongoNetworkError;
+const { expect } = require('chai');
+const { Topology } = require('../../lib/core');
+const { ClientSession } = require('../../lib/core/sessions');
+const { TestRunnerContext, generateTopologyTests } = require('./spec-runner');
+const { loadSpecTests } = require('../spec');
+const { MongoNetworkError } = require('../../lib/error');
 
 describe('Transactions', function() {
   const testContext = new TestRunnerContext();
@@ -49,9 +47,9 @@ describe('Transactions', function() {
   describe('withTransaction', function() {
     let session, sessionPool;
     beforeEach(() => {
-      const topology = new core.Topology('localhost:27017');
+      const topology = new Topology('localhost:27017');
       sessionPool = topology.s.sessionPool;
-      session = new sessions.ClientSession(topology, sessionPool);
+      session = new ClientSession(topology, sessionPool);
     });
 
     afterEach(() => {

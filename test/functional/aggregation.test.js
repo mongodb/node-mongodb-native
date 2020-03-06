@@ -53,6 +53,7 @@ describe('Aggregation', function() {
         var collection = db.collection('shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray');
         // Insert the docs
         collection.insert(docs, { w: 1 }, function(err, result) {
+          if (err) console.dir({ err });
           expect(result).to.exist;
           expect(err).to.be.null;
 

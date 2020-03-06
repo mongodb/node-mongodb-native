@@ -1,6 +1,7 @@
 'use strict';
 
 // Core module
+const error = require('./lib/error');
 const core = require('./lib/core');
 const Instrumentation = require('./lib/apm');
 
@@ -8,12 +9,12 @@ const Instrumentation = require('./lib/apm');
 const connect = require('./lib/mongo_client').connect;
 
 // Expose error class
-connect.MongoError = core.MongoError;
-connect.MongoNetworkError = core.MongoNetworkError;
-connect.MongoTimeoutError = core.MongoTimeoutError;
-connect.MongoServerSelectionError = core.MongoServerSelectionError;
-connect.MongoParseError = core.MongoParseError;
-connect.MongoWriteConcernError = core.MongoWriteConcernError;
+connect.MongoError = error.MongoError;
+connect.MongoNetworkError = error.MongoNetworkError;
+connect.MongoTimeoutError = error.MongoTimeoutError;
+connect.MongoServerSelectionError = error.MongoServerSelectionError;
+connect.MongoParseError = error.MongoParseError;
+connect.MongoWriteConcernError = error.MongoWriteConcernError;
 connect.MongoBulkWriteError = require('./lib/bulk/common').BulkWriteError;
 connect.BulkWriteError = connect.MongoBulkWriteError;
 

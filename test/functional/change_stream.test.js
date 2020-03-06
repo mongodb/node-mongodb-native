@@ -1,12 +1,10 @@
 'use strict';
-var assert = require('assert');
-var Transform = require('stream').Transform;
-const MongoError = require('../../lib/core').MongoError;
-var MongoNetworkError = require('../../lib/core').MongoNetworkError;
-var setupDatabase = require('./shared').setupDatabase;
-var delay = require('./shared').delay;
-var co = require('co');
-var mock = require('mongodb-mock-server');
+const assert = require('assert');
+const { Transform } = require('stream');
+const { MongoError, MongoNetworkError } = require('../../lib/error');
+const { setupDatabase, delay } = require('./shared');
+const co = require('co');
+const mock = require('mongodb-mock-server');
 const chai = require('chai');
 const expect = chai.expect;
 const sinon = require('sinon');
