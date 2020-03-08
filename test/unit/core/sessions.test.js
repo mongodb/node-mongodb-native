@@ -1,15 +1,10 @@
 'use strict';
 
 const mock = require('mongodb-mock-server');
-const expect = require('chai').expect;
-const genClusterTime = require('./common').genClusterTime;
-const sessionCleanupHandler = require('./common').sessionCleanupHandler;
-
-const core = require('../../../lib/core');
-const Topology = core.Topology;
-const ServerSessionPool = core.Sessions.ServerSessionPool;
-const ServerSession = core.Sessions.ServerSession;
-const ClientSession = core.Sessions.ClientSession;
+const { expect } = require('chai');
+const { genClusterTime, sessionCleanupHandler } = require('./common');
+const { Topology } = require('../../../lib/sdam/topology');
+const { ServerSessionPool, ServerSession, ClientSession } = require('../../../lib/sessions');
 
 let test = {};
 describe('Sessions', function() {

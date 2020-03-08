@@ -4,6 +4,7 @@ const chai = require('chai');
 const expect = chai.expect;
 const sinonChai = require('sinon-chai');
 const mock = require('mongodb-mock-server');
+const { Long, ObjectID } = require('../..');
 chai.use(sinonChai);
 
 describe('Collection', function() {
@@ -419,7 +420,6 @@ describe('Collection', function() {
      * @ignore
      */
     it('should correctly save document with Long value', function(done) {
-      const Long = configuration.require.Long;
       db.createCollection('test_save_long', (err, collection) => {
         collection.insertOne(
           { x: Long.fromNumber(9223372036854775807) },
@@ -550,7 +550,6 @@ describe('Collection', function() {
      * @ignore
      */
     it('should correctly save document with nested array', function(done) {
-      const ObjectID = configuration.require.ObjectID;
       db.createCollection('save_error_on_save_test', (err, collection) => {
         // Create unique index for username
         collection.createIndex([['username', 1]], configuration.writeConcernMax(), err => {

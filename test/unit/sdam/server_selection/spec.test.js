@@ -1,12 +1,13 @@
 'use strict';
 const path = require('path');
 const fs = require('fs');
-const { Topology, ReadPreference } = require('../../../../lib/core');
+const { Topology } = require('../../../../lib/sdam/topology');
+const { Server } = require('../../../../lib/sdam/server');
+const { ServerType } = require('../../../../lib/sdam/common');
+const { ServerDescription } = require('../../../../lib/sdam/server_description');
+const ReadPreference = require('../../../../lib/read_preference');
 const { MongoServerSelectionError } = require('../../../../lib/error');
-const { Server } = require('../../../../lib/core/sdam/server');
-const { ServerType } = require('../../../../lib/core/sdam/common');
-const { ServerDescription } = require('../../../../lib/core/sdam/server_description');
-const ServerSelectors = require('../../../../lib/core/sdam/server_selection');
+const ServerSelectors = require('../../../../lib/sdam/server_selection');
 
 const EJSON = require('mongodb-extjson');
 

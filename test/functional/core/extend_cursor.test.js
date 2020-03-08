@@ -1,8 +1,8 @@
 'use strict';
 
-const expect = require('chai').expect;
-const f = require('util').format;
-const CoreCursor = require('../../../lib/core/cursor').CoreCursor;
+const { expect } = require('chai');
+const { format: f } = require('util');
+const { CoreCursor } = require('../../../lib/cursor');
 
 describe('Extend cursor tests', function() {
   it('should correctly extend the cursor with custom implementation', {

@@ -8,6 +8,7 @@ const mock = require('mongodb-mock-server');
 const chai = require('chai');
 const expect = chai.expect;
 const sinon = require('sinon');
+const { ObjectId, Timestamp, Long, ReadPreference } = require('../..');
 
 chai.use(require('chai-subset'));
 
@@ -707,7 +708,6 @@ describe('Change Streams', function() {
 
     test: function(done) {
       var configuration = this.configuration;
-      const ObjectId = configuration.require.ObjectId;
 
       // Contain mock server
       var primaryServer = null;
@@ -804,7 +804,6 @@ describe('Change Streams', function() {
     },
     test: function(done) {
       var configuration = this.configuration;
-      const ObjectId = configuration.require.ObjectId;
 
       // Contain mock server
       var primaryServer = null;
@@ -899,9 +898,6 @@ describe('Change Streams', function() {
     },
     test: function(done) {
       var configuration = this.configuration;
-      const ObjectId = configuration.require.ObjectId;
-      const Timestamp = configuration.require.Timestamp;
-      const Long = configuration.require.Long;
 
       // Contain mock server
       var primaryServer = null;
@@ -1247,7 +1243,6 @@ describe('Change Streams', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var ReadPreference = configuration.require.ReadPreference;
       const client = configuration.newClient();
 
       return client.connect().then(client => {
@@ -1345,9 +1340,6 @@ describe('Change Streams', function() {
     },
     test: function(done) {
       var configuration = this.configuration;
-      const ObjectId = configuration.require.ObjectId;
-      const Timestamp = configuration.require.Timestamp;
-      const Long = configuration.require.Long;
 
       // Contain mock server
       var primaryServer = null;
@@ -1634,9 +1626,6 @@ describe('Change Streams', function() {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.7.3' } },
     test: function(done) {
       const configuration = this.configuration;
-      const ObjectId = configuration.require.ObjectId;
-      const Timestamp = configuration.require.Timestamp;
-      const Long = configuration.require.Long;
 
       const OPERATION_TIME = new Timestamp(4, 1501511802);
 
@@ -2045,7 +2034,7 @@ describe('Change Streams', function() {
         this.collection = 'test_coll';
         this.ns = `${this.database}.${this.collection}`;
         this._timestampCounter = 0;
-        this.cursorId = new this.config.require.Long('9064341847921713401');
+        this.cursorId = new Long('9064341847921713401');
         this.commandIterators = commandIterators;
         this.promise = this.init();
       }
@@ -2172,7 +2161,7 @@ describe('Change Streams', function() {
 
       // Helpers
       timestamp() {
-        return new this.config.require.Timestamp(this._timestampCounter++, Date.now());
+        return new Timestamp(this._timestampCounter++, Date.now());
       }
 
       applyOpTime(obj) {
@@ -2221,7 +2210,7 @@ describe('Change Streams', function() {
         return {
           ts: this.timestamp(),
           ns: this.namespace,
-          _id: new this.config.require.ObjectId()
+          _id: new ObjectId()
         };
       }
     }

@@ -3,6 +3,7 @@ var fs = require('fs');
 var f = require('util').format;
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
+const { MongoClient } = require('../..');
 
 describe('SSL (x509)', function() {
   before(function() {
@@ -18,8 +19,7 @@ describe('SSL (x509)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var ServerManager = require('mongodb-topology-manager').Server,
-        MongoClient = configuration.require.MongoClient;
+      var ServerManager = require('mongodb-topology-manager').Server;
 
       // Read the cert and key
       var cert = fs.readFileSync(__dirname + '/ssl/x509/client.pem');
@@ -136,8 +136,7 @@ describe('SSL (x509)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var ServerManager = require('mongodb-topology-manager').Server,
-        MongoClient = configuration.require.MongoClient;
+      var ServerManager = require('mongodb-topology-manager').Server;
 
       // Read the cert and key
       var cert = fs.readFileSync(__dirname + '/ssl/x509/client.pem');
@@ -254,8 +253,7 @@ describe('SSL (x509)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var ServerManager = require('mongodb-topology-manager').Server,
-        MongoClient = configuration.require.MongoClient;
+      var ServerManager = require('mongodb-topology-manager').Server;
 
       // Read the cert and key
       var cert = fs.readFileSync(__dirname + '/ssl/x509/client.pem');
@@ -371,8 +369,7 @@ describe('SSL (x509)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var ServerManager = require('mongodb-topology-manager').Server,
-        MongoClient = configuration.require.MongoClient;
+      var ServerManager = require('mongodb-topology-manager').Server;
 
       // Read the cert and key
       var cert = fs.readFileSync(__dirname + '/ssl/x509/client.pem');
@@ -482,8 +479,7 @@ describe('SSL (x509)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var ServerManager = require('mongodb-topology-manager').Server,
-        MongoClient = configuration.require.MongoClient;
+      var ServerManager = require('mongodb-topology-manager').Server;
 
       // Read the cert and key
       var cert = fs.readFileSync(__dirname + '/ssl/x509/client.pem');

@@ -1,6 +1,7 @@
 'use strict';
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
+const { Code } = require('../..');
 
 describe('MapReduce', function() {
   before(function() {
@@ -218,8 +219,6 @@ describe('MapReduce', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var Code = configuration.require.Code;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -264,8 +263,6 @@ describe('MapReduce', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var Code = configuration.require.Code;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -316,8 +313,6 @@ describe('MapReduce', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var Code = configuration.require.Code;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);

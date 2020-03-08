@@ -4,8 +4,8 @@ const qs = require('querystring');
 const util = require('util');
 
 const MongoClient = require('../../../lib/mongo_client');
-const TopologyType = require('../../../lib/core/sdam/common').TopologyType;
-const core = require('../../../lib/core');
+const { Topology } = require('../../../lib/sdam/topology');
+const { TopologyType } = require('../../../lib/sdam/common');
 
 function convertToConnStringMap(obj) {
   let result = [];
@@ -31,7 +31,6 @@ class NativeConfiguration {
       parsedURI.options
     );
 
-    this.mongo = this.require = require('../../..');
     this.writeConcern = function() {
       return { w: 1 };
     };
@@ -60,6 +59,14 @@ class NativeConfiguration {
 
   get setName() {
     return this.options.replicaSet;
+  }
+
+  get mongo() {
+    throw new TypeError('fix this!');
+  }
+
+  get require() {
+    throw new TypeError('fix this!');
   }
 
   newClient(dbOptions, serverOptions) {
@@ -132,7 +139,7 @@ class NativeConfiguration {
 
     options = Object.assign({}, options);
     const hosts = host == null ? [].concat(this.options.hosts) : [{ host, port }];
-    return new core.Topology(hosts, options);
+    return new Topology(hosts, options);
   }
 
   url(username, password, options) {

@@ -1,10 +1,10 @@
 'use strict';
 const mock = require('mongodb-mock-server');
 const BSON = require('bson');
-const Topology = require('../../../lib/core/sdam/topology').Topology;
-const Monitor = require('../../../lib/core/sdam/monitor').Monitor;
-const ServerType = require('../../../lib/core/sdam/common').ServerType;
-const expect = require('chai').expect;
+const { ServerType } = require('../../../lib/sdam/common');
+const { Topology } = require('../../../lib/sdam/topology');
+const { Monitor } = require('../../../lib/sdam/monitor');
+const { expect } = require('chai');
 
 class MockServer {
   constructor(options) {

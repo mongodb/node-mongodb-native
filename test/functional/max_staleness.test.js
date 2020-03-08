@@ -2,6 +2,7 @@
 const Long = require('bson').Long,
   expect = require('chai').expect,
   mock = require('mongodb-mock-server');
+const { ReadPreference } = require('../..');
 
 const test = {};
 describe('Max Staleness', function() {
@@ -84,10 +85,7 @@ describe('Max Staleness', function() {
     },
 
     test: function(done) {
-      var self = this;
       const configuration = this.configuration;
-      const ReadPreference = self.configuration.require.ReadPreference;
-
       const client = configuration.newClient(`mongodb://${test.server.uri()}/test`);
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -126,8 +124,6 @@ describe('Max Staleness', function() {
       test: function(done) {
         var self = this;
         const configuration = this.configuration;
-        const ReadPreference = self.configuration.require.ReadPreference;
-
         const client = configuration.newClient(`mongodb://${test.server.uri()}/test`);
         client.connect(function(err, client) {
           expect(err).to.not.exist;
@@ -163,8 +159,6 @@ describe('Max Staleness', function() {
     test: function(done) {
       var self = this;
       const configuration = this.configuration;
-      const ReadPreference = self.configuration.require.ReadPreference;
-
       const client = configuration.newClient(`mongodb://${test.server.uri()}/test`);
       client.connect(function(err, client) {
         expect(err).to.not.exist;

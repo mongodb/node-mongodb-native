@@ -2,6 +2,7 @@
 var test = require('./shared').assert;
 var co = require('co');
 var mock = require('mongodb-mock-server');
+const { ReadPreference, ObjectId } = require('../..');
 
 var extend = function(template, fields) {
   var object = {};
@@ -28,10 +29,7 @@ describe.skip('Buffering Proxy', function() {
     },
 
     test: function(done) {
-      var configuration = this.configuration,
-        ObjectId = configuration.require.ObjectId,
-        ReadPreference = configuration.require.ReadPreference;
-
+      var configuration = this.configuration;
       var currentIsMasterIndex = 0;
       var electionIds = [new ObjectId(0), new ObjectId(1)];
 
@@ -249,10 +247,7 @@ describe.skip('Buffering Proxy', function() {
     },
 
     test: function(done) {
-      var configuration = this.configuration,
-        ObjectId = configuration.require.ObjectId,
-        ReadPreference = configuration.require.ReadPreference;
-
+      var configuration = this.configuration;
       var currentIsMasterIndex = 0;
       var electionIds = [new ObjectId(0), new ObjectId(1)];
 

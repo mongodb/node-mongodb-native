@@ -1,5 +1,5 @@
 'use strict';
-const ServerDescription = require('../../../lib/core/sdam/server_description').ServerDescription;
+const { ServerDescription } = require('../../../lib/sdam/server_description');
 const expect = require('chai').expect;
 
 describe('ServerDescription', function() {

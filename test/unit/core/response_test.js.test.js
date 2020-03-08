@@ -3,7 +3,7 @@
 const expect = require('chai').expect;
 const { MongoError } = require('../../../lib/error');
 const mock = require('mongodb-mock-server');
-const { Topology } = require('../../../lib/core');
+const { Topology } = require('../../../lib/sdam/topology');
 const { Long } = require('bson');
 
 const test = {};

@@ -4,6 +4,7 @@ const setupDatabase = require('./shared').setupDatabase;
 const expect = require('chai').expect;
 const Buffer = require('safe-buffer').Buffer;
 const sinon = require('sinon');
+const { Code, ObjectID, Long, Binary } = require('../..');
 
 describe('Find', function() {
   before(function() {
@@ -534,8 +535,6 @@ describe('Find', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var Code = configuration.require.Code;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -652,8 +651,6 @@ describe('Find', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var ObjectID = configuration.require.ObjectID;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -692,7 +689,6 @@ describe('Find', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var ObjectID = configuration.require.ObjectID;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -770,8 +766,6 @@ describe('Find', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var ObjectID = configuration.require.ObjectID;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -1325,8 +1319,6 @@ describe('Find', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var ObjectID = configuration.require.ObjectID;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -1374,8 +1366,6 @@ describe('Find', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var ObjectID = configuration.require.ObjectID;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -1409,9 +1399,6 @@ describe('Find', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var ObjectID = configuration.require.ObjectID,
-        Long = configuration.require.Long;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -1462,7 +1449,6 @@ describe('Find', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var ObjectID = configuration.require.ObjectID;
       var p_client = configuration.newClient(configuration.writeConcernMax(), {
         poolSize: 1,
         auto_reconnect: false
@@ -1510,8 +1496,6 @@ describe('Find', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var ObjectID = configuration.require.ObjectID;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -1578,8 +1562,6 @@ describe('Find', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var ObjectID = configuration.require.ObjectID;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -1712,8 +1694,6 @@ describe('Find', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var ObjectID = configuration.require.ObjectID;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -1750,7 +1730,6 @@ describe('Find', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var ObjectID = configuration.require.ObjectID;
       var p_client = configuration.newClient(configuration.writeConcernMax(), {
         poolSize: 1,
         auto_reconnect: false
@@ -2184,7 +2163,6 @@ describe('Find', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var Binary = configuration.require.Binary;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);

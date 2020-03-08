@@ -1,9 +1,7 @@
 'use strict';
 
-const Logger = require('../../lib/core').Logger;
-const deprecateOptions = require('../../lib/utils').deprecateOptions;
-const arrayStrictEqual = require('../../lib/core/utils').arrayStrictEqual;
-const errorStrictEqual = require('../../lib/core/utils').errorStrictEqual;
+const Logger = require('../../lib/logger');
+const { deprecateOptions, arrayStrictEqual, errorStrictEqual } = require('../../lib/utils');
 const chalk = require('chalk');
 const chai = require('chai');
 const expect = chai.expect;

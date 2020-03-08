@@ -4,6 +4,7 @@ var f = require('util').format;
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 var Buffer = require('safe-buffer').Buffer;
+const { Code, GridStore, ObjectID } = require('../..');
 
 var delay = function(ms) {
   return new Promise(function(resolve) {
@@ -1325,7 +1326,6 @@ describe('Operation (Promises)', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var Code = configuration.require.Code;
       var client = configuration.newClient({ w: 0 }, { poolSize: 1 });
 
       return client.connect().then(function(client) {
@@ -1421,7 +1421,6 @@ describe('Operation (Promises)', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var Code = configuration.require.Code;
       var client = configuration.newClient({ w: 0 }, { poolSize: 1 });
 
       return client.connect().then(function(client) {
@@ -4790,8 +4789,6 @@ describe('Operation (Promises)', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
 
       return client.connect().then(function(client) {
@@ -4857,8 +4854,6 @@ describe('Operation (Promises)', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
 
       return client.connect().then(function(client) {
@@ -4989,8 +4984,6 @@ describe('Operation (Promises)', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       return client.connect().then(function(client) {
         var db = client.db(configuration.db);
@@ -5043,8 +5036,6 @@ describe('Operation (Promises)', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       return client.connect().then(function(client) {
         var db = client.db(configuration.db);
@@ -5131,8 +5122,6 @@ describe('Operation (Promises)', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       return client.connect().then(function(client) {
         var db = client.db(configuration.db);
@@ -5201,8 +5190,6 @@ describe('Operation (Promises)', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       return client.connect().then(function(client) {
         var db = client.db(configuration.db);
@@ -5257,8 +5244,6 @@ describe('Operation (Promises)', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       return client.connect().then(function(client) {
         var db = client.db(configuration.db);
@@ -5316,8 +5301,6 @@ describe('Operation (Promises)', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       return client.connect().then(function(client) {
         var db = client.db(configuration.db);
@@ -5377,8 +5360,6 @@ describe('Operation (Promises)', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       return client.connect().then(function(client) {
         var db = client.db(configuration.db);
@@ -5445,8 +5426,6 @@ describe('Operation (Promises)', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       return client.connect().then(function(client) {
         var db = client.db(configuration.db);
@@ -5508,8 +5487,6 @@ describe('Operation (Promises)', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       return client.connect().then(function(client) {
         var db = client.db(configuration.db);
@@ -5562,8 +5539,6 @@ describe('Operation (Promises)', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       return client.connect().then(function(client) {
         var db = client.db(configuration.db);
@@ -5632,8 +5607,6 @@ describe('Operation (Promises)', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       return client.connect().then(function(client) {
         var db = client.db(configuration.db);
@@ -5699,8 +5672,6 @@ describe('Operation (Promises)', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       return client.connect().then(function(client) {
         var db = client.db(configuration.db);
@@ -5772,8 +5743,6 @@ describe('Operation (Promises)', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       return client.connect().then(function(client) {
         var db = client.db(configuration.db);
@@ -5829,8 +5798,6 @@ describe('Operation (Promises)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect().then(function(client) {
         var db = client.db(configuration.db);
@@ -5954,9 +5921,6 @@ describe('Operation (Promises)', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       return client.connect().then(function(client) {
         var db = client.db(configuration.db);
@@ -6036,8 +6000,6 @@ describe('Operation (Promises)', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       return client.connect().then(function(client) {
         var db = client.db(configuration.db);
@@ -6104,7 +6066,6 @@ describe('Operation (Promises)', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       return client.connect().then(function(client) {
         var db = client.db(configuration.db);
@@ -6163,8 +6124,6 @@ describe('Operation (Promises)', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
 
       return client.connect().then(function(client) {

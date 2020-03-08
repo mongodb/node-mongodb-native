@@ -1,7 +1,5 @@
 'use strict';
-
-const topologyType = require('../../../../lib/core/topologies/shared').topologyType;
-const TopologyType = require('../../../../lib/core/sdam/common').TopologyType;
+const { TopologyType } = require('../../../../lib/sdam/common');
 
 /**
  * Filter for the MongoDB toopology required for the test
@@ -15,7 +13,7 @@ const TopologyType = require('../../../../lib/core/sdam/common').TopologyType;
  */
 class MongoDBTopologyFilter {
   initializeFilter(client, context, callback) {
-    let type = topologyType(client.topology);
+    let type = client.topology.description.type;
     context.topologyType = type;
     this.runtimeTopology = topologyTypeToString(type);
     console.log(`[ topology type: ${this.runtimeTopology} ]`);

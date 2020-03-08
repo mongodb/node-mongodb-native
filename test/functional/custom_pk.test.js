@@ -1,6 +1,7 @@
 'use strict';
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
+const { ObjectID } = require('../..');
 
 describe('Custom PK', function() {
   before(function() {
@@ -18,7 +19,6 @@ describe('Custom PK', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var ObjectID = configuration.require.ObjectID;
 
       // Custom factory (need to provide a 12 byte array);
       var CustomPKFactory = function() {};

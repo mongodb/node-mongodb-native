@@ -1,5 +1,5 @@
 'use strict';
-const eachAsync = require('../../lib/core/utils').eachAsync;
+const { eachAsync } = require('../../lib/utils');
 const expect = require('chai').expect;
 
 describe('utils', function() {

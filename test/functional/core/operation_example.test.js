@@ -1,8 +1,7 @@
 'use strict';
 
 const expect = require('chai').expect;
-const core = require('../../../lib/core');
-const Topology = core.Topology;
+const { Topology } = require('../../../lib/sdam/topology');
 
 /**************************************************************************
  *

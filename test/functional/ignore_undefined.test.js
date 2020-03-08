@@ -1,6 +1,7 @@
 'use strict';
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
+const { ObjectId } = require('../..');
 
 describe('Ignore Undefined', function() {
   before(function() {
@@ -101,8 +102,6 @@ describe('Ignore Undefined', function() {
 
     test: function(done) {
       var configuration = this.configuration;
-      var ObjectId = configuration.require.ObjectID;
-
       var client = configuration.newClient(configuration.writeConcernMax(), {
         poolSize: 1,
         ignoreUndefined: true

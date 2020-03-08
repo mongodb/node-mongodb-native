@@ -1,10 +1,10 @@
 'use strict';
 
-const expect = require('chai').expect;
+const { expect } = require('chai');
 const mock = require('mongodb-mock-server');
-const Topology = require('../../../lib/core').Topology;
-const Buffer = require('safe-buffer').Buffer;
-const MongoCredentials = require('../../../lib/core/auth/mongo_credentials').MongoCredentials;
+const { Topology } = require('../../../lib/sdam/topology');
+const { Buffer } = require('safe-buffer');
+const { MongoCredentials } = require('../../../lib/cmap/auth/mongo_credentials');
 
 describe('SCRAM Iterations Tests', function() {
   const test = {};

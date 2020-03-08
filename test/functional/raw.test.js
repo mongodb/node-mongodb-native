@@ -1,10 +1,9 @@
 'use strict';
-var test = require('./shared').assert;
-var setupDatabase = require('./shared').setupDatabase;
-var Buffer = require('buffer').Buffer;
+const { assert: test, setupDatabase } = require('./shared');
+const { Buffer } = require('buffer');
 
-var BSON = require('../../lib/core').BSON;
-var bson = new BSON([
+const BSON = require('../../lib/utils').retrieveBSON();
+const bson = new BSON([
   BSON.Binary,
   BSON.Code,
   BSON.DBRef,

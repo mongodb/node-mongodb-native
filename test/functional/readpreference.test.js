@@ -2,6 +2,7 @@
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 const expect = require('chai').expect;
+const { ReadPreference } = require('../..');
 
 describe('ReadPreference', function() {
   before(function() {
@@ -17,9 +18,6 @@ describe('ReadPreference', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var mongo = configuration.require,
-        ReadPreference = mongo.ReadPreference;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -60,9 +58,6 @@ describe('ReadPreference', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var mongo = configuration.require,
-        ReadPreference = mongo.ReadPreference;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -106,9 +101,6 @@ describe('ReadPreference', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var mongo = configuration.require,
-        ReadPreference = mongo.ReadPreference;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -153,9 +145,6 @@ describe('ReadPreference', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var mongo = configuration.require,
-        ReadPreference = mongo.ReadPreference;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -209,9 +198,6 @@ describe('ReadPreference', function() {
       // The actual test we wish to run
       test: function(done) {
         var configuration = this.configuration;
-        var mongo = configuration.require,
-          ReadPreference = mongo.ReadPreference;
-
         var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
         client.connect(function(err, client) {
           var db = client.db(configuration.db);
@@ -262,9 +248,6 @@ describe('ReadPreference', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var mongo = configuration.require,
-        ReadPreference = mongo.ReadPreference;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -301,9 +284,6 @@ describe('ReadPreference', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var mongo = configuration.require,
-        ReadPreference = mongo.ReadPreference;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -364,9 +344,6 @@ describe('ReadPreference', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var mongo = configuration.require,
-        ReadPreference = mongo.ReadPreference;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -406,9 +383,6 @@ describe('ReadPreference', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var mongo = configuration.require,
-        ReadPreference = mongo.ReadPreference;
-
       var client = configuration.newClient({ w: 1, readPreference: 'secondary' }, { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -521,14 +495,13 @@ describe('ReadPreference', function() {
 
     test: function(done) {
       var configuration = this.configuration;
-      var mongo = configuration.require,
-        SecondaryPreferred = mongo.ReadPreference.SECONDARY_PREFERRED;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
         test.equal(null, err);
-        var cursor = db.collection('test', { readPreference: SecondaryPreferred }).listIndexes();
+        var cursor = db
+          .collection('test', { readPreference: ReadPreference.SECONDARY_PREFERRED })
+          .listIndexes();
         test.equal(cursor.options.readPreference.mode, 'secondaryPreferred');
         client.close(done);
       });

@@ -8,6 +8,7 @@ const crypto = require('crypto'),
   setupDatabase = require('./shared').setupDatabase,
   expect = require('chai').expect,
   Buffer = require('safe-buffer').Buffer;
+const { GridFSBucket, ObjectId } = require('../..');
 
 describe('GridFS Stream', function() {
   before(function() {
@@ -27,8 +28,6 @@ describe('GridFS Stream', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridFSBucket = configuration.require.GridFSBucket;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
 
       // LINE var MongoClient = require('mongodb').MongoClient,
@@ -111,8 +110,6 @@ describe('GridFS Stream', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridFSBucket = configuration.require.GridFSBucket;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
       // LINE   test = require('assert');
@@ -196,8 +193,6 @@ describe('GridFS Stream', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridFSBucket = configuration.require.GridFSBucket;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
       // LINE   test = require('assert');
@@ -262,9 +257,6 @@ describe('GridFS Stream', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridFSBucket = configuration.require.GridFSBucket,
-        ObjectId = configuration.require.ObjectID;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
       // LINE   test = require('assert');
@@ -304,8 +296,6 @@ describe('GridFS Stream', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridFSBucket = configuration.require.GridFSBucket;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
       // LINE   test = require('assert');
@@ -357,8 +347,6 @@ describe('GridFS Stream', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridFSBucket = configuration.require.GridFSBucket;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
       // LINE   test = require('assert');
@@ -417,8 +405,6 @@ describe('GridFS Stream', function() {
 
     test: function(done) {
       const configuration = this.configuration;
-      const GridFSBucket = configuration.require.GridFSBucket;
-
       const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
@@ -460,8 +446,6 @@ describe('GridFS Stream', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridFSBucket = configuration.require.GridFSBucket;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
       // LINE   test = require('assert');
@@ -520,8 +504,6 @@ describe('GridFS Stream', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridFSBucket = configuration.require.GridFSBucket;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
       // LINE   test = require('assert');
@@ -582,8 +564,6 @@ describe('GridFS Stream', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridFSBucket = configuration.require.GridFSBucket;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
       // LINE   test = require('assert');
@@ -646,8 +626,6 @@ describe('GridFS Stream', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridFSBucket = configuration.require.GridFSBucket;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
       // LINE   test = require('assert');
@@ -718,8 +696,6 @@ describe('GridFS Stream', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridFSBucket = configuration.require.GridFSBucket;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
       // LINE   test = require('assert');
@@ -770,8 +746,6 @@ describe('GridFS Stream', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridFSBucket = configuration.require.GridFSBucket;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
       // LINE   test = require('assert');
@@ -815,8 +789,6 @@ describe('GridFS Stream', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridFSBucket = configuration.require.GridFSBucket;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
       // LINE   test = require('assert');
@@ -876,8 +848,6 @@ describe('GridFS Stream', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridFSBucket = configuration.require.GridFSBucket;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
       // LINE   test = require('assert');
@@ -935,8 +905,6 @@ describe('GridFS Stream', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridFSBucket = configuration.require.GridFSBucket;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
       // LINE   test = require('assert');
@@ -981,8 +949,6 @@ describe('GridFS Stream', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridFSBucket = configuration.require.GridFSBucket;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
       // LINE   test = require('assert');
@@ -1024,8 +990,6 @@ describe('GridFS Stream', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridFSBucket = configuration.require.GridFSBucket;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -1066,8 +1030,6 @@ describe('GridFS Stream', function() {
       }
 
       const configuration = this.configuration;
-      const GridFSBucket = configuration.require.GridFSBucket;
-
       const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         const db = client.db(configuration.db);
@@ -1105,8 +1067,6 @@ describe('GridFS Stream', function() {
 
         test: function(done) {
           var configuration = this.configuration;
-          var GridFSBucket = configuration.require.GridFSBucket;
-
           var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
           client.connect(function(err, client) {
             var db = client.db(configuration.db);
@@ -1162,8 +1122,6 @@ describe('GridFS Stream', function() {
 
         test: function(done) {
           var configuration = this.configuration;
-          var GridFSBucket = configuration.require.GridFSBucket;
-
           var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
           client.connect(function(err, client) {
             var db = client.db(configuration.db);
@@ -1347,7 +1305,6 @@ describe('GridFS Stream', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridFSBucket = configuration.require.GridFSBucket;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
       // LINE   test = require('assert');
@@ -1414,8 +1371,6 @@ describe('GridFS Stream', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridFSBucket = configuration.require.GridFSBucket;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
       // LINE   test = require('assert');

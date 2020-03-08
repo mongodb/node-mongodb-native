@@ -1,14 +1,12 @@
 'use strict';
 
-const Server = require('../../../lib/core/sdam/server').Server;
-const ServerDescription = require('../../../lib/core/sdam/server_description').ServerDescription;
 const mock = require('mongodb-mock-server');
-const expect = require('chai').expect;
+const { expect } = require('chai');
 const sinon = require('sinon');
-
-const core = require('../../../lib/core');
-const BSON = core.BSON;
-const Topology = core.Topology;
+const { Topology } = require('../../../lib/sdam/topology');
+const { Server } = require('../../../lib/sdam/server');
+const { ServerDescription } = require('../../../lib/sdam/server_description');
+const BSON = require('../../../lib/utils').retrieveBSON();
 
 describe('Topology (unit)', function() {
   describe('client metadata', function() {

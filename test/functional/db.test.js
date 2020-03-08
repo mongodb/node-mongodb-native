@@ -2,6 +2,7 @@
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 const expect = require('chai').expect;
+const { Db, DBRef } = require('../..');
 
 describe('Db', function() {
   before(function() {
@@ -18,9 +19,6 @@ describe('Db', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var Db = configuration.require.Db;
-
       // Assert rename
       try {
         new Db(5);
@@ -179,8 +177,6 @@ describe('Db', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var DBRef = configuration.require.DBRef;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);

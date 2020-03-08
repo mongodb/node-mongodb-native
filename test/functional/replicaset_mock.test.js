@@ -2,6 +2,7 @@
 var expect = require('chai').expect,
   mock = require('mongodb-mock-server'),
   ObjectId = require('bson').ObjectId;
+const Logger = require('../../lib/logger');
 
 const test = {};
 describe('ReplSet (mocks)', function() {
@@ -62,7 +63,6 @@ describe('ReplSet (mocks)', function() {
 
     test: function(done) {
       var configuration = this.configuration;
-      var Logger = configuration.require.Logger;
       var logger = Logger.currentLogger();
       Logger.setLevel('warn');
       Logger.setCurrentLogger(function(msg, state) {
@@ -96,7 +96,6 @@ describe('ReplSet (mocks)', function() {
 
     test: function(done) {
       var configuration = this.configuration;
-      var Logger = configuration.require.Logger;
       var warnings = [];
       var logger = Logger.currentLogger();
       Logger.setLevel('warn');

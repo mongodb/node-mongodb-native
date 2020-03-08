@@ -2,6 +2,7 @@
 const test = require('./shared').assert,
   setupDatabase = require('./shared').setupDatabase,
   expect = require('chai').expect;
+const { connect } = require('../..');
 
 describe('MongoClient Options', function() {
   before(function() {
@@ -17,8 +18,6 @@ describe('MongoClient Options', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var connect = configuration.require;
-
       connect(
         configuration.url(),
         {

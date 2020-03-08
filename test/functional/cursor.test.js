@@ -1,14 +1,12 @@
 'use strict';
-const test = require('./shared').assert;
-const setupDatabase = require('./shared').setupDatabase;
+const { assert: test } = require('./shared');
+const { setupDatabase } = require('./shared');
 const fs = require('fs');
-const expect = require('chai').expect;
-const Long = require('bson').Long;
+const { expect } = require('chai');
+const { Long } = require('bson');
 const sinon = require('sinon');
-const Writable = require('stream').Writable;
-
-const core = require('../../lib/core');
-const ReadPreference = core.ReadPreference;
+const { Writable } = require('stream');
+const ReadPreference = require('../../lib/read_preference');
 
 describe('Cursor', function() {
   before(function() {
@@ -3953,7 +3951,6 @@ describe('Cursor', function() {
     test: function(done) {
       var docs = [];
       var configuration = this.configuration;
-      var Long = configuration.require.Long;
 
       for (var i = 0; i < 50; i++) {
         var d = new Date().getTime() + i * 1000;

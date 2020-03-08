@@ -1,6 +1,7 @@
 'use strict';
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
+const { Long, Int32, Double } = require('../..');
 
 describe('Promote Values', function() {
   before(function() {
@@ -17,10 +18,6 @@ describe('Promote Values', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var Long = configuration.require.Long,
-        Int32 = configuration.require.Int32,
-        Double = configuration.require.Double;
-
       var client = configuration.newClient(configuration.writeConcernMax(), {
         poolSize: 1,
         promoteValues: false
@@ -64,10 +61,6 @@ describe('Promote Values', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var Long = configuration.require.Long,
-        Int32 = configuration.require.Int32,
-        Double = configuration.require.Double;
-
       const client = configuration.newClient({}, { promoteValues: false });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -106,10 +99,6 @@ describe('Promote Values', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var Long = configuration.require.Long,
-        Int32 = configuration.require.Int32,
-        Double = configuration.require.Double;
-
       const client = configuration.newClient({}, { promoteValues: false });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -150,10 +139,6 @@ describe('Promote Values', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var Long = configuration.require.Long,
-        Int32 = configuration.require.Int32,
-        Double = configuration.require.Double;
-
       const client = configuration.newClient();
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -194,10 +179,6 @@ describe('Promote Values', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var Long = configuration.require.Long,
-        Int32 = configuration.require.Int32,
-        Double = configuration.require.Double;
-
       const client = configuration.newClient();
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -238,8 +219,6 @@ describe('Promote Values', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var Long = configuration.require.Long;
-
       const client = configuration.newClient();
       client.connect(function(err, client) {
         var docs = new Array(150).fill(0).map(function(_, i) {

@@ -27,7 +27,7 @@
     "bl": "^2.2.0",
     "bson": "^1.1.1",
     "denque": "^1.4.1",
-    "require_optional": "^1.0.1",
+    "madge": "^3.7.0",
     "safe-buffer": "^5.1.2"
   },
   "devDependencies": {

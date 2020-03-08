@@ -1,8 +1,8 @@
 'use strict';
 
 const { expect } = require('chai');
-const { Topology } = require('../../lib/core');
-const { ClientSession } = require('../../lib/core/sessions');
+const { Topology } = require('../../lib/sdam/topology');
+const { ClientSession } = require('../../lib/sessions');
 const { TestRunnerContext, generateTopologyTests } = require('./spec-runner');
 const { loadSpecTests } = require('../spec');
 const { MongoNetworkError } = require('../../lib/error');

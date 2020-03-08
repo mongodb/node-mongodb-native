@@ -9,6 +9,7 @@ const {
 } = require('./shared');
 const { loadSpecTests } = require('../spec');
 const { expect } = require('chai');
+const ReadPreference = require('../../lib/read_preference');
 
 describe('APM', function() {
   before(function() {
@@ -197,7 +198,6 @@ describe('APM', function() {
     // The actual test we wish to run
     test: function() {
       const self = this;
-      const ReadPreference = self.configuration.require.ReadPreference;
       const started = [];
       const succeeded = [];
       const client = self.configuration.newClient(
@@ -239,7 +239,6 @@ describe('APM', function() {
     // The actual test we wish to run
     test: function() {
       const self = this;
-      const ReadPreference = self.configuration.require.ReadPreference;
       const started = [];
       const succeeded = [];
       const client = self.configuration.newClient(
@@ -359,7 +358,6 @@ describe('APM', function() {
     // The actual test we wish to run
     test: function() {
       const self = this;
-      const ReadPreference = self.configuration.require.ReadPreference;
       const started = [];
       const succeeded = [];
       const failed = [];
@@ -434,7 +432,6 @@ describe('APM', function() {
     // The actual test we wish to run
     test: function() {
       const self = this;
-      const ReadPreference = self.configuration.require.ReadPreference;
       const started = [];
       const succeeded = [];
       const failed = [];

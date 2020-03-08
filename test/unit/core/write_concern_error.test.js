@@ -1,5 +1,5 @@
 'use strict';
-const { Topology } = require('../../../lib/core');
+const { Topology } = require('../../../lib/sdam/topology');
 const mock = require('mongodb-mock-server');
 const { ReplSetFixture } = require('./common');
 const { MongoWriteConcernError } = require('../../../lib/error');
