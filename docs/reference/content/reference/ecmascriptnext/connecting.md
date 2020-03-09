@@ -14,7 +14,6 @@ The MongoClient connection method returns a Promise if no callback is passed to 
 
 ```js
 const MongoClient = require('mongodb').MongoClient;
-const assert = require('assert');
 
 (async function() {
   // Connection URL
