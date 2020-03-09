@@ -9,9 +9,9 @@ const expect = require('chai').expect;
 describe('Connection', function() {
   let server;
   after(() => mock.cleanup());
-  before(() => {
-    mock.createServer().then(s => (server = s));
-  });
+  before(() =>
+    mock.createServer().then(s => (server = s))
+  );
 
   it('should support fire-and-forget messages', function(done) {
     server.setMessageHandler(request => {
