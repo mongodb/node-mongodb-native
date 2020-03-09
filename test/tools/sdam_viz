@@ -9,8 +9,6 @@ const argv = require('yargs')
   .demandCommand(1)
   .help('h')
   .describe('workload', 'Simulate a read workload')
-  .describe('legacy', 'Use the legacy topology types')
-  .alias('l', 'legacy')
   .alias('w', 'workload')
   .alias('h', 'help').argv;
 
@@ -19,17 +17,10 @@ function print(msg) {
 }
 
 const uri = argv._[0];
-const client = new MongoClient(uri, {
-  useNewUrlParser: true,
-  useUnifiedTopology: !argv.legacy
-});
+const client = new MongoClient(uri);
 
 async function run() {
-  print(
-    `connecting to: ${chalk.bold(uri)} using ${chalk.bold(
-      argv.legacy ? 'legacy' : 'unified'
-    )} topology`
-  );
+  print(`connecting to: ${chalk.bold(uri)}`);
 
   visualizeMonitoringEvents(client);
   await client.connect();

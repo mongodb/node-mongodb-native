@@ -3,7 +3,7 @@ const BSON = require('bson');
 const Readable = require('stream').Readable;
 const Writable = require('stream').Writable;
 const MessageStream = require('../../../lib/cmap/message_stream');
-const Msg = require('../../../lib/core/connection/msg').Msg;
+const { Msg } = require('../../../lib/cmap/commands');
 const expect = require('chai').expect;
 
 function bufferToStream(buffer) {

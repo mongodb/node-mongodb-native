@@ -2,9 +2,9 @@
 
 const expect = require('chai').expect;
 const sinon = require('sinon');
-const core = require('../../../../lib/core');
+const { Topology } = require('../../../../lib/sdam/topology');
 const MongoClient = require('../../../../lib/mongo_client');
-const ServerSessionPool = core.Sessions.ServerSessionPool;
+const { ServerSessionPool } = require('../../../../lib/sessions');
 
 const sandbox = sinon.createSandbox();
 let activeSessions, pooledSessions, activeSessionsBeforeClose;
@@ -54,7 +54,7 @@ beforeEach('Session Leak Before Each - setup session tracking', function() {
     return _endAllPooledSessions.apply(this, arguments);
   });
 
-  [core.Server, core.ReplSet, core.Mongos].forEach(topology => {
+  [Topology].forEach(topology => {
     const _endSessions = topology.prototype.endSessions;
     sandbox.stub(topology.prototype, 'endSessions').callsFake(function(sessions) {
       sessions = Array.isArray(sessions) ? sessions : [sessions];

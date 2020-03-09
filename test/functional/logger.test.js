@@ -1,6 +1,7 @@
 'use strict';
 var expect = require('chai').expect;
 var connectToDb = require('./shared').connectToDb;
+const Logger = require('../../lib/logger');
 
 describe('Logger', function() {
   /**
@@ -13,7 +14,6 @@ describe('Logger', function() {
     // The actual test we wish to run
     test: function(done) {
       var self = this;
-      var Logger = self.configuration.require.Logger;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
         poolSize: 1
       });
@@ -59,8 +59,7 @@ describe('Logger', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var self = this,
-        Logger = self.configuration.require.Logger;
+      var self = this;
 
       // set a custom logger per http://mongodb.github.io/node-mongodb-native/2.0/tutorials/logging/
       Logger.setCurrentLogger(function() {});
@@ -94,8 +93,7 @@ describe('Logger', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var self = this,
-        Logger = self.configuration.require.Logger;
+      var self = this;
 
       connectToDb('mongodb://localhost:27017/test', self.configuration.db, function(
         err,
@@ -143,8 +141,7 @@ describe('Logger', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var self = this,
-        Logger = self.configuration.require.Logger;
+      var self = this;
 
       Logger.filter('class', ['Cursor']);
       var logged = false;

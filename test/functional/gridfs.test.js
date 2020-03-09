@@ -7,6 +7,7 @@ const test = require('./shared').assert,
   child_process = require('child_process'),
   expect = require('chai').expect,
   Buffer = require('safe-buffer').Buffer;
+const { GridStore, ObjectID, Long, Chunk } = require('../..');
 
 describe('GridFS', function() {
   before(function() {
@@ -24,8 +25,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -58,7 +57,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -93,7 +91,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -127,8 +124,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -164,8 +159,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -210,8 +203,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -248,8 +239,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -291,8 +280,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -369,8 +356,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -449,8 +434,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -521,8 +504,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -565,8 +546,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -609,8 +588,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -651,8 +628,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -706,8 +681,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -775,8 +748,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -863,8 +834,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -903,8 +872,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -953,8 +920,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -1002,8 +967,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -1052,8 +1015,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -1097,9 +1058,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -1141,8 +1099,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -1183,8 +1139,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
       var asset = { source: new ObjectID() };
 
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1216,9 +1170,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -1260,9 +1211,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -1319,9 +1267,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -1380,9 +1325,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -1443,9 +1385,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -1502,9 +1441,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -1560,9 +1496,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -1621,8 +1554,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -1682,8 +1613,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -1740,8 +1669,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -1791,9 +1718,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -1858,8 +1782,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -1902,8 +1824,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -1944,8 +1864,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -1985,9 +1903,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -2054,9 +1969,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -2122,8 +2034,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -2205,8 +2115,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -2257,9 +2165,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -2318,8 +2223,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -2377,8 +2280,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -2426,8 +2327,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -2479,8 +2378,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -2629,8 +2526,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -2686,7 +2581,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
 
       client.connect(function(err, client) {
@@ -2739,9 +2633,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        Chunk = configuration.require.Chunk;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -2779,9 +2670,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        Chunk = configuration.require.Chunk;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -2818,8 +2706,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -2864,8 +2750,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -2904,8 +2788,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -2942,8 +2824,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -3000,8 +2880,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -3067,8 +2945,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -3123,8 +2999,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -3162,8 +3036,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -3191,8 +3063,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -3244,8 +3114,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -3285,9 +3153,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -3329,8 +3194,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -3394,9 +3257,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        Long = configuration.require.Long;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -3447,8 +3307,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -3505,8 +3363,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -3531,8 +3387,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -3559,9 +3413,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -3600,8 +3451,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        fs = require('fs');
 
       // Use connect method to connect to the Server
       const client = configuration.newClient({}, { sslValidate: false });
@@ -3644,7 +3493,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
 
       // Use connect method to connect to the Server
       const client = configuration.newClient({}, { sslValidate: false });
@@ -3713,8 +3561,6 @@ describe('GridFS', function() {
       // The actual test we wish to run
       test: function(done) {
         var configuration = this.configuration;
-        var GridStore = configuration.require.GridStore,
-          ObjectID = configuration.require.ObjectID;
 
         var id = new ObjectID();
         const client = configuration.newClient({}, { sslValidate: false });
@@ -3795,8 +3641,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
 
       // Create a test buffer
       var buffer = Buffer.alloc(200033);
@@ -3836,8 +3680,6 @@ describe('GridFS', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
 
       var started = [];
       var succeeded = [];

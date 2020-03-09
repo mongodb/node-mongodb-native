@@ -187,11 +187,6 @@ describe('Sessions', function() {
 
     after(() => testContext.teardown());
     before(function() {
-      if (!this.configuration.usingUnifiedTopology()) {
-        this.test.parent.pending = true; // https://github.com/mochajs/mocha/issues/2683
-        this.skip();
-        return;
-      }
       return testContext.setup(this.configuration);
     });
 

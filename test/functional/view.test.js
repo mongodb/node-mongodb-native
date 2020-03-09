@@ -2,6 +2,7 @@
 var expect = require('chai').expect,
   mock = require('mongodb-mock-server'),
   co = require('co');
+const { Long } = require('../..');
 
 describe('Views', function() {
   it('should successfully pass through collation to findAndModify command', {
@@ -10,7 +11,6 @@ describe('Views', function() {
     test: function(done) {
       var self = this;
       const configuration = this.configuration;
-      const Long = configuration.mongo.Long;
 
       // Default message fields
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER);

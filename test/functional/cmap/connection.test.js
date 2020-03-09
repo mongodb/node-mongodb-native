@@ -1,7 +1,7 @@
 'use strict';
 
 const Connection = require('../../../lib/cmap/connection').Connection;
-const connect = require('../../../lib/core/connection/connect');
+const connect = require('../../../lib/cmap/connect');
 const expect = require('chai').expect;
 const BSON = require('bson');
 const setupDatabase = require('../../functional/shared').setupDatabase;

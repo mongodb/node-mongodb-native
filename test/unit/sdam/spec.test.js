@@ -1,11 +1,11 @@
 'use strict';
 const fs = require('fs');
 const path = require('path');
-const Topology = require('../../../lib/core/sdam/topology').Topology;
-const Server = require('../../../lib/core/sdam/server').Server;
-const ServerDescription = require('../../../lib/core/sdam/server_description').ServerDescription;
-const sdamEvents = require('../../../lib/core/sdam/events');
-const parse = require('../../../lib/core/uri_parser');
+const { Topology } = require('../../../lib/sdam/topology');
+const { Server } = require('../../../lib/sdam/server');
+const { ServerDescription } = require('../../../lib/sdam/server_description');
+const sdamEvents = require('../../../lib/sdam/events');
+const parse = require('../../../lib/connection_string').parseConnectionString;
 const sinon = require('sinon');
 const EJSON = require('mongodb-extjson');
 

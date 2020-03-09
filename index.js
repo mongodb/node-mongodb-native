@@ -1,19 +1,19 @@
 'use strict';
-
-// Core module
-const core = require('./lib/core');
+const error = require('./lib/error');
 const Instrumentation = require('./lib/apm');
+const BSON = require('./lib/utils').retrieveBSON();
+const { Cursor, AggregationCursor, CommandCursor } = require('./lib/cursor');
 
 // Set up the connect function
 const connect = require('./lib/mongo_client').connect;
 
 // Expose error class
-connect.MongoError = core.MongoError;
-connect.MongoNetworkError = core.MongoNetworkError;
-connect.MongoTimeoutError = core.MongoTimeoutError;
-connect.MongoServerSelectionError = core.MongoServerSelectionError;
-connect.MongoParseError = core.MongoParseError;
-connect.MongoWriteConcernError = core.MongoWriteConcernError;
+connect.MongoError = error.MongoError;
+connect.MongoNetworkError = error.MongoNetworkError;
+connect.MongoTimeoutError = error.MongoTimeoutError;
+connect.MongoServerSelectionError = error.MongoServerSelectionError;
+connect.MongoParseError = error.MongoParseError;
+connect.MongoWriteConcernError = error.MongoWriteConcernError;
 connect.MongoBulkWriteError = require('./lib/bulk/common').BulkWriteError;
 connect.BulkWriteError = connect.MongoBulkWriteError;
 
@@ -22,37 +22,31 @@ connect.Admin = require('./lib/admin');
 connect.MongoClient = require('./lib/mongo_client');
 connect.Db = require('./lib/db');
 connect.Collection = require('./lib/collection');
-connect.Server = require('./lib/topologies/server');
-connect.ReplSet = require('./lib/topologies/replset');
-connect.Mongos = require('./lib/topologies/mongos');
-connect.ReadPreference = core.ReadPreference;
+connect.ReadPreference = require('./lib/read_preference');
 connect.GridStore = require('./lib/gridfs/grid_store');
 connect.Chunk = require('./lib/gridfs/chunk');
-connect.Logger = core.Logger;
-connect.AggregationCursor = require('./lib/aggregation_cursor');
-connect.CommandCursor = require('./lib/command_cursor');
-connect.Cursor = require('./lib/cursor');
+connect.Logger = require('./lib/logger');
+connect.AggregationCursor = AggregationCursor;
+connect.CommandCursor = CommandCursor;
+connect.Cursor = Cursor;
 connect.GridFSBucket = require('./lib/gridfs-stream');
-// Exported to be used in tests not to be used anywhere else
-connect.CoreServer = core.Server;
-connect.CoreConnection = core.Connection;
 
 // BSON types exported
-connect.Binary = core.BSON.Binary;
-connect.Code = core.BSON.Code;
-connect.Map = core.BSON.Map;
-connect.DBRef = core.BSON.DBRef;
-connect.Double = core.BSON.Double;
-connect.Int32 = core.BSON.Int32;
-connect.Long = core.BSON.Long;
-connect.MinKey = core.BSON.MinKey;
-connect.MaxKey = core.BSON.MaxKey;
-connect.ObjectID = core.BSON.ObjectID;
-connect.ObjectId = core.BSON.ObjectID;
-connect.Symbol = core.BSON.Symbol;
-connect.Timestamp = core.BSON.Timestamp;
-connect.BSONRegExp = core.BSON.BSONRegExp;
-connect.Decimal128 = core.BSON.Decimal128;
+connect.Binary = BSON.Binary;
+connect.Code = BSON.Code;
+connect.Map = BSON.Map;
+connect.DBRef = BSON.DBRef;
+connect.Double = BSON.Double;
+connect.Int32 = BSON.Int32;
+connect.Long = BSON.Long;
+connect.MinKey = BSON.MinKey;
+connect.MaxKey = BSON.MaxKey;
+connect.ObjectID = BSON.ObjectID;
+connect.ObjectId = BSON.ObjectID;
+connect.Symbol = BSON.Symbol;
+connect.Timestamp = BSON.Timestamp;
+connect.BSONRegExp = BSON.BSONRegExp;
+connect.Decimal128 = BSON.Decimal128;
 
 // Add connect method
 connect.connect = connect;

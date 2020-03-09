@@ -1,10 +1,10 @@
 'use strict';
 const EventEmitter = require('events');
-const Pool = require('../../../lib/core/connection/pool');
-const f = require('util').format;
+const { ConnectionPool } = require('../../../lib/cmap/connection_pool');
+const { format: f } = require('util');
 const bson = require('bson');
-const Query = require('../../../lib/core/connection/commands').Query;
-const ReadPreference = require('../../../lib/core/topologies/read_preference');
+const { Query } = require('../../../lib/cmap/commands');
+const ReadPreference = require('../../../lib/read_preference');
 
 function executeCommand(configuration, db, cmd, options, cb) {
   // Optional options
@@ -17,7 +17,7 @@ function executeCommand(configuration, db, cmd, options, cb) {
   var port = options.port || configuration.port;
 
   // Attempt to connect
-  var pool = new Pool(null, {
+  var pool = new ConnectionPool(null, {
     host: host,
     port: port,
     bson: new bson()
@@ -51,17 +51,17 @@ function executeCommand(configuration, db, cmd, options, cb) {
 }
 
 function locateAuthMethod(configuration, cb) {
-  var Pool = require('../../../lib/core/connection/pool'),
+  var ConnectionPool = require('../../../lib/cmap/connection_pool'),
     bson = require('bson'),
     f = require('util').format,
-    Query = require('../../../lib/core/connection/commands').Query;
+    { Query } = require('../../../lib/cmap/commands');
 
   // Set up operations
   var db = 'admin';
   var cmd = { ismaster: true };
 
   // Attempt to connect
-  var pool = new Pool(null, {
+  var pool = new ConnectionPool(null, {
     host: configuration.host,
     port: configuration.port,
     bson: new bson()

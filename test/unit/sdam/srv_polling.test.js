@@ -1,12 +1,10 @@
 'use strict';
 
-const Topology = require('../../../lib/core/sdam/topology').Topology;
-const TopologyDescription = require('../../../lib/core/sdam/topology_description')
-  .TopologyDescription;
-const TopologyType = require('../../../lib/core/sdam/common').TopologyType;
-const sdamEvents = require('../../../lib/core/sdam/events');
-const SrvPoller = require('../../../lib/core/sdam/srv_polling').SrvPoller;
-const SrvPollingEvent = require('../../../lib/core/sdam/srv_polling').SrvPollingEvent;
+const { Topology } = require('../../../lib/sdam/topology');
+const { TopologyDescription } = require('../../../lib/sdam/topology_description');
+const { TopologyType } = require('../../../lib/sdam/common');
+const { SrvPoller, SrvPollingEvent } = require('../../../lib/sdam/srv_polling');
+const sdamEvents = require('../../../lib/sdam/events');
 
 const dns = require('dns');
 const EventEmitter = require('events').EventEmitter;

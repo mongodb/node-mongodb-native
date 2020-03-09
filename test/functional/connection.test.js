@@ -35,34 +35,6 @@ describe('Connection', function() {
   /**
    * @ignore
    */
-  it('should correctly disable monitoring for single server connection', {
-    metadata: { requires: { topology: 'single' } },
-
-    // The actual test we wish to run
-    test: function(done) {
-      const configuration = this.configuration;
-      if (configuration.usingUnifiedTopology()) {
-        // skipped for direct legacy variable inspection
-        return this.skip();
-      }
-
-      var client = configuration.newClient(
-        { w: 1 },
-        { poolSize: 1, host: '/tmp/mongodb-27017.sock', monitoring: false }
-      );
-
-      client.connect(function(err, client) {
-        test.equal(null, err);
-        test.equal(false, client.topology.s.coreTopology.s.monitoring);
-
-        client.close(done);
-      });
-    }
-  });
-
-  /**
-   * @ignore
-   */
   it('should correctly connect to server using domain socket', {
     metadata: { requires: { topology: 'single' } },
 
@@ -194,32 +166,6 @@ describe('Connection', function() {
   /**
    * @ignore
    */
-  it('should fail to connect using non-domain socket with undefined port', {
-    metadata: { requires: { topology: 'single' } },
-
-    // The actual test we wish to run
-    test: function(done) {
-      var configuration = this.configuration,
-        Server = configuration.require.Server,
-        MongoClient = configuration.require.MongoClient;
-
-      var error;
-      try {
-        var client = new MongoClient(new Server('localhost', undefined), { w: 0 });
-        client.connect(function() {});
-      } catch (err) {
-        error = err;
-      }
-
-      test.ok(error instanceof Error);
-      test.ok(/port must be specified/.test(error));
-      done();
-    }
-  });
-
-  /**
-   * @ignore
-   */
   function connectionTester(configuration, testName, callback) {
     return function(err, client) {
       var db = client.db(configuration.db);
@@ -254,67 +200,6 @@ describe('Connection', function() {
 
       client.connect(
         connectionTester(configuration, 'testConnectNoOptions', function(client) {
-          client.close(done);
-        })
-      );
-    }
-  });
-
-  /**
-   * @ignore
-   */
-  it('test connect server options', {
-    metadata: { requires: { topology: 'single' } },
-
-    // The actual test we wish to run
-    test: function(done) {
-      const configuration = this.configuration;
-      if (configuration.usingUnifiedTopology()) {
-        // skipped for direct legacy variable inspection
-        return this.skip();
-      }
-
-      const client = configuration.newClient(configuration.url(), {
-        auto_reconnect: true,
-        poolSize: 4
-      });
-
-      client.connect(
-        connectionTester(configuration, 'testConnectServerOptions', function(client) {
-          test.ok(client.topology.poolSize >= 1);
-          test.equal(4, client.topology.s.coreTopology.s.pool.size);
-          test.equal(true, client.topology.autoReconnect);
-          client.close(done);
-        })
-      );
-    }
-  });
-
-  /**
-   * @ignore
-   */
-  it('testConnectAllOptions', {
-    metadata: { requires: { topology: 'single' } },
-
-    // The actual test we wish to run
-    test: function(done) {
-      const configuration = this.configuration;
-      if (configuration.usingUnifiedTopology()) {
-        // skipped for direct legacy variable inspection
-        return this.skip();
-      }
-
-      const client = configuration.newClient(configuration.url(), {
-        auto_reconnect: true,
-        poolSize: 4,
-        native_parser: process.env['TEST_NATIVE'] != null
-      });
-
-      client.connect(
-        connectionTester(configuration, 'testConnectAllOptions', function(client) {
-          test.ok(client.topology.poolSize >= 1);
-          test.equal(4, client.topology.s.coreTopology.s.pool.size);
-          test.equal(true, client.topology.autoReconnect);
           client.close(done);
         })
       );

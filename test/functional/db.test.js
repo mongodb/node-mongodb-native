@@ -2,6 +2,7 @@
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 const expect = require('chai').expect;
+const { Db, DBRef } = require('../..');
 
 describe('Db', function() {
   before(function() {
@@ -18,9 +19,6 @@ describe('Db', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var Db = configuration.require.Db;
-
       // Assert rename
       try {
         new Db(5);
@@ -148,89 +146,6 @@ describe('Db', function() {
   /**
    * @ignore
    */
-  it('shouldCorrectlyPerformAutomaticConnect', {
-    metadata: { requires: { topology: 'single' } },
-
-    // The actual test we wish to run
-    test: function(done) {
-      const configuration = this.configuration;
-      if (configuration.usingUnifiedTopology()) {
-        // The unified topology deprecates autoReconnect
-        return this.skip();
-      }
-
-      var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: true
-      });
-
-      client.connect(function(err, client) {
-        var db = client.db(configuration.db);
-
-        var closeListener = function() {
-          var collection = db.collection('test_object_id_generation_data2');
-          collection.insert({ name: 'Patty', age: 34 }, configuration.writeConcernMax(), function(
-            err,
-            r
-          ) {
-            test.equal(1, r.ops.length);
-            test.ok(r.ops[0]._id.toHexString().length === 24);
-
-            collection.findOne({ name: 'Patty' }, function(err, document) {
-              test.equal(r.ops[0]._id.toHexString(), document._id.toHexString());
-              client.close(done);
-            });
-          });
-        };
-
-        client.once('close', closeListener);
-        db.serverConfig.connections()[0].destroy();
-      });
-    }
-  });
-
-  /**
-   * @ignore
-   */
-  it.skip('shouldCorrectlyPerformAutomaticConnectWithMaxBufferSize0', {
-    metadata: { requires: { topology: 'single' } },
-
-    // The actual test we wish to run
-    test: function(done) {
-      const configuration = this.configuration;
-      if (configuration.usingUnifiedTopology()) {
-        // The unified topology does not use a store
-        return this.skip();
-      }
-
-      var client = configuration.newClient(
-        { w: 1 },
-        { poolSize: 1, auto_reconnect: true, bufferMaxEntries: 0 }
-      );
-
-      client.connect(function(err, client) {
-        var automatic_connect_client = client.db(configuration.db);
-
-        var closeListener = function() {
-          var collection = automatic_connect_client.collection('test_object_id_generation_data2');
-          collection.insert({ name: 'Patty', age: 34 }, configuration.writeConcernMax(), function(
-            err
-          ) {
-            test.ok(err != null);
-            test.ok(err.message.indexOf('0') !== -1);
-            client.close(done);
-          });
-        };
-
-        automatic_connect_client.once('close', closeListener);
-        automatic_connect_client.serverConfig.connections()[0].destroy();
-      });
-    }
-  });
-
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyHandleFailedConnection', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
@@ -262,8 +177,6 @@ describe('Db', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var DBRef = configuration.require.DBRef;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -655,43 +568,6 @@ describe('Db', function() {
               client.close(done);
             });
           });
-        });
-      });
-    }
-  });
-
-  /**
-   * @ignore
-   */
-  it('should correctly execute close function in order', {
-    metadata: {
-      requires: {
-        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'],
-        mongodb: '>= 2.8.0',
-        unifiedTopology: false
-      }
-    },
-
-    // The actual test we wish to run
-    test: function(done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-
-      client.connect(function(err, client) {
-        expect(err).to.not.exist;
-
-        // run one command to ensure connections exist, otherwise `close` is near immediate
-        client.db('admin').command({ ping: 1 }, err => {
-          expect(err).to.not.exist;
-
-          var items = [];
-          items.push(1);
-          client.close(function() {
-            expect(items).to.have.length(2);
-            done();
-          });
-
-          items.push(2);
         });
       });
     }

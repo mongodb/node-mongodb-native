@@ -12,11 +12,7 @@ const CONFIGS = ['ATLAS_REPL', 'ATLAS_SHRD', 'ATLAS_FREE', 'ATLAS_TLS11', 'ATLAS
 );
 
 function runConnectionTest(config) {
-  const client = new MongoClient(config.url, {
-    useNewUrlParser: true,
-    // TODO: We should test both the unified and not-unified cases
-    useUnifiedTopology: false
-  });
+  const client = new MongoClient(config.url);
   return Promise.resolve()
     .then(() => console.log(`testing ${config.name}`))
     .then(() => client.connect())

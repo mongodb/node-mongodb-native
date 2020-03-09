@@ -2,51 +2,9 @@
 
 const expect = require('chai').expect;
 const sinon = require('sinon');
-const ReplSet = require('../../lib/topologies/replset');
 const NativeTopology = require('../../lib/topologies/native_topology');
 
 describe('URI', function() {
-  /**
-   * @ignore
-   */
-  it(
-    'Should correctly connect using MongoClient to a single server using connect with optional server setting',
-    {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: { requires: { topology: 'single', unifiedTopology: false } },
-
-      // The actual test we wish to run
-      test: function(done) {
-        var self = this;
-
-        // Connect using the connection string
-        const client = this.configuration.newClient('mongodb://localhost:27017/integration_tests', {
-          native_parser: false,
-          socketOptions: {
-            connectTimeoutMS: 500
-          }
-        });
-
-        client.connect(function(err, client) {
-          var db = client.db(self.configuration.db);
-          expect(err).to.not.exist;
-          expect(client.topology.connections()[0].connectionTimeout).to.equal(500);
-
-          db.collection('mongoclient_test').update({ a: 1 }, { b: 1 }, { upsert: true }, function(
-            err,
-            result
-          ) {
-            expect(err).to.not.exist;
-            expect(result.result.n).to.equal(1);
-
-            client.close(done);
-          });
-        });
-      }
-    }
-  );
-
   /**
    * @ignore
    */
@@ -191,10 +149,7 @@ describe('URI', function() {
         done();
       }
 
-      const topologyPrototype = this.configuration.usingUnifiedTopology()
-        ? NativeTopology.prototype
-        : ReplSet.prototype;
-
+      const topologyPrototype = NativeTopology.prototype;
       const connectStub = sinon.stub(topologyPrototype, 'connect').callsFake(validateConnect);
       const uri = 'mongodb://some-hostname/test?ssl=true&authMechanism=MONGODB-X509&replicaSet=rs0';
       const client = this.configuration.newClient(uri, { useNewUrlParser: true });

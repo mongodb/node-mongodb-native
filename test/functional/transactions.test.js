@@ -1,13 +1,11 @@
 'use strict';
 
-const chai = require('chai');
-const expect = chai.expect;
-const core = require('../../lib/core');
-const sessions = core.Sessions;
-const TestRunnerContext = require('./spec-runner').TestRunnerContext;
-const loadSpecTests = require('../spec').loadSpecTests;
-const generateTopologyTests = require('./spec-runner').generateTopologyTests;
-const MongoNetworkError = require('../../lib/core').MongoNetworkError;
+const { expect } = require('chai');
+const { Topology } = require('../../lib/sdam/topology');
+const { ClientSession } = require('../../lib/sessions');
+const { TestRunnerContext, generateTopologyTests } = require('./spec-runner');
+const { loadSpecTests } = require('../spec');
+const { MongoNetworkError } = require('../../lib/error');
 
 describe('Transactions', function() {
   const testContext = new TestRunnerContext();
@@ -49,9 +47,9 @@ describe('Transactions', function() {
   describe('withTransaction', function() {
     let session, sessionPool;
     beforeEach(() => {
-      const topology = new core.Server();
-      sessionPool = new sessions.ServerSessionPool(topology);
-      session = new sessions.ClientSession(topology, sessionPool);
+      const topology = new Topology('localhost:27017');
+      sessionPool = topology.s.sessionPool;
+      session = new ClientSession(topology, sessionPool);
     });
 
     afterEach(() => {
@@ -103,7 +101,7 @@ describe('Transactions', function() {
       metadata: { requires: { topology: ['sharded'], mongodb: '>=4.1.0' } },
       test: function(done) {
         const configuration = this.configuration;
-        const client = configuration.newClient(configuration.url(), { useUnifiedTopology: true });
+        const client = configuration.newClient(configuration.url());
 
         client.connect(err => {
           expect(err).to.not.exist;
@@ -127,7 +125,7 @@ describe('Transactions', function() {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=4.0.0' } },
       test: function(done) {
         const configuration = this.configuration;
-        const client = configuration.newClient({ w: 1 }, { useUnifiedTopology: true });
+        const client = configuration.newClient({ w: 1 });
 
         client.connect(err => {
           expect(err).to.not.exist;
@@ -170,7 +168,7 @@ describe('Transactions', function() {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=4.0.0' } },
       test: function(done) {
         const configuration = this.configuration;
-        const client = configuration.newClient({ w: 1 }, { useUnifiedTopology: true });
+        const client = configuration.newClient({ w: 1 });
 
         client.connect(err => {
           expect(err).to.not.exist;

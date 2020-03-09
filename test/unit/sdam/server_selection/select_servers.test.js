@@ -1,8 +1,8 @@
 'use strict';
-const ReadPreference = require('../../../../lib/core/topologies/read_preference');
-const Topology = require('../../../../lib/core/sdam/topology').Topology;
-const Server = require('../../../../lib/core/sdam/server').Server;
-const expect = require('chai').expect;
+const { Topology } = require('../../../../lib/sdam/topology');
+const { Server } = require('../../../../lib/sdam/server');
+const ReadPreference = require('../../../../lib/read_preference');
+const { expect } = require('chai');
 const sinon = require('sinon');
 
 describe('selectServer', function() {
@@ -85,7 +85,6 @@ describe('selectServer', function() {
       let completed = 0;
       function finish() {
         completed++;
-        console.log(completed);
         if (completed === toSelect) done();
       }
 

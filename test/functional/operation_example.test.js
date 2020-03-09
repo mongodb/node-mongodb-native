@@ -1,8 +1,10 @@
 'use strict';
-const test = require('./shared').assert;
-const setupDatabase = require('./shared').setupDatabase;
-const f = require('util').format;
-const Buffer = require('safe-buffer').Buffer;
+const { assert: test } = require('./shared');
+const { setupDatabase } = require('./shared');
+const { format: f } = require('util');
+const { Buffer } = require('safe-buffer');
+const { Topology } = require('../../lib/sdam/topology');
+const { Code, ObjectID, GridStore } = require('../..');
 
 const chai = require('chai');
 const expect = chai.expect;
@@ -1975,7 +1977,6 @@ describe('Operation Examples', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var Code = configuration.require.Code;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -2075,7 +2076,6 @@ describe('Operation Examples', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var Code = configuration.require.Code;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -3600,68 +3600,6 @@ describe('Operation Examples', function() {
   });
 
   /**
-   * An example that shows how to force close a db connection so it cannot be reused.
-   *
-   * @example-class Db
-   * @example-method close
-   * @ignore
-   */
-  it('shouldCorrectlyFailOnRetryDueToAppCloseOfDb', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    // The actual test we wish to run
-    test: function(done) {
-      const configuration = this.configuration;
-      if (configuration.usingUnifiedTopology()) {
-        // The new topology type has loose concepts of 'closing' and 'opening' a client. It will
-        // simply attempt here to retry the connection and reconnect, so this is a bad test for
-        // the driver in that configuration.
-
-        return this.skip();
-      }
-
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
-        // LINE var MongoClient = require('mongodb').MongoClient,
-        // LINE   test = require('assert');
-        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
-        // LINE client.connect(function(err, client) {
-        // LINE   var db = client.db('test);
-        // REPLACE configuration.writeConcernMax() WITH {w:1}
-        // REMOVE-LINE restartAndDone
-        // REMOVE-LINE done();
-        // REMOVE-LINE var db = client.db(configuration.db);
-        // BEGIN
-        var db = client.db(configuration.db);
-        // Fetch a collection
-        var collection = db.collection('shouldCorrectlyFailOnRetryDueToAppCloseOfDb');
-
-        // Insert a document
-        collection.insertOne({ a: 1 }, configuration.writeConcernMax(), function(err, result) {
-          test.ok(result);
-          test.equal(null, err);
-
-          // Force close the connection
-          client.close(true, function(err) {
-            test.equal(null, err);
-
-            // Attemp to insert should fail now with correct message 'db closed by application'
-            collection.insertOne({ a: 2 }, configuration.writeConcernMax(), function(err, result) {
-              expect(err).to.exist;
-              expect(result).to.not.exist;
-
-              client.close(done);
-            });
-          });
-        });
-      });
-      // END
-    }
-  });
-
-  /**
    * An example of a simple single server db connection
    *
    * @example-class Db
@@ -4662,23 +4600,19 @@ describe('Operation Examples', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var ReplSet = configuration.require.ReplSet,
-        MongoClient = configuration.require.MongoClient,
-        Server = configuration.require.Server;
 
       // Replica configuration
-      var replSet = new ReplSet(
+      var client = new Topology(
         [
-          new Server(configuration.host, configuration.port),
-          new Server(configuration.host, configuration.port + 1),
-          new Server(configuration.host, configuration.port + 2)
+          { host: configuration.host, port: configuration.port },
+          { host: configuration.host, port: configuration.port + 1 },
+          { host: configuration.host, port: configuration.port + 2 }
         ],
-        { rs_name: configuration.replicasetName }
+        { replicaSet: configuration.replicasetName }
       );
 
-      var client = new MongoClient(replSet, { w: 0 });
       client.connect(function(err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -6467,8 +6401,6 @@ describe('Operation Examples', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var ObjectID = configuration.require.ObjectID;
       // LINE var ObjectID = require('mongodb').ObjectID,
       // LINE   test = require('assert');
       // REPLACE configuration.writeConcernMax() WITH {w:1}
@@ -6503,8 +6435,6 @@ describe('Operation Examples', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var ObjectID = configuration.require.ObjectID;
       // LINE var ObjectID = require('mongodb').ObjectID,
       // LINE   test = require('assert');
       // REPLACE configuration.writeConcernMax() WITH {w:1}
@@ -6533,8 +6463,6 @@ describe('Operation Examples', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var ObjectID = configuration.require.ObjectID;
       // LINE var ObjectID = require('mongodb').ObjectID,
       // LINE   test = require('assert');
       // REPLACE configuration.writeConcernMax() WITH {w:1}
@@ -6572,8 +6500,6 @@ describe('Operation Examples', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var ObjectID = configuration.require.ObjectID;
       // LINE var ObjectID = require('mongodb').ObjectID,
       // LINE   test = require('assert');
       // REPLACE configuration.writeConcernMax() WITH {w:1}
@@ -6608,8 +6534,6 @@ describe('Operation Examples', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var ObjectID = configuration.require.ObjectID;
       // LINE var ObjectID = require('mongodb').ObjectID,
       // LINE   test = require('assert');
       // REPLACE configuration.writeConcernMax() WITH {w:1}
@@ -6644,8 +6568,6 @@ describe('Operation Examples', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var ObjectID = configuration.require.ObjectID;
       // LINE var ObjectID = require('mongodb').ObjectID,
       // LINE   test = require('assert');
       // REPLACE configuration.writeConcernMax() WITH {w:1}
@@ -6679,9 +6601,6 @@ describe('Operation Examples', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -6750,9 +6669,6 @@ describe('Operation Examples', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -6887,8 +6803,6 @@ describe('Operation Examples', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -6939,8 +6853,6 @@ describe('Operation Examples', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -7027,8 +6939,6 @@ describe('Operation Examples', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -7096,8 +7006,6 @@ describe('Operation Examples', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -7155,9 +7063,6 @@ describe('Operation Examples', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -7218,9 +7123,6 @@ describe('Operation Examples', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -7281,9 +7183,6 @@ describe('Operation Examples', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -7351,9 +7250,6 @@ describe('Operation Examples', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -7414,9 +7310,6 @@ describe('Operation Examples', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -7469,9 +7362,6 @@ describe('Operation Examples', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -7521,9 +7411,6 @@ describe('Operation Examples', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -7591,9 +7478,6 @@ describe('Operation Examples', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -7643,9 +7527,6 @@ describe('Operation Examples', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -7709,9 +7590,6 @@ describe('Operation Examples', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -7779,8 +7657,6 @@ describe('Operation Examples', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -7834,8 +7710,6 @@ describe('Operation Examples', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -7907,8 +7781,6 @@ describe('Operation Examples', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -7960,7 +7832,6 @@ describe('Operation Examples', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -8031,7 +7902,6 @@ describe('Operation Examples', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -8153,9 +8023,6 @@ describe('Operation Examples', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -8231,8 +8098,6 @@ describe('Operation Examples', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -8284,8 +8149,6 @@ describe('Operation Examples', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -8348,8 +8211,6 @@ describe('Operation Examples', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -8403,9 +8264,6 @@ describe('Operation Examples', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -8483,9 +8341,6 @@ describe('Operation Examples', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -8555,9 +8410,6 @@ describe('Operation Examples', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -8643,9 +8495,6 @@ describe('Operation Examples', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,

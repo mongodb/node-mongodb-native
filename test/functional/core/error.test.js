@@ -1,7 +1,8 @@
 'use strict';
 
-var expect = require('chai').expect,
-  f = require('util').format;
+const { expect } = require('chai');
+const { format: f } = require('util');
+const { MongoError, MongoNetworkError } = require('../../../lib/error');
 
 describe('Error tests', function() {
   it('should return helpful error when geoHaystack fails', {
@@ -38,8 +39,6 @@ describe('Error tests', function() {
     },
 
     test: function(done) {
-      var MongoError = require('../../../lib/core/error.js').MongoError;
-
       var errorMessage = 'A test error';
       var err = new MongoError(errorMessage);
       expect(err).to.be.an.instanceof(Error);
@@ -56,8 +55,6 @@ describe('Error tests', function() {
     },
 
     test: function(done) {
-      var MongoError = require('../../../lib/core/error.js').MongoError;
-
       var errorMessage = 'A test error';
       var err = new MongoError(new Error(errorMessage));
       expect(err).to.be.an.instanceof(Error);
@@ -74,8 +71,6 @@ describe('Error tests', function() {
     },
 
     test: function(done) {
-      var MongoError = require('../../../lib/core/error.js').MongoError;
-
       var errorMessage = 'A test error';
       var err = new MongoError({ message: errorMessage, someData: 12345 });
       expect(err).to.be.an.instanceof(Error);
@@ -93,12 +88,10 @@ describe('Error tests', function() {
     },
 
     test: function(done) {
-      var errors = require('../../../lib/core/error');
-
       var errorMessage = 'A test error';
-      var err = new errors.MongoNetworkError(errorMessage);
+      var err = new MongoNetworkError(errorMessage);
       expect(err).to.be.an.instanceof(Error);
-      expect(err).to.be.an.instanceof(errors.MongoError);
+      expect(err).to.be.an.instanceof(MongoError);
       expect(err.name).to.equal('MongoNetworkError');
       expect(err.message).to.equal(errorMessage);
 

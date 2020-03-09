@@ -1,15 +1,10 @@
 'use strict';
 
 const mock = require('mongodb-mock-server');
-const expect = require('chai').expect;
-const genClusterTime = require('./common').genClusterTime;
-const sessionCleanupHandler = require('./common').sessionCleanupHandler;
-
-const core = require('../../../lib/core');
-const Server = core.Server;
-const ServerSessionPool = core.Sessions.ServerSessionPool;
-const ServerSession = core.Sessions.ServerSession;
-const ClientSession = core.Sessions.ClientSession;
+const { expect } = require('chai');
+const { genClusterTime, sessionCleanupHandler } = require('./common');
+const { Topology } = require('../../../lib/sdam/topology');
+const { ServerSessionPool, ServerSession, ClientSession } = require('../../../lib/sessions');
 
 let test = {};
 describe('Sessions', function() {
@@ -34,8 +29,8 @@ describe('Sessions', function() {
     it('should default to `null` for `clusterTime`', {
       metadata: { requires: { topology: 'single' } },
       test: function(done) {
-        const client = new Server();
-        const sessionPool = new ServerSessionPool(client);
+        const client = new Topology('localhost:27017');
+        const sessionPool = client.s.sessionPool;
         const session = new ClientSession(client, sessionPool);
         done = sessionCleanupHandler(session, sessionPool, done);
 
@@ -48,8 +43,8 @@ describe('Sessions', function() {
       metadata: { requires: { topology: 'single' } },
       test: function(done) {
         const clusterTime = genClusterTime(Date.now());
-        const client = new Server();
-        const sessionPool = new ServerSessionPool(client);
+        const client = new Topology('localhost:27017');
+        const sessionPool = client.s.sessionPool;
         const session = new ClientSession(client, sessionPool, { initialClusterTime: clusterTime });
         done = sessionCleanupHandler(session, sessionPool, done);
 
@@ -80,7 +75,7 @@ describe('Sessions', function() {
           });
         })
         .then(() => {
-          test.client = new Server(test.server.address());
+          test.client = new Topology(test.server.address());
 
           return new Promise((resolve, reject) => {
             test.client.once('error', reject);

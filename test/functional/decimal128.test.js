@@ -1,6 +1,7 @@
 'use strict';
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
+const { Decimal128 } = require('../..');
 
 describe('Decimal128', function() {
   before(function() {
@@ -23,8 +24,6 @@ describe('Decimal128', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var Decimal128 = configuration.require.Decimal128;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);

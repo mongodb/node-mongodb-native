@@ -1,15 +1,12 @@
 'use strict';
-const test = require('./shared').assert;
-const setupDatabase = require('./shared').setupDatabase;
+const { assert: test } = require('./shared');
+const { setupDatabase } = require('./shared');
 const fs = require('fs');
-const expect = require('chai').expect;
-const Long = require('bson').Long;
+const { expect } = require('chai');
+const { Long } = require('bson');
 const sinon = require('sinon');
-const Buffer = require('safe-buffer').Buffer;
-const Writable = require('stream').Writable;
-
-const core = require('../../lib/core');
-const ReadPreference = core.ReadPreference;
+const { Writable } = require('stream');
+const ReadPreference = require('../../lib/read_preference');
 
 describe('Cursor', function() {
   before(function() {
@@ -296,15 +293,8 @@ describe('Cursor', function() {
         expect(err).to.not.exist;
         const db = client.db(configuration.db);
 
-        let internalClientCursor;
-        if (configuration.usingUnifiedTopology()) {
-          internalClientCursor = sinon.spy(client.topology, 'cursor');
-        } else {
-          internalClientCursor = sinon.spy(client.topology.s.coreTopology, 'cursor');
-        }
-
+        const internalClientCursor = sinon.spy(client.topology, 'cursor');
         const expectedReadPreference = new ReadPreference(ReadPreference.SECONDARY);
-
         const cursor = db.collection('countTEST').find({ qty: { $gt: 4 } });
         cursor.count(true, { readPreference: ReadPreference.SECONDARY }, err => {
           expect(err).to.be.null;
@@ -2143,75 +2133,6 @@ describe('Cursor', function() {
    * @ignore
    * @api private
    */
-  it('cursor stream errors connection force closed', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: {
-        mongodb: '<=3.5.0', // NOTE: remove this when SERVER-30576 is resolved
-        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'],
-        unifiedTopology: false
-      }
-    },
-
-    // The actual test we wish to run
-    test: function(done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
-        var db = client.db(configuration.db);
-        test.equal(null, err);
-
-        db.createCollection('cursor_stream_errors', function(err, collection) {
-          test.equal(null, err);
-
-          var docs = [];
-          for (var ii = 0; ii < 10; ++ii) docs.push({ b: ii + 1 });
-
-          // insert all docs
-          collection.insert(docs, configuration.writeConcernMax(), function(err) {
-            test.equal(null, err);
-
-            var finished = 0,
-              i = 0;
-
-            var stream = collection.find({}, { batchSize: 5 }).stream();
-
-            stream.on('data', function() {
-              if (++i === 5) {
-                client.topology
-                  .connections()[0]
-                  .write(Buffer.from('312312321321askdjljsaNCKnablibh'));
-              }
-            });
-
-            stream.once('close', testDone('close'));
-            stream.once('error', testDone('error'));
-
-            function testDone() {
-              return function() {
-                ++finished;
-
-                if (finished === 2) {
-                  setTimeout(function() {
-                    test.equal(5, i);
-                    test.equal(2, finished);
-                    test.equal(true, stream.isClosed());
-                    client.close(true, done);
-                  }, 150);
-                }
-              };
-            }
-          });
-        });
-      });
-    }
-  });
-
-  /**
-   * @ignore
-   * @api private
-   */
   it('cursor stream pipe', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -4030,7 +3951,6 @@ describe('Cursor', function() {
     test: function(done) {
       var docs = [];
       var configuration = this.configuration;
-      var Long = configuration.require.Long;
 
       for (var i = 0; i < 50; i++) {
         var d = new Date().getTime() + i * 1000;

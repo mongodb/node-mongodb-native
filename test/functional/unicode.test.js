@@ -1,6 +1,5 @@
 'use strict';
-var test = require('./shared').assert;
-var setupDatabase = require('./shared').setupDatabase;
+const { assert: test, setupDatabase } = require('./shared');
 
 describe('Unicode', function() {
   before(function() {

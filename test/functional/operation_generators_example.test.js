@@ -2,6 +2,7 @@
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 var Buffer = require('safe-buffer').Buffer;
+const { Code, GridStore, ObjectID } = require('../..');
 
 /**************************************************************************
  *
@@ -1294,8 +1295,7 @@ describe('Operation (Generators)', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var co = require('co'),
-        Code = configuration.require.Code;
+      var co = require('co');
 
       return co(function*() {
         // Connect
@@ -1388,8 +1388,7 @@ describe('Operation (Generators)', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var co = require('co'),
-        Code = configuration.require.Code;
+      var co = require('co');
 
       return co(function*() {
         // Connect
@@ -2790,68 +2789,6 @@ describe('Operation (Generators)', function() {
    * DB TESTS
    *
    *************************************************************************/
-
-  /**
-   * An example that shows how to force close a db connection so it cannot be reused using a Generator and the co module..
-   *
-   * @example-class Db
-   * @example-method close
-   * @ignore
-   */
-  it('shouldCorrectlyFailOnRetryDueToAppCloseOfDbWithGenerators', {
-    metadata: { requires: { generators: true, topology: ['single'] } },
-
-    // The actual test we wish to run
-    test: function() {
-      const configuration = this.configuration;
-      if (configuration.usingUnifiedTopology()) {
-        // The new topology type has loose concepts of 'closing' and 'opening' a client. It will
-        // simply attempt here to retry the connection and reconnect, so this is a bad test for
-        // the driver in that configuration.
-
-        return this.skip();
-      }
-
-      var co = require('co');
-      return co(function*() {
-        // Connect
-        var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
-          .connect();
-        var db = client.db(configuration.db);
-        // LINE var MongoClient = require('mongodb').MongoClient,
-        // LINE   co = require('co');
-        // LINE   test = require('assert');
-        // LINE
-        // LINE co(function*() {
-        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
-        // LINE   yield client.connect();
-        // LINE
-        // LINE   var db = client.db('test');
-        // REPLACE configuration.writeConcernMax() WITH {w:1}
-        // BEGIN
-
-        // Fetch a collection
-        var collection = db.collection(
-          'shouldCorrectlyFailOnRetryDueToAppCloseOfDb_with_generators'
-        );
-
-        // Insert a document
-        yield collection.insertOne({ a: 1 }, configuration.writeConcernMax());
-
-        // Force close the connection
-        yield client.close(true);
-
-        try {
-          // Attemp to insert should fail now with correct message 'db closed by application'
-          yield collection.insertOne({ a: 2 }, configuration.writeConcernMax());
-        } catch (err) {
-          yield client.close();
-        }
-      });
-      // END
-    }
-  });
 
   /**
    * An example of retrieving the collections list for a database using a Generator and the co module.
@@ -4468,9 +4405,7 @@ describe('Operation (Generators)', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var co = require('co'),
-        GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
+      var co = require('co');
 
       return co(function*() {
         // Connect
@@ -4530,9 +4465,7 @@ describe('Operation (Generators)', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var co = require('co'),
-        GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
+      var co = require('co');
 
       return co(function*() {
         // Connect
@@ -4648,8 +4581,7 @@ describe('Operation (Generators)', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var co = require('co'),
-        GridStore = configuration.require.GridStore;
+      var co = require('co');
 
       return co(function*() {
         // Connect
@@ -4701,8 +4633,7 @@ describe('Operation (Generators)', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var co = require('co'),
-        GridStore = configuration.require.GridStore;
+      var co = require('co');
 
       return co(function*() {
         // Connect
@@ -4776,8 +4707,7 @@ describe('Operation (Generators)', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var co = require('co'),
-        GridStore = configuration.require.GridStore;
+      var co = require('co');
 
       return co(function*() {
         // Connect
@@ -4837,8 +4767,7 @@ describe('Operation (Generators)', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var co = require('co'),
-        GridStore = configuration.require.GridStore;
+      var co = require('co');
 
       return co(function*() {
         // Connect
@@ -4892,9 +4821,7 @@ describe('Operation (Generators)', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var co = require('co'),
-        GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
+      var co = require('co');
 
       return co(function*() {
         // Connect
@@ -4951,9 +4878,7 @@ describe('Operation (Generators)', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var co = require('co'),
-        GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
+      var co = require('co');
 
       return co(function*() {
         // Connect
@@ -5013,9 +4938,7 @@ describe('Operation (Generators)', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var co = require('co'),
-        GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
+      var co = require('co');
 
       return co(function*() {
         // Connect
@@ -5082,9 +5005,7 @@ describe('Operation (Generators)', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var co = require('co'),
-        GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
+      var co = require('co');
 
       return co(function*() {
         // Connect
@@ -5144,9 +5065,7 @@ describe('Operation (Generators)', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var co = require('co'),
-        GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
+      var co = require('co');
 
       return co(function*() {
         // Connect
@@ -5199,9 +5118,7 @@ describe('Operation (Generators)', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var co = require('co'),
-        GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
+      var co = require('co');
 
       return co(function*() {
         // Connect
@@ -5264,9 +5181,7 @@ describe('Operation (Generators)', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var co = require('co'),
-        GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
+      var co = require('co');
 
       return co(function*() {
         // Connect
@@ -5329,9 +5244,7 @@ describe('Operation (Generators)', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var co = require('co'),
-        GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
+      var co = require('co');
 
       return co(function*() {
         // Connect
@@ -5398,8 +5311,7 @@ describe('Operation (Generators)', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var co = require('co'),
-        GridStore = configuration.require.GridStore;
+      var co = require('co');
 
       return co(function*() {
         // Connect
@@ -5452,8 +5364,7 @@ describe('Operation (Generators)', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var co = require('co'),
-        GridStore = configuration.require.GridStore;
+      var co = require('co');
 
       return co(function*() {
         // Connect
@@ -5556,9 +5467,7 @@ describe('Operation (Generators)', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var co = require('co'),
-        GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
+      var co = require('co');
 
       return co(function*() {
         // Connect
@@ -5627,8 +5536,7 @@ describe('Operation (Generators)', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var co = require('co'),
-        GridStore = configuration.require.GridStore;
+      var co = require('co');
 
       return co(function*() {
         // Connect
@@ -5687,8 +5595,7 @@ describe('Operation (Generators)', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var co = require('co'),
-        GridStore = configuration.require.GridStore;
+      var co = require('co');
 
       return co(function*() {
         // Connect
@@ -5741,9 +5648,7 @@ describe('Operation (Generators)', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var co = require('co'),
-        GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID;
+      var co = require('co');
 
       return co(function*() {
         // Connect

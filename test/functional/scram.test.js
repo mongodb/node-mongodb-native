@@ -1,6 +1,7 @@
 'use strict';
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
+const { MongoClient } = require('../..');
 
 describe('SCRAM', function() {
   before(function() {
@@ -16,9 +17,6 @@ describe('SCRAM', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
-
       // User and password
       var user = 'test';
       var password = 'test';

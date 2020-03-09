@@ -3,26 +3,16 @@
 const expect = require('chai').expect;
 const f = require('util').format;
 const mock = require('mongodb-mock-server');
-const ConnectionSpy = require('./shared').ConnectionSpy;
-const setupDatabase = require('./shared').setupDatabase;
+const { setupDatabase } = require('./shared');
+const ReadPreference = require('../../../lib/read_preference');
 
-const core = require('../../../lib/core');
-const ReadPreference = core.ReadPreference;
-const Connection = core.Connection;
-
-const test = {};
 describe('Operation tests', function() {
   beforeEach(function() {
-    test.spy = new ConnectionSpy();
-    Connection.enableConnectionAccounting(test.spy);
     return setupDatabase(this.configuration);
   });
 
   afterEach(() => {
-    return mock.cleanup(test.spy).then(() => {
-      test.spy = undefined;
-      Connection.disableConnectionAccounting();
-    });
+    return mock.cleanup();
   });
 
   it('should correctly connect using server object', {
@@ -113,7 +103,6 @@ describe('Operation tests', function() {
       var self = this;
       const config = this.configuration;
       const server = config.newTopology();
-      var ReadPreference = self.configuration.mongo.ReadPreference;
 
       // Add event listeners
       server.on('connect', function(_server) {
@@ -174,7 +163,6 @@ describe('Operation tests', function() {
       const self = this;
       const config = this.configuration;
       const server = config.newTopology();
-      var ReadPreference = self.configuration.mongo.ReadPreference;
 
       // Add event listeners
       server.on('connect', function(_server) {
@@ -237,7 +225,6 @@ describe('Operation tests', function() {
       var self = this;
       const config = this.configuration;
       const server = config.newTopology();
-      var ReadPreference = self.configuration.mongo.ReadPreference;
 
       // Add event listeners
       server.on('connect', function(_server) {

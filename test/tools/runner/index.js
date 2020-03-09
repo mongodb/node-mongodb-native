@@ -2,10 +2,10 @@
 
 const path = require('path');
 const fs = require('fs');
-const MongoClient = require('../../..').MongoClient;
+const { MongoClient } = require('../../..');
 const TestConfiguration = require('./config');
-const parseConnectionString = require('../../../lib/core/uri_parser');
-const eachAsync = require('../../../lib/core/utils').eachAsync;
+const { parseConnectionString } = require('../../../lib/connection_string');
+const { eachAsync } = require('../../../lib/utils');
 const mock = require('mongodb-mock-server');
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
@@ -60,7 +60,7 @@ before(function(_done) {
   //   )} topology`
   // );
 
-  const client = new MongoClient(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+  const client = new MongoClient(MONGODB_URI);
   const done = err => client.close(err2 => _done(err || err2));
 
   client.connect(err => {

@@ -233,10 +233,8 @@ function runTestSuiteTest(configuration, spec, context) {
   // test-specific client options
   clientOptions.autoReconnect = false;
   clientOptions.haInterval = 100;
+  clientOptions.minHeartbeatFrequencyMS = 100;
   clientOptions.useRecoveryToken = true;
-
-  // TODO: this should be configured by `newClient` and env variables
-  clientOptions.useUnifiedTopology = true;
 
   const url = resolveConnectionString(configuration, spec);
   const client = configuration.newClient(url, clientOptions);

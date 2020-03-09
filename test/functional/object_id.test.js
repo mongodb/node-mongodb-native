@@ -1,6 +1,7 @@
 'use strict';
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
+const { ObjectID } = require('../..');
 
 describe('ObjectID', function() {
   before(function() {
@@ -18,7 +19,6 @@ describe('ObjectID', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var ObjectID = configuration.require.ObjectID;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -82,8 +82,6 @@ describe('ObjectID', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var ObjectID = configuration.require.ObjectID;
       // Create a new ObjectID
       var objectId = new ObjectID();
       // Verify that the hex string is 24 characters long
@@ -102,8 +100,6 @@ describe('ObjectID', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var ObjectID = configuration.require.ObjectID;
       // Create a new ObjectID
       var objectId = new ObjectID();
       // Verify that the hex string is 24 characters long
@@ -158,9 +154,6 @@ describe('ObjectID', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var ObjectID = configuration.require.ObjectID;
-
       var timestamp = Math.floor(new Date().getTime() / 1000);
       var objectID = new ObjectID(timestamp);
       var time2 = objectID.generationTime;
@@ -179,9 +172,6 @@ describe('ObjectID', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var ObjectID = configuration.require.ObjectID;
-
       var timestamp = 1000;
       var objectID = new ObjectID();
       var id1 = objectID.id;

@@ -1037,48 +1037,6 @@ describe('Indexes', function() {
   /**
    * @ignore
    */
-  it('should correctly error out due to driver close', {
-    metadata: {
-      requires: { topology: ['single'] },
-      sessions: { skipLeakTests: true }
-    },
-
-    // The actual test we wish to run
-    test: function(done) {
-      var configuration = this.configuration;
-      if (configuration.usingUnifiedTopology()) {
-        // The new topology type has loose concepts of 'closing' and 'opening' a client. It will
-        // simply attempt here to retry the connection and reconnect, so this is a bad test for
-        // the driver in that configuration.
-
-        return this.skip();
-      }
-
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
-        var db = client.db(configuration.db);
-        client.close(function() {
-          setTimeout(() => {
-            db.createCollection('nonexisting', { w: 1 }, function(err) {
-              test.ok(err != null);
-              db.collection('nonexisting', { strict: true }, function(err) {
-                test.ok(err != null);
-                db.collection('nonexisting', { strict: false }, function(err) {
-                  // When set to false (default) it should not create an error
-                  test.ok(err === null);
-                  setTimeout(() => done());
-                });
-              });
-            });
-          });
-        });
-      });
-    }
-  });
-
-  /**
-   * @ignore
-   */
   it('should correctly create index on embedded key', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }

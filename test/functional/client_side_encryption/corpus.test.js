@@ -128,10 +128,7 @@ describe('Client Side Encryption Corpus', function() {
 
   before(function() {
     // 1. Create a MongoClient without encryption enabled (referred to as ``client``).
-    client = this.configuration.newClient({
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    });
+    client = this.configuration.newClient();
 
     return Promise.resolve()
       .then(() => client.connect())
@@ -192,14 +189,7 @@ describe('Client Side Encryption Corpus', function() {
               [dataNamespace]: corpusSchema
             };
           }
-          clientEncrypted = this.configuration.newClient(
-            {},
-            {
-              useNewUrlParser: true,
-              useUnifiedTopology: true,
-              autoEncryption
-            }
-          );
+          clientEncrypted = this.configuration.newClient({}, { autoEncryption });
 
           return clientEncrypted.connect().then(() => {
             clientEncryption = new mongodbClientEncryption.ClientEncryption(client, {

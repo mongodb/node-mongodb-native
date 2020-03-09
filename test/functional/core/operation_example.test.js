@@ -1,9 +1,7 @@
 'use strict';
 
 const expect = require('chai').expect;
-const core = require('../../../lib/core');
-const ReplSet = core.ReplSet;
-const Mongos = core.Mongos;
+const { Topology } = require('../../../lib/sdam/topology');
 
 /**************************************************************************
  *
@@ -329,15 +327,15 @@ describe('Server operation example tests', function() {
  *
  *************************************************************************/
 
-describe('Replset operation example tests', function() {
+describe('Topology operation example tests', function() {
   /**
-   * Correctly insert a document using the ReplSet insert method
+   * Correctly insert a document using the Topology insert method
    *
-   * @example-class ReplSet
+   * @example-class Topology
    * @example-method insert
    * @ignore
    */
-  it('simple insert into db using ReplSet', {
+  it('simple insert into db using Topology', {
     metadata: {
       requires: {
         topology: 'replicaset'
@@ -357,11 +355,11 @@ describe('Replset operation example tests', function() {
       };
 
       // Attempt to connect
-      var server = new ReplSet(config, options);
+      var server = new Topology(config, options);
 
       // LINE var Server = require('mongodb-core').Server,
       // LINE   test = require('assert');
-      // LINE var server = new ReplSet([{host: 'localhost', port:31000}], {setName:'rs'});
+      // LINE var server = new Topology([{host: 'localhost', port:31000}], {setName:'rs'});
       // REMOVE-LINE done();
       // BEGIN
       // Add event listeners
@@ -393,11 +391,11 @@ describe('Replset operation example tests', function() {
   /**
    * Correctly update a document using the Server update method
    *
-   * @example-class ReplSet
+   * @example-class Topology
    * @example-method update
    * @ignore
    */
-  it('update using ReplSet instance', {
+  it('update using Topology instance', {
     metadata: {
       requires: {
         topology: 'replicaset'
@@ -417,11 +415,11 @@ describe('Replset operation example tests', function() {
       };
 
       // Attempt to connect
-      var server = new ReplSet(config, options);
+      var server = new Topology(config, options);
 
       // LINE var Server = require('mongodb-core').Server,
       // LINE   test = require('assert');
-      // LINE var server = new ReplSet([{host: 'localhost', port:31000}], {setName:'rs'});
+      // LINE var server = new Topology([{host: 'localhost', port:31000}], {setName:'rs'});
       // REMOVE-LINE done();
       // BEGIN
       // Add event listeners
@@ -470,13 +468,13 @@ describe('Replset operation example tests', function() {
   });
 
   /**
-   * Correctly remove a document using the ReplSet remove method
+   * Correctly remove a document using the Topology remove method
    *
-   * @example-class ReplSet
+   * @example-class Topology
    * @example-method remove
    * @ignore
    */
-  it('remove using ReplSet instance', {
+  it('remove using Topology instance', {
     metadata: {
       requires: {
         topology: 'replicaset'
@@ -496,11 +494,11 @@ describe('Replset operation example tests', function() {
       };
 
       // Attempt to connect
-      var server = new ReplSet(config, options);
+      var server = new Topology(config, options);
 
       // LINE var Server = require('mongodb-core').Server,
       // LINE   test = require('assert');
-      // LINE var server = new ReplSet([{host: 'localhost', port:31000}], {setName:'rs'});
+      // LINE var server = new Topology([{host: 'localhost', port:31000}], {setName:'rs'});
       // REMOVE-LINE done();
       // BEGIN
       // Add event listeners
@@ -549,13 +547,13 @@ describe('Replset operation example tests', function() {
   });
 
   /**
-   * Correctly find a document on the ReplSet using the cursor
+   * Correctly find a document on the Topology using the cursor
    *
-   * @example-class ReplSet
+   * @example-class Topology
    * @example-method cursor
    * @ignore
    */
-  it('cursor using ReplSet instance', {
+  it('cursor using Topology instance', {
     metadata: {
       requires: {
         topology: 'replicaset'
@@ -575,11 +573,11 @@ describe('Replset operation example tests', function() {
       };
 
       // Attempt to connect
-      var server = new ReplSet(config, options);
+      var server = new Topology(config, options);
 
       // LINE var Server = require('mongodb-core').Server,
       // LINE   test = require('assert');
-      // LINE var server = new ReplSet([{host: 'localhost', port:31000}], {setName:'rs'});
+      // LINE var server = new Topology([{host: 'localhost', port:31000}], {setName:'rs'});
       // REMOVE-LINE done();
       // BEGIN
       // Add event listeners
@@ -621,13 +619,13 @@ describe('Replset operation example tests', function() {
   });
 
   /**
-   * Correctly execute ismaster command on the ReplSet using the cursor
+   * Correctly execute ismaster command on the Topology using the cursor
    *
-   * @example-class ReplSet
+   * @example-class Topology
    * @example-method command
    * @ignore
    */
-  it('command using ReplSet instance', {
+  it('command using Topology instance', {
     metadata: {
       requires: {
         topology: 'replicaset'
@@ -647,11 +645,11 @@ describe('Replset operation example tests', function() {
       };
 
       // Attempt to connect
-      var server = new ReplSet(config, options);
+      var server = new Topology(config, options);
 
       // LINE var Server = require('mongodb-core').Server,
       // LINE   test = require('assert');
-      // LINE var server = new ReplSet([{host: 'localhost', port:31000}], {setName:'rs'});
+      // LINE var server = new Topology([{host: 'localhost', port:31000}], {setName:'rs'});
       // REMOVE-LINE done();
       // BEGIN
       // Add event listeners
@@ -691,7 +689,7 @@ describe.skip('Mongos operation example tests', function() {
 
     test: function(done) {
       // Attempt to connect
-      var server = new Mongos([
+      var server = new Topology([
         {
           host: this.configuration.host,
           port: this.configuration.port
@@ -730,7 +728,7 @@ describe.skip('Mongos operation example tests', function() {
    * @example-method update
    * @ignore
    */
-  it('update using ReplSet instance', {
+  it('update using Topology instance', {
     metadata: {
       requires: {
         topology: 'mongos'
@@ -739,7 +737,7 @@ describe.skip('Mongos operation example tests', function() {
 
     test: function(done) {
       // Attempt to connect
-      var server = new Mongos([
+      var server = new Topology([
         {
           host: this.configuration.host,
           port: this.configuration.port
@@ -806,7 +804,7 @@ describe.skip('Mongos operation example tests', function() {
 
     test: function(done) {
       // Attempt to connect
-      var server = new Mongos([
+      var server = new Topology([
         {
           host: this.configuration.host,
           port: this.configuration.port
@@ -873,7 +871,7 @@ describe.skip('Mongos operation example tests', function() {
 
     test: function(done) {
       // Attempt to connect
-      var server = new Mongos([
+      var server = new Topology([
         {
           host: this.configuration.host,
           port: this.configuration.port
@@ -933,7 +931,7 @@ describe.skip('Mongos operation example tests', function() {
 
     test: function(done) {
       // Attempt to connect
-      var server = new Mongos([
+      var server = new Topology([
         {
           host: this.configuration.host,
           port: this.configuration.port

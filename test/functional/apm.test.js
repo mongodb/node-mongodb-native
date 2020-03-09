@@ -1,14 +1,15 @@
 'use strict';
 
 const instrument = require('../..').instrument;
-const shared = require('./shared');
-const setupDatabase = shared.setupDatabase;
-const filterForCommands = shared.filterForCommands;
-const filterOutCommands = shared.filterOutCommands;
-const ignoreNsNotFound = shared.ignoreNsNotFound;
-const loadSpecTests = require('../spec').loadSpecTests;
-const chai = require('chai');
-const expect = chai.expect;
+const {
+  setupDatabase,
+  filterForCommands,
+  filterOutCommands,
+  ignoreNsNotFound
+} = require('./shared');
+const { loadSpecTests } = require('../spec');
+const { expect } = require('chai');
+const ReadPreference = require('../../lib/read_preference');
 
 describe('APM', function() {
   before(function() {
@@ -197,7 +198,6 @@ describe('APM', function() {
     // The actual test we wish to run
     test: function() {
       const self = this;
-      const ReadPreference = self.configuration.require.ReadPreference;
       const started = [];
       const succeeded = [];
       const client = self.configuration.newClient(
@@ -223,15 +223,9 @@ describe('APM', function() {
           )
           .then(() => {
             expect(started).to.have.lengthOf(2);
-
-            if (self.configuration.usingUnifiedTopology()) {
-              expect(started[0])
-                .property('address')
-                .to.not.equal(started[1].address);
-            } else {
-              // Ensure command was not sent to the primary
-              expect(started[0].connectionId).to.not.equal(started[1].connectionId);
-            }
+            expect(started[0])
+              .property('address')
+              .to.not.equal(started[1].address);
 
             return client.close();
           });
@@ -245,7 +239,6 @@ describe('APM', function() {
     // The actual test we wish to run
     test: function() {
       const self = this;
-      const ReadPreference = self.configuration.require.ReadPreference;
       const started = [];
       const succeeded = [];
       const client = self.configuration.newClient(
@@ -279,15 +272,9 @@ describe('APM', function() {
           )
           .then(() => {
             expect(started).to.have.lengthOf(2);
-
-            // Ensure command was not sent to the primary
-            if (self.configuration.usingUnifiedTopology()) {
-              expect(started[0])
-                .property('address')
-                .to.not.equal(started[1].address);
-            } else {
-              expect(started[0].connectionId).to.not.equal(started[1].connectionId);
-            }
+            expect(started[0])
+              .property('address')
+              .to.not.equal(started[1].address);
 
             return client.close();
           });
@@ -371,7 +358,6 @@ describe('APM', function() {
     // The actual test we wish to run
     test: function() {
       const self = this;
-      const ReadPreference = self.configuration.require.ReadPreference;
       const started = [];
       const succeeded = [];
       const failed = [];
@@ -446,7 +432,6 @@ describe('APM', function() {
     // The actual test we wish to run
     test: function() {
       const self = this;
-      const ReadPreference = self.configuration.require.ReadPreference;
       const started = [];
       const succeeded = [];
       const failed = [];

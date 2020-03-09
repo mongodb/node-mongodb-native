@@ -1,17 +1,12 @@
 'use strict';
 
-const Pool = require('../../../lib/core/connection/pool');
 const BSON = require('bson');
-const apm = require('../../../lib/core/connection/apm');
-const expect = require('chai').expect;
-
-const commands = require('../../../lib/core/connection/commands');
-const Query = commands.Query;
-const KillCursor = commands.KillCursor;
-const GetMore = commands.GetMore;
+const { expect } = require('chai');
+const { Query, KillCursor, GetMore } = require('../../../lib/cmap/commands');
+const { CommandStartedEvent } = require('../../../lib/cmap/events');
 
 const bson = new BSON();
-const pool = new Pool({}, { bson });
+const conn = { id: '<some id>', address: '<some address>' };
 
 describe('APM tests', function() {
   describe('CommandStartedEvent', function() {
@@ -32,8 +27,7 @@ describe('APM tests', function() {
         {}
       );
 
-      const startEvent = new apm.CommandStartedEvent(pool, query);
-
+      const startEvent = new CommandStartedEvent(conn, query);
       expect(startEvent).to.have.property('commandName', 'testCmd');
       expect(startEvent).to.have.property('databaseName', db);
       expect(startEvent).to.have.property('requestId', query.requestId);
@@ -50,7 +44,7 @@ describe('APM tests', function() {
       const coll = 'testingKillCursors';
       const killCursor = new KillCursor(bson, `${db}.${coll}`, [12, 42, 57]);
 
-      const startEvent = new apm.CommandStartedEvent(pool, killCursor);
+      const startEvent = new CommandStartedEvent(conn, killCursor);
 
       expect(startEvent).to.have.property('commandName', 'killCursors');
       expect(startEvent).to.have.property('databaseName', db);
@@ -72,7 +66,7 @@ describe('APM tests', function() {
       const numberToReturn = 321;
       const getMore = new GetMore(bson, `${db}.${coll}`, 5525, { numberToReturn });
 
-      const startEvent = new apm.CommandStartedEvent(pool, getMore);
+      const startEvent = new CommandStartedEvent(conn, getMore);
 
       expect(startEvent).to.have.property('commandName', 'getMore');
       expect(startEvent).to.have.property('databaseName', db);
@@ -110,7 +104,7 @@ describe('APM tests', function() {
           {}
         );
 
-        const startEvent = new apm.CommandStartedEvent(pool, query);
+        const startEvent = new CommandStartedEvent(conn, query);
 
         expect(startEvent).to.have.property('commandName', 'testCmd');
         expect(startEvent).to.have.property('databaseName', db);
@@ -140,7 +134,7 @@ describe('APM tests', function() {
         {}
       );
 
-      const startEvent = new apm.CommandStartedEvent(pool, query);
+      const startEvent = new CommandStartedEvent(conn, query);
 
       expect(startEvent).to.have.property('commandName', 'find');
       expect(startEvent).to.have.property('databaseName', db);

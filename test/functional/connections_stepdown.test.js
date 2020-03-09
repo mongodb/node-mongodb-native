@@ -30,10 +30,7 @@ describe('Connections survive primary step down', function() {
   let collection;
 
   beforeEach(function() {
-    client = this.configuration.newClient(
-      { w: 1 },
-      { poolSize: 1, retryWrites: false, useUnifiedTopology: true }
-    );
+    client = this.configuration.newClient({ w: 1 }, { poolSize: 1, retryWrites: false });
 
     return client
       .connect()

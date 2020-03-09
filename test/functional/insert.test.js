@@ -6,6 +6,19 @@ const test = require('./shared').assert,
   normalizedFunctionString = require('bson/lib/bson/parser/utils').normalizedFunctionString,
   Buffer = require('safe-buffer').Buffer;
 
+const {
+  Long,
+  Timestamp,
+  ObjectID,
+  DBRef,
+  Symbol,
+  Double,
+  Binary,
+  MinKey,
+  MaxKey,
+  Code
+} = require('../..');
+
 /**
  * Module for parsing an ISO 8601 formatted string into a Date object.
  * @ignore
@@ -233,11 +246,6 @@ describe('Insert', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var ObjectID = configuration.require.ObjectID,
-        Binary = configuration.require.Binary,
-        Code = configuration.require.Code,
-        DBRef = configuration.require.DBRef;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -383,11 +391,6 @@ describe('Insert', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var ObjectID = configuration.require.ObjectID,
-        Binary = configuration.require.Binary,
-        Code = configuration.require.Code,
-        DBRef = configuration.require.DBRef;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -477,8 +480,6 @@ describe('Insert', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var Long = configuration.require.Long;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -547,9 +548,6 @@ describe('Insert', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var Timestamp = configuration.require.Timestamp,
-        Long = configuration.require.Long;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -620,10 +618,6 @@ describe('Insert', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var DBRef = configuration.require.DBRef,
-        ObjectID = configuration.require.ObjectID;
-
       var dbref = new DBRef('foo', ObjectID.createFromHexString('fc24a04d4560531f00000000'), null);
       JSON.stringify(dbref);
       done();
@@ -716,8 +710,6 @@ describe('Insert', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var Binary = configuration.require.Binary;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -818,9 +810,6 @@ describe('Insert', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var DBRef = configuration.require.DBRef,
-        ObjectID = configuration.require.ObjectID;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -960,8 +949,6 @@ describe('Insert', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var ObjectID = configuration.require.ObjectID;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -993,8 +980,6 @@ describe('Insert', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var ObjectID = configuration.require.ObjectID;
-
       var doc = {
         _id: new ObjectID('4e886e687ff7ef5e00000162'),
         str: 'foreign',
@@ -1039,9 +1024,6 @@ describe('Insert', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var ObjectID = configuration.require.ObjectID,
-        Timestamp = configuration.require.Timestamp;
-
       var doc = {
         _id: new ObjectID('4e886e687ff7ef5e00000162'),
         str: 'foreign',
@@ -1085,8 +1067,6 @@ describe('Insert', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var ObjectID = configuration.require.ObjectID;
-
       var doc = {
         _id: new ObjectID('4e886e687ff7ef5e00000162'),
         $key: 'foreign'
@@ -1279,8 +1259,6 @@ describe('Insert', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var ObjectID = configuration.require.ObjectID;
-
       var doc = {
         _id: new ObjectID(),
         Prop1: 'p1',
@@ -1524,8 +1502,6 @@ describe('Insert', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var Binary = configuration.require.Binary;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -1721,14 +1697,6 @@ describe('Insert', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var ObjectID = configuration.require.ObjectID,
-        Symbol = configuration.require.Symbol,
-        Double = configuration.require.Double,
-        Binary = configuration.require.Binary,
-        MinKey = configuration.require.MinKey,
-        MaxKey = configuration.require.MaxKey,
-        Code = configuration.require.Code;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -1810,14 +1778,6 @@ describe('Insert', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var ObjectID = configuration.require.ObjectID,
-        Symbol = configuration.require.Symbol,
-        Double = configuration.require.Double,
-        Binary = configuration.require.Binary,
-        MinKey = configuration.require.MinKey,
-        MaxKey = configuration.require.MaxKey,
-        Code = configuration.require.Code;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -1896,8 +1856,6 @@ describe('Insert', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var Timestamp = configuration.require.Timestamp;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -2072,8 +2030,6 @@ describe('Insert', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var Long = configuration.require.Long;
-
       var o = configuration.writeConcernMax();
       o.promoteLongs = false;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -2113,7 +2069,6 @@ describe('Insert', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var Long = configuration.require.Long;
       var o = configuration.writeConcernMax();
       o.promoteLongs = false;
 
@@ -2180,8 +2135,6 @@ describe('Insert', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var Long = configuration.require.Long;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -2220,8 +2173,6 @@ describe('Insert', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var Long = configuration.require.Long;
-
       var client = configuration.newClient(configuration.writeConcernMax(), {
         poolSize: 1,
         promoteLongs: false
@@ -2260,8 +2211,6 @@ describe('Insert', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var Long = configuration.require.Long;
-
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);

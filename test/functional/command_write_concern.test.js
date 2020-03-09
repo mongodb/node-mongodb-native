@@ -2,6 +2,7 @@
 var test = require('./shared').assert;
 var co = require('co');
 var mock = require('mongodb-mock-server');
+const { ObjectId, Long, Code } = require('../..');
 
 // Extend the object
 var extend = function(template, fields) {
@@ -29,9 +30,7 @@ describe('Command Write Concern', function() {
     },
 
     test: function(done) {
-      var configuration = this.configuration,
-        ObjectId = configuration.require.ObjectId;
-
+      var configuration = this.configuration;
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
@@ -144,10 +143,7 @@ describe('Command Write Concern', function() {
     },
 
     test: function(done) {
-      var configuration = this.configuration,
-        ObjectId = configuration.require.ObjectId,
-        Long = configuration.require.Long;
-
+      var configuration = this.configuration;
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
@@ -267,9 +263,7 @@ describe('Command Write Concern', function() {
     },
 
     test: function(done) {
-      var configuration = this.configuration,
-        ObjectId = configuration.require.ObjectId;
-
+      var configuration = this.configuration;
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
@@ -388,9 +382,7 @@ describe('Command Write Concern', function() {
     },
 
     test: function(done) {
-      var configuration = this.configuration,
-        ObjectId = configuration.require.ObjectId;
-
+      var configuration = this.configuration;
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
@@ -506,9 +498,7 @@ describe('Command Write Concern', function() {
     },
 
     test: function(done) {
-      var configuration = this.configuration,
-        ObjectId = configuration.require.ObjectId;
-
+      var configuration = this.configuration;
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
@@ -624,9 +614,7 @@ describe('Command Write Concern', function() {
     },
 
     test: function(done) {
-      var configuration = this.configuration,
-        ObjectId = configuration.require.ObjectId;
-
+      var configuration = this.configuration;
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
@@ -742,10 +730,7 @@ describe('Command Write Concern', function() {
     },
 
     test: function(done) {
-      var configuration = this.configuration,
-        ObjectId = configuration.require.ObjectId,
-        Code = configuration.require.Code;
-
+      var configuration = this.configuration;
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
@@ -869,9 +854,7 @@ describe('Command Write Concern', function() {
     },
 
     test: function(done) {
-      var configuration = this.configuration,
-        ObjectId = configuration.require.ObjectId;
-
+      var configuration = this.configuration;
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
@@ -981,9 +964,7 @@ describe('Command Write Concern', function() {
     },
 
     test: function(done) {
-      var configuration = this.configuration,
-        ObjectId = configuration.require.ObjectId;
-
+      var configuration = this.configuration;
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
@@ -1093,9 +1074,7 @@ describe('Command Write Concern', function() {
     },
 
     test: function(done) {
-      var configuration = this.configuration,
-        ObjectId = configuration.require.ObjectId;
-
+      var configuration = this.configuration;
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',

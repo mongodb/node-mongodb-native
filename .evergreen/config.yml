@@ -364,45 +364,6 @@ tasks:
           VERSION: latest
           TOPOLOGY: sharded_cluster
       - func: run tests
-  - name: test-latest-server-unified
-    tags:
-      - latest
-      - server-unified
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: latest
-          TOPOLOGY: server
-      - func: run tests
-        vars:
-          UNIFIED: 1
-  - name: test-latest-replica_set-unified
-    tags:
-      - latest
-      - replica_set-unified
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: latest
-          TOPOLOGY: replica_set
-      - func: run tests
-        vars:
-          UNIFIED: 1
-  - name: test-latest-sharded_cluster-unified
-    tags:
-      - latest
-      - sharded_cluster-unified
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: latest
-          TOPOLOGY: sharded_cluster
-      - func: run tests
-        vars:
-          UNIFIED: 1
   - name: test-4.2-server
     tags:
       - '4.2'
@@ -436,45 +397,6 @@ tasks:
           VERSION: '4.2'
           TOPOLOGY: sharded_cluster
       - func: run tests
-  - name: test-4.2-server-unified
-    tags:
-      - '4.2'
-      - server-unified
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '4.2'
-          TOPOLOGY: server
-      - func: run tests
-        vars:
-          UNIFIED: 1
-  - name: test-4.2-replica_set-unified
-    tags:
-      - '4.2'
-      - replica_set-unified
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '4.2'
-          TOPOLOGY: replica_set
-      - func: run tests
-        vars:
-          UNIFIED: 1
-  - name: test-4.2-sharded_cluster-unified
-    tags:
-      - '4.2'
-      - sharded_cluster-unified
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '4.2'
-          TOPOLOGY: sharded_cluster
-      - func: run tests
-        vars:
-          UNIFIED: 1
   - name: test-4.0-server
     tags:
       - '4.0'
@@ -508,45 +430,6 @@ tasks:
           VERSION: '4.0'
           TOPOLOGY: sharded_cluster
       - func: run tests
-  - name: test-4.0-server-unified
-    tags:
-      - '4.0'
-      - server-unified
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '4.0'
-          TOPOLOGY: server
-      - func: run tests
-        vars:
-          UNIFIED: 1
-  - name: test-4.0-replica_set-unified
-    tags:
-      - '4.0'
-      - replica_set-unified
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '4.0'
-          TOPOLOGY: replica_set
-      - func: run tests
-        vars:
-          UNIFIED: 1
-  - name: test-4.0-sharded_cluster-unified
-    tags:
-      - '4.0'
-      - sharded_cluster-unified
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '4.0'
-          TOPOLOGY: sharded_cluster
-      - func: run tests
-        vars:
-          UNIFIED: 1
   - name: test-3.6-server
     tags:
       - '3.6'
@@ -580,45 +463,6 @@ tasks:
           VERSION: '3.6'
           TOPOLOGY: sharded_cluster
       - func: run tests
-  - name: test-3.6-server-unified
-    tags:
-      - '3.6'
-      - server-unified
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '3.6'
-          TOPOLOGY: server
-      - func: run tests
-        vars:
-          UNIFIED: 1
-  - name: test-3.6-replica_set-unified
-    tags:
-      - '3.6'
-      - replica_set-unified
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '3.6'
-          TOPOLOGY: replica_set
-      - func: run tests
-        vars:
-          UNIFIED: 1
-  - name: test-3.6-sharded_cluster-unified
-    tags:
-      - '3.6'
-      - sharded_cluster-unified
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '3.6'
-          TOPOLOGY: sharded_cluster
-      - func: run tests
-        vars:
-          UNIFIED: 1
   - name: test-3.4-server
     tags:
       - '3.4'
@@ -652,45 +496,6 @@ tasks:
           VERSION: '3.4'
           TOPOLOGY: sharded_cluster
       - func: run tests
-  - name: test-3.4-server-unified
-    tags:
-      - '3.4'
-      - server-unified
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '3.4'
-          TOPOLOGY: server
-      - func: run tests
-        vars:
-          UNIFIED: 1
-  - name: test-3.4-replica_set-unified
-    tags:
-      - '3.4'
-      - replica_set-unified
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '3.4'
-          TOPOLOGY: replica_set
-      - func: run tests
-        vars:
-          UNIFIED: 1
-  - name: test-3.4-sharded_cluster-unified
-    tags:
-      - '3.4'
-      - sharded_cluster-unified
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '3.4'
-          TOPOLOGY: sharded_cluster
-      - func: run tests
-        vars:
-          UNIFIED: 1
   - name: test-3.2-server
     tags:
       - '3.2'
@@ -724,45 +529,6 @@ tasks:
           VERSION: '3.2'
           TOPOLOGY: sharded_cluster
       - func: run tests
-  - name: test-3.2-server-unified
-    tags:
-      - '3.2'
-      - server-unified
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '3.2'
-          TOPOLOGY: server
-      - func: run tests
-        vars:
-          UNIFIED: 1
-  - name: test-3.2-replica_set-unified
-    tags:
-      - '3.2'
-      - replica_set-unified
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '3.2'
-          TOPOLOGY: replica_set
-      - func: run tests
-        vars:
-          UNIFIED: 1
-  - name: test-3.2-sharded_cluster-unified
-    tags:
-      - '3.2'
-      - sharded_cluster-unified
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '3.2'
-          TOPOLOGY: sharded_cluster
-      - func: run tests
-        vars:
-          UNIFIED: 1
   - name: test-3.0-server
     tags:
       - '3.0'
@@ -796,45 +562,6 @@ tasks:
           VERSION: '3.0'
           TOPOLOGY: sharded_cluster
       - func: run tests
-  - name: test-3.0-server-unified
-    tags:
-      - '3.0'
-      - server-unified
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '3.0'
-          TOPOLOGY: server
-      - func: run tests
-        vars:
-          UNIFIED: 1
-  - name: test-3.0-replica_set-unified
-    tags:
-      - '3.0'
-      - replica_set-unified
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '3.0'
-          TOPOLOGY: replica_set
-      - func: run tests
-        vars:
-          UNIFIED: 1
-  - name: test-3.0-sharded_cluster-unified
-    tags:
-      - '3.0'
-      - sharded_cluster-unified
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '3.0'
-          TOPOLOGY: sharded_cluster
-      - func: run tests
-        vars:
-          UNIFIED: 1
   - name: test-2.6-server
     tags:
       - '2.6'
@@ -868,45 +595,6 @@ tasks:
           VERSION: '2.6'
           TOPOLOGY: sharded_cluster
       - func: run tests
-  - name: test-2.6-server-unified
-    tags:
-      - '2.6'
-      - server-unified
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '2.6'
-          TOPOLOGY: server
-      - func: run tests
-        vars:
-          UNIFIED: 1
-  - name: test-2.6-replica_set-unified
-    tags:
-      - '2.6'
-      - replica_set-unified
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '2.6'
-          TOPOLOGY: replica_set
-      - func: run tests
-        vars:
-          UNIFIED: 1
-  - name: test-2.6-sharded_cluster-unified
-    tags:
-      - '2.6'
-      - sharded_cluster-unified
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '2.6'
-          TOPOLOGY: sharded_cluster
-      - func: run tests
-        vars:
-          UNIFIED: 1
   - name: test-atlas-connectivity
     tags:
       - atlas-connect
@@ -931,350 +619,184 @@ tasks:
       - func: run aws auth test with aws credentials and session token as environment variables
       - func: run aws ECS auth test
 buildvariants:
-  - name: debian71-test-boron
-    display_name: Debian 7.1 Node Boron
-    run_on: debian71-test
-    expansions:
-      NODE_LTS_NAME: boron
-    tasks: &ref_0
-      - test-3.6-server
-      - test-3.6-replica_set
-      - test-3.6-sharded_cluster
-      - test-3.6-server-unified
-      - test-3.6-replica_set-unified
-      - test-3.6-sharded_cluster-unified
-      - test-3.4-server
-      - test-3.4-replica_set
-      - test-3.4-sharded_cluster
-      - test-3.4-server-unified
-      - test-3.4-replica_set-unified
-      - test-3.4-sharded_cluster-unified
-      - test-3.2-server
-      - test-3.2-replica_set
-      - test-3.2-sharded_cluster
-      - test-3.2-server-unified
-      - test-3.2-replica_set-unified
-      - test-3.2-sharded_cluster-unified
-      - test-3.0-server
-      - test-3.0-replica_set
-      - test-3.0-sharded_cluster
-      - test-3.0-server-unified
-      - test-3.0-replica_set-unified
-      - test-3.0-sharded_cluster-unified
-      - test-2.6-server
-      - test-2.6-replica_set
-      - test-2.6-sharded_cluster
-      - test-2.6-server-unified
-      - test-2.6-replica_set-unified
-      - test-2.6-sharded_cluster-unified
-  - name: debian71-test-argon
-    display_name: Debian 7.1 Node Argon
-    run_on: debian71-test
-    expansions:
-      NODE_LTS_NAME: argon
-    tasks: *ref_0
-  - name: debian81-test-dubnium
-    display_name: Debian 8.1 Node Dubnium
-    run_on: debian81-test
-    expansions:
-      NODE_LTS_NAME: dubnium
-    tasks: &ref_1
-      - test-4.0-server
-      - test-4.0-replica_set
-      - test-4.0-sharded_cluster
-      - test-4.0-server-unified
-      - test-4.0-replica_set-unified
-      - test-4.0-sharded_cluster-unified
-      - test-3.6-server
-      - test-3.6-replica_set
-      - test-3.6-sharded_cluster
-      - test-3.6-server-unified
-      - test-3.6-replica_set-unified
-      - test-3.6-sharded_cluster-unified
-      - test-3.4-server
-      - test-3.4-replica_set
-      - test-3.4-sharded_cluster
-      - test-3.4-server-unified
-      - test-3.4-replica_set-unified
-      - test-3.4-sharded_cluster-unified
   - name: debian81-test-carbon
     display_name: Debian 8.1 Node Carbon
     run_on: debian81-test
     expansions:
       NODE_LTS_NAME: carbon
-    tasks: *ref_1
-  - name: debian81-test-boron
-    display_name: Debian 8.1 Node Boron
-    run_on: debian81-test
-    expansions:
-      NODE_LTS_NAME: boron
-    tasks: *ref_1
-  - name: debian81-test-argon
-    display_name: Debian 8.1 Node Argon
-    run_on: debian81-test
-    expansions:
-      NODE_LTS_NAME: argon
-    tasks: *ref_1
-  - name: linux-64-amzn-test-boron
-    display_name: Amazon Linux (Enterprise) Node Boron
-    run_on: linux-64-amzn-test
-    expansions:
-      NODE_LTS_NAME: boron
-    tasks: *ref_0
-  - name: linux-64-amzn-test-argon
-    display_name: Amazon Linux (Enterprise) Node Argon
-    run_on: linux-64-amzn-test
-    expansions:
-      NODE_LTS_NAME: argon
-    tasks: *ref_0
-  - name: macos-1014-dubnium
-    display_name: macOS 10.14 Node Dubnium
-    run_on: macos-1014
-    expansions:
-      NODE_LTS_NAME: dubnium
-    tasks: &ref_2
-      - test-latest-server
-      - test-latest-replica_set
-      - test-latest-sharded_cluster
-      - test-latest-server-unified
-      - test-latest-replica_set-unified
-      - test-latest-sharded_cluster-unified
-      - test-4.2-server
-      - test-4.2-replica_set
-      - test-4.2-sharded_cluster
-      - test-4.2-server-unified
-      - test-4.2-replica_set-unified
-      - test-4.2-sharded_cluster-unified
+    tasks: &ref_0
       - test-4.0-server
       - test-4.0-replica_set
       - test-4.0-sharded_cluster
-      - test-4.0-server-unified
-      - test-4.0-replica_set-unified
-      - test-4.0-sharded_cluster-unified
       - test-3.6-server
       - test-3.6-replica_set
       - test-3.6-sharded_cluster
-      - test-3.6-server-unified
-      - test-3.6-replica_set-unified
-      - test-3.6-sharded_cluster-unified
       - test-3.4-server
       - test-3.4-replica_set
       - test-3.4-sharded_cluster
-      - test-3.4-server-unified
-      - test-3.4-replica_set-unified
-      - test-3.4-sharded_cluster-unified
-      - test-3.2-server
-      - test-3.2-replica_set
-      - test-3.2-sharded_cluster
-      - test-3.2-server-unified
-      - test-3.2-replica_set-unified
-      - test-3.2-sharded_cluster-unified
-      - test-3.0-server
-      - test-3.0-replica_set
-      - test-3.0-sharded_cluster
-      - test-3.0-server-unified
-      - test-3.0-replica_set-unified
-      - test-3.0-sharded_cluster-unified
-      - test-2.6-server
-      - test-2.6-replica_set
-      - test-2.6-sharded_cluster
-      - test-2.6-server-unified
-      - test-2.6-replica_set-unified
-      - test-2.6-sharded_cluster-unified
-      - test-atlas-connectivity
+  - name: debian81-test-dubnium
+    display_name: Debian 8.1 Node Dubnium
+    run_on: debian81-test
+    expansions:
+      NODE_LTS_NAME: dubnium
+    tasks: *ref_0
+  - name: debian81-test-erbium
+    display_name: Debian 8.1 Node Erbium
+    run_on: debian81-test
+    expansions:
+      NODE_LTS_NAME: erbium
+    tasks: *ref_0
   - name: macos-1014-carbon
     display_name: macOS 10.14 Node Carbon
     run_on: macos-1014
     expansions:
       NODE_LTS_NAME: carbon
-    tasks: *ref_2
-  - name: macos-1014-boron
-    display_name: macOS 10.14 Node Boron
+    tasks: &ref_1
+      - test-latest-server
+      - test-latest-replica_set
+      - test-latest-sharded_cluster
+      - test-4.2-server
+      - test-4.2-replica_set
+      - test-4.2-sharded_cluster
+      - test-4.0-server
+      - test-4.0-replica_set
+      - test-4.0-sharded_cluster
+      - test-3.6-server
+      - test-3.6-replica_set
+      - test-3.6-sharded_cluster
+      - test-3.4-server
+      - test-3.4-replica_set
+      - test-3.4-sharded_cluster
+      - test-3.2-server
+      - test-3.2-replica_set
+      - test-3.2-sharded_cluster
+      - test-3.0-server
+      - test-3.0-replica_set
+      - test-3.0-sharded_cluster
+      - test-2.6-server
+      - test-2.6-replica_set
+      - test-2.6-sharded_cluster
+      - test-atlas-connectivity
+  - name: macos-1014-dubnium
+    display_name: macOS 10.14 Node Dubnium
     run_on: macos-1014
-    expansions:
-      NODE_LTS_NAME: boron
-    tasks: *ref_2
-  - name: macos-1014-argon
-    display_name: macOS 10.14 Node Argon
-    run_on: macos-1014
-    expansions:
-      NODE_LTS_NAME: argon
-    tasks: *ref_2
-  - name: rhel70-dubnium
-    display_name: RHEL 7.0 Node Dubnium
-    run_on: rhel70-small
     expansions:
       NODE_LTS_NAME: dubnium
-    tasks: *ref_2
+    tasks: *ref_1
+  - name: macos-1014-erbium
+    display_name: macOS 10.14 Node Erbium
+    run_on: macos-1014
+    expansions:
+      NODE_LTS_NAME: erbium
+    tasks: *ref_1
   - name: rhel70-carbon
     display_name: RHEL 7.0 Node Carbon
     run_on: rhel70-small
     expansions:
       NODE_LTS_NAME: carbon
-    tasks: *ref_2
-  - name: rhel70-boron
-    display_name: RHEL 7.0 Node Boron
+    tasks: *ref_1
+  - name: rhel70-dubnium
+    display_name: RHEL 7.0 Node Dubnium
     run_on: rhel70-small
-    expansions:
-      NODE_LTS_NAME: boron
-    tasks: *ref_2
-  - name: rhel70-argon
-    display_name: RHEL 7.0 Node Argon
-    run_on: rhel70-small
-    expansions:
-      NODE_LTS_NAME: argon
-    tasks: *ref_2
-  - name: rhel71-power8-test-dubnium
-    display_name: RHEL 7.1 (POWER8) Node Dubnium
-    run_on: rhel71-power8-test
     expansions:
       NODE_LTS_NAME: dubnium
-    tasks: &ref_3
-      - test-latest-server
-      - test-latest-replica_set
-      - test-latest-sharded_cluster
-      - test-latest-server-unified
-      - test-latest-replica_set-unified
-      - test-latest-sharded_cluster-unified
-      - test-4.2-server
-      - test-4.2-replica_set
-      - test-4.2-sharded_cluster
-      - test-4.2-server-unified
-      - test-4.2-replica_set-unified
-      - test-4.2-sharded_cluster-unified
-      - test-4.0-server
-      - test-4.0-replica_set
-      - test-4.0-sharded_cluster
-      - test-4.0-server-unified
-      - test-4.0-replica_set-unified
-      - test-4.0-sharded_cluster-unified
-      - test-3.6-server
-      - test-3.6-replica_set
-      - test-3.6-sharded_cluster
-      - test-3.6-server-unified
-      - test-3.6-replica_set-unified
-      - test-3.6-sharded_cluster-unified
-      - test-3.4-server
-      - test-3.4-replica_set
-      - test-3.4-sharded_cluster
-      - test-3.4-server-unified
-      - test-3.4-replica_set-unified
-      - test-3.4-sharded_cluster-unified
-      - test-3.2-server
-      - test-3.2-replica_set
-      - test-3.2-sharded_cluster
-      - test-3.2-server-unified
-      - test-3.2-replica_set-unified
-      - test-3.2-sharded_cluster-unified
-      - test-atlas-connectivity
+    tasks: *ref_1
+  - name: rhel70-erbium
+    display_name: RHEL 7.0 Node Erbium
+    run_on: rhel70-small
+    expansions:
+      NODE_LTS_NAME: erbium
+    tasks: *ref_1
   - name: rhel71-power8-test-carbon
     display_name: RHEL 7.1 (POWER8) Node Carbon
     run_on: rhel71-power8-test
     expansions:
       NODE_LTS_NAME: carbon
-    tasks: *ref_3
-  - name: rhel71-power8-test-boron
-    display_name: RHEL 7.1 (POWER8) Node Boron
+    tasks: &ref_2
+      - test-latest-server
+      - test-latest-replica_set
+      - test-latest-sharded_cluster
+      - test-4.2-server
+      - test-4.2-replica_set
+      - test-4.2-sharded_cluster
+      - test-4.0-server
+      - test-4.0-replica_set
+      - test-4.0-sharded_cluster
+      - test-3.6-server
+      - test-3.6-replica_set
+      - test-3.6-sharded_cluster
+      - test-3.4-server
+      - test-3.4-replica_set
+      - test-3.4-sharded_cluster
+      - test-3.2-server
+      - test-3.2-replica_set
+      - test-3.2-sharded_cluster
+      - test-atlas-connectivity
+  - name: rhel71-power8-test-dubnium
+    display_name: RHEL 7.1 (POWER8) Node Dubnium
     run_on: rhel71-power8-test
-    expansions:
-      NODE_LTS_NAME: boron
-    tasks: *ref_3
-  - name: rhel71-power8-test-argon
-    display_name: RHEL 7.1 (POWER8) Node Argon
-    run_on: rhel71-power8-test
-    expansions:
-      NODE_LTS_NAME: argon
-    tasks: *ref_3
-  - name: suse12-x86-64-test-dubnium
-    display_name: SUSE 12 (x86_64) Node Dubnium
-    run_on: suse12-test
     expansions:
       NODE_LTS_NAME: dubnium
-    tasks: *ref_3
+    tasks: *ref_2
+  - name: rhel71-power8-test-erbium
+    display_name: RHEL 7.1 (POWER8) Node Erbium
+    run_on: rhel71-power8-test
+    expansions:
+      NODE_LTS_NAME: erbium
+    tasks: *ref_2
   - name: suse12-x86-64-test-carbon
     display_name: SUSE 12 (x86_64) Node Carbon
     run_on: suse12-test
     expansions:
       NODE_LTS_NAME: carbon
-    tasks: *ref_3
-  - name: suse12-x86-64-test-boron
-    display_name: SUSE 12 (x86_64) Node Boron
+    tasks: *ref_2
+  - name: suse12-x86-64-test-dubnium
+    display_name: SUSE 12 (x86_64) Node Dubnium
     run_on: suse12-test
-    expansions:
-      NODE_LTS_NAME: boron
-    tasks: *ref_3
-  - name: suse12-x86-64-test-argon
-    display_name: SUSE 12 (x86_64) Node Argon
-    run_on: suse12-test
-    expansions:
-      NODE_LTS_NAME: argon
-    tasks: *ref_3
-  - name: ubuntu-14.04-dubnium
-    display_name: Ubuntu 14.04 Node Dubnium
-    run_on: ubuntu1404-test
     expansions:
       NODE_LTS_NAME: dubnium
-    tasks: &ref_4
-      - test-4.0-server
-      - test-4.0-replica_set
-      - test-4.0-sharded_cluster
-      - test-4.0-server-unified
-      - test-4.0-replica_set-unified
-      - test-4.0-sharded_cluster-unified
-      - test-3.6-server
-      - test-3.6-replica_set
-      - test-3.6-sharded_cluster
-      - test-3.6-server-unified
-      - test-3.6-replica_set-unified
-      - test-3.6-sharded_cluster-unified
-      - test-3.4-server
-      - test-3.4-replica_set
-      - test-3.4-sharded_cluster
-      - test-3.4-server-unified
-      - test-3.4-replica_set-unified
-      - test-3.4-sharded_cluster-unified
-      - test-3.2-server
-      - test-3.2-replica_set
-      - test-3.2-sharded_cluster
-      - test-3.2-server-unified
-      - test-3.2-replica_set-unified
-      - test-3.2-sharded_cluster-unified
-      - test-3.0-server
-      - test-3.0-replica_set
-      - test-3.0-sharded_cluster
-      - test-3.0-server-unified
-      - test-3.0-replica_set-unified
-      - test-3.0-sharded_cluster-unified
-      - test-2.6-server
-      - test-2.6-replica_set
-      - test-2.6-sharded_cluster
-      - test-2.6-server-unified
-      - test-2.6-replica_set-unified
-      - test-2.6-sharded_cluster-unified
+    tasks: *ref_2
+  - name: suse12-x86-64-test-erbium
+    display_name: SUSE 12 (x86_64) Node Erbium
+    run_on: suse12-test
+    expansions:
+      NODE_LTS_NAME: erbium
+    tasks: *ref_2
   - name: ubuntu-14.04-carbon
     display_name: Ubuntu 14.04 Node Carbon
     run_on: ubuntu1404-test
     expansions:
       NODE_LTS_NAME: carbon
-    tasks: *ref_4
-  - name: ubuntu-14.04-boron
-    display_name: Ubuntu 14.04 Node Boron
+    tasks: &ref_3
+      - test-4.0-server
+      - test-4.0-replica_set
+      - test-4.0-sharded_cluster
+      - test-3.6-server
+      - test-3.6-replica_set
+      - test-3.6-sharded_cluster
+      - test-3.4-server
+      - test-3.4-replica_set
+      - test-3.4-sharded_cluster
+      - test-3.2-server
+      - test-3.2-replica_set
+      - test-3.2-sharded_cluster
+      - test-3.0-server
+      - test-3.0-replica_set
+      - test-3.0-sharded_cluster
+      - test-2.6-server
+      - test-2.6-replica_set
+      - test-2.6-sharded_cluster
+  - name: ubuntu-14.04-dubnium
+    display_name: Ubuntu 14.04 Node Dubnium
     run_on: ubuntu1404-test
-    expansions:
-      NODE_LTS_NAME: boron
-    tasks: *ref_4
-  - name: ubuntu-14.04-argon
-    display_name: Ubuntu 14.04 Node Argon
-    run_on: ubuntu1404-test
-    expansions:
-      NODE_LTS_NAME: argon
-    tasks: *ref_4
-  - name: ubuntu-16.04-dubnium
-    display_name: Ubuntu 16.04 Node Dubnium
-    run_on: ubuntu1604-test
     expansions:
       NODE_LTS_NAME: dubnium
-      CLIENT_ENCRYPTION: true
+    tasks: *ref_3
+  - name: ubuntu-14.04-erbium
+    display_name: Ubuntu 14.04 Node Erbium
+    run_on: ubuntu1404-test
+    expansions:
+      NODE_LTS_NAME: erbium
     tasks: *ref_3
   - name: ubuntu-16.04-carbon
     display_name: Ubuntu 16.04 Node Carbon
@@ -1282,99 +804,82 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: carbon
       CLIENT_ENCRYPTION: true
-    tasks: *ref_3
-  - name: ubuntu-16.04-boron
-    display_name: Ubuntu 16.04 Node Boron
+    tasks: *ref_2
+  - name: ubuntu-16.04-dubnium
+    display_name: Ubuntu 16.04 Node Dubnium
     run_on: ubuntu1604-test
     expansions:
-      NODE_LTS_NAME: boron
-      CLIENT_ENCRYPTION: true
-    tasks: *ref_3
-  - name: ubuntu1604-arm64-small-dubnium
-    display_name: Ubuntu 16.04 (ARM64) Node Dubnium
-    run_on: ubuntu1604-arm64-small
-    expansions:
       NODE_LTS_NAME: dubnium
-    tasks: *ref_1
+      CLIENT_ENCRYPTION: true
+    tasks: *ref_2
+  - name: ubuntu-16.04-erbium
+    display_name: Ubuntu 16.04 Node Erbium
+    run_on: ubuntu1604-test
+    expansions:
+      NODE_LTS_NAME: erbium
+      CLIENT_ENCRYPTION: true
+    tasks: *ref_2
   - name: ubuntu1604-arm64-small-carbon
     display_name: Ubuntu 16.04 (ARM64) Node Carbon
     run_on: ubuntu1604-arm64-small
     expansions:
       NODE_LTS_NAME: carbon
-    tasks: *ref_1
-  - name: ubuntu1604-arm64-small-boron
-    display_name: Ubuntu 16.04 (ARM64) Node Boron
+    tasks: *ref_0
+  - name: ubuntu1604-arm64-small-dubnium
+    display_name: Ubuntu 16.04 (ARM64) Node Dubnium
     run_on: ubuntu1604-arm64-small
-    expansions:
-      NODE_LTS_NAME: boron
-    tasks: *ref_1
-  - name: ubuntu1604-arm64-small-argon
-    display_name: Ubuntu 16.04 (ARM64) Node Argon
-    run_on: ubuntu1604-arm64-small
-    expansions:
-      NODE_LTS_NAME: argon
-    tasks: *ref_1
-  - name: ubuntu1604-power8-test-dubnium
-    display_name: Ubuntu 16.04 (POWER8) Node Dubnium
-    run_on: ubuntu1604-power8-test
     expansions:
       NODE_LTS_NAME: dubnium
-    tasks: *ref_1
+    tasks: *ref_0
+  - name: ubuntu1604-arm64-small-erbium
+    display_name: Ubuntu 16.04 (ARM64) Node Erbium
+    run_on: ubuntu1604-arm64-small
+    expansions:
+      NODE_LTS_NAME: erbium
+    tasks: *ref_0
   - name: ubuntu1604-power8-test-carbon
     display_name: Ubuntu 16.04 (POWER8) Node Carbon
     run_on: ubuntu1604-power8-test
     expansions:
       NODE_LTS_NAME: carbon
-    tasks: *ref_1
-  - name: ubuntu1604-power8-test-boron
-    display_name: Ubuntu 16.04 (POWER8) Node Boron
+    tasks: *ref_0
+  - name: ubuntu1604-power8-test-dubnium
+    display_name: Ubuntu 16.04 (POWER8) Node Dubnium
     run_on: ubuntu1604-power8-test
-    expansions:
-      NODE_LTS_NAME: boron
-    tasks: *ref_1
-  - name: ubuntu1604-power8-test-argon
-    display_name: Ubuntu 16.04 (POWER8) Node Argon
-    run_on: ubuntu1604-power8-test
-    expansions:
-      NODE_LTS_NAME: argon
-    tasks: *ref_1
-  - name: ubuntu1804-arm64-test-dubnium
-    display_name: Ubuntu 18.04 (ARM64) Node Dubnium
-    run_on: ubuntu1804-arm64-test
     expansions:
       NODE_LTS_NAME: dubnium
-    tasks: &ref_5
-      - test-latest-server
-      - test-latest-replica_set
-      - test-latest-sharded_cluster
-      - test-latest-server-unified
-      - test-latest-replica_set-unified
-      - test-latest-sharded_cluster-unified
-      - test-4.2-server
-      - test-4.2-replica_set
-      - test-4.2-sharded_cluster
-      - test-4.2-server-unified
-      - test-4.2-replica_set-unified
-      - test-4.2-sharded_cluster-unified
-      - test-atlas-connectivity
+    tasks: *ref_0
+  - name: ubuntu1604-power8-test-erbium
+    display_name: Ubuntu 16.04 (POWER8) Node Erbium
+    run_on: ubuntu1604-power8-test
+    expansions:
+      NODE_LTS_NAME: erbium
+    tasks: *ref_0
   - name: ubuntu1804-arm64-test-carbon
     display_name: Ubuntu 18.04 (ARM64) Node Carbon
     run_on: ubuntu1804-arm64-test
     expansions:
       NODE_LTS_NAME: carbon
-    tasks: *ref_5
-  - name: ubuntu1804-arm64-test-boron
-    display_name: Ubuntu 18.04 (ARM64) Node Boron
+    tasks: &ref_4
+      - test-latest-server
+      - test-latest-replica_set
+      - test-latest-sharded_cluster
+      - test-4.2-server
+      - test-4.2-replica_set
+      - test-4.2-sharded_cluster
+      - test-atlas-connectivity
+  - name: ubuntu1804-arm64-test-dubnium
+    display_name: Ubuntu 18.04 (ARM64) Node Dubnium
     run_on: ubuntu1804-arm64-test
     expansions:
-      NODE_LTS_NAME: boron
-    tasks: *ref_5
-  - name: ubuntu1804-arm64-test-argon
-    display_name: Ubuntu 18.04 (ARM64) Node Argon
+      NODE_LTS_NAME: dubnium
+    tasks: *ref_4
+  - name: ubuntu1804-arm64-test-erbium
+    display_name: Ubuntu 18.04 (ARM64) Node Erbium
     run_on: ubuntu1804-arm64-test
     expansions:
-      NODE_LTS_NAME: argon
-    tasks: *ref_5
+      NODE_LTS_NAME: erbium
+    tasks: *ref_4
   - name: ubuntu1804-test-mongodb-aws
     display_name: MONGODB-AWS Auth test
     run_on: ubuntu1804-test

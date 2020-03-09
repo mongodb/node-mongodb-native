@@ -2,6 +2,7 @@
 var expect = require('chai').expect;
 var Buffer = require('safe-buffer').Buffer;
 const setupDatabase = require('./shared').setupDatabase;
+const { Binary } = require('../..');
 
 describe('Cursor Streams', function() {
   before(function() {
@@ -91,7 +92,6 @@ describe('Cursor Streams', function() {
     // The actual test we wish to run
     test: function(done) {
       var self = this;
-      var Binary = self.configuration.require.Binary;
       var docs = [];
 
       for (var i = 0; i < 10000; i++) {
@@ -167,7 +167,6 @@ describe('Cursor Streams', function() {
     // The actual test we wish to run
     test: function(done) {
       var self = this;
-      var Binary = self.configuration.require.Binary;
       var docs = [];
       var counter = 0;
       var counter2 = 0;
@@ -219,9 +218,7 @@ describe('Cursor Streams', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var self = this,
-        Binary = self.configuration.require.Binary;
-
+      var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
         poolSize: 1
       });

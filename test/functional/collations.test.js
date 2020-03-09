@@ -2,6 +2,7 @@
 const setupDatabase = require('./shared').setupDatabase;
 const mock = require('mongodb-mock-server');
 const expect = require('chai').expect;
+const { Long, Code } = require('../..');
 
 const testContext = {};
 describe('Collation', function() {
@@ -214,7 +215,6 @@ describe('Collation', function() {
 
     test: function() {
       const configuration = this.configuration;
-      const Code = configuration.require.Code;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
       const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
 
@@ -440,7 +440,6 @@ describe('Collation', function() {
     metadata: { requires: { generators: true, topology: 'single' } },
     test: function() {
       const configuration = this.configuration;
-      const Long = configuration.require.Long;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
       const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
 

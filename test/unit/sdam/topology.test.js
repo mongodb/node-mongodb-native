@@ -1,12 +1,70 @@
 'use strict';
-const Topology = require('../../../lib/core/sdam/topology').Topology;
-const Server = require('../../../lib/core/sdam/server').Server;
-const ServerDescription = require('../../../lib/core/sdam/server_description').ServerDescription;
+
 const mock = require('mongodb-mock-server');
-const expect = require('chai').expect;
+const { expect } = require('chai');
 const sinon = require('sinon');
+const { Topology } = require('../../../lib/sdam/topology');
+const { Server } = require('../../../lib/sdam/server');
+const { ServerDescription } = require('../../../lib/sdam/server_description');
+const BSON = require('../../../lib/utils').retrieveBSON();
 
 describe('Topology (unit)', function() {
+  describe('client metadata', function() {
+    let mockServer;
+    before(() => mock.createServer().then(server => (mockServer = server)));
+    after(() => mock.cleanup());
+
+    it('should correctly pass appname', {
+      metadata: { requires: { topology: 'single' } },
+
+      test: function(done) {
+        // Attempt to connect
+        var server = new Topology(
+          [{ host: this.configuration.host, port: this.configuration.port }],
+          {
+            bson: new BSON(),
+            appname: 'My application name'
+          }
+        );
+
+        expect(server.clientMetadata.application.name).to.equal('My application name');
+        done();
+      }
+    });
+
+    it('should report the correct platform in client metadata', function(done) {
+      const ismasters = [];
+      mockServer.setMessageHandler(request => {
+        const doc = request.document;
+        if (doc.ismaster) {
+          ismasters.push(doc);
+          request.reply(mock.DEFAULT_ISMASTER);
+        } else {
+          request.reply({ ok: 1 });
+        }
+      });
+
+      const client = this.configuration.newClient(`mongodb://${mockServer.uri()}/`);
+      client.connect(err => {
+        expect(err).to.not.exist;
+        this.defer(() => client.close());
+
+        client.db().command({ ping: 1 }, err => {
+          expect(err).to.not.exist;
+
+          expect(ismasters).to.have.length.greaterThan(1);
+          ismasters.forEach(ismaster =>
+            expect(ismaster)
+              .nested.property('client.platform')
+              .to.match(/unified/)
+          );
+
+          done();
+        });
+      });
+    });
+  });
+
   describe('shouldCheckForSessionSupport', function() {
     beforeEach(function() {
       this.sinon = sinon.sandbox.create();
