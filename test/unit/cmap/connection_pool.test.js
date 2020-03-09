@@ -40,9 +40,7 @@ function closePool(pool) {
 describe('Connection Pool', function() {
   let server;
   after(() => mock.cleanup());
-  before(() => {
-    mock.createServer().then(s => (server = s));
-  });
+  before(() => mock.createServer().then(s => (server = s)));
 
   it('should destroy connections which have been closed', function(done) {
     server.setMessageHandler(request => {
