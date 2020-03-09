@@ -165,10 +165,10 @@ describe('Db', function() {
       });
 
       client.connect(function(err, client) {
-        var automatic_connect_client = client.db(configuration.db);
+        var db = client.db(configuration.db);
 
         var closeListener = function() {
-          var collection = automatic_connect_client.collection('test_object_id_generation_data2');
+          var collection = db.collection('test_object_id_generation_data2');
           collection.insert({ name: 'Patty', age: 34 }, configuration.writeConcernMax(), function(
             err,
             r
@@ -184,7 +184,7 @@ describe('Db', function() {
         };
 
         client.once('close', closeListener);
-        automatic_connect_client.serverConfig.connections()[0].destroy();
+        db.serverConfig.connections()[0].destroy();
       });
     }
   });
