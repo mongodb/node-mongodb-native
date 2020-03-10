@@ -12,6 +12,7 @@ describe('ReplicaSet state', function() {
 
   fs.readdirSync(path)
     .filter(x => x.indexOf('.json') !== -1)
+    .filter(x => !x.includes('repeated'))
     .forEach(x => {
       var testData = require(f('%s/%s', path, x));
 
