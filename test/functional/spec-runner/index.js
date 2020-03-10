@@ -1,5 +1,4 @@
 'use strict';
-const Promise = require('bluebird');
 const path = require('path');
 const fs = require('fs');
 const chai = require('chai');
@@ -13,6 +12,17 @@ chai.use(require('./matcher').default);
 chai.config.includeStack = true;
 chai.config.showDiff = true;
 chai.config.truncateThreshold = 0;
+
+// Promise.try alternative https://stackoverflow.com/questions/60624081/promise-try-without-bluebird/60624164?noredirect=1#comment107255389_60624164
+function promiseTry(callback) {
+  return new Promise((resolve, reject) => {
+    try {
+      resolve(callback());
+    } catch (e) {
+      reject(e);
+    }
+  });
+}
 
 function escape(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -571,8 +581,12 @@ function testOperation(operation, obj, context, options) {
     opPromise = cursor.toArray();
   } else {
     // wrap this in a `Promise.try` because some operations might throw
-    opPromise = Promise.try(() => obj[operationName].apply(obj, args));
+    opPromise = promiseTry(() => obj[operationName].apply(obj, args));
   }
+
+  Promise.resolve(() => {
+    throw new Error('sss')
+  }).catch(console.log);
 
   if (operation.error) {
     opPromise = opPromise.then(
