@@ -1,4 +1,5 @@
 'use strict';
+
 const path = require('path');
 const fs = require('fs');
 const chai = require('chai');
@@ -585,7 +586,7 @@ function testOperation(operation, obj, context, options) {
   }
 
   Promise.resolve(() => {
-    throw new Error('sss')
+    throw new Error('sss');
   }).catch(console.log);
 
   if (operation.error) {
