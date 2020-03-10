@@ -841,11 +841,11 @@ describe('Insert', function() {
               test.equal(null, err);
               test.equal('shouldCorrectlyInsertDBRefWithDbNotDefined', items[1].ref.namespace);
               test.equal(doc._id.toString(), items[1].ref.oid.toString());
-              test.equal(undefined, items[1].ref.db);
+              test.equal(null, items[1].ref.db);
 
               test.equal('shouldCorrectlyInsertDBRefWithDbNotDefined', items[2].ref.namespace);
               test.equal(doc._id.toString(), items[2].ref.oid.toString());
-              test.equal(configuration.db_name, items[2].ref.db);
+              test.equal(null, items[2].ref.db);
 
               client.close(done);
             });
