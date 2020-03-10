@@ -4147,9 +4147,8 @@ describe('Cursor', function() {
                 .then(() => {
                   // Confirm that cursorId is non-zero
                   const longId = cursor.cursorState.cursorId;
-                  expect(longId)
-                    .to.be.an('object')
-                    .and.to.haveOwnProperty('_bsontype', 'Long');
+                  expect(longId).to.be.an('object');
+                  expect(Object.getPrototypeOf(longId)).to.haveOwnProperty('_bsontype', 'Long');
                   const id = longId.toNumber();
 
                   expect(id).to.not.equal(0);

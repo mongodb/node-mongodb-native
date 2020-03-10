@@ -87,11 +87,10 @@ describe('Message Stream', function() {
       }
     ].forEach(test => {
       it(test.description, function(done) {
-        const bson = new BSON();
         const error = test.error;
         const expectedMessageCount = test.expectedMessageCount || 1;
         const inputStream = bufferToStream(test.data);
-        const messageStream = new MessageStream({ bson });
+        const messageStream = new MessageStream({ bson: BSON });
 
         let messageCount = 0;
         messageStream.on('message', msg => {
@@ -150,11 +149,10 @@ describe('Message Stream', function() {
         done();
       });
 
-      const bson = new BSON();
-      const messageStream = new MessageStream({ bson });
+      const messageStream = new MessageStream({ bson: BSON });
       messageStream.pipe(writeableStream);
 
-      const command = new Msg(bson, 'admin.$cmd', { ismaster: 1 }, { requestId: 3 });
+      const command = new Msg(BSON, 'admin.$cmd', { ismaster: 1 }, { requestId: 3 });
       messageStream.writeCommand(command, null, err => {
         done(err);
       });

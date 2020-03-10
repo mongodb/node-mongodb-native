@@ -18,7 +18,7 @@ describe('Connect Tests', function() {
       test.connectOptions = {
         host: test.server.host,
         port: test.server.port,
-        bson: new BSON(),
+        bson: BSON,
         credentials: new MongoCredentials({
           username: 'testUser',
           password: 'pencil',

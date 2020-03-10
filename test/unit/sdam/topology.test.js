@@ -22,7 +22,7 @@ describe('Topology (unit)', function() {
         var server = new Topology(
           [{ host: this.configuration.host, port: this.configuration.port }],
           {
-            bson: new BSON(),
+            bson: BSON,
             appname: 'My application name'
           }
         );

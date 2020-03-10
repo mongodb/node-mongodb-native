@@ -22,7 +22,7 @@ describe('Connection', function() {
     });
 
     connect(
-      Object.assign({ bson: new BSON(), connectionType: Connection }, server.address()),
+      Object.assign({ bson: BSON, connectionType: Connection }, server.address()),
       (err, conn) => {
         expect(err).to.not.exist;
         expect(conn).to.exist;
@@ -48,7 +48,7 @@ describe('Connection', function() {
     });
 
     connect(
-      Object.assign({ bson: new BSON(), connectionType: Connection }, server.address()),
+      Object.assign({ bson: BSON, connectionType: Connection }, server.address()),
       (err, conn) => {
         expect(err).to.not.exist;
         expect(conn).to.exist;

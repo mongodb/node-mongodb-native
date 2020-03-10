@@ -2,7 +2,7 @@
 const EventEmitter = require('events');
 const { ConnectionPool } = require('../../../lib/cmap/connection_pool');
 const { format: f } = require('util');
-const bson = require('bson');
+const BSON = require('bson');
 const { Query } = require('../../../lib/cmap/commands');
 const ReadPreference = require('../../../lib/read_preference');
 
@@ -20,12 +20,12 @@ function executeCommand(configuration, db, cmd, options, cb) {
   var pool = new ConnectionPool(null, {
     host: host,
     port: port,
-    bson: new bson()
+    bson: BSON
   });
 
   // Add event listeners
   pool.on('connect', function(_pool) {
-    var query = new Query(new bson(), f('%s.$cmd', db), cmd, {
+    var query = new Query(BSON, f('%s.$cmd', db), cmd, {
       numberToSkip: 0,
       numberToReturn: 1
     });
@@ -52,7 +52,7 @@ function executeCommand(configuration, db, cmd, options, cb) {
 
 function locateAuthMethod(configuration, cb) {
   var ConnectionPool = require('../../../lib/cmap/connection_pool'),
-    bson = require('bson'),
+    BSON = require('bson'),
     f = require('util').format,
     { Query } = require('../../../lib/cmap/commands');
 
@@ -64,12 +64,12 @@ function locateAuthMethod(configuration, cb) {
   var pool = new ConnectionPool(null, {
     host: configuration.host,
     port: configuration.port,
-    bson: new bson()
+    bson: BSON
   });
 
   // Add event listeners
   pool.on('connect', function(_pool) {
-    var query = new Query(new bson(), f('%s.$cmd', db), cmd, {
+    var query = new Query(BSON, f('%s.$cmd', db), cmd, {
       numberToSkip: 0,
       numberToReturn: 1
     });

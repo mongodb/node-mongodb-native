@@ -54,7 +54,7 @@ describe('Connection Pool', function() {
     });
 
     const pool = new ConnectionPool(
-      Object.assign({ bson: new BSON(), maxPoolSize: 1 }, server.address())
+      Object.assign({ bson: BSON, maxPoolSize: 1 }, server.address())
     );
 
     const events = [];
@@ -99,7 +99,7 @@ describe('Connection Pool', function() {
     });
 
     const pool = new ConnectionPool(
-      Object.assign({ bson: new BSON(), maxPoolSize: 1, socketTimeout: 50 }, server.address())
+      Object.assign({ bson: BSON, maxPoolSize: 1, socketTimeout: 50 }, server.address())
     );
 
     pool.withConnection(
@@ -125,7 +125,7 @@ describe('Connection Pool', function() {
         }
       });
 
-      const pool = new ConnectionPool(Object.assign({ bson: new BSON() }, server.address()));
+      const pool = new ConnectionPool(Object.assign({ bson: BSON }, server.address()));
       const callback = (err, result) => {
         expect(err).to.not.exist;
         expect(result).to.exist;
@@ -151,7 +151,7 @@ describe('Connection Pool', function() {
       });
 
       const pool = new ConnectionPool(
-        Object.assign({ bson: new BSON(), waitQueueTimeoutMS: 200 }, server.address())
+        Object.assign({ bson: BSON, waitQueueTimeoutMS: 200 }, server.address())
       );
 
       const callback = err => {
@@ -175,7 +175,7 @@ describe('Connection Pool', function() {
         }
       });
 
-      const pool = new ConnectionPool(Object.assign({ bson: new BSON() }, server.address()));
+      const pool = new ConnectionPool(Object.assign({ bson: BSON }, server.address()));
       const callback = (err, result) => {
         expect(err).to.exist;
         expect(result).to.not.exist;
@@ -198,7 +198,7 @@ describe('Connection Pool', function() {
       });
 
       const pool = new ConnectionPool(
-        Object.assign({ bson: new BSON(), maxPoolSize: 1 }, server.address())
+        Object.assign({ bson: BSON, maxPoolSize: 1 }, server.address())
       );
 
       const events = [];
@@ -228,7 +228,7 @@ describe('Connection Pool', function() {
     let pool = undefined;
 
     function createPool(options) {
-      options = Object.assign({}, options, { bson: new BSON() }, server.address());
+      options = Object.assign({}, options, { bson: BSON }, server.address());
       pool = new ConnectionPool(options);
       ALL_POOL_EVENTS.forEach(ev => {
         pool.on(ev, x => {

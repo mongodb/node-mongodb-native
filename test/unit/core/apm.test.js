@@ -5,7 +5,6 @@ const { expect } = require('chai');
 const { Query, KillCursor, GetMore } = require('../../../lib/cmap/commands');
 const { CommandStartedEvent } = require('../../../lib/cmap/events');
 
-const bson = new BSON();
 const conn = { id: '<some id>', address: '<some address>' };
 
 describe('APM tests', function() {
@@ -17,7 +16,7 @@ describe('APM tests', function() {
       const db = 'test1';
       const coll = 'testingQuery';
       const query = new Query(
-        bson,
+        BSON,
         `${db}.${coll}`,
         {
           testCmd: 1,
@@ -42,7 +41,7 @@ describe('APM tests', function() {
     it('should wrap a basic killCursor command', metadata, function() {
       const db = 'test2';
       const coll = 'testingKillCursors';
-      const killCursor = new KillCursor(bson, `${db}.${coll}`, [12, 42, 57]);
+      const killCursor = new KillCursor(BSON, `${db}.${coll}`, [12, 42, 57]);
 
       const startEvent = new CommandStartedEvent(conn, killCursor);
 
@@ -64,7 +63,7 @@ describe('APM tests', function() {
       const db = 'test3';
       const coll = 'testingGetMore';
       const numberToReturn = 321;
-      const getMore = new GetMore(bson, `${db}.${coll}`, 5525, { numberToReturn });
+      const getMore = new GetMore(BSON, `${db}.${coll}`, 5525, { numberToReturn });
 
       const startEvent = new CommandStartedEvent(conn, getMore);
 
@@ -90,7 +89,7 @@ describe('APM tests', function() {
         const db = 'admin';
         const coll = '$cmd';
         const query = new Query(
-          bson,
+          BSON,
           `${db}.${coll}`,
           {
             $query: {
@@ -122,7 +121,7 @@ describe('APM tests', function() {
       const db = 'test5';
       const coll = 'testingFindCommand';
       const query = new Query(
-        bson,
+        BSON,
         `${db}.${coll}`,
         {
           $query: {

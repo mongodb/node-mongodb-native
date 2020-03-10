@@ -3,7 +3,7 @@ const expect = require('chai').expect;
 const f = require('util').format;
 const locateAuthMethod = require('./shared').locateAuthMethod;
 const executeCommand = require('./shared').executeCommand;
-const Bson = require('bson');
+const BSON = require('bson');
 const mock = require('mongodb-mock-server');
 const Buffer = require('safe-buffer').Buffer;
 
@@ -19,7 +19,7 @@ describe('Server tests', function() {
     test: function(done) {
       const config = this.configuration;
       var server = config.newTopology(this.configuration.host, this.configuration.port, {
-        bson: new Bson()
+        bson: BSON
       });
 
       // Add event listeners
@@ -39,7 +39,7 @@ describe('Server tests', function() {
     test: function(done) {
       const config = this.configuration;
       var server = config.newTopology(this.configuration.host, this.configuration.port, {
-        bson: new Bson()
+        bson: BSON
       });
 
       // Add event listeners
@@ -65,7 +65,7 @@ describe('Server tests', function() {
     test: function(done) {
       const config = this.configuration;
       var server = config.newTopology(this.configuration.host, this.configuration.port, {
-        bson: new Bson()
+        bson: BSON
       });
 
       // Add event listeners
@@ -98,7 +98,7 @@ describe('Server tests', function() {
     test: function(done) {
       const config = this.configuration;
       var server = config.newTopology(this.configuration.host, this.configuration.port, {
-        bson: new Bson()
+        bson: BSON
       });
 
       // Add event listeners
@@ -133,7 +133,7 @@ describe('Server tests', function() {
       test: function(done) {
         const config = this.configuration;
         var server = config.newTopology(this.configuration.host, this.configuration.port, {
-          bson: new Bson(),
+          bson: BSON,
           compression: { compressors: ['snappy', 'zlib'] }
         });
 
@@ -168,7 +168,7 @@ describe('Server tests', function() {
     test: function(done) {
       const config = this.configuration;
       var server = config.newTopology(this.configuration.host, this.configuration.port, {
-        bson: new Bson()
+        bson: BSON
       });
 
       // Add event listeners
@@ -206,7 +206,7 @@ describe('Server tests', function() {
     test: function(done) {
       const config = this.configuration;
       var server = config.newTopology(this.configuration.host, this.configuration.port, {
-        bson: new Bson()
+        bson: BSON
       });
 
       // Add event listeners
@@ -244,7 +244,7 @@ describe('Server tests', function() {
     test: function(done) {
       const config = this.configuration;
       var server = config.newTopology(this.configuration.host, this.configuration.port, {
-        bson: new Bson()
+        bson: BSON
       });
 
       // Add event listeners
@@ -283,7 +283,7 @@ describe('Server tests', function() {
     test: function(done) {
       const config = this.configuration;
       var server = config.newTopology(this.configuration.host, this.configuration.port, {
-        bson: new Bson()
+        bson: BSON
       });
 
       // Add event listeners
@@ -328,7 +328,7 @@ describe('Server tests', function() {
 
       const config = this.configuration;
       var server = config.newTopology(this.configuration.host, this.configuration.port, {
-        bson: new Bson()
+        bson: BSON
       });
 
       // Add event listeners
@@ -510,7 +510,7 @@ describe('Server tests', function() {
       const config = this.configuration;
       var server = config.newTopology(this.configuration.host, this.configuration.port, {
         size: 10,
-        bson: new Bson()
+        bson: BSON
       });
       // Namespace
       var ns = 'integration_tests.remove_example';
@@ -521,7 +521,7 @@ describe('Server tests', function() {
           return {
             _id: 'needle_' + i,
             is_even: i % 2,
-            long: Bson.Long.fromString('1234567890'),
+            long: BSON.Long.fromString('1234567890'),
             double: 0.23456,
             int: 1234
           };
@@ -580,7 +580,7 @@ describe('Server tests', function() {
 
       try {
         config.newTopology(this.configuration.host, this.configuration.port, {
-          bson: new Bson(),
+          bson: BSON,
           compression: { compressors: ['notACompressor', 'alsoNotACompressor', 'snappy'] }
         });
       } catch (err) {
@@ -628,7 +628,7 @@ describe('Server tests', function() {
                 expect(r).to.exist;
 
                 var server = config.newTopology(this.configuration.host, this.configuration.port, {
-                  bson: new Bson(),
+                  bson: BSON,
                   compression: { compressors: ['snappy', 'zlib'] }
                 });
 
@@ -704,7 +704,7 @@ describe('Server tests', function() {
                 expect(r).to.exist;
 
                 var server = config.newTopology(this.configuration.host, this.configuration.port, {
-                  bson: new Bson(),
+                  bson: BSON,
                   compression: { compressors: ['snappy', 'zlib'] }
                 });
 
@@ -770,7 +770,7 @@ describe('Server tests', function() {
     test: function(done) {
       const config = this.configuration;
       var server = config.newTopology('doesntexist', 12345, {
-        bson: new Bson(),
+        bson: BSON,
         reconnectTries: 0
       });
 

@@ -13,7 +13,7 @@ describe('Connection', function() {
 
   it('should execute a command against a server', function(done) {
     const connectOptions = Object.assign(
-      { connectionType: Connection, bson: new BSON() },
+      { connectionType: Connection, bson: BSON },
       this.configuration.options
     );
 
@@ -35,7 +35,7 @@ describe('Connection', function() {
 
   it('should emit command monitoring events', function(done) {
     const connectOptions = Object.assign(
-      { connectionType: Connection, bson: new BSON(), monitorCommands: true },
+      { connectionType: Connection, bson: BSON, monitorCommands: true },
       this.configuration.options
     );
 
@@ -65,7 +65,7 @@ describe('Connection', function() {
     const connectOptions = Object.assign({
       host: '240.0.0.1',
       connectionType: Connection,
-      bson: new BSON(),
+      bson: BSON,
       connectionTimeout: 500
     });
 
@@ -81,7 +81,7 @@ describe('Connection', function() {
     test: function(done) {
       const ns = `${this.configuration.db}.$cmd`;
       const connectOptions = Object.assign(
-        { connectionType: Connection, bson: new BSON() },
+        { connectionType: Connection, bson: BSON },
         this.configuration.options
       );
 

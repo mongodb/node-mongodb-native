@@ -9,7 +9,7 @@ const { expect } = require('chai');
 class MockServer {
   constructor(options) {
     this.s = {
-      bson: new BSON()
+      bson: BSON
     };
 
     this.description = {

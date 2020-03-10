@@ -3,7 +3,7 @@ const test = require('./shared').assert,
   setupDatabase = require('./shared').setupDatabase,
   Script = require('vm'),
   expect = require('chai').expect,
-  normalizedFunctionString = require('bson/lib/bson/parser/utils').normalizedFunctionString,
+  normalizedFunctionString = require('bson/lib/parser/utils').normalizedFunctionString,
   Buffer = require('safe-buffer').Buffer;
 
 const {
@@ -11,7 +11,7 @@ const {
   Timestamp,
   ObjectID,
   DBRef,
-  Symbol,
+  BSONSymbol,
   Double,
   Binary,
   MinKey,
@@ -812,6 +812,7 @@ describe('Insert', function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
+        test.equal(null, err);
         var db = client.db(configuration.db);
         var collection = db.collection('shouldCorrectlyInsertDBRefWithDbNotDefined');
 
@@ -837,6 +838,7 @@ describe('Insert', function() {
 
             // Get all items
             collection.find().toArray(function(err, items) {
+              test.equal(null, err);
               test.equal('shouldCorrectlyInsertDBRefWithDbNotDefined', items[1].ref.namespace);
               test.equal(doc._id.toString(), items[1].ref.oid.toString());
               test.equal(undefined, items[1].ref.db);
@@ -1703,7 +1705,7 @@ describe('Insert', function() {
         var collection = db.collection('bson_types_insert');
 
         var document = {
-          symbol: new Symbol('abcdefghijkl'),
+          symbol: new BSONSymbol('abcdefghijkl'),
           objid: new ObjectID('abcdefghijkl'),
           double: new Double(1),
           binary: new Binary(Buffer.from('hello world')),
@@ -1716,7 +1718,7 @@ describe('Insert', function() {
           test.equal(null, err);
           test.ok(result);
 
-          collection.findOne({ symbol: new Symbol('abcdefghijkl') }, function(err, doc) {
+          collection.findOne({ symbol: new BSONSymbol('abcdefghijkl') }, function(err, doc) {
             test.equal(null, err);
             test.equal('abcdefghijkl', doc.symbol.toString());
 
@@ -1784,7 +1786,7 @@ describe('Insert', function() {
         var collection = db.collection('bson_types_insert_1');
 
         var document = {
-          symbol: new Symbol('abcdefghijkl'),
+          symbol: new BSONSymbol('abcdefghijkl'),
           objid: new ObjectID('abcdefghijkl'),
           double: new Double(1),
           binary: new Binary(Buffer.from('hello world')),
@@ -1797,7 +1799,7 @@ describe('Insert', function() {
           test.equal(null, err);
           test.ok(result);
 
-          collection.findOne({ symbol: new Symbol('abcdefghijkl') }, function(err, doc) {
+          collection.findOne({ symbol: new BSONSymbol('abcdefghijkl') }, function(err, doc) {
             test.equal(null, err);
             test.equal('abcdefghijkl', doc.symbol.toString());
 

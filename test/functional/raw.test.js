@@ -3,22 +3,6 @@ const { assert: test, setupDatabase } = require('./shared');
 const { Buffer } = require('buffer');
 
 const BSON = require('../../lib/utils').retrieveBSON();
-const bson = new BSON([
-  BSON.Binary,
-  BSON.Code,
-  BSON.DBRef,
-  BSON.Decimal128,
-  BSON.Double,
-  BSON.Int32,
-  BSON.Long,
-  BSON.Map,
-  BSON.MaxKey,
-  BSON.MinKey,
-  BSON.ObjectId,
-  BSON.BSONRegExp,
-  BSON.Symbol,
-  BSON.Timestamp
-]);
 
 describe('Raw', function() {
   before(function() {
@@ -53,7 +37,7 @@ describe('Raw', function() {
 
               for (var i = 0; i < items.length; i++) {
                 test.ok(Buffer.isBuffer(items[i]));
-                objects.push(bson.deserialize(items[i]));
+                objects.push(BSON.deserialize(items[i]));
               }
 
               test.equal(1, objects[0].a);
@@ -63,7 +47,7 @@ describe('Raw', function() {
               // Execute findOne
               collection.findOne({ a: 1 }, { raw: true }, function(err, item) {
                 test.ok(Buffer.isBuffer(item));
-                var object = bson.deserialize(item);
+                var object = BSON.deserialize(item);
                 test.equal(1, object.a);
                 client.close(done);
               });
@@ -100,7 +84,7 @@ describe('Raw', function() {
               var objects = [];
               for (var i = 0; i < items.length; i++) {
                 test.ok(Buffer.isBuffer(items[i]));
-                objects.push(bson.deserialize(items[i]));
+                objects.push(BSON.deserialize(items[i]));
               }
 
               test.equal(1, objects[0].a);
@@ -110,7 +94,7 @@ describe('Raw', function() {
               // Execute findOne
               collection.findOne({ a: 1 }, { raw: true }, function(err, item) {
                 test.ok(Buffer.isBuffer(item));
-                var object = bson.deserialize(item);
+                var object = BSON.deserialize(item);
                 test.equal(1, object.a);
                 client.close(done);
               });

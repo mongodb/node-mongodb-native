@@ -4,7 +4,7 @@ var expect = require('chai').expect,
   locateAuthMethod = require('./shared').locateAuthMethod,
   executeCommand = require('./shared').executeCommand,
   Connection = require('../../../lib/cmap/connection'),
-  Bson = require('bson');
+  BSON = require('bson');
 
 const MongoCredentials = require('../../../lib/core/auth/mongo_credentials').MongoCredentials;
 
@@ -44,7 +44,7 @@ describe('Basic single server auth tests', function() {
         expect(r).to.exist;
 
         const server = config.newTopology(this.configuration.host, this.configuration.port, {
-          bson: new Bson()
+          bson: BSON
         });
 
         server.on('connect', _server => {
@@ -102,7 +102,7 @@ describe('Basic single server auth tests', function() {
                 this.configuration.host,
                 this.configuration.port,
                 {
-                  bson: new Bson()
+                  bson: BSON
                 }
               );
 
@@ -151,7 +151,7 @@ describe('Basic single server auth tests', function() {
               expect(cmdErr).to.be.null;
 
               var server = config.newTopology(this.configuration.host, this.configuration.port, {
-                bson: new Bson()
+                bson: BSON
               });
 
               const credentials = new MongoCredentials({
@@ -244,7 +244,7 @@ describe('Basic single server auth tests', function() {
                       this.configuration.host,
                       this.configuration.port,
                       {
-                        bson: new Bson()
+                        bson: BSON
                       }
                     );
 
@@ -351,7 +351,7 @@ describe('Basic single server auth tests', function() {
                     this.configuration.host,
                     this.configuration.port,
                     {
-                      bson: new Bson()
+                      bson: BSON
                     }
                   );
 
@@ -472,7 +472,7 @@ describe('Basic single server auth tests', function() {
                     this.configuration.host,
                     this.configuration.port,
                     {
-                      bson: new Bson()
+                      bson: BSON
                     }
                   );
 
@@ -568,7 +568,7 @@ describe('Basic single server auth tests', function() {
                     this.configuration.host,
                     this.configuration.port,
                     {
-                      bson: new Bson()
+                      bson: BSON
                     }
                   );
 

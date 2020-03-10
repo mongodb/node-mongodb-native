@@ -41,7 +41,7 @@ function makeBSONLoader(fileName) {
     const EJSON = require('mongodb-extjson');
     EJSON.setBSONModule(BSON);
 
-    this.bson = new BSON();
+    this.bson = BSON;
     this.dataString = EJSON.parse(loadSpecString(['extended_bson', `${fileName}.json`]));
     this.data = this.bson.serialize(this.dataString);
   };
