@@ -4489,4 +4489,44 @@ describe('Cursor', function() {
       });
     });
   });
+
+  it('should correctly iterate all documents with a limit set', function(done) {
+    const configuration = this.configuration;
+    const client = configuration.newClient();
+
+    client.connect(err => {
+      expect(err).to.not.exist;
+      this.defer(() => client.close());
+
+      const collection = client.db().collection('documents');
+      collection.drop(() => {
+        const docs = [{ a: 1 }, { a: 2 }, { a: 3 }];
+        collection.insertMany(docs, err => {
+          expect(err).to.not.exist;
+
+          let cursor = collection.find({}).limit(5);
+
+          let bag = [];
+          function iterate() {
+            if (bag.length === docs.length) {
+              expect(bag).to.eql(docs);
+              return done();
+            }
+
+            cursor.hasNext((err, hasNext) => {
+              expect(err).to.not.exist;
+              expect(hasNext).to.be.true;
+              cursor.next((err, doc) => {
+                expect(err).to.not.exist;
+                bag.push(doc);
+                iterate();
+              });
+            });
+          }
+
+          iterate();
+        });
+      });
+    });
+  });
 });
