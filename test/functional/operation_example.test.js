@@ -3615,6 +3615,10 @@ describe('Operation Examples', function() {
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      // NODE-2484: investigate double close event in Unified Topology environment
+      // client.on('close', function() {
+      //   done();
+      // });
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -3626,14 +3630,9 @@ describe('Operation Examples', function() {
         // REMOVE-LINE done();
         // REMOVE-LINE var db = client.db(configuration.db);
         // BEGIN
-        var db = client.db(configuration.db);
         test.equal(null, err);
 
-        db.on('close', function() {
-          done();
-        });
-
-        client.close();
+        client.close(done);
       });
       // END
     }
