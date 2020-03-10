@@ -40,7 +40,7 @@ describe('BYO Promises', function() {
 class CustomPromise extends Promise {}
 CustomPromise.prototype.isCustomMongo = true;
 
-describe('Pptional PromiseLibrary / maybePromise', function() {
+describe('Optional PromiseLibrary / maybePromise', function() {
   it('should correctly implement custom dependency-less promise', function(done) {
     const getCustomPromise = v => new CustomPromise(resolve => resolve(v));
     const getNativePromise = v => new Promise(resolve => resolve(v));
