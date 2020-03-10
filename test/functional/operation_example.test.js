@@ -2000,8 +2000,8 @@ describe('Operation Examples', function() {
 
             // Map function
             var map = function() {
-              emit(fn(this.timestamp.getYear()), 1);
-            }; // eslint-disable-line
+              emit(fn(this.timestamp.getYear()), 1); // eslint-disable-line
+            };
 
             // Reduce function
             var reduce = function(k, v) {
