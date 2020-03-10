@@ -203,6 +203,13 @@ describe('Connection String', function() {
         done();
       });
     });
+
+    it('should validate non-equal tls values', function(done) {
+      parseConnectionString('mongodb://localhost/?tls=true&tls=false', err => {
+        expect(err).to.have.property('message', 'All values of tls must be the same.');
+        done();
+      });
+    });
   });
 
   describe('spec tests', function() {
