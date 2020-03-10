@@ -1999,13 +1999,23 @@ describe('Operation Examples', function() {
             test.equal(null, err);
 
             // Map function
-            var map = function() {emit(fn(this.timestamp.getYear()), 1);}; // eslint-disable-line
+            var map = function() {
+              emit(fn(this.timestamp.getYear()), 1);
+            }; // eslint-disable-line
 
             // Reduce function
-            var reduce = function(k, v) {var count = 0; for (var i = 0; i < v.length; i++) {count += v[i];}return count;};
+            var reduce = function(k, v) {
+              var count = 0;
+              for (var i = 0; i < v.length; i++) {
+                count += v[i];
+              }
+              return count;
+            };
 
             // Javascript function available in the map reduce scope
-            var t = function(val) {return val + 1;};
+            var t = function(val) {
+              return val + 1;
+            };
 
             // Execute the map reduce with the custom scope
             var o = {};
