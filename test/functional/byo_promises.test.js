@@ -46,42 +46,36 @@ describe('Optional PromiseLibrary / maybePromise', function() {
     done();
   });
 
-  it('should have cursor return native promise', {
-    metadata: { requires: { topology: ['single', 'ssl', 'wiredtiger'] } },
-    test: function(done) {
-      const configuration = this.configuration;
-      const client = this.configuration.newClient({ w: 1 }, { poolSize: 1 });
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        const db = client.db(configuration.db);
-        const collection = db.collection('test');
-        const cursor = collection.find({});
-        const isPromise = cursor.toArray();
-        expect(isPromise).to.not.have.property('isCustomMongo');
-        expect(isPromise).to.have.property('then');
-        isPromise.then(() => client.close(done));
-      });
-    }
+  it('should have cursor return native promise', function(done) {
+    const configuration = this.configuration;
+    const client = this.configuration.newClient({ w: 1 }, { poolSize: 1 });
+    client.connect((err, client) => {
+      expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      const collection = db.collection('test');
+      const cursor = collection.find({});
+      const isPromise = cursor.toArray();
+      expect(isPromise).to.not.have.property('isCustomMongo');
+      expect(isPromise).to.have.property('then');
+      isPromise.then(() => client.close(done));
+    });
   });
 
-  it('should have cursor return custom promise from new client options', {
-    metadata: { requires: { topology: 'single' } },
-    test: function(done) {
-      const configuration = this.configuration;
-      const client = this.configuration.newClient(
-        { w: 1 },
-        { poolSize: 1, promiseLibrary: CustomPromise }
-      );
-      client.connect((err, client) => {
-        const db = client.db(configuration.db);
-        expect(err).to.be.null;
-        const collection = db.collection('test');
-        const cursor = collection.find({});
-        const isPromise = cursor.toArray();
-        expect(isPromise).to.have.property('isCustomMongo');
-        expect(isPromise).to.have.property('then');
-        isPromise.then(() => client.close(done));
-      });
-    }
+  it('should have cursor return custom promise from new client options', function(done) {
+    const configuration = this.configuration;
+    const client = this.configuration.newClient(
+      { w: 1 },
+      { poolSize: 1, promiseLibrary: CustomPromise }
+    );
+    client.connect((err, client) => {
+      const db = client.db(configuration.db);
+      expect(err).to.be.null;
+      const collection = db.collection('test');
+      const cursor = collection.find({});
+      const isPromise = cursor.toArray();
+      expect(isPromise).to.have.property('isCustomMongo');
+      expect(isPromise).to.have.property('then');
+      isPromise.then(() => client.close(done));
+    });
   });
 });
