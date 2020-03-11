@@ -1,11 +1,12 @@
 'use strict';
+
 const maybePromise = require('./../../lib/utils').maybePromise;
 var expect = require('chai').expect;
 
 class CustomPromise extends Promise {}
 CustomPromise.prototype.isCustomMongo = true;
 
-const parent = { s: { promiseLibrary: CustomPromise }}
+const parent = { s: { promiseLibrary: CustomPromise } };
 
 describe('Optional PromiseLibrary / maybePromise', function() {
   it('should correctly implement custom dependency-less promise', function(done) {
