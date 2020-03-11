@@ -1182,7 +1182,7 @@ describe('Find', function() {
   /**
    * @ignore
    */
-  it('Should correctly pass timeout options to cursor', {
+  it('Should correctly pass timeout options to cursor noCursorTimeout', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
@@ -1194,19 +1194,55 @@ describe('Find', function() {
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
         db.createCollection('timeoutFalse', function(err, collection) {
-          collection.find({}, { timeout: false }, function(err, cursor) {
-            test.equal(false, cursor.cmd.noCursorTimeout);
+          const cursor = collection.find({}, {});
+          test.ok(!cursor.cmd.noCursorTimeout);
+          client.close(done);
+        });
+      });
+    }
+  });
 
-            collection.find({}, { timeout: true }, function(err, cursor) {
-              test.equal(true, cursor.cmd.noCursorTimeout);
+  /**
+   * @ignore
+   */
+  it('Should correctly pass timeout options to cursor is false', {
+    metadata: {
+      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+    },
 
-              collection.find({}, {}, function(err, cursor) {
-                test.ok(!cursor.cmd.noCursorTimeout);
+    // The actual test we wish to run
+    test: function(done) {
+      var configuration = this.configuration;
+      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      client.connect(function(err, client) {
+        var db = client.db(configuration.db);
+        db.createCollection('timeoutFalse', function(err, collection) {
+          const cursor = collection.find({}, { timeout: false });
+          test.equal(false, cursor.cmd.noCursorTimeout);
+          client.close(done);
+        });
+      });
+    }
+  });
 
-                client.close(done);
-              });
-            });
-          });
+  /**
+   * @ignore
+   */
+  it('Should correctly pass timeout options to cursor is true', {
+    metadata: {
+      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+    },
+
+    // The actual test we wish to run
+    test: function(done) {
+      var configuration = this.configuration;
+      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      client.connect(function(err, client) {
+        var db = client.db(configuration.db);
+        db.createCollection('timeoutFalse', function(err, collection) {
+          const cursor = collection.find({}, { timeout: true });
+          test.equal(true, cursor.cmd.noCursorTimeout);
+          client.close(done);
         });
       });
     }
@@ -2688,13 +2724,11 @@ describe('Find', function() {
         var db = client.db(configuration.db);
         var collection = db.collection('shouldNotMutateUserOptions');
         var options = { raw: 'TEST' };
-        collection.find({}, options, function(error) {
-          test.equal(null, error);
-          test.equal(undefined, options.skip);
-          test.equal(undefined, options.limit);
-          test.equal('TEST', options.raw);
-          client.close(done);
-        });
+        collection.find({}, options);
+        test.equal(undefined, options.skip);
+        test.equal(undefined, options.limit);
+        test.equal('TEST', options.raw);
+        client.close(done);
       });
     }
   });

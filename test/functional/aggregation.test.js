@@ -58,37 +58,32 @@ describe('Aggregation', function() {
           expect(err).to.be.null;
 
           // Execute aggregate, notice the pipeline is expressed as an Array
-          collection.aggregate(
-            [
-              {
-                $project: {
-                  author: 1,
-                  tags: 1
-                }
-              },
-              { $unwind: '$tags' },
-              {
-                $group: {
-                  _id: { tags: '$tags' },
-                  authors: { $addToSet: '$author' }
-                }
-              },
-              { $sort: { _id: -1 } }
-            ],
-            function(err, cursor) {
-              expect(err).to.be.null;
+          const cursor = collection.aggregate([
+            {
+              $project: {
+                author: 1,
+                tags: 1
+              }
+            },
+            { $unwind: '$tags' },
+            {
+              $group: {
+                _id: { tags: '$tags' },
+                authors: { $addToSet: '$author' }
+              }
+            },
+            { $sort: { _id: -1 } }
+          ]);
 
-              cursor.toArray(function(err, result) {
-                expect(err).to.be.null;
-                expect(result[0]._id.tags).to.equal('good');
-                expect(result[0].authors).to.eql(['bob']);
-                expect(result[1]._id.tags).to.equal('fun');
-                expect(result[1].authors).to.eql(['bob']);
+          cursor.toArray(function(err, result) {
+            expect(err).to.be.null;
+            expect(result[0]._id.tags).to.equal('good');
+            expect(result[0].authors).to.eql(['bob']);
+            expect(result[1]._id.tags).to.equal('fun');
+            expect(result[1].authors).to.eql(['bob']);
 
-                client.close(done);
-              });
-            }
-          );
+            client.close(done);
+          });
         });
       });
       // END
@@ -110,22 +105,18 @@ describe('Aggregation', function() {
         expect(err).to.not.exist;
 
         const db = client.db('admin');
-        db.aggregate([{ $currentOp: { localOps: true } }], (err, cursor) => {
+        const cursor = db.aggregate([{ $currentOp: { localOps: true } }]);
+
+        cursor.toArray((err, result) => {
           expect(err).to.not.exist;
 
-          cursor.toArray((err, result) => {
-            expect(err).to.not.exist;
+          const aggregateOperation = result.filter(op => op.command && op.command.aggregate)[0];
+          expect(aggregateOperation.command.aggregate).to.equal(1);
+          expect(aggregateOperation.command.pipeline).to.eql([{ $currentOp: { localOps: true } }]);
+          expect(aggregateOperation.command.cursor).to.deep.equal({});
+          expect(aggregateOperation.command['$db']).to.equal('admin');
 
-            const aggregateOperation = result.filter(op => op.command && op.command.aggregate)[0];
-            expect(aggregateOperation.command.aggregate).to.equal(1);
-            expect(aggregateOperation.command.pipeline).to.eql([
-              { $currentOp: { localOps: true } }
-            ]);
-            expect(aggregateOperation.command.cursor).to.deep.equal({});
-            expect(aggregateOperation.command['$db']).to.equal('admin');
-
-            client.close(done);
-          });
+          client.close(done);
         });
       });
     }
@@ -189,37 +180,32 @@ describe('Aggregation', function() {
 
           // Execute aggregate, notice the pipeline is expressed as function call parameters
           // instead of an Array.
-          collection.aggregate(
-            [
-              {
-                $project: {
-                  author: 1,
-                  tags: 1
-                }
-              },
-              { $unwind: '$tags' },
-              {
-                $group: {
-                  _id: { tags: '$tags' },
-                  authors: { $addToSet: '$author' }
-                }
-              },
-              { $sort: { _id: -1 } }
-            ],
-            function(err, cursor) {
-              expect(err).to.be.null;
+          const cursor = collection.aggregate([
+            {
+              $project: {
+                author: 1,
+                tags: 1
+              }
+            },
+            { $unwind: '$tags' },
+            {
+              $group: {
+                _id: { tags: '$tags' },
+                authors: { $addToSet: '$author' }
+              }
+            },
+            { $sort: { _id: -1 } }
+          ]);
 
-              cursor.toArray(function(err, result) {
-                expect(err).to.be.null;
-                expect(result[0]._id.tags).to.equal('good');
-                expect(result[0].authors).to.eql(['bob']);
-                expect(result[1]._id.tags).to.equal('fun');
-                expect(result[1].authors).to.eql(['bob']);
+          cursor.toArray(function(err, result) {
+            expect(err).to.be.null;
+            expect(result[0]._id.tags).to.equal('good');
+            expect(result[0].authors).to.eql(['bob']);
+            expect(result[1]._id.tags).to.equal('fun');
+            expect(result[1].authors).to.eql(['bob']);
 
-                client.close(done);
-              });
-            }
-          );
+            client.close(done);
+          });
         });
       });
       // END
@@ -284,37 +270,32 @@ describe('Aggregation', function() {
 
           // Execute aggregate, notice the pipeline is expressed as function call parameters
           // instead of an Array.
-          collection.aggregate(
-            [
-              {
-                $project: {
-                  author: 1,
-                  tags: 1
-                }
-              },
-              { $unwind: '$tags' },
-              {
-                $group: {
-                  _id: { tags: '$tags' },
-                  authors: { $addToSet: '$author' }
-                }
-              },
-              { $sort: { _id: -1 } }
-            ],
-            function(err, cursor) {
-              expect(err).to.be.null;
+          const cursor = collection.aggregate([
+            {
+              $project: {
+                author: 1,
+                tags: 1
+              }
+            },
+            { $unwind: '$tags' },
+            {
+              $group: {
+                _id: { tags: '$tags' },
+                authors: { $addToSet: '$author' }
+              }
+            },
+            { $sort: { _id: -1 } }
+          ]);
 
-              cursor.toArray(function(err, result) {
-                expect(err).to.be.null;
-                expect(result[0]._id.tags).to.equal('good');
-                expect(result[0].authors).to.eql(['bob']);
-                expect(result[1]._id.tags).to.equal('fun');
-                expect(result[1].authors).to.eql(['bob']);
+          cursor.toArray(function(err, result) {
+            expect(err).to.be.null;
+            expect(result[0]._id.tags).to.equal('good');
+            expect(result[0].authors).to.eql(['bob']);
+            expect(result[1]._id.tags).to.equal('fun');
+            expect(result[1].authors).to.eql(['bob']);
 
-                client.close(done);
-              });
-            }
-          );
+            client.close(done);
+          });
         });
       });
       // END
@@ -644,7 +625,7 @@ describe('Aggregation', function() {
           expect(err).to.be.null;
 
           // Execute aggregate, notice the pipeline is expressed as an Array
-          collection.aggregate(
+          const cursor = collection.aggregate(
             [
               {
                 $project: {
@@ -662,18 +643,14 @@ describe('Aggregation', function() {
             ],
             {
               out: 'testingOutCollectionForAggregation'
-            },
-            function(err, cursor) {
-              expect(err).to.be.null;
-
-              cursor.toArray(function(err, results) {
-                expect(err).to.be.null;
-                expect(results).to.be.empty;
-
-                client.close(done);
-              });
             }
           );
+          cursor.toArray(function(err, results) {
+            expect(err).to.be.null;
+            expect(results).to.be.empty;
+
+            client.close(done);
+          });
         });
       });
       // END
@@ -735,7 +712,7 @@ describe('Aggregation', function() {
           expect(err).to.be.null;
 
           // Execute aggregate, notice the pipeline is expressed as an Array
-          collection.aggregate(
+          const cursor = collection.aggregate(
             [
               {
                 $project: {
@@ -754,21 +731,17 @@ describe('Aggregation', function() {
             ],
             {
               allowDiskUse: true
-            },
-            function(err, cursor) {
-              expect(err).to.be.null;
-
-              cursor.toArray(function(err, results) {
-                expect(err).to.be.null;
-                expect(results[0]._id.tags).to.equal('good');
-                expect(results[0].authors).to.eql(['bob']);
-                expect(results[1]._id.tags).to.equal('fun');
-                expect(results[1].authors).to.eql(['bob']);
-
-                client.close(done);
-              });
             }
           );
+          cursor.toArray(function(err, results) {
+            expect(err).to.be.null;
+            expect(results[0]._id.tags).to.equal('good');
+            expect(results[0].authors).to.eql(['bob']);
+            expect(results[1]._id.tags).to.equal('fun');
+            expect(results[1].authors).to.eql(['bob']);
+
+            client.close(done);
+          });
         });
       });
       // END
@@ -863,31 +836,28 @@ describe('Aggregation', function() {
             expect(err).to.be.null;
             expect(r.result.n).to.equal(3);
 
-            //Using callback - OK
-            col.aggregate([{ $project: { a: 1 } }], function(err, cursor) {
+            const cursor = col.aggregate([{ $project: { a: 1 } }]);
+
+            cursor.toArray(function(err, docs) {
               expect(err).to.be.null;
+              expect(docs.length).to.be.greaterThan(0);
 
-              cursor.toArray(function(err, docs) {
-                expect(err).to.be.null;
-                expect(docs.length).to.be.greaterThan(0);
+              //Using cursor - KO
+              col
+                .aggregate([{ $project: { a: 1 } }], {
+                  cursor: { batchSize: 10000 }
+                })
+                .forEach(
+                  function() {
+                    count = count + 1;
+                  },
+                  function(err) {
+                    expect(err).to.be.null;
+                    expect(count).to.be.greaterThan(0);
 
-                //Using cursor - KO
-                col
-                  .aggregate([{ $project: { a: 1 } }], {
-                    cursor: { batchSize: 10000 }
-                  })
-                  .forEach(
-                    function() {
-                      count = count + 1;
-                    },
-                    function(err) {
-                      expect(err).to.be.null;
-                      expect(count).to.be.greaterThan(0);
-
-                      client.close(done);
-                    }
-                  );
-              });
+                    client.close(done);
+                  }
+                );
             });
           });
         });
@@ -1141,7 +1111,7 @@ describe('Aggregation', function() {
               };
 
               // Execute aggregate, notice the pipeline is expressed as an Array
-              collection.aggregate(
+              const secondCursor = collection.aggregate(
                 [
                   {
                     $project: {
@@ -1159,17 +1129,15 @@ describe('Aggregation', function() {
                 ],
                 {
                   maxTimeMS: 1000
-                },
-                function(err, r) {
-                  expect(err).to.not.exist;
-                  expect(r).to.exist;
-
-                  // Return the command
-                  db.command = cmd;
-                  cursor.close();
-                  client.close(done);
                 }
               );
+
+              expect(secondCursor).to.exist;
+
+              // Return the command
+              db.command = cmd;
+              cursor.close();
+              client.close(done);
             });
           });
         });
@@ -1208,11 +1176,10 @@ describe('Aggregation', function() {
           command.apply(db, Array.prototype.slice.call(arguments, 0));
         };
 
-        collection.aggregate([{ $project: { _id: 1 } }], { comment }, function(err, r) {
-          expect(err).to.be.null;
-          expect(r).to.not.be.null;
-          client.close(done);
-        });
+        const cursor = collection.aggregate([{ $project: { _id: 1 } }], { comment });
+
+        expect(cursor).to.not.be.null;
+        client.close(done);
       });
     }
   });
