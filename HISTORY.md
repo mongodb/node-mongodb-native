@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="3.5.5"></a>
+## [3.5.5](https://github.com/mongodb/node-mongodb-native/compare/v3.5.4...v3.5.5) (2020-03-11)
+
+
+### Bug Fixes
+
+* correctly use template string for connection string error message ([6238c84](https://github.com/mongodb/node-mongodb-native/commit/6238c84))
+* don't depend on private node api for `Timeout` wrapper ([3ddaa3e](https://github.com/mongodb/node-mongodb-native/commit/3ddaa3e))
+* multiple concurrent attempts to process the queue may fail ([f69f51c](https://github.com/mongodb/node-mongodb-native/commit/f69f51c))
+* pass optional promise lib to maybePromise ([cde11ec](https://github.com/mongodb/node-mongodb-native/commit/cde11ec))
+* **cursor:** hasNext consumes documents on cursor with limit ([ef04d00](https://github.com/mongodb/node-mongodb-native/commit/ef04d00))
+
+
+
 <a name="3.5.4"></a>
 ## [3.5.4](https://github.com/mongodb/node-mongodb-native/compare/v3.5.3...v3.5.4) (2020-02-25)
 

@@ -10,9 +10,9 @@ title = "Issues & Help"
 
 Our developer community is vibrant and highly engaged, with wide experience using Node.js with MongoDB.
 Often, the quickest way to get support for
-general questions is through the [mongodb-user google group](http://groups.google.com/group/mongodb-user)
+general questions is through the [MongoDB Community Forums](https://community.mongodb.com/tags/c/drivers-odms-connectors/7/node-js-driver)
 or through [stackoverflow](http://stackoverflow.com/questions/tagged/mongodb+nodejs).  
-Refer to our [support channels](http://www.mongodb.org/about/support) documentation for more information.
+Refer to our [support channels](https://docs.mongodb.com/manual/support) documentation for more information.
 
 ## Bugs / Feature Requests
 

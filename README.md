@@ -33,7 +33,7 @@ Core Server (i.e. SERVER) project are **public**.
 
 ### Support / Feedback
 
-For issues with, questions about, or feedback for the Node.js driver, please look into our [support channels](http://www.mongodb.org/about/support). Please do not email any of the driver developers directly with issues or questions - you're more likely to get an answer on the [mongodb-user](http://groups.google.com/group/mongodb-user>) list on Google Groups.
+For issues with, questions about, or feedback for the Node.js driver, please look into our [support channels](https://docs.mongodb.com/manual/support). Please do not email any of the driver developers directly with issues or questions - you're more likely to get an answer on the [MongoDB Community Forums](https://community.mongodb.com/tags/c/drivers-odms-connectors/7/node-js-driver).
 
 ### Change Log
 
