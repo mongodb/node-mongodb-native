@@ -3,6 +3,9 @@ var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 var f = require('util').format;
 
+class CustomPromise extends Promise {}
+CustomPromise.prototype.isCustomMongo = true;
+
 describe('Promises (Db)', function() {
   before(function() {
     return setupDatabase(this.configuration);
@@ -373,7 +376,7 @@ describe('Promises (Db)', function() {
     }
   });
 
-  it('Should correctly execute createCollection using passed down bluebird Promise', {
+  it('Should correctly execute createCollection using passed down CustomPromise Promise', {
     metadata: {
       requires: {
         topology: ['single']
@@ -384,9 +387,8 @@ describe('Promises (Db)', function() {
     test: function(done) {
       var configuration = this.configuration;
       var db = null;
-      var BlueBird = require('bluebird');
 
-      const client = configuration.newClient({}, { promiseLibrary: BlueBird });
+      const client = configuration.newClient({}, { promiseLibrary: CustomPromise });
       client
         .connect()
         .then(function() {
