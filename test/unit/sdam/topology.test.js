@@ -7,6 +7,71 @@ const expect = require('chai').expect;
 const sinon = require('sinon');
 
 describe('Topology (unit)', function() {
+  it('should successfully process multiple queue processing requests', function(done) {
+    const singleNodeIsMaster = Object.assign({}, mock.DEFAULT_ISMASTER, {
+      maxWireVersion: 9,
+      ismaster: true,
+      secondary: false,
+      setName: 'rs',
+      me: 'a:27017',
+      hosts: ['a:27017'],
+      logicalSessionTimeoutMinutes: 10
+    });
+
+    const topology = new Topology('a:27017', { replicaSet: 'rs' });
+    this.sinon.stub(Server.prototype, 'connect').callsFake(function() {
+      this.s.state = 'connected';
+      this.emit('connect');
+      setTimeout(
+        () =>
+          this.emit('descriptionReceived', new ServerDescription(this.name, singleNodeIsMaster)),
+        100
+      );
+    });
+
+    function simulatedRetryableReadOperation(topology, callback) {
+      topology.selectServer('primary', err => {
+        expect(err).to.not.exist;
+
+        topology.selectServer('primary', err => {
+          expect(err).to.not.exist;
+
+          callback();
+        });
+      });
+    }
+
+    topology.connect(err => {
+      expect(err).to.not.exist;
+      this.defer(() => topology.close());
+
+      let selected = 0;
+      const completionHandler = err => {
+        expect(err).to.not.exist;
+
+        selected++;
+        if (selected === 3) done();
+      };
+
+      // explicitly prevent server selection by reverting to `Unknown`
+      const server = topology.s.servers.get('a:27017');
+      server.emit('descriptionReceived', new ServerDescription(server.name, null));
+      process.nextTick(() => {
+        simulatedRetryableReadOperation(topology, completionHandler);
+        simulatedRetryableReadOperation(topology, completionHandler);
+
+        setTimeout(() => {
+          server.emit(
+            'descriptionReceived',
+            new ServerDescription(server.name, singleNodeIsMaster)
+          );
+
+          simulatedRetryableReadOperation(topology, completionHandler);
+        }, 250);
+      });
+    });
+  });
+
   describe('shouldCheckForSessionSupport', function() {
     beforeEach(function() {
       this.sinon = sinon.sandbox.create();
