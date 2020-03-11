@@ -585,10 +585,6 @@ function testOperation(operation, obj, context, options) {
     opPromise = promiseTry(() => obj[operationName].apply(obj, args));
   }
 
-  Promise.resolve(() => {
-    throw new Error('sss');
-  }).catch(console.log);
-
   if (operation.error) {
     opPromise = opPromise.then(
       () => {

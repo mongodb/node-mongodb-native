@@ -16,11 +16,10 @@ describe('Optional PromiseLibrary / maybePromise', function() {
     done();
   });
 
-  it('should return a promise with extra property CustomMongo', function(done) {
+  it('should return a promise with extra property CustomMongo', function() {
     const prom = maybePromise(CustomPromise, undefined, () => 'example');
     expect(prom).to.have.property('isCustomMongo');
     expect(prom).to.have.property('then');
-    done();
   });
 
   it('should return a native promise', function(done) {
@@ -36,8 +35,8 @@ describe('Optional PromiseLibrary / maybePromise', function() {
       const configuration = this.configuration;
       const client = this.configuration.newClient({ w: 1 }, { poolSize: 1 });
       client.connect((err, client) => {
+        expect(err).to.not.exist;
         const db = client.db(configuration.db);
-        expect(err).to.be.null;
         const collection = db.collection('test');
         const cursor = collection.find({});
         const isPromise = cursor.toArray();
