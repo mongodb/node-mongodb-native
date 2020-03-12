@@ -1,7 +1,7 @@
 'use strict';
-var expect = require('chai').expect,
-  mock = require('mongodb-mock-server'),
-  ObjectId = require('bson').ObjectId;
+const { expect } = require('chai');
+const mock = require('mongodb-mock-server');
+const { ObjectId } = require('bson');
 const Logger = require('../../lib/logger');
 
 const test = {};

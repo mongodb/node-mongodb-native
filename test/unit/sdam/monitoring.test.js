@@ -1,6 +1,5 @@
 'use strict';
 const mock = require('mongodb-mock-server');
-const BSON = require('bson');
 const { ServerType } = require('../../../lib/sdam/common');
 const { Topology } = require('../../../lib/sdam/topology');
 const { Monitor } = require('../../../lib/sdam/monitor');
@@ -8,9 +7,7 @@ const { expect } = require('chai');
 
 class MockServer {
   constructor(options) {
-    this.s = {
-      bson: BSON
-    };
+    this.s = {};
 
     this.description = {
       type: ServerType.Unknown,

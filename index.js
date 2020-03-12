@@ -1,7 +1,7 @@
 'use strict';
 const error = require('./lib/error');
 const Instrumentation = require('./lib/apm');
-const BSON = require('./lib/utils').retrieveBSON();
+const { BSON } = require('./lib/deps');
 const { Cursor, AggregationCursor, CommandCursor } = require('./lib/cursor');
 
 // Set up the connect function

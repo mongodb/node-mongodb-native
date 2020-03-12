@@ -1,8 +1,8 @@
 'use strict';
 
-var expect = require('chai').expect,
-  f = require('util').format,
-  ObjectId = require('bson').ObjectId;
+const { expect } = require('chai');
+const { format: f } = require('util');
+const { ObjectId } = require('bson');
 
 describe('A server', function() {
   it('should correctly execute insert culling undefined', {

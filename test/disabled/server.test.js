@@ -18,9 +18,7 @@ describe('Server tests', function() {
 
     test: function(done) {
       const config = this.configuration;
-      var server = config.newTopology(this.configuration.host, this.configuration.port, {
-        bson: BSON
-      });
+      var server = config.newTopology(this.configuration.host, this.configuration.port);
 
       // Add event listeners
       server.on('connect', function() {
@@ -38,9 +36,7 @@ describe('Server tests', function() {
 
     test: function(done) {
       const config = this.configuration;
-      var server = config.newTopology(this.configuration.host, this.configuration.port, {
-        bson: BSON
-      });
+      var server = config.newTopology(this.configuration.host, this.configuration.port);
 
       // Add event listeners
       server.on('connect', function() {
@@ -64,9 +60,7 @@ describe('Server tests', function() {
 
     test: function(done) {
       const config = this.configuration;
-      var server = config.newTopology(this.configuration.host, this.configuration.port, {
-        bson: BSON
-      });
+      var server = config.newTopology(this.configuration.host, this.configuration.port);
 
       // Add event listeners
       server.on('connect', function() {
@@ -97,9 +91,7 @@ describe('Server tests', function() {
 
     test: function(done) {
       const config = this.configuration;
-      var server = config.newTopology(this.configuration.host, this.configuration.port, {
-        bson: BSON
-      });
+      var server = config.newTopology(this.configuration.host, this.configuration.port);
 
       // Add event listeners
       server.on('connect', function() {
@@ -133,7 +125,6 @@ describe('Server tests', function() {
       test: function(done) {
         const config = this.configuration;
         var server = config.newTopology(this.configuration.host, this.configuration.port, {
-          bson: BSON,
           compression: { compressors: ['snappy', 'zlib'] }
         });
 
@@ -167,9 +158,7 @@ describe('Server tests', function() {
 
     test: function(done) {
       const config = this.configuration;
-      var server = config.newTopology(this.configuration.host, this.configuration.port, {
-        bson: BSON
-      });
+      var server = config.newTopology(this.configuration.host, this.configuration.port);
 
       // Add event listeners
       server.on('connect', function() {
@@ -205,9 +194,7 @@ describe('Server tests', function() {
 
     test: function(done) {
       const config = this.configuration;
-      var server = config.newTopology(this.configuration.host, this.configuration.port, {
-        bson: BSON
-      });
+      var server = config.newTopology(this.configuration.host, this.configuration.port);
 
       // Add event listeners
       server.on('connect', function() {
@@ -243,9 +230,7 @@ describe('Server tests', function() {
 
     test: function(done) {
       const config = this.configuration;
-      var server = config.newTopology(this.configuration.host, this.configuration.port, {
-        bson: BSON
-      });
+      var server = config.newTopology(this.configuration.host, this.configuration.port);
 
       // Add event listeners
       server.on('connect', function(_server) {
@@ -282,9 +267,7 @@ describe('Server tests', function() {
 
     test: function(done) {
       const config = this.configuration;
-      var server = config.newTopology(this.configuration.host, this.configuration.port, {
-        bson: BSON
-      });
+      var server = config.newTopology(this.configuration.host, this.configuration.port);
 
       // Add event listeners
       server.on('connect', function(_server) {
@@ -327,9 +310,7 @@ describe('Server tests', function() {
       var testDone = false;
 
       const config = this.configuration;
-      var server = config.newTopology(this.configuration.host, this.configuration.port, {
-        bson: BSON
-      });
+      var server = config.newTopology(this.configuration.host, this.configuration.port);
 
       // Add event listeners
       server.on('connect', function(_server) {
@@ -509,8 +490,7 @@ describe('Server tests', function() {
     test: function(done) {
       const config = this.configuration;
       var server = config.newTopology(this.configuration.host, this.configuration.port, {
-        size: 10,
-        bson: BSON
+        size: 10
       });
       // Namespace
       var ns = 'integration_tests.remove_example';
@@ -580,8 +560,9 @@ describe('Server tests', function() {
 
       try {
         config.newTopology(this.configuration.host, this.configuration.port, {
-          bson: BSON,
-          compression: { compressors: ['notACompressor', 'alsoNotACompressor', 'snappy'] }
+          compression: {
+            compressors: ['notACompressor', 'alsoNotACompressor', 'snappy']
+          }
         });
       } catch (err) {
         expect(err.message).to.equal('compressors must be at least one of snappy or zlib');
@@ -628,7 +609,6 @@ describe('Server tests', function() {
                 expect(r).to.exist;
 
                 var server = config.newTopology(this.configuration.host, this.configuration.port, {
-                  bson: BSON,
                   compression: { compressors: ['snappy', 'zlib'] }
                 });
 
@@ -704,7 +684,6 @@ describe('Server tests', function() {
                 expect(r).to.exist;
 
                 var server = config.newTopology(this.configuration.host, this.configuration.port, {
-                  bson: BSON,
                   compression: { compressors: ['snappy', 'zlib'] }
                 });
 
@@ -770,7 +749,6 @@ describe('Server tests', function() {
     test: function(done) {
       const config = this.configuration;
       var server = config.newTopology('doesntexist', 12345, {
-        bson: BSON,
         reconnectTries: 0
       });
 

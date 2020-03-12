@@ -1,6 +1,5 @@
 'use strict';
 
-const BSON = require('bson');
 const mock = require('mongodb-mock-server');
 const connect = require('../../../lib/cmap/connect');
 const Connection = require('../../../lib/cmap/connection').Connection;
@@ -21,20 +20,17 @@ describe('Connection', function() {
       // blackhole all other requests
     });
 
-    connect(
-      Object.assign({ bson: BSON, connectionType: Connection }, server.address()),
-      (err, conn) => {
+    connect(Object.assign({ connectionType: Connection }, server.address()), (err, conn) => {
+      expect(err).to.not.exist;
+      expect(conn).to.exist;
+
+      conn.command('$admin.cmd', { ping: 1 }, { noResponse: true }, (err, result) => {
         expect(err).to.not.exist;
-        expect(conn).to.exist;
+        expect(result).to.not.exist;
 
-        conn.command('$admin.cmd', { ping: 1 }, { noResponse: true }, (err, result) => {
-          expect(err).to.not.exist;
-          expect(result).to.not.exist;
-
-          done();
-        });
-      }
-    );
+        done();
+      });
+    });
   });
 
   it('should destroy streams which time out', function(done) {
@@ -47,23 +43,20 @@ describe('Connection', function() {
       // blackhole all other requests
     });
 
-    connect(
-      Object.assign({ bson: BSON, connectionType: Connection }, server.address()),
-      (err, conn) => {
-        expect(err).to.not.exist;
-        expect(conn).to.exist;
+    connect(Object.assign({ connectionType: Connection }, server.address()), (err, conn) => {
+      expect(err).to.not.exist;
+      expect(conn).to.exist;
 
-        conn.command('$admin.cmd', { ping: 1 }, { socketTimeout: 50 }, (err, result) => {
-          expect(err).to.exist;
-          expect(result).to.not.exist;
+      conn.command('$admin.cmd', { ping: 1 }, { socketTimeout: 50 }, (err, result) => {
+        expect(err).to.exist;
+        expect(result).to.not.exist;
 
-          expect(conn)
-            .property('stream')
-            .property('destroyed').to.be.true;
+        expect(conn)
+          .property('stream')
+          .property('destroyed').to.be.true;
 
-          done();
-        });
-      }
-    );
+        done();
+      });
+    });
   });
 });

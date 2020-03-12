@@ -1,10 +1,8 @@
 'use strict';
 
 const mock = require('mongodb-mock-server');
-const ObjectId = require('bson').ObjectId;
-const Timestamp = require('bson').Timestamp;
-const Binary = require('bson').Binary;
-const Buffer = require('safe-buffer').Buffer;
+const { ObjectId, Timestamp, Binary } = require('bson');
+const { Buffer } = require('safe-buffer');
 
 class ReplSetFixture {
   constructor() {

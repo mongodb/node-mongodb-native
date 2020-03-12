@@ -90,27 +90,6 @@ describe('Connection', function() {
   /**
    * @ignore
    */
-  it('should correctly identify parser type', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    // The actual test we wish to run
-    test: function(done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: true });
-
-      client.connect().then(() => {
-        test.equal('js', client.topology.parserType);
-
-        client.close(done);
-      });
-    }
-  });
-
-  /**
-   * @ignore
-   */
   it('should correctly connect to server using big connection pool', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] },

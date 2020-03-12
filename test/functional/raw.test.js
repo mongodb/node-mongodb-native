@@ -2,7 +2,7 @@
 const { assert: test, setupDatabase } = require('./shared');
 const { Buffer } = require('buffer');
 
-const BSON = require('../../lib/utils').retrieveBSON();
+const BSON = require('bson');
 
 describe('Raw', function() {
   before(function() {

@@ -1,5 +1,4 @@
 'use strict';
-const BSON = require('bson');
 const Readable = require('stream').Readable;
 const Writable = require('stream').Writable;
 const MessageStream = require('../../../lib/cmap/message_stream');
@@ -90,7 +89,7 @@ describe('Message Stream', function() {
         const error = test.error;
         const expectedMessageCount = test.expectedMessageCount || 1;
         const inputStream = bufferToStream(test.data);
-        const messageStream = new MessageStream({ bson: BSON });
+        const messageStream = new MessageStream();
 
         let messageCount = 0;
         messageStream.on('message', msg => {
@@ -149,10 +148,10 @@ describe('Message Stream', function() {
         done();
       });
 
-      const messageStream = new MessageStream({ bson: BSON });
+      const messageStream = new MessageStream();
       messageStream.pipe(writeableStream);
 
-      const command = new Msg(BSON, 'admin.$cmd', { ismaster: 1 }, { requestId: 3 });
+      const command = new Msg('admin.$cmd', { ismaster: 1 }, { requestId: 3 });
       messageStream.writeCommand(command, null, err => {
         done(err);
       });

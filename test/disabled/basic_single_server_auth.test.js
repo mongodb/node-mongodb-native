@@ -1,12 +1,11 @@
 'use strict';
 
-var expect = require('chai').expect,
-  locateAuthMethod = require('./shared').locateAuthMethod,
-  executeCommand = require('./shared').executeCommand,
-  Connection = require('../../../lib/cmap/connection'),
-  BSON = require('bson');
+const { expect } = require('chai');
+const { locateAuthMethod } = require('./shared');
+const { executeCommand } = require('./shared');
+const Connection = require('../../../lib/cmap/connection');
 
-const MongoCredentials = require('../../../lib/core/auth/mongo_credentials').MongoCredentials;
+const { MongoCredentials } = require('../../../lib/core/auth/mongo_credentials');
 
 describe('Basic single server auth tests', function() {
   it('should correctly authenticate server using scram-sha-256 using connect auth', {
@@ -43,9 +42,7 @@ describe('Basic single server auth tests', function() {
         expect(cmdErr).to.be.null;
         expect(r).to.exist;
 
-        const server = config.newTopology(this.configuration.host, this.configuration.port, {
-          bson: BSON
-        });
+        const server = config.newTopology(this.configuration.host, this.configuration.port);
 
         server.on('connect', _server => {
           dropUser((dropUserErr, dropUserRes) => {
@@ -100,10 +97,7 @@ describe('Basic single server auth tests', function() {
 
               var server = this.configuration.newTopology(
                 this.configuration.host,
-                this.configuration.port,
-                {
-                  bson: BSON
-                }
+                this.configuration.port
               );
 
               server.on('error', function() {
@@ -150,9 +144,7 @@ describe('Basic single server auth tests', function() {
               expect(r).to.exist;
               expect(cmdErr).to.be.null;
 
-              var server = config.newTopology(this.configuration.host, this.configuration.port, {
-                bson: BSON
-              });
+              var server = config.newTopology(this.configuration.host, this.configuration.port);
 
               const credentials = new MongoCredentials({
                 mechanism: method,
@@ -242,10 +234,7 @@ describe('Basic single server auth tests', function() {
                     // Attempt to connect
                     var server = config.newTopology(
                       this.configuration.host,
-                      this.configuration.port,
-                      {
-                        bson: BSON
-                      }
+                      this.configuration.port
                     );
 
                     var index = 0;
@@ -347,13 +336,7 @@ describe('Basic single server auth tests', function() {
                   expect(createUserErr).to.be.null;
 
                   // Attempt to connect
-                  var server = config.newTopology(
-                    this.configuration.host,
-                    this.configuration.port,
-                    {
-                      bson: BSON
-                    }
-                  );
+                  var server = config.newTopology(this.configuration.host, this.configuration.port);
 
                   var index = 0;
                   var error = false;
@@ -468,13 +451,7 @@ describe('Basic single server auth tests', function() {
                   expect(createUserErr).to.be.null;
 
                   // Attempt to connect
-                  var server = config.newTopology(
-                    this.configuration.host,
-                    this.configuration.port,
-                    {
-                      bson: BSON
-                    }
-                  );
+                  var server = config.newTopology(this.configuration.host, this.configuration.port);
 
                   // Add event listeners
                   server.on('connect', function(_server) {
@@ -564,13 +541,7 @@ describe('Basic single server auth tests', function() {
                   expect(createUserRes).to.exist;
                   expect(createUserErr).to.be.null;
                   // Attempt to connect
-                  var server = config.newTopology(
-                    this.configuration.host,
-                    this.configuration.port,
-                    {
-                      bson: BSON
-                    }
-                  );
+                  var server = config.newTopology(this.configuration.host, this.configuration.port);
 
                   // Add event listeners
                   server.on('connect', function(_server) {

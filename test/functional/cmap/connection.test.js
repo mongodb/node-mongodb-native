@@ -3,7 +3,6 @@
 const Connection = require('../../../lib/cmap/connection').Connection;
 const connect = require('../../../lib/cmap/connect');
 const expect = require('chai').expect;
-const BSON = require('bson');
 const setupDatabase = require('../../functional/shared').setupDatabase;
 
 describe('Connection', function() {
@@ -13,7 +12,7 @@ describe('Connection', function() {
 
   it('should execute a command against a server', function(done) {
     const connectOptions = Object.assign(
-      { connectionType: Connection, bson: BSON },
+      { connectionType: Connection },
       this.configuration.options
     );
 
@@ -35,7 +34,7 @@ describe('Connection', function() {
 
   it('should emit command monitoring events', function(done) {
     const connectOptions = Object.assign(
-      { connectionType: Connection, bson: BSON, monitorCommands: true },
+      { connectionType: Connection, monitorCommands: true },
       this.configuration.options
     );
 
@@ -65,7 +64,6 @@ describe('Connection', function() {
     const connectOptions = Object.assign({
       host: '240.0.0.1',
       connectionType: Connection,
-      bson: BSON,
       connectionTimeout: 500
     });
 
@@ -81,7 +79,7 @@ describe('Connection', function() {
     test: function(done) {
       const ns = `${this.configuration.db}.$cmd`;
       const connectOptions = Object.assign(
-        { connectionType: Connection, bson: BSON },
+        { connectionType: Connection },
         this.configuration.options
       );
 
