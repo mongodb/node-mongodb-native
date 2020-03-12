@@ -4,7 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const chai = require('chai');
 const expect = chai.expect;
-const EJSON = require('mongodb-extjson');
+const { EJSON } = require('bson');
 const TestRunnerContext = require('./context').TestRunnerContext;
 const resolveConnectionString = require('./utils').resolveConnectionString;
 

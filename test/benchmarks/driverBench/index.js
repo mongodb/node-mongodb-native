@@ -6,6 +6,7 @@ const Runner = MongoBench.Runner;
 const commonHelpers = require('./common');
 
 const BSON = require('bson');
+const { EJSON } = require('bson');
 
 const makeClient = commonHelpers.makeClient;
 const connectClient = commonHelpers.connectClient;
@@ -39,9 +40,6 @@ function decodeBSON() {
 
 function makeBSONLoader(fileName) {
   return function() {
-    const EJSON = require('mongodb-extjson');
-    EJSON.setBSONModule(BSON);
-
     this.dataString = EJSON.parse(loadSpecString(['extended_bson', `${fileName}.json`]));
     this.data = BSON.serialize(this.dataString);
   };
