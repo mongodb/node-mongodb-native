@@ -5,6 +5,8 @@ const MongoBench = require('../mongoBench');
 const Runner = MongoBench.Runner;
 const commonHelpers = require('./common');
 
+const BSON = require('bson');
+
 const makeClient = commonHelpers.makeClient;
 const connectClient = commonHelpers.connectClient;
 const disconnectClient = commonHelpers.disconnectClient;
@@ -25,25 +27,23 @@ function average(arr) {
 
 function encodeBSON() {
   for (let i = 0; i < 10000; i += 1) {
-    this.bson.serialize(this.dataString);
+    BSON.serialize(this.dataString);
   }
 }
 
 function decodeBSON() {
   for (let i = 0; i < 10000; i += 1) {
-    this.bson.deserialize(this.data);
+    BSON.deserialize(this.data);
   }
 }
 
 function makeBSONLoader(fileName) {
   return function() {
-    const BSON = require('bson');
     const EJSON = require('mongodb-extjson');
     EJSON.setBSONModule(BSON);
 
-    this.bson = BSON;
     this.dataString = EJSON.parse(loadSpecString(['extended_bson', `${fileName}.json`]));
-    this.data = this.bson.serialize(this.dataString);
+    this.data = BSON.serialize(this.dataString);
   };
 }
 

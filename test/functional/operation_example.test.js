@@ -2023,7 +2023,7 @@ describe('Operation Examples', function() {
             o.out = { replace: 'replacethiscollection' };
 
             collection.mapReduce(map, reduce, o, function(err, outCollection) {
-              test.equal(err, null);
+              expect(err).to.be.null;
 
               // Find all entries in the map-reduce collection
               outCollection.find().toArray(function(err, results) {
@@ -2040,7 +2040,7 @@ describe('Operation Examples', function() {
 
                   // Find all entries in the map-reduce collection
                   outCollection.find().toArray(function(err, results) {
-                    test.equal(null, err);
+                    expect(err).to.be.null;
                     test.equal(2, results[0].value);
 
                     client.close(done);

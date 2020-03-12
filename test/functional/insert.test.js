@@ -880,7 +880,6 @@ describe('Insert', function() {
         poolSize: 1
       });
       client.connect(function(err, client) {
-        test.equal(null, err);
         var db = client.db(configuration.db);
         var collection = db.collection('shouldCorrectlyInsertDBRefWithDbNotDefined');
 
@@ -906,14 +905,13 @@ describe('Insert', function() {
 
             // Get all items
             collection.find().toArray(function(err, items) {
-              test.equal(null, err);
               test.equal('shouldCorrectlyInsertDBRefWithDbNotDefined', items[1].ref.namespace);
               test.equal(doc._id.toString(), items[1].ref.oid.toString());
-              test.equal(null, items[1].ref.db);
+              expect(items[1].ref.db).to.be.null;
 
               test.equal('shouldCorrectlyInsertDBRefWithDbNotDefined', items[2].ref.namespace);
               test.equal(doc._id.toString(), items[2].ref.oid.toString());
-              test.equal(null, items[2].ref.db);
+              expect(items[2].ref.db).to.be.null;
 
               client.close(done);
             });
