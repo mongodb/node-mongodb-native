@@ -521,4 +521,11 @@ describe('ReadPreference', function() {
       client.close(done);
     });
   });
+
+  it('Should only accept an array for readPreferenceTags', function() {
+    expect(() => new ReadPreference('primary', 'invalid')).to.throw(
+      'ReadPreference tags must be an array'
+    );
+    expect(new ReadPreference('primary', [])).to.be.an.instanceOf(ReadPreference);
+  });
 });
