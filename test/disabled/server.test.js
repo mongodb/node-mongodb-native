@@ -560,9 +560,7 @@ describe('Server tests', function() {
 
       try {
         config.newTopology(this.configuration.host, this.configuration.port, {
-          compression: {
-            compressors: ['notACompressor', 'alsoNotACompressor', 'snappy']
-          }
+          compression: { compressors: ['notACompressor', 'alsoNotACompressor', 'snappy'] }
         });
       } catch (err) {
         expect(err.message).to.equal('compressors must be at least one of snappy or zlib');

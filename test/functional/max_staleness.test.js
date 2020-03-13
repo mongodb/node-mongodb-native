@@ -11,9 +11,7 @@ describe('Max Staleness', function() {
     return mock.createServer().then(server => {
       test.server = server;
 
-      const defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
-        msg: 'isdbgrid'
-      });
+      const defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, { msg: 'isdbgrid' });
 
       // Primary server states
       const serverIsMaster = [Object.assign({}, defaultFields)];
@@ -66,12 +64,7 @@ describe('Max Staleness', function() {
           .toArray(function(err) {
             expect(err).to.not.exist;
             expect(test.checkCommand).to.eql({
-              $query: {
-                find: 'test',
-                filter: {},
-                returnKey: false,
-                showRecordId: false
-              },
+              $query: { find: 'test', filter: {}, returnKey: false, showRecordId: false },
               $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
             });
 
@@ -97,9 +90,7 @@ describe('Max Staleness', function() {
 
         // Get a db with a new readPreference
         var db1 = client.db('test', {
-          readPreference: new ReadPreference('secondary', null, {
-            maxStalenessSeconds: 250
-          })
+          readPreference: new ReadPreference('secondary', null, { maxStalenessSeconds: 250 })
         });
 
         db1
@@ -108,12 +99,7 @@ describe('Max Staleness', function() {
           .toArray(function(err) {
             expect(err).to.not.exist;
             expect(test.checkCommand).to.eql({
-              $query: {
-                find: 'test',
-                filter: {},
-                returnKey: false,
-                showRecordId: false
-              },
+              $query: { find: 'test', filter: {}, returnKey: false, showRecordId: false },
               $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
             });
 
@@ -143,20 +129,13 @@ describe('Max Staleness', function() {
 
           // Get a db with a new readPreference
           db.collection('test', {
-            readPreference: new ReadPreference('secondary', null, {
-              maxStalenessSeconds: 250
-            })
+            readPreference: new ReadPreference('secondary', null, { maxStalenessSeconds: 250 })
           })
             .find({})
             .toArray(function(err) {
               expect(err).to.not.exist;
               expect(test.checkCommand).to.eql({
-                $query: {
-                  find: 'test',
-                  filter: {},
-                  returnKey: false,
-                  showRecordId: false
-                },
+                $query: { find: 'test', filter: {}, returnKey: false, showRecordId: false },
                 $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
               });
 
@@ -182,9 +161,7 @@ describe('Max Staleness', function() {
       client.connect(function(err, client) {
         expect(err).to.not.exist;
         var db = client.db(self.configuration.db);
-        var readPreference = new ReadPreference('secondary', null, {
-          maxStalenessSeconds: 250
-        });
+        var readPreference = new ReadPreference('secondary', null, { maxStalenessSeconds: 250 });
 
         // Get a db with a new readPreference
         db.collection('test')
@@ -193,12 +170,7 @@ describe('Max Staleness', function() {
           .toArray(function(err) {
             expect(err).to.not.exist;
             expect(test.checkCommand).to.eql({
-              $query: {
-                find: 'test',
-                filter: {},
-                returnKey: false,
-                showRecordId: false
-              },
+              $query: { find: 'test', filter: {}, returnKey: false, showRecordId: false },
               $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
             });
 

@@ -14,15 +14,7 @@ describe('Connection', function() {
     const args = {
       metadata: { requires: { topology: ['single'] } },
       test: function(done) {
-        const connection = new Connection(
-          noop,
-          Object.assign(
-            {
-              port: server.port
-            },
-            config
-          )
-        );
+        const connection = new Connection(noop, Object.assign({ port: server.port }, config));
 
         const cleanup = err => {
           connection.destroy();
