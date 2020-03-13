@@ -1,10 +1,12 @@
 'use strict';
 
+require('util.promisify/shim')();
 const loadSpecTests = require('../../spec').loadSpecTests;
 const ConnectionPool = require('../../../lib/cmap/connection_pool').ConnectionPool;
 const EventEmitter = require('events').EventEmitter;
 const mock = require('mongodb-mock-server');
 const BSON = require('bson');
+const util = require('util');
 const cmapEvents = require('../../../lib/cmap/events');
 
 const chai = require('chai');
@@ -24,10 +26,10 @@ const ALL_POOL_EVENTS = new Set([
   'connectionPoolCleared'
 ]);
 
-const POOL_FUNCTIONS = parent => ({
-  checkOut: ConnectionPool.prototype.checkOut.bind(parent),
-  close: ConnectionPool.prototype.close.bind(parent)
-});
+const PROMISIFIED_POOL_FUNCTIONS = {
+  checkOut: util.promisify(ConnectionPool.prototype.checkOut),
+  close: util.promisify(ConnectionPool.prototype.close)
+};
 
 function closePool(pool) {
   return new Promise(resolve => {
@@ -256,7 +258,7 @@ describe('Connection Pool', function() {
 
     const OPERATION_FUNCTIONS = {
       checkOut: function(op) {
-        return POOL_FUNCTIONS(pool).checkOut((err, connection) => {
+        return PROMISIFIED_POOL_FUNCTIONS.checkOut.call(pool).then(connection => {
           if (op.label != null) {
             connections.set(op.label, connection);
           } else {
@@ -278,7 +280,7 @@ describe('Connection Pool', function() {
         return pool.clear();
       },
       close: function() {
-        return POOL_FUNCTIONS(pool).close();
+        return PROMISIFIED_POOL_FUNCTIONS.close.call(pool);
       },
       wait: function(options) {
         const ms = options.ms;

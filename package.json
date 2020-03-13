@@ -28,7 +28,8 @@
     "bson": "^1.1.1",
     "denque": "^1.4.1",
     "require_optional": "^1.0.1",
-    "safe-buffer": "^5.1.2"
+    "safe-buffer": "^5.1.2",
+    "util.promisify": "^1.0.1"
   },
   "devDependencies": {
     "chai": "^4.1.1",
