@@ -78,37 +78,31 @@ describe('Operation Examples', function() {
           test.ok(result);
 
           // Execute aggregate, notice the pipeline is expressed as an Array
-          collection.aggregate(
-            [
-              {
-                $project: {
-                  author: 1,
-                  tags: 1
-                }
-              },
-              { $unwind: '$tags' },
-              {
-                $group: {
-                  _id: { tags: '$tags' },
-                  authors: { $addToSet: '$author' }
-                }
-              },
-              { $sort: { _id: -1 } }
-            ],
-            function(err, cursor) {
-              test.equal(null, err);
+          const cursor = collection.aggregate([
+            {
+              $project: {
+                author: 1,
+                tags: 1
+              }
+            },
+            { $unwind: '$tags' },
+            {
+              $group: {
+                _id: { tags: '$tags' },
+                authors: { $addToSet: '$author' }
+              }
+            },
+            { $sort: { _id: -1 } }
+          ]);
+          cursor.toArray(function(err, result) {
+            test.equal(null, err);
+            test.equal('good', result[0]._id.tags);
+            test.deepEqual(['bob'], result[0].authors);
+            test.equal('fun', result[1]._id.tags);
+            test.deepEqual(['bob'], result[1].authors);
 
-              cursor.toArray(function(err, result) {
-                test.equal(null, err);
-                test.equal('good', result[0]._id.tags);
-                test.deepEqual(['bob'], result[0].authors);
-                test.equal('fun', result[1]._id.tags);
-                test.deepEqual(['bob'], result[1].authors);
-
-                client.close(done);
-              });
-            }
-          );
+            client.close(done);
+          });
         });
       });
       // END
@@ -3615,6 +3609,10 @@ describe('Operation Examples', function() {
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      // NODE-2484: investigate double close event in Unified Topology environment
+      // client.on('close', function() {
+      //   done();
+      // });
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -3626,14 +3624,9 @@ describe('Operation Examples', function() {
         // REMOVE-LINE done();
         // REMOVE-LINE var db = client.db(configuration.db);
         // BEGIN
-        var db = client.db(configuration.db);
         test.equal(null, err);
 
-        db.on('close', function() {
-          done();
-        });
-
-        client.close();
+        client.close(done);
       });
       // END
     }

@@ -311,7 +311,7 @@ describe('Document Validation', function() {
                 test.equal(null, err);
 
                 // Execute aggregate, notice the pipeline is expressed as an Array
-                col.aggregate(
+                const cursor = col.aggregate(
                   [
                     {
                       $project: {
@@ -328,17 +328,14 @@ describe('Document Validation', function() {
                     },
                     { $out: 'createValidationCollectionOut' }
                   ],
-                  { bypassDocumentValidation: true },
-                  function(err, cursor) {
-                    test.equal(null, err);
-
-                    cursor.toArray(function(err) {
-                      test.equal(null, err);
-
-                      client.close(done);
-                    });
-                  }
+                  { bypassDocumentValidation: true }
                 );
+
+                cursor.toArray(function(err) {
+                  test.equal(null, err);
+
+                  client.close(done);
+                });
               });
             }
           );

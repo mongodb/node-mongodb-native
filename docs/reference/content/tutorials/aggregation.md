@@ -43,20 +43,15 @@ grouped by restaurant category.
 
 function simplePipeline(db, callback) {
   const collection = db.collection( 'restaurants' );
-  collection.aggregate(
-      [ { '$match': { "borough": "Bronx" } },
-        { '$unwind': '$categories'},
-        { '$group': { '_id': "$categories", 'Bronx restaurants': { '$sum': 1 } } }
-      ],
-    function(err, cursor) {
-        assert.equal(err, null);
-
-        cursor.toArray(function(err, documents) {
-          console.log(documents)
-          callback(documents);
-        });
-      }
-  );
+  const cursor = collection.aggregate([
+    { '$match': { "borough": "Bronx" } },
+    { '$unwind': '$categories'},
+    { '$group': { '_id': "$categories", 'Bronx restaurants': { '$sum': 1 } } }
+  ]);
+  cursor.toArray(function(err, documents) {
+    console.log(documents)
+    callback(documents);
+  });
 }
 ```
 

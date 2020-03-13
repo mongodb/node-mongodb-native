@@ -8,66 +8,6 @@ describe('Multiple Databases', function() {
   });
 
   /**
-   * @ignore
-   */
-  it('shouldCorrectlyEmitErrorOnAllDbsOnPoolClose', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { topology: 'single' } },
-
-    // The actual test we wish to run
-    test: function(done) {
-      if (process.platform !== 'linux') {
-        var configuration = this.configuration;
-        var client = configuration.newClient({ w: 1 }, { poolSize: 1 });
-
-        // All inserted docs
-        var numberOfCloses = 0;
-
-        // Start server
-        client.on('close', function(err) {
-          test.ok(err !== null);
-          numberOfCloses = numberOfCloses + 1;
-        });
-
-        client.connect(function(err, client) {
-          var db = client.db(configuration.db);
-
-          db.createCollection('shouldCorrectlyErrorOnAllDbs', function(err, collection) {
-            test.equal(null, err);
-
-            collection.insert({ a: 1 }, { w: 1 }, function(err) {
-              test.equal(null, err);
-              // Open a second db
-              var db2 = client.db('tests_2');
-              // Add a close handler
-              db2.on('close', function(err) {
-                test.ok(err !== null);
-                numberOfCloses = numberOfCloses + 1;
-                test.equal(2, numberOfCloses);
-              });
-
-              // Open a second db
-              var db3 = client.db('tests_3');
-              // Add a close handler
-              db3.on('close', function(err) {
-                test.ok(err !== null);
-                numberOfCloses = numberOfCloses + 1;
-                test.equal(3, numberOfCloses);
-                done();
-              });
-
-              client.close();
-            });
-          });
-        });
-      } else {
-        done();
-      }
-    }
-  });
-
-  /**
    * Test the auto connect functionality of the db
    *
    * @ignore
