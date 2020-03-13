@@ -28,10 +28,10 @@
     "bson": "^1.1.1",
     "denque": "^1.4.1",
     "require_optional": "^1.0.1",
-    "safe-buffer": "^5.1.2",
-    "util.promisify": "^1.0.1"
+    "safe-buffer": "^5.1.2"
   },
   "devDependencies": {
+    "util.promisify": "^1.0.1",
     "chai": "^4.1.1",
     "chai-subset": "^1.6.0",
     "chalk": "^2.4.2",
