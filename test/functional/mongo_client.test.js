@@ -53,7 +53,6 @@ describe('MongoClient', function() {
         test.equal('nearest', db.s.readPreference.mode);
         test.deepEqual({ loc: 'ny' }, db.s.readPreference.tags);
 
-        test.equal(false, db.s.nativeParser);
         test.equal(true, db.s.options.forceServerObjectId);
         test.equal(1, db.s.pkFactory());
         test.equal(true, db.s.options.serializeFunctions);
