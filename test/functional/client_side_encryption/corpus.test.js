@@ -4,7 +4,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const EJSON = require('mongodb-extjson');
+const { EJSON } = require('bson');
 const chai = require('chai');
 const expect = chai.expect;
 chai.config.includeStack = true;

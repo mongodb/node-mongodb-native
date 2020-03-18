@@ -343,13 +343,10 @@ describe('Cursor tests', function() {
   //   test: function(done) {
   //     var configuration = this.configuration,
   //       Server = require('../../../lib/core/topologies/server'),
-  //       bson = require('bson');
-
   //     // Attempt to connect
   //     var server = new Server({
   //       host: configuration.host,
   //       port: configuration.port,
-  //       bson: new bson(),
   //       // Nasty edge case: small timeout, small pool, no auto reconnect
   //       socketTimeout: 250,
   //       size: 1,

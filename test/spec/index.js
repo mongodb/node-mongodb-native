@@ -1,7 +1,7 @@
 'use strict';
 const path = require('path');
 const fs = require('fs');
-const EJSON = require('mongodb-extjson');
+const { EJSON } = require('bson');
 
 function loadSpecTests() {
   const specPath = path.resolve.apply(null, [__dirname].concat(Array.from(arguments)));

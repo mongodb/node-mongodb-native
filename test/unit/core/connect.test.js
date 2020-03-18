@@ -1,6 +1,5 @@
 'use strict';
 
-const BSON = require('bson');
 const mock = require('mongodb-mock-server');
 const { expect } = require('chai');
 const EventEmitter = require('events');
@@ -18,7 +17,6 @@ describe('Connect Tests', function() {
       test.connectOptions = {
         host: test.server.host,
         port: test.server.port,
-        bson: new BSON(),
         credentials: new MongoCredentials({
           username: 'testUser',
           password: 'pencil',

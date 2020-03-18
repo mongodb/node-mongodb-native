@@ -1,6 +1,6 @@
 'use strict';
-const Timestamp = require('bson').Timestamp;
-const expect = require('chai').expect;
+const { Timestamp } = require('bson');
+const { expect } = require('chai');
 const mock = require('mongodb-mock-server');
 
 const test = {};

@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "bl": "^2.2.0",
-    "bson": "^1.1.1",
+    "bson": "^4.0.3",
     "denque": "^1.4.1",
     "madge": "^3.7.0",
     "safe-buffer": "^5.1.2"
@@ -44,8 +44,7 @@
     "lodash.camelcase": "^4.3.0",
     "mocha": "5.2.0",
     "mocha-sinon": "^2.1.0",
-    "mongodb-extjson": "^2.1.1",
-    "mongodb-mock-server": "^1.0.1",
+    "mongodb-mock-server": "^2.0.1",
     "nyc": "^15.0.0",
     "prettier": "^1.19.1",
     "semver": "^5.5.0",

@@ -1,17 +1,17 @@
 'use strict';
-const test = require('./shared').assert,
-  setupDatabase = require('./shared').setupDatabase,
-  Script = require('vm'),
-  expect = require('chai').expect,
-  normalizedFunctionString = require('bson/lib/bson/parser/utils').normalizedFunctionString,
-  Buffer = require('safe-buffer').Buffer;
+const { assert: test } = require('./shared');
+const { setupDatabase } = require('./shared');
+const Script = require('vm');
+const { expect } = require('chai');
+const { normalizedFunctionString } = require('bson/lib/parser/utils');
+const { Buffer } = require('safe-buffer');
 
 const {
   Long,
   Timestamp,
   ObjectID,
   DBRef,
-  Symbol,
+  BSONSymbol,
   Double,
   Binary,
   MinKey,
@@ -667,7 +667,9 @@ describe('Insert', function() {
   it('shouldThrowErrorIfSerializingFunctionUnOrdered', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
+    metadata: {
+      requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] }
+    },
 
     // The actual test we wish to run
     test: function(done) {
@@ -839,11 +841,11 @@ describe('Insert', function() {
             collection.find().toArray(function(err, items) {
               test.equal('shouldCorrectlyInsertDBRefWithDbNotDefined', items[1].ref.namespace);
               test.equal(doc._id.toString(), items[1].ref.oid.toString());
-              test.equal(undefined, items[1].ref.db);
+              expect(items[1].ref.db).to.be.null;
 
               test.equal('shouldCorrectlyInsertDBRefWithDbNotDefined', items[2].ref.namespace);
               test.equal(doc._id.toString(), items[2].ref.oid.toString());
-              test.equal(configuration.db_name, items[2].ref.db);
+              expect(items[2].ref.db).to.be.null;
 
               client.close(done);
             });
@@ -1612,7 +1614,9 @@ describe('Insert', function() {
   it('executesCallbackOnceWithOveriddenDefaultDbWriteConcern', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
+    metadata: {
+      requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] }
+    },
 
     // The actual test we wish to run
     test: function(done) {
@@ -1637,7 +1641,9 @@ describe('Insert', function() {
   it('executesCallbackOnceWithOveriddenDefaultDbWriteConcernWithUpdate', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
+    metadata: {
+      requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] }
+    },
 
     // The actual test we wish to run
     test: function(done) {
@@ -1662,7 +1668,9 @@ describe('Insert', function() {
   it('executesCallbackOnceWithOveriddenDefaultDbWriteConcernWithRemove', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
+    metadata: {
+      requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] }
+    },
 
     // The actual test we wish to run
     test: function(done) {
@@ -1703,7 +1711,7 @@ describe('Insert', function() {
         var collection = db.collection('bson_types_insert');
 
         var document = {
-          symbol: new Symbol('abcdefghijkl'),
+          symbol: new BSONSymbol('abcdefghijkl'),
           objid: new ObjectID('abcdefghijkl'),
           double: new Double(1),
           binary: new Binary(Buffer.from('hello world')),
@@ -1716,7 +1724,7 @@ describe('Insert', function() {
           test.equal(null, err);
           test.ok(result);
 
-          collection.findOne({ symbol: new Symbol('abcdefghijkl') }, function(err, doc) {
+          collection.findOne({ symbol: new BSONSymbol('abcdefghijkl') }, function(err, doc) {
             test.equal(null, err);
             test.equal('abcdefghijkl', doc.symbol.toString());
 
@@ -1784,7 +1792,7 @@ describe('Insert', function() {
         var collection = db.collection('bson_types_insert_1');
 
         var document = {
-          symbol: new Symbol('abcdefghijkl'),
+          symbol: new BSONSymbol('abcdefghijkl'),
           objid: new ObjectID('abcdefghijkl'),
           double: new Double(1),
           binary: new Binary(Buffer.from('hello world')),
@@ -1797,7 +1805,7 @@ describe('Insert', function() {
           test.equal(null, err);
           test.ok(result);
 
-          collection.findOne({ symbol: new Symbol('abcdefghijkl') }, function(err, doc) {
+          collection.findOne({ symbol: new BSONSymbol('abcdefghijkl') }, function(err, doc) {
             test.equal(null, err);
             test.equal('abcdefghijkl', doc.symbol.toString());
 
@@ -2406,7 +2414,9 @@ describe('Insert', function() {
   it('should return error on unordered insertMany with multiple unique key constraints', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
+    metadata: {
+      requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] }
+    },
 
     // The actual test we wish to run
     test: function(done) {
@@ -2445,7 +2455,9 @@ describe('Insert', function() {
   it('should return error on unordered insert with multiple unique key constraints', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
+    metadata: {
+      requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] }
+    },
 
     // The actual test we wish to run
     test: function(done) {

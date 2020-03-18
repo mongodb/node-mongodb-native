@@ -1,13 +1,13 @@
 'use strict';
 
 const stream = require('stream');
-const crypto = require('crypto'),
-  EJSON = require('mongodb-extjson'),
-  fs = require('fs'),
-  test = require('./shared').assert,
-  setupDatabase = require('./shared').setupDatabase,
-  expect = require('chai').expect,
-  Buffer = require('safe-buffer').Buffer;
+const crypto = require('crypto');
+const { EJSON } = require('bson');
+const fs = require('fs');
+const { assert: test } = require('./shared');
+const { setupDatabase } = require('./shared');
+const { expect } = require('chai');
+const { Buffer } = require('safe-buffer');
 const { GridFSBucket, ObjectId } = require('../..');
 
 describe('GridFS Stream', function() {

@@ -2,7 +2,6 @@
 
 const chai = require('chai');
 const expect = chai.expect;
-const bson = require('bson');
 const sinon = require('sinon');
 const { ConnectionPool } = require('../../../lib/cmap/connection_pool.js');
 const wireProtocol = require('../../../lib/cmap/wire_protocol');
@@ -18,7 +17,7 @@ describe('WireProtocol', function() {
 
   function testPoolWrite(bypassDocumentValidation, expected) {
     const pool = sinon.createStubInstance(ConnectionPool);
-    const fakeServer = { s: { pool, bson } };
+    const fakeServer = { s: { pool } };
     const ns = 'fake.namespace';
     const ops = [{ a: 1 }, { b: 2 }];
     const options = { bypassDocumentValidation: bypassDocumentValidation };

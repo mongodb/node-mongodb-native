@@ -9,7 +9,7 @@ const ReadPreference = require('../../../../lib/read_preference');
 const { MongoServerSelectionError } = require('../../../../lib/error');
 const ServerSelectors = require('../../../../lib/sdam/server_selection');
 
-const EJSON = require('mongodb-extjson');
+const { EJSON } = require('bson');
 
 const sinon = require('sinon');
 const chai = require('chai');

@@ -1,6 +1,5 @@
 'use strict';
 
-const bson = require('bson');
 const expect = require('chai').expect;
 const mock = require('mongodb-mock-server');
 const Connection = require('../../../lib/core/connection/connection');
@@ -15,16 +14,7 @@ describe('Connection', function() {
     const args = {
       metadata: { requires: { topology: ['single'] } },
       test: function(done) {
-        const connection = new Connection(
-          noop,
-          Object.assign(
-            {
-              bson,
-              port: server.port
-            },
-            config
-          )
-        );
+        const connection = new Connection(noop, Object.assign({ port: server.port }, config));
 
         const cleanup = err => {
           connection.destroy();

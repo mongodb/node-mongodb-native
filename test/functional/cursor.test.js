@@ -3,7 +3,7 @@ const { assert: test } = require('./shared');
 const { setupDatabase } = require('./shared');
 const fs = require('fs');
 const { expect } = require('chai');
-const { Long } = require('bson');
+const BSON = require('bson');
 const sinon = require('sinon');
 const { Writable } = require('stream');
 const ReadPreference = require('../../lib/read_preference');
@@ -3994,7 +3994,7 @@ describe('Cursor', function() {
             var cursor = collection.find({});
             cursor.batchSize(-10).next(function(err) {
               test.equal(null, err);
-              test.ok(cursor.cursorState.cursorId.equals(Long.ZERO));
+              test.ok(cursor.cursorState.cursorId.equals(BSON.Long.ZERO));
 
               client.close(done);
             });
@@ -4147,9 +4147,8 @@ describe('Cursor', function() {
                 .then(() => {
                   // Confirm that cursorId is non-zero
                   const longId = cursor.cursorState.cursorId;
-                  expect(longId)
-                    .to.be.an('object')
-                    .and.to.haveOwnProperty('_bsontype', 'Long');
+                  expect(longId).to.be.an('object');
+                  expect(Object.getPrototypeOf(longId)).to.haveOwnProperty('_bsontype', 'Long');
                   const id = longId.toNumber();
 
                   expect(id).to.not.equal(0);
@@ -4165,7 +4164,7 @@ describe('Cursor', function() {
                       Array.isArray(response.cursorsKilled)
                     ) {
                       response.cursorsKilled = response.cursorsKilled.map(id =>
-                        typeof id === 'number' ? Long.fromNumber(id) : id
+                        typeof id === 'number' ? BSON.Long.fromNumber(id) : id
                       );
                     }
 

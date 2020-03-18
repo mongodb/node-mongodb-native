@@ -6,7 +6,6 @@ const sinon = require('sinon');
 const { Topology } = require('../../../lib/sdam/topology');
 const { Server } = require('../../../lib/sdam/server');
 const { ServerDescription } = require('../../../lib/sdam/server_description');
-const BSON = require('../../../lib/utils').retrieveBSON();
 
 describe('Topology (unit)', function() {
   describe('client metadata', function() {
@@ -22,7 +21,6 @@ describe('Topology (unit)', function() {
         var server = new Topology(
           [{ host: this.configuration.host, port: this.configuration.port }],
           {
-            bson: new BSON(),
             appname: 'My application name'
           }
         );

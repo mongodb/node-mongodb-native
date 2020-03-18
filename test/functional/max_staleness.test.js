@@ -1,7 +1,7 @@
 'use strict';
-const Long = require('bson').Long,
-  expect = require('chai').expect,
-  mock = require('mongodb-mock-server');
+const { Long } = require('bson');
+const { expect } = require('chai');
+const mock = require('mongodb-mock-server');
 const { ReadPreference } = require('../..');
 
 const test = {};
@@ -11,9 +11,7 @@ describe('Max Staleness', function() {
     return mock.createServer().then(server => {
       test.server = server;
 
-      const defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
-        msg: 'isdbgrid'
-      });
+      const defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, { msg: 'isdbgrid' });
 
       // Primary server states
       const serverIsMaster = [Object.assign({}, defaultFields)];

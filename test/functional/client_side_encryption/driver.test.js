@@ -2,7 +2,6 @@
 
 const crypto = require('crypto');
 const BSON = require('bson');
-const bson = new BSON();
 const chai = require('chai');
 const expect = chai.expect;
 chai.config.includeStack = true;
@@ -131,7 +130,7 @@ describe('Client Side Encryption Functional', function() {
           g: undefined
         };
 
-        const expected = bson.deserialize(bson.serialize(data, bsonOptions), bsonOptions);
+        const expected = BSON.deserialize(BSON.serialize(data, bsonOptions), bsonOptions);
 
         const coll = this.encryptedClient.db(dataDbName).collection(dataCollName);
         return Promise.resolve()

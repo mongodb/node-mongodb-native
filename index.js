@@ -1,7 +1,7 @@
 'use strict';
 const error = require('./lib/error');
 const Instrumentation = require('./lib/apm');
-const BSON = require('./lib/utils').retrieveBSON();
+const { BSON } = require('./lib/deps');
 const { Cursor, AggregationCursor, CommandCursor } = require('./lib/cursor');
 
 // Set up the connect function
@@ -43,7 +43,7 @@ connect.MinKey = BSON.MinKey;
 connect.MaxKey = BSON.MaxKey;
 connect.ObjectID = BSON.ObjectID;
 connect.ObjectId = BSON.ObjectID;
-connect.Symbol = BSON.Symbol;
+connect.BSONSymbol = BSON.BSONSymbol;
 connect.Timestamp = BSON.Timestamp;
 connect.BSONRegExp = BSON.BSONRegExp;
 connect.Decimal128 = BSON.Decimal128;

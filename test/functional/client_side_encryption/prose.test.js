@@ -443,7 +443,7 @@ describe('Client Side Encryption Prose Tests', function() {
   describe('BSON size limits and batch splitting', function() {
     const fs = require('fs');
     const path = require('path');
-    const EJSON = require('mongodb-extjson');
+    const { EJSON } = require('bson');
     function loadLimits(file) {
       return EJSON.parse(
         fs.readFileSync(path.resolve(__dirname, '../../spec/client-side-encryption/limits', file))
@@ -708,7 +708,7 @@ describe('Client Side Encryption Prose Tests', function() {
   describe('External Key Vault', function() {
     const fs = require('fs');
     const path = require('path');
-    const EJSON = require('mongodb-extjson');
+    const { EJSON } = require('bson');
     function loadExternal(file) {
       return EJSON.parse(
         fs.readFileSync(path.resolve(__dirname, '../../spec/client-side-encryption/external', file))

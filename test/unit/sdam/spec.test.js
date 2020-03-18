@@ -7,7 +7,7 @@ const { ServerDescription } = require('../../../lib/sdam/server_description');
 const sdamEvents = require('../../../lib/sdam/events');
 const parse = require('../../../lib/connection_string').parseConnectionString;
 const sinon = require('sinon');
-const EJSON = require('mongodb-extjson');
+const { EJSON } = require('bson');
 
 const chai = require('chai');
 chai.use(require('chai-subset'));
