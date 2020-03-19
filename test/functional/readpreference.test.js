@@ -9,6 +9,70 @@ describe('ReadPreference', function() {
     return setupDatabase(this.configuration);
   });
 
+  describe('::constructor', function() {
+    const maxStalenessSeconds = 1234;
+    const { PRIMARY, SECONDARY, NEAREST } = ReadPreference;
+    const TAGS = [{ loc: 'dc' }];
+
+    it('should accept (mode)', function() {
+      expect(new ReadPreference(PRIMARY)).to.be.an.instanceOf(ReadPreference);
+    });
+
+    it('should accept valid (mode, tags)', function() {
+      expect(new ReadPreference(PRIMARY, [])).to.be.an.instanceOf(ReadPreference);
+      const p0 = new ReadPreference(NEAREST, TAGS);
+      expect(p0.mode).to.equal(NEAREST);
+    });
+
+    it('should not accept invalid tags', function() {
+      expect(() => new ReadPreference(PRIMARY, 'invalid')).to.throw(
+        'ReadPreference tags must be an array'
+      );
+      expect(() => new ReadPreference(PRIMARY, { loc: 'dc' }, { maxStalenessSeconds })).to.throw(
+        'ReadPreference tags must be an array'
+      );
+    });
+
+    it('should accept (mode, options)', function() {
+      const p1 = new ReadPreference(SECONDARY, { maxStalenessSeconds });
+      expect(p1.mode).to.equal(SECONDARY);
+      expect(p1.maxStalenessSeconds).to.equal(maxStalenessSeconds);
+    });
+
+    it('should not accept mode=primary + tags', function() {
+      expect(() => new ReadPreference(PRIMARY, TAGS)).to.throw(
+        'Primary read preference cannot be combined with tags'
+      );
+    });
+
+    it('should not accept mode=primary + options.maxStalenessSeconds', function() {
+      expect(() => new ReadPreference(PRIMARY, null, { maxStalenessSeconds })).to.throw(
+        'Primary read preference cannot be combined with maxStalenessSeconds'
+      );
+    });
+
+    it('should accept (mode=secondary, tags=null, options)', function() {
+      const p2 = new ReadPreference(SECONDARY, null, { maxStalenessSeconds });
+      expect(p2).to.be.an.instanceOf(ReadPreference);
+      expect(p2.mode).to.equal(SECONDARY);
+      expect(p2.maxStalenessSeconds).to.equal(maxStalenessSeconds);
+    });
+
+    it('should accept (mode=secondary, tags, options)', function() {
+      const p3 = new ReadPreference(SECONDARY, TAGS, { maxStalenessSeconds });
+      expect(p3).to.be.an.instanceOf(ReadPreference);
+      expect(p3.mode).to.equal(SECONDARY);
+      expect(p3.tags).to.eql(TAGS);
+      expect(p3.maxStalenessSeconds).to.equal(maxStalenessSeconds);
+    });
+
+    it('should not accept (mode, options, tags)', function() {
+      expect(() => new ReadPreference(PRIMARY, { maxStalenessSeconds }, TAGS)).to.throw(
+        'ReadPreference tags must be an array'
+      );
+    });
+  });
+
   /**
    * @ignore
    */
@@ -514,70 +578,6 @@ describe('ReadPreference', function() {
       );
 
       client.close(done);
-    });
-  });
-
-  describe('ReadPreference construction', function() {
-    const maxStalenessSeconds = 1234;
-    const { PRIMARY, SECONDARY, NEAREST } = ReadPreference;
-    const TAGS = [{ loc: 'dc' }];
-
-    it('should accept (mode)', function() {
-      expect(new ReadPreference(PRIMARY)).to.be.an.instanceOf(ReadPreference);
-    });
-
-    it('should accept valid (mode, tags)', function() {
-      expect(new ReadPreference(PRIMARY, [])).to.be.an.instanceOf(ReadPreference);
-      const p0 = new ReadPreference(NEAREST, TAGS);
-      expect(p0.mode).to.equal(NEAREST);
-    });
-
-    it('should not accept invalid tags', function() {
-      expect(() => new ReadPreference(PRIMARY, 'invalid')).to.throw(
-        'ReadPreference tags must be an array'
-      );
-      expect(() => new ReadPreference(PRIMARY, { loc: 'dc' }, { maxStalenessSeconds })).to.throw(
-        'ReadPreference tags must be an array'
-      );
-    });
-
-    it('should accept (mode, options)', function() {
-      const p1 = new ReadPreference(SECONDARY, { maxStalenessSeconds });
-      expect(p1.mode).to.equal(SECONDARY);
-      expect(p1.maxStalenessSeconds).to.equal(maxStalenessSeconds);
-    });
-
-    it('should not accept mode=primary + tags', function() {
-      expect(() => new ReadPreference(PRIMARY, TAGS)).to.throw(
-        'Primary read preference cannot be combined with tags'
-      );
-    });
-
-    it('should not accept mode=primary + options.maxStalenessSeconds', function() {
-      expect(() => new ReadPreference(PRIMARY, null, { maxStalenessSeconds })).to.throw(
-        'Primary read preference cannot be combined with maxStalenessSeconds'
-      );
-    });
-
-    it('should accept (mode=secondary, tags=null, options)', function() {
-      const p2 = new ReadPreference(SECONDARY, null, { maxStalenessSeconds });
-      expect(p2).to.be.an.instanceOf(ReadPreference);
-      expect(p2.mode).to.equal(SECONDARY);
-      expect(p2.maxStalenessSeconds).to.equal(maxStalenessSeconds);
-    });
-
-    it('should accept (mode=secondary, tags, options)', function() {
-      const p3 = new ReadPreference(SECONDARY, TAGS, { maxStalenessSeconds });
-      expect(p3).to.be.an.instanceOf(ReadPreference);
-      expect(p3.mode).to.equal(SECONDARY);
-      expect(p3.tags).to.eql(TAGS);
-      expect(p3.maxStalenessSeconds).to.equal(maxStalenessSeconds);
-    });
-
-    it('should not accept (mode, options, tags)', function() {
-      expect(() => new ReadPreference(PRIMARY, { maxStalenessSeconds }, TAGS)).to.throw(
-        'ReadPreference tags must be an array'
-      );
     });
   });
 });
