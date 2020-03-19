@@ -124,7 +124,7 @@ describe('Document Validation', function() {
                             // updateMany
                             col.replaceOne(
                               { e: 1 },
-                              { $set: { e: 1 } },
+                              { e: 1 },
                               { upsert: true, bypassDocumentValidation: true },
                               function(err) {
                                 test.equal(null, err);
