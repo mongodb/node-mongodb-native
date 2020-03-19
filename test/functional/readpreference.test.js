@@ -73,9 +73,6 @@ describe('ReadPreference', function() {
     });
   });
 
-  /**
-   * @ignore
-   */
   it('Should correctly apply collection level read Preference to count', {
     metadata: { requires: { mongodb: '>=2.6.0', topology: ['single', 'ssl'] } },
 
@@ -113,9 +110,6 @@ describe('ReadPreference', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should correctly apply collection level read Preference to group', {
     metadata: { requires: { mongodb: '>=2.6.0,<=4.0.x', topology: ['single', 'ssl'] } },
 
@@ -156,9 +150,6 @@ describe('ReadPreference', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should correctly apply collection level read Preference to geoHaystackSearch', {
     metadata: { requires: { mongodb: '>=2.6.0', topology: ['single', 'ssl'] } },
 
@@ -200,9 +191,6 @@ describe('ReadPreference', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should correctly apply collection level read Preference to mapReduce', {
     metadata: { requires: { mongodb: '>=2.6.0', topology: ['single', 'ssl'] } },
 
@@ -251,9 +239,6 @@ describe('ReadPreference', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it(
     'Should correctly apply collection level read Preference to mapReduce backward compatibility',
     {
@@ -303,9 +288,6 @@ describe('ReadPreference', function() {
     }
   );
 
-  /**
-   * @ignore
-   */
   it('Should fail due to not using mapReduce inline with read preference', {
     metadata: { requires: { mongodb: '>=2.6.0', topology: ['single', 'ssl'] } },
 
@@ -339,9 +321,6 @@ describe('ReadPreference', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should correctly apply collection level read Preference to aggregate', {
     metadata: { requires: { mongodb: '>=2.6.0', topology: ['single', 'ssl'] } },
 
@@ -394,9 +373,6 @@ describe('ReadPreference', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should correctly apply collection level read Preference to stats', {
     metadata: { requires: { mongodb: '>=2.6.0', topology: ['single', 'ssl'] } },
 
@@ -433,9 +409,6 @@ describe('ReadPreference', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should correctly honor the readPreferences at DB and individual command level', {
     metadata: { requires: { mongodb: '>=2.6.0', topology: ['single', 'ssl'] } },
 
@@ -479,9 +452,6 @@ describe('ReadPreference', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should correctly apply readPreferences specified as objects', {
     metadata: { requires: { mongodb: '>=2.6.0', topology: ['single', 'ssl'] } },
 
@@ -502,9 +472,6 @@ describe('ReadPreference', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should correctly pass readPreferences specified as objects to cursors', {
     metadata: { requires: { mongodb: '>=2.6.0', topology: ['single', 'ssl'] } },
 
@@ -525,9 +492,6 @@ describe('ReadPreference', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should correctly pass readPreferences specified as objects to collection methods', {
     metadata: { requires: { mongodb: '>=2.6.0', topology: ['single', 'ssl'] } },
 
