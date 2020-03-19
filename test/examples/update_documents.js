@@ -154,19 +154,11 @@ describe('examples(update-documents):', function() {
       await db.collection('inventory').replaceOne(
         { item: 'paper' },
         {
-          $set: {
-            item: 'paper',
-            instock: [
-              { warehouse: 'A', qty: 60 },
-              { warehouse: 'B', qty: 40 }
-            ]
-          },
-          $unset: {
-            qty: '',
-            size: '',
-            status: '',
-            lastModified: ''
-          }
+          item: 'paper',
+          instock: [
+            { warehouse: 'A', qty: 60 },
+            { warehouse: 'B', qty: 40 }
+          ]
         }
       );
       // End Example 54
