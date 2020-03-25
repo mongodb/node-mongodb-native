@@ -1,11 +1,12 @@
 'use strict';
 
+require('util.promisify/shim')();
+const util = require('util');
 const loadSpecTests = require('../../spec').loadSpecTests;
 const ConnectionPool = require('../../../lib/cmap/connection_pool').ConnectionPool;
 const EventEmitter = require('events').EventEmitter;
 const mock = require('mongodb-mock-server');
 const BSON = require('bson');
-const util = require('util');
 const cmapEvents = require('../../../lib/cmap/events');
 
 const chai = require('chai');
