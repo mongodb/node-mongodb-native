@@ -93,7 +93,10 @@ Spec Test Runner
 
 Before running the tests
 
-- Create a MongoClient ``globalClient``, and connect to the server
+- Create a MongoClient ``globalClient``, and connect to the server.
+When executing tests against a sharded cluster, ``globalClient`` must only connect to one mongos. This is because tests
+that set failpoints will only work consistently if both the ``configureFailPoint`` and failing commands are sent to the
+same mongos.
 
 For each YAML file, for each element in ``tests``:
 
@@ -110,13 +113,10 @@ For each YAML file, for each element in ``tests``:
 
 - Create a new MongoClient ``client``
 - Begin monitoring all APM events for ``client``. (If the driver uses global listeners, filter out all events that do not originate with ``client``). Filter out any "internal" commands (e.g. ``isMaster``)
-- Using ``client``, create a changeStream ``changeStream`` against the specified ``target``. Use ``changeStreamPipeline`` and ``changeStreamOptions`` if they are non-empty
-- Using ``globalClient``, run every operation in ``operations`` in serial against the server
-- Wait until either:
-
-  - An error occurs
-  - All operations have been successful AND the changeStream has received as many changes as there are in ``result.success``
-
+- Using ``client``, create a changeStream ``changeStream`` against the specified ``target``. Use ``changeStreamPipeline`` and ``changeStreamOptions`` if they are non-empty. Capture any error.
+- If there was no error, use ``globalClient`` and run every operation in ``operations`` in serial against the server until all operations have been executed or an error is thrown. Capture any error.
+- If there was no error and ``result.error`` is set, iterate ``changeStream`` once and capture any error.
+- If there was no error and ``result.success`` is non-empty, iterate ``changeStream`` until it returns as many changes as there are elements in the ``result.success`` array or an error is thrown. Capture any error.
 - Close ``changeStream``
 - If there was an error:
 
@@ -131,8 +131,8 @@ For each YAML file, for each element in ``tests``:
 - If there are any ``expectations``
 
   - For each (``expected``, ``idx``) in ``expectations``
-
-    - Assert that ``actual[idx]`` MATCHES ``expected``
+    - If ``actual[idx]`` is a ``killCursors`` event, skip it and move to ``actual[idx+1]``.
+    - Else assert that ``actual[idx]`` MATCHES ``expected``
 
 - Close the MongoClient ``client``
 
@@ -142,62 +142,72 @@ After running all tests
 - Drop database ``database_name``
 - Drop database ``database2_name``
 
+Iterating the Change Stream
+---------------------------
+
+Although synchronous drivers must provide a `non-blocking mode of iteration <../change-streams.rst#not-blocking-on-iteration>`_, asynchronous drivers may not have such a mechanism. Those drivers with only a blocking mode of iteration should be careful not to iterate the change stream unnecessarily, as doing so could cause the test runner to block indefinitely. For this reason, the test runner procedure above advises drivers to take a conservative approach to iteration.
+
+If the test expects an error and one was not thrown by either creating the change stream or executing the test's operations, iterating the change stream once allows for an error to be thrown by a ``getMore`` command. If the test does not expect any error, the change stream should be iterated only until it returns as many result documents as are expected by the test.
 
 Prose Tests
 ===========
 
-The following tests have not yet been automated, but MUST still be tested
+The following tests have not yet been automated, but MUST still be tested. All tests SHOULD be run on both replica sets and sharded clusters unless otherwise specified:
 
 #. ``ChangeStream`` must continuously track the last seen ``resumeToken``
 #. ``ChangeStream`` will throw an exception if the server response is missing the resume token (if wire version is < 8, this is a driver-side error; for 8+, this is a server-side error)
-#. ``ChangeStream`` will automatically resume one time on a resumable error (including `not master`) with the initial pipeline and options, except for the addition/update of a ``resumeToken``.
-#. ``ChangeStream`` will not attempt to resume on any error encountered while executing an ``aggregate`` command.
-#. ``ChangeStream`` will not attempt to resume after encountering error code 11601 (Interrupted), 136 (CappedPositionLost), or 237 (CursorKilled) while executing a ``getMore`` command.
+#. After receiving a ``resumeToken``, ``ChangeStream`` will automatically resume one time on a resumable error with the initial pipeline and options, except for the addition/update of a ``resumeToken``.
+#. ``ChangeStream`` will not attempt to resume on any error encountered while executing an ``aggregate`` command. Note that retryable reads may retry ``aggregate`` commands. Drivers should be careful to distinguish retries from resume attempts. Alternatively, drivers may specify `retryReads=false` or avoid using a [retryable error](../../retryable-reads/retryable-reads.rst#retryable-error) for this test.
+#. **Removed**
 #. ``ChangeStream`` will perform server selection before attempting to resume, using initial ``readPreference``
 #. Ensure that a cursor returned from an aggregate command with a cursor id and an initial empty batch is not closed on the driver side.
 #. The ``killCursors`` command sent during the "Resume Process" must not be allowed to throw an exception.
-#. ``$changeStream`` stage for ``ChangeStream`` against a server ``>=4.0`` and ``<4.0.7`` that has not received any results yet MUST include a ``startAtOperationTime`` option when resuming a changestream.
-#. ``ChangeStream`` will resume after a ``killCursors`` command is issued for its child cursor.
-#. - For a ``ChangeStream`` under these conditions:
-      - Running against a server ``>=4.0.7``.
-      - The batch is empty or has been iterated to the last document.
-   - Expected result: 
-       - ``getResumeToken`` must return the ``postBatchResumeToken`` from the current command response.
-#. - For a ``ChangeStream`` under these conditions:
-      - Running against a server ``<4.0.7``.
-      - The batch is empty or has been iterated to the last document.
-   - Expected result: 
-      - ``getResumeToken`` must return the ``_id`` of the last document returned if one exists.
-      - ``getResumeToken`` must return ``startAfter`` from the initial aggregate if the option was specified.
-      - ``getResumeToken`` must return ``resumeAfter`` from the initial aggregate if the option was specified.
-      - If neither the ``startAfter`` nor ``resumeAfter`` options were specified, the ``getResumeToken`` result must be empty.
-#. - For a ``ChangeStream`` under these conditions:
-      - The batch is not empty.
-      - The batch has been iterated up to but not including the last element.
-   - Expected result:
-      - ``getResumeToken`` must return the ``_id`` of the previous document returned.
-#. - For a ``ChangeStream`` under these conditions:
-      - The batch is not empty.
-      - The batch hasn’t been iterated at all.
-      - Only the initial ``aggregate`` command has been executed.
-   - Expected result:
-      - ``getResumeToken`` must return ``startAfter`` from the initial aggregate if the option was specified.
-      - ``getResumeToken`` must return ``resumeAfter`` from the initial aggregate if the option was specified.
-      - If neither the ``startAfter`` nor ``resumeAfter`` options were specified, the ``getResumeToken`` result must be empty.
-#. - For a ``ChangeStream`` under these conditions:
-      - Running against a server ``>=4.0.7``.
-      - The batch is not empty.
-      - The batch hasn’t been iterated at all.
-      - The stream has iterated beyond a previous batch and a ``getMore`` command has just been executed.
-   - Expected result:
-      - ``getResumeToken`` must return the ``postBatchResumeToken`` from the previous command response.
-#. - For a ``ChangeStream`` under these conditions:
-      - Running against a server ``<4.0.7``.
-      - The batch is not empty.
-      - The batch hasn’t been iterated at all.
-      - The stream has iterated beyond a previous batch and a ``getMore`` command has just been executed.
-   - Expected result:
-      - ``getResumeToken`` must return the ``_id`` of the previous document returned if one exists.
-      - ``getResumeToken`` must return ``startAfter`` from the initial aggregate if the option was specified.
-      - ``getResumeToken`` must return ``resumeAfter`` from the initial aggregate if the option was specified.
-      - If neither the ``startAfter`` nor ``resumeAfter`` options were specified, the ``getResumeToken`` result must be empty.
+#. ``$changeStream`` stage for ``ChangeStream`` against a server ``>=4.0`` and ``<4.0.7`` that has not received any results yet MUST include a ``startAtOperationTime`` option when resuming a change stream.
+#. **Removed**
+#. For a ``ChangeStream`` under these conditions:
+
+   - Running against a server ``>=4.0.7``.
+   - The batch is empty or has been iterated to the last document.
+
+   Expected result:
+
+   - ``getResumeToken`` must return the ``postBatchResumeToken`` from the current command response.
+
+#. For a ``ChangeStream`` under these conditions:
+
+   - Running against a server ``<4.0.7``.
+   - The batch is empty or has been iterated to the last document.
+
+   Expected result:
+
+   - ``getResumeToken`` must return the ``_id`` of the last document returned if one exists.
+   - ``getResumeToken`` must return ``resumeAfter`` from the initial aggregate if the option was specified.
+   - If ``resumeAfter`` was not specified, the ``getResumeToken`` result must be empty.
+
+#. For a ``ChangeStream`` under these conditions:
+   
+   - The batch is not empty.
+   - The batch has been iterated up to but not including the last element.
+
+   Expected result:
+
+   - ``getResumeToken`` must return the ``_id`` of the previous document returned.
+
+#. For a ``ChangeStream`` under these conditions:
+
+   - The batch is not empty.
+   - The batch hasn’t been iterated at all.
+   - Only the initial ``aggregate`` command has been executed.
+
+   Expected result:
+
+   - ``getResumeToken`` must return ``startAfter`` from the initial aggregate if the option was specified.
+   - ``getResumeToken`` must return ``resumeAfter`` from the initial aggregate if the option was specified.
+   - If neither the ``startAfter`` nor ``resumeAfter`` options were specified, the ``getResumeToken`` result must be empty.
+
+   Note that this test cannot be run against sharded topologies because in that case the initial ``aggregate`` command only establishes cursors on the shards and always returns an empty ``firstBatch``.
+
+#. **Removed**
+#. **Removed**
+#. ``$changeStream`` stage for ``ChangeStream`` started with ``startAfter`` against a server ``>=4.1.1`` that has not received any results yet MUST include a ``startAfter`` option and MUST NOT include a ``resumeAfter`` option when resuming a change stream.
+#. ``$changeStream`` stage for ``ChangeStream`` started with ``startAfter`` against a server ``>=4.1.1`` that has received at least one result MUST include a ``resumeAfter`` option and MUST NOT include a ``startAfter`` option when resuming a change stream.
