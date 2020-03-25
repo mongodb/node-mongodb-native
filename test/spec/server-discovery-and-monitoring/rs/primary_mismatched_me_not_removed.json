@@ -1,0 +1,77 @@
+{
+  "description": "Primary mismatched me is not removed",
+  "uri": "mongodb://localhost:27017,localhost:27018/?replicaSet=rs",
+  "phases": [
+    {
+      "responses": [
+        [
+          "localhost:27017",
+          {
+            "ok": 1,
+            "hosts": [
+              "localhost:27017",
+              "localhost:27018"
+            ],
+            "ismaster": true,
+            "setName": "rs",
+            "primary": "localhost:27017",
+            "me": "a:27017",
+            "minWireVersion": 0,
+            "maxWireVersion": 7
+          }
+        ]
+      ],
+      "outcome": {
+        "servers": {
+          "localhost:27017": {
+            "type": "RSPrimary",
+            "setName": "rs"
+          },
+          "localhost:27018": {
+            "type": "Unknown",
+            "setName": null
+          }
+        },
+        "topologyType": "ReplicaSetWithPrimary",
+        "logicalSessionTimeoutMinutes": null,
+        "setName": "rs"
+      }
+    },
+    {
+      "responses": [
+        [
+          "localhost:27018",
+          {
+            "ok": 1,
+            "hosts": [
+              "localhost:27017",
+              "localhost:27018"
+            ],
+            "ismaster": false,
+            "secondary": true,
+            "setName": "rs",
+            "primary": "localhost:27017",
+            "me": "localhost:27018",
+            "minWireVersion": 0,
+            "maxWireVersion": 7
+          }
+        ]
+      ],
+      "outcome": {
+        "servers": {
+          "localhost:27017": {
+            "type": "RSPrimary",
+            "setName": "rs"
+          },
+          "localhost:27018": {
+            "type": "RSSecondary",
+            "setName": "rs"
+          }
+        },
+        "topologyType": "ReplicaSetWithPrimary",
+        "logicalSessionTimeoutMinutes": null,
+        "setName": "rs"
+      }
+    }
+  ]
+}
