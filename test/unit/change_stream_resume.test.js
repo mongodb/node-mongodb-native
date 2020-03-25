@@ -5,7 +5,6 @@ const mock = require('mongodb-mock-server');
 const ObjectId = require('../../index').ObjectId;
 const Timestamp = require('../../index').Timestamp;
 const Long = require('../../index').Long;
-const GET_MORE_NON_RESUMABLE_CODES = require('../../lib/error').GET_MORE_NON_RESUMABLE_CODES;
 const isResumableError = require('../../lib/error').isResumableError;
 
 describe('Change Stream Resume Tests', function() {
@@ -142,18 +141,6 @@ describe('Change Stream Resume Tests', function() {
         secondGetMore: req => req.reply(GET_MORE_RESPONSE)
       }
     ])
-    .concat(
-      Array.from(GET_MORE_NON_RESUMABLE_CODES).map(code => ({
-        description: `should not resume on error code ${code}`,
-        passing: false,
-        errmsg: 'firstGetMoreError',
-        firstAggregate: req => req.reply(AGGREGATE_RESPONSE),
-        secondAggregate: req =>
-          req.reply({ ok: 0, errmsg: 'We should not have a second aggregate' }),
-        firstGetMore: req => req.reply({ ok: 0, errmsg: 'firstGetMoreError', code }),
-        secondGetMore: req => req.reply({ ok: 0, errmsg: 'We should not have a second getMore' })
-      }))
-    )
     .concat(
       RESUMABLE_ERROR_CODES.map(code => ({
         description: `should not resume on aggregate, even for valid code ${code}`,

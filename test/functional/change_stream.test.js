@@ -1552,48 +1552,6 @@ describe('Change Streams', function() {
     }
   });
 
-  it('Should resume after a killCursors command is issued for its child cursor', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
-    test: function(done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient();
-
-      const collectionName = 'resumeAfterKillCursor';
-
-      let db;
-      let coll;
-      let changeStream;
-
-      function close(e) {
-        changeStream.close(() => client.close(() => done(e)));
-      }
-
-      client
-        .connect()
-        .then(() => (db = client.db('integration_tests')))
-        .then(() => (coll = db.collection(collectionName)))
-        .then(() => (changeStream = coll.watch()))
-        .then(() => ({ p: changeStream.next() }))
-        .then(x => coll.insertOne({ darmok: 'jalad' }).then(() => x.p))
-        .then(() =>
-          db.command({
-            killCursors: collectionName,
-            cursors: [changeStream.cursor.cursorState.cursorId]
-          })
-        )
-        .then(() => coll.insertOne({ shaka: 'walls fell' }))
-        .then(() => changeStream.next())
-        .then(change => {
-          expect(change).to.have.property('operationType', 'insert');
-          expect(change).to.have.nested.property('fullDocument.shaka', 'walls fell');
-        })
-        .then(
-          () => close(),
-          e => close(e)
-        );
-    }
-  });
-
   it('should maintain change stream options on resume', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
     test: function(done) {
