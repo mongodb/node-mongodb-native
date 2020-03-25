@@ -51,6 +51,7 @@
     "sinon-chai": "^3.2.0",
     "snappy": "^6.1.2",
     "standard-version": "^4.4.0",
+    "util.promisify": "^1.0.1",
     "worker-farm": "^1.5.0",
     "wtfnode": "^0.8.0",
     "yargs": "^14.2.0"

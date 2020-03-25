@@ -4609,4 +4609,58 @@ describe('Cursor', function() {
       });
     });
   });
+
+  describe('transforms', function() {
+    it('should correctly apply map transform to cursor as readable stream', function(done) {
+      const configuration = this.configuration;
+      const client = configuration.newClient();
+      client.connect(err => {
+        expect(err).to.not.exist;
+        this.defer(() => client.close());
+
+        const docs = 'Aaden Aaron Adrian Aditya Bob Joe'.split(' ').map(x => ({ name: x }));
+        const coll = client.db(configuration.db).collection('cursor_stream_mapping');
+        coll.insertMany(docs, err => {
+          expect(err).to.not.exist;
+
+          const bag = [];
+          const stream = coll
+            .find()
+            .project({ _id: 0, name: 1 })
+            .map(doc => ({ mapped: doc }))
+            .on('data', doc => bag.push(doc));
+
+          stream.on('error', done).on('end', () => {
+            expect(bag.map(x => x.mapped)).to.eql(docs.map(x => ({ name: x.name })));
+            done();
+          });
+        });
+      });
+    });
+
+    it('should correctly apply map transform when converting cursor to array', function(done) {
+      const configuration = this.configuration;
+      const client = configuration.newClient();
+      client.connect(err => {
+        expect(err).to.not.exist;
+        this.defer(() => client.close());
+
+        const docs = 'Aaden Aaron Adrian Aditya Bob Joe'.split(' ').map(x => ({ name: x }));
+        const coll = client.db(configuration.db).collection('cursor_toArray_mapping');
+        coll.insertMany(docs, err => {
+          expect(err).to.not.exist;
+
+          coll
+            .find()
+            .project({ _id: 0, name: 1 })
+            .map(doc => ({ mapped: doc }))
+            .toArray((err, mappedDocs) => {
+              expect(err).to.not.exist;
+              expect(mappedDocs.map(x => x.mapped)).to.eql(docs.map(x => ({ name: x.name })));
+              done();
+            });
+        });
+      });
+    });
+  });
 });
