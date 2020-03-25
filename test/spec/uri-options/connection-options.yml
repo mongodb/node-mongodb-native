@@ -104,3 +104,46 @@ tests:
         hosts: ~
         auth: ~
         options: {}
+
+    -
+      description: directConnection=true
+      uri: "mongodb://example.com/?directConnection=true"
+      valid: true
+      warning: false
+      hosts: ~
+      auth: ~
+      options:
+          directConnection: true
+    -
+      description: directConnection=true with multiple seeds
+      uri: "mongodb://example1.com,example2.com/?directConnection=true"
+      valid: false
+      warning: false
+      hosts: ~
+      auth: ~
+    -
+      description: directConnection=false
+      uri: "mongodb://example.com/?directConnection=false"
+      valid: true
+      warning: false
+      hosts: ~
+      auth: ~
+      options:
+          directConnection: false
+    -
+      description: directConnection=false with multiple seeds
+      uri: "mongodb://example1.com,example2.com/?directConnection=false"
+      valid: true
+      warning: false
+      hosts: ~
+      auth: ~
+      options:
+          directConnection: false
+    -
+      description: Invalid directConnection value
+      uri: "mongodb://example.com/?directConnection=invalid"
+      valid: true
+      warning: true
+      hosts: ~
+      auth: ~
+      options: {}

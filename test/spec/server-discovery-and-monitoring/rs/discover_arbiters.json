@@ -1,6 +1,6 @@
 {
-  "description": "Discover arbiters",
-  "uri": "mongodb://a/?replicaSet=rs",
+  "description": "Discover arbiters with directConnection URI option",
+  "uri": "mongodb://a/?directConnection=false",
   "phases": [
     {
       "responses": [

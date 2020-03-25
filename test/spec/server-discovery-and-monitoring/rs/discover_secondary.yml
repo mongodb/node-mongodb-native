@@ -1,6 +1,6 @@
-description: "Replica set discovery from secondary"
+description: "Discover secondary with directConnection URI option"
 
-uri: "mongodb://b/?replicaSet=rs"
+uri: "mongodb://b/?directConnection=false"
 
 phases: [
 
