@@ -63,7 +63,7 @@ The definition of MATCH or MATCHES in the Spec Test Runner is as follows:
 
 - MATCH takes two values, ``expected`` and ``actual``
 - Notation is "Assert [actual] MATCHES [expected]
-- Assertion passes if ``expected`` is a subset of ``actual``, with the values ``42`` and ``"42"`` acting as placeholders for "any value"
+- Assertion passes if ``expected`` is a subset of ``actual``, with the value ``42`` acting as placeholders for "any value"
 
 Pseudocode implementation of ``actual`` MATCHES ``expected``:
 

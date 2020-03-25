@@ -39,7 +39,7 @@ tests:
       -
         command_started_event:
           command:
-            getMore: "42"
+            getMore: 42
             collection: *collection_name
           command_name: getMore
           database_name: *database_name
@@ -104,7 +104,7 @@ tests:
       -
         command_started_event:
           command:
-            getMore: "42"
+            getMore: 42
             collection: *collection_name
           command_name: getMore
           database_name: *database_name
@@ -169,7 +169,7 @@ tests:
       -
         command_started_event:
           command:
-            getMore: "42"
+            getMore: 42
             collection: *collection_name
           command_name: getMore
           database_name: *database_name
@@ -234,7 +234,7 @@ tests:
       -
         command_started_event:
           command:
-            getMore: "42"
+            getMore: 42
             collection: *collection_name
           command_name: getMore
           database_name: *database_name
@@ -299,7 +299,7 @@ tests:
       -
         command_started_event:
           command:
-            getMore: "42"
+            getMore: 42
             collection: *collection_name
           command_name: getMore
           database_name: *database_name
@@ -364,7 +364,7 @@ tests:
       -
         command_started_event:
           command:
-            getMore: "42"
+            getMore: 42
             collection: *collection_name
           command_name: getMore
           database_name: *database_name
@@ -429,7 +429,7 @@ tests:
       -
         command_started_event:
           command:
-            getMore: "42"
+            getMore: 42
             collection: *collection_name
           command_name: getMore
           database_name: *database_name
@@ -494,7 +494,7 @@ tests:
       -
         command_started_event:
           command:
-            getMore: "42"
+            getMore: 42
             collection: *collection_name
           command_name: getMore
           database_name: *database_name
@@ -559,7 +559,7 @@ tests:
       -
         command_started_event:
           command:
-            getMore: "42"
+            getMore: 42
             collection: *collection_name
           command_name: getMore
           database_name: *database_name
@@ -624,7 +624,7 @@ tests:
       -
         command_started_event:
           command:
-            getMore: "42"
+            getMore: 42
             collection: *collection_name
           command_name: getMore
           database_name: *database_name
@@ -689,7 +689,7 @@ tests:
       -
         command_started_event:
           command:
-            getMore: "42"
+            getMore: 42
             collection: *collection_name
           command_name: getMore
           database_name: *database_name
@@ -754,7 +754,7 @@ tests:
       -
         command_started_event:
           command:
-            getMore: "42"
+            getMore: 42
             collection: *collection_name
           command_name: getMore
           database_name: *database_name
@@ -819,7 +819,7 @@ tests:
       -
         command_started_event:
           command:
-            getMore: "42"
+            getMore: 42
             collection: *collection_name
           command_name: getMore
           database_name: *database_name
@@ -884,7 +884,7 @@ tests:
       -
         command_started_event:
           command:
-            getMore: "42"
+            getMore: 42
             collection: *collection_name
           command_name: getMore
           database_name: *database_name
@@ -949,7 +949,7 @@ tests:
       -
         command_started_event:
           command:
-            getMore: "42"
+            getMore: 42
             collection: *collection_name
           command_name: getMore
           database_name: *database_name
@@ -1014,7 +1014,7 @@ tests:
       -
         command_started_event:
           command:
-            getMore: "42"
+            getMore: 42
             collection: *collection_name
           command_name: getMore
           database_name: *database_name
@@ -1079,72 +1079,7 @@ tests:
       -
         command_started_event:
           command:
-            getMore: "42"
-            collection: *collection_name
-          command_name: getMore
-          database_name: *database_name
-      -
-        command_started_event:
-          command:
-            aggregate: *collection_name
-            cursor: {}
-            pipeline:
-              -
-                $changeStream: {}
-          command_name: aggregate
-          database_name: *database_name
-    result:
-      success:
-        -
-          _id: "42"
-          documentKey: "42"
-          operationType: insert
-          ns:
-            db: *database_name
-            coll: *collection_name
-          fullDocument:
-            x:
-              $numberInt: "1"
-  -
-    description: "change stream resumes after ElectionInProgress"
-    minServerVersion: "4.2"
-    maxServerVersion: "4.2.99"
-    failPoint:
-      configureFailPoint: failCommand
-      mode: { times: 1 }
-      data:
-          failCommands: ["getMore"]
-          errorCode: 216
-          closeConnection: false
-    target: collection
-    topology:
-      - replicaset
-      - sharded
-    changeStreamPipeline: []
-    changeStreamOptions: {}
-    operations:
-      -
-        database: *database_name
-        collection: *collection_name
-        name: insertOne
-        arguments:
-          document:
-            x: 1
-    expectations:
-      -
-        command_started_event:
-          command:
-            aggregate: *collection_name
-            cursor: {}
-            pipeline:
-              -
-                $changeStream: {}
-          command_name: aggregate
-          database_name: *database_name
-      -
-        command_started_event:
-          command:
-            getMore: "42"
+            getMore: 42
             collection: *collection_name
           command_name: getMore
           database_name: *database_name

@@ -53,7 +53,7 @@
         {
           "command_started_event": {
             "command": {
-              "getMore": "42",
+              "getMore": 42,
               "collection": "test"
             },
             "command_name": "getMore",
@@ -146,7 +146,7 @@
         {
           "command_started_event": {
             "command": {
-              "getMore": "42",
+              "getMore": 42,
               "collection": "test"
             },
             "command_name": "getMore",
@@ -239,7 +239,7 @@
         {
           "command_started_event": {
             "command": {
-              "getMore": "42",
+              "getMore": 42,
               "collection": "test"
             },
             "command_name": "getMore",
@@ -332,7 +332,7 @@
         {
           "command_started_event": {
             "command": {
-              "getMore": "42",
+              "getMore": 42,
               "collection": "test"
             },
             "command_name": "getMore",
@@ -425,7 +425,7 @@
         {
           "command_started_event": {
             "command": {
-              "getMore": "42",
+              "getMore": 42,
               "collection": "test"
             },
             "command_name": "getMore",
@@ -518,7 +518,7 @@
         {
           "command_started_event": {
             "command": {
-              "getMore": "42",
+              "getMore": 42,
               "collection": "test"
             },
             "command_name": "getMore",
@@ -611,7 +611,7 @@
         {
           "command_started_event": {
             "command": {
-              "getMore": "42",
+              "getMore": 42,
               "collection": "test"
             },
             "command_name": "getMore",
@@ -704,7 +704,7 @@
         {
           "command_started_event": {
             "command": {
-              "getMore": "42",
+              "getMore": 42,
               "collection": "test"
             },
             "command_name": "getMore",
@@ -797,7 +797,7 @@
         {
           "command_started_event": {
             "command": {
-              "getMore": "42",
+              "getMore": 42,
               "collection": "test"
             },
             "command_name": "getMore",
@@ -890,7 +890,7 @@
         {
           "command_started_event": {
             "command": {
-              "getMore": "42",
+              "getMore": 42,
               "collection": "test"
             },
             "command_name": "getMore",
@@ -983,7 +983,7 @@
         {
           "command_started_event": {
             "command": {
-              "getMore": "42",
+              "getMore": 42,
               "collection": "test"
             },
             "command_name": "getMore",
@@ -1076,7 +1076,7 @@
         {
           "command_started_event": {
             "command": {
-              "getMore": "42",
+              "getMore": 42,
               "collection": "test"
             },
             "command_name": "getMore",
@@ -1169,7 +1169,7 @@
         {
           "command_started_event": {
             "command": {
-              "getMore": "42",
+              "getMore": 42,
               "collection": "test"
             },
             "command_name": "getMore",
@@ -1262,7 +1262,7 @@
         {
           "command_started_event": {
             "command": {
-              "getMore": "42",
+              "getMore": 42,
               "collection": "test"
             },
             "command_name": "getMore",
@@ -1355,7 +1355,7 @@
         {
           "command_started_event": {
             "command": {
-              "getMore": "42",
+              "getMore": 42,
               "collection": "test"
             },
             "command_name": "getMore",
@@ -1448,100 +1448,7 @@
         {
           "command_started_event": {
             "command": {
-              "getMore": "42",
-              "collection": "test"
-            },
-            "command_name": "getMore",
-            "database_name": "change-stream-tests"
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
-              "aggregate": "test",
-              "cursor": {},
-              "pipeline": [
-                {
-                  "$changeStream": {}
-                }
-              ]
-            },
-            "command_name": "aggregate",
-            "database_name": "change-stream-tests"
-          }
-        }
-      ],
-      "result": {
-        "success": [
-          {
-            "_id": "42",
-            "documentKey": "42",
-            "operationType": "insert",
-            "ns": {
-              "db": "change-stream-tests",
-              "coll": "test"
-            },
-            "fullDocument": {
-              "x": {
-                "$numberInt": "1"
-              }
-            }
-          }
-        ]
-      }
-    },
-    {
-      "description": "change stream resumes after ElectionInProgress",
-      "minServerVersion": "4.3.1",
-      "failPoint": {
-        "configureFailPoint": "failGetMoreAfterCursorCheckout",
-        "mode": {
-          "times": 1
-        },
-        "data": {
-          "errorCode": 216,
-          "closeConnection": false
-        }
-      },
-      "target": "collection",
-      "topology": [
-        "replicaset",
-        "sharded"
-      ],
-      "changeStreamPipeline": [],
-      "changeStreamOptions": {},
-      "operations": [
-        {
-          "database": "change-stream-tests",
-          "collection": "test",
-          "name": "insertOne",
-          "arguments": {
-            "document": {
-              "x": 1
-            }
-          }
-        }
-      ],
-      "expectations": [
-        {
-          "command_started_event": {
-            "command": {
-              "aggregate": "test",
-              "cursor": {},
-              "pipeline": [
-                {
-                  "$changeStream": {}
-                }
-              ]
-            },
-            "command_name": "aggregate",
-            "database_name": "change-stream-tests"
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
-              "getMore": "42",
+              "getMore": 42,
               "collection": "test"
             },
             "command_name": "getMore",
@@ -1640,7 +1547,7 @@
         {
           "command_started_event": {
             "command": {
-              "getMore": "42",
+              "getMore": 42,
               "collection": "test"
             },
             "command_name": "getMore",
