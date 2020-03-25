@@ -1591,7 +1591,7 @@ describe('Change Streams', function() {
   });
 
   it('Should include a startAtOperationTime field when resuming if no changes have been received', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.7.3' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=4.0 <4.0.7' } },
     test: function(done) {
       const configuration = this.configuration;
       const ObjectId = configuration.require.ObjectId;
