@@ -1,0 +1,25 @@
+{
+  "description": "replicaSet URI option causes starting topology to be RSNP",
+  "uri": "mongodb://a/?replicaSet=rs&directConnection=false",
+  "phases": [
+    {
+      "responses": [
+        [
+          "a:27017",
+          {
+            "ok": 1,
+            "ismaster": true,
+            "minWireVersion": 0,
+            "maxWireVersion": 6
+          }
+        ]
+      ],
+      "outcome": {
+        "servers": {},
+        "topologyType": "ReplicaSetNoPrimary",
+        "logicalSessionTimeoutMinutes": null,
+        "setName": "rs"
+      }
+    }
+  ]
+}

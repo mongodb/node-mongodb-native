@@ -2,7 +2,7 @@
   "tests": [
     {
       "description": "Valid required tls options are parsed correctly",
-      "uri": "mongodb://example.com/?tls=true&tlsCAFile=ca.pem&tlsCertificateKeyFile=cert.pem&tlsCertificateKeyFilePassword=hunter2",
+      "uri": "mongodb://example.com/?tls=true&tlsCAFile=ca.pem&tlsCertificateKeyFile=cert.pem",
       "valid": true,
       "warning": false,
       "hosts": null,
@@ -10,7 +10,17 @@
       "options": {
         "tls": true,
         "tlsCAFile": "ca.pem",
-        "tlsCertificateKeyFile": "cert.pem",
+        "tlsCertificateKeyFile": "cert.pem"
+      }
+    },
+    {
+      "description": "Valid tlsCertificateKeyFilePassword is parsed correctly",
+      "uri": "mongodb://example.com/?tlsCertificateKeyFilePassword=hunter2",
+      "valid": true,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {
         "tlsCertificateKeyFilePassword": "hunter2"
       }
     },
@@ -75,8 +85,8 @@
       }
     },
     {
-      "description": "Invalid tlsAllowInsecure causes a warning",
-      "uri": "mongodb://example.com/?tlsAllowInsecure=invalid",
+      "description": "Invalid tlsInsecure causes a warning",
+      "uri": "mongodb://example.com/?tlsInsecure=invalid",
       "valid": true,
       "warning": true,
       "hosts": null,
@@ -221,6 +231,414 @@
     {
       "description": "ssl=true and tls=false raises error",
       "uri": "mongodb://example.com/?ssl=true&tls=false",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "tlsDisableCertificateRevocationCheck can be set to true",
+      "uri": "mongodb://example.com/?tls=true&tlsDisableCertificateRevocationCheck=true",
+      "valid": true,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {
+        "tls": true,
+        "tlsDisableCertificateRevocationCheck": true
+      }
+    },
+    {
+      "description": "tlsDisableCertificateRevocationCheck can be set to false",
+      "uri": "mongodb://example.com/?tls=true&tlsDisableCertificateRevocationCheck=false",
+      "valid": true,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {
+        "tls": true,
+        "tlsDisableCertificateRevocationCheck": false
+      }
+    },
+    {
+      "description": "tlsAllowInvalidCertificates and tlsDisableCertificateRevocationCheck both present (and true) raises an error",
+      "uri": "mongodb://example.com/?tlsAllowInvalidCertificates=true&tlsDisableCertificateRevocationCheck=true",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "tlsAllowInvalidCertificates=true and tlsDisableCertificateRevocationCheck=false raises an error",
+      "uri": "mongodb://example.com/?tlsAllowInvalidCertificates=true&tlsDisableCertificateRevocationCheck=false",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "tlsAllowInvalidCertificates=false and tlsDisableCertificateRevocationCheck=true raises an error",
+      "uri": "mongodb://example.com/?tlsAllowInvalidCertificates=false&tlsDisableCertificateRevocationCheck=true",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "tlsAllowInvalidCertificates and tlsDisableCertificateRevocationCheck both present (and false) raises an error",
+      "uri": "mongodb://example.com/?tlsAllowInvalidCertificates=false&tlsDisableCertificateRevocationCheck=false",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "tlsDisableCertificateRevocationCheck and tlsAllowInvalidCertificates both present (and true) raises an error",
+      "uri": "mongodb://example.com/?tlsDisableCertificateRevocationCheck=true&tlsAllowInvalidCertificates=true",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "tlsDisableCertificateRevocationCheck=true and tlsAllowInvalidCertificates=false raises an error",
+      "uri": "mongodb://example.com/?tlsDisableCertificateRevocationCheck=true&tlsAllowInvalidCertificates=false",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "tlsDisableCertificateRevocationCheck=false and tlsAllowInvalidCertificates=true raises an error",
+      "uri": "mongodb://example.com/?tlsDisableCertificateRevocationCheck=false&tlsAllowInvalidCertificates=true",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "tlsDisableCertificateRevocationCheck and tlsAllowInvalidCertificates both present (and false) raises an error",
+      "uri": "mongodb://example.com/?tlsDisableCertificateRevocationCheck=false&tlsAllowInvalidCertificates=false",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "tlsInsecure and tlsDisableCertificateRevocationCheck both present (and true) raises an error",
+      "uri": "mongodb://example.com/?tlsInsecure=true&tlsDisableCertificateRevocationCheck=true",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "tlsInsecure=true and tlsDisableCertificateRevocationCheck=false raises an error",
+      "uri": "mongodb://example.com/?tlsInsecure=true&tlsDisableCertificateRevocationCheck=false",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "tlsInsecure=false and tlsDisableCertificateRevocationCheck=true raises an error",
+      "uri": "mongodb://example.com/?tlsInsecure=false&tlsDisableCertificateRevocationCheck=true",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "tlsInsecure and tlsDisableCertificateRevocationCheck both present (and false) raises an error",
+      "uri": "mongodb://example.com/?tlsInsecure=false&tlsDisableCertificateRevocationCheck=false",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "tlsDisableCertificateRevocationCheck and tlsInsecure both present (and true) raises an error",
+      "uri": "mongodb://example.com/?tlsDisableCertificateRevocationCheck=true&tlsInsecure=true",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "tlsDisableCertificateRevocationCheck=true and tlsInsecure=false raises an error",
+      "uri": "mongodb://example.com/?tlsDisableCertificateRevocationCheck=true&tlsInsecure=false",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "tlsDisableCertificateRevocationCheck=false and tlsInsecure=true raises an error",
+      "uri": "mongodb://example.com/?tlsDisableCertificateRevocationCheck=false&tlsInsecure=true",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "tlsDisableCertificateRevocationCheck and tlsInsecure both present (and false) raises an error",
+      "uri": "mongodb://example.com/?tlsDisableCertificateRevocationCheck=false&tlsInsecure=false",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "tlsDisableCertificateRevocationCheck and tlsDisableOCSPEndpointCheck both present (and true) raises an error",
+      "uri": "mongodb://example.com/?tlsDisableCertificateRevocationCheck=true&tlsDisableOCSPEndpointCheck=true",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "tlsDisableCertificateRevocationCheck=true and tlsDisableOCSPEndpointCheck=false raises an error",
+      "uri": "mongodb://example.com/?tlsDisableCertificateRevocationCheck=true&tlsDisableOCSPEndpointCheck=false",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "tlsDisableCertificateRevocationCheck=false and tlsDisableOCSPEndpointCheck=true raises an error",
+      "uri": "mongodb://example.com/?tlsDisableCertificateRevocationCheck=false&tlsDisableOCSPEndpointCheck=true",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "tlsDisableCertificateRevocationCheck and tlsDisableOCSPEndpointCheck both present (and false) raises an error",
+      "uri": "mongodb://example.com/?tlsDisableCertificateRevocationCheck=false&tlsDisableOCSPEndpointCheck=false",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "tlsDisableOCSPEndpointCheck and tlsDisableCertificateRevocationCheck both present (and true) raises an error",
+      "uri": "mongodb://example.com/?tlsDisableOCSPEndpointCheck=true&tlsDisableCertificateRevocationCheck=true",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "tlsDisableOCSPEndpointCheck=true and tlsDisableCertificateRevocationCheck=false raises an error",
+      "uri": "mongodb://example.com/?tlsDisableOCSPEndpointCheck=true&tlsDisableCertificateRevocationCheck=false",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "tlsDisableOCSPEndpointCheck=false and tlsDisableCertificateRevocationCheck=true raises an error",
+      "uri": "mongodb://example.com/?tlsDisableOCSPEndpointCheck=false&tlsDisableCertificateRevocationCheck=true",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "tlsDisableOCSPEndpointCheck and tlsDisableCertificateRevocationCheck both present (and false) raises an error",
+      "uri": "mongodb://example.com/?tlsDisableOCSPEndpointCheck=false&tlsDisableCertificateRevocationCheck=false",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "tlsDisableOCSPEndpointCheck can be set to true",
+      "uri": "mongodb://example.com/?tls=true&tlsDisableOCSPEndpointCheck=true",
+      "valid": true,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {
+        "tls": true,
+        "tlsDisableOCSPEndpointCheck": true
+      }
+    },
+    {
+      "description": "tlsDisableOCSPEndpointCheck can be set to false",
+      "uri": "mongodb://example.com/?tls=true&tlsDisableOCSPEndpointCheck=false",
+      "valid": true,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {
+        "tls": true,
+        "tlsDisableOCSPEndpointCheck": false
+      }
+    },
+    {
+      "description": "tlsInsecure and tlsDisableOCSPEndpointCheck both present (and true) raises an error",
+      "uri": "mongodb://example.com/?tlsInsecure=true&tlsDisableOCSPEndpointCheck=true",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "tlsInsecure=true and tlsDisableOCSPEndpointCheck=false raises an error",
+      "uri": "mongodb://example.com/?tlsInsecure=true&tlsDisableOCSPEndpointCheck=false",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "tlsInsecure=false and tlsDisableOCSPEndpointCheck=true raises an error",
+      "uri": "mongodb://example.com/?tlsInsecure=false&tlsDisableOCSPEndpointCheck=true",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "tlsInsecure and tlsDisableOCSPEndpointCheck both present (and false) raises an error",
+      "uri": "mongodb://example.com/?tlsInsecure=false&tlsDisableOCSPEndpointCheck=false",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "tlsDisableOCSPEndpointCheck and tlsInsecure both present (and true) raises an error",
+      "uri": "mongodb://example.com/?tlsDisableOCSPEndpointCheck=true&tlsInsecure=true",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "tlsDisableOCSPEndpointCheck=true and tlsInsecure=false raises an error",
+      "uri": "mongodb://example.com/?tlsDisableOCSPEndpointCheck=true&tlsInsecure=false",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "tlsDisableOCSPEndpointCheck=false and tlsInsecure=true raises an error",
+      "uri": "mongodb://example.com/?tlsDisableOCSPEndpointCheck=false&tlsInsecure=true",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "tlsDisableOCSPEndpointCheck and tlsInsecure both present (and false) raises an error",
+      "uri": "mongodb://example.com/?tlsDisableOCSPEndpointCheck=false&tlsInsecure=false",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "tlsAllowInvalidCertificates and tlsDisableOCSPEndpointCheck both present (and true) raises an error",
+      "uri": "mongodb://example.com/?tlsAllowInvalidCertificates=true&tlsDisableOCSPEndpointCheck=true",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "tlsAllowInvalidCertificates=true and tlsDisableOCSPEndpointCheck=false raises an error",
+      "uri": "mongodb://example.com/?tlsAllowInvalidCertificates=true&tlsDisableOCSPEndpointCheck=false",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "tlsAllowInvalidCertificates=false and tlsDisableOCSPEndpointCheck=true raises an error",
+      "uri": "mongodb://example.com/?tlsAllowInvalidCertificates=false&tlsDisableOCSPEndpointCheck=true",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "tlsAllowInvalidCertificates and tlsDisableOCSPEndpointCheck both present (and false) raises an error",
+      "uri": "mongodb://example.com/?tlsAllowInvalidCertificates=false&tlsDisableOCSPEndpointCheck=false",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "tlsDisableOCSPEndpointCheck and tlsAllowInvalidCertificates both present (and true) raises an error",
+      "uri": "mongodb://example.com/?tlsDisableOCSPEndpointCheck=true&tlsAllowInvalidCertificates=true",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "tlsDisableOCSPEndpointCheck=true and tlsAllowInvalidCertificates=false raises an error",
+      "uri": "mongodb://example.com/?tlsDisableOCSPEndpointCheck=true&tlsAllowInvalidCertificates=false",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "tlsDisableOCSPEndpointCheck=false and tlsAllowInvalidCertificates=true raises an error",
+      "uri": "mongodb://example.com/?tlsDisableOCSPEndpointCheck=false&tlsAllowInvalidCertificates=true",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "tlsDisableOCSPEndpointCheck and tlsAllowInvalidCertificates both present (and false) raises an error",
+      "uri": "mongodb://example.com/?tlsDisableOCSPEndpointCheck=false&tlsAllowInvalidCertificates=false",
       "valid": false,
       "warning": false,
       "hosts": null,

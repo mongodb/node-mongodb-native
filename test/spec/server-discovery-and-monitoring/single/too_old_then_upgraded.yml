@@ -1,0 +1,46 @@
+description: "Standalone with default maxWireVersion of 0 is upgraded to one with maxWireVersion 6"
+uri: "mongodb://a"
+phases: [
+    {
+        responses: [
+                ["a:27017", {
+                    ok: 1,
+                    ismaster: true
+                }]
+        ],
+        outcome: {
+            servers: {
+                "a:27017": {
+                    type: "Standalone",
+                    setName:
+                }
+            },
+            topologyType: "Single",
+            logicalSessionTimeoutMinutes: null,
+            setName: ,
+            compatible: false
+        }
+    },
+    {
+        responses: [
+                ["a:27017", {
+                    ok: 1,
+                    ismaster: true,
+                    minWireVersion: 0,
+                    maxWireVersion: 6
+                }]
+        ],
+        outcome: {
+            servers: {
+                "a:27017": {
+                    type: "Standalone",
+                    setName:
+                }
+            },
+            topologyType: "Single",
+            logicalSessionTimeoutMinutes: null,
+            setName: ,
+            compatible: true
+        }
+    }
+]

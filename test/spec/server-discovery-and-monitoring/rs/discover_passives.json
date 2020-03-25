@@ -1,6 +1,6 @@
 {
-  "description": "Discover passives",
-  "uri": "mongodb://a/?replicaSet=rs",
+  "description": "Discover passives with directConnection URI option",
+  "uri": "mongodb://a/?directConnection=false",
   "phases": [
     {
       "responses": [

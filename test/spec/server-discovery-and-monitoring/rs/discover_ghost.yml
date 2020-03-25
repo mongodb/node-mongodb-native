@@ -1,0 +1,35 @@
+description: "Discover ghost with directConnection URI option"
+
+uri: "mongodb://b/?directConnection=false"
+
+phases: [
+
+    {
+        responses: [
+
+                ["b:27017", {
+
+                    ok: 1,
+                    ismaster: false,
+                    isreplicaset: true,
+                    minWireVersion: 0,
+                    maxWireVersion: 6
+                }]
+        ],
+
+        outcome: {
+
+            servers: {
+
+                "b:27017": {
+
+                    type: "RSGhost",
+                    setName:
+                }
+            },
+            topologyType: "Unknown",
+            logicalSessionTimeoutMinutes: null,
+            setName:
+        }
+    }
+]

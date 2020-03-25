@@ -1,0 +1,30 @@
+{
+  "description": "Discover single mongos",
+  "uri": "mongodb://a/?directConnection=false",
+  "phases": [
+    {
+      "responses": [
+        [
+          "a:27017",
+          {
+            "ok": 1,
+            "ismaster": true,
+            "msg": "isdbgrid",
+            "minWireVersion": 0,
+            "maxWireVersion": 6
+          }
+        ]
+      ],
+      "outcome": {
+        "servers": {
+          "a:27017": {
+            "type": "Mongos",
+            "setName": null
+          }
+        },
+        "topologyType": "Sharded",
+        "setName": null
+      }
+    }
+  ]
+}
