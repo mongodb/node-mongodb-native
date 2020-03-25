@@ -163,7 +163,9 @@ describe('Change Stream Spec', function() {
               `Expected there to be an APM event at index ${idx}, but there was none`
             );
           }
-
+          if (events[idx].commandName === 'killCursors') {
+            return;
+          }
           expect(events[idx]).to.matchMongoSpec(expected);
         });
     };
