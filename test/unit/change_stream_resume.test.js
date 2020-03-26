@@ -6,6 +6,7 @@ const ObjectId = require('../../index').ObjectId;
 const Timestamp = require('../../index').Timestamp;
 const Long = require('../../index').Long;
 const isResumableError = require('../../lib/error').isResumableError;
+const GET_MORE_RESUMABLE_CODES = require('../../lib/error').GET_MORE_RESUMABLE_CODES;
 
 describe('Change Stream Resume Tests', function() {
   const test = {};
@@ -105,54 +106,28 @@ describe('Change Stream Resume Tests', function() {
     };
   }
 
-  const RESUMABLE_ERROR_CODES = [1, 40, 20000];
+  const RESUMABLE_ERROR_CODES = Array.from(GET_MORE_RESUMABLE_CODES).slice(0, 3);
 
-  const configs = RESUMABLE_ERROR_CODES.map(code => ({
-    description: `should resume on error code ${code}`,
-    passing: true,
-    firstAggregate: req => req.reply(AGGREGATE_RESPONSE),
-    secondAggregate: req => req.reply(AGGREGATE_RESPONSE),
-    firstGetMore: req => req.reply({ ok: 0, errmsg: 'firstGetMoreError', code }),
-    secondGetMore: req => req.reply(GET_MORE_RESPONSE)
-  }))
-    .concat([
-      {
-        description: `should resume on a network error`,
-        passing: true,
-        firstAggregate: req => req.reply(AGGREGATE_RESPONSE),
-        secondAggregate: req => req.reply(AGGREGATE_RESPONSE),
-        firstGetMore: () => {}, // Simulates a timeout
-        secondGetMore: req => req.reply(GET_MORE_RESPONSE)
-      },
-      {
-        description: `should resume on an error that says 'not master'`,
-        passing: true,
-        firstAggregate: req => req.reply(AGGREGATE_RESPONSE),
-        secondAggregate: req => req.reply(AGGREGATE_RESPONSE),
-        firstGetMore: req => req.reply({ ok: 0, errmsg: 'not master' }),
-        secondGetMore: req => req.reply(GET_MORE_RESPONSE)
-      },
-      {
-        description: `should resume on an error that says 'node is recovering'`,
-        passing: true,
-        firstAggregate: req => req.reply(AGGREGATE_RESPONSE),
-        secondAggregate: req => req.reply(AGGREGATE_RESPONSE),
-        firstGetMore: req => req.reply({ ok: 0, errmsg: 'node is recovering' }),
-        secondGetMore: req => req.reply(GET_MORE_RESPONSE)
-      }
-    ])
-    .concat(
-      RESUMABLE_ERROR_CODES.map(code => ({
-        description: `should not resume on aggregate, even for valid code ${code}`,
-        passing: false,
-        errmsg: 'fail aggregate',
-        firstAggregate: req => req.reply({ ok: 0, errmsg: 'fail aggregate', code }),
-        secondAggregate: req =>
-          req.reply({ ok: 0, errmsg: 'We should not have a second aggregate' }),
-        firstGetMore: req => req.reply({ ok: 0, errmsg: 'We should not have a first getMore' }),
-        secondGetMore: req => req.reply({ ok: 0, errmsg: 'We should not have a second getMore' })
-      }))
-    );
+  const configs = [
+    {
+      description: `should resume on a network error`,
+      passing: true,
+      firstAggregate: req => req.reply(AGGREGATE_RESPONSE),
+      secondAggregate: req => req.reply(AGGREGATE_RESPONSE),
+      firstGetMore: () => {}, // Simulates a timeout
+      secondGetMore: req => req.reply(GET_MORE_RESPONSE)
+    }
+  ].concat(
+    RESUMABLE_ERROR_CODES.map(code => ({
+      description: `should not resume on aggregate, even for valid code ${code}`,
+      passing: false,
+      errmsg: 'fail aggregate',
+      firstAggregate: req => req.reply({ ok: 0, errmsg: 'fail aggregate', code }),
+      secondAggregate: req => req.reply({ ok: 0, errmsg: 'We should not have a second aggregate' }),
+      firstGetMore: req => req.reply({ ok: 0, errmsg: 'We should not have a first getMore' }),
+      secondGetMore: req => req.reply({ ok: 0, errmsg: 'We should not have a second getMore' })
+    }))
+  );
 
   let client;
   let changeStream;
