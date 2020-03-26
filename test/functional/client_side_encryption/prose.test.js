@@ -1,5 +1,5 @@
 'use strict';
-
+const BSON = require('bson');
 const chai = require('chai');
 const expect = chai.expect;
 chai.use(require('chai-subset'));
@@ -94,6 +94,7 @@ describe('Client Side Encryption Prose Tests', function() {
           //   Configure ``client_encryption`` with the ``keyVaultClient`` of the previously created ``client``.
           .then(() => {
             this.clientEncryption = new mongodbClientEncryption.ClientEncryption(this.client, {
+              bson: BSON,
               kmsProviders: this.configuration.kmsProviders(null, localKey),
               keyVaultNamespace
             });
@@ -316,6 +317,7 @@ describe('Client Side Encryption Prose Tests', function() {
       return this.client.connect().then(() => {
         const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
         this.clientEncryption = new mongodbClientEncryption.ClientEncryption(this.client, {
+          bson: BSON,
           keyVaultNamespace,
           kmsProviders: this.configuration.kmsProviders('aws')
         });
@@ -443,7 +445,7 @@ describe('Client Side Encryption Prose Tests', function() {
   describe('BSON size limits and batch splitting', function() {
     const fs = require('fs');
     const path = require('path');
-    const { EJSON } = require('bson');
+    const { EJSON } = BSON;
     function loadLimits(file) {
       return EJSON.parse(
         fs.readFileSync(path.resolve(__dirname, '../../spec/client-side-encryption/limits', file))
@@ -708,7 +710,7 @@ describe('Client Side Encryption Prose Tests', function() {
   describe('External Key Vault', function() {
     const fs = require('fs');
     const path = require('path');
-    const { EJSON } = require('bson');
+    const { EJSON } = BSON;
     function loadExternal(file) {
       return EJSON.parse(
         fs.readFileSync(path.resolve(__dirname, '../../spec/client-side-encryption/external', file))
@@ -786,6 +788,7 @@ describe('Client Side Encryption Prose Tests', function() {
               //    Configure ``client_encrypted`` to use the schema `external/external-schema.json <../external/external-schema.json>`_  for ``db.coll`` by setting a schema map like: ``{ "db.coll": <contents of external-schema.json>}``
               .then(() => {
                 const options = {
+                  bson: BSON,
                   keyVaultNamespace,
                   kmsProviders: this.configuration.kmsProviders('local', localKey)
                 };
