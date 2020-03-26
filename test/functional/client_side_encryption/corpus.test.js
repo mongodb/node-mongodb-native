@@ -4,6 +4,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const BSON = require('bson');
 const { EJSON } = require('bson');
 const chai = require('chai');
 const expect = chai.expect;
@@ -21,13 +22,13 @@ describe('Client Side Encryption Corpus', function() {
 
   const corpusDir = path.resolve(__dirname, '../../spec/client-side-encryption/corpus');
   function loadCorpusData(filename) {
-    return EJSON.parse(fs.readFileSync(path.resolve(corpusDir, filename), { strict: true }));
+    return EJSON.parse(fs.readFileSync(path.resolve(corpusDir, filename)), { relaxed: false });
   }
 
   // TODO: build this into EJSON
   // TODO: make a custom chai assertion for this
   function toComparableExtendedJSON(value) {
-    return JSON.parse(EJSON.stringify({ value }, { strict: true }));
+    return JSON.parse(EJSON.stringify({ value }, { relaxed: false }));
   }
 
   const localKey = Buffer.from(
@@ -193,6 +194,7 @@ describe('Client Side Encryption Corpus', function() {
 
           return clientEncrypted.connect().then(() => {
             clientEncryption = new mongodbClientEncryption.ClientEncryption(client, {
+              bson: BSON,
               keyVaultNamespace,
               kmsProviders: this.configuration.kmsProviders(null, localKey)
             });

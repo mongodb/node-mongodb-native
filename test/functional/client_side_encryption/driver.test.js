@@ -48,6 +48,7 @@ describe('Client Side Encryption Functional', function() {
         .connect()
         .then(() => {
           encryption = new mongodbClientEncryption.ClientEncryption(this.client, {
+            bson: BSON,
             keyVaultNamespace,
             kmsProviders
           });
