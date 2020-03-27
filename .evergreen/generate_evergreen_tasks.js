@@ -29,12 +29,6 @@ const OPERATING_SYSTEMS = [
     display_name: 'RHEL 7.0',
     run_on: 'rhel70-small'
   },
-  {
-    name: 'rhel71-power8-test',
-    display_name: 'RHEL 7.1 (POWER8)',
-    run_on: 'rhel71-power8-test',
-    mongoVersion: '>=3.2'
-  },
   //suse
   {
     name: 'suse12-x86-64-test',
@@ -56,24 +50,7 @@ const OPERATING_SYSTEMS = [
     mongoVersion: '>=3.2',
     clientEncryption: true
   },
-  {
-    name: 'ubuntu1604-arm64-small',
-    display_name: 'Ubuntu 16.04 (ARM64)',
-    run_on: 'ubuntu1604-arm64-small',
-    mongoVersion: '>=3.4 <4.2'
-  },
-  {
-    name: 'ubuntu1604-power8-test',
-    display_name: 'Ubuntu 16.04 (POWER8)',
-    run_on: 'ubuntu1604-power8-test',
-    mongoVersion: '>=3.4 <4.2'
-  },
-  {
-    name: 'ubuntu1804-arm64-test',
-    display_name: 'Ubuntu 18.04 (ARM64)',
-    run_on: 'ubuntu1804-arm64-test',
-    mongoVersion: '>=4.2'
-  }
+
   // Windows. reenable this when nvm supports windows, or we settle on an alternative tool
   // {
   //   name: 'windows-64-vs2010-test',
