@@ -28,13 +28,6 @@ const OPERATING_SYSTEMS = [
     run_on: 'debian81-test',
     mongoVersion: '>=3.4 <4.2'
   },
-  // TODO: once we know how to test debian 9.x
-  // {
-  //   name: 'debian91-test',
-  //   display_name: 'Debian 9.1',
-  //   run_on: 'debian91-test',
-  //   mongoVersion: '>=4.0'
-  // },
   // Amazon Linux
   {
     name: 'linux-64-amzn-test',
@@ -55,12 +48,6 @@ const OPERATING_SYSTEMS = [
     name: 'rhel70',
     display_name: 'RHEL 7.0',
     run_on: 'rhel70-small'
-  },
-  {
-    name: 'rhel71-power8-test',
-    display_name: 'RHEL 7.1 (POWER8)',
-    run_on: 'rhel71-power8-test',
-    mongoVersion: '>=3.2'
   },
   //suse
   {
@@ -84,32 +71,6 @@ const OPERATING_SYSTEMS = [
     clientEncryption: true,
     nodeVersions: ['dubnium', 'carbon', 'boron']
   },
-  {
-    name: 'ubuntu1604-arm64-small',
-    display_name: 'Ubuntu 16.04 (ARM64)',
-    run_on: 'ubuntu1604-arm64-small',
-    mongoVersion: '>=3.4 <4.2'
-  },
-  {
-    name: 'ubuntu1604-power8-test',
-    display_name: 'Ubuntu 16.04 (POWER8)',
-    run_on: 'ubuntu1604-power8-test',
-    mongoVersion: '>=3.4 <4.2'
-  },
-  {
-    name: 'ubuntu1804-arm64-test',
-    display_name: 'Ubuntu 18.04 (ARM64)',
-    run_on: 'ubuntu1804-arm64-test',
-    mongoVersion: '>=4.2'
-  }
-
-  // reenable when these are actually running 7.2, or we release a 7.4 rpm
-  // {
-  //   name: 'rhel72-zseries-test',
-  //   display_name: 'RHEL 7.2 (zSeries)',
-  //   run_on: 'rhel72-zseries-test',
-  //   mongoVersion: '>=3.4'
-  // },
 
   // Windows. reenable this when nvm supports windows, or we settle on an alternative tool
   // {
