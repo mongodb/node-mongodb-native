@@ -707,9 +707,9 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: erbium
     tasks: *ref_1
-  - name: rhel71-power8-test-carbon
-    display_name: RHEL 7.1 (POWER8) Node Carbon
-    run_on: rhel71-power8-test
+  - name: suse12-x86-64-test-carbon
+    display_name: SUSE 12 (x86_64) Node Carbon
+    run_on: suse12-test
     expansions:
       NODE_LTS_NAME: carbon
     tasks: &ref_2
@@ -732,24 +732,6 @@ buildvariants:
       - test-3.2-replica_set
       - test-3.2-sharded_cluster
       - test-atlas-connectivity
-  - name: rhel71-power8-test-dubnium
-    display_name: RHEL 7.1 (POWER8) Node Dubnium
-    run_on: rhel71-power8-test
-    expansions:
-      NODE_LTS_NAME: dubnium
-    tasks: *ref_2
-  - name: rhel71-power8-test-erbium
-    display_name: RHEL 7.1 (POWER8) Node Erbium
-    run_on: rhel71-power8-test
-    expansions:
-      NODE_LTS_NAME: erbium
-    tasks: *ref_2
-  - name: suse12-x86-64-test-carbon
-    display_name: SUSE 12 (x86_64) Node Carbon
-    run_on: suse12-test
-    expansions:
-      NODE_LTS_NAME: carbon
-    tasks: *ref_2
   - name: suse12-x86-64-test-dubnium
     display_name: SUSE 12 (x86_64) Node Dubnium
     run_on: suse12-test
@@ -819,67 +801,6 @@ buildvariants:
       NODE_LTS_NAME: erbium
       CLIENT_ENCRYPTION: true
     tasks: *ref_2
-  - name: ubuntu1604-arm64-small-carbon
-    display_name: Ubuntu 16.04 (ARM64) Node Carbon
-    run_on: ubuntu1604-arm64-small
-    expansions:
-      NODE_LTS_NAME: carbon
-    tasks: *ref_0
-  - name: ubuntu1604-arm64-small-dubnium
-    display_name: Ubuntu 16.04 (ARM64) Node Dubnium
-    run_on: ubuntu1604-arm64-small
-    expansions:
-      NODE_LTS_NAME: dubnium
-    tasks: *ref_0
-  - name: ubuntu1604-arm64-small-erbium
-    display_name: Ubuntu 16.04 (ARM64) Node Erbium
-    run_on: ubuntu1604-arm64-small
-    expansions:
-      NODE_LTS_NAME: erbium
-    tasks: *ref_0
-  - name: ubuntu1604-power8-test-carbon
-    display_name: Ubuntu 16.04 (POWER8) Node Carbon
-    run_on: ubuntu1604-power8-test
-    expansions:
-      NODE_LTS_NAME: carbon
-    tasks: *ref_0
-  - name: ubuntu1604-power8-test-dubnium
-    display_name: Ubuntu 16.04 (POWER8) Node Dubnium
-    run_on: ubuntu1604-power8-test
-    expansions:
-      NODE_LTS_NAME: dubnium
-    tasks: *ref_0
-  - name: ubuntu1604-power8-test-erbium
-    display_name: Ubuntu 16.04 (POWER8) Node Erbium
-    run_on: ubuntu1604-power8-test
-    expansions:
-      NODE_LTS_NAME: erbium
-    tasks: *ref_0
-  - name: ubuntu1804-arm64-test-carbon
-    display_name: Ubuntu 18.04 (ARM64) Node Carbon
-    run_on: ubuntu1804-arm64-test
-    expansions:
-      NODE_LTS_NAME: carbon
-    tasks: &ref_4
-      - test-latest-server
-      - test-latest-replica_set
-      - test-latest-sharded_cluster
-      - test-4.2-server
-      - test-4.2-replica_set
-      - test-4.2-sharded_cluster
-      - test-atlas-connectivity
-  - name: ubuntu1804-arm64-test-dubnium
-    display_name: Ubuntu 18.04 (ARM64) Node Dubnium
-    run_on: ubuntu1804-arm64-test
-    expansions:
-      NODE_LTS_NAME: dubnium
-    tasks: *ref_4
-  - name: ubuntu1804-arm64-test-erbium
-    display_name: Ubuntu 18.04 (ARM64) Node Erbium
-    run_on: ubuntu1804-arm64-test
-    expansions:
-      NODE_LTS_NAME: erbium
-    tasks: *ref_4
   - name: ubuntu1804-test-mongodb-aws
     display_name: MONGODB-AWS Auth test
     run_on: ubuntu1804-test
