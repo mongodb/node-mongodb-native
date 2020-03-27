@@ -1274,9 +1274,9 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: argon
     tasks: *ref_2
-  - name: rhel71-power8-test-dubnium
-    display_name: RHEL 7.1 (POWER8) Node Dubnium
-    run_on: rhel71-power8-test
+  - name: suse12-x86-64-test-dubnium
+    display_name: SUSE 12 (x86_64) Node Dubnium
+    run_on: suse12-test
     expansions:
       NODE_LTS_NAME: dubnium
     tasks: &ref_3
@@ -1324,30 +1324,6 @@ buildvariants:
       - test-ocsp-soft-fail
       - test-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
       - test-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
-  - name: rhel71-power8-test-carbon
-    display_name: RHEL 7.1 (POWER8) Node Carbon
-    run_on: rhel71-power8-test
-    expansions:
-      NODE_LTS_NAME: carbon
-    tasks: *ref_3
-  - name: rhel71-power8-test-boron
-    display_name: RHEL 7.1 (POWER8) Node Boron
-    run_on: rhel71-power8-test
-    expansions:
-      NODE_LTS_NAME: boron
-    tasks: *ref_3
-  - name: rhel71-power8-test-argon
-    display_name: RHEL 7.1 (POWER8) Node Argon
-    run_on: rhel71-power8-test
-    expansions:
-      NODE_LTS_NAME: argon
-    tasks: *ref_3
-  - name: suse12-x86-64-test-dubnium
-    display_name: SUSE 12 (x86_64) Node Dubnium
-    run_on: suse12-test
-    expansions:
-      NODE_LTS_NAME: dubnium
-    tasks: *ref_3
   - name: suse12-x86-64-test-carbon
     display_name: SUSE 12 (x86_64) Node Carbon
     run_on: suse12-test
@@ -1447,98 +1423,6 @@ buildvariants:
       NODE_LTS_NAME: boron
       CLIENT_ENCRYPTION: true
     tasks: *ref_3
-  - name: ubuntu1604-arm64-small-dubnium
-    display_name: Ubuntu 16.04 (ARM64) Node Dubnium
-    run_on: ubuntu1604-arm64-small
-    expansions:
-      NODE_LTS_NAME: dubnium
-    tasks: *ref_1
-  - name: ubuntu1604-arm64-small-carbon
-    display_name: Ubuntu 16.04 (ARM64) Node Carbon
-    run_on: ubuntu1604-arm64-small
-    expansions:
-      NODE_LTS_NAME: carbon
-    tasks: *ref_1
-  - name: ubuntu1604-arm64-small-boron
-    display_name: Ubuntu 16.04 (ARM64) Node Boron
-    run_on: ubuntu1604-arm64-small
-    expansions:
-      NODE_LTS_NAME: boron
-    tasks: *ref_1
-  - name: ubuntu1604-arm64-small-argon
-    display_name: Ubuntu 16.04 (ARM64) Node Argon
-    run_on: ubuntu1604-arm64-small
-    expansions:
-      NODE_LTS_NAME: argon
-    tasks: *ref_1
-  - name: ubuntu1604-power8-test-dubnium
-    display_name: Ubuntu 16.04 (POWER8) Node Dubnium
-    run_on: ubuntu1604-power8-test
-    expansions:
-      NODE_LTS_NAME: dubnium
-    tasks: *ref_1
-  - name: ubuntu1604-power8-test-carbon
-    display_name: Ubuntu 16.04 (POWER8) Node Carbon
-    run_on: ubuntu1604-power8-test
-    expansions:
-      NODE_LTS_NAME: carbon
-    tasks: *ref_1
-  - name: ubuntu1604-power8-test-boron
-    display_name: Ubuntu 16.04 (POWER8) Node Boron
-    run_on: ubuntu1604-power8-test
-    expansions:
-      NODE_LTS_NAME: boron
-    tasks: *ref_1
-  - name: ubuntu1604-power8-test-argon
-    display_name: Ubuntu 16.04 (POWER8) Node Argon
-    run_on: ubuntu1604-power8-test
-    expansions:
-      NODE_LTS_NAME: argon
-    tasks: *ref_1
-  - name: ubuntu1804-arm64-test-dubnium
-    display_name: Ubuntu 18.04 (ARM64) Node Dubnium
-    run_on: ubuntu1804-arm64-test
-    expansions:
-      NODE_LTS_NAME: dubnium
-    tasks: &ref_5
-      - test-latest-server
-      - test-latest-replica_set
-      - test-latest-sharded_cluster
-      - test-latest-server-unified
-      - test-latest-replica_set-unified
-      - test-latest-sharded_cluster-unified
-      - test-4.2-server
-      - test-4.2-replica_set
-      - test-4.2-sharded_cluster
-      - test-4.2-server-unified
-      - test-4.2-replica_set-unified
-      - test-4.2-sharded_cluster-unified
-      - test-atlas-connectivity
-      - test-ocsp-valid-cert-server-staples
-      - test-ocsp-invalid-cert-server-staples
-      - test-ocsp-valid-cert-server-does-not-staple
-      - test-ocsp-invalid-cert-server-does-not-staple
-      - test-ocsp-soft-fail
-      - test-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
-      - test-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
-  - name: ubuntu1804-arm64-test-carbon
-    display_name: Ubuntu 18.04 (ARM64) Node Carbon
-    run_on: ubuntu1804-arm64-test
-    expansions:
-      NODE_LTS_NAME: carbon
-    tasks: *ref_5
-  - name: ubuntu1804-arm64-test-boron
-    display_name: Ubuntu 18.04 (ARM64) Node Boron
-    run_on: ubuntu1804-arm64-test
-    expansions:
-      NODE_LTS_NAME: boron
-    tasks: *ref_5
-  - name: ubuntu1804-arm64-test-argon
-    display_name: Ubuntu 18.04 (ARM64) Node Argon
-    run_on: ubuntu1804-arm64-test
-    expansions:
-      NODE_LTS_NAME: argon
-    tasks: *ref_5
   - name: ubuntu1804-test-mongodb-aws
     display_name: MONGODB-AWS Auth test
     run_on: ubuntu1804-test
