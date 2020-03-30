@@ -184,10 +184,24 @@ describe('ScramSHA256', function() {
       let sendAuthCommandSpy;
       test.sandbox
         .stub(ScramSHA256.prototype, '_executeScram')
-        .callsFake(function(sendAuthCommand, connection, credentials, nonce, callback) {
+        .callsFake(function(
+          sendAuthCommand,
+          connection,
+          credentials,
+          nonce,
+          saslStartCmd,
+          callback
+        ) {
           const executeScram = ScramSHA256.prototype._executeScram.wrappedMethod;
           sendAuthCommandSpy = test.sandbox.spy(sendAuthCommand);
-          executeScram.apply(this, [sendAuthCommandSpy, connection, credentials, nonce, callback]);
+          executeScram.apply(this, [
+            sendAuthCommandSpy,
+            connection,
+            credentials,
+            nonce,
+            saslStartCmd,
+            callback
+          ]);
         });
 
       return withClient(this.configuration.newClient({}, options), () => {
@@ -232,16 +246,16 @@ describe('ScramSHA256', function() {
           password: 'pencil'
         },
         authSource: 'admin',
-        serverSelectionTimeoutMS: 100
+        serverSelectionTimeoutMS: 100000000
       };
 
       const badPasswordOptions = {
         auth: {
           user: 'both',
-          password: 'pencil'
+          password: 'BadPassword'
         },
         authSource: 'admin',
-        serverSelectionTimeoutMS: 100
+        serverSelectionTimeoutMS: 1000000000
       };
 
       const getErrorMsg = options =>
@@ -252,25 +266,6 @@ describe('ScramSHA256', function() {
         );
 
       return Promise.all([getErrorMsg(noUsernameOptions), getErrorMsg(badPasswordOptions)]);
-    }
-  });
-
-  it('mytestforspecauth', {
-    metadata: { requires: { mongodb: '>=3.7.3' } },
-    test: function() {
-      const options = {
-        auth: {
-          user: userMap.both.username,
-          password: userMap.both.password
-        },
-        authSource: this.configuration.db
-      };
-
-      test.sandbox.spy(ScramSHA256.prototype, 'auth');
-
-      return withClient(this.configuration.newClient({}, options), () => {
-        expect(ScramSHA256.prototype.auth.called).to.equal(true);
-      });
     }
   });
 });
