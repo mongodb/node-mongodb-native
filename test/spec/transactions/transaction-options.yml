@@ -2,6 +2,9 @@ runOn:
     -
         minServerVersion: "4.0"
         topology: ["replicaset"]
+    -
+        minServerVersion: "4.1.8"
+        topology: ["sharded"]
 
 database_name: &database_name "transaction-tests"
 collection_name: &collection_name "test"
@@ -185,7 +188,7 @@ tests:
       session0:
         defaultTransactionOptions:
           readConcern:
-            level: snapshot
+            level: majority
           writeConcern:
             w: 1
           maxCommitTimeMS: 60000
@@ -205,7 +208,7 @@ tests:
             startTransaction: true
             autocommit: false
             readConcern:
-              level: snapshot
+              level: majority
             writeConcern:
           command_name: insert
           database_name: *database_name
@@ -235,7 +238,7 @@ tests:
             startTransaction: true
             autocommit: false
             readConcern:
-              level: snapshot
+              level: majority
               afterClusterTime: 42
             writeConcern:
           command_name: insert
@@ -266,7 +269,7 @@ tests:
       session0:
         defaultTransactionOptions:
           readConcern:
-            level: majority
+            level: snapshot
           writeConcern:
             w: 1
           maxCommitTimeMS: 30000
@@ -277,7 +280,7 @@ tests:
         arguments:
           options:
             readConcern:
-              level: snapshot
+              level: majority
             writeConcern:
               w: majority
             maxCommitTimeMS: 60000
@@ -296,7 +299,7 @@ tests:
         arguments:
           options:
             readConcern:
-              level: snapshot
+              level: majority
             writeConcern:
               w: majority
       - name: insertOne
@@ -323,7 +326,7 @@ tests:
             startTransaction: true
             autocommit: false
             readConcern:
-              level: snapshot
+              level: majority
             writeConcern:
             maxTimeMS:
           command_name: insert
@@ -354,7 +357,7 @@ tests:
             startTransaction: true
             autocommit: false
             readConcern:
-              level: snapshot
+              level: majority
               afterClusterTime: 42
             writeConcern:
             maxTimeMS:
@@ -387,7 +390,7 @@ tests:
       session0:
         defaultTransactionOptions:
           readConcern:
-            level: snapshot
+            level: majority
           writeConcern:
             w: majority
           maxCommitTimeMS: 60000
@@ -407,7 +410,7 @@ tests:
             startTransaction: true
             autocommit: false
             readConcern:
-              level: snapshot
+              level: majority
             writeConcern:
             maxTimeMS:
           command_name: insert
@@ -438,7 +441,7 @@ tests:
             startTransaction: true
             autocommit: false
             readConcern:
-              level: snapshot
+              level: majority
               afterClusterTime: 42
             writeConcern:
             maxTimeMS:
@@ -532,110 +535,6 @@ tests:
             readConcern:
             writeConcern:
               w: 1
-          command_name: abortTransaction
-          database_name: admin
-
-    outcome: *outcome
-
-  - description: readConcern snapshot in startTransaction options
-
-    sessionOptions:
-      session0:
-        defaultTransactionOptions:
-          readConcern:
-            level: majority # Overridden.
-
-    operations:
-      - name: startTransaction
-        object: session0
-        arguments:
-          options:
-            readConcern:
-              level: snapshot
-      - name: insertOne
-        object: collection
-        arguments:
-          session: session0
-          document:
-            _id: 1
-        result:
-          insertedId: 1
-      - name: commitTransaction
-        object: session0
-      # Now test abort.
-      - name: startTransaction
-        object: session0
-        arguments:
-          options:
-            readConcern:
-              level: snapshot
-      - name: insertOne
-        object: collection
-        arguments:
-          session: session0
-          document:
-            _id: 2
-        result:
-          insertedId: 2
-      - name: abortTransaction
-        object: session0
-
-    expectations:
-      - command_started_event:
-          command:
-            insert: *collection_name
-            documents:
-              - _id: 1
-            ordered: true
-            lsid: session0
-            txnNumber:
-              $numberLong: "1"
-            startTransaction: true
-            autocommit: false
-            readConcern:
-              level: snapshot
-            writeConcern:
-          command_name: insert
-          database_name: *database_name
-      - command_started_event:
-          command:
-            commitTransaction: 1
-            lsid: session0
-            txnNumber:
-              $numberLong: "1"
-            startTransaction:
-            autocommit: false
-            readConcern:
-            writeConcern:
-          command_name: commitTransaction
-          database_name: admin
-      - command_started_event:
-          command:
-            insert: *collection_name
-            documents:
-              - _id: 2
-            ordered: true
-            lsid: session0
-            txnNumber:
-              $numberLong: "2"
-            startTransaction: true
-            autocommit: false
-            readConcern:
-              level: snapshot
-              afterClusterTime: 42
-            writeConcern:
-          command_name: insert
-          database_name: *database_name
-      - command_started_event:
-          command:
-            abortTransaction: 1
-            lsid: session0
-            txnNumber:
-              $numberLong: "2"
-            startTransaction:
-            autocommit: false
-            readConcern:
-            writeConcern:
           command_name: abortTransaction
           database_name: admin
 

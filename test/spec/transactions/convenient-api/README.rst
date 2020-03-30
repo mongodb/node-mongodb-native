@@ -129,7 +129,7 @@ following fields:
     executed. Elements in this array will follow the same structure as the
     ``operations`` field defined above (and in the CRUD and Transactions specs).
 
-    Note that drivers are expected to evaluate ``error` and ``result``
+    Note that drivers are expected to evaluate ``error`` and ``result``
     assertions when executing operations within ``callback.operations``.
 
 - ``options`` (optional): Names and values of options to pass to

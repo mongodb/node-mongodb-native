@@ -153,11 +153,8 @@ tests:
             updates:
               - q: {_id: 1}
                 u: {$set: {x: 1}}
-                multi: false
-                upsert: false
               - q: {_id: 2}
                 u: {$set: {x: 2}}
-                multi: false
                 upsert: true
             ordered: true
             lsid: session0
@@ -192,12 +189,8 @@ tests:
             updates:
               - q: {_id: 1}
                 u: {y: 1}
-                multi: false
-                upsert: false
               - q: {_id: 2}
                 u: {y: 2}
-                multi: false
-                upsert: false
             ordered: true
             lsid: session0
             txnNumber:
@@ -231,7 +224,6 @@ tests:
               - q: {_id: {$gte: 2}}
                 u: {$set: {z: 1}}
                 multi: true
-                upsert: false
             ordered: true
             lsid: session0
             txnNumber:

@@ -27,7 +27,6 @@ tests:
           filter: {_id: 1}
           update:
             $inc: {count: 1}
-          upsert: false
         result:
           matchedCount: 1
           modifiedCount: 1
@@ -48,8 +47,6 @@ tests:
             updates:
               - q: {_id: 1}
                 u: {$inc: {count: 1}}
-                multi: false
-                upsert: false
             ordered: true
             lsid: session0
             readConcern:
@@ -65,8 +62,6 @@ tests:
             updates:
               - q: {_id: 1}
                 u: {$inc: {count: 1}}
-                multi: false
-                upsert: false
             ordered: true
             readConcern:
               afterClusterTime: 42
@@ -122,7 +117,6 @@ tests:
           filter: {_id: 1}
           update:
             $inc: {count: 1}
-          upsert: false
         result:
           matchedCount: 1
           modifiedCount: 1
@@ -150,8 +144,6 @@ tests:
             updates:
               - q: {_id: 1}
                 u: {$inc: {count: 1}}
-                multi: false
-                upsert: false
             ordered: true
             # No afterClusterTime
             readConcern:
