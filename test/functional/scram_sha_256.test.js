@@ -6,34 +6,33 @@ const ScramSHA256 = require('../../lib/core').ScramSHA256;
 const setupDatabase = require('./shared').setupDatabase;
 const withClient = require('./shared').withClient;
 
-describe('SCRAM-SHA-256 auth', function() {
-  const test = {};
-  const userMap = {
-    sha1: {
-      description: 'user with sha1 credentials',
-      username: 'sha1',
-      password: 'sha1',
-      mechanisms: ['SCRAM-SHA-1']
-    },
-    sha256: {
-      description: 'user with sha256 credentials',
-      username: 'sha256',
-      password: 'sha256',
-      mechanisms: ['SCRAM-SHA-256']
-    },
-    both: {
-      description: 'user with both credentials',
-      username: 'both',
-      password: 'both',
-      mechanisms: ['SCRAM-SHA-1', 'SCRAM-SHA-256']
-    }
-  };
+const makeConnectionString = (config, username, password) =>
+  `mongodb://${username}:${password}@${config.host}:${config.port}/${config.db}?`;
 
-  function makeConnectionString(config, username, password) {
-    return `mongodb://${username}:${password}@${config.host}:${config.port}/${config.db}?`;
+const userMap = {
+  sha1: {
+    description: 'user with sha1 credentials',
+    username: 'sha1',
+    password: 'sha1',
+    mechanisms: ['SCRAM-SHA-1']
+  },
+  sha256: {
+    description: 'user with sha256 credentials',
+    username: 'sha256',
+    password: 'sha256',
+    mechanisms: ['SCRAM-SHA-256']
+  },
+  both: {
+    description: 'user with both credentials',
+    username: 'both',
+    password: 'both',
+    mechanisms: ['SCRAM-SHA-1', 'SCRAM-SHA-256']
   }
+};
+const users = Object.values(userMap);
 
-  const users = Object.keys(userMap).map(name => userMap[name]);
+describe('ScramSHA256', function() {
+  const test = {};
 
   afterEach(() => test.sandbox.restore());
 
@@ -48,14 +47,16 @@ describe('SCRAM-SHA-256 auth', function() {
       this.configuration.db = 'admin';
       const db = client.db(this.configuration.db);
 
-      const createUserCommands = users.map(user => ({
-        createUser: user.username,
-        pwd: user.password,
-        roles: ['root'],
-        mechanisms: user.mechanisms
-      }));
+      const createUserCommands = users.map(user =>
+        db.command({
+          createUser: user.username,
+          pwd: user.password,
+          roles: ['root'],
+          mechanisms: user.mechanisms
+        })
+      );
 
-      return Promise.all(createUserCommands.map(cmd => db.command(cmd)));
+      return Promise.all(createUserCommands);
     });
   });
 
@@ -68,8 +69,9 @@ describe('SCRAM-SHA-256 auth', function() {
     });
   });
 
-  //   Step 2
-  // For each test user, verify that you can connect and run a command requiring authentication for the following cases:
+  // Step 2:
+  // For each test user,
+  // verify that you can connect and run a command requiring authentication for the following cases:
   // Explicitly specifying each mechanism the user supports.
   // Specifying no mechanism and relying on mechanism negotiation.
   // For the example users above, the dbstats command could be used as a test command.
@@ -250,6 +252,25 @@ describe('SCRAM-SHA-256 auth', function() {
         );
 
       return Promise.all([getErrorMsg(noUsernameOptions), getErrorMsg(badPasswordOptions)]);
+    }
+  });
+
+  it('mytestforspecauth', {
+    metadata: { requires: { mongodb: '>=3.7.3' } },
+    test: function() {
+      const options = {
+        auth: {
+          user: userMap.both.username,
+          password: userMap.both.password
+        },
+        authSource: this.configuration.db
+      };
+
+      test.sandbox.spy(ScramSHA256.prototype, 'auth');
+
+      return withClient(this.configuration.newClient({}, options), () => {
+        expect(ScramSHA256.prototype.auth.called).to.equal(true);
+      });
     }
   });
 });

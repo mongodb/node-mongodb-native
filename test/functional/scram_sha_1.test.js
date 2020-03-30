@@ -2,7 +2,7 @@
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 
-describe('SCRAM', function() {
+describe('ScramSHA1', function() {
   before(function() {
     return setupDatabase(this.configuration);
   });
