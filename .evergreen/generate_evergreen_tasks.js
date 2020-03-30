@@ -9,34 +9,17 @@ const MONGODB_VERSIONS = ['latest', '4.2', '4.0', '3.6', '3.4', '3.2', '3.0', '2
 const NODE_VERSIONS = ['carbon', 'dubnium', 'erbium'];
 const TOPOLOGIES = ['server', 'replica_set', 'sharded_cluster'];
 const OPERATING_SYSTEMS = [
-  // Debian
-  {
-    name: 'debian81-test',
-    display_name: 'Debian 8.1',
-    run_on: 'debian81-test',
-    mongoVersion: '>=3.4 <4.2'
-  },
-  // macos
   {
     name: 'macos-1014',
     display_name: 'macOS 10.14',
     run_on: 'macos-1014',
     auth: false
   },
-  // rhel
   {
     name: 'rhel70',
     display_name: 'RHEL 7.0',
     run_on: 'rhel70-small'
   },
-  //suse
-  {
-    name: 'suse12-x86-64-test',
-    display_name: 'SUSE 12 (x86_64)',
-    run_on: 'suse12-test',
-    mongoVersion: '>=3.2'
-  },
-  // Ubuntu
   {
     name: 'ubuntu-14.04',
     display_name: 'Ubuntu 14.04',
@@ -44,9 +27,9 @@ const OPERATING_SYSTEMS = [
     mongoVersion: '<4.2'
   },
   {
-    name: 'ubuntu-16.04',
-    display_name: 'Ubuntu 16.04',
-    run_on: 'ubuntu1604-test',
+    name: 'ubuntu-18.04',
+    display_name: 'Ubuntu 18.04',
+    run_on: 'ubuntu1804-test',
     mongoVersion: '>=3.2',
     clientEncryption: true
   },

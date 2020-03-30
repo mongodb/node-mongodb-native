@@ -619,39 +619,12 @@ tasks:
       - func: run aws auth test with aws credentials and session token as environment variables
       - func: run aws ECS auth test
 buildvariants:
-  - name: debian81-test-carbon
-    display_name: Debian 8.1 Node Carbon
-    run_on: debian81-test
-    expansions:
-      NODE_LTS_NAME: carbon
-    tasks: &ref_0
-      - test-4.0-server
-      - test-4.0-replica_set
-      - test-4.0-sharded_cluster
-      - test-3.6-server
-      - test-3.6-replica_set
-      - test-3.6-sharded_cluster
-      - test-3.4-server
-      - test-3.4-replica_set
-      - test-3.4-sharded_cluster
-  - name: debian81-test-dubnium
-    display_name: Debian 8.1 Node Dubnium
-    run_on: debian81-test
-    expansions:
-      NODE_LTS_NAME: dubnium
-    tasks: *ref_0
-  - name: debian81-test-erbium
-    display_name: Debian 8.1 Node Erbium
-    run_on: debian81-test
-    expansions:
-      NODE_LTS_NAME: erbium
-    tasks: *ref_0
   - name: macos-1014-carbon
     display_name: macOS 10.14 Node Carbon
     run_on: macos-1014
     expansions:
       NODE_LTS_NAME: carbon
-    tasks: &ref_1
+    tasks: &ref_0
       - test-latest-server
       - test-latest-replica_set
       - test-latest-sharded_cluster
@@ -682,74 +655,37 @@ buildvariants:
     run_on: macos-1014
     expansions:
       NODE_LTS_NAME: dubnium
-    tasks: *ref_1
+    tasks: *ref_0
   - name: macos-1014-erbium
     display_name: macOS 10.14 Node Erbium
     run_on: macos-1014
     expansions:
       NODE_LTS_NAME: erbium
-    tasks: *ref_1
+    tasks: *ref_0
   - name: rhel70-carbon
     display_name: RHEL 7.0 Node Carbon
     run_on: rhel70-small
     expansions:
       NODE_LTS_NAME: carbon
-    tasks: *ref_1
+    tasks: *ref_0
   - name: rhel70-dubnium
     display_name: RHEL 7.0 Node Dubnium
     run_on: rhel70-small
     expansions:
       NODE_LTS_NAME: dubnium
-    tasks: *ref_1
+    tasks: *ref_0
   - name: rhel70-erbium
     display_name: RHEL 7.0 Node Erbium
     run_on: rhel70-small
     expansions:
       NODE_LTS_NAME: erbium
-    tasks: *ref_1
-  - name: suse12-x86-64-test-carbon
-    display_name: SUSE 12 (x86_64) Node Carbon
-    run_on: suse12-test
-    expansions:
-      NODE_LTS_NAME: carbon
-    tasks: &ref_2
-      - test-latest-server
-      - test-latest-replica_set
-      - test-latest-sharded_cluster
-      - test-4.2-server
-      - test-4.2-replica_set
-      - test-4.2-sharded_cluster
-      - test-4.0-server
-      - test-4.0-replica_set
-      - test-4.0-sharded_cluster
-      - test-3.6-server
-      - test-3.6-replica_set
-      - test-3.6-sharded_cluster
-      - test-3.4-server
-      - test-3.4-replica_set
-      - test-3.4-sharded_cluster
-      - test-3.2-server
-      - test-3.2-replica_set
-      - test-3.2-sharded_cluster
-      - test-atlas-connectivity
-  - name: suse12-x86-64-test-dubnium
-    display_name: SUSE 12 (x86_64) Node Dubnium
-    run_on: suse12-test
-    expansions:
-      NODE_LTS_NAME: dubnium
-    tasks: *ref_2
-  - name: suse12-x86-64-test-erbium
-    display_name: SUSE 12 (x86_64) Node Erbium
-    run_on: suse12-test
-    expansions:
-      NODE_LTS_NAME: erbium
-    tasks: *ref_2
+    tasks: *ref_0
   - name: ubuntu-14.04-carbon
     display_name: Ubuntu 14.04 Node Carbon
     run_on: ubuntu1404-test
     expansions:
       NODE_LTS_NAME: carbon
-    tasks: &ref_3
+    tasks: &ref_1
       - test-4.0-server
       - test-4.0-replica_set
       - test-4.0-sharded_cluster
@@ -773,30 +709,49 @@ buildvariants:
     run_on: ubuntu1404-test
     expansions:
       NODE_LTS_NAME: dubnium
-    tasks: *ref_3
+    tasks: *ref_1
   - name: ubuntu-14.04-erbium
     display_name: Ubuntu 14.04 Node Erbium
     run_on: ubuntu1404-test
     expansions:
       NODE_LTS_NAME: erbium
-    tasks: *ref_3
-  - name: ubuntu-16.04-carbon
-    display_name: Ubuntu 16.04 Node Carbon
-    run_on: ubuntu1604-test
+    tasks: *ref_1
+  - name: ubuntu-18.04-carbon
+    display_name: Ubuntu 18.04 Node Carbon
+    run_on: ubuntu1804-test
     expansions:
       NODE_LTS_NAME: carbon
       CLIENT_ENCRYPTION: true
-    tasks: *ref_2
-  - name: ubuntu-16.04-dubnium
-    display_name: Ubuntu 16.04 Node Dubnium
-    run_on: ubuntu1604-test
+    tasks: &ref_2
+      - test-latest-server
+      - test-latest-replica_set
+      - test-latest-sharded_cluster
+      - test-4.2-server
+      - test-4.2-replica_set
+      - test-4.2-sharded_cluster
+      - test-4.0-server
+      - test-4.0-replica_set
+      - test-4.0-sharded_cluster
+      - test-3.6-server
+      - test-3.6-replica_set
+      - test-3.6-sharded_cluster
+      - test-3.4-server
+      - test-3.4-replica_set
+      - test-3.4-sharded_cluster
+      - test-3.2-server
+      - test-3.2-replica_set
+      - test-3.2-sharded_cluster
+      - test-atlas-connectivity
+  - name: ubuntu-18.04-dubnium
+    display_name: Ubuntu 18.04 Node Dubnium
+    run_on: ubuntu1804-test
     expansions:
       NODE_LTS_NAME: dubnium
       CLIENT_ENCRYPTION: true
     tasks: *ref_2
-  - name: ubuntu-16.04-erbium
-    display_name: Ubuntu 16.04 Node Erbium
-    run_on: ubuntu1604-test
+  - name: ubuntu-18.04-erbium
+    display_name: Ubuntu 18.04 Node Erbium
+    run_on: ubuntu1804-test
     expansions:
       NODE_LTS_NAME: erbium
       CLIENT_ENCRYPTION: true
