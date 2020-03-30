@@ -181,7 +181,10 @@
                 ],
                 "writeConcernError": {
                   "code": 91,
-                  "errmsg": "Replication is being shut down"
+                  "errmsg": "Replication is being shut down",
+                  "errorLabels": [
+                    "RetryableWriteError"
+                  ]
                 }
               }
             }

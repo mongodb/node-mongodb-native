@@ -305,10 +305,10 @@ tests:
           document:
             _id: 1
         result:
-          # Don't assert on errorCodeName because (after SERVER-38583) the
-          # DuplicateKey is reported in writeErrors, not as a top-level
-          # command error.
           errorLabelsOmit: ["TransientTransactionError", "UnknownTransactionCommitResult"]
+          # DuplicateKey error code included in the bulk write error message
+          # returned by the server
+          errorContains: E11000
       # Make sure the server aborted the transaction.
       - name: insertOne
         object: collection

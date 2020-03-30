@@ -274,6 +274,7 @@ tests:
       data:
           failCommands: ["abortTransaction"]
           errorCode: 10107
+          errorLabels: ["RetryableWriteError"]
           closeConnection: false
 
     operations:
@@ -341,6 +342,7 @@ tests:
       data:
           failCommands: ["abortTransaction"]
           errorCode: 13436
+          errorLabels: ["RetryableWriteError"]
           closeConnection: false
 
     operations:
@@ -408,6 +410,7 @@ tests:
       data:
           failCommands: ["abortTransaction"]
           errorCode: 13435
+          errorLabels: ["RetryableWriteError"]
           closeConnection: false
 
     operations:
@@ -467,7 +470,7 @@ tests:
       collection:
         data: []
 
-  - description: abortTransaction succeeds after InterruptedDueToStepDown 
+  - description: abortTransaction succeeds after InterruptedDueToReplStateChange
 
     failPoint:
       configureFailPoint: failCommand
@@ -475,6 +478,7 @@ tests:
       data:
           failCommands: ["abortTransaction"]
           errorCode: 11602
+          errorLabels: ["RetryableWriteError"]
           closeConnection: false
 
     operations:
@@ -542,6 +546,7 @@ tests:
       data:
           failCommands: ["abortTransaction"]
           errorCode: 11600
+          errorLabels: ["RetryableWriteError"]
           closeConnection: false
 
     operations:
@@ -609,6 +614,7 @@ tests:
       data:
           failCommands: ["abortTransaction"]
           errorCode: 189
+          errorLabels: ["RetryableWriteError"]
           closeConnection: false
 
     operations:
@@ -676,6 +682,7 @@ tests:
       data:
           failCommands: ["abortTransaction"]
           errorCode: 91
+          errorLabels: ["RetryableWriteError"]
           closeConnection: false
 
     operations:
@@ -743,6 +750,7 @@ tests:
       data:
           failCommands: ["abortTransaction"]
           errorCode: 7
+          errorLabels: ["RetryableWriteError"]
           closeConnection: false
 
     operations:
@@ -810,6 +818,7 @@ tests:
       data:
           failCommands: ["abortTransaction"]
           errorCode: 6
+          errorLabels: ["RetryableWriteError"]
           closeConnection: false
 
     operations:
@@ -877,6 +886,7 @@ tests:
       data:
           failCommands: ["abortTransaction"]
           errorCode: 9001
+          errorLabels: ["RetryableWriteError"]
           closeConnection: false
 
     operations:
@@ -944,6 +954,7 @@ tests:
       data:
           failCommands: ["abortTransaction"]
           errorCode: 89
+          errorLabels: ["RetryableWriteError"]
           closeConnection: false
 
     operations:
@@ -1012,6 +1023,7 @@ tests:
           failCommands: ["abortTransaction"]
           writeConcernError:
             code: 11600
+            errorLabels: ["RetryableWriteError"]
             errmsg: Replication is being shut down
 
     operations:
@@ -1077,7 +1089,7 @@ tests:
       collection:
         data: []
 
-  - description: abortTransaction succeeds after WriteConcernError InterruptedDueToStepDown 
+  - description: abortTransaction succeeds after WriteConcernError InterruptedDueToReplStateChange
 
     failPoint:
       configureFailPoint: failCommand
@@ -1086,6 +1098,7 @@ tests:
           failCommands: ["abortTransaction"]
           writeConcernError:
             code: 11602
+            errorLabels: ["RetryableWriteError"]
             errmsg: Replication is being shut down
 
     operations:
@@ -1160,6 +1173,7 @@ tests:
           failCommands: ["abortTransaction"]
           writeConcernError:
             code: 189
+            errorLabels: ["RetryableWriteError"]
             errmsg: Replication is being shut down
 
     operations:
@@ -1234,6 +1248,7 @@ tests:
           failCommands: ["abortTransaction"]
           writeConcernError:
             code: 91
+            errorLabels: ["RetryableWriteError"]
             errmsg: Replication is being shut down
 
     operations:
