@@ -57,6 +57,7 @@
           "object": "session0",
           "result": {
             "errorLabelsContain": [
+              "RetryableWriteError",
               "UnknownTransactionCommitResult"
             ],
             "errorLabelsOmit": [
@@ -207,6 +208,7 @@
           "object": "session0",
           "result": {
             "errorLabelsContain": [
+              "RetryableWriteError",
               "UnknownTransactionCommitResult"
             ],
             "errorLabelsOmit": [
@@ -353,7 +355,9 @@
           "result": {
             "errorCodeName": "Interrupted",
             "errorLabelsOmit": [
-              "TransientTransactionError"
+              "RetryableWriteError",
+              "TransientTransactionError",
+              "UnknownTransactionCommitResult"
             ]
           }
         }
@@ -406,7 +410,7 @@
       }
     },
     {
-      "description": "commitTransaction fails after WriteConcernError Interrupted",
+      "description": "commitTransaction is not retried after UnsatisfiableWriteConcern error",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -417,8 +421,8 @@
             "commitTransaction"
           ],
           "writeConcernError": {
-            "code": 11601,
-            "errmsg": "operation was interrupted"
+            "code": 100,
+            "errmsg": "Not enough data-bearing nodes"
           }
         }
       },
@@ -452,7 +456,9 @@
           "object": "session0",
           "result": {
             "errorLabelsOmit": [
-              "TransientTransactionError"
+              "RetryableWriteError",
+              "TransientTransactionError",
+              "UnknownTransactionCommitResult"
             ]
           }
         }
@@ -629,6 +635,9 @@
             "commitTransaction"
           ],
           "errorCode": 10107,
+          "errorLabels": [
+            "RetryableWriteError"
+          ],
           "closeConnection": false
         }
       },
@@ -737,6 +746,9 @@
             "commitTransaction"
           ],
           "errorCode": 13436,
+          "errorLabels": [
+            "RetryableWriteError"
+          ],
           "closeConnection": false
         }
       },
@@ -845,6 +857,9 @@
             "commitTransaction"
           ],
           "errorCode": 13435,
+          "errorLabels": [
+            "RetryableWriteError"
+          ],
           "closeConnection": false
         }
       },
@@ -942,7 +957,7 @@
       }
     },
     {
-      "description": "commitTransaction succeeds after InterruptedDueToStepDown",
+      "description": "commitTransaction succeeds after InterruptedDueToReplStateChange",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -953,6 +968,9 @@
             "commitTransaction"
           ],
           "errorCode": 11602,
+          "errorLabels": [
+            "RetryableWriteError"
+          ],
           "closeConnection": false
         }
       },
@@ -1061,6 +1079,9 @@
             "commitTransaction"
           ],
           "errorCode": 11600,
+          "errorLabels": [
+            "RetryableWriteError"
+          ],
           "closeConnection": false
         }
       },
@@ -1169,6 +1190,9 @@
             "commitTransaction"
           ],
           "errorCode": 189,
+          "errorLabels": [
+            "RetryableWriteError"
+          ],
           "closeConnection": false
         }
       },
@@ -1277,6 +1301,9 @@
             "commitTransaction"
           ],
           "errorCode": 91,
+          "errorLabels": [
+            "RetryableWriteError"
+          ],
           "closeConnection": false
         }
       },
@@ -1385,6 +1412,9 @@
             "commitTransaction"
           ],
           "errorCode": 7,
+          "errorLabels": [
+            "RetryableWriteError"
+          ],
           "closeConnection": false
         }
       },
@@ -1493,6 +1523,9 @@
             "commitTransaction"
           ],
           "errorCode": 6,
+          "errorLabels": [
+            "RetryableWriteError"
+          ],
           "closeConnection": false
         }
       },
@@ -1601,6 +1634,9 @@
             "commitTransaction"
           ],
           "errorCode": 9001,
+          "errorLabels": [
+            "RetryableWriteError"
+          ],
           "closeConnection": false
         }
       },
@@ -1709,6 +1745,9 @@
             "commitTransaction"
           ],
           "errorCode": 89,
+          "errorLabels": [
+            "RetryableWriteError"
+          ],
           "closeConnection": false
         }
       },
@@ -1818,6 +1857,9 @@
           ],
           "writeConcernError": {
             "code": 11600,
+            "errorLabels": [
+              "RetryableWriteError"
+            ],
             "errmsg": "Replication is being shut down"
           }
         }
@@ -1925,7 +1967,7 @@
       }
     },
     {
-      "description": "commitTransaction succeeds after WriteConcernError InterruptedDueToStepDown",
+      "description": "commitTransaction succeeds after WriteConcernError InterruptedDueToReplStateChange",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -1937,6 +1979,9 @@
           ],
           "writeConcernError": {
             "code": 11602,
+            "errorLabels": [
+              "RetryableWriteError"
+            ],
             "errmsg": "Replication is being shut down"
           }
         }
@@ -2056,6 +2101,9 @@
           ],
           "writeConcernError": {
             "code": 189,
+            "errorLabels": [
+              "RetryableWriteError"
+            ],
             "errmsg": "Replication is being shut down"
           }
         }
@@ -2175,6 +2223,9 @@
           ],
           "writeConcernError": {
             "code": 91,
+            "errorLabels": [
+              "RetryableWriteError"
+            ],
             "errmsg": "Replication is being shut down"
           }
         }

@@ -61,10 +61,11 @@ control the fail point's behavior. ``failCommand`` supports the following
 
 - ``failCommands``: Required, the list of command names to fail.
 - ``closeConnection``: Boolean option, which defaults to ``false``. If
-  ``true``, the connection on which the command is executed will be closed
-  and the client will see a network error.
-- ``errorCode``: Integer option, which is unset by default. If set, the
-  specified command error code will be returned as a command error.
+  ``true``, the command will not be executed, the connection will be closed, and
+  the client will see a network error.
+- ``errorCode``: Integer option, which is unset by default. If set, the command
+  will not be executed and the specified command error code will be returned as
+  a command error.
 - ``writeConcernError``: A document, which is unset by default. If set, the
   server will return this document in the "writeConcernError" field. This
   failure response only applies to commands that support write concern and
@@ -121,8 +122,8 @@ Each YAML file has the following keys:
     configureFailPoint command to run on the admin database. This option and
     ``useMultipleMongoses: true`` are mutually exclusive.
 
-  - ``sessionOptions``: Optional, parameters to pass to
-    MongoClient.startSession().
+  - ``sessionOptions``: Optional, map of session names (e.g. "session0") to
+    parameters to pass to MongoClient.startSession() when creating that session.
 
   - ``operations``: Array of documents, each describing an operation to be
     executed. Each document has the following fields:
@@ -136,11 +137,17 @@ Each YAML file has the following keys:
     - ``collectionOptions``: Optional, parameters to pass to the Collection()
       used for this operation.
 
+    - ``databaseOptions``: Optional, parameters to pass to the Database()
+      used for this operation.
+
     - ``command_name``: Present only when ``name`` is "runCommand". The name
       of the command to run. Required for languages that are unable preserve
       the order keys in the "command" argument when parsing JSON/YAML.
 
     - ``arguments``: Optional, the names and values of arguments.
+
+    - ``error``: Optional. If true, the test should expect an error or
+      exception. This could be a server-generated or a driver-generated error.
 
     - ``result``: The return value from the operation, if any. This field may
       be a single document or an array of documents in the case of a
@@ -191,7 +198,8 @@ Then for each element in ``tests``:
 #. If the ``skipReason`` field is present, skip this test completely.
 #. Create a MongoClient and call
    ``client.admin.runCommand({killAllSessions: []})`` to clean up any open
-   transactions from previous test failures.
+   transactions from previous test failures. Ignore a command failure with
+   error code 11601 ("Interrupted") to work around `SERVER-38335`_.
 
    - Running ``killAllSessions`` cleans up any open transactions from
      a previously failed test to prevent the current test from blocking.
@@ -225,7 +233,7 @@ Then for each element in ``tests``:
 #. Call ``client.startSession`` twice to create ClientSession objects
    ``session0`` and ``session1``, using the test's "sessionOptions" if they
    are present. Save their lsids so they are available after calling
-   ``endSession``, see `Logical Session Id`.
+   ``endSession``, see `Logical Session Id`_.
 #. For each element in ``operations``:
 
    - If the operation ``name`` is a special test operation type, execute it and
@@ -235,8 +243,9 @@ Then for each element in ``tests``:
      field at the top level of the test file.
    - Create a Collection object from the Database, using the
      ``collection_name`` field at the top level of the test file.
-     If ``collectionOptions`` is present create the Collection object with the
-     provided options. Otherwise create the object with the default options.
+     If ``collectionOptions`` or ``databaseOptions`` is present, create the
+     Collection or Database object with the provided options, respectively.
+     Otherwise create the object with the default options.
    - Execute the named method on the provided ``object``, passing the
      arguments listed. Pass ``session0`` or ``session1`` to the method,
      depending on which session's name is in the arguments list.
@@ -244,6 +253,8 @@ Then for each element in ``tests``:
      method.
    - If the driver throws an exception / returns an error while executing this
      series of operations, store the error message and server error code.
+   - If the operation's ``error`` field is ``true``, verify that the method
+     threw an exception or returned an error.
    - If the result document has an "errorContains" field, verify that the
      method threw an exception or returned an error, and that the value of the
      "errorContains" field matches the error string. "errorContains" is a
@@ -289,6 +300,8 @@ Then for each element in ``tests``:
      **local read concern** even when the MongoClient is configured with
      another read preference or read concern.
 
+.. _SERVER-38335: https://jira.mongodb.org/browse/SERVER-38335
+
 Special Test Operations
 ```````````````````````
 
@@ -329,6 +342,26 @@ fail point on the mongos server which "session0" is pinned to::
               failCommands: ["commitTransaction"]
               closeConnection: true
 
+Tests that use the "targetedFailPoint" operation do not include
+``configureFailPoint`` commands in their command expectations. Drivers MUST
+ensure that ``configureFailPoint`` commands do not appear in the list of logged
+commands, either by manually filtering it from the list of observed commands or
+by using a different MongoClient to execute ``configureFailPoint``.
+
+assertSessionTransactionState
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The "assertSessionTransactionState" operation instructs the test runner to
+assert that the transaction state of the given session is equal to the
+specified value. The possible values are as follows: ``none``, ``starting``,
+``in_progress``, ``committed``, ``aborted``::
+
+      - name: assertSessionTransactionState
+        object: testRunner
+        arguments:
+          session: session0
+          state: in_progress
+
 assertSessionPinned
 ~~~~~~~~~~~~~~~~~~~
 
@@ -350,6 +383,70 @@ the given session is not pinned to a mongos::
         object: testRunner
         arguments:
           session: session0
+
+assertCollectionExists
+~~~~~~~~~~~~~~~~~~~~~~
+
+The "assertCollectionExists" operation instructs the test runner to assert that
+the given collection exists in the database::
+
+      - name: assertCollectionExists
+        object: testRunner
+        arguments:
+          database: db
+          collection: test
+
+Use a ``listCollections`` command to check whether the collection exists. Note
+that it is currently not possible to run ``listCollections`` from within a
+transaction.
+
+assertCollectionNotExists
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The "assertCollectionNotExists" operation instructs the test runner to assert
+that the given collection does not exist in the database::
+
+      - name: assertCollectionNotExists
+        object: testRunner
+        arguments:
+          database: db
+          collection: test
+
+Use a ``listCollections`` command to check whether the collection exists. Note
+that it is currently not possible to run ``listCollections`` from within a
+transaction.
+
+assertIndexExists
+~~~~~~~~~~~~~~~~~
+
+The "assertIndexExists" operation instructs the test runner to assert that the
+index with the given name exists on the collection::
+
+      - name: assertIndexExists
+        object: testRunner
+        arguments:
+          database: db
+          collection: test
+          index: t_1
+
+Use a ``listIndexes`` command to check whether the index exists. Note that it is
+currently not possible to run ``listIndexes`` from within a transaction.
+
+assertIndexNotExists
+~~~~~~~~~~~~~~~~~~~~
+
+The "assertIndexNotExists" operation instructs the test runner to assert that
+the index with the given name does not exist on the collection::
+
+      - name: assertIndexNotExists
+        object: testRunner
+        arguments:
+          database: db
+          collection: test
+          index: t_1
+
+Use a ``listIndexes`` command to check whether the index exists. Note that it is
+currently not possible to run ``listIndexes`` from within a transaction.
 
 Command-Started Events
 ``````````````````````
@@ -524,6 +621,7 @@ is the only command allowed in a sharded transaction that uses the
 Changelog
 =========
 
+:2019-05-15: Add operation level ``error`` field to assert any error.
 :2019-03-25: Add workaround for StaleDbVersion on distinct.
 :2019-03-01: Add top-level ``runOn`` field to denote server version and/or
              topology requirements requirements for the test file. Removes the

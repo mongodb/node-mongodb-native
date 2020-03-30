@@ -192,6 +192,7 @@ tests:
       data:
           failCommands: ["commitTransaction"]
           errorCode: 10107 # NotMaster
+          errorLabels: ["RetryableWriteError"] # SPEC-1565
           closeConnection: false
     operations:
       - *withTransaction

@@ -116,7 +116,6 @@
                       "x": 1
                     }
                   },
-                  "multi": false,
                   "upsert": true
                 }
               ],
@@ -145,9 +144,7 @@
                   },
                   "u": {
                     "y": 1
-                  },
-                  "multi": false,
-                  "upsert": false
+                  }
                 }
               ],
               "ordered": true,
@@ -179,8 +176,7 @@
                       "z": 1
                     }
                   },
-                  "multi": true,
-                  "upsert": false
+                  "multi": true
                 }
               ],
               "ordered": true,
@@ -346,7 +342,6 @@
                       "x": 1
                     }
                   },
-                  "multi": false,
                   "upsert": true
                 }
               ],
@@ -375,9 +370,7 @@
                   },
                   "u": {
                     "y": 1
-                  },
-                  "multi": false,
-                  "upsert": false
+                  }
                 }
               ],
               "ordered": true,
@@ -409,8 +402,7 @@
                       "z": 1
                     }
                   },
-                  "multi": true,
-                  "upsert": false
+                  "multi": true
                 }
               ],
               "ordered": true,

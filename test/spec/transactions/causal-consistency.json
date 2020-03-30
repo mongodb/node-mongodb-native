@@ -40,8 +40,7 @@
               "$inc": {
                 "count": 1
               }
-            },
-            "upsert": false
+            }
           },
           "result": {
             "matchedCount": 1,
@@ -65,8 +64,7 @@
               "$inc": {
                 "count": 1
               }
-            },
-            "upsert": false
+            }
           },
           "result": {
             "matchedCount": 1,
@@ -93,9 +91,7 @@
                     "$inc": {
                       "count": 1
                     }
-                  },
-                  "multi": false,
-                  "upsert": false
+                  }
                 }
               ],
               "ordered": true,
@@ -123,9 +119,7 @@
                     "$inc": {
                       "count": 1
                     }
-                  },
-                  "multi": false,
-                  "upsert": false
+                  }
                 }
               ],
               "ordered": true,
@@ -212,8 +206,7 @@
               "$inc": {
                 "count": 1
               }
-            },
-            "upsert": false
+            }
           },
           "result": {
             "matchedCount": 1,
@@ -260,9 +253,7 @@
                     "$inc": {
                       "count": 1
                     }
-                  },
-                  "multi": false,
-                  "upsert": false
+                  }
                 }
               ],
               "ordered": true,

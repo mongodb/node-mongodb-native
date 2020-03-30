@@ -304,9 +304,7 @@
                     "$set": {
                       "x": 1
                     }
-                  },
-                  "multi": false,
-                  "upsert": false
+                  }
                 },
                 {
                   "q": {
@@ -317,7 +315,6 @@
                       "x": 2
                     }
                   },
-                  "multi": false,
                   "upsert": true
                 }
               ],
@@ -379,9 +376,7 @@
                   },
                   "u": {
                     "y": 1
-                  },
-                  "multi": false,
-                  "upsert": false
+                  }
                 },
                 {
                   "q": {
@@ -389,9 +384,7 @@
                   },
                   "u": {
                     "y": 2
-                  },
-                  "multi": false,
-                  "upsert": false
+                  }
                 }
               ],
               "ordered": true,
@@ -454,8 +447,7 @@
                       "z": 1
                     }
                   },
-                  "multi": true,
-                  "upsert": false
+                  "multi": true
                 }
               ],
               "ordered": true,

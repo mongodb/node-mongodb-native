@@ -1,0 +1,223 @@
+{
+  "runOn": [
+    {
+      "minServerVersion": "4.3.1",
+      "topology": [
+        "replicaset",
+        "sharded"
+      ]
+    }
+  ],
+  "database_name": "transaction-tests",
+  "collection_name": "test",
+  "data": [],
+  "tests": [
+    {
+      "description": "commitTransaction does not retry error without RetryableWriteError label",
+      "clientOptions": {
+        "retryWrites": false
+      },
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "commitTransaction"
+          ],
+          "errorCode": 11600,
+          "errorLabels": []
+        }
+      },
+      "operations": [
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 1
+            }
+          },
+          "result": {
+            "insertedId": 1
+          }
+        },
+        {
+          "name": "commitTransaction",
+          "object": "session0",
+          "result": {
+            "errorLabelsOmit": [
+              "RetryableWriteError",
+              "TransientTransactionError"
+            ]
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "insert": "test",
+              "documents": [
+                {
+                  "_id": 1
+                }
+              ],
+              "ordered": true,
+              "readConcern": null,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": true,
+              "autocommit": false,
+              "writeConcern": null
+            },
+            "command_name": "insert",
+            "database_name": "transaction-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "commitTransaction": 1,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": null,
+              "autocommit": false,
+              "writeConcern": null
+            },
+            "command_name": "commitTransaction",
+            "database_name": "admin"
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": []
+        }
+      }
+    },
+    {
+      "description": "commitTransaction retries once with RetryableWriteError from server",
+      "clientOptions": {
+        "retryWrites": false
+      },
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "commitTransaction"
+          ],
+          "errorCode": 112,
+          "errorLabels": [
+            "RetryableWriteError"
+          ]
+        }
+      },
+      "operations": [
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 1
+            }
+          },
+          "result": {
+            "insertedId": 1
+          }
+        },
+        {
+          "name": "commitTransaction",
+          "object": "session0"
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "insert": "test",
+              "documents": [
+                {
+                  "_id": 1
+                }
+              ],
+              "ordered": true,
+              "readConcern": null,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": true,
+              "autocommit": false,
+              "writeConcern": null
+            },
+            "command_name": "insert",
+            "database_name": "transaction-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "commitTransaction": 1,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": null,
+              "autocommit": false,
+              "writeConcern": null
+            },
+            "command_name": "commitTransaction",
+            "database_name": "admin"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "commitTransaction": 1,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": null,
+              "autocommit": false,
+              "writeConcern": {
+                "w": "majority",
+                "wtimeout": 10000
+              }
+            },
+            "command_name": "commitTransaction",
+            "database_name": "admin"
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 1
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
