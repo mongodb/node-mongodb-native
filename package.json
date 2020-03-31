@@ -39,6 +39,7 @@
     "co": "4.6.0",
     "coveralls": "^2.11.6",
     "eslint": "^4.5.0",
+    "eslint-config-prettier": "^6.10.1",
     "eslint-plugin-prettier": "^2.2.0",
     "istanbul": "^0.4.5",
     "jsdoc": "3.5.5",
