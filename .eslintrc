@@ -1,9 +1,5 @@
 {
-  "extends": [
-    "eslint:recommended",
-    "plugin:prettier/recommended",
-    "plugin:jsdoc/recommended"
-  ],
+  "extends": ["eslint:recommended", "plugin:prettier/recommended", "plugin:jsdoc/recommended"],
   "env": {
     "node": true,
     "mocha": true,
@@ -12,15 +8,21 @@
   "parserOptions": {
     "ecmaVersion": 2018
   },
-  "plugins": [
-    "prettier",
-    "jsdoc"
-  ],
+  "plugins": ["prettier", "jsdoc"],
   "rules": {
     "prettier/prettier": "error",
 
-    "no-console": 0,
-    "eqeqeq": ["error", "always", {"null": "ignore"}],
+    "jsdoc/check-tag-names": [
+      "warn",
+      {
+        "definedTags": ["example-class", "example-method"]
+      }
+    ],
+
+    "jsdoc/no-undefined-types": 0,
+
+    "no-console": "off",
+    "eqeqeq": ["error", "always", { "null": "ignore" }],
     "strict": ["error", "global"]
   },
   "settings": {
