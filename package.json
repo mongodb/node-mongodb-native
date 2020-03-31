@@ -5,7 +5,8 @@
   "main": "index.js",
   "files": [
     "index.js",
-    "lib"
+    "lib",
+    "types/index.d.ts"
   ],
   "repository": {
     "type": "git",
@@ -64,15 +65,15 @@
     "url": "https://github.com/mongodb/node-mongodb-native/issues"
   },
   "scripts": {
-    "atlas": "node ./test/tools/atlas_connectivity_tests.js",
-    "test": "npm run lint && mocha --recursive test/functional test/unit",
-    "test-nolint": "mocha --recursive test/functional test/unit",
-    "coverage": "nyc mocha --timeout 60000 --recursive test/unit test/functional",
-    "lint": "eslint lib test",
-    "format": "prettier --print-width 100 --tab-width 2 --single-quote --write 'test/**/*.js' 'lib/**/*.js'",
-    "bench": "node test/benchmarks/driverBench/",
-    "generate-evergreen": "node .evergreen/generate_evergreen_tasks.js",
-    "release": "standard-version -i HISTORY.md"
+    "build:evergreen": "node .evergreen/generate_evergreen_tasks.js",
+    "check:atlas": "node test/tools/atlas_connectivity_tests.js",
+    "check:bench": "node test/benchmarks/driverBench",
+    "check:coverage": "nyc mocha --timeout 60000 --recursive test/{functional,unit}",
+    "check:lint": "eslint index.js lib test",
+    "check:test": "mocha --recursive test/{functional,unit}",
+    "check:types": "tsc",
+    "release": "standard-version -i HISTORY.md",
+    "test": "npm run check:lint && npm run check:types && npm run check:test"
   },
   "homepage": "https://github.com/mongodb/node-mongodb-native",
   "optionalDependencies": {

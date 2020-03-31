@@ -1,32 +1,32 @@
 {
   "extends": [
-    "eslint:recommended"
+    "eslint:recommended",
+    "plugin:prettier/recommended",
+    "plugin:jsdoc/recommended"
   ],
   "env": {
     "node": true,
     "mocha": true,
     "es6": true
   },
-  "globals": {
-    "Promise": true,
-    "Set": true,
-    "Symbol": true
-  },
   "parserOptions": {
-    "ecmaVersion": 2017
+    "ecmaVersion": 2018
   },
   "plugins": [
-    "prettier"
+    "prettier",
+    "jsdoc"
   ],
   "rules": {
-    "prettier/prettier": ["error", {
-      "singleQuote": true,
-      "tabWidth": 2,
-      "printWidth": 100
-    }],
+    "prettier/prettier": "error",
 
     "no-console": 0,
     "eqeqeq": ["error", "always", {"null": "ignore"}],
     "strict": ["error", "global"]
+  },
+  "settings": {
+    "jsdoc": {
+      "check-types": false,
+      "mode": "typescript"
+    }
   }
 }
