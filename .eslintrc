@@ -25,6 +25,7 @@
     "jsdoc/require-returns": "off",
     "jsdoc/require-returns-description": "off",
     "jsdoc/require-returns-type": "off",
+    "jsdoc/valid-types": "off",
 
     "no-console": "off",
     "eqeqeq": ["error", "always", { "null": "ignore" }],
