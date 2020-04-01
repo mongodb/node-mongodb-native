@@ -384,7 +384,7 @@ function extractCrudResult(result, operation) {
   }
 
   return Object.keys(operation.result).reduce((crudResult, key) => {
-    if (result.hasOwnProperty(key) && result[key] != null) {
+    if (Object.prototype.hasOwnProperty.call(result, key) && result[key] != null) {
       // FIXME(major): update crud results are broken and need to be changed
       crudResult[key] = key === 'upsertedId' ? result[key]._id : result[key];
     }

@@ -1794,7 +1794,8 @@ describe('Find', function() {
 
         db.collection('collection2', function(err, collection) {
           // Keep hammering in inserts
-          var insert = function() {
+          var insert;
+          insert = function() {
             process.nextTick(function() {
               collection.insert({ a: 1 });
               if (running) process.nextTick(insert);
