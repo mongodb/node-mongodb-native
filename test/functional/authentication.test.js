@@ -11,7 +11,7 @@ describe('Authentication', function() {
 
   it('should still work for auth when using new url parser and no database is in url', {
     metadata: { requires: { topology: ['single'] } },
-    test: function(done) {
+    test: function() {
       const configuration = this.configuration;
       const username = 'testUser';
       const password = 'pencil';
@@ -27,28 +27,25 @@ describe('Authentication', function() {
 
       const controllerClient = configuration.newClient();
 
-      controllerClient
-        .connect()
-        .then(() => {
-          const controllerClientCleanup = tap(() => controllerClient.close());
-          const admin = controllerClient.db('admin');
-          return admin
-            .addUser(username, password)
-            .then(() => {
-              const client = configuration.newClient(AUTH_URL, { useNewUrlParser: true });
+      return controllerClient.connect().then(() => {
+        const controllerClientCleanup = tap(() => controllerClient.close());
+        const admin = controllerClient.db('admin');
+        return admin
+          .addUser(username, password)
+          .then(() => {
+            const client = configuration.newClient(AUTH_URL, { useNewUrlParser: true });
 
-              const removeUser = tap(() => admin.removeUser(username));
-              const clientCleanup = tap(() => client.close());
+            const removeUser = tap(() => admin.removeUser(username));
+            const clientCleanup = tap(() => client.close());
 
-              return client
-                .connect()
-                .then(() => undefined)
-                .then(clientCleanup, clientCleanup)
-                .then(removeUser, removeUser);
-            })
-            .then(controllerClientCleanup, controllerClientCleanup);
-        })
-        .then(done, done);
+            return client
+              .connect()
+              .then(() => undefined)
+              .then(clientCleanup, clientCleanup)
+              .then(removeUser, removeUser);
+          })
+          .then(controllerClientCleanup, controllerClientCleanup);
+      });
     }
   });
 

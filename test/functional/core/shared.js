@@ -87,7 +87,7 @@ function locateAuthMethod(configuration, cb) {
 
         // Establish the type of auth method
         if (!result.result.maxWireVersion || result.result.maxWireVersion === 2) {
-          cb(null, 'mongocr');
+          cb(null, 'mongodb-cr');
         } else {
           cb(null, 'scram-sha-1');
         }

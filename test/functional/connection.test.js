@@ -222,6 +222,7 @@ describe('Connection', function() {
    */
   function connectionTester(configuration, testName, callback) {
     return function(err, client) {
+      expect(err).to.not.exist;
       var db = client.db(configuration.db);
       test.equal(err, null);
 
