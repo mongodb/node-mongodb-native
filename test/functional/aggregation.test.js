@@ -750,6 +750,7 @@ describe('Aggregation', function() {
 
   /**
    * Correctly perform simple group
+   *
    * @ignore
    */
   it('should perform a simple group aggregation', {
@@ -805,6 +806,7 @@ describe('Aggregation', function() {
 
   /**
    * Correctly perform simple group
+   *
    * @ignore
    */
   it('should correctly perform an aggregation using a collection name with dot in it', {

@@ -108,7 +108,7 @@ class MongosFixture {
  * Creates a cluster time for use in unit testing cluster time gossiping and
  * causal consistency.
  *
- * @param {Number} time the logical time
+ * @param {number} time the logical time
  * @returns a cluster time according to the driver sessions specification
  */
 function genClusterTime(time) {

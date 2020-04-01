@@ -21,7 +21,9 @@ const {
 
 /**
  * Module for parsing an ISO 8601 formatted string into a Date object.
+ *
  * @ignore
+ * @param {any} string
  */
 var ISODate = function(string) {
   var match;

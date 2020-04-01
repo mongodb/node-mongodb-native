@@ -18,9 +18,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('cursorShouldBeAbleToResetOnToArrayRunningQueryAgain', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -68,9 +66,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('cursor should close after first next operation', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -111,9 +107,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('cursor should trigger getMore', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -152,9 +146,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('shouldCorrectlyExecuteCursorExplain', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -190,9 +182,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('shouldCorrectlyExecuteCursorCount', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -310,9 +300,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('shouldCorrectlyExecuteCursorCountWithDottedCollectionName', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -398,9 +386,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('shouldCorrectlyExecuteSortOnCursor', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -513,9 +499,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('shouldThrowErrorOnEachWhenMissingCallback', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -564,9 +548,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('shouldCorrectlyHandleLimitOnCursor', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -615,9 +597,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('shouldCorrectlyHandleNegativeOneLimitOnCursor', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -669,9 +649,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('shouldCorrectlyHandleAnyNegativeLimitOnCursor', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -723,9 +701,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('shouldCorrectlyReturnErrorsOnIllegalLimitValuesNotAnInt', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -763,9 +739,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('shouldCorrectlyReturnErrorsOnIllegalLimitValuesIsClosedWithinNext', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -806,9 +780,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('shouldCorrectlyReturnErrorsOnIllegalLimitValuesIsClosedWithinClose', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -850,9 +822,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('shouldCorrectlySkipRecordsOnCursor', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -930,9 +900,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('shouldCorrectlyReturnErrorsOnIllegalSkipValues', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -988,9 +956,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('shouldReturnErrorsOnIllegalBatchSizes', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1054,9 +1020,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('shouldCorrectlyHandleChangesInBatchSizes', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1149,9 +1113,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('shouldCorrectlyHandleBatchSize', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1226,9 +1188,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('shouldHandleWhenLimitBiggerThanBatchSize', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1297,9 +1257,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('shouldHandleLimitLessThanBatchSize', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1357,9 +1315,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('shouldHandleSkipLimitChaining', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1425,9 +1381,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('shouldCorrectlyHandleLimitSkipChainingInline', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1495,9 +1449,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('shouldCloseCursorNoQuerySent', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1528,9 +1480,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('shouldCorrectlyRefillViaGetMoreCommand', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1615,9 +1565,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('shouldCorrectlyRefillViaGetMoreAlternativeCollection', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1701,9 +1649,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('shouldCloseCursorAfterQueryHasBeenSent', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1743,9 +1689,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('shouldCorrectlyExecuteCursorCountWithFields', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1784,9 +1728,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('shouldCorrectlyCountWithFieldsUsingExclude', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1822,9 +1764,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('Should correctly execute count on cursor', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1884,9 +1824,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('should be able to stream documents', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1971,9 +1909,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('immediately destroying a stream prevents the query from executing', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -2033,9 +1969,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('destroying a stream stops it', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -2094,9 +2028,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   // NOTE: skipped for use of topology manager
   it.skip('cursor stream errors', {
     // Add a tag that our runner can trigger on
@@ -2160,9 +2092,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('cursor stream pipe', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -2820,9 +2750,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('shouldNotFailDueToStackOverflowEach', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -2881,9 +2809,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('shouldNotFailDueToStackOverflowToArray', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -2942,9 +2868,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('shouldCorrectlySkipAndLimit', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -2991,9 +2915,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('shouldFailToTailANormalCollection', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -3306,9 +3228,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('Should correctly execute count on cursor with maxTimeMS', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -3366,9 +3286,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('Should correctly execute count on cursor with maxTimeMS set using legacy method', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -3415,9 +3333,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('Should correctly apply map to toArray', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -3472,9 +3388,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('Should correctly apply map to next', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -3526,9 +3440,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('Should correctly apply map to each', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -3581,9 +3493,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('Should correctly apply map to forEach', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -3639,9 +3549,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('Should correctly apply multiple uses of map and apply forEach', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -3694,9 +3602,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('Should correctly apply skip and limit to large set of documents', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -3793,9 +3699,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('Should not emit any events after close event emitted due to cursor killed', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -3836,9 +3740,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('shouldCorrectlyExecuteEnsureIndexWithNoCallback', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -3893,9 +3795,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('Should correctly execute count on cursor with limit and skip', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -3955,9 +3855,7 @@ describe('Cursor', function() {
   });
 
   /**
-   * @ignore
-   * @api private
-   */
+   * @ignore   */
   it('Should correctly handle negative batchSize and set the limit', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run

@@ -70,6 +70,7 @@ describe('MapReduce', function() {
 
   /**
    * Mapreduce tests
+   *
    * @ignore
    */
   it('shouldPerformMapReduceWithStringFunctions', {
@@ -116,6 +117,7 @@ describe('MapReduce', function() {
 
   /**
    * Mapreduce tests
+   *
    * @ignore
    */
   it('shouldForceMapReduceError', {
@@ -480,6 +482,7 @@ describe('MapReduce', function() {
 
   /**
    * Mapreduce tests
+   *
    * @ignore
    */
   it.skip('shouldPerformMapReduceWithScopeContainingFunction', {

@@ -13,6 +13,7 @@ describe('Find', function() {
 
   /**
    * Test a simple find
+   *
    * @ignore
    */
   it('shouldCorrectlyPerformSimpleFind', {
@@ -61,6 +62,7 @@ describe('Find', function() {
 
   /**
    * Test a simple find chained
+   *
    * @ignore
    */
   it('shouldCorrectlyPerformSimpleChainedFind', {
@@ -111,6 +113,7 @@ describe('Find', function() {
 
   /**
    * Test advanced find
+   *
    * @ignore
    */
   it('shouldCorrectlyPerformAdvancedFinds', {
@@ -210,6 +213,7 @@ describe('Find', function() {
 
   /**
    * Test sorting of results
+   *
    * @ignore
    */
   it('shouldCorrectlyPerformFindWithSort', {
@@ -342,6 +346,7 @@ describe('Find', function() {
 
   /**
    * Test the limit function of the db
+   *
    * @ignore
    */
   it('shouldCorrectlyPerformFindWithLimit', {
@@ -402,6 +407,7 @@ describe('Find', function() {
 
   /**
    * Test find by non-quoted values (issue #128)
+   *
    * @ignore
    */
   it('shouldCorrectlyFindWithNonQuotedValues', {
@@ -442,6 +448,7 @@ describe('Find', function() {
 
   /**
    * Test for querying embedded document using dot-notation (issue #126)
+   *
    * @ignore
    */
   it('shouldCorrectlyFindEmbeddedDocument', {
@@ -493,6 +500,7 @@ describe('Find', function() {
 
   /**
    * Find no records
+   *
    * @ignore
    */
   it('shouldCorrectlyFindNoRecords', {
@@ -787,6 +795,7 @@ describe('Find', function() {
 
   /**
    * Test field select with options
+   *
    * @ignore
    */
   it('shouldCorrectlyPerformFindWithOptions', {
@@ -832,6 +841,7 @@ describe('Find', function() {
 
   /**
    * Test findAndModify a document
+   *
    * @ignore
    */
   it('shouldCorrectlyFindAndModifyDocument', {
@@ -942,6 +952,7 @@ describe('Find', function() {
 
   /**
    * Test findAndModify a document with fields
+   *
    * @ignore
    */
   it('shouldCorrectlyFindAndModifyDocumentAndReturnSelectedFieldsOnly', {
@@ -1032,6 +1043,7 @@ describe('Find', function() {
 
   /**
    * Test findAndModify a document
+   *
    * @ignore
    */
   it('Should Correctly Handle FindAndModify Duplicate Key Error', {
@@ -1250,6 +1262,7 @@ describe('Find', function() {
 
   /**
    * Test findAndModify a document with strict mode enabled
+   *
    * @ignore
    */
   it('shouldCorrectlyFindAndModifyDocumentWithDBStrict', {
@@ -1296,6 +1309,7 @@ describe('Find', function() {
 
   /**
    * Test findAndModify a document that fails in first step before safe
+   *
    * @ignore
    */
   it('shouldCorrectlyFindAndModifyDocumentThatFailsInFirstStep', {
@@ -1392,6 +1406,7 @@ describe('Find', function() {
 
   /**
    * Should correctly execute findAndModify that is breaking in prod
+   *
    * @ignore
    */
   it('shouldCorrectlyExecuteFindAndModify', {
@@ -2835,6 +2850,7 @@ describe('Find', function() {
 
   /**
    * Find and modify should allow for a write Concern without failing
+   *
    * @ignore
    */
   it('should correctly execute a findAndModifyWithAWriteConcern', {
@@ -2874,6 +2890,7 @@ describe('Find', function() {
 
   /**
    * Test a simple find
+   *
    * @ignore
    */
   it('should execute query using batchSize of 0', {
@@ -2913,6 +2930,7 @@ describe('Find', function() {
 
   /**
    * Test a simple find
+   *
    * @ignore
    */
   it('should execute query using limit of 0', {
@@ -2955,6 +2973,7 @@ describe('Find', function() {
 
   /**
    * Test a simple find
+   *
    * @ignore
    */
   it('should execute query using $elemMatch', {
@@ -3000,6 +3019,7 @@ describe('Find', function() {
 
   /**
    * Test a simple find
+   *
    * @ignore
    */
   it('should execute query using limit of 101', {
@@ -3064,6 +3084,7 @@ describe('Find', function() {
 
   /**
    * Test a simple find
+   *
    * @ignore
    */
   it('Should correctly apply db level options to find cursor', {

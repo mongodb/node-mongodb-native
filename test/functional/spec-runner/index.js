@@ -504,11 +504,11 @@ const kOperations = new Map([
 
 /**
  *
- * @param {Object} operation the operation definition from the spec test
- * @param {Object} obj the object to call the operation on
- * @param {Object} context a context object containing sessions used for the test
- * @param {Object} [options] Optional settings
- * @param {Boolean} [options.swallowOperationErrors] Generally we want to observe operation errors, validate them against our expectations, and then swallow them. In cases like `withTransaction` we want to use the same `testOperations` to build the lambda, and in those cases it is not desireable to swallow the errors, since we need to test this behavior.
+ * @param {object} operation the operation definition from the spec test
+ * @param {object} obj the object to call the operation on
+ * @param {object} context a context object containing sessions used for the test
+ * @param {object} [options] Optional settings
+ * @param {boolean} [options.swallowOperationErrors] Generally we want to observe operation errors, validate them against our expectations, and then swallow them. In cases like `withTransaction` we want to use the same `testOperations` to build the lambda, and in those cases it is not desireable to swallow the errors, since we need to test this behavior.
  */
 function testOperation(operation, obj, context, options) {
   options = options || { swallowOperationErrors: true };

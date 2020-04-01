@@ -6,6 +6,7 @@ const Logger = require('../../lib/logger');
 describe('Logger', function() {
   /**
    * Test a simple find
+   *
    * @ignore
    */
   it('should correctly Enable logging', {
@@ -52,6 +53,7 @@ describe('Logger', function() {
 
   /**
    * Should No fail with undefined id
+   *
    * @ignore
    */
   it('should not fail with undefined id', {
@@ -86,6 +88,7 @@ describe('Logger', function() {
 
   /**
    * Should No fail with undefined id
+   *
    * @ignore
    */
   it('should correctly log cursor', {
@@ -134,6 +137,7 @@ describe('Logger', function() {
 
   /**
    * Should No fail with undefined id
+   *
    * @ignore
    */
   it('should pass the logLevel down through the options', {

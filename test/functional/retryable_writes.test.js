@@ -118,6 +118,8 @@ function executeScenarioTest(test, ctx) {
 
 /**
  * Transforms the arguments from a test into actual arguments for our function calls
+ *
+ * @param {any} test
  */
 function generateArguments(test) {
   const args = [];
@@ -147,6 +149,8 @@ function generateArguments(test) {
 
 /**
  * Transforms a request arg into a bulk write operation
+ *
+ * @param {any} op
  */
 function convertBulkWriteOperation(op) {
   return { [op.name]: op.arguments };
@@ -154,6 +158,8 @@ function convertBulkWriteOperation(op) {
 
 /**
  * Transforms output of a bulk write to conform to the test format
+ *
+ * @param {any} result
  */
 function transformToResultValue(result) {
   return result && result.value ? result.value : result;
@@ -162,6 +168,8 @@ function transformToResultValue(result) {
 /**
  * Transforms expected values from the proper test format to
  * our (improper) actual output for upsertedId.
+ *
+ * @param {any} result
  */
 function transformToFixUpsertedId(result) {
   if (Array.isArray(result)) {
@@ -186,6 +194,9 @@ function transformToFixUpsertedId(result) {
 
 /**
  * Runs a command that turns off a fail point
+ *
+ * @param {any} db
+ * @param {any} name
  */
 function turnOffFailPoint(db, name) {
   return db.executeDbAdminCommand({

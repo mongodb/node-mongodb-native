@@ -249,6 +249,7 @@ describe('GridFS Stream', function() {
 
   /**
    * Correctly return file not found error
+   *
    * @ignore
    */
   it('should fail to locate gridfs stream', {
