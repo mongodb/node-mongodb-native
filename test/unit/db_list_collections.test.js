@@ -43,7 +43,7 @@ describe('db.listCollections', function() {
     },
     {
       description: 'should send nameOnly: true for db.createCollection',
-      command: db => db.createCollection('foo', () => {}),
+      command: db => db.createCollection('foo', { strict: true }, () => {}),
       listCollectionsValue: true
     },
     {
