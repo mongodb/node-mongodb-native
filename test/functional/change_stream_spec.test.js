@@ -85,12 +85,19 @@ describe('Change Stream Spec', function() {
   // Fn Generator methods
 
   function generateMetadata(test) {
-    const mongodb = test.minServerVersion;
     const topology = test.topology;
     const requires = {};
-    if (mongodb) {
-      requires.mongodb = `>=${mongodb}`;
+    const versionLimits = [];
+    if (test.minServerVersion) {
+      versionLimits.push(`>=${test.minServerVersion}`);
     }
+    if (test.maxServerVersion) {
+      versionLimits.push(`<=${test.maxServerVersion}`);
+    }
+    if (versionLimits.length) {
+      requires.mongodb = versionLimits.join(' ');
+    }
+
     if (topology) {
       requires.topology = topology;
     }
