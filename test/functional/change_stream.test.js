@@ -2973,7 +2973,7 @@ describe('Change Streams', function() {
     });
 
     it('should work with events', {
-      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+      metadata: { requires: { topology: 'replicaset', mongodb: '>=4.1.1' } },
       test: function(done) {
         const changeStream = coll.watch([], { startAfter });
         changeStream.once('change', change => {
@@ -2988,7 +2988,7 @@ describe('Change Streams', function() {
     });
 
     it('should work with callbacks', {
-      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+      metadata: { requires: { topology: 'replicaset', mongodb: '>=4.1.1' } },
       test: function(done) {
         const changeStream = coll.watch([], { startAfter });
         exhaust(changeStream, (err, bag) => {
