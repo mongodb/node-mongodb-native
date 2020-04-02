@@ -31,7 +31,6 @@ describe.skip('ReplSet (Connection)', function() {
   it('Should throw error due to mongos connection usage', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var ReplSet = configuration.require.ReplSet,
@@ -56,7 +55,6 @@ describe.skip('ReplSet (Connection)', function() {
   it('Should correctly handle error when no server up in replicaset', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var CoreServer = configuration.require.CoreServer,
@@ -89,7 +87,6 @@ describe.skip('ReplSet (Connection)', function() {
   it('Should correctly connect with default replicaset', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var CoreServer = configuration.require.CoreServer,
@@ -119,7 +116,6 @@ describe.skip('ReplSet (Connection)', function() {
   it('Should correctly connect with default replicaset and no setName specified', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var CoreServer = configuration.require.CoreServer,
@@ -147,7 +143,6 @@ describe.skip('ReplSet (Connection)', function() {
   it('Should correctly connect with default replicaset and socket options set', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var CoreServer = configuration.require.CoreServer,
@@ -176,7 +171,6 @@ describe.skip('ReplSet (Connection)', function() {
   it('Should emit close no callback', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var CoreServer = configuration.require.CoreServer,
@@ -214,7 +208,6 @@ describe.skip('ReplSet (Connection)', function() {
   it('Should emit close with callback', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var CoreServer = configuration.require.CoreServer,
@@ -252,7 +245,6 @@ describe.skip('ReplSet (Connection)', function() {
   it('Should correctly pass error when wrong replicaSet', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       const client = configuration.newClient({}, { rs_name: 'wrong' });
@@ -288,7 +280,6 @@ describe.skip('ReplSet (Connection)', function() {
   it('Should connect with primary stepped down', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var CoreServer = configuration.require.CoreServer,
@@ -325,7 +316,6 @@ describe.skip('ReplSet (Connection)', function() {
   it('Should connect with third node killed', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var CoreServer = configuration.require.CoreServer,
@@ -362,7 +352,6 @@ describe.skip('ReplSet (Connection)', function() {
   it('Should connect with primary node killed', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var CoreServer = configuration.require.CoreServer,
@@ -399,7 +388,6 @@ describe.skip('ReplSet (Connection)', function() {
   it('Should correctly emit open signal and full set signal', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var CoreServer = configuration.require.CoreServer,
@@ -442,7 +430,6 @@ describe.skip('ReplSet (Connection)', function() {
   it('ReplSet honors socketOptions options', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var CoreServer = configuration.require.CoreServer,
@@ -487,7 +474,6 @@ describe.skip('ReplSet (Connection)', function() {
   it('Should receive all events for primary and secondary leaving', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var CoreServer = configuration.require.CoreServer,
@@ -517,7 +503,6 @@ describe.skip('ReplSet (Connection)', function() {
   it('Should Fail due to bufferMaxEntries = 0 not causing any buffering', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var CoreServer = configuration.require.CoreServer,
@@ -557,13 +542,9 @@ describe.skip('ReplSet (Connection)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should correctly connect to a replicaset with additional options', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       const configuration = this.configuration;
       const CoreServer = configuration.require.CoreServer;
@@ -622,13 +603,9 @@ describe.skip('ReplSet (Connection)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should correctly connect to a replicaset with readPreference set', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       const configuration = this.configuration;
       const CoreServer = configuration.require.CoreServer;
@@ -671,13 +648,9 @@ describe.skip('ReplSet (Connection)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should give an error for non-existing servers', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var url = f(
@@ -697,15 +670,11 @@ describe.skip('ReplSet (Connection)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it(
     'Should correctly connect to a replicaset with writeConcern specified and GridStore should inherit correctly',
     {
       metadata: { requires: { topology: 'replicaset' } },
 
-      // The actual test we wish to run
       test: function(done) {
         var configuration = this.configuration;
         var mongo = configuration.require,
@@ -750,13 +719,9 @@ describe.skip('ReplSet (Connection)', function() {
     }
   );
 
-  /**
-   * @ignore
-   */
   it('Should Correctly remove server going into recovery mode', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var CoreServer = configuration.require.CoreServer,
@@ -825,13 +790,9 @@ describe.skip('ReplSet (Connection)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should return single server direct connection when replicaSet not provided', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
@@ -891,7 +852,6 @@ describe.skip('ReplSet (Connection)', function() {
   it('Should correctly connect to arbiter with single connection', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var CoreServer = configuration.require.CoreServer,
@@ -930,7 +890,6 @@ describe.skip('ReplSet (Connection)', function() {
   it('Should correctly connect to secondary with single connection', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var CoreServer = configuration.require.CoreServer,
@@ -1022,13 +981,9 @@ describe.skip('ReplSet (Connection)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should correctly modify the server reconnectTries for all replset instances', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       const configuration = this.configuration;
       const CoreServer = configuration.require.CoreServer;
@@ -1070,15 +1025,11 @@ describe.skip('ReplSet (Connection)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it(
     'Should correctly connect to a replicaset with auth options, bufferMaxEntries and connectWithNoPrimary',
     {
       metadata: { requires: { topology: 'replicaset' } },
 
-      // The actual test we wish to run
       test: function(done) {
         var configuration = this.configuration;
         var url = f(

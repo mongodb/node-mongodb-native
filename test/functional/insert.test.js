@@ -22,7 +22,6 @@ const {
 /**
  * Module for parsing an ISO 8601 formatted string into a Date object.
  *
- * @ignore
  * @param {any} string
  */
 var ISODate = function(string) {
@@ -65,9 +64,6 @@ describe('Insert', function() {
     return setupDatabase(this.configuration);
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyPerformSingleInsert', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -75,7 +71,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -94,9 +89,6 @@ describe('Insert', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyHandleMultipleDocumentInsert', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -104,7 +96,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -145,9 +136,6 @@ describe('Insert', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyExecuteSaveInsertUpdate', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -155,7 +143,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -182,9 +169,6 @@ describe('Insert', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyInsertAndRetrieveLargeIntegratedArrayDocument', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -192,7 +176,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -235,9 +218,6 @@ describe('Insert', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyInsertAndRetrieveDocumentWithAllTypes', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -245,7 +225,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -309,9 +288,6 @@ describe('Insert', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyInsertAndUpdateDocumentWithNewScriptContext', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -319,7 +295,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -380,9 +355,6 @@ describe('Insert', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlySerializeDocumentWithAllTypesInNewContext', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -390,7 +362,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -469,9 +440,6 @@ describe('Insert', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyDoToJsonForLongValue', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -479,7 +447,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -502,9 +469,6 @@ describe('Insert', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyInsertAndUpdateWithNoCallback', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -512,7 +476,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -537,9 +500,6 @@ describe('Insert', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldInsertAndQueryTimestamp', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -547,7 +507,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -574,9 +533,6 @@ describe('Insert', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyInsertAndQueryUndefined', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -584,7 +540,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -608,9 +563,6 @@ describe('Insert', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlySerializeDBRefToJSON', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -618,7 +570,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var dbref = new DBRef('foo', ObjectID.createFromHexString('fc24a04d4560531f00000000'), null);
       JSON.stringify(dbref);
@@ -626,9 +577,6 @@ describe('Insert', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldThrowErrorIfSerializingFunctionOrdered', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -636,7 +584,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -663,9 +610,6 @@ describe('Insert', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldThrowErrorIfSerializingFunctionUnOrdered', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -673,7 +617,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -701,9 +644,6 @@ describe('Insert', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyInsertDocumentWithUUID', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -711,7 +651,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -760,9 +699,6 @@ describe('Insert', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyCallCallbackWithDbDriverInStrictMode', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -770,7 +706,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -801,9 +736,6 @@ describe('Insert', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyInsertDBRefWithDbNotDefined', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -811,7 +743,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -857,9 +788,6 @@ describe('Insert', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyInsertUpdateRemoveWithNoOptions', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -867,7 +795,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -901,9 +828,6 @@ describe('Insert', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyExecuteMultipleFetches', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -911,7 +835,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       // Search parameter
       var to = 'ralph';
@@ -940,9 +863,6 @@ describe('Insert', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyFailWhenNoObjectToUpdate', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -950,7 +870,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -971,9 +890,6 @@ describe('Insert', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should correctly insert object and retrieve it when containing array and IsoDate', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -981,7 +897,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var doc = {
@@ -1015,9 +930,6 @@ describe('Insert', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should correctly insert object with timestamps', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1025,7 +937,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var doc = {
@@ -1058,9 +969,6 @@ describe('Insert', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should fail on insert due to key starting with $', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1068,7 +976,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var doc = {
@@ -1090,9 +997,6 @@ describe('Insert', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should Correctly allow for control of serialization of functions on command level', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1100,7 +1004,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
 
@@ -1148,9 +1051,6 @@ describe('Insert', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should Correctly allow for control of serialization of functions on collection level', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1158,7 +1058,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
 
@@ -1187,9 +1086,6 @@ describe('Insert', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should Correctly allow for using a Date object as _id', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1197,7 +1093,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var doc = {
         _id: new Date(),
@@ -1222,9 +1117,6 @@ describe('Insert', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should Correctly fail to update returning 0 results', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1232,7 +1124,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1250,9 +1141,6 @@ describe('Insert', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should Correctly update two fields including a sub field', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1260,7 +1148,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var doc = {
@@ -1304,9 +1191,6 @@ describe('Insert', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should correctly fail due to duplicate key for _id', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1314,7 +1198,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1341,9 +1224,6 @@ describe('Insert', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyInsertDocWithCustomId', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1351,7 +1231,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1376,9 +1255,6 @@ describe('Insert', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyPerformUpsertAgainstNewDocumentAndExistingOne', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1386,7 +1262,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1413,9 +1288,6 @@ describe('Insert', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyPerformLargeTextInsert', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1423,7 +1295,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1455,9 +1326,6 @@ describe('Insert', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyPerformInsertOfObjectsUsingToBSON', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1465,7 +1333,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1493,9 +1360,6 @@ describe('Insert', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldAttempToForceBsonSize', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1503,7 +1367,6 @@ describe('Insert', function() {
       requires: { topology: 'single' }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1533,9 +1396,6 @@ describe('Insert', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyUseCustomObjectToUpdateDocument', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1543,7 +1403,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1581,9 +1440,6 @@ describe('Insert', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldExecuteInsertWithNoCallbackAndWriteConcern', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1591,7 +1447,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1610,9 +1465,6 @@ describe('Insert', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('executesCallbackOnceWithOveriddenDefaultDbWriteConcern', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1620,7 +1472,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       function cb(err) {
         test.equal(null, err);
@@ -1637,9 +1488,6 @@ describe('Insert', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('executesCallbackOnceWithOveriddenDefaultDbWriteConcernWithUpdate', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1647,7 +1495,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       function cb(err) {
         test.equal(null, err);
@@ -1664,9 +1511,6 @@ describe('Insert', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('executesCallbackOnceWithOveriddenDefaultDbWriteConcernWithRemove', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1674,7 +1518,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       function cb(err) {
         test.equal(null, err);
@@ -1691,9 +1534,6 @@ describe('Insert', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('handleBSONTypeInsertsCorrectly', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1704,7 +1544,6 @@ describe('Insert', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1772,9 +1611,6 @@ describe('Insert', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('handleBSONTypeInsertsCorrectlyFor28OrHigher', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1785,7 +1621,6 @@ describe('Insert', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1853,9 +1688,6 @@ describe('Insert', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('mixedTimestampAndDateQuery', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1863,7 +1695,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1893,9 +1724,6 @@ describe('Insert', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('positiveAndNegativeInfinity', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1903,7 +1731,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1938,7 +1765,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var regexp = /foobar/i;
 
@@ -1972,7 +1798,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var regexp = /foobaré/;
 
@@ -2007,7 +1832,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2037,7 +1861,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var o = configuration.writeConcernMax();
@@ -2076,7 +1899,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var o = configuration.writeConcernMax();
@@ -2142,7 +1964,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2180,7 +2001,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -2218,7 +2038,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2253,7 +2072,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
 
@@ -2284,7 +2102,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2324,7 +2141,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2378,7 +2194,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2420,7 +2235,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2461,7 +2275,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2502,7 +2315,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2543,7 +2355,6 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2580,7 +2391,6 @@ describe('Insert', function() {
   it('Correctly allow forceServerObjectId for insertOne', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var started = [];
       var succeeded = [];
@@ -2618,7 +2428,6 @@ describe('Insert', function() {
   it('Correctly allow forceServerObjectId for insertMany', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var started = [];
       var succeeded = [];
@@ -2656,7 +2465,6 @@ describe('Insert', function() {
   it('Correctly allow forceServerObjectId for insertMany', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var started = [];
       var succeeded = [];
@@ -2731,7 +2539,6 @@ describe('Insert', function() {
   it('Insert document including sub documents', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2776,7 +2583,6 @@ describe('Insert', function() {
   it('should return result using toJSON', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       const configuration = this.configuration;
       const client = configuration.newClient();

@@ -5,15 +5,11 @@ const sinon = require('sinon');
 const NativeTopology = require('../../lib/topologies/native_topology');
 
 describe('URI', function() {
-  /**
-   * @ignore
-   */
   it('should correctly allow for w:0 overriding on the connect url', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { topology: 'single' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var self = this;
 
@@ -49,7 +45,6 @@ describe('URI', function() {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { topology: 'single' } },
 
-    // The actual test we wish to run
     test: function(done) {
       if (process.platform === 'win32') {
         return done();
@@ -71,7 +66,6 @@ describe('URI', function() {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { topology: 'single' } },
 
-    // The actual test we wish to run
     test: function(done) {
       const client = this.configuration.newClient('mongodb://127.0.0.1:27017/?fsync=true');
       client.connect((err, client) => {
@@ -87,7 +81,6 @@ describe('URI', function() {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { topology: 'single' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var self = this;
       const configuration = this.configuration;

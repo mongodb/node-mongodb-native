@@ -7,15 +7,11 @@ describe('Remove', function() {
     return setupDatabsae(this.configuration);
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly clear out collection', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
@@ -62,15 +58,11 @@ describe('Remove', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly remove document using RegExp', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
@@ -107,15 +99,11 @@ describe('Remove', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly remove only first document', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
@@ -151,15 +139,11 @@ describe('Remove', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should not error on empty remove', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {

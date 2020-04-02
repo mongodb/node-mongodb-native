@@ -16,9 +16,6 @@ class MockTopology extends EventEmitter {
 }
 
 describe('Collection', function() {
-  /**
-   * @ignore
-   */
   it('should not allow atomic operators for findOneAndReplace', {
     metadata: { requires: { topology: 'single' } },
     test: function() {

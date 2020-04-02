@@ -8,9 +8,6 @@ describe('MapReduce', function() {
     return setupDatabase(this.configuration);
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyExecuteGroupFunctionWithFinalizeFunction', {
     metadata: {
       requires: {
@@ -19,7 +16,6 @@ describe('MapReduce', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -70,15 +66,12 @@ describe('MapReduce', function() {
 
   /**
    * Mapreduce tests
-   *
-   * @ignore
    */
   it('shouldPerformMapReduceWithStringFunctions', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -117,8 +110,6 @@ describe('MapReduce', function() {
 
   /**
    * Mapreduce tests
-   *
-   * @ignore
    */
   it('shouldForceMapReduceError', {
     // Add a tag that our runner can trigger on
@@ -130,7 +121,6 @@ describe('MapReduce', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -157,15 +147,11 @@ describe('MapReduce', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldPerformMapReduceWithParametersBeingFunctions', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -210,15 +196,11 @@ describe('MapReduce', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldPerformMapReduceWithCodeObjects', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -254,15 +236,11 @@ describe('MapReduce', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldPerformMapReduceWithOptions', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -304,15 +282,11 @@ describe('MapReduce', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldHandleMapReduceErrors', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -344,9 +318,6 @@ describe('MapReduce', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldSaveDataToDifferentDbFromMapreduce', {
     metadata: {
       requires: {
@@ -355,7 +326,6 @@ describe('MapReduce', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -414,9 +384,6 @@ describe('MapReduce', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyReturnNestedKeys', {
     metadata: {
       requires: {
@@ -425,7 +392,6 @@ describe('MapReduce', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -482,15 +448,12 @@ describe('MapReduce', function() {
 
   /**
    * Mapreduce tests
-   *
-   * @ignore
    */
   it.skip('shouldPerformMapReduceWithScopeContainingFunction', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var util = {
         times_one_hundred: function(x) {

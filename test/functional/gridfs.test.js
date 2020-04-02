@@ -14,15 +14,11 @@ describe('GridFS', function() {
     return setupDatabase(this.configuration);
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCreateNewGridStoreObject', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -46,15 +42,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCreateNewGridStoreObjectWithIntId', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -80,15 +72,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCreateNewGridStoreObjectWithStringId', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -113,15 +101,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlySafeFileAndReadFileByObjectId', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -148,15 +132,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyExecuteGridStoreExists', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -192,15 +172,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyPerformGridStoreReadLength', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -228,15 +204,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyReadFromFileWithOffset', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -269,15 +241,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyHandleMultipleChunkGridStore', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -345,15 +313,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyHandleUnlinkingWeirdName', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -423,15 +387,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyUnlinkAnArrayOfFiles', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -493,15 +453,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyWriteFileToGridStore', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -535,15 +491,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyWriteFileToGridStoreUsingObjectId', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -577,15 +529,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyPerformWorkingFiledRead', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -617,15 +565,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyPerformWorkingFiledReadWithChunkSizeLessThanFileSize', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -668,9 +612,6 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyPerformWorkingFiledWithBigFile', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] },
@@ -678,7 +619,6 @@ describe('GridFS', function() {
       ignore: { travis: true }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -737,15 +677,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyPerformWorkingFiledWriteWithDifferentChunkSizes', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -823,15 +759,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyReadAndWriteFile', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -861,15 +793,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyReadAndWriteBuffersMultipleChunks', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -909,15 +837,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyReadAndWriteBuffersSingleChunks', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -956,15 +880,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyReadAndWriteBuffersUsingNormalWriteWithMultipleChunks', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1004,15 +924,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyReadAndWriteBuffersSingleChunksAndVerifyExistance', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1047,15 +963,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlySaveDataByObjectID', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1088,15 +1000,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCheckExistsByUsingRegexp', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1128,15 +1036,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyOpenGridStoreWithDifferentRoot', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var asset = { source: new ObjectID() };
@@ -1159,15 +1063,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlySetFilenameForGridstoreOpen', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1200,15 +1100,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlySaveFileAndThenOpenChangeContentTypeAndSaveAgain', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1256,15 +1152,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlySaveFileWithoutFilenameAndThenOpenAddFilenameAndSaveAgain', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1314,15 +1206,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlySaveFileAndThenOpenChangeFilenameAndSaveAgain', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1374,15 +1262,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlySaveFileAndThenAppendChangeFilenameAndSaveAgain', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1430,15 +1314,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyHandleSeekWithStream', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1485,15 +1365,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyHandleSeekIntoSecondChunkWithStream', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1543,15 +1419,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should correctly handle multiple seeks', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1602,15 +1474,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should correctly handle multiple seeks over several chunks', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1660,13 +1528,9 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it.skip('shouldWriteFileWithMongofilesAndReadWithNodeJS', {
     metadata: { requires: { topology: 'single' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1707,15 +1571,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should fail when attempting to append to a file', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1771,15 +1631,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyStreamReadFromGridStoreObject', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1814,14 +1670,10 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyStreamReadFromGridStoreObjectNoGridStoreOpenCalled', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1853,15 +1705,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyStreamWriteFromGridStoreObject', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1892,15 +1740,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyWriteLargeFileStringAndReadBack', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1958,15 +1802,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyWriteLargeFileBufferAndReadBack', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2023,15 +1863,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should return same data for streaming as for direct read', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2104,15 +1940,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyFailDueToMissingChunks', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2154,15 +1986,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyWriteASmallPayload', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2212,15 +2040,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyWriteSmallFileUsingABuffer', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2269,15 +2093,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldSaveSmallFileToGridStore', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2316,15 +2136,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyOverwriteFile', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2367,15 +2183,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlySeekWithString', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2515,15 +2327,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlySeekAcrossChunks', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2570,15 +2378,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlySaveEmptyFile', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2622,15 +2426,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldEnsureThatChunkSizeCannotBeChangedDuringRead', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2659,15 +2459,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldEnsureChunkSizeCannotChangeAfterDataHasBeenWritten', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2695,15 +2491,12 @@ describe('GridFS', function() {
 
   /*
    * checks if 8 bit values will be preserved in gridstore
-   *
-   * @ignore
    */
   it('shouldCorrectlyStore8bitValues', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2739,15 +2532,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldAllowChangingChunkSize', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2777,15 +2566,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldAllowChangingChunkSizeAtCreationOfGridStore', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2813,15 +2598,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyCalculateMD5', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2869,15 +2650,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyUpdateUploadDate', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2934,15 +2711,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlySaveContentType', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2988,15 +2761,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlySaveContentTypeWhenPassedInAtGridStoreCreation', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3025,15 +2794,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyReportIllegalMode', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3052,15 +2817,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlySaveAndRetrieveFileMetadata', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3103,15 +2864,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldNotThrowErrorOnClosingOfGridObject', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3142,15 +2899,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldNotThrowErrorOnClose', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3183,15 +2936,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlySafeFileUsingIntAsIdKey', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3246,15 +2995,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyReadWithPositionOffset', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3296,15 +3041,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyWrite', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3352,15 +3093,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyReturnErrorMessageOnNoFileExisting', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3376,15 +3113,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should fail when seeking on a write enabled gridstore object', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3402,15 +3135,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly handle filename as ObjectId', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3440,15 +3169,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly pipe through multiple pipelines', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
 
@@ -3482,15 +3207,11 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly seek on file where size of file is a multiple of the chunk size', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
 
@@ -3548,9 +3269,6 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it(
     'should correctly seek on file where size of file is a multiple of the chunk size and then stream',
     {
@@ -3558,7 +3276,6 @@ describe('GridFS', function() {
         requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
       },
 
-      // The actual test we wish to run
       test: function(done) {
         var configuration = this.configuration;
 
@@ -3630,15 +3347,11 @@ describe('GridFS', function() {
     }
   );
 
-  /**
-   * @ignore
-   */
   it('should correctly write fake png to gridstore', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
 
@@ -3677,7 +3390,6 @@ describe('GridFS', function() {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
 

@@ -8,13 +8,9 @@ var f = require('util').format;
 //       server. Disabling the suite until we can sort this out for everyone.
 
 describe.skip('SSL (MongoClient)', function() {
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyCommunicateUsingSSLSocket', {
     metadata: { requires: { topology: 'ssl' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var ServerManager = require('mongodb-topology-manager').Server,
@@ -59,13 +55,9 @@ describe.skip('SSL (MongoClient)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should fail due to CRL list passed in', {
     metadata: { requires: { topology: 'ssl' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var ServerManager = require('mongodb-topology-manager').Server,
@@ -116,13 +108,9 @@ describe.skip('SSL (MongoClient)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyValidateServerCertificate', {
     metadata: { requires: { topology: 'ssl' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var ServerManager = require('mongodb-topology-manager').Server,
@@ -168,13 +156,9 @@ describe.skip('SSL (MongoClient)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should correctly pass down servername to connection for TLS SNI support', {
     metadata: { requires: { topology: 'ssl' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var ServerManager = require('mongodb-topology-manager').Server,
@@ -221,15 +205,11 @@ describe.skip('SSL (MongoClient)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it(
     'should correctly validate ssl certificate and ignore server certificate host name validation',
     {
       metadata: { requires: { topology: 'ssl' } },
 
-      // The actual test we wish to run
       test: function(done) {
         var configuration = this.configuration;
         var ServerManager = require('mongodb-topology-manager').Server,
@@ -285,13 +265,9 @@ describe.skip('SSL (MongoClient)', function() {
     }
   );
 
-  /**
-   * @ignore
-   */
   it('should fail to validate certificate due to illegal host name', {
     metadata: { requires: { topology: 'ssl' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var ServerManager = require('mongodb-topology-manager').Server,
@@ -335,13 +311,9 @@ describe.skip('SSL (MongoClient)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyValidatePresentedServerCertificateAndPresentValidCertificate', {
     metadata: { requires: { topology: 'ssl' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var ServerManager = require('mongodb-topology-manager').Server,
@@ -395,13 +367,9 @@ describe.skip('SSL (MongoClient)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldValidatePresentedServerCertificateButPresentInvalidCertificate', {
     metadata: { requires: { topology: 'ssl' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var ServerManager = require('mongodb-topology-manager').Server,
@@ -454,13 +422,9 @@ describe.skip('SSL (MongoClient)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyValidatePresentedServerCertificateAndInvalidKey', {
     metadata: { requires: { topology: 'ssl' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var ServerManager = require('mongodb-topology-manager').Server,
@@ -512,13 +476,9 @@ describe.skip('SSL (MongoClient)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should correctly shut down if attempting to connect to ssl server with wrong parameters', {
     metadata: { requires: { topology: 'ssl' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var ServerManager = require('mongodb-topology-manager').Server,
@@ -553,13 +513,9 @@ describe.skip('SSL (MongoClient)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly connect using SSL to ReplSetManager', {
     metadata: { requires: { topology: 'ssl' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var ReplSetManager = require('mongodb-topology-manager').ReplSet,
@@ -633,13 +589,9 @@ describe.skip('SSL (MongoClient)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlySendCertificateToReplSetAndValidateServerCertificate', {
     metadata: { requires: { topology: 'ssl' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var ReplSetManager = require('mongodb-topology-manager').ReplSet,
@@ -727,13 +679,9 @@ describe.skip('SSL (MongoClient)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly send SNI TLS servername to replicaset members', {
     metadata: { requires: { topology: 'ssl' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var ReplSetManager = require('mongodb-topology-manager').ReplSet,
@@ -826,13 +774,9 @@ describe.skip('SSL (MongoClient)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly send SNI TLS servername to replicaset members with restart', {
     metadata: { requires: { topology: 'ssl' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var ReplSetManager = require('mongodb-topology-manager').ReplSet,
@@ -941,13 +885,9 @@ describe.skip('SSL (MongoClient)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldSendWrongCertificateToReplSetAndValidateServerCertificate', {
     metadata: { requires: { topology: 'ssl' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var ReplSetManager = require('mongodb-topology-manager').ReplSet,
@@ -1040,13 +980,9 @@ describe.skip('SSL (MongoClient)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly to replicaset using ssl connect with password', {
     metadata: { requires: { topology: 'ssl' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var ReplSetManager = require('mongodb-topology-manager').ReplSet,
@@ -1133,13 +1069,9 @@ describe.skip('SSL (MongoClient)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly connect using ssl with sslValidation turned off', {
     metadata: { requires: { topology: 'ssl' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var ReplSetManager = require('mongodb-topology-manager').ReplSet,
@@ -1214,13 +1146,9 @@ describe.skip('SSL (MongoClient)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly connect using SSL to replicaset with requireSSL', {
     metadata: { requires: { topology: 'ssl' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var ReplSetManager = require('mongodb-topology-manager').ReplSet,
@@ -1340,13 +1268,9 @@ describe.skip('SSL (MongoClient)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly connect to Replicaset using SSL when secondary down', {
     metadata: { requires: { topology: 'ssl' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var ReplSetManager = require('mongodb-topology-manager').ReplSet,
@@ -1426,15 +1350,11 @@ describe.skip('SSL (MongoClient)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   /*
   it('should fail due to accessing using ip address'] = {
     metadata: { requires: { topology: 'ssl' } },
 
-    // The actual test we wish to run
-    test: function(done) {
+        test: function(done) {
       var ServerManager = require('mongodb-topology-manager').Server
         , MongoClient = configuration.require.MongoClient;
 

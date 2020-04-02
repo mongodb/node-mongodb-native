@@ -9,7 +9,6 @@ describe('BYO Promises', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var self = this;
       const configuration = this.configuration;

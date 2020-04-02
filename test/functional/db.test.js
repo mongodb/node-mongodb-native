@@ -9,15 +9,11 @@ describe('Db', function() {
     return setupDatabase(this.configuration);
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyHandleIllegalDbNames', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       // Assert rename
       try {
@@ -68,15 +64,11 @@ describe('Db', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should not call callback twice on collection() with callback', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -109,9 +101,6 @@ describe('Db', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should callback with an error only when a MongoError', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
@@ -143,15 +132,11 @@ describe('Db', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyHandleFailedConnection', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var fs_client = configuration.newClient('mongodb://127.0.0.1:25117/test', {
@@ -166,15 +151,11 @@ describe('Db', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyResaveDBRef', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -229,7 +210,6 @@ describe('Db', function() {
       requires: { topology: ['single', 'replicaset'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -292,15 +272,11 @@ describe('Db', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyGetErrorDroppingNonExistingDb', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -317,15 +293,11 @@ describe('Db', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it.skip('shouldCorrectlyThrowWhenTryingToReOpenConnection', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -342,15 +314,11 @@ describe('Db', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyReconnectWhenError', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(`mongodb://127.0.0.1:27088/test`, {
@@ -399,15 +367,11 @@ describe('Db', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyUseCursorWithListCollectionsCommand', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
 
@@ -440,15 +404,11 @@ describe('Db', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyUseCursorWithListCollectionsCommandAndBatchSize', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
 
@@ -481,15 +441,11 @@ describe('Db', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly list collection names with . in the middle', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
 
@@ -529,9 +485,6 @@ describe('Db', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly list collection names with batchSize 1 for 2.8 or higher', {
     metadata: {
       requires: {
@@ -540,7 +493,6 @@ describe('Db', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
 

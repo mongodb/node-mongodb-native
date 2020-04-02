@@ -20,12 +20,10 @@ describe('GridFS Stream', function() {
    *
    * @example-class GridFSBucket
    * @example-method openUploadStream
-   * @ignore
    */
   it('shouldUploadFromFileStream', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -102,12 +100,10 @@ describe('GridFS Stream', function() {
    *
    * @example-class GridFSBucket
    * @example-method openUploadStreamWithId
-   * @ignore
    */
   it('shouldUploadFromFileStreamWithCustomId', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -185,12 +181,10 @@ describe('GridFS Stream', function() {
    *
    * @example-class GridFSBucket
    * @example-method openDownloadStream
-   * @ignore
    */
   it('shouldDownloadToUploadStream', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -249,13 +243,10 @@ describe('GridFS Stream', function() {
 
   /**
    * Correctly return file not found error
-   *
-   * @ignore
    */
   it('should fail to locate gridfs stream', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -289,12 +280,10 @@ describe('GridFS Stream', function() {
    *
    * @example-class GridFSBucket
    * @example-method openDownloadStreamByName
-   * @ignore
    */
   it('openDownloadStreamByName', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -340,12 +329,10 @@ describe('GridFS Stream', function() {
    *
    * @example-class GridFSBucket
    * @example-method openDownloadStream
-   * @ignore
    */
   it('start/end options for openDownloadStream', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -439,12 +426,10 @@ describe('GridFS Stream', function() {
    *
    * @example-class GridFSBucket
    * @example-method delete
-   * @ignore
    */
   it('Deleting a file', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -497,12 +482,10 @@ describe('GridFS Stream', function() {
    *
    * @example-class GridFSBucketWriteStream
    * @example-method abort
-   * @ignore
    */
   it('Aborting an upload', {
     metadata: { requires: { topology: ['single'], node: '>12.0.0' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -556,13 +539,10 @@ describe('GridFS Stream', function() {
 
   /**
    * Aborting an upload
-   *
-   * @ignore
    */
   it('Destroy an upload', {
     metadata: { requires: { topology: ['single'], node: '>12.0.0' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -619,12 +599,10 @@ describe('GridFS Stream', function() {
    *
    * @example-class GridFSBucketReadStream
    * @example-method abort
-   * @ignore
    */
   it('Destroying a download stream', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -689,12 +667,10 @@ describe('GridFS Stream', function() {
    *
    * @example-class GridFSBucket
    * @example-method delete
-   * @ignore
    */
   it('Deleting a file using promises', {
     metadata: { requires: { topology: ['single'], node: '>12.0.0' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -744,7 +720,6 @@ describe('GridFS Stream', function() {
   it('find()', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -782,12 +757,10 @@ describe('GridFS Stream', function() {
    *
    * @example-class GridFSBucket
    * @example-method drop
-   * @ignore
    */
   it('drop example', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -841,12 +814,10 @@ describe('GridFS Stream', function() {
    *
    * @example-class GridFSBucket
    * @example-method drop
-   * @ignore
    */
   it('drop using promises', {
     metadata: { requires: { topology: ['single'], node: '>12.0.0' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -898,12 +869,10 @@ describe('GridFS Stream', function() {
    *
    * @example-class GridFSBucket
    * @example-method find
-   * @ignore
    */
   it('find example', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -942,12 +911,10 @@ describe('GridFS Stream', function() {
    *
    * @example-class GridFSBucket
    * @example-method rename
-   * @ignore
    */
   it('rename example', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -982,13 +949,9 @@ describe('GridFS Stream', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('download empty doc', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1024,7 +987,6 @@ describe('GridFS Stream', function() {
   it('should use chunkSize for download', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       if (typeof stream.pipeline !== 'function') {
         this.skip();
@@ -1297,13 +1259,10 @@ describe('GridFS Stream', function() {
 
   /**
    * NODE-822 GridFSBucketWriteStream end method does not handle optional parameters
-   *
-   * @ignore
    */
   it('should correctly handle calling end function with only a callback', {
     metadata: { requires: { topology: ['single'], node: '>4.0.0' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1364,12 +1323,10 @@ describe('GridFS Stream', function() {
    *
    * @example-class GridFSBucket
    * @example-method openDownloadStream
-   * @ignore
    */
   it('NODE-829 start/end options for openDownloadStream where start-end is < size of chunk', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });

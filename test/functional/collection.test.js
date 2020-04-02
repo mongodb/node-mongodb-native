@@ -31,9 +31,6 @@ describe('Collection', function() {
       return client.close();
     });
 
-    /**
-     * @ignore
-     */
     it('should correctly execute basic collection methods', function(done) {
       db.createCollection('test_collection_methods', (err, collection) => {
         // Verify that all the result are correct coming back (should contain the value ok)
@@ -82,9 +79,6 @@ describe('Collection', function() {
       });
     });
 
-    /**
-     * @ignore
-     */
     it('should correctly access collection names', function(done) {
       // Create two collections
       db.createCollection('test.spiderman', () => {
@@ -124,9 +118,6 @@ describe('Collection', function() {
       });
     });
 
-    /**
-     * @ignore
-     */
     it('should correctly retrieve listCollections', function(done) {
       db.createCollection('test_collection_names', err => {
         expect(err).to.not.exist;
@@ -174,9 +165,6 @@ describe('Collection', function() {
       });
     });
 
-    /**
-     * @ignore
-     */
     it('should ensure strict access collection', function(done) {
       db.collection('does-not-exist', { strict: true }, err => {
         expect(err).to.be.an.instanceof(Error);
@@ -194,9 +182,6 @@ describe('Collection', function() {
       });
     });
 
-    /**
-     * @ignore
-     */
     it('should perform strict create collection', function(done) {
       db.createCollection('test_strict_create_collection', (err, collection) => {
         expect(err).to.not.exist;
@@ -219,9 +204,6 @@ describe('Collection', function() {
       });
     });
 
-    /**
-     * @ignore
-     */
     it('should fail to insert due to illegal keys', function(done) {
       db.createCollection('test_invalid_key_names', (err, collection) => {
         // Legal inserts
@@ -308,9 +290,6 @@ describe('Collection', function() {
       });
     });
 
-    /**
-     * @ignore
-     */
     it('should fail due to illegal listCollections', function(done) {
       db.collection(5, err => {
         expect(err.message).to.equal('collection name must be a String');
@@ -349,9 +328,6 @@ describe('Collection', function() {
         });
       });
     });
-    /**
-     * @ignore
-     */
     it('should correctly count on non-existent collection', function(done) {
       db.collection('test_multiple_insert_2', (err, collection) => {
         collection.countDocuments((err, count) => {
@@ -362,9 +338,6 @@ describe('Collection', function() {
       });
     });
 
-    /**
-     * @ignore
-     */
     it('should correctly execute save', function(done) {
       db.createCollection('test_save', (err, collection) => {
         const doc = { hello: 'world' };
@@ -416,9 +389,6 @@ describe('Collection', function() {
       });
     });
 
-    /**
-     * @ignore
-     */
     it('should correctly save document with Long value', function(done) {
       db.createCollection('test_save_long', (err, collection) => {
         collection.insertOne(
@@ -437,9 +407,6 @@ describe('Collection', function() {
       });
     });
 
-    /**
-     * @ignore
-     */
     it('should save object that has id but does not exist in collection', function(done) {
       db.createCollection(
         'test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection',
@@ -473,9 +440,6 @@ describe('Collection', function() {
       );
     });
 
-    /**
-     * @ignore
-     */
     it('should correctly execute insert update delete safe mode', function(done) {
       db.createCollection(
         'test_should_execute_insert_update_delete_safe_mode',
@@ -510,9 +474,6 @@ describe('Collection', function() {
       );
     });
 
-    /**
-     * @ignore
-     */
     it('should perform multiple saves', function(done) {
       db.createCollection('multiple_save_test', (err, collection) => {
         const doc = {
@@ -546,9 +507,6 @@ describe('Collection', function() {
       });
     });
 
-    /**
-     * @ignore
-     */
     it('should correctly save document with nested array', function(done) {
       db.createCollection('save_error_on_save_test', (err, collection) => {
         // Create unique index for username
@@ -602,9 +560,6 @@ describe('Collection', function() {
       });
     });
 
-    /**
-     * @ignore
-     */
     it('should perform collection remove with no callback', function(done) {
       db.collection('remove_with_no_callback_bug_test', (err, collection) => {
         expect(err).to.not.exist;
@@ -629,9 +584,6 @@ describe('Collection', function() {
       });
     });
 
-    /**
-     * @ignore
-     */
     it('should correctly read back document with null', function(done) {
       db.createCollection('shouldCorrectlyReadBackDocumentWithNull', {}, (err, collection) => {
         // Insert a document with a date
@@ -647,9 +599,6 @@ describe('Collection', function() {
       });
     });
 
-    /**
-     * @ignore
-     */
     it('should throw error due to illegal update', function(done) {
       db.createCollection('shouldThrowErrorDueToIllegalUpdate', {}, (err, coll) => {
         coll.update({}, null, err => {
@@ -663,9 +612,6 @@ describe('Collection', function() {
       });
     });
 
-    /**
-     * @ignore
-     */
     it('should correctly handle 0 as id for save', function(done) {
       db.collection('shouldCorrectlyHandle0asIdForSave').save({ _id: 0 }, err => {
         expect(err).to.not.exist;
@@ -739,9 +685,6 @@ describe('Collection', function() {
       });
     });
 
-    /**
-     * @ignore
-     */
     it('should fail due to existing collection', function(done) {
       db.createCollection('shouldFailDueToExistingCollection', { strict: true }, (err, coll) => {
         expect(err).to.not.exist;
@@ -787,9 +730,6 @@ describe('Collection', function() {
       });
     });
 
-    /**
-     * @ignore
-     */
     it('should filter correctly with index during list', function(done) {
       const testCollection = 'collection_124';
       // Create a collection
@@ -817,9 +757,6 @@ describe('Collection', function() {
       });
     });
 
-    /**
-     * @ignore
-     */
     it('should correctly list multipleCollections', function(done) {
       const emptyDb = client.db('listCollectionsDb');
       emptyDb.createCollection('test1', err => {
@@ -847,9 +784,6 @@ describe('Collection', function() {
       });
     });
 
-    /**
-     * @ignore
-     */
     it('should correctly handle namespace when using collections method', function(done) {
       const emptyDb = client.db('listCollectionsDb2');
       emptyDb.createCollection('test1', err => {
@@ -887,9 +821,6 @@ describe('Collection', function() {
       });
     });
 
-    /**
-     * @ignore
-     */
     it('should provide access to the database name', function() {
       return client
         .db('test_db')
@@ -959,9 +890,6 @@ describe('Collection', function() {
       });
     });
 
-    /**
-     * @ignore
-     */
     it('should support createIndex with no options', function(done) {
       db.createCollection('create_index_without_options', {}, (err, collection) => {
         collection.createIndex({ createdAt: 1 }, err => {
@@ -1285,7 +1213,6 @@ describe('Collection', function() {
       requires: { mongodb: '>=4.2.0' }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {

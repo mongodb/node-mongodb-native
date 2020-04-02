@@ -7,15 +7,11 @@ describe('Indexes', function() {
     return setupDatabase(this.configuration);
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyExtractIndexInformation', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -67,15 +63,11 @@ describe('Indexes', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyHandleMultipleColumnIndexes', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -122,15 +114,11 @@ describe('Indexes', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyHandleUniqueIndex', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { topology: 'single' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -181,15 +169,11 @@ describe('Indexes', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyCreateSubfieldIndex', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -235,15 +219,11 @@ describe('Indexes', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyDropIndexes', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -276,15 +256,11 @@ describe('Indexes', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyHandleDistinctIndexes', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -318,15 +294,11 @@ describe('Indexes', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyExecuteEnsureIndex', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -370,15 +342,11 @@ describe('Indexes', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyCreateAndUseSparseIndex', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -417,9 +385,6 @@ describe('Indexes', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyHandleGeospatialIndexes', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -430,7 +395,6 @@ describe('Indexes', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -462,9 +426,6 @@ describe('Indexes', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyHandleGeospatialIndexesAlteredRange', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -475,7 +436,6 @@ describe('Indexes', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -513,15 +473,11 @@ describe('Indexes', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldThrowDuplicateKeyErrorWhenCreatingIndex', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -544,15 +500,11 @@ describe('Indexes', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldThrowDuplicateKeyErrorWhenDriverInStrictMode', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -575,15 +527,11 @@ describe('Indexes', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyUseMinMaxForSettingRangeInEnsureIndex', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -609,15 +557,11 @@ describe('Indexes', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should correctly create an index with overriden name', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -649,7 +593,6 @@ describe('Indexes', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -677,7 +620,6 @@ describe('Indexes', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -703,7 +645,6 @@ describe('Indexes', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -735,7 +676,6 @@ describe('Indexes', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -771,7 +711,6 @@ describe('Indexes', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -810,7 +749,6 @@ describe('Indexes', function() {
       requires: { mongodb: '>=2.4.0', topology: ['single', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -838,7 +776,6 @@ describe('Indexes', function() {
       requires: { mongodb: '>=2.4.0', topology: ['single', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -866,7 +803,6 @@ describe('Indexes', function() {
       requires: { mongodb: '>=2.4.0', topology: ['single', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -894,7 +830,6 @@ describe('Indexes', function() {
       requires: { mongodb: '>=2.6.0', topology: ['single', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -927,15 +862,11 @@ describe('Indexes', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyCreateTextIndex', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -954,9 +885,6 @@ describe('Indexes', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly pass partialIndexes through to createIndexCommand', {
     metadata: {
       requires: {
@@ -965,7 +893,6 @@ describe('Indexes', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var started = [];
@@ -1001,9 +928,6 @@ describe('Indexes', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should not retry partial index expression error', {
     metadata: {
       requires: {
@@ -1012,7 +936,6 @@ describe('Indexes', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1034,15 +957,11 @@ describe('Indexes', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly create index on embedded key', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1073,15 +992,11 @@ describe('Indexes', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly create index using . keys', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1102,15 +1017,11 @@ describe('Indexes', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('error on duplicate key index', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1144,14 +1055,10 @@ describe('Indexes', function() {
     }
   });
 
-  // /**
-  //  * @ignore
-  //  */
   // it('should correctly return all indexes'] = {
   //   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
-  //   // The actual test we wish to run
-  //   test: function(done) {
+  //     //   test: function(done) {
   //     var db = configuration.newClient(configuration.writeConcernMax(), {poolSize:1});
   //     db.open(function(err, db) {
   //       db.createCollection('test_drop_indexes', function(err, collection) {
@@ -1183,15 +1090,11 @@ describe('Indexes', function() {
   //   }
   // }
 
-  /**
-   * @ignore
-   */
   it('should correctly create Index with sub element', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1211,9 +1114,6 @@ describe('Indexes', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly fail detect error code 85 when performing createIndex', {
     metadata: {
       requires: {
@@ -1222,7 +1122,6 @@ describe('Indexes', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1252,9 +1151,6 @@ describe('Indexes', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly fail by detecting error code 86 when performing createIndex', {
     metadata: {
       requires: {
@@ -1263,7 +1159,6 @@ describe('Indexes', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1285,15 +1180,11 @@ describe('Indexes', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly create Index with sub element running in background', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });

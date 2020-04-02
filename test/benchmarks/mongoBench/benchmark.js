@@ -147,7 +147,6 @@ class Benchmark {
   }
 
   /**
-   * @ignore
    * @param {any} hookList
    * @param {any} fn
    */
@@ -166,7 +165,6 @@ class Benchmark {
   }
 
   /**
-   * @ignore
    * @param {any} arr
    */
   _convertArrayToAsyncPipeFn(arr) {

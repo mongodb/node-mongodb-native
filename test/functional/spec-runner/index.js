@@ -503,7 +503,6 @@ const kOperations = new Map([
 ]);
 
 /**
- *
  * @param {object} operation the operation definition from the spec test
  * @param {object} obj the object to call the operation on
  * @param {object} context a context object containing sessions used for the test

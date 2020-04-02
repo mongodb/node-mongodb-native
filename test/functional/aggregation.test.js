@@ -7,7 +7,6 @@ describe('Aggregation', function() {
    *
    * @example-class Collection
    * @example-method aggregate
-   * @ignore
    */
   it('should correctly execute simple aggregation pipeline using array', {
     // Add a tag that our runner can trigger on
@@ -19,7 +18,6 @@ describe('Aggregation', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var client = this.configuration.newClient({ w: 1 }, { poolSize: 1 }),
         databaseName = this.configuration.db;
@@ -127,7 +125,6 @@ describe('Aggregation', function() {
    *
    * @example-class Collection
    * @example-method aggregate
-   * @ignore
    */
   it('should fail when executing simple aggregation pipeline using arguments not an array', {
     // Add a tag that our runner can trigger on
@@ -139,7 +136,6 @@ describe('Aggregation', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var client = this.configuration.newClient({ w: 1 }, { poolSize: 1 }),
         databaseName = this.configuration.db;
@@ -217,7 +213,6 @@ describe('Aggregation', function() {
    *
    * @example-class Collection
    * @example-method aggregate
-   * @ignore
    */
   it('should fail when executing simple aggregation pipeline using arguments using single object', {
     // Add a tag that our runner can trigger on
@@ -229,7 +224,6 @@ describe('Aggregation', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var client = this.configuration.newClient({ w: 1 }, { poolSize: 1 }),
         databaseName = this.configuration.db;
@@ -307,7 +301,6 @@ describe('Aggregation', function() {
    *
    * @example-class Collection
    * @example-method aggregate
-   * @ignore
    */
   it('should correctly return and iterate over all the cursor results', {
     // Add a tag that our runner can trigger on
@@ -319,7 +312,6 @@ describe('Aggregation', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var client = this.configuration.newClient({ w: 1 }, { poolSize: 1 }),
         databaseName = this.configuration.db;
@@ -391,7 +383,6 @@ describe('Aggregation', function() {
    *
    * @example-class Collection
    * @example-method aggregate
-   * @ignore
    */
   it('should correctly return a cursor and call explain', {
     // Add a tag that our runner can trigger on
@@ -403,7 +394,6 @@ describe('Aggregation', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var client = this.configuration.newClient({ w: 1 }, { poolSize: 1 }),
         databaseName = this.configuration.db;
@@ -481,7 +471,6 @@ describe('Aggregation', function() {
    *
    * @example-class Collection
    * @example-method aggregate
-   * @ignore
    */
   it('should correctly return a cursor with batchSize 1 and call next', {
     // Add a tag that our runner can trigger on
@@ -493,7 +482,6 @@ describe('Aggregation', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var client = this.configuration.newClient({ w: 1 }, { poolSize: 1 }),
         databaseName = this.configuration.db;
@@ -575,7 +563,6 @@ describe('Aggregation', function() {
    *
    * @example-class Collection
    * @example-method aggregate
-   * @ignore
    */
   it('should correctly write the results out to a new collection', {
     // Add a tag that our runner can trigger on
@@ -587,7 +574,6 @@ describe('Aggregation', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var client = this.configuration.newClient({ w: 1 }, { poolSize: 1 }),
         databaseName = this.configuration.db;
@@ -662,7 +648,6 @@ describe('Aggregation', function() {
    *
    * @example-class Collection
    * @example-method aggregate
-   * @ignore
    */
   it('should correctly use allowDiskUse when performing an aggregation', {
     // Add a tag that our runner can trigger on
@@ -674,7 +659,6 @@ describe('Aggregation', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var client = this.configuration.newClient({ w: 1 }, { poolSize: 1 }),
         databaseName = this.configuration.db;
@@ -750,8 +734,6 @@ describe('Aggregation', function() {
 
   /**
    * Correctly perform simple group
-   *
-   * @ignore
    */
   it('should perform a simple group aggregation', {
     // Add a tag that our runner can trigger on
@@ -763,7 +745,6 @@ describe('Aggregation', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var databaseName = this.configuration.db;
       var client = this.configuration.newClient(this.configuration.writeConcernMax(), {
@@ -806,8 +787,6 @@ describe('Aggregation', function() {
 
   /**
    * Correctly perform simple group
-   *
-   * @ignore
    */
   it('should correctly perform an aggregation using a collection name with dot in it', {
     // Add a tag that our runner can trigger on
@@ -819,7 +798,6 @@ describe('Aggregation', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var databaseName = this.configuration.db;
       var client = this.configuration.newClient(this.configuration.writeConcernMax(), {
@@ -869,8 +847,6 @@ describe('Aggregation', function() {
 
   /**
    * Correctly call the aggregation framework to return a cursor with batchSize 1 and get the first result using next
-   *
-   * @ignore
    */
   it('should fail aggregation due to illegal cursor option and streams', {
     // Add a tag that our runner can trigger on
@@ -882,7 +858,6 @@ describe('Aggregation', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var databaseName = this.configuration.db;
       var client = this.configuration.newClient(this.configuration.writeConcernMax(), {
@@ -1013,8 +988,6 @@ describe('Aggregation', function() {
 
   /**
    * Correctly call the aggregation framework to return a cursor with batchSize 1 and get the first result using next
-   *
-   * @ignore
    */
   it(
     'should ensure MaxTimeMS is correctly passed down into command execution when using a cursor',
@@ -1028,7 +1001,6 @@ describe('Aggregation', function() {
         }
       },
 
-      // The actual test we wish to run
       test: function(done) {
         var client = this.configuration.newClient({ w: 1 }, { poolSize: 1 }),
           databaseName = this.configuration.db;
@@ -1188,8 +1160,6 @@ describe('Aggregation', function() {
 
   /**
    * Correctly call the aggregation framework to return a cursor with batchSize 1 and get the first result using next
-   *
-   * @ignore
    */
   it('should correctly handle ISODate date matches in aggregation framework', {
     // Add a tag that our runner can trigger on
@@ -1201,7 +1171,6 @@ describe('Aggregation', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var databaseName = this.configuration.db;
       var client = this.configuration.newClient(this.configuration.writeConcernMax(), {
@@ -1260,8 +1229,6 @@ describe('Aggregation', function() {
 
   /**
    * Correctly call the aggregation framework to return a cursor with batchSize 1 and get the first result using next
-   *
-   * @ignore
    */
   it('should correctly exercise hasNext function on aggregation cursor', {
     metadata: {
@@ -1271,7 +1238,6 @@ describe('Aggregation', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var databaseName = this.configuration.db;
       var client = this.configuration.newClient(this.configuration.writeConcernMax(), {
