@@ -2,7 +2,7 @@
 
 const expect = require('chai').expect;
 const sinon = require('sinon');
-const ScramSHA256 = require('../../lib/core').ScramSHA256;
+const ScramSHA256 = require('../../lib/core/auth/scram').ScramSHA256;
 const setupDatabase = require('./shared').setupDatabase;
 const withClient = require('./shared').withClient;
 
@@ -116,8 +116,8 @@ describe('ScramSHA256', function() {
       });
     });
 
-    it(`should auth ${user.description} using mechanism negotiaton`, {
-      metadata: { requires: { mongodb: '>=3.7.3' } },
+    it(`should auth ${user.description} using mechanism negotiation`, {
+      metadata: { requires: { mongodb: '>=3.7.3 <4.3.5' } },
       test: function() {
         const options = {
           auth: {
@@ -133,8 +133,8 @@ describe('ScramSHA256', function() {
       }
     });
 
-    it(`should auth ${user.description} using mechanism negotiaton and url`, {
-      metadata: { requires: { mongodb: '>=3.7.3' } },
+    it(`should auth ${user.description} using mechanism negotiation and url`, {
+      metadata: { requires: { mongodb: '>=3.7.3 <4.3.5' } },
       test: function() {
         const username = encodeURIComponent(user.username);
         const password = encodeURIComponent(user.password);
@@ -150,7 +150,7 @@ describe('ScramSHA256', function() {
   });
 
   // For a test user supporting both SCRAM-SHA-1 and SCRAM-SHA-256,
-  // drivers should verify that negotation selects SCRAM-SHA-256..
+  // drivers should verify that negotiation selects SCRAM-SHA-256..
   it('should select SCRAM-SHA-256 for a user that supports both auth mechanisms', {
     metadata: { requires: { mongodb: '>=3.7.3' } },
     test: function() {
@@ -171,7 +171,7 @@ describe('ScramSHA256', function() {
   });
 
   it('should shorten SCRAM conversations if the server supports it ', {
-    metadata: { requires: { mongodb: '>=4.3.x' } },
+    metadata: { requires: { mongodb: '>=4.3.4 <4.3.5' } },
     test: function() {
       const options = {
         auth: {
@@ -211,7 +211,7 @@ describe('ScramSHA256', function() {
   });
 
   // Step 3
-  // For test users that support only one mechanism, verify that explictly specifying the other mechanism fails.
+  // For test users that support only one mechanism, verify that explicitly specifying the other mechanism fails.
   it('should fail to connect if incorrect auth mechanism is explicitly specified', {
     metadata: { requires: { mongodb: '>=3.7.3' } },
     test: function() {
@@ -246,7 +246,7 @@ describe('ScramSHA256', function() {
           password: 'pencil'
         },
         authSource: 'admin',
-        serverSelectionTimeoutMS: 100000000
+        serverSelectionTimeoutMS: 100
       };
 
       const badPasswordOptions = {
@@ -255,7 +255,7 @@ describe('ScramSHA256', function() {
           password: 'BadPassword'
         },
         authSource: 'admin',
-        serverSelectionTimeoutMS: 1000000000
+        serverSelectionTimeoutMS: 100
       };
 
       const getErrorMsg = options =>

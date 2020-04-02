@@ -185,7 +185,7 @@ describe('URI', function() {
     test: function(done) {
       function validateConnect(options /*, callback */) {
         expect(options).to.have.property('credentials');
-        expect(options.credentials.mechanism).to.eql('x509');
+        expect(options.credentials.mechanism).to.equal('MONGODB-X509');
 
         connectStub.restore();
         done();
