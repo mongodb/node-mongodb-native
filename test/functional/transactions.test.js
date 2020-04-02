@@ -75,6 +75,23 @@ describe('Transactions', function() {
         session.endSession(done);
       }
     });
+
+    it('should return readable error if promise rejected with no reason', {
+      metadata: { requires: { topology: ['replicaset', 'sharded'], mongodb: '>=4.0.2' } },
+      test: function(done) {
+        function fnThatReturnsBadPromise() {
+          return Promise.reject();
+        }
+
+        session
+          .withTransaction(fnThatReturnsBadPromise)
+          .then(() => done(Error('Expected error')))
+          .catch(err => {
+            expect(err).to.equal(undefined);
+            session.endSession(done);
+          });
+      }
+    });
   });
 
   describe('startTransaction', function() {
