@@ -15,7 +15,7 @@ var delay = function(ms) {
 
 describe('Operation (Promises)', function() {
   before(function() {
-    return setupDatabase(this.configuration, ['integration_tests_2']);
+    return setupDatabase(this.configuration, ['integration_tests_2', 'hr', 'reporting']);
   });
 
   /**************************************************************************
