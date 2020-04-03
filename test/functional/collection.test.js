@@ -10,7 +10,7 @@ describe('Collection', function() {
   let configuration;
   before(function() {
     configuration = this.configuration;
-    return setupDatabase(configuration);
+    return setupDatabase(configuration, ['listCollectionsDb', 'listCollectionsDb2', 'test_db']);
   });
 
   describe('standard collection tests', function() {
@@ -208,12 +208,7 @@ describe('Collection', function() {
             'Collection test_strict_create_collection already exists. Currently in strict mode.'
           );
 
-          // Switch out of strict mode and try to re-create collection
-          db.createCollection('test_strict_create_collection', { strict: false }, err => {
-            expect(err).to.not.exist;
-            // Let's close the db
-            done();
-          });
+          done();
         });
       });
     });
@@ -749,7 +744,7 @@ describe('Collection', function() {
         expect(coll).to.exist;
 
         db.createCollection('shouldFailDueToExistingCollection', { strict: true }, err => {
-          expect(err).to.be.an.instanceof(Error);
+          expect(err).to.exist;
           expect(err.message).to.equal(
             'Collection shouldFailDueToExistingCollection already exists. Currently in strict mode.'
           );

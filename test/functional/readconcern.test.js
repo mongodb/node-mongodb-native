@@ -474,7 +474,9 @@ describe('ReadConcern', function() {
         expect(db.readConcern).to.deep.equal({ level: 'local' });
 
         // Get a collection using createCollection
-        db.createCollection('readConcernCollection', (err, collection) => {
+        db.createCollection('readConcernCollection_createCollection', (err, collection) => {
+          expect(err).to.not.exist;
+
           // Validate readConcern
           expect(collection.readConcern).to.deep.equal({ level: 'local' });
           done();
