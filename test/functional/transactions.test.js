@@ -9,8 +9,66 @@ const loadSpecTests = require('../spec').loadSpecTests;
 const generateTopologyTests = require('./spec-runner').generateTopologyTests;
 const MongoNetworkError = require('../../lib/core').MongoNetworkError;
 
+function ignoreNsNotFoundForListIndexes(err) {
+  if (err.code !== 26) {
+    throw err;
+  }
+
+  return [];
+}
+
+class TransactionsRunnerContext extends TestRunnerContext {
+  assertCollectionExists(options) {
+    const client = this.sharedClient;
+    const db = client.db(options.database);
+    const collectionName = options.collection;
+
+    return db
+      .listCollections()
+      .toArray()
+      .then(collections => expect(collections.some(coll => coll.name === collectionName)).to.be.ok);
+  }
+
+  assertCollectionNotExists(options) {
+    const client = this.sharedClient;
+    const db = client.db(options.database);
+    const collectionName = options.collection;
+
+    return db
+      .listCollections()
+      .toArray()
+      .then(
+        collections => expect(collections.every(coll => coll.name !== collectionName)).to.be.ok
+      );
+  }
+
+  assertIndexExists(options) {
+    const client = this.sharedClient;
+    const collection = client.db(options.database).collection(options.collection);
+    const indexName = options.index;
+
+    return collection
+      .listIndexes()
+      .toArray()
+      .catch(ignoreNsNotFoundForListIndexes)
+      .then(indexes => expect(indexes.some(idx => idx.name === indexName)).to.be.ok);
+  }
+
+  assertIndexNotExists(options) {
+    const client = this.sharedClient;
+    const collection = client.db(options.database).collection(options.collection);
+    const indexName = options.index;
+
+    return collection
+      .listIndexes()
+      .toArray()
+      .catch(ignoreNsNotFoundForListIndexes)
+      .then(indexes => expect(indexes.every(idx => idx.name !== indexName)).to.be.ok);
+  }
+}
+
 describe('Transactions', function() {
-  const testContext = new TestRunnerContext();
+  const testContext = new TransactionsRunnerContext();
 
   [
     { name: 'spec tests', specPath: 'transactions' },
@@ -36,7 +94,17 @@ describe('Transactions', function() {
           // This test needs there to be multiple mongoses
           'increment txnNumber',
           // Skipping this until SPEC-1320 is resolved
-          'remain pinned after non-transient error on commit'
+          'remain pinned after non-transient error on commit',
+
+          // Will be implemented as part of NODE-2034
+          'Client side error in command starting transaction',
+          'Client side error when transaction is in progress',
+
+          // Will be implemented as part of NODE-2538
+          'abortTransaction only retries once with RetryableWriteError from server',
+          'abortTransaction does not retry without RetryableWriteError label',
+          'commitTransaction does not retry error without RetryableWriteError label',
+          'commitTransaction retries once with RetryableWriteError from server'
         ];
 
         return SKIP_TESTS.indexOf(spec.description) === -1;
@@ -151,7 +219,7 @@ describe('Transactions', function() {
 
           const session = client.startSession();
           const db = client.db(configuration.db);
-          db.createCollection('transaction_error_test', (err, coll) => {
+          db.createCollection('transaction_error_test_2', (err, coll) => {
             expect(err).to.not.exist;
 
             session.startTransaction();
