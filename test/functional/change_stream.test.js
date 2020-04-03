@@ -4,6 +4,7 @@ var Transform = require('stream').Transform;
 const MongoError = require('../../lib/core').MongoError;
 var MongoNetworkError = require('../../lib/core').MongoNetworkError;
 const mongoErrorContextSymbol = require('../../lib/core').mongoErrorContextSymbol;
+const isResumableError = require('../../lib/error').isResumableError;
 var setupDatabase = require('./shared').setupDatabase;
 var delay = require('./shared').delay;
 var co = require('co');
@@ -3093,5 +3094,11 @@ describe('Change Streams', function() {
         });
       }
     });
+  });
+});
+
+describe('Change Stream Resume Error Tests', function() {
+  it('should properly process errors that lack the `mongoErrorContextSymbol`', function() {
+    expect(() => isResumableError(new Error())).to.not.throw();
   });
 });
