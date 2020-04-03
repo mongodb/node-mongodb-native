@@ -1,10 +1,15 @@
 'use strict';
 
-const expect = require('chai').expect;
+const chai = require('chai');
+const expect = chai.expect;
 const sinon = require('sinon');
+const sinonChai = require('sinon-chai');
+chai.use(sinonChai);
 const ScramSHA256 = require('../../lib/core/auth/scram').ScramSHA256;
 const setupDatabase = require('./shared').setupDatabase;
 const withClient = require('./shared').withClient;
+
+const wireprotocol = require('../../lib/core/wireprotocol');
 
 const makeConnectionString = (config, username, password) =>
   `mongodb://${username}:${password}@${config.host}:${config.port}/${config.db}?`;
@@ -266,6 +271,50 @@ describe('ScramSHA256', function() {
         );
 
       return Promise.all([getErrorMsg(noUsernameOptions), getErrorMsg(badPasswordOptions)]);
+    }
+  });
+
+  it('should speculatively authenticate', {
+    metadata: { requires: { mongodb: '>=4.3.5' }, useUnifiedTopology: true },
+    test: function() {
+      const commandSpy = test.sandbox.spy(wireprotocol, 'command');
+
+      const options = {
+        auth: {
+          user: userMap.sha256.username,
+          password: userMap.sha256.password
+        },
+        authSource: 'admin'
+      };
+
+      return withClient(this.configuration.newClient({}, options), () => {
+        const firstIsMaster = commandSpy.getCall(0).args[2];
+        const saslContinueCommand = commandSpy.getCall(1).args[2];
+        expect(firstIsMaster).to.have.property('speculativeAuthenticate');
+        expect(saslContinueCommand).to.have.property('saslContinue');
+      });
+    }
+  });
+
+  it('should handle no response to speculative authenticate', {
+    metadata: { requires: { mongodb: '<4.3.5' }, useUnifiedTopology: true },
+    test: function() {
+      const commandSpy = test.sandbox.spy(wireprotocol, 'command');
+
+      const options = {
+        auth: {
+          user: userMap.sha256.username,
+          password: userMap.sha256.password
+        },
+        authSource: 'admin'
+      };
+
+      return withClient(this.configuration.newClient({}, options), () => {
+        const firstIsMaster = commandSpy.getCall(0).args[2];
+        const saslStartCommand = commandSpy.getCall(1).args[2];
+        expect(firstIsMaster).to.have.property('speculativeAuthenticate');
+        expect(saslStartCommand).to.have.property('saslStart');
+      });
     }
   });
 });
