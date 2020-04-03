@@ -32,7 +32,7 @@
   "database_name": "crud-tests",
   "tests": [
     {
-      "description": "BulkWrite with arrayFilters",
+      "description": "BulkWrite updateOne with arrayFilters",
       "operations": [
         {
           "name": "bulkWrite",
@@ -53,7 +53,86 @@
                     }
                   ]
                 }
-              },
+              }
+            ],
+            "options": {
+              "ordered": true
+            }
+          },
+          "result": {
+            "deletedCount": 0,
+            "insertedCount": 0,
+            "insertedIds": {},
+            "matchedCount": 1,
+            "modifiedCount": 1,
+            "upsertedCount": 0,
+            "upsertedIds": {}
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "update": "test",
+              "updates": [
+                {
+                  "q": {},
+                  "u": {
+                    "$set": {
+                      "y.$[i].b": 2
+                    }
+                  },
+                  "arrayFilters": [
+                    {
+                      "i.b": 3
+                    }
+                  ]
+                }
+              ],
+              "ordered": true
+            },
+            "command_name": "update",
+            "database_name": "crud-tests"
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "y": [
+                {
+                  "b": 2
+                },
+                {
+                  "b": 1
+                }
+              ]
+            },
+            {
+              "_id": 2,
+              "y": [
+                {
+                  "b": 0
+                },
+                {
+                  "b": 1
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "BulkWrite updateMany with arrayFilters",
+      "operations": [
+        {
+          "name": "bulkWrite",
+          "arguments": {
+            "requests": [
               {
                 "name": "updateMany",
                 "arguments": {
@@ -79,8 +158,8 @@
             "deletedCount": 0,
             "insertedCount": 0,
             "insertedIds": {},
-            "matchedCount": 3,
-            "modifiedCount": 3,
+            "matchedCount": 2,
+            "modifiedCount": 2,
             "upsertedCount": 0,
             "upsertedIds": {}
           }
@@ -92,19 +171,6 @@
             "command": {
               "update": "test",
               "updates": [
-                {
-                  "q": {},
-                  "u": {
-                    "$set": {
-                      "y.$[i].b": 2
-                    }
-                  },
-                  "arrayFilters": [
-                    {
-                      "i.b": 3
-                    }
-                  ]
-                },
                 {
                   "q": {},
                   "u": {
@@ -134,7 +200,7 @@
               "_id": 1,
               "y": [
                 {
-                  "b": 2
+                  "b": 3
                 },
                 {
                   "b": 2

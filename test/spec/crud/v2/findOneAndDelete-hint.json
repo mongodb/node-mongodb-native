@@ -1,0 +1,110 @@
+{
+  "runOn": [
+    {
+      "minServerVersion": "4.3.4"
+    }
+  ],
+  "data": [
+    {
+      "_id": 1,
+      "x": 11
+    },
+    {
+      "_id": 2,
+      "x": 22
+    }
+  ],
+  "collection_name": "findOneAndDelete_hint",
+  "tests": [
+    {
+      "description": "FindOneAndDelete with hint string",
+      "operations": [
+        {
+          "object": "collection",
+          "name": "findOneAndDelete",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "hint": "_id_"
+          },
+          "result": {
+            "_id": 1,
+            "x": 11
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "findAndModify": "findOneAndDelete_hint",
+              "query": {
+                "_id": 1
+              },
+              "hint": "_id_",
+              "remove": true
+            }
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 2,
+              "x": 22
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "FindOneAndDelete with hint document",
+      "operations": [
+        {
+          "object": "collection",
+          "name": "findOneAndDelete",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "hint": {
+              "_id": 1
+            }
+          },
+          "result": {
+            "_id": 1,
+            "x": 11
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "findAndModify": "findOneAndDelete_hint",
+              "query": {
+                "_id": 1
+              },
+              "hint": {
+                "_id": 1
+              },
+              "remove": true
+            }
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 2,
+              "x": 22
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
