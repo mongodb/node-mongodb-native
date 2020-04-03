@@ -18,7 +18,6 @@ describe('MongoClient', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       const client = configuration.newClient(
@@ -65,15 +64,11 @@ describe('MongoClient', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should fail due to wrong uri user:password@localhost', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       const client = configuration.newClient('user:password@localhost:27017/test');
@@ -85,15 +80,11 @@ describe('MongoClient', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should fail due to wrong uri user:password@localhost, with new url parser', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       const client = configuration.newClient('user:password@localhost:27017/test', {
@@ -107,15 +98,11 @@ describe('MongoClient', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('correctly error out when no socket available on MongoClient `connect`', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       const client = configuration.newClient('mongodb://localhost:27088/test', {
@@ -133,7 +120,6 @@ describe('MongoClient', function() {
   it('should correctly connect to mongodb using domain socket', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       const client = configuration.newClient('mongodb://%2Ftmp%2Fmongodb-27017.sock/test');
@@ -151,7 +137,6 @@ describe('MongoClient', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       const client = configuration.newClient('mongodb://unknownhost:36363/ddddd', {
@@ -172,7 +157,6 @@ describe('MongoClient', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var url = configuration.url();
@@ -199,7 +183,6 @@ describe('MongoClient', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var url = configuration.url();
@@ -221,7 +204,6 @@ describe('MongoClient', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       const client = configuration.newClient(
@@ -261,7 +243,6 @@ describe('MongoClient', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       const client = configuration.newClient();
@@ -288,7 +269,6 @@ describe('MongoClient', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       const client = configuration.newClient();

@@ -13,14 +13,12 @@ describe('Find', function() {
 
   /**
    * Test a simple find
-   * @ignore
    */
   it('shouldCorrectlyPerformSimpleFind', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -61,14 +59,12 @@ describe('Find', function() {
 
   /**
    * Test a simple find chained
-   * @ignore
    */
   it('shouldCorrectlyPerformSimpleChainedFind', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -111,14 +107,12 @@ describe('Find', function() {
 
   /**
    * Test advanced find
-   * @ignore
    */
   it('shouldCorrectlyPerformAdvancedFinds', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -210,14 +204,12 @@ describe('Find', function() {
 
   /**
    * Test sorting of results
-   * @ignore
    */
   it('shouldCorrectlyPerformFindWithSort', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -342,14 +334,12 @@ describe('Find', function() {
 
   /**
    * Test the limit function of the db
-   * @ignore
    */
   it('shouldCorrectlyPerformFindWithLimit', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -402,14 +392,12 @@ describe('Find', function() {
 
   /**
    * Test find by non-quoted values (issue #128)
-   * @ignore
    */
   it('shouldCorrectlyFindWithNonQuotedValues', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -442,14 +430,12 @@ describe('Find', function() {
 
   /**
    * Test for querying embedded document using dot-notation (issue #126)
-   * @ignore
    */
   it('shouldCorrectlyFindEmbeddedDocument', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -493,14 +479,12 @@ describe('Find', function() {
 
   /**
    * Find no records
-   * @ignore
    */
   it('shouldCorrectlyFindNoRecords', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -521,9 +505,6 @@ describe('Find', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyPerformFindByWhere', {
     metadata: {
       requires: {
@@ -532,7 +513,6 @@ describe('Find', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -571,15 +551,11 @@ describe('Find', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyPerformFindsWithHintTurnedOn', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -640,15 +616,11 @@ describe('Find', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyPerformFindByObjectID', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -678,15 +650,11 @@ describe('Find', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyReturnDocumentWithOriginalStructure', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -718,15 +686,11 @@ describe('Find', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyRetrieveSingleRecord', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var p_client = configuration.newClient(configuration.writeConcernMax(), {
@@ -755,15 +719,11 @@ describe('Find', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyHandleError', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -787,14 +747,12 @@ describe('Find', function() {
 
   /**
    * Test field select with options
-   * @ignore
    */
   it('shouldCorrectlyPerformFindWithOptions', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -832,14 +790,12 @@ describe('Find', function() {
 
   /**
    * Test findAndModify a document
-   * @ignore
    */
   it('shouldCorrectlyFindAndModifyDocument', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -942,14 +898,12 @@ describe('Find', function() {
 
   /**
    * Test findAndModify a document with fields
-   * @ignore
    */
   it('shouldCorrectlyFindAndModifyDocumentAndReturnSelectedFieldsOnly', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -978,15 +932,11 @@ describe('Find', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('ShouldCorrectlyLocatePostAndIncValues', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1032,14 +982,12 @@ describe('Find', function() {
 
   /**
    * Test findAndModify a document
-   * @ignore
    */
   it('Should Correctly Handle FindAndModify Duplicate Key Error', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1074,15 +1022,11 @@ describe('Find', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should correctly return null when attempting to modify a non-existing document', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1103,15 +1047,11 @@ describe('Find', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should correctly handle chained skip and limit on find with toArray', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1140,15 +1080,11 @@ describe('Find', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should correctly handle chained skip and negative limit on find with toArray', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1179,15 +1115,11 @@ describe('Find', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should correctly pass timeout options to cursor noCursorTimeout', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1202,21 +1134,18 @@ describe('Find', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should correctly pass timeout options to cursor is false', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
-        db.createCollection('timeoutFalse', function(err, collection) {
+        db.createCollection('cursor_timeout_false_0', function(err, collection) {
+          expect(err).to.not.exist;
           const cursor = collection.find({}, { timeout: false });
           test.equal(false, cursor.cmd.noCursorTimeout);
           client.close(done);
@@ -1225,21 +1154,18 @@ describe('Find', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should correctly pass timeout options to cursor is true', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
-        db.createCollection('timeoutFalse', function(err, collection) {
+        db.createCollection('cursor_timeout_false_1', function(err, collection) {
+          expect(err).to.not.exist;
           const cursor = collection.find({}, { timeout: true });
           test.equal(true, cursor.cmd.noCursorTimeout);
           client.close(done);
@@ -1250,14 +1176,12 @@ describe('Find', function() {
 
   /**
    * Test findAndModify a document with strict mode enabled
-   * @ignore
    */
   it('shouldCorrectlyFindAndModifyDocumentWithDBStrict', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var p_client = configuration.newClient(configuration.writeConcernMax(), {
@@ -1296,14 +1220,12 @@ describe('Find', function() {
 
   /**
    * Test findAndModify a document that fails in first step before safe
-   * @ignore
    */
   it('shouldCorrectlyFindAndModifyDocumentThatFailsInFirstStep', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1344,15 +1266,11 @@ describe('Find', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should correctly return new modified document', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1392,20 +1310,18 @@ describe('Find', function() {
 
   /**
    * Should correctly execute findAndModify that is breaking in prod
-   * @ignore
    */
   it('shouldCorrectlyExecuteFindAndModify', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
-        db.createCollection('shouldCorrectlyExecuteFindAndModify', function(err, collection) {
+        db.createCollection('execute_find_and_modify', function(err, collection) {
           var self = { _id: new ObjectID() };
           var _uuid = 'sddffdss';
 
@@ -1424,15 +1340,11 @@ describe('Find', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should correctly return record with 64-bit id', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1474,15 +1386,11 @@ describe('Find', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should Correctly find a Document using findOne excluding _id field', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var p_client = configuration.newClient(configuration.writeConcernMax(), {
@@ -1521,15 +1429,11 @@ describe('Find', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should correctly execute find queries with selector set to null', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1556,15 +1460,11 @@ describe('Find', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyHandlerErrorForFindAndModifyWhenNoRecordExists', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1587,15 +1487,11 @@ describe('Find', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyExecuteFindAndModifyShouldGenerateCorrectBSON', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1619,7 +1515,7 @@ describe('Find', function() {
           transactions: transactions
         };
 
-        db.createCollection('shouldCorrectlyExecuteFindAndModify', function(err, collection) {
+        db.createCollection('find_and_modify_generate_correct_bson', function(err, collection) {
           test.equal(null, err);
 
           collection.insert(wrapingObject, configuration.writeConcernMax(), function(err, r) {
@@ -1656,15 +1552,11 @@ describe('Find', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyExecuteMultipleFindsInParallel', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var p_client = configuration.newClient(configuration.writeConcernMax(), {
@@ -1719,15 +1611,11 @@ describe('Find', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyReturnErrorFromMongodbOnFindAndModifyForcedError', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1755,15 +1643,11 @@ describe('Find', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyExecuteFindAndModifyUnderConcurrentLoad', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var p_client = configuration.newClient(configuration.writeConcernMax(), {
@@ -1794,7 +1678,8 @@ describe('Find', function() {
 
         db.collection('collection2', function(err, collection) {
           // Keep hammering in inserts
-          var insert = function() {
+          var insert;
+          insert = function() {
             process.nextTick(function() {
               collection.insert({ a: 1 });
               if (running) process.nextTick(insert);
@@ -1805,15 +1690,11 @@ describe('Find', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyIterateOverCollection', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var p_client = configuration.newClient(configuration.writeConcernMax(), {
@@ -1858,15 +1739,11 @@ describe('Find', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyErrorOutFindAndModifyOnDuplicateRecord', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var p_client = configuration.newClient(configuration.writeConcernMax(), {
@@ -1915,15 +1792,12 @@ describe('Find', function() {
 
   /**
    * An example of using find with a very large in parameter
-   *
-   * @ignore
    */
   it('shouldPerformSimpleFindInArray', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1962,7 +1836,6 @@ describe('Find', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1999,7 +1872,6 @@ describe('Find', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2059,7 +1931,6 @@ describe('Find', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2108,7 +1979,6 @@ describe('Find', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2152,7 +2022,6 @@ describe('Find', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2196,7 +2065,6 @@ describe('Find', function() {
   it('shouldCorrectlyExecuteExhaustQuery', {
     metadata: { requires: { topology: ['single', 'replicaset'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2253,7 +2121,6 @@ describe('Find', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2294,7 +2161,6 @@ describe('Find', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2317,7 +2183,6 @@ describe('Find', function() {
   it('shouldCorrectlyFindDocumentsByRegExp', {
     metadata: { requires: { topology: ['single', 'replicaset'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2361,7 +2226,6 @@ describe('Find', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2404,7 +2268,6 @@ describe('Find', function() {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { mongodb: '>2.5.5 <=4.1.0', topology: ['single', 'replicaset'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2469,7 +2332,6 @@ describe('Find', function() {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { mongodb: '>2.5.5 <=4.1.0', topology: ['single', 'replicaset'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2527,7 +2389,6 @@ describe('Find', function() {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { mongodb: '>2.5.5 <=4.1.0', topology: ['single', 'replicaset'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2570,7 +2431,6 @@ describe('Find', function() {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { mongodb: '>2.5.5 <=4.1.0', topology: ['single', 'replicaset'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2676,7 +2536,6 @@ describe('Find', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2716,7 +2575,6 @@ describe('Find', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2740,7 +2598,6 @@ describe('Find', function() {
       // in this case we are setting that node needs to be higher than 0.10.X to run
       metadata: { requires: { mongodb: '>2.5.5 <=4.1.0', topology: ['single', 'replicaset'] } },
 
-      // The actual test we wish to run
       test: function(done) {
         var configuration = this.configuration;
         var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2789,7 +2646,6 @@ describe('Find', function() {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { mongodb: '>2.5.5', topology: ['single', 'replicaset'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2834,14 +2690,12 @@ describe('Find', function() {
 
   /**
    * Find and modify should allow for a write Concern without failing
-   * @ignore
    */
   it('should correctly execute a findAndModifyWithAWriteConcern', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2873,14 +2727,12 @@ describe('Find', function() {
 
   /**
    * Test a simple find
-   * @ignore
    */
   it('should execute query using batchSize of 0', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2912,14 +2764,12 @@ describe('Find', function() {
 
   /**
    * Test a simple find
-   * @ignore
    */
   it('should execute query using limit of 0', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2954,14 +2804,12 @@ describe('Find', function() {
 
   /**
    * Test a simple find
-   * @ignore
    */
   it('should execute query using $elemMatch', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2999,14 +2847,12 @@ describe('Find', function() {
 
   /**
    * Test a simple find
-   * @ignore
    */
   it('should execute query using limit of 101', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3063,12 +2909,10 @@ describe('Find', function() {
 
   /**
    * Test a simple find
-   * @ignore
    */
   it('Should correctly apply db level options to find cursor', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var listener = require('../..').instrument(function(err) {
         test.equal(null, err);

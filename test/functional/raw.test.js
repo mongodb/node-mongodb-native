@@ -9,15 +9,11 @@ describe('Raw', function() {
     return setupDatabase(this.configuration);
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlySaveDocumentsAndReturnAsRaw', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -58,15 +54,11 @@ describe('Raw', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlySaveDocumentsAndReturnAsRawWithRawSetAtCollectionLevel', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });

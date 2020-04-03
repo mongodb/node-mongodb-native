@@ -14,7 +14,6 @@ describe('Cursor Streams', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var self = this;
       var docs = [];
@@ -89,7 +88,6 @@ describe('Cursor Streams', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var self = this;
       var docs = [];
@@ -164,7 +162,6 @@ describe('Cursor Streams', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var self = this;
       var docs = [];
@@ -216,7 +213,6 @@ describe('Cursor Streams', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
@@ -286,7 +282,6 @@ describe('Cursor Streams', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
@@ -326,7 +321,6 @@ describe('Cursor Streams', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {

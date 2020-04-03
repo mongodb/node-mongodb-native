@@ -21,7 +21,6 @@ describe('APM', function() {
     {
       metadata: { requires: { topology: ['single', 'replicaset', 'sharded'] } },
 
-      // The actual test we wish to run
       test: function() {
         let started = [];
         let succeeded = [];
@@ -81,7 +80,6 @@ describe('APM', function() {
   it('should support legacy `instrument`/`uninstrument` methods with MongoClient `connect`', {
     metadata: { requires: { topology: ['single', 'replicaset', 'sharded'] } },
 
-    // The actual test we wish to run
     test: function() {
       let started = [];
       let succeeded = [];
@@ -130,7 +128,6 @@ describe('APM', function() {
   it('should correctly receive the APM events for an insert', {
     metadata: { requires: { topology: ['single', 'replicaset', 'sharded'] } },
 
-    // The actual test we wish to run
     test: function() {
       const started = [];
       const succeeded = [];
@@ -164,7 +161,6 @@ describe('APM', function() {
   it('should correctly handle cursor.close when no cursor existed', {
     metadata: { requires: { topology: ['single', 'replicaset'] } },
 
-    // The actual test we wish to run
     test: function() {
       const started = [];
       const succeeded = [];
@@ -195,7 +191,6 @@ describe('APM', function() {
   it('should correctly receive the APM events for a listCollections command', {
     metadata: { requires: { topology: ['replicaset'], mongodb: '>=3.0.0' } },
 
-    // The actual test we wish to run
     test: function() {
       const self = this;
       const started = [];
@@ -236,7 +231,6 @@ describe('APM', function() {
   it('should correctly receive the APM events for a listIndexes command', {
     metadata: { requires: { topology: ['replicaset'], mongodb: '>=3.0.0' } },
 
-    // The actual test we wish to run
     test: function() {
       const self = this;
       const started = [];
@@ -287,7 +281,6 @@ describe('APM', function() {
     {
       metadata: { requires: { topology: ['single', 'replicaset'] } },
 
-      // The actual test we wish to run
       test: function() {
         const self = this;
         const started = [];
@@ -355,7 +348,6 @@ describe('APM', function() {
   it('should correctly receive the APM events for a find with getmore and killcursor', {
     metadata: { requires: { topology: ['single', 'replicaset'] } },
 
-    // The actual test we wish to run
     test: function() {
       const self = this;
       const started = [];
@@ -429,7 +421,6 @@ describe('APM', function() {
   it('should correctly receive the APM failure event for find', {
     metadata: { requires: { topology: ['single', 'replicaset'], mongodb: '>=2.6.0' } },
 
-    // The actual test we wish to run
     test: function() {
       const self = this;
       const started = [];
@@ -489,7 +480,6 @@ describe('APM', function() {
   it('should correctly receive the APM events for a bulk operation', {
     metadata: { requires: { topology: ['single', 'replicaset'] } },
 
-    // The actual test we wish to run
     test: function() {
       const self = this;
       const started = [];
@@ -582,7 +572,6 @@ describe('APM', function() {
   it('should correctly filter out sensitive commands', {
     metadata: { requires: { topology: ['single', 'replicaset'] } },
 
-    // The actual test we wish to run
     test: function() {
       const self = this;
       const started = [];
@@ -616,7 +605,6 @@ describe('APM', function() {
   it('should correctly receive the APM events for an updateOne', {
     metadata: { requires: { topology: ['single', 'replicaset'] } },
 
-    // The actual test we wish to run
     test: function() {
       const self = this;
       const started = [];
@@ -652,7 +640,6 @@ describe('APM', function() {
   it('should correctly receive the APM events for an updateMany', {
     metadata: { requires: { topology: ['single', 'replicaset'] } },
 
-    // The actual test we wish to run
     test: function() {
       const self = this;
       const started = [];
@@ -688,7 +675,6 @@ describe('APM', function() {
   it('should correctly receive the APM events for deleteOne', {
     metadata: { requires: { topology: ['single', 'replicaset'] } },
 
-    // The actual test we wish to run
     test: function() {
       const self = this;
       const started = [];
@@ -724,7 +710,6 @@ describe('APM', function() {
   it('should ensure killcursor commands are sent on 3.0 or earlier when APM is enabled', {
     metadata: { requires: { topology: ['single', 'replicaset'], mongodb: '<=3.0.x' } },
 
-    // The actual test we wish to run
     test: function() {
       const self = this;
       const client = self.configuration.newClient(
@@ -768,7 +753,6 @@ describe('APM', function() {
   it('should correctly decorate the apm result for aggregation with cursorId', {
     metadata: { requires: { topology: ['single', 'replicaset'], mongodb: '>=3.0.0' } },
 
-    // The actual test we wish to run
     test: function() {
       const self = this;
       const started = [];

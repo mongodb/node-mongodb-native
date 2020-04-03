@@ -9,13 +9,9 @@ describe('LDAP', function() {
     return setupDatabase(this.configuration);
   });
 
-  /**
-   * @ignore
-   */
   it('Should correctly authenticate against ldap', {
     metadata: { requires: { topology: 'ldap' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
 
@@ -49,13 +45,9 @@ describe('LDAP', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should correctly reauthenticate against ldap', {
     metadata: { requires: { topology: 'ldap' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
 

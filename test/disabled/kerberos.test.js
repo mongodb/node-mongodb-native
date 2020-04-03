@@ -14,13 +14,9 @@ describe('Kerberos', function() {
     return setupDatabase(this.configuration);
   });
 
-  /**
-   * @ignore
-   */
   it('Should Correctly Authenticate using kerberos with MongoClient', {
     metadata: { requires: { topology: 'kerberos', os: '!win32' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
 
@@ -51,13 +47,9 @@ describe('Kerberos', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Validate that SERVICE_REALM and CANONICALIZE_HOST_NAME is passed in', {
     metadata: { requires: { topology: 'kerberos', os: '!win32' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
 
@@ -88,15 +80,11 @@ describe('Kerberos', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it(
     'Should Correctly Authenticate using kerberos with MongoClient and authentication properties',
     {
       metadata: { requires: { topology: 'kerberos', os: '!win32' } },
 
-      // The actual test we wish to run
       test: function(done) {
         var configuration = this.configuration;
 
@@ -128,13 +116,9 @@ describe('Kerberos', function() {
     }
   );
 
-  /**
-   * @ignore
-   */
   it('Should Correctly Authenticate using kerberos with MongoClient and then reconnect', {
     metadata: { requires: { topology: 'kerberos', os: '!win32' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
 
@@ -191,13 +175,9 @@ describe('Kerberos', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should Correctly Authenticate authenticate method manually', {
     metadata: { requires: { topology: 'kerberos', os: '!win32' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var MongoClient = configuration.require.MongoClient,
@@ -229,13 +209,9 @@ describe('Kerberos', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should Fail to Authenticate due to illegal service name', {
     metadata: { requires: { topology: 'kerberos', os: '!win32' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
 
@@ -257,13 +233,9 @@ describe('Kerberos', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should Correctly Authenticate on Win32 using kerberos with MongoClient', {
     metadata: { requires: { topology: 'kerberos', os: 'win32' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
 
@@ -298,13 +270,9 @@ describe('Kerberos', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should Correctly Authenticate using kerberos on Win32 with MongoClient and then reconnect', {
     metadata: { requires: { topology: 'kerberos', os: 'win32' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
 
@@ -364,13 +332,9 @@ describe('Kerberos', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should Correctly Authenticate on Win32 authenticate method manually', {
     metadata: { requires: { topology: 'kerberos', os: 'win32' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var MongoClient = configuration.require.MongoClient,
@@ -404,13 +368,9 @@ describe('Kerberos', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should Fail to Authenticate due to illegal service name on win32', {
     metadata: { requires: { topology: 'kerberos', os: 'win32' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
 

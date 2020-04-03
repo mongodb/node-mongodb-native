@@ -8,13 +8,9 @@ describe('Connection', function() {
     return setupDatabase(this.configuration);
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly start monitoring for single server connection', {
     metadata: { requires: { topology: 'single' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(
@@ -32,13 +28,9 @@ describe('Connection', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly connect to server using domain socket', {
     metadata: { requires: { topology: 'single' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(
@@ -66,15 +58,11 @@ describe('Connection', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly connect to server using just events', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: true });
@@ -87,16 +75,12 @@ describe('Connection', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly connect to server using big connection pool', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] },
       ignore: { travis: true }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient({ w: 1 }, { poolSize: 2000, auto_reconnect: true });
@@ -108,13 +92,9 @@ describe('Connection', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should connect to server using domain socket with undefined port', {
     metadata: { requires: { topology: 'single' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(
@@ -143,7 +123,9 @@ describe('Connection', function() {
   });
 
   /**
-   * @ignore
+   * @param {any} configuration
+   * @param {any} testName
+   * @param {any} callback
    */
   function connectionTester(configuration, testName, callback) {
     return function(err, client) {
@@ -166,13 +148,9 @@ describe('Connection', function() {
     };
   }
 
-  /**
-   * @ignore
-   */
   it('test connect no options', {
     metadata: { requires: { topology: 'single' } },
 
-    // The actual test we wish to run
     test: function(done) {
       const configuration = this.configuration;
       const client = configuration.newClient();
@@ -185,13 +163,9 @@ describe('Connection', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('test connect good auth', {
     metadata: { requires: { topology: 'single' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var user = 'testConnectGoodAuth',
@@ -221,13 +195,9 @@ describe('Connection', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('test connect good auth as option', {
     metadata: { requires: { topology: 'single' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var user = 'testConnectGoodAuthAsOption',
@@ -262,13 +232,9 @@ describe('Connection', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('test connect bad auth', {
     metadata: { requires: { topology: 'single' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       const client = configuration.newClient(configuration.url('slithy', 'toves'), {
@@ -283,13 +249,9 @@ describe('Connection', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('test connect bad url', {
     metadata: { requires: { topology: 'single' } },
 
-    // The actual test we wish to run
     test: function(done) {
       const configuration = this.configuration;
       const client = configuration.newClient('mangodb://localhost:27017/test?safe=false');
@@ -304,13 +266,9 @@ describe('Connection', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly return false on `isConnected` before connection happened', {
     metadata: { requires: { topology: 'single' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });

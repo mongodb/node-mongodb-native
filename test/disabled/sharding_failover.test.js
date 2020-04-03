@@ -11,13 +11,9 @@ describe.skip('Sharding (Failover)', function() {
     return setupDatabase(this.configuration);
   });
 
-  /**
-   * @ignore
-   */
   it('Should correctly connect and then handle a mongos failure', {
     metadata: { requires: { topology: 'sharded' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var manager = configuration.manager;
@@ -69,13 +65,9 @@ describe.skip('Sharding (Failover)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyConnectToMongoSShardedSetupAndKillTheMongoSProxy', {
     metadata: { requires: { topology: 'sharded' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var Mongos = configuration.require.Mongos,
@@ -179,13 +171,9 @@ describe.skip('Sharding (Failover)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should correctly connect and emit a reconnect event after mongos failover', {
     metadata: { requires: { topology: 'sharded' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var manager = configuration.manager;

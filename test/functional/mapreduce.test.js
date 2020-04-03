@@ -2,15 +2,13 @@
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 const { Code } = require('../..');
+const { expect } = require('chai');
 
 describe('MapReduce', function() {
   before(function() {
-    return setupDatabase(this.configuration);
+    return setupDatabase(this.configuration, ['outputCollectionDb']);
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyExecuteGroupFunctionWithFinalizeFunction', {
     metadata: {
       requires: {
@@ -19,7 +17,6 @@ describe('MapReduce', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -70,14 +67,12 @@ describe('MapReduce', function() {
 
   /**
    * Mapreduce tests
-   * @ignore
    */
   it('shouldPerformMapReduceWithStringFunctions', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -116,7 +111,6 @@ describe('MapReduce', function() {
 
   /**
    * Mapreduce tests
-   * @ignore
    */
   it('shouldForceMapReduceError', {
     // Add a tag that our runner can trigger on
@@ -128,13 +122,13 @@ describe('MapReduce', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
+        expect(err).to.not.exist;
         var db = client.db(configuration.db);
-        db.createCollection('test_map_reduce', function(err, collection) {
+        db.createCollection('should_force_map_reduce_error', function(err, collection) {
           collection.insert(
             [{ user_id: 1 }, { user_id: 2 }],
             configuration.writeConcernMax(),
@@ -155,15 +149,11 @@ describe('MapReduce', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldPerformMapReduceWithParametersBeingFunctions', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -208,15 +198,11 @@ describe('MapReduce', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldPerformMapReduceWithCodeObjects', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -252,15 +238,11 @@ describe('MapReduce', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldPerformMapReduceWithOptions', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -302,15 +284,11 @@ describe('MapReduce', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldHandleMapReduceErrors', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -342,9 +320,6 @@ describe('MapReduce', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldSaveDataToDifferentDbFromMapreduce', {
     metadata: {
       requires: {
@@ -353,7 +328,6 @@ describe('MapReduce', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -386,7 +360,7 @@ describe('MapReduce', function() {
                 collection.mapReduce(
                   map,
                   reduce,
-                  { out: { replace: 'tempCollection', db: 'outputCollectionDb' } },
+                  { out: { replace: 'test_map_reduce_functions_temp', db: 'outputCollectionDb' } },
                   function(err, collection) {
                     test.equal(null, err);
 
@@ -412,9 +386,6 @@ describe('MapReduce', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyReturnNestedKeys', {
     metadata: {
       requires: {
@@ -423,7 +394,6 @@ describe('MapReduce', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -480,14 +450,12 @@ describe('MapReduce', function() {
 
   /**
    * Mapreduce tests
-   * @ignore
    */
   it.skip('shouldPerformMapReduceWithScopeContainingFunction', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var util = {
         times_one_hundred: function(x) {
@@ -515,7 +483,7 @@ describe('MapReduce', function() {
               collection.mapReduce(
                 map,
                 reduce,
-                { scope: { util: util }, out: { replace: 'tempCollection' } },
+                { scope: { util: util }, out: { replace: 'test_map_reduce_temp' } },
                 function(err, collection) {
                   // After MapReduce
                   test.equal(200, util.times_one_hundred(2));

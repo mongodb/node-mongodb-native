@@ -11,6 +11,8 @@ var Mocha = require('mocha'),
  * This UI is identical to the BDD interface, but with the addition of
  * allowing tests and suites to contain metadata
  * https://github.com/mochajs/mocha/blob/master/lib/interfaces/bdd.js
+ *
+ * @param {any} suite
  */
 module.exports = Mocha.interfaces.metadata_ui = function(suite) {
   var suites = [suite];
@@ -26,6 +28,8 @@ module.exports = Mocha.interfaces.metadata_ui = function(suite) {
 
     /**
      * Parse arguments for suite and test functions
+     *
+     * @param {any} args
      */
     var _parseArgs = function(args) {
       var testData = {};
@@ -83,6 +87,8 @@ module.exports = Mocha.interfaces.metadata_ui = function(suite) {
      * Create new suite that can contain metadata
      * Adapted from Suite prototype
      * https://github.com/mochajs/mocha/blob/master/lib/suite.js
+     *
+     * @param {any} opts
      */
     var _create = function(opts) {
       var testData = _parseArgs(opts.args);
@@ -182,6 +188,8 @@ module.exports = Mocha.interfaces.metadata_ui = function(suite) {
 
     /**
      * Pending test case.
+     *
+     * @param {any} title
      */
     context.xit = context.xspecify = context.it.skip = function(title) {
       context.it(title);
@@ -189,6 +197,8 @@ module.exports = Mocha.interfaces.metadata_ui = function(suite) {
 
     /**
      * Number of attempts to retry.
+     *
+     * @param {any} n
      */
     context.it.retries = function(n) {
       context.retries(n);

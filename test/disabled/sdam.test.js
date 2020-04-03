@@ -10,7 +10,6 @@ describe.skip('SDAM', function() {
   it('Should correctly emit all Replicaset SDAM operations', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var operations = {
@@ -60,7 +59,6 @@ describe.skip('SDAM', function() {
   it('Should correctly emit all Mongos SDAM operations', {
     metadata: { requires: { topology: 'sharded' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var operations = {
@@ -112,7 +110,6 @@ describe.skip('SDAM', function() {
   it('Should correctly emit all Server SDAM operations', {
     metadata: { requires: { topology: 'single' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var operations = {

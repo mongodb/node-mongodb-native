@@ -10,12 +10,10 @@ describe('SCRAM', function() {
 
   /**
    * rm -rf data; mkdir data; mongod --dbpath=./data --setParameter authenticationMechanisms=SCRAM-SHA-1 --auth
-   * @ignore
    */
   it('Should correctly authenticate against scram', {
     metadata: { requires: { topology: 'scram', mongodb: '>=3.2.0' } },
 
-    // The actual test we wish to run
     test: function(done) {
       // User and password
       var user = 'test';

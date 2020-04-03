@@ -8,9 +8,6 @@ describe('Ignore Undefined', function() {
     return setupDatabase(this.configuration);
   });
 
-  /**
-   * @ignore
-   */
   it('Should correctly insert document ignoring undefined field', {
     metadata: { requires: { topology: ['single'] } },
 
@@ -40,9 +37,6 @@ describe('Ignore Undefined', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it(
     'Should correctly connect using MongoClient and perform insert document ignoring undefined field',
     {
@@ -94,9 +88,6 @@ describe('Ignore Undefined', function() {
     }
   );
 
-  /**
-   * @ignore
-   */
   it('Should correctly update document ignoring undefined field', {
     metadata: { requires: { topology: ['single'] } },
 

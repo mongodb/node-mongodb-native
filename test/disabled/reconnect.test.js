@@ -7,14 +7,10 @@ describe('Reconnect', function() {
     return setupDatabase(this.configuration);
   });
 
-  /**
-   * @ignore
-   */
   // NOTE: skipped for use of topology manager
   it.skip('Should correctly stop reconnection attempts after limit reached', {
     metadata: { requires: { topology: ['single'] }, ignore: { travis: true } },
 
-    // The actual test we wish to run
     test: function(done) {
       // Create a new db instance
       var configuration = this.configuration;
@@ -45,14 +41,10 @@ describe('Reconnect', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   // NOTE: skipped for use of topology manager
   it.skip('Should correctly recover when bufferMaxEntries: -1 and multiple restarts', {
     metadata: { requires: { topology: ['single'] }, ignore: { travis: true } },
 
-    // The actual test we wish to run
     test: function(done) {
       const configuration = this.configuration;
       const client = configuration.newClient('mongodb://localhost:27017/test', {

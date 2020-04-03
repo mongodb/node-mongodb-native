@@ -54,13 +54,10 @@ describe('Authentication', function() {
 
   /**
    * Fail due to illegal authentication mechanism
-   *
-   * @ignore
    */
   it('should fail due to illegal authentication mechanism', {
     metadata: { requires: { topology: ['auth'], mongodb: '<=2.6.x' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration,
         MongoClient = configuration.require.MongoClient,
@@ -100,13 +97,9 @@ describe('Authentication', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly authenticate with kay.kay', {
     metadata: { requires: { topology: ['auth'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration,
         MongoClient = configuration.require.MongoClient,
@@ -143,13 +136,10 @@ describe('Authentication', function() {
   /**
    * Retrieve the server information for the current
    * instance of the db client
-   *
-   * @ignore
    */
   it('should correctly call validateCollection using authenticatedMode', {
     metadata: { requires: { topology: ['single', 'heap', 'wiredtiger'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
 
@@ -194,13 +184,9 @@ describe('Authentication', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it.skip('should correctly issue authenticated event on successful authentication', {
     metadata: { requires: { topology: 'single' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient({ w: 1 }, { poolSize: 1 });
@@ -252,7 +238,6 @@ describe('Authentication', function() {
   it('should correctly authenticate against normal db', {
     metadata: { requires: { topology: ['auth'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration,
         MongoClient = configuration.require.MongoClient,
@@ -336,7 +321,6 @@ describe('Authentication', function() {
   it('should correctly reapply the authentications', {
     metadata: { requires: { topology: ['auth'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration,
         MongoClient = configuration.require.MongoClient,
@@ -412,7 +396,6 @@ describe('Authentication', function() {
   it('ordered bulk operation should fail correctly when not authenticated', {
     metadata: { requires: { topology: ['auth'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration,
         MongoClient = configuration.require.MongoClient,
@@ -466,7 +449,6 @@ describe('Authentication', function() {
   it('unordered bulk operation should fail correctly when not authenticated', {
     metadata: { requires: { topology: ['auth'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration,
         MongoClient = configuration.require.MongoClient,
@@ -604,13 +586,9 @@ describe('Authentication', function() {
     });
   };
 
-  /**
-   * @ignore
-   */
   it('should correctly handle replicaset master stepdown and stepup without loosing auth', {
     metadata: { requires: { topology: ['auth'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration,
         MongoClient = configuration.require.MongoClient,
@@ -679,15 +657,11 @@ describe('Authentication', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it(
     'Should correctly perform nearest read from secondaries without auth fail when priamry is first seed',
     {
       metadata: { requires: { topology: ['auth'] } },
 
-      // The actual test we wish to run
       test: function(done) {
         var configuration = this.configuration,
           Server = configuration.require.Server,
@@ -758,13 +732,9 @@ describe('Authentication', function() {
     }
   );
 
-  /**
-   * @ignore
-   */
   it('should correctly create indexes without hanging when different seedlists', {
     metadata: { requires: { topology: ['auth'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration,
         Server = configuration.require.Server,
@@ -835,13 +805,9 @@ describe('Authentication', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly authenticate using primary', {
     metadata: { requires: { topology: ['auth'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration,
         MongoClient = configuration.require.MongoClient,
@@ -915,13 +881,9 @@ describe('Authentication', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly authenticate with two seeds', {
     metadata: { requires: { topology: ['auth'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration,
         MongoClient = configuration.require.MongoClient,
@@ -993,13 +955,9 @@ describe('Authentication', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly authenticate with only secondary seed', {
     metadata: { requires: { topology: ['auth'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration,
         MongoClient = configuration.require.MongoClient,
@@ -1135,13 +1093,9 @@ describe('Authentication', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly authenticate and ensure index', {
     metadata: { requires: { topology: ['auth'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration,
         MongoClient = configuration.require.MongoClient,
@@ -1225,13 +1179,9 @@ describe('Authentication', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly authenticate and use read preference', {
     metadata: { requires: { topology: ['auth'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration,
         MongoClient = configuration.require.MongoClient,
@@ -1302,13 +1252,9 @@ describe('Authentication', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly bring replicaset step down primary and still read from secondary', {
     metadata: { requires: { topology: ['auth'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration,
         MongoClient = configuration.require.MongoClient,
@@ -1416,13 +1362,9 @@ describe('Authentication', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly auth with secondary after killing primary', {
     metadata: { requires: { topology: ['auth'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration,
         MongoClient = configuration.require.MongoClient,
@@ -1518,13 +1460,9 @@ describe('Authentication', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly auth against replicaset admin db using MongoClient', {
     metadata: { requires: { topology: ['auth'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration,
         MongoClient = configuration.require.MongoClient,
@@ -1594,13 +1532,9 @@ describe('Authentication', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly auth against normal db using MongoClient', {
     metadata: { requires: { topology: ['auth'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration,
         MongoClient = configuration.require.MongoClient,
@@ -1733,13 +1667,9 @@ describe('Authentication', function() {
     });
   };
 
-  /**
-   * @ignore
-   */
   it('should correctly connect and authenticate against admin database using mongos', {
     metadata: { requires: { topology: ['auth'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration,
         MongoClient = configuration.require.MongoClient,
@@ -1801,13 +1731,9 @@ describe('Authentication', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly handle proxy stepdown and stepup without loosing auth for sharding', {
     metadata: { requires: { topology: ['auth'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration,
         MongoClient = configuration.require.MongoClient,

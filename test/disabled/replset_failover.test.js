@@ -77,13 +77,9 @@ describe.skip('ReplSet (Failover)', function() {
     }
   );
 
-  /**
-   * @ignore
-   */
   it('Should correctly handle primary stepDown', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       // The state
@@ -263,9 +259,6 @@ describe.skip('ReplSet (Failover)', function() {
     }
   );
 
-  /**
-   * @ignore
-   */
   it('Should work correctly with inserts after bringing master back', {
     metadata: { requires: { topology: 'replicaset' } },
 
@@ -374,9 +367,6 @@ describe.skip('ReplSet (Failover)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should correctly read from secondary even if primary is down', {
     metadata: { requires: { topology: 'replicaset' } },
 
@@ -433,13 +423,9 @@ describe.skip('ReplSet (Failover)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldStillQuerySecondaryWhenNoPrimaryAvailable', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
@@ -512,9 +498,6 @@ describe.skip('ReplSet (Failover)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it(
     'Should get proper error when strict is set and only a secondary is available and readPreference is nearest',
     {
@@ -558,9 +541,6 @@ describe.skip('ReplSet (Failover)', function() {
     }
   );
 
-  /**
-   * @ignore
-   */
   /*
   it('Should correctly re-execute createIndex against primary after step-down', {
     metadata: { requires: { topology: 'replicaset' } },

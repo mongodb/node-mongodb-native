@@ -10,13 +10,9 @@ describe('Sharding (Read Preference)', function() {
     return setupDatabase(this.configuration);
   });
 
-  /**
-   * @ignore
-   */
   it.skip('Should correctly perform a Mongos secondary read using the read preferences', {
     metadata: { requires: { topology: 'sharded' } },
 
-    // The actual test we wish to run
     test: function(done) {
       // NOTE: this test is skipped because it directly mucks with the connection string, which isn't
       // guaranteed to be present with mongo-orchestration. This behavior should be unit tested.
@@ -73,13 +69,9 @@ describe('Sharding (Read Preference)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should fail a Mongos secondary read using the read preference and tags that dont exist', {
     metadata: { requires: { topology: 'sharded' } },
 
-    // The actual test we wish to run
     test: function(done) {
       const configuration = this.configuration;
       const host = configuration.host;
@@ -137,14 +129,10 @@ describe('Sharding (Read Preference)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it.skip('Should correctly read from a tagged secondary using Mongos', {
     // NOTE: skipped because mongo-orchestration will not set up these tags
     metadata: { requires: { topology: 'sharded' } },
 
-    // The actual test we wish to run
     test: function(done) {
       const configuration = this.configuration;
       // Set up mongos connection
@@ -200,14 +188,9 @@ describe('Sharding (Read Preference)', function() {
     }
   });
 
-  /**
-   *
-   * @ignore
-   */
   it('shouldCorrectlyEmitOpenEvent', {
     metadata: { requires: { topology: 'sharded' } },
 
-    // The actual test we wish to run
     test: function(done) {
       const configuration = this.configuration;
 
@@ -226,14 +209,9 @@ describe('Sharding (Read Preference)', function() {
     }
   });
 
-  /**
-   *
-   * @ignore
-   */
   it('Should correctly apply readPreference when performing inline mapReduce', {
     metadata: { requires: { topology: 'sharded' } },
 
-    // The actual test we wish to run
     test: function(done) {
       const configuration = this.configuration;
 

@@ -96,13 +96,9 @@ describe('JIRA bugs', function() {
     return setupDatabase(this.configuration);
   });
 
-  /**
-   * @ignore
-   */
   it('NODE-746 should correctly connect to single primary/secondary with both hosts in uri', {
     metadata: { requires: { topology: ['auth'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var Db = configuration.require.Db,

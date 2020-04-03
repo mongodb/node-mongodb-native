@@ -15,7 +15,6 @@ describe('Promises (Collection)', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var url = configuration.url();
@@ -46,7 +45,6 @@ describe('Promises (Collection)', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -94,7 +92,6 @@ describe('Promises (Collection)', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -144,7 +141,6 @@ describe('Promises (Collection)', function() {
         }
       },
 
-      // The actual test we wish to run
       test: function(done) {
         var configuration = this.configuration;
         var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -193,7 +189,6 @@ describe('Promises (Collection)', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -233,7 +228,6 @@ describe('Promises (Collection)', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var url = configuration.url();
@@ -264,7 +258,6 @@ describe('Promises (Collection)', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var url = configuration.url();
@@ -295,7 +288,6 @@ describe('Promises (Collection)', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var url = configuration.url();
@@ -329,7 +321,6 @@ describe('Promises (Collection)', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var url = configuration.url();
