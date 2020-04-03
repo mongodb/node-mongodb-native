@@ -22,6 +22,21 @@
       }
     },
     {
+      "description": "Single readPreferenceTags is parsed as array of size one",
+      "uri": "mongodb://example.com/?readPreferenceTags=dc:ny",
+      "valid": true,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {
+        "readPreferenceTags": [
+          {
+            "dc": "ny"
+          }
+        ]
+      }
+    },
+    {
       "description": "Invalid readPreferenceTags causes a warning",
       "uri": "mongodb://example.com/?readPreferenceTags=invalid",
       "valid": true,
