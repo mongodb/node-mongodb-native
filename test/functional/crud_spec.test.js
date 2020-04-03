@@ -12,6 +12,19 @@ const TestRunnerContext = require('./spec-runner').TestRunnerContext;
 const gatherTestSuites = require('./spec-runner').gatherTestSuites;
 const generateTopologyTests = require('./spec-runner').generateTopologyTests;
 
+function enforceServerVersionLimits(requires, scenario) {
+  const versionLimits = [];
+  if (scenario.minServerVersion) {
+    versionLimits.push(`>=${scenario.minServerVersion}`);
+  }
+  if (scenario.maxServerVersion) {
+    versionLimits.push(`<=${scenario.maxServerVersion}`);
+  }
+  if (versionLimits.length) {
+    requires.mongodb = versionLimits.join(' ');
+  }
+}
+
 function findScenarios() {
   const route = [__dirname, '..', 'spec', 'crud'].concat(Array.from(arguments));
   return fs
@@ -53,9 +66,7 @@ describe('CRUD spec', function() {
         }
       };
 
-      if (scenario.minServerVersion) {
-        metadata.requires.mongodb = `>=${scenario.minServerVersion}`;
-      }
+      enforceServerVersionLimits(metadata.requires, scenario);
 
       describe(scenarioName, function() {
         scenario.tests.forEach(scenarioTest => {
@@ -83,9 +94,7 @@ describe('CRUD spec', function() {
         }
       };
 
-      if (scenario.minServerVersion) {
-        metadata.requires.mongodb = `>=${scenario.minServerVersion}`;
-      }
+      enforceServerVersionLimits(metadata.requires, scenario);
 
       describe(scenarioName, function() {
         beforeEach(() => testContext.db.dropDatabase());
