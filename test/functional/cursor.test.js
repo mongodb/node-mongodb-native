@@ -680,7 +680,7 @@ describe('Cursor', function() {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
-        db.createCollection('test_limit_exceptions', function(err, collection) {
+        db.createCollection('test_limit_exceptions_2', function(err, collection) {
           test.equal(null, err);
 
           collection.insert({ a: 1 }, configuration.writeConcernMax(), function(err) {
@@ -753,7 +753,7 @@ describe('Cursor', function() {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
-        db.createCollection('test_limit_exceptions', function(err, collection) {
+        db.createCollection('test_limit_exceptions_1', function(err, collection) {
           test.equal(null, err);
 
           collection.insert({ a: 1 }, configuration.writeConcernMax(), function(err) {
@@ -2147,7 +2147,10 @@ describe('Cursor', function() {
 
         var db = client.db(configuration.db);
         var options = { capped: true, size: 8 };
-        db.createCollection('should_await_data', options, function(err, collection) {
+        db.createCollection('should_await_data_retry_tailable_cursor', options, function(
+          err,
+          collection
+        ) {
           test.equal(null, err);
 
           collection.insert({ a: 1 }, configuration.writeConcernMax(), function(err) {
@@ -3603,10 +3606,7 @@ describe('Cursor', function() {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
-        db.createCollection('Should_correctly_execute_count_on_cursor_1_', function(
-          err,
-          collection
-        ) {
+        db.createCollection('negative_batch_size_and_limit_set', function(err, collection) {
           test.equal(null, err);
 
           // insert all docs
