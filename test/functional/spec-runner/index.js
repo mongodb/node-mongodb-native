@@ -473,30 +473,57 @@ function resolveOperationArgs(operationName, operationArgs, context) {
 const CURSOR_COMMANDS = new Set(['find', 'aggregate', 'listIndexes', 'listCollections']);
 const ADMIN_COMMANDS = new Set(['listDatabases']);
 
+function maybeSession(operation, context) {
+  return (
+    operation &&
+    operation.arguments &&
+    operation.arguments.session &&
+    context[operation.arguments.session]
+  );
+}
+
 const kOperations = new Map([
   [
     'createIndex',
-    (operation, collection /*, context, options */) => {
+    (operation, collection, context /*, options */) => {
       const fieldOrSpec = operation.arguments.keys;
-      return collection.createIndex(fieldOrSpec);
+      const options = { session: maybeSession(operation, context) };
+      if (operation.arguments.name) options.name = operation.arguments.name;
+      return collection.createIndex(fieldOrSpec, options);
+    }
+  ],
+  [
+    'createCollection',
+    (operation, db, context /*, options */) => {
+      const collectionName = operation.arguments.collection;
+      const session = maybeSession(operation, context);
+      return db.createCollection(collectionName, { session });
+    }
+  ],
+  [
+    'dropCollection',
+    (operation, db, context /*, options */) => {
+      const collectionName = operation.arguments.collection;
+      const session = maybeSession(operation, context);
+      return db.dropCollection(collectionName, { session });
     }
   ],
   [
     'dropIndex',
     (operation, collection /*, context, options */) => {
       const indexName = operation.arguments.name;
-      return collection.dropIndex(indexName);
+      const session = maybeSession(operation, context);
+      return collection.dropIndex(indexName, { session });
     }
   ],
   [
     'mapReduce',
-    (operation, collection /*, context, options */) => {
+    (operation, collection, context /*, options */) => {
       const args = operation.arguments;
       const map = args.map;
       const reduce = args.reduce;
-      const options = {};
+      const options = { session: maybeSession(operation, context) };
       if (args.out) options.out = args.out;
-
       return collection.mapReduce(map, reduce, options);
     }
   ]
