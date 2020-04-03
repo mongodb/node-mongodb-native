@@ -8,7 +8,7 @@ const Long = require('../../index').Long;
 const isResumableError = require('../../lib/error').isResumableError;
 const GET_MORE_RESUMABLE_CODES = require('../../lib/error').GET_MORE_RESUMABLE_CODES;
 
-describe('Change Stream Resume Tests', function() {
+describe.skip('Change Stream Resume Tests', function() {
   const test = {};
   const DEFAULT_IS_MASTER = Object.assign({}, mock.DEFAULT_ISMASTER, {
     setName: 'rs',
