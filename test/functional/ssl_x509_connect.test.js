@@ -10,13 +10,9 @@ describe('SSL (x509)', function() {
     return setupDatabase(this.configuration);
   });
 
-  /**
-   * @ignore
-   */
   it('Should correctly authenticate using x509', {
     metadata: { requires: { topology: 'ssl' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var ServerManager = require('mongodb-topology-manager').Server;
@@ -127,13 +123,9 @@ describe('SSL (x509)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should correctly handle bad x509 certificate', {
     metadata: { requires: { topology: 'ssl' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var ServerManager = require('mongodb-topology-manager').Server;
@@ -244,13 +236,9 @@ describe('SSL (x509)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should give reasonable error on x509 authentication failure', {
     metadata: { requires: { topology: 'ssl' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var ServerManager = require('mongodb-topology-manager').Server;
@@ -360,13 +348,9 @@ describe('SSL (x509)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should give helpful error when attempting to use x509 without SSL', {
     metadata: { requires: { topology: 'ssl' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var ServerManager = require('mongodb-topology-manager').Server;
@@ -470,13 +454,9 @@ describe('SSL (x509)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should correctly reauthenticate against x509', {
     metadata: { requires: { topology: 'ssl' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var ServerManager = require('mongodb-topology-manager').Server;

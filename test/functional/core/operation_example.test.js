@@ -14,7 +14,6 @@ describe('Server operation example tests', function() {
    *
    * @example-class Server
    * @example-method insert
-   * @ignore
    */
   it('simple insert into db', {
     metadata: {
@@ -68,7 +67,6 @@ describe('Server operation example tests', function() {
    *
    * @example-class Server
    * @example-method update
-   * @ignore
    */
   it('update using Server instance', {
     metadata: {
@@ -141,7 +139,6 @@ describe('Server operation example tests', function() {
    *
    * @example-class Server
    * @example-method remove
-   * @ignore
    */
   it('remove using Server instance', {
     metadata: {
@@ -214,7 +211,6 @@ describe('Server operation example tests', function() {
    *
    * @example-class Server
    * @example-method cursor
-   * @ignore
    */
   it('cursor using Server instance', {
     metadata: {
@@ -280,7 +276,6 @@ describe('Server operation example tests', function() {
    *
    * @example-class Server
    * @example-method command
-   * @ignore
    */
   it('command using Server instance', {
     metadata: {
@@ -333,7 +328,6 @@ describe('Topology operation example tests', function() {
    *
    * @example-class Topology
    * @example-method insert
-   * @ignore
    */
   it('simple insert into db using Topology', {
     metadata: {
@@ -393,7 +387,6 @@ describe('Topology operation example tests', function() {
    *
    * @example-class Topology
    * @example-method update
-   * @ignore
    */
   it('update using Topology instance', {
     metadata: {
@@ -472,7 +465,6 @@ describe('Topology operation example tests', function() {
    *
    * @example-class Topology
    * @example-method remove
-   * @ignore
    */
   it('remove using Topology instance', {
     metadata: {
@@ -551,7 +543,6 @@ describe('Topology operation example tests', function() {
    *
    * @example-class Topology
    * @example-method cursor
-   * @ignore
    */
   it('cursor using Topology instance', {
     metadata: {
@@ -623,7 +614,6 @@ describe('Topology operation example tests', function() {
    *
    * @example-class Topology
    * @example-method command
-   * @ignore
    */
   it('command using Topology instance', {
     metadata: {
@@ -682,7 +672,6 @@ describe.skip('Mongos operation example tests', function() {
    *
    * @example-class Mongos
    * @example-method insert
-   * @ignore
    */
   it('simple insert into db using Mongos', {
     metadata: { requires: { topology: 'sharded' } },
@@ -726,7 +715,6 @@ describe.skip('Mongos operation example tests', function() {
    *
    * @example-class Mongos
    * @example-method update
-   * @ignore
    */
   it('update using Topology instance', {
     metadata: {
@@ -793,7 +781,6 @@ describe.skip('Mongos operation example tests', function() {
    *
    * @example-class Mongos
    * @example-method remove
-   * @ignore
    */
   it('remove using Mongos instance', {
     metadata: {
@@ -860,7 +847,6 @@ describe.skip('Mongos operation example tests', function() {
    *
    * @example-class Mongos
    * @example-method cursor
-   * @ignore
    */
   it('cursor using Mongos instance', {
     metadata: {
@@ -920,7 +906,6 @@ describe.skip('Mongos operation example tests', function() {
    *
    * @example-class Mongos
    * @example-method command
-   * @ignore
    */
   it('command using Mongos instance', {
     metadata: {

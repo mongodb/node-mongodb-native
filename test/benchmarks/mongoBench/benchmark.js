@@ -20,8 +20,9 @@ class Benchmark {
 
   /**
    * Set the task to benchmark
+   *
    * @param {Function} fn The task to benchmark
-   * @return {this} this
+   * @returns {this} this
    */
   task(fn) {
     if (typeof fn !== 'function') {
@@ -39,8 +40,9 @@ class Benchmark {
 
   /**
    * Add a setup lifecycle hook
+   *
    * @param {Function|Function[]} fn The lifecycle hook
-   * @return {this} this
+   * @returns {this} this
    */
   setup(fn) {
     return this._pushLifecycleHook(this._setup, fn);
@@ -48,8 +50,9 @@ class Benchmark {
 
   /**
    * Add a beforeTask lifecycle hook
+   *
    * @param {Function|Function[]} fn The lifecycle hook
-   * @return {this} this
+   * @returns {this} this
    */
   beforeTask(fn) {
     return this._pushLifecycleHook(this._beforeTask, fn);
@@ -57,8 +60,9 @@ class Benchmark {
 
   /**
    * Add an afterTask lifecycle hook
+   *
    * @param {Function|Function[]} fn The lifecycle hook
-   * @return {this} this
+   * @returns {this} this
    */
   afterTask(fn) {
     return this._pushLifecycleHook(this._afterTask, fn);
@@ -66,8 +70,9 @@ class Benchmark {
 
   /**
    * Add a teardown lifecycle hook
+   *
    * @param {Function|Function[]} fn The lifecycle hook
-   * @return {this} this
+   * @returns {this} this
    */
   teardown(fn) {
     return this._pushLifecycleHook(this._teardown, fn);
@@ -75,8 +80,9 @@ class Benchmark {
 
   /**
    * Set the Task Size
-   * @param {Number} size The Task Size in MB
-   * @return {this} this
+   *
+   * @param {number} size The Task Size in MB
+   * @returns {this} this
    */
   taskSize(size) {
     if (!(Number.isFinite(size) && size > 0)) {
@@ -94,8 +100,9 @@ class Benchmark {
 
   /**
    * Set the Description
-   * @param {String} description The description of the benchmark
-   * @return {this} this
+   *
+   * @param {string} description The description of the benchmark
+   * @returns {this} this
    */
   description(description) {
     if (typeof description !== 'string' || !description) {
@@ -113,6 +120,7 @@ class Benchmark {
 
   /**
    * Validates that the benchmark has all the fields necessary
+   *
    * @throws Error
    */
   validate() {
@@ -139,7 +147,8 @@ class Benchmark {
   }
 
   /**
-   * @ignore
+   * @param {any} hookList
+   * @param {any} fn
    */
   _pushLifecycleHook(hookList, fn) {
     if (Array.isArray(fn)) {
@@ -156,7 +165,7 @@ class Benchmark {
   }
 
   /**
-   * @ignore
+   * @param {any} arr
    */
   _convertArrayToAsyncPipeFn(arr) {
     return arr.length ? util.asyncChain(arr) : util.noop;

@@ -8,15 +8,11 @@ describe('ObjectID', function() {
     return setupDatabase(this.configuration);
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyGenerateObjectID', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -72,15 +68,11 @@ describe('ObjectID', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyRetrieve24CharacterHexStringFromToString', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       // Create a new ObjectID
       var objectId = new ObjectID();
@@ -90,15 +82,11 @@ describe('ObjectID', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyRetrieve24CharacterHexStringFromToJSON', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       // Create a new ObjectID
       var objectId = new ObjectID();
@@ -108,15 +96,11 @@ describe('ObjectID', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyCreateOIDNotUsingObjectID', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -144,15 +128,11 @@ describe('ObjectID', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyGenerateObjectIDFromTimestamp', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var timestamp = Math.floor(new Date().getTime() / 1000);
       var objectID = new ObjectID(timestamp);
@@ -162,15 +142,11 @@ describe('ObjectID', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyCreateAnObjectIDAndOverrideTheTimestamp', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var timestamp = 1000;
       var objectID = new ObjectID();
@@ -190,15 +166,11 @@ describe('ObjectID', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyInsertWithObjectId', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });

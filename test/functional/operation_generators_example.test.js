@@ -20,14 +20,12 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method aggregate
-   * @ignore
    */
   it('aggregationExample2WithGenerators', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { generators: true, mongodb: '>2.1.0', topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -106,14 +104,12 @@ describe('Operation (Generators)', function() {
    *
    * @example-class AggregationCursor
    * @example-method next
-   * @ignore
    */
   it('Aggregation Cursor next Test with Generators', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { generators: true, mongodb: '>2.1.0', topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -193,12 +189,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method count
-   * @ignore
    */
   it('shouldCorrectlyDoSimpleCountExamplesWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -246,12 +240,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method createIndex
-   * @ignore
    */
   it('shouldCreateComplexIndexOnTwoFieldsWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -308,12 +300,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method distinct
-   * @ignore
    */
   it('shouldCorrectlyHandleDistinctIndexesWithSubQueryFilterWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -367,13 +357,10 @@ describe('Operation (Generators)', function() {
 
   /**
    * Example of running the distinct command against a collection using a Generator and the co module with a filter query
-   *
-   * @ignore
    */
   it('shouldCorrectlyHandleDistinctIndexesWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -428,12 +415,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method drop
-   * @ignore
    */
   it('shouldCorrectlyDropCollectionWithDropFunctionWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -491,12 +476,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method dropAllIndexes
-   * @ignore
    */
   it('dropAllIndexesExample1WithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -533,12 +516,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method dropIndex
-   * @ignore
    */
   it('shouldCorrectlyCreateAndDropIndexWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -595,12 +576,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method ensureIndex
-   * @ignore
    */
   it('shouldCreateComplexEnsureIndexWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -660,12 +639,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method ensureIndex
-   * @ignore
    */
   it('ensureIndexExampleWithCompountIndexWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -722,12 +699,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method find
-   * @ignore
    */
   it('shouldPerformASimpleQueryWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -775,12 +750,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method find
-   * @ignore
    */
   it('shouldPerformASimpleExplainQueryWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -826,12 +799,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method find
-   * @ignore
    */
   it('shouldPerformASimpleLimitSkipQueryWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -894,12 +865,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method findAndModify
-   * @ignore
    */
   it('shouldPerformSimpleFindAndModifyOperationsWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -975,12 +944,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method findAndRemove
-   * @ignore
    */
   it('shouldPerformSimpleFindAndRemoveWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -1033,12 +1000,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method findOne
-   * @ignore
    */
   it('shouldPerformASimpleLimitSkipFindOneQueryWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -1091,12 +1056,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method geoHaystackSearch
-   * @ignore
    */
   it('shouldCorrectlyPerformSimpleGeoHaystackSearchCommandWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -1152,12 +1115,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method mapReduce
-   * @ignore
    */
   it('shouldPerformSimpleMapReduceFunctionsWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -1219,14 +1180,12 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method mapReduce
-   * @ignore
    */
   it('shouldPerformMapReduceFunctionInlineWithGenerators', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { generators: true, mongodb: '>1.7.6', topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -1287,12 +1246,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method mapReduce
-   * @ignore
    */
   it('shouldPerformMapReduceWithContextWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -1380,12 +1337,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method mapReduce
-   * @ignore
    */
   it.skip('shouldPerformMapReduceInContextObjectsWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -1473,12 +1428,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method indexes
-   * @ignore
    */
   it('shouldCorrectlyRetrieveACollectionsIndexesWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -1524,12 +1477,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method indexExists
-   * @ignore
    */
   it('shouldCorrectlyExecuteIndexExistsWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -1582,14 +1533,12 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method indexInformation
-   * @ignore
    */
   it('shouldCorrectlyShowTheResultsFromIndexInformationWithGenerators', {
     metadata: {
       requires: { generators: true, topology: ['single'] }
     },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -1658,12 +1607,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method indexInformation
-   * @ignore
    */
   it('shouldCorrectlyShowAllTheResultsFromIndexInformationWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -1729,13 +1676,11 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method insert
-   * @ignore
    */
   it('shouldCorrectlyPerformASimpleSingleDocumentInsertNoCallbackNoSafeWithGenerators', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { generators: true, topology: ['single'] } },
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -1774,14 +1719,12 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method insert
-   * @ignore
    */
   it('shouldCorrectlyPerformABatchDocumentInsertSafeWithGenerators', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -1826,14 +1769,12 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method insert
-   * @ignore
    */
   it('shouldCorrectlyPerformASimpleDocumentInsertWithFunctionSafeWithGenerators', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -1879,14 +1820,12 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method insert
-   * @ignore
    */
   it('Should correctly execute insert with keepGoing option on mongod >= 1.9.1 with Generators', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { generators: true, mongodb: '>1.9.1', topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -1947,12 +1886,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method isCapped
-   * @ignore
    */
   it('shouldCorrectlyExecuteIsCappedWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -1997,12 +1934,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method options
-   * @ignore
    */
   it('shouldCorrectlyRetrieveCollectionOptionsWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -2048,14 +1983,12 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method parallelCollectionScan
-   * @ignore
    */
   it('Should correctly execute parallelCollectionScan with multiple cursors with Generators', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { generators: true, mongodb: '>2.5.5 <=4.1.0', topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -2114,12 +2047,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method reIndex
-   * @ignore
    */
   it('shouldCorrectlyIndexAndForceReindexOnCollectionWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -2184,12 +2115,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method remove
-   * @ignore
    */
   it('shouldRemoveAllDocumentsNoSafeWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -2235,12 +2164,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method remove
-   * @ignore
    */
   it('shouldRemoveSubsetOfDocumentsSafeModeWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -2281,14 +2208,12 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method rename
-   * @ignore
    */
   it('shouldCorrectlyRenameCollectionWithGenerators', {
     metadata: {
       requires: { generators: true, topology: ['single'] }
     },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -2390,12 +2315,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method save
-   * @ignore
    */
   it('shouldCorrectlySaveASimpleDocumentWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -2437,12 +2360,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method save
-   * @ignore
    */
   it('shouldCorrectlySaveASimpleDocumentModifyItAndResaveItWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -2499,12 +2420,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method update
-   * @ignore
    */
   it('shouldCorrectlyUpdateASimpleDocumentWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -2552,12 +2471,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method update
-   * @ignore
    */
   it('shouldCorrectlyUpsertASimpleDocumentWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -2605,12 +2522,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method update
-   * @ignore
    */
   it('shouldCorrectlyUpdateMultipleDocumentsWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -2667,12 +2582,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method stats
-   * @ignore
    */
   it('shouldCorrectlyReturnACollectionsStatsWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -2719,12 +2632,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method dropIndexes
-   * @ignore
    */
   it('shouldCorrectlyCreateAndDropAllIndexWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -2795,14 +2706,12 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Db
    * @example-method listCollections
-   * @ignore
    */
   it('shouldCorrectlyRetrievelistCollectionsWithGenerators', {
     metadata: {
       requires: { generators: true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] }
     },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -2852,12 +2761,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Db
    * @example-method collections
-   * @ignore
    */
   it('shouldCorrectlyRetrieveAllCollectionsWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -2894,12 +2801,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Db
    * @example-method addUser
-   * @ignore
    */
   it('shouldCorrectlyAddUserToDbWithGenerators', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -2937,12 +2842,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Db
    * @example-method removeUser
-   * @ignore
    */
   it('shouldCorrectlyAddAndRemoveUserWithGenerators', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -3000,12 +2903,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Db
    * @example-method createCollection
-   * @ignore
    */
   it('shouldCorrectlyCreateACollectionWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -3048,12 +2949,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Db
    * @example-method dropCollection
-   * @ignore
    */
   it('shouldCorrectlyExecuteACommandAgainstTheServerWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -3107,12 +3006,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Db
    * @example-method command
-   * @ignore
    */
   it('shouldCorrectlyCreateDropAndVerifyThatCollectionIsGoneWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -3147,12 +3044,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Db
    * @example-method renameCollection
-   * @ignore
    */
   it('shouldCorrectlyRenameACollectionWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -3220,12 +3115,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Db
    * @example-method createIndex
-   * @ignore
    */
   it('shouldCreateOnDbComplexIndexOnTwoFieldsWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -3287,12 +3180,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Db
    * @example-method ensureIndex
-   * @ignore
    */
   it('shouldCreateComplexEnsureIndexDbWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -3354,12 +3245,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Db
    * @example-method dropDatabase
-   * @ignore
    */
   it('shouldCorrectlyDropTheDatabaseWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -3427,12 +3316,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Db
    * @example-method stats
-   * @ignore
    */
   it('shouldCorrectlyRetrieveDbStatsWithGeneratorsWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -3468,12 +3355,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Db
    * @example-method db
-   * @ignore
    */
   it('shouldCorrectlyShareConnectionPoolsAcrossMultipleDbInstancesWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -3531,12 +3416,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Admin
    * @example-method buildInfo
-   * @ignore
    */
   it('shouldCorrectlyRetrieveBuildInfoWithGenerators', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -3576,12 +3459,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Admin
    * @example-method command
-   * @ignore
    */
   it('shouldCorrectlyRetrieveBuildInfoUsingCommandWithGenerators', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -3622,12 +3503,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Db
    * @example-method setProfilingLevel
-   * @ignore
    */
   it('shouldCorrectlyChangeProfilingLevelWithGenerators', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -3698,12 +3577,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Db
    * @example-method profilingInfo
-   * @ignore
    */
   it('shouldCorrectlySetAndExtractProfilingInfoWithGenerators', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -3761,12 +3638,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Admin
    * @example-method validateCollection
-   * @ignore
    */
   it('shouldCorrectlyCallValidateCollectionWithGenerators', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -3813,12 +3688,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Admin
    * @example-method ping
-   * @ignore
    */
   it('shouldCorrectlyPingTheMongoDbInstanceWithGenerators', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -3858,12 +3731,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Admin
    * @example-method addUser
-   * @ignore
    */
   it('shouldCorrectlyAddAUserToAdminDbWithGenerators', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -3905,12 +3776,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Admin
    * @example-method removeUser
-   * @ignore
    */
   it('shouldCorrectlyAddAUserAndRemoveItFromAdminDbWithGenerators', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -3954,12 +3823,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Admin
    * @example-method listDatabases
-   * @ignore
    */
   it('shouldCorrectlyListAllAvailableDatabasesWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -4000,12 +3867,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Admin
    * @example-method serverStatus
-   * @ignore
    */
   it('shouldCorrectlyRetrieveServerInfoWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -4053,12 +3918,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Admin
    * @example-method replSetGetStatus
-   * @ignore
    */
   it('shouldCorrectlyRetrieveReplSetGetStatusWithGenerators', {
     metadata: { requires: { generators: true, topology: ['replicaset'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -4113,14 +3976,12 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Cursor
    * @example-method toArray
-   * @ignore
    */
   it('shouldCorrectlyExecuteToArrayWithGenerators', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -4165,14 +4026,12 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Cursor
    * @example-method count
-   * @ignore
    */
   it('shouldCorrectlyUseCursorCountFunctionWithGenerators', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -4216,14 +4075,12 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Cursor
    * @example-method next
-   * @ignore
    */
   it('shouldCorrectlyPerformNextOnCursorWithGenerators', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -4279,14 +4136,12 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Cursor
    * @example-method explain
-   * @ignore
    */
   it('shouldCorrectlyPerformSimpleExplainCursorWithGenerators', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -4331,14 +4186,12 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Cursor
    * @example-method close
-   * @ignore
    */
   it('shouldStreamDocumentsUsingTheCloseFunctionWithGenerators', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -4397,12 +4250,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class GridStore
    * @example-method GridStore.exist
-   * @ignore
    */
   it('shouldCorrectlyExecuteGridStoreExistsByObjectIdWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -4457,12 +4308,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class GridStore
    * @example-method GridStore.list
-   * @ignore
    */
   it('shouldCorrectlyExecuteGridStoreListWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -4573,12 +4422,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class GridStore
    * @example-method puts
-   * @ignore
    */
   it('shouldCorrectlyReadlinesAndPutLinesWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -4625,12 +4472,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class GridStore
    * @example-method GridStore.unlink
-   * @ignore
    */
   it('shouldCorrectlyUnlinkWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -4699,12 +4544,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class GridStore
    * @example-method read
-   * @ignore
    */
   it('shouldCorrectlyWriteAndReadJpgImageWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -4759,12 +4602,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class GridStore
    * @example-method open
-   * @ignore
    */
   it('shouldCorrectlySaveSimpleFileToGridStoreUsingFilenameWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -4813,12 +4654,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class GridStore
    * @example-method open
-   * @ignore
    */
   it('shouldCorrectlySaveSimpleFileToGridStoreUsingObjectIDWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -4870,12 +4709,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class GridStore
    * @example-method writeFile
-   * @ignore
    */
   it('shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -4930,12 +4767,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class GridStore
    * @example-method writeFile
-   * @ignore
    */
   it('shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithHandleWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -4997,12 +4832,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class GridStore
    * @example-method write
-   * @ignore
    */
   it('shouldCorrectlySaveSimpleFileToGridStoreUsingWriteWithStringsAndBuffersWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -5057,12 +4890,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class GridStore
    * @example-method close
-   * @ignore
    */
   it('shouldCorrectlySaveSimpleFileToGridStoreUsingCloseWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -5110,12 +4941,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class GridStore
    * @example-method unlink
-   * @ignore
    */
   it('shouldCorrectlySaveSimpleFileToGridStoreUsingCloseAndThenUnlinkItWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -5173,12 +5002,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class GridStore
    * @example-method GridStore.readlines
-   * @ignore
    */
   it('shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseReadlinesWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -5236,12 +5063,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class GridStore
    * @example-method readlines
-   * @ignore
    */
   it('shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseInstanceReadlinesWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -5303,12 +5128,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class GridStore
    * @example-method GridStore.read
-   * @ignore
    */
   it('shouldCorrectlyPutACoupleOfLinesInGridStoreReadWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -5356,12 +5179,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class GridStore
    * @example-method seek
-   * @ignore
    */
   it('shouldCorrectlySeekWithBufferWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -5459,12 +5280,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class GridStore
    * @example-method rewind
-   * @ignore
    */
   it('shouldCorrectlyRewingAndTruncateOnWriteWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -5528,12 +5347,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class GridStore
    * @example-method tell
-   * @ignore
    */
   it('shouldCorrectlyExecuteGridstoreTellWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -5587,12 +5404,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class GridStore
    * @example-method getc
-   * @ignore
    */
   it('shouldCorrectlyRetrieveSingleCharacterUsingGetCWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -5640,12 +5455,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class GridStore
    * @example-method open
-   * @ignore
    */
   it('shouldCorrectlyRetrieveSingleCharacterUsingGetCWithGenerators2', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -5716,12 +5529,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method initializeOrderedBulkOp
-   * @ignore
    */
   it('Should correctly execute ordered batch with no errors using write commands with Generators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -5788,12 +5599,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method initializeUnorderedBulkOp
-   * @ignore
    */
   it('Should correctly execute unordered batch with no errors with Generators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -5866,12 +5675,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method insertOne
-   * @ignore
    */
   it('Should correctly execute insertOne operation with Generators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -5909,12 +5716,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method insertMany
-   * @ignore
    */
   it('Should correctly execute insertMany operation with Generators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -5952,12 +5757,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method updateOne
-   * @ignore
    */
   it('Should correctly execute updateOne operation with Generators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -5996,12 +5799,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method updateMany
-   * @ignore
    */
   it('Should correctly execute updateMany operation with Generators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -6045,12 +5846,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method removeOne
-   * @ignore
    */
   it('Should correctly execute removeOne operation with Generators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -6091,12 +5890,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method removeMany
-   * @ignore
    */
   it('Should correctly execute removeMany operation with Generators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -6139,12 +5936,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method bulkWrite
-   * @ignore
    */
   it('Should correctly execute bulkWrite operation with Generators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -6204,12 +5999,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method findOneAndDelete
-   * @ignore
    */
   it('Should correctly execute findOneAndDelete operation with Generators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -6251,12 +6044,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method findOneAndReplace
-   * @ignore
    */
   it('Should correctly execute findOneAndReplace operation with Generators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -6308,12 +6099,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Collection
    * @example-method findOneAndUpdate
-   * @ignore
    */
   it('Should correctly execute findOneAndUpdate operation with Generators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -6365,12 +6154,10 @@ describe('Operation (Generators)', function() {
    *
    * @example-class Db
    * @example-method createCollection
-   * @ignore
    */
   it('Should correctly add capped collection options to cursor with Generators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');
@@ -6436,8 +6223,6 @@ describe('Operation (Generators)', function() {
 
   /**
    * Correctly call the aggregation framework to return a cursor with batchSize 1 and get the first result using next
-   *
-   * @ignore
    */
   it('Correctly handle sample aggregation', {
     // Add a tag that our runner can trigger on
@@ -6451,7 +6236,6 @@ describe('Operation (Generators)', function() {
       ignore: { travis: true }
     },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var co = require('co');

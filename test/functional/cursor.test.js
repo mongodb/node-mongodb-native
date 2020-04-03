@@ -17,10 +17,6 @@ describe('Cursor', function() {
     ]);
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('cursorShouldBeAbleToResetOnToArrayRunningQueryAgain', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -28,7 +24,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -67,10 +62,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('cursor should close after first next operation', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -78,7 +69,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -110,10 +100,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('cursor should trigger getMore', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -121,7 +107,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -151,10 +136,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('shouldCorrectlyExecuteCursorExplain', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -162,7 +143,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -189,10 +169,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('shouldCorrectlyExecuteCursorCount', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -200,7 +176,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -284,7 +259,6 @@ describe('Cursor', function() {
       requires: { topology: 'replicaset' }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -309,10 +283,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('shouldCorrectlyExecuteCursorCountWithDottedCollectionName', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -320,7 +290,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -397,10 +366,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('shouldCorrectlyExecuteSortOnCursor', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -408,7 +373,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -512,10 +476,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('shouldThrowErrorOnEachWhenMissingCallback', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -523,7 +483,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -563,10 +522,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('shouldCorrectlyHandleLimitOnCursor', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -574,7 +529,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -614,10 +568,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('shouldCorrectlyHandleNegativeOneLimitOnCursor', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -625,7 +575,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -668,10 +617,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('shouldCorrectlyHandleAnyNegativeLimitOnCursor', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -679,7 +624,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -722,10 +666,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('shouldCorrectlyReturnErrorsOnIllegalLimitValuesNotAnInt', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -733,7 +673,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -762,10 +701,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('shouldCorrectlyReturnErrorsOnIllegalLimitValuesIsClosedWithinNext', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -773,7 +708,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -805,10 +739,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('shouldCorrectlyReturnErrorsOnIllegalLimitValuesIsClosedWithinClose', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -816,7 +746,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -849,10 +778,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('shouldCorrectlySkipRecordsOnCursor', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -860,7 +785,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -929,10 +853,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('shouldCorrectlyReturnErrorsOnIllegalSkipValues', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -940,7 +860,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -987,10 +906,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('shouldReturnErrorsOnIllegalBatchSizes', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -998,7 +913,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1053,10 +967,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('shouldCorrectlyHandleChangesInBatchSizes', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1064,7 +974,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1148,10 +1057,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('shouldCorrectlyHandleBatchSize', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1159,7 +1064,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1225,10 +1129,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('shouldHandleWhenLimitBiggerThanBatchSize', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1236,7 +1136,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1296,10 +1195,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('shouldHandleLimitLessThanBatchSize', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1307,7 +1202,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1356,10 +1250,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('shouldHandleSkipLimitChaining', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1367,7 +1257,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1424,10 +1313,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('shouldCorrectlyHandleLimitSkipChainingInline', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1435,7 +1320,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1494,10 +1378,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('shouldCloseCursorNoQuerySent', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1505,7 +1385,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1527,10 +1406,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('shouldCorrectlyRefillViaGetMoreCommand', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1538,7 +1413,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var COUNT = 1000;
 
@@ -1614,10 +1488,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('shouldCorrectlyRefillViaGetMoreAlternativeCollection', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1625,7 +1495,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1700,10 +1569,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('shouldCloseCursorAfterQueryHasBeenSent', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1711,7 +1576,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1742,10 +1606,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('shouldCorrectlyExecuteCursorCountWithFields', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1753,7 +1613,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1783,10 +1642,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('shouldCorrectlyCountWithFieldsUsingExclude', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1794,7 +1649,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1821,10 +1675,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('Should correctly execute count on cursor', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1832,7 +1682,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var docs = [];
 
@@ -1883,10 +1732,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('should be able to stream documents', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1894,7 +1739,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var docs = [];
 
@@ -1970,10 +1814,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('immediately destroying a stream prevents the query from executing', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1981,7 +1821,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var i = 0,
         docs = [{ b: 2 }, { b: 3 }],
@@ -2032,10 +1871,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('destroying a stream stops it', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -2043,7 +1878,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2093,17 +1927,12 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   // NOTE: skipped for use of topology manager
   it.skip('cursor stream errors', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2159,10 +1988,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('cursor stream pipe', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -2170,7 +1995,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2230,9 +2054,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCloseDeadTailableCursors', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -2241,7 +2062,6 @@ describe('Cursor', function() {
       sessions: { skipLeakTests: true }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       // http://www.mongodb.org/display/DOCS/Tailable+Cursors
 
@@ -2310,9 +2130,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldAwaitData', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -2320,7 +2137,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       // http://www.mongodb.org/display/DOCS/Tailable+Cursors
 
@@ -2358,9 +2174,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldAwaitDataWithDocumentsAvailable', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -2368,7 +2181,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       // http://www.mongodb.org/display/DOCS/Tailable+Cursors
 
@@ -2402,9 +2214,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldAwaitDataUsingCursorFlag', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -2412,7 +2221,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       // http://www.mongodb.org/display/DOCS/Tailable+Cursors
 
@@ -2448,17 +2256,13 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   /*
   it('shouldNotAwaitDataWhenFalse = {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
-    // The actual test we wish to run
-    test: function(done) {
+        test: function(done) {
       // NODE-98
       var db = configuration.newClient(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
@@ -2479,9 +2283,6 @@ describe('Cursor', function() {
   }
   */
 
-  /**
-   * @ignore
-   */
   it('Should correctly retry tailable cursor connection', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -2489,7 +2290,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       // http://www.mongodb.org/display/DOCS/Tailable+Cursors
 
@@ -2523,9 +2323,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectExecuteExplainHonoringLimit', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -2533,7 +2330,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var docs = [];
       docs[0] = {
@@ -2749,9 +2545,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldNotExplainWhenFalse', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -2759,7 +2552,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var doc = { name: 'camera', _keywords: ['compact', 'ii2gd', 'led', 'red', 'aet'] };
 
@@ -2787,9 +2579,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldFailToSetReadPreferenceOnCursor', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -2797,7 +2586,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2819,10 +2607,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('shouldNotFailDueToStackOverflowEach', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -2830,7 +2614,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2880,10 +2663,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('shouldNotFailDueToStackOverflowToArray', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -2891,7 +2670,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2941,10 +2719,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('shouldCorrectlySkipAndLimit', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -2952,7 +2726,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2990,10 +2763,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('shouldFailToTailANormalCollection', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -3001,7 +2770,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3030,9 +2798,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyUseFindAndCursorCount', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -3040,7 +2805,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3082,9 +2846,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly apply hint to count command for cursor', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -3095,7 +2856,6 @@ describe('Cursor', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3151,9 +2911,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Terminate each after first document by returning false', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -3161,7 +2918,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3202,9 +2958,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should correctly handle maxTimeMS as part of findOne options', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -3212,7 +2965,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3241,9 +2993,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should correctly handle batchSize of 2', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -3251,7 +3000,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3282,13 +3030,9 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should report database name and collection name', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3305,10 +3049,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('Should correctly execute count on cursor with maxTimeMS', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -3316,7 +3056,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var docs = [];
 
@@ -3365,10 +3104,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('Should correctly execute count on cursor with maxTimeMS set using legacy method', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -3376,7 +3111,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var docs = [];
 
@@ -3414,10 +3148,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('Should correctly apply map to toArray', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -3425,7 +3155,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var docs = [];
 
@@ -3471,10 +3200,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('Should correctly apply map to next', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -3482,7 +3207,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var docs = [];
 
@@ -3525,10 +3249,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('Should correctly apply map to each', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -3536,7 +3256,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var docs = [];
 
@@ -3580,10 +3299,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('Should correctly apply map to forEach', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -3591,7 +3306,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var docs = [];
 
@@ -3638,10 +3352,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('Should correctly apply multiple uses of map and apply forEach', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -3649,7 +3359,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var docs = [];
 
@@ -3693,16 +3402,11 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('Should correctly apply skip and limit to large set of documents', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3738,15 +3442,11 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should tail cursor using maxAwaitTimeMS for 3.2 or higher', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { topology: ['single'], mongodb: '>3.1.9' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3792,16 +3492,11 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('Should not emit any events after close event emitted due to cursor killed', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3835,10 +3530,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('shouldCorrectlyExecuteEnsureIndexWithNoCallback', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -3846,7 +3537,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var docs = [];
 
@@ -3892,10 +3582,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('Should correctly execute count on cursor with limit and skip', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -3903,7 +3589,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var docs = [];
 
@@ -3954,10 +3639,6 @@ describe('Cursor', function() {
     }
   });
 
-  /**
-   * @ignore
-   * @api private
-   */
   it('Should correctly handle negative batchSize and set the limit', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -3965,7 +3646,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var docs = [];
       var configuration = this.configuration;
@@ -4011,7 +3691,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var started = [];
       var listener = require('../..').instrument(function(err) {
@@ -4057,7 +3736,6 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var started = [];
 
@@ -4111,7 +3789,6 @@ describe('Cursor', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function() {
       // Load up the documents
       const docs = [];

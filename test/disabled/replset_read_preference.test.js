@@ -26,7 +26,6 @@ describe.skip('ReplSet (ReadPreference)', function() {
   it('Should Correctly Pick lowest ping time', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
@@ -152,7 +151,6 @@ describe.skip('ReplSet (ReadPreference)', function() {
   it('Should Correctly vary read server when using readpreference NEAREST', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
@@ -212,7 +210,6 @@ describe.skip('ReplSet (ReadPreference)', function() {
     {
       metadata: { requires: { topology: 'replicaset' } },
 
-      // The actual test we wish to run
       test: function(done) {
         var configuration = this.configuration;
         var mongo = configuration.require,
@@ -274,13 +271,9 @@ describe.skip('ReplSet (ReadPreference)', function() {
     }
   );
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyReadFromGridstoreWithSecondaryReadPreference', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var GridStore = configuration.require.GridStore,
@@ -352,13 +345,9 @@ describe.skip('ReplSet (ReadPreference)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Connection to replicaset with primary read preference', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
@@ -401,13 +390,9 @@ describe.skip('ReplSet (ReadPreference)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should Set read preference at collection level using collection method', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
@@ -451,13 +436,9 @@ describe.skip('ReplSet (ReadPreference)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should Set read preference at collection level using createCollection method', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
@@ -505,13 +486,9 @@ describe.skip('ReplSet (ReadPreference)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should Set read preference at cursor level', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
@@ -555,13 +532,9 @@ describe.skip('ReplSet (ReadPreference)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Attempt to change read preference at cursor level after object read legacy', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
@@ -600,13 +573,9 @@ describe.skip('ReplSet (ReadPreference)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Set read preference at db level', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
@@ -650,13 +619,9 @@ describe.skip('ReplSet (ReadPreference)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Set read preference at collection level using collection method', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
@@ -699,13 +664,9 @@ describe.skip('ReplSet (ReadPreference)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Ensure tag read goes only to the correct server', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
@@ -745,13 +706,9 @@ describe.skip('ReplSet (ReadPreference)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Ensure tag read goes only to the correct servers using nearest', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
@@ -794,13 +751,9 @@ describe.skip('ReplSet (ReadPreference)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Always uses primary readPreference for findAndModify', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
@@ -832,13 +785,9 @@ describe.skip('ReplSet (ReadPreference)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly apply read preference for direct secondary connection', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
@@ -895,15 +844,11 @@ describe.skip('ReplSet (ReadPreference)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   /*
   it('should correctly list Collections on secondary', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
-    test: function(done) {
+        test: function(done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
         MongoClient = mongo.MongoClient;

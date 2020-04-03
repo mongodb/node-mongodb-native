@@ -93,13 +93,9 @@ describe('SSL Validation', function() {
     return setupDatabase(this.configuration);
   });
 
-  /**
-   * @ignore
-   */
   it('shouldFailDuePresentingWrongCredentialsToServer', {
     metadata: { requires: { topology: 'ssl' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var Server = configuration.require.Server,
@@ -143,13 +139,9 @@ describe('SSL Validation', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should correctly receive ping and ha events using ssl', {
     metadata: { requires: { topology: 'ssl' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var Server = configuration.require.Server,
@@ -203,13 +195,9 @@ describe('SSL Validation', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldFailToValidateServerSSLCertificate', {
     metadata: { requires: { topology: 'ssl' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var Server = configuration.require.Server,
@@ -248,13 +236,9 @@ describe('SSL Validation', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyValidateAndPresentCertificateReplSet', {
     metadata: { requires: { topology: 'ssl' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var Server = configuration.require.Server,
@@ -321,13 +305,9 @@ describe('SSL Validation', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyConnectToSSLBasedReplicaset', {
     metadata: { requires: { topology: 'ssl' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var Server = configuration.require.Server,
@@ -393,13 +373,9 @@ describe('SSL Validation', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldFailToValidateServerSSLCertificate', {
     metadata: { requires: { topology: 'ssl' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var Server = configuration.require.Server,
@@ -438,13 +414,9 @@ describe('SSL Validation', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldFailDueToNotPresentingCertificateToServer', {
     metadata: { requires: { topology: 'ssl' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var Server = configuration.require.Server,
@@ -484,13 +456,9 @@ describe('SSL Validation', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyPresentPasswordProtectedCertificate', {
     metadata: { requires: { topology: 'ssl' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var Server = configuration.require.Server,
@@ -578,13 +546,9 @@ describe('SSL Validation', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyValidateServerSSLCertificate', {
     metadata: { requires: { topology: 'ssl' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var Server = configuration.require.Server,

@@ -22,9 +22,6 @@ describe('ReplSet (Operations)', function() {
    *
    *******************************************************************/
 
-  /**
-   * @ignore
-   */
   it('Should fail due to w:5 and wtimeout:1 with ordered batch api', {
     metadata: {
       requires: {
@@ -33,7 +30,6 @@ describe('ReplSet (Operations)', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       const configuration = this.configuration;
 
@@ -104,9 +100,6 @@ describe('ReplSet (Operations)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it.skip(
     'Should fail due to w:5 and wtimeout:1 combined with duplicate key errors with ordered batch api',
     {
@@ -117,7 +110,6 @@ describe('ReplSet (Operations)', function() {
         }
       },
 
-      // The actual test we wish to run
       test: function(done) {
         const configuration = this.configuration;
 
@@ -208,9 +200,6 @@ describe('ReplSet (Operations)', function() {
    *
    *******************************************************************/
 
-  /**
-   * @ignore
-   */
   it('Should fail due to w:5 and wtimeout:1 with unordered batch api', {
     metadata: {
       requires: {
@@ -219,7 +208,6 @@ describe('ReplSet (Operations)', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       const configuration = this.configuration;
 
@@ -295,9 +283,6 @@ describe('ReplSet (Operations)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it.skip(
     'Should fail due to w:5 and wtimeout:1 combined with duplicate key errors with unordered batch api',
     {
@@ -308,7 +293,6 @@ describe('ReplSet (Operations)', function() {
         }
       },
 
-      // The actual test we wish to run
       test: function(done) {
         const configuration = this.configuration;
 
@@ -404,7 +388,6 @@ describe('ReplSet (Operations)', function() {
   it.skip('Should fail to do map reduce to out collection', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>1.7.6' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
@@ -463,7 +446,6 @@ describe('ReplSet (Operations)', function() {
   it.skip('Should Correctly group using replicaset', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
@@ -535,7 +517,6 @@ describe('ReplSet (Operations)', function() {
   it.skip('Should Correctly execute createIndex with secondary readPreference', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var mongo = configuration.require,

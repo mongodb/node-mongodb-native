@@ -16,7 +16,6 @@ describe('Find and Modify', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var started = [];
       var succeeded = [];
@@ -79,7 +78,6 @@ describe('Find and Modify', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var started = [];
       var succeeded = [];
@@ -142,7 +140,6 @@ describe('Find and Modify', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var started = [];
@@ -208,7 +205,6 @@ describe('Find and Modify', function() {
       requires: { topology: 'replicaset' }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       const configuration = this.configuration;
       const client = configuration.newClient({ readPreference: 'secondary' }, { poolSize: 1 });

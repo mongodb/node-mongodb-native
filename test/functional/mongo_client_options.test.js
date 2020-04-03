@@ -9,13 +9,9 @@ describe('MongoClient Options', function() {
     return setupDatabase(this.configuration);
   });
 
-  /**
-   * @ignore
-   */
   it('should error on unexpected options', {
     metadata: { requires: { topology: 'single' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       connect(

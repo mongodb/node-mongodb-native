@@ -6,15 +6,11 @@ describe('Unicode', function() {
     return setupDatabase(this.configuration);
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlySaveUnicodeContainingDocument', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -82,15 +78,11 @@ describe('Unicode', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyInsertUnicodeCharacters', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -119,15 +111,11 @@ describe('Unicode', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCreateObjectWithChineseObjectName', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var object = { 客家话: 'Hello' };
 
@@ -156,15 +144,11 @@ describe('Unicode', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyHandleUT8KeyNames', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });

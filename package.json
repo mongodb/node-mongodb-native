@@ -5,7 +5,8 @@
   "main": "index.js",
   "files": [
     "index.js",
-    "lib"
+    "lib",
+    "types/index.d.ts"
   ],
   "repository": {
     "type": "git",
@@ -27,21 +28,23 @@
     "bl": "^2.2.0",
     "bson": "^4.0.4",
     "denque": "^1.4.1",
-    "madge": "^3.7.0",
     "safe-buffer": "^5.1.2"
   },
   "devDependencies": {
+    "@types/node": "^13.9.8",
     "bluebird": "3.5.0",
     "chai": "^4.1.1",
     "chai-subset": "^1.6.0",
     "chalk": "^2.4.2",
     "co": "4.6.0",
-    "coveralls": "^2.11.6",
-    "eslint": "^4.5.0",
-    "eslint-plugin-prettier": "^2.2.0",
-    "istanbul": "^0.4.5",
-    "jsdoc": "3.5.5",
+    "coveralls": "^3.0.11",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.10.1",
+    "eslint-plugin-jsdoc": "^22.1.0",
+    "eslint-plugin-prettier": "^3.1.2",
+    "jsdoc": "^3.6.3",
     "lodash.camelcase": "^4.3.0",
+    "madge": "^3.8.0",
     "mocha": "5.2.0",
     "mocha-sinon": "^2.1.0",
     "mongodb-mock-server": "^2.0.1",
@@ -51,28 +54,30 @@
     "sinon": "^4.3.0",
     "sinon-chai": "^3.2.0",
     "snappy": "^6.1.2",
-    "standard-version": "^4.4.0",
+    "standard-version": "^7.1.0",
+    "typescript": "^3.8.3",
     "worker-farm": "^1.5.0",
     "wtfnode": "^0.8.0",
     "yargs": "^14.2.0"
   },
   "license": "Apache-2.0",
   "engines": {
-    "node": ">=4"
+    "node": ">=10"
   },
   "bugs": {
     "url": "https://github.com/mongodb/node-mongodb-native/issues"
   },
   "scripts": {
-    "atlas": "node ./test/tools/atlas_connectivity_tests.js",
-    "test": "npm run lint && mocha --recursive test/functional test/unit",
-    "test-nolint": "mocha --recursive test/functional test/unit",
-    "coverage": "nyc mocha --timeout 60000 --recursive test/unit test/functional",
-    "lint": "eslint lib test",
-    "format": "prettier --print-width 100 --tab-width 2 --single-quote --write 'test/**/*.js' 'lib/**/*.js'",
-    "bench": "node test/benchmarks/driverBench/",
-    "generate-evergreen": "node .evergreen/generate_evergreen_tasks.js",
-    "release": "standard-version -i HISTORY.md"
+    "build:evergreen": "node .evergreen/generate_evergreen_tasks.js",
+    "build:types": "tsc",
+    "check:atlas": "node test/tools/atlas_connectivity_tests.js",
+    "check:bench": "node test/benchmarks/driverBench",
+    "check:coverage": "nyc mocha --timeout 60000 --recursive test/{functional,unit}",
+    "check:lint": "eslint index.js lib test",
+    "check:test": "mocha --recursive test/{functional,unit}",
+    "check:types": "tsc -p tsconfig.check.json",
+    "release": "standard-version -i HISTORY.md",
+    "test": "npm run check:lint && npm run check:test"
   },
   "homepage": "https://github.com/mongodb/node-mongodb-native",
   "optionalDependencies": {

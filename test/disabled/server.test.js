@@ -304,7 +304,6 @@ describe('Server tests', function() {
       requires: { topology: ['single'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var self = this;
       var testDone = false;
@@ -486,7 +485,6 @@ describe('Server tests', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       const config = this.configuration;
       var server = config.newTopology(this.configuration.host, this.configuration.port, {

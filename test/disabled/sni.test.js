@@ -2,13 +2,9 @@
 var test = require('./shared').assert;
 
 describe('SNI', function() {
-  /**
-   * @ignore
-   */
   it('Should correct connect to snitest1.10gen.cc', {
     metadata: { requires: { topology: 'sni', os: '!win32' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var MongoClient = configuration.require.MongoClient;
@@ -27,13 +23,9 @@ describe('SNI', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should correct connect to snitest2.mongodb.com', {
     metadata: { requires: { topology: 'sni', os: '!win32' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var MongoClient = configuration.require.MongoClient;

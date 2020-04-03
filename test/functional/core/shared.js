@@ -137,7 +137,7 @@ class ConnectionSpy extends EventEmitter {
  * Prepares a database for testing, dropping all databases
  *
  * @param {Configuration} configuration The test configuration
- * @param {String[]} [dbsToClean] The databases to clean
+ * @param {string[]} [dbsToClean] The databases to clean
  */
 function setupDatabase(configuration, dbsToClean) {
   return new Promise((resolve, reject) => {

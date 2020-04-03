@@ -30,14 +30,12 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method aggregate
-   * @ignore
    */
   it('aggregationExample2WithPromises', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { mongodb: '>2.1.0', topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -114,14 +112,12 @@ describe('Operation (Promises)', function() {
    *
    * @example-class AggregationCursor
    * @example-method next
-   * @ignore
    */
   it('Aggregation Cursor next Test With Promises', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { mongodb: '>2.1.0', topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -202,12 +198,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method count
-   * @ignore
    */
   it('shouldCorrectlyDoSimpleCountExamplesWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient({ w: 0 }, { poolSize: 1 });
@@ -254,12 +248,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method createIndex
-   * @ignore
    */
   it('shouldCreateComplexIndexOnTwoFieldsWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -323,12 +315,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method distinct
-   * @ignore
    */
   it('shouldCorrectlyHandleDistinctIndexesWithSubQueryFilterWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -382,13 +372,10 @@ describe('Operation (Promises)', function() {
 
   /**
    * Example of running the distinct command against a collection using a Promise with a filter query
-   *
-   * @ignore
    */
   it('shouldCorrectlyHandleDistinctIndexesWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -441,12 +428,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method drop
-   * @ignore
    */
   it('shouldCorrectlyDropCollectionWithDropFunctionWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -502,12 +487,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method dropAllIndexes
-   * @ignore
    */
   it('dropAllIndexesExample1WithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -546,12 +529,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method dropIndex
-   * @ignore
    */
   it('shouldCorrectlyCreateAndDropIndexWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient({ w: 0 }, { poolSize: 1, auto_reconnect: true });
@@ -611,12 +592,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method ensureIndex
-   * @ignore
    */
   it('shouldCreateComplexEnsureIndexWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -683,12 +662,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method ensureIndex
-   * @ignore
    */
   it('ensureIndexExampleWithCompountIndexWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient({ w: 0 }, { poolSize: 1, auto_reconnect: true });
@@ -748,12 +725,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method find
-   * @ignore
    */
   it('shouldPerformASimpleQueryWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -798,12 +773,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method find
-   * @ignore
    */
   it('shouldPerformASimpleExplainQueryWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -848,12 +821,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method find
-   * @ignore
    */
   it('shouldPerformASimpleLimitSkipQueryWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -916,12 +887,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method findAndModify
-   * @ignore
    */
   it('shouldPerformSimpleFindAndModifyOperationsWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -1002,12 +971,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method findAndRemove
-   * @ignore
    */
   it('shouldPerformSimpleFindAndRemoveWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -1060,12 +1027,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method findOne
-   * @ignore
    */
   it('shouldPerformASimpleLimitSkipFindOneQueryWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -1118,12 +1083,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method geoHaystackSearch
-   * @ignore
    */
   it('shouldCorrectlyPerformSimpleGeoHaystackSearchCommandWithPromises', {
     metadata: { requires: { topology: ['single', 'replicaset'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1181,12 +1144,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method mapReduce
-   * @ignore
    */
   it('shouldPerformSimpleMapReduceFunctionsWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient({ w: 0 }, { poolSize: 1 });
@@ -1250,14 +1211,12 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method mapReduce
-   * @ignore
    */
   it('shouldPerformMapReduceFunctionInlineWithPromises', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { mongodb: '>1.7.6', topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient({ w: 0 }, { poolSize: 1 });
@@ -1318,12 +1277,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method mapReduce
-   * @ignore
    */
   it('shouldPerformMapReduceWithContextWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient({ w: 0 }, { poolSize: 1 });
@@ -1413,12 +1370,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method mapReduce
-   * @ignore
    */
   it.skip('shouldPerformMapReduceInContextObjectsWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient({ w: 0 }, { poolSize: 1 });
@@ -1508,12 +1463,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method indexes
-   * @ignore
    */
   it('shouldCorrectlyRetrieveACollectionsIndexesWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1563,12 +1516,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method indexExists
-   * @ignore
    */
   it('shouldCorrectlyExecuteIndexExistsWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1624,14 +1575,12 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method indexInformation
-   * @ignore
    */
   it('shouldCorrectlyShowTheResultsFromIndexInformationWithPromises', {
     metadata: {
       requires: { topology: ['single', 'replicaset'] }
     },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(
@@ -1704,12 +1653,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method indexInformation
-   * @ignore
    */
   it('shouldCorrectlyShowAllTheResultsFromIndexInformationWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient({ w: 0 }, { poolSize: 1, auto_reconnect: true });
@@ -1779,13 +1726,11 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method insert
-   * @ignore
    */
   it('shouldCorrectlyPerformASimpleSingleDocumentInsertNoCallbackNoSafeWithPromises', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { topology: ['single'] } },
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1822,14 +1767,12 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method insert
-   * @ignore
    */
   it('shouldCorrectlyPerformABatchDocumentInsertSafeWithPromises', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1872,14 +1815,12 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method insert
-   * @ignore
    */
   it('shouldCorrectlyPerformASimpleDocumentInsertWithFunctionSafeWithPromises', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1928,14 +1869,12 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method insert
-   * @ignore
    */
   it('Should correctly execute insert with keepGoing option on mongod >= 1.9.1 With Promises', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { mongodb: '>1.9.1', topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2001,12 +1940,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method isCapped
-   * @ignore
    */
   it('shouldCorrectlyExecuteIsCappedWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2045,12 +1982,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method options
-   * @ignore
    */
   it('shouldCorrectlyRetrieveCollectionOptionsWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2090,7 +2025,6 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method parallelCollectionScan
-   * @ignore
    */
   it('Should correctly execute parallelCollectionScan with multiple cursors With Promises', {
     // Add a tag that our runner can trigger on
@@ -2099,7 +2033,6 @@ describe('Operation (Promises)', function() {
       requires: { mongodb: '>2.5.5 <=4.1.0', topology: ['single', 'replicaset'] }
     },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -2170,12 +2103,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method reIndex
-   * @ignore
    */
   it('shouldCorrectlyIndexAndForceReindexOnCollectionWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient({ w: 0 }, { poolSize: 1, auto_reconnect: true });
@@ -2246,12 +2177,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method remove
-   * @ignore
    */
   it('shouldRemoveAllDocumentsNoSafeWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient({ w: 0 }, { poolSize: 1 });
@@ -2297,12 +2226,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method remove
-   * @ignore
    */
   it('shouldRemoveSubsetOfDocumentsSafeModeWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient({ w: 0 }, { poolSize: 1 });
@@ -2344,14 +2271,12 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method rename
-   * @ignore
    */
   it('shouldCorrectlyRenameCollectionWithPromises', {
     metadata: {
       requires: { topology: ['single'] }
     },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -2476,12 +2401,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method save
-   * @ignore
    */
   it('shouldCorrectlySaveASimpleDocumentWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient({ w: 0 }, { poolSize: 1 });
@@ -2521,12 +2444,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method save
-   * @ignore
    */
   it('shouldCorrectlySaveASimpleDocumentModifyItAndResaveItWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2586,12 +2507,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method update
-   * @ignore
    */
   it('shouldCorrectlyUpdateASimpleDocumentWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient({ w: 0 }, { poolSize: 1 });
@@ -2637,12 +2556,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method update
-   * @ignore
    */
   it('shouldCorrectlyUpsertASimpleDocumentWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2685,12 +2602,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method update
-   * @ignore
    */
   it('shouldCorrectlyUpdateMultipleDocumentsWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2747,12 +2662,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method stats
-   * @ignore
    */
   it('shouldCorrectlyReturnACollectionsStatsWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2793,12 +2706,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method dropIndexes
-   * @ignore
    */
   it('shouldCorrectlyCreateAndDropAllIndexWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient({ w: 0 }, { poolSize: 1, auto_reconnect: true });
@@ -2875,12 +2786,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Db
    * @example-method close
-   * @ignore
    */
   it('shouldCorrectlyOpenASimpleDbSingleServerConnectionAndCloseWithCallbackWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -2910,14 +2819,12 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Db
    * @example-method listCollections
-   * @ignore
    */
   it('shouldCorrectlyRetrievelistCollectionsWithPromises', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] }
     },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -2964,13 +2871,9 @@ describe('Operation (Promises)', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyRetrievelistCollectionsWiredTigerWithPromises', {
     metadata: { requires: { topology: ['wiredtiger'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -3013,12 +2916,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Db
    * @example-method collection
-   * @ignore
    */
   it('shouldCorrectlyAccessACollectionWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -3074,12 +2975,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Db
    * @example-method collections
-   * @ignore
    */
   it('shouldCorrectlyRetrieveAllCollectionsWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -3112,12 +3011,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Db
    * @example-method addUser
-   * @ignore
    */
   it('shouldCorrectlyAddUserToDbWithPromises', {
     metadata: { requires: { topology: 'single' } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -3158,12 +3055,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Db
    * @example-method removeUser
-   * @ignore
    */
   it.skip('shouldCorrectlyAddAndRemoveUserWithPromises', {
     metadata: { requires: { topology: 'single', mongodb: '<=3.4.x' } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
 
@@ -3229,12 +3124,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Db
    * @example-method createCollection
-   * @ignore
    */
   it('shouldCorrectlyCreateACollectionWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -3278,12 +3171,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Db
    * @example-method dropCollection
-   * @ignore
    */
   it('shouldCorrectlyExecuteACommandAgainstTheServerWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -3344,12 +3235,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Db
    * @example-method command
-   * @ignore
    */
   it('shouldCorrectlyCreateDropAndVerifyThatCollectionIsGoneWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -3382,12 +3271,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Db
    * @example-method renameCollection
-   * @ignore
    */
   it('shouldCorrectlyRenameACollectionWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -3463,12 +3350,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Db
    * @example-method createIndex
-   * @ignore
    */
   it('shouldCreateOnDbComplexIndexOnTwoFieldsWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -3535,12 +3420,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Db
    * @example-method ensureIndex
-   * @ignore
    */
   it('shouldCreateComplexEnsureIndexDbWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -3607,12 +3490,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Db
    * @example-method dropDatabase
-   * @ignore
    */
   it('shouldCorrectlyDropTheDatabaseWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -3684,12 +3565,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Db
    * @example-method stats
-   * @ignore
    */
   it('shouldCorrectlyRetrieveDbStatsWithPromisesWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3718,12 +3597,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Db
    * @example-method db
-   * @ignore
    */
   it('shouldCorrectlyShareConnectionPoolsAcrossMultipleDbInstancesWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3783,12 +3660,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Admin
    * @example-method buildInfo
-   * @ignore
    */
   it('shouldCorrectlyRetrieveBuildInfoWithPromises', {
     metadata: { requires: { topology: 'single' } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3823,12 +3698,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Admin
    * @example-method command
-   * @ignore
    */
   it('shouldCorrectlyRetrieveBuildInfoUsingCommandWithPromises', {
     metadata: { requires: { topology: 'single' } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3863,12 +3736,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Db
    * @example-method profilingLevel
-   * @ignore
    */
   it('shouldCorrectlySetDefaultProfilingLevelWithPromises', {
     metadata: { requires: { topology: 'single' } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3915,12 +3786,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Db
    * @example-method setProfilingLevel
-   * @ignore
    */
   it('shouldCorrectlyChangeProfilingLevelWithPromises', {
     metadata: { requires: { topology: 'single' } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3999,12 +3868,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Admin
    * @example-method profilingInfo
-   * @ignore
    */
   it('shouldCorrectlySetAndExtractProfilingInfoWithPromises', {
     metadata: { requires: { topology: 'single' } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -4068,12 +3935,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Admin
    * @example-method validateCollection
-   * @ignore
    */
   it('shouldCorrectlyCallValidateCollectionWithPromises', {
     metadata: { requires: { topology: 'single' } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -4118,12 +3983,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Admin
    * @example-method ping
-   * @ignore
    */
   it('shouldCorrectlyPingTheMongoDbInstanceWithPromises', {
     metadata: { requires: { topology: 'single' } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -4158,12 +4021,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Admin
    * @example-method addUser
-   * @ignore
    */
   it('shouldCorrectlyAddAUserToAdminDbWithPromises', {
     metadata: { requires: { topology: 'single' } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -4204,12 +4065,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Admin
    * @example-method removeUser
-   * @ignore
    */
   it('shouldCorrectlyAddAUserAndRemoveItFromAdminDbWithPromises', {
     metadata: { requires: { topology: 'single' } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -4252,12 +4111,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Admin
    * @example-method listDatabases
-   * @ignore
    */
   it('shouldCorrectlyListAllAvailableDatabasesWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -4292,12 +4149,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Admin
    * @example-method serverStatus
-   * @ignore
    */
   it('shouldCorrectlyRetrieveServerInfoWithPromises', {
     metadata: { requires: { topology: 'single' } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -4359,14 +4214,12 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Cursor
    * @example-method toArray
-   * @ignore
    */
   it('shouldCorrectlyExecuteToArrayWithPromises', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -4412,14 +4265,12 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Cursor
    * @example-method count
-   * @ignore
    */
   it('shouldCorrectlyUseCursorCountFunctionWithPromises', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -4464,14 +4315,12 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Cursor
    * @example-method next
-   * @ignore
    */
   it('shouldCorrectlyPerformNextOnCursorWithPromises', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -4516,14 +4365,12 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Cursor
    * @example-method explain
-   * @ignore
    */
   it('shouldCorrectlyPerformSimpleExplainCursorWithPromises', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -4568,14 +4415,12 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Cursor
    * @example-method close
-   * @ignore
    */
   it('shouldStreamDocumentsUsingTheCloseFunctionWithPromises', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -4638,12 +4483,10 @@ describe('Operation (Promises)', function() {
    * Example of a simple url connection string to a replicaset, with acknowledgement of writes using a Promise.
    *
    * @example-class MongoClient
-   * @ignore
    */
   it('Should correctly connect to a replicaset With Promises', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var url = f(
@@ -4685,12 +4528,10 @@ describe('Operation (Promises)', function() {
    * Example of a simple url connection string to a shard, with acknowledgement of writes using a Promise.
    *
    * @example-class MongoClient
-   * @ignore
    */
   it('Should connect to mongos proxies using connectiong string With Promises', {
     metadata: { requires: { topology: 'sharded' } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var url = f(
@@ -4731,14 +4572,12 @@ describe('Operation (Promises)', function() {
    * Example of a simple url connection string for a single server connection
    *
    * @example-class MongoClient
-   * @ignore
    */
   it('Should correctly connect using MongoClient to a single server using connect With Promises', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { topology: 'single' } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       const client = configuration.newClient('mongodb://localhost:27017/integration_tests', {
@@ -4781,12 +4620,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class GridStore
    * @example-method GridStore.exist
-   * @ignore
    */
   it('shouldCorrectlyExecuteGridStoreExistsByObjectIdWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -4846,12 +4683,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class GridStore
    * @example-method GridStore.list
-   * @ignore
    */
   it('shouldCorrectlyExecuteGridStoreListWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -4976,12 +4811,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class GridStore
    * @example-method puts
-   * @ignore
    */
   it('shouldCorrectlyReadlinesAndPutLinesWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -5028,12 +4861,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class GridStore
    * @example-method GridStore.unlink
-   * @ignore
    */
   it('shouldCorrectlyUnlinkWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -5114,12 +4945,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class GridStore
    * @example-method read
-   * @ignore
    */
   it('shouldCorrectlyWriteAndReadJpgImageWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -5182,12 +5011,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class GridStore
    * @example-method open
-   * @ignore
    */
   it('shouldCorrectlySaveSimpleFileToGridStoreUsingFilenameWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -5236,12 +5063,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class GridStore
    * @example-method open
-   * @ignore
    */
   it('shouldCorrectlySaveSimpleFileToGridStoreUsingObjectIDWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -5293,12 +5118,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class GridStore
    * @example-method writeFile
-   * @ignore
    */
   it('shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -5352,12 +5175,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class GridStore
    * @example-method writeFile
-   * @ignore
    */
   it('shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithHandleWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -5418,12 +5239,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class GridStore
    * @example-method write
-   * @ignore
    */
   it('shouldCorrectlySaveSimpleFileToGridStoreUsingWriteWithStringsAndBuffersWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -5479,12 +5298,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class GridStore
    * @example-method close
-   * @ignore
    */
   it('shouldCorrectlySaveSimpleFileToGridStoreUsingCloseWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -5531,12 +5348,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class GridStore
    * @example-method unlink
-   * @ignore
    */
   it('shouldCorrectlySaveSimpleFileToGridStoreUsingCloseAndThenUnlinkItWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -5599,12 +5414,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class GridStore
    * @example-method GridStore.readlines
-   * @ignore
    */
   it('shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseReadlinesWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -5664,12 +5477,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class GridStore
    * @example-method readlines
-   * @ignore
    */
   it('shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseInstanceReadlinesWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -5735,12 +5546,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class GridStore
    * @example-method GridStore.read
-   * @ignore
    */
   it('shouldCorrectlyPutACoupleOfLinesInGridStoreReadWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -5790,12 +5599,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class GridStore
    * @example-method seek
-   * @ignore
    */
   it('shouldCorrectlySeekWithBufferWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -5913,12 +5720,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class GridStore
    * @example-method rewind
-   * @ignore
    */
   it('shouldCorrectlyRewingAndTruncateOnWriteWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -5992,12 +5797,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class GridStore
    * @example-method tell
-   * @ignore
    */
   it('shouldCorrectlyExecuteGridstoreTellWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -6058,12 +5861,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class GridStore
    * @example-method getc
-   * @ignore
    */
   it('shouldCorrectlyRetrieveSingleCharacterUsingGetCWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -6116,12 +5917,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class GridStore
    * @example-method open
-   * @ignore
    */
   it('shouldCorrectlyRetrieveSingleCharacterUsingGetCWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -6208,12 +6007,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method initializeOrderedBulkOp
-   * @ignore
    */
   it('Should correctly execute ordered batch with no errors using write commands With Promises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -6277,12 +6074,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method initializeUnorderedBulkOp
-   * @ignore
    */
   it('Should correctly execute unordered batch with no errors With Promises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -6352,12 +6147,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method insertOne
-   * @ignore
    */
   it('Should correctly execute insertOne operation With Promises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -6392,12 +6185,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method insertMany
-   * @ignore
    */
   it('Should correctly execute insertMany operation With Promises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -6432,12 +6223,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method updateOne
-   * @ignore
    */
   it('Should correctly execute updateOne operation With Promises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -6473,12 +6262,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method updateMany
-   * @ignore
    */
   it('Should correctly execute updateMany operation With Promises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -6527,12 +6314,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method removeOne
-   * @ignore
    */
   it('Should correctly execute removeOne operation With Promises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -6574,12 +6359,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method removeMany
-   * @ignore
    */
   it('Should correctly execute removeMany operation With Promises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -6623,12 +6406,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method bulkWrite
-   * @ignore
    */
   it('Should correctly execute bulkWrite operation With Promises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -6687,7 +6468,6 @@ describe('Operation (Promises)', function() {
   it('Should correctly handle duplicate key error with bulkWrite', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -6718,12 +6498,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method findOneAndDelete
-   * @ignore
    */
   it('Should correctly execute findOneAndDelete operation With Promises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -6766,12 +6544,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method findOneAndReplace
-   * @ignore
    */
   it('Should correctly execute findOneAndReplace operation With Promises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -6823,12 +6599,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Collection
    * @example-method findOneAndUpdate
-   * @ignore
    */
   it('Should correctly execute findOneAndUpdate operation With Promises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -6881,12 +6655,10 @@ describe('Operation (Promises)', function() {
    *
    * @example-class Db
    * @example-method createCollection
-   * @ignore
    */
   it('Should correctly add capped collection options to cursor With Promises', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {

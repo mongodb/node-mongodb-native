@@ -13,7 +13,6 @@ describe('Generators', function() {
       requires: { generators: true, topology: 'single', node: '>6.0.0', mongodb: '>=2.6.0' }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var co = require('co');
       var configuration = this.configuration;

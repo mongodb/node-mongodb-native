@@ -6,12 +6,10 @@ const Logger = require('../../lib/logger');
 describe('Logger', function() {
   /**
    * Test a simple find
-   * @ignore
    */
   it('should correctly Enable logging', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
@@ -52,12 +50,10 @@ describe('Logger', function() {
 
   /**
    * Should No fail with undefined id
-   * @ignore
    */
   it('should not fail with undefined id', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var self = this;
 
@@ -86,12 +82,10 @@ describe('Logger', function() {
 
   /**
    * Should No fail with undefined id
-   * @ignore
    */
   it('should correctly log cursor', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var self = this;
 
@@ -134,12 +128,10 @@ describe('Logger', function() {
 
   /**
    * Should No fail with undefined id
-   * @ignore
    */
   it('should pass the logLevel down through the options', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var self = this;
 

@@ -384,7 +384,7 @@ function extractCrudResult(result, operation) {
   }
 
   return Object.keys(operation.result).reduce((crudResult, key) => {
-    if (result.hasOwnProperty(key) && result[key] != null) {
+    if (Object.prototype.hasOwnProperty.call(result, key) && result[key] != null) {
       // FIXME(major): update crud results are broken and need to be changed
       crudResult[key] = key === 'upsertedId' ? result[key]._id : result[key];
     }
@@ -503,12 +503,11 @@ const kOperations = new Map([
 ]);
 
 /**
- *
- * @param {Object} operation the operation definition from the spec test
- * @param {Object} obj the object to call the operation on
- * @param {Object} context a context object containing sessions used for the test
- * @param {Object} [options] Optional settings
- * @param {Boolean} [options.swallowOperationErrors] Generally we want to observe operation errors, validate them against our expectations, and then swallow them. In cases like `withTransaction` we want to use the same `testOperations` to build the lambda, and in those cases it is not desireable to swallow the errors, since we need to test this behavior.
+ * @param {object} operation the operation definition from the spec test
+ * @param {object} obj the object to call the operation on
+ * @param {object} context a context object containing sessions used for the test
+ * @param {object} [options] Optional settings
+ * @param {boolean} [options.swallowOperationErrors] Generally we want to observe operation errors, validate them against our expectations, and then swallow them. In cases like `withTransaction` we want to use the same `testOperations` to build the lambda, and in those cases it is not desireable to swallow the errors, since we need to test this behavior.
  */
 function testOperation(operation, obj, context, options) {
   options = options || { swallowOperationErrors: true };

@@ -7,15 +7,11 @@ describe('Domains', function() {
     return setupDatabase(this.configuration);
   });
 
-  /**
-   * @ignore
-   */
   it('shouldStayInCorrectDomainForReadCommand', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var Domain = require('domain');
       var domainInstance = Domain.create();
@@ -41,15 +37,11 @@ describe('Domains', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldStayInCorrectDomainForReadCommandUsingMongoClient', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var Domain = require('domain');
@@ -72,15 +64,11 @@ describe('Domains', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldStayInCorrectDomainForWriteCommand', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var Domain = require('domain');
       var domainInstance = Domain.create();

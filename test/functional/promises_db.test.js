@@ -15,7 +15,6 @@ describe('Promises (Db)', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
       var url = configuration.url();
@@ -36,7 +35,6 @@ describe('Promises (Db)', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient({ w: 1 }, { poolSize: 1 });
@@ -53,7 +51,6 @@ describe('Promises (Db)', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var url = configuration.url();
@@ -84,7 +81,6 @@ describe('Promises (Db)', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var url = configuration.url();
@@ -117,7 +113,6 @@ describe('Promises (Db)', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var url = configuration.url();
@@ -150,7 +145,6 @@ describe('Promises (Db)', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var url = configuration.url();
@@ -180,7 +174,6 @@ describe('Promises (Db)', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var url = configuration.url();
@@ -218,7 +211,6 @@ describe('Promises (Db)', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var url = configuration.url();
@@ -251,7 +243,6 @@ describe('Promises (Db)', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var url = configuration.url();
@@ -288,7 +279,6 @@ describe('Promises (Db)', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var url = configuration.url();
@@ -318,7 +308,6 @@ describe('Promises (Db)', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var url = configuration.url();
@@ -349,7 +338,6 @@ describe('Promises (Db)', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var url = configuration.url();
@@ -380,7 +368,6 @@ describe('Promises (Db)', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var db = null;

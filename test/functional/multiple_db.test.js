@@ -9,15 +9,12 @@ describe('Multiple Databases', function() {
 
   /**
    * Test the auto connect functionality of the db
-   *
-   * @ignore
    */
   it('shouldCorrectlyUseSameConnectionsForTwoDifferentDbs', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient({ w: 1 }, { poolSize: 1 });
@@ -68,15 +65,11 @@ describe('Multiple Databases', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyHandleMultipleDbsFindAndModifies', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -95,15 +88,11 @@ describe('Multiple Databases', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should not leak listeners', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       const client = configuration.newClient({}, { sslValidate: false });

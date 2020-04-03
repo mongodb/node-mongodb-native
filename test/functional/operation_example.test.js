@@ -26,7 +26,6 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method aggregate
-   * @ignore
    */
   it('aggregationExample1', {
     // Add a tag that our runner can trigger on
@@ -38,7 +37,6 @@ describe('Operation Examples', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -114,7 +112,6 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method aggregate
-   * @ignore
    */
   it('aggregationExample2', {
     // Add a tag that our runner can trigger on
@@ -126,7 +123,6 @@ describe('Operation Examples', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -202,7 +198,6 @@ describe('Operation Examples', function() {
    *
    * @example-class AggregationCursor
    * @example-method toArray
-   * @ignore
    */
   it('Aggregation Cursor toArray Test', {
     // Add a tag that our runner can trigger on
@@ -214,7 +209,6 @@ describe('Operation Examples', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -290,7 +284,6 @@ describe('Operation Examples', function() {
    *
    * @example-class AggregationCursor
    * @example-method next
-   * @ignore
    */
   it('Aggregation Cursor toArray Test', {
     // Add a tag that our runner can trigger on
@@ -302,7 +295,6 @@ describe('Operation Examples', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -382,7 +374,6 @@ describe('Operation Examples', function() {
    *
    * @example-class AggregationCursor
    * @example-method each
-   * @ignore
    */
   it('Aggregation Cursor each Test', {
     // Add a tag that our runner can trigger on
@@ -394,7 +385,6 @@ describe('Operation Examples', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -472,7 +462,6 @@ describe('Operation Examples', function() {
    *
    * @example-class AggregationCursor
    * @example-method forEach
-   * @ignore
    */
   it('Aggregation Cursor forEach Test', {
     // Add a tag that our runner can trigger on
@@ -484,7 +473,6 @@ describe('Operation Examples', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -568,7 +556,6 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method aggregate
-   * @ignore
    */
   it('aggregationExample3', {
     // Add a tag that our runner can trigger on
@@ -580,7 +567,6 @@ describe('Operation Examples', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -660,14 +646,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method count
-   * @ignore
    */
   it('shouldCorrectlyDoSimpleCountExamples', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -717,14 +701,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method createIndex
-   * @ignore
    */
   it('shouldCreateComplexIndexOnTwoFields', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -790,14 +772,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method createIndex
-   * @ignore
    */
   it('shouldCreateASimpleIndexOnASingleField', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -846,14 +826,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method createIndex
-   * @ignore
    */
   it('createIndexExample3', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -917,14 +895,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method distinct
-   * @ignore
    */
   it('shouldCorrectlyHandleDistinctIndexesWithSubQueryFilter', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -981,14 +957,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method distinct
-   * @ignore
    */
   it('shouldCorrectlyHandleDistinctIndexes', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1041,14 +1015,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method drop
-   * @ignore
    */
   it('shouldCorrectlyDropCollectionWithDropFunction', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1102,14 +1074,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method dropAllIndexes
-   * @ignore
    */
   it('dropAllIndexesExample1', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1148,14 +1118,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method dropIndex
-   * @ignore
    */
   it('shouldCorrectlyCreateAndDropIndex', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1220,14 +1188,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method ensureIndex
-   * @ignore
    */
   it('shouldCreateComplexEnsureIndex', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1293,14 +1259,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method ensureIndex
-   * @ignore
    */
   it('ensureIndexExampleWithCompountIndex', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1365,14 +1329,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method find
-   * @ignore
    */
   it('shouldPerformASimpleQuery', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1418,14 +1380,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method find
-   * @ignore
    */
   it('shouldPerformASimpleExplainQuery', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1470,14 +1430,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method find
-   * @ignore
    */
   it('shouldPerformASimpleLimitSkipQuery', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1537,14 +1495,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method findAndModify
-   * @ignore
    */
   it('shouldPerformSimpleFindAndModifyOperations', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1630,14 +1586,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method findAndRemove
-   * @ignore
    */
   it('shouldPerformSimpleFindAndRemove', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1690,14 +1644,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method findOne
-   * @ignore
    */
   it('shouldPerformASimpleLimitSkipFindOneQuery', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1747,12 +1699,10 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method geoHaystackSearch
-   * @ignore
    */
   it('shouldCorrectlyPerformSimpleGeoHaystackSearchCommand', {
     metadata: { requires: { topology: ['single', 'replicaset'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1813,14 +1763,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method mapReduce
-   * @ignore
    */
   it('shouldPerformSimpleMapReduceFunctions', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1885,7 +1833,6 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method mapReduce
-   * @ignore
    */
   it('shouldPerformMapReduceFunctionInline', {
     // Add a tag that our runner can trigger on
@@ -1897,7 +1844,6 @@ describe('Operation Examples', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -1961,14 +1907,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method mapReduce
-   * @ignore
    */
   it('shouldPerformMapReduceWithContext', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2060,14 +2004,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method mapReduce
-   * @ignore
    */
   it.skip('shouldPerformMapReduceInContextObjects', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2158,14 +2100,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method indexes
-   * @ignore
    */
   it('shouldCorrectlyRetrieveACollectionsIndexes', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2216,14 +2156,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method indexExists
-   * @ignore
    */
   it('shouldCorrectlyExecuteIndexExists', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2278,14 +2216,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method indexInformation
-   * @ignore
    */
   it('shouldCorrectlyShowTheResultsFromIndexInformation', {
     metadata: {
       requires: { topology: ['single', 'replicaset'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2360,14 +2296,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method indexInformation
-   * @ignore
    */
   it('shouldCorrectlyShowAllTheResultsFromIndexInformation', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2439,7 +2373,6 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method insert
-   * @ignore
    */
   it('shouldCorrectlyPerformASimpleSingleDocumentInsertNoCallbackNoSafe', {
     // Add a tag that our runner can trigger on
@@ -2447,7 +2380,6 @@ describe('Operation Examples', function() {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2486,7 +2418,6 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method insert
-   * @ignore
    */
   it('shouldCorrectlyPerformABatchDocumentInsertSafe', {
     // Add a tag that our runner can trigger on
@@ -2495,7 +2426,6 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2539,7 +2469,6 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method insert
-   * @ignore
    */
   it('shouldCorrectlyPerformASimpleDocumentInsertWithFunctionSafe', {
     // Add a tag that our runner can trigger on
@@ -2548,7 +2477,6 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2598,7 +2526,6 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method insert
-   * @ignore
    */
   it('Should correctly execute insert with keepGoing option on mongod >= 1.9.1', {
     // Add a tag that our runner can trigger on
@@ -2610,7 +2537,6 @@ describe('Operation Examples', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2675,14 +2601,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method isCapped
-   * @ignore
    */
   it('shouldCorrectlyExecuteIsCapped', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2722,14 +2646,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method options
-   * @ignore
    */
   it('shouldCorrectlyRetrieveCollectionOptions', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2770,14 +2692,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method parallelCollectionScan
-   * @ignore
    */
   it('Should correctly execute parallelCollectionScan with multiple cursors using toArray', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { mongodb: '>2.5.5 <=4.1.0', topology: ['single', 'replicaset'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2845,14 +2765,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method reIndex
-   * @ignore
    */
   it('shouldCorrectlyIndexAndForceReindexOnCollection', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2924,14 +2842,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method remove
-   * @ignore
    */
   it('shouldRemoveAllDocumentsNoSafe', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -2974,14 +2890,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method remove
-   * @ignore
    */
   it('shouldRemoveSubsetOfDocumentsSafeMode', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3023,14 +2937,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method rename
-   * @ignore
    */
   it('shouldCorrectlyRenameCollection', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3138,14 +3050,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method save
-   * @ignore
    */
   it('shouldCorrectlySaveASimpleDocument', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3185,14 +3095,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method save
-   * @ignore
    */
   it('shouldCorrectlySaveASimpleDocumentModifyItAndResaveIt', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3250,14 +3158,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method updateOne
-   * @ignore
    */
   it('shouldCorrectlyUpdateASimpleDocument', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3305,14 +3211,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method updateOne
-   * @ignore
    */
   it('shouldCorrectlyUpsertASimpleDocument', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3356,14 +3260,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method updateMany
-   * @ignore
    */
   it('shouldCorrectlyUpdateMultipleDocuments', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3421,14 +3323,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method stats
-   * @ignore
    */
   it('shouldCorrectlyReturnACollectionsStats', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3473,14 +3373,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method dropIndexes
-   * @ignore
    */
   it('shouldCorrectlyCreateAndDropAllIndex', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3560,14 +3458,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Db
    * @example-method admin
-   * @ignore
    */
   it('accessAdminLevelOperations', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3598,14 +3494,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Db
    * @example-method open
-   * @ignore
    */
   it('shouldCorrectlyOpenASimpleDbSingleServerConnection', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3637,14 +3531,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Db
    * @example-method close
-   * @ignore
    */
   it('shouldCorrectlyOpenASimpleDbSingleServerConnectionAndCloseWithCallback', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3676,12 +3568,10 @@ describe('Operation Examples', function() {
    *
    * @example-class Db
    * @example-method listCollections
-   * @ignore
    */
   it('shouldCorrectlyRetrievelistCollections', {
     metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3728,13 +3618,9 @@ describe('Operation Examples', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyRetrievelistCollectionsWiredTiger', {
     metadata: { requires: { topology: ['wiredtiger'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3782,14 +3668,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Db
    * @example-method collection
-   * @ignore
    */
   it('shouldCorrectlyAccessACollection', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3845,14 +3729,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Db
    * @example-method collections
-   * @ignore
    */
   it('shouldCorrectlyRetrieveAllCollections', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3887,12 +3769,10 @@ describe('Operation Examples', function() {
    *
    * @example-class Db
    * @example-method addUser
-   * @ignore
    */
   it('shouldCorrectlyAddUserToDb', {
     metadata: { requires: { topology: 'single' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -3933,12 +3813,10 @@ describe('Operation Examples', function() {
    *
    * @example-class Db
    * @example-method removeUser
-   * @ignore
    */
   it('shouldCorrectlyAddAndRemoveUser', {
     metadata: { requires: { topology: 'single' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
 
@@ -4006,14 +3884,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Db
    * @example-method createCollection
-   * @ignore
    */
   it('shouldCorrectlyCreateACollection', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -4057,14 +3933,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Db
    * @example-method dropCollection
-   * @ignore
    */
   it('shouldCorrectlyExecuteACommandAgainstTheServer', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -4131,14 +4005,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Db
    * @example-method command
-   * @ignore
    */
   it('shouldCorrectlyCreateDropAndVerifyThatCollectionIsGone', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -4173,14 +4045,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Db
    * @example-method renameCollection
-   * @ignore
    */
   it('shouldCorrectlyRenameACollection', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -4258,14 +4128,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Db
    * @example-method createIndex
-   * @ignore
    */
   it('shouldCreateOnDbComplexIndexOnTwoFields', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -4332,14 +4200,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Db
    * @example-method ensureIndex
-   * @ignore
    */
   it('shouldCreateComplexEnsureIndexDb', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -4406,12 +4272,10 @@ describe('Operation Examples', function() {
    *
    * @example-class Db
    * @example-method dropDatabase
-   * @ignore
    */
   it('should correctly drop the database', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -4481,14 +4345,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Db
    * @example-method stats
-   * @ignore
    */
   it('shouldCorrectlyRetrieveDbStats', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -4522,14 +4384,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Db
    * @example-method db
-   * @ignore
    */
   it('shouldCorrectlyShareConnectionPoolsAcrossMultipleDbInstances', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -4586,12 +4446,10 @@ describe('Operation Examples', function() {
    *
    * @example-class Db
    * @example-method open
-   * @ignore
    */
   it('Should correctly connect with default replicasetNoOption', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
 
@@ -4634,12 +4492,10 @@ describe('Operation Examples', function() {
    *
    * @example-class Admin
    * @example-method buildInfo
-   * @ignore
    */
   it('shouldCorrectlyRetrieveBuildInfo', {
     metadata: { requires: { topology: 'single' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -4676,12 +4532,10 @@ describe('Operation Examples', function() {
    *
    * @example-class Admin
    * @example-method command
-   * @ignore
    */
   it('shouldCorrectlyRetrieveBuildInfoUsingCommand', {
     metadata: { requires: { topology: 'single' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -4717,12 +4571,10 @@ describe('Operation Examples', function() {
    *
    * @example-class Db
    * @example-method profilingLevel
-   * @ignore
    */
   it('shouldCorrectlySetDefaultProfilingLevel', {
     metadata: { requires: { topology: 'single' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -4770,12 +4622,10 @@ describe('Operation Examples', function() {
    *
    * @example-class Db
    * @example-method profilingInfo
-   * @ignore
    */
   it('shouldCorrectlySetAndExtractProfilingInfo', {
     metadata: { requires: { topology: 'single' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -4842,12 +4692,10 @@ describe('Operation Examples', function() {
    *
    * @example-class Admin
    * @example-method validateCollection
-   * @ignore
    */
   it('shouldCorrectlyCallValidateCollection', {
     metadata: { requires: { topology: 'single' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -4892,12 +4740,10 @@ describe('Operation Examples', function() {
    *
    * @example-class Admin
    * @example-method ping
-   * @ignore
    */
   it('shouldCorrectlyPingTheMongoDbInstance', {
     metadata: { requires: { topology: 'single' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -4933,12 +4779,10 @@ describe('Operation Examples', function() {
    *
    * @example-class Admin
    * @example-method addUser
-   * @ignore
    */
   it('shouldCorrectlyAddAUserToAdminDb', {
     metadata: { requires: { topology: 'single' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -4976,12 +4820,10 @@ describe('Operation Examples', function() {
    *
    * @example-class Admin
    * @example-method removeUser
-   * @ignore
    */
   it('shouldCorrectlyAddAUserAndRemoveItFromAdminDb', {
     metadata: { requires: { topology: 'single' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -5022,14 +4864,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Admin
    * @example-method listDatabases
-   * @ignore
    */
   it('should correctly list all available databases', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -5068,7 +4908,6 @@ describe('Operation Examples', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -5104,12 +4943,10 @@ describe('Operation Examples', function() {
    *
    * @example-class Admin
    * @example-method serverStatus
-   * @ignore
    */
   it('shouldCorrectlyRetrieveServerInfo', {
     metadata: { requires: { topology: 'single' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -5155,12 +4992,10 @@ describe('Operation Examples', function() {
    *
    * @example-class Admin
    * @example-method replSetGetStatus
-   * @ignore
    */
   it('shouldCorrectlyRetrieveReplSetGetStatus', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -5214,7 +5049,6 @@ describe('Operation Examples', function() {
    *
    * @example-class Cursor
    * @example-method toArray
-   * @ignore
    */
   it('shouldCorrectlyExecuteToArray', {
     // Add a tag that our runner can trigger on
@@ -5223,7 +5057,6 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -5265,7 +5098,6 @@ describe('Operation Examples', function() {
    *
    * @example-class Cursor
    * @example-method each
-   * @ignore
    */
   it('shouldCorrectlyFailToArrayDueToFinishedEachOperation', {
     // Add a tag that our runner can trigger on
@@ -5274,7 +5106,6 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -5325,7 +5156,6 @@ describe('Operation Examples', function() {
    *
    * @example-class Cursor
    * @example-method forEach
-   * @ignore
    */
   it('Should correctly iterate over cursor using forEach', {
     // Add a tag that our runner can trigger on
@@ -5334,7 +5164,6 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -5385,7 +5214,6 @@ describe('Operation Examples', function() {
    *
    * @example-class Cursor
    * @example-method rewind
-   * @ignore
    */
   it('Should correctly rewind and restart cursor', {
     // Add a tag that our runner can trigger on
@@ -5394,7 +5222,6 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -5452,7 +5279,6 @@ describe('Operation Examples', function() {
    *
    * @example-class Cursor
    * @example-method count
-   * @ignore
    */
   it('shouldCorrectlyUseCursorCountFunction', {
     // Add a tag that our runner can trigger on
@@ -5461,7 +5287,6 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -5506,7 +5331,6 @@ describe('Operation Examples', function() {
    *
    * @example-class Cursor
    * @example-method sort
-   * @ignore
    */
   it('shouldCorrectlyPerformSimpleSorts', {
     // Add a tag that our runner can trigger on
@@ -5515,7 +5339,6 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -5573,7 +5396,6 @@ describe('Operation Examples', function() {
    *
    * @example-class Cursor
    * @example-method limit
-   * @ignore
    */
   it('shouldCorrectlyPerformLimitOnCursor', {
     // Add a tag that our runner can trigger on
@@ -5582,7 +5404,6 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -5631,7 +5452,6 @@ describe('Operation Examples', function() {
    *
    * @example-class Cursor
    * @example-method skip
-   * @ignore
    */
   it('shouldCorrectlyPerformSkipOnCursor', {
     // Add a tag that our runner can trigger on
@@ -5640,7 +5460,6 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -5690,7 +5509,6 @@ describe('Operation Examples', function() {
    *
    * @example-class Cursor
    * @example-method batchSize
-   * @ignore
    */
   it('shouldCorrectlyPerformBatchSizeOnCursor', {
     // Add a tag that our runner can trigger on
@@ -5699,7 +5517,6 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -5749,7 +5566,6 @@ describe('Operation Examples', function() {
    *
    * @example-class Cursor
    * @example-method next
-   * @ignore
    */
   it('shouldCorrectlyPerformNextOnCursorWithCallbacks', {
     // Add a tag that our runner can trigger on
@@ -5758,7 +5574,6 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -5836,7 +5651,6 @@ describe('Operation Examples', function() {
    *
    * @example-class Cursor
    * @example-method explain
-   * @ignore
    */
   it('shouldCorrectlyPerformSimpleExplainCursor', {
     // Add a tag that our runner can trigger on
@@ -5845,7 +5659,6 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -5891,7 +5704,6 @@ describe('Operation Examples', function() {
    *
    * @example-class Cursor
    * @example-method stream
-   * @ignore
    */
   it('shouldStreamDocumentsUsingTheStreamFunction', {
     // Add a tag that our runner can trigger on
@@ -5900,7 +5712,6 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -5952,7 +5763,6 @@ describe('Operation Examples', function() {
    *
    * @example-class Cursor
    * @example-method isClosed
-   * @ignore
    */
   it('shouldStreamDocumentsUsingTheIsCloseFunction', {
     // Add a tag that our runner can trigger on
@@ -5961,7 +5771,6 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -6019,7 +5828,6 @@ describe('Operation Examples', function() {
    *
    * @example-class Cursor
    * @example-method close
-   * @ignore
    */
   it('shouldStreamDocumentsUsingTheCloseFunction', {
     // Add a tag that our runner can trigger on
@@ -6028,7 +5836,6 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -6085,14 +5892,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Cursor
    * @example-method stream
-   * @ignore
    */
   it('shouldStreamDocumentsUsingTheCursorStreamPauseFunction', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -6155,14 +5960,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Cursor
    * @example-method destroy
-   * @ignore
    */
   it('shouldStreamDocumentsUsingTheCursorStreamDestroyFunction', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -6221,12 +6024,10 @@ describe('Operation Examples', function() {
    * Example of a simple url connection string to a replicaset, with acknowledgement of writes.
    *
    * @example-class MongoClient
-   * @ignore
    */
   it('Should correctly connect to a replicaset', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
 
@@ -6276,12 +6077,10 @@ describe('Operation Examples', function() {
    * Example of a simple url connection string to a shard, with acknowledgement of writes.
    *
    * @example-class MongoClient
-   * @ignore
    */
   it('Should connect to mongos proxies using connectiong string', {
     metadata: { requires: { topology: 'sharded' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var url = f(
@@ -6328,14 +6127,12 @@ describe('Operation Examples', function() {
    * Example of a simple url connection string for a single server connection
    *
    * @example-class MongoClient
-   * @ignore
    */
   it('Should correctly connect using MongoClient to a single server using connect', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { topology: 'single' } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       const client = configuration.newClient('mongodb://localhost:27017/integration_tests', {
@@ -6386,14 +6183,12 @@ describe('Operation Examples', function() {
    *
    * @example-class ObjectID
    * @example-method getTimestamp
-   * @ignore
    */
   it('shouldCorrectlyGenerate12ByteStringFromTimestamp', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       // LINE var ObjectID = require('mongodb').ObjectID,
       // LINE   test = require('assert');
@@ -6420,14 +6215,12 @@ describe('Operation Examples', function() {
    *
    * @example-class ObjectID
    * @example-method toHexString
-   * @ignore
    */
   it('shouldCorrectlyRetrieve24CharacterHexStringFromToHexString', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       // LINE var ObjectID = require('mongodb').ObjectID,
       // LINE   test = require('assert');
@@ -6448,14 +6241,12 @@ describe('Operation Examples', function() {
    *
    * @example-class ObjectID
    * @example-method generationTime
-   * @ignore
    */
   it('shouldCorrectlyGetAndSetObjectIDUsingGenerationTimeProperty', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       // LINE var ObjectID = require('mongodb').ObjectID,
       // LINE   test = require('assert');
@@ -6485,14 +6276,12 @@ describe('Operation Examples', function() {
    *
    * @example-class ObjectID
    * @example-method createFromHexString
-   * @ignore
    */
   it('shouldCorrectlyTransformObjectIDToHexAndObjectId', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       // LINE var ObjectID = require('mongodb').ObjectID,
       // LINE   test = require('assert');
@@ -6519,14 +6308,12 @@ describe('Operation Examples', function() {
    *
    * @example-class ObjectID
    * @example-method equals
-   * @ignore
    */
   it('shouldCorrectlyDifferentiateBetweenObjectIdInstances', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       // LINE var ObjectID = require('mongodb').ObjectID,
       // LINE   test = require('assert');
@@ -6553,14 +6340,12 @@ describe('Operation Examples', function() {
    *
    * @example-class ObjectID
    * @example-method ObjectID.createFromTime
-   * @ignore
    */
   it('shouldCorrectlyUseCreateFromTime', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       // LINE var ObjectID = require('mongodb').ObjectID,
       // LINE   test = require('assert');
@@ -6585,14 +6370,12 @@ describe('Operation Examples', function() {
    *
    * @example-class GridStore
    * @example-method GridStore.exist
-   * @ignore
    */
   it('shouldCorrectlyExecuteGridStoreExistsByObjectId', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -6653,14 +6436,12 @@ describe('Operation Examples', function() {
    *
    * @example-class GridStore
    * @example-method GridStore.list
-   * @ignore
    */
   it('shouldCorrectlyExecuteGridStoreList', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -6787,14 +6568,12 @@ describe('Operation Examples', function() {
    *
    * @example-class GridStore
    * @example-method puts
-   * @ignore
    */
   it('shouldCorrectlyReadlinesAndPutLines', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -6839,12 +6618,10 @@ describe('Operation Examples', function() {
    *
    * @example-class GridStore
    * @example-method GridStore.unlink
-   * @ignore
    */
   it('shouldCorrectlyUnlink', {
     metadata: { requires: { topology: ['single'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -6923,14 +6700,12 @@ describe('Operation Examples', function() {
    *
    * @example-class GridStore
    * @example-method read
-   * @ignore
    */
   it('shouldCorrectlyWriteAndReadJpgImage', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -6990,14 +6765,12 @@ describe('Operation Examples', function() {
    *
    * @example-class GridStore
    * @example-method open
-   * @ignore
    */
   it('shouldCorrectlySaveSimpleFileToGridStoreUsingFilename', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -7047,14 +6820,12 @@ describe('Operation Examples', function() {
    *
    * @example-class GridStore
    * @example-method open
-   * @ignore
    */
   it('shouldCorrectlySaveSimpleFileToGridStoreUsingObjectID', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -7107,14 +6878,12 @@ describe('Operation Examples', function() {
    *
    * @example-class GridStore
    * @example-method writeFile
-   * @ignore
    */
   it('shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFile', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -7167,14 +6936,12 @@ describe('Operation Examples', function() {
    *
    * @example-class GridStore
    * @example-method writeFile
-   * @ignore
    */
   it('shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithHandle', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -7234,14 +7001,12 @@ describe('Operation Examples', function() {
    *
    * @example-class GridStore
    * @example-method write
-   * @ignore
    */
   it('shouldCorrectlySaveSimpleFileToGridStoreUsingWriteWithStringsAndBuffers', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -7294,14 +7059,12 @@ describe('Operation Examples', function() {
    *
    * @example-class GridStore
    * @example-method close
-   * @ignore
    */
   it('shouldCorrectlySaveSimpleFileToGridStoreUsingClose', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -7346,14 +7109,12 @@ describe('Operation Examples', function() {
    *
    * @example-class GridStore
    * @example-method chunkCollection
-   * @ignore
    */
   it('shouldCorrectlyAccessChunkCollection', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -7395,14 +7156,12 @@ describe('Operation Examples', function() {
    *
    * @example-class GridStore
    * @example-method unlink
-   * @ignore
    */
   it('shouldCorrectlySaveSimpleFileToGridStoreUsingCloseAndThenUnlinkIt', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -7462,14 +7221,12 @@ describe('Operation Examples', function() {
    *
    * @example-class GridStore
    * @example-method collection
-   * @ignore
    */
   it('shouldCorrectlyAccessFilesCollection', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -7511,14 +7268,12 @@ describe('Operation Examples', function() {
    *
    * @example-class GridStore
    * @example-method GridStore.readlines
-   * @ignore
    */
   it('shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseReadlines', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -7574,14 +7329,12 @@ describe('Operation Examples', function() {
    *
    * @example-class GridStore
    * @example-method readlines
-   * @ignore
    */
   it('shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseInstanceReadlines', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -7641,14 +7394,12 @@ describe('Operation Examples', function() {
    *
    * @example-class GridStore
    * @example-method GridStore.read
-   * @ignore
    */
   it('shouldCorrectlyPutACoupleOfLinesInGridStoreRead', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -7694,14 +7445,12 @@ describe('Operation Examples', function() {
    *
    * @example-class GridStore
    * @example-method stream
-   * @ignore
    */
   it('shouldCorrectlyReadFileUsingStream', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -7765,14 +7514,12 @@ describe('Operation Examples', function() {
    *
    * @example-class GridStore
    * @example-method stream
-   * @ignore
    */
   it('shouldCorrectlyStreamWriteToGridStoreObject', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -7816,14 +7563,12 @@ describe('Operation Examples', function() {
    *
    * @example-class GridStore
    * @example-method stream
-   * @ignore
    */
   it('shouldCorrectlyPipeAGridFsToAfile', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -7886,14 +7631,12 @@ describe('Operation Examples', function() {
    *
    * @example-class GridStore
    * @example-method seek
-   * @ignore
    */
   it('shouldCorrectlySeekWithBuffer', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -8007,14 +7750,12 @@ describe('Operation Examples', function() {
    *
    * @example-class GridStore
    * @example-method rewind
-   * @ignore
    */
   it('shouldCorrectlyRewingAndTruncateOnWrite', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -8082,14 +7823,12 @@ describe('Operation Examples', function() {
    *
    * @example-class GridStore
    * @example-method eof
-   * @ignore
    */
   it('shouldCorrectlyDetectEOF', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -8133,14 +7872,12 @@ describe('Operation Examples', function() {
    *
    * @example-class GridStore
    * @example-method tell
-   * @ignore
    */
   it('shouldCorrectlyExecuteGridstoreTell', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -8195,14 +7932,12 @@ describe('Operation Examples', function() {
    *
    * @example-class GridStore
    * @example-method getc
-   * @ignore
    */
   it('shouldCorrectlyRetrieveSingleCharacterUsingGetC', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -8248,14 +7983,12 @@ describe('Operation Examples', function() {
    *
    * @example-class GridStore
    * @example-method open
-   * @ignore
    */
   it('shouldCorrectlyRetrieveSingleCharacterUsingGetC', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -8325,14 +8058,12 @@ describe('Operation Examples', function() {
    *
    * @example-class GridStoreStream
    * @example-method pause
-   * @ignore
    */
   it('shouldStreamDocumentsUsingTheReadStreamPauseFunction', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -8394,14 +8125,12 @@ describe('Operation Examples', function() {
    *
    * @example-class GridStoreStream
    * @example-method resume
-   * @ignore
    */
   it('shouldStreamDocumentsUsingTheReadStreamResumeFunction', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -8479,14 +8208,12 @@ describe('Operation Examples', function() {
    *
    * @example-class GridStoreStream
    * @example-method destroy
-   * @ignore
    */
   it('shouldStreamDocumentsUsingTheReadStreamDestroyFunction', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -8552,14 +8279,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method initializeOrderedBulkOp
-   * @ignore
    */
   it('Should correctly execute ordered batch with no errors using write commands', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -8621,12 +8346,10 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method initializeUnorderedBulkOp
-   * @ignore
    */
   it('Should correctly execute unordered batch with no errors', {
     metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -8694,14 +8417,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method insertOne
-   * @ignore
    */
   it('Should correctly execute insertOne operation', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -8735,14 +8456,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method insertMany
-   * @ignore
    */
   it('Should correctly execute insertMany operation', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -8776,14 +8495,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method updateOne
-   * @ignore
    */
   it('Should correctly execute updateOne operation', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -8818,14 +8535,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method updateMany
-   * @ignore
    */
   it('Should correctly execute updateMany operation', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -8867,14 +8582,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method removeOne
-   * @ignore
    */
   it('Should correctly execute removeOne operation', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -8913,14 +8626,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method removeMany
-   * @ignore
    */
   it('Should correctly execute removeMany operation', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -8961,14 +8672,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method bulkWrite
-   * @ignore
    */
   it('Should correctly execute bulkWrite operation', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -9025,14 +8734,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method findOneAndDelete
-   * @ignore
    */
   it('Should correctly execute findOneAndDelete operation', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -9075,14 +8782,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method findOneAndReplace
-   * @ignore
    */
   it('Should correctly execute findOneAndReplace operation', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -9133,14 +8838,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Collection
    * @example-method findOneAndUpdate
-   * @ignore
    */
   it('Should correctly execute findOneAndUpdate operation', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -9191,14 +8894,12 @@ describe('Operation Examples', function() {
    *
    * @example-class Db
    * @example-method createCollection
-   * @ignore
    */
   it('Should correctly add capped collection options to cursor', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
