@@ -1144,7 +1144,8 @@ describe('Find', function() {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
-        db.createCollection('timeoutFalse', function(err, collection) {
+        db.createCollection('cursor_timeout_false_0', function(err, collection) {
+          expect(err).to.not.exist;
           const cursor = collection.find({}, { timeout: false });
           test.equal(false, cursor.cmd.noCursorTimeout);
           client.close(done);
@@ -1163,7 +1164,8 @@ describe('Find', function() {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
-        db.createCollection('timeoutFalse', function(err, collection) {
+        db.createCollection('cursor_timeout_false_1', function(err, collection) {
+          expect(err).to.not.exist;
           const cursor = collection.find({}, { timeout: true });
           test.equal(true, cursor.cmd.noCursorTimeout);
           client.close(done);
@@ -1319,7 +1321,7 @@ describe('Find', function() {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
-        db.createCollection('shouldCorrectlyExecuteFindAndModify', function(err, collection) {
+        db.createCollection('execute_find_and_modify', function(err, collection) {
           var self = { _id: new ObjectID() };
           var _uuid = 'sddffdss';
 
@@ -1513,7 +1515,7 @@ describe('Find', function() {
           transactions: transactions
         };
 
-        db.createCollection('shouldCorrectlyExecuteFindAndModify', function(err, collection) {
+        db.createCollection('find_and_modify_generate_correct_bson', function(err, collection) {
           test.equal(null, err);
 
           collection.insert(wrapingObject, configuration.writeConcernMax(), function(err, r) {

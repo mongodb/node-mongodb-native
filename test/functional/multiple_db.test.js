@@ -1,10 +1,11 @@
 'use strict';
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
+const { expect } = require('chai');
 
 describe('Multiple Databases', function() {
   before(function() {
-    return setupDatabase(this.configuration);
+    return setupDatabase(this.configuration, ['integration_tests2']);
   });
 
   /**
@@ -26,11 +27,8 @@ describe('Multiple Databases', function() {
           // Close second database
           second_test_database.close();
           // Let's grab a connection to the different db resusing our connection pools
-          var secondDb = client.db(configuration.db_name + '_2');
-          secondDb.createCollection('shouldCorrectlyUseSameConnectionsForTwoDifferentDbs', function(
-            err,
-            collection
-          ) {
+          var secondDb = client.db('integration_tests2');
+          secondDb.createCollection('same_connection_two_dbs', function(err, collection) {
             // Insert a dummy document
             collection.insert({ a: 20 }, { safe: true }, function(err) {
               test.equal(null, err);
@@ -40,10 +38,9 @@ describe('Multiple Databases', function() {
                 test.equal(20, item.a);
 
                 // Use the other db
-                db.createCollection('shouldCorrectlyUseSameConnectionsForTwoDifferentDbs', function(
-                  err,
-                  collection
-                ) {
+                db.createCollection('same_connection_two_dbs', function(err, collection) {
+                  expect(err).to.not.exist;
+
                   // Insert a dummy document
                   collection.insert({ b: 20 }, { safe: true }, function(err) {
                     test.equal(null, err);
@@ -74,11 +71,13 @@ describe('Multiple Databases', function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
+        expect(err).to.not.exist;
         var db_instance = client.db('site1');
         db_instance = client.db('site2');
         db_instance = client.db('rss');
 
         db_instance.collection('counters', function(err, collection) {
+          expect(err).to.not.exist;
           collection.findAndModify({}, {}, { $inc: { db: 1 } }, { new: true }, function(err) {
             test.equal(null, err);
             client.close(done);
