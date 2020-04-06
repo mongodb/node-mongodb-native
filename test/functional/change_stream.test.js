@@ -127,7 +127,7 @@ describe('Change Streams', function() {
   afterEach(() => mock.cleanup());
 
   it('Should close the listeners after the cursor is closed', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     // The actual test we wish to run
     test: function(done) {
@@ -161,7 +161,7 @@ describe('Change Streams', function() {
   });
 
   it('Should create a Change Stream on a collection and emit `change` events', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     // The actual test we wish to run
     test: function(done) {
@@ -227,7 +227,7 @@ describe('Change Streams', function() {
   it(
     'Should create a Change Stream on a collection and get change events through imperative callback form',
     {
-      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
       // The actual test we wish to run
       test: function(done) {
@@ -286,7 +286,7 @@ describe('Change Streams', function() {
   );
 
   it('Should support creating multiple simultaneous Change Streams', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     // The actual test we wish to run
     test: function(done) {
@@ -372,7 +372,7 @@ describe('Change Streams', function() {
   });
 
   it('Should properly close Change Stream cursor', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     // The actual test we wish to run
     test: function(done) {
@@ -403,7 +403,7 @@ describe('Change Streams', function() {
   it(
     'Should error when attempting to create a Change Stream with a forbidden aggregation pipeline stage',
     {
-      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
       // The actual test we wish to run
       test: function(done) {
@@ -430,7 +430,7 @@ describe('Change Streams', function() {
   );
 
   it('Should cache the change stream resume token using imperative callback form', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     // The actual test we wish to run
     test: function(done) {
@@ -469,7 +469,7 @@ describe('Change Streams', function() {
   });
 
   it('Should cache the change stream resume token using promises', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     // The actual test we wish to run
     test: function() {
@@ -506,7 +506,7 @@ describe('Change Streams', function() {
   });
 
   it('Should cache the change stream resume token using event listeners', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     // The actual test we wish to run
     test: function(done) {
@@ -542,7 +542,7 @@ describe('Change Streams', function() {
   it(
     'Should error if resume token projected out of change stream document using imperative callback form',
     {
-      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
       // The actual test we wish to run
       test: function(done) {
@@ -580,7 +580,7 @@ describe('Change Streams', function() {
   );
 
   it('Should error if resume token projected out of change stream document using event listeners', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     // The actual test we wish to run
     test: function(done) {
@@ -619,7 +619,7 @@ describe('Change Streams', function() {
   });
 
   it('Should invalidate change stream on collection rename using event listeners', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     // The actual test we wish to run
     test: function(done) {
@@ -675,7 +675,7 @@ describe('Change Streams', function() {
   });
 
   it('Should invalidate change stream on database drop using imperative callback form', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     // The actual test we wish to run
     test: function(done) {
@@ -730,7 +730,7 @@ describe('Change Streams', function() {
   });
 
   it('Should invalidate change stream on collection drop using promises', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     // The actual test we wish to run
     test: function(done) {
@@ -787,7 +787,7 @@ describe('Change Streams', function() {
       requires: {
         generators: true,
         topology: 'single',
-        mongodb: '>=3.5.10'
+        mongodb: '>=3.6'
       }
     },
 
@@ -885,7 +885,7 @@ describe('Change Streams', function() {
       requires: {
         generators: true,
         topology: 'single',
-        mongodb: '>=3.5.10'
+        mongodb: '>=3.6'
       }
     },
     test: function(done) {
@@ -980,7 +980,7 @@ describe('Change Streams', function() {
       requires: {
         generators: true,
         topology: 'single',
-        mongodb: '>=3.5.10'
+        mongodb: '>=3.6'
       }
     },
     test: function(done) {
@@ -1115,7 +1115,7 @@ describe('Change Streams', function() {
   });
 
   it('Should resume from point in time using user-provided resumeAfter', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     // The actual test we wish to run
     test: function() {
@@ -1205,7 +1205,7 @@ describe('Change Streams', function() {
   });
 
   it('Should support full document lookup', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     // The actual test we wish to run
     test: function() {
@@ -1260,7 +1260,7 @@ describe('Change Streams', function() {
   });
 
   it('Should support full document lookup with deleted documents', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     // The actual test we wish to run
     test: function() {
@@ -1328,7 +1328,7 @@ describe('Change Streams', function() {
   });
 
   it('Should create Change Streams with correct read preferences', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     // The actual test we wish to run
     test: function() {
@@ -1376,7 +1376,7 @@ describe('Change Streams', function() {
   });
 
   it('Should support piping of Change Streams', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     // The actual test we wish to run
     test: function(done) {
@@ -1426,7 +1426,7 @@ describe('Change Streams', function() {
       requires: {
         generators: true,
         topology: 'single',
-        mongodb: '>=3.5.10'
+        mongodb: '>=3.6'
       }
     },
     test: function(done) {
@@ -1575,7 +1575,7 @@ describe('Change Streams', function() {
   });
 
   it('Should support piping of Change Streams through multiple pipes', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     // The actual test we wish to run
     test: function(done) {
@@ -1637,7 +1637,7 @@ describe('Change Streams', function() {
   });
 
   it('should maintain change stream options on resume', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
     test: function(done) {
       const configuration = this.configuration;
       const client = configuration.newClient();
@@ -1936,7 +1936,7 @@ describe('Change Streams', function() {
   });
 
   it('should emit close event after error event', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
     test: function(done) {
       const configuration = this.configuration;
       const client = configuration.newClient();
@@ -2005,7 +2005,7 @@ describe('Change Streams', function() {
     });
 
     it('when invoked with promises', {
-      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
       test: function() {
         function read() {
           const changeStream = coll.watch();
@@ -2027,7 +2027,7 @@ describe('Change Streams', function() {
     });
 
     it('when invoked with callbacks', {
-      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
       test: function(done) {
         const changeStream = coll.watch();
 
@@ -2052,7 +2052,7 @@ describe('Change Streams', function() {
     });
 
     it('when invoked using eventEmitter API', {
-      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
       test: function(done) {
         let closed = false;
         const close = _err => {
@@ -2603,7 +2603,7 @@ describe('Change Streams', function() {
 
   describe('tryNext', function() {
     it('should return null on single iteration of empty cursor', {
-      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
       test: function(done) {
         const client = this.configuration.newClient();
         client.connect(err => {
@@ -2625,7 +2625,7 @@ describe('Change Streams', function() {
     });
 
     it('should iterate a change stream until first empty batch', {
-      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
       test: function(done) {
         const client = this.configuration.newClient();
         client.connect(err => {
