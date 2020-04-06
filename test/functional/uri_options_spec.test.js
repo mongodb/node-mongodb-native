@@ -1,9 +1,7 @@
 'use strict';
 
-
 const qs = require('qs');
 const url = require('url');
-
 const chai = require('chai');
 const expect = chai.expect;
 chai.use(require('chai-subset'));
