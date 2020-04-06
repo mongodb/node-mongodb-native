@@ -1,8 +1,15 @@
 'use strict';
 var fs = require('fs');
-var f = require('util').format;
-var test = require('./shared').assert;
-var setupDatabase = require('./shared').setupDatabase;
+const chai = require('chai');
+const expect = chai.expect;
+const sinon = require('sinon');
+const sinonChai = require('sinon-chai');
+chai.use(sinonChai);
+const f = require('util').format;
+const test = require('./shared').assert;
+const setupDatabase = require('./shared').setupDatabase;
+
+const wireprotocol = require('../../lib/core/wireprotocol');
 
 describe('SSL (x509)', function() {
   before(function() {
@@ -115,6 +122,127 @@ describe('SSL (x509)', function() {
                         serverManager.stop().then(function() {
                           done();
                         });
+                      }
+                    );
+                  }
+                );
+              });
+            }
+          );
+        });
+      });
+    }
+  });
+
+  it('Should speculatively authenticate using x509', {
+    metadata: { requires: { topology: 'ssl', mongodb: '' }, useUnifiedTopology: true },
+
+    // The actual test we wish to run
+    test: function(done) {
+      var configuration = this.configuration;
+      var ServerManager = require('mongodb-topology-manager').Server,
+        MongoClient = configuration.require.MongoClient;
+
+      const commandSpy = sinon.spy(wireprotocol, 'command');
+
+      // Read the cert and key
+      var cert = fs.readFileSync(__dirname + '/ssl/x509/client.pem');
+      var key = fs.readFileSync(__dirname + '/ssl/x509/client.pem');
+
+      // User name
+      var userName = 'CN=client,OU=kerneluser,O=10Gen,L=New York City,ST=New York,C=US';
+
+      // Create server manager
+      var serverManager = new ServerManager(
+        'mongod',
+        {
+          bind_ip: 'server',
+          port: 27019,
+          dbpath: f('%s/../db/27019', __dirname),
+          sslPEMKeyFile: __dirname + '/ssl/x509/server.pem',
+          sslCAFile: __dirname + '/ssl/x509/ca.pem',
+          sslCRLFile: __dirname + '/ssl/x509/crl.pem',
+          sslMode: 'requireSSL',
+          sslWeakCertificateValidation: null
+        },
+        {
+          ssl: true,
+          host: 'server',
+          key: cert,
+          cert: cert,
+          rejectUnauthorized: false
+        }
+      );
+
+      // Purge the set
+      serverManager.purge().then(function() {
+        // Start the server
+        serverManager.start().then(function() {
+          // Connect and validate the server certificate
+          MongoClient.connect(
+            'mongodb://server:27019/test?ssl=true&maxPoolSize=1',
+            {
+              server: {
+                sslKey: key,
+                sslCert: cert,
+                sslValidate: false
+              }
+            },
+            function(err, client) {
+              expect(err).to.not.exist;
+              var db = client.db(configuration.db);
+
+              // Execute build info
+              db.command({ buildInfo: 1 }, function(err, result) {
+                expect(err).to.not.exist;
+                var version = parseInt(result.versionArray.slice(0, 3).join(''), 10);
+                if (version < 253) {
+                  client.close();
+                  return done();
+                }
+
+                // Add the X509 auth user to the $external db
+                var ext = client.db('$external');
+                ext.addUser(
+                  userName,
+                  {
+                    roles: [
+                      { role: 'readWriteAnyDatabase', db: 'admin' },
+                      { role: 'userAdminAnyDatabase', db: 'admin' }
+                    ]
+                  },
+                  function(err, result) {
+                    expect(err).to.not.exist;
+                    test.equal(userName, result[0].user);
+                    test.equal('', result[0].pwd);
+                    client.close();
+
+                    // Connect using X509 authentication
+                    MongoClient.connect(
+                      f(
+                        'mongodb://%s@server:27019/test?authMechanism=%s&ssl=true&maxPoolSize=1',
+                        encodeURIComponent(userName),
+                        'MONGODB-X509'
+                      ),
+                      {
+                        server: {
+                          sslKey: key,
+                          sslCert: cert,
+                          sslValidate: false
+                        }
+                      },
+                      function(err, client) {
+                        expect(err).to.not.exist;
+
+                        const firstIsMaster = commandSpy.getCall(0).args[2];
+                        const saslContinueCommand = commandSpy.getCall(1).args[2];
+                        expect(firstIsMaster).to.have.property('speculativeAuthenticate');
+                        expect(saslContinueCommand).to.have.property('saslContinue');
+                        commandSpy.restore();
+
+                        client.close();
+
+                        serverManager.stop().then(() => done());
                       }
                     );
                   }
