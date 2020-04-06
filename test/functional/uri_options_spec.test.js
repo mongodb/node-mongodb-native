@@ -1,5 +1,9 @@
 'use strict';
 
+
+const qs = require('qs');
+const url = require('url');
+
 const chai = require('chai');
 const expect = chai.expect;
 chai.use(require('chai-subset'));
@@ -10,14 +14,17 @@ const MongoParseError = core.MongoParseError;
 const loadSpecTests = require('../spec').loadSpecTests;
 
 describe('URI Options (spec)', function() {
-  loadSpecTests('uri-options')
-    .filter(suite => {
-      if (suite.name === 'tls-options') return false;
-      return true;
-    })
-    .forEach(suite => {
-      describe(suite.name, () => {
-        suite.tests.forEach(test => {
+  loadSpecTests('uri-options').forEach(suite => {
+    describe(suite.name, () => {
+      suite.tests
+        .filter(test => {
+          const query = qs.parse(url.parse(test.uri).query);
+          if (query.tlsAllowInvalidCertificates) return false;
+          if (query.tlsDisableOCSPEndpointCheck) return false;
+          if (query.tlsDisableCertificateRevocationCheck) return false;
+          return true;
+        })
+        .forEach(test => {
           const itFn = test.warning ? it.skip : it;
 
           itFn(test.description, {
@@ -40,6 +47,6 @@ describe('URI Options (spec)', function() {
             }
           });
         });
-      });
     });
+  });
 });
