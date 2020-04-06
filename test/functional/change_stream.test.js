@@ -285,7 +285,7 @@ describe('Change Streams', function() {
     }
   );
 
-  it.skip('Should support creating multiple simultaneous Change Streams', {
+  it('Should support creating multiple simultaneous Change Streams', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
 
     // The actual test we wish to run
@@ -429,7 +429,7 @@ describe('Change Streams', function() {
     }
   );
 
-  it.skip('Should cache the change stream resume token using imperative callback form', {
+  it('Should cache the change stream resume token using imperative callback form', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
 
     // The actual test we wish to run
@@ -468,7 +468,7 @@ describe('Change Streams', function() {
     }
   });
 
-  it.skip('Should cache the change stream resume token using promises', {
+  it('Should cache the change stream resume token using promises', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
 
     // The actual test we wish to run
@@ -505,7 +505,7 @@ describe('Change Streams', function() {
     }
   });
 
-  it.skip('Should cache the change stream resume token using event listeners', {
+  it('Should cache the change stream resume token using event listeners', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
 
     // The actual test we wish to run
@@ -1421,7 +1421,7 @@ describe('Change Streams', function() {
     }
   });
 
-  it.skip('Should resume piping of Change Streams when a resumable error is encountered', {
+  it('Should resume piping of Change Streams when a resumable error is encountered', {
     metadata: {
       requires: {
         generators: true,
