@@ -1,11 +1,10 @@
 'use strict';
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
-const expect = require('chai').expect;
 
 describe('MapReduce', function() {
   before(function() {
-    return setupDatabase(this.configuration, ['outputCollectionDb']);
+    return setupDatabase(this.configuration);
   });
 
   /**
@@ -134,9 +133,7 @@ describe('MapReduce', function() {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
-        db.createCollection('should_force_map_reduce_error', function(err, collection) {
-          expect(err).to.not.exist;
-
+        db.createCollection('test_map_reduce', function(err, collection) {
           collection.insert(
             [{ user_id: 1 }, { user_id: 2 }],
             configuration.writeConcernMax(),
@@ -372,7 +369,7 @@ describe('MapReduce', function() {
         // Create a test collection
         db.createCollection('test_map_reduce_functions', function(err, collection) {
           // create the output collection
-          outDb.createCollection('test_map_reduce_functions_temp', err => {
+          outDb.createCollection('tempCollection', err => {
             test.equal(null, err);
 
             // Insert some documents to perform map reduce over
@@ -394,7 +391,7 @@ describe('MapReduce', function() {
                 collection.mapReduce(
                   map,
                   reduce,
-                  { out: { replace: 'test_map_reduce_functions_temp', db: 'outputCollectionDb' } },
+                  { out: { replace: 'tempCollection', db: 'outputCollectionDb' } },
                   function(err, collection) {
                     test.equal(null, err);
 
@@ -523,7 +520,7 @@ describe('MapReduce', function() {
               collection.mapReduce(
                 map,
                 reduce,
-                { scope: { util: util }, out: { replace: 'test_map_reduce_temp' } },
+                { scope: { util: util }, out: { replace: 'tempCollection' } },
                 function(err, collection) {
                   // After MapReduce
                   test.equal(200, util.times_one_hundred(2));

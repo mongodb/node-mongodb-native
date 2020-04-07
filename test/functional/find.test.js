@@ -1379,7 +1379,7 @@ describe('Find', function() {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
-        db.createCollection('execute_find_and_modify', function(err, collection) {
+        db.createCollection('shouldCorrectlyExecuteFindAndModify', function(err, collection) {
           var self = { _id: new ObjectID() };
           var _uuid = 'sddffdss';
 
@@ -1601,7 +1601,7 @@ describe('Find', function() {
           transactions: transactions
         };
 
-        db.createCollection('find_and_modify_generate_correct_bson', function(err, collection) {
+        db.createCollection('shouldCorrectlyExecuteFindAndModify', function(err, collection) {
           test.equal(null, err);
 
           collection.insert(wrapingObject, configuration.writeConcernMax(), function(err, r) {
