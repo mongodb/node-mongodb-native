@@ -37,15 +37,6 @@
       }
     },
     {
-      "description": "Too low w causes a warning",
-      "uri": "mongodb://example.com/?w=-2",
-      "valid": true,
-      "warning": true,
-      "hosts": null,
-      "auth": null,
-      "options": {}
-    },
-    {
       "description": "Non-numeric wTimeoutMS causes a warning",
       "uri": "mongodb://example.com/?wTimeoutMS=invalid",
       "valid": true,

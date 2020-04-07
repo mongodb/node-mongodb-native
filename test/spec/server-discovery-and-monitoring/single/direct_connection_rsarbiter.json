@@ -1,6 +1,6 @@
 {
-  "description": "Connect to RSArbiter",
-  "uri": "mongodb://a",
+  "description": "Direct connection to RSArbiter",
+  "uri": "mongodb://a/?directConnection=true",
   "phases": [
     {
       "responses": [

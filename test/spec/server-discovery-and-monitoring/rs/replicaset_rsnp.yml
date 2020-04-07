@@ -1,0 +1,20 @@
+description: replicaSet URI option causes starting topology to be RSNP
+
+uri: "mongodb://a/?replicaSet=rs&directConnection=false"
+
+phases:
+  # We are connecting to a standalone
+  - responses:
+    -
+      - "a:27017"
+      - ok: 1
+        ismaster: true
+        minWireVersion: 0
+        maxWireVersion: 6
+    outcome:
+      # Server is removed because it's a standalone and the driver
+      # started in RSNP topology
+      servers: {}
+      topologyType: "ReplicaSetNoPrimary"
+      logicalSessionTimeoutMinutes: ~
+      setName: "rs"

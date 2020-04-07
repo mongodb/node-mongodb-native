@@ -1,6 +1,6 @@
 {
-  "description": "Connect to mongos",
-  "uri": "mongodb://a",
+  "description": "Direct connection to mongos",
+  "uri": "mongodb://a/?directConnection=true",
   "phases": [
     {
       "responses": [
