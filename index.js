@@ -1,65 +1,77 @@
 'use strict';
-const error = require('./lib/error');
 const Instrumentation = require('./lib/apm');
 const { BSON } = require('./lib/deps');
 const { Cursor, AggregationCursor, CommandCursor } = require('./lib/cursor');
+const {
+  MongoError,
+  MongoNetworkError,
+  MongoTimeoutError,
+  MongoServerSelectionError,
+  MongoParseError,
+  MongoWriteConcernError
+} = require('./lib/error');
+const { BulkWriteError } = require('./lib/bulk/common');
+
+const Admin = require('./lib/admin');
+const MongoClient = require('./lib/mongo_client');
+const Db = require('./lib/db');
+const Collection = require('./lib/collection');
+const ReadPreference = require('./lib/read_preference');
+const Logger = require('./lib/logger');
+const GridFSBucket = require('./lib/gridfs-stream');
 
 // Set up the connect function
-const connect = require('./lib/mongo_client').connect;
-
-// Expose error class
-connect.MongoError = error.MongoError;
-connect.MongoNetworkError = error.MongoNetworkError;
-connect.MongoTimeoutError = error.MongoTimeoutError;
-connect.MongoServerSelectionError = error.MongoServerSelectionError;
-connect.MongoParseError = error.MongoParseError;
-connect.MongoWriteConcernError = error.MongoWriteConcernError;
-connect.MongoBulkWriteError = require('./lib/bulk/common').BulkWriteError;
-connect.BulkWriteError = connect.MongoBulkWriteError;
-
-// Actual driver classes exported
-connect.Admin = require('./lib/admin');
-connect.MongoClient = require('./lib/mongo_client');
-connect.Db = require('./lib/db');
-connect.Collection = require('./lib/collection');
-connect.ReadPreference = require('./lib/read_preference');
-connect.Logger = require('./lib/logger');
-connect.AggregationCursor = AggregationCursor;
-connect.CommandCursor = CommandCursor;
-connect.Cursor = Cursor;
-connect.GridFSBucket = require('./lib/gridfs-stream');
-
-// BSON types exported
-connect.Binary = BSON.Binary;
-connect.Code = BSON.Code;
-connect.Map = BSON.Map;
-connect.DBRef = BSON.DBRef;
-connect.Double = BSON.Double;
-connect.Int32 = BSON.Int32;
-connect.Long = BSON.Long;
-connect.MinKey = BSON.MinKey;
-connect.MaxKey = BSON.MaxKey;
-connect.ObjectID = BSON.ObjectID;
-connect.ObjectId = BSON.ObjectID;
-connect.BSONSymbol = BSON.BSONSymbol;
-connect.Timestamp = BSON.Timestamp;
-connect.BSONRegExp = BSON.BSONRegExp;
-connect.Decimal128 = BSON.Decimal128;
-
-// Add connect method
-connect.connect = connect;
+const { connect } = require('./lib/mongo_client');
 
 // Set up the instrumentation method
-connect.instrument = function(options, callback) {
+function instrument(options, callback) {
   if (typeof options === 'function') {
     callback = options;
     options = {};
   }
 
   const instrumentation = new Instrumentation();
-  instrumentation.instrument(connect.MongoClient, callback);
+  instrumentation.instrument(MongoClient, callback);
   return instrumentation;
-};
+}
 
-// Set our exports to be the connect function
-module.exports = connect;
+module.exports = {
+  // Expose error class
+  MongoError,
+  MongoNetworkError,
+  MongoTimeoutError,
+  MongoServerSelectionError,
+  MongoParseError,
+  MongoWriteConcernError,
+  BulkWriteError,
+  MongoBulkWriteError: BulkWriteError,
+  // Actual driver classes exported
+  Admin,
+  MongoClient,
+  Db,
+  Collection,
+  ReadPreference,
+  Logger,
+  GridFSBucket,
+  AggregationCursor,
+  CommandCursor,
+  Cursor,
+  // BSON types
+  Binary: BSON.Binary,
+  Code: BSON.Code,
+  Map: BSON['Map'], // TODO:(neal) should this just be Map?
+  DBRef: BSON.DBRef,
+  Double: BSON.Double,
+  Int32: BSON.Int32,
+  Long: BSON.Long,
+  MinKey: BSON.MinKey,
+  MaxKey: BSON.MaxKey,
+  ObjectId: BSON.ObjectId,
+  BSONSymbol: BSON['BSONSymbol'], // TODO:(neal) this is missing from bson types?
+  Timestamp: BSON.Timestamp,
+  BSONRegExp: BSON.BSONRegExp,
+  Decimal128: BSON.Decimal128,
+  // connect method
+  connect,
+  instrument
+};
