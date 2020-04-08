@@ -2669,9 +2669,17 @@ describe('Change Streams', function() {
     let coll;
     let startAfter;
 
+    function recordEvent(events, e) {
+      if (e.commandName === 'aggregate') {
+        events.push({ $changeStream: e.command.pipeline[0].$changeStream });
+      } else if (e.commandName === 'insert') {
+        events.push({ insert: { x: e.command.documents[0].x } });
+      }
+    }
+
     beforeEach(function(done) {
       const configuration = this.configuration;
-      client = configuration.newClient();
+      client = configuration.newClient({ monitorCommands: true });
       client.connect(err => {
         expect(err).to.not.exist;
         coll = client.db('integration_tests').collection('setupAfterTest');
@@ -2737,90 +2745,63 @@ describe('Change Streams', function() {
     // 17. $changeStream stage for ChangeStream started with startAfter against a server >=4.1.1
     // that has not received any results yet
     // - MUST include a startAfter option
-    // - MUST NOT include a resumeAfter option when resuming a change stream.
+    // - MUST NOT include a resumeAfter option
+    // when resuming a change stream.
     it('$changeStream that has not received results must include startAfter and not resumeAfter', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=4.1.1' } },
       test: function(done) {
+        const events = [];
+        client.on('commandStarted', e => recordEvent(events, e));
         const changeStream = coll.watch([], { startAfter });
-        tryNext(changeStream, (err, change) => {
-          expect(err).to.not.exist;
+        changeStream.once('change', change => {
           expect(change).to.containSubset({
             operationType: 'insert',
             fullDocument: { x: 2 }
           });
-          triggerResumableError(changeStream);
-          tryNext(changeStream, (err, change) => {
-            expect(err).to.exist;
-            expect(change).to.not.exist;
-            const retry = setInterval(
-              () =>
-                tryNext(changeStream, (err, change) => {
-                  if (err || !changeStream.cursor) {
-                    return;
-                  }
-                  expect(change).to.be.null;
-                  expect(err).to.be.null;
-                  clearInterval(retry);
-                  // expect(change).to.containSubset({
-                  //   operationType: 'insert',
-                  //   fullDocument: { x: 3 }
-                  // });
-                  const pipeline = changeStream.cursor.operation.pipeline;
-                  expect(pipeline).to.be.an('array');
-                  expect(pipeline[0]).to.have.property('$changeStream');
-                  expect(pipeline[0].$changeStream).to.have.property('resumeAfter');
-                  expect(pipeline[0].$changeStream).to.not.have.property('startAfter');
-                  changeStream.close(done);
-                }),
-              1000
-            );
-          });
+          expect(events[0]).to.equal('error');
+          expect(events[1]).to.have.property('$changeStream');
+          expect(events[1].$changeStream).to.have.property('startAfter');
+          changeStream.close(done);
         });
+
+        events.push('error');
+        triggerResumableError(changeStream);
       }
     });
 
     // 18. $changeStream stage for ChangeStream started with startAfter against a server >=4.1.1
     // that has received at least one result
     // - MUST include a resumeAfter option
-    // - MUST NOT include a startAfter option when resuming a change stream.
+    // - MUST NOT include a startAfter option
+    // when resuming a change stream.
     it('$changeStream that has received results must include resumeAfter and not startAfter', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=4.1.1' } },
       test: function(done) {
+        let events = [];
+        client.on('commandStarted', e => recordEvent(events, e));
         const changeStream = coll.watch([], { startAfter });
-        tryNext(changeStream, (err, change) => {
+
+        changeStream.on('change', change => {
+          events.push({ change: { insert: { x: change.fullDocument.x } } });
+          switch (change.fullDocument.x) {
+            case 2:
+              // only events after this point are relevant to this test
+              events = [];
+              events.push('error');
+              triggerResumableError(changeStream);
+              break;
+            case 3:
+              expect(events[0]).to.equal('error');
+              expect(events[1]).to.have.property('$changeStream');
+              expect(events[1].$changeStream).to.have.property('resumeAfter');
+              expect(events[2]).to.eql({ change: { insert: { x: 3 } } });
+              changeStream.close(done);
+              break;
+          }
+        });
+
+        coll.insertOne({ x: 3 }, { w: 'majority', j: true }, err => {
           expect(err).to.not.exist;
-          expect(change).to.containSubset({
-            operationType: 'insert',
-            fullDocument: { x: 2 }
-          });
-          coll.insertOne({ x: 3 }, { w: 'majority', j: true }, err => {
-            expect(err).to.not.exist;
-            triggerResumableError(changeStream);
-            tryNext(changeStream, (err, change) => {
-              expect(err).to.exist;
-              expect(change).to.not.exist;
-              const retry = setInterval(
-                () =>
-                  tryNext(changeStream, (err, change) => {
-                    if (err) {
-                      return;
-                    }
-                    clearInterval(retry);
-                    expect(change).to.containSubset({
-                      operationType: 'insert',
-                      fullDocument: { x: 3 }
-                    });
-                    const pipeline = changeStream.cursor.operation.pipeline;
-                    expect(pipeline).to.be.an('array');
-                    expect(pipeline[0]).to.have.property('$changeStream');
-                    expect(pipeline[0].$changeStream).to.have.property('resumeAfter');
-                    expect(pipeline[0].$changeStream).to.not.have.property('startAfter');
-                    changeStream.close(done);
-                  }),
-                1000
-              );
-            });
-          });
         });
       }
     });
