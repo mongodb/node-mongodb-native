@@ -37,13 +37,15 @@ describe('Change Stream Spec', function() {
         const sDB = suite.database_name;
         const sColl = suite.collection_name;
         const configuration = this.configuration;
-        const steps = [() => gc.db(sDB).createCollection(sColl)];
-        if (suite.database2_name && suite.collection2_name) {
-          steps.push(() => gc.db(suite.database2_name).createCollection(suite.collection2_name));
-        }
-        steps.push(
-          () => configuration.newClient({}, { monitorCommands: true }).connect(),
-          client => {
+        return Promise.all(ALL_DBS.map(db => gc.db(db).dropDatabase({ w: 'majority' })))
+          .then(() => gc.db(sDB).createCollection(sColl))
+          .then(() => {
+            if (suite.database2_name && suite.collection2_name) {
+              return gc.db(suite.database2_name).createCollection(suite.collection2_name);
+            }
+          })
+          .then(() => configuration.newClient({}, { monitorCommands: true }).connect())
+          .then(client => {
             ctx = { gc, client };
             events = [];
             const _events = events;
@@ -53,12 +55,7 @@ describe('Change Stream Spec', function() {
             ctx.client.on('commandStarted', e => {
               if (e.commandName !== 'ismaster') _events.push(e);
             });
-          }
-        );
-        return steps.reduce(
-          (chain, step) => chain.then(step),
-          Promise.all(ALL_DBS.map(db => gc.db(db).dropDatabase({ w: 'majority' })))
-        );
+          });
       });
 
       afterEach(function() {
@@ -170,6 +167,8 @@ describe('Change Stream Spec', function() {
               `Expected there to be an APM event at index ${idx}, but there was none`
             );
           }
+          // killCursors events should be skipped
+          // (see https://github.com/mongodb/specifications/blob/master/source/change-streams/tests/README.rst#spec-test-runner)
           if (events[idx].commandName === 'killCursors') {
             return;
           }
