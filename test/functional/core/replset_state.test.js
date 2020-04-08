@@ -12,11 +12,21 @@ describe('ReplicaSet state', function() {
 
   fs.readdirSync(path)
     .filter(x => x.indexOf('.json') !== -1)
-    .filter(x => !x.includes('repeated'))
     .forEach(x => {
-      var testData = require(f('%s/%s', path, x));
+      const testData = require(f('%s/%s', path, x));
+      const description = testData.description;
+      it(description, function(done) {
+        if (
+          description.match(/Repeated ismaster response must be processed/) ||
+          description.match(/Primary mismatched me is not removed/) ||
+          description.match(/replicaSet URI option causes starting topology to be RSNP/) ||
+          description.match(/Discover secondary with directConnection URI option/) ||
+          description.match(/Discover ghost with directConnection URI option/)
+        ) {
+          this.skip();
+          return;
+        }
 
-      it(testData.description, function(done) {
         executeEntry(testData, done);
       });
     });
