@@ -21,10 +21,7 @@ array of test case objects, each of which have the following keys:
 
 - ``description``: A string describing the test.
 - ``uri``: A string containing the URI to be parsed.
-- ``valid``: A boolean indicating if the URI should be considered valid. 
-  This will always be true, as the Connection String spec tests the validity of the structure, but 
-  it's still included to make it easier to reuse the connection string spec test runners that 
-  drivers already have.
+- ``valid``: A boolean indicating if the URI should be considered valid.
 - ``warning``: A boolean indicating whether URI parsing should emit a warning.
 - ``hosts``: Included for compatibility with the Connection String spec tests. This will always be ``~``.
 - ``auth``: Included for compatibility with the Connection String spec tests. This will always be ``~``.

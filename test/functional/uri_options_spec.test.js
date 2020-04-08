@@ -1,5 +1,7 @@
 'use strict';
 
+const qs = require('qs');
+const url = require('url');
 const chai = require('chai');
 const expect = chai.expect;
 chai.use(require('chai-subset'));
@@ -18,6 +20,10 @@ describe('URI Options (spec)', function() {
         itFn(test.description, {
           metadata: { requires: { topology: 'single' } },
           test: function(done) {
+            const query = qs.parse(url.parse(test.uri).query);
+            if (query.hasOwnProperty('tlsDisableOCSPEndpointCheck')) return this.skip();
+            if (query.hasOwnProperty('tlsDisableCertificateRevocationCheck')) return this.skip();
+
             parse(test.uri, {}, (err, result) => {
               if (test.valid === true) {
                 expect(err).to.not.exist;
