@@ -67,6 +67,7 @@ module.exports = {
   MinKey: BSON.MinKey,
   MaxKey: BSON.MaxKey,
   ObjectId: BSON.ObjectId,
+  ObjectID: BSON.ObjectId,
   BSONSymbol: BSON['BSONSymbol'], // TODO:(neal) this is missing from bson types?
   Timestamp: BSON.Timestamp,
   BSONRegExp: BSON.BSONRegExp,
