@@ -19,8 +19,15 @@ chai.use(require('chai-subset'));
  * Triggers a fake resumable error on a change stream
  *
  * @param {ChangeStream} changeStream
+ * @param {function} callback when cursor closed due this error
  */
-function triggerResumableError(changeStream) {
+function triggerResumableError(changeStream, onCursorClosed) {
+  const closeCursor = changeStream.cursor.close;
+  changeStream.cursor.close = callback => {
+    onCursorClosed();
+    changeStream.cursor.close = closeCursor;
+    changeStream.cursor.close(callback);
+  };
   const fakeResumableError = new MongoNetworkError('fake error');
   fakeResumableError[mongoErrorContextSymbol] = { isGetMore: true };
   changeStream.cursor.emit('error', fakeResumableError);
@@ -2757,6 +2764,9 @@ describe('Change Streams', function() {
             operationType: 'insert',
             fullDocument: { x: 2 }
           });
+          expect(events)
+            .to.be.an('array')
+            .with.lengthOf(3);
           expect(events[0]).nested.property('$changeStream.startAfter').to.exist;
           expect(events[1]).to.equal('error');
           expect(events[2]).nested.property('$changeStream.startAfter').to.exist;
@@ -2764,13 +2774,12 @@ describe('Change Streams', function() {
         });
 
         waitForStarted(changeStream, () => {
-          changeStream.once('attemptingResume', () => {
+          triggerResumableError(changeStream, () => {
             events.push('error');
             coll.insertOne({ x: 2 }, { w: 'majority', j: true }, err => {
               expect(err).to.not.exist;
             });
           });
-          triggerResumableError(changeStream);
         });
       }
     });
@@ -2793,12 +2802,12 @@ describe('Change Streams', function() {
             case 2:
               // only events after this point are relevant to this test
               events = [];
-              changeStream.once('attemptingResume', () => {
-                events.push('error');
-              });
-              triggerResumableError(changeStream);
+              triggerResumableError(changeStream, () => events.push('error'));
               break;
             case 3:
+              expect(events)
+                .to.be.an('array')
+                .with.lengthOf(3);
               expect(events[0]).to.equal('error');
               expect(events[1]).nested.property('$changeStream.resumeAfter').to.exist;
               expect(events[2]).to.eql({ change: { insert: { x: 3 } } });
