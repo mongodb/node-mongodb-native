@@ -1,5 +1,7 @@
 description: "Incompatible ghost"
+
 uri: "mongodb://a,b/?replicaSet=rs"
+
 phases:
   - responses:
       -

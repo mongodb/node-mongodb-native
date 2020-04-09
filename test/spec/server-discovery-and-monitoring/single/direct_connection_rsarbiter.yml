@@ -1,6 +1,6 @@
-description: "Connect to RSArbiter"
+description: "Direct connection to RSArbiter"
 
-uri: "mongodb://a"
+uri: "mongodb://a/?directConnection=true"
 
 phases: [
 

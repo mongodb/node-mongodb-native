@@ -1,0 +1,7 @@
+{
+  "uri": "mongodb+srv://test3.test.build.10gen.cc/?directConnection=true",
+  "seeds": [],
+  "hosts": [],
+  "error": true,
+  "comment": "Should fail because directConnection=true is incompatible with SRV URIs."
+}

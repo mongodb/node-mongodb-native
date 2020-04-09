@@ -1,0 +1,22 @@
+description: Direct connection with replicaSet URI option
+
+uri: "mongodb://a/?replicaSet=rs&directConnection=true"
+
+phases:
+  # We are connecting to a replica set member
+  - responses:
+    -
+      - "a:27017"
+      - ok: 1
+        ismaster: true
+        setName: rs
+        minWireVersion: 0
+        maxWireVersion: 6
+    outcome:
+      servers:
+        "a:27017":
+          type: "RSPrimary"
+          setName: "rs"
+      topologyType: "Single"
+      logicalSessionTimeoutMinutes:
+      setName: rs

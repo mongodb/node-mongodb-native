@@ -1,6 +1,6 @@
 {
-  "description": "Connect to standalone",
-  "uri": "mongodb://a",
+  "description": "Direct connection to standalone",
+  "uri": "mongodb://a/?directConnection=true",
   "phases": [
     {
       "responses": [

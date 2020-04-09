@@ -1,6 +1,6 @@
 {
-  "description": "Unavailable seed",
-  "uri": "mongodb://a",
+  "description": "Direct connection to unavailable seed",
+  "uri": "mongodb://a/?directConnection=true",
   "phases": [
     {
       "responses": [

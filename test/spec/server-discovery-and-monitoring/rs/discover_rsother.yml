@@ -1,6 +1,6 @@
-description: "Ghost discovered"
+description: "Discover RSOther with directConnection URI option"
 
-uri: "mongodb://a,b/?replicaSet=rs"
+uri: "mongodb://b/?directConnection=false"
 
 phases: [
 
@@ -11,7 +11,9 @@ phases: [
 
                     ok: 1,
                     ismaster: false,
-                    isreplicaset: true,
+                    secondary: false,
+                    hosts: ["c:27017", "d:27017"],
+                    setName: "rs",
                     minWireVersion: 0,
                     maxWireVersion: 6
                 }]
@@ -21,16 +23,22 @@ phases: [
 
             servers: {
 
-                "a:27017": {
-
-                    type: "Unknown",
-                    setName:
-                },
-
                 "b:27017": {
 
-                    type: "RSGhost",
-                    setName:
+                    type: "RSOther",
+                    setName: "rs"
+                },
+
+                "c:27017": {
+
+                    type: "Unknown",
+                    setName: 
+                },
+
+                "d:27017": {
+
+                    type: "Unknown",
+                    setName: 
                 }
             },
             topologyType: "ReplicaSetNoPrimary",
