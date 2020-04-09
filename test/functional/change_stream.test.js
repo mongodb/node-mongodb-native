@@ -2672,8 +2672,6 @@ describe('Change Streams', function() {
     function recordEvent(events, e) {
       if (e.commandName === 'aggregate') {
         events.push({ $changeStream: e.command.pipeline[0].$changeStream });
-      } else if (e.commandName === 'insert') {
-        events.push({ insert: { x: e.command.documents[0].x } });
       }
     }
 
@@ -2761,8 +2759,7 @@ describe('Change Streams', function() {
           });
           expect(events[0]).nested.property('$changeStream.startAfter').to.exist;
           expect(events[1]).to.equal('error');
-          expect(events[2]).to.eql({ insert: { x: 2 } });
-          expect(events[3]).nested.property('$changeStream.startAfter').to.exist;
+          expect(events[2]).nested.property('$changeStream.startAfter').to.exist;
           changeStream.close(done);
         });
 
@@ -2803,9 +2800,8 @@ describe('Change Streams', function() {
               break;
             case 3:
               expect(events[0]).to.equal('error');
-              expect(events[1]).to.eql({ insert: { x: 3 } });
-              expect(events[2]).nested.property('$changeStream.resumeAfter').to.exist;
-              expect(events[3]).to.eql({ change: { insert: { x: 3 } } });
+              expect(events[1]).nested.property('$changeStream.resumeAfter').to.exist;
+              expect(events[2]).to.eql({ change: { insert: { x: 3 } } });
               changeStream.close(done);
               break;
           }
