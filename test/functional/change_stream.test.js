@@ -2690,10 +2690,6 @@ describe('Change Streams', function() {
 
             coll.drop(err => {
               expect(err).to.not.exist;
-
-              coll.insertOne({ x: 2 }, { w: 'majority', j: true }, err => {
-                expect(err).to.not.exist;
-              });
             });
           });
         });
@@ -2715,14 +2711,16 @@ describe('Change Streams', function() {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=4.1.1' } },
       test: function(done) {
         const changeStream = coll.watch([], { startAfter });
-        changeStream.once('change', change => {
-          expect(change).to.containSubset({
-            operationType: 'insert',
-            fullDocument: { x: 2 }
+        coll.insertOne({ x: 2 }, { w: 'majority', j: true }, err => {
+          expect(err).to.not.exist;
+          changeStream.once('change', change => {
+            expect(change).to.containSubset({
+              operationType: 'insert',
+              fullDocument: { x: 2 }
+            });
+            changeStream.close(done);
           });
-          changeStream.close();
         });
-        changeStream.once('close', () => setTimeout(done));
       }
     });
 
@@ -2730,14 +2728,17 @@ describe('Change Streams', function() {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=4.1.1' } },
       test: function(done) {
         const changeStream = coll.watch([], { startAfter });
-        exhaust(changeStream, (err, bag) => {
+        coll.insertOne({ x: 2 }, { w: 'majority', j: true }, err => {
           expect(err).to.not.exist;
-          const finalOperation = bag.pop();
-          expect(finalOperation).to.containSubset({
-            operationType: 'insert',
-            fullDocument: { x: 2 }
+          exhaust(changeStream, (err, bag) => {
+            expect(err).to.not.exist;
+            const finalOperation = bag.pop();
+            expect(finalOperation).to.containSubset({
+              operationType: 'insert',
+              fullDocument: { x: 2 }
+            });
+            changeStream.close(done);
           });
-          changeStream.close(done);
         });
       }
     });
@@ -2758,14 +2759,22 @@ describe('Change Streams', function() {
             operationType: 'insert',
             fullDocument: { x: 2 }
           });
-          expect(events[0]).to.equal('error');
-          expect(events[1]).to.have.property('$changeStream');
-          expect(events[1].$changeStream).to.have.property('startAfter');
+          expect(events[0]).nested.property('$changeStream.startAfter').to.exist;
+          expect(events[1]).to.equal('error');
+          expect(events[2]).to.eql({ insert: { x: 2 } });
+          expect(events[3]).nested.property('$changeStream.startAfter').to.exist;
           changeStream.close(done);
         });
 
-        events.push('error');
-        triggerResumableError(changeStream);
+        waitForStarted(changeStream, () => {
+          changeStream.once('attemptingResume', () => {
+            events.push('error');
+            coll.insertOne({ x: 2 }, { w: 'majority', j: true }, err => {
+              expect(err).to.not.exist;
+            });
+          });
+          triggerResumableError(changeStream);
+        });
       }
     });
 
@@ -2787,22 +2796,28 @@ describe('Change Streams', function() {
             case 2:
               // only events after this point are relevant to this test
               events = [];
-              events.push('error');
+              changeStream.once('attemptingResume', () => {
+                events.push('error');
+              });
               triggerResumableError(changeStream);
               break;
             case 3:
               expect(events[0]).to.equal('error');
-              expect(events[1]).to.have.property('$changeStream');
-              expect(events[1].$changeStream).to.have.property('resumeAfter');
-              expect(events[2]).to.eql({ change: { insert: { x: 3 } } });
+              expect(events[1]).to.eql({ insert: { x: 3 } });
+              expect(events[2]).nested.property('$changeStream.resumeAfter').to.exist;
+              expect(events[3]).to.eql({ change: { insert: { x: 3 } } });
               changeStream.close(done);
               break;
           }
         });
-
-        coll.insertOne({ x: 3 }, { w: 'majority', j: true }, err => {
-          expect(err).to.not.exist;
-        });
+        waitForStarted(changeStream, () =>
+          coll.insertOne({ x: 2 }, { w: 'majority', j: true }, err => {
+            expect(err).to.not.exist;
+            coll.insertOne({ x: 3 }, { w: 'majority', j: true }, err => {
+              expect(err).to.not.exist;
+            });
+          })
+        );
       }
     });
   });
