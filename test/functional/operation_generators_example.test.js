@@ -3968,7 +3968,6 @@ describe('Operation (Generators)', function() {
    * CURSOR TESTS
    *
    *************************************************************************/
-  var fs = require('fs');
 
   /**
    * An example showing the information returned by indexInformation using a Generator and the co module.

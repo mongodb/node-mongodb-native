@@ -5041,7 +5041,6 @@ describe('Operation Examples', function() {
    * CURSOR TESTS
    *
    *************************************************************************/
-  var fs = require('fs');
 
   /**
    * An example showing the information returned by indexInformation
