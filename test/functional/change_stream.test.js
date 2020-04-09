@@ -19,7 +19,7 @@ chai.use(require('chai-subset'));
  * Triggers a fake resumable error on a change stream
  *
  * @param {ChangeStream} changeStream
- * @param {function} callback when cursor closed due this error
+ * @param {function} onCursorClosed callback when cursor closed due this error
  */
 function triggerResumableError(changeStream, onCursorClosed) {
   const closeCursor = changeStream.cursor.close;
