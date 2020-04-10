@@ -27,8 +27,7 @@ tests:
             cursor: {}
             pipeline:
               -
-                $changeStream:
-                  fullDocument: default
+                $changeStream: {}
           command_name: aggregate
           database_name: *database_name
     result:
@@ -110,8 +109,7 @@ tests:
             cursor: {}
             pipeline:
               - 
-                $changeStream:
-                  fullDocument: default
+                $changeStream: {}
           command_name: aggregate
           database_name: *database_name
     result:
@@ -158,8 +156,7 @@ tests:
             cursor: {}
             pipeline:
               - 
-                $changeStream:
-                  fullDocument: default
+                $changeStream: {}
               -
                 $match:
                   "fullDocument.z":
@@ -215,8 +212,7 @@ tests:
             cursor: {}
             pipeline:
               - 
-                $changeStream:
-                  fullDocument: default
+                $changeStream: {}
           command_name: aggregate
           database_name: *database_name
     result:
@@ -277,7 +273,6 @@ tests:
             pipeline:
               - 
                 $changeStream:
-                  fullDocument: default
                   allChangesForCluster: true
           command_name: aggregate
           database_name: admin
@@ -357,8 +352,7 @@ tests:
             cursor: {}
             pipeline:
               -
-                $changeStream:
-                  fullDocument: default
+                $changeStream: {}
           command_name: aggregate
           database_name: *database_name
     result:
@@ -416,8 +410,7 @@ tests:
             cursor: {}
             pipeline:
               -
-                $changeStream:
-                  fullDocument: default
+                $changeStream: {}
           command_name: aggregate
           database_name: *database_name
     result:
@@ -453,8 +446,7 @@ tests:
             cursor: {}
             pipeline:
               -
-                $changeStream:
-                  fullDocument: default
+                $changeStream: {}
           command_name: aggregate
           database_name: *database_name
     result:
@@ -512,8 +504,7 @@ tests:
             cursor: {batchSize: 1}
             pipeline:
               -
-                $changeStream:
-                  fullDocument: default
+                $changeStream: {}
           command_name: aggregate
           database_name: *database_name
     result:
