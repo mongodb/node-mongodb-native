@@ -2,6 +2,8 @@
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 const expect = require('chai').expect;
+const core = require('../../lib/core');
+const ReadPreference = core.ReadPreference;
 
 describe('ReadPreference', function() {
   before(function() {
@@ -545,6 +547,47 @@ describe('ReadPreference', function() {
         'Invalid read preference mode invalid'
       );
 
+      client.close(done);
+    });
+  });
+
+  it('Should propagate hedged reads', function(done) {
+    const configuration = this.configuration;
+    const client = configuration.newClient();
+    client.connect((err, client) => {
+      if (err) return done(err);
+      const db = client.db(configuration.db);
+      let readPreference, cursor;
+      [{ hedge: { enabled: false } }, { hedge: { enabled: true } }, { hedge: {} }, undefined].map(
+        opt => {
+          readPreference = new ReadPreference(ReadPreference.SECONDARY_PREFERRED, null, opt);
+          cursor = db.collection('test', { readPreference }).listIndexes();
+          test.deepEqual(cursor.options.readPreference.hedge, opt && opt.hedge);
+
+          readPreference = new ReadPreference(ReadPreference.SECONDARY_PREFERRED, opt);
+          cursor = db.collection('test', { readPreference }).listIndexes();
+          test.deepEqual(cursor.options.readPreference.hedge, opt && opt.hedge);
+        }
+      );
+
+      client.close(done);
+    });
+  });
+
+  it('Should error if mode primary and hedge', function(done) {
+    const configuration = this.configuration;
+    const client = configuration.newClient();
+    client.connect((err, client) => {
+      if (err) return done(err);
+      [{ hedge: { enabled: false } }, { hedge: { enabled: true } }, { hedge: {} }].map(opt => {
+        expect(() => {
+          new ReadPreference(ReadPreference.PRIMARY, null, opt);
+        }).to.throw();
+
+        expect(() => {
+          new ReadPreference(ReadPreference.PRIMARY, opt);
+        }).to.throw();
+      });
       client.close(done);
     });
   });
