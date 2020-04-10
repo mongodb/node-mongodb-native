@@ -31,7 +31,6 @@
     "safe-buffer": "^5.1.2"
   },
   "devDependencies": {
-    "@types/bson": "^4.0.2",
     "@types/node": "^13.11.0",
     "bluebird": "3.5.0",
     "chai": "^4.1.1",
