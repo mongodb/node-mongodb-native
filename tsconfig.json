@@ -7,6 +7,8 @@
     "declarationDir": "types",
     "strict": false,
 
+    "pretty": true,
+
     "target": "ES2018",
     "module": "commonJS",
     "moduleResolution": "node",
