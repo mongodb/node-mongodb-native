@@ -2768,7 +2768,7 @@ describe('Operation Examples', function() {
    */
   it('shouldCorrectlyIndexAndForceReindexOnCollection', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'ssl', 'heap', 'wiredtiger'] }
     },
 
     test: function(done) {
