@@ -20,9 +20,6 @@ const ReadPreference = require('./lib/read_preference');
 const Logger = require('./lib/logger');
 const GridFSBucket = require('./lib/gridfs-stream');
 
-// Set up the connect function
-const { connect } = require('./lib/mongo_client');
-
 // Set up the instrumentation method
 function instrument(options, callback) {
   if (typeof options === 'function') {
@@ -73,6 +70,6 @@ module.exports = {
   BSONRegExp: BSON.BSONRegExp,
   Decimal128: BSON.Decimal128,
   // connect method
-  connect,
+  connect: MongoClient.connect,
   instrument
 };
