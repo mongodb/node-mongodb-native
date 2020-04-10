@@ -1,7 +1,12 @@
 'use strict';
 const assert = require('assert');
 const { Transform } = require('stream');
-const { MongoError, MongoNetworkError, mongoErrorContextSymbol } = require('../../lib/error');
+const {
+  MongoError,
+  MongoNetworkError,
+  mongoErrorContextSymbol,
+  isResumableError
+} = require('../../lib/error');
 const { setupDatabase, delay } = require('./shared');
 const co = require('co');
 const mock = require('mongodb-mock-server');
@@ -16,7 +21,7 @@ chai.use(require('chai-subset'));
  * Triggers a fake resumable error on a change stream
  *
  * @param {ChangeStream} changeStream
- * @param {function} onCursorClosed callback when cursor closed due this error
+ * @param {Function} onCursorClosed callback when cursor closed due this error
  */
 function triggerResumableError(changeStream, onCursorClosed) {
   const closeCursor = changeStream.cursor.close;
@@ -34,7 +39,7 @@ function triggerResumableError(changeStream, onCursorClosed) {
  * Waits for a change stream to start
  *
  * @param {ChangeStream} changeStream
- * @param {function} callback
+ * @param {Function} callback
  */
 function waitForStarted(changeStream, callback) {
   changeStream.cursor.once('init', () => {
@@ -48,7 +53,7 @@ function waitForStarted(changeStream, callback) {
  * for a non-empty batch.
  *
  * @param {ChangeStream} changeStream
- * @param {function} callback
+ * @param {Function} callback
  */
 function tryNext(changeStream, callback) {
   let complete = false;
@@ -84,7 +89,8 @@ function tryNext(changeStream, callback) {
  * empty batch into a returned array of events.
  *
  * @param {ChangeStream} changeStream
- * @param {function} callback
+ * @param {Function|Array} bag
+ * @param {Function} [callback]
  */
 function exhaust(changeStream, bag, callback) {
   if (typeof bag === 'function') {
