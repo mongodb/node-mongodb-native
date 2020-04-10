@@ -29,7 +29,8 @@
 
     "no-console": "off",
     "eqeqeq": ["error", "always", { "null": "ignore" }],
-    "strict": ["error", "global"]
+    "strict": ["error", "global"],
+    "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }]
   },
   "settings": {
     "jsdoc": {

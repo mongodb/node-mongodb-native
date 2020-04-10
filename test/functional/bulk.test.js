@@ -1584,7 +1584,6 @@ describe('Bulk', function() {
       err => {
         expect(err).to.be.an.instanceOf(MongoError);
         expect(err).to.not.be.an.instanceOf(TypeError);
-        expect(err.driver).to.equal(true);
         expect(err.name).to.equal('MongoError');
       }
     );
