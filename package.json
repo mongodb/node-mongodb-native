@@ -77,7 +77,7 @@
     "check:test": "mocha --recursive test/functional test/unit",
     "check:types": "tsc -p tsconfig.check.json",
     "release": "standard-version -i HISTORY.md",
-    "test": "npm run check:lint && npm run check:test"
+    "test": "npm run check:types && npm run check:lint && npm run check:test"
   },
   "homepage": "https://github.com/mongodb/node-mongodb-native",
   "optionalDependencies": {
