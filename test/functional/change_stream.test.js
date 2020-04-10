@@ -1,7 +1,7 @@
 'use strict';
 const assert = require('assert');
 const { Transform } = require('stream');
-const { MongoError, MongoNetworkError } = require('../../lib/error');
+const { MongoError, MongoNetworkError, mongoErrorContextSymbol } = require('../../lib/error');
 const { setupDatabase, delay } = require('./shared');
 const co = require('co');
 const mock = require('mongodb-mock-server');
@@ -11,6 +11,95 @@ const sinon = require('sinon');
 const { ObjectId, Timestamp, Long, ReadPreference } = require('../..');
 
 chai.use(require('chai-subset'));
+
+/**
+ * Triggers a fake resumable error on a change stream
+ *
+ * @param {ChangeStream} changeStream
+ * @param {function} onCursorClosed callback when cursor closed due this error
+ */
+function triggerResumableError(changeStream, onCursorClosed) {
+  const closeCursor = changeStream.cursor.close;
+  changeStream.cursor.close = callback => {
+    onCursorClosed();
+    changeStream.cursor.close = closeCursor;
+    changeStream.cursor.close(callback);
+  };
+  const fakeResumableError = new MongoNetworkError('fake error');
+  fakeResumableError[mongoErrorContextSymbol] = { isGetMore: true };
+  changeStream.cursor.emit('error', fakeResumableError);
+}
+
+/**
+ * Waits for a change stream to start
+ *
+ * @param {ChangeStream} changeStream
+ * @param {function} callback
+ */
+function waitForStarted(changeStream, callback) {
+  changeStream.cursor.once('init', () => {
+    callback();
+  });
+}
+
+/**
+ * Iterates the next discrete batch of a change stream non-eagerly. This
+ * will return `null` if the next bach is empty, rather than waiting forever
+ * for a non-empty batch.
+ *
+ * @param {ChangeStream} changeStream
+ * @param {function} callback
+ */
+function tryNext(changeStream, callback) {
+  let complete = false;
+  function done(err, result) {
+    if (complete) return;
+
+    // if the arity is 1 then this a callback for `more`
+    if (arguments.length === 1) {
+      result = err;
+      const batch = result.cursor.firstBatch || result.cursor.nextBatch;
+      if (batch.length === 0) {
+        complete = true;
+        callback(null, null);
+      }
+
+      return;
+    }
+
+    // otherwise, this a normal response to `next`
+    complete = true;
+    changeStream.removeListener('more', done);
+    if (err) return callback(err);
+    callback(err, result);
+  }
+
+  // race the two requests
+  changeStream.next(done);
+  changeStream.cursor.once('more', done);
+}
+
+/**
+ * Exhausts a change stream aggregating all responses until the first
+ * empty batch into a returned array of events.
+ *
+ * @param {ChangeStream} changeStream
+ * @param {function} callback
+ */
+function exhaust(changeStream, bag, callback) {
+  if (typeof bag === 'function') {
+    callback = bag;
+    bag = [];
+  }
+
+  tryNext(changeStream, (err, doc) => {
+    if (err) return callback(err);
+    if (doc === null) return callback(undefined, bag);
+
+    bag.push(doc);
+    exhaust(changeStream, bag, callback);
+  });
+}
 
 // Define the pipeline processing changes
 var pipeline = [
@@ -42,7 +131,7 @@ describe('Change Streams', function() {
   afterEach(() => mock.cleanup());
 
   it('Should close the listeners after the cursor is closed', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     test: function(done) {
       let closed = false;
@@ -75,7 +164,7 @@ describe('Change Streams', function() {
   });
 
   it('Should create a Change Stream on a collection and emit `change` events', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     test: function(done) {
       const configuration = this.configuration;
@@ -140,7 +229,7 @@ describe('Change Streams', function() {
   it(
     'Should create a Change Stream on a collection and get change events through imperative callback form',
     {
-      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
       test: function(done) {
         var configuration = this.configuration;
@@ -198,7 +287,7 @@ describe('Change Streams', function() {
   );
 
   it('Should support creating multiple simultaneous Change Streams', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     test: function(done) {
       var configuration = this.configuration;
@@ -283,7 +372,7 @@ describe('Change Streams', function() {
   });
 
   it('Should properly close Change Stream cursor', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     test: function(done) {
       var configuration = this.configuration;
@@ -313,7 +402,7 @@ describe('Change Streams', function() {
   it(
     'Should error when attempting to create a Change Stream with a forbidden aggregation pipeline stage',
     {
-      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
       test: function(done) {
         var configuration = this.configuration;
@@ -338,8 +427,8 @@ describe('Change Streams', function() {
     }
   );
 
-  it.skip('Should cache the change stream resume token using imperative callback form', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+  it('Should cache the change stream resume token using imperative callback form', {
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     test: function(done) {
       var configuration = this.configuration;
@@ -376,8 +465,8 @@ describe('Change Streams', function() {
     }
   });
 
-  it.skip('Should cache the change stream resume token using promises', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+  it('Should cache the change stream resume token using promises', {
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     test: function() {
       var configuration = this.configuration;
@@ -412,8 +501,8 @@ describe('Change Streams', function() {
     }
   });
 
-  it.skip('Should cache the change stream resume token using event listeners', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+  it('Should cache the change stream resume token using event listeners', {
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     test: function(done) {
       var configuration = this.configuration;
@@ -448,7 +537,7 @@ describe('Change Streams', function() {
   it(
     'Should error if resume token projected out of change stream document using imperative callback form',
     {
-      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
       test: function(done) {
         var configuration = this.configuration;
@@ -485,7 +574,7 @@ describe('Change Streams', function() {
   );
 
   it('Should error if resume token projected out of change stream document using event listeners', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     test: function(done) {
       var configuration = this.configuration;
@@ -523,7 +612,7 @@ describe('Change Streams', function() {
   });
 
   it('Should invalidate change stream on collection rename using event listeners', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     test: function(done) {
       var configuration = this.configuration;
@@ -578,7 +667,7 @@ describe('Change Streams', function() {
   });
 
   it('Should invalidate change stream on database drop using imperative callback form', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     test: function(done) {
       var configuration = this.configuration;
@@ -632,7 +721,7 @@ describe('Change Streams', function() {
   });
 
   it('Should invalidate change stream on collection drop using promises', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     test: function(done) {
       var configuration = this.configuration;
@@ -688,7 +777,7 @@ describe('Change Streams', function() {
       requires: {
         generators: true,
         topology: 'single',
-        mongodb: '>=3.5.10'
+        mongodb: '>=3.6'
       }
     },
 
@@ -785,7 +874,7 @@ describe('Change Streams', function() {
       requires: {
         generators: true,
         topology: 'single',
-        mongodb: '>=3.5.10'
+        mongodb: '>=3.6'
       }
     },
     test: function(done) {
@@ -879,7 +968,7 @@ describe('Change Streams', function() {
       requires: {
         generators: true,
         topology: 'single',
-        mongodb: '>=3.5.10'
+        mongodb: '>=3.6'
       }
     },
     test: function(done) {
@@ -1011,7 +1100,7 @@ describe('Change Streams', function() {
   });
 
   it('Should resume from point in time using user-provided resumeAfter', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     test: function() {
       var configuration = this.configuration;
@@ -1100,7 +1189,7 @@ describe('Change Streams', function() {
   });
 
   it('Should support full document lookup', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     test: function() {
       var configuration = this.configuration;
@@ -1154,7 +1243,7 @@ describe('Change Streams', function() {
   });
 
   it('Should support full document lookup with deleted documents', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     test: function() {
       var configuration = this.configuration;
@@ -1221,7 +1310,7 @@ describe('Change Streams', function() {
   });
 
   it('Should create Change Streams with correct read preferences', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     test: function() {
       var configuration = this.configuration;
@@ -1267,7 +1356,7 @@ describe('Change Streams', function() {
   });
 
   it('Should support piping of Change Streams', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     test: function(done) {
       const configuration = this.configuration;
@@ -1316,7 +1405,7 @@ describe('Change Streams', function() {
       requires: {
         generators: true,
         topology: 'single',
-        mongodb: '>=3.5.10'
+        mongodb: '>=3.6'
       }
     },
     test: function(done) {
@@ -1462,7 +1551,7 @@ describe('Change Streams', function() {
   });
 
   it('Should support piping of Change Streams through multiple pipes', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     test: function(done) {
       var configuration = this.configuration;
@@ -1522,50 +1611,8 @@ describe('Change Streams', function() {
     }
   });
 
-  it('Should resume after a killCursors command is issued for its child cursor', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
-    test: function(done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient();
-
-      const collectionName = 'resumeAfterKillCursor';
-
-      let db;
-      let coll;
-      let changeStream;
-
-      function close(e) {
-        changeStream.close(() => client.close(() => done(e)));
-      }
-
-      client
-        .connect()
-        .then(() => (db = client.db('integration_tests')))
-        .then(() => (coll = db.collection(collectionName)))
-        .then(() => (changeStream = coll.watch()))
-        .then(() => ({ p: changeStream.next() }))
-        .then(x => coll.insertOne({ darmok: 'jalad' }).then(() => x.p))
-        .then(() =>
-          db.command({
-            killCursors: collectionName,
-            cursors: [changeStream.cursor.cursorState.cursorId]
-          })
-        )
-        .then(() => coll.insertOne({ shaka: 'walls fell' }))
-        .then(() => changeStream.next())
-        .then(change => {
-          expect(change).to.have.property('operationType', 'insert');
-          expect(change).to.have.nested.property('fullDocument.shaka', 'walls fell');
-        })
-        .then(
-          () => close(),
-          e => close(e)
-        );
-    }
-  });
-
   it('should maintain change stream options on resume', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
     test: function(done) {
       const configuration = this.configuration;
       const client = configuration.newClient();
@@ -1602,8 +1649,10 @@ describe('Change Streams', function() {
     }
   });
 
+  // 9. $changeStream stage for ChangeStream against a server >=4.0 and <4.0.7 that has not received
+  // any results yet MUST include a startAtOperationTime option when resuming a change stream.
   it('Should include a startAtOperationTime field when resuming if no changes have been received', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.7.3' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=4.0 <4.0.7' } },
     test: function(done) {
       const configuration = this.configuration;
 
@@ -1859,7 +1908,7 @@ describe('Change Streams', function() {
   });
 
   it('should emit close event after error event', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
     test: function(done) {
       const configuration = this.configuration;
       const client = configuration.newClient();
@@ -1928,7 +1977,7 @@ describe('Change Streams', function() {
     });
 
     it('when invoked with promises', {
-      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
       test: function() {
         function read() {
           const changeStream = coll.watch();
@@ -1950,7 +1999,7 @@ describe('Change Streams', function() {
     });
 
     it('when invoked with callbacks', {
-      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
       test: function(done) {
         const changeStream = coll.watch();
 
@@ -1975,7 +2024,7 @@ describe('Change Streams', function() {
     });
 
     it('when invoked using eventEmitter API', {
-      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
+      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
       test: function(done) {
         let closed = false;
         const close = _err => {
@@ -2195,7 +2244,7 @@ describe('Change Streams', function() {
       }
     }
 
-    // For a ChangeStream under these conditions:
+    // 11. For a ChangeStream under these conditions:
     //   Running against a server >=4.0.7.
     //   The batch is empty or has been iterated to the last document.
     // Expected result:
@@ -2244,14 +2293,13 @@ describe('Change Streams', function() {
       });
     });
 
-    // For a ChangeStream under these conditions:
+    // 12. For a ChangeStream under these conditions:
     //   Running against a server <4.0.7.
     //   The batch is empty or has been iterated to the last document.
     // Expected result:
     //   getResumeToken must return the _id of the last document returned if one exists.
-    //   getResumeToken must return startAfter from the initial aggregate if the option was specified.
     //   getResumeToken must return resumeAfter from the initial aggregate if the option was specified.
-    //   If neither the startAfter nor resumeAfter options were specified, the getResumeToken result must be empty.
+    //   If ``resumeAfter`` was not specified, the ``getResumeToken`` result must be empty.
     describe('for emptied batch on server <= 4.0.7', function() {
       it('must return the _id of the last document returned if one exists', function() {
         const manager = new MockServerManager(this.configuration, {
@@ -2285,47 +2333,6 @@ describe('Change Streams', function() {
 
             expect(tokens).to.have.a.lengthOf(1);
             expect(tokens[0]).to.deep.equal(successes[1].nextBatch[0]._id);
-          });
-      });
-      it('must return startAfter from the initial aggregate if the option was specified', function() {
-        const manager = new MockServerManager(this.configuration, {
-          aggregate: (function*() {
-            yield { numDocuments: 0, postBatchResumeToken: false };
-          })(),
-          getMore: (function*() {
-            yield { numDocuments: 0, postBatchResumeToken: false };
-          })()
-        });
-        let token;
-        const startAfter = manager.resumeToken();
-        const resumeAfter = manager.resumeToken();
-
-        return manager
-          .ready()
-          .then(() => {
-            return new Promise(resolve => {
-              const changeStream = manager.makeChangeStream({ startAfter, resumeAfter });
-              let counter = 0;
-              changeStream.cursor.on('response', () => {
-                if (counter === 1) {
-                  token = changeStream.resumeToken;
-                  resolve();
-                }
-                counter += 1;
-              });
-
-              // Note: this is expected to fail
-              changeStream.next().catch(() => {});
-            });
-          })
-          .then(
-            () => manager.teardown(),
-            err => manager.teardown(err)
-          )
-          .then(() => {
-            expect(token)
-              .to.deep.equal(startAfter)
-              .and.to.not.deep.equal(resumeAfter);
           });
       });
       it('must return resumeAfter from the initial aggregate if the option was specified', function() {
@@ -2366,7 +2373,7 @@ describe('Change Streams', function() {
             expect(token).to.deep.equal(resumeAfter);
           });
       });
-      it('must be empty if neither the startAfter nor resumeAfter options were specified', function() {
+      it('must be empty if resumeAfter options was not specified', function() {
         const manager = new MockServerManager(this.configuration, {
           aggregate: (function*() {
             yield { numDocuments: 0, postBatchResumeToken: false };
@@ -2405,7 +2412,7 @@ describe('Change Streams', function() {
       });
     });
 
-    // For a ChangeStream under these conditions:
+    // 13. For a ChangeStream under these conditions:
     //   The batch is not empty.
     //   The batch has been iterated up to but not including the last element.
     // Expected result:
@@ -2450,7 +2457,7 @@ describe('Change Streams', function() {
       });
     });
 
-    // For a ChangeStream under these conditions:
+    // 14. For a ChangeStream under these conditions:
     //   The batch is not empty.
     //   The batch hasn’t been iterated at all.
     //   Only the initial aggregate command has been executed.
@@ -2564,233 +2571,230 @@ describe('Change Streams', function() {
           });
       });
     });
+  });
 
-    // For a ChangeStream under these conditions:
-    //   Running against a server >=4.0.7.
-    //   The batch is not empty.
-    //   The batch hasn’t been iterated at all.
-    //   The stream has iterated beyond a previous batch and a getMore command has just been executed.
-    // Expected result:
-    //   getResumeToken must return the postBatchResumeToken from the previous command response.
-    describe('for non-empty non-iterated batch where getMore has just been executed against server >=4.0.7', function() {
-      it('must return the postBatchResumeToken from the previous command response', function() {
-        const manager = new MockServerManager(this.configuration, {
-          aggregate: (function*() {
-            yield { numDocuments: 1, postBatchResumeToken: true };
-          })(),
-          getMore: (function*() {
-            yield { numDocuments: 1, postBatchResumeToken: true };
-          })()
-        });
-        let token;
-        const startAfter = manager.resumeToken();
-        const resumeAfter = manager.resumeToken();
+  describe('tryNext', function() {
+    it('should return null on single iteration of empty cursor', {
+      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
+      test: function(done) {
+        const client = this.configuration.newClient();
+        client.connect(err => {
+          expect(err).to.not.exist;
 
-        return manager
-          .ready()
-          .then(() => {
-            return manager.makeChangeStream({ startAfter, resumeAfter }).next();
-          })
-          .then(() => {
-            manager.changeStream.cursor.once('response', () => {
-              token = manager.changeStream.resumeToken;
-            });
+          const changeStream = client
+            .db()
+            .collection('test')
+            .watch();
 
-            // Note: this is expected to fail
-            return manager.changeStream.next();
-          })
-          .then(
-            () => manager.teardown(),
-            err => manager.teardown(err)
-          )
-          .then(() => {
-            const successes = manager.apm.succeeded.map(e => {
-              try {
-                return e.reply.cursor;
-              } catch (e) {
-                return {};
-              }
-            });
+          tryNext(changeStream, (err, doc) => {
+            expect(err).to.not.exist;
+            expect(doc).to.not.exist;
 
-            expect(successes).to.have.a.lengthOf(2);
-            expect(successes[0]).to.have.a.property('postBatchResumeToken');
-            expect(successes[0]).to.have.a.nested.property('firstBatch[0]._id');
-
-            expect(token)
-              .to.deep.equal(successes[0].postBatchResumeToken)
-              .and.to.not.deep.equal(successes[0].firstBatch[0]._id)
-              .and.to.not.deep.equal(startAfter)
-              .and.to.not.deep.equal(resumeAfter);
+            changeStream.close(() => client.close(done));
           });
+        });
+      }
+    });
+
+    it('should iterate a change stream until first empty batch', {
+      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
+      test: function(done) {
+        const client = this.configuration.newClient();
+        client.connect(err => {
+          expect(err).to.not.exist;
+
+          const collection = client.db().collection('test');
+          const changeStream = collection.watch();
+          waitForStarted(changeStream, () => {
+            collection.insertOne({ a: 42 }, err => {
+              expect(err).to.not.exist;
+
+              collection.insertOne({ b: 24 }, err => {
+                expect(err).to.not.exist;
+              });
+            });
+          });
+
+          tryNext(changeStream, (err, doc) => {
+            expect(err).to.not.exist;
+            expect(doc).to.exist;
+
+            tryNext(changeStream, (err, doc) => {
+              expect(err).to.not.exist;
+              expect(doc).to.exist;
+
+              tryNext(changeStream, (err, doc) => {
+                expect(err).to.not.exist;
+                expect(doc).to.not.exist;
+
+                changeStream.close(() => client.close(done));
+              });
+            });
+          });
+        });
+      }
+    });
+  });
+
+  describe('startAfter', function() {
+    let client;
+    let coll;
+    let startAfter;
+
+    function recordEvent(events, e) {
+      if (e.commandName === 'aggregate') {
+        events.push({ $changeStream: e.command.pipeline[0].$changeStream });
+      }
+    }
+
+    beforeEach(function(done) {
+      const configuration = this.configuration;
+      client = configuration.newClient({ monitorCommands: true });
+      client.connect(err => {
+        expect(err).to.not.exist;
+        coll = client.db('integration_tests').collection('setupAfterTest');
+        const changeStream = coll.watch();
+        waitForStarted(changeStream, () => {
+          coll.insertOne({ x: 1 }, { w: 'majority', j: true }, err => {
+            expect(err).to.not.exist;
+
+            coll.drop(err => {
+              expect(err).to.not.exist;
+            });
+          });
+        });
+
+        changeStream.on('change', change => {
+          if (change.operationType === 'invalidate') {
+            startAfter = change._id;
+            changeStream.close(done);
+          }
+        });
       });
     });
 
-    // For a ChangeStream under these conditions:
-    //   Running against a server <4.0.7.
-    //   The batch is not empty.
-    //   The batch hasn’t been iterated at all.
-    //   The stream has iterated beyond a previous batch and a getMore command has just been executed.
-    // Expected result:
-    //   getResumeToken must return the _id of the previous document returned if one exists.
-    //   getResumeToken must return startAfter from the initial aggregate if the option was specified.
-    //   getResumeToken must return resumeAfter from the initial aggregate if the option was specified.
-    //   If neither the startAfter nor resumeAfter options were specified, the getResumeToken result must be empty.
-    describe('for non-empty non-iterated batch where getMore has just been executed against server < 4.0.7', function() {
-      it('must return the _id of the previous document returned if one exists', function() {
-        const manager = new MockServerManager(this.configuration, {
-          aggregate: (function*() {
-            yield { numDocuments: 1, postBatchResumeToken: false };
-          })(),
-          getMore: (function*() {
-            yield { numDocuments: 1, postBatchResumeToken: false };
-          })()
-        });
-        let token;
-        const startAfter = manager.resumeToken();
-        const resumeAfter = manager.resumeToken();
-
-        return manager
-          .ready()
-          .then(() => {
-            return manager.makeChangeStream({ startAfter, resumeAfter }).next();
-          })
-          .then(() => {
-            manager.changeStream.cursor.once('response', () => {
-              token = manager.changeStream.resumeToken;
-            });
-
-            // Note: this is expected to fail
-            return manager.changeStream.next();
-          })
-          .then(
-            () => manager.teardown(),
-            err => manager.teardown(err)
-          )
-          .then(() => {
-            const successes = manager.apm.succeeded.map(e => {
-              try {
-                return e.reply.cursor;
-              } catch (e) {
-                return {};
-              }
-            });
-
-            expect(successes).to.have.a.lengthOf(2);
-            expect(successes[0]).to.have.a.nested.property('firstBatch[0]._id');
-
-            expect(token)
-              .to.deep.equal(successes[0].firstBatch[0]._id)
-              .and.to.not.deep.equal(startAfter)
-              .and.to.not.deep.equal(resumeAfter);
-          });
-      });
-      it('must return startAfter from the initial aggregate if the option was specified', function() {
-        const manager = new MockServerManager(this.configuration, {
-          aggregate: (function*() {
-            yield { numDocuments: 0, postBatchResumeToken: false };
-          })(),
-          getMore: (function*() {
-            yield { numDocuments: 1, postBatchResumeToken: false };
-          })()
-        });
-        let token;
-        const startAfter = manager.resumeToken();
-        const resumeAfter = manager.resumeToken();
-
-        return manager
-          .ready()
-          .then(() => {
-            const changeStream = manager.makeChangeStream({ startAfter, resumeAfter });
-            let counter = 0;
-            changeStream.cursor.on('response', () => {
-              if (counter === 1) {
-                token = changeStream.resumeToken;
-              }
-              counter += 1;
-            });
-
-            // Note: this is expected to fail
-            return changeStream.next();
-          })
-          .then(
-            () => manager.teardown(),
-            err => manager.teardown(err)
-          )
-          .then(() => {
-            expect(token)
-              .to.deep.equal(startAfter)
-              .and.to.not.deep.equal(resumeAfter);
-          });
-      });
-      it('must return resumeAfter from the initial aggregate if the option was specified', function() {
-        const manager = new MockServerManager(this.configuration, {
-          aggregate: (function*() {
-            yield { numDocuments: 0, postBatchResumeToken: false };
-          })(),
-          getMore: (function*() {
-            yield { numDocuments: 1, postBatchResumeToken: false };
-          })()
-        });
-        let token;
-        const resumeAfter = manager.resumeToken();
-
-        return manager
-          .ready()
-          .then(() => {
-            const changeStream = manager.makeChangeStream({ resumeAfter });
-            let counter = 0;
-            changeStream.cursor.on('response', () => {
-              if (counter === 1) {
-                token = changeStream.resumeToken;
-              }
-              counter += 1;
-            });
-
-            // Note: this is expected to fail
-            return changeStream.next();
-          })
-          .then(
-            () => manager.teardown(),
-            err => manager.teardown(err)
-          )
-          .then(() => {
-            expect(token).to.deep.equal(resumeAfter);
-          });
-      });
-      it('must be empty if neither the startAfter nor resumeAfter options were specified', function() {
-        const manager = new MockServerManager(this.configuration, {
-          aggregate: (function*() {
-            yield { numDocuments: 0, postBatchResumeToken: false };
-          })(),
-          getMore: (function*() {
-            yield { numDocuments: 1, postBatchResumeToken: false };
-          })()
-        });
-        let token;
-
-        return manager
-          .ready()
-          .then(() => {
-            const changeStream = manager.makeChangeStream();
-            let counter = 0;
-            changeStream.cursor.on('response', () => {
-              if (counter === 1) {
-                token = changeStream.resumeToken;
-              }
-              counter += 1;
-            });
-
-            // Note: this is expected to fail
-            return changeStream.next();
-          })
-          .then(
-            () => manager.teardown(),
-            err => manager.teardown(err)
-          )
-          .then(() => {
-            expect(token).to.not.exist;
-          });
-      });
+    afterEach(function(done) {
+      client.close(done);
     });
+
+    it('should work with events', {
+      metadata: { requires: { topology: 'replicaset', mongodb: '>=4.1.1' } },
+      test: function(done) {
+        const changeStream = coll.watch([], { startAfter });
+        coll.insertOne({ x: 2 }, { w: 'majority', j: true }, err => {
+          expect(err).to.not.exist;
+          changeStream.once('change', change => {
+            expect(change).to.containSubset({
+              operationType: 'insert',
+              fullDocument: { x: 2 }
+            });
+            changeStream.close(done);
+          });
+        });
+      }
+    });
+
+    it('should work with callbacks', {
+      metadata: { requires: { topology: 'replicaset', mongodb: '>=4.1.1' } },
+      test: function(done) {
+        const changeStream = coll.watch([], { startAfter });
+        coll.insertOne({ x: 2 }, { w: 'majority', j: true }, err => {
+          expect(err).to.not.exist;
+          exhaust(changeStream, (err, bag) => {
+            expect(err).to.not.exist;
+            const finalOperation = bag.pop();
+            expect(finalOperation).to.containSubset({
+              operationType: 'insert',
+              fullDocument: { x: 2 }
+            });
+            changeStream.close(done);
+          });
+        });
+      }
+    });
+
+    // 17. $changeStream stage for ChangeStream started with startAfter against a server >=4.1.1
+    // that has not received any results yet
+    // - MUST include a startAfter option
+    // - MUST NOT include a resumeAfter option
+    // when resuming a change stream.
+    it('$changeStream that has not received results must include startAfter and not resumeAfter', {
+      metadata: { requires: { topology: 'replicaset', mongodb: '>=4.1.1' } },
+      test: function(done) {
+        const events = [];
+        client.on('commandStarted', e => recordEvent(events, e));
+        const changeStream = coll.watch([], { startAfter });
+        changeStream.once('change', change => {
+          expect(change).to.containSubset({
+            operationType: 'insert',
+            fullDocument: { x: 2 }
+          });
+          expect(events)
+            .to.be.an('array')
+            .with.lengthOf(3);
+          expect(events[0]).nested.property('$changeStream.startAfter').to.exist;
+          expect(events[1]).to.equal('error');
+          expect(events[2]).nested.property('$changeStream.startAfter').to.exist;
+          changeStream.close(done);
+        });
+
+        waitForStarted(changeStream, () => {
+          triggerResumableError(changeStream, () => {
+            events.push('error');
+            coll.insertOne({ x: 2 }, { w: 'majority', j: true }, err => {
+              expect(err).to.not.exist;
+            });
+          });
+        });
+      }
+    });
+
+    // 18. $changeStream stage for ChangeStream started with startAfter against a server >=4.1.1
+    // that has received at least one result
+    // - MUST include a resumeAfter option
+    // - MUST NOT include a startAfter option
+    // when resuming a change stream.
+    it('$changeStream that has received results must include resumeAfter and not startAfter', {
+      metadata: { requires: { topology: 'replicaset', mongodb: '>=4.1.1' } },
+      test: function(done) {
+        let events = [];
+        client.on('commandStarted', e => recordEvent(events, e));
+        const changeStream = coll.watch([], { startAfter });
+
+        changeStream.on('change', change => {
+          events.push({ change: { insert: { x: change.fullDocument.x } } });
+          switch (change.fullDocument.x) {
+            case 2:
+              // only events after this point are relevant to this test
+              events = [];
+              triggerResumableError(changeStream, () => events.push('error'));
+              break;
+            case 3:
+              expect(events)
+                .to.be.an('array')
+                .with.lengthOf(3);
+              expect(events[0]).to.equal('error');
+              expect(events[1]).nested.property('$changeStream.resumeAfter').to.exist;
+              expect(events[2]).to.eql({ change: { insert: { x: 3 } } });
+              changeStream.close(done);
+              break;
+          }
+        });
+        waitForStarted(changeStream, () =>
+          coll.insertOne({ x: 2 }, { w: 'majority', j: true }, err => {
+            expect(err).to.not.exist;
+            coll.insertOne({ x: 3 }, { w: 'majority', j: true }, err => {
+              expect(err).to.not.exist;
+            });
+          })
+        );
+      }
+    });
+  });
+});
+
+describe('Change Stream Resume Error Tests', function() {
+  it('should properly process errors that lack the `mongoErrorContextSymbol`', function() {
+    expect(() => isResumableError(new Error())).to.not.throw();
   });
 });
