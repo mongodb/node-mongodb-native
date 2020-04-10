@@ -42,8 +42,7 @@ tests:
             cursor: {}
             pipeline:
               - 
-                $changeStream:
-                  fullDocument: default
+                $changeStream: {}
               -
                 $unsupported: foo
           command_name: aggregate
@@ -74,3 +73,32 @@ tests:
       error:
         code: 280
         errorLabels: [ "NonResumableChangeStreamError" ]
+  -
+    description: change stream errors on MaxTimeMSExpired
+    minServerVersion: "4.2"
+    failPoint:
+      configureFailPoint: failCommand
+      mode: { times: 1 }
+      data:
+          failCommands: ["getMore"]
+          errorCode: 50 # An error code that's not on the old blacklist or whitelist
+          closeConnection: false
+    target: collection
+    topology:
+      - replicaset
+      - sharded
+    changeStreamPipeline:
+      -
+        $project: { _id: 0 }
+    changeStreamOptions: {}
+    operations:
+      -
+        database: *database_name
+        collection: *collection_name
+        name: insertOne
+        arguments:
+          document:
+            z: 3
+    result:
+      error:
+        code: 50
