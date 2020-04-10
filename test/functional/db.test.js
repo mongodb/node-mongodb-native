@@ -313,7 +313,7 @@ describe('Db', function() {
    */
   it('shouldCorrectlyForceReindexOnCollection', {
     metadata: {
-      requires: { topology: ['single', 'replicaset'] }
+      requires: { topology: ['single'] }
     },
 
     // The actual test we wish to run
