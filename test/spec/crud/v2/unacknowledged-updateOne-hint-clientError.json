@@ -1,8 +1,7 @@
 {
   "runOn": [
     {
-      "minServerVersion": "4.2.0",
-      "maxServerVersion": "4.3.3"
+      "maxServerVersion": "4.1.9"
     }
   ],
   "data": [
@@ -15,37 +14,36 @@
       "x": 22
     }
   ],
-  "collection_name": "findOneAndDelete_hint",
+  "collection_name": "Updateone_hint",
   "tests": [
     {
-      "description": "FindOneAndDelete with hint string unsupported (server-side error)",
+      "description": "Unacknowledged updateOne with hint string fails with client-side error on server < 4.2",
       "operations": [
         {
           "object": "collection",
-          "name": "findOneAndDelete",
+          "collectionOptions": {
+            "writeConcern": {
+              "w": 0
+            }
+          },
+          "name": "updateOne",
           "arguments": {
             "filter": {
-              "_id": 1
+              "_id": {
+                "$gt": 1
+              }
+            },
+            "update": {
+              "$inc": {
+                "x": 1
+              }
             },
             "hint": "_id_"
           },
           "error": true
         }
       ],
-      "expectations": [
-        {
-          "command_started_event": {
-            "command": {
-              "findAndModify": "findOneAndDelete_hint",
-              "query": {
-                "_id": 1
-              },
-              "hint": "_id_",
-              "remove": true
-            }
-          }
-        }
-      ],
+      "expectations": {},
       "outcome": {
         "collection": {
           "data": [
@@ -62,14 +60,26 @@
       }
     },
     {
-      "description": "FindOneAndDelete with hint document unsupported (server-side error)",
+      "description": "Unacknowledged updateOne with hint document fails with client-side error on server < 4.2",
       "operations": [
         {
           "object": "collection",
-          "name": "findOneAndDelete",
+          "collectionOptions": {
+            "writeConcern": {
+              "w": 0
+            }
+          },
+          "name": "updateOne",
           "arguments": {
             "filter": {
-              "_id": 1
+              "_id": {
+                "$gt": 1
+              }
+            },
+            "update": {
+              "$inc": {
+                "x": 1
+              }
             },
             "hint": {
               "_id": 1
@@ -78,22 +88,7 @@
           "error": true
         }
       ],
-      "expectations": [
-        {
-          "command_started_event": {
-            "command": {
-              "findAndModify": "findOneAndDelete_hint",
-              "query": {
-                "_id": 1
-              },
-              "hint": {
-                "_id": 1
-              },
-              "remove": true
-            }
-          }
-        }
-      ],
+      "expectations": {},
       "outcome": {
         "collection": {
           "data": [

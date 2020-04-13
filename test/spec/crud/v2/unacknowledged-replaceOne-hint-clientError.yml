@@ -1,0 +1,46 @@
+runOn:
+  # These tests assert that the driver raises a client-side error when the hint
+  # option is passed with an unacknowledged update operation against a server
+  # that does not support hints in update operations.
+  - { maxServerVersion: "4.1.9" }
+
+data:
+  - {_id: 1, x: 11}
+  - {_id: 2, x: 22}
+
+collection_name: &collection_name 'ReplaceOne_hint'
+
+tests:
+  -
+    description: "Unacknowledged ReplaceOne with hint string fails with client-side error on server < 4.2"
+    operations:
+      -
+        object: collection
+        collectionOptions: &collection_options
+          writeConcern: { w: 0 }
+        name: replaceOne
+        arguments:
+          filter: &filter { _id: { $gt: 1 } }
+          replacement: &replacement { x: 111 }
+          hint: "_id_"
+        error: true
+    expectations: {}
+    outcome: &outcome
+      collection:
+        data:
+          - {_id: 1, x: 11}
+          - {_id: 2, x: 22}
+  -
+    description: "Unacknowledged ReplaceOne with hint document fails with client-side error on server < 4.2"
+    operations:
+      -
+        object: collection
+        collectionOptions: *collection_options
+        name: replaceOne
+        arguments:
+          filter: *filter
+          replacement: *replacement
+          hint: { _id: 1 }
+        error: true
+    expectations: {}
+    outcome: *outcome

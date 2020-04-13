@@ -1,7 +1,6 @@
 {
   "runOn": [
     {
-      "minServerVersion": "3.4.0",
       "maxServerVersion": "4.3.3"
     }
   ],
@@ -22,10 +21,15 @@
   "collection_name": "DeleteMany_hint",
   "tests": [
     {
-      "description": "DeleteMany with hint string unsupported (server-side error)",
+      "description": "Unacknowledged deleteMany with hint string fails with client-side error on server < 4.4",
       "operations": [
         {
           "object": "collection",
+          "collectionOptions": {
+            "writeConcern": {
+              "w": 0
+            }
+          },
           "name": "deleteMany",
           "arguments": {
             "filter": {
@@ -38,26 +42,7 @@
           "error": true
         }
       ],
-      "expectations": [
-        {
-          "command_started_event": {
-            "command": {
-              "delete": "DeleteMany_hint",
-              "deletes": [
-                {
-                  "q": {
-                    "_id": {
-                      "$gt": 1
-                    }
-                  },
-                  "hint": "_id_",
-                  "limit": 0
-                }
-              ]
-            }
-          }
-        }
-      ],
+      "expectations": {},
       "outcome": {
         "collection": {
           "data": [
@@ -78,10 +63,15 @@
       }
     },
     {
-      "description": "DeleteMany with hint document unsupported (server-side error)",
+      "description": "Unacknowledged deleteMany with hint document fails with client-side error on server < 4.4",
       "operations": [
         {
           "object": "collection",
+          "collectionOptions": {
+            "writeConcern": {
+              "w": 0
+            }
+          },
           "name": "deleteMany",
           "arguments": {
             "filter": {
@@ -96,28 +86,7 @@
           "error": true
         }
       ],
-      "expectations": [
-        {
-          "command_started_event": {
-            "command": {
-              "delete": "DeleteMany_hint",
-              "deletes": [
-                {
-                  "q": {
-                    "_id": {
-                      "$gt": 1
-                    }
-                  },
-                  "hint": {
-                    "_id": 1
-                  },
-                  "limit": 0
-                }
-              ]
-            }
-          }
-        }
-      ],
+      "expectations": {},
       "outcome": {
         "collection": {
           "data": [
