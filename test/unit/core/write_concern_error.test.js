@@ -152,11 +152,8 @@ describe('WriteConcernError', function() {
         try {
           expect(err).to.be.an.instanceOf(MongoWriteConcernError);
           expect(err.result).to.exist;
-          expect(err.result.writeConcernError).to.exist;
-          expect(err.result.writeConcernError.errInfo).to.exist;
-          expect(err.result.writeConcernError.errInfo.writeConcern).to.exist;
-          expect(err.result.writeConcernError.errInfo.writeConcern.provenance).to.equal(
-            RAW_USER_WRITE_CONCERN_ERROR_INFO.writeConcernError.errInfo.writeConcern.provenance
+          expect(err.result.writeConcernError).to.deep.equal(
+            RAW_USER_WRITE_CONCERN_ERROR_INFO.writeConcernError
           );
         } catch (e) {
           _err = e;
