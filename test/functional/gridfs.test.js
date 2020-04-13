@@ -3884,4 +3884,37 @@ describe('GridFS', function() {
       });
     }
   });
+
+  /**
+   * @ignore
+   */
+  it('should correctly create index', {
+    metadata: {
+      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+    },
+
+    // The actual test we wish to run
+    test: function(done) {
+      var configuration = this.configuration;
+      var GridStore = configuration.require.GridStore;
+      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+
+      client.connect(function(err, client) {
+        expect(err).to.not.exist;
+        var db = client.db(configuration.db);
+        var gridStore = new GridStore(db, 'test_gs_save_empty_file', 'w');
+        gridStore.open(function(err) {
+          expect(err).to.not.exist;
+          db.collection('fs.files').createIndex({ filename: 1, uploadDate: 1 }, {}, (err, val) => {
+            expect(err).to.not.exist;
+            expect(val).to.equal('filename_1_uploadDate_1');
+            gridStore.close(function(err) {
+              expect(err).to.not.exist;
+              client.close(done);
+            });
+          });
+        });
+      });
+    }
+  });
 });
