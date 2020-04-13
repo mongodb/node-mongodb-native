@@ -9,16 +9,17 @@ collection_name: &collection_name 'DeleteOne_hint'
 
 tests:
   -
-    description: "DeleteOne with hint string"
+    description: "Unacknowledged deleteOne with hint string succeeds on server >= 4.4"
     operations:
       -
         object: collection
+        collectionOptions: &collection_options
+          writeConcern: { w: 0 }
         name: deleteOne
         arguments:
           filter: &filter { _id: 1 }
           hint: "_id_"
-        result: &result
-          deletedCount: 1
+        # Don't check result because different drivers return different responses to unacknowledged deletes
     expectations:
       -
         command_started_event:
@@ -29,20 +30,19 @@ tests:
                 q: *filter
                 hint: "_id_"
                 limit: 1
-    outcome: &outcome
-      collection:
-        data:
-          - {_id: 2, x: 22 }
+    # Do not verify the contents of the collection to avoid race conditions
+    outcome: {}
   -
-    description: "deleteOne with hint document"
+    description: "Unacknowledged deleteOne with hint document succeeds on server >= 4.4"
     operations:
       -
         object: collection
+        collectionOptions: *collection_options
         name: deleteOne
         arguments:
           filter: *filter
           hint: { _id: 1 }
-        result: *result
+        # Don't check result because different drivers return different responses to unacknowledged deletes
     expectations:
       -
         command_started_event:
@@ -53,5 +53,6 @@ tests:
                 q: *filter
                 hint: { _id: 1 }
                 limit: 1
-    outcome: *outcome
+    # Do not verify the contents of the collection to avoid race conditions
+    outcome: {}
 
