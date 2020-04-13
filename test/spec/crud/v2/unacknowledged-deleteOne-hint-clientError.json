@@ -1,7 +1,6 @@
 {
   "runOn": [
     {
-      "minServerVersion": "3.4.0",
       "maxServerVersion": "4.3.3"
     }
   ],
@@ -18,10 +17,15 @@
   "collection_name": "DeleteOne_hint",
   "tests": [
     {
-      "description": "DeleteOne with hint string unsupported (server-side error)",
+      "description": "Unacknowledged deleteOne with hint string fails with client-side error on server < 4.4",
       "operations": [
         {
           "object": "collection",
+          "collectionOptions": {
+            "writeConcern": {
+              "w": 0
+            }
+          },
           "name": "deleteOne",
           "arguments": {
             "filter": {
@@ -32,24 +36,7 @@
           "error": true
         }
       ],
-      "expectations": [
-        {
-          "command_started_event": {
-            "command": {
-              "delete": "DeleteOne_hint",
-              "deletes": [
-                {
-                  "q": {
-                    "_id": 1
-                  },
-                  "hint": "_id_",
-                  "limit": 1
-                }
-              ]
-            }
-          }
-        }
-      ],
+      "expectations": {},
       "outcome": {
         "collection": {
           "data": [
@@ -66,10 +53,15 @@
       }
     },
     {
-      "description": "DeleteOne with hint document unsupported (server-side error)",
+      "description": "Unacknowledged deleteOne with hint document fails with client-side error on server < 4.4",
       "operations": [
         {
           "object": "collection",
+          "collectionOptions": {
+            "writeConcern": {
+              "w": 0
+            }
+          },
           "name": "deleteOne",
           "arguments": {
             "filter": {
@@ -82,26 +74,7 @@
           "error": true
         }
       ],
-      "expectations": [
-        {
-          "command_started_event": {
-            "command": {
-              "delete": "DeleteOne_hint",
-              "deletes": [
-                {
-                  "q": {
-                    "_id": 1
-                  },
-                  "hint": {
-                    "_id": 1
-                  },
-                  "limit": 1
-                }
-              ]
-            }
-          }
-        }
-      ],
+      "expectations": {},
       "outcome": {
         "collection": {
           "data": [

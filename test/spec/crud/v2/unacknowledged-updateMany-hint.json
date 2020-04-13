@@ -1,7 +1,7 @@
 {
   "runOn": [
     {
-      "minServerVersion": "4.3.4"
+      "minServerVersion": "4.2.0"
     }
   ],
   "data": [
@@ -18,24 +18,31 @@
       "x": 33
     }
   ],
-  "collection_name": "DeleteMany_hint",
+  "collection_name": "UpdateMany_hint",
   "tests": [
     {
-      "description": "DeleteMany with hint string",
+      "description": "Unacknowledged updateMany with hint string succeeds on server >= 4.2",
       "operations": [
         {
           "object": "collection",
-          "name": "deleteMany",
+          "collectionOptions": {
+            "writeConcern": {
+              "w": 0
+            }
+          },
+          "name": "updateMany",
           "arguments": {
             "filter": {
               "_id": {
                 "$gt": 1
               }
             },
+            "update": {
+              "$inc": {
+                "x": 1
+              }
+            },
             "hint": "_id_"
-          },
-          "result": {
-            "deletedCount": 2
           }
         }
       ],
@@ -43,51 +50,54 @@
         {
           "command_started_event": {
             "command": {
-              "delete": "DeleteMany_hint",
-              "deletes": [
+              "update": "UpdateMany_hint",
+              "updates": [
                 {
                   "q": {
                     "_id": {
                       "$gt": 1
                     }
                   },
-                  "hint": "_id_",
-                  "limit": 0
+                  "u": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  },
+                  "multi": true,
+                  "hint": "_id_"
                 }
               ]
             }
           }
         }
       ],
-      "outcome": {
-        "collection": {
-          "data": [
-            {
-              "_id": 1,
-              "x": 11
-            }
-          ]
-        }
-      }
+      "outcome": {}
     },
     {
-      "description": "DeleteMany with hint document",
+      "description": "Unacknowledged updateMany with hint document succeeds on server >= 4.2",
       "operations": [
         {
           "object": "collection",
-          "name": "deleteMany",
+          "collectionOptions": {
+            "writeConcern": {
+              "w": 0
+            }
+          },
+          "name": "updateMany",
           "arguments": {
             "filter": {
               "_id": {
                 "$gt": 1
+              }
+            },
+            "update": {
+              "$inc": {
+                "x": 1
               }
             },
             "hint": {
               "_id": 1
             }
-          },
-          "result": {
-            "deletedCount": 2
           }
         }
       ],
@@ -95,34 +105,30 @@
         {
           "command_started_event": {
             "command": {
-              "delete": "DeleteMany_hint",
-              "deletes": [
+              "update": "UpdateMany_hint",
+              "updates": [
                 {
                   "q": {
                     "_id": {
                       "$gt": 1
                     }
                   },
+                  "u": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  },
+                  "multi": true,
                   "hint": {
                     "_id": 1
-                  },
-                  "limit": 0
+                  }
                 }
               ]
             }
           }
         }
       ],
-      "outcome": {
-        "collection": {
-          "data": [
-            {
-              "_id": 1,
-              "x": 11
-            }
-          ]
-        }
-      }
+      "outcome": {}
     }
   ]
 }

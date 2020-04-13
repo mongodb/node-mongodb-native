@@ -1,0 +1,160 @@
+{
+  "runOn": [
+    {
+      "maxServerVersion": "4.3.3"
+    }
+  ],
+  "data": [
+    {
+      "_id": 1,
+      "x": 11
+    },
+    {
+      "_id": 2,
+      "x": 22
+    },
+    {
+      "_id": 3,
+      "x": 33
+    },
+    {
+      "_id": 4,
+      "x": 44
+    }
+  ],
+  "collection_name": "BulkWrite_delete_hint",
+  "tests": [
+    {
+      "description": "Unacknowledged bulkWrite deleteOne with hints fails with client-side error on server < 4.4",
+      "operations": [
+        {
+          "name": "bulkWrite",
+          "collectionOptions": {
+            "writeConcern": {
+              "w": 0
+            }
+          },
+          "arguments": {
+            "requests": [
+              {
+                "name": "deleteOne",
+                "arguments": {
+                  "filter": {
+                    "_id": 1
+                  },
+                  "hint": "_id_"
+                }
+              },
+              {
+                "name": "deleteOne",
+                "arguments": {
+                  "filter": {
+                    "_id": 2
+                  },
+                  "hint": {
+                    "_id": 1
+                  }
+                }
+              }
+            ],
+            "options": {
+              "ordered": true
+            }
+          },
+          "error": true
+        }
+      ],
+      "expectations": {},
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            },
+            {
+              "_id": 4,
+              "x": 44
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "Unacknowledged bulkWrite deleteMany with hints fails with client-side error on server < 4.4",
+      "operations": [
+        {
+          "name": "bulkWrite",
+          "collectionOptions": {
+            "writeConcern": {
+              "w": 0
+            }
+          },
+          "arguments": {
+            "requests": [
+              {
+                "name": "deleteMany",
+                "arguments": {
+                  "filter": {
+                    "_id": {
+                      "$lt": 3
+                    }
+                  },
+                  "hint": "_id_"
+                }
+              },
+              {
+                "name": "deleteMany",
+                "arguments": {
+                  "filter": {
+                    "_id": {
+                      "$gte": 4
+                    }
+                  },
+                  "hint": {
+                    "_id": 1
+                  }
+                }
+              }
+            ],
+            "options": {
+              "ordered": true
+            }
+          },
+          "error": true
+        }
+      ],
+      "expectations": {},
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            },
+            {
+              "_id": 4,
+              "x": 44
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

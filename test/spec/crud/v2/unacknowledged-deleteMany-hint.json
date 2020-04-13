@@ -1,8 +1,7 @@
 {
   "runOn": [
     {
-      "minServerVersion": "3.4.0",
-      "maxServerVersion": "4.3.3"
+      "minServerVersion": "4.3.4"
     }
   ],
   "data": [
@@ -13,109 +12,103 @@
     {
       "_id": 2,
       "x": 22
+    },
+    {
+      "_id": 3,
+      "x": 33
     }
   ],
-  "collection_name": "DeleteOne_hint",
+  "collection_name": "DeleteMany_hint",
   "tests": [
     {
-      "description": "DeleteOne with hint string unsupported (server-side error)",
+      "description": "Unacknowledged deleteMany with hint string succeeds on server >= 4.4",
       "operations": [
         {
           "object": "collection",
-          "name": "deleteOne",
+          "collectionOptions": {
+            "writeConcern": {
+              "w": 0
+            }
+          },
+          "name": "deleteMany",
           "arguments": {
             "filter": {
-              "_id": 1
+              "_id": {
+                "$gt": 1
+              }
             },
             "hint": "_id_"
-          },
-          "error": true
+          }
         }
       ],
       "expectations": [
         {
           "command_started_event": {
             "command": {
-              "delete": "DeleteOne_hint",
+              "delete": "DeleteMany_hint",
               "deletes": [
                 {
                   "q": {
-                    "_id": 1
+                    "_id": {
+                      "$gt": 1
+                    }
                   },
                   "hint": "_id_",
-                  "limit": 1
+                  "limit": 0
                 }
               ]
             }
           }
         }
       ],
-      "outcome": {
-        "collection": {
-          "data": [
-            {
-              "_id": 1,
-              "x": 11
-            },
-            {
-              "_id": 2,
-              "x": 22
-            }
-          ]
-        }
-      }
+      "outcome": {}
     },
     {
-      "description": "DeleteOne with hint document unsupported (server-side error)",
+      "description": "Unacknowledged deleteMany with hint document succeeds on server >= 4.4",
       "operations": [
         {
           "object": "collection",
-          "name": "deleteOne",
+          "collectionOptions": {
+            "writeConcern": {
+              "w": 0
+            }
+          },
+          "name": "deleteMany",
           "arguments": {
             "filter": {
-              "_id": 1
+              "_id": {
+                "$gt": 1
+              }
             },
             "hint": {
               "_id": 1
             }
-          },
-          "error": true
+          }
         }
       ],
       "expectations": [
         {
           "command_started_event": {
             "command": {
-              "delete": "DeleteOne_hint",
+              "delete": "DeleteMany_hint",
               "deletes": [
                 {
                   "q": {
-                    "_id": 1
+                    "_id": {
+                      "$gt": 1
+                    }
                   },
                   "hint": {
                     "_id": 1
                   },
-                  "limit": 1
+                  "limit": 0
                 }
               ]
             }
           }
         }
       ],
-      "outcome": {
-        "collection": {
-          "data": [
-            {
-              "_id": 1,
-              "x": 11
-            },
-            {
-              "_id": 2,
-              "x": 22
-            }
-          ]
-        }
-      }
+      "outcome": {}
     }
   ]
 }

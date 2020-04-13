@@ -1,8 +1,7 @@
 {
   "runOn": [
     {
-      "minServerVersion": "4.2.0",
-      "maxServerVersion": "4.3.3"
+      "minServerVersion": "4.3.4"
     }
   ],
   "data": [
@@ -18,18 +17,22 @@
   "collection_name": "findOneAndDelete_hint",
   "tests": [
     {
-      "description": "FindOneAndDelete with hint string unsupported (server-side error)",
+      "description": "Unacknowledged findOneAndDelete with hint string succeeds on server >= 4.4",
       "operations": [
         {
           "object": "collection",
+          "collectionOptions": {
+            "writeConcern": {
+              "w": 0
+            }
+          },
           "name": "findOneAndDelete",
           "arguments": {
             "filter": {
               "_id": 1
             },
             "hint": "_id_"
-          },
-          "error": true
+          }
         }
       ],
       "expectations": [
@@ -46,26 +49,18 @@
           }
         }
       ],
-      "outcome": {
-        "collection": {
-          "data": [
-            {
-              "_id": 1,
-              "x": 11
-            },
-            {
-              "_id": 2,
-              "x": 22
-            }
-          ]
-        }
-      }
+      "outcome": {}
     },
     {
-      "description": "FindOneAndDelete with hint document unsupported (server-side error)",
+      "description": "Unacknowledged findOneAndDelete with hint document succeeds on server >= 4.4",
       "operations": [
         {
           "object": "collection",
+          "collectionOptions": {
+            "writeConcern": {
+              "w": 0
+            }
+          },
           "name": "findOneAndDelete",
           "arguments": {
             "filter": {
@@ -74,8 +69,7 @@
             "hint": {
               "_id": 1
             }
-          },
-          "error": true
+          }
         }
       ],
       "expectations": [
@@ -94,20 +88,7 @@
           }
         }
       ],
-      "outcome": {
-        "collection": {
-          "data": [
-            {
-              "_id": 1,
-              "x": 11
-            },
-            {
-              "_id": 2,
-              "x": 22
-            }
-          ]
-        }
-      }
+      "outcome": {}
     }
   ]
 }
