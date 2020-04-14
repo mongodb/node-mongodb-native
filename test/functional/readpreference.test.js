@@ -553,7 +553,7 @@ describe('ReadPreference', function() {
 
   context('hedge', function() {
     before(function() {
-      this.hoist = callback => {
+      this.testHedge = callback => {
         const { configuration } = this;
         const client = configuration.newClient(configuration.writeConcernMax(), {
           poolSize: 1,
@@ -569,9 +569,9 @@ describe('ReadPreference', function() {
       };
     });
 
-    it('should correctly set hoist using [find option & empty hedge]', function(done) {
+    it('should correctly set hedge using [find option & empty hedge]', function(done) {
       const rp = new ReadPreference(ReadPreference.SECONDARY, null, { hedge: {} });
-      this.hoist((client, collection, events) => {
+      this.testHedge((client, collection, events) => {
         collection.find({}, { readPreference: rp }).toArray(err => {
           test.equal(null, err);
           const expected = { mode: ReadPreference.SECONDARY, hedge: {} };
@@ -581,9 +581,9 @@ describe('ReadPreference', function() {
       });
     });
 
-    it('should correctly set hoist using [.setReadPreference & empty hedge] ', function(done) {
+    it('should correctly set hedge using [.setReadPreference & empty hedge] ', function(done) {
       const rp = new ReadPreference(ReadPreference.SECONDARY, null, { hedge: {} });
-      this.hoist((client, collection, events) => {
+      this.testHedge((client, collection, events) => {
         collection
           .find({})
           .setReadPreference(rp)
@@ -596,9 +596,9 @@ describe('ReadPreference', function() {
       });
     });
 
-    it('should correctly set hoist using [.setReadPreference & enabled hedge] ', function(done) {
+    it('should correctly set hedge using [.setReadPreference & enabled hedge] ', function(done) {
       const rp = new ReadPreference(ReadPreference.SECONDARY, null, { hedge: { enabled: true } });
-      this.hoist((client, collection, events) => {
+      this.testHedge((client, collection, events) => {
         collection
           .find({})
           .setReadPreference(rp)
@@ -611,9 +611,9 @@ describe('ReadPreference', function() {
       });
     });
 
-    it('should correctly set hoist using [.setReadPreference & disabled hedge] ', function(done) {
+    it('should correctly set hedge using [.setReadPreference & disabled hedge] ', function(done) {
       const rp = new ReadPreference(ReadPreference.SECONDARY, null, { hedge: { enabled: false } });
-      this.hoist((client, collection, events) => {
+      this.testHedge((client, collection, events) => {
         collection
           .find({})
           .setReadPreference(rp)
@@ -626,9 +626,9 @@ describe('ReadPreference', function() {
       });
     });
 
-    it('should correctly set hoist using [.setReadPreference & undefined hedge] ', function(done) {
+    it('should correctly set hedge using [.setReadPreference & undefined hedge] ', function(done) {
       const rp = new ReadPreference(ReadPreference.SECONDARY, null);
-      this.hoist((client, collection, events) => {
+      this.testHedge((client, collection, events) => {
         collection
           .find({})
           .setReadPreference(rp)
