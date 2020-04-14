@@ -11,7 +11,7 @@ database_name: &database_name "crud-tests"
 
 tests:
   -
-    description: "BulkWrite with arrayFilters"
+    description: "BulkWrite updateOne with arrayFilters"
     operations:
       -
         name: "bulkWrite"
@@ -24,20 +24,13 @@ tests:
                 filter: {}
                 update: { $set: { "y.$[i].b": 2 } }
                 arrayFilters: [ { "i.b": 3 } ]
-            -
-              # UpdateMany when multiple documents match arrayFilters
-              name: "updateMany"
-              arguments:
-                filter: {}
-                update: { $set: { "y.$[i].b": 2 } }
-                arrayFilters: [ { "i.b": 1 } ]
           options: { ordered: true }
         result:
           deletedCount: 0
           insertedCount: 0
           insertedIds: {}
-          matchedCount: 3
-          modifiedCount: 3
+          matchedCount: 1
+          modifiedCount: 1
           upsertedCount: 0
           upsertedIds: {}
     expectations:
@@ -50,6 +43,47 @@ tests:
                 q: {}
                 u: { $set: { "y.$[i].b": 2 } }
                 arrayFilters: [ { "i.b": 3 } ]
+            ordered: true
+            # TODO: check that these fields do not exist once
+            # https://jira.mongodb.org/browse/SPEC-1215 has been resolved.
+            # writeConcern: null
+            # bypassDocumentValidation: null
+          command_name: update
+          database_name: *database_name
+    outcome:
+      collection:
+        data:
+          - {_id: 1, y: [{b: 2}, {b: 1}]}
+          - {_id: 2, y: [{b: 0}, {b: 1}]}
+  -
+    description: "BulkWrite updateMany with arrayFilters"
+    operations:
+      -
+        name: "bulkWrite"
+        arguments:
+          requests:
+            -
+              # UpdateMany when multiple documents match arrayFilters
+              name: "updateMany"
+              arguments:
+                filter: {}
+                update: { $set: { "y.$[i].b": 2 } }
+                arrayFilters: [ { "i.b": 1 } ]
+          options: { ordered: true }
+        result:
+          deletedCount: 0
+          insertedCount: 0
+          insertedIds: {}
+          matchedCount: 2
+          modifiedCount: 2
+          upsertedCount: 0
+          upsertedIds: {}
+    expectations:
+      -
+        command_started_event:
+          command:
+            update: *collection_name
+            updates:
               -
                 q: {}
                 u: { $set: { "y.$[i].b": 2 } }
@@ -65,5 +99,5 @@ tests:
     outcome:
       collection:
         data:
-          - {_id: 1, y: [{b: 2}, {b: 2}]}
+          - {_id: 1, y: [{b: 3}, {b: 2}]}
           - {_id: 2, y: [{b: 0}, {b: 2}]}

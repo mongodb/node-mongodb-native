@@ -1,0 +1,84 @@
+{
+  "runOn": [
+    {
+      "maxServerVersion": "3.3.99"
+    }
+  ],
+  "data": [
+    {
+      "_id": 1,
+      "x": 11
+    },
+    {
+      "_id": 2,
+      "x": 22
+    }
+  ],
+  "collection_name": "DeleteOne_hint",
+  "tests": [
+    {
+      "description": "DeleteOne with hint string unsupported (client-side error)",
+      "operations": [
+        {
+          "object": "collection",
+          "name": "deleteOne",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "hint": "_id_"
+          },
+          "error": true
+        }
+      ],
+      "expectations": [],
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "DeleteOne with hint document unsupported (client-side error)",
+      "operations": [
+        {
+          "object": "collection",
+          "name": "deleteOne",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "hint": {
+              "_id": 1
+            }
+          },
+          "error": true
+        }
+      ],
+      "expectations": [],
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
