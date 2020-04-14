@@ -559,17 +559,24 @@ describe('ReadPreference', function() {
           poolSize: 1,
           monitorCommands: true
         });
+        const events = [];
+        client.on('commandStarted', filterForCommands(['find'], events));
         client.connect(function(err, client) {
           test.equal(null, err);
-          const events = [];
-          client.on('commandStarted', filterForCommands(['find'], events));
           const collection = client.db(configuration.db).collection('test');
           return callback(client, collection, events);
         });
       };
     });
 
-    it('should correctly set hedge using [find option & empty hedge]', function(done) {
+    const itWithMeta = (a, b) => {
+      it(a, {
+        metadata: { requires: { mongodb: '>=3.6.0' } },
+        test: b
+      });
+    };
+
+    itWithMeta('should set hedge using [find option & empty hedge]', function(done) {
       const rp = new ReadPreference(ReadPreference.SECONDARY, null, { hedge: {} });
       this.testHedge((client, collection, events) => {
         collection.find({}, { readPreference: rp }).toArray(err => {
@@ -581,7 +588,7 @@ describe('ReadPreference', function() {
       });
     });
 
-    it('should correctly set hedge using [.setReadPreference & empty hedge] ', function(done) {
+    itWithMeta('should set hedge using [.setReadPreference & empty hedge] ', function(done) {
       const rp = new ReadPreference(ReadPreference.SECONDARY, null, { hedge: {} });
       this.testHedge((client, collection, events) => {
         collection
@@ -596,7 +603,7 @@ describe('ReadPreference', function() {
       });
     });
 
-    it('should correctly set hedge using [.setReadPreference & enabled hedge] ', function(done) {
+    itWithMeta('should set hedge using [.setReadPreference & enabled hedge] ', function(done) {
       const rp = new ReadPreference(ReadPreference.SECONDARY, null, { hedge: { enabled: true } });
       this.testHedge((client, collection, events) => {
         collection
@@ -611,7 +618,7 @@ describe('ReadPreference', function() {
       });
     });
 
-    it('should correctly set hedge using [.setReadPreference & disabled hedge] ', function(done) {
+    itWithMeta('should set hedge using [.setReadPreference & disabled hedge] ', function(done) {
       const rp = new ReadPreference(ReadPreference.SECONDARY, null, { hedge: { enabled: false } });
       this.testHedge((client, collection, events) => {
         collection
@@ -626,7 +633,7 @@ describe('ReadPreference', function() {
       });
     });
 
-    it('should correctly set hedge using [.setReadPreference & undefined hedge] ', function(done) {
+    itWithMeta('should set hedge using [.setReadPreference & undefined hedge] ', function(done) {
       const rp = new ReadPreference(ReadPreference.SECONDARY, null);
       this.testHedge((client, collection, events) => {
         collection
