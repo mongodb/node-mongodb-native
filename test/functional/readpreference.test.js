@@ -570,28 +570,23 @@ describe('ReadPreference', function() {
     });
 
     it('should correctly set hoist using [find option & empty hedge]', function(done) {
+      const rp = new ReadPreference(ReadPreference.SECONDARY, null, { hedge: {} });
       this.hoist((client, collection, events) => {
-        collection
-          .find(
-            {},
-            {
-              readPreference: new ReadPreference(ReadPreference.SECONDARY, null, { hedge: {} })
-            }
-          )
-          .toArray(err => {
-            test.equal(null, err);
-            const expected = { mode: ReadPreference.SECONDARY, hedge: {} };
-            expect(events[0].command.$readPreference).to.deep.equal(expected);
-            client.close(done);
-          });
+        collection.find({}, { readPreference: rp }).toArray(err => {
+          test.equal(null, err);
+          const expected = { mode: ReadPreference.SECONDARY, hedge: {} };
+          expect(events[0].command.$readPreference).to.deep.equal(expected);
+          client.close(done);
+        });
       });
     });
 
     it('should correctly set hoist using [.setReadPreference & empty hedge] ', function(done) {
+      const rp = new ReadPreference(ReadPreference.SECONDARY, null, { hedge: {} });
       this.hoist((client, collection, events) => {
         collection
           .find({})
-          .setReadPreference(new ReadPreference(ReadPreference.SECONDARY, null, { hedge: {} }))
+          .setReadPreference(rp)
           .toArray(err => {
             test.equal(null, err);
             const expected = { mode: ReadPreference.SECONDARY, hedge: {} };
