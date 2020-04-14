@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="3.5.6"></a>
+## [3.5.6](https://github.com/mongodb/node-mongodb-native/compare/v3.5.5...v3.5.6) (2020-04-14)
+
+
+### Bug Fixes
+
+* always return empty array for selection on unknown topology ([f9e786a](https://github.com/mongodb/node-mongodb-native/commit/f9e786a))
+* createCollection only uses listCollections in strict mode ([d368f12](https://github.com/mongodb/node-mongodb-native/commit/d368f12))
+* don't throw if `withTransaction()` callback rejects with a null reason ([153646c](https://github.com/mongodb/node-mongodb-native/commit/153646c))
+* only mark server session dirty if the client session is alive ([611be8d](https://github.com/mongodb/node-mongodb-native/commit/611be8d))
+* polyfill for util.promisify ([1c4cf6c](https://github.com/mongodb/node-mongodb-native/commit/1c4cf6c))
+* single `readPreferenceTags` should be parsed as an array ([a50611b](https://github.com/mongodb/node-mongodb-native/commit/a50611b))
+* **cursor:** transforms should only be applied once to documents ([704f30a](https://github.com/mongodb/node-mongodb-native/commit/704f30a))
+
+
+
 <a name="3.5.5"></a>
 ## [3.5.5](https://github.com/mongodb/node-mongodb-native/compare/v3.5.4...v3.5.5) (2020-03-11)
 
