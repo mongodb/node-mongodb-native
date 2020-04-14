@@ -571,7 +571,7 @@ describe('ReadPreference', function() {
 
     const itWithMeta = (a, b) => {
       it(a, {
-        metadata: { requires: { mongodb: '>=3.6.0' } },
+        metadata: { requires: { topology: ['sharded'] } },
         test: b
       });
     };
