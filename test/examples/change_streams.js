@@ -16,11 +16,8 @@ describe('examples(change-stream):', function() {
     client = await this.configuration.newClient().connect();
     db = client.db(this.configuration.db);
 
-    // ensure database exists, we need this for 3.6
-    await db.collection('inventory').insertOne({});
-
-    // now clear the collection
-    await db.collection('inventory').deleteMany();
+    await db.createCollection('inventory');
+    await db.collection('inventory').deleteMany({});
   });
 
   afterEach(async function() {

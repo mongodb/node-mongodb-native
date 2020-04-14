@@ -1,11 +1,10 @@
 'use strict';
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
-const expect = require('chai').expect;
 
 describe('Multiple Databases', function() {
   before(function() {
-    return setupDatabase(this.configuration, ['integration_tests2']);
+    return setupDatabase(this.configuration);
   });
 
   /**
@@ -85,18 +84,16 @@ describe('Multiple Databases', function() {
       var second_test_database_client = configuration.newClient({ w: 1 }, { poolSize: 1 });
       // Just create second database
       client.connect(function(err, client) {
-        expect(err).to.not.exist;
-
         second_test_database_client.connect(function(err, second_test_database) {
-          expect(err).to.not.exist;
           var db = client.db(configuration.db);
           // Close second database
           second_test_database.close();
           // Let's grab a connection to the different db resusing our connection pools
-          var secondDb = client.db('integration_tests2');
-          secondDb.createCollection('same_connection_two_dbs', function(err, collection) {
-            expect(err).to.not.exist;
-
+          var secondDb = client.db(configuration.db_name + '_2');
+          secondDb.createCollection('shouldCorrectlyUseSameConnectionsForTwoDifferentDbs', function(
+            err,
+            collection
+          ) {
             // Insert a dummy document
             collection.insert({ a: 20 }, { safe: true }, function(err) {
               test.equal(null, err);
@@ -106,9 +103,10 @@ describe('Multiple Databases', function() {
                 test.equal(20, item.a);
 
                 // Use the other db
-                db.createCollection('same_connection_two_dbs', function(err, collection) {
-                  expect(err).to.not.exist;
-
+                db.createCollection('shouldCorrectlyUseSameConnectionsForTwoDifferentDbs', function(
+                  err,
+                  collection
+                ) {
                   // Insert a dummy document
                   collection.insert({ b: 20 }, { safe: true }, function(err) {
                     test.equal(null, err);
