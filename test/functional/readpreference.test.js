@@ -1,9 +1,9 @@
 'use strict';
+
 var test = require('./shared').assert;
-var setupDatabase = require('./shared').setupDatabase;
+const { setupDatabase, filterForCommands } = require('./shared');
 const expect = require('chai').expect;
-const core = require('../../lib/core');
-const ReadPreference = core.ReadPreference;
+const ReadPreference = require('../../lib/core/topologies/read_preference');
 
 describe('ReadPreference', function() {
   before(function() {
@@ -551,44 +551,99 @@ describe('ReadPreference', function() {
     });
   });
 
-  it('Should propagate hedged reads', function(done) {
-    const configuration = this.configuration;
-    const client = configuration.newClient();
-    client.connect((err, client) => {
-      if (err) return done(err);
-      const db = client.db(configuration.db);
-      let readPreference, cursor;
-      [{ hedge: { enabled: false } }, { hedge: { enabled: true } }, { hedge: {} }, undefined].map(
-        opt => {
-          readPreference = new ReadPreference(ReadPreference.SECONDARY_PREFERRED, null, opt);
-          cursor = db.collection('test', { readPreference }).listIndexes();
-          test.deepEqual(cursor.options.readPreference.hedge, opt && opt.hedge);
-
-          readPreference = new ReadPreference(ReadPreference.SECONDARY_PREFERRED, opt);
-          cursor = db.collection('test', { readPreference }).listIndexes();
-          test.deepEqual(cursor.options.readPreference.hedge, opt && opt.hedge);
-        }
-      );
-
-      client.close(done);
+  context('hedge', function() {
+    before(function() {
+      this.hoist = callback => {
+        const { configuration } = this;
+        const client = configuration.newClient(configuration.writeConcernMax(), {
+          poolSize: 1,
+          monitorCommands: true
+        });
+        client.connect(function(err, client) {
+          test.equal(null, err);
+          const events = [];
+          client.on('commandStarted', filterForCommands(['find'], events));
+          const collection = client.db(configuration.db).collection('test');
+          return callback(client, collection, events);
+        });
+      };
     });
-  });
 
-  it('Should error if mode primary and hedge', function(done) {
-    const configuration = this.configuration;
-    const client = configuration.newClient();
-    client.connect((err, client) => {
-      if (err) return done(err);
-      [{ hedge: { enabled: false } }, { hedge: { enabled: true } }, { hedge: {} }].map(opt => {
-        expect(() => {
-          new ReadPreference(ReadPreference.PRIMARY, null, opt);
-        }).to.throw();
-
-        expect(() => {
-          new ReadPreference(ReadPreference.PRIMARY, opt);
-        }).to.throw();
+    it('should correctly set hoist using [find option & empty hedge]', function(done) {
+      this.hoist((client, collection, events) => {
+        collection
+          .find(
+            {},
+            {
+              readPreference: new ReadPreference(ReadPreference.SECONDARY, null, { hedge: {} })
+            }
+          )
+          .toArray(err => {
+            test.equal(null, err);
+            const expected = { mode: ReadPreference.SECONDARY, hedge: {} };
+            expect(events[0].command.$readPreference).to.deep.equal(expected);
+            client.close(done);
+          });
       });
-      client.close(done);
+    });
+
+    it('should correctly set hoist using [.setReadPreference & empty hedge] ', function(done) {
+      this.hoist((client, collection, events) => {
+        collection
+          .find({})
+          .setReadPreference(new ReadPreference(ReadPreference.SECONDARY, null, { hedge: {} }))
+          .toArray(err => {
+            test.equal(null, err);
+            const expected = { mode: ReadPreference.SECONDARY, hedge: {} };
+            expect(events[0].command.$readPreference).to.deep.equal(expected);
+            client.close(done);
+          });
+      });
+    });
+
+    it('should correctly set hoist using [.setReadPreference & enabled hedge] ', function(done) {
+      const rp = new ReadPreference(ReadPreference.SECONDARY, null, { hedge: { enabled: true } });
+      this.hoist((client, collection, events) => {
+        collection
+          .find({})
+          .setReadPreference(rp)
+          .toArray(err => {
+            test.equal(null, err);
+            const expected = { mode: ReadPreference.SECONDARY, hedge: { enabled: true } };
+            expect(events[0].command.$readPreference).to.deep.equal(expected);
+            client.close(done);
+          });
+      });
+    });
+
+    it('should correctly set hoist using [.setReadPreference & disabled hedge] ', function(done) {
+      const rp = new ReadPreference(ReadPreference.SECONDARY, null, { hedge: { enabled: false } });
+      this.hoist((client, collection, events) => {
+        collection
+          .find({})
+          .setReadPreference(rp)
+          .toArray(err => {
+            test.equal(null, err);
+            const expected = { mode: ReadPreference.SECONDARY, hedge: { enabled: false } };
+            expect(events[0].command.$readPreference).to.deep.equal(expected);
+            client.close(done);
+          });
+      });
+    });
+
+    it('should correctly set hoist using [.setReadPreference & undefined hedge] ', function(done) {
+      const rp = new ReadPreference(ReadPreference.SECONDARY, null);
+      this.hoist((client, collection, events) => {
+        collection
+          .find({})
+          .setReadPreference(rp)
+          .toArray(err => {
+            test.equal(null, err);
+            const expected = { mode: ReadPreference.SECONDARY };
+            expect(events[0].command.$readPreference).to.deep.equal(expected);
+            client.close(done);
+          });
+      });
     });
   });
 });
