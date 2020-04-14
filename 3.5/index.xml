@@ -348,7 +348,7 @@ const MongoClient = require(&#39;mongodb&#39;).MongoClient; const Logger = requi
       <pubDate>Wed, 18 Mar 2015 16:56:14 +0000</pubDate>
       
       <guid>/node-mongodb-native/3.5/issues-help/</guid>
-      <description>Issues &amp;amp; Help Our developer community is vibrant and highly engaged, with wide experience using Node.js with MongoDB. Often, the quickest way to get support for general questions is through the mongodb-user google group or through stackoverflow.
+      <description>Issues &amp;amp; Help Our developer community is vibrant and highly engaged, with wide experience using Node.js with MongoDB. Often, the quickest way to get support for general questions is through the MongoDB Community Forums or through stackoverflow.
 Refer to our support channels documentation for more information.
 Bugs / Feature Requests To report a bug or to request a new feature in the Node.js driver, please open a case in our issue management tool, JIRA:</description>
     </item>

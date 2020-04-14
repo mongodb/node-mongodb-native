@@ -2334,10 +2334,13 @@
 
 <p>At the time of writing the node driver has seven topology classes, including the newly introduced unified topology. Each legacy topology type from the core module targets a supported topology class: Replica Sets, Sharded Deployments (mongos) and Standalone servers. On top of each of these rests a thin topology wrapper from the &ldquo;native&rdquo; layer which introduces the concept of a &ldquo;disconnect handler&rdquo;, essentially a callback queue for handling naive retryability.</p>
 
-<p>The goal of the unified topology is threefold:
-  - fully support the drivers Server Discovery and Monitoring, Server Selection and Max Staleness specifications
-  - reduce the maintenance burden of supporting the topology layer in the driver by modeling all supported topology types with a single engine
-  - remove confusing functionality which could be potentially dangerous for our users</p>
+<p>The goal of the unified topology is threefold:</p>
+
+<ul>
+<li>fully support the drivers Server Discovery and Monitoring, Server Selection and Max Staleness specifications</li>
+<li>reduce the maintenance burden of supporting the topology layer in the driver by modeling all supported topology types with a single engine</li>
+<li>remove confusing functionality which could be potentially dangerous for our users</li>
+</ul>
 
 <h2 id="how-to-use-it">How to use it</h2>
 
@@ -2352,25 +2355,31 @@
 
 <h2 id="deprecated-events-and-options">Deprecated events and options</h2>
 
-<p>The unified topology no longer supports the following events:
-- <code>reconnect</code>
-- <code>reconnectFailed</code>
-- <code>attemptReconnect</code>
-- <code>joined</code>
-- <code>left</code>
-- <code>ping</code>
-- <code>ha</code>
-- <code>all</code>
-- <code>fullsetup</code>
-- <code>open</code></p>
+<p>The unified topology no longer supports the following events:</p>
 
-<p>It also deprecates the following options passed into the <code>MongoClient</code>:
-- <code>autoReconnect</code>
-- <code>reconnectTries</code>
-- <code>reconnectInterval</code>
-- <code>bufferMaxEntries</code></p>
+<ul>
+<li><code>reconnect</code></li>
+<li><code>reconnectFailed</code></li>
+<li><code>attemptReconnect</code></li>
+<li><code>joined</code></li>
+<li><code>left</code></li>
+<li><code>ping</code></li>
+<li><code>ha</code></li>
+<li><code>all</code></li>
+<li><code>fullsetup</code></li>
+<li><code>open</code></li>
+</ul>
 
-<p>The following sections will go into detail about why tese values are no longer used.</p>
+<p>It also deprecates the following options passed into the <code>MongoClient</code>:</p>
+
+<ul>
+<li><code>autoReconnect</code></li>
+<li><code>reconnectTries</code></li>
+<li><code>reconnectInterval</code></li>
+<li><code>bufferMaxEntries</code></li>
+</ul>
+
+<p>The following sections will go into detail about why these values are no longer used.</p>
 
 <h3 id="mongoclient-connect-isconnected"><code>MongoClient.connect</code>, <code>isConnected</code></h3>
 
@@ -2416,9 +2425,12 @@ await client.close();
 
 <h3 id="disconnecthandler">disconnectHandler</h3>
 
-<p>The three topology types from the &ldquo;native&rdquo; layer (in <code>lib/topologies</code>) primarily provide support for a callback store, called the &ldquo;disconnect handler&rdquo;. Rather than using a server selection loop, the legacy topologies instead place callbacks on this store in cases when no suitable server is available, intending to run the operation at some later time. This callback store also provides a form of naive retryability, however in practice this might lead to unexpected, or even unintended results:
-  - The callback store is only associated with a single server, so attempts to re-execute an operation are only ever made against the originally selected server. If that server never comes back (it was stepped down, and decommissioned for instance), the operation will sit in limbo.
-  - There is no collaboration with the server to ensure that queued write operations only happen one time. Imagine running an <code>updateOne</code> operation which is interrupted by a network error. The operation was successfully sent to the server, but the server response was lost during the interruption, which means the operation is placed in the callback store to be retried. At the same, another microservice allows a user to update the written data. Once the original client is reconnected to the server, it automatically rexecutes the operation and updates the <em>newer</em> data with an <em>older</em> value.</p>
+<p>The three topology types from the &ldquo;native&rdquo; layer (in <code>lib/topologies</code>) primarily provide support for a callback store, called the &ldquo;disconnect handler&rdquo;. Rather than using a server selection loop, the legacy topologies instead place callbacks on this store in cases when no suitable server is available, intending to run the operation at some later time. This callback store also provides a form of naive retryability, however in practice this might lead to unexpected, or even unintended results:</p>
+
+<ul>
+<li>The callback store is only associated with a single server, so attempts to re-execute an operation are only ever made against the originally selected server. If that server never comes back (it was stepped down, and decommissioned for instance), the operation will sit in limbo.</li>
+<li>There is no collaboration with the server to ensure that queued write operations only happen one time. Imagine running an <code>updateOne</code> operation which is interrupted by a network error. The operation was successfully sent to the server, but the server response was lost during the interruption, which means the operation is placed in the callback store to be retried. At the same, another microservice allows a user to update the written data. Once the original client is reconnected to the server, it automatically rexecutes the operation and updates the <em>newer</em> data with an <em>older</em> value.</li>
+</ul>
 
 <p>The unified topology completely removes the disconnect handler, in favor of the more robust and consistent <a href="https://github.com/mongodb/specifications/blob/master/source/retryable-reads/retryable-reads.rst">Retryable Reads</a> and <a href="https://github.com/mongodb/specifications/blob/master/source/retryable-writes/retryable-writes.rst">Retryable Writes</a> features. Operations now will attempt execution in a server selection loop for up to <code>serverSelectionTimeoutMS</code> (default: 30s), and will retry the operation one time in the event of a <a href="https://github.com/mongodb/specifications/blob/master/source/retryable-writes/retryable-writes.rst#terms">retryable error</a>. All errors outside of this loop are returned to the user, since they know best what to do in these scenarios.</p>
 

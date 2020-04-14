@@ -2289,16 +2289,12 @@ const MongoError = require('./core').MongoError;
 const CoreCursor = require('./core/cursor').CoreCursor;
 const CursorState = require('./core/cursor').CursorState;
 const Map = require('./core').BSON.Map;
+const maybePromise = require('./utils').maybePromise;
+const executeOperation = require('./operations/execute_operation');
+const formattedOrderClause = require('./utils').formattedOrderClause;
 
 const each = require('./operations/cursor_ops').each;
-
 const CountOperation = require('./operations/count');
-const ExplainOperation = require('./operations/explain');
-const HasNextOperation = require('./operations/has_next');
-const NextOperation = require('./operations/next');
-const ToArrayOperation = require('./operations/to_array');
-
-const executeOperation = require('./operations/execute_operation');
 
 /**
  * @fileOverview The **Cursor** class is an internal class that embodies a cursor on MongoDB
@@ -2408,8 +2404,6 @@ class Cursor extends CoreCursor {
       state: CursorState.INIT,
       // Promise library
       promiseLibrary,
-      // Current doc
-      currentDoc: null,
       // explicitlyIgnoreSession
       explicitlyIgnoreSession: !!options.explicitlyIgnoreSession
     };
@@ -2479,9 +2473,33 @@ class Cursor extends CoreCursor {
    * @return {Promise} returns Promise if no callback passed
    */
   hasNext(callback) {
-    const hasNextOperation = new HasNextOperation(this);
+    if (this.s.state === CursorState.CLOSED || (this.isDead &amp;&amp; this.isDead())) {
+      throw MongoError.create({ message: 'Cursor is closed', driver: true });
+    }
 
-    return executeOperation(this.topology, hasNextOperation, callback);
+    return maybePromise(this, callback, cb => {
+      const cursor = this;
+      if (cursor.isNotified()) {
+        return cb(null, false);
+      }
+
+      cursor._next((err, doc) => {
+        if (err) return cb(err);
+        if (doc == null || cursor.s.state === Cursor.CLOSED || cursor.isDead()) {
+          return cb(null, false);
+        }
+
+        cursor.s.state = CursorState.OPEN;
+
+        // NODE-2482: merge this into the core cursor implementation
+        cursor.cursorState.cursorIndex--;
+        if (cursor.cursorState.limit > 0) {
+          cursor.cursorState.currentLimit--;
+        }
+
+        cb(null, true);
+      });
+    });
   }
 
   /**
@@ -2492,9 +2510,27 @@ class Cursor extends CoreCursor {
    * @return {Promise} returns Promise if no callback passed
    */
   next(callback) {
-    const nextOperation = new NextOperation(this);
+    return maybePromise(this, callback, cb => {
+      const cursor = this;
+      if (cursor.s.state === CursorState.CLOSED || (cursor.isDead &amp;&amp; cursor.isDead())) {
+        cb(MongoError.create({ message: 'Cursor is closed', driver: true }));
+        return;
+      }
 
-    return executeOperation(this.topology, nextOperation, callback);
+      if (cursor.s.state === CursorState.INIT &amp;&amp; cursor.cmd.sort) {
+        try {
+          cursor.cmd.sort = formattedOrderClause(cursor.cmd.sort);
+        } catch (err) {
+          return cb(err);
+        }
+      }
+
+      cursor._next((err, doc) => {
+        if (err) return cb(err);
+        cursor.s.state = CursorState.OPEN;
+        cb(null, doc);
+      });
+    });
   }
 
   /**
@@ -3064,9 +3100,43 @@ class Cursor extends CoreCursor {
       });
     }
 
-    const toArrayOperation = new ToArrayOperation(this);
+    return maybePromise(this, callback, cb => {
+      const cursor = this;
+      const items = [];
 
-    return executeOperation(this.topology, toArrayOperation, callback);
+      // Reset cursor
+      cursor.rewind();
+      cursor.s.state = CursorState.INIT;
+
+      // Fetch all the documents
+      const fetchDocs = () => {
+        cursor._next((err, doc) => {
+          if (err) {
+            return cursor._endSession
+              ? cursor._endSession(() => handleCallback(cb, err))
+              : handleCallback(cb, err);
+          }
+
+          if (doc == null) {
+            return cursor.close({ skipKillCursors: true }, () => handleCallback(cb, null, items));
+          }
+
+          // Add doc to items
+          items.push(doc);
+
+          // Get all buffered objects
+          if (cursor.bufferedCount() > 0) {
+            let docs = cursor.readBufferedDocuments(cursor.bufferedCount());
+            Array.prototype.push.apply(items, docs);
+          }
+
+          // Attempt a fetch
+          fetchDocs();
+        });
+      };
+
+      fetchDocs();
+    });
   }
 
   /**
@@ -3251,10 +3321,9 @@ class Cursor extends CoreCursor {
     if (this.cmd.readConcern) {
       delete this.cmd['readConcern'];
     }
-
-    const explainOperation = new ExplainOperation(this);
-
-    return executeOperation(this.topology, explainOperation, callback);
+    return maybePromise(this, callback, cb => {
+      CoreCursor.prototype._next.apply(this, [cb]);
+    });
   }
 
   /**
@@ -3377,7 +3446,7 @@ module.exports = Cursor;
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Fri Jan 24 2020 07:37:15 GMT-0500 (EST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Tue Apr 14 2020 08:11:14 GMT-0400 (EDT)
                     </footer>
                 </div>
             </td>
