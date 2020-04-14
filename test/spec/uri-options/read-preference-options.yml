@@ -9,12 +9,23 @@ tests:
         options:
             readPreference: "primaryPreferred"
             readPreferenceTags:
-                - 
+                -
                     dc: "ny"
                     rack: "1"
                 -
                     dc: "ny"
             maxStalenessSeconds: 120
+    -
+        description: "Single readPreferenceTags is parsed as array of size one"
+        uri: "mongodb://example.com/?readPreferenceTags=dc:ny"
+        valid: true
+        warning: false
+        hosts: ~
+        auth: ~
+        options:
+            readPreferenceTags:
+                -
+                    dc: "ny"
     -
         description: "Invalid readPreferenceTags causes a warning"
         uri: "mongodb://example.com/?readPreferenceTags=invalid"

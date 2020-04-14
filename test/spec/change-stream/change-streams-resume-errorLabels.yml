@@ -1,0 +1,1105 @@
+# Tests for resume behavior on server versions that support the ResumableChangeStreamError label
+collection_name: &collection_name "test"
+database_name: &database_name "change-stream-tests"
+tests:
+  -
+    description: "change stream resumes after HostUnreachable"
+    minServerVersion: "4.3.1"
+    failPoint:
+      configureFailPoint: failGetMoreAfterCursorCheckout # SERVER-46091 explains why a new failpoint was needed
+      mode: { times: 1 }
+      data:
+          errorCode: 6
+          closeConnection: false
+    target: collection
+    topology: 
+      - replicaset
+      - sharded
+    changeStreamPipeline: []
+    changeStreamOptions: {}
+    operations:
+      -
+        database: *database_name
+        collection: *collection_name
+        name: insertOne
+        arguments:
+          document:
+            x: 1
+    expectations:
+      -
+        command_started_event:
+          command:
+            aggregate: *collection_name
+            cursor: {}
+            pipeline:
+              -
+                $changeStream: {}
+          command_name: aggregate
+          database_name: *database_name
+      -
+        command_started_event:
+          command:
+            getMore: 42
+            collection: *collection_name
+          command_name: getMore
+          database_name: *database_name
+      -
+        command_started_event:
+          command:
+            aggregate: *collection_name
+            cursor: {}
+            pipeline:
+              -
+                $changeStream: {}
+          command_name: aggregate
+          database_name: *database_name
+    result:
+      success:
+        -
+          _id: "42"
+          documentKey: "42"
+          operationType: insert
+          ns:
+            db: *database_name
+            coll: *collection_name
+          fullDocument:
+            x:
+              $numberInt: "1"
+  -
+    description: "change stream resumes after HostNotFound"
+    minServerVersion: "4.3.1"
+    failPoint:
+      configureFailPoint: failGetMoreAfterCursorCheckout
+      mode: { times: 1 }
+      data:
+          errorCode: 7
+          closeConnection: false
+    target: collection
+    topology:
+      - replicaset
+      - sharded
+    changeStreamPipeline: []
+    changeStreamOptions: {}
+    operations:
+      -
+        database: *database_name
+        collection: *collection_name
+        name: insertOne
+        arguments:
+          document:
+            x: 1
+    expectations:
+      -
+        command_started_event:
+          command:
+            aggregate: *collection_name
+            cursor: {}
+            pipeline:
+              -
+                $changeStream: {}
+          command_name: aggregate
+          database_name: *database_name
+      -
+        command_started_event:
+          command:
+            getMore: 42
+            collection: *collection_name
+          command_name: getMore
+          database_name: *database_name
+      -
+        command_started_event:
+          command:
+            aggregate: *collection_name
+            cursor: {}
+            pipeline:
+              -
+                $changeStream: {}
+          command_name: aggregate
+          database_name: *database_name
+    result:
+      success:
+        -
+          _id: "42"
+          documentKey: "42"
+          operationType: insert
+          ns:
+            db: *database_name
+            coll: *collection_name
+          fullDocument:
+            x:
+              $numberInt: "1"
+  -
+    description: "change stream resumes after NetworkTimeout"
+    minServerVersion: "4.3.1"
+    failPoint:
+      configureFailPoint: failGetMoreAfterCursorCheckout
+      mode: { times: 1 }
+      data:
+          errorCode: 89
+          closeConnection: false
+    target: collection
+    topology:
+      - replicaset
+      - sharded
+    changeStreamPipeline: []
+    changeStreamOptions: {}
+    operations:
+      -
+        database: *database_name
+        collection: *collection_name
+        name: insertOne
+        arguments:
+          document:
+            x: 1
+    expectations:
+      -
+        command_started_event:
+          command:
+            aggregate: *collection_name
+            cursor: {}
+            pipeline:
+              -
+                $changeStream: {}
+          command_name: aggregate
+          database_name: *database_name
+      -
+        command_started_event:
+          command:
+            getMore: 42
+            collection: *collection_name
+          command_name: getMore
+          database_name: *database_name
+      -
+        command_started_event:
+          command:
+            aggregate: *collection_name
+            cursor: {}
+            pipeline:
+              -
+                $changeStream: {}
+          command_name: aggregate
+          database_name: *database_name
+    result:
+      success:
+        -
+          _id: "42"
+          documentKey: "42"
+          operationType: insert
+          ns:
+            db: *database_name
+            coll: *collection_name
+          fullDocument:
+            x:
+              $numberInt: "1"
+  -
+    description: "change stream resumes after ShutdownInProgress"
+    minServerVersion: "4.3.1"
+    failPoint:
+      configureFailPoint: failGetMoreAfterCursorCheckout
+      mode: { times: 1 }
+      data:
+          errorCode: 91
+          closeConnection: false
+    target: collection
+    topology:
+      - replicaset
+      - sharded
+    changeStreamPipeline: []
+    changeStreamOptions: {}
+    operations:
+      -
+        database: *database_name
+        collection: *collection_name
+        name: insertOne
+        arguments:
+          document:
+            x: 1
+    expectations:
+      -
+        command_started_event:
+          command:
+            aggregate: *collection_name
+            cursor: {}
+            pipeline:
+              -
+                $changeStream: {}
+          command_name: aggregate
+          database_name: *database_name
+      -
+        command_started_event:
+          command:
+            getMore: 42
+            collection: *collection_name
+          command_name: getMore
+          database_name: *database_name
+      -
+        command_started_event:
+          command:
+            aggregate: *collection_name
+            cursor: {}
+            pipeline:
+              -
+                $changeStream: {}
+          command_name: aggregate
+          database_name: *database_name
+    result:
+      success:
+        -
+          _id: "42"
+          documentKey: "42"
+          operationType: insert
+          ns:
+            db: *database_name
+            coll: *collection_name
+          fullDocument:
+            x:
+              $numberInt: "1"
+  -
+    description: "change stream resumes after PrimarySteppedDown"
+    minServerVersion: "4.3.1"
+    failPoint:
+      configureFailPoint: failGetMoreAfterCursorCheckout
+      mode: { times: 1 }
+      data:
+          errorCode: 189
+          closeConnection: false
+    target: collection
+    topology:
+      - replicaset
+      - sharded
+    changeStreamPipeline: []
+    changeStreamOptions: {}
+    operations:
+      -
+        database: *database_name
+        collection: *collection_name
+        name: insertOne
+        arguments:
+          document:
+            x: 1
+    expectations:
+      -
+        command_started_event:
+          command:
+            aggregate: *collection_name
+            cursor: {}
+            pipeline:
+              -
+                $changeStream: {}
+          command_name: aggregate
+          database_name: *database_name
+      -
+        command_started_event:
+          command:
+            getMore: 42
+            collection: *collection_name
+          command_name: getMore
+          database_name: *database_name
+      -
+        command_started_event:
+          command:
+            aggregate: *collection_name
+            cursor: {}
+            pipeline:
+              -
+                $changeStream: {}
+          command_name: aggregate
+          database_name: *database_name
+    result:
+      success:
+        -
+          _id: "42"
+          documentKey: "42"
+          operationType: insert
+          ns:
+            db: *database_name
+            coll: *collection_name
+          fullDocument:
+            x:
+              $numberInt: "1"
+  -
+    description: "change stream resumes after ExceededTimeLimit"
+    minServerVersion: "4.3.1"
+    failPoint:
+      configureFailPoint: failGetMoreAfterCursorCheckout
+      mode: { times: 1 }
+      data:
+          errorCode: 262
+          closeConnection: false
+    target: collection
+    topology:
+      - replicaset
+      - sharded
+    changeStreamPipeline: []
+    changeStreamOptions: {}
+    operations:
+      -
+        database: *database_name
+        collection: *collection_name
+        name: insertOne
+        arguments:
+          document:
+            x: 1
+    expectations:
+      -
+        command_started_event:
+          command:
+            aggregate: *collection_name
+            cursor: {}
+            pipeline:
+              -
+                $changeStream: {}
+          command_name: aggregate
+          database_name: *database_name
+      -
+        command_started_event:
+          command:
+            getMore: 42
+            collection: *collection_name
+          command_name: getMore
+          database_name: *database_name
+      -
+        command_started_event:
+          command:
+            aggregate: *collection_name
+            cursor: {}
+            pipeline:
+              -
+                $changeStream: {}
+          command_name: aggregate
+          database_name: *database_name
+    result:
+      success:
+        -
+          _id: "42"
+          documentKey: "42"
+          operationType: insert
+          ns:
+            db: *database_name
+            coll: *collection_name
+          fullDocument:
+            x:
+              $numberInt: "1"
+  -
+    description: "change stream resumes after SocketException"
+    minServerVersion: "4.3.1"
+    failPoint:
+      configureFailPoint: failGetMoreAfterCursorCheckout
+      mode: { times: 1 }
+      data:
+          errorCode: 9001
+          closeConnection: false
+    target: collection
+    topology:
+      - replicaset
+      - sharded
+    changeStreamPipeline: []
+    changeStreamOptions: {}
+    operations:
+      -
+        database: *database_name
+        collection: *collection_name
+        name: insertOne
+        arguments:
+          document:
+            x: 1
+    expectations:
+      -
+        command_started_event:
+          command:
+            aggregate: *collection_name
+            cursor: {}
+            pipeline:
+              -
+                $changeStream: {}
+          command_name: aggregate
+          database_name: *database_name
+      -
+        command_started_event:
+          command:
+            getMore: 42
+            collection: *collection_name
+          command_name: getMore
+          database_name: *database_name
+      -
+        command_started_event:
+          command:
+            aggregate: *collection_name
+            cursor: {}
+            pipeline:
+              -
+                $changeStream: {}
+          command_name: aggregate
+          database_name: *database_name
+    result:
+      success:
+        -
+          _id: "42"
+          documentKey: "42"
+          operationType: insert
+          ns:
+            db: *database_name
+            coll: *collection_name
+          fullDocument:
+            x:
+              $numberInt: "1"
+  -
+    description: "change stream resumes after NotMaster"
+    minServerVersion: "4.3.1"
+    failPoint:
+      configureFailPoint: failGetMoreAfterCursorCheckout
+      mode: { times: 1 }
+      data:
+          errorCode: 10107
+          closeConnection: false
+    target: collection
+    topology:
+      - replicaset
+      - sharded
+    changeStreamPipeline: []
+    changeStreamOptions: {}
+    operations:
+      -
+        database: *database_name
+        collection: *collection_name
+        name: insertOne
+        arguments:
+          document:
+            x: 1
+    expectations:
+      -
+        command_started_event:
+          command:
+            aggregate: *collection_name
+            cursor: {}
+            pipeline:
+              -
+                $changeStream: {}
+          command_name: aggregate
+          database_name: *database_name
+      -
+        command_started_event:
+          command:
+            getMore: 42
+            collection: *collection_name
+          command_name: getMore
+          database_name: *database_name
+      -
+        command_started_event:
+          command:
+            aggregate: *collection_name
+            cursor: {}
+            pipeline:
+              -
+                $changeStream: {}
+          command_name: aggregate
+          database_name: *database_name
+    result:
+      success:
+        -
+          _id: "42"
+          documentKey: "42"
+          operationType: insert
+          ns:
+            db: *database_name
+            coll: *collection_name
+          fullDocument:
+            x:
+              $numberInt: "1"
+  -
+    description: "change stream resumes after InterruptedAtShutdown"
+    minServerVersion: "4.3.1"
+    failPoint:
+      configureFailPoint: failGetMoreAfterCursorCheckout
+      mode: { times: 1 }
+      data:
+          errorCode: 11600
+          closeConnection: false
+    target: collection
+    topology:
+      - replicaset
+      - sharded
+    changeStreamPipeline: []
+    changeStreamOptions: {}
+    operations:
+      -
+        database: *database_name
+        collection: *collection_name
+        name: insertOne
+        arguments:
+          document:
+            x: 1
+    expectations:
+      -
+        command_started_event:
+          command:
+            aggregate: *collection_name
+            cursor: {}
+            pipeline:
+              -
+                $changeStream: {}
+          command_name: aggregate
+          database_name: *database_name
+      -
+        command_started_event:
+          command:
+            getMore: 42
+            collection: *collection_name
+          command_name: getMore
+          database_name: *database_name
+      -
+        command_started_event:
+          command:
+            aggregate: *collection_name
+            cursor: {}
+            pipeline:
+              -
+                $changeStream: {}
+          command_name: aggregate
+          database_name: *database_name
+    result:
+      success:
+        -
+          _id: "42"
+          documentKey: "42"
+          operationType: insert
+          ns:
+            db: *database_name
+            coll: *collection_name
+          fullDocument:
+            x:
+              $numberInt: "1"
+  -
+    description: "change stream resumes after InterruptedDueToReplStateChange"
+    minServerVersion: "4.3.1"
+    failPoint:
+      configureFailPoint: failGetMoreAfterCursorCheckout
+      mode: { times: 1 }
+      data:
+          errorCode: 11602
+          closeConnection: false
+    target: collection
+    topology:
+      - replicaset
+      - sharded
+    changeStreamPipeline: []
+    changeStreamOptions: {}
+    operations:
+      -
+        database: *database_name
+        collection: *collection_name
+        name: insertOne
+        arguments:
+          document:
+            x: 1
+    expectations:
+      -
+        command_started_event:
+          command:
+            aggregate: *collection_name
+            cursor: {}
+            pipeline:
+              -
+                $changeStream: {}
+          command_name: aggregate
+          database_name: *database_name
+      -
+        command_started_event:
+          command:
+            getMore: 42
+            collection: *collection_name
+          command_name: getMore
+          database_name: *database_name
+      -
+        command_started_event:
+          command:
+            aggregate: *collection_name
+            cursor: {}
+            pipeline:
+              -
+                $changeStream: {}
+          command_name: aggregate
+          database_name: *database_name
+    result:
+      success:
+        -
+          _id: "42"
+          documentKey: "42"
+          operationType: insert
+          ns:
+            db: *database_name
+            coll: *collection_name
+          fullDocument:
+            x:
+              $numberInt: "1"
+  -
+    description: "change stream resumes after NotMasterNoSlaveOk"
+    minServerVersion: "4.3.1"
+    failPoint:
+      configureFailPoint: failGetMoreAfterCursorCheckout
+      mode: { times: 1 }
+      data:
+          errorCode: 13435
+          closeConnection: false
+    target: collection
+    topology:
+      - replicaset
+      - sharded
+    changeStreamPipeline: []
+    changeStreamOptions: {}
+    operations:
+      -
+        database: *database_name
+        collection: *collection_name
+        name: insertOne
+        arguments:
+          document:
+            x: 1
+    expectations:
+      -
+        command_started_event:
+          command:
+            aggregate: *collection_name
+            cursor: {}
+            pipeline:
+              -
+                $changeStream: {}
+          command_name: aggregate
+          database_name: *database_name
+      -
+        command_started_event:
+          command:
+            getMore: 42
+            collection: *collection_name
+          command_name: getMore
+          database_name: *database_name
+      -
+        command_started_event:
+          command:
+            aggregate: *collection_name
+            cursor: {}
+            pipeline:
+              -
+                $changeStream: {}
+          command_name: aggregate
+          database_name: *database_name
+    result:
+      success:
+        -
+          _id: "42"
+          documentKey: "42"
+          operationType: insert
+          ns:
+            db: *database_name
+            coll: *collection_name
+          fullDocument:
+            x:
+              $numberInt: "1"
+  -
+    description: "change stream resumes after NotMasterOrSecondary"
+    minServerVersion: "4.3.1"
+    failPoint:
+      configureFailPoint: failGetMoreAfterCursorCheckout
+      mode: { times: 1 }
+      data:
+          errorCode: 13436
+          closeConnection: false
+    target: collection
+    topology:
+      - replicaset
+      - sharded
+    changeStreamPipeline: []
+    changeStreamOptions: {}
+    operations:
+      -
+        database: *database_name
+        collection: *collection_name
+        name: insertOne
+        arguments:
+          document:
+            x: 1
+    expectations:
+      -
+        command_started_event:
+          command:
+            aggregate: *collection_name
+            cursor: {}
+            pipeline:
+              -
+                $changeStream: {}
+          command_name: aggregate
+          database_name: *database_name
+      -
+        command_started_event:
+          command:
+            getMore: 42
+            collection: *collection_name
+          command_name: getMore
+          database_name: *database_name
+      -
+        command_started_event:
+          command:
+            aggregate: *collection_name
+            cursor: {}
+            pipeline:
+              -
+                $changeStream: {}
+          command_name: aggregate
+          database_name: *database_name
+    result:
+      success:
+        -
+          _id: "42"
+          documentKey: "42"
+          operationType: insert
+          ns:
+            db: *database_name
+            coll: *collection_name
+          fullDocument:
+            x:
+              $numberInt: "1"
+  -
+    description: "change stream resumes after StaleShardVersion"
+    minServerVersion: "4.3.1"
+    failPoint:
+      configureFailPoint: failGetMoreAfterCursorCheckout
+      mode: { times: 1 }
+      data:
+          errorCode: 63
+          closeConnection: false
+    target: collection
+    topology:
+      - replicaset
+      - sharded
+    changeStreamPipeline: []
+    changeStreamOptions: {}
+    operations:
+      -
+        database: *database_name
+        collection: *collection_name
+        name: insertOne
+        arguments:
+          document:
+            x: 1
+    expectations:
+      -
+        command_started_event:
+          command:
+            aggregate: *collection_name
+            cursor: {}
+            pipeline:
+              -
+                $changeStream: {}
+          command_name: aggregate
+          database_name: *database_name
+      -
+        command_started_event:
+          command:
+            getMore: 42
+            collection: *collection_name
+          command_name: getMore
+          database_name: *database_name
+      -
+        command_started_event:
+          command:
+            aggregate: *collection_name
+            cursor: {}
+            pipeline:
+              -
+                $changeStream: {}
+          command_name: aggregate
+          database_name: *database_name
+    result:
+      success:
+        -
+          _id: "42"
+          documentKey: "42"
+          operationType: insert
+          ns:
+            db: *database_name
+            coll: *collection_name
+          fullDocument:
+            x:
+              $numberInt: "1"
+  -
+    description: "change stream resumes after StaleEpoch"
+    minServerVersion: "4.3.1"
+    failPoint:
+      configureFailPoint: failGetMoreAfterCursorCheckout
+      mode: { times: 1 }
+      data:
+          errorCode: 150
+          closeConnection: false
+    target: collection
+    topology:
+      - replicaset
+      - sharded
+    changeStreamPipeline: []
+    changeStreamOptions: {}
+    operations:
+      -
+        database: *database_name
+        collection: *collection_name
+        name: insertOne
+        arguments:
+          document:
+            x: 1
+    expectations:
+      -
+        command_started_event:
+          command:
+            aggregate: *collection_name
+            cursor: {}
+            pipeline:
+              -
+                $changeStream: {}
+          command_name: aggregate
+          database_name: *database_name
+      -
+        command_started_event:
+          command:
+            getMore: 42
+            collection: *collection_name
+          command_name: getMore
+          database_name: *database_name
+      -
+        command_started_event:
+          command:
+            aggregate: *collection_name
+            cursor: {}
+            pipeline:
+              -
+                $changeStream: {}
+          command_name: aggregate
+          database_name: *database_name
+    result:
+      success:
+        -
+          _id: "42"
+          documentKey: "42"
+          operationType: insert
+          ns:
+            db: *database_name
+            coll: *collection_name
+          fullDocument:
+            x:
+              $numberInt: "1"
+  -
+    description: "change stream resumes after RetryChangeStream"
+    minServerVersion: "4.3.1"
+    failPoint:
+      configureFailPoint: failGetMoreAfterCursorCheckout
+      mode: { times: 1 }
+      data:
+          errorCode: 234
+          closeConnection: false
+    target: collection
+    topology:
+      - replicaset
+      - sharded
+    changeStreamPipeline: []
+    changeStreamOptions: {}
+    operations:
+      -
+        database: *database_name
+        collection: *collection_name
+        name: insertOne
+        arguments:
+          document:
+            x: 1
+    expectations:
+      -
+        command_started_event:
+          command:
+            aggregate: *collection_name
+            cursor: {}
+            pipeline:
+              -
+                $changeStream: {}
+          command_name: aggregate
+          database_name: *database_name
+      -
+        command_started_event:
+          command:
+            getMore: 42
+            collection: *collection_name
+          command_name: getMore
+          database_name: *database_name
+      -
+        command_started_event:
+          command:
+            aggregate: *collection_name
+            cursor: {}
+            pipeline:
+              -
+                $changeStream: {}
+          command_name: aggregate
+          database_name: *database_name
+    result:
+      success:
+        -
+          _id: "42"
+          documentKey: "42"
+          operationType: insert
+          ns:
+            db: *database_name
+            coll: *collection_name
+          fullDocument:
+            x:
+              $numberInt: "1"
+  -
+    description: "change stream resumes after FailedToSatisfyReadPreference"
+    minServerVersion: "4.3.1"
+    failPoint:
+      configureFailPoint: failGetMoreAfterCursorCheckout
+      mode: { times: 1 }
+      data:
+          errorCode: 133
+          closeConnection: false
+    target: collection
+    topology:
+      - replicaset
+      - sharded
+    changeStreamPipeline: []
+    changeStreamOptions: {}
+    operations:
+      -
+        database: *database_name
+        collection: *collection_name
+        name: insertOne
+        arguments:
+          document:
+            x: 1
+    expectations:
+      -
+        command_started_event:
+          command:
+            aggregate: *collection_name
+            cursor: {}
+            pipeline:
+              -
+                $changeStream: {}
+          command_name: aggregate
+          database_name: *database_name
+      -
+        command_started_event:
+          command:
+            getMore: 42
+            collection: *collection_name
+          command_name: getMore
+          database_name: *database_name
+      -
+        command_started_event:
+          command:
+            aggregate: *collection_name
+            cursor: {}
+            pipeline:
+              -
+                $changeStream: {}
+          command_name: aggregate
+          database_name: *database_name
+    result:
+      success:
+        -
+          _id: "42"
+          documentKey: "42"
+          operationType: insert
+          ns:
+            db: *database_name
+            coll: *collection_name
+          fullDocument:
+            x:
+              $numberInt: "1"
+  # The next two tests ensure that the driver only uses the error label, not the whitelist.
+  -
+    description: "change stream resumes if error contains ResumableChangeStreamError"
+    minServerVersion: "4.3.1"
+    failPoint:
+      configureFailPoint: failCommand
+      mode: { times: 1 }
+      data:
+          failCommands: ["getMore"]
+          errorCode: 50 # Use an error code that does not have the whitelist label by default
+          closeConnection: false
+          errorLabels: ["ResumableChangeStreamError"]
+    target: collection
+    topology:
+      - replicaset
+      - sharded
+    changeStreamPipeline: []
+    changeStreamOptions: {}
+    operations:
+      -
+        database: *database_name
+        collection: *collection_name
+        name: insertOne
+        arguments:
+          document:
+            x: 1
+    expectations:
+      -
+        command_started_event:
+          command:
+            aggregate: *collection_name
+            cursor: {}
+            pipeline:
+              -
+                $changeStream: {}
+          command_name: aggregate
+          database_name: *database_name
+      -
+        command_started_event:
+          command:
+            getMore: 42
+            collection: *collection_name
+          command_name: getMore
+          database_name: *database_name
+      -
+        command_started_event:
+          command:
+            aggregate: *collection_name
+            cursor: {}
+            pipeline:
+              -
+                $changeStream: {}
+          command_name: aggregate
+          database_name: *database_name
+    result:
+      success:
+        -
+          _id: "42"
+          documentKey: "42"
+          operationType: insert
+          ns:
+            db: *database_name
+            coll: *collection_name
+          fullDocument:
+            x:
+              $numberInt: "1"
+  -
+    description: "change stream does not resume if error does not contain ResumableChangeStreamError"
+    minServerVersion: "4.3.1"
+    failPoint:
+      configureFailPoint: failCommand # failCommand will not add the whitelist error label
+      mode: { times: 1 }
+      data:
+          failCommands: ["getMore"]
+          errorCode: 6 # Use an error code that is on the whitelist
+          closeConnection: false
+    target: collection
+    topology:
+      - replicaset
+      - sharded
+    changeStreamPipeline: []
+    changeStreamOptions: {}
+    operations:
+      -
+        database: *database_name
+        collection: *collection_name
+        name: insertOne
+        arguments:
+          document:
+            x: 1
+    result:
+      error:
+        code: 6
