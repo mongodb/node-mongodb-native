@@ -13,6 +13,96 @@ const sinon = require('sinon');
 
 chai.use(require('chai-subset'));
 
+/**
+ * Triggers a fake resumable error on a change stream
+ *
+ * @param {ChangeStream} changeStream
+ * @param {Function} onCursorClosed callback when cursor closed due this error
+ */
+function triggerResumableError(changeStream, onCursorClosed) {
+  const closeCursor = changeStream.cursor.close;
+  changeStream.cursor.close = callback => {
+    changeStream.cursor.close = closeCursor;
+    changeStream.cursor.close(callback);
+    onCursorClosed();
+  };
+  const fakeResumableError = new MongoNetworkError('fake error');
+  fakeResumableError[mongoErrorContextSymbol] = { isGetMore: true };
+  changeStream.cursor.emit('error', fakeResumableError);
+}
+
+/**
+ * Waits for a change stream to start
+ *
+ * @param {ChangeStream} changeStream
+ * @param {Function} callback
+ */
+function waitForStarted(changeStream, callback) {
+  changeStream.cursor.once('init', () => {
+    callback();
+  });
+}
+
+/**
+ * Iterates the next discrete batch of a change stream non-eagerly. This
+ * will return `null` if the next bach is empty, rather than waiting forever
+ * for a non-empty batch.
+ *
+ * @param {ChangeStream} changeStream
+ * @param {Function} callback
+ */
+function tryNext(changeStream, callback) {
+  let complete = false;
+  function done(err, result) {
+    if (complete) return;
+
+    // if the arity is 1 then this a callback for `more`
+    if (arguments.length === 1) {
+      result = err;
+      const batch = result.cursor.firstBatch || result.cursor.nextBatch;
+      if (batch.length === 0) {
+        complete = true;
+        callback(null, null);
+      }
+
+      return;
+    }
+
+    // otherwise, this a normal response to `next`
+    complete = true;
+    changeStream.removeListener('more', done);
+    if (err) return callback(err);
+    callback(err, result);
+  }
+
+  // race the two requests
+  changeStream.next(done);
+  changeStream.cursor.once('more', done);
+}
+
+/**
+ * Exhausts a change stream aggregating all responses until the first
+ * empty batch into a returned array of events.
+ *
+ * @param {ChangeStream} changeStream
+ * @param {Function|Array} bag
+ * @param {Function} [callback]
+ */
+function exhaust(changeStream, bag, callback) {
+  if (typeof bag === 'function') {
+    callback = bag;
+    bag = [];
+  }
+
+  tryNext(changeStream, (err, doc) => {
+    if (err) return callback(err);
+    if (doc === null) return callback(undefined, bag);
+
+    bag.push(doc);
+    exhaust(changeStream, bag, callback);
+  });
+}
+
 // Define the pipeline processing changes
 var pipeline = [
   { $addFields: { addedField: 'This is a field added using $addFields' } },
@@ -2825,5 +2915,102 @@ describe('Change Streams', function() {
           });
       });
     });
+  });
+});
+
+describe('Change Stream Resume Error Tests', function() {
+  it('(events) should continue iterating after a resumable error', function(done) {
+    const configuration = this.configuration;
+    const client = configuration.newClient();
+    client.connect(err => {
+      expect(err).to.not.exist;
+      const collection = client.db().collection('test');
+      const changeStream = collection.watch();
+      const docs = [];
+      changeStream.on('change', change => {
+        expect(change).to.exist;
+        docs.push(change);
+        if (docs.length === 2) {
+          expect(docs[0]).to.containSubset({
+            operationType: 'insert',
+            fullDocument: { a: 42 }
+          });
+          expect(docs[1]).to.containSubset({
+            operationType: 'insert',
+            fullDocument: { b: 24 }
+          });
+          changeStream.close(() => client.close(done));
+        }
+      });
+      waitForStarted(changeStream, () => {
+        collection.insertOne({ a: 42 }, err => {
+          expect(err).to.not.exist;
+          triggerResumableError(changeStream, () => {
+            collection.insertOne({ b: 24 }, err => {
+              expect(err).to.not.exist;
+            });
+          });
+        });
+      });
+    });
+  });
+
+  it('(promises) hasNext should work after a resumable error', function(done) {
+    const configuration = this.configuration;
+    const client = configuration.newClient();
+    client.connect(err => {
+      expect(err).to.not.exist;
+      const collection = client.db().collection('test');
+      const changeStream = collection.watch();
+      waitForStarted(changeStream, () => {
+        collection.insertOne({ a: 42 }, err => {
+          expect(err).to.not.exist;
+          triggerResumableError(changeStream, () => {
+            changeStream.hasNext((err1, hasNext) => {
+              expect(err).to.not.exist;
+              expect(hasNext).to.be.true;
+              changeStream.close(() => client.close(done));
+            });
+          });
+        });
+      });
+      changeStream.hasNext((err, hasNext) => {
+        expect(err).to.not.exist;
+        expect(hasNext).to.be.true;
+        changeStream.close(() => client.close(done));
+      });
+    });
+  });
+
+  it('(promises) should continue iterating after a resumable error', async function() {
+    const configuration = this.configuration;
+    const client = configuration.newClient();
+    await client.connect();
+    const collection = client.db().collection('test');
+    const changeStream = collection.watch();
+    waitForStarted(changeStream, () => {
+      collection.insertOne({ a: 42 }, err => {
+        expect(err).to.not.exist;
+        triggerResumableError(changeStream, () => {
+          collection.insertOne({ b: 24 }, err => {
+            expect(err).to.not.exist;
+          });
+        });
+      });
+    });
+    const docs = [];
+    while (await changeStream.hasNext()) {
+      const change = await changeStream.next();
+      docs.push(change.fullDocument);
+      if (change.fullDocument.b === 24) {
+        break;
+      }
+    }
+    expect(docs)
+      .to.be.an('array')
+      .with.lengthOf(2);
+
+    await changeStream.close();
+    await client.close();
   });
 });
