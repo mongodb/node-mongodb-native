@@ -1,6 +1,6 @@
 {
   "name": "mongodb",
-  "version": "3.5.5",
+  "version": "3.6.0-beta.0",
   "description": "The official MongoDB driver for Node.js",
   "main": "index.js",
   "files": [
@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "bl": "^2.2.0",
-    "bson": "^1.1.1",
+    "bson": "^1.1.4",
     "denque": "^1.4.1",
     "require_optional": "^1.0.1",
     "safe-buffer": "^5.1.2"

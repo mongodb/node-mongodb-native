@@ -214,4 +214,52 @@ describe('Sessions', function() {
       }
     });
   });
+
+  context('error handling', function() {
+    let mockServer;
+
+    afterEach(() => mock.cleanup());
+    beforeEach(() => {
+      return mock.createServer().then(server => (mockServer = server));
+    });
+
+    it('should not mark session as dirty on network error if already ended', function(done) {
+      mockServer.setMessageHandler(request => {
+        const doc = request.document;
+        if (doc.ismaster) {
+          request.reply(
+            Object.assign({}, mock.DEFAULT_ISMASTER, { logicalSessionTimeoutMinutes: 10 })
+          );
+        } else if (doc.ping) {
+          request.reply({ ok: 1 });
+        } else if (doc.endSessions) {
+          request.reply({ ok: 1 });
+        } else if (doc.insert) {
+          request.connection.destroy();
+        }
+      });
+
+      const client = this.configuration.newClient(`mongodb://${mockServer.uri()}/test`, {
+        useUnifiedTopology: true
+      });
+
+      client.connect(err => {
+        expect(err).to.not.exist;
+        this.defer(() => client.close());
+
+        const session = client.startSession();
+        const collection = client.db('test').collection('foo');
+
+        client.db('admin').command({ ping: 1 }, { session }, err => {
+          expect(err).to.not.exist;
+
+          process.nextTick(() => session.endSession());
+          collection.insertOne({ a: 42 }, { session }, err => {
+            expect(err).to.exist;
+            done();
+          });
+        });
+      });
+    });
+  });
 });

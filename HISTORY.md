@@ -2,6 +2,46 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="3.6.0-beta.0"></a>
+# [3.6.0-beta.0](https://github.com/mongodb/node-mongodb-native/compare/v3.5.5...v3.6.0-beta.0) (2020-04-14)
+
+
+### Bug Fixes
+
+* always return empty array for selection on unknown topology ([af57b57](https://github.com/mongodb/node-mongodb-native/commit/af57b57))
+* always return empty array for selection on unknown topology ([f9e786a](https://github.com/mongodb/node-mongodb-native/commit/f9e786a))
+* correctly use template string for connection string error message ([814e278](https://github.com/mongodb/node-mongodb-native/commit/814e278))
+* createCollection only uses listCollections in strict mode ([d368f12](https://github.com/mongodb/node-mongodb-native/commit/d368f12))
+* don't depend on private node api for `Timeout` wrapper ([e6dc1f4](https://github.com/mongodb/node-mongodb-native/commit/e6dc1f4))
+* don't throw if `withTransaction()` callback rejects with a null reason ([153646c](https://github.com/mongodb/node-mongodb-native/commit/153646c))
+* **cursor:** transforms should only be applied once to documents ([704f30a](https://github.com/mongodb/node-mongodb-native/commit/704f30a))
+* only consider MongoError subclasses for retryability ([265fe40](https://github.com/mongodb/node-mongodb-native/commit/265fe40))
+* **ChangeStream:** whitelist change stream resumable errors ([8a9c108](https://github.com/mongodb/node-mongodb-native/commit/8a9c108)), closes [#17](https://github.com/mongodb/node-mongodb-native/issues/17) [#18](https://github.com/mongodb/node-mongodb-native/issues/18)
+* **sdam:** use ObjectId comparison to track maxElectionId ([db991d6](https://github.com/mongodb/node-mongodb-native/commit/db991d6))
+* only mark server session dirty if the client session is alive ([611be8d](https://github.com/mongodb/node-mongodb-native/commit/611be8d))
+* pass options into `commandSupportsReadConcern` ([e855c83](https://github.com/mongodb/node-mongodb-native/commit/e855c83))
+* polyfill for util.promisify ([1c4cf6c](https://github.com/mongodb/node-mongodb-native/commit/1c4cf6c))
+* single `readPreferenceTags` should be parsed as an array ([a50611b](https://github.com/mongodb/node-mongodb-native/commit/a50611b))
+* store name of collection for more informative error messages ([979d41e](https://github.com/mongodb/node-mongodb-native/commit/979d41e))
+* support write concern provided as string in `fromOptions` ([637f428](https://github.com/mongodb/node-mongodb-native/commit/637f428))
+* use properly camel cased form of `mapReduce` for command ([c1ed2c1](https://github.com/mongodb/node-mongodb-native/commit/c1ed2c1))
+
+
+### Features
+
+* add MONGODB-AWS as a supported auth mechanism ([7f3cfba](https://github.com/mongodb/node-mongodb-native/commit/7f3cfba))
+* bump wire protocol version for 4.4 ([6d3f313](https://github.com/mongodb/node-mongodb-native/commit/6d3f313))
+* deprecate `oplogReplay` for find commands ([24155e7](https://github.com/mongodb/node-mongodb-native/commit/24155e7))
+* directConnection adds unify behavior for replica set discovery ([c5d60fc](https://github.com/mongodb/node-mongodb-native/commit/c5d60fc))
+* expand use of error labels for retryable writes ([c775a4a](https://github.com/mongodb/node-mongodb-native/commit/c775a4a))
+* support `allowDiskUse` for find commands ([dbc0b37](https://github.com/mongodb/node-mongodb-native/commit/dbc0b37))
+* support creating collections and indexes in transactions ([17e4c88](https://github.com/mongodb/node-mongodb-native/commit/17e4c88))
+* support passing a hint to findOneAndReplace/findOneAndUpdate ([faee15b](https://github.com/mongodb/node-mongodb-native/commit/faee15b))
+* support shorter SCRAM conversations ([6b9ff05](https://github.com/mongodb/node-mongodb-native/commit/6b9ff05))
+* use error labels for retryable writes in legacy topologies ([fefc165](https://github.com/mongodb/node-mongodb-native/commit/fefc165))
+
+
+
 <a name="3.5.5"></a>
 ## [3.5.5](https://github.com/mongodb/node-mongodb-native/compare/v3.5.4...v3.5.5) (2020-03-11)
 
