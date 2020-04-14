@@ -1,0 +1,92 @@
+runOn:
+  # These tests assert that the driver does not raise client-side errors and
+  # instead relies on the server to raise an error. Server versions >= 3.4.0
+  # raise errors for unknown deleteOne options, and server versions >= 4.3.4
+  # support the hint option in deleteOne.
+  - { minServerVersion: "3.4.0", maxServerVersion: "4.3.3" }
+
+data:
+  - {_id: 1, x: 11}
+  - {_id: 2, x: 22}
+  - {_id: 3, x: 33}
+  - {_id: 4, x: 44}
+
+collection_name: &collection_name 'BulkWrite_delete_hint'
+
+tests:
+  -
+    description: "BulkWrite deleteOne with hints unsupported (server-side error)"
+    operations:
+      -
+        name: "bulkWrite"
+        arguments:
+          requests:
+            -
+              name: "deleteOne"
+              arguments:
+                filter: &deleteOne_filter1 { _id: 1 }
+                hint: &hint_string "_id_"
+            -
+              name: "deleteOne"
+              arguments:
+                filter: &deleteOne_filter2 { _id: 2 }
+                hint: &hint_doc { _id: 1 }
+          options: { ordered: true }
+        error: true
+    expectations:
+      -
+        command_started_event:
+          command:
+            delete: *collection_name
+            deletes:
+              -
+                q: *deleteOne_filter1
+                hint: *hint_string
+                limit: 1
+              -
+                q: *deleteOne_filter2
+                hint: *hint_doc
+                limit: 1
+            ordered: true
+    outcome: &outcome
+      collection:
+        data:
+          - {_id: 1, x: 11 }
+          - {_id: 2, x: 22 }
+          - {_id: 3, x: 33 }
+          - {_id: 4, x: 44 }
+  -
+    description: "BulkWrite deleteMany with hints unsupported (server-side error)"
+    operations:
+      -
+        name: "bulkWrite"
+        arguments:
+          requests:
+            -
+              name: "deleteMany"
+              arguments:
+                filter: &deleteMany_filter1 { _id: { $lt: 3 } }
+                hint: *hint_string
+            -
+              name: "deleteMany"
+              arguments:
+                filter: &deleteMany_filter2 { _id: { $gte: 4 } }
+                hint: *hint_doc
+          options: { ordered: true }
+        error: true
+    expectations:
+      -
+        command_started_event:
+          command:
+            delete: *collection_name
+            deletes:
+              -
+                q: *deleteMany_filter1
+                hint: *hint_string
+                limit: 0
+              -
+                q: *deleteMany_filter2
+                hint: *hint_doc
+                limit: 0
+            ordered: true
+    outcome: *outcome

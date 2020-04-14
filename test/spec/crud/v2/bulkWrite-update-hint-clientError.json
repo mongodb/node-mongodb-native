@@ -1,7 +1,7 @@
 {
   "runOn": [
     {
-      "minServerVersion": "4.2.0"
+      "maxServerVersion": "3.3.99"
     }
   ],
   "data": [
@@ -25,7 +25,7 @@
   "collection_name": "test_bulkwrite_update_hint",
   "tests": [
     {
-      "description": "BulkWrite updateOne with update hints",
+      "description": "BulkWrite updateOne with update hints unsupported (client-side error)",
       "operations": [
         {
           "name": "bulkWrite",
@@ -66,279 +66,10 @@
               "ordered": true
             }
           },
-          "result": {
-            "deletedCount": 0,
-            "insertedCount": 0,
-            "insertedIds": {},
-            "matchedCount": 2,
-            "modifiedCount": 2,
-            "upsertedCount": 0,
-            "upsertedIds": {}
-          }
+          "error": true
         }
       ],
-      "expectations": [
-        {
-          "command_started_event": {
-            "command": {
-              "update": "test_bulkwrite_update_hint",
-              "updates": [
-                {
-                  "q": {
-                    "_id": 1
-                  },
-                  "u": {
-                    "$inc": {
-                      "x": 1
-                    }
-                  },
-                  "hint": "_id_"
-                },
-                {
-                  "q": {
-                    "_id": 1
-                  },
-                  "u": {
-                    "$inc": {
-                      "x": 1
-                    }
-                  },
-                  "hint": {
-                    "_id": 1
-                  }
-                }
-              ],
-              "ordered": true
-            }
-          }
-        }
-      ],
-      "outcome": {
-        "collection": {
-          "data": [
-            {
-              "_id": 1,
-              "x": 13
-            },
-            {
-              "_id": 2,
-              "x": 22
-            },
-            {
-              "_id": 3,
-              "x": 33
-            },
-            {
-              "_id": 4,
-              "x": 44
-            }
-          ]
-        }
-      }
-    },
-    {
-      "description": "BulkWrite updateMany with update hints",
-      "operations": [
-        {
-          "name": "bulkWrite",
-          "arguments": {
-            "requests": [
-              {
-                "name": "updateMany",
-                "arguments": {
-                  "filter": {
-                    "_id": {
-                      "$lt": 3
-                    }
-                  },
-                  "update": {
-                    "$inc": {
-                      "x": 1
-                    }
-                  },
-                  "hint": "_id_"
-                }
-              },
-              {
-                "name": "updateMany",
-                "arguments": {
-                  "filter": {
-                    "_id": {
-                      "$lt": 3
-                    }
-                  },
-                  "update": {
-                    "$inc": {
-                      "x": 1
-                    }
-                  },
-                  "hint": {
-                    "_id": 1
-                  }
-                }
-              }
-            ],
-            "options": {
-              "ordered": true
-            }
-          },
-          "result": {
-            "deletedCount": 0,
-            "insertedCount": 0,
-            "insertedIds": {},
-            "matchedCount": 4,
-            "modifiedCount": 4,
-            "upsertedCount": 0,
-            "upsertedIds": {}
-          }
-        }
-      ],
-      "expectations": [
-        {
-          "command_started_event": {
-            "command": {
-              "update": "test_bulkwrite_update_hint",
-              "updates": [
-                {
-                  "q": {
-                    "_id": {
-                      "$lt": 3
-                    }
-                  },
-                  "u": {
-                    "$inc": {
-                      "x": 1
-                    }
-                  },
-                  "multi": true,
-                  "hint": "_id_"
-                },
-                {
-                  "q": {
-                    "_id": {
-                      "$lt": 3
-                    }
-                  },
-                  "u": {
-                    "$inc": {
-                      "x": 1
-                    }
-                  },
-                  "multi": true,
-                  "hint": {
-                    "_id": 1
-                  }
-                }
-              ],
-              "ordered": true
-            }
-          }
-        }
-      ],
-      "outcome": {
-        "collection": {
-          "data": [
-            {
-              "_id": 1,
-              "x": 13
-            },
-            {
-              "_id": 2,
-              "x": 24
-            },
-            {
-              "_id": 3,
-              "x": 33
-            },
-            {
-              "_id": 4,
-              "x": 44
-            }
-          ]
-        }
-      }
-    },
-    {
-      "description": "BulkWrite replaceOne with update hints",
-      "operations": [
-        {
-          "name": "bulkWrite",
-          "arguments": {
-            "requests": [
-              {
-                "name": "replaceOne",
-                "arguments": {
-                  "filter": {
-                    "_id": 3
-                  },
-                  "replacement": {
-                    "x": 333
-                  },
-                  "hint": "_id_"
-                }
-              },
-              {
-                "name": "replaceOne",
-                "arguments": {
-                  "filter": {
-                    "_id": 4
-                  },
-                  "replacement": {
-                    "x": 444
-                  },
-                  "hint": {
-                    "_id": 1
-                  }
-                }
-              }
-            ],
-            "options": {
-              "ordered": true
-            }
-          },
-          "result": {
-            "deletedCount": 0,
-            "insertedCount": 0,
-            "insertedIds": {},
-            "matchedCount": 2,
-            "modifiedCount": 2,
-            "upsertedCount": 0,
-            "upsertedIds": {}
-          }
-        }
-      ],
-      "expectations": [
-        {
-          "command_started_event": {
-            "command": {
-              "update": "test_bulkwrite_update_hint",
-              "updates": [
-                {
-                  "q": {
-                    "_id": 3
-                  },
-                  "u": {
-                    "x": 333
-                  },
-                  "hint": "_id_"
-                },
-                {
-                  "q": {
-                    "_id": 4
-                  },
-                  "u": {
-                    "x": 444
-                  },
-                  "hint": {
-                    "_id": 1
-                  }
-                }
-              ],
-              "ordered": true
-            }
-          }
-        }
-      ],
+      "expectations": [],
       "outcome": {
         "collection": {
           "data": [
@@ -352,11 +83,149 @@
             },
             {
               "_id": 3,
-              "x": 333
+              "x": 33
             },
             {
               "_id": 4,
-              "x": 444
+              "x": 44
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "BulkWrite updateMany with update hints unsupported (client-side error)",
+      "operations": [
+        {
+          "name": "bulkWrite",
+          "arguments": {
+            "requests": [
+              {
+                "name": "updateMany",
+                "arguments": {
+                  "filter": {
+                    "_id": {
+                      "$lt": 3
+                    }
+                  },
+                  "update": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  },
+                  "hint": "_id_"
+                }
+              },
+              {
+                "name": "updateMany",
+                "arguments": {
+                  "filter": {
+                    "_id": {
+                      "$lt": 3
+                    }
+                  },
+                  "update": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  },
+                  "hint": {
+                    "_id": 1
+                  }
+                }
+              }
+            ],
+            "options": {
+              "ordered": true
+            }
+          },
+          "error": true
+        }
+      ],
+      "expectations": [],
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            },
+            {
+              "_id": 4,
+              "x": 44
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "BulkWrite replaceOne with update hints unsupported (client-side error)",
+      "operations": [
+        {
+          "name": "bulkWrite",
+          "arguments": {
+            "requests": [
+              {
+                "name": "replaceOne",
+                "arguments": {
+                  "filter": {
+                    "_id": 3
+                  },
+                  "replacement": {
+                    "x": 333
+                  },
+                  "hint": "_id_"
+                }
+              },
+              {
+                "name": "replaceOne",
+                "arguments": {
+                  "filter": {
+                    "_id": 4
+                  },
+                  "replacement": {
+                    "x": 444
+                  },
+                  "hint": {
+                    "_id": 1
+                  }
+                }
+              }
+            ],
+            "options": {
+              "ordered": true
+            }
+          },
+          "error": true
+        }
+      ],
+      "expectations": [],
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            },
+            {
+              "_id": 4,
+              "x": 44
             }
           ]
         }

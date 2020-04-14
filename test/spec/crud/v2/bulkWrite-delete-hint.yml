@@ -1,0 +1,103 @@
+runOn:
+  - { minServerVersion: "4.3.4" }
+
+data:
+  - {_id: 1, x: 11}
+  - {_id: 2, x: 22}
+  - {_id: 3, x: 33}
+  - {_id: 4, x: 44}
+
+collection_name: &collection_name 'BulkWrite_delete_hint'
+
+tests:
+  -
+    description: "BulkWrite deleteOne with hints"
+    operations:
+      -
+        name: "bulkWrite"
+        arguments:
+          requests:
+            -
+              name: "deleteOne"
+              arguments:
+                filter: &deleteOne_filter1 { _id: 1 }
+                hint: &hint_string "_id_"
+            -
+              name: "deleteOne"
+              arguments:
+                filter: &deleteOne_filter2 { _id: 2 }
+                hint: &hint_doc { _id: 1 }
+          options: { ordered: true }
+        result:
+          deletedCount: 2
+          insertedCount: 0
+          insertedIds: {}
+          matchedCount: 0
+          modifiedCount: 0
+          upsertedCount: 0
+          upsertedIds: {}
+    expectations:
+      -
+        command_started_event:
+          command:
+            delete: *collection_name
+            deletes:
+              -
+                q: *deleteOne_filter1
+                hint: *hint_string
+                limit: 1
+              -
+                q: *deleteOne_filter2
+                hint: *hint_doc
+                limit: 1
+            ordered: true
+    outcome:
+      collection:
+        data:
+          - {_id: 3, x: 33 }
+          - {_id: 4, x: 44 }
+  -
+    description: "BulkWrite deleteMany with hints"
+    operations:
+      -
+        name: "bulkWrite"
+        arguments:
+          requests:
+            -
+              name: "deleteMany"
+              arguments:
+                filter: &deleteMany_filter1 { _id: { $lt: 3 } }
+                hint: *hint_string
+            -
+              name: "deleteMany"
+              arguments:
+                filter: &deleteMany_filter2 { _id: { $gte: 4 } }
+                hint: *hint_doc
+          options: { ordered: true }
+        result:
+          deletedCount: 3
+          insertedCount: 0
+          insertedIds: {}
+          matchedCount: 0
+          modifiedCount: 0
+          upsertedCount: 0
+          upsertedIds: {}
+    expectations:
+      -
+        command_started_event:
+          command:
+            delete: *collection_name
+            deletes:
+              -
+                q: *deleteMany_filter1
+                hint: *hint_string
+                limit: 0
+              -
+                q: *deleteMany_filter2
+                hint: *hint_doc
+                limit: 0
+            ordered: true
+    outcome:
+      collection:
+        data:
+          - {_id: 3, x: 33 }

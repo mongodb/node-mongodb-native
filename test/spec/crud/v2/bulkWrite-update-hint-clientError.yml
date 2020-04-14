@@ -1,0 +1,90 @@
+runOn:
+  # Server versions >= 3.4.0 will return an error response for unrecognized
+  # updateOne options. These tests check that the driver will raise an error
+  # if a hint is provided on a server version < 3.4.
+  - { maxServerVersion: "3.3.99" }
+
+data:
+  - {_id: 1, x: 11}
+  - {_id: 2, x: 22}
+  - {_id: 3, x: 33}
+  - {_id: 4, x: 44}
+
+collection_name: &collection_name 'test_bulkwrite_update_hint'
+
+tests:
+  -
+    description: "BulkWrite updateOne with update hints unsupported (client-side error)"
+    operations:
+      -
+        name: "bulkWrite"
+        arguments:
+          requests:
+            -
+              name: "updateOne"
+              arguments:
+                filter: &updateOne_filter { _id: 1 }
+                update: &updateOne_update { $inc: { x: 1 } }
+                hint: &hint_string "_id_"
+            -
+              name: "updateOne"
+              arguments:
+                filter: *updateOne_filter
+                update: *updateOne_update
+                hint: &hint_doc { _id: 1 }
+          options: { ordered: true }
+        error: true
+    expectations: []
+    outcome: &outcome
+      collection:
+        data:
+          - {_id: 1, x: 11 }
+          - {_id: 2, x: 22 }
+          - {_id: 3, x: 33 }
+          - {_id: 4, x: 44 }
+  -
+    description: "BulkWrite updateMany with update hints unsupported (client-side error)"
+    operations:
+      -
+        name: "bulkWrite"
+        arguments:
+          requests:
+            -
+              name: "updateMany"
+              arguments:
+                filter: &updateMany_filter { _id: { $lt: 3 } }
+                update: &updateMany_update { $inc: { x: 1 } }
+                hint: *hint_string
+            -
+              name: "updateMany"
+              arguments:
+                filter: *updateMany_filter
+                update: *updateMany_update
+                hint: *hint_doc
+          options: { ordered: true }
+        error: true
+    expectations: []
+    outcome: *outcome
+  -
+    description: "BulkWrite replaceOne with update hints unsupported (client-side error)"
+    operations:
+      -
+        name: "bulkWrite"
+        arguments:
+          requests:
+            -
+              name: "replaceOne"
+              arguments:
+                filter: { _id: 3 }
+                replacement: { x: 333 }
+                hint: *hint_string
+            -
+              name: "replaceOne"
+              arguments:
+                filter: { _id: 4 }
+                replacement: { x: 444 }
+                hint: *hint_doc
+          options: { ordered: true }
+        error: true
+    expectations: []
+    outcome: *outcome
