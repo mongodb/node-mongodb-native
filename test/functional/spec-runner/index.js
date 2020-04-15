@@ -99,8 +99,10 @@ function generateTopologyTests(testSuites, testContext, filter) {
     let runOn = testSuite.runOn;
     if (!testSuite.runOn) {
       runOn = [{ minServerVersion: testSuite.minServerVersion }];
+      if (testSuite.maxServerVersion) {
+        runOn.push({ maxServerVersion: testSuite.maxServerVersion });
+      }
     }
-
     const environmentRequirementList = parseRunOn(runOn);
 
     environmentRequirementList.forEach(requires => {

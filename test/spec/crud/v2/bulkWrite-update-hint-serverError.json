@@ -1,7 +1,8 @@
 {
   "runOn": [
     {
-      "minServerVersion": "4.2.0"
+      "minServerVersion": "3.4.0",
+      "maxServerVersion": "4.1.9"
     }
   ],
   "data": [
@@ -25,7 +26,7 @@
   "collection_name": "test_bulkwrite_update_hint",
   "tests": [
     {
-      "description": "BulkWrite updateOne with update hints",
+      "description": "BulkWrite updateOne with update hints unsupported (server-side error)",
       "operations": [
         {
           "name": "bulkWrite",
@@ -66,15 +67,7 @@
               "ordered": true
             }
           },
-          "result": {
-            "deletedCount": 0,
-            "insertedCount": 0,
-            "insertedIds": {},
-            "matchedCount": 2,
-            "modifiedCount": 2,
-            "upsertedCount": 0,
-            "upsertedIds": {}
-          }
+          "error": true
         }
       ],
       "expectations": [
@@ -118,7 +111,7 @@
           "data": [
             {
               "_id": 1,
-              "x": 13
+              "x": 11
             },
             {
               "_id": 2,
@@ -137,7 +130,7 @@
       }
     },
     {
-      "description": "BulkWrite updateMany with update hints",
+      "description": "BulkWrite updateMany with update hints unsupported (server-side error)",
       "operations": [
         {
           "name": "bulkWrite",
@@ -182,15 +175,7 @@
               "ordered": true
             }
           },
-          "result": {
-            "deletedCount": 0,
-            "insertedCount": 0,
-            "insertedIds": {},
-            "matchedCount": 4,
-            "modifiedCount": 4,
-            "upsertedCount": 0,
-            "upsertedIds": {}
-          }
+          "error": true
         }
       ],
       "expectations": [
@@ -240,11 +225,11 @@
           "data": [
             {
               "_id": 1,
-              "x": 13
+              "x": 11
             },
             {
               "_id": 2,
-              "x": 24
+              "x": 22
             },
             {
               "_id": 3,
@@ -259,7 +244,7 @@
       }
     },
     {
-      "description": "BulkWrite replaceOne with update hints",
+      "description": "BulkWrite replaceOne with update hints unsupported (server-side error)",
       "operations": [
         {
           "name": "bulkWrite",
@@ -296,15 +281,7 @@
               "ordered": true
             }
           },
-          "result": {
-            "deletedCount": 0,
-            "insertedCount": 0,
-            "insertedIds": {},
-            "matchedCount": 2,
-            "modifiedCount": 2,
-            "upsertedCount": 0,
-            "upsertedIds": {}
-          }
+          "error": true
         }
       ],
       "expectations": [
@@ -352,11 +329,11 @@
             },
             {
               "_id": 3,
-              "x": 333
+              "x": 33
             },
             {
               "_id": 4,
-              "x": 444
+              "x": 44
             }
           ]
         }

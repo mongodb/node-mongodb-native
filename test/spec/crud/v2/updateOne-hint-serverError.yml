@@ -1,0 +1,62 @@
+runOn:
+  # These tests assert that the driver does not raise client-side errors and
+  # instead relies on the server to raise an error. Server versions >= 3.4.0
+  # raise errors for unknown updateOne options, and server versions >= 4.2.0
+  # support the hint option in updateOne.
+  - { minServerVersion: "3.4.0", maxServerVersion: "4.1.9" }
+
+data:
+  - {_id: 1, x: 11}
+  - {_id: 2, x: 22}
+
+collection_name: &collection_name 'test_updateone_hint'
+
+tests:
+  -
+    description: "UpdateOne with hint string unsupported (server-side error)"
+    operations:
+      -
+        object: collection
+        name: updateOne
+        arguments:
+          filter: &filter { _id: { $gt: 1 } }
+          update: &update { $inc: { x: 1 } }
+          hint: "_id_"
+        error: true
+    expectations:
+      -
+        command_started_event:
+          command:
+            update: *collection_name
+            updates:
+              -
+                q: *filter
+                u: *update
+                hint: "_id_"
+    outcome: &outcome
+      collection:
+        data:
+          - {_id: 1, x: 11}
+          - {_id: 2, x: 22}
+  -
+    description: "UpdateOne with hint document unsupported (server-side error)"
+    operations:
+      -
+        object: collection
+        name: updateOne
+        arguments:
+          filter: *filter
+          update: *update
+          hint: { _id: 1 }
+        error: true
+    expectations:
+      -
+        command_started_event:
+          command:
+            update: *collection_name
+            updates:
+              -
+                q: *filter
+                u: *update
+                hint: { _id: 1 }
+    outcome: *outcome
