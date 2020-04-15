@@ -21,9 +21,12 @@ describe('URI Options (spec)', function() {
           metadata: { requires: { topology: 'single' } },
           test: function(done) {
             const query = qs.parse(url.parse(test.uri).query);
-            if (query.hasOwnProperty('tlsDisableOCSPEndpointCheck')) return this.skip();
-            if (query.hasOwnProperty('tlsDisableCertificateRevocationCheck')) return this.skip();
-
+            if (typeof query['tlsDisableOCSPEndpointCheck'] !== undefined) {
+              return this.skip();
+            }
+            if (typeof query['tlsDisableCertificateRevocationCheck'] !== undefined) {
+              return this.skip();
+            }
             parse(test.uri, {}, (err, result) => {
               if (test.valid === true) {
                 expect(err).to.not.exist;
