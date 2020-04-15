@@ -3889,7 +3889,7 @@ describe('GridFS', function() {
    * @ignore
    */
   it('should correctly create an index', function(done) {
-    const { configuration } = this;
+    const configuration = this.configuration;
     const client = configuration.newClient();
 
     client.connect((err, client) => {
@@ -3898,7 +3898,7 @@ describe('GridFS', function() {
       const gridStore = new GridStore(db, 'test_gs_save_empty_file', 'w');
       gridStore.open(err => {
         expect(err).to.not.exist;
-        db.collection('fs.files').createIndex({ filename: 1, uploadDate: 1 }, {}, (err, val) => {
+        db.collection('fs.files').createIndex({ filename: 1, uploadDate: 1 }, (err, val) => {
           expect(err).to.not.exist;
           expect(val).to.equal('filename_1_uploadDate_1');
           gridStore.close(err => {
