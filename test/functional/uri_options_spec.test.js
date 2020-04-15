@@ -1,6 +1,6 @@
 'use strict';
 
-const qs = require('qs');
+const qs = require('querystring');
 const url = require('url');
 const chai = require('chai');
 const expect = chai.expect;
