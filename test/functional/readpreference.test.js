@@ -1,6 +1,6 @@
 'use strict';
 
-var test = require('./shared').assert;
+const test = require('./shared').assert;
 const setupDatabase = require('./shared').setupDatabase;
 const withMonitoredClient = require('./shared').withMonitoredClient;
 const expect = require('chai').expect;
@@ -555,101 +555,103 @@ describe('ReadPreference', function() {
   context('hedge', function() {
     it('should set hedge using [find option & empty hedge]', {
       metadata: { requires: { mongodb: '>=3.6.0' } },
-      test: function(done) {
+      test: withMonitoredClient(['find'], function(client, events, done) {
         const rp = new ReadPreference(ReadPreference.SECONDARY, null, { hedge: {} });
-        withMonitoredClient(this.configuration, (client, collection, events) => {
-          collection.find({}, { readPreference: rp }).toArray(err => {
+        client
+          .db(this.configuration.db)
+          .collection('test')
+          .find({}, { readPreference: rp })
+          .toArray(err => {
             expect(err).to.not.exist;
             const expected = { mode: ReadPreference.SECONDARY, hedge: {} };
             expect(events[0])
               .nested.property('command.$readPreference')
               .to.deep.equal(expected);
-            client.close(done);
+            done();
           });
-        });
-      }
+      })
     });
 
     it('should set hedge using [.setReadPreference & empty hedge] ', {
       metadata: { requires: { mongodb: '>=3.6.0' } },
-      test: function(done) {
+      test: withMonitoredClient(['find'], function(client, events, done) {
         const rp = new ReadPreference(ReadPreference.SECONDARY, null, { hedge: {} });
-        withMonitoredClient(this.configuration, (client, collection, events) => {
-          collection
-            .find({})
-            .setReadPreference(rp)
-            .toArray(err => {
-              expect(err).to.not.exist;
-              const expected = { mode: ReadPreference.SECONDARY, hedge: {} };
-              expect(events[0])
-                .nested.property('command.$readPreference')
-                .to.deep.equal(expected);
-              client.close(done);
-            });
-        });
-      }
+        client
+          .db(this.configuration.db)
+          .collection('test')
+          .find({})
+          .setReadPreference(rp)
+          .toArray(err => {
+            expect(err).to.not.exist;
+            const expected = { mode: ReadPreference.SECONDARY, hedge: {} };
+            expect(events[0])
+              .nested.property('command.$readPreference')
+              .to.deep.equal(expected);
+            done();
+          });
+      })
     });
 
     it('should set hedge using [.setReadPreference & enabled hedge] ', {
       metadata: { requires: { mongodb: '>=3.6.0' } },
-      test: function(done) {
+      test: withMonitoredClient(['find'], function(client, events, done) {
         const rp = new ReadPreference(ReadPreference.SECONDARY, null, { hedge: { enabled: true } });
-        withMonitoredClient(this.configuration, (client, collection, events) => {
-          collection
-            .find({})
-            .setReadPreference(rp)
-            .toArray(err => {
-              expect(err).to.not.exist;
-              const expected = { mode: ReadPreference.SECONDARY, hedge: { enabled: true } };
-              expect(events[0])
-                .nested.property('command.$readPreference')
-                .to.deep.equal(expected);
-              client.close(done);
-            });
-        });
-      }
+        client
+          .db(this.configuration.db)
+          .collection('test')
+          .find({})
+          .setReadPreference(rp)
+          .toArray(err => {
+            expect(err).to.not.exist;
+            const expected = { mode: ReadPreference.SECONDARY, hedge: { enabled: true } };
+            expect(events[0])
+              .nested.property('command.$readPreference')
+              .to.deep.equal(expected);
+            done();
+          });
+      })
     });
 
     it('should set hedge using [.setReadPreference & disabled hedge] ', {
       metadata: { requires: { mongodb: '>=3.6.0' } },
-      test: function(done) {
+      test: withMonitoredClient(['find'], function(client, events, done) {
         const rp = new ReadPreference(ReadPreference.SECONDARY, null, {
           hedge: { enabled: false }
         });
-        withMonitoredClient(this.configuration, (client, collection, events) => {
-          collection
-            .find({})
-            .setReadPreference(rp)
-            .toArray(err => {
-              test.equal(null, err);
-              const expected = { mode: ReadPreference.SECONDARY, hedge: { enabled: false } };
-              expect(events[0])
-                .nested.property('command.$readPreference')
-                .to.deep.equal(expected);
-              client.close(done);
-            });
-        });
-      }
+        client
+          .db(this.configuration.db)
+          .collection('test')
+          .find({})
+          .setReadPreference(rp)
+          .toArray(err => {
+            expect(err).to.not.exist;
+            const expected = { mode: ReadPreference.SECONDARY, hedge: { enabled: false } };
+            expect(events[0])
+              .nested.property('command.$readPreference')
+              .to.deep.equal(expected);
+            done();
+          });
+      })
     });
 
     it('should set hedge using [.setReadPreference & undefined hedge] ', {
       metadata: { requires: { mongodb: '>=3.6.0' } },
-      test: function(done) {
+      test: withMonitoredClient(['find'], function(client, events, done) {
         const rp = new ReadPreference(ReadPreference.SECONDARY, null);
-        withMonitoredClient(this.configuration, (client, collection, events) => {
-          collection
-            .find({})
-            .setReadPreference(rp)
-            .toArray(err => {
-              expect(err).to.not.exist;
-              const expected = { mode: ReadPreference.SECONDARY };
-              expect(events[0])
-                .nested.property('command.$readPreference')
-                .to.deep.equal(expected);
-              client.close(done);
-            });
-        });
-      }
+        client
+          .db(this.configuration.db)
+          .collection('test')
+          .find({})
+          .setReadPreference(rp)
+          .toArray(err => {
+            expect(err).to.not.exist;
+            const expected = { mode: ReadPreference.SECONDARY };
+            expect(events[0])
+              .nested.property('command.$readPreference')
+              .to.deep.equal(expected);
+            done();
+          });
+      })
     });
   });
 });
