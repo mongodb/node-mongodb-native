@@ -1,11 +1,12 @@
 'use strict';
 
-const { setupDatabase, assert: test } = require('./shared');
+const test = require('./shared').assert;
+const setupDatabase = require('./shared').setupDatabase;
 const fs = require('fs');
-const { format } = require('util');
+const format = require('util').format;
 const child_process = require('child_process');
-const { expect } = require('chai');
-const { Buffer } = require('safe-buffer');
+const expect = require('chai').expect;
+const Buffer = require('safe-buffer').Buffer;
 const GridStore = require('../../lib/gridfs/grid_store');
 
 describe('GridFS', function() {
@@ -3885,9 +3886,6 @@ describe('GridFS', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly create an index', function(done) {
     const configuration = this.configuration;
     const client = configuration.newClient();
