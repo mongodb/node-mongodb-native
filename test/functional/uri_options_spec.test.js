@@ -20,11 +20,11 @@ describe('URI Options (spec)', function() {
         itFn(test.description, {
           metadata: { requires: { topology: 'single' } },
           test: function(done) {
-            const query = qs.parse(url.parse(test.uri).query);
-            if (typeof query['tlsDisableOCSPEndpointCheck'] !== undefined) {
-              return this.skip();
-            }
-            if (typeof query['tlsDisableCertificateRevocationCheck'] !== undefined) {
+            const query = Object.assign({}, qs.parse(url.parse(test.uri).query));
+            if (
+              query.hasOwnProperty('tlsDisableOCSPEndpointCheck') ||
+              query.hasOwnProperty('tlsDisableCertificateRevocationCheck')
+            ) {
               return this.skip();
             }
             parse(test.uri, {}, (err, result) => {
