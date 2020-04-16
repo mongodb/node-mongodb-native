@@ -120,6 +120,7 @@ describe('WriteConcernError', function() {
           expect(err.result).to.not.have.property('errmsg');
           expect(err.result).to.not.have.property('code');
           expect(err.result).to.not.have.property('codeName');
+          expect(err.result).to.have.property('writeConcernError');
         } catch (e) {
           _err = e;
         } finally {
