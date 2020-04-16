@@ -2,7 +2,7 @@
 
 var test = require('./shared').assert;
 const setupDatabase = require('./shared').setupDatabase;
-const filterForCommands = require('./shared').filterForCommands;
+const withMonitoredClient = require('./shared').withMonitoredClient;
 const expect = require('chai').expect;
 const ReadPreference = require('../../lib/core/topologies/read_preference');
 
@@ -553,25 +553,11 @@ describe('ReadPreference', function() {
   });
 
   context('hedge', function() {
-    before(function() {
-      this.testHedge = callback => {
-        const configuration = this.configuration;
-        const client = configuration.newClient({ monitorCommands: true });
-        const events = [];
-        client.on('commandStarted', filterForCommands(['find'], events));
-        client.connect((err, client) => {
-          expect(err).to.not.exist;
-          const collection = client.db(configuration.db).collection('test');
-          return callback(client, collection, events);
-        });
-      };
-    });
-
     it('should set hedge using [find option & empty hedge]', {
       metadata: { requires: { mongodb: '>=3.6.0' } },
       test: function(done) {
         const rp = new ReadPreference(ReadPreference.SECONDARY, null, { hedge: {} });
-        this.testHedge((client, collection, events) => {
+        withMonitoredClient((client, collection, events) => {
           collection.find({}, { readPreference: rp }).toArray(err => {
             expect(err).to.not.exist;
             const expected = { mode: ReadPreference.SECONDARY, hedge: {} };
@@ -588,7 +574,7 @@ describe('ReadPreference', function() {
       metadata: { requires: { mongodb: '>=3.6.0' } },
       test: function(done) {
         const rp = new ReadPreference(ReadPreference.SECONDARY, null, { hedge: {} });
-        this.testHedge((client, collection, events) => {
+        withMonitoredClient((client, collection, events) => {
           collection
             .find({})
             .setReadPreference(rp)
@@ -608,7 +594,7 @@ describe('ReadPreference', function() {
       metadata: { requires: { mongodb: '>=3.6.0' } },
       test: function(done) {
         const rp = new ReadPreference(ReadPreference.SECONDARY, null, { hedge: { enabled: true } });
-        this.testHedge((client, collection, events) => {
+        withMonitoredClient((client, collection, events) => {
           collection
             .find({})
             .setReadPreference(rp)
@@ -630,7 +616,7 @@ describe('ReadPreference', function() {
         const rp = new ReadPreference(ReadPreference.SECONDARY, null, {
           hedge: { enabled: false }
         });
-        this.testHedge((client, collection, events) => {
+        withMonitoredClient((client, collection, events) => {
           collection
             .find({})
             .setReadPreference(rp)
@@ -650,7 +636,7 @@ describe('ReadPreference', function() {
       metadata: { requires: { mongodb: '>=3.6.0' } },
       test: function(done) {
         const rp = new ReadPreference(ReadPreference.SECONDARY, null);
-        this.testHedge((client, collection, events) => {
+        withMonitoredClient((client, collection, events) => {
           collection
             .find({})
             .setReadPreference(rp)

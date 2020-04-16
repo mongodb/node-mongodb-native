@@ -192,12 +192,25 @@ class EventCollector {
   }
 }
 
+function withMonitoredClient(callback) {
+  const configuration = this.configuration;
+  const client = configuration.newClient({ monitorCommands: true });
+  const events = [];
+  client.on('commandStarted', filterForCommands(['find'], events));
+  client.connect((err, client) => {
+    expect(err).to.not.exist;
+    const collection = client.db(configuration.db).collection('test');
+    return callback(client, collection, events);
+  });
+}
+
 module.exports = {
   connectToDb,
   setupDatabase,
   assert,
   delay,
   withClient,
+  withMonitoredClient,
   filterForCommands,
   filterOutCommands,
   ignoreNsNotFound,
