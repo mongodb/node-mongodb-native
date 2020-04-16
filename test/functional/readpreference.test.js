@@ -557,7 +557,7 @@ describe('ReadPreference', function() {
       metadata: { requires: { mongodb: '>=3.6.0' } },
       test: function(done) {
         const rp = new ReadPreference(ReadPreference.SECONDARY, null, { hedge: {} });
-        withMonitoredClient((client, collection, events) => {
+        withMonitoredClient(this.configuration, (client, collection, events) => {
           collection.find({}, { readPreference: rp }).toArray(err => {
             expect(err).to.not.exist;
             const expected = { mode: ReadPreference.SECONDARY, hedge: {} };
@@ -574,7 +574,7 @@ describe('ReadPreference', function() {
       metadata: { requires: { mongodb: '>=3.6.0' } },
       test: function(done) {
         const rp = new ReadPreference(ReadPreference.SECONDARY, null, { hedge: {} });
-        withMonitoredClient((client, collection, events) => {
+        withMonitoredClient(this.configuration, (client, collection, events) => {
           collection
             .find({})
             .setReadPreference(rp)
@@ -594,7 +594,7 @@ describe('ReadPreference', function() {
       metadata: { requires: { mongodb: '>=3.6.0' } },
       test: function(done) {
         const rp = new ReadPreference(ReadPreference.SECONDARY, null, { hedge: { enabled: true } });
-        withMonitoredClient((client, collection, events) => {
+        withMonitoredClient(this.configuration, (client, collection, events) => {
           collection
             .find({})
             .setReadPreference(rp)
@@ -616,7 +616,7 @@ describe('ReadPreference', function() {
         const rp = new ReadPreference(ReadPreference.SECONDARY, null, {
           hedge: { enabled: false }
         });
-        withMonitoredClient((client, collection, events) => {
+        withMonitoredClient(this.configuration, (client, collection, events) => {
           collection
             .find({})
             .setReadPreference(rp)
@@ -636,7 +636,7 @@ describe('ReadPreference', function() {
       metadata: { requires: { mongodb: '>=3.6.0' } },
       test: function(done) {
         const rp = new ReadPreference(ReadPreference.SECONDARY, null);
-        withMonitoredClient((client, collection, events) => {
+        withMonitoredClient(this.configuration, (client, collection, events) => {
           collection
             .find({})
             .setReadPreference(rp)

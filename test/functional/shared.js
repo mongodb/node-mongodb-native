@@ -192,8 +192,7 @@ class EventCollector {
   }
 }
 
-function withMonitoredClient(callback) {
-  const configuration = this.configuration;
+function withMonitoredClient(configuration, callback) {
   const client = configuration.newClient({ monitorCommands: true });
   const events = [];
   client.on('commandStarted', filterForCommands(['find'], events));
