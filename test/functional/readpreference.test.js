@@ -1,7 +1,8 @@
 'use strict';
 
 var test = require('./shared').assert;
-const { setupDatabase, filterForCommands } = require('./shared');
+const setupDatabase = require('./shared').setupDatabase;
+const filterForCommands = require('./shared').filterForCommands;
 const expect = require('chai').expect;
 const ReadPreference = require('../../lib/core/topologies/read_preference');
 
