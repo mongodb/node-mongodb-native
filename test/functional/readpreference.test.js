@@ -556,10 +556,7 @@ describe('ReadPreference', function() {
     before(function() {
       this.testHedge = callback => {
         const configuration = this.configuration;
-        const client = configuration.newClient(configuration.writeConcernMax(), {
-          poolSize: 1,
-          monitorCommands: true
-        });
+        const client = configuration.newClient({ monitorCommands: true });
         const events = [];
         client.on('commandStarted', filterForCommands(['find'], events));
         client.connect((err, client) => {
