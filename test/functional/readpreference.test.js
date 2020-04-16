@@ -569,34 +569,12 @@ describe('ReadPreference', function() {
       };
     });
 
-    const itWithMeta = (a, b) => {
-      it(a, {
-        metadata: { requires: { topology: ['sharded'] } },
-        test: b
-      });
-    };
-
-    itWithMeta('should set hedge using [find option & empty hedge]', function(done) {
-      const rp = new ReadPreference(ReadPreference.SECONDARY, null, { hedge: {} });
-      this.testHedge((client, collection, events) => {
-        collection.find({}, { readPreference: rp }).toArray(err => {
-          test.equal(null, err);
-          const expected = { mode: ReadPreference.SECONDARY, hedge: {} };
-          expect(events[0])
-            .nested.property('command.$readPreference')
-            .to.deep.equal(expected);
-          client.close(done);
-        });
-      });
-    });
-
-    itWithMeta('should set hedge using [.setReadPreference & empty hedge] ', function(done) {
-      const rp = new ReadPreference(ReadPreference.SECONDARY, null, { hedge: {} });
-      this.testHedge((client, collection, events) => {
-        collection
-          .find({})
-          .setReadPreference(rp)
-          .toArray(err => {
+    it('should set hedge using [find option & empty hedge]', {
+      metadata: { requires: { mongodb: '>=3.6.0' } },
+      test: function(done) {
+        const rp = new ReadPreference(ReadPreference.SECONDARY, null, { hedge: {} });
+        this.testHedge((client, collection, events) => {
+          collection.find({}, { readPreference: rp }).toArray(err => {
             test.equal(null, err);
             const expected = { mode: ReadPreference.SECONDARY, hedge: {} };
             expect(events[0])
@@ -604,58 +582,90 @@ describe('ReadPreference', function() {
               .to.deep.equal(expected);
             client.close(done);
           });
-      });
+        });
+      }
     });
 
-    itWithMeta('should set hedge using [.setReadPreference & enabled hedge] ', function(done) {
-      const rp = new ReadPreference(ReadPreference.SECONDARY, null, { hedge: { enabled: true } });
-      this.testHedge((client, collection, events) => {
-        collection
-          .find({})
-          .setReadPreference(rp)
-          .toArray(err => {
-            test.equal(null, err);
-            const expected = { mode: ReadPreference.SECONDARY, hedge: { enabled: true } };
-            expect(events[0])
-              .nested.property('command.$readPreference')
-              .to.deep.equal(expected);
-            client.close(done);
-          });
-      });
+    it('should set hedge using [.setReadPreference & empty hedge] ', {
+      metadata: { requires: { mongodb: '>=3.6.0' } },
+      test: function(done) {
+        const rp = new ReadPreference(ReadPreference.SECONDARY, null, { hedge: {} });
+        this.testHedge((client, collection, events) => {
+          collection
+            .find({})
+            .setReadPreference(rp)
+            .toArray(err => {
+              test.equal(null, err);
+              const expected = { mode: ReadPreference.SECONDARY, hedge: {} };
+              expect(events[0])
+                .nested.property('command.$readPreference')
+                .to.deep.equal(expected);
+              client.close(done);
+            });
+        });
+      }
     });
 
-    itWithMeta('should set hedge using [.setReadPreference & disabled hedge] ', function(done) {
-      const rp = new ReadPreference(ReadPreference.SECONDARY, null, { hedge: { enabled: false } });
-      this.testHedge((client, collection, events) => {
-        collection
-          .find({})
-          .setReadPreference(rp)
-          .toArray(err => {
-            test.equal(null, err);
-            const expected = { mode: ReadPreference.SECONDARY, hedge: { enabled: false } };
-            expect(events[0])
-              .nested.property('command.$readPreference')
-              .to.deep.equal(expected);
-            client.close(done);
-          });
-      });
+    it('should set hedge using [.setReadPreference & enabled hedge] ', {
+      metadata: { requires: { mongodb: '>=3.6.0' } },
+      test: function(done) {
+        const rp = new ReadPreference(ReadPreference.SECONDARY, null, { hedge: { enabled: true } });
+        this.testHedge((client, collection, events) => {
+          collection
+            .find({})
+            .setReadPreference(rp)
+            .toArray(err => {
+              test.equal(null, err);
+              const expected = { mode: ReadPreference.SECONDARY, hedge: { enabled: true } };
+              expect(events[0])
+                .nested.property('command.$readPreference')
+                .to.deep.equal(expected);
+              client.close(done);
+            });
+        });
+      }
     });
 
-    itWithMeta('should set hedge using [.setReadPreference & undefined hedge] ', function(done) {
-      const rp = new ReadPreference(ReadPreference.SECONDARY, null);
-      this.testHedge((client, collection, events) => {
-        collection
-          .find({})
-          .setReadPreference(rp)
-          .toArray(err => {
-            test.equal(null, err);
-            const expected = { mode: ReadPreference.SECONDARY };
-            expect(events[0])
-              .nested.property('command.$readPreference')
-              .to.deep.equal(expected);
-            client.close(done);
-          });
-      });
+    it('should set hedge using [.setReadPreference & disabled hedge] ', {
+      metadata: { requires: { mongodb: '>=3.6.0' } },
+      test: function(done) {
+        const rp = new ReadPreference(ReadPreference.SECONDARY, null, {
+          hedge: { enabled: false }
+        });
+        this.testHedge((client, collection, events) => {
+          collection
+            .find({})
+            .setReadPreference(rp)
+            .toArray(err => {
+              test.equal(null, err);
+              const expected = { mode: ReadPreference.SECONDARY, hedge: { enabled: false } };
+              expect(events[0])
+                .nested.property('command.$readPreference')
+                .to.deep.equal(expected);
+              client.close(done);
+            });
+        });
+      }
+    });
+
+    it('should set hedge using [.setReadPreference & undefined hedge] ', {
+      metadata: { requires: { mongodb: '>=3.6.0' } },
+      test: function(done) {
+        const rp = new ReadPreference(ReadPreference.SECONDARY, null);
+        this.testHedge((client, collection, events) => {
+          collection
+            .find({})
+            .setReadPreference(rp)
+            .toArray(err => {
+              test.equal(null, err);
+              const expected = { mode: ReadPreference.SECONDARY };
+              expect(events[0])
+                .nested.property('command.$readPreference')
+                .to.deep.equal(expected);
+              client.close(done);
+            });
+        });
+      }
     });
   });
 });
