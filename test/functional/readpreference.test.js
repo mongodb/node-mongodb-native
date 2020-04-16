@@ -582,7 +582,9 @@ describe('ReadPreference', function() {
         collection.find({}, { readPreference: rp }).toArray(err => {
           test.equal(null, err);
           const expected = { mode: ReadPreference.SECONDARY, hedge: {} };
-          expect(events[0].command.$readPreference).to.deep.equal(expected);
+          expect(events[0])
+            .nested.property('command.$readPreference')
+            .to.deep.equal(expected);
           client.close(done);
         });
       });
@@ -597,7 +599,9 @@ describe('ReadPreference', function() {
           .toArray(err => {
             test.equal(null, err);
             const expected = { mode: ReadPreference.SECONDARY, hedge: {} };
-            expect(events[0].command.$readPreference).to.deep.equal(expected);
+            expect(events[0])
+              .nested.property('command.$readPreference')
+              .to.deep.equal(expected);
             client.close(done);
           });
       });
@@ -612,7 +616,9 @@ describe('ReadPreference', function() {
           .toArray(err => {
             test.equal(null, err);
             const expected = { mode: ReadPreference.SECONDARY, hedge: { enabled: true } };
-            expect(events[0].command.$readPreference).to.deep.equal(expected);
+            expect(events[0])
+              .nested.property('command.$readPreference')
+              .to.deep.equal(expected);
             client.close(done);
           });
       });
@@ -627,7 +633,9 @@ describe('ReadPreference', function() {
           .toArray(err => {
             test.equal(null, err);
             const expected = { mode: ReadPreference.SECONDARY, hedge: { enabled: false } };
-            expect(events[0].command.$readPreference).to.deep.equal(expected);
+            expect(events[0])
+              .nested.property('command.$readPreference')
+              .to.deep.equal(expected);
             client.close(done);
           });
       });
@@ -642,7 +650,9 @@ describe('ReadPreference', function() {
           .toArray(err => {
             test.equal(null, err);
             const expected = { mode: ReadPreference.SECONDARY };
-            expect(events[0].command.$readPreference).to.deep.equal(expected);
+            expect(events[0])
+              .nested.property('command.$readPreference')
+              .to.deep.equal(expected);
             client.close(done);
           });
       });
