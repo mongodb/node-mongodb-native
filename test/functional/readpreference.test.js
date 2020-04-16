@@ -562,7 +562,7 @@ describe('ReadPreference', function() {
         });
         const events = [];
         client.on('commandStarted', filterForCommands(['find'], events));
-        client.connect(function(err, client) {
+        client.connect((err, client) => {
           expect(err).to.not.exist;
           const collection = client.db(configuration.db).collection('test');
           return callback(client, collection, events);
