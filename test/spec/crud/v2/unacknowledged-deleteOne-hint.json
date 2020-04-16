@@ -1,8 +1,7 @@
 {
   "runOn": [
     {
-      "minServerVersion": "3.4.0",
-      "maxServerVersion": "4.3.3"
+      "minServerVersion": "4.3.4"
     }
   ],
   "data": [
@@ -18,18 +17,22 @@
   "collection_name": "DeleteOne_hint",
   "tests": [
     {
-      "description": "DeleteOne with hint string unsupported (server-side error)",
+      "description": "Unacknowledged deleteOne with hint string succeeds on server >= 4.4",
       "operations": [
         {
           "object": "collection",
+          "collectionOptions": {
+            "writeConcern": {
+              "w": 0
+            }
+          },
           "name": "deleteOne",
           "arguments": {
             "filter": {
               "_id": 1
             },
             "hint": "_id_"
-          },
-          "error": true
+          }
         }
       ],
       "expectations": [
@@ -50,26 +53,18 @@
           }
         }
       ],
-      "outcome": {
-        "collection": {
-          "data": [
-            {
-              "_id": 1,
-              "x": 11
-            },
-            {
-              "_id": 2,
-              "x": 22
-            }
-          ]
-        }
-      }
+      "outcome": {}
     },
     {
-      "description": "DeleteOne with hint document unsupported (server-side error)",
+      "description": "Unacknowledged deleteOne with hint document succeeds on server >= 4.4",
       "operations": [
         {
           "object": "collection",
+          "collectionOptions": {
+            "writeConcern": {
+              "w": 0
+            }
+          },
           "name": "deleteOne",
           "arguments": {
             "filter": {
@@ -78,8 +73,7 @@
             "hint": {
               "_id": 1
             }
-          },
-          "error": true
+          }
         }
       ],
       "expectations": [
@@ -102,20 +96,7 @@
           }
         }
       ],
-      "outcome": {
-        "collection": {
-          "data": [
-            {
-              "_id": 1,
-              "x": 11
-            },
-            {
-              "_id": 2,
-              "x": 22
-            }
-          ]
-        }
-      }
+      "outcome": {}
     }
   ]
 }

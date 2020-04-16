@@ -1,0 +1,66 @@
+runOn:
+  # These tests assert that the driver raises a client-side error when the hint
+  # option is passed with an unacknowledged delete operation against a server
+  # that does not support hints in delete operations.
+  - { maxServerVersion: "4.3.3" }
+
+data:
+  - {_id: 1, x: 11}
+  - {_id: 2, x: 22}
+  - {_id: 3, x: 33}
+  - {_id: 4, x: 44}
+
+collection_name: &collection_name 'BulkWrite_delete_hint'
+
+tests:
+  -
+    description: "Unacknowledged bulkWrite deleteOne with hints fails with client-side error on server < 4.4"
+    operations:
+      -
+        name: "bulkWrite"
+        collectionOptions: &collection_options
+          writeConcern: { w: 0 }
+        arguments:
+          requests:
+            -
+              name: "deleteOne"
+              arguments:
+                filter: &deleteOne_filter1 { _id: 1 }
+                hint: &hint_string "_id_"
+            -
+              name: "deleteOne"
+              arguments:
+                filter: &deleteOne_filter2 { _id: 2 }
+                hint: &hint_doc { _id: 1 }
+          options: { ordered: true }
+        error: true
+    expectations: {}
+    outcome: &outcome
+      collection:
+        data:
+          - {_id: 1, x: 11 }
+          - {_id: 2, x: 22 }
+          - {_id: 3, x: 33 }
+          - {_id: 4, x: 44 }
+  -
+    description: "Unacknowledged bulkWrite deleteMany with hints fails with client-side error on server < 4.4"
+    operations:
+      -
+        name: "bulkWrite"
+        collectionOptions: *collection_options
+        arguments:
+          requests:
+            -
+              name: "deleteMany"
+              arguments:
+                filter: &deleteMany_filter1 { _id: { $lt: 3 } }
+                hint: *hint_string
+            -
+              name: "deleteMany"
+              arguments:
+                filter: &deleteMany_filter2 { _id: { $gte: 4 } }
+                hint: *hint_doc
+          options: { ordered: true }
+        error: true
+    expectations: {}
+    outcome: *outcome

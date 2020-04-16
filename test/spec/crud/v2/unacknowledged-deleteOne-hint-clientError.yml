@@ -1,0 +1,44 @@
+runOn:
+  # These tests assert that the driver raises a client-side error when the hint
+  # option is passed with an unacknowledged delete operation against a server
+  # that does not support hints in delete operations.
+  - { maxServerVersion: "4.3.3" }
+
+data:
+  - { _id: 1, x: 11 }
+  - { _id: 2, x: 22 }
+
+collection_name: &collection_name 'DeleteOne_hint'
+
+tests:
+  -
+    description: "Unacknowledged deleteOne with hint string fails with client-side error on server < 4.4"
+    operations:
+      -
+        object: collection
+        collectionOptions: &collection_options
+          writeConcern: { w: 0 }
+        name: deleteOne
+        arguments:
+          filter: &filter { _id: 1 }
+          hint: "_id_"
+        error: true
+    expectations: {}
+    outcome: &outcome
+      collection:
+        data:
+          - { _id: 1, x: 11 }
+          - { _id: 2, x: 22 }
+  -
+    description: "Unacknowledged deleteOne with hint document fails with client-side error on server < 4.4"
+    operations:
+      -
+        object: collection
+        collectionOptions: *collection_options
+        name: deleteOne
+        arguments:
+          filter: *filter
+          hint: { _id: 1 }
+        error: true
+    expectations: {}
+    outcome: *outcome
