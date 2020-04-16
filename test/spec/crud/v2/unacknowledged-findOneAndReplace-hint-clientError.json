@@ -1,7 +1,6 @@
 {
   "runOn": [
     {
-      "minServerVersion": "3.4.0",
       "maxServerVersion": "4.3.3"
     }
   ],
@@ -15,41 +14,32 @@
       "x": 22
     }
   ],
-  "collection_name": "DeleteOne_hint",
+  "collection_name": "FindOneAndReplace_hint",
   "tests": [
     {
-      "description": "DeleteOne with hint string unsupported (server-side error)",
+      "description": "Unacknowledged findOneAndReplace with hint string fails with client-side error on server < 4.4",
       "operations": [
         {
           "object": "collection",
-          "name": "deleteOne",
+          "collectionOptions": {
+            "writeConcern": {
+              "w": 0
+            }
+          },
+          "name": "findOneAndReplace",
           "arguments": {
             "filter": {
               "_id": 1
+            },
+            "replacement": {
+              "x": 33
             },
             "hint": "_id_"
           },
           "error": true
         }
       ],
-      "expectations": [
-        {
-          "command_started_event": {
-            "command": {
-              "delete": "DeleteOne_hint",
-              "deletes": [
-                {
-                  "q": {
-                    "_id": 1
-                  },
-                  "hint": "_id_",
-                  "limit": 1
-                }
-              ]
-            }
-          }
-        }
-      ],
+      "expectations": {},
       "outcome": {
         "collection": {
           "data": [
@@ -66,14 +56,22 @@
       }
     },
     {
-      "description": "DeleteOne with hint document unsupported (server-side error)",
+      "description": "Unacknowledged findOneAndReplace with hint document fails with client-side error on server < 4.4",
       "operations": [
         {
           "object": "collection",
-          "name": "deleteOne",
+          "collectionOptions": {
+            "writeConcern": {
+              "w": 0
+            }
+          },
+          "name": "findOneAndReplace",
           "arguments": {
             "filter": {
               "_id": 1
+            },
+            "replacement": {
+              "x": 33
             },
             "hint": {
               "_id": 1
@@ -82,26 +80,7 @@
           "error": true
         }
       ],
-      "expectations": [
-        {
-          "command_started_event": {
-            "command": {
-              "delete": "DeleteOne_hint",
-              "deletes": [
-                {
-                  "q": {
-                    "_id": 1
-                  },
-                  "hint": {
-                    "_id": 1
-                  },
-                  "limit": 1
-                }
-              ]
-            }
-          }
-        }
-      ],
+      "expectations": {},
       "outcome": {
         "collection": {
           "data": [
