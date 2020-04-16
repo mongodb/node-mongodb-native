@@ -1,12 +1,7 @@
 'use strict';
 const assert = require('assert');
 const { Transform } = require('stream');
-const {
-  MongoError,
-  MongoNetworkError,
-  mongoErrorContextSymbol,
-  isResumableError
-} = require('../../lib/error');
+const { MongoError, MongoNetworkError } = require('../../lib/error');
 const { setupDatabase, delay } = require('./shared');
 const co = require('co');
 const mock = require('mongodb-mock-server');
@@ -31,7 +26,6 @@ function triggerResumableError(changeStream, onCursorClosed) {
     changeStream.cursor.close(callback);
   };
   const fakeResumableError = new MongoNetworkError('fake error');
-  fakeResumableError[mongoErrorContextSymbol] = { isGetMore: true };
   changeStream.cursor.emit('error', fakeResumableError);
 }
 
@@ -2796,11 +2790,5 @@ describe('Change Streams', function() {
         );
       }
     });
-  });
-});
-
-describe('Change Stream Resume Error Tests', function() {
-  it('should properly process errors that lack the `mongoErrorContextSymbol`', function() {
-    expect(() => isResumableError(new Error())).to.not.throw();
   });
 });
