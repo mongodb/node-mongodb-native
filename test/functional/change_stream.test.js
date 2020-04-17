@@ -1949,7 +1949,7 @@ describe('Change Streams', function() {
     }
   });
 
-  describe('should properly handle a changeStream event being processed mid-close', function() {
+  describe.skip('should properly handle a changeStream event being processed mid-close', function() {
     let client, coll;
 
     function write() {
