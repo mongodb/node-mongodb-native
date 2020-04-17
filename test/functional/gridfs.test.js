@@ -1,12 +1,13 @@
 'use strict';
 
-const test = require('./shared').assert,
-  setupDatabase = require('./shared').setupDatabase,
-  fs = require('fs'),
-  format = require('util').format,
-  child_process = require('child_process'),
-  expect = require('chai').expect,
-  Buffer = require('safe-buffer').Buffer;
+const test = require('./shared').assert;
+const setupDatabase = require('./shared').setupDatabase;
+const fs = require('fs');
+const format = require('util').format;
+const child_process = require('child_process');
+const expect = require('chai').expect;
+const Buffer = require('safe-buffer').Buffer;
+const GridStore = require('../../lib/gridfs/grid_store');
 
 describe('GridFS', function() {
   before(function() {
@@ -3883,5 +3884,27 @@ describe('GridFS', function() {
         });
       });
     }
+  });
+
+  it('should correctly create an index', function(done) {
+    const configuration = this.configuration;
+    const client = configuration.newClient();
+
+    client.connect((err, client) => {
+      expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      const gridStore = new GridStore(db, 'test_gs_save_empty_file', 'w');
+      gridStore.open(err => {
+        expect(err).to.not.exist;
+        db.collection('fs.files').createIndex({ filename: 1, uploadDate: 1 }, (err, val) => {
+          expect(err).to.not.exist;
+          expect(val).to.equal('filename_1_uploadDate_1');
+          gridStore.close(err => {
+            expect(err).to.not.exist;
+            client.close(done);
+          });
+        });
+      });
+    });
   });
 });
