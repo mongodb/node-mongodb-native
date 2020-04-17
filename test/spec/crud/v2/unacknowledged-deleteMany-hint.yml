@@ -1,28 +1,26 @@
 runOn:
-  # These tests assert that the driver does not raise client-side errors and
-  # instead relies on the server to raise an error. Server versions >= 3.4.0
-  # raise errors for unknown deleteMany options, and server versions >= 4.3.4
-  # support the hint option in deleteMany.
-  - { minServerVersion: "3.4.0", maxServerVersion: "4.3.3" }
+  - { minServerVersion: "4.3.4" }
 
 data:
-  - { _id: 1, x: 11 }
-  - { _id: 2, x: 22 }
-  - { _id: 3, x: 33 }
+  - {_id: 1, x: 11}
+  - {_id: 2, x: 22}
+  - {_id: 3, x: 33}
 
 collection_name: &collection_name 'DeleteMany_hint'
 
 tests:
   -
-    description: "DeleteMany with hint string unsupported (server-side error)"
+    description: "Unacknowledged deleteMany with hint string succeeds on server >= 4.4"
     operations:
       -
         object: collection
+        collectionOptions: &collection_options
+          writeConcern: { w: 0 }
         name: deleteMany
         arguments:
           filter: &filter { _id: { $gt: 1 } }
           hint: "_id_"
-        error: true
+        # Don't check result because different drivers return different responses to unacknowledged deletes
     expectations:
       -
         command_started_event:
@@ -33,22 +31,19 @@ tests:
                 q: *filter
                 hint: "_id_"
                 limit: 0
-    outcome: &outcome
-      collection:
-        data:
-          - { _id: 1, x: 11 }
-          - { _id: 2, x: 22 }
-          - { _id: 3, x: 33 }
+    # Do not verify the contents of the collection to avoid race conditions
+    outcome: {}
   -
-    description: "DeleteMany with hint document unsupported (server-side error)"
+    description: "Unacknowledged deleteMany with hint document succeeds on server >= 4.4"
     operations:
       -
         object: collection
+        collectionOptions: *collection_options
         name: deleteMany
         arguments:
           filter: *filter
           hint: { _id: 1 }
-        error: true
+        # Don't check result because different drivers return different responses to unacknowledged deletes
     expectations:
       -
         command_started_event:
@@ -59,4 +54,6 @@ tests:
                 q: *filter
                 hint: { _id: 1 }
                 limit: 0
-    outcome: *outcome
+    # Do not verify the contents of the collection to avoid race conditions
+    outcome: {}
+

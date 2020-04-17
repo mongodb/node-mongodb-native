@@ -1,9 +1,5 @@
 runOn:
-  # These tests assert that the driver does not raise client-side errors and
-  # instead relies on the server to raise an error. Server versions >= 4.2.0
-  # raise errors for unknown findOneAndModify options, and server versions >= 4.3.4
-  # support the hint option in findOneAndModify when remove is true.
-  - { minServerVersion: "4.2.0", maxServerVersion: "4.3.3" }
+  - { minServerVersion: "4.3.4" }
 
 data:
   - { _id: 1, x: 11 }
@@ -13,15 +9,17 @@ collection_name: &collection_name 'findOneAndDelete_hint'
 
 tests:
   -
-    description: "FindOneAndDelete with hint string unsupported (server-side error)"
+    description: "Unacknowledged findOneAndDelete with hint string succeeds on server >= 4.4"
     operations:
       -
         object: collection
+        collectionOptions: &collection_options
+          writeConcern: { w: 0 }
         name: findOneAndDelete
         arguments:
           filter: &filter { _id: 1 }
           hint: "_id_"
-        error: true
+        # Don't check result because different drivers return different responses to unacknowledged findAndModify commands
     expectations:
       -
         command_started_event:
@@ -30,21 +28,19 @@ tests:
             query: *filter
             hint: "_id_"
             remove: true
-    outcome: &outcome
-      collection:
-        data:
-          - { _id: 1, x: 11 }
-          - { _id: 2, x: 22 }
+    # Do not verify the contents of the collection to avoid race conditions
+    outcome: {}
   -
-    description: "FindOneAndDelete with hint document unsupported (server-side error)"
+    description: "Unacknowledged findOneAndDelete with hint document succeeds on server >= 4.4"
     operations:
       -
         object: collection
+        collectionOptions: *collection_options
         name: findOneAndDelete
         arguments:
           filter: &filter { _id: 1 }
           hint: { _id: 1 }
-        error: true
+        # Don't check result because different drivers return different responses to unacknowledged findAndModify commands
     expectations:
       -
         command_started_event:
@@ -53,8 +49,5 @@ tests:
             query: *filter
             hint: { _id: 1 }
             remove: true
-    outcome: &outcome
-      collection:
-        data:
-          - { _id: 1, x: 11 }
-          - { _id: 2, x: 22 }
+    # Do not verify the contents of the collection to avoid race conditions
+    outcome: {}

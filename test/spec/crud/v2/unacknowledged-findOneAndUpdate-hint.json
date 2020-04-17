@@ -1,0 +1,112 @@
+{
+  "runOn": [
+    {
+      "minServerVersion": "4.3.4"
+    }
+  ],
+  "data": [
+    {
+      "_id": 1,
+      "x": 11
+    },
+    {
+      "_id": 2,
+      "x": 22
+    }
+  ],
+  "collection_name": "FindOneAndUpdate_hint",
+  "tests": [
+    {
+      "description": "Unacknowledged findOneAndUpdate with hint string succeeds on server >= 4.4",
+      "operations": [
+        {
+          "object": "collection",
+          "collectionOptions": {
+            "writeConcern": {
+              "w": 0
+            }
+          },
+          "name": "findOneAndUpdate",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "update": {
+              "$inc": {
+                "x": 1
+              }
+            },
+            "hint": "_id_"
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "findAndModify": "FindOneAndUpdate_hint",
+              "query": {
+                "_id": 1
+              },
+              "update": {
+                "$inc": {
+                  "x": 1
+                }
+              },
+              "hint": "_id_"
+            }
+          }
+        }
+      ],
+      "outcome": {}
+    },
+    {
+      "description": "Unacknowledged findOneAndUpdate with hint document succeeds on server >= 4.4",
+      "operations": [
+        {
+          "object": "collection",
+          "collectionOptions": {
+            "writeConcern": {
+              "w": 0
+            }
+          },
+          "name": "findOneAndUpdate",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "update": {
+              "$inc": {
+                "x": 1
+              }
+            },
+            "hint": {
+              "_id": 1
+            }
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "findAndModify": "FindOneAndUpdate_hint",
+              "query": {
+                "_id": 1
+              },
+              "update": {
+                "$inc": {
+                  "x": 1
+                }
+              },
+              "hint": {
+                "_id": 1
+              }
+            }
+          }
+        }
+      ],
+      "outcome": {}
+    }
+  ]
+}
