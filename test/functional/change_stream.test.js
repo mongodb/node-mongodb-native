@@ -3,7 +3,6 @@ var assert = require('assert');
 var Transform = require('stream').Transform;
 const MongoError = require('../../lib/core').MongoError;
 var MongoNetworkError = require('../../lib/core').MongoNetworkError;
-const isResumableError = require('../../lib/error').isResumableError;
 var setupDatabase = require('./shared').setupDatabase;
 var delay = require('./shared').delay;
 var co = require('co');
