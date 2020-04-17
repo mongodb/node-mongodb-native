@@ -56,7 +56,7 @@ module.exports = {
   // BSON types
   Binary: BSON.Binary,
   Code: BSON.Code,
-  Map: BSON['Map'], // TODO:(neal) should this just be Map?
+  Map: BSON.Map,
   DBRef: BSON.DBRef,
   Double: BSON.Double,
   Int32: BSON.Int32,
@@ -65,7 +65,7 @@ module.exports = {
   MaxKey: BSON.MaxKey,
   ObjectId: BSON.ObjectId,
   ObjectID: BSON.ObjectId,
-  BSONSymbol: BSON['BSONSymbol'], // TODO:(neal) this is missing from bson types?
+  BSONSymbol: BSON.BSONSymbol,
   Timestamp: BSON.Timestamp,
   BSONRegExp: BSON.BSONRegExp,
   Decimal128: BSON.Decimal128,
