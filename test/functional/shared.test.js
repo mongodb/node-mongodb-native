@@ -22,7 +22,7 @@ describe('shared test utilities', function() {
       var e = [];
       const fakeDone = () => {
         expect(c.isConnected()).to.be.false;
-        expect(e.length).to.equal(1)
+        expect(e.length).to.equal(1);
         done();
       };
       const encapsulatedTest = withMonitoredClient(['find'], function(client, events, innerDone) {
