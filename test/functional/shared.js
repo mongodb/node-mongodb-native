@@ -203,7 +203,10 @@ function withMonitoredClient(commands, callback) {
     client.on('commandStarted', filterForCommands(commands, events));
     client.connect((err, client) => {
       expect(err).to.not.exist;
-      const d = () => client.close(done);
+      const d = function() {
+        const args = Object.values(arguments);
+        client.close(() => done.apply(this, args));
+      };
       callback.bind(this)(client, events, d);
     });
   };
