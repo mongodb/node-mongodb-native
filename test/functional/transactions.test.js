@@ -8,6 +8,7 @@ const TestRunnerContext = require('./spec-runner').TestRunnerContext;
 const loadSpecTests = require('../spec').loadSpecTests;
 const generateTopologyTests = require('./spec-runner').generateTopologyTests;
 const MongoNetworkError = require('../../lib/core').MongoNetworkError;
+const semver = require('semver');
 
 describe('Transactions', function() {
   const testContext = new TestRunnerContext();
@@ -26,7 +27,12 @@ describe('Transactions', function() {
         return testContext.setup(this.configuration);
       });
 
-      function testFilter(spec) {
+      function testFilter(spec, config) {
+        // NODE-2574: remove this when HELP-15010 is resolved
+        if (config.topologyType === 'Sharded' && semver.satisfies(config.version, '>=4.4')) {
+          return false;
+        }
+
         const SKIP_TESTS = [
           // commitTransaction retry seems to be swallowed by mongos in these three cases
           'commitTransaction retry succeeds on new mongos',

@@ -123,14 +123,16 @@ function generateTopologyTests(testSuites, testContext, filter) {
           afterEach(() => testContext.cleanupAfterSuite());
 
           testSuite.tests.forEach(spec => {
-            const maybeSkipIt =
-              spec.skipReason || (filter && typeof filter === 'function' && !filter(spec))
-                ? it.skip
-                : it;
+            it(spec.description, function() {
+              if (
+                spec.skipReason ||
+                (filter && typeof filter === 'function' && !filter(spec, this.configuration))
+              ) {
+                this.skip();
+                return;
+              }
 
-            maybeSkipIt(spec.description, function() {
               let testPromise = Promise.resolve();
-
               if (spec.failPoint) {
                 testPromise = testPromise.then(() => testContext.enableFailPoint(spec.failPoint));
               }
