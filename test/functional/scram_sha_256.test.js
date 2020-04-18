@@ -169,7 +169,7 @@ describe('SCRAM-SHA-256 auth', function() {
   });
 
   it('should shorten SCRAM conversations if the server supports it ', {
-    metadata: { requires: { mongodb: '>=4.3.x' } },
+    metadata: { requires: { mongodb: '>=4.4' } },
     test: function() {
       const options = {
         auth: {
@@ -179,17 +179,22 @@ describe('SCRAM-SHA-256 auth', function() {
         authSource: this.configuration.db
       };
 
-      let sendAuthCommandSpy;
+      let runCommandSpy;
       test.sandbox
-        .stub(ScramSHA256.prototype, '_executeScram')
-        .callsFake(function(sendAuthCommand, connection, credentials, nonce, callback) {
-          const executeScram = ScramSHA256.prototype._executeScram.wrappedMethod;
-          sendAuthCommandSpy = test.sandbox.spy(sendAuthCommand);
-          executeScram.apply(this, [sendAuthCommandSpy, connection, credentials, nonce, callback]);
+        .stub(ScramSHA256.prototype, 'auth')
+        .callsFake(function(connection, credentials, callback) {
+          const auth = ScramSHA256.prototype.auth.wrappedMethod;
+          runCommandSpy = test.sandbox.spy(connection, 'command');
+          function _callback(err, res) {
+            runCommandSpy.restore();
+            callback(err, res);
+          }
+
+          auth.apply(this, [connection, credentials, _callback]);
         });
 
       return withClient(this.configuration.newClient({}, options), () => {
-        expect(sendAuthCommandSpy.callCount).to.equal(2);
+        expect(runCommandSpy.callCount).to.equal(2);
       });
     }
   });
@@ -205,8 +210,7 @@ describe('SCRAM-SHA-256 auth', function() {
           password: userMap.sha256.password
         },
         authSource: this.configuration.db,
-        authMechanism: 'SCRAM-SHA-1',
-        serverSelectionTimeoutMS: 100
+        authMechanism: 'SCRAM-SHA-1'
       };
 
       return withClient(
@@ -229,8 +233,7 @@ describe('SCRAM-SHA-256 auth', function() {
           user: 'roth',
           password: 'pencil'
         },
-        authSource: 'admin',
-        serverSelectionTimeoutMS: 100
+        authSource: 'admin'
       };
 
       const badPasswordOptions = {
@@ -238,8 +241,7 @@ describe('SCRAM-SHA-256 auth', function() {
           user: 'both',
           password: 'pencil'
         },
-        authSource: 'admin',
-        serverSelectionTimeoutMS: 100
+        authSource: 'admin'
       };
 
       const getErrorMsg = options =>

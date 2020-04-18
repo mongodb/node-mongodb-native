@@ -4,7 +4,7 @@ const BSON = require('bson');
 const mock = require('mongodb-mock-server');
 const expect = require('chai').expect;
 const EventEmitter = require('events');
-
+const Connection = require('../../../lib/core/connection/connection');
 const connect = require('../../../lib/core/connection/connect');
 const MongoCredentials = require('../../../lib/core/auth/mongo_credentials').MongoCredentials;
 const genClusterTime = require('./common').genClusterTime;
@@ -115,26 +115,13 @@ describe('Connect Tests', function() {
 
   describe('runCommand', function() {
     const metadata = { requires: { topology: 'single' } };
-    class MockConnection extends EventEmitter {
-      constructor(conn) {
-        super();
-        this.options = { bson: new BSON() };
-        this.conn = conn;
-      }
-
-      get address() {
-        return 'mocked';
-      }
-
-      setSocketTimeout() {}
-      resetSocketTimeout() {}
-      destroy() {
-        this.conn.destroy();
-      }
-    }
 
     it('should treat non-Error generating error-like events as errors', metadata, function(done) {
-      class ConnectionFailingWithClose extends MockConnection {
+      class ConnectionFailingWithClose extends Connection {
+        constructor(conn) {
+          super(conn, { bson: new BSON() });
+        }
+
         write() {
           this.emit('close');
         }
@@ -155,7 +142,11 @@ describe('Connect Tests', function() {
       'should not crash the application if multiple error-like events are emitted on `runCommand`',
       metadata,
       function(done) {
-        class ConnectionFailingWithAllEvents extends MockConnection {
+        class ConnectionFailingWithAllEvents extends Connection {
+          constructor(conn) {
+            super(conn, { bson: new BSON() });
+          }
+
           write() {
             this.emit('close');
             this.emit('timeout');
