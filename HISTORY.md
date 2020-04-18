@@ -5,7 +5,6 @@ All notable changes to this project will be documented in this file. See [standa
 <a name="3.6.0-beta.0"></a>
 # [3.6.0-beta.0](https://github.com/mongodb/node-mongodb-native/compare/v3.5.5...v3.6.0-beta.0) (2020-04-14)
 
-
 ### Bug Fixes
 
 * always return empty array for selection on unknown topology ([af57b57](https://github.com/mongodb/node-mongodb-native/commit/af57b57))
@@ -39,6 +38,21 @@ All notable changes to this project will be documented in this file. See [standa
 * support passing a hint to findOneAndReplace/findOneAndUpdate ([faee15b](https://github.com/mongodb/node-mongodb-native/commit/faee15b))
 * support shorter SCRAM conversations ([6b9ff05](https://github.com/mongodb/node-mongodb-native/commit/6b9ff05))
 * use error labels for retryable writes in legacy topologies ([fefc165](https://github.com/mongodb/node-mongodb-native/commit/fefc165))
+
+
+
+<a name="3.5.6"></a>
+## [3.5.6](https://github.com/mongodb/node-mongodb-native/compare/v3.5.5...v3.5.6) (2020-04-14)
+
+### Bug Fixes
+
+* always return empty array for selection on unknown topology ([f9e786a](https://github.com/mongodb/node-mongodb-native/commit/f9e786a))
+* createCollection only uses listCollections in strict mode ([d368f12](https://github.com/mongodb/node-mongodb-native/commit/d368f12))
+* don't throw if `withTransaction()` callback rejects with a null reason ([153646c](https://github.com/mongodb/node-mongodb-native/commit/153646c))
+* only mark server session dirty if the client session is alive ([611be8d](https://github.com/mongodb/node-mongodb-native/commit/611be8d))
+* polyfill for util.promisify ([1c4cf6c](https://github.com/mongodb/node-mongodb-native/commit/1c4cf6c))
+* single `readPreferenceTags` should be parsed as an array ([a50611b](https://github.com/mongodb/node-mongodb-native/commit/a50611b))
+* **cursor:** transforms should only be applied once to documents ([704f30a](https://github.com/mongodb/node-mongodb-native/commit/704f30a))
 
 
 

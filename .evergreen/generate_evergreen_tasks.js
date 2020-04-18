@@ -37,7 +37,7 @@ const OPERATING_SYSTEMS = [
     run_on: 'ubuntu1804-test',
     mongoVersion: '>=3.2',
     clientEncryption: true
-  },
+  }
 
   // Windows. reenable this when nvm supports windows, or we settle on an alternative tool
   // {
@@ -263,12 +263,12 @@ const getTaskList = (() => {
     }
 
     const ret = TASKS.filter(task => {
-      const tasksWithVars =  task.commands.filter(task => !!task.vars);
-      if (tasksWithVars.length === 0) {
+      const tasksWithVars = task.commands.filter(task => !!task.vars);
+      if (!tasksWithVars.length) {
         return true;
       }
 
-      const { VERSION } = task.commands.filter(task => !!task.vars)[0].vars;
+      const { VERSION } = tasksWithVars[0].vars || {};
       if (VERSION === 'latest') {
         return semver.satisfies(semver.coerce(LATEST_EFFECTIVE_VERSION), mongoVersion);
       }
