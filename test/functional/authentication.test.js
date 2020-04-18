@@ -6,7 +6,7 @@ var setupDatabase = require('./shared').setupDatabase;
 
 describe('Authentication', function() {
   before(function() {
-    return setupDatabase(this.configuration, ['admin']);
+    return setupDatabase(this.configuration);
   });
 
   it('should still work for auth when using new url parser and no database is in url', {
