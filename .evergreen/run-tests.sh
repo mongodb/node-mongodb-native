@@ -30,4 +30,4 @@ else
   npm install mongodb-client-encryption
 fi
 
-MONGODB_UNIFIED_TOPOLOGY=${UNIFIED} MONGODB_URI=${MONGODB_URI} npm test
+MONGODB_UNIFIED_TOPOLOGY=${UNIFIED} MONGODB_URI=${MONGODB_URI} npm run check:test
