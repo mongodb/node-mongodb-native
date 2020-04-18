@@ -67,6 +67,7 @@ const OPERATING_SYSTEMS = [
 );
 
 const TASKS = [];
+const SINGLETON_TASKS = [];
 
 function makeTask({ mongoVersion, topology }) {
   let topologyForTest = topology;
@@ -106,12 +107,7 @@ Array.prototype.push.apply(TASKS, [
     tags: ['atlas-connect'],
     commands: [
       { func: 'install dependencies' },
-      {
-        func: 'run atlas tests',
-        vars: {
-          VERSION: 'latest'
-        }
-      }
+      { func: 'run atlas tests' }
     ]
   },
   {
@@ -267,8 +263,12 @@ const getTaskList = (() => {
     }
 
     const ret = TASKS.filter(task => {
-      const { VERSION } = task.commands.filter(task => !!task.vars)[0].vars;
+      const tasksWithVars =  task.commands.filter(task => !!task.vars);
+      if (tasksWithVars.length === 0) {
+        return true;
+      }
 
+      const { VERSION } = task.commands.filter(task => !!task.vars)[0].vars;
       if (VERSION === 'latest') {
         return semver.satisfies(semver.coerce(LATEST_EFFECTIVE_VERSION), mongoVersion);
       }
@@ -308,6 +308,28 @@ OPERATING_SYSTEMS.forEach(
   }
 );
 
+// singleton build variant for linting
+SINGLETON_TASKS.push({
+  name: 'run-checks',
+  tags: ['run-checks'],
+  commands: [
+    {
+      func: 'install dependencies',
+      vars: {
+        NODE_LTS_NAME: 'erbium'
+      }
+    },
+    { func: 'run checks' }
+  ]
+});
+
+BUILD_VARIANTS.push({
+  name: 'lint',
+  display_name: 'lint',
+  run_on: 'rhel70',
+  tasks: ['run-checks']
+});
+
 // special case for MONGODB-AWS authentication
 BUILD_VARIANTS.push({
   name: 'ubuntu1804-test-mongodb-aws',
@@ -320,8 +342,7 @@ BUILD_VARIANTS.push({
 });
 
 const fileData = yaml.safeLoad(fs.readFileSync(`${__dirname}/config.yml.in`, 'utf8'));
-
-fileData.tasks = (fileData.tasks || []).concat(TASKS);
+fileData.tasks = (fileData.tasks || []).concat(TASKS).concat(SINGLETON_TASKS);
 fileData.buildvariants = (fileData.buildvariants || []).concat(BUILD_VARIANTS);
 
 fs.writeFileSync(`${__dirname}/config.yml`, yaml.safeDump(fileData, { lineWidth: 120 }), 'utf8');

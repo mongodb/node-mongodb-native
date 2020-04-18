@@ -114,6 +114,14 @@ functions:
 
           AUTH=${AUTH} SSL=${SSL} UNIFIED=${UNIFIED} MONGODB_URI="${MONGODB_URI}" bash
           ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
+  run checks:
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: src
+        script: |
+          ${PREPARE_SHELL}
+          bash ${PROJECT_DIRECTORY}/.evergreen/run-checks.sh
   cleanup:
     - command: shell.exec
       params:
@@ -960,8 +968,6 @@ tasks:
     commands:
       - func: install dependencies
       - func: run atlas tests
-        vars:
-          VERSION: latest
   - name: test-ocsp-valid-cert-server-staples
     tags:
       - ocsp
@@ -1073,6 +1079,14 @@ tasks:
       - func: run aws auth test with aws credentials as environment variables
       - func: run aws auth test with aws credentials and session token as environment variables
       - func: run aws ECS auth test
+  - name: run-checks
+    tags:
+      - run-checks
+    commands:
+      - func: install dependencies
+        vars:
+          NODE_LTS_NAME: erbium
+      - func: run checks
 buildvariants:
   - name: macos-1014-dubnium
     display_name: macOS 10.14 Node Dubnium
@@ -1220,6 +1234,7 @@ buildvariants:
       - test-2.6-server-unified
       - test-2.6-replica_set-unified
       - test-2.6-sharded_cluster-unified
+      - test-atlas-connectivity
   - name: ubuntu-14.04-carbon
     display_name: Ubuntu 14.04 Node Carbon
     run_on: ubuntu1404-test
@@ -1310,6 +1325,11 @@ buildvariants:
       NODE_LTS_NAME: argon
       CLIENT_ENCRYPTION: true
     tasks: *ref_2
+  - name: lint
+    display_name: lint
+    run_on: rhel70
+    tasks:
+      - run-checks
   - name: ubuntu1804-test-mongodb-aws
     display_name: MONGODB-AWS Auth test
     run_on: ubuntu1804-test
