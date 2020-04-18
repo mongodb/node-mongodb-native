@@ -19,6 +19,7 @@ function convertToConnStringMap(obj) {
 class NativeConfiguration {
   constructor(parsedURI, context) {
     this.topologyType = context.topologyType;
+    this.version = context.version;
     this.clientSideEncryption = context.clientSideEncryption;
     this.options = Object.assign(
       {
