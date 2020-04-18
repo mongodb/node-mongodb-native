@@ -6,7 +6,7 @@ const yaml = require('js-yaml');
 
 const LATEST_EFFECTIVE_VERSION = '5.0';
 const MONGODB_VERSIONS = ['latest', '4.2', '4.0', '3.6', '3.4', '3.2', '3.0', '2.6'];
-const NODE_VERSIONS = ['dubnium', 'carbon', 'boron', 'argon'];
+const NODE_VERSIONS = ['erbium', 'dubnium', 'carbon', 'boron', 'argon'];
 const TOPOLOGIES = ['server', 'replica_set', 'sharded_cluster'].concat([
   'server-unified',
   'replica_set-unified',
