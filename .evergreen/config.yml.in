@@ -130,6 +130,15 @@ functions:
 
           AUTH=${AUTH} SSL=${SSL} UNIFIED=${UNIFIED} MONGODB_URI="${MONGODB_URI}" bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
 
+  "run checks":
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: "src"
+        script: |
+          ${PREPARE_SHELL}
+          bash ${PROJECT_DIRECTORY}/.evergreen/run-checks.sh
+
   "cleanup":
     - command: shell.exec
       params:

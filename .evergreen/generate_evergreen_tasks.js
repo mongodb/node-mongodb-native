@@ -6,7 +6,7 @@ const yaml = require('js-yaml');
 
 const LATEST_EFFECTIVE_VERSION = '5.0';
 const MONGODB_VERSIONS = ['latest', '4.2', '4.0', '3.6', '3.4', '3.2', '3.0', '2.6'];
-const NODE_VERSIONS = ['dubnium', 'carbon', 'boron', 'argon'];
+const NODE_VERSIONS = ['erbium', 'dubnium', 'carbon', 'boron', 'argon'];
 const TOPOLOGIES = ['server', 'replica_set', 'sharded_cluster'].concat([
   'server-unified',
   'replica_set-unified',
@@ -37,7 +37,7 @@ const OPERATING_SYSTEMS = [
     run_on: 'ubuntu1804-test',
     mongoVersion: '>=3.2',
     clientEncryption: true
-  },
+  }
 
   // Windows. reenable this when nvm supports windows, or we settle on an alternative tool
   // {
@@ -67,6 +67,7 @@ const OPERATING_SYSTEMS = [
 );
 
 const TASKS = [];
+const SINGLETON_TASKS = [];
 
 function makeTask({ mongoVersion, topology }) {
   let topologyForTest = topology;
@@ -80,9 +81,7 @@ function makeTask({ mongoVersion, topology }) {
     name: `test-${mongoVersion}-${topology}`,
     tags: [mongoVersion, topology],
     commands: [
-      {
-        func: 'install dependencies'
-      },
+      { func: 'install dependencies' },
       {
         func: 'bootstrap mongo-orchestration',
         vars: {
@@ -101,20 +100,11 @@ MONGODB_VERSIONS.forEach(mongoVersion => {
   });
 });
 
+// singleton task for connectivity tests
 TASKS.push({
   name: 'test-atlas-connectivity',
   tags: ['atlas-connect'],
-  commands: [
-    {
-      func: 'install dependencies'
-    },
-    {
-      func: 'run atlas tests',
-      vars: {
-        VERSION: 'latest'
-      }
-    }
-  ]
+  commands: [{ func: 'install dependencies' }, { func: 'run atlas tests' }]
 });
 
 const BUILD_VARIANTS = [];
@@ -129,8 +119,12 @@ const getTaskList = (() => {
     }
 
     const ret = TASKS.filter(task => {
-      const { VERSION } = task.commands.filter(task => !!task.vars)[0].vars;
+      const tasksWithVars = task.commands.filter(task => !!task.vars);
+      if (!tasksWithVars.length) {
+        return true;
+      }
 
+      const { VERSION } = tasksWithVars[0].vars || {};
       if (VERSION === 'latest') {
         return semver.satisfies(semver.coerce(LATEST_EFFECTIVE_VERSION), mongoVersion);
       }
@@ -170,9 +164,30 @@ OPERATING_SYSTEMS.forEach(
   }
 );
 
-const fileData = yaml.safeLoad(fs.readFileSync(`${__dirname}/config.yml.in`, 'utf8'));
+// singleton build variant for linting
+SINGLETON_TASKS.push({
+  name: 'run-checks',
+  tags: ['run-checks'],
+  commands: [
+    {
+      func: 'install dependencies',
+      vars: {
+        NODE_LTS_NAME: 'erbium'
+      }
+    },
+    { func: 'run checks' }
+  ]
+});
 
-fileData.tasks = (fileData.tasks || []).concat(TASKS);
+BUILD_VARIANTS.push({
+  name: 'lint',
+  display_name: 'lint',
+  run_on: 'rhel70',
+  tasks: ['run-checks']
+});
+
+const fileData = yaml.safeLoad(fs.readFileSync(`${__dirname}/config.yml.in`, 'utf8'));
+fileData.tasks = (fileData.tasks || []).concat(TASKS).concat(SINGLETON_TASKS);
 fileData.buildvariants = (fileData.buildvariants || []).concat(BUILD_VARIANTS);
 
 fs.writeFileSync(`${__dirname}/config.yml`, yaml.safeDump(fileData, { lineWidth: 120 }), 'utf8');

@@ -112,6 +112,14 @@ functions:
 
           AUTH=${AUTH} SSL=${SSL} UNIFIED=${UNIFIED} MONGODB_URI="${MONGODB_URI}" bash
           ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
+  run checks:
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: src
+        script: |
+          ${PREPARE_SHELL}
+          bash ${PROJECT_DIRECTORY}/.evergreen/run-checks.sh
   cleanup:
     - command: shell.exec
       params:
@@ -744,14 +752,20 @@ tasks:
     commands:
       - func: install dependencies
       - func: run atlas tests
+  - name: run-checks
+    tags:
+      - run-checks
+    commands:
+      - func: install dependencies
         vars:
-          VERSION: latest
+          NODE_LTS_NAME: erbium
+      - func: run checks
 buildvariants:
-  - name: macos-1014-dubnium
-    display_name: macOS 10.14 Node Dubnium
+  - name: macos-1014-erbium
+    display_name: macOS 10.14 Node Erbium
     run_on: macos-1014
     expansions:
-      NODE_LTS_NAME: dubnium
+      NODE_LTS_NAME: erbium
     tasks: &ref_0
       - test-latest-server
       - test-latest-replica_set
@@ -802,6 +816,12 @@ buildvariants:
       - test-2.6-replica_set-unified
       - test-2.6-sharded_cluster-unified
       - test-atlas-connectivity
+  - name: macos-1014-dubnium
+    display_name: macOS 10.14 Node Dubnium
+    run_on: macos-1014
+    expansions:
+      NODE_LTS_NAME: dubnium
+    tasks: *ref_0
   - name: macos-1014-carbon
     display_name: macOS 10.14 Node Carbon
     run_on: macos-1014
@@ -819,6 +839,12 @@ buildvariants:
     run_on: macos-1014
     expansions:
       NODE_LTS_NAME: argon
+    tasks: *ref_0
+  - name: rhel70-erbium
+    display_name: RHEL 7.0 Node Erbium
+    run_on: rhel70-small
+    expansions:
+      NODE_LTS_NAME: erbium
     tasks: *ref_0
   - name: rhel70-dubnium
     display_name: RHEL 7.0 Node Dubnium
@@ -844,11 +870,11 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: argon
     tasks: *ref_0
-  - name: ubuntu-14.04-dubnium
-    display_name: Ubuntu 14.04 Node Dubnium
+  - name: ubuntu-14.04-erbium
+    display_name: Ubuntu 14.04 Node Erbium
     run_on: ubuntu1404-test
     expansions:
-      NODE_LTS_NAME: dubnium
+      NODE_LTS_NAME: erbium
     tasks: &ref_1
       - test-4.0-server
       - test-4.0-replica_set
@@ -886,6 +912,13 @@ buildvariants:
       - test-2.6-server-unified
       - test-2.6-replica_set-unified
       - test-2.6-sharded_cluster-unified
+      - test-atlas-connectivity
+  - name: ubuntu-14.04-dubnium
+    display_name: Ubuntu 14.04 Node Dubnium
+    run_on: ubuntu1404-test
+    expansions:
+      NODE_LTS_NAME: dubnium
+    tasks: *ref_1
   - name: ubuntu-14.04-carbon
     display_name: Ubuntu 14.04 Node Carbon
     run_on: ubuntu1404-test
@@ -904,11 +937,11 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: argon
     tasks: *ref_1
-  - name: ubuntu-18.04-dubnium
-    display_name: Ubuntu 18.04 Node Dubnium
+  - name: ubuntu-18.04-erbium
+    display_name: Ubuntu 18.04 Node Erbium
     run_on: ubuntu1804-test
     expansions:
-      NODE_LTS_NAME: dubnium
+      NODE_LTS_NAME: erbium
       CLIENT_ENCRYPTION: true
     tasks: &ref_2
       - test-latest-server
@@ -948,6 +981,13 @@ buildvariants:
       - test-3.2-replica_set-unified
       - test-3.2-sharded_cluster-unified
       - test-atlas-connectivity
+  - name: ubuntu-18.04-dubnium
+    display_name: Ubuntu 18.04 Node Dubnium
+    run_on: ubuntu1804-test
+    expansions:
+      NODE_LTS_NAME: dubnium
+      CLIENT_ENCRYPTION: true
+    tasks: *ref_2
   - name: ubuntu-18.04-carbon
     display_name: Ubuntu 18.04 Node Carbon
     run_on: ubuntu1804-test
@@ -969,3 +1009,8 @@ buildvariants:
       NODE_LTS_NAME: argon
       CLIENT_ENCRYPTION: true
     tasks: *ref_2
+  - name: lint
+    display_name: lint
+    run_on: rhel70
+    tasks:
+      - run-checks
