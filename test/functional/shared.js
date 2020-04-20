@@ -192,12 +192,33 @@ class EventCollector {
   }
 }
 
+function withMonitoredClient(commands, callback) {
+  if (!callback.hasOwnProperty('prototype')) {
+    throw new Error('withMonitoredClient callback can not be arrow function');
+  }
+  return function(done) {
+    const configuration = this.configuration;
+    const client = configuration.newClient({ monitorCommands: true });
+    const events = [];
+    client.on('commandStarted', filterForCommands(commands, events));
+    client.connect((err, client) => {
+      expect(err).to.not.exist;
+      const d = function() {
+        const args = Object.values(arguments);
+        client.close(() => done.apply(this, args));
+      };
+      callback.bind(this)(client, events, d);
+    });
+  };
+}
+
 module.exports = {
   connectToDb,
   setupDatabase,
   assert,
   delay,
   withClient,
+  withMonitoredClient,
   filterForCommands,
   filterOutCommands,
   ignoreNsNotFound,
