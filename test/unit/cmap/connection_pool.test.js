@@ -1,6 +1,7 @@
 'use strict';
 
-const Promise = require('bluebird');
+require('util.promisify/shim')();
+const util = require('util');
 const loadSpecTests = require('../../spec').loadSpecTests;
 const ConnectionPool = require('../../../lib/cmap/connection_pool').ConnectionPool;
 const EventEmitter = require('events').EventEmitter;
@@ -25,8 +26,8 @@ const ALL_POOL_EVENTS = new Set([
 ]);
 
 const PROMISIFIED_POOL_FUNCTIONS = {
-  checkOut: Promise.promisify(ConnectionPool.prototype.checkOut),
-  close: Promise.promisify(ConnectionPool.prototype.close)
+  checkOut: util.promisify(ConnectionPool.prototype.checkOut),
+  close: util.promisify(ConnectionPool.prototype.close)
 };
 
 function closePool(pool) {
@@ -370,7 +371,7 @@ describe('Connection Pool', function() {
       return p
         .then(() => {
           const connectionsToDestroy = Array.from(orphans).concat(Array.from(connections.values()));
-          return Promise.each(connectionsToDestroy, conn => {
+          const promises = connectionsToDestroy.map(conn => {
             return new Promise((resolve, reject) =>
               conn.destroy({ force: true }, err => {
                 if (err) return reject(err);
@@ -378,6 +379,7 @@ describe('Connection Pool', function() {
               })
             );
           });
+          return Promise.all(promises);
         })
         .then(() => {
           pool = undefined;

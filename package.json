@@ -32,7 +32,6 @@
   },
   "devDependencies": {
     "@types/node": "^13.9.8",
-    "bluebird": "3.5.0",
     "chai": "^4.1.1",
     "chai-subset": "^1.6.0",
     "chalk": "^2.4.2",
@@ -58,7 +57,8 @@
     "typescript": "^3.8.3",
     "worker-farm": "^1.5.0",
     "wtfnode": "^0.8.0",
-    "yargs": "^14.2.0"
+    "yargs": "^14.2.0",
+    "util.promisify": "^1.0.1"
   },
   "license": "Apache-2.0",
   "engines": {
