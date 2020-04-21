@@ -1,7 +1,6 @@
 'use strict';
 
 const { expect } = require('chai');
-const { format: f } = require('util');
 const { MongoError, MongoNetworkError } = require('../../../lib/error');
 
 describe('Error tests', function() {
