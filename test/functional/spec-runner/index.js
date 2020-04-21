@@ -644,76 +644,81 @@ function testOperation(operation, obj, context, options) {
       opOptions.nameOnly = true;
     }
 
-  if (CURSOR_COMMANDS.has(operationName)) {
-    // `find` creates a cursor, so we need to call `toArray` on it
-    const cursor = obj[operationName].apply(obj, args);
-    opPromise = cursor.toArray();
-  } else {
-    // wrap this in a `Promise.try` because some operations might throw
-    opPromise = promiseTry(() => obj[operationName].apply(obj, args));
-  }
+    if (CURSOR_COMMANDS.has(operationName)) {
+      // `find` creates a cursor, so we need to call `toArray` on it
+      const cursor = obj[operationName].apply(obj, args);
+      opPromise = cursor.toArray();
+    } else {
+      // wrap this in a `Promise.try` because some operations might throw
+      opPromise = promiseTry(() => obj[operationName].apply(obj, args));
+    }
 
-  if (operation.error) {
-    opPromise = opPromise.then(
-      () => {
-        throw new Error('expected an error!');
-      },
-      () => {}
-    );
-  }
-
-  if (operation.result) {
-    const result = operation.result;
-
-    if (
-      result.errorContains != null ||
-      result.errorCodeName ||
-      result.errorLabelsContain ||
-      result.errorLabelsOmit
-    ) {
-      return opPromise.then(
+    if (operation.error) {
+      opPromise = opPromise.then(
         () => {
           throw new Error('expected an error!');
         },
-        err => {
-          const errorContains = result.errorContains;
-          const errorCodeName = result.errorCodeName;
-          const errorLabelsContain = result.errorLabelsContain;
-          const errorLabelsOmit = result.errorLabelsOmit;
-
-          if (errorLabelsContain) {
-            expect(err).to.have.property('errorLabels');
-            expect(err.errorLabels).to.include.members(errorLabelsContain);
-          }
-
-          if (errorLabelsOmit) {
-            if (err.errorLabels && Array.isArray(err.errorLabels) && err.errorLabels.length !== 0) {
-              expect(errorLabelsOmit).to.not.include.members(err.errorLabels);
-            }
-          }
-
-          if (operation.result.errorContains) {
-            expect(err.message).to.match(new RegExp(escape(errorContains), 'i'));
-          }
-
-          if (errorCodeName) {
-            expect(err.codeName).to.equal(errorCodeName);
-          }
-
-          if (!options.swallowOperationErrors) {
-            throw err;
-          }
-        }
+        () => {}
       );
     }
 
-    return opPromise.then(opResult => {
-      const actual = extractCrudResult(opResult, operation);
-      expect(actual).to.matchMongoSpec(operation.result);
-    });
-  }
+    if (operation.result) {
+      const result = operation.result;
 
-  return opPromise;
+      if (
+        result.errorContains != null ||
+        result.errorCodeName ||
+        result.errorLabelsContain ||
+        result.errorLabelsOmit
+      ) {
+        return opPromise.then(
+          () => {
+            throw new Error('expected an error!');
+          },
+          err => {
+            const errorContains = result.errorContains;
+            const errorCodeName = result.errorCodeName;
+            const errorLabelsContain = result.errorLabelsContain;
+            const errorLabelsOmit = result.errorLabelsOmit;
+
+            if (errorLabelsContain) {
+              expect(err).to.have.property('errorLabels');
+              expect(err.errorLabels).to.include.members(errorLabelsContain);
+            }
+
+            if (errorLabelsOmit) {
+              if (
+                err.errorLabels &&
+                Array.isArray(err.errorLabels) &&
+                err.errorLabels.length !== 0
+              ) {
+                expect(errorLabelsOmit).to.not.include.members(err.errorLabels);
+              }
+            }
+
+            if (operation.result.errorContains) {
+              expect(err.message).to.match(new RegExp(escape(errorContains), 'i'));
+            }
+
+            if (errorCodeName) {
+              expect(err.codeName).to.equal(errorCodeName);
+            }
+
+            if (!options.swallowOperationErrors) {
+              throw err;
+            }
+          }
+        );
+      }
+
+      return opPromise.then(opResult => {
+        const actual = extractCrudResult(opResult, operation);
+        expect(actual).to.matchMongoSpec(operation.result);
+      });
+    }
+
+    return opPromise;
+  }
 }
 
 function convertCollectionOptions(options) {
