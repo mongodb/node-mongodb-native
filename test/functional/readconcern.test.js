@@ -41,11 +41,11 @@ describe('ReadConcern', function() {
       commandName: 'aggregate',
       readConcern: { level: 'majority' }
     },
-    {
+    /*{
       description: 'Should set majority readConcern geoSearch command',
       commandName: 'geoSearch',
       readConcern: { level: 'majority' }
-    },
+    },*/
     {
       description: 'Should set local readConcern at collection level',
       commandName: 'find',

@@ -1699,7 +1699,7 @@ describe('Operation Examples', function() {
    * @example-class Collection
    * @example-method geoHaystackSearch
    */
-  it('shouldCorrectlyPerformSimpleGeoHaystackSearchCommand', {
+  it.skip('shouldCorrectlyPerformSimpleGeoHaystackSearchCommand', {
     metadata: { requires: { topology: ['single', 'replicaset'] } },
 
     test: function(done) {

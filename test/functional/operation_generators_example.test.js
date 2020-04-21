@@ -1056,7 +1056,7 @@ describe('Operation (Generators)', function() {
    * @example-class Collection
    * @example-method geoHaystackSearch
    */
-  it('shouldCorrectlyPerformSimpleGeoHaystackSearchCommandWithGenerators', {
+  it.skip('shouldCorrectlyPerformSimpleGeoHaystackSearchCommandWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
     test: function() {

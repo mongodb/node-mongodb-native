@@ -148,7 +148,7 @@ describe('ReadPreference', function() {
     }
   });
 
-  it('Should correctly apply collection level read Preference to geoHaystackSearch', {
+  it.skip('Should correctly apply collection level read Preference to geoHaystackSearch', {
     metadata: { requires: { mongodb: '>=2.6.0', topology: ['single', 'ssl'] } },
 
     test: function(done) {

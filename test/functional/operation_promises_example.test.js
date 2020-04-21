@@ -1082,7 +1082,7 @@ describe('Operation (Promises)', function() {
    * @example-class Collection
    * @example-method geoHaystackSearch
    */
-  it('shouldCorrectlyPerformSimpleGeoHaystackSearchCommandWithPromises', {
+  it.skip('shouldCorrectlyPerformSimpleGeoHaystackSearchCommandWithPromises', {
     metadata: { requires: { topology: ['single', 'replicaset'] } },
 
     test: function() {

@@ -5,7 +5,7 @@ const { format: f } = require('util');
 const { MongoError, MongoNetworkError } = require('../../../lib/error');
 
 describe('Error tests', function() {
-  it('should return helpful error when geoHaystack fails', {
+  it.skip('should return helpful error when geoHaystack fails', {
     metadata: {
       requires: {
         mongodb: '< 4.1.x',
