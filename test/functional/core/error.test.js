@@ -5,34 +5,6 @@ const { format: f } = require('util');
 const { MongoError, MongoNetworkError } = require('../../../lib/error');
 
 describe('Error tests', function() {
-  it.skip('should return helpful error when geoHaystack fails', {
-    metadata: {
-      requires: {
-        mongodb: '< 4.1.x',
-        topology: ['single', 'replicaset']
-      }
-    },
-
-    test: function(done) {
-      var self = this;
-      const config = this.configuration;
-      const server = config.newTopology();
-
-      var ns = f('%s.geohaystack1', self.configuration.db);
-      server.on('connect', function(_server) {
-        _server.command('system.$cmd', { geoNear: ns }, {}, function(_err, result) {
-          expect(result).to.not.exist;
-          expect(/can't find ns/.test(_err)).to.be.ok;
-          _server.destroy();
-          done();
-        });
-      });
-
-      // Start connection
-      server.connect();
-    }
-  });
-
   it('should create a MongoError from string', {
     metadata: {
       requires: { topology: ['single'] }

@@ -41,11 +41,6 @@ describe('ReadConcern', function() {
       commandName: 'aggregate',
       readConcern: { level: 'majority' }
     },
-    /*{
-      description: 'Should set majority readConcern geoSearch command',
-      commandName: 'geoSearch',
-      readConcern: { level: 'majority' }
-    },*/
     {
       description: 'Should set local readConcern at collection level',
       commandName: 'find',
@@ -100,38 +95,6 @@ describe('ReadConcern', function() {
               expect(err).to.not.exist;
               validateTestResults(started, succeeded, test.commandName, test.readConcern.level);
               done();
-            });
-          } else if (test.commandName === 'geoSearch') {
-            collection.ensureIndex({ loc: 'geoHaystack', type: 1 }, { bucketSize: 1 }, err => {
-              expect(err).to.not.exist;
-              // Save a new location tagged document
-              collection.insertMany(
-                [
-                  { a: 1, loc: [50, 30] },
-                  { a: 1, loc: [30, 50] }
-                ],
-                configuration.writeConcernMax(),
-                err => {
-                  expect(err).to.not.exist;
-
-                  // Use geoHaystackSearch command to find document
-                  collection.geoHaystackSearch(
-                    50,
-                    50,
-                    { search: { a: 1 }, limit: 1, maxDistance: 100 },
-                    err => {
-                      expect(err).to.not.exist;
-                      validateTestResults(
-                        started,
-                        succeeded,
-                        test.commandName,
-                        test.readConcern.level
-                      );
-                      done();
-                    }
-                  );
-                }
-              );
             });
           }
         });
