@@ -1,5 +1,4 @@
 'use strict';
-
 const path = require('path');
 const fs = require('fs');
 const chai = require('chai');
@@ -8,13 +7,6 @@ const { EJSON } = require('bson');
 const TestRunnerContext = require('./context').TestRunnerContext;
 const resolveConnectionString = require('./utils').resolveConnectionString;
 
-chai.use(require('chai-subset'));
-chai.use(require('./matcher').default);
-chai.config.includeStack = true;
-chai.config.showDiff = true;
-chai.config.truncateThreshold = 0;
-
-// Promise.try alternative https://stackoverflow.com/questions/60624081/promise-try-without-bluebird/60624164?noredirect=1#comment107255389_60624164
 function promiseTry(callback) {
   return new Promise((resolve, reject) => {
     try {
@@ -24,6 +16,12 @@ function promiseTry(callback) {
     }
   });
 }
+
+chai.use(require('chai-subset'));
+chai.use(require('./matcher').default);
+chai.config.includeStack = true;
+chai.config.showDiff = true;
+chai.config.truncateThreshold = 0;
 
 function escape(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -649,76 +647,72 @@ function testOperation(operation, obj, context, options) {
       const cursor = obj[operationName].apply(obj, args);
       opPromise = cursor.toArray();
     } else {
-      // wrap this in a `Promise.try` because some operations might throw
+      // wrap this in a `promiseTry` because some operations might throw
       opPromise = promiseTry(() => obj[operationName].apply(obj, args));
     }
+  }
 
-    if (operation.error) {
-      opPromise = opPromise.then(
+  if (operation.error) {
+    opPromise = opPromise.then(
+      () => {
+        throw new Error('expected an error!');
+      },
+      () => {}
+    );
+  }
+
+  if (operation.result) {
+    const result = operation.result;
+
+    if (
+      result.errorContains != null ||
+      result.errorCodeName ||
+      result.errorLabelsContain ||
+      result.errorLabelsOmit
+    ) {
+      return opPromise.then(
         () => {
           throw new Error('expected an error!');
         },
-        () => {}
+        err => {
+          const errorContains = result.errorContains;
+          const errorCodeName = result.errorCodeName;
+          const errorLabelsContain = result.errorLabelsContain;
+          const errorLabelsOmit = result.errorLabelsOmit;
+
+          if (errorLabelsContain) {
+            expect(err).to.have.property('errorLabels');
+            expect(err.errorLabels).to.include.members(errorLabelsContain);
+          }
+
+          if (errorLabelsOmit) {
+            if (err.errorLabels && Array.isArray(err.errorLabels) && err.errorLabels.length !== 0) {
+              expect(errorLabelsOmit).to.not.include.members(err.errorLabels);
+            }
+          }
+
+          if (operation.result.errorContains) {
+            expect(err.message).to.match(new RegExp(escape(errorContains), 'i'));
+          }
+
+          if (errorCodeName) {
+            expect(err.codeName).to.equal(errorCodeName);
+          }
+
+          if (!options.swallowOperationErrors) {
+            throw err;
+          }
+        }
       );
     }
 
-    if (operation.result) {
-      const result = operation.result;
-
-      if (
-        result.errorContains != null ||
-        result.errorCodeName ||
-        result.errorLabelsContain ||
-        result.errorLabelsOmit
-      ) {
-        return opPromise.then(
-          () => {
-            throw new Error('expected an error!');
-          },
-          err => {
-            const errorContains = result.errorContains;
-            const errorCodeName = result.errorCodeName;
-            const errorLabelsContain = result.errorLabelsContain;
-            const errorLabelsOmit = result.errorLabelsOmit;
-
-            if (errorLabelsContain) {
-              expect(err).to.have.property('errorLabels');
-              expect(err.errorLabels).to.include.members(errorLabelsContain);
-            }
-
-            if (errorLabelsOmit) {
-              if (
-                err.errorLabels &&
-                Array.isArray(err.errorLabels) &&
-                err.errorLabels.length !== 0
-              ) {
-                expect(errorLabelsOmit).to.not.include.members(err.errorLabels);
-              }
-            }
-
-            if (operation.result.errorContains) {
-              expect(err.message).to.match(new RegExp(escape(errorContains), 'i'));
-            }
-
-            if (errorCodeName) {
-              expect(err.codeName).to.equal(errorCodeName);
-            }
-
-            if (!options.swallowOperationErrors) {
-              throw err;
-            }
-          }
-        );
-      }
-
-      return opPromise.then(opResult => {
-        const actual = extractCrudResult(opResult, operation);
-        expect(actual).to.matchMongoSpec(operation.result);
-      });
-    }
-
-    return opPromise;
+    return opPromise.then(opResult => {
+      const actual = extractCrudResult(opResult, operation);
+      expect(actual).to.matchMongoSpec(operation.result);
+    });
   }
+
+  return opPromise;
 }
 
 function convertCollectionOptions(options) {
