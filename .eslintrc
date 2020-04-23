@@ -1,4 +1,5 @@
 {
+  "root": true,
   "extends": ["eslint:recommended", "plugin:prettier/recommended", "plugin:jsdoc/recommended"],
   "env": {
     "node": true,
@@ -26,6 +27,8 @@
     "jsdoc/require-returns-description": "off",
     "jsdoc/require-returns-type": "off",
     "jsdoc/valid-types": "off",
+    // we don't need the type annotations in our jsDocs if there .d.ts files available
+    "jsdoc/require-param-type": "off",
 
     "no-console": "off",
     "eqeqeq": ["error", "always", { "null": "ignore" }],

@@ -1,16 +1,21 @@
 {
   "compilerOptions": {
-    "allowJs": true,
-    "checkJs": true,
+    "allowJs": false,
+    "checkJs": false,
     "declaration": true,
-    "emitDeclarationOnly": true,
     "declarationDir": "types",
-    "strict": false,
+    "outDir": "lib",
+    "strict": true,
+
+    // do not install tslib
+    // keeping this set will complain when we use a feature that needs a polyfill
+    "importHelpers": true,
+    "alwaysStrict": true,
 
     "target": "ES2018",
     "module": "commonJS",
     "moduleResolution": "node",
     "lib": ["ES2018"]
   },
-  "include": ["index.js", "lib/**/*"]
+  "include": ["src"]
 }

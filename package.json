@@ -32,6 +32,8 @@
   },
   "devDependencies": {
     "@types/node": "^13.9.8",
+    "@typescript-eslint/eslint-plugin": "^2.29.0",
+    "@typescript-eslint/parser": "^2.29.0",
     "bluebird": "3.5.0",
     "chai": "^4.1.1",
     "chai-subset": "^1.6.0",
@@ -70,12 +72,12 @@
   "scripts": {
     "build:evergreen": "node .evergreen/generate_evergreen_tasks.js",
     "build:types": "tsc",
+    "watch:types": "tsc --watch",
     "check:atlas": "node test/tools/atlas_connectivity_tests.js",
     "check:bench": "node test/benchmarks/driverBench",
     "check:coverage": "nyc mocha --timeout 60000 --recursive test/functional test/unit",
-    "check:lint": "eslint index.js lib test",
+    "check:lint": "eslint index.js src lib test --ext .js,.ts",
     "check:test": "mocha --recursive test/functional test/unit",
-    "check:types": "tsc -p tsconfig.check.json",
     "release": "standard-version -i HISTORY.md",
     "test": "npm run check:lint && npm run check:test"
   },
