@@ -4367,7 +4367,7 @@ describe('Cursor', function() {
     }
   );
 
-  it('should return a promise when no callback supplied to forEach method', function(done) {
+  it.skip('should return a promise when no callback supplied to forEach method', function(done) {
     const configuration = this.configuration;
     const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
 

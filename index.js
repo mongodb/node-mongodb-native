@@ -6,6 +6,16 @@ const Instrumentation = require('./lib/apm');
 
 // Set up the connect function
 const connect = require('./lib/mongo_client').connect;
+const provide = require('./lib/provided_promise');
+
+Object.defineProperty(connect, 'Promise', {
+  get: function() {
+    return provide.Promise;
+  },
+  set: function(lib) {
+    provide.Promise = lib;
+  }
+});
 
 // Expose error class
 connect.MongoError = core.MongoError;

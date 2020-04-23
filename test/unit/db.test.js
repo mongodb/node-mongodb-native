@@ -7,9 +7,6 @@ const sinon = require('sinon');
 class MockTopology extends EventEmitter {
   constructor() {
     super();
-    this.s = {
-      promiseLibrary: Promise
-    };
   }
 
   isDestroyed() {

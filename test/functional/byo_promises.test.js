@@ -1,14 +1,16 @@
 'use strict';
 
-const maybePromise = require('./../../lib/utils').maybePromise;
+const mongodb = require('../../index');
+const maybePromise = require('../../lib/utils').maybePromise;
 var expect = require('chai').expect;
 
 class CustomPromise extends Promise {}
 CustomPromise.prototype.isCustomMongo = true;
 
-const parent = { s: { promiseLibrary: CustomPromise } };
-
 describe('Optional PromiseLibrary / maybePromise', function() {
+  afterEach(() => {
+    mongodb.Promise = global.Promise;
+  });
   it('should correctly implement custom dependency-less promise', function(done) {
     const getCustomPromise = v => new CustomPromise(resolve => resolve(v));
     const getNativePromise = v => new Promise(resolve => resolve(v));
@@ -19,28 +21,8 @@ describe('Optional PromiseLibrary / maybePromise', function() {
     done();
   });
 
-  it('should return a promise with extra property CustomMongo', function() {
-    const prom = maybePromise(parent, undefined, () => 'example');
-    expect(prom).to.have.property('isCustomMongo');
-    expect(prom).to.have.property('then');
-  });
-
-  it('should return a native promise with no parent', function(done) {
-    const prom = maybePromise(undefined, undefined, () => 'example');
-    expect(prom).to.not.have.property('isCustomMongo');
-    expect(prom).to.have.property('then');
-    done();
-  });
-
-  it('should return a native promise with empty parent', function(done) {
-    const prom = maybePromise({}, undefined, () => 'example');
-    expect(prom).to.not.have.property('isCustomMongo');
-    expect(prom).to.have.property('then');
-    done();
-  });
-
-  it('should return a native promise with emtpy "s"', function(done) {
-    const prom = maybePromise({ s: {} }, undefined, () => 'example');
+  it('should return a native promise', function(done) {
+    const prom = maybePromise(undefined, () => 'example');
     expect(prom).to.not.have.property('isCustomMongo');
     expect(prom).to.have.property('then');
     done();
@@ -61,7 +43,8 @@ describe('Optional PromiseLibrary / maybePromise', function() {
     });
   });
 
-  it('should have cursor return custom promise from new client options', function(done) {
+  it('should have cursor return custom promise from global promise store', function(done) {
+    mongodb.Promise = CustomPromise;
     const configuration = this.configuration;
     const client = this.configuration.newClient(
       { w: 1 },
@@ -76,6 +59,36 @@ describe('Optional PromiseLibrary / maybePromise', function() {
       expect(isPromise).to.have.property('isCustomMongo');
       expect(isPromise).to.have.property('then');
       isPromise.then(() => client.close(done));
+    });
+  });
+
+  it('should be able to change promise library', function(done) {
+    mongodb.Promise = CustomPromise;
+    const configuration = this.configuration;
+    const client = this.configuration.newClient(
+      { w: 1 },
+      { poolSize: 1, promiseLibrary: CustomPromise }
+    );
+    client.connect((err, client) => {
+      const db = client.db(configuration.db);
+      expect(err).to.be.null;
+      const collection = db.collection('test');
+      const cursor = collection.find({});
+      const isPromise = cursor.toArray();
+      expect(isPromise).to.have.property('isCustomMongo');
+      expect(isPromise).to.have.property('then');
+
+      mongodb.Promise = global.Promise;
+      const cursor2 = collection.find({});
+      const isPromise2 = cursor2.toArray();
+      expect(isPromise2).to.not.have.property('isCustomMongo');
+      expect(isPromise2).to.have.property('then');
+
+      isPromise.then(() => {
+        isPromise2.then(() => {
+          client.close(done);
+        });
+      });
     });
   });
 });
