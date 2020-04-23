@@ -204,7 +204,7 @@ function withMonitoredClient(commands, callback) {
     client.connect((err, client) => {
       expect(err).to.not.exist;
       const d = function() {
-        const args = Object.values(arguments);
+        const args = Object.keys(arguments).map(e => arguments[e]);
         client.close(() => done.apply(this, args));
       };
       callback.bind(this)(client, events, d);
