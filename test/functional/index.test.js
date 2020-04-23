@@ -1,6 +1,8 @@
 'use strict';
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
+const expect = require('chai').expect;
+const filterForCommands = require('./shared').filterForCommands;
 
 describe('Indexes', function() {
   before(function() {
@@ -1353,5 +1355,76 @@ describe('Indexes', function() {
         );
       });
     }
+  });
+
+  context('commitQuorum', function() {
+    it('should throw on error if commitQuorum specified on MongoDB < 4.4', {
+      metadata: { requires: { mongodb: '<4.4' } },
+      test: function(done) {
+        const client = this.configuration.newClient();
+        client.connect(err => {
+          expect(err).to.not.exist;
+          const db = client.db('test');
+          const collection = db.collection('commitQuorum');
+          collection.insertOne({ a: 1 }, function(err) {
+            expect(err).to.not.exist;
+            db.createIndex(
+              collection.collectionName,
+              'a',
+              { commitQuorum: 'all' },
+              (err, result) => {
+                expect(err.message).to.equal(
+                  'commitQuorum option for createIndex not supported on servers < 4.4'
+                );
+                expect(result).to.not.exist;
+                collection.drop(err => {
+                  expect(err).to.not.exist;
+                  client.close(done);
+                });
+              }
+            );
+          });
+        });
+      }
+    });
+    context('should run command with commitQuorum if specified on MongoDB >= 4.4', function() {
+      it('db.createIndex', {
+        metadata: { requires: { mongodb: '>=4.4' } },
+        test: function(done) {
+          const client = this.configuration.newClient({ monitorCommands: true });
+          const commands = [];
+          client.on('commandStarted', filterForCommands('createIndexes', commands));
+          client.connect(err => {
+            expect(err).to.not.exist;
+            const db = client.db('test');
+            const collection = db.collection('commitQuorum');
+            collection.insertOne({ a: 1 }, function(err) {
+              expect(err).to.not.exist;
+              db.createIndex(
+                collection.collectionName,
+                'a',
+                { w: 'majority', commitQuorum: 0 },
+                (err, result) => {
+                  expect(err).to.not.exist;
+                  expect(result).to.equal('a_1');
+                  expect(commands)
+                    .to.be.an('array')
+                    .with.lengthOf(1);
+                  expect(commands[0])
+                    .nested.property('command.commitQuorum')
+                    .to.equal(0);
+                  collection.drop(err => {
+                    expect(err).to.not.exist;
+                    client.close(done);
+                  });
+                }
+              );
+            });
+          });
+        }
+      });
+      it('collection.createIndex');
+      it('collection.createIndexes');
+    });
   });
 });
