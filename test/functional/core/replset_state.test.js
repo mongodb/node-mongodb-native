@@ -21,7 +21,8 @@ describe('ReplicaSet state', function() {
           description.match(/Primary mismatched me is not removed/) ||
           description.match(/replicaSet URI option causes starting topology to be RSNP/) ||
           description.match(/Discover secondary with directConnection URI option/) ||
-          description.match(/Discover ghost with directConnection URI option/)
+          description.match(/Discover ghost with directConnection URI option/) ||
+          description.match(/topologyVersion/)
         ) {
           this.skip();
           return;
