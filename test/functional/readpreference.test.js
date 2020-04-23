@@ -148,46 +148,6 @@ describe('ReadPreference', function() {
     }
   });
 
-  it('Should correctly apply collection level read Preference to geoHaystackSearch', {
-    metadata: { requires: { mongodb: '>=2.6.0', topology: ['single', 'ssl'] } },
-
-    test: function(done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
-        var db = client.db(configuration.db);
-        test.equal(null, err);
-        // Set read preference
-        var collection = db.collection('read_pref_1', {
-          readPreference: ReadPreference.SECONDARY_PREFERRED
-        });
-        // Save checkout function
-        var command = client.topology.command;
-        // Set up our checker method
-        client.topology.command = function() {
-          var args = Array.prototype.slice.call(arguments, 0);
-          if (args[0] === 'integration_tests.$cmd') {
-            test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.mode);
-          }
-
-          return command.apply(db.serverConfig, args);
-        };
-
-        // Execute count
-        collection.geoHaystackSearch(
-          50,
-          50,
-          { search: { a: 1 }, limit: 1, maxDistance: 100 },
-          function(/* err */) {
-            // test.equal(null, err);
-            client.topology.command = command;
-            client.close(done);
-          }
-        );
-      });
-    }
-  });
-
   it('Should correctly apply collection level read Preference to mapReduce', {
     metadata: { requires: { mongodb: '>=2.6.0', topology: ['single', 'ssl'] } },
 

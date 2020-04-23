@@ -1077,67 +1077,6 @@ describe('Operation (Promises)', function() {
   });
 
   /**
-   * Example of a simple geoHaystackSearch query across some documents using a Promise.
-   *
-   * @example-class Collection
-   * @example-method geoHaystackSearch
-   */
-  it('shouldCorrectlyPerformSimpleGeoHaystackSearchCommandWithPromises', {
-    metadata: { requires: { topology: ['single', 'replicaset'] } },
-
-    test: function() {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-
-      return client.connect().then(function(client) {
-        var db = client.db(configuration.db);
-        // LINE var MongoClient = require('mongodb').MongoClient,
-        // LINE   test = require('assert');
-        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
-        // LINE client.connect().then(() => {
-        // LINE   var db = client.db('test);
-        // REPLACE configuration.writeConcernMax() WITH {w:1}
-        // REMOVE-LINE done();
-        // BEGIN
-
-        // Fetch the collection
-        var collection = db.collection('simple_geo_haystack_command_with_promise');
-
-        // Add a location based index
-        return collection
-          .ensureIndex({ loc: 'geoHaystack', type: 1 }, { bucketSize: 1 })
-          .then(function(result) {
-            test.ok(result);
-
-            // Save a new location tagged document
-            return collection.insertMany(
-              [
-                { a: 1, loc: [50, 30] },
-                { a: 1, loc: [30, 50] }
-              ],
-              configuration.writeConcernMax()
-            );
-          })
-          .then(function(result) {
-            test.ok(result);
-
-            // Use geoHaystackSearch command to find document
-            return collection.geoHaystackSearch(50, 50, {
-              search: { a: 1 },
-              limit: 1,
-              maxDistance: 100
-            });
-          })
-          .then(function(docs) {
-            test.equal(1, docs.results.length);
-            return client.close();
-          });
-      });
-      // END
-    }
-  });
-
-  /**
    * A simple map reduce example using a Promise.
    *
    * @example-class Collection

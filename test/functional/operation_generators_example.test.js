@@ -1051,65 +1051,6 @@ describe('Operation (Generators)', function() {
   });
 
   /**
-   * Example of a simple geoHaystackSearch query across some documents using a Generator and the co module.
-   *
-   * @example-class Collection
-   * @example-method geoHaystackSearch
-   */
-  it('shouldCorrectlyPerformSimpleGeoHaystackSearchCommandWithGenerators', {
-    metadata: { requires: { generators: true, topology: ['single'] } },
-
-    test: function() {
-      var configuration = this.configuration;
-      var co = require('co');
-
-      return co(function*() {
-        // Connect
-        var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
-          .connect();
-        var db = client.db(configuration.db);
-        // LINE var MongoClient = require('mongodb').MongoClient,
-        // LINE   co = require('co');
-        // LINE   test = require('assert');
-        // LINE
-        // LINE co(function*() {
-        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
-        // LINE   yield client.connect();
-        // LINE
-        // LINE   var db = client.db('test');
-        // REPLACE configuration.writeConcernMax() WITH {w:1}
-        // BEGIN
-
-        // Fetch the collection
-        var collection = db.collection('simple_geo_haystack_command_with_generators');
-
-        // Add a location based index
-        yield collection.ensureIndex({ loc: 'geoHaystack', type: 1 }, { bucketSize: 1 });
-
-        // Save a new location tagged document
-        yield collection.insertMany(
-          [
-            { a: 1, loc: [50, 30] },
-            { a: 1, loc: [30, 50] }
-          ],
-          configuration.writeConcernMax()
-        );
-
-        // Use geoHaystackSearch command to find document
-        var docs = yield collection.geoHaystackSearch(50, 50, {
-          search: { a: 1 },
-          limit: 1,
-          maxDistance: 100
-        });
-        test.equal(1, docs.results.length);
-        yield client.close();
-      });
-      // END
-    }
-  });
-
-  /**
    * A simple map reduce example using a Generator and the co module.
    *
    * @example-class Collection
