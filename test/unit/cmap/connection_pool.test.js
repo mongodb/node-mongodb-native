@@ -96,7 +96,7 @@ describe('Connection Pool', function() {
     });
 
     const pool = new ConnectionPool(
-      Object.assign({ maxPoolSize: 1, socketTimeout: 50 }, server.address())
+      Object.assign({ maxPoolSize: 1, socketTimeout: 200 }, server.address())
     );
 
     pool.withConnection(
