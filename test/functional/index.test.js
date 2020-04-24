@@ -1405,7 +1405,7 @@ describe('Indexes', function() {
   context('should run command with commitQuorum if specified on MongoDB >= 4.4', function() {
     function commitQuorumTest(testCommand) {
       return {
-        metadata: { requires: { mongodb: '>=4.4' } },
+        metadata: { requires: { mongodb: '>=4.4' }, topology: ['replicaset', 'sharded'] },
         test: function(done) {
           const client = this.configuration.newClient({ monitorCommands: true });
           const commands = [];
