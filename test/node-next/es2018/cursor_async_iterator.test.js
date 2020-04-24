@@ -83,7 +83,7 @@ describe('Cursor Async Iterator Tests', function() {
           expect(doc).to.exist;
           cursor.close();
         }
-        throw new Error('expected closing the cursor to break iteration');
+        throw new MongoError('expected closing the cursor to break iteration');
       } catch (e) {
         expect(e).to.be.an.instanceOf(MongoError);
       }
