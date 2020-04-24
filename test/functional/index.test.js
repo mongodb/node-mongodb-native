@@ -1357,38 +1357,54 @@ describe('Indexes', function() {
     }
   });
 
-  context('commitQuorum', function() {
-    it('should throw on error if commitQuorum specified on MongoDB < 4.4', {
-      metadata: { requires: { mongodb: '<4.4' } },
-      test: function(done) {
-        const client = this.configuration.newClient();
-        client.connect(err => {
-          expect(err).to.not.exist;
-          const db = client.db('test');
-          const collection = db.collection('commitQuorum');
-          collection.insertOne({ a: 1 }, function(err) {
+  context('should throw on error if commitQuorum specified on MongoDB < 4.4', function() {
+    function throwErrorTest(testCommand) {
+      return {
+        metadata: { requires: { mongodb: '<4.4' } },
+        test: function(done) {
+          const client = this.configuration.newClient();
+          client.connect(err => {
             expect(err).to.not.exist;
-            db.createIndex(
-              collection.collectionName,
-              'a',
-              { commitQuorum: 'all' },
-              (err, result) => {
-                expect(err.message).to.equal(
-                  'commitQuorum option for createIndex not supported on servers < 4.4'
-                );
-                expect(result).to.not.exist;
-                collection.drop(err => {
-                  expect(err).to.not.exist;
-                  client.close(done);
-                });
-              }
-            );
+            const db = client.db('test');
+            const collection = db.collection('commitQuorum');
+            testCommand(db, collection, (err, result) => {
+              expect(err.message).to.equal(
+                '`commitQuorum` option for `createIndexes` not supported on servers < 4.4'
+              );
+              expect(result).to.not.exist;
+              client.close(done);
+            });
           });
-        });
-      }
-    });
-    context('should run command with commitQuorum if specified on MongoDB >= 4.4', function() {
-      it('db.createIndex', {
+        }
+      };
+    }
+    it(
+      'db.createIndex',
+      throwErrorTest((db, collection, cb) =>
+        db.createIndex(collection.collectionName, 'a', { commitQuorum: 'all' }, cb)
+      )
+    );
+    it(
+      'collection.createIndex',
+      throwErrorTest((db, collection, cb) =>
+        collection.createIndex('a', { commitQuorum: 'all' }, cb)
+      )
+    );
+    it(
+      'collection.createIndexes',
+      throwErrorTest((db, collection, cb) =>
+        collection.createIndexes(
+          [{ key: { a: 1 } }, { key: { b: 1 } }],
+          { commitQuorum: 'all' },
+          cb
+        )
+      )
+    );
+  });
+
+  context('should run command with commitQuorum if specified on MongoDB >= 4.4', function() {
+    function commitQuorumTest(testCommand) {
+      return {
         metadata: { requires: { mongodb: '>=4.4' } },
         test: function(done) {
           const client = this.configuration.newClient({ monitorCommands: true });
@@ -1398,33 +1414,43 @@ describe('Indexes', function() {
             expect(err).to.not.exist;
             const db = client.db('test');
             const collection = db.collection('commitQuorum');
-            collection.insertOne({ a: 1 }, function(err) {
+            collection.insertMany([{ a: 1 }], function(err) {
               expect(err).to.not.exist;
-              db.createIndex(
-                collection.collectionName,
-                'a',
-                { w: 'majority', commitQuorum: 0 },
-                (err, result) => {
+              testCommand(db, collection, err => {
+                expect(err).to.not.exist;
+                expect(commands)
+                  .to.be.an('array')
+                  .with.lengthOf(1);
+                expect(commands[0])
+                  .nested.property('command.commitQuorum')
+                  .to.equal(0);
+                collection.drop(err => {
                   expect(err).to.not.exist;
-                  expect(result).to.equal('a_1');
-                  expect(commands)
-                    .to.be.an('array')
-                    .with.lengthOf(1);
-                  expect(commands[0])
-                    .nested.property('command.commitQuorum')
-                    .to.equal(0);
-                  collection.drop(err => {
-                    expect(err).to.not.exist;
-                    client.close(done);
-                  });
-                }
-              );
+                  client.close(done);
+                });
+              });
             });
           });
         }
-      });
-      it('collection.createIndex');
-      it('collection.createIndexes');
-    });
+      };
+    }
+    it(
+      'db.createIndex',
+      commitQuorumTest((db, collection, cb) =>
+        db.createIndex(collection.collectionName, 'a', { w: 'majority', commitQuorum: 0 }, cb)
+      )
+    );
+    it(
+      'collection.createIndex',
+      commitQuorumTest((db, collection, cb) =>
+        collection.createIndex('a', { w: 'majority', commitQuorum: 0 }, cb)
+      )
+    );
+    it(
+      'collection.createIndexes',
+      commitQuorumTest((db, collection, cb) =>
+        collection.createIndexes([{ key: { a: 1 } }], { w: 'majority', commitQuorum: 0 }, cb)
+      )
+    );
   });
 });
