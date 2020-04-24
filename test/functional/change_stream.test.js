@@ -1960,7 +1960,7 @@ describe('Change Streams', function() {
       }
     });
 
-    it('when invoked with promises', {
+    it.skip('when invoked with promises', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
       test: function() {
         function read() {
@@ -1982,7 +1982,7 @@ describe('Change Streams', function() {
       }
     });
 
-    it('when invoked with callbacks', {
+    it.skip('when invoked with callbacks', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
       test: function(done) {
         const changeStream = coll.watch();
