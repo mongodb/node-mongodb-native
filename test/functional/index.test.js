@@ -1357,7 +1357,7 @@ describe('Indexes', function() {
     }
   });
 
-  context('should throw on error if commitQuorum specified on MongoDB < 4.4', function() {
+  context('should throw an error if commitQuorum specified on MongoDB < 4.4', function() {
     function throwErrorTest(testCommand) {
       return {
         metadata: { requires: { mongodb: '<4.4' } },
@@ -1414,7 +1414,7 @@ describe('Indexes', function() {
             expect(err).to.not.exist;
             const db = client.db('test');
             const collection = db.collection('commitQuorum');
-            collection.insertMany([{ a: 1 }], function(err) {
+            collection.insertOne({ a: 1 }, function(err) {
               expect(err).to.not.exist;
               testCommand(db, collection, err => {
                 expect(err).to.not.exist;
