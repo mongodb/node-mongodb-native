@@ -419,6 +419,39 @@ tasks:
           VERSION: latest
           TOPOLOGY: sharded_cluster
       - func: run tests
+  - name: test-4.4-server
+    tags:
+      - '4.4'
+      - server
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.4'
+          TOPOLOGY: server
+      - func: run tests
+  - name: test-4.4-replica_set
+    tags:
+      - '4.4'
+      - replica_set
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.4'
+          TOPOLOGY: replica_set
+      - func: run tests
+  - name: test-4.4-sharded_cluster
+    tags:
+      - '4.4'
+      - sharded_cluster
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.4'
+          TOPOLOGY: sharded_cluster
+      - func: run tests
   - name: test-4.2-server
     tags:
       - '4.2'
@@ -785,6 +818,9 @@ buildvariants:
       - test-latest-server
       - test-latest-replica_set
       - test-latest-sharded_cluster
+      - test-4.4-server
+      - test-4.4-replica_set
+      - test-4.4-sharded_cluster
       - test-4.2-server
       - test-4.2-replica_set
       - test-4.2-sharded_cluster
@@ -891,6 +927,9 @@ buildvariants:
       - test-latest-server
       - test-latest-replica_set
       - test-latest-sharded_cluster
+      - test-4.4-server
+      - test-4.4-replica_set
+      - test-4.4-sharded_cluster
       - test-4.2-server
       - test-4.2-replica_set
       - test-4.2-sharded_cluster
