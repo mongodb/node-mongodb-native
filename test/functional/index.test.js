@@ -2,7 +2,7 @@
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 const expect = require('chai').expect;
-const filterForCommands = require('./shared').filterForCommands;
+const withMonitoredClient = require('./shared').withMonitoredClient;
 
 describe('Indexes', function() {
   before(function() {
@@ -1406,32 +1406,26 @@ describe('Indexes', function() {
     function commitQuorumTest(testCommand) {
       return {
         metadata: { requires: { mongodb: '>=4.4', topology: ['replicaset', 'sharded'] } },
-        test: function(done) {
-          const client = this.configuration.newClient({ monitorCommands: true });
-          const commands = [];
-          client.on('commandStarted', filterForCommands('createIndexes', commands));
-          client.connect(err => {
+        test: withMonitoredClient('createIndexes', function(client, events, done) {
+          const db = client.db('test');
+          const collection = db.collection('commitQuorum');
+          collection.insertOne({ a: 1 }, function(err) {
             expect(err).to.not.exist;
-            const db = client.db('test');
-            const collection = db.collection('commitQuorum');
-            collection.insertOne({ a: 1 }, function(err) {
+            testCommand(db, collection, err => {
               expect(err).to.not.exist;
-              testCommand(db, collection, err => {
+              expect(events)
+                .to.be.an('array')
+                .with.lengthOf(1);
+              expect(events[0])
+                .nested.property('command.commitQuorum')
+                .to.equal(0);
+              collection.drop(err => {
                 expect(err).to.not.exist;
-                expect(commands)
-                  .to.be.an('array')
-                  .with.lengthOf(1);
-                expect(commands[0])
-                  .nested.property('command.commitQuorum')
-                  .to.equal(0);
-                collection.drop(err => {
-                  expect(err).to.not.exist;
-                  client.close(done);
-                });
+                done();
               });
             });
           });
-        }
+        })
       };
     }
     it(
