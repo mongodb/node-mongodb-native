@@ -73,20 +73,18 @@ describe('Cursor Async Iterator Tests', function() {
     }
   });
 
-  it('should properly error when cursor is closed', {
+  it('should properly stop when cursor is closed', {
     metadata: { requires: { node: '>=10.5.0' } },
     test: async function() {
       const cursor = collection.find();
 
-      try {
-        for await (const doc of cursor) {
-          expect(doc).to.exist;
-          cursor.close();
-        }
-        throw new Error('expected closing the cursor to break iteration');
-      } catch (e) {
-        expect(e).to.be.an.instanceOf(MongoError);
+      let count = 0;
+      for await (const doc of cursor) {
+        expect(doc).to.exist;
+        count++;
+        cursor.close();
       }
+      expect(count).to.equal(1);
     }
   });
 });
