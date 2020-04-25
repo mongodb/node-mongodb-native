@@ -7,7 +7,6 @@ const fs = require('fs');
 const { assert: test } = require('./shared');
 const { setupDatabase } = require('./shared');
 const { expect } = require('chai');
-const { Buffer } = require('safe-buffer');
 const { GridFSBucket, ObjectId } = require('../..');
 
 describe('GridFS Stream', function() {

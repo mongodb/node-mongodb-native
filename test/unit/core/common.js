@@ -2,7 +2,6 @@
 
 const mock = require('mongodb-mock-server');
 const { ObjectId, Timestamp, Binary } = require('bson');
-const { Buffer } = require('safe-buffer');
 
 class ReplSetFixture {
   constructor() {

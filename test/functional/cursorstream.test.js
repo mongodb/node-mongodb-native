@@ -1,6 +1,5 @@
 'use strict';
 var expect = require('chai').expect;
-var Buffer = require('safe-buffer').Buffer;
 const setupDatabase = require('./shared').setupDatabase;
 const { Binary } = require('../..');
 

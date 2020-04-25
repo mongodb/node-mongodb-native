@@ -2,7 +2,6 @@
 const test = require('./shared').assert;
 const setupDatabase = require('./shared').setupDatabase;
 const expect = require('chai').expect;
-const Buffer = require('safe-buffer').Buffer;
 const sinon = require('sinon');
 const { Code, ObjectID, Long, Binary } = require('../..');
 

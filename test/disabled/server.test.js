@@ -5,7 +5,6 @@ const locateAuthMethod = require('./shared').locateAuthMethod;
 const executeCommand = require('./shared').executeCommand;
 const BSON = require('bson');
 const mock = require('mongodb-mock-server');
-const Buffer = require('safe-buffer').Buffer;
 
 const core = require('../../../lib/core');
 const ReadPreference = core.ReadPreference;

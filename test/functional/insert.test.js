@@ -4,7 +4,6 @@ const { setupDatabase } = require('./shared');
 const Script = require('vm');
 const { expect } = require('chai');
 const { normalizedFunctionString } = require('bson/lib/parser/utils');
-const { Buffer } = require('safe-buffer');
 
 const {
   Long,
