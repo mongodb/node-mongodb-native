@@ -21,9 +21,8 @@ Troubleshooting
 The MongoDB driver depends on several other packages, including:
 
 * `bson <https://www.npmjs.com/package/bson>`_
-* `require_optional <https://www.npmjs.com/package/require_optional>`_
-* `safe-buffer <https://www.npmjs.com/package/safe-buffer>`_
-* `saslprep <https://www.npmjs.com/package/saslprep>`_
+* `denque <https://github.com/invertase/denque>`_
+* `bl <https://github.com/rvagg/bl>`_
 
 Additionally, there are multiple optional dependencies that can be installed alongside the driver:
 

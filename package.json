@@ -27,8 +27,7 @@
   "dependencies": {
     "bl": "^2.2.0",
     "bson": "^4.0.4",
-    "denque": "^1.4.1",
-    "safe-buffer": "^5.1.2"
+    "denque": "^1.4.1"
   },
   "devDependencies": {
     "@types/node": "^13.9.8",
