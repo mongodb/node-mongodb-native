@@ -46,66 +46,6 @@ function waitForStarted(changeStream, callback) {
   });
 }
 
-/**
- * Iterates the next discrete batch of a change stream non-eagerly. This
- * will return `null` if the next bach is empty, rather than waiting forever
- * for a non-empty batch.
- *
- * @param {ChangeStream} changeStream
- * @param {Function} callback
- */
-function tryNext(changeStream, callback) {
-  let complete = false;
-  function done(err, result) {
-    if (complete) return;
-
-    // if the arity is 1 then this a callback for `more`
-    if (arguments.length === 1) {
-      result = err;
-      const batch = result.cursor.firstBatch || result.cursor.nextBatch;
-      if (batch.length === 0) {
-        complete = true;
-        callback(null, null);
-      }
-
-      return;
-    }
-
-    // otherwise, this a normal response to `next`
-    complete = true;
-    changeStream.removeListener('more', done);
-    if (err) return callback(err);
-    callback(err, result);
-  }
-
-  // race the two requests
-  changeStream.next(done);
-  changeStream.cursor.once('more', done);
-}
-
-/**
- * Exhausts a change stream aggregating all responses until the first
- * empty batch into a returned array of events.
- *
- * @param {ChangeStream} changeStream
- * @param {Function|Array} bag
- * @param {Function} [callback]
- */
-function exhaust(changeStream, bag, callback) {
-  if (typeof bag === 'function') {
-    callback = bag;
-    bag = [];
-  }
-
-  tryNext(changeStream, (err, doc) => {
-    if (err) return callback(err);
-    if (doc === null) return callback(undefined, bag);
-
-    bag.push(doc);
-    exhaust(changeStream, bag, callback);
-  });
-}
-
 // Define the pipeline processing changes
 var pipeline = [
   { $addFields: { addedField: 'This is a field added using $addFields' } },
