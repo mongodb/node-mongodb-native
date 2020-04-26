@@ -2971,7 +2971,7 @@ describe('Change Stream Resume Error Tests', function() {
     })
   });
 
-  it.skip('(callback) hasNext should work after a resumable error', {
+  it('(callback) hasNext and next should work after a resumable error', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
     test: withChangeStream((collection, changeStream, done) => {
       waitForStarted(changeStream, () => {
@@ -2981,43 +2981,29 @@ describe('Change Stream Resume Error Tests', function() {
             changeStream.hasNext((err1, hasNext) => {
               expect(err1).to.not.exist;
               expect(hasNext).to.be.true;
-              done();
-            });
-          });
-        });
-      });
-      changeStream.hasNext((err, hasNext) => {
-        expect(err).to.not.exist;
-        expect(hasNext).to.be.true;
-      });
-    })
-  });
-
-  it.skip('(callback) should continue iterating after a resumable error', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
-    test: withChangeStream((collection, changeStream, done) => {
-      waitForStarted(changeStream, () => {
-        collection.insertOne({ a: 42 }, err => {
-          expect(err).to.not.exist;
-          triggerResumableError(changeStream, () => {
-            changeStream.hasNext((err, hasNext) => {
-              expect(err).to.not.exist;
-              expect(hasNext).to.be.true;
               changeStream.next((err, change) => {
                 expect(err).to.not.exist;
                 expect(change).to.containSubset({
                   operationType: 'insert',
-                  fullDocument: { a: 42 }
+                  fullDocument: { b: 24 }
                 });
                 done();
               });
             });
+            collection.insertOne({ b: 24 });
           });
         });
       });
       changeStream.hasNext((err, hasNext) => {
         expect(err).to.not.exist;
         expect(hasNext).to.be.true;
+        changeStream.next((err, change) => {
+          expect(err).to.not.exist;
+          expect(change).to.containSubset({
+            operationType: 'insert',
+            fullDocument: { a: 42 }
+          });
+        });
       });
     })
   });
