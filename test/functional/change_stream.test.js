@@ -2922,107 +2922,103 @@ describe('Change Streams', function() {
 });
 
 describe('Change Stream Resume Error Tests', function() {
-  it('(events) should continue iterating after a resumable error', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
-    test: function(done) {
+  function withChangeStream(callback) {
+    return function(done) {
       const configuration = this.configuration;
       const client = configuration.newClient();
       client.connect(err => {
         expect(err).to.not.exist;
-        const collection = client.db().collection('test');
-        const changeStream = collection.watch();
-        const docs = [];
-        changeStream.on('change', change => {
-          expect(change).to.exist;
-          docs.push(change);
-          if (docs.length === 2) {
-            expect(docs[0]).to.containSubset({
-              operationType: 'insert',
-              fullDocument: { a: 42 }
-            });
-            expect(docs[1]).to.containSubset({
-              operationType: 'insert',
-              fullDocument: { b: 24 }
-            });
-            changeStream.close(() => client.close(done));
-          }
+        const db = client.db('test');
+        db.createCollection('changeStreamResumeErrorTest', (err, collection) => {
+          expect(err).to.not.exist;
+          const changeStream = collection.watch();
+          callback(collection, changeStream, () =>
+            changeStream.close(() => collection.drop(() => client.close(done)))
+          );
         });
-        waitForStarted(changeStream, () => {
-          collection.insertOne({ a: 42 }, err => {
-            expect(err).to.not.exist;
-            triggerResumableError(changeStream, () => {
-              collection.insertOne({ b: 24 }, err => {
-                expect(err).to.not.exist;
-              });
+      });
+    };
+  }
+  it('(events) should continue iterating after a resumable error', {
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
+    test: withChangeStream((collection, changeStream, done) => {
+      const docs = [];
+      changeStream.on('change', change => {
+        expect(change).to.exist;
+        docs.push(change);
+        if (docs.length === 2) {
+          expect(docs[0]).to.containSubset({
+            operationType: 'insert',
+            fullDocument: { a: 42 }
+          });
+          expect(docs[1]).to.containSubset({
+            operationType: 'insert',
+            fullDocument: { b: 24 }
+          });
+          done();
+        }
+      });
+      waitForStarted(changeStream, () => {
+        collection.insertOne({ a: 42 }, err => {
+          expect(err).to.not.exist;
+          triggerResumableError(changeStream, () => {
+            collection.insertOne({ b: 24 }, err => {
+              expect(err).to.not.exist;
             });
           });
         });
       });
-    }
+    })
   });
 
   it('(callback) hasNext should work after a resumable error', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
-    test: function(done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient();
-      client.connect(err => {
-        expect(err).to.not.exist;
-        const collection = client.db().collection('test');
-        const changeStream = collection.watch();
-        waitForStarted(changeStream, () => {
-          collection.insertOne({ a: 42 }, err => {
-            expect(err).to.not.exist;
-            triggerResumableError(changeStream, () => {
-              changeStream.hasNext((err1, hasNext) => {
-                expect(err1).to.not.exist;
-                expect(hasNext).to.be.true;
-                changeStream.close(() => client.close(done));
-              });
+    test: withChangeStream((collection, changeStream, done) => {
+      waitForStarted(changeStream, () => {
+        collection.insertOne({ a: 42 }, err => {
+          expect(err).to.not.exist;
+          triggerResumableError(changeStream, () => {
+            changeStream.hasNext((err1, hasNext) => {
+              expect(err1).to.not.exist;
+              expect(hasNext).to.be.true;
+              done();
             });
           });
         });
-        changeStream.hasNext((err, hasNext) => {
-          expect(err).to.not.exist;
-          expect(hasNext).to.be.true;
-        });
       });
-    }
+      changeStream.hasNext((err, hasNext) => {
+        expect(err).to.not.exist;
+        expect(hasNext).to.be.true;
+      });
+    })
   });
 
   it('(callback) should continue iterating after a resumable error', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
-    test: function(done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient();
-      client.connect(err => {
-        expect(err).to.not.exist;
-        const collection = client.db().collection('test');
-        const changeStream = collection.watch();
-        waitForStarted(changeStream, () => {
-          collection.insertOne({ a: 42 }, err => {
-            expect(err).to.not.exist;
-            triggerResumableError(changeStream, () => {
-              changeStream.hasNext((err, hasNext) => {
+    test: withChangeStream((collection, changeStream, done) => {
+      waitForStarted(changeStream, () => {
+        collection.insertOne({ a: 42 }, err => {
+          expect(err).to.not.exist;
+          triggerResumableError(changeStream, () => {
+            changeStream.hasNext((err, hasNext) => {
+              expect(err).to.not.exist;
+              expect(hasNext).to.be.true;
+              changeStream.next((err, change) => {
                 expect(err).to.not.exist;
-                expect(hasNext).to.be.true;
-                changeStream.next((err, change) => {
-                  expect(err).to.not.exist;
-                  expect(change).to.containSubset({
-                    operationType: 'insert',
-                    fullDocument: { a: 42 }
-                  });
-                  changeStream.close(() => client.close(done));
+                expect(change).to.containSubset({
+                  operationType: 'insert',
+                  fullDocument: { a: 42 }
                 });
+                done();
               });
             });
           });
         });
-        changeStream.hasNext((err, hasNext) => {
-          expect(err).to.not.exist;
-          expect(hasNext).to.be.true;
-        });
       });
-    }
+      changeStream.hasNext((err, hasNext) => {
+        expect(err).to.not.exist;
+        expect(hasNext).to.be.true;
+      });
+    })
   });
 });
