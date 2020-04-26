@@ -1825,7 +1825,7 @@ describe('Change Streams', function() {
     }
   });
 
-  it('should not resume when error includes error label NonRetryableChangeStreamError', function() {
+  it('should not resume when error includes error label NonResumableChangeStreamError', function() {
     let server;
     let client;
     let changeStream;
@@ -1873,7 +1873,7 @@ describe('Change Streams', function() {
           getMoreCount += 1;
           request.reply({
             ok: 0,
-            errorLabels: ['NonRetryableChangeStreamError']
+            errorLabels: ['NonResumableChangeStreamError']
           });
         } else {
           getMoreCount += 1;
@@ -1916,7 +1916,7 @@ describe('Change Streams', function() {
         () => Promise.reject('Expected changeStream to not resume'),
         err => {
           expect(err).to.be.an.instanceOf(MongoError);
-          expect(err.hasErrorLabel('NonRetryableChangeStreamError')).to.be.true;
+          expect(err.hasErrorLabel('NonResumableChangeStreamError')).to.be.true;
           expect(aggregateCount).to.equal(1);
           expect(getMoreCount).to.equal(1);
         }
