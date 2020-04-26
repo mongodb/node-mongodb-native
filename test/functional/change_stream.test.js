@@ -2971,7 +2971,7 @@ describe('Change Stream Resume Error Tests', function() {
     })
   });
 
-  it('(callback) hasNext should work after a resumable error', {
+  it.skip('(callback) hasNext should work after a resumable error', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
     test: withChangeStream((collection, changeStream, done) => {
       waitForStarted(changeStream, () => {
@@ -2993,7 +2993,7 @@ describe('Change Stream Resume Error Tests', function() {
     })
   });
 
-  it('(callback) should continue iterating after a resumable error', {
+  it.skip('(callback) should continue iterating after a resumable error', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
     test: withChangeStream((collection, changeStream, done) => {
       waitForStarted(changeStream, () => {
