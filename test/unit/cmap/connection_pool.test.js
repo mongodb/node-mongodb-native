@@ -1,6 +1,5 @@
 'use strict';
 
-require('util.promisify/shim')();
 const util = require('util');
 const loadSpecTests = require('../../spec').loadSpecTests;
 const ConnectionPool = require('../../../lib/cmap/connection_pool').ConnectionPool;
