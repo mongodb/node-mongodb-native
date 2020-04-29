@@ -2918,8 +2918,8 @@ describe('Change Stream Resume Error Tests', function() {
         collection.insertOne({ a: 42 }, err => {
           expect(err).to.not.exist;
           triggerResumableError(changeStream, () => {
-            changeStream.hasNext((err1, hasNext) => {
-              expect(err1).to.not.exist;
+            changeStream.hasNext((err, hasNext) => {
+              expect(err).to.not.exist;
               expect(hasNext).to.be.true;
               changeStream.next((err, change) => {
                 expect(err).to.not.exist;
