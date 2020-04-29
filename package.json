@@ -32,7 +32,6 @@
   },
   "devDependencies": {
     "@types/node": "^13.9.8",
-    "bluebird": "3.5.0",
     "chai": "^4.1.1",
     "chai-subset": "^1.6.0",
     "chalk": "^2.4.2",

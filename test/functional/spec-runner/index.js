@@ -1,5 +1,4 @@
 'use strict';
-const Promise = require('bluebird');
 const path = require('path');
 const fs = require('fs');
 const chai = require('chai');
@@ -7,6 +6,16 @@ const expect = chai.expect;
 const { EJSON } = require('bson');
 const TestRunnerContext = require('./context').TestRunnerContext;
 const resolveConnectionString = require('./utils').resolveConnectionString;
+
+function promiseTry(callback) {
+  return new Promise((resolve, reject) => {
+    try {
+      resolve(callback());
+    } catch (e) {
+      reject(e);
+    }
+  });
+}
 
 chai.use(require('chai-subset'));
 chai.use(require('./matcher').default);
@@ -638,8 +647,8 @@ function testOperation(operation, obj, context, options) {
       const cursor = obj[operationName].apply(obj, args);
       opPromise = cursor.toArray();
     } else {
-      // wrap this in a `Promise.try` because some operations might throw
-      opPromise = Promise.try(() => obj[operationName].apply(obj, args));
+      // wrap this in a `promiseTry` because some operations might throw
+      opPromise = promiseTry(() => obj[operationName].apply(obj, args));
     }
   }
 
