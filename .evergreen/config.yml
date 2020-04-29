@@ -809,11 +809,11 @@ tasks:
           NODE_LTS_NAME: erbium
       - func: run checks
 buildvariants:
-  - name: macos-1014-carbon
-    display_name: macOS 10.14 Node Carbon
+  - name: macos-1014-dubnium
+    display_name: macOS 10.14 Node Dubnium
     run_on: macos-1014
     expansions:
-      NODE_LTS_NAME: carbon
+      NODE_LTS_NAME: dubnium
     tasks: &ref_0
       - test-latest-server
       - test-latest-replica_set
@@ -850,23 +850,11 @@ buildvariants:
       - test-ocsp-soft-fail
       - test-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
       - test-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
-  - name: macos-1014-dubnium
-    display_name: macOS 10.14 Node Dubnium
-    run_on: macos-1014
-    expansions:
-      NODE_LTS_NAME: dubnium
-    tasks: *ref_0
   - name: macos-1014-erbium
     display_name: macOS 10.14 Node Erbium
     run_on: macos-1014
     expansions:
       NODE_LTS_NAME: erbium
-    tasks: *ref_0
-  - name: rhel70-carbon
-    display_name: RHEL 7.0 Node Carbon
-    run_on: rhel70-small
-    expansions:
-      NODE_LTS_NAME: carbon
     tasks: *ref_0
   - name: rhel70-dubnium
     display_name: RHEL 7.0 Node Dubnium
@@ -880,11 +868,11 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: erbium
     tasks: *ref_0
-  - name: ubuntu-14.04-carbon
-    display_name: Ubuntu 14.04 Node Carbon
+  - name: ubuntu-14.04-dubnium
+    display_name: Ubuntu 14.04 Node Dubnium
     run_on: ubuntu1404-test
     expansions:
-      NODE_LTS_NAME: carbon
+      NODE_LTS_NAME: dubnium
     tasks: &ref_1
       - test-4.0-server
       - test-4.0-replica_set
@@ -905,23 +893,17 @@ buildvariants:
       - test-2.6-replica_set
       - test-2.6-sharded_cluster
       - test-atlas-connectivity
-  - name: ubuntu-14.04-dubnium
-    display_name: Ubuntu 14.04 Node Dubnium
-    run_on: ubuntu1404-test
-    expansions:
-      NODE_LTS_NAME: dubnium
-    tasks: *ref_1
   - name: ubuntu-14.04-erbium
     display_name: Ubuntu 14.04 Node Erbium
     run_on: ubuntu1404-test
     expansions:
       NODE_LTS_NAME: erbium
     tasks: *ref_1
-  - name: ubuntu-18.04-carbon
-    display_name: Ubuntu 18.04 Node Carbon
+  - name: ubuntu-18.04-dubnium
+    display_name: Ubuntu 18.04 Node Dubnium
     run_on: ubuntu1804-test
     expansions:
-      NODE_LTS_NAME: carbon
+      NODE_LTS_NAME: dubnium
       CLIENT_ENCRYPTION: true
     tasks: &ref_2
       - test-latest-server
@@ -953,13 +935,6 @@ buildvariants:
       - test-ocsp-soft-fail
       - test-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
       - test-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
-  - name: ubuntu-18.04-dubnium
-    display_name: Ubuntu 18.04 Node Dubnium
-    run_on: ubuntu1804-test
-    expansions:
-      NODE_LTS_NAME: dubnium
-      CLIENT_ENCRYPTION: true
-    tasks: *ref_2
   - name: ubuntu-18.04-erbium
     display_name: Ubuntu 18.04 Node Erbium
     run_on: ubuntu1804-test
