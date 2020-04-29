@@ -951,6 +951,6 @@ buildvariants:
     display_name: MONGODB-AWS Auth test
     run_on: ubuntu1804-test
     expansions:
-      NODE_LTS_NAME: carbon
+      NODE_LTS_NAME: dubnium
     tasks:
       - aws-auth-test

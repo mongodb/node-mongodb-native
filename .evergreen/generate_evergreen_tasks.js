@@ -54,7 +54,7 @@ const OPERATING_SYSTEMS = [
   Object.assign(
     {
       mongoVersion: '>=2.6',
-      nodeVersion: 'carbon',
+      nodeVersion: 'dubnium',
       auth: false
     },
     osConfig
@@ -327,7 +327,7 @@ BUILD_VARIANTS.push({
   display_name: 'MONGODB-AWS Auth test',
   run_on: 'ubuntu1804-test',
   expansions: {
-    NODE_LTS_NAME: 'carbon'
+    NODE_LTS_NAME: 'dubnium'
   },
   tasks: ['aws-auth-test']
 });
