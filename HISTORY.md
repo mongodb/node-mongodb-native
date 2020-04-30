@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="3.5.7"></a>
+## [3.5.7](https://github.com/mongodb/node-mongodb-native/compare/v3.5.6...v3.5.7) (2020-04-29)
+
+
+### Bug Fixes
+
+* limit growth of server sessions through lazy acquisition ([3d05a6d](https://github.com/mongodb/node-mongodb-native/commit/3d05a6d))
+* remove circular dependency warnings on node 14 ([56a1b8a](https://github.com/mongodb/node-mongodb-native/commit/56a1b8a))
+
+
+
 <a name="3.5.6"></a>
 ## [3.5.6](https://github.com/mongodb/node-mongodb-native/compare/v3.5.5...v3.5.6) (2020-04-14)
 

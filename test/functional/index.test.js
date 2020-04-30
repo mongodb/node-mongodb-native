@@ -1272,24 +1272,20 @@ describe('Indexes', function() {
         var db = client.db(configuration.db);
         var collection = db.collection('messed_up_options');
 
-        collection.ensureIndex(
-          { 'a.one': 1, 'a.two': 1 },
-          { name: 'n1', partialFilterExpression: { 'a.two': { $exists: true } } },
-          function(err) {
-            test.equal(null, err);
+        collection.ensureIndex({ 'a.one': 1, 'a.two': 1 }, { name: 'n1', sparse: false }, function(
+          err
+        ) {
+          test.equal(null, err);
 
-            collection.ensureIndex(
-              { 'a.one': 1, 'a.two': 1 },
-              { name: 'n2', partialFilterExpression: { 'a.too': { $exists: true } } },
-              function(err) {
-                test.ok(err);
-                test.equal(85, err.code);
+          collection.ensureIndex({ 'a.one': 1, 'a.two': 1 }, { name: 'n2', sparse: true }, function(
+            err
+          ) {
+            test.ok(err);
+            test.equal(85, err.code);
 
-                client.close(done);
-              }
-            );
-          }
-        );
+            client.close(done);
+          });
+        });
       });
     }
   });
