@@ -1982,7 +1982,7 @@ describe('Change Streams', function() {
   });
 
   // TODO: re-enable/fix these tests in NODE-2548
-  describe.skip('should properly handle a changeStream event being processed mid-close', function() {
+  describe('should properly handle a changeStream event being processed mid-close', function() {
     let client, coll;
 
     function write() {
@@ -2018,15 +2018,14 @@ describe('Change Streams', function() {
             .then(() => changeStream.next())
             .then(() => changeStream.next())
             .then(() => {
-              const nextP = changeStream.next();
-
-              return changeStream.close().then(() => nextP);
+              const nextP = () => changeStream.next();
+              return changeStream.close().then(() => nextP());
             });
         }
 
         return Promise.all([read(), write()]).then(
           () => Promise.reject(new Error('Expected operation to fail with error')),
-          err => expect(err.message).to.equal('ChangeStream is closed')
+          err => expect(err.message).to.equal('ChangeStream is closed.')
         );
       }
     });
@@ -2038,17 +2037,19 @@ describe('Change Streams', function() {
 
         changeStream.next(() => {
           changeStream.next(() => {
-            changeStream.next(err => {
-              let _err = null;
-              try {
-                expect(err.message).to.equal('ChangeStream is closed');
-              } catch (e) {
-                _err = e;
-              } finally {
-                done(_err);
-              }
+            changeStream.close(err => {
+              expect(err).to.not.exist;
+              changeStream.next(err => {
+                let _err = null;
+                try {
+                  expect(err.message).to.equal('ChangeStream is closed.');
+                } catch (e) {
+                  _err = e;
+                } finally {
+                  done(_err);
+                }
+              });
             });
-            changeStream.close();
           });
         });
 
