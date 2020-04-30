@@ -39,7 +39,11 @@ describe('Change Stream Spec', function() {
         const configuration = this.configuration;
         return Promise.all(ALL_DBS.map(db => gc.db(db).dropDatabase({ w: 'majority' })))
           .then(() => gc.db(sDB).createCollection(sColl))
-          .then(() => gc.db(suite.database2_name).createCollection(suite.collection2_name))
+          .then(() => {
+            if (suite.database2_name && suite.collection2_name) {
+              return gc.db(suite.database2_name).createCollection(suite.collection2_name);
+            }
+          })
           .then(() => configuration.newClient({}, { monitorCommands: true }).connect())
           .then(client => {
             ctx = { gc, client };
@@ -78,12 +82,19 @@ describe('Change Stream Spec', function() {
   // Fn Generator methods
 
   function generateMetadata(test) {
-    const mongodb = test.minServerVersion;
     const topology = test.topology;
     const requires = {};
-    if (mongodb) {
-      requires.mongodb = `>=${mongodb}`;
+    const versionLimits = [];
+    if (test.minServerVersion) {
+      versionLimits.push(`>=${test.minServerVersion}`);
     }
+    if (test.maxServerVersion) {
+      versionLimits.push(`<=${test.maxServerVersion}`);
+    }
+    if (versionLimits.length) {
+      requires.mongodb = versionLimits.join(' ');
+    }
+
     if (topology) {
       requires.topology = topology;
     }
@@ -156,7 +167,11 @@ describe('Change Stream Spec', function() {
               `Expected there to be an APM event at index ${idx}, but there was none`
             );
           }
-
+          // killCursors events should be skipped
+          // (see https://github.com/mongodb/specifications/blob/master/source/change-streams/tests/README.rst#spec-test-runner)
+          if (events[idx].commandName === 'killCursors') {
+            return;
+          }
           expect(events[idx]).to.matchMongoSpec(expected);
         });
     };

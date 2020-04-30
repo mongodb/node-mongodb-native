@@ -33,9 +33,7 @@
               "cursor": {},
               "pipeline": [
                 {
-                  "$changeStream": {
-                    "fullDocument": "default"
-                  }
+                  "$changeStream": {}
                 }
               ]
             },
@@ -153,9 +151,7 @@
               "cursor": {},
               "pipeline": [
                 {
-                  "$changeStream": {
-                    "fullDocument": "default"
-                  }
+                  "$changeStream": {}
                 }
               ]
             },
@@ -226,9 +222,7 @@
               "cursor": {},
               "pipeline": [
                 {
-                  "$changeStream": {
-                    "fullDocument": "default"
-                  }
+                  "$changeStream": {}
                 },
                 {
                   "$match": {
@@ -312,9 +306,7 @@
               "cursor": {},
               "pipeline": [
                 {
-                  "$changeStream": {
-                    "fullDocument": "default"
-                  }
+                  "$changeStream": {}
                 }
               ]
             },
@@ -404,7 +396,6 @@
               "pipeline": [
                 {
                   "$changeStream": {
-                    "fullDocument": "default",
                     "allChangesForCluster": true
                   }
                 }
@@ -523,9 +514,7 @@
               "cursor": {},
               "pipeline": [
                 {
-                  "$changeStream": {
-                    "fullDocument": "default"
-                  }
+                  "$changeStream": {}
                 }
               ]
             },
@@ -611,9 +600,7 @@
               "cursor": {},
               "pipeline": [
                 {
-                  "$changeStream": {
-                    "fullDocument": "default"
-                  }
+                  "$changeStream": {}
                 }
               ]
             },
@@ -665,9 +652,7 @@
               "cursor": {},
               "pipeline": [
                 {
-                  "$changeStream": {
-                    "fullDocument": "default"
-                  }
+                  "$changeStream": {}
                 }
               ]
             },
@@ -756,9 +741,7 @@
               },
               "pipeline": [
                 {
-                  "$changeStream": {
-                    "fullDocument": "default"
-                  }
+                  "$changeStream": {}
                 }
               ]
             },

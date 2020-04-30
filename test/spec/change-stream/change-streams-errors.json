@@ -54,9 +54,7 @@
               "cursor": {},
               "pipeline": [
                 {
-                  "$changeStream": {
-                    "fullDocument": "default"
-                  }
+                  "$changeStream": {}
                 },
                 {
                   "$unsupported": "foo"
@@ -108,6 +106,53 @@
           "errorLabels": [
             "NonResumableChangeStreamError"
           ]
+        }
+      }
+    },
+    {
+      "description": "change stream errors on MaxTimeMSExpired",
+      "minServerVersion": "4.2",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "getMore"
+          ],
+          "errorCode": 50,
+          "closeConnection": false
+        }
+      },
+      "target": "collection",
+      "topology": [
+        "replicaset",
+        "sharded"
+      ],
+      "changeStreamPipeline": [
+        {
+          "$project": {
+            "_id": 0
+          }
+        }
+      ],
+      "changeStreamOptions": {},
+      "operations": [
+        {
+          "database": "change-stream-tests",
+          "collection": "test",
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "z": 3
+            }
+          }
+        }
+      ],
+      "result": {
+        "error": {
+          "code": 50
         }
       }
     }
