@@ -798,7 +798,7 @@ describe('Change Streams', function() {
     }
   });
 
-  it('Should return MongoNetworkError after first retry attempt fails using promises', {
+  it.skip('Should return MongoNetworkError after first retry attempt fails using promises', {
     metadata: {
       requires: {
         generators: true,
@@ -896,7 +896,7 @@ describe('Change Streams', function() {
     }
   });
 
-  it('Should return MongoNetworkError after first retry attempt fails using callbacks', {
+  it.skip('Should return MongoNetworkError after first retry attempt fails using callbacks', {
     metadata: {
       requires: {
         generators: true,
@@ -991,7 +991,7 @@ describe('Change Streams', function() {
     }
   });
 
-  it('Should resume Change Stream when a resumable error is encountered', {
+  it.skip('Should resume Change Stream when a resumable error is encountered', {
     metadata: {
       requires: {
         generators: true,
