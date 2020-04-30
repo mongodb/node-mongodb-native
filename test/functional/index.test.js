@@ -1353,7 +1353,7 @@ describe('Indexes', function() {
     }
   });
 
-  context('should throw an error if commitQuorum specified on MongoDB < 4.4', function() {
+  context('commitQuorum', function() {
     function throwErrorTest(testCommand) {
       return {
         metadata: { requires: { mongodb: '<4.4' } },
@@ -1376,19 +1376,19 @@ describe('Indexes', function() {
       };
     }
     it(
-      'db.createIndex',
+      'should throw an error if commitQuorum specified on db.createIndex',
       throwErrorTest((db, collection, cb) =>
         db.createIndex(collection.collectionName, 'a', { commitQuorum: 'all' }, cb)
       )
     );
     it(
-      'collection.createIndex',
+      'should throw an error if commitQuorum specified on collection.createIndex',
       throwErrorTest((db, collection, cb) =>
         collection.createIndex('a', { commitQuorum: 'all' }, cb)
       )
     );
     it(
-      'collection.createIndexes',
+      'should throw an error if commitQuorum specified on collection.createIndexes',
       throwErrorTest((db, collection, cb) =>
         collection.createIndexes(
           [{ key: { a: 1 } }, { key: { b: 1 } }],
@@ -1397,9 +1397,7 @@ describe('Indexes', function() {
         )
       )
     );
-  });
 
-  context('should run command with commitQuorum if specified on MongoDB >= 4.4', function() {
     function commitQuorumTest(testCommand) {
       return {
         metadata: { requires: { mongodb: '>=4.4', topology: ['replicaset', 'sharded'] } },
@@ -1426,19 +1424,19 @@ describe('Indexes', function() {
       };
     }
     it(
-      'db.createIndex',
+      'should run command with commitQuorum if specified on db.createIndex',
       commitQuorumTest((db, collection, cb) =>
         db.createIndex(collection.collectionName, 'a', { w: 'majority', commitQuorum: 0 }, cb)
       )
     );
     it(
-      'collection.createIndex',
+      'should run command with commitQuorum if specified on collection.createIndex',
       commitQuorumTest((db, collection, cb) =>
         collection.createIndex('a', { w: 'majority', commitQuorum: 0 }, cb)
       )
     );
     it(
-      'collection.createIndexes',
+      'should run command with commitQuorum if specified on collection.createIndexes',
       commitQuorumTest((db, collection, cb) =>
         collection.createIndexes([{ key: { a: 1 } }], { w: 'majority', commitQuorum: 0 }, cb)
       )
