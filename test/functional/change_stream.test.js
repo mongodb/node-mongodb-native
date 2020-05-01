@@ -986,7 +986,7 @@ describe('Change Streams', function() {
     }
   });
 
-  it.skip('Should resume Change Stream when a resumable error is encountered', {
+  it('Should resume Change Stream when a resumable error is encountered', {
     metadata: {
       requires: {
         generators: true,
