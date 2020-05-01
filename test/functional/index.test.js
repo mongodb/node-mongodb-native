@@ -89,13 +89,10 @@ describe('Indexes', function() {
             // Create an index on the collection
             db.createIndex(
               collection.collectionName,
-              [
-                ['a', -1],
-                ['b', 1],
-                ['c', -1]
-              ],
+              { a: -1, b: 1, c: -1 },
               configuration.writeConcernMax(),
               function(err, indexName) {
+                expect(err).to.not.exist;
                 test.equal('a_-1_b_1_c_-1', indexName);
                 // Let's fetch the index information
                 db.indexInformation(collection.collectionName, function(err, collectionInfo) {
