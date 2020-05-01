@@ -16,7 +16,8 @@
     "ecmaVersion": 2017
   },
   "plugins": [
-    "prettier"
+    "prettier",
+    "promise"
   ],
   "rules": {
     "prettier/prettier": ["error", {
@@ -24,7 +25,7 @@
       "tabWidth": 2,
       "printWidth": 100
     }],
-
+    "promise/no-native": "error",
     "no-console": 0,
     "eqeqeq": ["error", "always", {"null": "ignore"}],
     "strict": ["error", "global"]

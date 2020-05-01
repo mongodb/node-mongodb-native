@@ -38,6 +38,7 @@
     "coveralls": "^2.11.6",
     "eslint": "^4.5.0",
     "eslint-plugin-prettier": "^2.2.0",
+    "eslint-plugin-promise": "^4.2.1",
     "istanbul": "^0.4.5",
     "jsdoc": "3.5.5",
     "lodash.camelcase": "^4.3.0",
