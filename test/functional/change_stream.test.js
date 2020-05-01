@@ -18,8 +18,9 @@ chai.use(require('chai-subset'));
  *
  * @param {ChangeStream} changeStream
  * @param {Function} onCursorClosed callback when cursor closed due this error
+ * @param {number} [delay] optional delay before triggering error
  */
-function triggerResumableError(changeStream, onCursorClosed) {
+function triggerResumableError(changeStream, onCursorClosed, delay) {
   const closeCursor = changeStream.cursor.close.bind(changeStream.cursor);
   changeStream.cursor.close = callback => {
     closeCursor(err => {
@@ -29,7 +30,11 @@ function triggerResumableError(changeStream, onCursorClosed) {
   };
   const fakeResumableError = new MongoNetworkError('fake error');
   // delay error slightly to better simulate real conditions
-  setTimeout(() => changeStream.cursor.emit('error', fakeResumableError), 250);
+  if (delay) {
+    setTimeout(() => changeStream.cursor.emit('error', fakeResumableError), delay);
+  } else {
+    changeStream.cursor.emit('error', fakeResumableError);
+  }
 }
 
 /**
@@ -1941,7 +1946,7 @@ describe('Change Streams', function() {
         )
         .then(() => teardown(), teardown);
     });
-  ['NonResumableChangeStreamError', 'NonResumableChangeStreamError'].forEach(label =>
+  ['NonRetryableChangeStreamError', 'NonResumableChangeStreamError'].forEach(label =>
     oldLabelTest(label)
   );
 
@@ -1987,7 +1992,6 @@ describe('Change Streams', function() {
     }
   });
 
-  // TODO: re-enable/fix these tests in NODE-2548
   describe('should properly handle a changeStream event being processed mid-close', function() {
     let client, coll;
 
@@ -2779,12 +2783,16 @@ describe('Change Streams', function() {
         });
 
         waitForStarted(changeStream, () => {
-          triggerResumableError(changeStream, () => {
-            events.push('error');
-            coll.insertOne({ x: 2 }, { w: 'majority', j: true }, err => {
-              expect(err).to.not.exist;
-            });
-          });
+          triggerResumableError(
+            changeStream,
+            () => {
+              events.push('error');
+              coll.insertOne({ x: 2 }, { w: 'majority', j: true }, err => {
+                expect(err).to.not.exist;
+              });
+            },
+            250
+          );
         });
       }
     });
@@ -2794,8 +2802,7 @@ describe('Change Streams', function() {
     // - MUST include a resumeAfter option
     // - MUST NOT include a startAfter option
     // when resuming a change stream.
-    // TODO: unskip before merging
-    it.skip('$changeStream that has received results must include resumeAfter and not startAfter', {
+    it('$changeStream that has received results must include resumeAfter and not startAfter', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=4.1.1' } },
       test: function(done) {
         let events = [];
@@ -2808,7 +2815,7 @@ describe('Change Streams', function() {
             case 2:
               // only events after this point are relevant to this test
               events = [];
-              triggerResumableError(changeStream, () => events.push('error'));
+              triggerResumableError(changeStream, () => events.push('error'), 0);
               break;
             case 3:
               expect(events)
@@ -2890,21 +2897,25 @@ describe('Change Stream Resume Error Tests', function() {
       waitForStarted(changeStream, () => {
         collection.insertOne({ a: 42 }, err => {
           expect(err).to.not.exist;
-          triggerResumableError(changeStream, () => {
-            changeStream.hasNext((err, hasNext) => {
-              expect(err).to.not.exist;
-              expect(hasNext).to.be.true;
-              changeStream.next((err, change) => {
+          triggerResumableError(
+            changeStream,
+            () => {
+              changeStream.hasNext((err, hasNext) => {
                 expect(err).to.not.exist;
-                expect(change).to.containSubset({
-                  operationType: 'insert',
-                  fullDocument: { b: 24 }
+                expect(hasNext).to.be.true;
+                changeStream.next((err, change) => {
+                  expect(err).to.not.exist;
+                  expect(change).to.containSubset({
+                    operationType: 'insert',
+                    fullDocument: { b: 24 }
+                  });
+                  done();
                 });
-                done();
               });
-            });
-            collection.insertOne({ b: 24 });
-          });
+              collection.insertOne({ b: 24 });
+            },
+            250
+          );
         });
       });
       changeStream.hasNext((err, hasNext) => {
