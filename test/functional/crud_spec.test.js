@@ -1,5 +1,6 @@
 'use strict';
 
+const Promise = require('../../lib/promise_provider').get();
 const fs = require('fs');
 const path = require('path');
 const chai = require('chai');

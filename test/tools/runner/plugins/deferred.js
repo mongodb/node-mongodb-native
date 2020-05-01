@@ -1,4 +1,6 @@
 'use strict';
+
+const Promise = require('../../../../lib/promise_provider').get();
 const kDeferred = Symbol('deferred');
 
 (mocha => {

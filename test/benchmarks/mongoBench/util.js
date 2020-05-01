@@ -1,5 +1,7 @@
 'use strict';
 
+const Promise = require('../../../lib/promise_provider').get();
+
 function asyncChain(_chain) {
   // Make a copy of the chain so people can't mutate it :)
   const chain = [].concat(_chain);

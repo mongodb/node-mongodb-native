@@ -1,5 +1,6 @@
 'use strict';
 
+const Promise = require('../../../../lib/promise_provider').get();
 const Mongos = require('../../../../lib/core/topologies/mongos');
 const expect = require('chai').expect;
 const mock = require('mongodb-mock-server');

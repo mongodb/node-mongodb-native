@@ -1,5 +1,6 @@
 'use strict';
 
+const Promise = require('../../../lib/promise_provider').get();
 const crypto = require('crypto');
 const BSON = require('bson');
 const chai = require('chai');

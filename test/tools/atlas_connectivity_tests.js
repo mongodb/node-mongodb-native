@@ -1,5 +1,6 @@
 'use strict';
 
+const Promise = require('../../lib/promise_provider').get();
 const MongoClient = require('../..').MongoClient;
 
 const CONFIGS = ['ATLAS_REPL', 'ATLAS_SHRD', 'ATLAS_FREE', 'ATLAS_TLS11', 'ATLAS_TLS12'].map(

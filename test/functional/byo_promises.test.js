@@ -1,5 +1,6 @@
 'use strict';
 
+const Promise = require('../../lib/promise_provider').get();
 const maybePromise = require('./../../lib/utils').maybePromise;
 var expect = require('chai').expect;
 

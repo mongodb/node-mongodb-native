@@ -1,4 +1,6 @@
 'use strict';
+
+const Promise = require('../../lib/promise_provider').get();
 const expect = require('chai').expect;
 const setupDatabase = require('./shared').setupDatabase;
 const TestRunnerContext = require('./spec-runner').TestRunnerContext;
