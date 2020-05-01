@@ -1,5 +1,6 @@
 'use strict';
 
+const Promise = require('../../../lib/promise_provider').get();
 const mock = require('mongodb-mock-server');
 const expect = require('chai').expect;
 const genClusterTime = require('./common').genClusterTime;

@@ -1,4 +1,6 @@
 'use strict';
+
+const Promise = require('../../../lib/promise_provider').get();
 const EventEmitter = require('events');
 const Pool = require('../../../lib/core/connection/pool');
 const f = require('util').format;

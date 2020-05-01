@@ -1,5 +1,6 @@
 'use strict';
 
+const Promise = require('../../lib/promise_provider').get();
 const instrument = require('../..').instrument;
 const shared = require('./shared');
 const setupDatabase = shared.setupDatabase;

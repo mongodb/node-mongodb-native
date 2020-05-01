@@ -1,6 +1,7 @@
 /* eslint no-unused-vars: 0 */
 'use strict';
 
+const Promise = require('../../lib/promise_provider').get();
 const setupDatabase = require('../functional/shared').setupDatabase;
 const expect = require('chai').expect;
 

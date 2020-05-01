@@ -1,5 +1,6 @@
 'use strict';
 
+const Promise = require('../../lib/promise_provider').get();
 const expect = require('chai').expect;
 const sinon = require('sinon');
 const ScramSHA256 = require('../../lib/core').ScramSHA256;

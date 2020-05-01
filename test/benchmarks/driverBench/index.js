@@ -1,5 +1,6 @@
 'use strict';
 
+const Promise = require('../../../lib/promise_provider').get();
 const MongoBench = require('../mongoBench');
 
 const Runner = MongoBench.Runner;

@@ -1,5 +1,6 @@
 'use strict';
 
+const Promise = require('../../lib/promise_provider').get();
 const chai = require('chai');
 const loadSpecTests = require('../spec').loadSpecTests;
 const camelCase = require('lodash.camelcase');

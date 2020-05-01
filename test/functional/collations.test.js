@@ -1,4 +1,6 @@
 'use strict';
+
+const Promise = require('../../lib/promise_provider').get();
 const setupDatabase = require('./shared').setupDatabase;
 const mock = require('mongodb-mock-server');
 const expect = require('chai').expect;

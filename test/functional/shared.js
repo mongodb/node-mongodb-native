@@ -1,5 +1,6 @@
 'use strict';
 
+const Promise = require('../../lib/promise_provider').get();
 const MongoClient = require('../../').MongoClient;
 const expect = require('chai').expect;
 

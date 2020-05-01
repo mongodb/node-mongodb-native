@@ -1,5 +1,6 @@
 'use strict';
 
+const Promise = require('../../../lib/promise_provider').get();
 require('util.promisify/shim')();
 const util = require('util');
 const loadSpecTests = require('../../spec').loadSpecTests;

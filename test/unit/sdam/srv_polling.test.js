@@ -1,5 +1,6 @@
 'use strict';
 
+const Promise = require('../../../lib/promise_provider').get();
 const Topology = require('../../../lib/core/sdam/topology').Topology;
 const TopologyDescription = require('../../../lib/core/sdam/topology_description')
   .TopologyDescription;

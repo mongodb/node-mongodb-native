@@ -1,5 +1,6 @@
 'use strict';
 
+const Promise = require('../../../lib/promise_provider').get();
 const mock = require('mongodb-mock-server');
 const ObjectId = require('bson').ObjectId;
 const Timestamp = require('bson').Timestamp;

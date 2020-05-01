@@ -1,4 +1,6 @@
 'use strict';
+
+const Promise = require('../../lib/promise_provider').get();
 const test = require('./shared').assert;
 const setupDatabase = require('./shared').setupDatabase;
 const fs = require('fs');

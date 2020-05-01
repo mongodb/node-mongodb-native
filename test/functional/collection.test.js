@@ -1,4 +1,6 @@
 'use strict';
+
+const Promise = require('../../lib/promise_provider').get();
 const setupDatabase = require('./shared').setupDatabase;
 const chai = require('chai');
 const expect = chai.expect;

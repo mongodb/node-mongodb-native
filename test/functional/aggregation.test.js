@@ -1,4 +1,6 @@
 'use strict';
+
+const Promise = require('../../lib/promise_provider').get();
 var expect = require('chai').expect;
 
 describe('Aggregation', function() {

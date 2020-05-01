@@ -1,4 +1,6 @@
 'use strict';
+
+const Promise = require('../../lib/promise_provider').get();
 var expect = require('chai').expect,
   mock = require('mongodb-mock-server'),
   ObjectId = require('bson').ObjectId;

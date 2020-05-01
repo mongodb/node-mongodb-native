@@ -1,4 +1,6 @@
 'use strict';
+
+const Promise = require('../../lib/promise_provider').get();
 var assert = require('assert');
 var Transform = require('stream').Transform;
 const MongoError = require('../../lib/core').MongoError;
