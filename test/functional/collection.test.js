@@ -548,7 +548,7 @@ describe('Collection', function() {
       const ObjectID = configuration.require.ObjectID;
       db.createCollection('save_error_on_save_test', (err, collection) => {
         // Create unique index for username
-        collection.createIndex({ username: 1 }, configuration.writeConcernMax(), err => {
+        collection.createIndex([['username', 1]], configuration.writeConcernMax(), err => {
           expect(err).to.not.exist;
           const doc = {
             email: 'email@email.com',
