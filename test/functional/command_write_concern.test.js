@@ -20,7 +20,6 @@ var extend = function(template, fields) {
 class WriteConcernTest {
   constructor(configuration) {
     this.configuration = configuration;
-    this.handlers = {};
     this.responseDecoration = {};
     const ObjectId = configuration.require.ObjectId;
     const electionIds = [new ObjectId(), new ObjectId()];
@@ -80,7 +79,7 @@ class WriteConcernTest {
         if (doc.ismaster) {
           request.reply(self.serverStates.primary[0]);
         } else if (self.docKey && doc[self.docKey]) {
-          this.handler(doc);
+          self.handler(doc);
         } else if (doc[resultKey]) {
           self.commandResult = doc;
           request.reply(Object.assign({ ok: 1 }, self.responseDecoration));
