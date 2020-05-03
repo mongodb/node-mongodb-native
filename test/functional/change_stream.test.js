@@ -1981,7 +1981,6 @@ describe('Change Streams', function() {
     }
   });
 
-  // TODO: re-enable/fix these tests in NODE-2548
   describe('should properly handle a changeStream event being processed mid-close', function() {
     let client, coll;
 
