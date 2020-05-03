@@ -13,7 +13,7 @@ chai.use(require('chai-subset'));
 describe('Client Side Encryption Functional', function() {
   const dataDbName = 'db';
   const dataCollName = 'coll';
-  const keyVaultDbName = 'admin';
+  const keyVaultDbName = 'keyvault';
   const keyVaultCollName = 'datakeys';
   const keyVaultNamespace = `${keyVaultDbName}.${keyVaultCollName}`;
 
