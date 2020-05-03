@@ -32,14 +32,14 @@ tests:
             listCollections: 1
             filter:
               name: "datakeys"
-            $db: admin
+            $db: keyvault
           command_name: listCollections
       # Then key is fetched from the key vault.
       - command_started_event:
           command:
             find: datakeys
             filter: {"$or": [{"_id": {"$in": [ {'$binary': {'base64': 'AAAAAAAAAAAAAAAAAAAAAA==', 'subType': '04'}} ] }}, {"keyAltNames": {"$in": []}}]}
-            $db: admin
+            $db: keyvault
             readConcern: { level: "majority" }
           command_name: find
       - command_started_event:
@@ -80,14 +80,14 @@ tests:
             listCollections: 1
             filter:
               name: "datakeys"
-            $db: admin
+            $db: keyvault
           command_name: listCollections
       # Then key is fetched from the key vault.
       - command_started_event:
           command:
             find: datakeys
             filter: {"$or": [{"_id": {"$in": [ {'$binary': {'base64': 'AAAAAAAAAAAAAAAAAAAAAA==', 'subType': '04'}} ] }}, {"keyAltNames": {"$in": []}}]}
-            $db: admin
+            $db: keyvault
             readConcern: { level: "majority" }
           command_name: find
       - command_started_event:
@@ -128,14 +128,14 @@ tests:
             listCollections: 1
             filter:
               name: "datakeys"
-            $db: admin
+            $db: keyvault
           command_name: listCollections
       # Then key is fetched from the key vault.
       - command_started_event:
           command:
             find: datakeys
             filter: {"$or": [{"_id": {"$in": [ {'$binary': {'base64': 'AAAAAAAAAAAAAAAAAAAAAA==', 'subType': '04'}} ] }}, {"keyAltNames": {"$in": []}}]}
-            $db: admin
+            $db: keyvault
             readConcern: { level: "majority" }
           command_name: find
       - command_started_event:
@@ -202,14 +202,14 @@ tests:
             listCollections: 1
             filter:
               name: "datakeys"
-            $db: admin
+            $db: keyvault
           command_name: listCollections
       # Then key is fetched from the key vault.
       - command_started_event:
           command:
             find: datakeys
             filter: {"$or": [{"_id": {"$in": [ {'$binary': {'base64': 'AAAAAAAAAAAAAAAAAAAAAA==', 'subType': '04'}} ] }}, {"keyAltNames": {"$in": []}}]}
-            $db: admin
+            $db: keyvault
             readConcern: { level: "majority" }
           command_name: find
       - command_started_event:
@@ -250,14 +250,14 @@ tests:
             listCollections: 1
             filter:
               name: "datakeys"
-            $db: admin
+            $db: keyvault
           command_name: listCollections
       # Then key is fetched from the key vault.
       - command_started_event:
           command:
             find: datakeys
             filter: {"$or": [{"_id": {"$in": [ {'$binary': {'base64': 'AAAAAAAAAAAAAAAAAAAAAA==', 'subType': '04'}} ] }}, {"keyAltNames": {"$in": []}}]}
-            $db: admin
+            $db: keyvault
             readConcern: { level: "majority" }
           command_name: find
       - command_started_event:
@@ -324,14 +324,14 @@ tests:
             listCollections: 1
             filter:
               name: "datakeys"
-            $db: admin
+            $db: keyvault
           command_name: listCollections
       # Then key is fetched from the key vault.
       - command_started_event:
           command:
             find: datakeys
             filter: {"$or": [{"_id": {"$in": [ {'$binary': {'base64': 'AAAAAAAAAAAAAAAAAAAAAA==', 'subType': '04'}} ] }}, {"keyAltNames": {"$in": []}}]}
-            $db: admin
+            $db: keyvault
             readConcern: { level: "majority" }
           command_name: find
       - command_started_event:
@@ -372,14 +372,14 @@ tests:
             listCollections: 1
             filter:
               name: "datakeys"
-            $db: admin
+            $db: keyvault
           command_name: listCollections
       # Then key is fetched from the key vault.
       - command_started_event:
           command:
             find: datakeys
             filter: {"$or": [{"_id": {"$in": [ {'$binary': {'base64': 'AAAAAAAAAAAAAAAAAAAAAA==', 'subType': '04'}} ] }}, {"keyAltNames": {"$in": []}}]}
-            $db: admin
+            $db: keyvault
             readConcern: { level: "majority" }
           command_name: find
       - command_started_event:
@@ -420,14 +420,14 @@ tests:
             listCollections: 1
             filter:
               name: "datakeys"
-            $db: admin
+            $db: keyvault
           command_name: listCollections
       # Then key is fetched from the key vault.
       - command_started_event:
           command:
             find: datakeys
             filter: {"$or": [{"_id": {"$in": [ {'$binary': {'base64': 'AAAAAAAAAAAAAAAAAAAAAA==', 'subType': '04'}} ] }}, {"keyAltNames": {"$in": []}}]}
-            $db: admin
+            $db: keyvault
             readConcern: { level: "majority" }
           command_name: find
       - command_started_event:

@@ -39,6 +39,10 @@ function translateClientOptions(options) {
     } else if (key === 'autoEncryptOpts') {
       options.autoEncryption = Object.assign({}, options.autoEncryptOpts);
 
+      if (options.autoEncryptOpts.keyVaultNamespace == null) {
+        options.autoEncryption.keyVaultNamespace = 'keyvault.datakeys';
+      }
+
       if (options.autoEncryptOpts.kmsProviders) {
         delete options.kmsProviders;
         options.autoEncryption.kmsProviders = options.autoEncryptOpts.kmsProviders;
@@ -165,7 +169,7 @@ function prepareDatabaseForSuite(suite, context) {
     .admin()
     .command({ killAllSessions: [] })
     .catch(err => {
-      if (err.code === 11601 || err.message.match(/no such/)) {
+      if (err.message.match(/no such command/) || err.code === 11601) {
         return;
       }
 
@@ -184,7 +188,7 @@ function prepareDatabaseForSuite(suite, context) {
     })
     .then(() => {
       if (suite.key_vault_data) {
-        const dataKeysCollection = context.sharedClient.db('admin').collection('datakeys');
+        const dataKeysCollection = context.sharedClient.db('keyvault').collection('datakeys');
         return dataKeysCollection
           .drop({ w: 'majority' })
           .catch(err => {

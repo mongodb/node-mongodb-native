@@ -60,7 +60,7 @@ describe('Client Side Encryption Corpus', function() {
   const dataDbName = 'db';
   const dataCollName = 'coll';
   const dataNamespace = `${dataDbName}.${dataCollName}`;
-  const keyVaultDbName = 'admin';
+  const keyVaultDbName = 'keyvault';
   const keyVaultCollName = 'datakeys';
   const keyVaultNamespace = `${keyVaultDbName}.${keyVaultCollName}`;
 
@@ -134,7 +134,7 @@ describe('Client Side Encryption Corpus', function() {
     return Promise.resolve()
       .then(() => client.connect())
       .then(() => {
-        // 3. Using ``client``, drop the collection ``admin.datakeys``. Insert the documents `corpus/corpus-key-local.json <../corpus/corpus-key-local.json>`_ and `corpus/corpus-key-aws.json <../corpus/corpus-key-aws.json>`_.
+        // 3. Using ``client``, drop the collection ``keyvault.datakeys``. Insert the documents `corpus/corpus-key-local.json <../corpus/corpus-key-local.json>`_ and `corpus/corpus-key-aws.json <../corpus/corpus-key-aws.json>`_.
         const keyDb = client.db(keyVaultDbName);
         return Promise.resolve()
           .then(() => keyDb.dropCollection(keyVaultCollName))
@@ -180,7 +180,7 @@ describe('Client Side Encryption Corpus', function() {
           //    Where LOCAL_MASTERKEY is the following base64:
           //    .. code:: javascript
           //       Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk
-          //    Configure both objects with ``keyVaultNamespace`` set to ``admin.datakeys``.
+          //    Configure both objects with ``keyVaultNamespace`` set to ``keyvault.datakeys``.
           const autoEncryption = {
             keyVaultNamespace,
             kmsProviders: this.configuration.kmsProviders(null, localKey)

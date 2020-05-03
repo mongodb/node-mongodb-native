@@ -17,7 +17,7 @@ describe('Client Side Encryption Prose Tests', function() {
   const dataDbName = 'db';
   const dataCollName = 'coll';
   const dataNamespace = `${dataDbName}.${dataCollName}`;
-  const keyVaultDbName = 'admin';
+  const keyVaultDbName = 'keyvault';
   const keyVaultCollName = 'datakeys';
   const keyVaultNamespace = `${keyVaultDbName}.${keyVaultCollName}`;
 
@@ -62,7 +62,7 @@ describe('Client Side Encryption Prose Tests', function() {
       return (
         Promise.resolve()
           .then(() => this.client.connect())
-          // #. Using ``client``, drop the collections ``admin.datakeys`` and ``db.coll``.
+          // #. Using ``client``, drop the collections ``keyvault.datakeys`` and ``db.coll``.
           .then(() => dropCollection(this.client.db(dataDbName), dataCollName))
           .then(() => dropCollection(this.client.db(keyVaultDbName), keyVaultCollName))
           // #. Create the following:
@@ -74,7 +74,7 @@ describe('Client Side Encryption Prose Tests', function() {
           //           "aws": { <AWS credentials> },
           //           "local": { "key": <base64 decoding of LOCAL_MASTERKEY> }
           //       }
-          //   Configure both objects with ``keyVaultNamespace`` set to ``admin.datakeys``.
+          //   Configure both objects with ``keyVaultNamespace`` set to ``keyvault.datakeys``.
           //   Configure the ``MongoClient`` with the following ``schema_map``:
           //   .. code:: javascript
           //       {
@@ -132,7 +132,7 @@ describe('Client Side Encryption Prose Tests', function() {
         .then(() => {
           // #. Call ``client_encryption.createDataKey()`` with the ``local`` KMS provider and keyAltNames set to ``["local_altname"]``.
           // - Expect a BSON binary with subtype 4 to be returned, referred to as ``local_datakey_id``.
-          // - Use ``client`` to run a ``find`` on ``admin.datakeys`` by querying with the ``_id`` set to the ``local_datakey_id``.
+          // - Use ``client`` to run a ``find`` on ``keyvault.datakeys`` by querying with the ``_id`` set to the ``local_datakey_id``.
           // - Expect that exactly one document is returned with the "masterKey.provider" equal to "local".
           // - Check that ``client`` captured a command_started event for the ``insert`` command containing a majority writeConcern.
           this.commandStartedEvents.clear();
@@ -206,7 +206,7 @@ describe('Client Side Encryption Prose Tests', function() {
           //         key: "arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0"
           //       }
           //    - Expect a BSON binary with subtype 4 to be returned, referred to as ``aws_datakey_id``.
-          //    - Use ``client`` to run a ``find`` on ``admin.datakeys`` by querying with the ``_id`` set to the ``aws_datakey_id``.
+          //    - Use ``client`` to run a ``find`` on ``keyvault.datakeys`` by querying with the ``_id`` set to the ``aws_datakey_id``.
           //    - Expect that exactly one document is returned with the "masterKey.provider" equal to "aws".
           //    - Check that ``client`` captured a command_started event for the ``insert`` command containing a majority writeConcern.
           this.commandStartedEvents.clear();
@@ -311,7 +311,7 @@ describe('Client Side Encryption Prose Tests', function() {
       //       {
       //           "aws": { <AWS credentials> }
       //       }
-      //    Configure with ``keyVaultNamespace`` set to ``admin.datakeys``, and a default MongoClient as the ``keyVaultClient``.
+      //    Configure with ``keyVaultNamespace`` set to ``keyvault.datakeys``, and a default MongoClient as the ``keyVaultClient``.
       this.client = this.configuration.newClient();
 
       return this.client.connect().then(() => {
@@ -472,7 +472,7 @@ describe('Client Side Encryption Prose Tests', function() {
               validator: { $jsonSchema: limitsSchema }
             });
           })
-          // #. Using ``client``, drop the collection ``admin.datakeys``. Insert the document `limits/limits-key.json <../limits/limits-key.json>`_
+          // #. Using ``client``, drop the collection ``keyvault.datakeys``. Insert the document `limits/limits-key.json <../limits/limits-key.json>`_
           .then(() => dropCollection(this.client.db(keyVaultDbName), keyVaultCollName))
           .then(() => {
             return this.client
@@ -488,7 +488,7 @@ describe('Client Side Encryption Prose Tests', function() {
       //    Configure with the ``local`` KMS provider as follows:
       //    .. code:: javascript
       //       { "local": { "key": <base64 decoding of LOCAL_MASTERKEY> } }
-      //    Configure with the ``keyVaultNamespace`` set to ``admin.datakeys``.
+      //    Configure with the ``keyVaultNamespace`` set to ``keyvault.datakeys``.
       this.clientEncrypted = this.configuration.newClient(
         {},
         {
@@ -727,8 +727,8 @@ describe('Client Side Encryption Prose Tests', function() {
       return (
         this.client
           .connect()
-          // #. Using ``client``, drop the collections ``admin.datakeys`` and ``db.coll``.
-          //    Insert the document `external/external-key.json <../external/external-key.json>`_ into ``admin.datakeys``.
+          // #. Using ``client``, drop the collections ``keyvault.datakeys`` and ``db.coll``.
+          //    Insert the document `external/external-key.json <../external/external-key.json>`_ into ``keyvault.datakeys``.
           .then(() => dropCollection(this.client.db(dataDbName), dataCollName))
           .then(() => dropCollection(this.client.db(keyVaultDbName), keyVaultCollName))
           .then(() => {
@@ -784,7 +784,7 @@ describe('Client Side Encryption Prose Tests', function() {
               //    Configure both objects with the ``local`` KMS providers as follows:
               //    .. code:: javascript
               //       { "local": { "key": <base64 decoding of LOCAL_MASTERKEY> } }
-              //    Configure both objects with ``keyVaultNamespace`` set to ``admin.datakeys``.
+              //    Configure both objects with ``keyVaultNamespace`` set to ``keyvault.datakeys``.
               //    Configure ``client_encrypted`` to use the schema `external/external-schema.json <../external/external-schema.json>`_  for ``db.coll`` by setting a schema map like: ``{ "db.coll": <contents of external-schema.json>}``
               .then(() => {
                 const options = {
