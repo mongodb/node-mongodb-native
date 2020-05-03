@@ -448,7 +448,7 @@ describe('Change Streams', function() {
         var thisChangeStream = theDatabase.collection('cacheResumeTokenCallback').watch(pipeline);
 
         // Trigger the first database event
-        waitForStarted(thisChangeStream, () => {
+        setTimeout(() => {
           theDatabase
             .collection('cacheResumeTokenCallback')
             .insert({ b: 2 }, function(err, result) {
@@ -484,7 +484,7 @@ describe('Change Streams', function() {
         var theDatabase = client.db('integration_tests');
         var thisChangeStream = theDatabase.collection('cacheResumeTokenPromise').watch(pipeline);
 
-        waitForStarted(thisChangeStream, () => {
+        setTimeout(() => {
           // Trigger the first database event
           theDatabase.collection('cacheResumeTokenPromise').insert({ b: 2 }, function(err, result) {
             assert.ifError(err);
@@ -530,7 +530,7 @@ describe('Change Streams', function() {
           thisChangeStream.close().then(() => client.close(done));
         });
 
-        waitForStarted(thisChangeStream, () => {
+        setTimeout(() => {
           // Trigger the first database event
           theDatabase
             .collection('cacheResumeTokenListener')
