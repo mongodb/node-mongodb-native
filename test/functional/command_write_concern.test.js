@@ -60,10 +60,6 @@ class WriteConcernTest {
       ]
     };
   }
-  setHandler(docKey, handler) {
-    this.docKey = docKey;
-    this.handler = handler;
-  }
   decorateResponse(obj) {
     Object.assign(this.responseDecoration, obj);
   }
@@ -78,8 +74,6 @@ class WriteConcernTest {
         var doc = request.document;
         if (doc.ismaster) {
           request.reply(self.serverStates.primary[0]);
-        } else if (self.docKey && doc[self.docKey]) {
-          self.handler(doc);
         } else if (doc[resultKey]) {
           self.commandResult = doc;
           request.reply(Object.assign({ ok: 1 }, self.responseDecoration));
@@ -119,6 +113,32 @@ class WriteConcernTest {
   }
 }
 
+function withStubbedClient(testFn) {
+  return function(done) {
+    const t = new WriteConcernTest(this.configuration);
+    testFn.call(this, t, done);
+  };
+}
+
+const writeConcernTestOptions = { w: 2, wtimeout: 1000 };
+
+function writeConcernTest(command, testFn) {
+  return withStubbedClient(function(t, done) {
+    switch (command) {
+      case 'mapReduce':
+        t.decorateResponse({ result: 'tempCollection' });
+        break;
+    }
+    t.run(command, (client, db) =>
+      testFn.call(this, db, Object.assign({}, writeConcernTestOptions), err => {
+        test.equal(null, err);
+        test.deepEqual(writeConcernTestOptions, t.commandResult.writeConcern);
+        client.close(done);
+      })
+    );
+  });
+}
+
 describe('Command Write Concern', function() {
   afterEach(() => mock.cleanup());
 
@@ -130,22 +150,14 @@ describe('Command Write Concern', function() {
       }
     },
 
-    test: function(done) {
-      const t = new WriteConcernTest(this.configuration);
-      t.run('aggregate', (client, db) => {
-        db.collection('test')
-          .aggregate([{ $match: {} }, { $out: 'readConcernCollectionAggregate1Output' }], {
-            w: 2,
-            wtimeout: 1000
-          })
-          .toArray(function(err) {
-            test.equal(null, err);
-            test.deepEqual({ w: 2, wtimeout: 1000 }, t.commandResult.writeConcern);
-
-            client.close(done);
-          });
-      });
-    }
+    test: writeConcernTest('aggregate', function(db, writeConcernTestOptions, done) {
+      db.collection('test')
+        .aggregate(
+          [{ $match: {} }, { $out: 'readConcernCollectionAggregate1Output' }],
+          writeConcernTestOptions
+        )
+        .toArray(done);
+    })
   });
 
   it('successfully pass through writeConcern to create command', {
@@ -156,28 +168,9 @@ describe('Command Write Concern', function() {
       }
     },
 
-    test: function(done) {
-      const Long = this.configuration.require.Long;
-      const t = new WriteConcernTest(this.configuration);
-      t.setHandler('listCollections', request =>
-        request.reply({
-          ok: 1,
-          cursor: {
-            id: Long.fromNumber(0),
-            ns: 'test.cmd$.listCollections',
-            firstBatch: []
-          }
-        })
-      );
-      t.run('create', (client, db) => {
-        db.createCollection('test_collection_methods', { w: 2, wtimeout: 1000 }, function(err) {
-          test.equal(null, err);
-          test.deepEqual({ w: 2, wtimeout: 1000 }, t.commandResult.writeConcern);
-
-          client.close(done);
-        });
-      });
-    }
+    test: writeConcernTest('create', function(db, writeConcernTestOptions, done) {
+      db.createCollection('test_collection_methods', writeConcernTestOptions, done);
+    })
   });
 
   it('successfully pass through writeConcern to createIndexes command', {
@@ -188,25 +181,13 @@ describe('Command Write Concern', function() {
       }
     },
 
-    test: function(done) {
-      const t = new WriteConcernTest(this.configuration);
-      t.run('createIndexes', (client, db) => {
-        db.collection('indexOptionDefault').createIndex(
-          { a: 1 },
-          {
-            indexOptionDefaults: true,
-            w: 2,
-            wtimeout: 1000
-          },
-          function(err) {
-            test.equal(null, err);
-            test.deepEqual({ w: 2, wtimeout: 1000 }, t.commandResult.writeConcern);
-
-            client.close(done);
-          }
-        );
-      });
-    }
+    test: writeConcernTest('createIndexes', function(db, writeConcernTestOptions, done) {
+      db.collection('indexOptionDefault').createIndex(
+        { a: 1 },
+        Object.assign({ indexOptionDefaults: true }, writeConcernTestOptions),
+        done
+      );
+    })
   });
 
   it('successfully pass through writeConcern to drop command', {
@@ -217,23 +198,9 @@ describe('Command Write Concern', function() {
       }
     },
 
-    test: function(done) {
-      const t = new WriteConcernTest(this.configuration);
-      t.run('drop', (client, db) => {
-        db.collection('indexOptionDefault').drop(
-          {
-            w: 2,
-            wtimeout: 1000
-          },
-          function(err) {
-            test.equal(null, err);
-            test.deepEqual({ w: 2, wtimeout: 1000 }, t.commandResult.writeConcern);
-
-            client.close(done);
-          }
-        );
-      });
-    }
+    test: writeConcernTest('drop', function(db, writeConcernTestOptions, done) {
+      db.collection('indexOptionDefault').drop(writeConcernTestOptions, done);
+    })
   });
 
   it('successfully pass through writeConcern to dropDatabase command', {
@@ -244,23 +211,9 @@ describe('Command Write Concern', function() {
       }
     },
 
-    test: function(done) {
-      const t = new WriteConcernTest(this.configuration);
-      t.run('dropDatabase', (client, db) => {
-        db.dropDatabase(
-          {
-            w: 2,
-            wtimeout: 1000
-          },
-          function(err) {
-            test.equal(null, err);
-            test.deepEqual({ w: 2, wtimeout: 1000 }, t.commandResult.writeConcern);
-
-            client.close(done);
-          }
-        );
-      });
-    }
+    test: writeConcernTest('dropDatabase', function(db, writeConcernTestOptions, done) {
+      db.dropDatabase(writeConcernTestOptions, done);
+    })
   });
 
   it('successfully pass through writeConcern to dropIndexes command', {
@@ -271,23 +224,9 @@ describe('Command Write Concern', function() {
       }
     },
 
-    test: function(done) {
-      const t = new WriteConcernTest(this.configuration);
-      t.run('dropIndexes', (client, db) => {
-        db.collection('test').dropIndexes(
-          {
-            w: 2,
-            wtimeout: 1000
-          },
-          function(err) {
-            test.equal(null, err);
-            test.deepEqual({ w: 2, wtimeout: 1000 }, t.commandResult.writeConcern);
-
-            client.close(done);
-          }
-        );
-      });
-    }
+    test: writeConcernTest('dropIndexes', function(db, writeConcernTestOptions, done) {
+      db.collection('test').dropIndexes(writeConcernTestOptions, done);
+    })
   });
 
   it('successfully pass through writeConcern to mapReduce command', {
@@ -298,33 +237,17 @@ describe('Command Write Concern', function() {
       }
     },
 
-    test: function(done) {
+    test: writeConcernTest('mapReduce', function(db, writeConcernTestOptions, done) {
       const Code = this.configuration.require.Code;
-      const t = new WriteConcernTest(this.configuration);
-      t.decorateResponse({ result: 'tempCollection' });
-      t.run('mapReduce', (client, db) => {
-        // String functions
-        var map = new Code('function() { emit(this.user_id, 1); }');
-        var reduce = new Code('function(k,vals) { return 1; }');
-
-        // db.collection('test').mapReduce({
-        db.collection('test').mapReduce(
-          map,
-          reduce,
-          {
-            out: { replace: 'tempCollection' },
-            w: 2,
-            wtimeout: 1000
-          },
-          function(err) {
-            test.equal(null, err);
-            test.deepEqual({ w: 2, wtimeout: 1000 }, t.commandResult.writeConcern);
-
-            client.close(done);
-          }
-        );
-      });
-    }
+      const map = new Code('function() { emit(this.user_id, 1); }');
+      const reduce = new Code('function(k,vals) { return 1; }');
+      db.collection('test').mapReduce(
+        map,
+        reduce,
+        Object.assign({ out: { replace: 'tempCollection' } }, writeConcernTestOptions),
+        done
+      );
+    })
   });
 
   it('successfully pass through writeConcern to createUser command', {
@@ -335,17 +258,9 @@ describe('Command Write Concern', function() {
       }
     },
 
-    test: function(done) {
-      const t = new WriteConcernTest(this.configuration);
-      t.run('createUser', (client, db) => {
-        db.admin().addUser('kay:kay', 'abc123', { w: 2, wtimeout: 1000 }, function(err) {
-          test.equal(null, err);
-          test.deepEqual({ w: 2, wtimeout: 1000 }, t.commandResult.writeConcern);
-
-          client.close(done);
-        });
-      });
-    }
+    test: writeConcernTest('createUser', function(db, writeConcernTestOptions, done) {
+      db.admin().addUser('kay:kay', 'abc123', writeConcernTestOptions, done);
+    })
   });
 
   it('successfully pass through writeConcern to dropUser command', {
@@ -356,17 +271,9 @@ describe('Command Write Concern', function() {
       }
     },
 
-    test: function(done) {
-      const t = new WriteConcernTest(this.configuration);
-      t.run('dropUser', (client, db) => {
-        db.admin().removeUser('kay:kay', { w: 2, wtimeout: 1000 }, function(err) {
-          test.equal(null, err);
-          test.deepEqual({ w: 2, wtimeout: 1000 }, t.commandResult.writeConcern);
-
-          client.close(done);
-        });
-      });
-    }
+    test: writeConcernTest('dropUser', function(db, writeConcernTestOptions, done) {
+      db.admin().removeUser('kay:kay', writeConcernTestOptions, done);
+    })
   });
 
   it('successfully pass through writeConcern to findAndModify command', {
@@ -377,23 +284,14 @@ describe('Command Write Concern', function() {
       }
     },
 
-    test: function(done) {
-      const t = new WriteConcernTest(this.configuration);
-      t.decorateResponse({ result: {} });
-      t.run('findAndModify', (client, db) => {
-        db.collection('test').findAndModify(
-          { a: 1 },
-          [['a', 1]],
-          { $set: { b1: 1 } },
-          { new: true, w: 2, wtimeout: 1000 },
-          function(err) {
-            test.equal(null, err);
-            test.deepEqual({ w: 2, wtimeout: 1000 }, t.commandResult.writeConcern);
-
-            client.close(done);
-          }
-        );
-      });
-    }
+    test: writeConcernTest('findAndModify', function(db, writeConcernTestOptions, done) {
+      db.collection('test').findAndModify(
+        { a: 1 },
+        [['a', 1]],
+        { $set: { b1: 1 } },
+        Object.assign({ new: true }, writeConcernTestOptions),
+        done
+      );
+    })
   });
 });
