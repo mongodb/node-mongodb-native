@@ -2017,10 +2017,7 @@ describe('Change Streams', function() {
           return Promise.resolve()
             .then(() => changeStream.next())
             .then(() => changeStream.next())
-            .then(() => {
-              const nextP = () => changeStream.next();
-              return changeStream.close().then(() => nextP());
-            });
+            .then(() => Promise.all([changeStream.close(), changeStream.next()]));
         }
 
         return Promise.all([read(), write()]).then(
@@ -2037,18 +2034,16 @@ describe('Change Streams', function() {
 
         changeStream.next(() => {
           changeStream.next(() => {
-            changeStream.close(err => {
-              expect(err).to.not.exist;
-              changeStream.next(err => {
-                let _err = null;
-                try {
-                  expect(err.message).to.equal('ChangeStream is closed');
-                } catch (e) {
-                  _err = e;
-                } finally {
-                  done(_err);
-                }
-              });
+            changeStream.close();
+            changeStream.next(err => {
+              let _err = null;
+              try {
+                expect(err.message).to.equal('ChangeStream is closed');
+              } catch (e) {
+                _err = e;
+              } finally {
+                done(_err);
+              }
             });
           });
         });
