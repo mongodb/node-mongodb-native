@@ -707,6 +707,7 @@ describe('Change Streams', function() {
 
             function completeStream() {
               changeStream.hasNext(function(err, hasNext) {
+                expect(err).to.not.exist;
                 assert.equal(hasNext, false);
                 assert.equal(changeStream.isClosed(), true);
                 client.close(done);
@@ -2024,7 +2025,7 @@ describe('Change Streams', function() {
 
         return Promise.all([read(), write()]).then(
           () => Promise.reject(new Error('Expected operation to fail with error')),
-          err => expect(err.message).to.equal('ChangeStream is closed.')
+          err => expect(err.message).to.equal('ChangeStream is closed')
         );
       }
     });
@@ -2041,7 +2042,7 @@ describe('Change Streams', function() {
               changeStream.next(err => {
                 let _err = null;
                 try {
-                  expect(err.message).to.equal('ChangeStream is closed.');
+                  expect(err.message).to.equal('ChangeStream is closed');
                 } catch (e) {
                   _err = e;
                 } finally {
