@@ -3992,7 +3992,7 @@ describe('Cursor', function() {
 
       const cursor = collection.find();
       const promise = cursor.forEach();
-      expect(promise).to.exist.and.to.be.an.instanceof(cursor.s.promiseLibrary);
+      expect(promise).to.exist.and.to.be.an.instanceof(Promise);
       promise.catch(() => {});
 
       cursor.close(() => client.close(() => done()));

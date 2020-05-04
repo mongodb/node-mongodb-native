@@ -1,14 +1,11 @@
 'use strict';
 
-const maybePromise = require('./../../lib/utils').maybePromise;
 var expect = require('chai').expect;
 
 class CustomPromise extends Promise {}
 CustomPromise.prototype.isCustomMongo = true;
 
-const parent = { s: { promiseLibrary: CustomPromise } };
-
-describe.skip('Optional PromiseLibrary / maybePromise', function() {
+describe('Optional PromiseLibrary / maybePromise', function() {
   it('should correctly implement custom dependency-less promise', function(done) {
     const getCustomPromise = v => new CustomPromise(resolve => resolve(v));
     const getNativePromise = v => new Promise(resolve => resolve(v));
@@ -16,33 +13,6 @@ describe.skip('Optional PromiseLibrary / maybePromise', function() {
     expect(getCustomPromise()).to.have.property('isCustomMongo');
     expect(getNativePromise()).to.have.property('then');
     expect(getCustomPromise()).to.have.property('then');
-    done();
-  });
-
-  it('should return a promise with extra property CustomMongo', function() {
-    const prom = maybePromise(parent, undefined, () => 'example');
-    expect(prom).to.have.property('isCustomMongo');
-    expect(prom).to.have.property('then');
-  });
-
-  it('should return a native promise with no parent', function(done) {
-    const prom = maybePromise(undefined, undefined, () => 'example');
-    expect(prom).to.not.have.property('isCustomMongo');
-    expect(prom).to.have.property('then');
-    done();
-  });
-
-  it('should return a native promise with empty parent', function(done) {
-    const prom = maybePromise({}, undefined, () => 'example');
-    expect(prom).to.not.have.property('isCustomMongo');
-    expect(prom).to.have.property('then');
-    done();
-  });
-
-  it('should return a native promise with emtpy "s"', function(done) {
-    const prom = maybePromise({ s: {} }, undefined, () => 'example');
-    expect(prom).to.not.have.property('isCustomMongo');
-    expect(prom).to.have.property('then');
     done();
   });
 

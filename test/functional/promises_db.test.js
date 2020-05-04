@@ -363,30 +363,4 @@ describe('Promises (Db)', function() {
       });
     }
   });
-
-  it.skip('Should correctly execute createCollection using passed down CustomPromise Promise', {
-    metadata: {
-      requires: {
-        topology: ['single']
-      }
-    },
-
-    test: function(done) {
-      var configuration = this.configuration;
-      var db = null;
-
-      const client = configuration.newClient({}, { promiseLibrary: CustomPromise });
-      client
-        .connect()
-        .then(function() {
-          db = client.db(configuration.db);
-          return db.createCollection('test');
-        })
-        .then(function(col) {
-          test.ok(col.s.options.promiseLibrary != null);
-
-          client.close(done);
-        });
-    }
-  });
 });
