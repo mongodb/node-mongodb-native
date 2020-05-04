@@ -169,7 +169,7 @@ function prepareDatabaseForSuite(suite, context) {
     .admin()
     .command({ killAllSessions: [] })
     .catch(err => {
-      if (err.message.match(/no such command/) || err.code === 11601) {
+      if (err.message.match(/no such (cmd|command)/) || err.code === 11601) {
         return;
       }
 
