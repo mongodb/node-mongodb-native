@@ -576,7 +576,7 @@ describe('Change Streams', function() {
             expect(err).to.exist;
 
             // Close the change stream
-            thisChangeStream.close(client.close(done));
+            thisChangeStream.close(() => client.close(done));
           });
         });
       }
