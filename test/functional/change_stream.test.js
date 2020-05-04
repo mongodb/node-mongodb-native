@@ -1983,7 +1983,7 @@ describe('Change Streams', function() {
   });
 
   describe('should properly handle a changeStream event being processed mid-close', function() {
-    let client, coll;
+    let client, coll, changeStream;
 
     function write() {
       return Promise.resolve()
@@ -1997,23 +1997,33 @@ describe('Change Streams', function() {
       return client.connect().then(_client => {
         client = _client;
         coll = client.db(this.configuration.db).collection('tester');
+        changeStream = coll.watch();
       });
     });
 
     afterEach(function() {
-      coll = undefined;
-      if (client) {
-        return client.close().then(() => {
+      return Promise.resolve()
+        .then(() => {
+          if (changeStream && !changeStream.isClosed()) {
+            return changeStream.close();
+          }
+        })
+        .then(() => {
+          if (client) {
+            client.close();
+          }
+        })
+        .then(() => {
+          coll = undefined;
+          changeStream = undefined;
           client = undefined;
         });
-      }
     });
 
     it('when invoked with promises', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
       test: function() {
         function read() {
-          const changeStream = coll.watch();
           return Promise.resolve()
             .then(() => changeStream.next())
             .then(() => changeStream.next())
@@ -2030,8 +2040,6 @@ describe('Change Streams', function() {
     it('when invoked with callbacks', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
       test: function(done) {
-        const changeStream = coll.watch();
-
         changeStream.next(() => {
           changeStream.next(() => {
             changeStream.close();
@@ -2063,8 +2071,6 @@ describe('Change Streams', function() {
           closed = true;
           return done(_err);
         };
-
-        const changeStream = coll.watch();
 
         let counter = 0;
         changeStream.on('change', () => {
