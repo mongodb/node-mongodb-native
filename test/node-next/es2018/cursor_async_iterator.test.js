@@ -1,7 +1,6 @@
 'use strict';
 
 const { expect } = require('chai');
-const { MongoError } = require('../../../index');
 
 describe('Cursor Async Iterator Tests', function() {
   let client, collection;
