@@ -1,9 +1,4 @@
 {
-  "runOn": [
-    {
-      "maxServerVersion": "4.3.3"
-    }
-  ],
   "data": [
     {
       "_id": 1,
@@ -21,7 +16,7 @@
   "collection_name": "DeleteMany_hint",
   "tests": [
     {
-      "description": "Unacknowledged deleteMany with hint string fails with client-side error on server < 4.4",
+      "description": "Unacknowledged deleteMany with hint string fails with client-side error",
       "operations": [
         {
           "object": "collection",
@@ -42,7 +37,7 @@
           "error": true
         }
       ],
-      "expectations": {},
+      "expectations": [],
       "outcome": {
         "collection": {
           "data": [
@@ -63,7 +58,7 @@
       }
     },
     {
-      "description": "Unacknowledged deleteMany with hint document fails with client-side error on server < 4.4",
+      "description": "Unacknowledged deleteMany with hint document fails with client-side error",
       "operations": [
         {
           "object": "collection",
@@ -86,7 +81,7 @@
           "error": true
         }
       ],
-      "expectations": {},
+      "expectations": [],
       "outcome": {
         "collection": {
           "data": [

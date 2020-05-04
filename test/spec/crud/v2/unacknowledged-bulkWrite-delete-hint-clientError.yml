@@ -1,9 +1,3 @@
-runOn:
-  # These tests assert that the driver raises a client-side error when the hint
-  # option is passed with an unacknowledged delete operation against a server
-  # that does not support hints in delete operations.
-  - { maxServerVersion: "4.3.3" }
-
 data:
   - {_id: 1, x: 11}
   - {_id: 2, x: 22}
@@ -14,7 +8,7 @@ collection_name: &collection_name 'BulkWrite_delete_hint'
 
 tests:
   -
-    description: "Unacknowledged bulkWrite deleteOne with hints fails with client-side error on server < 4.4"
+    description: "Unacknowledged bulkWrite deleteOne with hints fails with client-side error"
     operations:
       -
         name: "bulkWrite"
@@ -34,7 +28,7 @@ tests:
                 hint: &hint_doc { _id: 1 }
           options: { ordered: true }
         error: true
-    expectations: {}
+    expectations: []
     outcome: &outcome
       collection:
         data:
@@ -43,7 +37,7 @@ tests:
           - {_id: 3, x: 33 }
           - {_id: 4, x: 44 }
   -
-    description: "Unacknowledged bulkWrite deleteMany with hints fails with client-side error on server < 4.4"
+    description: "Unacknowledged bulkWrite deleteMany with hints fails with client-side error"
     operations:
       -
         name: "bulkWrite"
@@ -62,5 +56,5 @@ tests:
                 hint: *hint_doc
           options: { ordered: true }
         error: true
-    expectations: {}
+    expectations: []
     outcome: *outcome
