@@ -562,14 +562,14 @@ describe('Change Streams', function() {
             .watch([{ $project: { _id: false } }]);
 
           // Trigger the first database event
-          setTimeout(() => {
+          waitForStarted(thisChangeStream, () => {
             theDatabase
               .collection('resumetokenProjectedOutCallback')
               .insert({ b: 2 }, function(err, result) {
                 expect(err).to.not.exist;
                 expect(result.insertedCount).to.equal(1);
               });
-          }, 250);
+          });
 
           // Fetch the change notification
           thisChangeStream.next(function(err) {
@@ -610,7 +610,7 @@ describe('Change Streams', function() {
         });
 
         // Trigger the first database event
-        setTimeout(() => {
+        waitForStarted(thisChangeStream, () => {
           theDatabase
             .collection('resumetokenProjectedOutListener')
             .insert({ b: 2 }, function(err, result) {
@@ -669,7 +669,7 @@ describe('Change Streams', function() {
         });
 
         // Trigger the first database event
-        setTimeout(() => {
+        waitForStarted(changeStream, () => {
           database.collection('invalidateListeners').insert({ a: 1 }, function(err) {
             assert.ifError(err);
           });
@@ -693,7 +693,7 @@ describe('Change Streams', function() {
         var changeStream = database.collection('invalidateCallback').watch(pipeline);
 
         // Trigger the first database event
-        setTimeout(() => {
+        waitForStarted(changeStream, () => {
           database.collection('invalidateCallback').insert({ a: 1 }, function(err) {
             assert.ifError(err);
           });
@@ -758,14 +758,14 @@ describe('Change Streams', function() {
         var changeStream = database.collection('invalidateCollectionDropPromises').watch(pipeline);
 
         // Trigger the first database event
-        setTimeout(() => {
+        waitForStarted(changeStream, () => {
           return database
             .collection('invalidateCollectionDropPromises')
             .insert({ a: 1 })
             .then(function() {
               return delay(200);
             });
-        }, 200);
+        });
 
         return changeStream
           .next()
@@ -1139,7 +1139,7 @@ describe('Change Streams', function() {
         // Trigger the first database event
 
         firstChangeStream = collection.watch(pipeline);
-        setTimeout(() => {
+        waitForStarted(firstChangeStream, () => {
           return collection
             .insert(docs[0])
             .then(function(result) {
@@ -1224,7 +1224,7 @@ describe('Change Streams', function() {
           fullDocument: 'updateLookup'
         });
 
-        setTimeout(() => {
+        waitForStarted(changeStream, () => {
           return collection.insert({ f: 128 }).then(function(result) {
             assert.equal(result.insertedCount, 1);
           });
@@ -1280,7 +1280,7 @@ describe('Change Streams', function() {
         });
 
         // Trigger the first database event
-        setTimeout(() => {
+        waitForStarted(changeStream, () => {
           return collection
             .insert({ i: 128 })
             .then(function(result) {
@@ -1417,7 +1417,7 @@ describe('Change Streams', function() {
           })
           .on('error', close);
 
-        setTimeout(() => {
+        waitForStarted(thisChangeStream, () => {
           theCollection.insert({ a: 1 }, function(err) {
             assert.ifError(err);
           });
@@ -1632,7 +1632,7 @@ describe('Change Streams', function() {
           done(err);
         });
 
-        setTimeout(() => {
+        waitForStarted(thisChangeStream, () => {
           theCollection.insert({ a: 1407 }, function(err) {
             if (err) done(err);
           });
@@ -1972,7 +1972,7 @@ describe('Change Streams', function() {
         changeStream.on('close', closeSpy);
 
         // Trigger the first database event
-        setTimeout(() => {
+        waitForStarted(changeStream, () => {
           coll.insertOne({ a: 1 }, (err, result) => {
             expect(err).to.not.exist;
             expect(result.insertedCount).to.equal(1);
@@ -2078,7 +2078,7 @@ describe('Change Streams', function() {
         });
         changeStream.on('error', err => close(err));
 
-        setTimeout(() => write().catch(() => {}));
+        waitForStarted(changeStream, () => write().catch(() => {}));
       }
     });
   });
