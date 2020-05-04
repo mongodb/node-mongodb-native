@@ -1,9 +1,4 @@
 {
-  "runOn": [
-    {
-      "maxServerVersion": "4.1.9"
-    }
-  ],
   "data": [
     {
       "_id": 1,
@@ -14,10 +9,10 @@
       "x": 22
     }
   ],
-  "collection_name": "Updateone_hint",
+  "collection_name": "UpdateOne_hint",
   "tests": [
     {
-      "description": "Unacknowledged updateOne with hint string fails with client-side error on server < 4.2",
+      "description": "Unacknowledged updateOne with hint string fails with client-side error",
       "operations": [
         {
           "object": "collection",
@@ -43,7 +38,7 @@
           "error": true
         }
       ],
-      "expectations": {},
+      "expectations": [],
       "outcome": {
         "collection": {
           "data": [
@@ -60,7 +55,7 @@
       }
     },
     {
-      "description": "Unacknowledged updateOne with hint document fails with client-side error on server < 4.2",
+      "description": "Unacknowledged updateOne with hint document fails with client-side error",
       "operations": [
         {
           "object": "collection",
@@ -88,7 +83,7 @@
           "error": true
         }
       ],
-      "expectations": {},
+      "expectations": [],
       "outcome": {
         "collection": {
           "data": [

@@ -1,9 +1,4 @@
 {
-  "runOn": [
-    {
-      "maxServerVersion": "4.1.9"
-    }
-  ],
   "data": [
     {
       "_id": 1,
@@ -17,7 +12,7 @@
   "collection_name": "ReplaceOne_hint",
   "tests": [
     {
-      "description": "Unacknowledged ReplaceOne with hint string fails with client-side error on server < 4.2",
+      "description": "Unacknowledged ReplaceOne with hint string fails with client-side error",
       "operations": [
         {
           "object": "collection",
@@ -41,7 +36,7 @@
           "error": true
         }
       ],
-      "expectations": {},
+      "expectations": [],
       "outcome": {
         "collection": {
           "data": [
@@ -58,7 +53,7 @@
       }
     },
     {
-      "description": "Unacknowledged ReplaceOne with hint document fails with client-side error on server < 4.2",
+      "description": "Unacknowledged ReplaceOne with hint document fails with client-side error",
       "operations": [
         {
           "object": "collection",
@@ -84,7 +79,7 @@
           "error": true
         }
       ],
-      "expectations": {},
+      "expectations": [],
       "outcome": {
         "collection": {
           "data": [
