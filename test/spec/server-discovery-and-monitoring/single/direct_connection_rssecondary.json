@@ -1,6 +1,6 @@
 {
-  "description": "Connect to RSSecondary",
-  "uri": "mongodb://a",
+  "description": "Direct connection to RSSecondary",
+  "uri": "mongodb://a/?directConnection=true",
   "phases": [
     {
       "responses": [

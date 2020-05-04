@@ -1,5 +1,7 @@
 description: "Replica set member and an unknown server"
+
 uri: "mongodb://a,b/?replicaSet=rs"
+
 phases: [
     {
         responses: [

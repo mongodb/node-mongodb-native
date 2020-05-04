@@ -1,6 +1,6 @@
-description: "RSOther discovered"
+description: "Discover hidden with replicaSet URI option"
 
-uri: "mongodb://a,b/?replicaSet=rs"
+uri: "mongodb://a/?replicaSet=rs"
 
 phases: [
 
@@ -18,16 +18,6 @@ phases: [
                     minWireVersion: 0,
                     maxWireVersion: 6
                 }],
-                ["b:27017", {
-
-                    ok: 1,
-                    ismaster: false,
-                    secondary: false,
-                    hosts: ["c:27017", "d:27017"],
-                    setName: "rs",
-                    minWireVersion: 0,
-                    maxWireVersion: 6
-                }]
         ],
 
         outcome: {
@@ -35,12 +25,6 @@ phases: [
             servers: {
 
                 "a:27017": {
-
-                    type: "RSOther",
-                    setName: "rs"
-                },
-
-                "b:27017": {
 
                     type: "RSOther",
                     setName: "rs"

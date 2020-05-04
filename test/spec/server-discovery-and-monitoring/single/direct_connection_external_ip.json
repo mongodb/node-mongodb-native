@@ -1,6 +1,6 @@
 {
   "description": "Direct connection to RSPrimary via external IP",
-  "uri": "mongodb://a",
+  "uri": "mongodb://a/?directConnection=true",
   "phases": [
     {
       "responses": [

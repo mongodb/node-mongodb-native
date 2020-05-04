@@ -1,5 +1,6 @@
 {
   "description": "Secondary mismatched me",
+  "uri": "mongodb://localhost:27017/?replicaSet=rs",
   "phases": [
     {
       "outcome": {
@@ -35,6 +36,5 @@
         ]
       ]
     }
-  ],
-  "uri": "mongodb://localhost:27017/?replicaSet=rs"
+  ]
 }
