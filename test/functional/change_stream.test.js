@@ -2020,14 +2020,18 @@ describe('Change Streams', function() {
         });
     });
 
-    it('when invoked with promises', {
+    it.skip('when invoked with promises', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
       test: function() {
         function read() {
           return Promise.resolve()
             .then(() => changeStream.next())
             .then(() => changeStream.next())
-            .then(() => Promise.all([changeStream.close(), changeStream.next()]));
+            .then(() => {
+              const nextP = changeStream.next();
+
+              return changeStream.close().then(() => nextP);
+            });
         }
 
         return Promise.all([read(), write()]).then(
@@ -2037,12 +2041,11 @@ describe('Change Streams', function() {
       }
     });
 
-    it('when invoked with callbacks', {
+    it.skip('when invoked with callbacks', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
       test: function(done) {
         changeStream.next(() => {
           changeStream.next(() => {
-            changeStream.close();
             changeStream.next(err => {
               let _err = null;
               try {
@@ -2053,6 +2056,7 @@ describe('Change Streams', function() {
                 done(_err);
               }
             });
+            changeStream.close();
           });
         });
 
