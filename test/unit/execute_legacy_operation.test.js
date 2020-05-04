@@ -9,10 +9,7 @@ describe('executeLegacyOperation', function() {
     let callbackError, caughtError;
 
     const topology = {
-      logicalSessionTimeoutMinutes: null,
-      s: {
-        promiseLibrary: Promise
-      }
+      logicalSessionTimeoutMinutes: null
     };
     const operation = () => {
       throw expectedError;
@@ -36,10 +33,7 @@ describe('executeLegacyOperation', function() {
     let callbackError;
 
     const topology = {
-      logicalSessionTimeoutMinutes: null,
-      s: {
-        promiseLibrary: Promise
-      }
+      logicalSessionTimeoutMinutes: null
     };
     const operation = () => {
       throw expectedError;

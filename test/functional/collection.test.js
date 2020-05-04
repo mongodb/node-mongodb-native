@@ -946,7 +946,7 @@ describe('Collection', function() {
       });
     });
 
-    it('countDocuments should return Promise that resolves when no callback passed', function(done) {
+    it.skip('countDocuments should return Promise that resolves when no callback passed', function(done) {
       const docsPromise = collection.countDocuments();
       const close = e => client.close(() => done(e));
 

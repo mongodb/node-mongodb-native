@@ -8,7 +8,7 @@ CustomPromise.prototype.isCustomMongo = true;
 
 const parent = { s: { promiseLibrary: CustomPromise } };
 
-describe('Optional PromiseLibrary / maybePromise', function() {
+describe.skip('Optional PromiseLibrary / maybePromise', function() {
   it('should correctly implement custom dependency-less promise', function(done) {
     const getCustomPromise = v => new CustomPromise(resolve => resolve(v));
     const getNativePromise = v => new Promise(resolve => resolve(v));

@@ -364,7 +364,7 @@ describe('Promises (Db)', function() {
     }
   });
 
-  it('Should correctly execute createCollection using passed down CustomPromise Promise', {
+  it.skip('Should correctly execute createCollection using passed down CustomPromise Promise', {
     metadata: {
       requires: {
         topology: ['single']
