@@ -83,7 +83,7 @@ Each YAML file has the following keys:
 
       - ``schemaMap``: Optional, a map from namespaces to local JSON schemas.
 
-      - ``keyVaultNamespace``: Optional, a namespace to the key vault collection. Defaults to "admin.datakeys".
+      - ``keyVaultNamespace``: Optional, a namespace to the key vault collection. Defaults to "keyvault.datakeys".
 
       - ``bypassAutoEncryption``: Optional, a boolean to indicate whether or not auto encryption should be bypassed. Defaults to ``false``.
 
@@ -124,8 +124,8 @@ Then for each element in ``tests``:
 #. If the ``skipReason`` field is present, skip this test completely.
 #. If the ``key_vault_data`` field is present:
 
-   #. Drop the ``admin.datakeys`` collection using writeConcern "majority".
-   #. Insert the data specified into the ``admin.datakeys`` with write concern "majority".
+   #. Drop the ``keyvault.datakeys`` collection using writeConcern "majority".
+   #. Insert the data specified into the ``keyvault.datakeys`` with write concern "majority".
 
 #. Create a MongoClient.
 
@@ -144,7 +144,7 @@ Then for each element in ``tests``:
 #. Create a **new** MongoClient using ``clientOptions``.
 
    #. If ``autoEncryptOpts`` includes ``aws`` as a KMS provider, pass in AWS credentials from the environment.
-   #. If ``autoEncryptOpts`` does not include ``keyVaultNamespace``, default it to ``admin.datakeys``.
+   #. If ``autoEncryptOpts`` does not include ``keyVaultNamespace``, default it to ``keyvault.datakeys``.
 
 #. For each element in ``operations``:
 
@@ -208,6 +208,8 @@ In the prose tests LOCAL_MASTERKEY refers to the following base64:
 
   Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk
 
+Perform all applicable operations on key vault collections (e.g. inserting an example data key, or running a find command) with readConcern/writeConcern "majority".
+
 Data key and double encryption
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -215,7 +217,7 @@ First, perform the setup.
 
 #. Create a MongoClient without encryption enabled (referred to as ``client``). Enable command monitoring to listen for command_started events.
 
-#. Using ``client``, drop the collections ``admin.datakeys`` and ``db.coll``.
+#. Using ``client``, drop the collections ``keyvault.datakeys`` and ``db.coll``.
 
 #. Create the following:
 
@@ -231,7 +233,7 @@ First, perform the setup.
           "local": { "key": <base64 decoding of LOCAL_MASTERKEY> }
       }
 
-   Configure both objects with ``keyVaultNamespace`` set to ``admin.datakeys``.
+   Configure both objects with ``keyVaultNamespace`` set to ``keyvault.datakeys``.
 
    Configure the ``MongoClient`` with the following ``schema_map``:
 
@@ -259,7 +261,7 @@ Then, test creating and using data keys from a ``local`` KMS provider:
 #. Call ``client_encryption.createDataKey()`` with the ``local`` KMS provider and keyAltNames set to ``["local_altname"]``.
 
    - Expect a BSON binary with subtype 4 to be returned, referred to as ``local_datakey_id``.
-   - Use ``client`` to run a ``find`` on ``admin.datakeys`` by querying with the ``_id`` set to the ``local_datakey_id``.
+   - Use ``client`` to run a ``find`` on ``keyvault.datakeys`` by querying with the ``_id`` set to the ``local_datakey_id``.
    - Expect that exactly one document is returned with the "masterKey.provider" equal to "local".
    - Check that ``client`` captured a command_started event for the ``insert`` command containing a majority writeConcern.
 
@@ -286,7 +288,7 @@ Then, repeat the above tests with the ``aws`` KMS provider:
 
 
    - Expect a BSON binary with subtype 4 to be returned, referred to as ``aws_datakey_id``.
-   - Use ``client`` to run a ``find`` on ``admin.datakeys`` by querying with the ``_id`` set to the ``aws_datakey_id``.
+   - Use ``client`` to run a ``find`` on ``keyvault.datakeys`` by querying with the ``_id`` set to the ``aws_datakey_id``.
    - Expect that exactly one document is returned with the "masterKey.provider" equal to "aws".
    - Check that ``client`` captured a command_started event for the ``insert`` command containing a majority writeConcern.
 
@@ -317,8 +319,8 @@ Run the following tests twice, parameterized by a boolean ``withExternalKeyVault
 
 #. Create a MongoClient without encryption enabled (referred to as ``client``).
 
-#. Using ``client``, drop the collections ``admin.datakeys`` and ``db.coll``.
-   Insert the document `external/external-key.json <../external/external-key.json>`_ into ``admin.datakeys``.
+#. Using ``client``, drop the collections ``keyvault.datakeys`` and ``db.coll``.
+   Insert the document `external/external-key.json <../external/external-key.json>`_ into ``keyvault.datakeys``.
 
 #. Create the following:
 
@@ -331,7 +333,7 @@ Run the following tests twice, parameterized by a boolean ``withExternalKeyVault
 
       { "local": { "key": <base64 decoding of LOCAL_MASTERKEY> } }
 
-   Configure both objects with ``keyVaultNamespace`` set to ``admin.datakeys``.
+   Configure both objects with ``keyVaultNamespace`` set to ``keyvault.datakeys``.
 
    Configure ``client_encrypted`` to use the schema `external/external-schema.json <../external/external-schema.json>`_  for ``db.coll`` by setting a schema map like: ``{ "db.coll": <contents of external-schema.json>}``
 
@@ -354,7 +356,7 @@ First, perform the setup.
 
 #. Using ``client``, drop and create the collection ``db.coll`` configured with the included JSON schema `limits/limits-schema.json <../limits/limits-schema.json>`_.
 
-#. Using ``client``, drop the collection ``admin.datakeys``. Insert the document `limits/limits-key.json <../limits/limits-key.json>`_
+#. Using ``client``, drop the collection ``keyvault.datakeys``. Insert the document `limits/limits-key.json <../limits/limits-key.json>`_
 
 #. Create a MongoClient configured with auto encryption (referred to as ``client_encrypted``)
 
@@ -364,7 +366,7 @@ First, perform the setup.
 
       { "local": { "key": <base64 decoding of LOCAL_MASTERKEY> } }
 
-   Configure with the ``keyVaultNamespace`` set to ``admin.datakeys``.
+   Configure with the ``keyVaultNamespace`` set to ``keyvault.datakeys``.
 
 Using ``client_encrypted`` perform the following operations:
 
@@ -420,13 +422,13 @@ Views are prohibited
 
       { "local": { "key": <base64 decoding of LOCAL_MASTERKEY> } }
 
-   Configure with the ``keyVaultNamespace`` set to ``admin.datakeys``.
+   Configure with the ``keyVaultNamespace`` set to ``keyvault.datakeys``.
 
 #. Using ``client_encrypted``, attempt to insert a document into ``db.view``. Expect an exception to be thrown containing the message: "cannot auto encrypt a view".
 
 
 Corpus Test
-===========
+~~~~~~~~~~~
 
 The corpus test exhaustively enumerates all ways to encrypt all BSON value types. Note, the test data includes BSON binary subtype 4 (or standard UUID), which MUST be decoded and encoded as subtype 4. Run the test as follows.
 
@@ -434,7 +436,7 @@ The corpus test exhaustively enumerates all ways to encrypt all BSON value types
 
 2. Using ``client``, drop and create the collection ``db.coll`` configured with the included JSON schema `corpus/corpus-schema.json <../corpus/corpus-schema.json>`_.
 
-3. Using ``client``, drop the collection ``admin.datakeys``. Insert the documents `corpus/corpus-key-local.json <../corpus/corpus-key-local.json>`_ and `corpus/corpus-key-aws.json <../corpus/corpus-key-aws.json>`_.
+3. Using ``client``, drop the collection ``keyvault.datakeys``. Insert the documents `corpus/corpus-key-local.json <../corpus/corpus-key-local.json>`_ and `corpus/corpus-key-aws.json <../corpus/corpus-key-aws.json>`_.
 
 4. Create the following:
 
@@ -456,7 +458,7 @@ The corpus test exhaustively enumerates all ways to encrypt all BSON value types
 
       Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk
 
-   Configure both objects with ``keyVaultNamespace`` set to ``admin.datakeys``.
+   Configure both objects with ``keyVaultNamespace`` set to ``keyvault.datakeys``.
 
 5. Load `corpus/corpus.json <../corpus/corpus.json>`_ to a variable named ``corpus``. The corpus contains subdocuments with the following fields:
 
@@ -507,7 +509,7 @@ The corpus test exhaustively enumerates all ways to encrypt all BSON value types
 9. Repeat steps 1-8 with a local JSON schema. I.e. amend step 4 to configure the schema on ``client_encrypted`` with the ``schema_map`` option.
 
 Custom Endpoint Test
-====================
+~~~~~~~~~~~~~~~~~~~~
 
 Data keys created with AWS KMS may specify a custom endpoint to contact (instead of the default endpoint derived from the AWS region).
 
@@ -521,7 +523,7 @@ Data keys created with AWS KMS may specify a custom endpoint to contact (instead
           "aws": { <AWS credentials> }
       }
 
-   Configure with ``keyVaultNamespace`` set to ``admin.datakeys``, and a default MongoClient as the ``keyVaultClient``.
+   Configure with ``keyVaultNamespace`` set to ``keyvault.datakeys``, and a default MongoClient as the ``keyVaultClient``.
 
 2. Call `client_encryption.createDataKey()` with "aws" as the provider and the following masterKey:
 
@@ -594,3 +596,67 @@ Data keys created with AWS KMS may specify a custom endpoint to contact (instead
 
    Expect this to fail with an exception with a message containing the string: "parse error"
 
+Bypass spawning mongocryptd
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Via mongocryptdBypassSpawn
+``````````````````````````
+
+The following tests that setting ``mongocryptdBypassSpawn=true`` really does bypass spawning mongocryptd.
+
+#. Create a MongoClient configured with auto encryption (referred to as ``client_encrypted``)
+
+   Configure the required options. Use the ``local`` KMS provider as follows:
+
+   .. code:: javascript
+
+      { "local": { "key": <base64 decoding of LOCAL_MASTERKEY> } }
+
+   Configure with the ``keyVaultNamespace`` set to ``keyvault.datakeys``.
+
+   Configure ``client_encrypted`` to use the schema `external/external-schema.json <../external/external-schema.json>`_  for ``db.coll`` by setting a schema map like: ``{ "db.coll": <contents of external-schema.json>}``
+
+   Configure the following ``extraOptions``:
+
+   .. code:: javascript
+
+      {
+        "mongocryptdBypassSpawn": true
+        "mongocryptdURI": "mongodb://localhost:27021/db?serverSelectionTimeoutMS=1000",
+        "mongocryptdSpawnArgs": [ "--pidfilepath=bypass-spawning-mongocryptd.pid", "--port=27021"]
+      }
+
+   Drivers MAY pass a different port if they expect their testing infrastructure to be using port 27021. Pass a port that should be free.
+
+#. Use ``client_encrypted`` to insert the document ``{"encrypted": "test"}`` into ``db.coll``. Expect a server selection error propagated from the internal MongoClient failing to connect to mongocryptd on port 27021.
+
+Via bypassAutoEncryption
+````````````````````````
+
+The following tests that setting ``bypassAutoEncryption=true`` really does bypass spawning mongocryptd.
+
+#. Create a MongoClient configured with auto encryption (referred to as ``client_encrypted``)
+
+   Configure the required options. Use the ``local`` KMS provider as follows:
+
+   .. code:: javascript
+
+      { "local": { "key": <base64 decoding of LOCAL_MASTERKEY> } }
+
+   Configure with the ``keyVaultNamespace`` set to ``keyvault.datakeys``.
+
+   Configure with ``bypassAutoEncryption=true``.
+
+   Configure the following ``extraOptions``:
+
+   .. code:: javascript
+
+      {
+        "mongocryptdSpawnArgs": [ "--pidfilepath=bypass-spawning-mongocryptd.pid", "--port=27021"]
+      }
+
+   Drivers MAY pass a different value to ``--port`` if they expect their testing infrastructure to be using port 27021. Pass a port that should be free.
+
+#. Use ``client_encrypted`` to insert the document ``{"unencrypted": "test"}`` into ``db.coll``. Expect this to succeed. 
+
+#. Validate that mongocryptd was not spawned. Create a MongoClient to localhost:27021 (or whatever was passed via ``--port``) with serverSelectionTimeoutMS=1000. Run an ``isMaster`` command and ensure it fails with a server selection timeout.

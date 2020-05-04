@@ -196,7 +196,7 @@
                   }
                 ]
               },
-              "$db": "admin",
+              "$db": "keyvault",
               "readConcern": {
                 "level": "majority"
               }
@@ -369,7 +369,7 @@
                   }
                 ]
               },
-              "$db": "admin",
+              "$db": "keyvault",
               "readConcern": {
                 "level": "majority"
               }
