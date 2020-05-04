@@ -4,7 +4,7 @@ const test = require('./shared').assert;
 const setupDatabase = require('./shared').setupDatabase;
 const withMonitoredClient = require('./shared').withMonitoredClient;
 const expect = require('chai').expect;
-const ReadPreference = require('../../lib/core/topologies/read_preference');
+const { ReadPreference } = require('../..');
 
 describe('ReadPreference', function() {
   before(function() {
