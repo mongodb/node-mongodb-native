@@ -717,7 +717,7 @@ describe('Collation', function() {
           .then(() => Promise.reject('should not succeed'))
           .catch(err => {
             expect(err).to.exist;
-            expect(err.message).to.equal('server/primary/mongos does not support collation');
+            expect(err.message).to.match(/does not support collation$/);
           })
           .then(() => client.close());
       });
@@ -751,7 +751,7 @@ describe('Collation', function() {
           .createIndexes([{ key: { a: 1 }, collation: { caseLevel: true } }])
           .then(() => Promise.reject('should not succeed'))
           .catch(err => {
-            expect(err.message).to.equal('server/primary/mongos does not support collation');
+            expect(err.message).to.match(/does not support collation$/);
             return client.close();
           });
       });

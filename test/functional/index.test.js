@@ -1,6 +1,9 @@
 'use strict';
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
+const expect = require('chai').expect;
+const withClient = require('./shared').withClient;
+const withMonitoredClient = require('./shared').withMonitoredClient;
 
 describe('Indexes', function() {
   before(function() {
@@ -94,6 +97,7 @@ describe('Indexes', function() {
               ],
               configuration.writeConcernMax(),
               function(err, indexName) {
+                expect(err).to.not.exist;
                 test.equal('a_-1_b_1_c_-1', indexName);
                 // Let's fetch the index information
                 db.indexInformation(collection.collectionName, function(err, collectionInfo) {
@@ -1349,5 +1353,93 @@ describe('Indexes', function() {
         );
       });
     }
+  });
+
+  context('commitQuorum', function() {
+    function throwErrorTest(testCommand) {
+      return {
+        metadata: { requires: { mongodb: '<4.4' } },
+        test: function() {
+          return withClient(this.configuration.newClient(), client => done => {
+            const db = client.db('test');
+            const collection = db.collection('commitQuorum');
+            testCommand(db, collection, (err, result) => {
+              expect(err).to.exist;
+              expect(err.message).to.equal(
+                '`commitQuorum` option for `createIndexes` not supported on servers < 4.4'
+              );
+              expect(result).to.not.exist;
+              done();
+            });
+          });
+        }
+      };
+    }
+    it(
+      'should throw an error if commitQuorum specified on db.createIndex',
+      throwErrorTest((db, collection, cb) =>
+        db.createIndex(collection.collectionName, 'a', { commitQuorum: 'all' }, cb)
+      )
+    );
+    it(
+      'should throw an error if commitQuorum specified on collection.createIndex',
+      throwErrorTest((db, collection, cb) =>
+        collection.createIndex('a', { commitQuorum: 'all' }, cb)
+      )
+    );
+    it(
+      'should throw an error if commitQuorum specified on collection.createIndexes',
+      throwErrorTest((db, collection, cb) =>
+        collection.createIndexes(
+          [{ key: { a: 1 } }, { key: { b: 1 } }],
+          { commitQuorum: 'all' },
+          cb
+        )
+      )
+    );
+
+    function commitQuorumTest(testCommand) {
+      return {
+        metadata: { requires: { mongodb: '>=4.4', topology: ['replicaset', 'sharded'] } },
+        test: withMonitoredClient('createIndexes', function(client, events, done) {
+          const db = client.db('test');
+          const collection = db.collection('commitQuorum');
+          collection.insertOne({ a: 1 }, function(err) {
+            expect(err).to.not.exist;
+            testCommand(db, collection, err => {
+              expect(err).to.not.exist;
+              expect(events)
+                .to.be.an('array')
+                .with.lengthOf(1);
+              expect(events[0])
+                .nested.property('command.commitQuorum')
+                .to.equal(0);
+              collection.drop(err => {
+                expect(err).to.not.exist;
+                done();
+              });
+            });
+          });
+        })
+      };
+    }
+    it(
+      'should run command with commitQuorum if specified on db.createIndex',
+      commitQuorumTest((db, collection, cb) =>
+        db.createIndex(collection.collectionName, 'a', { w: 'majority', commitQuorum: 0 }, cb)
+      )
+    );
+    it(
+      'should run command with commitQuorum if specified on collection.createIndex',
+      commitQuorumTest((db, collection, cb) =>
+        collection.createIndex('a', { w: 'majority', commitQuorum: 0 }, cb)
+      )
+    );
+    it(
+      'should run command with commitQuorum if specified on collection.createIndexes',
+      commitQuorumTest((db, collection, cb) =>
+        collection.createIndexes([{ key: { a: 1 } }], { w: 'majority', commitQuorum: 0 }, cb)
+      )
+    );
   });
 });
