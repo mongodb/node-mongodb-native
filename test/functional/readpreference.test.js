@@ -150,9 +150,6 @@ describe('ReadPreference', function() {
     }
   });
 
-  /**
-   * @ignore
-   */
   it('Should correctly apply collection level read Preference to mapReduce', {
     metadata: { requires: { mongodb: '>=2.6.0', topology: ['single', 'ssl'] } },
 
