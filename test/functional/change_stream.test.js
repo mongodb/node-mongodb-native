@@ -158,7 +158,7 @@ describe('Change Streams', function() {
             close(err);
           });
         });
-        setTimeout(() => coll.insertOne({ x: 1 }));
+        waitForStarted(changeStream, () => coll.insertOne({ x: 1 }));
         changeStream.on('error', err => close(err));
       });
     }
@@ -176,17 +176,6 @@ describe('Change Streams', function() {
         expect(err).to.not.exist;
         const collection = client.db('integration_tests').collection('docsDataEvent');
         const changeStream = collection.watch(pipeline);
-
-        changeStream.cursor.once('response', () => {
-          // Trigger the first database event
-          collection.insertOne({ d: 4 }, function(err) {
-            assert.ifError(err);
-            // Trigger the second database event
-            collection.updateOne({ d: 4 }, { $inc: { d: 2 } }, function(err) {
-              assert.ifError(err);
-            });
-          });
-        });
 
         let count = 0;
 
@@ -223,6 +212,17 @@ describe('Change Streams', function() {
           } catch (e) {
             cleanup(e);
           }
+        });
+
+        waitForStarted(changeStream, () => {
+          // Trigger the first database event
+          collection.insertOne({ d: 4 }, function(err) {
+            assert.ifError(err);
+            // Trigger the second database event
+            collection.updateOne({ d: 4 }, { $inc: { d: 2 } }, function(err) {
+              assert.ifError(err);
+            });
+          });
         });
       });
     }
