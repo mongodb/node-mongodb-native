@@ -34,7 +34,7 @@
   },
   "overrides": [
     {
-      "files": ["test/**", "test/**/**", "test/**/*", "test/*"],
+      "files": ["test/**/*.js"],
       "rules": {
         "promise/no-native": "off"
       }
