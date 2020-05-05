@@ -193,7 +193,7 @@ class EventCollector {
 }
 
 function withMonitoredClient(commands, callback) {
-  if (!callback.hasOwnProperty('prototype')) {
+  if (!Object.prototype.hasOwnProperty.call(callback, 'prototype')) {
     throw new Error('withMonitoredClient callback can not be arrow function');
   }
   return function(done) {
