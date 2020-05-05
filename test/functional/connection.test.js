@@ -237,10 +237,7 @@ describe('Connection', function() {
 
     test: function(done) {
       var configuration = this.configuration;
-      const client = configuration.newClient(configuration.url('slithy', 'toves'), {
-        serverSelectionTimeoutMS: 10
-      });
-
+      const client = configuration.newClient(configuration.url('slithy', 'toves'));
       client.connect(function(err, client) {
         expect(err).to.exist;
         expect(client).to.not.exist;
