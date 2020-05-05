@@ -4,6 +4,7 @@ var Transform = require('stream').Transform;
 const MongoError = require('../../lib/core').MongoError;
 var MongoNetworkError = require('../../lib/core').MongoNetworkError;
 var setupDatabase = require('./shared').setupDatabase;
+var withTempDb = require('./shared').withTempDb;
 var delay = require('./shared').delay;
 var co = require('co');
 var mock = require('mongodb-mock-server');
@@ -54,9 +55,12 @@ function tryNext(changeStream, callback) {
   let complete = false;
   function done(err, result) {
     if (complete) return;
-
     // if the arity is 1 then this a callback for `more`
     if (arguments.length === 1) {
+      if (err instanceof Error) {
+        callback(err);
+        return;
+      }
       result = err;
       const batch = result.cursor.firstBatch || result.cursor.nextBatch;
       if (batch.length === 0) {
@@ -1940,12 +1944,12 @@ describe('Change Streams', function() {
       .then(() => teardown(), teardown);
   });
 
-  it('should emit close event after error event', {
+  it.only('should emit close event after error event', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
     test: function(done) {
       const configuration = this.configuration;
       const client = configuration.newClient();
-      const errorSpy = sinon.spy();
+      const closeSpy = sinon.spy();
 
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -1961,11 +1965,14 @@ describe('Change Streams', function() {
           expect(changeDoc).to.be.null;
         });
 
-        changeStream.on('error', errorSpy);
+        changeStream.on('close', closeSpy);
 
-        changeStream.on('close', () => {
-          expect(errorSpy.calledOnce).to.be.true;
-          client.close(done);
+        changeStream.on('error', err => {
+          expect(err).to.exist;
+          changeStream.close(() => {
+            expect(closeSpy.calledOnce).to.be.true;
+            client.close(done);
+          });
         });
 
         // Trigger the first database event
@@ -2612,21 +2619,14 @@ describe('Change Streams', function() {
   describe('tryNext', function() {
     it('should return null on single iteration of empty cursor', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
-      test: function(done) {
-        const client = this.configuration.newClient();
-        client.connect(err => {
-          expect(err).to.not.exist;
-
-          const changeStream = client
-            .db()
-            .collection('test')
-            .watch();
-
+      test: function() {
+        return withTempDb('testTryNext', this.configuration.newClient(), db => done => {
+          const changeStream = db.collection('test').watch();
           tryNext(changeStream, (err, doc) => {
             expect(err).to.not.exist;
             expect(doc).to.not.exist;
 
-            changeStream.close(() => client.close(done));
+            changeStream.close(done);
           });
         });
       }
@@ -2634,12 +2634,9 @@ describe('Change Streams', function() {
 
     it('should iterate a change stream until first empty batch', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
-      test: function(done) {
-        const client = this.configuration.newClient();
-        client.connect(err => {
-          expect(err).to.not.exist;
-
-          const collection = client.db().collection('test');
+      test: function() {
+        return withTempDb('testTryNext', this.configuration.newClient(), db => done => {
+          const collection = db.collection('test');
           const changeStream = collection.watch();
           waitForStarted(changeStream, () => {
             collection.insertOne({ a: 42 }, err => {
@@ -2663,7 +2660,7 @@ describe('Change Streams', function() {
                 expect(err).to.not.exist;
                 expect(doc).to.not.exist;
 
-                changeStream.close(() => client.close(done));
+                changeStream.close(done);
               });
             });
           });

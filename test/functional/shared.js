@@ -75,6 +75,17 @@ function makeCleanupFn(client) {
   };
 }
 
+function withTempDb(dbName, client, operation, errorHandler) {
+  return withClient(
+    client,
+    client => done => {
+      const db = client.db(dbName);
+      operation(db)(() => db.dropDatabase(done));
+    },
+    errorHandler
+  );
+}
+
 function withClient(client, operation, errorHandler) {
   const cleanup = makeCleanupFn(client);
 
@@ -198,6 +209,7 @@ module.exports = {
   assert,
   delay,
   withClient,
+  withTempDb,
   filterForCommands,
   filterOutCommands,
   ignoreNsNotFound,
