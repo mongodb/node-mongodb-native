@@ -1,5 +1,7 @@
 'use strict';
 
+const format = require('util').format;
+const child_process = require('child_process');
 const stream = require('stream');
 const crypto = require('crypto');
 const { EJSON } = require('bson');
@@ -1379,5 +1381,44 @@ describe('GridFS Stream', function() {
       });
       // END
     }
+  });
+
+  it('should correctly handle indexes created in shell', function(done) {
+    const configuration = this.configuration;
+    const url = format(
+      'mongodb://%s/%s',
+      format('%s:%s', configuration.host, configuration.port),
+      configuration.db
+    );
+    const cmd = `mongo ${url} --eval 'db.fs.files.createIndex({"filename" : 1,"uploadDate" : 1})'`;
+    child_process.exec(cmd, err => {
+      expect(err).to.not.exist;
+      const client = configuration.newClient();
+      client.connect((err, client) => {
+        expect(err).to.not.exist;
+        const db = client.db(configuration.db);
+        db.collection('fs.files')
+          .listIndexes()
+          .toArray((err, indexes) => {
+            expect(err).to.not.exist;
+            expect(indexes).to.deep.equal([
+              {
+                v: 2,
+                key: { _id: 1 },
+                name: '_id_',
+                ns: 'integration_tests.fs.files'
+              },
+              {
+                v: 2,
+                key: { filename: 1, uploadDate: 1 },
+                name: 'filename_1_uploadDate_1',
+                ns: 'integration_tests.fs.files'
+              }
+            ]);
+            client.close();
+            done();
+          });
+      });
+    });
   });
 });
