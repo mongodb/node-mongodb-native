@@ -1992,8 +1992,11 @@ describe('Change Streams', function() {
     function write() {
       return Promise.resolve()
         .then(() => coll.insertOne({ a: 1 }))
-        .then(() => coll.insertOne({ b: 2 }))
-        .then(() => coll.insertOne({ c: 3 }));
+        .then(() => coll.insertOne({ b: 2 }));
+    }
+
+    function lastWrite() {
+      return coll.insertOne({ c: 3 });
     }
 
     beforeEach(function() {
@@ -2014,7 +2017,7 @@ describe('Change Streams', function() {
         })
         .then(() => {
           if (client) {
-            client.close();
+            return client.close();
           }
         })
         .then(() => {
@@ -2024,7 +2027,7 @@ describe('Change Streams', function() {
         });
     });
 
-    it.skip('when invoked with promises', {
+    it('when invoked with promises', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
       test: function() {
         function read() {
@@ -2032,6 +2035,7 @@ describe('Change Streams', function() {
             .then(() => changeStream.next())
             .then(() => changeStream.next())
             .then(() => {
+              lastWrite();
               const nextP = changeStream.next();
 
               return changeStream.close().then(() => nextP);
@@ -2045,15 +2049,18 @@ describe('Change Streams', function() {
       }
     });
 
-    it.skip('when invoked with callbacks', {
+    it('when invoked with callbacks', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
       test: function(done) {
         changeStream.next(() => {
           changeStream.next(() => {
+            lastWrite();
             changeStream.next(err => {
               let _err = null;
               try {
-                expect(err.message).to.equal('ChangeStream is closed');
+                expect(err)
+                  .property('message')
+                  .to.equal('ChangeStream is closed');
               } catch (e) {
                 _err = e;
               } finally {
