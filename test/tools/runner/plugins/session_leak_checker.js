@@ -72,6 +72,7 @@ beforeEach('Session Leak Before Each - setup session tracking', function() {
 
 afterEach('Session Leak After Each - ensure no leaks', function() {
   if (
+    this.currentTest == null ||
     this.currentTest.state === 'failed' ||
     getSessionLeakMetadata(this.currentTest).skipLeakTests
   ) {

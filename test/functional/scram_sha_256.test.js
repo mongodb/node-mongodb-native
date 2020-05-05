@@ -2,6 +2,7 @@
 
 const sinon = require('sinon');
 const { expect } = require('chai');
+const { Connection } = require('../../lib/cmap/connection');
 const { ScramSHA256 } = require('../../lib/cmap/auth/scram');
 const { setupDatabase, withClient } = require('./shared');
 
@@ -167,8 +168,8 @@ describe('SCRAM-SHA-256 auth', function() {
     }
   });
 
-  it('should shorten SCRAM conversations if the server supports it ', {
-    metadata: { requires: { mongodb: '>=4.3.x' } },
+  it('should shorten SCRAM conversations if the server supports it', {
+    metadata: { requires: { mongodb: '>=4.4', topology: ['single'] } },
     test: function() {
       const options = {
         auth: {
@@ -178,17 +179,21 @@ describe('SCRAM-SHA-256 auth', function() {
         authSource: this.configuration.db
       };
 
-      let sendAuthCommandSpy;
-      test.sandbox
-        .stub(ScramSHA256.prototype, '_executeScram')
-        .callsFake(function(sendAuthCommand, connection, credentials, nonce, callback) {
-          const executeScram = ScramSHA256.prototype._executeScram.wrappedMethod;
-          sendAuthCommandSpy = test.sandbox.spy(sendAuthCommand);
-          executeScram.apply(this, [sendAuthCommandSpy, connection, credentials, nonce, callback]);
-        });
+      let runCommandSpy;
+      test.sandbox.stub(ScramSHA256.prototype, 'auth').callsFake(function(authContext, callback) {
+        const connection = authContext.connection;
+        const auth = ScramSHA256.prototype.auth.wrappedMethod;
+        runCommandSpy = test.sandbox.spy(connection, 'command');
+        function _callback(err, res) {
+          runCommandSpy.restore();
+          callback(err, res);
+        }
+
+        auth.apply(this, [authContext, _callback]);
+      });
 
       return withClient(this.configuration.newClient({}, options), () => {
-        expect(sendAuthCommandSpy.callCount).to.equal(2);
+        expect(runCommandSpy.callCount).to.equal(1);
       });
     }
   });
@@ -204,8 +209,7 @@ describe('SCRAM-SHA-256 auth', function() {
           password: userMap.sha256.password
         },
         authSource: this.configuration.db,
-        authMechanism: 'SCRAM-SHA-1',
-        serverSelectionTimeoutMS: 100
+        authMechanism: 'SCRAM-SHA-1'
       };
 
       return withClient(
@@ -228,8 +232,7 @@ describe('SCRAM-SHA-256 auth', function() {
           user: 'roth',
           password: 'pencil'
         },
-        authSource: 'admin',
-        serverSelectionTimeoutMS: 100
+        authSource: 'admin'
       };
 
       const badPasswordOptions = {
@@ -237,8 +240,7 @@ describe('SCRAM-SHA-256 auth', function() {
           user: 'both',
           password: 'pencil'
         },
-        authSource: 'admin',
-        serverSelectionTimeoutMS: 100
+        authSource: 'admin'
       };
 
       const getErrorMsg = options =>
@@ -249,6 +251,31 @@ describe('SCRAM-SHA-256 auth', function() {
         );
 
       return Promise.all([getErrorMsg(noUsernameOptions), getErrorMsg(badPasswordOptions)]);
+    }
+  });
+
+  it('should send speculativeAuthenticate on initial handshake on MongoDB 4.4+', {
+    metadata: { requires: { mongodb: '>=4.4', topology: ['single'] } },
+    test: function() {
+      const options = {
+        auth: {
+          user: userMap.both.username,
+          password: userMap.both.password
+        },
+        authSource: this.configuration.db
+      };
+
+      const commandSpy = test.sandbox.spy(Connection.prototype, 'command');
+      return withClient(this.configuration.newClient({}, options), () => {
+        const calls = commandSpy
+          .getCalls()
+          .filter(c => c.thisValue.id !== '<monitor>') // ignore all monitor connections
+          .filter(c => c.args[1].ismaster); // only consider handshakes
+
+        expect(calls).to.have.length(1);
+        const handshakeDoc = calls[0].args[1];
+        expect(handshakeDoc).to.have.property('speculativeAuthenticate');
+      });
     }
   });
 });
