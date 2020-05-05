@@ -421,15 +421,19 @@ describe('Change Streams', function() {
         client.connect(function(err, client) {
           assert.ifError(err);
 
+          const forbiddenStage = {};
+          const forbiddenStageName = '$alksdjfhlaskdfjh';
+          forbiddenStage[forbiddenStageName] = 2;
+
           var theDatabase = client.db('integration_tests');
-          var changeStream = theDatabase
-            .collection('forbiddenStageTest')
-            .watch([{ $alksdjfhlaskdfjh: 2 }]);
+          var changeStream = theDatabase.collection('forbiddenStageTest').watch([forbiddenStage]);
 
           changeStream.next(function(err) {
             assert.ok(err);
             assert.ok(err.message);
-            // assert.ok(err.message.indexOf('SOME ERROR MESSAGE HERE ONCE SERVER-29137 IS DONE') > -1);
+            assert.ok(
+              err.message.indexOf(`Unrecognized pipeline stage name: '${forbiddenStageName}'`) > -1
+            );
             changeStream.close(err => client.close(cerr => done(err || cerr)));
           });
         });
