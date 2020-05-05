@@ -1422,4 +1422,25 @@ describe('GridFS Stream', function() {
       });
     });
   });
+
+  it('should correctly handle indexes create with exponent', function(done) {
+    const configuration = this.configuration;
+    const client = configuration.newClient();
+    client.connect((err, client) => {
+      expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      const col = db.collection('fs.files');
+      // prettier-ignore
+      col.createIndex({ filename: 1e0, uploadDate: 1e0 }, err => {
+        expect(err).to.not.exist;
+        col.listIndexes().toArray((err, indexes) => {
+          expect(err).to.not.exist;
+          const names = indexes.map(i => i.name);
+          expect(names).to.eql(['_id_', 'filename_1_uploadDate_1']);
+          client.close();
+          done();
+        });
+      });
+    });
+  });
 });
