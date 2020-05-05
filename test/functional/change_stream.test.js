@@ -2107,7 +2107,11 @@ describe('Change Streams', function() {
         });
         changeStream.on('error', err => close(err));
 
-        waitForStarted(changeStream, () => write().catch(() => {}));
+        waitForStarted(changeStream, () =>
+          write()
+            .then(() => lastWrite())
+            .catch(() => {})
+        );
       }
     });
   });
