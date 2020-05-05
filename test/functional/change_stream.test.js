@@ -1945,7 +1945,7 @@ describe('Change Streams', function() {
     test: function(done) {
       const configuration = this.configuration;
       const client = configuration.newClient();
-      const closeSpy = sinon.spy();
+      const errorSpy = sinon.spy();
 
       client.connect(function(err, client) {
         expect(err).to.not.exist;
@@ -1961,15 +1961,12 @@ describe('Change Streams', function() {
           expect(changeDoc).to.be.null;
         });
 
-        changeStream.on('error', err => {
-          expect(err).to.exist;
-          changeStream.close(() => {
-            expect(closeSpy.calledOnce).to.be.true;
-            client.close(done);
-          });
-        });
+        changeStream.on('error', errorSpy);
 
-        changeStream.on('close', closeSpy);
+        changeStream.on('close', () => {
+          expect(errorSpy.calledOnce).to.be.true;
+          client.close(done);
+        });
 
         // Trigger the first database event
         waitForStarted(changeStream, () => {
