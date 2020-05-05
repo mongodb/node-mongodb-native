@@ -38,7 +38,11 @@ function triggerResumableError(changeStream, onCursorClosed) {
  * @param {function} callback
  */
 function waitForStarted(changeStream, callback) {
+  const timeout = setTimeout(() => {
+    throw new Error('Change stream never started');
+  }, 2000);
   changeStream.cursor.once('init', () => {
+    clearTimeout(timeout);
     callback();
   });
 }
