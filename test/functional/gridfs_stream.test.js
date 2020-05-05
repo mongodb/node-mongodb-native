@@ -1401,20 +1401,8 @@ describe('GridFS Stream', function() {
           .listIndexes()
           .toArray((err, indexes) => {
             expect(err).to.not.exist;
-            expect(indexes).to.deep.equal([
-              {
-                v: 2,
-                key: { _id: 1 },
-                name: '_id_',
-                ns: 'integration_tests.fs.files'
-              },
-              {
-                v: 2,
-                key: { filename: 1, uploadDate: 1 },
-                name: 'filename_1_uploadDate_1',
-                ns: 'integration_tests.fs.files'
-              }
-            ]);
+            const names = indexes.map(i => i.name);
+            expect(names).to.eql(['_id_', 'filename_1_uploadDate_1']);
             client.close();
             done();
           });
