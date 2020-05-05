@@ -1,9 +1,4 @@
 {
-  "runOn": [
-    {
-      "maxServerVersion": "4.3.3"
-    }
-  ],
   "data": [
     {
       "_id": 1,
@@ -25,7 +20,7 @@
   "collection_name": "BulkWrite_delete_hint",
   "tests": [
     {
-      "description": "Unacknowledged bulkWrite deleteOne with hints fails with client-side error on server < 4.4",
+      "description": "Unacknowledged bulkWrite deleteOne with hints fails with client-side error",
       "operations": [
         {
           "name": "bulkWrite",
@@ -64,7 +59,7 @@
           "error": true
         }
       ],
-      "expectations": {},
+      "expectations": [],
       "outcome": {
         "collection": {
           "data": [
@@ -89,7 +84,7 @@
       }
     },
     {
-      "description": "Unacknowledged bulkWrite deleteMany with hints fails with client-side error on server < 4.4",
+      "description": "Unacknowledged bulkWrite deleteMany with hints fails with client-side error",
       "operations": [
         {
           "name": "bulkWrite",
@@ -132,7 +127,7 @@
           "error": true
         }
       ],
-      "expectations": {},
+      "expectations": [],
       "outcome": {
         "collection": {
           "data": [

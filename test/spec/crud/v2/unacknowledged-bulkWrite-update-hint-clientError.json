@@ -1,9 +1,4 @@
 {
-  "runOn": [
-    {
-      "maxServerVersion": "4.1.9"
-    }
-  ],
   "data": [
     {
       "_id": 1,
@@ -25,7 +20,7 @@
   "collection_name": "Bulkwrite_update_hint",
   "tests": [
     {
-      "description": "Unacknowledged bulkWrite updateOne with hints fails with client-side error on server < 4.2",
+      "description": "Unacknowledged bulkWrite updateOne with hints fails with client-side error",
       "operations": [
         {
           "name": "bulkWrite",
@@ -74,7 +69,7 @@
           "error": true
         }
       ],
-      "expectations": {},
+      "expectations": [],
       "outcome": {
         "collection": {
           "data": [
@@ -99,7 +94,7 @@
       }
     },
     {
-      "description": "Unacknowledged bulkWrite updateMany with hints fails with client-side error on server < 4.2",
+      "description": "Unacknowledged bulkWrite updateMany with hints fails with client-side error",
       "operations": [
         {
           "name": "bulkWrite",
@@ -152,7 +147,7 @@
           "error": true
         }
       ],
-      "expectations": {},
+      "expectations": [],
       "outcome": {
         "collection": {
           "data": [
@@ -177,7 +172,7 @@
       }
     },
     {
-      "description": "Unacknowledged bulkWrite replaceOne with hints unsupported (client-side error)",
+      "description": "Unacknowledged bulkWrite replaceOne with hints fails with client-side error",
       "operations": [
         {
           "name": "bulkWrite",
@@ -222,7 +217,7 @@
           "error": true
         }
       ],
-      "expectations": {},
+      "expectations": [],
       "outcome": {
         "collection": {
           "data": [
