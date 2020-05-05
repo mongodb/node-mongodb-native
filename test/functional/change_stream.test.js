@@ -1944,7 +1944,7 @@ describe('Change Streams', function() {
       .then(() => teardown(), teardown);
   });
 
-  it.only('should emit close event after error event', {
+  it('should emit close event after error event', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
     test: function(done) {
       const configuration = this.configuration;
