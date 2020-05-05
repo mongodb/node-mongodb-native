@@ -1383,29 +1383,42 @@ describe('GridFS Stream', function() {
     }
   });
 
-  it('should correctly handle indexes created in shell', function(done) {
+  it('should correctly handle indexes create with number', function(done) {
     const configuration = this.configuration;
-    const url = format(
-      'mongodb://%s/%s',
-      format('%s:%s', configuration.host, configuration.port),
-      configuration.db
-    );
-    const cmd = `mongo ${url} --eval 'db.fs.files.createIndex({"filename" : 1,"uploadDate" : 1})'`;
-    child_process.exec(cmd, err => {
+    const client = configuration.newClient();
+    client.connect((err, client) => {
       expect(err).to.not.exist;
-      const client = configuration.newClient();
-      client.connect((err, client) => {
+      const db = client.db(configuration.db);
+      const col = db.collection('fs.files');
+      col.createIndex({ filename: 1, uploadDate: 1 }, err => {
         expect(err).to.not.exist;
-        const db = client.db(configuration.db);
-        db.collection('fs.files')
-          .listIndexes()
-          .toArray((err, indexes) => {
-            expect(err).to.not.exist;
-            const names = indexes.map(i => i.name);
-            expect(names).to.eql(['_id_', 'filename_1_uploadDate_1']);
-            client.close();
-            done();
-          });
+        col.listIndexes().toArray((err, indexes) => {
+          expect(err).to.not.exist;
+          const names = indexes.map(i => i.name);
+          expect(names).to.eql(['_id_', 'filename_1_uploadDate_1']);
+          client.close();
+          done();
+        });
+      });
+    });
+  });
+
+  it('should correctly handle indexes create with decimal', function(done) {
+    const configuration = this.configuration;
+    const client = configuration.newClient();
+    client.connect((err, client) => {
+      expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      const col = db.collection('fs.files');
+      col.createIndex({ filename: 1.0, uploadDate: 1.0 }, err => {
+        expect(err).to.not.exist;
+        col.listIndexes().toArray((err, indexes) => {
+          expect(err).to.not.exist;
+          const names = indexes.map(i => i.name);
+          expect(names).to.eql(['_id_', 'filename_1_uploadDate_1']);
+          client.close();
+          done();
+        });
       });
     });
   });
