@@ -80,7 +80,7 @@ function withTempDb(dbName, client, operation, errorHandler) {
     client,
     client => done => {
       const db = client.db(dbName);
-      operation(db)(() => db.dropDatabase(done));
+      operation.call(this, db)(() => db.dropDatabase(done));
     },
     errorHandler
   );
