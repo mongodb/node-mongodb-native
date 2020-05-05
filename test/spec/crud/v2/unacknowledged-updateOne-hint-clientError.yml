@@ -1,18 +1,12 @@
-runOn:
-  # These tests assert that the driver raises a client-side error when the hint
-  # option is passed with an unacknowledged update operation against a server
-  # that does not support hints in update operations.
-  - { maxServerVersion: "4.1.9" }
-
 data:
   - {_id: 1, x: 11}
   - {_id: 2, x: 22}
 
-collection_name: &collection_name 'Updateone_hint'
+collection_name: &collection_name 'UpdateOne_hint'
 
 tests:
   -
-    description: "Unacknowledged updateOne with hint string fails with client-side error on server < 4.2"
+    description: "Unacknowledged updateOne with hint string fails with client-side error"
     operations:
       -
         object: collection
@@ -24,14 +18,14 @@ tests:
           update: &update { $inc: { x: 1 } }
           hint: "_id_"
         error: true
-    expectations: {}
+    expectations: []
     outcome: &outcome
       collection:
         data:
           - {_id: 1, x: 11}
           - {_id: 2, x: 22}
   -
-    description: "Unacknowledged updateOne with hint document fails with client-side error on server < 4.2"
+    description: "Unacknowledged updateOne with hint document fails with client-side error"
     operations:
       -
         object: collection
@@ -42,5 +36,5 @@ tests:
           update: *update
           hint: { _id: 1 }
         error: true
-    expectations: {}
+    expectations: []
     outcome: *outcome
