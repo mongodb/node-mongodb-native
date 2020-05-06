@@ -75,6 +75,13 @@ function makeCleanupFn(client) {
   };
 }
 
+/**
+ * Safely perform a test with provided MongoClient, ensuring client won't leak.
+ *
+ * @param {MongoClient} client
+ * @param {Function|Promise} operation
+ * @param {Function|Promise} [errorHandler]
+ */
 function withClient(client, operation, errorHandler) {
   const cleanup = makeCleanupFn(client);
 
@@ -192,6 +199,15 @@ class EventCollector {
   }
 }
 
+/**
+ * Perform a test with a monitored MongoClient that will filter for certain commands.
+ *
+ * @param {string|Array} commands commands to filter for
+ * @param {object} [options] options to pass on to configuration.newClient
+ * @param {object} [options.dbOptions] connection string options
+ * @param {object} [options.serverOptions] MongoClient options
+ * @param {withMonitoredClientCallback} callback the test function
+ */
 function withMonitoredClient(commands, options, callback) {
   if (arguments.length === 2) {
     callback = options;
@@ -217,6 +233,13 @@ function withMonitoredClient(commands, options, callback) {
     });
   };
 }
+
+/**
+ * @callback withMonitoredClientCallback
+ * @param {MongoClient} client monitored client
+ * @param {Array} events record of monitored commands
+ * @param {Function} done trigger end of test and cleanup
+ */
 
 module.exports = {
   connectToDb,
