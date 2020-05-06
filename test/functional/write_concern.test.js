@@ -48,13 +48,13 @@ describe('Write Concern', function() {
     // baseline to confirm client option is working
     it(
       'should set write concern with j: true client option',
-      withMonitoredClient('insert', { j: true }, writeConcernJournalOptionTest)
+      withMonitoredClient('insert', { serverOptions: { j: true } }, writeConcernJournalOptionTest)
     );
 
     // ensure query option in connection string passes through
     it(
       'should set write concern with journal=true connection string option',
-      withMonitoredClient('insert', { journal: true }, writeConcernJournalOptionTest)
+      withMonitoredClient('insert', { dbOptions: { journal: true } }, writeConcernJournalOptionTest)
     );
 
   });
