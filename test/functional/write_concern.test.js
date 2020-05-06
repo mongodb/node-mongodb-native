@@ -22,8 +22,6 @@ describe('Write Concern', function() {
 
   // TODO - implement `read-write-concern/connection-string` spec tests
   describe('test journal connection string option', function() {
-    const dbOptions = { journal: true };
-    const serverOptions = { j: true };
     function writeConcernJournalOptionTest(client, events, done) {
       expect(client).to.have.nested.property('s.options');
       const clientOptions = client.s.options;
@@ -46,13 +44,18 @@ describe('Write Concern', function() {
           done();
         });
     }
-    it(
-      'should set write concern with journal=true connection string option',
-      withMonitoredClient('insert', { dbOptions }, writeConcernJournalOptionTest)
-    );
+
+    // baseline to confirm client option is working
     it(
       'should set write concern with j: true client option',
-      withMonitoredClient('insert', { serverOptions }, writeConcernJournalOptionTest)
+      withMonitoredClient('insert', { j: true }, writeConcernJournalOptionTest)
     );
+
+    // ensure query option in connection string passes through
+    it(
+      'should set write concern with journal=true connection string option',
+      withMonitoredClient('insert', { journal: true }, writeConcernJournalOptionTest)
+    );
+
   });
 });
