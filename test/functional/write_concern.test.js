@@ -20,9 +20,9 @@ describe('Write Concern', function() {
     generateTopologyTests(testSuites, testContext);
   });
 
-  // TODO - implement `read-write-concern/connection-string` spec tests
+  // TODO: once `read-write-concern/connection-string` spec tests are implemented these can likely be removed
   describe('test journal connection string option', function() {
-    function writeConcernJournalOptionTest(client, events, done) {
+    function journalOptionTest(client, events, done) {
       expect(client).to.have.nested.property('s.options');
       const clientOptions = client.s.options;
       expect(clientOptions).to.containSubset({ j: true });
@@ -48,14 +48,13 @@ describe('Write Concern', function() {
     // baseline to confirm client option is working
     it(
       'should set write concern with j: true client option',
-      withMonitoredClient('insert', { clientOptions: { j: true } }, writeConcernJournalOptionTest)
+      withMonitoredClient('insert', { clientOptions: { j: true } }, journalOptionTest)
     );
 
     // ensure query option in connection string passes through
     it(
       'should set write concern with journal=true connection string option',
-      withMonitoredClient('insert', { queryOptions: { journal: true } }, writeConcernJournalOptionTest)
+      withMonitoredClient('insert', { queryOptions: { journal: true } }, journalOptionTest)
     );
-
   });
 });
