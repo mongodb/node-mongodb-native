@@ -204,8 +204,8 @@ class EventCollector {
  *
  * @param {string|Array} commands commands to filter for
  * @param {object} [options] options to pass on to configuration.newClient
- * @param {object} [options.dbOptions] connection string options
- * @param {object} [options.serverOptions] MongoClient options
+ * @param {object} [options.queryOptions] connection string options
+ * @param {object} [options.clientOptions] MongoClient options
  * @param {withMonitoredClientCallback} callback the test function
  */
 function withMonitoredClient(commands, options, callback) {
@@ -219,8 +219,8 @@ function withMonitoredClient(commands, options, callback) {
   return function(done) {
     const configuration = this.configuration;
     const client = configuration.newClient(
-      Object.assign({ monitorCommands: true }, options.dbOptions),
-      Object.assign({}, options.serverOptions)
+      Object.assign({ monitorCommands: true }, options.queryOptions),
+      Object.assign({}, options.clientOptions)
     );
     const events = [];
     client.on('commandStarted', filterForCommands(commands, events));
