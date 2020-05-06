@@ -192,13 +192,20 @@ class EventCollector {
   }
 }
 
-function withMonitoredClient(commands, callback) {
+function withMonitoredClient(commands, options, callback) {
+  if (arguments.length === 2) {
+    callback = options;
+    options = {};
+  }
   if (!Object.prototype.hasOwnProperty.call(callback, 'prototype')) {
     throw new Error('withMonitoredClient callback can not be arrow function');
   }
   return function(done) {
     const configuration = this.configuration;
-    const client = configuration.newClient({ monitorCommands: true });
+    const client = configuration.newClient(
+      Object.assign({ monitorCommands: true }, options.dbOptions),
+      Object.assign({}, options.serverOptions)
+    );
     const events = [];
     client.on('commandStarted', filterForCommands(commands, events));
     client.connect((err, client) => {
