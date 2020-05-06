@@ -21,7 +21,7 @@ describe('Write Concern', function() {
   });
 
   // TODO - implement `read-write-concern/connection-string` spec tests
-  describe.only('test journal connection string option', function() {
+  describe('test journal connection string option', function() {
     const dbOptions = { journal: true };
     const serverOptions = { j: true };
     function writeConcernJournalOptionTest(client, events, done) {
