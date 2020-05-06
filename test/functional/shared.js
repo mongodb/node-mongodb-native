@@ -78,9 +78,20 @@ function makeCleanupFn(client) {
 function withClient(client, operation, errorHandler) {
   const cleanup = makeCleanupFn(client);
 
+  function operationHandler(client) {
+    // run the operation
+    const result = operation(client);
+    // if it returns a callback, wrap it in a Promise
+    if (typeof result === 'function') {
+      return new Promise(done => result(done));
+    }
+    // otherwise assume it returned a Promise
+    return result;
+  }
+
   return client
     .connect()
-    .then(operation, errorHandler)
+    .then(operationHandler, errorHandler)
     .then(() => cleanup(), cleanup);
 }
 
