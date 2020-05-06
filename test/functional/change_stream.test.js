@@ -61,10 +61,6 @@ function tryNext(changeStream, callback) {
     if (complete) return;
     // if the arity is 1 then this a callback for `more`
     if (arguments.length === 1) {
-      if (err instanceof Error) {
-        callback(err);
-        return;
-      }
       result = err;
       const batch = result.cursor.firstBatch || result.cursor.nextBatch;
       if (batch.length === 0) {
