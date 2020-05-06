@@ -75,11 +75,11 @@ function makeCleanupFn(client) {
   };
 }
 
-function withTempDb(dbName, client, operation, errorHandler) {
+function withTempDb(name, options, client, operation, errorHandler) {
   return withClient(
     client,
     client => done => {
-      const db = client.db(dbName);
+      const db = client.db(name, options);
       operation.call(this, db)(() => db.dropDatabase(done));
     },
     errorHandler
