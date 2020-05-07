@@ -1,7 +1,6 @@
 'use strict';
 
-const format = require('util').format;
-const child_process = require('child_process');
+const { Double } = require('bson');
 const stream = require('stream');
 const crypto = require('crypto');
 const { EJSON } = require('bson');
@@ -1432,6 +1431,26 @@ describe('GridFS Stream', function() {
       const col = db.collection('fs.files');
       // prettier-ignore
       col.createIndex({ filename: 1e0, uploadDate: 1e0 }, err => {
+        expect(err).to.not.exist;
+        col.listIndexes().toArray((err, indexes) => {
+          expect(err).to.not.exist;
+          const names = indexes.map(i => i.name);
+          expect(names).to.eql(['_id_', 'filename_1_uploadDate_1']);
+          client.close();
+          done();
+        });
+      });
+    });
+  });
+
+  it('should correctly handle indexes create with Double', function(done) {
+    const configuration = this.configuration;
+    const client = configuration.newClient();
+    client.connect((err, client) => {
+      expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      const col = db.collection('fs.files');
+      col.createIndex({ filename: new Double(1.0), uploadDate: new Double(1.0) }, err => {
         expect(err).to.not.exist;
         col.listIndexes().toArray((err, indexes) => {
           expect(err).to.not.exist;
