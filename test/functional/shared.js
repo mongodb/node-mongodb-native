@@ -75,6 +75,17 @@ function makeCleanupFn(client) {
   };
 }
 
+function withTempDb(name, options, client, operation, errorHandler) {
+  return withClient(
+    client,
+    client => done => {
+      const db = client.db(name, options);
+      operation.call(this, db)(() => db.dropDatabase(done));
+    },
+    errorHandler
+  );
+}
+
 function withClient(client, operation, errorHandler) {
   const cleanup = makeCleanupFn(client);
 
@@ -204,7 +215,7 @@ class EventCollector {
 }
 
 function withMonitoredClient(commands, callback) {
-  if (!callback.hasOwnProperty('prototype')) {
+  if (!Object.hasOwnProperty.call(callback, 'prototype')) {
     throw new Error('withMonitoredClient callback can not be arrow function');
   }
   return function(done) {
@@ -229,6 +240,7 @@ module.exports = {
   delay,
   withClient,
   withMonitoredClient,
+  withTempDb,
   filterForCommands,
   filterOutCommands,
   ignoreNsNotFound,
