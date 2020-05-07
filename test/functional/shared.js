@@ -86,6 +86,13 @@ function withTempDb(name, options, client, operation, errorHandler) {
   );
 }
 
+/**
+ * Safely perform a test with provided MongoClient, ensuring client won't leak.
+ *
+ * @param {MongoClient} client
+ * @param {Function|Promise} operation
+ * @param {Function|Promise} [errorHandler]
+ */
 function withClient(client, operation, errorHandler) {
   const cleanup = makeCleanupFn(client);
 
@@ -203,13 +210,29 @@ class EventCollector {
   }
 }
 
-function withMonitoredClient(commands, callback) {
+/**
+ * Perform a test with a monitored MongoClient that will filter for certain commands.
+ *
+ * @param {string|Array} commands commands to filter for
+ * @param {object} [options] options to pass on to configuration.newClient
+ * @param {object} [options.queryOptions] connection string options
+ * @param {object} [options.clientOptions] MongoClient options
+ * @param {withMonitoredClientCallback} callback the test function
+ */
+function withMonitoredClient(commands, options, callback) {
+  if (arguments.length === 2) {
+    callback = options;
+    options = {};
+  }
   if (!Object.prototype.hasOwnProperty.call(callback, 'prototype')) {
     throw new Error('withMonitoredClient callback can not be arrow function');
   }
   return function(done) {
     const configuration = this.configuration;
-    const client = configuration.newClient({ monitorCommands: true });
+    const client = configuration.newClient(
+      Object.assign({}, options.queryOptions),
+      Object.assign({ monitorCommands: true }, options.clientOptions)
+    );
     const events = [];
     client.on('commandStarted', filterForCommands(commands, events));
     client.connect((err, client) => {
@@ -221,6 +244,13 @@ function withMonitoredClient(commands, callback) {
     });
   };
 }
+
+/**
+ * @callback withMonitoredClientCallback
+ * @param {MongoClient} client monitored client
+ * @param {Array} events record of monitored commands
+ * @param {Function} done trigger end of test and cleanup
+ */
 
 module.exports = {
   connectToDb,
