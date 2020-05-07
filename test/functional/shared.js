@@ -219,8 +219,8 @@ function withMonitoredClient(commands, options, callback) {
   return function(done) {
     const configuration = this.configuration;
     const client = configuration.newClient(
-      Object.assign({ monitorCommands: true }, options.queryOptions),
-      Object.assign({}, options.clientOptions)
+      Object.assign({}, options.queryOptions),
+      Object.assign({ monitorCommands: true }, options.clientOptions)
     );
     const events = [];
     client.on('commandStarted', filterForCommands(commands, events));
