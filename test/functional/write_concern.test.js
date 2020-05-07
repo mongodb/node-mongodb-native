@@ -2,10 +2,11 @@
 
 const chai = require('chai');
 const expect = chai.expect;
+chai.use(require('chai-subset'));
 const TestRunnerContext = require('./spec-runner').TestRunnerContext;
 const generateTopologyTests = require('./spec-runner').generateTopologyTests;
 const loadSpecTests = require('../spec').loadSpecTests;
-const { withMonitoredClient } = require('./shared');
+const withMonitoredClient = require('./shared').withMonitoredClient;
 
 describe('Write Concern', function() {
   describe('spec tests', function() {
