@@ -2866,12 +2866,12 @@ describe('Change Stream Resume Error Tests', function() {
       const client = configuration.newClient();
       client.connect(err => {
         expect(err).to.not.exist;
-        const db = client.db('test');
+        const db = client.db(`changeStreamResumeErrorDb${process.pid}`);
         db.createCollection('changeStreamResumeErrorTest', (err, collection) => {
           expect(err).to.not.exist;
           const changeStream = collection.watch();
           callback(collection, changeStream, () =>
-            changeStream.close(() => collection.drop(() => client.close(done)))
+            changeStream.close(() => db.dropDatabase(() => client.close(done)))
           );
         });
       });
