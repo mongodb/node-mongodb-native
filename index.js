@@ -1,11 +1,22 @@
 'use strict';
+
 const error = require('./lib/error');
 const Instrumentation = require('./lib/apm');
 const { BSON } = require('./lib/deps');
 const { Cursor, AggregationCursor, CommandCursor } = require('./lib/cursor');
+const PromiseProvider = require('./lib/promise_provider');
 
 // Set up the connect function
 const connect = require('./lib/mongo_client').connect;
+
+Object.defineProperty(connect, 'Promise', {
+  get: function() {
+    return PromiseProvider.get();
+  },
+  set: function(lib) {
+    PromiseProvider.set(lib);
+  }
+});
 
 // Expose error class
 connect.MongoError = error.MongoError;

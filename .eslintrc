@@ -8,7 +8,7 @@
   "parserOptions": {
     "ecmaVersion": 2018
   },
-  "plugins": ["prettier", "jsdoc"],
+  "plugins": ["prettier", "promise", "jsdoc"],
   "rules": {
     "prettier/prettier": "error",
 
@@ -30,8 +30,17 @@
 
     "no-console": "off",
     "eqeqeq": ["error", "always", { "null": "ignore" }],
-    "strict": ["error", "global"]
+    "strict": ["error", "global"],
+    "promise/no-native": "error"
   },
+  "overrides": [
+    {
+      "files": ["test/**/*.js"],
+      "rules": {
+        "promise/no-native": "off"
+      }
+    }
+  ],
   "settings": {
     "jsdoc": {
       "check-types": false,

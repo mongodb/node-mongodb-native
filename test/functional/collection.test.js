@@ -950,7 +950,7 @@ describe('Collection', function() {
       const docsPromise = collection.countDocuments();
       const close = e => client.close(() => done(e));
 
-      expect(docsPromise).to.exist.and.to.be.an.instanceof(collection.s.promiseLibrary);
+      expect(docsPromise).to.exist.and.to.be.an.instanceof(Promise);
 
       docsPromise
         .then(result => expect(result).to.equal(0))
