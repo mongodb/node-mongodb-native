@@ -241,41 +241,68 @@ function parseSessionOptions(options) {
 }
 
 const IGNORED_COMMANDS = new Set(['ismaster', 'configureFailPoint', 'endSessions']);
+const SDAM_EVENTS = new Set([
+  'serverOpening',
+  'serverClosed',
+  'serverDescriptionChanged',
+  'topologyOpening',
+  'topologyClosed',
+  'topologyDescriptionChanged',
+  'serverHeartbeatStarted',
+  'serverHeartbeatSucceeded',
+  'serverHeartbeatFailed'
+]);
+
+const CMAP_EVENTS = new Set([
+  'connectionPoolCreated',
+  'connectionPoolClosed',
+  'connectionCreated',
+  'connectionReady',
+  'connectionClosed',
+  'connectionCheckOutStarted',
+  'connectionCheckOutFailed',
+  'connectionCheckedOut',
+  'connectionCheckedIn',
+  'connectionPoolCleared'
+]);
 
 let displayCommands = false;
 function runTestSuiteTest(configuration, spec, context) {
   context.commandEvents = [];
   const clientOptions = translateClientOptions(
-    Object.assign({ monitorCommands: true }, spec.clientOptions)
+    Object.assign(
+      {
+        useUnifiedTopology: true,
+        autoReconnect: false,
+        haInterval: 100,
+        heartbeatFrequencyMS: 100,
+        minHeartbeatFrequencyMS: 100,
+        useRecoveryToken: true,
+        monitorCommands: true
+      },
+      spec.clientOptions
+    )
   );
-
-  // test-specific client options
-  clientOptions.autoReconnect = false;
-  clientOptions.haInterval = 100;
-  clientOptions.heartbeatFrequencyMS = 100;
-  clientOptions.minHeartbeatFrequencyMS = 100;
-  clientOptions.useRecoveryToken = true;
-
-  // TODO: this should be configured by `newClient` and env variables
-  clientOptions.useUnifiedTopology = true;
 
   const url = resolveConnectionString(configuration, spec);
   const client = configuration.newClient(url, clientOptions);
+  CMAP_EVENTS.forEach(eventName => client.on(eventName, event => context.cmapEvents.push(event)));
+  SDAM_EVENTS.forEach(eventName => client.on(eventName, event => context.sdamEvents.push(event)));
+  client.on('commandStarted', event => {
+    if (IGNORED_COMMANDS.has(event.commandName)) {
+      return;
+    }
+
+    context.commandEvents.push(event);
+
+    // very useful for debugging
+    if (displayCommands) {
+      // console.dir(event, { depth: 5 });
+    }
+  });
+
   return client.connect().then(client => {
     context.testClient = client;
-    client.on('commandStarted', event => {
-      if (IGNORED_COMMANDS.has(event.commandName)) {
-        return;
-      }
-
-      context.commandEvents.push(event);
-
-      // very useful for debugging
-      if (displayCommands) {
-        console.dir(event, { depth: 5 });
-      }
-    });
-
     const sessionOptions = Object.assign({}, spec.transactionOptions);
 
     spec.sessionOptions = spec.sessionOptions || {};

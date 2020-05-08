@@ -66,6 +66,20 @@ class TransactionsRunnerContext extends TestRunnerContext {
       .catch(ignoreNsNotFoundForListIndexes)
       .then(indexes => expect(indexes.every(idx => idx.name !== indexName)).to.be.ok);
   }
+
+  assertSessionPinned(options) {
+    expect(options).to.have.property('session');
+
+    const session = options.session;
+    expect(session.transaction.isPinned).to.be.true;
+  }
+
+  assertSessionUnpinned(options) {
+    expect(options).to.have.property('session');
+
+    const session = options.session;
+    expect(session.transaction.isPinned).to.be.false;
+  }
 }
 
 describe('Transactions', function() {
