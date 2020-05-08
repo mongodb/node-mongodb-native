@@ -1,154 +1,51 @@
 'use strict';
-var test = require('./shared').assert;
-var setupDatabase = require('./shared').setupDatabase;
+const TestRunnerContext = require('./spec-runner').TestRunnerContext;
+const loadSpecTests = require('../spec').loadSpecTests;
+const generateTopologyTests = require('./spec-runner').generateTopologyTests;
 
-describe.skip('SDAM', function() {
-  before(function() {
-    return setupDatabase(this.configuration);
-  });
+class SDAMRunnerContext extends TestRunnerContext {
+  constructor() {
+    super();
 
-  it('Should correctly emit all Replicaset SDAM operations', {
-    metadata: { requires: { topology: 'replicaset' } },
+    this.currentPrimary = null;
+  }
 
-    // The actual test we wish to run
-    test: function(done) {
-      var configuration = this.configuration;
-      var operations = {
-        serverDescriptionChanged: [],
-        serverHeartbeatStarted: [],
-        serverHeartbeatSucceeded: [],
-        serverOpening: [],
-        serverClosed: [],
-        topologyOpening: [],
-        topologyDescriptionChanged: [],
-        topologyClosed: []
-      };
+  configureFailPoint(args) {
+    return this.enableFailPoint(args.failPoint);
+  }
 
-      var client = configuration.newClient();
-      var events = [
-        'serverDescriptionChanged',
-        'serverHeartbeatStarted',
-        'serverHeartbeatSucceeded',
-        'serverOpening',
-        'serverClosed',
-        'topologyOpening',
-        'topologyDescriptionChanged',
-        'topologyClosed'
-      ];
-      events.forEach(function(e) {
-        client.on(e, function(result) {
-          operations[e].push(result);
-        });
-      });
+  recordPrimary(client) {
+    const servers = client.topology.description.servers;
+    const primary = Array.from(servers.values()).filter(sd => sd.type === 'RSPrimary')[0];
+    this.currentPrimary = primary.address;
+  }
 
-      client.connect(function(err) {
-        test.equal(null, err);
-
-        client.close(true, function() {
-          setTimeout(() => {
-            for (var name in operations) {
-              test.ok(operations[name].length > 0);
-            }
-
-            done();
-          }, 1000);
-        });
-      });
-    }
-  });
-
-  it('Should correctly emit all Mongos SDAM operations', {
-    metadata: { requires: { topology: 'sharded' } },
-
-    // The actual test we wish to run
-    test: function(done) {
-      var configuration = this.configuration;
-      var operations = {
-        serverDescriptionChanged: [],
-        serverHeartbeatStarted: [],
-        serverHeartbeatSucceeded: [],
-        serverOpening: [],
-        serverClosed: [],
-        topologyOpening: [],
-        topologyDescriptionChanged: [],
-        topologyClosed: []
-      };
-
-      var client = configuration.newClient({}, { haInterval: 500 });
-      var events = [
-        'serverDescriptionChanged',
-        'serverHeartbeatStarted',
-        'serverHeartbeatSucceeded',
-        'serverOpening',
-        'serverClosed',
-        'topologyOpening',
-        'topologyDescriptionChanged',
-        'topologyClosed'
-      ];
-      events.forEach(function(e) {
-        client.on(e, function(result) {
-          operations[e].push(result);
-        });
-      });
-
-      client.on('fullsetup', function(topology) {
-        setTimeout(function() {
-          topology.close();
-
-          for (var name in operations) {
-            test.ok(operations[name].length > 0);
-          }
-
-          done();
-        }, 1000);
-      });
-
-      client.connect(function(err) {
-        test.equal(null, err);
-      });
-    }
-  });
-
-  it('Should correctly emit all Server SDAM operations', {
-    metadata: { requires: { topology: 'single' } },
-
-    // The actual test we wish to run
-    test: function(done) {
-      var configuration = this.configuration;
-      var operations = {
-        serverDescriptionChanged: [],
-        serverOpening: [],
-        serverClosed: [],
-        topologyOpening: [],
-        topologyDescriptionChanged: [],
-        topologyClosed: []
-      };
-
-      var client = configuration.newClient();
-      var events = [
-        'serverDescriptionChanged',
-        'serverOpening',
-        'serverClosed',
-        'topologyOpening',
-        'topologyDescriptionChanged',
-        'topologyClosed'
-      ];
-      events.forEach(function(e) {
-        client.on(e, function(result) {
-          operations[e].push(result);
-        });
-      });
-
-      client.connect(function(err, client) {
-        test.equal(null, err);
-        client.close(true);
-
-        for (var name in operations) {
-          test.ok(operations[name].length > 0);
+  waitForPrimaryChange(client) {
+    return new Promise(resolve => {
+      function eventHandler(event) {
+        if (
+          event.newDescription.type === 'RSPrimary' &&
+          event.newDescription.address !== this.currentPrimary
+        ) {
+          resolve();
+          client.removeListener('serverDescriptionChanged', eventHandler);
         }
+      }
 
-        done();
-      });
-    }
+      client.on('serverDescriptionChanged', eventHandler);
+    });
+  }
+}
+
+describe('SDAM', function() {
+  context('integration spec tests', function() {
+    const testContext = new SDAMRunnerContext();
+    const testSuites = loadSpecTests('server-discovery-and-monitoring/integration');
+    after(() => testContext.teardown());
+    before(function() {
+      return testContext.setup(this.configuration);
+    });
+
+    generateTopologyTests(testSuites, testContext);
   });
 });

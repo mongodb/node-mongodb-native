@@ -364,6 +364,7 @@ function validateOutcome(testData, testContext) {
       .db(testContext.dbName)
       .collection(outcomeCollection)
       .find({}, { readPreference: 'primary', readConcern: { level: 'local' } })
+      .sort({ _id: 1 })
       .toArray()
       .then(docs => {
         expect(docs).to.matchMongoSpec(testData.outcome.collection.data);
@@ -533,6 +534,18 @@ function maybeSession(operation, context) {
 }
 
 const kOperations = new Map([
+  [
+    'recordPrimary',
+    (operation, testRunner, context /*, options */) => {
+      testRunner.recordPrimary(context.client);
+    }
+  ],
+  [
+    'waitForPrimaryChange',
+    (operation, testRunner, context /*, options */) => {
+      testRunner.waitForPrimaryChange(context.client);
+    }
+  ],
   [
     'runOnThread',
     (operation, testRunner, context, options) => {

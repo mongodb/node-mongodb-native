@@ -169,8 +169,7 @@ class TestRunnerContext {
     expect(matchingEvents).to.have.lengthOf.at.least(count);
   }
 
-  runAdminCommand(options) {
-    const command = options.command;
+  runAdminCommand(command) {
     return this.sharedClient.db('admin').command(command);
   }
 
