@@ -2860,18 +2860,18 @@ describe('Change Streams', function() {
 });
 
 describe('Change Stream Resume Error Tests', function() {
-  function withChangeStream(callback) {
+  function withChangeStream(testName, callback) {
     return function(done) {
       const configuration = this.configuration;
       const client = configuration.newClient();
       client.connect(err => {
         expect(err).to.not.exist;
-        const db = client.db(`changeStreamResumeErrorDb${process.pid}`);
-        db.createCollection('changeStreamResumeErrorTest', (err, collection) => {
+        const db = client.db('changeStreamResumErrorTest');
+        db.createCollection(testName, (err, collection) => {
           expect(err).to.not.exist;
           const changeStream = collection.watch();
           callback(collection, changeStream, () =>
-            changeStream.close(() => db.dropDatabase(() => client.close(done)))
+            changeStream.close(() => collection.drop(() => client.close(done)))
           );
         });
       });
@@ -2879,7 +2879,7 @@ describe('Change Stream Resume Error Tests', function() {
   }
   it('(events) should continue iterating after a resumable error', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
-    test: withChangeStream((collection, changeStream, done) => {
+    test: withChangeStream('resumeErrorEvents', (collection, changeStream, done) => {
       const docs = [];
       changeStream.on('change', change => {
         expect(change).to.exist;
@@ -2911,7 +2911,7 @@ describe('Change Stream Resume Error Tests', function() {
 
   it('(callback) hasNext and next should work after a resumable error', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
-    test: withChangeStream((collection, changeStream, done) => {
+    test: withChangeStream('resumeErrorIterator', (collection, changeStream, done) => {
       waitForStarted(changeStream, () => {
         collection.insertOne({ a: 42 }, err => {
           expect(err).to.not.exist;
