@@ -9,6 +9,7 @@ NPM_TMP_DIR="${NODE_ARTIFACTS_PATH}/tmp"
 
 # this needs to be explicitly exported for the nvm install below
 export NVM_DIR="${NODE_ARTIFACTS_PATH}/nvm"
+export XDG_CONFIG_HOME=${NODE_ARTIFACTS_PATH}
 
 # create node artifacts path if needed
 mkdir -p ${NODE_ARTIFACTS_PATH}
