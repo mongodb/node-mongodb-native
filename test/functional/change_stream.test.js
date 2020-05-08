@@ -22,19 +22,23 @@ chai.use(require('chai-subset'));
  * @param {number} [delay] optional delay before triggering error
  */
 function triggerResumableError(changeStream, onCursorClosed, delay) {
+  let cbCalled = false;
   const closeCursor = changeStream.cursor.close.bind(changeStream.cursor);
   changeStream.cursor.close = callback => {
     closeCursor(err => {
       callback && callback(err);
+      if (cbCalled) return;
+      cbCalled = true;
       onCursorClosed();
     });
   };
   const fakeResumableError = new MongoNetworkError('fake error');
   // delay error slightly to better simulate real conditions
   if (delay) {
-    return setTimeout(() => changeStream.cursor.emit('error', fakeResumableError), delay);
+    setTimeout(() => changeStream.cursor.emit('error', fakeResumableError), delay);
+  } else {
+    changeStream.cursor.emit('error', fakeResumableError);
   }
-  changeStream.cursor.emit('error', fakeResumableError);
 }
 
 /**
@@ -2707,9 +2711,8 @@ describe('Change Streams', function() {
     let startAfter;
 
     function recordEvent(events, e) {
-      if (e.commandName === 'aggregate') {
-        events.push({ $changeStream: e.command.pipeline[0].$changeStream });
-      }
+      if (e.commandName !== 'aggregate') return;
+      events.push({ $changeStream: e.command.pipeline[0].$changeStream });
     }
 
     beforeEach(function(done) {
@@ -2783,7 +2786,7 @@ describe('Change Streams', function() {
     // - MUST include a startAfter option
     // - MUST NOT include a resumeAfter option
     // when resuming a change stream.
-    it('$changeStream that has not received results must include startAfter and not resumeAfter', {
+    it('$changeStream w/o results must include startAfter and not resumeAfter', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=4.1.1' } },
       test: function(done) {
         const events = [];
@@ -2804,16 +2807,10 @@ describe('Change Streams', function() {
         });
 
         waitForStarted(changeStream, () => {
-          triggerResumableError(
-            changeStream,
-            () => {
-              events.push('error');
-              coll.insertOne({ x: 2 }, { w: 'majority', j: true }, err => {
-                expect(err).to.not.exist;
-              });
-            },
-            250
-          );
+          triggerResumableError(changeStream, () => events.push('error'));
+          coll.insertOne({ x: 2 }, { w: 'majority', j: true }, err => {
+            expect(err).to.not.exist;
+          });
         });
       }
     });
@@ -2823,7 +2820,7 @@ describe('Change Streams', function() {
     // - MUST include a resumeAfter option
     // - MUST NOT include a startAfter option
     // when resuming a change stream.
-    it('$changeStream that has received results must include resumeAfter and not startAfter', {
+    it('$changeStream w/ results must include resumeAfter and not startAfter', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=4.1.1' } },
       test: function(done) {
         let events = [];
@@ -2836,7 +2833,7 @@ describe('Change Streams', function() {
             case 2:
               // only events after this point are relevant to this test
               events = [];
-              triggerResumableError(changeStream, () => events.push('error'), 0);
+              triggerResumableError(changeStream, () => events.push('error'));
               break;
             case 3:
               expect(events)
