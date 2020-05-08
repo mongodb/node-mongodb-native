@@ -18,7 +18,7 @@ mkdir -p "${NPM_TMP_DIR}"
 # install Node.js
 curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.8/install.sh | bash
 [ -s "${NVM_DIR}/nvm.sh" ] && \. "${NVM_DIR}/nvm.sh"
-nvm install --lts=${NODE_LTS_NAME}
+nvm install --no-progress --lts=${NODE_LTS_NAME}
 
 # setup npm cache in a local directory
 cat <<EOT > .npmrc
