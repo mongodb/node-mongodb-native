@@ -534,6 +534,19 @@ function maybeSession(operation, context) {
 
 const kOperations = new Map([
   [
+    'runOnThread',
+    (operation, testRunner, context, options) => {
+      const args = operation.arguments;
+      const threadName = args.name;
+      const subOperation = args.operation;
+
+      return testRunner.runOnThread(
+        threadName,
+        testOperation(subOperation, context[subOperation.object], context, options)
+      );
+    }
+  ],
+  [
     'createIndex',
     (operation, collection, context /*, options */) => {
       const fieldOrSpec = operation.arguments.keys;

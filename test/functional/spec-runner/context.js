@@ -2,6 +2,33 @@
 const expect = require('chai').expect;
 const resolveConnectionString = require('./utils').resolveConnectionString;
 
+class Thread {
+  constructor() {
+    this._killed = false;
+    this._error = undefined;
+    this._promise = new Promise(resolve => {
+      this.start = () => setTimeout(resolve);
+    });
+  }
+
+  run(opPromise) {
+    if (this._killed || this._error) {
+      throw new Error('Attempted to run operation on killed thread');
+    }
+
+    this._promise = this._promise.then(() => opPromise).catch(e => (this._error = e));
+  }
+
+  finish() {
+    this._killed = true;
+    return this._promise.then(() => {
+      if (this._error) {
+        throw this._error;
+      }
+    });
+  }
+}
+
 class TestRunnerContext {
   constructor() {
     this.url = null;
@@ -13,6 +40,8 @@ class TestRunnerContext {
     this.commandEvents = [];
     this.sdamEvents = [];
     this.cmapEvents = [];
+
+    this.threads = new Map();
   }
 
   runForAllClients(fn) {
@@ -72,6 +101,7 @@ class TestRunnerContext {
       context.commandEvents = [];
       context.sdamEvents = [];
       context.cmapEvents = [];
+      context.threads.clear();
 
       const client = context.testClient;
       context.testClient = undefined;
@@ -137,6 +167,52 @@ class TestRunnerContext {
     const count = options.count;
     const matchingEvents = findMatchingEvents(this, eventName);
     expect(matchingEvents).to.have.lengthOf.at.least(count);
+  }
+
+  runAdminCommand(options) {
+    const command = options.command;
+    return this.sharedClient.db('admin').command(command);
+  }
+
+  // simulated thread helpers
+  wait(options) {
+    const ms = options.ms;
+    return new Promise(r => setTimeout(r, ms));
+  }
+
+  startThread(options) {
+    const name = options.name;
+    const threads = this.threads;
+    if (threads.has(name)) {
+      throw new Error(`Thread "${name}" already exists`);
+    }
+
+    const thread = new Thread();
+    threads.set(name, thread);
+    thread.start();
+  }
+
+  runOnThread(threadName, operation) {
+    const threads = this.threads;
+    if (!threads.has(threadName)) {
+      throw new Error(`Attempted to run operation on non-existent thread "${threadName}"`);
+    }
+
+    const thread = threads.get(threadName);
+    thread.run(operation);
+  }
+
+  waitForThread(options) {
+    const name = options.name;
+    const threads = this.threads;
+    if (!threads.has(name)) {
+      throw new Error(`Attempted to wait for non-existent thread "${name}"`);
+    }
+
+    const thread = threads.get(name);
+    return thread.finish().catch(e => {
+      throw e;
+    });
   }
 }
 
