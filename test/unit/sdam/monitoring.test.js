@@ -267,7 +267,7 @@ describe('monitoring', function() {
       monitor.connect();
     });
 
-    it('should report the most recent error on second monitoring failure', function(done) {
+    it.skip('should report the most recent error on second monitoring failure', function(done) {
       let failedCount = 0;
       let initialConnectCompleted = false;
       mockServer.setMessageHandler(request => {
@@ -320,7 +320,7 @@ describe('monitoring', function() {
       monitor.connect();
     });
 
-    it('should report events in the correct order during monitoring failure', function(done) {
+    it.skip('should report events in the correct order during monitoring failure', function(done) {
       let failedCount = 0;
       let initialConnectCompleted = false;
       mockServer.setMessageHandler(request => {

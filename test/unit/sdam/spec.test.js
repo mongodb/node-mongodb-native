@@ -24,7 +24,8 @@ const specDir = path.resolve(__dirname, '../../spec/server-discovery-and-monitor
 function collectTests() {
   const testTypes = fs
     .readdirSync(specDir)
-    .filter(d => fs.statSync(path.resolve(specDir, d)).isDirectory());
+    .filter(d => fs.statSync(path.resolve(specDir, d)).isDirectory())
+    .filter(d => d !== 'integration');
 
   const tests = {};
   testTypes.forEach(testType => {
