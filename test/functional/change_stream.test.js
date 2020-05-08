@@ -2899,11 +2899,15 @@ describe('Change Stream Resume Error Tests', function() {
       waitForStarted(changeStream, () => {
         collection.insertOne({ a: 42 }, err => {
           expect(err).to.not.exist;
-          triggerResumableError(changeStream, () => {
-            collection.insertOne({ b: 24 }, err => {
-              expect(err).to.not.exist;
-            });
-          });
+          triggerResumableError(
+            changeStream,
+            () => {
+              collection.insertOne({ b: 24 }, err => {
+                expect(err).to.not.exist;
+              });
+            },
+            1000
+          );
         });
       });
     })
