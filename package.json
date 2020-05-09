@@ -20,7 +20,7 @@
     "kerberos": "^1.1.0",
     "mongodb-client-encryption": "^1.0.0",
     "mongodb-extjson": "^2.1.2",
-    "snappy": "^6.1.1",
+    "snappy": "^6.3.4",
     "bson-ext": "^2.0.0"
   },
   "dependencies": {
@@ -49,7 +49,7 @@
     "semver": "^5.5.0",
     "sinon": "^4.3.0",
     "sinon-chai": "^3.2.0",
-    "snappy": "^6.1.2",
+    "snappy": "^6.3.4",
     "standard-version": "^4.4.0",
     "util.promisify": "^1.0.1",
     "worker-farm": "^1.5.0",

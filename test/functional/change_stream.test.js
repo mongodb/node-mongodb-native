@@ -4,6 +4,7 @@ var Transform = require('stream').Transform;
 const MongoError = require('../../lib/core').MongoError;
 var MongoNetworkError = require('../../lib/core').MongoNetworkError;
 var setupDatabase = require('./shared').setupDatabase;
+var withTempDb = require('./shared').withTempDb;
 var delay = require('./shared').delay;
 var co = require('co');
 var mock = require('mongodb-mock-server');
@@ -37,7 +38,11 @@ function triggerResumableError(changeStream, onCursorClosed) {
  * @param {function} callback
  */
 function waitForStarted(changeStream, callback) {
+  const timeout = setTimeout(() => {
+    throw new Error('Change stream never started');
+  }, 2000);
   changeStream.cursor.once('init', () => {
+    clearTimeout(timeout);
     callback();
   });
 }
@@ -54,7 +59,6 @@ function tryNext(changeStream, callback) {
   let complete = false;
   function done(err, result) {
     if (complete) return;
-
     // if the arity is 1 then this a callback for `more`
     if (arguments.length === 1) {
       result = err;
@@ -158,7 +162,7 @@ describe('Change Streams', function() {
             close(err);
           });
         });
-        setTimeout(() => coll.insertOne({ x: 1 }));
+        waitForStarted(changeStream, () => coll.insertOne({ x: 1 }));
         changeStream.on('error', err => close(err));
       });
     }
@@ -176,17 +180,6 @@ describe('Change Streams', function() {
         expect(err).to.not.exist;
         const collection = client.db('integration_tests').collection('docsDataEvent');
         const changeStream = collection.watch(pipeline);
-
-        changeStream.cursor.once('response', () => {
-          // Trigger the first database event
-          collection.insertOne({ d: 4 }, function(err) {
-            assert.ifError(err);
-            // Trigger the second database event
-            collection.updateOne({ d: 4 }, { $inc: { d: 2 } }, function(err) {
-              assert.ifError(err);
-            });
-          });
-        });
 
         let count = 0;
 
@@ -223,6 +216,17 @@ describe('Change Streams', function() {
           } catch (e) {
             cleanup(e);
           }
+        });
+
+        waitForStarted(changeStream, () => {
+          // Trigger the first database event
+          collection.insertOne({ d: 4 }, function(err) {
+            assert.ifError(err);
+            // Trigger the second database event
+            collection.updateOne({ d: 4 }, { $inc: { d: 2 } }, function(err) {
+              assert.ifError(err);
+            });
+          });
         });
       });
     }
@@ -417,15 +421,19 @@ describe('Change Streams', function() {
         client.connect(function(err, client) {
           assert.ifError(err);
 
+          const forbiddenStage = {};
+          const forbiddenStageName = '$alksdjfhlaskdfjh';
+          forbiddenStage[forbiddenStageName] = 2;
+
           var theDatabase = client.db('integration_tests');
-          var changeStream = theDatabase
-            .collection('forbiddenStageTest')
-            .watch([{ $alksdjfhlaskdfjh: 2 }]);
+          var changeStream = theDatabase.collection('forbiddenStageTest').watch([forbiddenStage]);
 
           changeStream.next(function(err) {
             assert.ok(err);
             assert.ok(err.message);
-            // assert.ok(err.message.indexOf('SOME ERROR MESSAGE HERE ONCE SERVER-29137 IS DONE') > -1);
+            assert.ok(
+              err.message.indexOf(`Unrecognized pipeline stage name: '${forbiddenStageName}'`) > -1
+            );
             changeStream.close(err => client.close(cerr => done(err || cerr)));
           });
         });
@@ -448,7 +456,7 @@ describe('Change Streams', function() {
         var thisChangeStream = theDatabase.collection('cacheResumeTokenCallback').watch(pipeline);
 
         // Trigger the first database event
-        setTimeout(() => {
+        waitForStarted(thisChangeStream, () => {
           theDatabase
             .collection('cacheResumeTokenCallback')
             .insert({ b: 2 }, function(err, result) {
@@ -484,7 +492,7 @@ describe('Change Streams', function() {
         var theDatabase = client.db('integration_tests');
         var thisChangeStream = theDatabase.collection('cacheResumeTokenPromise').watch(pipeline);
 
-        setTimeout(() => {
+        waitForStarted(thisChangeStream, () => {
           // Trigger the first database event
           theDatabase.collection('cacheResumeTokenPromise').insert({ b: 2 }, function(err, result) {
             assert.ifError(err);
@@ -530,7 +538,7 @@ describe('Change Streams', function() {
           thisChangeStream.close().then(() => client.close(done));
         });
 
-        setTimeout(() => {
+        waitForStarted(thisChangeStream, () => {
           // Trigger the first database event
           theDatabase
             .collection('cacheResumeTokenListener')
@@ -562,21 +570,21 @@ describe('Change Streams', function() {
             .watch([{ $project: { _id: false } }]);
 
           // Trigger the first database event
-          setTimeout(() => {
+          waitForStarted(thisChangeStream, () => {
             theDatabase
               .collection('resumetokenProjectedOutCallback')
               .insert({ b: 2 }, function(err, result) {
                 expect(err).to.not.exist;
                 expect(result.insertedCount).to.equal(1);
               });
-          }, 250);
+          });
 
           // Fetch the change notification
           thisChangeStream.next(function(err) {
             expect(err).to.exist;
 
             // Close the change stream
-            thisChangeStream.close().then(() => client.close(done));
+            thisChangeStream.close(() => client.close(done));
           });
         });
       }
@@ -610,7 +618,7 @@ describe('Change Streams', function() {
         });
 
         // Trigger the first database event
-        setTimeout(() => {
+        waitForStarted(thisChangeStream, () => {
           theDatabase
             .collection('resumetokenProjectedOutListener')
             .insert({ b: 2 }, function(err, result) {
@@ -669,7 +677,7 @@ describe('Change Streams', function() {
         });
 
         // Trigger the first database event
-        setTimeout(() => {
+        waitForStarted(changeStream, () => {
           database.collection('invalidateListeners').insert({ a: 1 }, function(err) {
             assert.ifError(err);
           });
@@ -693,7 +701,7 @@ describe('Change Streams', function() {
         var changeStream = database.collection('invalidateCallback').watch(pipeline);
 
         // Trigger the first database event
-        setTimeout(() => {
+        waitForStarted(changeStream, () => {
           database.collection('invalidateCallback').insert({ a: 1 }, function(err) {
             assert.ifError(err);
           });
@@ -707,6 +715,7 @@ describe('Change Streams', function() {
 
             function completeStream() {
               changeStream.hasNext(function(err, hasNext) {
+                expect(err).to.not.exist;
                 assert.equal(hasNext, false);
                 assert.equal(changeStream.isClosed(), true);
                 client.close(done);
@@ -757,14 +766,14 @@ describe('Change Streams', function() {
         var changeStream = database.collection('invalidateCollectionDropPromises').watch(pipeline);
 
         // Trigger the first database event
-        setTimeout(() => {
+        waitForStarted(changeStream, () => {
           return database
             .collection('invalidateCollectionDropPromises')
             .insert({ a: 1 })
             .then(function() {
               return delay(200);
             });
-        }, 200);
+        });
 
         return changeStream
           .next()
@@ -1138,7 +1147,7 @@ describe('Change Streams', function() {
         // Trigger the first database event
 
         firstChangeStream = collection.watch(pipeline);
-        setTimeout(() => {
+        waitForStarted(firstChangeStream, () => {
           return collection
             .insert(docs[0])
             .then(function(result) {
@@ -1223,7 +1232,7 @@ describe('Change Streams', function() {
           fullDocument: 'updateLookup'
         });
 
-        setTimeout(() => {
+        waitForStarted(changeStream, () => {
           return collection.insert({ f: 128 }).then(function(result) {
             assert.equal(result.insertedCount, 1);
           });
@@ -1279,7 +1288,7 @@ describe('Change Streams', function() {
         });
 
         // Trigger the first database event
-        setTimeout(() => {
+        waitForStarted(changeStream, () => {
           return collection
             .insert({ i: 128 })
             .then(function(result) {
@@ -1416,7 +1425,7 @@ describe('Change Streams', function() {
           })
           .on('error', close);
 
-        setTimeout(() => {
+        waitForStarted(thisChangeStream, () => {
           theCollection.insert({ a: 1 }, function(err) {
             assert.ifError(err);
           });
@@ -1631,7 +1640,7 @@ describe('Change Streams', function() {
           done(err);
         });
 
-        setTimeout(() => {
+        waitForStarted(thisChangeStream, () => {
           theCollection.insert({ a: 1407 }, function(err) {
             if (err) done(err);
           });
@@ -1960,6 +1969,8 @@ describe('Change Streams', function() {
           expect(changeDoc).to.be.null;
         });
 
+        changeStream.on('close', closeSpy);
+
         changeStream.on('error', err => {
           expect(err).to.exist;
           changeStream.close(() => {
@@ -1968,10 +1979,8 @@ describe('Change Streams', function() {
           });
         });
 
-        changeStream.on('close', closeSpy);
-
         // Trigger the first database event
-        setTimeout(() => {
+        waitForStarted(changeStream, () => {
           coll.insertOne({ a: 1 }, (err, result) => {
             expect(err).to.not.exist;
             expect(result.insertedCount).to.equal(1);
@@ -1982,13 +1991,16 @@ describe('Change Streams', function() {
   });
 
   describe('should properly handle a changeStream event being processed mid-close', function() {
-    let client, coll;
+    let client, coll, changeStream;
 
     function write() {
       return Promise.resolve()
         .then(() => coll.insertOne({ a: 1 }))
-        .then(() => coll.insertOne({ b: 2 }))
-        .then(() => coll.insertOne({ c: 3 }));
+        .then(() => coll.insertOne({ b: 2 }));
+    }
+
+    function lastWrite() {
+      return coll.insertOne({ c: 3 });
     }
 
     beforeEach(function() {
@@ -1996,27 +2008,38 @@ describe('Change Streams', function() {
       return client.connect().then(_client => {
         client = _client;
         coll = client.db(this.configuration.db).collection('tester');
+        changeStream = coll.watch();
       });
     });
 
     afterEach(function() {
-      coll = undefined;
-      if (client) {
-        return client.close().then(() => {
+      return Promise.resolve()
+        .then(() => {
+          if (changeStream && !changeStream.isClosed()) {
+            return changeStream.close();
+          }
+        })
+        .then(() => {
+          if (client) {
+            return client.close();
+          }
+        })
+        .then(() => {
+          coll = undefined;
+          changeStream = undefined;
           client = undefined;
         });
-      }
     });
 
     it('when invoked with promises', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
       test: function() {
         function read() {
-          const changeStream = coll.watch();
           return Promise.resolve()
             .then(() => changeStream.next())
             .then(() => changeStream.next())
             .then(() => {
+              lastWrite();
               const nextP = changeStream.next();
 
               return changeStream.close().then(() => nextP);
@@ -2033,14 +2056,15 @@ describe('Change Streams', function() {
     it('when invoked with callbacks', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
       test: function(done) {
-        const changeStream = coll.watch();
-
         changeStream.next(() => {
           changeStream.next(() => {
+            lastWrite();
             changeStream.next(err => {
               let _err = null;
               try {
-                expect(err.message).to.equal('ChangeStream is closed');
+                expect(err)
+                  .property('message')
+                  .to.equal('ChangeStream is closed');
               } catch (e) {
                 _err = e;
               } finally {
@@ -2067,8 +2091,6 @@ describe('Change Streams', function() {
           return done(_err);
         };
 
-        const changeStream = coll.watch();
-
         let counter = 0;
         changeStream.on('change', () => {
           counter += 1;
@@ -2081,7 +2103,11 @@ describe('Change Streams', function() {
         });
         changeStream.on('error', err => close(err));
 
-        setTimeout(() => write().catch(() => {}));
+        waitForStarted(changeStream, () =>
+          write()
+            .then(() => lastWrite())
+            .catch(() => {})
+        );
       }
     });
   });
@@ -2608,48 +2634,43 @@ describe('Change Streams', function() {
   describe('tryNext', function() {
     it('should return null on single iteration of empty cursor', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
-      test: function(done) {
-        const client = this.configuration.newClient();
-        client.connect(err => {
-          expect(err).to.not.exist;
+      test: function() {
+        return withTempDb(
+          'testTryNext',
+          { w: 'majority' },
+          this.configuration.newClient(),
+          db => done => {
+            const changeStream = db.collection('test').watch();
+            tryNext(changeStream, (err, doc) => {
+              expect(err).to.not.exist;
+              expect(doc).to.not.exist;
 
-          const changeStream = client
-            .db()
-            .collection('test')
-            .watch();
-
-          tryNext(changeStream, (err, doc) => {
-            expect(err).to.not.exist;
-            expect(doc).to.not.exist;
-
-            changeStream.close(() => client.close(done));
-          });
-        });
+              changeStream.close(done);
+            });
+          }
+        );
       }
     });
 
     it('should iterate a change stream until first empty batch', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
-      test: function(done) {
-        const client = this.configuration.newClient();
-        client.connect(err => {
-          expect(err).to.not.exist;
-
-          const collection = client.db().collection('test');
-          const changeStream = collection.watch();
-          waitForStarted(changeStream, () => {
-            collection.insertOne({ a: 42 }, err => {
-              expect(err).to.not.exist;
-
-              collection.insertOne({ b: 24 }, err => {
+      test: function() {
+        return withTempDb(
+          'testTryNext',
+          { w: 'majority' },
+          this.configuration.newClient(),
+          db => done => {
+            const collection = db.collection('test');
+            const changeStream = collection.watch();
+            waitForStarted(changeStream, () => {
+              collection.insertOne({ a: 42 }, err => {
                 expect(err).to.not.exist;
+
+                collection.insertOne({ b: 24 }, err => {
+                  expect(err).to.not.exist;
+                });
               });
             });
-          });
-
-          tryNext(changeStream, (err, doc) => {
-            expect(err).to.not.exist;
-            expect(doc).to.exist;
 
             tryNext(changeStream, (err, doc) => {
               expect(err).to.not.exist;
@@ -2657,13 +2678,18 @@ describe('Change Streams', function() {
 
               tryNext(changeStream, (err, doc) => {
                 expect(err).to.not.exist;
-                expect(doc).to.not.exist;
+                expect(doc).to.exist;
 
-                changeStream.close(() => client.close(done));
+                tryNext(changeStream, (err, doc) => {
+                  expect(err).to.not.exist;
+                  expect(doc).to.not.exist;
+
+                  changeStream.close(done);
+                });
               });
             });
-          });
-        });
+          }
+        );
       }
     });
   });
