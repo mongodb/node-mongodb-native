@@ -3,6 +3,45 @@
 const MongoClient = require('../../').MongoClient;
 const expect = require('chai').expect;
 
+// helpers for using chai.expect in the assert style
+const assert = {
+  equal: function(a, b) {
+    expect(a).to.equal(b);
+  },
+
+  deepEqual: function(a, b) {
+    expect(a).to.eql(b);
+  },
+
+  strictEqual: function(a, b) {
+    expect(a).to.eql(b);
+  },
+
+  notEqual: function(a, b) {
+    expect(a).to.not.equal(b);
+  },
+
+  ok: function(a) {
+    expect(a).to.be.ok;
+  },
+
+  throws: function(func) {
+    expect(func).to.throw;
+  }
+};
+
+function delay(timeout) {
+  return new Promise(function(resolve) {
+    setTimeout(function() {
+      resolve();
+    }, timeout);
+  });
+}
+
+function dropCollection(dbObj, collectionName) {
+  return dbObj.dropCollection(collectionName).catch(ignoreNsNotFound);
+}
+
 function filterForCommands(commands, bag) {
   commands = Array.isArray(commands) ? commands : [commands];
   return function(event) {
@@ -17,16 +56,8 @@ function filterOutCommands(commands, bag) {
   };
 }
 
-function connectToDb(url, db, options, callback) {
-  if (typeof options === 'function') {
-    callback = options;
-    options = {};
-  }
-
-  MongoClient.connect(url, options || {}, function(err, client) {
-    if (err) return callback(err);
-    callback(null, client.db(db), client);
-  });
+function ignoreNsNotFound(err) {
+  if (!err.message.match(/ns not found/)) throw err;
 }
 
 function setupDatabase(configuration, dbsToClean) {
@@ -57,8 +88,21 @@ function setupDatabase(configuration, dbsToClean) {
     );
 }
 
-function makeCleanupFn(client) {
-  return function(err) {
+/**
+ * Safely perform a test with provided MongoClient, ensuring client won't leak.
+ *
+ * @param {MongoClient} [client]
+ * @param {Function|Promise} operation
+ * @param {Function|Promise} [errorHandler]
+ */
+function withClient(client, operation, errorHandler) {
+  if (!(client instanceof MongoClient)) {
+    client = this.configuration.newClient();
+    operation = client;
+    errorHandler = operation;
+  }
+
+  function cleanup(err) {
     return new Promise((resolve, reject) => {
       try {
         client.close(closeErr => {
@@ -72,29 +116,7 @@ function makeCleanupFn(client) {
         return reject(err || e);
       }
     });
-  };
-}
-
-function withTempDb(name, options, client, operation, errorHandler) {
-  return withClient(
-    client,
-    client => done => {
-      const db = client.db(name, options);
-      operation.call(this, db)(() => db.dropDatabase(done));
-    },
-    errorHandler
-  );
-}
-
-/**
- * Safely perform a test with provided MongoClient, ensuring client won't leak.
- *
- * @param {MongoClient} client
- * @param {Function|Promise} operation
- * @param {Function|Promise} [errorHandler]
- */
-function withClient(client, operation, errorHandler) {
-  const cleanup = makeCleanupFn(client);
+  }
 
   return client
     .connect()
@@ -102,47 +124,68 @@ function withClient(client, operation, errorHandler) {
     .then(() => cleanup(), cleanup);
 }
 
-var assert = {
-  equal: function(a, b) {
-    expect(a).to.equal(b);
-  },
-
-  deepEqual: function(a, b) {
-    expect(a).to.eql(b);
-  },
-
-  strictEqual: function(a, b) {
-    expect(a).to.eql(b);
-  },
-
-  notEqual: function(a, b) {
-    expect(a).to.not.equal(b);
-  },
-
-  ok: function(a) {
-    expect(a).to.be.ok;
-  },
-
-  throws: function(func) {
-    expect(func).to.throw;
+/**
+ * use as the `operation` of `withClient`
+ *
+ * @param {string} name database name
+ * @param {object} [options] database options
+ * @param {Function} testFn test function to execute
+ * @param {boolean} [drop] drop database after test
+ */
+function withDb(name, options, testFn, drop) {
+  if (typeof options === 'function') {
+    drop = testFn;
+    testFn = options;
+    options = {};
   }
-};
-
-var delay = function(timeout) {
-  return new Promise(function(resolve) {
-    setTimeout(function() {
-      resolve();
-    }, timeout);
-  });
-};
-
-function ignoreNsNotFound(err) {
-  if (!err.message.match(/ns not found/)) throw err;
+  return client =>
+    new Promise(resolve => {
+      const db = client.db(name, options);
+      testFn.call(this, db, drop ? () => db.dropDatabase(resolve) : resolve);
+    });
 }
 
-function dropCollection(dbObj, collectionName) {
-  return dbObj.dropCollection(collectionName).catch(ignoreNsNotFound);
+/**
+ * Perform a test with a monitored MongoClient that will filter for certain commands.
+ *
+ * @param {string|Array} commands commands to filter for
+ * @param {object} [options] options to pass on to configuration.newClient
+ * @param {object} [options.queryOptions] connection string options
+ * @param {object} [options.clientOptions] MongoClient options
+ * @param {withMonitoredClientCallback} callback the test function
+ */
+function withMonitoredClient(commands, options, callback) {
+  if (arguments.length === 2) {
+    callback = options;
+    options = {};
+  }
+  if (!Object.prototype.hasOwnProperty.call(callback, 'prototype')) {
+    throw new Error('withMonitoredClient callback can not be arrow function');
+  }
+  return function(done) {
+    const configuration = this.configuration;
+    const client = configuration.newClient(
+      Object.assign({}, options.queryOptions),
+      Object.assign({ monitorCommands: true }, options.clientOptions)
+    );
+    const events = [];
+    client.on('commandStarted', filterForCommands(commands, events));
+    client.connect((err, client) => {
+      expect(err).to.not.exist;
+      function _done(err) {
+        client.close(err2 => done(err || err2));
+      }
+      callback.bind(this)(client, events, _done);
+    });
+  };
 }
+
+/**
+ * @callback withMonitoredClientCallback
+ * @param {MongoClient} client monitored client
+ * @param {Array} events record of monitored commands
+ * @param {Function} done trigger end of test and cleanup
+ */
 
 /**
  * A class for listening on specific events
@@ -210,59 +253,16 @@ class EventCollector {
   }
 }
 
-/**
- * Perform a test with a monitored MongoClient that will filter for certain commands.
- *
- * @param {string|Array} commands commands to filter for
- * @param {object} [options] options to pass on to configuration.newClient
- * @param {object} [options.queryOptions] connection string options
- * @param {object} [options.clientOptions] MongoClient options
- * @param {withMonitoredClientCallback} callback the test function
- */
-function withMonitoredClient(commands, options, callback) {
-  if (arguments.length === 2) {
-    callback = options;
-    options = {};
-  }
-  if (!Object.prototype.hasOwnProperty.call(callback, 'prototype')) {
-    throw new Error('withMonitoredClient callback can not be arrow function');
-  }
-  return function(done) {
-    const configuration = this.configuration;
-    const client = configuration.newClient(
-      Object.assign({}, options.queryOptions),
-      Object.assign({ monitorCommands: true }, options.clientOptions)
-    );
-    const events = [];
-    client.on('commandStarted', filterForCommands(commands, events));
-    client.connect((err, client) => {
-      expect(err).to.not.exist;
-      function _done(err) {
-        client.close(err2 => done(err || err2));
-      }
-      callback.bind(this)(client, events, _done);
-    });
-  };
-}
-
-/**
- * @callback withMonitoredClientCallback
- * @param {MongoClient} client monitored client
- * @param {Array} events record of monitored commands
- * @param {Function} done trigger end of test and cleanup
- */
-
 module.exports = {
-  connectToDb,
-  setupDatabase,
   assert,
   delay,
-  withClient,
-  withMonitoredClient,
-  withTempDb,
+  dropCollection,
   filterForCommands,
   filterOutCommands,
   ignoreNsNotFound,
-  dropCollection,
+  setupDatabase,
+  withClient,
+  withMonitoredClient,
+  withDb,
   EventCollector
 };

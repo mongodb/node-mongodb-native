@@ -2,7 +2,8 @@
 const assert = require('assert');
 const { Transform } = require('stream');
 const { MongoError, MongoNetworkError } = require('../../lib/error');
-const { setupDatabase, withTempDb, delay } = require('./shared');
+const shared = require('./shared');
+const { setupDatabase, delay } = shared;
 const co = require('co');
 const mock = require('mongodb-mock-server');
 const chai = require('chai');
@@ -2602,19 +2603,23 @@ describe('Change Streams', function() {
     it('should return null on single iteration of empty cursor', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
       test: function() {
-        return withTempDb(
-          'testTryNext',
-          { w: 'majority' },
-          this.configuration.newClient(),
-          db => done => {
-            const changeStream = db.collection('test').watch();
-            tryNext(changeStream, (err, doc) => {
-              expect(err).to.not.exist;
-              expect(doc).to.not.exist;
+        const withClient = shared.withClient.bind(this);
+        const withDb = shared.withDb.bind(this);
+        return withClient(
+          withDb(
+            'testTryNext',
+            { w: 'majority' },
+            function(db, done) {
+              const changeStream = db.collection('test').watch();
+              tryNext(changeStream, (err, doc) => {
+                expect(err).to.not.exist;
+                expect(doc).to.not.exist;
 
-              changeStream.close(done);
-            });
-          }
+                changeStream.close(done);
+              });
+            },
+            true
+          )
         );
       }
     });
@@ -2622,26 +2627,24 @@ describe('Change Streams', function() {
     it('should iterate a change stream until first empty batch', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
       test: function() {
-        return withTempDb(
-          'testTryNext',
-          { w: 'majority' },
-          this.configuration.newClient(),
-          db => done => {
-            const collection = db.collection('test');
-            const changeStream = collection.watch();
-            waitForStarted(changeStream, () => {
-              collection.insertOne({ a: 42 }, err => {
-                expect(err).to.not.exist;
-
-                collection.insertOne({ b: 24 }, err => {
+        const withClient = shared.withClient.bind(this);
+        const withDb = shared.withDb.bind(this);
+        return withClient(
+          withDb(
+            'testTryNext',
+            { w: 'majority' },
+            function(db, done) {
+              const collection = db.collection('test');
+              const changeStream = collection.watch();
+              waitForStarted(changeStream, () => {
+                collection.insertOne({ a: 42 }, err => {
                   expect(err).to.not.exist;
+
+                  collection.insertOne({ b: 24 }, err => {
+                    expect(err).to.not.exist;
+                  });
                 });
               });
-            });
-
-            tryNext(changeStream, (err, doc) => {
-              expect(err).to.not.exist;
-              expect(doc).to.exist;
 
               tryNext(changeStream, (err, doc) => {
                 expect(err).to.not.exist;
@@ -2649,13 +2652,19 @@ describe('Change Streams', function() {
 
                 tryNext(changeStream, (err, doc) => {
                   expect(err).to.not.exist;
-                  expect(doc).to.not.exist;
+                  expect(doc).to.exist;
 
-                  changeStream.close(done);
+                  tryNext(changeStream, (err, doc) => {
+                    expect(err).to.not.exist;
+                    expect(doc).to.not.exist;
+
+                    changeStream.close(done);
+                  });
                 });
               });
-            });
-          }
+            },
+            true
+          )
         );
       }
     });

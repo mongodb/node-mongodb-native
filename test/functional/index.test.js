@@ -2,8 +2,7 @@
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 const expect = require('chai').expect;
-const withClient = require('./shared').withClient;
-const withMonitoredClient = require('./shared').withMonitoredClient;
+const shared = require('./shared');
 
 describe('Indexes', function() {
   before(function() {
@@ -1209,18 +1208,21 @@ describe('Indexes', function() {
       return {
         metadata: { requires: { mongodb: '<4.4' } },
         test: function() {
-          return withClient(this.configuration.newClient(), client => done => {
-            const db = client.db('test');
-            const collection = db.collection('commitQuorum');
-            testCommand(db, collection, (err, result) => {
-              expect(err).to.exist;
-              expect(err.message).to.equal(
-                '`commitQuorum` option for `createIndexes` not supported on servers < 4.4'
-              );
-              expect(result).to.not.exist;
-              done();
-            });
-          });
+          const withClient = shared.withClient.bind(this);
+          const withDb = shared.withDb.bind(this);
+          return withClient(
+            withDb('test', (db, done) => {
+              const collection = db.collection('commitQuorum');
+              testCommand(db, collection, (err, result) => {
+                expect(err).to.exist;
+                expect(err.message).to.equal(
+                  '`commitQuorum` option for `createIndexes` not supported on servers < 4.4'
+                );
+                expect(result).to.not.exist;
+                done();
+              });
+            })
+          );
         }
       };
     }
@@ -1250,7 +1252,7 @@ describe('Indexes', function() {
     function commitQuorumTest(testCommand) {
       return {
         metadata: { requires: { mongodb: '>=4.4', topology: ['replicaset', 'sharded'] } },
-        test: withMonitoredClient('createIndexes', function(client, events, done) {
+        test: shared.withMonitoredClient('createIndexes', function(client, events, done) {
           const db = client.db('test');
           const collection = db.collection('commitQuorum');
           collection.insertOne({ a: 1 }, function(err) {
