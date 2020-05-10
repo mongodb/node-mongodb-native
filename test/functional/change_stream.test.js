@@ -2,8 +2,7 @@
 const assert = require('assert');
 const { Transform } = require('stream');
 const { MongoError, MongoNetworkError } = require('../../lib/error');
-const shared = require('./shared');
-const { setupDatabase, delay } = shared;
+const { delay, setupDatabase, withClient, withDb } = require('./shared');
 const co = require('co');
 const mock = require('mongodb-mock-server');
 const chai = require('chai');
@@ -2603,13 +2602,11 @@ describe('Change Streams', function() {
     it('should return null on single iteration of empty cursor', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
       test: function() {
-        const withClient = shared.withClient.bind(this);
-        const withDb = shared.withDb.bind(this);
-        return withClient(
+        return withClient.bind(this)(
           withDb(
             'testTryNext',
             { w: 'majority' },
-            function(db, done) {
+            (db, done) => {
               const changeStream = db.collection('test').watch();
               tryNext(changeStream, (err, doc) => {
                 expect(err).to.not.exist;
@@ -2627,13 +2624,11 @@ describe('Change Streams', function() {
     it('should iterate a change stream until first empty batch', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
       test: function() {
-        const withClient = shared.withClient.bind(this);
-        const withDb = shared.withDb.bind(this);
-        return withClient(
+        return withClient.bind(this)(
           withDb(
             'testTryNext',
             { w: 'majority' },
-            function(db, done) {
+            (db, done) => {
               const collection = db.collection('test');
               const changeStream = collection.watch();
               waitForStarted(changeStream, () => {

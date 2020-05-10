@@ -1,6 +1,6 @@
 'use strict';
 const expect = require('chai').expect;
-const shared = require('./shared');
+const { withClient, withDb } = require('./shared');
 const Logger = require('../../lib/logger');
 
 describe('Logger', function() {
@@ -59,11 +59,9 @@ describe('Logger', function() {
       Logger.setCurrentLogger(function() {});
       Logger.setLevel('debug');
 
-      const withClient = shared.withClient.bind(this);
-      const withDb = shared.withDb.bind(this);
-      return withClient(
+      return withClient.bind(this)(
         this.configuration.newClient('mongodb://localhost:27017/test'),
-        withDb(this.configuration.db, function(db, done) {
+        withDb(this.configuration.db, (db, done) => {
           // perform any operation that gets logged
           db.collection('foo').findOne({}, function(err) {
             expect(err).to.not.exist;
@@ -84,11 +82,9 @@ describe('Logger', function() {
     metadata: { requires: { topology: ['single'] } },
 
     test: function() {
-      const withClient = shared.withClient.bind(this);
-      const withDb = shared.withDb.bind(this);
-      return withClient(
+      return withClient.bind(this)(
         this.configuration.newClient('mongodb://localhost:27017/test'),
-        withDb(this.configuration.db, function(db, done) {
+        withDb(this.configuration.db, (db, done) => {
           // Status
           var logged = false;
 
@@ -130,9 +126,7 @@ describe('Logger', function() {
       Logger.filter('class', ['Cursor']);
       var logged = false;
 
-      const withClient = shared.withClient.bind(this);
-      const withDb = shared.withDb.bind(this);
-      return withClient(
+      return withClient.bind(this)(
         this.configuration.newClient('mongodb://localhost:27017/test'),
         withDb(
           this.configuration.db,

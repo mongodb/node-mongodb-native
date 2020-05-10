@@ -141,7 +141,7 @@ function withDb(name, options, testFn, drop) {
   return client =>
     new Promise(resolve => {
       const db = client.db(name, options);
-      testFn.call(this, db, drop ? () => db.dropDatabase(resolve) : resolve);
+      testFn(db, drop ? () => db.dropDatabase(resolve) : resolve);
     });
 }
 

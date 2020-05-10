@@ -3,6 +3,7 @@ var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 const expect = require('chai').expect;
 const shared = require('./shared');
+const { withClient, withDb, withMonitoredClient } = shared;
 
 describe('Indexes', function() {
   before(function() {
@@ -1208,9 +1209,7 @@ describe('Indexes', function() {
       return {
         metadata: { requires: { mongodb: '<4.4' } },
         test: function() {
-          const withClient = shared.withClient.bind(this);
-          const withDb = shared.withDb.bind(this);
-          return withClient(
+          return withClient.bind(this)(
             withDb('test', (db, done) => {
               const collection = db.collection('commitQuorum');
               testCommand(db, collection, (err, result) => {
@@ -1252,7 +1251,7 @@ describe('Indexes', function() {
     function commitQuorumTest(testCommand) {
       return {
         metadata: { requires: { mongodb: '>=4.4', topology: ['replicaset', 'sharded'] } },
-        test: shared.withMonitoredClient('createIndexes', function(client, events, done) {
+        test: withMonitoredClient('createIndexes', function(client, events, done) {
           const db = client.db('test');
           const collection = db.collection('commitQuorum');
           collection.insertOne({ a: 1 }, function(err) {
