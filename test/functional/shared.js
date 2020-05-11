@@ -57,15 +57,25 @@ function setupDatabase(configuration, dbsToClean) {
     );
 }
 
-function withTempDb(name, options, client, operation, errorHandler) {
-  return withClient(
-    client,
-    client => done => {
+/**
+ * use as the `operation` of `withClient`
+ *
+ * @param {string} name database name
+ * @param {object} [options] database options
+ * @param {Function} testFn test function to execute
+ * @param {boolean} [drop] drop database after test
+ */
+function withDb(name, options, testFn, drop) {
+  if (typeof options === 'function') {
+    drop = testFn;
+    testFn = options;
+    options = {};
+  }
+  return client =>
+    new Promise(resolve => {
       const db = client.db(name, options);
-      operation.call(this, db)(() => db.dropDatabase(done));
-    },
-    errorHandler
-  );
+      testFn(db, drop ? () => db.dropDatabase(resolve) : resolve);
+    });
 }
 
 /**
@@ -243,7 +253,7 @@ module.exports = {
   delay,
   withClient,
   withMonitoredClient,
-  withTempDb,
+  withDb,
   filterForCommands,
   filterOutCommands,
   ignoreNsNotFound,

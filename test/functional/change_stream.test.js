@@ -4,7 +4,8 @@ var Transform = require('stream').Transform;
 const MongoError = require('../../lib/core').MongoError;
 var MongoNetworkError = require('../../lib/core').MongoNetworkError;
 var setupDatabase = require('./shared').setupDatabase;
-var withTempDb = require('./shared').withTempDb;
+var withClient = require('./shared').withClient;
+var withDb = require('./shared').withDb;
 var delay = require('./shared').delay;
 var co = require('co');
 var mock = require('mongodb-mock-server');
@@ -2635,19 +2636,21 @@ describe('Change Streams', function() {
     it('should return null on single iteration of empty cursor', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
       test: function() {
-        return withTempDb(
-          'testTryNext',
-          { w: 'majority' },
-          this.configuration.newClient(),
-          db => done => {
-            const changeStream = db.collection('test').watch();
-            tryNext(changeStream, (err, doc) => {
-              expect(err).to.not.exist;
-              expect(doc).to.not.exist;
+        return withClient.bind(this)(
+          withDb(
+            'testTryNext',
+            { w: 'majority' },
+            (db, done) => {
+              const changeStream = db.collection('test').watch();
+              tryNext(changeStream, (err, doc) => {
+                expect(err).to.not.exist;
+                expect(doc).to.not.exist;
 
-              changeStream.close(done);
-            });
-          }
+                changeStream.close(done);
+              });
+            },
+            true
+          )
         );
       }
     });
@@ -2655,11 +2658,8 @@ describe('Change Streams', function() {
     it('should iterate a change stream until first empty batch', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
       test: function() {
-        return withTempDb(
-          'testTryNext',
-          { w: 'majority' },
-          this.configuration.newClient(),
-          db => done => {
+        return withClient.bind(this)(
+          withDb('testTryNext', { w: 'majority' }, (db, done) => {
             const collection = db.collection('test');
             const changeStream = collection.watch();
             waitForStarted(changeStream, () => {
@@ -2688,7 +2688,7 @@ describe('Change Streams', function() {
                 });
               });
             });
-          }
+          })
         );
       }
     });
