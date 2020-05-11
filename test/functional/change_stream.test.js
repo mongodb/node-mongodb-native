@@ -2601,45 +2601,46 @@ describe('Change Streams', function() {
   describe('tryNext', function() {
     it('should return null on single iteration of empty cursor', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
-      test: function() {
-        return withClient.bind(this)(
-          withDb(
-            'testTryNext',
-            { w: 'majority' },
-            (db, done) => {
-              const changeStream = db.collection('test').watch();
-              tryNext(changeStream, (err, doc) => {
-                expect(err).to.not.exist;
-                expect(doc).to.not.exist;
+      test: withClient(
+        withDb(
+          'testTryNext',
+          { w: 'majority' },
+          (db, done) => {
+            const changeStream = db.collection('test').watch();
+            tryNext(changeStream, (err, doc) => {
+              expect(err).to.not.exist;
+              expect(doc).to.not.exist;
 
-                changeStream.close(done);
-              });
-            },
-            true
-          )
-        );
-      }
+              changeStream.close(done);
+            });
+          },
+          true
+        )
+      )
     });
 
     it('should iterate a change stream until first empty batch', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
-      test: function() {
-        return withClient.bind(this)(
-          withDb(
-            'testTryNext',
-            { w: 'majority' },
-            (db, done) => {
-              const collection = db.collection('test');
-              const changeStream = collection.watch();
-              waitForStarted(changeStream, () => {
-                collection.insertOne({ a: 42 }, err => {
-                  expect(err).to.not.exist;
+      test: withClient(
+        withDb(
+          'testTryNext',
+          { w: 'majority' },
+          (db, done) => {
+            const collection = db.collection('test');
+            const changeStream = collection.watch();
+            waitForStarted(changeStream, () => {
+              collection.insertOne({ a: 42 }, err => {
+                expect(err).to.not.exist;
 
-                  collection.insertOne({ b: 24 }, err => {
-                    expect(err).to.not.exist;
-                  });
+                collection.insertOne({ b: 24 }, err => {
+                  expect(err).to.not.exist;
                 });
               });
+            });
+
+            tryNext(changeStream, (err, doc) => {
+              expect(err).to.not.exist;
+              expect(doc).to.exist;
 
               tryNext(changeStream, (err, doc) => {
                 expect(err).to.not.exist;
@@ -2647,21 +2648,16 @@ describe('Change Streams', function() {
 
                 tryNext(changeStream, (err, doc) => {
                   expect(err).to.not.exist;
-                  expect(doc).to.exist;
+                  expect(doc).to.not.exist;
 
-                  tryNext(changeStream, (err, doc) => {
-                    expect(err).to.not.exist;
-                    expect(doc).to.not.exist;
-
-                    changeStream.close(done);
-                  });
+                  changeStream.close(done);
                 });
               });
-            },
-            true
-          )
-        );
-      }
+            });
+          },
+          true
+        )
+      )
     });
   });
 

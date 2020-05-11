@@ -1208,21 +1208,19 @@ describe('Indexes', function() {
     function throwErrorTest(testCommand) {
       return {
         metadata: { requires: { mongodb: '<4.4' } },
-        test: function() {
-          return withClient.bind(this)(
-            withDb('test', (db, done) => {
-              const collection = db.collection('commitQuorum');
-              testCommand(db, collection, (err, result) => {
-                expect(err).to.exist;
-                expect(err.message).to.equal(
-                  '`commitQuorum` option for `createIndexes` not supported on servers < 4.4'
-                );
-                expect(result).to.not.exist;
-                done();
-              });
-            })
-          );
-        }
+        test: withClient(
+          withDb('test', (db, done) => {
+            const collection = db.collection('commitQuorum');
+            testCommand(db, collection, (err, result) => {
+              expect(err).to.exist;
+              expect(err.message).to.equal(
+                '`commitQuorum` option for `createIndexes` not supported on servers < 4.4'
+              );
+              expect(result).to.not.exist;
+              done();
+            });
+          })
+        )
       };
     }
     it(

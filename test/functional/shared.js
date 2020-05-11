@@ -99,7 +99,7 @@ function withClient(client, operation, errorHandler) {
   if (!(client instanceof MongoClient)) {
     errorHandler = operation;
     operation = client;
-    client = this.configuration.newClient();
+    client = undefined;
   }
 
   if (operation.length === 2) {
@@ -123,10 +123,20 @@ function withClient(client, operation, errorHandler) {
     });
   }
 
-  return client
-    .connect()
-    .then(operation, errorHandler)
-    .then(() => cleanup(), cleanup);
+  function lambda() {
+    if (!client) {
+      client = this.configuration.newClient();
+    }
+    return client
+      .connect()
+      .then(operation, errorHandler)
+      .then(() => cleanup(), cleanup);
+  }
+
+  if (this && this.configuration) {
+    return lambda.call(this);
+  }
+  return lambda;
 }
 
 /**
