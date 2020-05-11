@@ -517,7 +517,7 @@ describe('Connection', function() {
   });
 
   it('should be able to connect again after close', function() {
-    return withClient(this.configuration.newClient(), client => done => {
+    return withClient.call(this, (client, done) => {
       expect(client.isConnected()).to.be.true;
       const collection = () => client.db('testReconnect').collection('test');
       collection().insertOne({ a: 1 }, (err, result) => {

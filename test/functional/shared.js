@@ -57,8 +57,37 @@ function setupDatabase(configuration, dbsToClean) {
     );
 }
 
-function makeCleanupFn(client) {
-  return function(err) {
+function withTempDb(name, options, client, operation, errorHandler) {
+  return withClient(
+    client,
+    client => done => {
+      const db = client.db(name, options);
+      operation.call(this, db)(() => db.dropDatabase(done));
+    },
+    errorHandler
+  );
+}
+
+/**
+ * Safely perform a test with provided MongoClient, ensuring client won't leak.
+ *
+ * @param {MongoClient} [client] if not provided, withClient must be bound to test function `this`
+ * @param {Function} operation (client):Promise or (client, done):void
+ * @param {Function} [errorHandler]
+ */
+function withClient(client, operation, errorHandler) {
+  if (!(client instanceof MongoClient)) {
+    errorHandler = operation;
+    operation = client;
+    client = this.configuration.newClient();
+  }
+
+  if (operation.length === 2) {
+    const callback = operation;
+    operation = client => new Promise(resolve => callback(client, resolve));
+  }
+
+  function cleanup(err) {
     return new Promise((resolve, reject) => {
       try {
         client.close(closeErr => {
@@ -72,37 +101,11 @@ function makeCleanupFn(client) {
         return reject(err || e);
       }
     });
-  };
-}
-
-function withTempDb(name, options, client, operation, errorHandler) {
-  return withClient(
-    client,
-    client => done => {
-      const db = client.db(name, options);
-      operation.call(this, db)(() => db.dropDatabase(done));
-    },
-    errorHandler
-  );
-}
-
-function withClient(client, operation, errorHandler) {
-  const cleanup = makeCleanupFn(client);
-
-  function operationHandler(client) {
-    // run the operation
-    const result = operation(client);
-    // if it returns a callback, wrap it in a Promise
-    if (typeof result === 'function') {
-      return new Promise(done => result(done));
-    }
-    // otherwise assume it returned a Promise
-    return result;
   }
 
   return client
     .connect()
-    .then(operationHandler, errorHandler)
+    .then(operation, errorHandler)
     .then(() => cleanup(), cleanup);
 }
 
