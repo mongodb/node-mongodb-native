@@ -91,15 +91,20 @@ function setupDatabase(configuration, dbsToClean) {
 /**
  * Safely perform a test with provided MongoClient, ensuring client won't leak.
  *
- * @param {MongoClient} [client]
- * @param {Function|Promise} operation
- * @param {Function|Promise} [errorHandler]
+ * @param {MongoClient} [client] if not provided, withClient must be bound to test function `this`
+ * @param {Function} operation (client):Promise or (client, done):void
+ * @param {Function} [errorHandler]
  */
 function withClient(client, operation, errorHandler) {
   if (!(client instanceof MongoClient)) {
-    client = this.configuration.newClient();
-    operation = client;
     errorHandler = operation;
+    operation = client;
+    client = this.configuration.newClient();
+  }
+
+  if (operation.length === 2) {
+    const callback = operation;
+    operation = client => new Promise(resolve => callback(client, resolve));
   }
 
   function cleanup(err) {
