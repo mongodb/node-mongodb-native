@@ -51,6 +51,7 @@ describe('Server Discovery and Monitoring (spec)', function() {
     serverConnect.restore();
   });
 
+  // DRIVERS-1249 should add directConnection and then update spec, remove skip
   const shouldSkip = desc => {
     const descriptions = [
       'Monitoring a standalone connection',
