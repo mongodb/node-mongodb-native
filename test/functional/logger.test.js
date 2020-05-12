@@ -59,7 +59,7 @@ describe('Logger', function() {
       Logger.setCurrentLogger(function() {});
       Logger.setLevel('debug');
 
-      return withClient.bind(this)(
+      return withClient(
         this.configuration.newClient('mongodb://localhost:27017/test'),
         withDb(this.configuration.db, (db, done) => {
           // perform any operation that gets logged
@@ -82,7 +82,7 @@ describe('Logger', function() {
     metadata: { requires: { topology: ['single'] } },
 
     test: function() {
-      return withClient.bind(this)(
+      return withClient(
         this.configuration.newClient('mongodb://localhost:27017/test'),
         withDb(this.configuration.db, (db, done) => {
           // Status
@@ -126,7 +126,7 @@ describe('Logger', function() {
       Logger.filter('class', ['Cursor']);
       var logged = false;
 
-      return withClient.bind(this)(
+      return withClient(
         this.configuration.newClient('mongodb://localhost:27017/test'),
         withDb(
           this.configuration.db,
