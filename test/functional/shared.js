@@ -43,6 +43,11 @@ function dropCollection(dbObj, collectionName) {
 }
 
 function filterForCommands(commands, bag) {
+  if (typeof commands === 'function') {
+    return function(event) {
+      if (commands(event.commandName)) bag.push(event);
+    };
+  }
   commands = Array.isArray(commands) ? commands : [commands];
   return function(event) {
     if (commands.indexOf(event.commandName) !== -1) bag.push(event);
@@ -50,6 +55,11 @@ function filterForCommands(commands, bag) {
 }
 
 function filterOutCommands(commands, bag) {
+  if (typeof commands === 'function') {
+    return function(event) {
+      if (!commands(event.commandName)) bag.push(event);
+    };
+  }
   commands = Array.isArray(commands) ? commands : [commands];
   return function(event) {
     if (commands.indexOf(event.commandName) === -1) bag.push(event);
@@ -163,7 +173,7 @@ function withDb(name, options, testFn, drop) {
 /**
  * Perform a test with a monitored MongoClient that will filter for certain commands.
  *
- * @param {string|Array} commands commands to filter for
+ * @param {string|Array|Function} commands commands to filter for
  * @param {object} [options] options to pass on to configuration.newClient
  * @param {object} [options.queryOptions] connection string options
  * @param {object} [options.clientOptions] MongoClient options
