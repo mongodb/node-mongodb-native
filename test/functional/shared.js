@@ -58,23 +58,76 @@ function setupDatabase(configuration, dbsToClean) {
 }
 
 /**
+ * use as the `testFn` of `withDb`
+ *
+ * @param {string} [name='test'] database name
+ * @param {object} [options] options
+ * @param {object} [options.collection={}] collection options
+ * @param {object} [options.helper={}] helper options
+ * @param {boolean} [options.helper.create] create collection before test
+ * @param {boolean} [options.helper.drop] drop collection after test
+ * @param {Function} testFn test function to execute
+ */
+function withCollection(name, options, testFn) {
+  if (arguments.length === 1) {
+    testFn = name;
+    name = 'test';
+    options = { collection: {}, helper: {} };
+  } else if (arguments.length === 2) {
+    testFn = options;
+    if (typeof name === 'string') {
+      options = { collection: {}, helper: {} };
+    } else {
+      options = name;
+      name = 'test';
+    }
+  }
+  function runTest(collection, done) {
+    testFn(collection, options.helper.drop ? () => collection.drop(done) : done);
+  }
+  if (options.helper.create) {
+    return (db, done) =>
+      db.createCollection(name, options, (err, collection) => {
+        if (err) return done(err);
+        runTest(collection, done);
+      });
+  }
+  return (db, done) => {
+    const collection = db.collection(name, options.collection);
+    runTest(collection, done);
+  };
+}
+
+
+/**
  * use as the `operation` of `withClient`
  *
- * @param {string} name database name
- * @param {object} [options] database options
+ * @param {string} [name='test'] database name
+ * @param {object} [options] options
+ * @param {object} [options.db={}] database options
+ * @param {object} [options.helper={}] helper options
+ * @param {boolean} [options.helper.drop] drop database after test
  * @param {Function} testFn test function to execute
- * @param {boolean} [drop] drop database after test
+ 
  */
-function withDb(name, options, testFn, drop) {
-  if (typeof options === 'function') {
-    drop = testFn;
+function withDb(name, options, testFn) {
+  if (arguments.length === 1) {
+    testFn = name;
+    name = 'test';
+    options = { db: {}, helper: {} };
+  } else if (arguments.length === 2) {
     testFn = options;
-    options = {};
+    if (typeof name === 'string') {
+      options = { db: {}, helper: {} };
+    } else {
+      options = name;
+      name = 'test';
+    }
   }
   return client =>
     new Promise(resolve => {
-      const db = client.db(name, options);
-      testFn(db, drop ? () => db.dropDatabase(resolve) : resolve);
+      const db = client.db(name, options.db);
+      testFn(db, options.helper.drop ? () => db.dropDatabase(resolve) : resolve);
     });
 }
 
@@ -277,6 +330,7 @@ module.exports = {
   withClient,
   withMonitoredClient,
   withDb,
+  withCollection,
   filterForCommands,
   filterOutCommands,
   ignoreNsNotFound,

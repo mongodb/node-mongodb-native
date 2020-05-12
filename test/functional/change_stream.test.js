@@ -6,6 +6,7 @@ var MongoNetworkError = require('../../lib/core').MongoNetworkError;
 var setupDatabase = require('./shared').setupDatabase;
 var withClient = require('./shared').withClient;
 var withDb = require('./shared').withDb;
+var withCollection = require('./shared').withCollection;
 var delay = require('./shared').delay;
 var co = require('co');
 var mock = require('mongodb-mock-server');
@@ -60,8 +61,12 @@ function tryNext(changeStream, callback) {
   let complete = false;
   function done(err, result) {
     if (complete) return;
-    // if the arity is 1 then this a callback for `more`
+    // if the arity is 1 then this is a callback for `more`
     if (arguments.length === 1) {
+      if (err instanceof Error) {
+        callback(err);
+        return;
+      }
       result = err;
       const batch = result.cursor.firstBatch || result.cursor.nextBatch;
       if (batch.length === 0) {
@@ -2633,64 +2638,67 @@ describe('Change Streams', function() {
   });
 
   describe('tryNext', function() {
-    it('should return null on single iteration of empty cursor', {
-      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
-      test: function() {
+    function withTemporaryCollectionOnDb(database, testFn) {
+      return function() {
         return withClient.bind(this)(
           withDb(
-            'testTryNext',
-            { w: 'majority' },
-            (db, done) => {
-              const changeStream = db.collection('test').watch();
-              tryNext(changeStream, (err, doc) => {
-                expect(err).to.not.exist;
-                expect(doc).to.not.exist;
-
-                changeStream.close(done);
-              });
-            },
-            true
+            database,
+            { helper: { drop: true } },
+            withCollection(
+              {
+                collection: { w: 'majority' },
+                helper: { create: true }
+              },
+              testFn
+            )
           )
         );
-      }
+      };
+    }
+    it('should return null on single iteration of empty cursor', {
+      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
+      test: withTemporaryCollectionOnDb('test_try_next_empty', (collection, done) => {
+        const changeStream = collection.watch();
+        tryNext(changeStream, (err, doc) => {
+          expect(err).to.not.exist;
+          expect(doc).to.not.exist;
+
+          changeStream.close(done);
+        });
+      })
     });
 
     it('should iterate a change stream until first empty batch', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
-      test: function() {
-        return withClient.bind(this)(
-          withDb('testTryNext', { w: 'majority' }, (db, done) => {
-            const collection = db.collection('test');
-            const changeStream = collection.watch();
-            waitForStarted(changeStream, () => {
-              collection.insertOne({ a: 42 }, err => {
-                expect(err).to.not.exist;
+      test: withTemporaryCollectionOnDb('test_try_next_results', (collection, done) => {
+        const changeStream = collection.watch();
+        waitForStarted(changeStream, () => {
+          collection.insertOne({ a: 42 }, err => {
+            expect(err).to.not.exist;
 
-                collection.insertOne({ b: 24 }, err => {
-                  expect(err).to.not.exist;
-                });
-              });
+            collection.insertOne({ b: 24 }, err => {
+              expect(err).to.not.exist;
             });
+          });
+        });
+
+        tryNext(changeStream, (err, doc) => {
+          expect(err).to.not.exist;
+          expect(doc).to.exist;
+
+          tryNext(changeStream, (err, doc) => {
+            expect(err).to.not.exist;
+            expect(doc).to.exist;
 
             tryNext(changeStream, (err, doc) => {
               expect(err).to.not.exist;
-              expect(doc).to.exist;
+              expect(doc).to.not.exist;
 
-              tryNext(changeStream, (err, doc) => {
-                expect(err).to.not.exist;
-                expect(doc).to.exist;
-
-                tryNext(changeStream, (err, doc) => {
-                  expect(err).to.not.exist;
-                  expect(doc).to.not.exist;
-
-                  changeStream.close(done);
-                });
-              });
+              changeStream.close(done);
             });
-          })
-        );
-      }
+          });
+        });
+      })
     });
   });
 
