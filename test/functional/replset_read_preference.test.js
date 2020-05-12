@@ -437,7 +437,7 @@ describe.skip('ReplSet (ReadPreference)', function() {
           var cursor = collection.find();
           cursor.toArray(function(err) {
             test.equal(null, err);
-            test.equal(ReadPreference.SECONDARY, cursor.readPreference.preference);
+            test.equal(ReadPreference.SECONDARY, cursor.readPreference.mode);
             client.close();
             restartAndDone(done);
           });
@@ -489,7 +489,7 @@ describe.skip('ReplSet (ReadPreference)', function() {
               cursor.toArray(function(err) {
                 test.equal(null, err);
                 // Does not get called or we don't care
-                test.equal(ReadPreference.SECONDARY, cursor.readPreference.preference);
+                test.equal(ReadPreference.SECONDARY, cursor.readPreference.mode);
                 client.close();
                 restartAndDone(done);
               });
@@ -592,7 +592,7 @@ describe.skip('ReplSet (ReadPreference)', function() {
                 test.ok(err != null);
               }
 
-              test.equal(ReadPreference.SECONDARY, cursor.readPreference.preference);
+              test.equal(ReadPreference.SECONDARY, cursor.readPreference.mode);
             }
           });
         });
@@ -636,7 +636,7 @@ describe.skip('ReplSet (ReadPreference)', function() {
           cursor.toArray(function(err) {
             test.equal(null, err);
             // Does not get called or we don't care
-            test.equal(ReadPreference.SECONDARY, cursor.readPreference.preference);
+            test.equal(ReadPreference.SECONDARY, cursor.readPreference.mode);
             client.close();
             restartAndDone(done);
           });
@@ -685,7 +685,7 @@ describe.skip('ReplSet (ReadPreference)', function() {
           cursor.toArray(function(err) {
             test.equal(null, err);
             // Does not get called or we don't care
-            test.equal(ReadPreference.SECONDARY, cursor.readPreference.preference);
+            test.equal(ReadPreference.SECONDARY, cursor.readPreference.mode);
             client.close();
             restartAndDone(done);
           });
@@ -724,7 +724,7 @@ describe.skip('ReplSet (ReadPreference)', function() {
       // Trigger test once whole set is up
       client.on('fullsetup', function() {
         client.topology.replset.once('pickedServer', function(readPreference) {
-          test.equal('secondary', readPreference.preference);
+          test.equal('secondary', readPreference.mode);
           test.equal('ny', readPreference.tags['loc']);
         });
 

@@ -1357,7 +1357,7 @@ describe('Change Streams', function() {
 
         var changeStream0 = database.collection('docs0').watch(pipeline);
         assert.deepEqual(
-          changeStream0.cursor.readPreference.preference,
+          changeStream0.cursor.readPreference.mode,
           ReadPreference.PRIMARY_PREFERRED
         );
 
@@ -1368,7 +1368,7 @@ describe('Change Streams', function() {
 
         var changeStream1 = collection.watch(pipeline);
         assert.deepEqual(
-          changeStream1.cursor.readPreference.preference,
+          changeStream1.cursor.readPreference.mode,
           ReadPreference.SECONDARY_PREFERRED
         );
 
@@ -1377,7 +1377,7 @@ describe('Change Streams', function() {
           readPreference: ReadPreference.NEAREST
         });
 
-        assert.deepEqual(changeStream2.cursor.readPreference.preference, ReadPreference.NEAREST);
+        assert.deepEqual(changeStream2.cursor.readPreference.mode, ReadPreference.NEAREST);
 
         return Promise.all([
           changeStream0.close(),
