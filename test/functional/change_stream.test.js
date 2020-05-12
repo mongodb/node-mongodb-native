@@ -2,7 +2,7 @@
 const assert = require('assert');
 const { Transform } = require('stream');
 const { MongoError, MongoNetworkError } = require('../../lib/error');
-const { delay, setupDatabase, withClient, withDb, withCollection } = require('./shared');
+const { delay, setupDatabase, withClient } = require('./shared');
 const co = require('co');
 const mock = require('mongodb-mock-server');
 const chai = require('chai');
@@ -2600,19 +2600,13 @@ describe('Change Streams', function() {
 
   describe('tryNext', function() {
     function withTemporaryCollectionOnDb(database, testFn) {
-      return withClient(
-        withDb(
-          database,
-          { helper: { drop: true } },
-          withCollection(
-            {
-              collection: { w: 'majority' },
-              helper: { create: true }
-            },
-            testFn
-          )
-        )
-      );
+      return withClient((client, done) => {
+        const db = client.db(database);
+        db.createCollection('test', { w: 'majority' }, (err, collection) => {
+          if (err) return done(err);
+          testFn(collection, () => db.dropDatabase(done));
+        });
+      });
     }
     it('should return null on single iteration of empty cursor', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },

@@ -3,7 +3,7 @@ var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 const expect = require('chai').expect;
 const shared = require('./shared');
-const { withClient, withDb, withMonitoredClient } = shared;
+const { withClient, withMonitoredClient } = shared;
 
 describe('Indexes', function() {
   before(function() {
@@ -1208,19 +1208,18 @@ describe('Indexes', function() {
     function throwErrorTest(testCommand) {
       return {
         metadata: { requires: { mongodb: '<4.4' } },
-        test: withClient(
-          withDb('test', (db, done) => {
-            const collection = db.collection('commitQuorum');
-            testCommand(db, collection, (err, result) => {
-              expect(err).to.exist;
-              expect(err.message).to.equal(
-                '`commitQuorum` option for `createIndexes` not supported on servers < 4.4'
-              );
-              expect(result).to.not.exist;
-              done();
-            });
-          })
-        )
+        test: withClient((client, done) => {
+          const db = client.db('test');
+          const collection = db.collection('commitQuorum');
+          testCommand(db, collection, (err, result) => {
+            expect(err).to.exist;
+            expect(err.message).to.equal(
+              '`commitQuorum` option for `createIndexes` not supported on servers < 4.4'
+            );
+            expect(result).to.not.exist;
+            done();
+          });
+        })
       };
     }
     it(

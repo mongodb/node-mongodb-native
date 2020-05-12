@@ -1,6 +1,6 @@
 'use strict';
 const expect = require('chai').expect;
-const { withClient, withDb } = require('./shared');
+const { withClient } = require('./shared');
 const Logger = require('../../lib/logger');
 
 describe('Logger', function() {
@@ -59,19 +59,17 @@ describe('Logger', function() {
       Logger.setCurrentLogger(function() {});
       Logger.setLevel('debug');
 
-      return withClient(
-        this.configuration.newClient('mongodb://localhost:27017/test'),
-        withDb(this.configuration.db, (db, done) => {
-          // perform any operation that gets logged
-          db.collection('foo').findOne({}, function(err) {
-            expect(err).to.not.exist;
+      return withClient('mongodb://localhost:27017/test', (client, done) => {
+        const db = client.db(this.configuration.db);
+        // perform any operation that gets logged
+        db.collection('foo').findOne({}, function(err) {
+          expect(err).to.not.exist;
 
-            // Clean up
-            Logger.reset();
-            done();
-          });
-        })
-      );
+          // Clean up
+          Logger.reset();
+          done();
+        });
+      });
     }
   });
 
@@ -82,37 +80,35 @@ describe('Logger', function() {
     metadata: { requires: { topology: ['single'] } },
 
     test: function() {
-      return withClient(
-        this.configuration.newClient('mongodb://localhost:27017/test'),
-        withDb(this.configuration.db, (db, done) => {
-          // Status
-          var logged = false;
+      return withClient('mongodb://localhost:27017/test', (client, done) => {
+        const db = client.db(this.configuration.db);
+        // Status
+        var logged = false;
 
-          // Set the current logger
-          Logger.setCurrentLogger(function(msg, context) {
-            expect(msg).to.exist;
-            expect(context.type).to.equal('debug');
-            expect(context.className).to.equal('Cursor');
-            logged = true;
+        // Set the current logger
+        Logger.setCurrentLogger(function(msg, context) {
+          expect(msg).to.exist;
+          expect(context.type).to.equal('debug');
+          expect(context.className).to.equal('Cursor');
+          logged = true;
+        });
+
+        // Set the filter
+        Logger.setLevel('debug');
+        Logger.filter('class', ['Cursor']);
+
+        // perform any operation that gets logged
+        db.collection('logging')
+          .find()
+          .toArray(function(err) {
+            expect(err).to.not.exist;
+            expect(logged).to.be.true;
+
+            // Clean up
+            Logger.reset();
+            done();
           });
-
-          // Set the filter
-          Logger.setLevel('debug');
-          Logger.filter('class', ['Cursor']);
-
-          // perform any operation that gets logged
-          db.collection('logging')
-            .find()
-            .toArray(function(err) {
-              expect(err).to.not.exist;
-              expect(logged).to.be.true;
-
-              // Clean up
-              Logger.reset();
-              done();
-            });
-        })
-      );
+      });
     }
   });
 
@@ -126,29 +122,24 @@ describe('Logger', function() {
       Logger.filter('class', ['Cursor']);
       var logged = false;
 
-      return withClient(
-        this.configuration.newClient('mongodb://localhost:27017/test'),
-        withDb(
-          this.configuration.db,
-          {
-            loggerLevel: 'debug',
-            logger: function() {
-              logged = true;
-            }
-          },
-          (db, done) => {
-            // perform any operation that gets logged
-            db.collection('foo').findOne({}, function(err) {
-              expect(err).to.not.exist;
-              expect(logged).to.be.true;
-
-              // Clean up
-              Logger.reset();
-              done();
-            });
+      return withClient('mongodb://localhost:27017/test', (client, done) => {
+        const db = client.db(this.configuration.db, {
+          loggerLevel: 'debug',
+          logger: function() {
+            logged = true;
           }
-        )
-      );
+        });
+
+        // perform any operation that gets logged
+        db.collection('foo').findOne({}, function(err) {
+          expect(err).to.not.exist;
+          expect(logged).to.be.true;
+
+          // Clean up
+          Logger.reset();
+          done();
+        });
+      });
     }
   });
 });
