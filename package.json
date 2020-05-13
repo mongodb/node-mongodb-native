@@ -72,7 +72,7 @@
     "check:atlas": "node test/tools/atlas_connectivity_tests.js",
     "check:bench": "node test/benchmarks/driverBench",
     "check:coverage": "nyc mocha --timeout 60000 --recursive test/functional test/unit",
-    "check:lint": "eslint index.js lib test",
+    "check:lint": "eslint -v && eslint index.js lib test",
     "check:test": "mocha --recursive test/functional test/unit",
     "check:types": "tsc -p tsconfig.check.json",
     "release": "standard-version -i HISTORY.md",

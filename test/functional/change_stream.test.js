@@ -2,7 +2,7 @@
 const assert = require('assert');
 const { Transform } = require('stream');
 const { MongoError, MongoNetworkError } = require('../../lib/error');
-const { setupDatabase, withTempDb, delay } = require('./shared');
+const { delay, setupDatabase, withClient } = require('./shared');
 const co = require('co');
 const mock = require('mongodb-mock-server');
 const chai = require('chai');
@@ -2599,65 +2599,59 @@ describe('Change Streams', function() {
   });
 
   describe('tryNext', function() {
+    function withTemporaryCollectionOnDb(database, testFn) {
+      return withClient((client, done) => {
+        const db = client.db(database);
+        db.createCollection('test', { w: 'majority' }, (err, collection) => {
+          if (err) return done(err);
+          testFn(collection, () => db.dropDatabase(done));
+        });
+      });
+    }
     it('should return null on single iteration of empty cursor', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
-      test: function() {
-        return withTempDb(
-          'testTryNext',
-          { w: 'majority' },
-          this.configuration.newClient(),
-          db => done => {
-            const changeStream = db.collection('test').watch();
+      test: withTemporaryCollectionOnDb('testTryNext', (collection, done) => {
+        const changeStream = collection.watch();
+        tryNext(changeStream, (err, doc) => {
+          expect(err).to.not.exist;
+          expect(doc).to.not.exist;
+
+          changeStream.close(done);
+        });
+      })
+    });
+
+    it('should iterate a change stream until first empty batch', {
+      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
+      test: withTemporaryCollectionOnDb('testTryNext', (collection, done) => {
+        const changeStream = collection.watch();
+        waitForStarted(changeStream, () => {
+          collection.insertOne({ a: 42 }, err => {
+            expect(err).to.not.exist;
+
+            collection.insertOne({ b: 24 }, err => {
+              expect(err).to.not.exist;
+            });
+          });
+        });
+
+        tryNext(changeStream, (err, doc) => {
+          expect(err).to.not.exist;
+          expect(doc).to.exist;
+
+          tryNext(changeStream, (err, doc) => {
+            expect(err).to.not.exist;
+            expect(doc).to.exist;
+
             tryNext(changeStream, (err, doc) => {
               expect(err).to.not.exist;
               expect(doc).to.not.exist;
 
               changeStream.close(done);
             });
-          }
-        );
-      }
-    });
-
-    it('should iterate a change stream until first empty batch', {
-      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
-      test: function() {
-        return withTempDb(
-          'testTryNext',
-          { w: 'majority' },
-          this.configuration.newClient(),
-          db => done => {
-            const collection = db.collection('test');
-            const changeStream = collection.watch();
-            waitForStarted(changeStream, () => {
-              collection.insertOne({ a: 42 }, err => {
-                expect(err).to.not.exist;
-
-                collection.insertOne({ b: 24 }, err => {
-                  expect(err).to.not.exist;
-                });
-              });
-            });
-
-            tryNext(changeStream, (err, doc) => {
-              expect(err).to.not.exist;
-              expect(doc).to.exist;
-
-              tryNext(changeStream, (err, doc) => {
-                expect(err).to.not.exist;
-                expect(doc).to.exist;
-
-                tryNext(changeStream, (err, doc) => {
-                  expect(err).to.not.exist;
-                  expect(doc).to.not.exist;
-
-                  changeStream.close(done);
-                });
-              });
-            });
-          }
-        );
-      }
+          });
+        });
+      })
     });
   });
 
