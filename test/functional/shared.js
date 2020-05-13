@@ -178,7 +178,9 @@ function withMonitoredClient(commands, options, callback) {
     );
     const events = [];
     monitoredClient.on('commandStarted', filterForCommands(commands, events));
-    return withClient(monitoredClient, (client, done) => callback(client, events, done));
+    return withClient(monitoredClient, (client, done) =>
+      callback.bind(this)(client, events, done)
+    )();
   };
 }
 
