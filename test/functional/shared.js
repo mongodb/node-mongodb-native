@@ -144,7 +144,12 @@ function withClient(client, callback) {
     return client
       .connect()
       .then(callback)
-      .then(() => cleanup(), cleanup);
+      .then(err => {
+        cleanup();
+        if (err) {
+          throw err;
+        }
+      }, cleanup);
   }
 
   if (this && this.configuration) {
