@@ -1,6 +1,5 @@
 'use strict';
 
-const MongoClient = require('../../').MongoClient;
 const expect = require('chai').expect;
 
 // helpers for using chai.expect in the assert style
