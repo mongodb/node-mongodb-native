@@ -1,16 +1,14 @@
 {
   "compilerOptions": {
+    "resolveJsonModule": true,
+    "outDir": "./dist",
     "allowJs": true,
-    "checkJs": true,
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "declarationDir": "types",
-    "strict": false,
-
+    "checkJs": false,
+    "strict": true,
     "target": "ES2018",
-    "module": "commonJS",
+    "module": "commonjs",
     "moduleResolution": "node",
-    "lib": ["ES2018"]
+    "types": ["node"]
   },
-  "include": ["index.js", "lib/**/*"]
+  "include": ["lib/**/*"]
 }

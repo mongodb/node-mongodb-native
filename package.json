@@ -2,7 +2,7 @@
   "name": "mongodb",
   "version": "3.5.4",
   "description": "The official MongoDB driver for Node.js",
-  "main": "index.js",
+  "main": "dist/index.js",
   "files": [
     "index.js",
     "lib",
@@ -30,7 +30,7 @@
     "denque": "^1.4.1"
   },
   "devDependencies": {
-    "@types/node": "^13.9.8",
+    "@types/node": "^13.13.6",
     "chai": "^4.1.1",
     "chai-subset": "^1.6.0",
     "chalk": "^2.4.2",
@@ -54,7 +54,7 @@
     "sinon-chai": "^3.2.0",
     "snappy": "^6.1.2",
     "standard-version": "^7.1.0",
-    "typescript": "^3.8.3",
+    "typescript": "^3.9.2",
     "worker-farm": "^1.5.0",
     "wtfnode": "^0.8.0",
     "yargs": "^14.2.0"
@@ -76,7 +76,8 @@
     "check:test": "mocha --recursive test/functional test/unit",
     "check:types": "tsc -p tsconfig.check.json",
     "release": "standard-version -i HISTORY.md",
-    "test": "npm run check:lint && npm run check:test"
+    "test": "npm run check:lint && npm run check:test",
+    "build": "tsc"
   },
   "homepage": "https://github.com/mongodb/node-mongodb-native",
   "optionalDependencies": {
