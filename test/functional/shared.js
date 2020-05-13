@@ -102,12 +102,12 @@ function setupDatabase(configuration, dbsToClean) {
  * Safely perform a test with provided MongoClient, ensuring client won't leak.
  *
  * @param {string|MongoClient} [client] if not provided, `withClient` must be bound to test function `this`
- * @param {withClientCallback} operation test operation to perform
+ * @param {withClientCallback} callback the test function
  */
-function withClient(client, operation) {
+function withClient(client, callback) {
   let connectionString;
   if (arguments.length === 1) {
-    operation = client;
+    callback = client;
     client = undefined;
   } else {
     if (typeof client === 'string') {
@@ -116,9 +116,9 @@ function withClient(client, operation) {
     }
   }
 
-  if (operation.length === 2) {
-    const callback = operation;
-    operation = client => new Promise(resolve => callback(client, resolve));
+  if (callback.length === 2) {
+    const cb = callback;
+    callback = client => new Promise(resolve => cb(client, resolve));
   }
 
   function cleanup(err) {
@@ -143,7 +143,7 @@ function withClient(client, operation) {
     }
     return client
       .connect()
-      .then(operation)
+      .then(callback)
       .then(() => cleanup(), cleanup);
   }
 
@@ -171,25 +171,16 @@ function withMonitoredClient(commands, options, callback) {
   if (!Object.prototype.hasOwnProperty.call(callback, 'prototype')) {
     throw new Error('withMonitoredClient callback can not be arrow function');
   }
-  return function(done) {
-    const configuration = this.configuration;
-    const client = configuration.newClient(
+  return function() {
+    const monitoredClient = this.configuration.newClient(
       Object.assign({}, options.queryOptions),
       Object.assign({ monitorCommands: true }, options.clientOptions)
     );
     const events = [];
-    client.on('commandStarted', filterForCommands(commands, events));
-    client.connect((err, client) => {
-      expect(err).to.not.exist;
-      function _done(err) {
-        client.close(err2 => done(err || err2));
-      }
-      callback.bind(this)(client, events, _done);
-    });
+    monitoredClient.on('commandStarted', filterForCommands(commands, events));
+    return withClient(monitoredClient, (client, done) => callback(client, events, done));
   };
 }
-
-
 
 /**
  * A class for listening on specific events
