@@ -97,11 +97,12 @@ function setupDatabase(configuration, dbsToClean) {
     );
 }
 
+/** @typedef {(client: MongoClient) => Promise | (client: MongoClient, done: Function) => void} withClientCallback */
 /**
  * Safely perform a test with provided MongoClient, ensuring client won't leak.
  *
- * @param {string|MongoClient} [client] if not provided, withClient must be bound to test function `this`
- * @param {Function} operation (client):Promise or (client, done):void
+ * @param {string|MongoClient} [client] if not provided, `withClient` must be bound to test function `this`
+ * @param {withClientCallback} operation test operation to perform
  */
 function withClient(client, operation) {
   let connectionString;
@@ -152,6 +153,7 @@ function withClient(client, operation) {
   return lambda;
 }
 
+/** @typedef {(client: MongoClient, events: Array, done: Function) => void} withMonitoredClientCallback */
 /**
  * Perform a test with a monitored MongoClient that will filter for certain commands.
  *
@@ -187,12 +189,7 @@ function withMonitoredClient(commands, options, callback) {
   };
 }
 
-/**
- * @callback withMonitoredClientCallback
- * @param {MongoClient} client monitored client
- * @param {Array} events record of monitored commands
- * @param {Function} done trigger end of test and cleanup
- */
+
 
 /**
  * A class for listening on specific events
