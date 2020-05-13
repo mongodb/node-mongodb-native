@@ -1,9 +1,6 @@
 'use strict';
-var test = require('./shared').assert;
-var setupDatabase = require('./shared').setupDatabase;
-const expect = require('chai').expect;
-const shared = require('./shared');
-const { withClient, withMonitoredClient } = shared;
+const { expect } = require('chai');
+const { assert: test, setupDatabase, withClient, withMonitoredClient } = require('./shared');
 
 describe('Indexes', function() {
   before(function() {
