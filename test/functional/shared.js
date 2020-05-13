@@ -118,7 +118,12 @@ function withClient(client, callback) {
 
   if (callback.length === 2) {
     const cb = callback;
-    callback = client => new Promise(resolve => cb(client, resolve));
+    callback = client =>
+      new Promise((resolve, reject) =>
+        cb(client, err => {
+          return err ? reject(err) : resolve();
+        })
+      );
   }
 
   function cleanup(err) {
@@ -144,12 +149,7 @@ function withClient(client, callback) {
     return client
       .connect()
       .then(callback)
-      .then(err => {
-        cleanup();
-        if (err) {
-          throw err;
-        }
-      }, cleanup);
+      .then(() => cleanup(), cleanup);
   }
 
   if (this && this.configuration) {
