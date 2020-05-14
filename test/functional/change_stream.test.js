@@ -5,6 +5,7 @@ const MongoError = require('../../lib/core').MongoError;
 var MongoNetworkError = require('../../lib/core').MongoNetworkError;
 var setupDatabase = require('./shared').setupDatabase;
 var withClient = require('./shared').withClient;
+var withCursor = require('./shared').withCursor;
 var delay = require('./shared').delay;
 var co = require('co');
 var mock = require('mongodb-mock-server');
@@ -2859,24 +2860,21 @@ describe('Change Streams', function() {
 });
 
 describe('Change Stream Resume Error Tests', function() {
-  function withChangeStream(testName, callback) {
-    return function(done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient();
-      client.connect(err => {
-        expect(err).to.not.exist;
-        const db = client.db('changeStreamResumErrorTest');
-        db.createCollection(testName, (err, collection) => {
-          expect(err).to.not.exist;
-          const changeStream = collection.watch();
-          callback(collection, changeStream, () =>
-            changeStream.close(() => collection.drop(() => client.close(done)))
-          );
+  function withChangeStream(collectionName, callback) {
+    return withCursor(
+      // get change stream cursor
+      (client, cursorCb) => {
+        const db = client.db('changeStreamResumeErrorTest');
+        db.createCollection(collectionName, (err, collection) => {
+          if (err) return cursorCb(err);
+          cursorCb(null, collection.watch());
         });
-      });
-    };
+      },
+      // perform test on change stream cursor
+      (cursor, done) => callback(cursor.parent, cursor, done)
+    );
   }
-  it('(events) should continue iterating after a resumable error', {
+  it('should continue emitting change events after a resumable error', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
     test: withChangeStream('resumeErrorEvents', (collection, changeStream, done) => {
       const docs = [];
@@ -2908,7 +2906,7 @@ describe('Change Stream Resume Error Tests', function() {
     })
   });
 
-  it('(callback) hasNext and next should work after a resumable error', {
+  it('should continue iterating changes after a resumable error', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
     test: withChangeStream('resumeErrorIterator', (collection, changeStream, done) => {
       waitForStarted(changeStream, () => {

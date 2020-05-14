@@ -190,6 +190,20 @@ function withMonitoredClient(commands, options, callback) {
 }
 
 /**
+ * Safely perform a test with an arbitrary cursor.
+ *
+ * @param {function} getCursor given a client, provide cursor for test
+ * @param {function} callback the test function
+ */
+function withCursor(getCursor, callback) {
+  return withClient((client, done) => {
+    getCursor(client, (cursorErr, cursor) => {
+      callback(cursor, () => cursor.close(closeErr => done(cursorErr || closeErr)));
+    });
+  });
+}
+
+/**
  * A class for listening on specific events
  *
  * @example
@@ -265,5 +279,6 @@ module.exports = {
   setupDatabase,
   withClient,
   withMonitoredClient,
+  withCursor,
   EventCollector
 };
