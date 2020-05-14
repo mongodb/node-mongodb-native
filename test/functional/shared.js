@@ -197,8 +197,9 @@ function withMonitoredClient(commands, options, callback) {
  */
 function withCursor(getCursor, callback) {
   return withClient((client, done) => {
-    getCursor(client, (cursorErr, cursor) => {
-      callback(cursor, () => cursor.close(closeErr => done(cursorErr || closeErr)));
+    getCursor(client, (err, cursor) => {
+      if (err) return done(err);
+      callback(cursor, () => cursor.close(done));
     });
   });
 }
