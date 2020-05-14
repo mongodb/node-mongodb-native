@@ -2701,7 +2701,7 @@ describe('Operation Examples', function() {
    * @example-class Collection
    * @example-method reIndex
    */
-  it('shouldCorrectlyIndexAndForceReindexOnCollection', {
+  it.skip('shouldCorrectlyIndexAndForceReindexOnCollection', {
     metadata: {
       requires: { topology: ['single', 'ssl', 'heap', 'wiredtiger'] }
     },

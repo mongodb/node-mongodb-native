@@ -2041,7 +2041,7 @@ describe('Operation (Promises)', function() {
    * @example-class Collection
    * @example-method reIndex
    */
-  it('shouldCorrectlyIndexAndForceReindexOnCollectionWithPromises', {
+  it.skip('shouldCorrectlyIndexAndForceReindexOnCollectionWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
     test: function() {

@@ -205,7 +205,7 @@ describe('Db', function() {
   /**
    * An example showing how to force a reindex of a collection.
    */
-  it('shouldCorrectlyForceReindexOnCollection', {
+  it.skip('shouldCorrectlyForceReindexOnCollection', {
     metadata: {
       requires: { topology: ['single'] }
     },

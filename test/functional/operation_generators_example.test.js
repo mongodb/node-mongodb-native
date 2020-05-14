@@ -1988,7 +1988,7 @@ describe('Operation (Generators)', function() {
    * @example-class Collection
    * @example-method reIndex
    */
-  it('shouldCorrectlyIndexAndForceReindexOnCollectionWithGenerators', {
+  it.skip('shouldCorrectlyIndexAndForceReindexOnCollectionWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
     test: function() {
