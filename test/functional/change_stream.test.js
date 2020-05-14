@@ -733,7 +733,7 @@ describe('Change Streams', function() {
               changeStream.hasNext(function(err, hasNext) {
                 expect(err).to.not.exist;
                 assert.equal(hasNext, false);
-                assert.equal(changeStream.isClosed(true), true);
+                assert.equal(changeStream.isClosed(), true);
                 client.close(done);
               });
             }
@@ -801,7 +801,7 @@ describe('Change Streams', function() {
           .then(() => changeStream.hasNext())
           .then(function(hasNext) {
             assert.equal(hasNext, false);
-            assert.equal(changeStream.isClosed(true), true);
+            assert.equal(changeStream.isClosed(), true);
             client.close(done);
           })
           .catch(function(err) {
