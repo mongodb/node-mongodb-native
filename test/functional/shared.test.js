@@ -36,7 +36,7 @@ describe('shared test utilities', function() {
             return innerDone();
           });
       }).bind(this);
-      encapsulatedTest(fakeDone);
+      encapsulatedTest().then(fakeDone);
     });
 
     it('should propagate passed error to done', function(done) {
@@ -59,7 +59,7 @@ describe('shared test utilities', function() {
             return innerDone(new Error('hello world'));
           });
       }).bind(this);
-      encapsulatedTest(fakeDone);
+      encapsulatedTest().catch(fakeDone);
     });
 
     it('should call done and close connection with promise', function(done) {
@@ -82,7 +82,7 @@ describe('shared test utilities', function() {
             return innerDone();
           });
       }).bind(this);
-      encapsulatedTest(fakeDone);
+      encapsulatedTest().then(fakeDone);
     });
 
     it('should propagate passed error to done from promise', function(done) {
@@ -106,7 +106,7 @@ describe('shared test utilities', function() {
             return innerDone(new Error('hello world'));
           });
       }).bind(this);
-      encapsulatedTest(fakeDone);
+      encapsulatedTest().catch(fakeDone);
     });
   });
 });
