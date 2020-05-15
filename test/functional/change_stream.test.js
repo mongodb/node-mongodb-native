@@ -28,7 +28,7 @@ function withChangeStream(dbName, collectionName, callback) {
   collectionName = collectionName || 'test';
 
   return withClient((client, done) => {
-    const db = client.db();
+    const db = client.db(dbName);
     db.createCollection(collectionName, { w: 'majority' }, (err, collection) => {
       if (err) return done(err);
       withCursor(
@@ -2674,7 +2674,6 @@ describe('Change Streams', function() {
   });
 
   describe('tryNext', function() {
-
     it('should return null on single iteration of empty cursor', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
       test: withChangeStream((collection, changeStream, done) => {
