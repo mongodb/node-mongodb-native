@@ -1,6 +1,6 @@
 {
-  "description": "Replica set discovery from primary",
-  "uri": "mongodb://a/?replicaSet=rs",
+  "description": "Discover primary with directConnection URI option",
+  "uri": "mongodb://a/?directConnection=false",
   "phases": [
     {
       "responses": [

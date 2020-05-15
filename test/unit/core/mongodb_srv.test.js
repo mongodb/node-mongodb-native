@@ -29,26 +29,18 @@ describe('mongodb+srv', function() {
       it(test[1].comment, {
         metadata: { requires: { topology: ['single'] } },
         test: function(done) {
-          parseConnectionString(test[1].uri, { caseTranslate: false }, (err, result) => {
+          parseConnectionString(test[1].uri, (err, result) => {
             if (test[1].error) {
               expect(err).to.exist;
               expect(result).to.not.exist;
             } else {
               expect(err).to.not.exist;
               expect(result).to.exist;
-
-              if (test[1].options && test[1].options.replicaSet) {
-                expect(result.options.replicaset).to.equal(test[1].options.replicaSet);
+              if (test[1].options) {
+                expect(result)
+                  .property('options')
+                  .to.matchMongoSpec(test[1].options);
               }
-
-              if (test[1].options && test[1].options.ssl) {
-                expect(result.options.ssl).to.equal(test[1].options.ssl);
-              }
-
-              if (test[1].options && test[1].options.authSource) {
-                expect(result.options.authsource).to.equal(test[1].options.authSource);
-              }
-
               if (
                 test[1].parsed_options &&
                 test[1].parsed_options.user &&
@@ -58,7 +50,6 @@ describe('mongodb+srv', function() {
                 expect(result.auth.password).to.equal(test[1].parsed_options.password);
               }
             }
-
             done();
           });
         }
