@@ -15,6 +15,31 @@ const sinon = require('sinon');
 
 chai.use(require('chai-subset'));
 
+function withChangeStream(dbName, collectionName, callback) {
+  if (arguments.length === 1) {
+    callback = dbName;
+    dbName = undefined;
+  } else if (arguments.length === 2) {
+    callback = collectionName;
+    collectionName = dbName;
+    dbName = undefined;
+  }
+  dbName = dbName || 'changestream_integration_test';
+  collectionName = collectionName || 'test';
+
+  return withClient((client, done) => {
+    const db = client.db();
+    db.createCollection(collectionName, { w: 'majority' }, (err, collection) => {
+      if (err) return done(err);
+      withCursor(
+        collection.watch(),
+        (cursor, done) => callback(collection, cursor, done),
+        err => collection.drop(dropErr => done(err || dropErr))
+      );
+    });
+  });
+}
+
 /**
  * Triggers a fake resumable error on a change stream
  *
@@ -2649,32 +2674,21 @@ describe('Change Streams', function() {
   });
 
   describe('tryNext', function() {
-    function withTemporaryCollectionOnDb(database, testFn) {
-      return withClient((client, done) => {
-        const db = client.db(database);
-        db.createCollection('test', { w: 'majority' }, (err, collection) => {
-          if (err) return done(err);
-          testFn(collection, () => db.dropDatabase(done));
-        });
-      });
-    }
+
     it('should return null on single iteration of empty cursor', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
-      test: withTemporaryCollectionOnDb('testTryNext', (collection, done) => {
-        const changeStream = collection.watch();
+      test: withChangeStream((collection, changeStream, done) => {
         tryNext(changeStream, (err, doc) => {
           expect(err).to.not.exist;
           expect(doc).to.not.exist;
-
-          changeStream.close(done);
+          done();
         });
       })
     });
 
     it('should iterate a change stream until first empty batch', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
-      test: withTemporaryCollectionOnDb('testTryNext', (collection, done) => {
-        const changeStream = collection.watch();
+      test: withChangeStream((collection, changeStream, done) => {
         waitForStarted(changeStream, () => {
           collection.insertOne({ a: 42 }, err => {
             expect(err).to.not.exist;
@@ -2697,7 +2711,7 @@ describe('Change Streams', function() {
               expect(err).to.not.exist;
               expect(doc).to.not.exist;
 
-              changeStream.close(done);
+              done();
             });
           });
         });
@@ -2860,23 +2874,9 @@ describe('Change Streams', function() {
 });
 
 describe('Change Stream Resume Error Tests', function() {
-  function withChangeStream(collectionName, callback) {
-    return withCursor(
-      // get change stream cursor
-      (client, cursorCb) => {
-        const db = client.db('changeStreamResumeErrorTest');
-        db.createCollection(collectionName, (err, collection) => {
-          if (err) return cursorCb(err);
-          cursorCb(null, collection.watch());
-        });
-      },
-      // perform test on change stream cursor
-      (cursor, done) => callback(cursor.parent, cursor, done)
-    );
-  }
   it('should continue emitting change events after a resumable error', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
-    test: withChangeStream('resumeErrorEvents', (collection, changeStream, done) => {
+    test: withChangeStream((collection, changeStream, done) => {
       const docs = [];
       changeStream.on('change', change => {
         expect(change).to.exist;
@@ -2908,7 +2908,7 @@ describe('Change Stream Resume Error Tests', function() {
 
   it('should continue iterating changes after a resumable error', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
-    test: withChangeStream('resumeErrorIterator', (collection, changeStream, done) => {
+    test: withChangeStream((collection, changeStream, done) => {
       waitForStarted(changeStream, () => {
         collection.insertOne({ a: 42 }, err => {
           expect(err).to.not.exist;

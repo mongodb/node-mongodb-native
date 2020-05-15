@@ -192,16 +192,22 @@ function withMonitoredClient(commands, options, callback) {
 /**
  * Safely perform a test with an arbitrary cursor.
  *
- * @param {function} getCursor given a client, provide cursor for test
- * @param {function} callback the test function
+ * @param {function} cursor any cursor that needs to be closed
+ * @param {(cursor: Object, done: Function) => void} body test body
+ * @param {function} done called after cleanup
  */
-function withCursor(getCursor, callback) {
-  return withClient((client, done) => {
-    getCursor(client, (err, cursor) => {
-      if (err) return done(err);
-      callback(cursor, () => cursor.close(done));
-    });
-  });
+function withCursor(cursor, body, done) {
+  let clean = false;
+  function cleanup(testErr) {
+    if (clean) return;
+    clean = true;
+    return cursor.close(closeErr => done(testErr || closeErr));
+  }
+  try {
+    body(cursor, cleanup);
+  } catch (err) {
+    cleanup(err);
+  }
 }
 
 /**
