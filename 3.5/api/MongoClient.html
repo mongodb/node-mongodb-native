@@ -2301,7 +2301,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line151">line 151</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line154">line 154</a>
         </div>
         
     </div>
@@ -4769,6 +4769,114 @@ If null, will attempt to connect with IPv6, and will fall back to IPv4 on failur
 	
         <tr>
             
+                <td class="name"><code>localThresholdMS</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    15
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p><strong>Only applies to the unified topology</strong> The size of the latency window for selecting among multiple suitable servers</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>serverSelectionTimeoutMS</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    30000
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p><strong>Only applies to the unified topology</strong> How long to block for server selection before throwing an error</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>heartbeatFrequencyMS</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    10000
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p><strong>Only applies to the unified topology</strong> The frequency with which topology updates are scheduled</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
                 <td class="name"><code>autoEncryption</code></td>
             
             
@@ -4952,7 +5060,7 @@ MongoClient instance
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line412">line 412</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line423">line 423</a>
         </div>
         
     </div>
@@ -5173,7 +5281,7 @@ MongoClient instance
                         
                     
                 
-                <p>Validate mongod server certificate against Certificate Authority <em>deprecated</em> use <code>tls</code> variants</p></td>
+                <p>Validate mongod server certificate against Certificate Authority</p></td>
         </tr>
 	
 	
@@ -5745,7 +5853,7 @@ MongoClient instance
             <td class="type">
             
                 
-<span class="param-type">boolean</span>
+<span class="param-type">number</span>
 
 
             
@@ -7282,6 +7390,42 @@ If null, will attempt to connect with IPv6, and will fall back to IPv4 on failur
 	
         <tr>
             
+                <td class="name"><code>monitorCommands</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Enable command monitoring for this client</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
                 <td class="name"><code>minSize</code></td>
             
             
@@ -7310,6 +7454,252 @@ If null, will attempt to connect with IPv6, and will fall back to IPv4 on failur
                     
                 
                 <p>If present, the connection pool will be initialized with minSize connections, and will never dip below minSize connections</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>useNewUrlParser</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    true
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Determines whether or not to use the new url parser. Enables the new, spec-compliant, url parser shipped in the core driver. This url parser fixes a number of problems with the original parser, and aims to outright replace that parser in the near future. Defaults to true, and must be explicitly set to false to use the legacy url parser.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>useUnifiedTopology</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Enables the new unified topology layer</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>localThresholdMS</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    15
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p><strong>Only applies to the unified topology</strong> The size of the latency window for selecting among multiple suitable servers</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>serverSelectionTimeoutMS</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    30000
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p><strong>Only applies to the unified topology</strong> How long to block for server selection before throwing an error</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>heartbeatFrequencyMS</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    10000
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p><strong>Only applies to the unified topology</strong> The frequency with which topology updates are scheduled</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>autoEncryption</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type"><a href="AutoEncrypter.html#~AutoEncryptionOptions">AutoEncrypter~AutoEncryptionOptions</a></span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Optionally enable client side auto encryption</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>driverInfo</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#DriverInfoOptions">DriverInfoOptions</a></span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Allows a wrapping driver to amend the client metadata generated by the driver to include information about the wrapping driver</p></td>
         </tr>
 	
 	
@@ -7412,7 +7802,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line234">line 234</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line237">line 237</a>
         </div>
         
     </div>
@@ -7586,7 +7976,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line205">line 205</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line208">line 208</a>
         </div>
         
     </div>
@@ -7720,7 +8110,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line285">line 285</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line288">line 288</a>
         </div>
         
     </div>
@@ -7977,7 +8367,7 @@ You can control these behaviors with the options noListener and returnNonCachedI
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line327">line 327</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line330">line 330</a>
         </div>
         
     </div>
@@ -8201,7 +8591,7 @@ You can control these behaviors with the options noListener and returnNonCachedI
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line430">line 430</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line441">line 441</a>
         </div>
         
     </div>
@@ -8333,7 +8723,7 @@ newly established session
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line498">line 498</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line509">line 509</a>
         </div>
         
     </div>
@@ -8799,7 +9189,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line453">line 453</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line464">line 464</a>
         </div>
         
     </div>
@@ -8963,7 +9353,7 @@ will be handled without the need for user interaction.</p>
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line187">line 187</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line190">line 190</a>
         </div>
         
     </div>
@@ -9104,7 +9494,7 @@ will be handled without the need for user interaction.</p>
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Tue Apr 14 2020 08:41:41 GMT-0400 (EDT)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Sun May 17 2020 10:28:53 GMT-0400 (EDT)
                     </footer>
                 </div>
             </td>

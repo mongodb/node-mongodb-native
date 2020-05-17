@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Source: node_modules/mongodb-core/lib/transactions.js</title>
+    <title>Class: MongoNetworkTimeoutError</title>
     
     
     
@@ -136,6 +136,8 @@
             
                 <li data-name="AggregationCursor#explain"><a href="AggregationCursor.html#explain">explain</a></li>
             
+                <li data-name="AggregationCursor#forEach"><a href="AggregationCursor.html#forEach">forEach</a></li>
+            
                 <li data-name="AggregationCursor#geoNear"><a href="AggregationCursor.html#geoNear">geoNear</a></li>
             
                 <li data-name="AggregationCursor#group"><a href="AggregationCursor.html#group">group</a></li>
@@ -198,6 +200,37 @@
                 <li data-name="AggregationCursor#event:end"><a href="AggregationCursor.html#event:end">end</a></li>
             
                 <li data-name="AggregationCursor#event:readable"><a href="AggregationCursor.html#event:readable">readable</a></li>
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="AutoEncrypter">
+            <span class="title">
+                <a href="AutoEncrypter.html">AutoEncrypter</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="AutoEncrypter~logLevel"><a href="AutoEncrypter.html#~logLevel">logLevel</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            <span class="subtitle">Typedefs</span>
+            
+                <li data-name="AutoEncrypter~AutoEncryptionExtraOptions"><a href="AutoEncrypter.html#~AutoEncryptionExtraOptions">AutoEncryptionExtraOptions</a></li>
+            
+                <li data-name="AutoEncrypter~AutoEncryptionOptions"><a href="AutoEncrypter.html#~AutoEncryptionOptions">AutoEncryptionOptions</a></li>
+            
+                <li data-name="AutoEncrypter~logger"><a href="AutoEncrypter.html#~logger">logger</a></li>
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
             
             </ul>
         </li>
@@ -278,18 +311,18 @@
             </ul>
             <ul class="typedefs itemMembers">
             
+            <span class="subtitle">Typedefs</span>
+            
+                <li data-name="BulkOperationBase~resultCallback"><a href="BulkOperationBase.html#~resultCallback">resultCallback</a></li>
+            
             </ul>
             <ul class="methods itemMembers">
             
             <span class="subtitle">Methods</span>
             
-                <li data-name="BulkOperationBase#bulkExecute"><a href="BulkOperationBase.html#bulkExecute">bulkExecute</a></li>
-            
-                <li data-name="BulkOperationBase#finalOptionsHandler"><a href="BulkOperationBase.html#finalOptionsHandler">finalOptionsHandler</a></li>
+                <li data-name="BulkOperationBase#execute"><a href="BulkOperationBase.html#execute">execute</a></li>
             
                 <li data-name="BulkOperationBase#find"><a href="BulkOperationBase.html#find">find</a></li>
-            
-                <li data-name="BulkOperationBase#handleWriteError"><a href="BulkOperationBase.html#handleWriteError">handleWriteError</a></li>
             
                 <li data-name="BulkOperationBase#insert"><a href="BulkOperationBase.html#insert">insert</a></li>
             
@@ -313,6 +346,10 @@
             
             </ul>
             <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="BulkWriteError#hasErrorLabel"><a href="BulkWriteError.html#hasErrorLabel">hasErrorLabel</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -388,6 +425,10 @@
             </span>
             <ul class="members itemMembers">
             
+            <span class="subtitle">Members</span>
+            
+                <li data-name="ChangeStream#resumeToken"><a href="ChangeStream.html#resumeToken">resumeToken</a></li>
+            
             </ul>
             <ul class="typedefs itemMembers">
             
@@ -431,6 +472,45 @@
             
                 <li data-name="ChangeStream#event:error"><a href="ChangeStream.html#event:error">error</a></li>
             
+                <li data-name="ChangeStream#event:resumeTokenChanged"><a href="ChangeStream.html#event:resumeTokenChanged">resumeTokenChanged</a></li>
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="ClientEncryption">
+            <span class="title">
+                <a href="ClientEncryption.html">ClientEncryption</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            <span class="subtitle">Typedefs</span>
+            
+                <li data-name="ClientEncryption~createDataKeyCallback"><a href="ClientEncryption.html#~createDataKeyCallback">createDataKeyCallback</a></li>
+            
+                <li data-name="ClientEncryption~dataKeyId"><a href="ClientEncryption.html#~dataKeyId">dataKeyId</a></li>
+            
+                <li data-name="ClientEncryption~decryptCallback"><a href="ClientEncryption.html#~decryptCallback">decryptCallback</a></li>
+            
+                <li data-name="ClientEncryption~encryptCallback"><a href="ClientEncryption.html#~encryptCallback">encryptCallback</a></li>
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="ClientEncryption#createDataKey"><a href="ClientEncryption.html#createDataKey">createDataKey</a></li>
+            
+                <li data-name="ClientEncryption#decrypt"><a href="ClientEncryption.html#decrypt">decrypt</a></li>
+            
+                <li data-name="ClientEncryption#encrypt"><a href="ClientEncryption.html#encrypt">encrypt</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
             </ul>
         </li>
     
@@ -469,6 +549,8 @@
             
                 <li data-name="ClientSession#startTransaction"><a href="ClientSession.html#startTransaction">startTransaction</a></li>
             
+                <li data-name="ClientSession#withTransaction"><a href="ClientSession.html#withTransaction">withTransaction</a></li>
+            
             </ul>
             <ul class="events itemMembers">
             
@@ -501,6 +583,22 @@
             </span>
             <ul class="members itemMembers">
             
+            <span class="subtitle">Members</span>
+            
+                <li data-name="Collection#collectionName"><a href="Collection.html#collectionName">collectionName</a></li>
+            
+                <li data-name="Collection#dbName"><a href="Collection.html#dbName">dbName</a></li>
+            
+                <li data-name="Collection#hint"><a href="Collection.html#hint">hint</a></li>
+            
+                <li data-name="Collection#namespace"><a href="Collection.html#namespace">namespace</a></li>
+            
+                <li data-name="Collection#readConcern"><a href="Collection.html#readConcern">readConcern</a></li>
+            
+                <li data-name="Collection#readPreference"><a href="Collection.html#readPreference">readPreference</a></li>
+            
+                <li data-name="Collection#writeConcern"><a href="Collection.html#writeConcern">writeConcern</a></li>
+            
             </ul>
             <ul class="typedefs itemMembers">
             
@@ -523,6 +621,8 @@
                 <li data-name="Collection~findAndModifyCallback"><a href="Collection.html#~findAndModifyCallback">findAndModifyCallback</a></li>
             
                 <li data-name="Collection~findAndModifyWriteOpResult"><a href="Collection.html#~findAndModifyWriteOpResult">findAndModifyWriteOpResult</a></li>
+            
+                <li data-name="Collection~IndexDefinition"><a href="Collection.html#~IndexDefinition">IndexDefinition</a></li>
             
                 <li data-name="Collection~insertOneWriteOpCallback"><a href="Collection.html#~insertOneWriteOpCallback">insertOneWriteOpCallback</a></li>
             
@@ -884,6 +984,8 @@
             
                 <li data-name="Db#admin"><a href="Db.html#admin">admin</a></li>
             
+                <li data-name="Db#aggregate"><a href="Db.html#aggregate">aggregate</a></li>
+            
                 <li data-name="Db#collection"><a href="Db.html#collection">collection</a></li>
             
                 <li data-name="Db#collections"><a href="Db.html#collections">collections</a></li>
@@ -1106,13 +1208,27 @@
             
             <span class="subtitle">Methods</span>
             
-                <li data-name="GridFSBucketReadStream#_read"><a href="GridFSBucketReadStream.html#_read">_read</a></li>
-            
                 <li data-name="GridFSBucketReadStream#abort"><a href="GridFSBucketReadStream.html#abort">abort</a></li>
             
                 <li data-name="GridFSBucketReadStream#end"><a href="GridFSBucketReadStream.html#end">end</a></li>
             
+                <li data-name="GridFSBucketReadStream#pause"><a href="GridFSBucketReadStream.html#pause">pause</a></li>
+            
+                <li data-name="GridFSBucketReadStream#pipe"><a href="GridFSBucketReadStream.html#pipe">pipe</a></li>
+            
+                <li data-name="GridFSBucketReadStream#read"><a href="GridFSBucketReadStream.html#read">read</a></li>
+            
+                <li data-name="GridFSBucketReadStream#resume"><a href="GridFSBucketReadStream.html#resume">resume</a></li>
+            
+                <li data-name="GridFSBucketReadStream#setEncoding"><a href="GridFSBucketReadStream.html#setEncoding">setEncoding</a></li>
+            
                 <li data-name="GridFSBucketReadStream#start"><a href="GridFSBucketReadStream.html#start">start</a></li>
+            
+                <li data-name="GridFSBucketReadStream#unpipe"><a href="GridFSBucketReadStream.html#unpipe">unpipe</a></li>
+            
+                <li data-name="GridFSBucketReadStream#unshift"><a href="GridFSBucketReadStream.html#unshift">unshift</a></li>
+            
+                <li data-name="GridFSBucketReadStream#wrap"><a href="GridFSBucketReadStream.html#wrap">wrap</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -1352,6 +1468,10 @@
             </ul>
             <ul class="typedefs itemMembers">
             
+            <span class="subtitle">Typedefs</span>
+            
+                <li data-name="Logger~loggerCallback"><a href="Logger.html#~loggerCallback">loggerCallback</a></li>
+            
             </ul>
             <ul class="methods itemMembers">
             
@@ -1557,13 +1677,30 @@
             
                 <li data-name="MongoClient#isConnected"><a href="MongoClient.html#isConnected">isConnected</a></li>
             
-                <li data-name="MongoClient#logout"><a href="MongoClient.html#logout">logout</a></li>
-            
                 <li data-name="MongoClient#startSession"><a href="MongoClient.html#startSession">startSession</a></li>
             
                 <li data-name="MongoClient#watch"><a href="MongoClient.html#watch">watch</a></li>
             
                 <li data-name="MongoClient#withSession"><a href="MongoClient.html#withSession">withSession</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="MongoCryptError">
+            <span class="title">
+                <a href="MongoCryptError.html">MongoCryptError</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
             
             </ul>
             <ul class="events itemMembers">
@@ -1588,6 +1725,8 @@
             
                 <li data-name="MongoError.create"><a href="MongoError.html#.create">create</a></li>
             
+                <li data-name="MongoError#hasErrorLabel"><a href="MongoError.html#hasErrorLabel">hasErrorLabel</a></li>
+            
             </ul>
             <ul class="events itemMembers">
             
@@ -1607,6 +1746,33 @@
             </ul>
             <ul class="methods itemMembers">
             
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="MongoNetworkError#hasErrorLabel"><a href="MongoNetworkError.html#hasErrorLabel">hasErrorLabel</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="MongoNetworkTimeoutError">
+            <span class="title">
+                <a href="MongoNetworkTimeoutError.html">MongoNetworkTimeoutError</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="MongoNetworkTimeoutError#hasErrorLabel"><a href="MongoNetworkTimeoutError.html#hasErrorLabel">hasErrorLabel</a></li>
+            
             </ul>
             <ul class="events itemMembers">
             
@@ -1625,6 +1791,10 @@
             
             </ul>
             <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="MongoParseError#hasErrorLabel"><a href="MongoParseError.html#hasErrorLabel">hasErrorLabel</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -1679,6 +1849,29 @@
             </ul>
         </li>
     
+        <li class="item" data-name="MongoServerSelectionError">
+            <span class="title">
+                <a href="MongoServerSelectionError.html">MongoServerSelectionError</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="MongoServerSelectionError#hasErrorLabel"><a href="MongoServerSelectionError.html#hasErrorLabel">hasErrorLabel</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
         <li class="item" data-name="MongoTimeoutError">
             <span class="title">
                 <a href="MongoTimeoutError.html">MongoTimeoutError</a>
@@ -1691,6 +1884,10 @@
             
             </ul>
             <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="MongoTimeoutError#hasErrorLabel"><a href="MongoTimeoutError.html#hasErrorLabel">hasErrorLabel</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -1710,6 +1907,10 @@
             
             </ul>
             <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="MongoWriteConcernError#hasErrorLabel"><a href="MongoWriteConcernError.html#hasErrorLabel">hasErrorLabel</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -1762,16 +1963,18 @@
             </ul>
             <ul class="typedefs itemMembers">
             
-            <span class="subtitle">Typedefs</span>
-            
-                <li data-name="OrderedBulkOperation~resultCallback"><a href="OrderedBulkOperation.html#~resultCallback">resultCallback</a></li>
-            
             </ul>
             <ul class="methods itemMembers">
             
             <span class="subtitle">Methods</span>
             
                 <li data-name="OrderedBulkOperation#execute"><a href="OrderedBulkOperation.html#execute">execute</a></li>
+            
+                <li data-name="OrderedBulkOperation#find"><a href="OrderedBulkOperation.html#find">find</a></li>
+            
+                <li data-name="OrderedBulkOperation#insert"><a href="OrderedBulkOperation.html#insert">insert</a></li>
+            
+                <li data-name="OrderedBulkOperation#raw"><a href="OrderedBulkOperation.html#raw">raw</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -2001,16 +2204,18 @@
             </ul>
             <ul class="typedefs itemMembers">
             
-            <span class="subtitle">Typedefs</span>
-            
-                <li data-name="UnorderedBulkOperation~resultCallback"><a href="UnorderedBulkOperation.html#~resultCallback">resultCallback</a></li>
-            
             </ul>
             <ul class="methods itemMembers">
             
             <span class="subtitle">Methods</span>
             
                 <li data-name="UnorderedBulkOperation#execute"><a href="UnorderedBulkOperation.html#execute">execute</a></li>
+            
+                <li data-name="UnorderedBulkOperation#find"><a href="UnorderedBulkOperation.html#find">find</a></li>
+            
+                <li data-name="UnorderedBulkOperation#insert"><a href="UnorderedBulkOperation.html#insert">insert</a></li>
+            
+                <li data-name="UnorderedBulkOperation#raw"><a href="UnorderedBulkOperation.html#raw">raw</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -2089,158 +2294,403 @@
             </td>
             <td valign='top'>        
                 <div class="main">
-                    <h1 class="page-title" data-filename="node_modules_mongodb-core_lib_transactions.js.html">Source: node_modules/mongodb-core/lib/transactions.js</h1>
+                    <h1 class="page-title" data-filename="MongoNetworkTimeoutError.html">Class: MongoNetworkTimeoutError</h1>
                     
 
 
+
+<section>
     
-    <section>
-        <article>
-            <pre class="prettyprint source linenums"><code>'use strict';
-const MongoError = require('./error').MongoError;
+<header>
+    <h2>
+    MongoNetworkTimeoutError
+    </h2>
+    
+        <div class="class-description"><p>An error indicating a network timeout occurred</p></div>
+    
+</header>  
 
-let TxnState;
-let stateMachine;
+<article>
+    
+        <div class="container-overview">
+        
+        
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="MongoNetworkTimeoutError">
+            
+            new MongoNetworkTimeoutError<span class="signature">(message)</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_core_error.js.html">lib/core/error.js</a>, <a href="lib_core_error.js.html#line110">line 110</a>
+        </div>
+        
+    </div>
 
-(() => {
-  const NO_TRANSACTION = 'NO_TRANSACTION';
-  const STARTING_TRANSACTION = 'STARTING_TRANSACTION';
-  const TRANSACTION_IN_PROGRESS = 'TRANSACTION_IN_PROGRESS';
-  const TRANSACTION_COMMITTED = 'TRANSACTION_COMMITTED';
-  const TRANSACTION_COMMITTED_EMPTY = 'TRANSACTION_COMMITTED_EMPTY';
-  const TRANSACTION_ABORTED = 'TRANSACTION_ABORTED';
+    
+</dt>
+<dd>
+    
+    
 
-  TxnState = {
-    NO_TRANSACTION,
-    STARTING_TRANSACTION,
-    TRANSACTION_IN_PROGRESS,
-    TRANSACTION_COMMITTED,
-    TRANSACTION_COMMITTED_EMPTY,
-    TRANSACTION_ABORTED
-  };
+    
+    
+    
+    
+    
+        
 
-  stateMachine = {
-    [NO_TRANSACTION]: [NO_TRANSACTION, STARTING_TRANSACTION],
-    [STARTING_TRANSACTION]: [
-      TRANSACTION_IN_PROGRESS,
-      TRANSACTION_COMMITTED,
-      TRANSACTION_COMMITTED_EMPTY,
-      TRANSACTION_ABORTED
-    ],
-    [TRANSACTION_IN_PROGRESS]: [
-      TRANSACTION_IN_PROGRESS,
-      TRANSACTION_COMMITTED,
-      TRANSACTION_ABORTED
-    ],
-    [TRANSACTION_COMMITTED]: [
-      TRANSACTION_COMMITTED,
-      TRANSACTION_COMMITTED_EMPTY,
-      STARTING_TRANSACTION,
-      NO_TRANSACTION
-    ],
-    [TRANSACTION_ABORTED]: [STARTING_TRANSACTION, NO_TRANSACTION],
-    [TRANSACTION_COMMITTED_EMPTY]: [TRANSACTION_COMMITTED_EMPTY, NO_TRANSACTION]
-  };
-})();
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>message</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Error</span>
+|
 
-/**
- * The MongoDB ReadConcern, which allows for control of the consistency and isolation properties
- * of the data read from replica sets and replica set shards.
- * @typedef {Object} ReadConcern
- * @property {'local'|'available'|'majority'|'linearizable'|'snapshot'} level The readConcern Level
- * @see https://docs.mongodb.com/manual/reference/read-concern/
- */
+<span class="param-type">string</span>
+|
 
-/**
- * A MongoDB WriteConcern, which describes the level of acknowledgement
- * requested from MongoDB for write operations.
- * @typedef {Object} WriteConcern
- * @property {number|'majority'|string} [w=1] requests acknowledgement that the write operation has
- * propagated to a specified number of mongod hosts
- * @property {boolean} [j=false] requests acknowledgement from MongoDB that the write operation has
- * been written to the journal
- * @property {number} [wtimeout] a time limit, in milliseconds, for the write concern
- * @see https://docs.mongodb.com/manual/reference/write-concern/
- */
+<span class="param-type">object</span>
 
-/**
- * Configuration options for a transaction.
- * @typedef {Object} TransactionOptions
- * @property {ReadConcern} [readConcern] A default read concern for commands in this transaction
- * @property {WriteConcern} [writeConcern] A default writeConcern for commands in this transaction
- * @property {ReadPreference} [readPreference] A default read preference for commands in this transaction
- */
 
-/**
- * A class maintaining state related to a server transaction. Internal Only
- * @ignore
- */
-class Transaction {
-  /**
-   * Create a transaction
-   *
-   * @ignore
-   * @param {TransactionOptions} [options] Optional settings
-   */
-  constructor(options) {
-    options = options || {};
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>The error message</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+        <h5 class="subsection-title">Properties:</h5>
+        
+        <dl>
 
-    this.state = TxnState.NO_TRANSACTION;
-    this.options = {};
+<table class="props">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		<th>Argument</th>
+		
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>message</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
 
-    if (options.writeConcern || typeof options.w !== 'undefined') {
-      const w = options.writeConcern ? options.writeConcern.w : options.w;
-      if (w &lt;= 0) {
-        throw new MongoError('Transactions do not support unacknowledged write concern');
-      }
 
-      this.options.writeConcern = options.writeConcern ? options.writeConcern : { w: options.w };
-    }
+            
+            </td>
+            
+            
+                <td class="attributes">
+                
+                    
+                
+                </td>
+            
+            
+            
+            
+            <td class="description last"><p>The error message</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>options.beforeHandshake</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
 
-    if (options.readConcern) this.options.readConcern = options.readConcern;
-    if (options.readPreference) this.options.readPreference = options.readPreference;
-  }
 
-  /**
-   * @ignore
-   * @return Whether this session is presently in a transaction
-   */
-  get isActive() {
-    return (
-      [TxnState.STARTING_TRANSACTION, TxnState.TRANSACTION_IN_PROGRESS].indexOf(this.state) !== -1
-    );
-  }
+            
+            </td>
+            
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+                    
+                
+                </td>
+            
+            
+            
+            
+            <td class="description last"><p>Indicates the timeout happened before a connection handshake completed</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table></dl>
+        
+    
+        
+    
+    
+    
 
-  /**
-   * Transition the transaction in the state machine
-   * @ignore
-   * @param {TxnState} state The new state to transition to
-   */
-  transition(nextState) {
-    const nextStates = stateMachine[this.state];
-    if (nextStates &amp;&amp; nextStates.indexOf(nextState) !== -1) {
-      this.state = nextState;
-      return;
-    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
 
-    throw new MongoError(
-      `Attempted illegal state transition from [${this.state}] to [${nextState}]`
-    );
-  }
-}
+    
+    
 
-module.exports = { TxnState, Transaction };
-</code></pre>
-        </article>
-    </section>
+    
 
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+        </div>
+    
+    
+    
+        <h3 class="subsection-title">Extends</h3>
+        
+        <ul>
+            <li><a href="MongoError.html">MongoError</a></li>
+        </ul>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+        <h3 class="subsection-title">Methods</h3>
+        
+        <dl>
+            
+<dt>
+    <div class="nameContainer inherited">
+        <h4 class="name" id="hasErrorLabel">
+            
+                <span class="inherited"><a href="MongoError.html#hasErrorLabel">inherited</a></span>
+            
+            hasErrorLabel<span class="signature">(label)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{boolean}</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_core_error.js.html">lib/core/error.js</a>, <a href="lib_core_error.js.html#line55">line 55</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Checks the error to see if it has an error label</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>label</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>The error label to check for</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+
+
+<h5>Returns:</h5>
+true if the error has the provided error label
+<br />
+
+    
+    
+    
+</dd>
+
+        </dl>
+    
+    
+    
+    
+    
+</article>
+
+</section>  
 
 
 
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Sun May 17 2020 10:29:06 GMT-0400 (EDT)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Sun May 17 2020 10:28:50 GMT-0400 (EDT)
                     </footer>
                 </div>
             </td>

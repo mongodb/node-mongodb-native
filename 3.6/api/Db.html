@@ -1756,6 +1756,29 @@
             </ul>
         </li>
     
+        <li class="item" data-name="MongoNetworkTimeoutError">
+            <span class="title">
+                <a href="MongoNetworkTimeoutError.html">MongoNetworkTimeoutError</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="MongoNetworkTimeoutError#hasErrorLabel"><a href="MongoNetworkTimeoutError.html#hasErrorLabel">hasErrorLabel</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
         <li class="item" data-name="MongoParseError">
             <span class="title">
                 <a href="MongoParseError.html">MongoParseError</a>
@@ -3450,7 +3473,7 @@ Db instance.
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line811">line 811</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line812">line 812</a>
         </div>
         
     </div>
@@ -6898,7 +6921,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line746">line 746</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line747">line 747</a>
         </div>
         
     </div>
@@ -7530,6 +7553,43 @@ Promise if no callback passed
                     
                 
                 <p>optional session to use for this operation</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>commitQuorum</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+|
+
+<span class="param-type">string</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>(MongoDB 4.4. or higher) Specifies how many data-bearing members of a replica set, including the primary, must complete the index builds successfully before the primary marks the indexes as ready. This option accepts the same values for the &quot;w&quot; field in a write concern plus &quot;votingMembers&quot;, which indicates all voting data-bearing nodes.</p></td>
         </tr>
 	
 	
@@ -8211,7 +8271,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line778">line 778</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line779">line 779</a>
         </div>
         
     </div>
@@ -9505,7 +9565,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line909">line 909</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line910">line 910</a>
         </div>
         
     </div>
@@ -10163,7 +10223,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line889">line 889</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line890">line 890</a>
         </div>
         
     </div>
@@ -10377,7 +10437,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line838">line 838</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line839">line 839</a>
         </div>
         
     </div>
@@ -11044,7 +11104,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line856">line 856</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line857">line 857</a>
         </div>
         
     </div>
@@ -11530,7 +11590,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line922">line 922</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line923">line 923</a>
         </div>
         
     </div>
@@ -11601,7 +11661,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line942">line 942</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line943">line 943</a>
         </div>
         
     </div>
@@ -12217,7 +12277,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line965">line 965</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line966">line 966</a>
         </div>
         
     </div>
@@ -12299,7 +12359,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line985">line 985</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line986">line 986</a>
         </div>
         
     </div>
@@ -12381,7 +12441,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1012">line 1012</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1013">line 1013</a>
         </div>
         
     </div>
@@ -12467,7 +12527,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1003">line 1003</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1004">line 1004</a>
         </div>
         
     </div>
@@ -12549,7 +12609,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line974">line 974</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line975">line 975</a>
         </div>
         
     </div>
@@ -12635,7 +12695,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line994">line 994</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line995">line 995</a>
         </div>
         
     </div>
@@ -12717,7 +12777,7 @@ ChangeStream instance.
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Tue Apr 14 2020 08:41:38 GMT-0400 (EDT)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Sun May 17 2020 10:28:50 GMT-0400 (EDT)
                     </footer>
                 </div>
             </td>

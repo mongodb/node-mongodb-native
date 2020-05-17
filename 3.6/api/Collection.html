@@ -1756,6 +1756,29 @@
             </ul>
         </li>
     
+        <li class="item" data-name="MongoNetworkTimeoutError">
+            <span class="title">
+                <a href="MongoNetworkTimeoutError.html">MongoNetworkTimeoutError</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="MongoNetworkTimeoutError#hasErrorLabel"><a href="MongoNetworkTimeoutError.html#hasErrorLabel">hasErrorLabel</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
         <li class="item" data-name="MongoParseError">
             <span class="title">
                 <a href="MongoParseError.html">MongoParseError</a>
@@ -2301,7 +2324,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line103">line 103</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line102">line 102</a>
         </div>
         
     </div>
@@ -2713,7 +2736,7 @@ this collection, will be inherited from the parent DB</p>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1881">line 1881</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1891">line 1891</a>
         </div>
         
     </div>
@@ -3565,7 +3588,7 @@ this collection, will be inherited from the parent DB</p>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line612">line 612</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line611">line 611</a>
         </div>
         
     </div>
@@ -4145,7 +4168,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1499">line 1499</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1509">line 1509</a>
         </div>
         
     </div>
@@ -4593,7 +4616,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1566">line 1566</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1576">line 1576</a>
         </div>
         
     </div>
@@ -4998,7 +5021,7 @@ Promise if no callback passed.
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1236">line 1236</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1238">line 1238</a>
         </div>
         
     </div>
@@ -5642,6 +5665,43 @@ Promise if no callback passed.
         </tr>
 	
 	
+	
+        <tr>
+            
+                <td class="name"><code>commitQuorum</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+|
+
+<span class="param-type">string</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>(MongoDB 4.4. or higher) Specifies how many data-bearing members of a replica set, including the primary, must complete the index builds successfully before the primary marks the indexes as ready. This option accepts the same values for the &quot;w&quot; field in a write concern plus &quot;votingMembers&quot;, which indicates all voting data-bearing nodes.</p></td>
+        </tr>
+	
+	
 	</tbody>
 </table>
             </td>
@@ -5760,7 +5820,7 @@ await collection.createIndex(['j', ['k', -1], { l: '2d' }])</p></code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1288">line 1288</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1291">line 1291</a>
         </div>
         
     </div>
@@ -5907,6 +5967,39 @@ Index specifications are defined <a href="http://docs.mongodb.org/manual/referen
         </tr>
 	
 	
+	
+        <tr>
+            
+                <td class="name"><code>commitQuorum</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+|
+
+<span class="param-type">string</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>(MongoDB 4.4. or higher) Specifies how many data-bearing members of a replica set, including the primary, must complete the index builds successfully before the primary marks the indexes as ready. This option accepts the same values for the &quot;w&quot; field in a write concern plus &quot;votingMembers&quot;, which indicates all voting data-bearing nodes.</p></td>
+        </tr>
+	
+	
 	</tbody>
 </table>
             </td>
@@ -6029,7 +6122,7 @@ name: 'tanagra'<br>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line957">line 957</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line958">line 958</a>
         </div>
         
     </div>
@@ -6424,6 +6517,43 @@ name: 'tanagra'<br>
                     
                 
                 <p>optional session to use for this operation</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>hint</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>optional index hint for optimizing the filter query</p></td>
         </tr>
 	
 	
@@ -6924,6 +7054,43 @@ Promise if no callback passed
         </tr>
 	
 	
+	
+        <tr>
+            
+                <td class="name"><code>hint</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>optional index hint for optimizing the filter query</p></td>
+        </tr>
+	
+	
 	</tbody>
 </table>
             </td>
@@ -7023,7 +7190,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1590">line 1590</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1600">line 1600</a>
         </div>
         
     </div>
@@ -7388,7 +7555,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1145">line 1145</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1146">line 1146</a>
         </div>
         
     </div>
@@ -7725,7 +7892,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1352">line 1352</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1361">line 1361</a>
         </div>
         
     </div>
@@ -7852,7 +8019,7 @@ Promise if no [callback] passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1312">line 1312</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1321">line 1321</a>
         </div>
         
     </div>
@@ -8241,7 +8408,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1334">line 1334</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1343">line 1343</a>
         </div>
         
     </div>
@@ -8485,7 +8652,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1418">line 1418</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1428">line 1428</a>
         </div>
         
     </div>
@@ -9193,7 +9360,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1525">line 1525</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1535">line 1535</a>
         </div>
         
     </div>
@@ -9407,7 +9574,7 @@ Promise if no callback passed.
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line321">line 321</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line320">line 320</a>
         </div>
         
     </div>
@@ -10672,7 +10839,7 @@ Promise if no callback passed.
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1796">line 1796</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1806">line 1806</a>
         </div>
         
     </div>
@@ -11295,7 +11462,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1840">line 1840</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1850">line 1850</a>
         </div>
         
     </div>
@@ -11680,7 +11847,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1082">line 1082</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1083">line 1083</a>
         </div>
         
     </div>
@@ -12812,7 +12979,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1669">line 1669</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1679">line 1679</a>
         </div>
         
     </div>
@@ -13304,7 +13471,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1704">line 1704</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1714">line 1714</a>
         </div>
         
     </div>
@@ -13969,7 +14136,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1754">line 1754</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1764">line 1764</a>
         </div>
         
     </div>
@@ -14668,7 +14835,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2020">line 2020</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2031">line 2031</a>
         </div>
         
     </div>
@@ -15035,6 +15202,8 @@ Promise if no callback passed
     
 
     
+        <dt class="important tag-deprecated">Deprecated</dt><dd><ul class="dummy"><li>See <a href="https://docs.mongodb.com/manual/geospatial-queries/">geospatial queries docs</a> for current geospatial support</li><ul></dd>
+    
     
     
     
@@ -15085,7 +15254,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2047">line 2047</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2058">line 2058</a>
         </div>
         
     </div>
@@ -15517,7 +15686,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1609">line 1609</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1619">line 1619</a>
         </div>
         
     </div>
@@ -15731,7 +15900,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1439">line 1439</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1449">line 1449</a>
         </div>
         
     </div>
@@ -15976,7 +16145,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1457">line 1457</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1467">line 1467</a>
         </div>
         
     </div>
@@ -16232,7 +16401,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2188">line 2188</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2199">line 2199</a>
         </div>
         
     </div>
@@ -16589,7 +16758,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2164">line 2164</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2175">line 2175</a>
         </div>
         
     </div>
@@ -16918,7 +17087,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line694">line 694</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line693">line 693</a>
         </div>
         
     </div>
@@ -17388,7 +17557,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line545">line 545</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line544">line 544</a>
         </div>
         
     </div>
@@ -17961,7 +18130,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line509">line 509</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line508">line 508</a>
         </div>
         
     </div>
@@ -18498,7 +18667,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1185">line 1185</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1186">line 1186</a>
         </div>
         
     </div>
@@ -18712,7 +18881,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1385">line 1385</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1395">line 1395</a>
         </div>
         
     </div>
@@ -18971,7 +19140,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2127">line 2127</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2138">line 2138</a>
         </div>
         
     </div>
@@ -19656,7 +19825,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1167">line 1167</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1168">line 1168</a>
         </div>
         
     </div>
@@ -19870,7 +20039,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1980">line 1980</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1990">line 1990</a>
         </div>
         
     </div>
@@ -20202,7 +20371,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1366">line 1366</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1376">line 1376</a>
         </div>
         
     </div>
@@ -20367,6 +20536,8 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
     
 
     
+        <dt class="important tag-deprecated">Deprecated</dt><dd><ul class="dummy"><li>use db.command instead</li><ul></dd>
+    
     
     
     
@@ -20417,7 +20588,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line989">line 989</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line990">line 990</a>
         </div>
         
     </div>
@@ -20844,7 +21015,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1123">line 1123</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1124">line 1124</a>
         </div>
         
     </div>
@@ -21128,7 +21299,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line793">line 793</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line792">line 792</a>
         </div>
         
     </div>
@@ -21759,7 +21930,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1021">line 1021</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1022">line 1022</a>
         </div>
         
     </div>
@@ -22117,7 +22288,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1628">line 1628</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1638">line 1638</a>
         </div>
         
     </div>
@@ -22361,7 +22532,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line873">line 873</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line872">line 872</a>
         </div>
         
     </div>
@@ -22971,7 +23142,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line829">line 829</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line828">line 828</a>
         </div>
         
     </div>
@@ -23636,7 +23807,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line750">line 750</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line749">line 749</a>
         </div>
         
     </div>
@@ -24301,7 +24472,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1948">line 1948</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1958">line 1958</a>
         </div>
         
     </div>
@@ -24772,7 +24943,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1041">line 1041</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1042">line 1042</a>
         </div>
         
     </div>
@@ -24911,7 +25082,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line566">line 566</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line565">line 565</a>
         </div>
         
     </div>
@@ -25303,7 +25474,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1105">line 1105</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1106">line 1106</a>
         </div>
         
     </div>
@@ -25442,7 +25613,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1471">line 1471</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1481">line 1481</a>
         </div>
         
     </div>
@@ -25581,7 +25752,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line901">line 901</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line900">line 900</a>
         </div>
         
     </div>
@@ -25928,7 +26099,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1645">line 1645</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1655">line 1655</a>
         </div>
         
     </div>
@@ -26257,7 +26428,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line668">line 668</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line667">line 667</a>
         </div>
         
     </div>
@@ -26650,7 +26821,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line661">line 661</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line660">line 660</a>
         </div>
         
     </div>
@@ -27043,7 +27214,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1961">line 1961</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1971">line 1971</a>
         </div>
         
     </div>
@@ -27182,7 +27353,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1034">line 1034</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1035">line 1035</a>
         </div>
         
     </div>
@@ -27321,7 +27492,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line722">line 722</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line721">line 721</a>
         </div>
         
     </div>
@@ -27905,7 +28076,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line632">line 632</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line631">line 631</a>
         </div>
         
     </div>
@@ -28184,7 +28355,7 @@ ChangeStream instance.
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Tue Apr 14 2020 08:41:38 GMT-0400 (EDT)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Sun May 17 2020 10:28:50 GMT-0400 (EDT)
                     </footer>
                 </div>
             </td>

@@ -2079,7 +2079,7 @@ bucket.openDownloadStreamByName('meistersinger.mp3').
   on('error', function(error) {
     assert.ifError(error);
   }).
-  on('end', function() {
+  on('finish', function() {
     console.log('done!');
     process.exit(0);
   });
@@ -2097,7 +2097,7 @@ the mp3 and skip right to the good part of the song as shown below.</p>
   on('error', function(error) {
     assert.ifError(error);
   }).
-  on('end', function() {
+  on('finish', function() {
     console.log('done!');
     process.exit(0);
   });

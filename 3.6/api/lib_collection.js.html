@@ -1756,6 +1756,29 @@
             </ul>
         </li>
     
+        <li class="item" data-name="MongoNetworkTimeoutError">
+            <span class="title">
+                <a href="MongoNetworkTimeoutError.html">MongoNetworkTimeoutError</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="MongoNetworkTimeoutError#hasErrorLabel"><a href="MongoNetworkTimeoutError.html#hasErrorLabel">hasErrorLabel</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
         <li class="item" data-name="MongoParseError">
             <span class="title">
                 <a href="MongoParseError.html">MongoParseError</a>
@@ -2315,7 +2338,6 @@ const updateDocuments = require('./operations/common_functions').updateDocuments
 const AggregateOperation = require('./operations/aggregate');
 const BulkWriteOperation = require('./operations/bulk_write');
 const CountDocumentsOperation = require('./operations/count_documents');
-const CreateIndexOperation = require('./operations/create_index');
 const CreateIndexesOperation = require('./operations/create_indexes');
 const DeleteManyOperation = require('./operations/delete_many');
 const DeleteOneOperation = require('./operations/delete_one');
@@ -3198,6 +3220,7 @@ Collection.prototype.update = deprecate(function(selector, update, options, call
  * @param {boolean} [options.serializeFunctions=false] Serialize functions on any object.
  * @param {boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
  * @param {ClientSession} [options.session] optional session to use for this operation
+ * @param {string|object} [options.hint] optional index hint for optimizing the filter query
  * @param {Collection~deleteWriteOpCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
@@ -3231,6 +3254,7 @@ Collection.prototype.removeOne = Collection.prototype.deleteOne;
  * @param {boolean} [options.serializeFunctions=false] Serialize functions on any object.
  * @param {boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
  * @param {ClientSession} [options.session] optional session to use for this operation
+ * @param {string|object} [options.hint] optional index hint for optimizing the filter query
  * @param {Collection~deleteWriteOpCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
@@ -3491,6 +3515,7 @@ Collection.prototype.isCapped = function(options, callback) {
  * @param {object} [options.partialFilterExpression] Creates a partial index based on the given filter object (MongoDB 3.2 or higher)
  * @param {object} [options.collation] Specify collation (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields).
  * @param {ClientSession} [options.session] optional session to use for this operation
+ * @param {(number|string)} [options.commitQuorum] (MongoDB 4.4. or higher) Specifies how many data-bearing members of a replica set, including the primary, must complete the index builds successfully before the primary marks the indexes as ready. This option accepts the same values for the "w" field in a write concern plus "votingMembers", which indicates all voting data-bearing nodes.
  * @param {Collection~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  * @example
@@ -3517,14 +3542,14 @@ Collection.prototype.createIndex = function(fieldOrSpec, options, callback) {
   if (typeof options === 'function') (callback = options), (options = {});
   options = options || {};
 
-  const createIndexOperation = new CreateIndexOperation(
-    this.s.db,
+  const createIndexesOperation = new CreateIndexesOperation(
+    this,
     this.collectionName,
     fieldOrSpec,
     options
   );
 
-  return executeOperation(this.s.topology, createIndexOperation, callback);
+  return executeOperation(this.s.topology, createIndexesOperation, callback);
 };
 
 /**
@@ -3545,6 +3570,7 @@ Collection.prototype.createIndex = function(fieldOrSpec, options, callback) {
  * @param {Collection~IndexDefinition[]} indexSpecs An array of index specifications to be created
  * @param {Object} [options] Optional settings
  * @param {ClientSession} [options.session] optional session to use for this operation
+ * @param {(number|string)} [options.commitQuorum] (MongoDB 4.4. or higher) Specifies how many data-bearing members of a replica set, including the primary, must complete the index builds successfully before the primary marks the indexes as ready. This option accepts the same values for the "w" field in a write concern plus "votingMembers", which indicates all voting data-bearing nodes.
  * @param {Collection~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  * @example
@@ -3569,9 +3595,15 @@ Collection.prototype.createIndexes = function(indexSpecs, options, callback) {
   if (typeof options === 'function') (callback = options), (options = {});
 
   options = options ? Object.assign({}, options) : {};
+
   if (typeof options.maxTimeMS !== 'number') delete options.maxTimeMS;
 
-  const createIndexesOperation = new CreateIndexesOperation(this, indexSpecs, options);
+  const createIndexesOperation = new CreateIndexesOperation(
+    this,
+    this.collectionName,
+    indexSpecs,
+    options
+  );
 
   return executeOperation(this.s.topology, createIndexesOperation, callback);
 };
@@ -3638,19 +3670,20 @@ Collection.prototype.dropAllIndexes = deprecate(
  * Reindex all indexes on the collection
  * Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground) and will be slow for large collections.
  * @method
+ * @deprecated use db.command instead
  * @param {Object} [options] Optional settings
  * @param {ClientSession} [options.session] optional session to use for this operation
  * @param {Collection~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
-Collection.prototype.reIndex = function(options, callback) {
+Collection.prototype.reIndex = deprecate(function(options, callback) {
   if (typeof options === 'function') (callback = options), (options = {});
   options = options || {};
 
   const reIndexOperation = new ReIndexOperation(this, options);
 
   return executeOperation(this.s.topology, reIndexOperation, callback);
-};
+}, 'collection.reIndex is deprecated. Use db.command instead.');
 
 /**
  * Get the list of all indexes information for the collection.
@@ -4296,8 +4329,9 @@ Collection.prototype.parallelCollectionScan = deprecate(function(options, callba
  * @param {ClientSession} [options.session] optional session to use for this operation
  * @param {Collection~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
+ * @deprecated See {@link https://docs.mongodb.com/manual/geospatial-queries/|geospatial queries docs} for current geospatial support
  */
-Collection.prototype.geoHaystackSearch = function(x, y, options, callback) {
+Collection.prototype.geoHaystackSearch = deprecate(function(x, y, options, callback) {
   const args = Array.prototype.slice.call(arguments, 2);
   callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
   options = args.length ? args.shift() || {} : {};
@@ -4305,7 +4339,7 @@ Collection.prototype.geoHaystackSearch = function(x, y, options, callback) {
   const geoHaystackSearchOperation = new GeoHaystackSearchOperation(this, x, y, options);
 
   return executeOperation(this.s.topology, geoHaystackSearchOperation, callback);
-};
+}, 'geoHaystackSearch is deprecated, and will be removed in a future version.');
 
 /**
  * Run a group command across a collection
@@ -4496,7 +4530,7 @@ module.exports = Collection;
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Tue Apr 14 2020 08:41:38 GMT-0400 (EDT)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Sun May 17 2020 10:28:50 GMT-0400 (EDT)
                     </footer>
                 </div>
             </td>
