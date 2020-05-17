@@ -1,16 +1,17 @@
 {
   "compilerOptions": {
-    "allowJs": true,
-    "checkJs": true,
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "declarationDir": "types",
-    "strict": false,
-
+    "allowJs": false,
+    "checkJs": false,
+    "strict": true,
+    "declaration": false,
+    "importHelpers": false,
+    "alwaysStrict": true,
     "target": "ES2018",
     "module": "commonJS",
     "moduleResolution": "node",
-    "lib": ["ES2018"]
+    "lib": ["ES2018"],
+    "noEmitHelpers": true,
+    "noEmitOnError": true
   },
-  "include": ["index.js", "lib/**/*"]
+  "include": ["src/**/*"]
 }

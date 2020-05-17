@@ -1,4 +1,3 @@
-'use strict';
 /**
  * The **ReadConcern** class is a class that represents a MongoDB ReadConcern.
  *
@@ -7,12 +6,14 @@
  * @see https://docs.mongodb.com/manual/reference/read-concern/index.html
  */
 class ReadConcern {
+  level?: string
+
   /**
    * Constructs a ReadConcern from the read concern properties.
    *
    * @param {string} [level] The read concern level ({'local'|'available'|'majority'|'linearizable'|'snapshot'})
    */
-  constructor(level) {
+  constructor(level: string) {
     if (level != null) {
       this.level = level;
     }
@@ -24,7 +25,7 @@ class ReadConcern {
    * @param {object} options The options object from which to extract the write concern.
    * @returns {ReadConcern}
    */
-  static fromOptions(options) {
+  static fromOptions(options: any) {
     if (options == null) {
       return;
     }
