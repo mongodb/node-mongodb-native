@@ -199,7 +199,7 @@ function executeSDAMTest(testData, testDone) {
       topology.close(e => testDone(e || err));
     }
 
-    const incompatabilityHandler = err => {
+    const incompatibilityHandler = err => {
       if (err.message.match(/but this version of the driver/)) return;
       throw err;
     };
@@ -217,15 +217,15 @@ function executeSDAMTest(testData, testDone) {
             }
 
             // remove error handler
-            topology.removeListener('error', incompatabilityHandler);
+            topology.removeListener('error', incompatibilityHandler);
             // reset the captured events for each phase
             events = [];
             cb();
           }
 
-          const incompatibilityExpected = phase.outcome ? !phase.outcome.comptabile : false;
+          const incompatibilityExpected = phase.outcome ? !phase.outcome.compatible : false;
           if (incompatibilityExpected) {
-            topology.on('error', incompatabilityHandler);
+            topology.on('error', incompatibilityHandler);
           }
 
           // if (phase.description) {
