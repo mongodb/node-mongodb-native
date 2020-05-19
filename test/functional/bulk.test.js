@@ -1637,9 +1637,9 @@ describe('Bulk', function() {
               coll.bulkWrite(
                 [
                   { insertOne: { _id: 5, a: 0 } },
-                  { updateOne: { filter: { _id: 1 }, update: { $set: { a: 0 } } } },
+                  { updateOne: { filter: { _id: 1 }, update: { $set: { a: 15 } } } },
                   { insertOne: { _id: 6, a: 0 } },
-                  { updateOne: { filter: { _id: 2 }, update: { $set: { a: 0 } } } }
+                  { updateOne: { filter: { _id: 2 }, update: { $set: { a: 42 } } } }
                 ],
                 { ordered: false }
               )
@@ -1666,7 +1666,7 @@ describe('Bulk', function() {
     return client.connect().then(() => {
       this.defer(() => client.close());
 
-      const coll = client.db().collection('bulk_op_ordering_test');
+      const coll = client.db().collection('unordered_preserve_order');
       function ignoreNsNotFound(err) {
         if (!err.message.match(/ns not found/)) throw err;
       }
@@ -1694,6 +1694,72 @@ describe('Bulk', function() {
             expect(err).to.have.nested.property('writeErrors[0].err.index', 1);
             expect(err).to.have.nested.property('writeErrors[1].err.index', 3);
           }
+        );
+    });
+  });
+
+  it('should not fail on the first error in an unorderd bulkWrite', function() {
+    const client = this.configuration.newClient();
+    return client.connect().then(() => {
+      this.defer(() => client.close());
+
+      const coll = client.db().collection('bulk_op_ordering_test');
+      function ignoreNsNotFound(err) {
+        if (!err.message.match(/ns not found/)) throw err;
+      }
+
+      return coll
+        .drop()
+        .catch(ignoreNsNotFound)
+        .then(() => coll.createIndex({ email: 1 }, { unique: 1, background: false }))
+        .then(() =>
+          Promise.all([
+            coll.updateOne(
+              { email: 'adam@gmail.com' },
+              { $set: { name: 'Adam Smith', age: 29 } },
+              { upsert: true }
+            ),
+            coll.updateOne(
+              { email: 'john@gmail.com' },
+              { $set: { name: 'John Doe', age: 32 } },
+              { upsert: true }
+            )
+          ])
+        )
+        .then(() =>
+          coll.bulkWrite(
+            [
+              {
+                updateOne: {
+                  filter: { email: 'adam@gmail.com' },
+                  update: { $set: { age: 39 } }
+                }
+              },
+              {
+                insertOne: {
+                  document: {
+                    email: 'john@gmail.com'
+                  }
+                }
+              }
+            ],
+            { ordered: false }
+          )
+        )
+        .then(
+          () => {
+            throw new Error('expected a bulk error');
+          },
+          err =>
+            expect(err)
+              .property('code')
+              .to.equal(11000)
+        )
+        .then(() => coll.findOne({ email: 'adam@gmail.com' }))
+        .then(updatedAdam =>
+          expect(updatedAdam)
+            .property('age')
+            .to.equal(39)
         );
     });
   });
