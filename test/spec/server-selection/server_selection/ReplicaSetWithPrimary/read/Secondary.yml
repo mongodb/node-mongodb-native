@@ -3,18 +3,18 @@ topology_description:
   servers:
   - &1
     address: b:27017
-    avg_rtt_ms: 5
+    avg_rtt_ms: 21 # outside the latency window if primary is considered
     type: RSSecondary
     tags:
       data_center: nyc
   - &2
     address: c:27017
-    avg_rtt_ms: 100
+    avg_rtt_ms: 100 # outside the latency window if both secondaries are considered
     type: RSSecondary
     tags:
       data_center: nyc
   - address: a:27017
-    avg_rtt_ms: 26
+    avg_rtt_ms: 5
     type: RSPrimary
     tags:
       data_center: nyc
