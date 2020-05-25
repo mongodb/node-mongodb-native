@@ -1,7 +1,7 @@
 'use strict';
 const expect = require('chai').expect;
 const { withClient } = require('./shared');
-const Logger = require('../../lib/logger');
+const Logger = require('../../src/logger');
 
 describe('Logger', function() {
   /**

@@ -827,7 +827,7 @@ describe.skip('ReplSet (Connection)', function() {
 
   var waitForPrimary;
   waitForPrimary = function(count, config, options, callback) {
-    var ReplSet = require('../../lib/core').ReplSet;
+    var ReplSet = require('../../src/core').ReplSet;
     if (count === 0) return callback(new Error('could not connect'));
     // Attempt to connect
     var server = new ReplSet(config, options);

@@ -4,7 +4,7 @@ const mock = require('mongodb-mock-server');
 const genClusterTime = require('../common').genClusterTime;
 const sessionCleanupHandler = require('../common').sessionCleanupHandler;
 
-const core = require('../../../../lib/core');
+const core = require('../../../../src/core');
 const Server = core.Server;
 const Long = core.BSON.Long;
 const ObjectId = core.BSON.ObjectId;

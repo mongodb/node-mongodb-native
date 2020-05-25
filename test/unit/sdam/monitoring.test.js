@@ -1,8 +1,8 @@
 'use strict';
 const mock = require('mongodb-mock-server');
-const { ServerType } = require('../../../lib/sdam/common');
-const { Topology } = require('../../../lib/sdam/topology');
-const { Monitor } = require('../../../lib/sdam/monitor');
+const { ServerType } = require('../../../src/sdam/common');
+const { Topology } = require('../../../src/sdam/topology');
+const { Monitor } = require('../../../src/sdam/monitor');
 const { expect } = require('chai');
 
 class MockServer {

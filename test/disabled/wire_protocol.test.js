@@ -3,8 +3,8 @@
 const chai = require('chai');
 const expect = chai.expect;
 const sinon = require('sinon');
-const { ConnectionPool } = require('../../../lib/cmap/connection_pool.js');
-const wireProtocol = require('../../../lib/cmap/wire_protocol');
+const { ConnectionPool } = require('../../../src/cmap/connection_pool.js');
+const wireProtocol = require('../../../src/cmap/wire_protocol');
 
 describe('WireProtocol', function() {
   it('should only set bypassDocumentValidation to true if explicitly set by user to true', function() {

@@ -4,7 +4,7 @@ const mock = require('mongodb-mock-server');
 const MongosFixture = require('../common').MongosFixture;
 const sessionCleanupHandler = require('../common').sessionCleanupHandler;
 
-const core = require('../../../../lib/core');
+const core = require('../../../../src/core');
 const ClientSession = core.Sessions.ClientSession;
 const ServerSessionPool = core.Sessions.ServerSessionPool;
 const Mongos = core.Mongos;

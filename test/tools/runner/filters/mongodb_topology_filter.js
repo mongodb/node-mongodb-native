@@ -1,5 +1,5 @@
 'use strict';
-const { TopologyType } = require('../../../../lib/sdam/common');
+const { TopologyType } = require('../../../../src/sdam/common');
 
 /**
  * Filter for the MongoDB toopology required for the test

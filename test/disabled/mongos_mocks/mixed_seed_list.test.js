@@ -3,7 +3,7 @@ const expect = require('chai').expect;
 const co = require('co');
 const mock = require('mongodb-mock-server');
 
-const core = require('../../../../lib/core');
+const core = require('../../../../src/core');
 const Logger = core.Logger;
 const Mongos = core.Mongos;
 const ObjectId = core.BSON.ObjectId;

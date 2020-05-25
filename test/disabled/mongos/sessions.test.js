@@ -4,7 +4,7 @@ const mock = require('mongodb-mock-server');
 const genClusterTime = require('../common').genClusterTime;
 const sessionCleanupHandler = require('../common').sessionCleanupHandler;
 
-const core = require('../../../../lib/core');
+const core = require('../../../../src/core');
 const ServerSessionPool = core.Sessions.ServerSessionPool;
 const ClientSession = core.Sessions.ClientSession;
 const ReadPreference = core.ReadPreference;

@@ -1,8 +1,8 @@
 'use strict';
 
 const { expect } = require('chai');
-const { Query, KillCursor, GetMore } = require('../../../lib/cmap/commands');
-const { CommandStartedEvent } = require('../../../lib/cmap/events');
+const { Query, KillCursor, GetMore } = require('../../../src/cmap/commands');
+const { CommandStartedEvent } = require('../../../src/cmap/events');
 
 const conn = { id: '<some id>', address: '<some address>' };
 

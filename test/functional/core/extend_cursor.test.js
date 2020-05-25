@@ -2,7 +2,7 @@
 
 const { expect } = require('chai');
 const { format: f } = require('util');
-const { CoreCursor } = require('../../../lib/cursor');
+const { CoreCursor } = require('../../../src/cursor');
 
 describe('Extend cursor tests', function() {
   it('should correctly extend the cursor with custom implementation', {

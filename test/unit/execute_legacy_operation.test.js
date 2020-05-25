@@ -1,7 +1,7 @@
 'use strict';
 
 const expect = require('chai').expect;
-const executeLegacyOperation = require('../../lib/utils').executeLegacyOperation;
+const executeLegacyOperation = require('../../src/utils').executeLegacyOperation;
 
 describe('executeLegacyOperation', function() {
   it('should call callback with errors on throw errors, and rethrow error', function() {

@@ -35,11 +35,11 @@ describe('Database', function() {
   before(() => {
     // NOTE: These modules are being used prior to test run. In order to monkey-patch them
     //       we must remove their cached versions.
-    const resolvedUtils = require.resolve('../../lib/utils');
-    const resolvedDb = require.resolve('../../lib/db');
+    const resolvedUtils = require.resolve('../../src/utils');
+    const resolvedDb = require.resolve('../../src/db');
     delete require.cache[resolvedUtils];
     delete require.cache[resolvedDb];
-    test.utils = require('../../lib/utils');
+    test.utils = require('../../src/utils');
 
     // create a sandbox for stub cleanup
     test.sandbox = sinon.sandbox.create();
@@ -55,7 +55,7 @@ describe('Database', function() {
         expect(options.readPreference).to.equal('primary');
       });
 
-      const Db = require('../../lib/db');
+      const Db = require('../../src/db');
       const db = new Db('fakeDb', new MockTopology(), { readPreference: 'nearest' });
       db.dropDatabase();
     }

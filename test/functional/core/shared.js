@@ -1,9 +1,9 @@
 'use strict';
 const EventEmitter = require('events');
-const { ConnectionPool } = require('../../../lib/cmap/connection_pool');
+const { ConnectionPool } = require('../../../src/cmap/connection_pool');
 const { format: f } = require('util');
-const { Query } = require('../../../lib/cmap/commands');
-const ReadPreference = require('../../../lib/read_preference');
+const { Query } = require('../../../src/cmap/commands');
+const ReadPreference = require('../../../src/read_preference');
 
 function executeCommand(configuration, db, cmd, options, cb) {
   // Optional options
@@ -49,9 +49,9 @@ function executeCommand(configuration, db, cmd, options, cb) {
 }
 
 function locateAuthMethod(configuration, cb) {
-  var ConnectionPool = require('../../../lib/cmap/connection_pool'),
+  var ConnectionPool = require('../../../src/cmap/connection_pool'),
     f = require('util').format,
-    { Query } = require('../../../lib/cmap/commands');
+    { Query } = require('../../../src/cmap/commands');
 
   // Set up operations
   var db = 'admin';

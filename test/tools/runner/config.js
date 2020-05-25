@@ -3,9 +3,9 @@ const url = require('url');
 const qs = require('querystring');
 const util = require('util');
 
-const MongoClient = require('../../../lib/mongo_client');
-const { Topology } = require('../../../lib/sdam/topology');
-const { TopologyType } = require('../../../lib/sdam/common');
+const MongoClient = require('../../../src/mongo_client');
+const { Topology } = require('../../../src/sdam/topology');
+const { TopologyType } = require('../../../src/sdam/common');
 
 function convertToConnStringMap(obj) {
   let result = [];

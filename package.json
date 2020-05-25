@@ -2,9 +2,8 @@
   "name": "mongodb",
   "version": "3.5.4",
   "description": "The official MongoDB driver for Node.js",
-  "main": "index.js",
+  "main": "lib/index.js",
   "files": [
-    "index.js",
     "lib"
   ],
   "repository": {
@@ -30,6 +29,8 @@
   },
   "devDependencies": {
     "@types/node": "^14.0.1",
+    "@typescript-eslint/eslint-plugin": "^3.4.0",
+    "@typescript-eslint/parser": "^3.4.0",
     "chai": "^4.2.0",
     "chai-subset": "^1.6.0",
     "chalk": "^2.4.2",
@@ -46,7 +47,7 @@
     "jsdoc": "^3.6.4",
     "lodash.camelcase": "^4.3.0",
     "madge": "^3.9.0",
-    "mocha": "5.2.0",
+    "mocha": "^8.0.1",
     "mocha-sinon": "^2.1.0",
     "mongodb-mock-server": "^2.0.1",
     "nyc": "^15.0.0",
@@ -57,7 +58,8 @@
     "snappy": "^6.1.2",
     "standard-version": "^7.1.0",
     "through2": "^3.0.1",
-    "typescript": "^3.8.3",
+    "ts-node": "^8.10.2",
+    "typescript": "^3.9.6",
     "worker-farm": "^1.5.0",
     "wtfnode": "^0.8.0",
     "yargs": "^14.2.0"
@@ -72,12 +74,14 @@
   "scripts": {
     "build:evergreen": "node .evergreen/generate_evergreen_tasks.js",
     "build:ts": "gulp -f test/tools/ts-pipeline.js",
-    "check:atlas": "node test/tools/atlas_connectivity_tests.js",
     "check:bench": "node test/benchmarks/driverBench",
     "check:coverage": "nyc mocha --timeout 60000 --recursive test/functional test/unit",
-    "check:lint": "eslint -v && eslint index.js lib test",
+    "check:lint": "eslint -v && eslint src/**/*.ts test",
     "check:test": "mocha --recursive test/functional test/unit",
     "check:ts": "tsc --noEmit",
+    "check:atlas": "mocha --config \"test/manual/mocharc.json\" test/manual/atlas_connectivity.test.js",
+    "check:ocsp": "mocha --config \"test/manual/mocharc.json\" test/manual/ocsp_support.test.js",
+    "prepublishOnly": "npm run build:ts",
     "release": "standard-version -i HISTORY.md",
     "test": "npm run check:lint && npm run check:test"
   },

@@ -1,14 +1,28 @@
 {
-  "extends": ["eslint:recommended", "plugin:prettier/recommended", "plugin:jsdoc/recommended"],
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2018
+  },
+  "plugins": [
+    "@typescript-eslint",
+    "prettier",
+    "promise",
+    "jsdoc"
+  ],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:@typescript-eslint/recommended",
+    "prettier/@typescript-eslint",
+    "plugin:prettier/recommended",
+    "plugin:jsdoc/recommended"
+  ],
   "env": {
     "node": true,
     "mocha": true,
     "es6": true
   },
-  "parserOptions": {
-    "ecmaVersion": 2018
-  },
-  "plugins": ["prettier", "promise", "jsdoc"],
   "rules": {
     "prettier/prettier": "error",
 
@@ -20,7 +34,6 @@
     ],
     "jsdoc/require-jsdoc": "off",
     "jsdoc/no-undefined-types": "off",
-
     "jsdoc/require-param": "off",
     "jsdoc/require-param-description": "off",
     "jsdoc/require-returns": "off",
@@ -31,16 +44,21 @@
     "no-console": "off",
     "eqeqeq": ["error", "always", { "null": "ignore" }],
     "strict": ["error", "global"],
-    "promise/no-native": "error"
+    "promise/no-native": "error",
+
+    // TBD
+    "@typescript-eslint/ban-types": "off",
+    "@typescript-eslint/explicit-module-boundary-types": "off",
+    "@typescript-eslint/no-empty-function": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-this-alias": "off",
+    "@typescript-eslint/no-non-null-assertion": "off",
+    "@typescript-eslint/no-var-requires": "off",
+    "no-var": "off",
+    "prefer-const": "off",
+    "prefer-spread": "off",
+    "prefer-rest-params": "off"
   },
-  "overrides": [
-    {
-      "files": ["test/**/*.js"],
-      "rules": {
-        "promise/no-native": "off"
-      }
-    }
-  ],
   "settings": {
     "jsdoc": {
       "check-types": false,

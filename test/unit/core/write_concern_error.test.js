@@ -1,8 +1,8 @@
 'use strict';
-const { Topology } = require('../../../lib/sdam/topology');
+const { Topology } = require('../../../src/sdam/topology');
 const mock = require('mongodb-mock-server');
 const { ReplSetFixture } = require('./common');
-const { MongoWriteConcernError } = require('../../../lib/error');
+const { MongoWriteConcernError } = require('../../../src/error');
 const { expect } = require('chai');
 
 describe('WriteConcernError', function() {

@@ -3,7 +3,7 @@ const test = require('./shared').assert;
 const setupDatabase = require('./shared').setupDatabase;
 const expect = require('chai').expect;
 const sinon = require('sinon');
-const { Code, ObjectID, Long, Binary } = require('../..');
+const { Code, ObjectID, Long, Binary } = require('../../src');
 
 describe('Find', function() {
   before(function() {
@@ -2913,7 +2913,7 @@ describe('Find', function() {
     metadata: { requires: { topology: ['single'] } },
 
     test: function(done) {
-      var listener = require('../..').instrument(function(err) {
+      var listener = require('../../src').instrument(function(err) {
         test.equal(null, err);
       });
 

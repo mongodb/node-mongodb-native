@@ -1,7 +1,7 @@
 'use strict';
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
-const { MongoClient } = require('../..');
+const { MongoClient } = require('../../src');
 
 describe('SCRAM', function() {
   before(function() {

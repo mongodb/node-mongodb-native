@@ -1,5 +1,0 @@
-  --recursive
-  --timeout 60000
-  --file test/tools/runner
-  --ui test/tools/runner/metadata_ui.js
-

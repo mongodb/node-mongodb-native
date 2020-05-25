@@ -1,6 +1,6 @@
 'use strict';
 
-const MongoClient = require('../..').MongoClient;
+const MongoClient = require('../../src').MongoClient;
 const expect = require('chai').expect;
 
 const OCSP_TLS_SHOULD_SUCCEED = process.env.OCSP_TLS_SHOULD_SUCCEED;

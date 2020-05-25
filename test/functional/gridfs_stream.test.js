@@ -8,7 +8,7 @@ const fs = require('fs');
 const { assert: test } = require('./shared');
 const { setupDatabase, withClient } = require('./shared');
 const { expect } = require('chai');
-const { GridFSBucket, ObjectId } = require('../..');
+const { GridFSBucket, ObjectId } = require('../../src');
 
 describe('GridFS Stream', function() {
   before(function() {

@@ -1,5 +1,5 @@
 'use strict';
-const { eachAsync, now, makeInterruptableAsyncInterval } = require('../../lib/utils');
+const { eachAsync, now, makeInterruptableAsyncInterval } = require('../../src/utils');
 const { expect } = require('chai');
 
 describe('utils', function() {

@@ -3,9 +3,9 @@
 const mock = require('mongodb-mock-server');
 const { expect } = require('chai');
 const { genClusterTime, sessionCleanupHandler } = require('./common');
-const { Topology } = require('../../../lib/sdam/topology');
-const { ServerSessionPool, ServerSession, ClientSession } = require('../../../lib/sessions');
-const { now } = require('../../../lib/utils');
+const { Topology } = require('../../../src/sdam/topology');
+const { ServerSessionPool, ServerSession, ClientSession } = require('../../../src/sessions');
+const { now } = require('../../../src/utils');
 
 let test = {};
 describe('Sessions', function() {

@@ -1,6 +1,6 @@
 'use strict';
 
-const instrument = require('../..').instrument;
+const { instrument } = require('../../src');
 const {
   setupDatabase,
   filterForCommands,
@@ -9,7 +9,7 @@ const {
 } = require('./shared');
 const { loadSpecTests } = require('../spec');
 const { expect } = require('chai');
-const ReadPreference = require('../../lib/read_preference');
+const ReadPreference = require('../../src/read_preference');
 
 describe('APM', function() {
   before(function() {
@@ -287,7 +287,7 @@ describe('APM', function() {
         const succeeded = [];
         const callbackTriggered = false;
 
-        // testListener = require('../..').instrument(
+        // testListener = require('../../src').instrument(
         //   {
         //     operationIdGenerator: {
         //       next: function() {

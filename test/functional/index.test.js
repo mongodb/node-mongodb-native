@@ -900,7 +900,7 @@ describe('Indexes', function() {
       var succeeded = [];
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
 
-      var listener = require('../..').instrument(function(err) {
+      var listener = require('../../src').instrument(function(err) {
         test.equal(null, err);
       });
 

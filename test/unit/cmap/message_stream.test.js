@@ -1,8 +1,8 @@
 'use strict';
 const Readable = require('stream').Readable;
 const Writable = require('stream').Writable;
-const MessageStream = require('../../../lib/cmap/message_stream');
-const { Msg } = require('../../../lib/cmap/commands');
+const MessageStream = require('../../../src/cmap/message_stream');
+const { Msg } = require('../../../src/cmap/commands');
 const expect = require('chai').expect;
 
 function bufferToStream(buffer) {

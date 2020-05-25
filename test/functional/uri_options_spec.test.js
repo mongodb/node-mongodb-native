@@ -4,8 +4,8 @@ const chai = require('chai');
 const expect = chai.expect;
 chai.use(require('chai-subset'));
 
-const { parseConnectionString: parse } = require('../../lib/connection_string');
-const { MongoParseError } = require('../../lib/error');
+const { parseConnectionString: parse } = require('../../src/connection_string');
+const { MongoParseError } = require('../../src/error');
 const { loadSpecTests } = require('../spec');
 
 describe('URI Options (spec)', function() {

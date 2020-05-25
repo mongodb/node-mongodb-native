@@ -1,7 +1,7 @@
 'use strict';
 
 const { expect } = require('chai');
-const { MongoError, MongoNetworkError } = require('../../../lib/error');
+const { MongoError, MongoNetworkError } = require('../../../src/error');
 
 describe('Error tests', function() {
   it('should create a MongoError from string', {

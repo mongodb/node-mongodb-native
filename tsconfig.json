@@ -11,7 +11,8 @@
     "moduleResolution": "node",
     "lib": ["ES2018"],
     "noEmitHelpers": true,
-    "noEmitOnError": true
+    "noEmitOnError": true,
+    "outDir": "lib"
   },
   "include": ["src/**/*"]
 }

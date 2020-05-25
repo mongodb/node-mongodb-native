@@ -2,11 +2,11 @@
 
 const util = require('util');
 const loadSpecTests = require('../../spec').loadSpecTests;
-const ConnectionPool = require('../../../lib/cmap/connection_pool').ConnectionPool;
-const WaitQueueTimeoutError = require('../../../lib/cmap/errors').WaitQueueTimeoutError;
+const ConnectionPool = require('../../../src/cmap/connection_pool').ConnectionPool;
+const WaitQueueTimeoutError = require('../../../src/cmap/errors').WaitQueueTimeoutError;
 const EventEmitter = require('events').EventEmitter;
 const mock = require('mongodb-mock-server');
-const cmapEvents = require('../../../lib/cmap/events');
+const cmapEvents = require('../../../src/cmap/events');
 const sinon = require('sinon');
 const chai = require('chai');
 chai.use(require('../../functional/spec-runner/matcher').default);

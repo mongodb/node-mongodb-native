@@ -1,14 +1,14 @@
 'use strict';
 const assert = require('assert');
 const { Transform } = require('stream');
-const { MongoNetworkError } = require('../../lib/error');
+const { MongoNetworkError } = require('../../src/error');
 const { delay, setupDatabase, withClient, withCursor } = require('./shared');
 const co = require('co');
 const mock = require('mongodb-mock-server');
 const chai = require('chai');
 const expect = chai.expect;
 const sinon = require('sinon');
-const { ObjectId, Timestamp, Long, ReadPreference } = require('../..');
+const { ObjectId, Timestamp, Long, ReadPreference } = require('../../src');
 const fs = require('fs');
 const crypto = require('crypto');
 

@@ -6,7 +6,7 @@ const { expect } = require('chai');
 const BSON = require('bson');
 const sinon = require('sinon');
 const { Writable } = require('stream');
-const ReadPreference = require('../../lib/read_preference');
+const ReadPreference = require('../../src/read_preference');
 
 describe('Cursor', function() {
   before(function() {
@@ -3693,7 +3693,7 @@ describe('Cursor', function() {
 
     test: function(done) {
       var started = [];
-      var listener = require('../..').instrument(function(err) {
+      var listener = require('../../src').instrument(function(err) {
         test.equal(null, err);
       });
 
@@ -3739,7 +3739,7 @@ describe('Cursor', function() {
     test: function(done) {
       var started = [];
 
-      var listener = require('../..').instrument(function(err) {
+      var listener = require('../../src').instrument(function(err) {
         test.equal(null, err);
       });
 

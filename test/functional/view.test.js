@@ -2,7 +2,7 @@
 var expect = require('chai').expect,
   mock = require('mongodb-mock-server'),
   co = require('co');
-const { Long } = require('../..');
+const { Long } = require('../../src');
 
 describe('Views', function() {
   it('should successfully pass through collation to findAndModify command', {

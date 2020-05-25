@@ -6,14 +6,14 @@
  * @see https://docs.mongodb.com/manual/reference/read-concern/index.html
  */
 class ReadConcern {
-  level?: string
+  level?: string;
 
   /**
    * Constructs a ReadConcern from the read concern properties.
    *
    * @param {string} [level] The read concern level ({'local'|'available'|'majority'|'linearizable'|'snapshot'})
    */
-  constructor(level: string) {
+  constructor(level?: string) {
     if (level != null) {
       this.level = level;
     }
@@ -22,10 +22,10 @@ class ReadConcern {
   /**
    * Construct a ReadConcern given an options object.
    *
-   * @param {object} options The options object from which to extract the write concern.
-   * @returns {ReadConcern}
+   * @param {any} options The options object from which to extract the write concern.
+   * @returns {ReadConcern|undefined}
    */
-  static fromOptions(options: any) {
+  static fromOptions(options: any): ReadConcern | undefined {
     if (options == null) {
       return;
     }
@@ -60,4 +60,4 @@ class ReadConcern {
   }
 }
 
-module.exports = ReadConcern;
+export = ReadConcern;

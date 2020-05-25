@@ -4,7 +4,7 @@ const expect = require('chai').expect;
 const mock = require('mongodb-mock-server');
 const ReplSetFixture = require('../common').ReplSetFixture;
 
-const core = require('../../../../lib/core');
+const core = require('../../../../src/core');
 const ReplSet = core.ReplSet;
 const ClientSession = core.Sessions.ClientSession;
 const ServerSessionPool = core.Sessions.ServerSessionPool;

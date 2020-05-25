@@ -6,7 +6,7 @@ const executeCommand = require('./shared').executeCommand;
 const BSON = require('bson');
 const mock = require('mongodb-mock-server');
 
-const core = require('../../../lib/core');
+const core = require('../../../src/core');
 const ReadPreference = core.ReadPreference;
 const MongoCredentials = core.MongoCredentials;
 const Connection = core.Connection;

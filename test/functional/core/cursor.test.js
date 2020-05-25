@@ -342,7 +342,7 @@ describe('Cursor tests', function() {
   //   metadata: { requires: { topology: ['single'] } },
   //   test: function(done) {
   //     var configuration = this.configuration,
-  //       Server = require('../../../lib/core/topologies/server'),
+  //       Server = require('../../../src/core/topologies/server'),
   //     // Attempt to connect
   //     var server = new Server({
   //       host: configuration.host,

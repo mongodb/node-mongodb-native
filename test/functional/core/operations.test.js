@@ -4,7 +4,7 @@ const expect = require('chai').expect;
 const f = require('util').format;
 const mock = require('mongodb-mock-server');
 const { setupDatabase } = require('./shared');
-const ReadPreference = require('../../../lib/read_preference');
+const ReadPreference = require('../../../src/read_preference');
 
 describe('Operation tests', function() {
   beforeEach(function() {

@@ -18,4 +18,4 @@ export NVM_DIR="${PROJECT_DIRECTORY}/node-artifacts/nvm"
 MONGODB_UNIFIED_TOPOLOGY=${UNIFIED} \
 OCSP_TLS_SHOULD_SUCCEED=${OCSP_TLS_SHOULD_SUCCEED} \
 CA_FILE=${CA_FILE} \
-npx mocha --opts '{}' test/manual/ocsp_support.test.js
+npm run check:ocsp

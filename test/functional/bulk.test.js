@@ -3,7 +3,7 @@ const test = require('./shared').assert,
   setupDatabase = require('./shared').setupDatabase,
   expect = require('chai').expect;
 
-const MongoError = require('../../index').MongoError;
+const MongoError = require('../../src/error').MongoError;
 const ignoreNsNotFound = require('./shared').ignoreNsNotFound;
 
 describe('Bulk', function() {
@@ -63,7 +63,7 @@ describe('Bulk', function() {
 
             // Get the first error
             error = result.getWriteErrorAt(1);
-            test.equal(null, error);
+            expect(error).to.not.exist;
 
             // Finish up test
             client.close(done);
@@ -651,7 +651,7 @@ describe('Bulk', function() {
 
             // Get the first error
             error = result.getWriteErrorAt(1);
-            test.equal(null, error);
+            expect(error).to.not.exist;
 
             // Finish up test
             client.close(done);
