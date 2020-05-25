@@ -63,7 +63,7 @@ describe('Bulk', function() {
 
             // Get the first error
             error = result.getWriteErrorAt(1);
-            test.equal(null, error);
+            expect(error).to.not.exist;
 
             // Finish up test
             client.close(done);
@@ -651,7 +651,7 @@ describe('Bulk', function() {
 
             // Get the first error
             error = result.getWriteErrorAt(1);
-            test.equal(null, error);
+            expect(error).to.not.exist;
 
             // Finish up test
             client.close(done);
