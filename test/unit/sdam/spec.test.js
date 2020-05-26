@@ -273,7 +273,7 @@ function executeSDAMTest(testData, testDone) {
         });
 
         // remove error handler
-        topology.removeListener('error', incompatabilityHandler);
+        topology.removeListener('error', incompatibilityHandler);
 
         // reset the captured events for each phase
         events = [];
