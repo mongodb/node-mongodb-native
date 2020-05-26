@@ -4,6 +4,7 @@ const test = require('./shared').assert,
   expect = require('chai').expect;
 
 const MongoError = require('../../index').MongoError;
+const ignoreNsNotFound = require('./shared').ignoreNsNotFound;
 
 describe('Bulk', function() {
   before(function() {
@@ -1616,16 +1617,41 @@ describe('Bulk', function() {
       .then(() => client.close());
   });
 
+  it('should promote a single error to the top-level message, and preserve writeErrors', function() {
+    const client = this.configuration.newClient();
+    return client.connect().then(() => {
+      this.defer(() => client.close());
+
+      const coll = client.db().collection('single_bulk_write_error');
+      return coll
+        .drop()
+        .catch(ignoreNsNotFound)
+        .then(() => coll.insert(Array.from({ length: 4 }, (_, i) => ({ _id: i, a: i }))))
+        .then(() =>
+          coll.bulkWrite([{ insertOne: { _id: 5, a: 0 } }, { insertOne: { _id: 5, a: 0 } }])
+        )
+        .then(
+          () => {
+            throw new Error('expected a bulk error');
+          },
+          err => {
+            expect(err)
+              .property('message')
+              .to.match(/E11000/);
+            expect(err)
+              .to.have.property('writeErrors')
+              .with.length(1);
+          }
+        );
+    });
+  });
+
   it('should preserve order of operation index in unordered bulkWrite', function() {
     const client = this.configuration.newClient();
     return client.connect().then(() => {
       this.defer(() => client.close());
 
       const coll = client.db().collection('bulk_write_ordering_test');
-      function ignoreNsNotFound(err) {
-        if (!err.message.match(/ns not found/)) throw err;
-      }
-
       return coll
         .drop()
         .catch(ignoreNsNotFound)
@@ -1667,10 +1693,6 @@ describe('Bulk', function() {
       this.defer(() => client.close());
 
       const coll = client.db().collection('unordered_preserve_order');
-      function ignoreNsNotFound(err) {
-        if (!err.message.match(/ns not found/)) throw err;
-      }
-
       return coll
         .drop()
         .catch(ignoreNsNotFound)
@@ -1704,10 +1726,6 @@ describe('Bulk', function() {
       this.defer(() => client.close());
 
       const coll = client.db().collection('bulk_op_ordering_test');
-      function ignoreNsNotFound(err) {
-        if (!err.message.match(/ns not found/)) throw err;
-      }
-
       return coll
         .drop()
         .catch(ignoreNsNotFound)
