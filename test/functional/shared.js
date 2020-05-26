@@ -193,7 +193,7 @@ function withMonitoredClient(commands, options, callback) {
  * Safely perform a test with an arbitrary cursor.
  *
  * @param {Function} cursor any cursor that needs to be closed
- * @param {(cursor: Object, done: Function) => void} body test body
+ * @param {(cursor: object, done: Function) => void} body test body
  * @param {Function} done called after cleanup
  */
 function withCursor(cursor, body, done) {
