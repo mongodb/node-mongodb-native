@@ -4,11 +4,12 @@ require('util.promisify/shim')();
 const util = require('util');
 const loadSpecTests = require('../../spec').loadSpecTests;
 const ConnectionPool = require('../../../lib/cmap/connection_pool').ConnectionPool;
+const WaitQueueTimeoutError = require('../../../lib/cmap/errors').WaitQueueTimeoutError;
 const EventEmitter = require('events').EventEmitter;
 const mock = require('mongodb-mock-server');
 const BSON = require('bson');
 const cmapEvents = require('../../../lib/cmap/events');
-
+const sinon = require('sinon');
 const chai = require('chai');
 chai.use(require('../../functional/spec-runner/matcher').default);
 const expect = chai.expect;
@@ -115,6 +116,42 @@ describe('Connection Pool', function() {
       },
       () => pool.close(done)
     );
+  });
+
+  it('should clear timed out wait queue members if no connections are available', function(done) {
+    server.setMessageHandler(request => {
+      const doc = request.document;
+      if (doc.ismaster) {
+        request.reply(mock.DEFAULT_ISMASTER_36);
+      }
+    });
+
+    const pool = new ConnectionPool(
+      Object.assign({ bson: new BSON(), maxPoolSize: 1, waitQueueTimeoutMS: 200 }, server.address())
+    );
+
+    pool.checkOut((err, conn) => {
+      expect(err).to.not.exist;
+      expect(conn).to.exist;
+
+      pool.checkOut(err => {
+        expect(err).to.exist.and.be.instanceOf(WaitQueueTimeoutError);
+
+        // We can only process the wait queue with `checkIn` and `checkOut`, so we
+        // force the pool here to think there are no available connections, even though
+        // we are checking the connection back in. This simulates a slow leak where
+        // incoming requests outpace the ability of the queue to fully process cancelled
+        // wait queue members
+        sinon.stub(pool, 'availableConnectionCount').get(() => 0);
+        pool.checkIn(conn);
+
+        expect(pool)
+          .property('waitQueueSize')
+          .to.equal(0);
+
+        done();
+      });
+    });
   });
 
   describe('withConnection', function() {
