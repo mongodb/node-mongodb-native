@@ -123,7 +123,7 @@ describe('Connection Pool', function() {
     });
 
     const pool = new ConnectionPool(
-      Object.assign({ bson: new BSON(), maxPoolSize: 1, waitQueueTimeoutMS: 200 }, server.address())
+      Object.assign({ maxPoolSize: 1, waitQueueTimeoutMS: 200 }, server.address())
     );
 
     pool.checkOut((err, conn) => {
