@@ -341,6 +341,10 @@
             </span>
             <ul class="members itemMembers">
             
+            <span class="subtitle">Members</span>
+            
+                <li data-name="BulkWriteError#errmsg"><a href="BulkWriteError.html#errmsg">errmsg</a></li>
+            
             </ul>
             <ul class="typedefs itemMembers">
             
@@ -1715,6 +1719,10 @@
             </span>
             <ul class="members itemMembers">
             
+            <span class="subtitle">Members</span>
+            
+                <li data-name="MongoError#errmsg"><a href="MongoError.html#errmsg">errmsg</a></li>
+            
             </ul>
             <ul class="typedefs itemMembers">
             
@@ -1740,6 +1748,10 @@
             </span>
             <ul class="members itemMembers">
             
+            <span class="subtitle">Members</span>
+            
+                <li data-name="MongoNetworkError#errmsg"><a href="MongoNetworkError.html#errmsg">errmsg</a></li>
+            
             </ul>
             <ul class="typedefs itemMembers">
             
@@ -1762,6 +1774,10 @@
                 
             </span>
             <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="MongoParseError#errmsg"><a href="MongoParseError.html#errmsg">errmsg</a></li>
             
             </ul>
             <ul class="typedefs itemMembers">
@@ -1833,6 +1849,10 @@
             </span>
             <ul class="members itemMembers">
             
+            <span class="subtitle">Members</span>
+            
+                <li data-name="MongoServerSelectionError#errmsg"><a href="MongoServerSelectionError.html#errmsg">errmsg</a></li>
+            
             </ul>
             <ul class="typedefs itemMembers">
             
@@ -1856,6 +1876,10 @@
             </span>
             <ul class="members itemMembers">
             
+            <span class="subtitle">Members</span>
+            
+                <li data-name="MongoTimeoutError#errmsg"><a href="MongoTimeoutError.html#errmsg">errmsg</a></li>
+            
             </ul>
             <ul class="typedefs itemMembers">
             
@@ -1878,6 +1902,10 @@
                 
             </span>
             <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="MongoWriteConcernError#errmsg"><a href="MongoWriteConcernError.html#errmsg">errmsg</a></li>
             
             </ul>
             <ul class="typedefs itemMembers">
@@ -2301,7 +2329,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_change_stream.js.html">lib/change_stream.js</a>, <a href="lib_change_stream.js.html#line48">line 48</a>
+            <a href="lib_change_stream.js.html">lib/change_stream.js</a>, <a href="lib_change_stream.js.html#line51">line 51</a>
         </div>
         
     </div>
@@ -2627,7 +2655,7 @@ after the most recently returned change.</p></td>
     
         
         <div class="tag-source">
-            <a href="lib_change_stream.js.html">lib/change_stream.js</a>, <a href="lib_change_stream.js.html#line163">line 163</a>
+            <a href="lib_change_stream.js.html">lib/change_stream.js</a>, <a href="lib_change_stream.js.html#line177">line 177</a>
         </div>
         
     </div>
@@ -2759,7 +2787,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_change_stream.js.html">lib/change_stream.js</a>, <a href="lib_change_stream.js.html#line125">line 125</a>
+            <a href="lib_change_stream.js.html">lib/change_stream.js</a>, <a href="lib_change_stream.js.html#line128">line 128</a>
         </div>
         
     </div>
@@ -2901,12 +2929,12 @@ Promise if no callback passed
     <div class="nameContainer">
         <h4 class="name" id="isClosed">
             
-            isClosed<span class="signature">()</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{boolean}</span>
+            isClosed<span class="signature">(<span class="optional">checkCursor</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{boolean}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_change_stream.js.html">lib/change_stream.js</a>, <a href="lib_change_stream.js.html#line154">line 154</a>
+            <a href="lib_change_stream.js.html">lib/change_stream.js</a>, <a href="lib_change_stream.js.html#line167">line 167</a>
         </div>
         
     </div>
@@ -2917,7 +2945,7 @@ Promise if no callback passed
     
     
     <div class="description">
-        <p>Is the cursor closed</p>
+        <p>Is the change stream closed</p>
     </div>
     
 
@@ -2925,6 +2953,66 @@ Promise if no callback passed
     
     
     
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		<th>Default</th>
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>checkCursor</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    true
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>also check if the underlying cursor is closed</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
     
     
     
@@ -2982,7 +3070,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_change_stream.js.html">lib/change_stream.js</a>, <a href="lib_change_stream.js.html#line136">line 136</a>
+            <a href="lib_change_stream.js.html">lib/change_stream.js</a>, <a href="lib_change_stream.js.html#line144">line 144</a>
         </div>
         
     </div>
@@ -3129,7 +3217,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_change_stream.js.html">lib/change_stream.js</a>, <a href="lib_change_stream.js.html#line231">line 231</a>
+            <a href="lib_change_stream.js.html">lib/change_stream.js</a>, <a href="lib_change_stream.js.html#line247">line 247</a>
         </div>
         
     </div>
@@ -3205,7 +3293,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_change_stream.js.html">lib/change_stream.js</a>, <a href="lib_change_stream.js.html#line195">line 195</a>
+            <a href="lib_change_stream.js.html">lib/change_stream.js</a>, <a href="lib_change_stream.js.html#line211">line 211</a>
         </div>
         
     </div>
@@ -3361,7 +3449,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_change_stream.js.html">lib/change_stream.js</a>, <a href="lib_change_stream.js.html#line239">line 239</a>
+            <a href="lib_change_stream.js.html">lib/change_stream.js</a>, <a href="lib_change_stream.js.html#line255">line 255</a>
         </div>
         
     </div>
@@ -3437,7 +3525,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_change_stream.js.html">lib/change_stream.js</a>, <a href="lib_change_stream.js.html#line222">line 222</a>
+            <a href="lib_change_stream.js.html">lib/change_stream.js</a>, <a href="lib_change_stream.js.html#line238">line 238</a>
         </div>
         
     </div>
@@ -3617,7 +3705,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_change_stream.js.html">lib/change_stream.js</a>, <a href="lib_change_stream.js.html#line208">line 208</a>
+            <a href="lib_change_stream.js.html">lib/change_stream.js</a>, <a href="lib_change_stream.js.html#line224">line 224</a>
         </div>
         
     </div>
@@ -3751,7 +3839,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_change_stream.js.html">lib/change_stream.js</a>, <a href="lib_change_stream.js.html#line541">line 541</a>
+            <a href="lib_change_stream.js.html">lib/change_stream.js</a>, <a href="lib_change_stream.js.html#line604">line 604</a>
         </div>
         
     </div>
@@ -3899,7 +3987,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_change_stream.js.html">lib/change_stream.js</a>, <a href="lib_change_stream.js.html#line376">line 376</a>
+            <a href="lib_change_stream.js.html">lib/change_stream.js</a>, <a href="lib_change_stream.js.html#line392">line 392</a>
         </div>
         
     </div>
@@ -3982,7 +4070,7 @@ then be passed as soon as it is available.</p>
     
         
         <div class="tag-source">
-            <a href="lib_change_stream.js.html">lib/change_stream.js</a>, <a href="lib_change_stream.js.html#line390">line 390</a>
+            <a href="lib_change_stream.js.html">lib/change_stream.js</a>, <a href="lib_change_stream.js.html#line406">line 406</a>
         </div>
         
     </div>
@@ -4063,7 +4151,7 @@ then be passed as soon as it is available.</p>
     
         
         <div class="tag-source">
-            <a href="lib_change_stream.js.html">lib/change_stream.js</a>, <a href="lib_change_stream.js.html#line397">line 397</a>
+            <a href="lib_change_stream.js.html">lib/change_stream.js</a>, <a href="lib_change_stream.js.html#line413">line 413</a>
         </div>
         
     </div>
@@ -4144,7 +4232,7 @@ then be passed as soon as it is available.</p>
     
         
         <div class="tag-source">
-            <a href="lib_change_stream.js.html">lib/change_stream.js</a>, <a href="lib_change_stream.js.html#line411">line 411</a>
+            <a href="lib_change_stream.js.html">lib/change_stream.js</a>, <a href="lib_change_stream.js.html#line427">line 427</a>
         </div>
         
     </div>
@@ -4225,7 +4313,7 @@ then be passed as soon as it is available.</p>
     
         
         <div class="tag-source">
-            <a href="lib_change_stream.js.html">lib/change_stream.js</a>, <a href="lib_change_stream.js.html#line404">line 404</a>
+            <a href="lib_change_stream.js.html">lib/change_stream.js</a>, <a href="lib_change_stream.js.html#line420">line 420</a>
         </div>
         
     </div>
@@ -4306,7 +4394,7 @@ then be passed as soon as it is available.</p>
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Sun May 17 2020 10:34:37 GMT-0400 (EDT)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Thu May 28 2020 10:09:43 GMT-0400 (EDT)
                     </footer>
                 </div>
             </td>
