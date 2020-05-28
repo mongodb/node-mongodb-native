@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="3.5.8"></a>
+## [3.5.8](https://github.com/mongodb/node-mongodb-native/compare/v3.5.7...v3.5.8) (2020-05-28)
+
+
+### Bug Fixes
+
+* always clear cancelled wait queue members during processing ([0394f9d](https://github.com/mongodb/node-mongodb-native/commit/0394f9d))
+* always include `writeErrors` on a `BulkWriteError` instance ([58b4f94](https://github.com/mongodb/node-mongodb-native/commit/58b4f94))
+* ensure implicit sessions are ended consistently ([5c6fda1](https://github.com/mongodb/node-mongodb-native/commit/5c6fda1))
+* filter servers before applying reducers ([4faf9f5](https://github.com/mongodb/node-mongodb-native/commit/4faf9f5))
+* unordered bulk write should attempt to execute all batches ([6cee96b](https://github.com/mongodb/node-mongodb-native/commit/6cee96b))
+* **ChangeStream:** should resume from errors when iterating ([5ecf18e](https://github.com/mongodb/node-mongodb-native/commit/5ecf18e))
+* honor journal=true in connection string ([#2359](https://github.com/mongodb/node-mongodb-native/issues/2359)) ([246669f](https://github.com/mongodb/node-mongodb-native/commit/246669f))
+* **ChangeStream:** whitelist resumable errors ([#2337](https://github.com/mongodb/node-mongodb-native/issues/2337)) ([a9d3965](https://github.com/mongodb/node-mongodb-native/commit/a9d3965)), closes [#17](https://github.com/mongodb/node-mongodb-native/issues/17) [#18](https://github.com/mongodb/node-mongodb-native/issues/18)
+
+
+
 <a name="3.5.7"></a>
 ## [3.5.7](https://github.com/mongodb/node-mongodb-native/compare/v3.5.6...v3.5.7) (2020-04-29)
 
