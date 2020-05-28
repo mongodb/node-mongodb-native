@@ -1,0 +1,87 @@
+runOn:
+    # 4.4 is required for streaming.
+    # A replica set is required for replSetStepDown.
+    - minServerVersion: "4.4"
+      topology: ["replicaset"]
+
+database_name: &database_name "sdam-tests"
+collection_name: &collection_name "test-replSetStepDown"
+
+data: &data
+  - {_id: 1}
+  - {_id: 2}
+
+tests:
+  - description: Rediscover quickly after replSetStepDown
+    clientOptions:
+      appname: replSetStepDownTest
+      # Configure a large heartbeatFrequencyMS
+      heartbeatFrequencyMS: 60000
+      # Configure a much smaller server selection timeout so that the test
+      # will error when it cannot discover the new primary soon.
+      serverSelectionTimeoutMS: 5000
+      w: majority
+    operations:
+      # Discover the primary.
+      - name: insertMany
+        object: collection
+        arguments:
+          documents:
+            - _id: 3
+            - _id: 4
+      - name: recordPrimary
+        object: testRunner
+      # Run replSetStepDown on the meta client.
+      - name: runAdminCommand
+        object: testRunner
+        command_name: replSetStepDown
+        arguments:
+          command:
+            replSetStepDown: 1
+            secondaryCatchUpPeriodSecs: 1
+            force: false
+      - name: waitForPrimaryChange
+        object: testRunner
+        arguments:
+          timeoutMS: 5000
+      # Rediscover the new primary.
+      - name: insertMany
+        object: collection
+        arguments:
+          documents:
+            - _id: 5
+            - _id: 6
+      # Assert that no pools were cleared.
+      - name: assertEventCount
+        object: testRunner
+        arguments:
+          event: PoolClearedEvent
+          count: 0
+
+    expectations:
+      - command_started_event:
+          command:
+            insert: *collection_name
+            documents:
+              - _id: 3
+              - _id: 4
+          command_name: insert
+          database_name: *database_name
+      - command_started_event:
+          command:
+            insert: *collection_name
+            documents:
+              - _id: 5
+              - _id: 6
+          command_name: insert
+          database_name: *database_name
+
+    outcome:
+      collection:
+        data:
+          - {_id: 1}
+          - {_id: 2}
+          - {_id: 3}
+          - {_id: 4}
+          - {_id: 5}
+          - {_id: 6}
