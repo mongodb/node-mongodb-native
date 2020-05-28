@@ -1470,7 +1470,7 @@ describe('GridFS Stream', function() {
     }
   });
 
-  it('NODE-2623 uncaught error on end > size', function() {
+  it('NODE-2623 downloadStream should emit error on end > size', function() {
     const configuration = this.configuration;
     return withClient.bind(this)((client, done) => {
       const GridFSBucket = configuration.require.GridFSBucket;
@@ -1493,7 +1493,7 @@ describe('GridFS Stream', function() {
           expect(err.message).to.equal(
             `Stream end (${wrongExpectedSize}) must not be more than the length of the file (${actualSize})`
           );
-          client.close(done);
+          done();
         });
       });
 
