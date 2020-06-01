@@ -1,7 +1,7 @@
 {
   "runOn": [
     {
-      "minServerVersion": "4.3.1",
+      "minServerVersion": "4.3.4",
       "topology": [
         "replicaset",
         "sharded"
@@ -13,57 +13,63 @@
   "data": [],
   "tests": [
     {
-      "description": "abortTransaction only retries once with RetryableWriteError from server",
-      "failPoint": {
-        "configureFailPoint": "failCommand",
-        "mode": {
-          "times": 2
-        },
-        "data": {
-          "failCommands": [
-            "abortTransaction"
-          ],
-          "errorCode": 112,
-          "errorLabels": [
-            "RetryableWriteError"
-          ]
-        }
-      },
+      "description": "explicitly create collection using create command",
       "operations": [
+        {
+          "name": "dropCollection",
+          "object": "database",
+          "arguments": {
+            "collection": "test"
+          }
+        },
         {
           "name": "startTransaction",
           "object": "session0"
         },
         {
-          "name": "insertOne",
-          "object": "collection",
+          "name": "createCollection",
+          "object": "database",
           "arguments": {
             "session": "session0",
-            "document": {
-              "_id": 1
-            }
-          },
-          "result": {
-            "insertedId": 1
+            "collection": "test"
           }
         },
         {
-          "name": "abortTransaction",
+          "name": "assertCollectionNotExists",
+          "object": "testRunner",
+          "arguments": {
+            "database": "transaction-tests",
+            "collection": "test"
+          }
+        },
+        {
+          "name": "commitTransaction",
           "object": "session0"
+        },
+        {
+          "name": "assertCollectionExists",
+          "object": "testRunner",
+          "arguments": {
+            "database": "transaction-tests",
+            "collection": "test"
+          }
         }
       ],
       "expectations": [
         {
           "command_started_event": {
             "command": {
-              "insert": "test",
-              "documents": [
-                {
-                  "_id": 1
-                }
-              ],
-              "ordered": true,
-              "readConcern": null,
+              "drop": "test",
+              "writeConcern": null
+            },
+            "command_name": "drop",
+            "database_name": "transaction-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "create": "test",
               "lsid": "session0",
               "txnNumber": {
                 "$numberLong": "1"
@@ -72,14 +78,14 @@
               "autocommit": false,
               "writeConcern": null
             },
-            "command_name": "insert",
+            "command_name": "create",
             "database_name": "transaction-tests"
           }
         },
         {
           "command_started_event": {
             "command": {
-              "abortTransaction": 1,
+              "commitTransaction": 1,
               "lsid": "session0",
               "txnNumber": {
                 "$numberLong": "1"
@@ -88,49 +94,22 @@
               "autocommit": false,
               "writeConcern": null
             },
-            "command_name": "abortTransaction",
-            "database_name": "admin"
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
-              "abortTransaction": 1,
-              "lsid": "session0",
-              "txnNumber": {
-                "$numberLong": "1"
-              },
-              "startTransaction": null,
-              "autocommit": false,
-              "writeConcern": null
-            },
-            "command_name": "abortTransaction",
+            "command_name": "commitTransaction",
             "database_name": "admin"
           }
         }
-      ],
-      "outcome": {
-        "collection": {
-          "data": []
-        }
-      }
+      ]
     },
     {
-      "description": "abortTransaction does not retry without RetryableWriteError label",
-      "failPoint": {
-        "configureFailPoint": "failCommand",
-        "mode": {
-          "times": 1
-        },
-        "data": {
-          "failCommands": [
-            "abortTransaction"
-          ],
-          "errorCode": 11600,
-          "errorLabels": []
-        }
-      },
+      "description": "implicitly create collection using insert",
       "operations": [
+        {
+          "name": "dropCollection",
+          "object": "database",
+          "arguments": {
+            "collection": "test"
+          }
+        },
         {
           "name": "startTransaction",
           "object": "session0"
@@ -149,11 +128,37 @@
           }
         },
         {
-          "name": "abortTransaction",
+          "name": "assertCollectionNotExists",
+          "object": "testRunner",
+          "arguments": {
+            "database": "transaction-tests",
+            "collection": "test"
+          }
+        },
+        {
+          "name": "commitTransaction",
           "object": "session0"
+        },
+        {
+          "name": "assertCollectionExists",
+          "object": "testRunner",
+          "arguments": {
+            "database": "transaction-tests",
+            "collection": "test"
+          }
         }
       ],
       "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "drop": "test",
+              "writeConcern": null
+            },
+            "command_name": "drop",
+            "database_name": "transaction-tests"
+          }
+        },
         {
           "command_started_event": {
             "command": {
@@ -180,7 +185,7 @@
         {
           "command_started_event": {
             "command": {
-              "abortTransaction": 1,
+              "commitTransaction": 1,
               "lsid": "session0",
               "txnNumber": {
                 "$numberLong": "1"
@@ -189,16 +194,11 @@
               "autocommit": false,
               "writeConcern": null
             },
-            "command_name": "abortTransaction",
+            "command_name": "commitTransaction",
             "database_name": "admin"
           }
         }
-      ],
-      "outcome": {
-        "collection": {
-          "data": []
-        }
-      }
+      ]
     }
   ]
 }

@@ -384,6 +384,70 @@ the given session is not pinned to a mongos::
         arguments:
           session: session0
 
+assertCollectionExists
+~~~~~~~~~~~~~~~~~~~~~~
+
+The "assertCollectionExists" operation instructs the test runner to assert that
+the given collection exists in the database::
+
+      - name: assertCollectionExists
+        object: testRunner
+        arguments:
+          database: db
+          collection: test
+
+Use a ``listCollections`` command to check whether the collection exists. Note
+that it is currently not possible to run ``listCollections`` from within a
+transaction.
+
+assertCollectionNotExists
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The "assertCollectionNotExists" operation instructs the test runner to assert
+that the given collection does not exist in the database::
+
+      - name: assertCollectionNotExists
+        object: testRunner
+        arguments:
+          database: db
+          collection: test
+
+Use a ``listCollections`` command to check whether the collection exists. Note
+that it is currently not possible to run ``listCollections`` from within a
+transaction.
+
+assertIndexExists
+~~~~~~~~~~~~~~~~~
+
+The "assertIndexExists" operation instructs the test runner to assert that the
+index with the given name exists on the collection::
+
+      - name: assertIndexExists
+        object: testRunner
+        arguments:
+          database: db
+          collection: test
+          index: t_1
+
+Use a ``listIndexes`` command to check whether the index exists. Note that it is
+currently not possible to run ``listIndexes`` from within a transaction.
+
+assertIndexNotExists
+~~~~~~~~~~~~~~~~~~~~
+
+The "assertIndexNotExists" operation instructs the test runner to assert that
+the index with the given name does not exist on the collection::
+
+      - name: assertIndexNotExists
+        object: testRunner
+        arguments:
+          database: db
+          collection: test
+          index: t_1
+
+Use a ``listIndexes`` command to check whether the index exists. Note that it is
+currently not possible to run ``listIndexes`` from within a transaction.
+
 Command-Started Events
 ``````````````````````
 

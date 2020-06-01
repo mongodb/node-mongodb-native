@@ -33,7 +33,7 @@ tests:
       - name: commitTransaction
         object: session0
         result:
-          errorLabelsOmit: ["RetryableWriteError", "TransientTransactionError", "UnknownTransactionCommitResult"]
+          errorLabelsOmit: ["RetryableWriteError", "TransientTransactionError"]
     expectations:
       - command_started_event:
           command:
