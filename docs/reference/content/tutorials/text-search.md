@@ -10,7 +10,7 @@ title = "Text Search"
 
 # Text Search
 
-> [Atlas Search](https://www.mongodb.com/cloud/atlas?tck=docs_server) makes it easy to build fast, relevance-based search capabilities on top of your MongoDB data. Try it today on [MongoDB Atlas](https://www.mongodb.com/cloud/atlas?tck=docs_server), our fully managed database as a service.
+> [Atlas Search](https://www.mongodb.com/cloud/atlas-search?tck=docs_server) makes it easy to build fast, relevance-based search capabilities on top of your MongoDB data. Try it today on [MongoDB Atlas](https://www.mongodb.com/cloud/atlas?tck=docs_server), our fully managed database as a service.
 
 Use the [$text](https://docs.mongodb.org/manual/reference/operator/query/text/)
 operator to perform text searches on fields which have a
