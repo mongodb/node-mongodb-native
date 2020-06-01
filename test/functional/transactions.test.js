@@ -69,9 +69,7 @@ class TransactionsRunnerContext extends TestRunnerContext {
 describe('Transactions', function() {
   const testContext = new TransactionsRunnerContext();
 
-  [
-    { name: 'spec tests', specPath: 'transactions' }
-  ].forEach(suiteSpec => {
+  [{ name: 'spec tests', specPath: 'transactions' }].forEach(suiteSpec => {
     describe(suiteSpec.name, function() {
       const testSuites = loadSpecTests(suiteSpec.specPath);
       after(() => testContext.teardown());
