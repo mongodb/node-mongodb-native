@@ -54,7 +54,8 @@
           "result": {
             "errorLabelsOmit": [
               "RetryableWriteError",
-              "TransientTransactionError"
+              "TransientTransactionError",
+              "UnknownTransactionCommitResult"
             ]
           }
         }
