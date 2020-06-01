@@ -70,11 +70,7 @@ describe('Transactions', function() {
   const testContext = new TransactionsRunnerContext();
 
   [
-    { name: 'spec tests', specPath: 'transactions' },
-    {
-      name: 'withTransaction spec tests',
-      specPath: 'transactions/convenient-api'
-    }
+    { name: 'spec tests', specPath: 'transactions' }
   ].forEach(suiteSpec => {
     describe(suiteSpec.name, function() {
       const testSuites = loadSpecTests(suiteSpec.specPath);
