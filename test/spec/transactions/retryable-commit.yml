@@ -252,7 +252,7 @@ tests:
       collection:
         data: []
 
-  - description: commitTransaction is not retried after UnsatisfiableWriteConcern error
+  - description: commitTransaction fails after WriteConcernError Interrupted
 
     failPoint:
       configureFailPoint: failCommand
@@ -260,8 +260,8 @@ tests:
       data:
           failCommands: ["commitTransaction"]
           writeConcernError:
-            code: 100
-            errmsg: Not enough data-bearing nodes
+            code: 11601
+            errmsg: operation was interrupted
 
     operations:
       - name: startTransaction
@@ -393,7 +393,7 @@ tests:
       data:
           failCommands: ["commitTransaction"]
           errorCode: 10107
-          errorLabels: ["RetryableWriteError"]
+          errorLabels: ["RetryableWriteError"] # SPEC-1565
           closeConnection: false
 
     operations:
@@ -463,7 +463,7 @@ tests:
       data:
           failCommands: ["commitTransaction"]
           errorCode: 13436
-          errorLabels: ["RetryableWriteError"]
+          errorLabels: ["RetryableWriteError"] # SPEC-1565
           closeConnection: false
 
     operations:
@@ -533,7 +533,7 @@ tests:
       data:
           failCommands: ["commitTransaction"]
           errorCode: 13435
-          errorLabels: ["RetryableWriteError"]
+          errorLabels: ["RetryableWriteError"] # SPEC-1565
           closeConnection: false
 
     operations:
@@ -603,7 +603,7 @@ tests:
       data:
           failCommands: ["commitTransaction"]
           errorCode: 11602
-          errorLabels: ["RetryableWriteError"]
+          errorLabels: ["RetryableWriteError"] # SPEC-1565
           closeConnection: false
 
     operations:
@@ -673,7 +673,7 @@ tests:
       data:
           failCommands: ["commitTransaction"]
           errorCode: 11600
-          errorLabels: ["RetryableWriteError"]
+          errorLabels: ["RetryableWriteError"] # SPEC-1565
           closeConnection: false
 
     operations:
@@ -743,7 +743,7 @@ tests:
       data:
           failCommands: ["commitTransaction"]
           errorCode: 189
-          errorLabels: ["RetryableWriteError"]
+          errorLabels: ["RetryableWriteError"] # SPEC-1565
           closeConnection: false
 
     operations:
@@ -813,7 +813,7 @@ tests:
       data:
           failCommands: ["commitTransaction"]
           errorCode: 91
-          errorLabels: ["RetryableWriteError"]
+          errorLabels: ["RetryableWriteError"] # SPEC-1565
           closeConnection: false
 
     operations:
@@ -883,7 +883,7 @@ tests:
       data:
           failCommands: ["commitTransaction"]
           errorCode: 7
-          errorLabels: ["RetryableWriteError"]
+          errorLabels: ["RetryableWriteError"] # SPEC-1565
           closeConnection: false
 
     operations:
@@ -953,7 +953,7 @@ tests:
       data:
           failCommands: ["commitTransaction"]
           errorCode: 6
-          errorLabels: ["RetryableWriteError"]
+          errorLabels: ["RetryableWriteError"] # SPEC-1565
           closeConnection: false
 
     operations:
@@ -1023,7 +1023,7 @@ tests:
       data:
           failCommands: ["commitTransaction"]
           errorCode: 9001
-          errorLabels: ["RetryableWriteError"]
+          errorLabels: ["RetryableWriteError"] # SPEC-1565
           closeConnection: false
 
     operations:
@@ -1093,7 +1093,7 @@ tests:
       data:
           failCommands: ["commitTransaction"]
           errorCode: 89
-          errorLabels: ["RetryableWriteError"]
+          errorLabels: ["RetryableWriteError"] # SPEC-1565
           closeConnection: false
 
     operations:
@@ -1164,7 +1164,7 @@ tests:
           failCommands: ["commitTransaction"]
           writeConcernError:
             code: 11600
-            errorLabels: ["RetryableWriteError"]
+            errorLabels: ["RetryableWriteError"] # SPEC-1565
             errmsg: Replication is being shut down
 
     operations:
@@ -1240,7 +1240,7 @@ tests:
           failCommands: ["commitTransaction"]
           writeConcernError:
             code: 11602
-            errorLabels: ["RetryableWriteError"]
+            errorLabels: ["RetryableWriteError"] # SPEC-1565
             errmsg: Replication is being shut down
 
     operations:
@@ -1316,7 +1316,7 @@ tests:
           failCommands: ["commitTransaction"]
           writeConcernError:
             code: 189
-            errorLabels: ["RetryableWriteError"]
+            errorLabels: ["RetryableWriteError"] # SPEC-1565
             errmsg: Replication is being shut down
 
     operations:
@@ -1392,7 +1392,7 @@ tests:
           failCommands: ["commitTransaction"]
           writeConcernError:
             code: 91
-            errorLabels: ["RetryableWriteError"]
+            errorLabels: ["RetryableWriteError"] # SPEC-1565
             errmsg: Replication is being shut down
 
     operations:

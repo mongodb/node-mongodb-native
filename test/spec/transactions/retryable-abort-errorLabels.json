@@ -3,8 +3,7 @@
     {
       "minServerVersion": "4.3.1",
       "topology": [
-        "replicaset",
-        "sharded"
+        "replicaset, sharded"
       ]
     }
   ],
@@ -150,7 +149,12 @@
         },
         {
           "name": "abortTransaction",
-          "object": "session0"
+          "object": "session0",
+          "result": {
+            "errorLabelsOmit": [
+              "RetryableWriteError"
+            ]
+          }
         }
       ],
       "expectations": [
