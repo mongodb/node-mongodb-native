@@ -16,10 +16,8 @@ describe('OCSP Support', function() {
   });
 
   function connect(options, done) {
-    const clientOptions = MONGODB_UNIFIED_TOPOLOGY ? { useUnifiedTopology: true } : {};
     const client = new MongoClient(
-      `mongodb://localhost:27017/?serverSelectionTimeoutMS=500&tlsCAFile=${CA_FILE}&${options}`,
-      clientOptions
+      `mongodb://localhost:27017/?serverSelectionTimeoutMS=500&tlsCAFile=${CA_FILE}&${options}`
     );
 
     client.connect(err => {

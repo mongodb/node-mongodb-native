@@ -1,0 +1,152 @@
+{
+  "runOn": [
+    {
+      "minServerVersion": "4.4",
+      "topology": [
+        "replicaset"
+      ]
+    }
+  ],
+  "database_name": "sdam-tests",
+  "collection_name": "test-replSetStepDown",
+  "data": [
+    {
+      "_id": 1
+    },
+    {
+      "_id": 2
+    }
+  ],
+  "tests": [
+    {
+      "description": "Rediscover quickly after replSetStepDown",
+      "clientOptions": {
+        "appname": "replSetStepDownTest",
+        "heartbeatFrequencyMS": 60000,
+        "serverSelectionTimeoutMS": 5000,
+        "w": "majority"
+      },
+      "operations": [
+        {
+          "name": "insertMany",
+          "object": "collection",
+          "arguments": {
+            "documents": [
+              {
+                "_id": 3
+              },
+              {
+                "_id": 4
+              }
+            ]
+          }
+        },
+        {
+          "name": "recordPrimary",
+          "object": "testRunner"
+        },
+        {
+          "name": "runAdminCommand",
+          "object": "testRunner",
+          "command_name": "replSetStepDown",
+          "arguments": {
+            "command": {
+              "replSetStepDown": 1,
+              "secondaryCatchUpPeriodSecs": 1,
+              "force": false
+            }
+          }
+        },
+        {
+          "name": "waitForPrimaryChange",
+          "object": "testRunner",
+          "arguments": {
+            "timeoutMS": 5000
+          }
+        },
+        {
+          "name": "insertMany",
+          "object": "collection",
+          "arguments": {
+            "documents": [
+              {
+                "_id": 5
+              },
+              {
+                "_id": 6
+              }
+            ]
+          }
+        },
+        {
+          "name": "assertEventCount",
+          "object": "testRunner",
+          "arguments": {
+            "event": "PoolClearedEvent",
+            "count": 0
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "insert": "test-replSetStepDown",
+              "documents": [
+                {
+                  "_id": 3
+                },
+                {
+                  "_id": 4
+                }
+              ]
+            },
+            "command_name": "insert",
+            "database_name": "sdam-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "insert": "test-replSetStepDown",
+              "documents": [
+                {
+                  "_id": 5
+                },
+                {
+                  "_id": 6
+                }
+              ]
+            },
+            "command_name": "insert",
+            "database_name": "sdam-tests"
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            },
+            {
+              "_id": 3
+            },
+            {
+              "_id": 4
+            },
+            {
+              "_id": 5
+            },
+            {
+              "_id": 6
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

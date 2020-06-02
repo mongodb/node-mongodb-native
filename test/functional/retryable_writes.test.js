@@ -48,7 +48,7 @@ function executeScenarioSetup(scenario, test, config, ctx) {
   const url = config.url();
   const options = Object.assign({}, test.clientOptions, {
     haInterval: 100,
-    minHeartbeatFrequencyMS: 100,
+    heartbeatFrequencyMS: 100,
     monitorCommands: true,
     minSize: 10
   });

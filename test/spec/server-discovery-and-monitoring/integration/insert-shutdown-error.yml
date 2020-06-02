@@ -1,0 +1,115 @@
+# Test SDAM error handling.
+runOn:
+    # failCommand appName requirements
+    - minServerVersion: "4.4"
+
+database_name: &database_name "sdam-tests"
+collection_name: &collection_name "insert-shutdown-error"
+
+data: []
+
+tests:
+  - description: Concurrent shutdown error on insert
+    clientOptions:
+      retryWrites: false
+      heartbeatFrequencyMS: 500
+      appname: shutdownErrorInsertTest
+    operations:
+      # Perform an operation to ensure the node is discovered.
+      - name: insertOne
+        object: collection
+        arguments:
+          document:
+            _id: 1
+      # Configure the next two inserts to fail with a non-timeout shutdown
+      # errors. Block the connection for 500ms to ensure both operations check
+      # out connections from the same pool generation.
+      - name: configureFailPoint
+        object: testRunner
+        arguments:
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+                failCommands: ["insert"]
+                appName: shutdownErrorInsertTest
+                errorCode: 91
+                blockConnection: true
+                blockTimeMS: 500
+      # Start threads.
+      - name: startThread
+        object: testRunner
+        arguments:
+          name: thread1
+      - name: startThread
+        object: testRunner
+        arguments:
+          name: thread2
+      # Perform concurrent insert operations. Both fail with shutdown errors.
+      - name: runOnThread
+        object: testRunner
+        arguments:
+          name: thread1
+          operation:
+            name: insertOne
+            object: collection
+            arguments:
+              document:
+                _id: 2
+            error: true
+      - name: runOnThread
+        object: testRunner
+        arguments:
+          name: thread2
+          operation:
+            name: insertOne
+            object: collection
+            arguments:
+              document:
+                _id: 3
+            error: true
+      # Stop threads.
+      - name: waitForThread
+        object: testRunner
+        arguments:
+          name: thread1
+      - name: waitForThread
+        object: testRunner
+        arguments:
+          name: thread2
+      # The first shutdown error should mark the server Unknown and then clear
+      # the pool.
+      - name: waitForEvent
+        object: testRunner
+        arguments:
+          event: ServerMarkedUnknownEvent
+          count: 1
+      - name: waitForEvent
+        object: testRunner
+        arguments:
+          event: PoolClearedEvent
+          count: 1
+      # Perform an operation to ensure the node is rediscovered.
+      - name: insertOne
+        object: collection
+        arguments:
+          document:
+            _id: 4
+      # Assert the server was marked Unknown and pool was cleared exactly once.
+      - name: assertEventCount
+        object: testRunner
+        arguments:
+          event: ServerMarkedUnknownEvent
+          count: 1
+      - name: assertEventCount
+        object: testRunner
+        arguments:
+          event: PoolClearedEvent
+          count: 1
+
+    # Order of operations is non-deterministic so we cannot check events.
+    outcome:
+      collection:
+        data:
+          - {_id: 1}
+          - {_id: 4}

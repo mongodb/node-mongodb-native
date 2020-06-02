@@ -7,6 +7,7 @@ const { EJSON } = require('bson');
 const TestRunnerContext = require('./context').TestRunnerContext;
 const resolveConnectionString = require('./utils').resolveConnectionString;
 
+// Promise.try alternative https://stackoverflow.com/questions/60624081/promise-try-without-bluebird/60624164?noredirect=1#comment107255389_60624164
 function promiseTry(callback) {
   return new Promise((resolve, reject) => {
     try {
@@ -239,37 +240,65 @@ function parseSessionOptions(options) {
 }
 
 const IGNORED_COMMANDS = new Set(['ismaster', 'configureFailPoint', 'endSessions']);
+const SDAM_EVENTS = new Set([
+  'serverOpening',
+  'serverClosed',
+  'serverDescriptionChanged',
+  'topologyOpening',
+  'topologyClosed',
+  'topologyDescriptionChanged',
+  'serverHeartbeatStarted',
+  'serverHeartbeatSucceeded',
+  'serverHeartbeatFailed'
+]);
+
+const CMAP_EVENTS = new Set([
+  'connectionPoolCreated',
+  'connectionPoolClosed',
+  'connectionCreated',
+  'connectionReady',
+  'connectionClosed',
+  'connectionCheckOutStarted',
+  'connectionCheckOutFailed',
+  'connectionCheckedOut',
+  'connectionCheckedIn',
+  'connectionPoolCleared'
+]);
 
 let displayCommands = false;
 function runTestSuiteTest(configuration, spec, context) {
   context.commandEvents = [];
   const clientOptions = translateClientOptions(
-    Object.assign({ monitorCommands: true }, spec.clientOptions)
+    Object.assign(
+      {
+        heartbeatFrequencyMS: 100,
+        minHeartbeatFrequencyMS: 100,
+        useRecoveryToken: true,
+        monitorCommands: true
+      },
+      spec.clientOptions
+    )
   );
-
-  // test-specific client options
-  clientOptions.autoReconnect = false;
-  clientOptions.haInterval = 100;
-  clientOptions.minHeartbeatFrequencyMS = 100;
-  clientOptions.useRecoveryToken = true;
 
   const url = resolveConnectionString(configuration, spec);
   const client = configuration.newClient(url, clientOptions);
+  CMAP_EVENTS.forEach(eventName => client.on(eventName, event => context.cmapEvents.push(event)));
+  SDAM_EVENTS.forEach(eventName => client.on(eventName, event => context.sdamEvents.push(event)));
+  client.on('commandStarted', event => {
+    if (IGNORED_COMMANDS.has(event.commandName)) {
+      return;
+    }
+
+    context.commandEvents.push(event);
+
+    // very useful for debugging
+    if (displayCommands) {
+      // console.dir(event, { depth: 5 });
+    }
+  });
+
   return client.connect().then(client => {
     context.testClient = client;
-    client.on('commandStarted', event => {
-      if (IGNORED_COMMANDS.has(event.commandName)) {
-        return;
-      }
-
-      context.commandEvents.push(event);
-
-      // very useful for debugging
-      if (displayCommands) {
-        console.dir(event, { depth: 5 });
-      }
-    });
-
     const sessionOptions = Object.assign({}, spec.transactionOptions);
 
     spec.sessionOptions = spec.sessionOptions || {};
@@ -331,6 +360,7 @@ function validateOutcome(testData, testContext) {
       .db(testContext.dbName)
       .collection(outcomeCollection)
       .find({}, { readPreference: 'primary', readConcern: { level: 'local' } })
+      .sort({ _id: 1 })
       .toArray()
       .then(docs => {
         expect(docs).to.matchMongoSpec(testData.outcome.collection.data);
@@ -401,7 +431,7 @@ function extractCrudResult(result, operation) {
   }
 
   return Object.keys(operation.result).reduce((crudResult, key) => {
-    if (Object.prototype.hasOwnProperty.call(result, key) && result[key] != null) {
+    if (result.hasOwnProperty(key) && result[key] != null) {
       // FIXME(major): update crud results are broken and need to be changed
       crudResult[key] = key === 'upsertedId' ? result[key]._id : result[key];
     }
@@ -500,6 +530,31 @@ function maybeSession(operation, context) {
 }
 
 const kOperations = new Map([
+  [
+    'recordPrimary',
+    (operation, testRunner, context /*, options */) => {
+      testRunner.recordPrimary(context.client);
+    }
+  ],
+  [
+    'waitForPrimaryChange',
+    (operation, testRunner, context /*, options */) => {
+      testRunner.waitForPrimaryChange(context.client);
+    }
+  ],
+  [
+    'runOnThread',
+    (operation, testRunner, context, options) => {
+      const args = operation.arguments;
+      const threadName = args.name;
+      const subOperation = args.operation;
+
+      return testRunner.runOnThread(
+        threadName,
+        testOperation(subOperation, context[subOperation.object], context, options)
+      );
+    }
+  ],
   [
     'createIndex',
     (operation, collection, context /*, options */) => {

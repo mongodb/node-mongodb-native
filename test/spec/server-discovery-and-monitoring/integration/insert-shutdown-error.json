@@ -1,0 +1,167 @@
+{
+  "runOn": [
+    {
+      "minServerVersion": "4.4"
+    }
+  ],
+  "database_name": "sdam-tests",
+  "collection_name": "insert-shutdown-error",
+  "data": [],
+  "tests": [
+    {
+      "description": "Concurrent shutdown error on insert",
+      "clientOptions": {
+        "retryWrites": false,
+        "heartbeatFrequencyMS": 500,
+        "appname": "shutdownErrorInsertTest"
+      },
+      "operations": [
+        {
+          "name": "insertOne",
+          "object": "collection",
+          "arguments": {
+            "document": {
+              "_id": 1
+            }
+          }
+        },
+        {
+          "name": "configureFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 2
+              },
+              "data": {
+                "failCommands": [
+                  "insert"
+                ],
+                "appName": "shutdownErrorInsertTest",
+                "errorCode": 91,
+                "blockConnection": true,
+                "blockTimeMS": 500
+              }
+            }
+          }
+        },
+        {
+          "name": "startThread",
+          "object": "testRunner",
+          "arguments": {
+            "name": "thread1"
+          }
+        },
+        {
+          "name": "startThread",
+          "object": "testRunner",
+          "arguments": {
+            "name": "thread2"
+          }
+        },
+        {
+          "name": "runOnThread",
+          "object": "testRunner",
+          "arguments": {
+            "name": "thread1",
+            "operation": {
+              "name": "insertOne",
+              "object": "collection",
+              "arguments": {
+                "document": {
+                  "_id": 2
+                }
+              },
+              "error": true
+            }
+          }
+        },
+        {
+          "name": "runOnThread",
+          "object": "testRunner",
+          "arguments": {
+            "name": "thread2",
+            "operation": {
+              "name": "insertOne",
+              "object": "collection",
+              "arguments": {
+                "document": {
+                  "_id": 3
+                }
+              },
+              "error": true
+            }
+          }
+        },
+        {
+          "name": "waitForThread",
+          "object": "testRunner",
+          "arguments": {
+            "name": "thread1"
+          }
+        },
+        {
+          "name": "waitForThread",
+          "object": "testRunner",
+          "arguments": {
+            "name": "thread2"
+          }
+        },
+        {
+          "name": "waitForEvent",
+          "object": "testRunner",
+          "arguments": {
+            "event": "ServerMarkedUnknownEvent",
+            "count": 1
+          }
+        },
+        {
+          "name": "waitForEvent",
+          "object": "testRunner",
+          "arguments": {
+            "event": "PoolClearedEvent",
+            "count": 1
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "collection",
+          "arguments": {
+            "document": {
+              "_id": 4
+            }
+          }
+        },
+        {
+          "name": "assertEventCount",
+          "object": "testRunner",
+          "arguments": {
+            "event": "ServerMarkedUnknownEvent",
+            "count": 1
+          }
+        },
+        {
+          "name": "assertEventCount",
+          "object": "testRunner",
+          "arguments": {
+            "event": "PoolClearedEvent",
+            "count": 1
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 4
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

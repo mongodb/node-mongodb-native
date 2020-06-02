@@ -8,6 +8,9 @@ const sdamEvents = require('../../../lib/sdam/events');
 const parse = require('../../../lib/connection_string').parseConnectionString;
 const sinon = require('sinon');
 const { EJSON } = require('bson');
+const { ConnectionPool } = require('../../../lib/cmap/connection_pool');
+const { MongoError, MongoNetworkError, MongoNetworkTimeoutError } = require('../../../lib/error');
+const { eachAsyncSeries } = require('../../../lib/utils');
 
 const chai = require('chai');
 chai.use(require('chai-subset'));
@@ -18,7 +21,8 @@ const specDir = path.resolve(__dirname, '../../spec/server-discovery-and-monitor
 function collectTests() {
   const testTypes = fs
     .readdirSync(specDir)
-    .filter(d => fs.statSync(path.resolve(specDir, d)).isDirectory());
+    .filter(d => fs.statSync(path.resolve(specDir, d)).isDirectory())
+    .filter(d => d !== 'integration');
 
   const tests = {};
   testTypes.forEach(testType => {
@@ -213,73 +217,158 @@ function executeSDAMTest(testData, testDone) {
     topology.connect(testData.uri, err => {
       expect(err).to.not.exist;
 
-      testData.phases.forEach(phase => {
-        const incompatibilityExpected = phase.outcome ? !phase.outcome.compatible : false;
-        if (incompatibilityExpected) {
-          topology.on('error', incompatibilityHandler);
-        }
-
-        // simulate each ismaster response
-        phase.responses.forEach(response =>
-          topology.serverUpdateHandler(new ServerDescription(response[0], response[1]))
-        );
-
-        // then verify the resulting outcome
-        const description = topology.description;
-        Object.keys(phase.outcome).forEach(key => {
-          const outcomeValue = phase.outcome[key];
-          const translatedKey = translateOutcomeKey(key);
-
-          if (key === 'servers') {
-            expect(description).to.include.keys(translatedKey);
-            const expectedServers = outcomeValue;
-            const actualServers = description[translatedKey];
-
-            Object.keys(expectedServers).forEach(serverName => {
-              expect(actualServers).to.include.keys(serverName);
-              const expectedServer = normalizeServerDescription(expectedServers[serverName]);
-              const omittedFields = findOmittedFields(expectedServer);
-
-              const actualServer = actualServers.get(serverName);
-              expect(actualServer).to.matchMongoSpec(expectedServer);
-
-              if (omittedFields.length) {
-                expect(actualServer).to.not.have.all.keys(omittedFields);
-              }
-            });
-
-            return;
-          }
-
-          if (key === 'events') {
-            const expectedEvents = convertOutcomeEvents(outcomeValue);
-            expect(events).to.have.length(expectedEvents.length);
-            for (let i = 0; i < events.length; ++i) {
-              const expectedEvent = expectedEvents[i];
-              const actualEvent = cloneForCompare(events[i]);
-              expect(actualEvent).to.matchMongoSpec(expectedEvent);
+      eachAsyncSeries(
+        testData.phases,
+        (phase, cb) => {
+          function phaseDone() {
+            if (phase.outcome) {
+              assertOutcomeExpectations(topology, events, phase.outcome);
             }
 
-            return;
+            // remove error handler
+            topology.removeListener('error', incompatibilityHandler);
+            // reset the captured events for each phase
+            events = [];
+            cb();
           }
 
-          if (key === 'compatible' || key === 'setName') {
-            expect(topology.description[key]).to.equal(outcomeValue);
-            return;
+          const incompatibilityExpected = phase.outcome ? !phase.outcome.compatible : false;
+          if (incompatibilityExpected) {
+            topology.on('error', incompatibilityHandler);
           }
 
-          expect(description).to.include.keys(translatedKey);
-          expect(description[translatedKey]).to.eql(outcomeValue, `(key="${translatedKey}")`);
-        });
+          // if (phase.description) {
+          //   console.log(`[phase] ${phase.description}`);
+          // }
 
-        // remove error handler
-        topology.removeListener('error', incompatibilityHandler);
+          if (phase.responses) {
+            // simulate each ismaster response
+            phase.responses.forEach(response =>
+              topology.serverUpdateHandler(new ServerDescription(response[0], response[1]))
+            );
 
-        // reset the captured events for each phase
-        events = [];
+            phaseDone();
+          } else if (phase.applicationErrors) {
+            eachAsyncSeries(
+              phase.applicationErrors,
+              (appError, phaseCb) => {
+                let withConnectionStub = sinon
+                  .stub(ConnectionPool.prototype, 'withConnection')
+                  .callsFake(withConnectionStubImpl(appError));
+
+                const server = topology.s.servers.get(appError.address);
+                server.command('admin.$cmd', { ping: 1 }, err => {
+                  expect(err).to.exist;
+                  withConnectionStub.restore();
+
+                  phaseCb();
+                });
+              },
+              err => {
+                expect(err).to.not.exist;
+                phaseDone();
+              }
+            );
+          }
+        },
+        err => {
+          expect(err).to.not.exist;
+          done();
+        }
+      );
+    });
+  });
+}
+
+function withConnectionStubImpl(appError) {
+  return function(fn, callback) {
+    const connectionPool = this; // we are stubbing `withConnection` on the `ConnectionPool` class
+    const fakeConnection = {
+      generation:
+        typeof appError.generation === 'number' ? appError.generation : connectionPool.generation,
+
+      command: (ns, cmd, options, callback) => {
+        if (appError.type === 'network') {
+          callback(new MongoNetworkError('test generated'));
+        } else if (appError.type === 'timeout') {
+          callback(
+            new MongoNetworkTimeoutError('xxx timed out', {
+              beforeHandshake: appError.when === 'beforeHandshakeCompletes'
+            })
+          );
+        } else {
+          callback(new MongoError(appError.response));
+        }
+      }
+    };
+
+    fn(undefined, fakeConnection, (fnErr, result) => {
+      if (typeof callback === 'function') {
+        if (fnErr) {
+          callback(fnErr);
+        } else {
+          callback(undefined, result);
+        }
+      }
+    });
+  };
+}
+
+function assertOutcomeExpectations(topology, events, outcome) {
+  // then verify the resulting outcome
+  const description = topology.description;
+  Object.keys(outcome).forEach(key => {
+    const outcomeValue = outcome[key];
+    const translatedKey = translateOutcomeKey(key);
+
+    if (key === 'servers') {
+      expect(description).to.include.keys(translatedKey);
+      const expectedServers = outcomeValue;
+      const actualServers = description[translatedKey];
+
+      Object.keys(expectedServers).forEach(serverName => {
+        expect(actualServers).to.include.keys(serverName);
+
+        // TODO: clean all this up, always operate directly on `Server` not `ServerDescription`
+        if (expectedServers[serverName].pool) {
+          const expectedPool = expectedServers[serverName].pool;
+          delete expectedServers[serverName].pool;
+          const actualPoolGeneration = topology.s.servers.get(serverName).s.pool.generation;
+          expect(actualPoolGeneration).to.equal(expectedPool.generation);
+        }
+
+        const expectedServer = normalizeServerDescription(expectedServers[serverName]);
+        const omittedFields = findOmittedFields(expectedServer);
+
+        const actualServer = actualServers.get(serverName);
+        expect(actualServer).to.matchMongoSpec(expectedServer);
+
+        if (omittedFields.length) {
+          expect(actualServer).to.not.have.all.keys(omittedFields);
+        }
       });
 
-      topology.close(done);
-    });
+      return;
+    }
+
+    if (key === 'events') {
+      const expectedEvents = convertOutcomeEvents(outcomeValue);
+      expect(events).to.have.length(expectedEvents.length);
+      for (let i = 0; i < events.length; ++i) {
+        const expectedEvent = expectedEvents[i];
+        const actualEvent = cloneForCompare(events[i]);
+        expect(actualEvent).to.matchMongoSpec(expectedEvent);
+      }
+
+      return;
+    }
+
+    if (key === 'compatible' || key === 'setName') {
+      expect(topology.description[key]).to.equal(outcomeValue);
+      return;
+    }
+
+    expect(description).to.include.keys(translatedKey);
+    expect(description[translatedKey]).to.eql(outcomeValue, `(key="${translatedKey}")`);
   });
 }

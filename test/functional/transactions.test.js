@@ -64,6 +64,20 @@ class TransactionsRunnerContext extends TestRunnerContext {
       .catch(ignoreNsNotFoundForListIndexes)
       .then(indexes => expect(indexes.every(idx => idx.name !== indexName)).to.be.ok);
   }
+
+  assertSessionPinned(options) {
+    expect(options).to.have.property('session');
+
+    const session = options.session;
+    expect(session.transaction.isPinned).to.be.true;
+  }
+
+  assertSessionUnpinned(options) {
+    expect(options).to.have.property('session');
+
+    const session = options.session;
+    expect(session.transaction.isPinned).to.be.false;
+  }
 }
 
 describe('Transactions', function() {
@@ -144,6 +158,23 @@ describe('Transactions', function() {
         session.endSession(done);
       }
     });
+
+    it('should return readable error if promise rejected with no reason', {
+      metadata: { requires: { topology: ['replicaset', 'sharded'], mongodb: '>=4.0.2' } },
+      test: function(done) {
+        function fnThatReturnsBadPromise() {
+          return Promise.reject();
+        }
+
+        session
+          .withTransaction(fnThatReturnsBadPromise)
+          .then(() => done(Error('Expected error')))
+          .catch(err => {
+            expect(err).to.equal(undefined);
+            session.endSession(done);
+          });
+      }
+    });
   });
 
   describe('startTransaction', function() {
@@ -206,32 +237,34 @@ describe('Transactions', function() {
 
           const session = client.startSession();
           const db = client.db(configuration.db);
-          db.createCollection('transaction_error_test_2', (err, coll) => {
-            expect(err).to.not.exist;
-
-            session.startTransaction();
-            coll.insertOne({ a: 1 }, { session }, err => {
+          db.collection('transaction_error_test_2').drop(() => {
+            db.createCollection('transaction_error_test_2', (err, coll) => {
               expect(err).to.not.exist;
-              expect(session.inTransaction()).to.be.true;
 
-              db.executeDbAdminCommand(
-                {
-                  configureFailPoint: 'failCommand',
-                  mode: { times: 1 },
-                  data: { failCommands: ['insert'], closeConnection: true }
-                },
-                err => {
-                  expect(err).to.not.exist;
-                  expect(session.inTransaction()).to.be.true;
+              session.startTransaction();
+              coll.insertOne({ a: 1 }, { session }, err => {
+                expect(err).to.not.exist;
+                expect(session.inTransaction()).to.be.true;
 
-                  coll.insertOne({ b: 2 }, { session }, err => {
-                    expect(err).to.exist.and.to.be.an.instanceof(MongoNetworkError);
-                    expect(err.hasErrorLabel('TransientTransactionError')).to.be.true;
+                db.executeDbAdminCommand(
+                  {
+                    configureFailPoint: 'failCommand',
+                    mode: { times: 1 },
+                    data: { failCommands: ['insert'], closeConnection: true }
+                  },
+                  err => {
+                    expect(err).to.not.exist;
+                    expect(session.inTransaction()).to.be.true;
 
-                    session.abortTransaction(() => session.endSession(() => client.close(done)));
-                  });
-                }
-              );
+                    coll.insertOne({ b: 2 }, { session }, err => {
+                      expect(err).to.exist.and.to.be.an.instanceof(MongoNetworkError);
+                      expect(err.hasErrorLabel('TransientTransactionError')).to.be.true;
+
+                      session.abortTransaction(() => session.endSession(() => client.close(done)));
+                    });
+                  }
+                );
+              });
             });
           });
         });
