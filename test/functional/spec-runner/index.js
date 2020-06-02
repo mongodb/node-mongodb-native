@@ -129,6 +129,9 @@ function generateTopologyTests(testSuites, testContext, filter) {
           afterEach(() => testContext.cleanupAfterSuite());
 
           testSuite.tests.forEach(spec => {
+            // const desc = 'add RetryableWriteError and UnknownTransactionCommitResult labels to retryable commit errors'
+            const desc = 'do not add RetryableWriteError label to writeConcernError ShutdownInProgress that occurs within transaction';
+            if (spec.description !== desc) return;
             it(spec.description, function() {
               if (
                 spec.skipReason ||
