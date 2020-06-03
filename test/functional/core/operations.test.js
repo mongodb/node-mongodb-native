@@ -298,7 +298,9 @@ describe('Operation tests', function() {
           },
           function(insertErr, insertResults) {
             expect(insertErr).to.be.null;
-            expect(insertResults.result.n).to.equal(3);
+            expect(insertResults)
+              .nested.property('result.n')
+              .to.equal(3);
 
             // Execute find
             var cursor = _server.cursor(f('%s.inserts10', self.configuration.db), {
@@ -310,16 +312,22 @@ describe('Operation tests', function() {
             // Execute next
             cursor._next(function(cursorErr, cursorD) {
               expect(cursorErr).to.be.null;
-              expect(cursorD.a).to.equal(1);
+              expect(cursorD)
+                .property('a')
+                .to.equal(1);
 
               // Execute next
               cursor._next(function(secondCursorErr, secondCursorD) {
                 expect(secondCursorErr).to.be.null;
-                expect(secondCursorD.a).to.equal(2);
+                expect(secondCursorD)
+                  .property('a')
+                  .to.equal(2);
 
                 cursor._next(function(thirdCursorErr, thirdCursorD) {
                   expect(thirdCursorErr).to.be.null;
-                  expect(thirdCursorD.a).to.equal(3);
+                  expect(thirdCursorD)
+                    .property('a')
+                    .to.equal(3);
 
                   // Destroy the server connection
                   _server.destroy(done);
