@@ -86,7 +86,7 @@ tests:
         result:
           # Note, the server will return the errorLabel in this case.
           errorLabelsContain: ["TransientTransactionError"]
-          errorLabelsOmit: ["UnknownTransactionCommitResult"]
+          errorLabelsOmit: ["RetryableWriteError", "UnknownTransactionCommitResult"]
       - name: abortTransaction
         object: session0
 
@@ -143,7 +143,7 @@ tests:
         result:
           # Note, the server will return the errorLabel in this case.
           errorLabelsContain: ["TransientTransactionError"]
-          errorLabelsOmit: ["UnknownTransactionCommitResult"]
+          errorLabelsOmit: ["RetryableWriteError", "UnknownTransactionCommitResult"]
       - name: abortTransaction
         object: session0
 
@@ -200,7 +200,7 @@ tests:
         result:
           # Note, the server will return the errorLabel in this case.
           errorLabelsContain: ["TransientTransactionError"]
-          errorLabelsOmit: ["UnknownTransactionCommitResult"]
+          errorLabelsOmit: ["RetryableWriteError", "UnknownTransactionCommitResult"]
       - name: abortTransaction
         object: session0
 
@@ -295,7 +295,7 @@ tests:
       collection:
         data: []
 
-  - description: add TransientTransactionError label to connection errors
+  - description: add TransientTransactionError label to connection errors, but do not add RetryableWriteError label
 
     failPoint:
       configureFailPoint: failCommand
@@ -315,7 +315,10 @@ tests:
             _id: 1
         result: &transient_label_only
           errorLabelsContain: ["TransientTransactionError"]
-          errorLabelsOmit: ["UnknownTransactionCommitResult"]
+          # While a connection error would normally be retryable, these are not because
+          # they occur within a transaction; ensure the driver does not add the
+          # RetryableWriteError label to these errors.
+          errorLabelsOmit: ["RetryableWriteError", "UnknownTransactionCommitResult"]
       - name: find
         object: collection
         arguments:
@@ -669,6 +672,66 @@ tests:
       collection:
         data:
           - _id: 1
+
+  - description: do not add RetryableWriteError label to writeConcernError ShutdownInProgress that occurs within transaction
+
+    failPoint:
+      configureFailPoint: failCommand
+      mode: { times: 1 }
+      data:
+          failCommands: ["insert"]
+          writeConcernError:
+            code: 91
+            errmsg: Replication is being shut down
+
+    operations:
+      - name: startTransaction
+        object: session0
+        arguments:
+          options:
+            writeConcern:
+              w: majority
+      - name: insertOne
+        object: collection
+        arguments:
+          session: session0
+          document:
+            _id: 1
+        result:
+          errorLabelsContain: []
+          errorLabelsOmit: ["RetryableWriteError", "TransientTransactionError", "UnknownTransactionCommitResult"]
+      - name: abortTransaction
+        object: session0
+
+    expectations:
+      - command_started_event:
+          command:
+            insert: *collection_name
+            documents:
+              - _id: 1
+            ordered: true
+            readConcern:
+            lsid: session0
+            txnNumber:
+              $numberLong: "1"
+            startTransaction: true
+            autocommit: false
+          command_name: insert
+          database_name: *database_name
+      - command_started_event:
+          command:
+            abortTransaction: 1
+            lsid: session0
+            txnNumber:
+              $numberLong: "1"
+            startTransaction:
+            autocommit: false
+          command_name: abortTransaction
+          database_name: admin
+
+    outcome:
+      collection:
+        data: []
 
   - description: add UnknownTransactionCommitResult label to writeConcernError WriteConcernFailed
 
