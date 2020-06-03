@@ -317,6 +317,10 @@ and sharded clusters.
     retryWrites=false to your connection string.
 
    and the error code is 20.
+   
+   **Note**: Drivers that rely on ``serverStatus`` to determine the storage engine
+   in use MAY skip this test for sharded clusters, since ``mongos`` does not report
+   this information in its ``serverStatus`` response.
 
 Changelog
 =========
