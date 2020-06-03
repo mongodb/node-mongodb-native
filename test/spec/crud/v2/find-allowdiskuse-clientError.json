@@ -1,0 +1,40 @@
+{
+  "runOn": [
+    {
+      "maxServerVersion": "3.0.99"
+    }
+  ],
+  "collection_name": "test_find_allowdiskuse_clienterror",
+  "tests": [
+    {
+      "description": "Find fails when allowDiskUse true is specified against pre 3.2 server",
+      "operations": [
+        {
+          "object": "collection",
+          "name": "find",
+          "arguments": {
+            "filter": {},
+            "allowDiskUse": true
+          },
+          "error": true
+        }
+      ],
+      "expectations": []
+    },
+    {
+      "description": "Find fails when allowDiskUse false is specified against pre 3.2 server",
+      "operations": [
+        {
+          "object": "collection",
+          "name": "find",
+          "arguments": {
+            "filter": {},
+            "allowDiskUse": false
+          },
+          "error": true
+        }
+      ],
+      "expectations": []
+    }
+  ]
+}
