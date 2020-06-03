@@ -19,7 +19,7 @@ tests:
             data:
                 failCommands: ["update"]
                 errorCode: 189
-                errorLabels: ["RetryableWriteError"] # SPEC-1565
+                errorLabels: ["RetryableWriteError"]
         operation:
             name: "bulkWrite"
             arguments:
@@ -61,7 +61,7 @@ tests:
                 writeConcernError:
                     code: 91
                     errmsg: Replication is being shut down
-                    errorLabels: ["RetryableWriteError"] # SPEC-1565
+                    errorLabels: ["RetryableWriteError"]
         operation:
             name: "bulkWrite"
             arguments:
