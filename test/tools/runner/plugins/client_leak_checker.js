@@ -47,4 +47,3 @@ after(function() {
 
   activeClients = [];
 });
-

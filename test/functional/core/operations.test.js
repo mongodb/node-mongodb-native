@@ -96,7 +96,7 @@ describe('Operation tests', function() {
 
   it('should correctly execute find', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
+      requires: { topology: ['single', 'replicaset'] }
     },
 
     test: function(done) {
@@ -156,7 +156,7 @@ describe('Operation tests', function() {
 
   it('should correctly execute find with limit and skip', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
+      requires: { topology: ['single', 'replicaset'] }
     },
 
     test: function(done) {
@@ -218,7 +218,7 @@ describe('Operation tests', function() {
 
   it('should correctly execute find against document with result array field', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
+      requires: { topology: ['single', 'replicaset'] }
     },
 
     test: function(done) {
@@ -255,10 +255,16 @@ describe('Operation tests', function() {
 
               // Execute next
               cursor._next(function(cursorErr, cursorD) {
-                expect(cursorErr).to.be.null;
-                expect(cursorD.a).to.equal(1);
-                expect(cursorD.result[0].c).to.equal(1);
-                expect(cursorD.result[1].c).to.equal(2);
+                expect(cursorErr).to.not.exist;
+                expect(cursorD)
+                  .property('a')
+                  .to.equal(1);
+                expect(cursorD)
+                  .nested.property('result[0].c')
+                  .to.equal(1);
+                expect(cursorD)
+                  .nested.property('result[1].c')
+                  .to.equal(2);
 
                 // Destroy the server connection
                 _server.destroy(done);
@@ -276,7 +282,7 @@ describe('Operation tests', function() {
   it('should correctly execute aggregation command', {
     metadata: {
       requires: {
-        topology: ['single', 'replicaset', 'sharded'],
+        topology: ['single', 'replicaset'],
         mongodb: '>=2.6.0'
       }
     },
@@ -297,7 +303,7 @@ describe('Operation tests', function() {
             ordered: true
           },
           function(insertErr, insertResults) {
-            expect(insertErr).to.be.null;
+            expect(insertErr).to.not.exist;
             expect(insertResults)
               .nested.property('result.n')
               .to.equal(3);
@@ -419,7 +425,7 @@ describe('Operation tests', function() {
     metadata: {
       requires: {
         mongodb: '>=2.6.0',
-        topology: ['single', 'replicaset', 'sharded']
+        topology: ['single', 'replicaset']
       }
     },
 
@@ -451,8 +457,11 @@ describe('Operation tests', function() {
 
             // Execute next
             cursor._next(function(cursorErr, cursorD) {
-              expect(cursorErr).to.be.null;
-              expect(cursorD.a).to.equal(1);
+              expect(cursorErr).to.not.exist;
+              expect(cursorD).to.exist;
+              expect(cursorD)
+                .property('a')
+                .to.equal(1);
 
               // Kill the cursor
               cursor.kill(function() {
@@ -476,7 +485,7 @@ describe('Operation tests', function() {
   it('should correctly kill find command cursor', {
     metadata: {
       requires: {
-        topology: ['single', 'replicaset', 'sharded']
+        topology: ['single', 'replicaset']
       }
     },
 
@@ -497,7 +506,9 @@ describe('Operation tests', function() {
           },
           function(insertErr, insertResults) {
             expect(insertErr).to.be.null;
-            expect(insertResults.result.n).to.equal(3);
+            expect(insertResults)
+              .nested.property('result.n')
+              .to.equal(3);
 
             // Execute find
             var cursor = _server.cursor(f('%s.inserts21', self.configuration.db), {
