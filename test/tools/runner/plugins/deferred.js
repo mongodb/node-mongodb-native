@@ -7,26 +7,33 @@ const kDeferred = Symbol('deferred');
     return () => {
       const deferredActions = test[kDeferred];
 
-      return Promise.all(
-        Array.from(deferredActions).map(action => {
-          if (action.length > 0) {
-            // assume these are async methods with provided `done`
-            return new Promise((resolve, reject) => {
-              function done(err) {
-                if (err) return reject(err);
-                resolve();
-              }
+      // process actions LIFO
+      const promises = Array.from(deferredActions).reverse();
+      const result = promises.reduce((p, action) => {
+        if (action.length > 0) {
+          // assume these are async methods with provided `done`
+          const actionPromise = new Promise((resolve, reject) => {
+            function done(err) {
+              if (err) return reject(err);
+              resolve();
+            }
 
-              action(done);
-            });
-          }
+            action(done);
+          });
 
-          // otherwise assume a Promise is returned
-          return action();
-        })
-      ).then(() => {
-        test[kDeferred].clear();
-      });
+          return p.then(actionPromise);
+        }
+
+        return p.then(action);
+      }, Promise.resolve());
+
+      return result.then(
+        () => test[kDeferred].clear(),
+        err => {
+          test[kDeferred].clear();
+          return Promise.reject(err);
+        }
+      );
     };
   }
 

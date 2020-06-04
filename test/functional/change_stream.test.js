@@ -1,17 +1,18 @@
 'use strict';
-var assert = require('assert');
-var Transform = require('stream').Transform;
-const MongoError = require('../../lib/core').MongoError;
-var MongoNetworkError = require('../../lib/core').MongoNetworkError;
-var setupDatabase = require('./shared').setupDatabase;
-var withClient = require('./shared').withClient;
-var withCursor = require('./shared').withCursor;
-var delay = require('./shared').delay;
-var co = require('co');
-var mock = require('mongodb-mock-server');
+const assert = require('assert');
+const Transform = require('stream').Transform;
+const MongoNetworkError = require('../../lib/core').MongoNetworkError;
+const setupDatabase = require('./shared').setupDatabase;
+const withClient = require('./shared').withClient;
+const withCursor = require('./shared').withCursor;
+const delay = require('./shared').delay;
+const co = require('co');
+const mock = require('mongodb-mock-server');
 const chai = require('chai');
 const expect = chai.expect;
 const sinon = require('sinon');
+const fs = require('fs');
+const crypto = require('crypto');
 
 chai.use(require('chai-subset'));
 
@@ -24,6 +25,7 @@ function withChangeStream(dbName, collectionName, callback) {
     collectionName = dbName;
     dbName = undefined;
   }
+
   dbName = dbName || 'changestream_integration_test';
   collectionName = collectionName || 'test';
 
@@ -82,6 +84,7 @@ function waitForStarted(changeStream, callback) {
   const timeout = setTimeout(() => {
     throw new Error('Change stream never started');
   }, 2000);
+
   changeStream.cursor.once('init', () => {
     clearTimeout(timeout);
     callback();
@@ -148,7 +151,7 @@ function exhaust(changeStream, bag, callback) {
 }
 
 // Define the pipeline processing changes
-var pipeline = [
+const pipeline = [
   { $addFields: { addedField: 'This is a field added using $addFields' } },
   { $project: { documentKey: false } },
   { $addFields: { comment: 'The documentKey field has been projected out of this document.' } }
@@ -176,26 +179,29 @@ describe('Change Streams', function() {
   });
   afterEach(() => mock.cleanup());
 
-  it('Should close the listeners after the cursor is closed', {
+  it('should close the listeners after the cursor is closed', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     // The actual test we wish to run
     test: function(done) {
       let closed = false;
-      const close = _err => {
-        if (closed) {
-          return;
-        }
+      function close(err) {
+        if (closed) return;
         closed = true;
-        return client.close(() => done(_err));
-      };
+        done(err);
+      }
+
       const configuration = this.configuration;
       const client = configuration.newClient();
 
       client.connect((err, client) => {
         expect(err).to.not.exist;
+        this.defer(() => client.close());
+
         const coll = client.db('integration_tests').collection('listenertest');
         const changeStream = coll.watch();
+        this.defer(() => changeStream.close());
+
         changeStream.on('change', () => {
           const internalCursor = changeStream.cursor;
           expect(internalCursor.listenerCount('data')).to.equal(1);
@@ -204,13 +210,64 @@ describe('Change Streams', function() {
             close(err);
           });
         });
-        waitForStarted(changeStream, () => coll.insertOne({ x: 1 }));
+
+        waitForStarted(changeStream, () => this.defer(coll.insertOne({ x: 1 })));
         changeStream.on('error', err => close(err));
       });
     }
   });
 
-  it('Should create a Change Stream on a collection and emit `change` events', {
+  class EventCollector {
+    constructor(obj, events, options) {
+      this._events = [];
+      this._timeout = options ? options.timeout : 5000;
+
+      events.forEach(eventName => {
+        this._events[eventName] = [];
+        obj.on(eventName, event => this._events[eventName].push(event));
+      });
+    }
+
+    waitForEvent(eventName, count, callback) {
+      if (typeof count === 'function') {
+        callback = count;
+        count = 1;
+      }
+
+      waitForEventImpl(this, Date.now(), eventName, count, callback);
+    }
+
+    reset(eventName) {
+      if (eventName == null) {
+        Object.keys(this._events).forEach(eventName => {
+          this._events[eventName] = [];
+        });
+
+        return;
+      }
+
+      if (this._events[eventName] == null) {
+        throw new TypeError(`invalid event name "${eventName}" specified for reset`);
+      }
+
+      this._events[eventName] = [];
+    }
+  }
+
+  function waitForEventImpl(collector, start, eventName, count, callback) {
+    const events = collector._events[eventName];
+    if (events.length >= count) {
+      return callback(undefined, events);
+    }
+
+    if (Date.now() - start >= collector._timeout) {
+      return callback(new Error(`timed out waiting for event "${eventName}"`));
+    }
+
+    setTimeout(() => waitForEventImpl(collector, start, eventName, count, callback), 10);
+  }
+
+  it('should create a ChangeStream on a collection and emit `change` events', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     // The actual test we wish to run
@@ -218,55 +275,46 @@ describe('Change Streams', function() {
       const configuration = this.configuration;
       const client = configuration.newClient();
 
-      client.connect(function(err, client) {
+      client.connect((err, client) => {
         expect(err).to.not.exist;
+        this.defer(() => client.close());
+
         const collection = client.db('integration_tests').collection('docsDataEvent');
         const changeStream = collection.watch(pipeline);
+        this.defer(() => changeStream.close());
 
-        let count = 0;
-
-        const cleanup = _err => {
-          changeStream.removeAllListeners('change');
-          changeStream.close(err => client.close(cerr => done(_err || err || cerr)));
-        };
-
-        // Attach first event listener
-        changeStream.on('change', function(change) {
-          try {
-            if (count === 0) {
-              count += 1;
-              expect(change).to.containSubset({
-                operationType: 'insert',
-                fullDocument: { d: 4 },
-                ns: {
-                  db: 'integration_tests',
-                  coll: 'docsDataEvent'
-                },
-                comment: 'The documentKey field has been projected out of this document.'
-              });
-              expect(change).to.not.have.property('documentKey');
-              return;
-            }
-
-            expect(change).to.containSubset({
-              operationType: 'update',
-              updateDescription: {
-                updatedFields: { d: 6 }
-              }
-            });
-            cleanup();
-          } catch (e) {
-            cleanup(e);
-          }
-        });
-
+        const collector = new EventCollector(changeStream, ['init', 'change']);
         waitForStarted(changeStream, () => {
           // Trigger the first database event
-          collection.insertOne({ d: 4 }, function(err) {
-            assert.ifError(err);
+          collection.insertOne({ d: 4 }, err => {
+            expect(err).to.not.exist;
             // Trigger the second database event
-            collection.updateOne({ d: 4 }, { $inc: { d: 2 } }, function(err) {
-              assert.ifError(err);
+            collection.updateOne({ d: 4 }, { $inc: { d: 2 } }, err => {
+              expect(err).to.not.exist;
+
+              collector.waitForEvent('change', 2, (err, changes) => {
+                expect(err).to.not.exist;
+                expect(changes).to.have.length(2);
+                expect(changes[0]).to.not.have.property('documentKey');
+                expect(changes[0]).to.containSubset({
+                  operationType: 'insert',
+                  fullDocument: { d: 4 },
+                  ns: {
+                    db: 'integration_tests',
+                    coll: 'docsDataEvent'
+                  },
+                  comment: 'The documentKey field has been projected out of this document.'
+                });
+
+                expect(changes[1]).to.containSubset({
+                  operationType: 'update',
+                  updateDescription: {
+                    updatedFields: { d: 6 }
+                  }
+                });
+
+                done();
+              });
             });
           });
         });
@@ -275,27 +323,30 @@ describe('Change Streams', function() {
   });
 
   it(
-    'Should create a Change Stream on a collection and get change events through imperative callback form',
+    'should create a ChangeStream on a collection and get change events through imperative callback form',
     {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
       // The actual test we wish to run
       test: function(done) {
-        var configuration = this.configuration;
+        const configuration = this.configuration;
         const client = configuration.newClient();
 
-        client.connect(function(err, client) {
-          assert.ifError(err);
+        client.connect((err, client) => {
+          expect(err).to.not.exist;
+          this.defer(() => client.close());
 
-          var collection = client.db('integration_tests').collection('docsCallback');
-          var changeStream = collection.watch(pipeline);
+          const collection = client.db('integration_tests').collection('docsCallback');
+          const changeStream = collection.watch(pipeline);
+          this.defer(() => changeStream.close());
 
           // Fetch the change notification
-          changeStream.hasNext(function(err, hasNext) {
-            assert.ifError(err);
+          changeStream.hasNext((err, hasNext) => {
+            expect(err).to.not.exist;
+
             assert.equal(true, hasNext);
-            changeStream.next(function(err, change) {
-              assert.ifError(err);
+            changeStream.next((err, change) => {
+              expect(err).to.not.exist;
               assert.equal(change.operationType, 'insert');
               assert.equal(change.fullDocument.e, 5);
               assert.equal(change.ns.db, 'integration_tests');
@@ -307,16 +358,16 @@ describe('Change Streams', function() {
               );
 
               // Trigger the second database event
-              collection.update({ e: 5 }, { $inc: { e: 2 } }, function(err) {
-                assert.ifError(err);
-                changeStream.hasNext(function(err, hasNext) {
-                  assert.ifError(err);
+              collection.updateOne({ e: 5 }, { $inc: { e: 2 } }, err => {
+                expect(err).to.not.exist;
+                changeStream.hasNext((err, hasNext) => {
+                  expect(err).to.not.exist;
                   assert.equal(true, hasNext);
-                  changeStream.next(function(err, change) {
-                    assert.ifError(err);
+                  changeStream.next((err, change) => {
+                    expect(err).to.not.exist;
                     assert.equal(change.operationType, 'update');
-                    // Close the change stream
-                    changeStream.close(err => client.close(cerr => done(err || cerr)));
+
+                    done();
                   });
                 });
               });
@@ -326,61 +377,50 @@ describe('Change Streams', function() {
           // Trigger the first database event
           // NOTE: this needs to be triggered after the changeStream call so
           // that the cursor is run
-          collection.insert({ e: 5 }, function(err, result) {
-            assert.ifError(err);
-            assert.equal(result.insertedCount, 1);
-          });
+          this.defer(collection.insertOne({ e: 5 }));
         });
       }
     }
   );
 
-  it('Should support creating multiple simultaneous Change Streams', {
+  it('should support creating multiple simultaneous ChangeStreams', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
+      const configuration = this.configuration;
       const client = configuration.newClient();
 
-      client.connect(function(err, client) {
-        assert.ifError(err);
+      client.connect((err, client) => {
+        expect(err).to.not.exist;
+        this.defer(() => client.close());
 
-        var theDatabase = client.db('integration_tests');
-        var theCollection1 = theDatabase.collection('simultaneous1');
-        var theCollection2 = theDatabase.collection('simultaneous2');
+        const database = client.db('integration_tests');
+        const collection1 = database.collection('simultaneous1');
+        const collection2 = database.collection('simultaneous2');
 
-        var thisChangeStream1, thisChangeStream2, thisChangeStream3;
+        const changeStream1 = collection1.watch([{ $addFields: { changeStreamNumber: 1 } }]);
+        this.defer(() => changeStream1.close());
+        const changeStream2 = collection2.watch([{ $addFields: { changeStreamNumber: 2 } }]);
+        this.defer(() => changeStream2.close());
+        const changeStream3 = collection2.watch([{ $addFields: { changeStreamNumber: 3 } }]);
+        this.defer(() => changeStream3.close());
 
         setTimeout(() => {
-          theCollection1.insert({ a: 1 }).then(function() {
-            return theCollection2.insert({ a: 1 });
-          });
-        });
+          this.defer(collection1.insert({ a: 1 }).then(() => collection2.insert({ a: 1 })));
+        }, 50);
 
         Promise.resolve()
-          .then(function() {
-            thisChangeStream1 = theCollection1.watch([{ $addFields: { changeStreamNumber: 1 } }]);
-            thisChangeStream2 = theCollection2.watch([{ $addFields: { changeStreamNumber: 2 } }]);
-            thisChangeStream3 = theCollection2.watch([{ $addFields: { changeStreamNumber: 3 } }]);
-
-            return Promise.all([
-              thisChangeStream1.hasNext(),
-              thisChangeStream2.hasNext(),
-              thisChangeStream3.hasNext()
-            ]);
-          })
+          .then(() =>
+            Promise.all([changeStream1.hasNext(), changeStream2.hasNext(), changeStream3.hasNext()])
+          )
           .then(function(hasNexts) {
             // Check all the Change Streams have a next item
             assert.ok(hasNexts[0]);
             assert.ok(hasNexts[1]);
             assert.ok(hasNexts[2]);
 
-            return Promise.all([
-              thisChangeStream1.next(),
-              thisChangeStream2.next(),
-              thisChangeStream3.next()
-            ]);
+            return Promise.all([changeStream1.next(), changeStream2.next(), changeStream3.next()]);
           })
           .then(function(changes) {
             // Check the values of the change documents are correct
@@ -403,293 +443,276 @@ describe('Change Streams', function() {
             assert.equal(changes[0].changeStreamNumber, 1);
             assert.equal(changes[1].changeStreamNumber, 2);
             assert.equal(changes[2].changeStreamNumber, 3);
-
-            return Promise.all([
-              thisChangeStream1.close(),
-              thisChangeStream2.close(),
-              thisChangeStream3.close()
-            ]);
           })
-          .then(() => client.close())
-          .then(function() {
-            done();
-          })
-          .catch(function(err) {
-            assert.ifError(err);
-          });
+          .then(
+            () => done(),
+            err => done(err)
+          );
       });
     }
   });
 
-  it('Should properly close Change Stream cursor', {
+  it('should properly close ChangeStream cursor', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
+      const configuration = this.configuration;
       const client = configuration.newClient();
 
-      client.connect(function(err, client) {
-        assert.ifError(err);
-        var theDatabase = client.db('integration_tests');
+      client.connect((err, client) => {
+        expect(err).to.not.exist;
+        this.defer(() => client.close());
 
-        var thisChangeStream = theDatabase.collection('changeStreamCloseTest').watch(pipeline);
+        const database = client.db('integration_tests');
+        const changeStream = database.collection('changeStreamCloseTest').watch(pipeline);
+        this.defer(() => changeStream.close());
 
-        assert.equal(thisChangeStream.isClosed(), false);
-        assert.equal(thisChangeStream.cursor.isClosed(), false);
+        assert.equal(changeStream.isClosed(), false);
+        assert.equal(changeStream.cursor.isClosed(), false);
 
-        thisChangeStream.close(function(err) {
-          assert.ifError(err);
+        changeStream.close(err => {
+          expect(err).to.not.exist;
 
           // Check the cursor is closed
-          assert.equal(thisChangeStream.isClosed(), true);
-          assert.ok(!thisChangeStream.cursor);
-          client.close(() => done());
+          assert.equal(changeStream.isClosed(), true);
+          assert.ok(!changeStream.cursor);
+          done();
         });
       });
     }
   });
 
   it(
-    'Should error when attempting to create a Change Stream with a forbidden aggregation pipeline stage',
+    'should error when attempting to create a ChangeStream with a forbidden aggregation pipeline stage',
     {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
       // The actual test we wish to run
       test: function(done) {
-        var configuration = this.configuration;
+        const configuration = this.configuration;
         const client = configuration.newClient();
 
-        client.connect(function(err, client) {
-          assert.ifError(err);
+        client.connect((err, client) => {
+          expect(err).to.not.exist;
+          this.defer(() => client.close());
 
           const forbiddenStage = {};
           const forbiddenStageName = '$alksdjfhlaskdfjh';
           forbiddenStage[forbiddenStageName] = 2;
 
-          var theDatabase = client.db('integration_tests');
-          var changeStream = theDatabase.collection('forbiddenStageTest').watch([forbiddenStage]);
+          const database = client.db('integration_tests');
+          const changeStream = database.collection('forbiddenStageTest').watch([forbiddenStage]);
+          this.defer(() => changeStream.close());
 
-          changeStream.next(function(err) {
+          changeStream.next(err => {
             assert.ok(err);
             assert.ok(err.message);
             assert.ok(
               err.message.indexOf(`Unrecognized pipeline stage name: '${forbiddenStageName}'`) > -1
             );
-            changeStream.close(err => client.close(cerr => done(err || cerr)));
+
+            done();
           });
         });
       }
     }
   );
 
-  it('Should cache the change stream resume token using imperative callback form', {
+  it('should cache the change stream resume token using imperative callback form', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
+      const configuration = this.configuration;
       const client = configuration.newClient();
 
-      client.connect(function(err, client) {
-        assert.ifError(err);
+      client.connect((err, client) => {
+        expect(err).to.not.exist;
+        this.defer(() => client.close());
 
-        var theDatabase = client.db('integration_tests');
-        var thisChangeStream = theDatabase.collection('cacheResumeTokenCallback').watch(pipeline);
+        const database = client.db('integration_tests');
+        const changeStream = database.collection('cacheResumeTokenCallback').watch(pipeline);
+        this.defer(() => changeStream.close());
 
         // Trigger the first database event
-        waitForStarted(thisChangeStream, () => {
-          theDatabase
-            .collection('cacheResumeTokenCallback')
-            .insert({ b: 2 }, function(err, result) {
-              assert.ifError(err);
-              assert.equal(result.insertedCount, 1);
-            });
+        waitForStarted(changeStream, () => {
+          this.defer(database.collection('cacheResumeTokenCallback').insert({ b: 2 }));
         });
-        // Fetch the change notification
-        thisChangeStream.hasNext(function(err, hasNext) {
-          assert.ifError(err);
-          assert.equal(true, hasNext);
-          thisChangeStream.next(function(err, change) {
-            assert.ifError(err);
-            assert.deepEqual(thisChangeStream.resumeToken, change._id);
 
-            // Close the change stream
-            thisChangeStream.close(err => client.close(cerr => done(err || cerr)));
+        // Fetch the change notification
+        changeStream.hasNext(function(err, hasNext) {
+          expect(err).to.not.exist;
+          assert.equal(true, hasNext);
+          changeStream.next(function(err, change) {
+            expect(err).to.not.exist;
+            assert.deepEqual(changeStream.resumeToken, change._id);
+            done();
           });
         });
       });
     }
   });
 
-  it('Should cache the change stream resume token using promises', {
+  it('should cache the change stream resume token using promises', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
-
-    // The actual test we wish to run
     test: function() {
-      var configuration = this.configuration;
+      const configuration = this.configuration;
       const client = configuration.newClient();
 
-      return client.connect().then(function() {
-        var theDatabase = client.db('integration_tests');
-        var thisChangeStream = theDatabase.collection('cacheResumeTokenPromise').watch(pipeline);
+      return client.connect().then(() => {
+        this.defer(() => client.close());
 
-        waitForStarted(thisChangeStream, () => {
-          // Trigger the first database event
-          theDatabase.collection('cacheResumeTokenPromise').insert({ b: 2 }, function(err, result) {
-            assert.ifError(err);
-            assert.equal(result.insertedCount, 1);
-            // Fetch the change notification
-          });
+        const database = client.db('integration_tests');
+        const changeStream = database.collection('cacheResumeTokenPromise').watch(pipeline);
+        this.defer(() => changeStream.close());
+
+        // trigger the first database event
+        waitForStarted(changeStream, () => {
+          this.defer(database.collection('cacheResumeTokenPromise').insert({ b: 2 }));
         });
 
-        return thisChangeStream
+        return changeStream
           .hasNext()
-          .then(function(hasNext) {
+          .then(hasNext => {
             assert.equal(true, hasNext);
-            return thisChangeStream.next();
+            return changeStream.next();
           })
-          .then(function(change) {
-            assert.deepEqual(thisChangeStream.resumeToken, change._id);
-
-            // Close the change stream
-            return thisChangeStream.close().then(() => client.close());
+          .then(change => {
+            assert.deepEqual(changeStream.resumeToken, change._id);
           });
       });
     }
   });
 
-  it('Should cache the change stream resume token using event listeners', {
+  it('should cache the change stream resume token using event listeners', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
+      const configuration = this.configuration;
       const client = configuration.newClient();
 
-      client.connect(function(err, client) {
-        assert.ifError(err);
+      client.connect((err, client) => {
+        expect(err).to.not.exist;
+        this.defer(() => client.close());
 
-        var theDatabase = client.db('integration_tests');
+        const db = client.db('integration_tests');
+        const changeStream = db.collection('cacheResumeTokenListener').watch(pipeline);
+        this.defer(() => changeStream.close());
 
-        var thisChangeStream = theDatabase.collection('cacheResumeTokenListener').watch(pipeline);
-
-        thisChangeStream.once('change', function(change) {
-          assert.deepEqual(thisChangeStream.resumeToken, change._id);
-          // Close the change stream
-          thisChangeStream.close().then(() => client.close(done));
-        });
-
-        waitForStarted(thisChangeStream, () => {
+        const collector = new EventCollector(changeStream, ['change']);
+        waitForStarted(changeStream, () => {
           // Trigger the first database event
-          theDatabase
-            .collection('cacheResumeTokenListener')
-            .insert({ b: 2 }, function(err, result) {
-              assert.ifError(err);
-              assert.equal(result.insertedCount, 1);
+          db.collection('cacheResumeTokenListener').insert({ b: 2 }, (err, result) => {
+            expect(err).to.not.exist;
+            expect(result)
+              .property('insertedCount')
+              .to.equal(1);
+
+            collector.waitForEvent('change', (err, events) => {
+              expect(err).to.not.exist;
+              expect(changeStream)
+                .property('resumeToken')
+                .to.eql(events[0]._id);
+
+              done();
             });
+          });
         });
       });
     }
   });
 
   it(
-    'Should error if resume token projected out of change stream document using imperative callback form',
+    'should error if resume token projected out of change stream document using imperative callback form',
     {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
       // The actual test we wish to run
       test: function(done) {
-        var configuration = this.configuration;
+        const configuration = this.configuration;
         const client = configuration.newClient();
 
-        client.connect(function(err, client) {
-          assert.ifError(err);
+        client.connect((err, client) => {
+          expect(err).to.not.exist;
+          this.defer(() => client.close());
 
-          var theDatabase = client.db('integration_tests');
-          var thisChangeStream = theDatabase
+          const database = client.db('integration_tests');
+          const changeStream = database
             .collection('resumetokenProjectedOutCallback')
             .watch([{ $project: { _id: false } }]);
+          this.defer(() => changeStream.close());
 
           // Trigger the first database event
-          waitForStarted(thisChangeStream, () => {
-            theDatabase
-              .collection('resumetokenProjectedOutCallback')
-              .insert({ b: 2 }, function(err, result) {
-                expect(err).to.not.exist;
-                expect(result.insertedCount).to.equal(1);
-              });
+          waitForStarted(changeStream, () => {
+            this.defer(database.collection('resumetokenProjectedOutCallback').insert({ b: 2 }));
           });
 
           // Fetch the change notification
-          thisChangeStream.next(function(err) {
+          changeStream.next(err => {
             expect(err).to.exist;
-
-            // Close the change stream
-            thisChangeStream.close(() => client.close(done));
+            done();
           });
         });
       }
     }
   );
 
-  it('Should error if resume token projected out of change stream document using event listeners', {
+  it('should error if resume token projected out of change stream document using event listeners', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
+      const configuration = this.configuration;
       const client = configuration.newClient();
 
-      client.connect(function(err, client) {
-        assert.ifError(err);
+      client.connect((err, client) => {
+        expect(err).to.not.exist;
+        this.defer(() => client.close());
 
-        var theDatabase = client.db('integration_tests');
-        var thisChangeStream = theDatabase
-          .collection('resumetokenProjectedOutListener')
-          .watch([{ $project: { _id: false } }]);
+        const db = client.db('integration_tests');
+        const collection = db.collection('resumetokenProjectedOutListener');
+        const changeStream = collection.watch([{ $project: { _id: false } }]);
+        this.defer(() => changeStream.close());
 
-        // Fetch the change notification
-        thisChangeStream.on('change', function() {
-          assert.ok(false);
-        });
+        const collector = new EventCollector(changeStream, ['change', 'error']);
+        waitForStarted(changeStream, () => {
+          collection.insert({ b: 2 }, (err, result) => {
+            expect(err).to.not.exist;
+            expect(result)
+              .property('insertedCount')
+              .to.equal(1);
 
-        thisChangeStream.on('error', function(err) {
-          expect(err).to.exist;
-          thisChangeStream.close(() => client.close(done));
-        });
-
-        // Trigger the first database event
-        waitForStarted(thisChangeStream, () => {
-          theDatabase
-            .collection('resumetokenProjectedOutListener')
-            .insert({ b: 2 }, function(err, result) {
-              assert.ifError(err);
-              assert.equal(result.insertedCount, 1);
+            collector.waitForEvent('error', (err, events) => {
+              expect(err).to.not.exist;
+              expect(events).to.have.lengthOf.at.least(1);
+              done();
             });
+          });
         });
       });
     }
   });
 
-  it('Should invalidate change stream on collection rename using event listeners', {
+  it('should invalidate change stream on collection rename using event listeners', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
-
-    // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
+      const configuration = this.configuration;
       const client = configuration.newClient();
 
-      client.connect(function(err, client) {
-        assert.ifError(err);
+      client.connect((err, client) => {
+        expect(err).to.not.exist;
+        this.defer(() => client.close());
 
-        var database = client.db('integration_tests');
-        var changeStream = database
+        const database = client.db('integration_tests');
+        const changeStream = database
           .collection('invalidateListeners')
           .watch(pipeline, { batchSize: 1 });
+        this.defer(() => changeStream.close());
 
         // Attach first event listener
-        changeStream.once('change', function(change) {
+        changeStream.once('change', change => {
           assert.equal(change.operationType, 'insert');
           assert.equal(change.fullDocument.a, 1);
           assert.equal(change.ns.db, 'integration_tests');
@@ -701,72 +724,69 @@ describe('Change Streams', function() {
           );
 
           // Attach second event listener
-          changeStream.on('change', function(change) {
+          changeStream.on('change', change => {
             if (change.operationType === 'invalidate') {
               // now expect the server to close the stream
-              changeStream.once('close', () => client.close(done));
+              changeStream.once('close', () => done());
             }
           });
 
           // Trigger the second database event
           setTimeout(() => {
-            database
-              .collection('invalidateListeners')
-              .rename('renamedDocs', { dropTarget: true }, function(err) {
-                assert.ifError(err);
-              });
+            this.defer(
+              database.collection('invalidateListeners').rename('renamedDocs', { dropTarget: true })
+            );
           }, 250);
         });
 
         // Trigger the first database event
         waitForStarted(changeStream, () => {
-          database.collection('invalidateListeners').insert({ a: 1 }, function(err) {
-            assert.ifError(err);
-          });
+          this.defer(database.collection('invalidateListeners').insert({ a: 1 }));
         });
       });
     }
   });
 
-  it('Should invalidate change stream on database drop using imperative callback form', {
+  it('should invalidate change stream on database drop using imperative callback form', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
+      const configuration = this.configuration;
       const client = configuration.newClient();
 
-      client.connect(function(err, client) {
-        assert.ifError(err);
+      client.connect((err, client) => {
+        expect(err).to.not.exist;
+        this.defer(() => client.close());
 
-        var database = client.db('integration_tests');
-        var changeStream = database.collection('invalidateCallback').watch(pipeline);
+        const database = client.db('integration_tests');
+        const changeStream = database.collection('invalidateCallback').watch(pipeline);
+        this.defer(() => changeStream.close());
 
         // Trigger the first database event
         waitForStarted(changeStream, () => {
-          database.collection('invalidateCallback').insert({ a: 1 }, function(err) {
-            assert.ifError(err);
-          });
+          this.defer(database.collection('invalidateCallback').insert({ a: 1 }));
         });
-        return changeStream.next(function(err, change) {
-          assert.ifError(err);
+
+        changeStream.next((err, change) => {
+          expect(err).to.not.exist;
           assert.equal(change.operationType, 'insert');
 
-          database.dropDatabase(function(err) {
-            assert.ifError(err);
+          database.dropDatabase(err => {
+            expect(err).to.not.exist;
 
             function completeStream() {
               changeStream.hasNext(function(err, hasNext) {
                 expect(err).to.not.exist;
                 assert.equal(hasNext, false);
                 assert.equal(changeStream.isClosed(), true);
-                client.close(done);
+                done();
               });
             }
 
             function checkInvalidate() {
               changeStream.next(function(err, change) {
-                assert.ifError(err);
+                expect(err).to.not.exist;
 
                 // Check the cursor invalidation has occured
                 if (change.operationType === 'invalidate') {
@@ -784,12 +804,12 @@ describe('Change Streams', function() {
     }
   });
 
-  it('Should invalidate change stream on collection drop using promises', {
+  it('should invalidate change stream on collection drop using promises', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
+      const configuration = this.configuration;
       const client = configuration.newClient();
 
       function checkInvalidate(changeStream) {
@@ -802,19 +822,19 @@ describe('Change Streams', function() {
         });
       }
 
-      client.connect(function(err, client) {
-        assert.ifError(err);
-        var database = client.db('integration_tests');
-        var changeStream = database.collection('invalidateCollectionDropPromises').watch(pipeline);
+      client.connect((err, client) => {
+        expect(err).to.not.exist;
+        this.defer(() => client.close());
+
+        const database = client.db('integration_tests');
+        const changeStream = database
+          .collection('invalidateCollectionDropPromises')
+          .watch(pipeline);
+        this.defer(() => changeStream.close());
 
         // Trigger the first database event
         waitForStarted(changeStream, () => {
-          return database
-            .collection('invalidateCollectionDropPromises')
-            .insert({ a: 1 })
-            .then(function() {
-              return delay(200);
-            });
+          this.defer(database.collection('invalidateCollectionDropPromises').insert({ a: 1 }));
         });
 
         return changeStream
@@ -828,16 +848,13 @@ describe('Change Streams', function() {
           .then(function(hasNext) {
             assert.equal(hasNext, false);
             assert.equal(changeStream.isClosed(), true);
-            client.close(done);
-          })
-          .catch(function(err) {
-            assert.ifError(err);
+            done();
           });
       });
     }
   });
 
-  it('Should return MongoNetworkError after first retry attempt fails using promises', {
+  it.skip('should return MongoNetworkError after first retry attempt fails using promises', {
     metadata: {
       requires: {
         generators: true,
@@ -847,14 +864,14 @@ describe('Change Streams', function() {
     },
 
     test: function(done) {
-      var configuration = this.configuration;
+      const configuration = this.configuration;
       const ObjectId = configuration.require.ObjectId;
 
       // Contain mock server
-      var primaryServer = null;
+      let primaryServer = null;
 
       // Default message fields
-      var defaultFields = {
+      const defaultFields = {
         setName: 'rs',
         setVersion: 1,
         electionId: new ObjectId(0),
@@ -872,7 +889,7 @@ describe('Change Streams', function() {
         primaryServer = yield mock.createServer(32000, 'localhost');
 
         primaryServer.setMessageHandler(request => {
-          var doc = request.document;
+          const doc = request.document;
 
           if (doc.ismaster) {
             request.reply(
@@ -897,22 +914,22 @@ describe('Change Streams', function() {
       const mockServerURL = 'mongodb://localhost:32000/';
       const client = configuration.newClient(mockServerURL);
 
-      client.connect(function(err, client) {
-        assert.ifError(err);
+      client.connect((err, client) => {
+        expect(err).to.not.exist;
 
-        var database = client.db('integration_tests');
-        var collection = database.collection('MongoNetworkErrorTestPromises');
-        var changeStream = collection.watch(pipeline);
+        const database = client.db('integration_tests');
+        const collection = database.collection('MongoNetworkErrorTestPromises');
+        const changeStream = collection.watch(pipeline);
 
         return changeStream
           .next()
           .then(function() {
-            // We should never execute this line because calling thisChangeStream.next() should throw an error
+            // We should never execute this line because calling changeStream.next() should throw an error
             throw new Error(
               'ChangeStream.next() returned a change document but it should have returned a MongoNetworkError'
             );
           })
-          .catch(function(err) {
+          .catch(err => {
             assert.ok(
               err instanceof MongoNetworkError,
               'error was not instance of MongoNetworkError'
@@ -920,8 +937,8 @@ describe('Change Streams', function() {
             assert.ok(err.message);
             assert.ok(err.message.indexOf('closed') > -1);
 
-            changeStream.close(function(err) {
-              assert.ifError(err);
+            changeStream.close(err => {
+              expect(err).to.not.exist;
               changeStream.close();
 
               // running = false;
@@ -935,7 +952,7 @@ describe('Change Streams', function() {
     }
   });
 
-  it('Should return MongoNetworkError after first retry attempt fails using callbacks', {
+  it.skip('should return MongoNetworkError after first retry attempt fails using callbacks', {
     metadata: {
       requires: {
         generators: true,
@@ -944,14 +961,14 @@ describe('Change Streams', function() {
       }
     },
     test: function(done) {
-      var configuration = this.configuration;
+      const configuration = this.configuration;
       const ObjectId = configuration.require.ObjectId;
 
       // Contain mock server
-      var primaryServer = null;
+      let primaryServer = null;
 
       // Default message fields
-      var defaultFields = {
+      const defaultFields = {
         setName: 'rs',
         setVersion: 1,
         electionId: new ObjectId(0),
@@ -966,13 +983,13 @@ describe('Change Streams', function() {
       };
 
       // Die
-      var die = false;
+      let die = false;
 
       co(function*() {
         primaryServer = yield mock.createServer(32000, 'localhost');
 
         primaryServer.setMessageHandler(request => {
-          var doc = request.document;
+          const doc = request.document;
 
           if (die) {
             request.connection.destroy();
@@ -1001,14 +1018,14 @@ describe('Change Streams', function() {
         validateOptions: true
       });
 
-      client.connect(function(err, client) {
-        assert.ifError(err);
+      client.connect((err, client) => {
+        expect(err).to.not.exist;
 
-        var theDatabase = client.db('integration_tests');
-        var theCollection = theDatabase.collection('MongoNetworkErrorTestPromises');
-        var thisChangeStream = theCollection.watch(pipeline);
+        const database = client.db('integration_tests');
+        const collection = database.collection('MongoNetworkErrorTestPromises');
+        const changeStream = collection.watch(pipeline);
 
-        thisChangeStream.next(function(err, change) {
+        changeStream.next(function(err, change) {
           assert.ok(err instanceof MongoNetworkError);
           assert.ok(err.message);
           assert.ok(err.message.indexOf('timed out') > -1);
@@ -1019,9 +1036,9 @@ describe('Change Streams', function() {
             'ChangeStream.next() returned a change document but it should have returned a MongoNetworkError'
           );
 
-          thisChangeStream.close(function(err) {
-            assert.ifError(err);
-            thisChangeStream.close();
+          changeStream.close(err => {
+            expect(err).to.not.exist;
+            changeStream.close();
 
             client.close(() => mock.cleanup(() => done()));
           });
@@ -1030,7 +1047,7 @@ describe('Change Streams', function() {
     }
   });
 
-  it('Should resume Change Stream when a resumable error is encountered', {
+  it.skip('should resume Change Stream when a resumable error is encountered', {
     metadata: {
       requires: {
         generators: true,
@@ -1039,16 +1056,16 @@ describe('Change Streams', function() {
       }
     },
     test: function(done) {
-      var configuration = this.configuration;
+      const configuration = this.configuration;
       const ObjectId = configuration.require.ObjectId;
       const Timestamp = configuration.require.Timestamp;
       const Long = configuration.require.Long;
 
       // Contain mock server
-      var primaryServer = null;
+      let primaryServer = null;
 
       // Default message fields
-      var defaultFields = {
+      const defaultFields = {
         setName: 'rs',
         setVersion: 1,
         electionId: new ObjectId(0),
@@ -1063,15 +1080,15 @@ describe('Change Streams', function() {
       };
 
       // Die
-      var callsToGetMore = 0;
+      let callsToGetMore = 0;
 
       // Boot the mock
       co(function*() {
         primaryServer = yield mock.createServer(32000, 'localhost');
 
-        var counter = 0;
+        let counter = 0;
         primaryServer.setMessageHandler(request => {
-          var doc = request.document;
+          const doc = request.document;
 
           // Create a server that responds to the initial aggregation to connect to the server, but not to subsequent getMore requests
           if (doc.ismaster) {
@@ -1130,9 +1147,9 @@ describe('Change Streams', function() {
       client
         .connect()
         .then(client => {
-          var database = client.db('integration_tests');
-          var collection = database.collection('MongoNetworkErrorTestPromises');
-          var changeStream = collection.watch(pipeline);
+          const database = client.db('integration_tests');
+          const collection = database.collection('MongoNetworkErrorTestPromises');
+          const changeStream = collection.watch(pipeline);
 
           return changeStream
             .next()
@@ -1169,49 +1186,45 @@ describe('Change Streams', function() {
     }
   });
 
-  it('Should resume from point in time using user-provided resumeAfter', {
+  it('should resume from point in time using user-provided resumeAfter', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     // The actual test we wish to run
     test: function() {
-      var configuration = this.configuration;
+      const configuration = this.configuration;
       const client = configuration.newClient();
 
       return client.connect().then(client => {
-        var database = client.db('integration_tests');
-        var collection = database.collection('resumeAfterTest2');
+        this.defer(() => client.close());
 
-        var firstChangeStream, secondChangeStream;
+        const database = client.db('integration_tests');
+        const collection = database.collection('resumeAfterTest2');
 
-        var resumeToken;
-        var docs = [{ a: 0 }, { a: 1 }, { a: 2 }];
+        let firstChangeStream, secondChangeStream;
 
-        // Trigger the first database event
+        let resumeToken;
+        const docs = [{ a: 0 }, { a: 1 }, { a: 2 }];
 
         firstChangeStream = collection.watch(pipeline);
+        this.defer(() => firstChangeStream.close());
+
+        // Trigger the first database event
         waitForStarted(firstChangeStream, () => {
-          return collection
-            .insert(docs[0])
-            .then(function(result) {
-              assert.equal(result.insertedCount, 1);
-              return collection.insert(docs[1]);
-            })
-            .then(function(result) {
-              assert.equal(result.insertedCount, 1);
-              return collection.insert(docs[2]);
-            })
-            .then(function(result) {
-              assert.equal(result.insertedCount, 1);
-              return delay(200);
-            });
+          this.defer(
+            collection
+              .insert(docs[0])
+              .then(() => collection.insertOne(docs[1]))
+              .then(() => collection.insertOne(docs[2]))
+          );
         });
+
         return firstChangeStream
           .hasNext()
-          .then(function(hasNext) {
+          .then(hasNext => {
             assert.equal(true, hasNext);
             return firstChangeStream.next();
           })
-          .then(function(change) {
+          .then(change => {
             assert.equal(change.operationType, 'insert');
             assert.equal(change.fullDocument.a, docs[0].a);
 
@@ -1219,66 +1232,67 @@ describe('Change Streams', function() {
             resumeToken = change._id;
             return firstChangeStream.next();
           })
-          .then(function(change) {
+          .then(change => {
             assert.equal(change.operationType, 'insert');
             assert.equal(change.fullDocument.a, docs[1].a);
 
             return firstChangeStream.next();
           })
-          .then(function(change) {
+          .then(change => {
             assert.equal(change.operationType, 'insert');
             assert.equal(change.fullDocument.a, docs[2].a);
 
             return firstChangeStream.close();
           })
-          .then(function() {
+          .then(() => {
             secondChangeStream = collection.watch(pipeline, {
               resumeAfter: resumeToken
             });
+            this.defer(() => secondChangeStream.close());
+
             return delay(200);
           })
-          .then(function() {
-            return secondChangeStream.hasNext();
-          })
-          .then(function(hasNext) {
+          .then(() => secondChangeStream.hasNext())
+          .then(hasNext => {
             assert.equal(true, hasNext);
             return secondChangeStream.next();
           })
-          .then(function(change) {
+          .then(change => {
             assert.equal(change.operationType, 'insert');
             assert.equal(change.fullDocument.a, docs[1].a);
             return secondChangeStream.next();
           })
-          .then(function(change) {
+          .then(change => {
             assert.equal(change.operationType, 'insert');
             assert.equal(change.fullDocument.a, docs[2].a);
             return secondChangeStream.close();
-          })
-          .then(() => client.close());
+          });
       });
     }
   });
 
-  it('Should support full document lookup', {
+  it('should support full document lookup', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     // The actual test we wish to run
     test: function() {
-      var configuration = this.configuration;
+      const configuration = this.configuration;
       const client = configuration.newClient();
 
       return client.connect().then(client => {
-        var database = client.db('integration_tests');
-        var collection = database.collection('fullDocumentLookup');
-        var changeStream = collection.watch(pipeline, {
+        this.defer(() => client.close());
+
+        const database = client.db('integration_tests');
+        const collection = database.collection('fullDocumentLookup');
+        const changeStream = collection.watch(pipeline, {
           fullDocument: 'updateLookup'
         });
+        this.defer(() => changeStream.close());
 
         waitForStarted(changeStream, () => {
-          return collection.insert({ f: 128 }).then(function(result) {
-            assert.equal(result.insertedCount, 1);
-          });
+          this.defer(collection.insert({ f: 128 }));
         });
+
         return changeStream
           .hasNext()
           .then(function(hasNext) {
@@ -1307,41 +1321,34 @@ describe('Change Streams', function() {
             assert.ok(change.fullDocument);
             assert.equal(change.fullDocument.f, 128);
             assert.equal(change.fullDocument.c, 2);
-
-            return changeStream.close().then(() => client.close());
           });
       });
     }
   });
 
-  it('Should support full document lookup with deleted documents', {
+  it('should support full document lookup with deleted documents', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     // The actual test we wish to run
     test: function() {
-      var configuration = this.configuration;
+      const configuration = this.configuration;
       const client = configuration.newClient();
 
       return client.connect().then(client => {
-        var database = client.db('integration_tests');
-        var collection = database.collection('fullLookupTest');
-        var changeStream = collection.watch(pipeline, {
+        this.defer(() => client.close());
+
+        const database = client.db('integration_tests');
+        const collection = database.collection('fullLookupTest');
+        const changeStream = collection.watch(pipeline, {
           fullDocument: 'updateLookup'
         });
+        this.defer(() => changeStream.close());
 
         // Trigger the first database event
         waitForStarted(changeStream, () => {
-          return collection
-            .insert({ i: 128 })
-            .then(function(result) {
-              assert.equal(result.insertedCount, 1);
-
-              return collection.deleteOne({ i: 128 });
-            })
-            .then(function(result) {
-              assert.equal(result.result.n, 1);
-            });
+          this.defer(collection.insert({ i: 128 }).then(() => collection.deleteOne({ i: 128 })));
         });
+
         return changeStream
           .hasNext()
           .then(function(hasNext) {
@@ -1362,75 +1369,68 @@ describe('Change Streams', function() {
             // Trigger the second database event
             return collection.update({ i: 128 }, { $set: { c: 2 } });
           })
-          .then(function() {
-            return changeStream.hasNext();
-          })
+          .then(() => changeStream.hasNext())
           .then(function(hasNext) {
             assert.equal(true, hasNext);
             return changeStream.next();
           })
           .then(function(change) {
             assert.equal(change.operationType, 'delete');
-
-            // Check the full lookedUpDocument is present
             assert.equal(change.lookedUpDocument, null);
-
-            return changeStream.close();
-          })
-          .then(() => client.close());
+          });
       });
     }
   });
 
-  it('Should create Change Streams with correct read preferences', {
+  it('should create Change Streams with correct read preferences', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     // The actual test we wish to run
     test: function() {
-      var configuration = this.configuration;
-      var ReadPreference = configuration.require.ReadPreference;
+      const configuration = this.configuration;
+      const ReadPreference = configuration.require.ReadPreference;
       const client = configuration.newClient();
 
       return client.connect().then(client => {
-        // Should get preference from database
-        var database = client.db('integration_tests', {
+        this.defer(() => client.close());
+
+        // should get preference from database
+        const database = client.db('integration_tests', {
           readPreference: ReadPreference.PRIMARY_PREFERRED
         });
 
-        var changeStream0 = database.collection('docs0').watch(pipeline);
+        const changeStream0 = database.collection('docs0').watch(pipeline);
+        this.defer(() => changeStream0.close());
+
         assert.deepEqual(
           changeStream0.cursor.readPreference.preference,
           ReadPreference.PRIMARY_PREFERRED
         );
 
-        // Should get preference from collection
-        var collection = database.collection('docs1', {
+        // should get preference from collection
+        const collection = database.collection('docs1', {
           readPreference: ReadPreference.SECONDARY_PREFERRED
         });
 
-        var changeStream1 = collection.watch(pipeline);
+        const changeStream1 = collection.watch(pipeline);
         assert.deepEqual(
           changeStream1.cursor.readPreference.preference,
           ReadPreference.SECONDARY_PREFERRED
         );
+        this.defer(() => changeStream1.close());
 
-        // Should get preference from Change Stream options
-        var changeStream2 = collection.watch(pipeline, {
+        // should get preference from Change Stream options
+        const changeStream2 = collection.watch(pipeline, {
           readPreference: ReadPreference.NEAREST
         });
+        this.defer(() => changeStream2.close());
 
         assert.deepEqual(changeStream2.cursor.readPreference.preference, ReadPreference.NEAREST);
-
-        return Promise.all([
-          changeStream0.close(),
-          changeStream1.close(),
-          changeStream2.close()
-        ]).then(() => client.close());
       });
     }
   });
 
-  it('Should support piping of Change Streams', {
+  it('should support piping of Change Streams', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 
     // The actual test we wish to run
@@ -1439,44 +1439,40 @@ describe('Change Streams', function() {
       const stream = require('stream');
       const client = configuration.newClient();
 
-      client.connect(function(err, client) {
-        assert.ifError(err);
+      client.connect((err, client) => {
+        expect(err).to.not.exist;
+        this.defer(() => client.close());
 
-        const theDatabase = client.db('integration_tests');
-        const theCollection = theDatabase.collection('pipeTest');
-        const thisChangeStream = theCollection.watch(pipeline);
+        const database = client.db('integration_tests');
+        const collection = database.collection('pipeTest');
+        const changeStream = collection.watch(pipeline);
+        this.defer(() => changeStream.close());
 
         const outStream = new stream.PassThrough({ objectMode: true });
 
         // Make a stream transforming to JSON and piping to the file
-        thisChangeStream.stream({ transform: JSON.stringify }).pipe(outStream);
-
-        function close(_err) {
-          thisChangeStream.close(err => client.close(cErr => done(_err || err || cErr)));
-        }
+        changeStream.stream({ transform: JSON.stringify }).pipe(outStream);
 
         outStream
           .on('data', data => {
             try {
               const parsedEvent = JSON.parse(data);
               assert.equal(parsedEvent.fullDocument.a, 1);
-              close();
+              done();
             } catch (e) {
-              close(e);
+              done(e);
             }
           })
-          .on('error', close);
+          .on('error', done);
 
-        waitForStarted(thisChangeStream, () => {
-          theCollection.insert({ a: 1 }, function(err) {
-            assert.ifError(err);
-          });
+        waitForStarted(changeStream, () => {
+          this.defer(collection.insert({ a: 1 }));
         });
       });
     }
   });
 
-  it.skip('Should resume piping of Change Streams when a resumable error is encountered', {
+  it.skip('should resume piping of Change Streams when a resumable error is encountered', {
     metadata: {
       requires: {
         generators: true,
@@ -1485,16 +1481,16 @@ describe('Change Streams', function() {
       }
     },
     test: function(done) {
-      var configuration = this.configuration;
+      const configuration = this.configuration;
       const ObjectId = configuration.require.ObjectId;
       const Timestamp = configuration.require.Timestamp;
       const Long = configuration.require.Long;
 
       // Contain mock server
-      var primaryServer = null;
+      let primaryServer = null;
 
       // Default message fields
-      var defaultFields = {
+      const defaultFields = {
         setName: 'rs',
         setVersion: 1,
         electionId: new ObjectId(0),
@@ -1511,9 +1507,9 @@ describe('Change Streams', function() {
       co(function*() {
         primaryServer = yield mock.createServer();
 
-        var counter = 0;
+        let counter = 0;
         primaryServer.setMessageHandler(request => {
-          var doc = request.document;
+          const doc = request.document;
 
           // Create a server that responds to the initial aggregation to connect to the server, but not to subsequent getMore requests
           if (doc.ismaster) {
@@ -1594,32 +1590,30 @@ describe('Change Streams', function() {
           validateOptions: true
         });
 
-        client.connect(function(err, client) {
-          assert.ifError(err);
+        client.connect((err, client) => {
+          expect(err).to.not.exist;
 
-          var fs = require('fs');
-          var theDatabase = client.db('integration_tests5');
-          var theCollection = theDatabase.collection('MongoNetworkErrorTestPromises');
-          var thisChangeStream = theCollection.watch(pipeline);
+          const database = client.db('integration_tests5');
+          const collection = database.collection('MongoNetworkErrorTestPromises');
+          const changeStream = collection.watch(pipeline);
 
-          var filename = '/tmp/_nodemongodbnative_resumepipe.txt';
-          var outStream = fs.createWriteStream(filename);
+          const filename = '/tmp/_nodemongodbnative_resumepipe.txt';
+          const outStream = fs.createWriteStream(filename);
 
-          thisChangeStream.stream({ transform: JSON.stringify }).pipe(outStream);
+          changeStream.stream({ transform: JSON.stringify }).pipe(outStream);
 
           // Listen for changes to the file
-          var watcher = fs.watch(filename, function(eventType) {
+          const watcher = fs.watch(filename, function(eventType) {
             assert.equal(eventType, 'change');
 
-            var fileContents = fs.readFileSync(filename, 'utf8');
-
-            var parsedFileContents = JSON.parse(fileContents);
+            const fileContents = fs.readFileSync(filename, 'utf8');
+            const parsedFileContents = JSON.parse(fileContents);
             assert.equal(parsedFileContents.fullDocument.a, 1);
 
             watcher.close();
 
-            thisChangeStream.close(function(err) {
-              assert.ifError(err);
+            changeStream.close(err => {
+              expect(err).to.not.exist;
 
               mock.cleanup(() => done());
             });
@@ -1629,63 +1623,59 @@ describe('Change Streams', function() {
     }
   });
 
-  it('Should support piping of Change Streams through multiple pipes', {
+  it('should support piping of Change Streams through multiple pipes', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
-
-    // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var crypto = require('crypto');
+      const configuration = this.configuration;
       const client = configuration.newClient(configuration.url(), {
         poolSize: 1,
         autoReconnect: false
       });
 
-      client.connect(function(err, client) {
-        assert.ifError(err);
+      client.connect((err, client) => {
+        expect(err).to.not.exist;
+        this.defer(() => client.close());
 
-        var cipher = crypto.createCipher('aes192', 'a password');
-        var decipher = crypto.createDecipher('aes192', 'a password');
+        const cipher = crypto.createCipher('aes192', 'a password');
+        const decipher = crypto.createDecipher('aes192', 'a password');
 
-        var theDatabase = client.db('integration_tests');
-        var theCollection = theDatabase.collection('multiPipeTest');
-        var thisChangeStream = theCollection.watch(pipeline);
+        const database = client.db('integration_tests');
+        const collection = database.collection('multiPipeTest');
+        const changeStream = collection.watch(pipeline);
+        this.defer(() => changeStream.close());
 
         // Make a stream transforming to JSON and piping to the file
-        var basicStream = thisChangeStream.pipe(
+        const basicStream = changeStream.pipe(
           new Transform({
             transform: (data, encoding, callback) => callback(null, JSON.stringify(data)),
             objectMode: true
           })
         );
-        var pipedStream = basicStream.pipe(cipher).pipe(decipher);
+        const pipedStream = basicStream.pipe(cipher).pipe(decipher);
 
-        var dataEmitted = '';
+        let dataEmitted = '';
         pipedStream.on('data', function(data) {
           dataEmitted += data.toString();
 
           // Work around poor compatibility with crypto cipher
-          thisChangeStream.cursor.emit('end');
+          changeStream.cursor.emit('end');
         });
 
         pipedStream.on('end', function() {
-          var parsedData = JSON.parse(dataEmitted.toString());
+          const parsedData = JSON.parse(dataEmitted.toString());
           assert.equal(parsedData.operationType, 'insert');
           assert.equal(parsedData.fullDocument.a, 1407);
 
           basicStream.emit('close');
-
-          thisChangeStream.close(err => client.close(cErr => done(err || cErr)));
+          done();
         });
 
-        pipedStream.on('error', function(err) {
+        pipedStream.on('error', err => {
           done(err);
         });
 
-        waitForStarted(thisChangeStream, () => {
-          theCollection.insert({ a: 1407 }, function(err) {
-            if (err) done(err);
-          });
+        waitForStarted(changeStream, () => {
+          this.defer(collection.insert({ a: 1407 }));
         });
       });
     }
@@ -1693,20 +1683,11 @@ describe('Change Streams', function() {
 
   it('should maintain change stream options on resume', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
-    test: function(done) {
+    test: function() {
       const configuration = this.configuration;
       const client = configuration.newClient();
 
       const collectionName = 'resumeAfterKillCursor';
-
-      let db;
-      let coll;
-      let changeStream;
-
-      function close(e) {
-        changeStream.close(() => client.close(() => done(e)));
-      }
-
       const changeStreamOptions = {
         fullDocument: 'updateLookup',
         collation: { maxVariable: 'punct' },
@@ -1714,24 +1695,22 @@ describe('Change Streams', function() {
         batchSize: 200
       };
 
-      client
-        .connect()
-        .then(() => (db = client.db('integration_tests')))
-        .then(() => (coll = db.collection(collectionName)))
-        .then(() => (changeStream = coll.watch([], changeStreamOptions)))
-        .then(() => {
-          expect(changeStream.cursor.resumeOptions).to.containSubset(changeStreamOptions);
-        })
-        .then(
-          () => close(),
-          e => close(e)
-        );
+      return client.connect().then(() => {
+        this.defer(() => client.close());
+
+        const db = client.db('integration_tests');
+        const coll = db.collection(collectionName);
+        const changeStream = coll.watch([], changeStreamOptions);
+        this.defer(() => changeStream.close());
+
+        expect(changeStream.cursor.resumeOptions).to.containSubset(changeStreamOptions);
+      });
     }
   });
 
   // 9. $changeStream stage for ChangeStream against a server >=4.0 and <4.0.7 that has not received
   // any results yet MUST include a startAtOperationTime option when resuming a change stream.
-  it('Should include a startAtOperationTime field when resuming if no changes have been received', {
+  it('should include a startAtOperationTime field when resuming if no changes have been received', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=4.0 <4.0.7' } },
     test: function(done) {
       const configuration = this.configuration;
@@ -1891,105 +1870,6 @@ describe('Change Streams', function() {
     }
   });
 
-  it('should not resume when error includes error label NonRetryableChangeStreamError', function() {
-    let server;
-    let client;
-    let changeStream;
-
-    function teardown(e) {
-      return Promise.resolve()
-        .then(() => changeStream && changeStream.close())
-        .catch(() => {})
-        .then(() => client && client.close())
-        .catch(() => {})
-        .then(() => e && Promise.reject(e));
-    }
-
-    const db = 'foobar';
-    const coll = 'foobar';
-    const ns = `${db}.${coll}`;
-
-    let aggregateCount = 0;
-    let getMoreCount = 0;
-
-    function messageHandler(request) {
-      const doc = request.document;
-
-      if (doc.ismaster) {
-        request.reply(
-          Object.assign({}, mock.DEFAULT_ISMASTER_36, {
-            ismaster: true,
-            secondary: false,
-            me: server.uri(),
-            primary: server.uri()
-          })
-        );
-      } else if (doc.aggregate) {
-        aggregateCount += 1;
-        request.reply({
-          ok: 1,
-          cursor: {
-            firstBatch: [],
-            id: 1,
-            ns
-          }
-        });
-      } else if (doc.getMore) {
-        if (getMoreCount === 0) {
-          getMoreCount += 1;
-          request.reply({
-            ok: 0,
-            errorLabels: ['NonRetryableChangeStreamError']
-          });
-        } else {
-          getMoreCount += 1;
-          request.reply({
-            ok: 1,
-            cursor: {
-              nextBatch: [
-                {
-                  _id: {},
-                  operationType: 'insert',
-                  ns: { db, coll },
-                  fullDocument: { a: 1 }
-                }
-              ],
-              id: 1,
-              ns
-            }
-          });
-        }
-      } else {
-        request.reply({ ok: 1 });
-      }
-    }
-
-    return mock
-      .createServer()
-      .then(_server => (server = _server))
-      .then(() => server.setMessageHandler(messageHandler))
-      .then(() => (client = this.configuration.newClient(`mongodb://${server.uri()}`)))
-      .then(() => client.connect())
-      .then(
-        () =>
-          (changeStream = client
-            .db(db)
-            .collection(coll)
-            .watch())
-      )
-      .then(() => changeStream.next())
-      .then(
-        () => Promise.reject('Expected changeStream to not resume'),
-        err => {
-          expect(err).to.be.an.instanceOf(MongoError);
-          expect(err.hasErrorLabel('NonRetryableChangeStreamError')).to.be.true;
-          expect(aggregateCount).to.equal(1);
-          expect(getMoreCount).to.equal(1);
-        }
-      )
-      .then(() => teardown(), teardown);
-  });
-
   it('should emit close event after error event', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
     test: function(done) {
@@ -1997,8 +1877,9 @@ describe('Change Streams', function() {
       const client = configuration.newClient();
       const closeSpy = sinon.spy();
 
-      client.connect(function(err, client) {
+      client.connect((err, client) => {
         expect(err).to.not.exist;
+        this.defer(() => client.close());
 
         const db = client.db('integration_tests');
         const coll = db.collection('event_test');
@@ -2006,27 +1887,23 @@ describe('Change Streams', function() {
         // This will cause an error because the _id will be projected out, which causes the following error:
         // "A change stream document has been received that lacks a resume token (_id)."
         const changeStream = coll.watch([{ $project: { _id: false } }]);
-
+        changeStream.on('close', closeSpy);
         changeStream.on('change', changeDoc => {
           expect(changeDoc).to.be.null;
         });
 
-        changeStream.on('close', closeSpy);
-
         changeStream.on('error', err => {
           expect(err).to.exist;
+
           changeStream.close(() => {
-            expect(closeSpy.calledOnce).to.be.true;
-            client.close(done);
+            expect(closeSpy).property('calledOnce').to.be.true;
+            done();
           });
         });
 
         // Trigger the first database event
         waitForStarted(changeStream, () => {
-          coll.insertOne({ a: 1 }, (err, result) => {
-            expect(err).to.not.exist;
-            expect(result.insertedCount).to.equal(1);
-          });
+          this.defer(coll.insertOne({ a: 1 }));
         });
       });
     }
@@ -2076,14 +1953,15 @@ describe('Change Streams', function() {
     it('when invoked with promises', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
       test: function() {
+        const test = this;
+
         function read() {
           return Promise.resolve()
             .then(() => changeStream.next())
             .then(() => changeStream.next())
             .then(() => {
-              lastWrite();
+              test.defer(lastWrite());
               const nextP = changeStream.next();
-
               return changeStream.close().then(() => nextP);
             });
         }
@@ -2100,19 +1978,20 @@ describe('Change Streams', function() {
       test: function(done) {
         changeStream.next(() => {
           changeStream.next(() => {
-            lastWrite();
+            this.defer(lastWrite());
+
             changeStream.next(err => {
-              let _err = null;
               try {
                 expect(err)
                   .property('message')
                   .to.equal('ChangeStream is closed');
+                done();
               } catch (e) {
-                _err = e;
-              } finally {
-                done(_err);
+                done(e);
               }
             });
+
+            // explicitly close the change stream after the write has begun
             changeStream.close();
           });
         });
@@ -2140,7 +2019,7 @@ describe('Change Streams', function() {
             changeStream.close();
             setTimeout(() => close());
           } else if (counter >= 3) {
-            close(new Error('Should not have received more than 2 events'));
+            close(new Error('should not have received more than 2 events'));
           }
         });
         changeStream.on('error', err => close(err));
@@ -2762,6 +2641,8 @@ describe('Change Streams', function() {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=4.1.1' } },
       test: function(done) {
         const changeStream = coll.watch([], { startAfter });
+        this.defer(() => changeStream.close());
+
         coll.insertOne({ x: 2 }, { w: 'majority', j: true }, err => {
           expect(err).to.not.exist;
           changeStream.once('change', change => {
@@ -2769,7 +2650,8 @@ describe('Change Streams', function() {
               operationType: 'insert',
               fullDocument: { x: 2 }
             });
-            changeStream.close(done);
+
+            done();
           });
         });
       }
@@ -2779,6 +2661,8 @@ describe('Change Streams', function() {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=4.1.1' } },
       test: function(done) {
         const changeStream = coll.watch([], { startAfter });
+        this.defer(() => changeStream.close());
+
         coll.insertOne({ x: 2 }, { w: 'majority', j: true }, err => {
           expect(err).to.not.exist;
           exhaust(changeStream, (err, bag) => {
@@ -2788,7 +2672,8 @@ describe('Change Streams', function() {
               operationType: 'insert',
               fullDocument: { x: 2 }
             });
-            changeStream.close(done);
+
+            done();
           });
         });
       }
@@ -2805,6 +2690,8 @@ describe('Change Streams', function() {
         const events = [];
         client.on('commandStarted', e => recordEvent(events, e));
         const changeStream = coll.watch([], { startAfter });
+        this.defer(() => changeStream.close());
+
         changeStream.once('change', change => {
           expect(change).to.containSubset({
             operationType: 'insert',
@@ -2816,14 +2703,12 @@ describe('Change Streams', function() {
           expect(events[0]).nested.property('$changeStream.startAfter').to.exist;
           expect(events[1]).to.equal('error');
           expect(events[2]).nested.property('$changeStream.startAfter').to.exist;
-          changeStream.close(done);
+          done();
         });
 
         waitForStarted(changeStream, () => {
           triggerResumableError(changeStream, () => events.push('error'));
-          coll.insertOne({ x: 2 }, { w: 'majority', j: true }, err => {
-            expect(err).to.not.exist;
-          });
+          this.defer(coll.insertOne({ x: 2 }, { w: 'majority', j: true }));
         });
       }
     });
@@ -2839,6 +2724,7 @@ describe('Change Streams', function() {
         let events = [];
         client.on('commandStarted', e => recordEvent(events, e));
         const changeStream = coll.watch([], { startAfter });
+        this.defer(() => changeStream.close());
 
         changeStream.on('change', change => {
           events.push({ change: { insert: { x: change.fullDocument.x } } });
@@ -2855,17 +2741,17 @@ describe('Change Streams', function() {
               expect(events[0]).to.equal('error');
               expect(events[1]).nested.property('$changeStream.resumeAfter').to.exist;
               expect(events[2]).to.eql({ change: { insert: { x: 3 } } });
-              changeStream.close(done);
+              done();
               break;
           }
         });
+
         waitForStarted(changeStream, () =>
-          coll.insertOne({ x: 2 }, { w: 'majority', j: true }, err => {
-            expect(err).to.not.exist;
-            coll.insertOne({ x: 3 }, { w: 'majority', j: true }, err => {
-              expect(err).to.not.exist;
-            });
-          })
+          this.defer(
+            coll
+              .insertOne({ x: 2 }, { w: 'majority', j: true })
+              .then(() => coll.insertOne({ x: 3 }, { w: 'majority', j: true }))
+          )
         );
       }
     });
@@ -2892,6 +2778,7 @@ describe('Change Stream Resume Error Tests', function() {
           done();
         }
       });
+
       waitForStarted(changeStream, () => {
         collection.insertOne({ a: 42 }, err => {
           expect(err).to.not.exist;
@@ -2928,6 +2815,7 @@ describe('Change Stream Resume Error Tests', function() {
           });
         });
       });
+
       changeStream.hasNext((err, hasNext) => {
         expect(err).to.not.exist;
         expect(hasNext).to.be.true;

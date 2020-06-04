@@ -124,6 +124,11 @@ describe('examples(change-stream):', function() {
       });
       looper.run();
 
+      let processChange;
+      const streamExampleFinished = new Promise(resolve => {
+        processChange = resolve;
+      });
+
       // Start Changestream Example 3
       const collection = db.collection('inventory');
       const changeStream = collection.watch();
@@ -135,7 +140,7 @@ describe('examples(change-stream):', function() {
 
         newChangeStream = collection.watch({ resumeAfter: resumeToken });
         newChangeStream.on('change', next => {
-          // process next document
+          processChange(next);
         });
       });
       // End Changestream Example 3
@@ -152,6 +157,8 @@ describe('examples(change-stream):', function() {
       // End Changestream Example 3 Alternative
 
       await newChangeStreamIterator.close();
+
+      await streamExampleFinished;
       await newChangeStream.close();
       await looper.stop();
 
