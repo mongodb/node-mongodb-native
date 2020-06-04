@@ -5,7 +5,6 @@ const expect = require('chai').expect;
 
 const OCSP_TLS_SHOULD_SUCCEED = process.env.OCSP_TLS_SHOULD_SUCCEED;
 const CA_FILE = process.env.CA_FILE;
-const MONGODB_UNIFIED_TOPOLOGY = process.env.MONGODB_UNIFIED_TOPOLOGY;
 
 // NOTE: this file is NOT run through the normal test runner
 describe('OCSP Support', function() {

@@ -6,6 +6,7 @@ const expect = chai.expect;
 const { EJSON } = require('bson');
 const TestRunnerContext = require('./context').TestRunnerContext;
 const resolveConnectionString = require('./utils').resolveConnectionString;
+const hasOwnProperty = Object.prototype.hasOwnProperty;
 
 // Promise.try alternative https://stackoverflow.com/questions/60624081/promise-try-without-bluebird/60624164?noredirect=1#comment107255389_60624164
 function promiseTry(callback) {
@@ -431,7 +432,7 @@ function extractCrudResult(result, operation) {
   }
 
   return Object.keys(operation.result).reduce((crudResult, key) => {
-    if (result.hasOwnProperty(key) && result[key] != null) {
+    if (hasOwnProperty.call(result, key) && result[key] != null) {
       // FIXME(major): update crud results are broken and need to be changed
       crudResult[key] = key === 'upsertedId' ? result[key]._id : result[key];
     }
