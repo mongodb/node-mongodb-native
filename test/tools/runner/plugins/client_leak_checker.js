@@ -52,4 +52,3 @@ after(function() {
 
   activeClients = [];
 });
-

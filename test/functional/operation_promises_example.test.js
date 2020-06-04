@@ -7166,7 +7166,8 @@ describe('Operation (Promises)', function() {
           });
           // END
         }
-        client
+
+        return client
           .connect()
           .then(() => updateEmployeeInfo(client))
           .then(() => client.close());
