@@ -1,7 +1,6 @@
 'use strict';
 
 const TestConfiguration = require('../config');
-const wtfnode = require('wtfnode');
 const chalk = require('chalk');
 
 let activeClients = [];
@@ -31,8 +30,6 @@ function unifiedTopologyIsConnected(client) {
 }
 
 after(function() {
-  wtfnode.dump();
-
   const isUnifiedTopology = this.configuration.usingUnifiedTopology;
   const traces = [];
   const openClientCount = activeClients.reduce((count, client) => {
@@ -55,3 +52,4 @@ after(function() {
 
   activeClients = [];
 });
+
