@@ -56,11 +56,11 @@ function simplePipeline(db, callback) {
 ```
 
 Inside the ``aggregate`` method, the first pipeline stage filters out
-all documents except those with ``5`` in the ``stars`` field. The
+all documents except those with ``Bronx`` in the ``borough`` field. The
 second stage unwinds the ``categories`` field, which is an array, and
 treats each item in the array as a separate document. The third stage
 groups the documents by category and adds up the number of matching
-5-star results.
+results from the Bronx borough.
 
 ## Single Purpose Aggregation Operations
 
