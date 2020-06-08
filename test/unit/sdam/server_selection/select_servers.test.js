@@ -85,7 +85,6 @@ describe('selectServer', function() {
       let completed = 0;
       function finish() {
         completed++;
-        console.log(completed);
         if (completed === toSelect) done();
       }
 
