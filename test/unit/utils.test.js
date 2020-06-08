@@ -1,9 +1,11 @@
 'use strict';
 const eachAsync = require('../../lib/core/utils').eachAsync;
+const makeInterruptableAsyncInterval = require('../../lib/utils').makeInterruptableAsyncInterval;
+const now = require('../../lib/utils').now;
 const expect = require('chai').expect;
 
 describe('utils', function() {
-  describe('eachAsync', function() {
+  context('eachAsync', function() {
     it('should callback with an error', function(done) {
       eachAsync(
         [{ error: false }, { error: true }],
@@ -31,6 +33,78 @@ describe('utils', function() {
         )
       ).to.throw(/something wicked/);
       done();
+    });
+  });
+
+  context('makeInterruptableAsyncInterval', function() {
+    const roundToNearestMultipleOfTen = x => Math.floor(x / 10) * 10;
+
+    it('should execute a method in an repeating interval', function(done) {
+      let lastTime = now();
+      const marks = [];
+      const executor = makeInterruptableAsyncInterval(
+        callback => {
+          marks.push(now() - lastTime);
+          lastTime = now();
+          callback();
+        },
+        { interval: 10 }
+      );
+
+      setTimeout(() => {
+        const roundedMarks = marks.map(roundToNearestMultipleOfTen);
+        expect(roundedMarks.every(mark => roundedMarks[0] === mark)).to.be.true;
+        executor.stop();
+        done();
+      }, 50);
+    });
+
+    it('should schedule execution sooner if requested within min interval threshold', function(done) {
+      let lastTime = now();
+      const marks = [];
+      const executor = makeInterruptableAsyncInterval(
+        callback => {
+          marks.push(now() - lastTime);
+          lastTime = now();
+          callback();
+        },
+        { interval: 50, minInterval: 10 }
+      );
+
+      // immediately schedule execution
+      executor.wake();
+
+      setTimeout(() => {
+        const roundedMarks = marks.map(roundToNearestMultipleOfTen);
+        expect(roundedMarks[0]).to.equal(10);
+        executor.stop();
+        done();
+      }, 50);
+    });
+
+    it('should debounce multiple requests to wake the interval sooner', function(done) {
+      let lastTime = now();
+      const marks = [];
+      const executor = makeInterruptableAsyncInterval(
+        callback => {
+          marks.push(now() - lastTime);
+          lastTime = now();
+          callback();
+        },
+        { interval: 50, minInterval: 10 }
+      );
+
+      for (let i = 0; i < 100; ++i) {
+        executor.wake();
+      }
+
+      setTimeout(() => {
+        const roundedMarks = marks.map(roundToNearestMultipleOfTen);
+        expect(roundedMarks[0]).to.equal(10);
+        expect(roundedMarks.slice(1).every(mark => mark === 50)).to.be.true;
+        executor.stop();
+        done();
+      }, 250);
     });
   });
 });
