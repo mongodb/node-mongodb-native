@@ -812,6 +812,7 @@ describe('Find', function() {
               { $set: { b: 3 } },
               { new: true },
               function(err, updated_doc) {
+                test.equal(null, err);
                 test.equal(1, updated_doc.value.a);
                 test.equal(3, updated_doc.value.b);
 
