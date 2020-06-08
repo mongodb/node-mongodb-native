@@ -123,11 +123,19 @@ function executeScenarioTest(test, ctx) {
  */
 function generateArguments(test) {
   const args = [];
+  const name = test.operation.name;
+  const findOneAndDelete = 'findOneAndDelete';
+  const findOneAndDeleteOptions = ['collation', 'projection', 'sort', 'maxTimeMS'];
 
   if (test.operation.arguments) {
     const options = {};
     Object.keys(test.operation.arguments).forEach(arg => {
-      if (arg === 'requests') {
+      if (name === findOneAndDelete && arg === 'filter') {
+        args[0] = test.operation.arguments[arg];
+      } else if (name === findOneAndDelete && findOneAndDeleteOptions.includes(arg)) {
+        if (!args[1]) args[1] = {};
+        args[1][arg] = test.operation.arguments[arg];
+      } else if (arg === 'requests') {
         args.push(test.operation.arguments[arg].map(convertBulkWriteOperation));
       } else if (arg === 'upsert') {
         options.upsert = test.operation.arguments[arg];
