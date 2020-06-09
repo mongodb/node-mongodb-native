@@ -1,8 +1,6 @@
 'use strict';
-var f = require('util').format;
-var test = require('./shared').assert;
-var withMonitoredClient = require('./shared').withMonitoredClient;
-var setupDatabase = require('./shared').setupDatabase;
+const withMonitoredClient = require('./shared').withMonitoredClient;
+const setupDatabase = require('./shared').setupDatabase;
 const expect = require('chai').expect;
 
 describe('Find and Modify', function() {
