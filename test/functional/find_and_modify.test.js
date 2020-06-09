@@ -22,6 +22,7 @@ describe('Find and Modify', function() {
       const collection = db.collection('findAndModifyTEST', writeConcern);
       return collection.findOneAndUpdate({}, { $set: { a: 1 } }, writeConcern, err => {
         expect(err).to.not.exist;
+        console.log(events[0].command);
         expect(events[0].command.writeConcern).to.deep.equal(writeConcern);
         return collection.findOneAndReplace({}, { b: 1 }, writeConcern, err => {
           expect(err).to.not.exist;
