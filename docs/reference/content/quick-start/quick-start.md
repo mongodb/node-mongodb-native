@@ -43,7 +43,7 @@ For complete MongoDB installation instructions, see [the manual](https://docs.mo
 3. Install and start a ``mongod`` process.
 
 ```
-mongod --dbpath=/data
+mongod --dbpath=./data
 ```
 
 You should see the **mongod** process start up and print some status information.
