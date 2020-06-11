@@ -4,6 +4,7 @@ const mock = require('mongodb-mock-server');
 const expect = require('chai').expect;
 const genClusterTime = require('./common').genClusterTime;
 const sessionCleanupHandler = require('./common').sessionCleanupHandler;
+const now = require('../../../lib/utils').now;
 
 const core = require('../../../lib/core');
 const Server = core.Server;
@@ -138,7 +139,7 @@ describe('Sessions', function() {
 
       test: function(done) {
         const oldSession = new ServerSession();
-        oldSession.lastUse = new Date(Date.now() - 30 * 60 * 1000).getTime(); // add 30min
+        oldSession.lastUse = now() - 30 * 60 * 1000; // add 30min
 
         const pool = new ServerSessionPool(test.client);
         done = sessionCleanupHandler(null, pool, done);
@@ -159,7 +160,7 @@ describe('Sessions', function() {
       test: function(done) {
         const newSession = new ServerSession();
         const oldSessions = [new ServerSession(), new ServerSession()].map(session => {
-          session.lastUse = new Date(Date.now() - 30 * 60 * 1000).getTime(); // add 30min
+          session.lastUse = now() - 30 * 60 * 1000; // add 30min
           return session;
         });
 
@@ -179,7 +180,7 @@ describe('Sessions', function() {
 
       test: function(done) {
         const session = new ServerSession();
-        session.lastUse = new Date(Date.now() - 9.5 * 60 * 1000).getTime(); // add 9.5min
+        session.lastUse = now() - 9.5 * 60 * 1000; // add 9.5min
 
         const pool = new ServerSessionPool(test.client);
         done = sessionCleanupHandler(null, pool, done);
