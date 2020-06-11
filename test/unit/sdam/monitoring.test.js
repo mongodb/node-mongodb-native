@@ -83,20 +83,17 @@ describe('monitoring', function() {
     const topology = new Topology(mockServer.uri());
     topology.connect(err => {
       expect(err).to.not.exist;
+      expect(topology)
+        .property('description')
+        .property('servers')
+        .to.have.length(1);
 
-      setTimeout(() => {
-        expect(topology)
-          .property('description')
-          .property('servers')
-          .to.have.length(1);
+      const serverDescription = Array.from(topology.description.servers.values())[0];
+      expect(serverDescription)
+        .property('roundTripTime')
+        .to.be.greaterThan(0);
 
-        const serverDescription = Array.from(topology.description.servers.values())[0];
-        expect(serverDescription)
-          .property('roundTripTime')
-          .to.be.greaterThan(0);
-
-        topology.close(done);
-      }, 500);
+      topology.close(done);
     });
   });
 

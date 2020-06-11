@@ -5,6 +5,7 @@ const { expect } = require('chai');
 const { genClusterTime, sessionCleanupHandler } = require('./common');
 const { Topology } = require('../../../lib/sdam/topology');
 const { ServerSessionPool, ServerSession, ClientSession } = require('../../../lib/sessions');
+const { now } = require('../../../lib/utils');
 
 let test = {};
 describe('Sessions', function() {
@@ -133,7 +134,7 @@ describe('Sessions', function() {
 
       test: function(done) {
         const oldSession = new ServerSession();
-        oldSession.lastUse = new Date(Date.now() - 30 * 60 * 1000).getTime(); // add 30min
+        oldSession.lastUse = now() - 30 * 60 * 1000; // add 30min
 
         const pool = new ServerSessionPool(test.client);
         done = sessionCleanupHandler(null, pool, done);
@@ -154,7 +155,7 @@ describe('Sessions', function() {
       test: function(done) {
         const newSession = new ServerSession();
         const oldSessions = [new ServerSession(), new ServerSession()].map(session => {
-          session.lastUse = new Date(Date.now() - 30 * 60 * 1000).getTime(); // add 30min
+          session.lastUse = now() - 30 * 60 * 1000; // add 30min
           return session;
         });
 
@@ -174,7 +175,7 @@ describe('Sessions', function() {
 
       test: function(done) {
         const session = new ServerSession();
-        session.lastUse = new Date(Date.now() - 9.5 * 60 * 1000).getTime(); // add 9.5min
+        session.lastUse = now() - 9.5 * 60 * 1000; // add 9.5min
 
         const pool = new ServerSessionPool(test.client);
         done = sessionCleanupHandler(null, pool, done);
