@@ -21,11 +21,13 @@ class SDAMRunnerContext extends TestRunnerContext {
   }
 
   waitForPrimaryChange(client) {
+    const currentPrimary = this.currentPrimary;
+
     return new Promise(resolve => {
       function eventHandler(event) {
         if (
           event.newDescription.type === 'RSPrimary' &&
-          event.newDescription.address !== this.currentPrimary
+          event.newDescription.address !== currentPrimary
         ) {
           resolve();
           client.removeListener('serverDescriptionChanged', eventHandler);
