@@ -37,7 +37,7 @@ describe('utils', function() {
   });
 
   context('makeInterruptableAsyncInterval', function() {
-    const roundToNearestMultipleOfTen = x => Math.floor(x / 10) * 10;
+    const roundToNearestMultipleOfTen = x => Math.round(x / 10) * 10;
 
     it('should execute a method in an repeating interval', function(done) {
       let lastTime = now();
@@ -76,7 +76,7 @@ describe('utils', function() {
 
       setTimeout(() => {
         const roundedMarks = marks.map(roundToNearestMultipleOfTen);
-        expect(roundedMarks[0]).to.equal(10);
+        expect(roundedMarks[0]).to.be.lessThan(50);
         executor.stop();
         done();
       }, 50);
@@ -100,7 +100,7 @@ describe('utils', function() {
 
       setTimeout(() => {
         const roundedMarks = marks.map(roundToNearestMultipleOfTen);
-        expect(roundedMarks[0]).to.equal(10);
+        expect(roundedMarks[0]).to.be.lessThan(50);
         expect(roundedMarks.slice(1).every(mark => mark === 50)).to.be.true;
         executor.stop();
         done();

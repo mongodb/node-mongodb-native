@@ -543,7 +543,7 @@ const kOperations = new Map([
   [
     'waitForPrimaryChange',
     (operation, testRunner, context /*, options */) => {
-      testRunner.waitForPrimaryChange(context.client);
+      return testRunner.waitForPrimaryChange(context.client);
     }
   ],
   [
