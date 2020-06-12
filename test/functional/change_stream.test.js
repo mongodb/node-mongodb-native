@@ -1992,11 +1992,11 @@ describe('Change Streams', function() {
             });
 
             // explicitly close the change stream after the write has begun
-            changeStream.close();
+            this.defer(changeStream.close());
           });
         });
 
-        write().catch(() => {});
+        this.defer(write().catch(() => {}));
       }
     });
 
