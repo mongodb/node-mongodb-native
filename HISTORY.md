@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="3.5.9"></a>
+## [3.5.9](https://github.com/mongodb/node-mongodb-native/compare/v3.5.8...v3.5.9) (2020-06-12)
+
+
+### Bug Fixes
+
+* don't try to calculate sMax if there are no viable servers ([be51347](https://github.com/mongodb/node-mongodb-native/commit/be51347))
+* use async interruptable interval for server monitoring ([1f855a4](https://github.com/mongodb/node-mongodb-native/commit/1f855a4))
+* use duration of handshake if no previous roundTripTime exists ([ddfa41b](https://github.com/mongodb/node-mongodb-native/commit/ddfa41b))
+
+
+### Features
+
+* introduce an interruptable async interval timer ([9e12cd5](https://github.com/mongodb/node-mongodb-native/commit/9e12cd5))
+
+
+
 <a name="3.5.8"></a>
 ## [3.5.8](https://github.com/mongodb/node-mongodb-native/compare/v3.5.7...v3.5.8) (2020-05-28)
 
