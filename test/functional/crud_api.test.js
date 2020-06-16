@@ -41,7 +41,7 @@ describe('CRUD API', function() {
             .batchSize(2)
             .comment('some comment 2')
             .limit(2)
-            .maxTimeMs(50)
+            .maxTimeMS(50)
             .project({ a: 1 })
             .skip(0)
             .sort({ a: 1 });
