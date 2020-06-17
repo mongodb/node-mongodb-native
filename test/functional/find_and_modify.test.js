@@ -1,7 +1,6 @@
 'use strict';
-var f = require('util').format;
-var test = require('./shared').assert;
-var setupDatabase = require('./shared').setupDatabase;
+const withMonitoredClient = require('./shared').withMonitoredClient;
+const setupDatabase = require('./shared').setupDatabase;
 const expect = require('chai').expect;
 
 describe('Find and Modify', function() {
@@ -16,59 +15,25 @@ describe('Find and Modify', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
-      var started = [];
-      var succeeded = [];
-
-      var listener = require('../..').instrument(function(err) {
-        test.equal(null, err);
-      });
-
-      listener.on('started', function(event) {
-        if (event.commandName === 'findAndModify') started.push(event);
-      });
-
-      listener.on('succeeded', function(event) {
-        if (event.commandName === 'findAndModify') succeeded.push(event);
-      });
-
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
-        var db = client.db(configuration.db);
-        test.equal(null, err);
-
-        var collection = db.collection('findAndModifyTEST');
-        // Execute findOneAndUpdate
-        collection.findOneAndUpdate({}, { $set: { a: 1 } }, { fsync: 1 }, function(err) {
-          test.equal(null, err);
-          test.deepEqual({ fsync: 1 }, started[0].command.writeConcern);
-
-          // Cleanup
-          started = [];
-          succeeded = [];
-
-          // Execute findOneAndReplace
-          collection.findOneAndReplace({}, { b: 1 }, { fsync: 1 }, function(err) {
-            test.equal(null, err);
-            test.deepEqual({ fsync: 1 }, started[0].command.writeConcern);
-
-            // Cleanup
-            started = [];
-            succeeded = [];
-
-            // Execute findOneAndReplace
-            collection.findOneAndDelete({}, { fsync: 1 }, function(err) {
-              test.equal(null, err);
-              test.deepEqual({ fsync: 1 }, started[0].command.writeConcern);
-
-              listener.uninstrument();
-              client.close(done);
-            });
+    test: withMonitoredClient(['findAndModify'], function(client, events, done) {
+      const configuration = this.configuration;
+      const db = client.db(configuration.db);
+      const writeConcern = { fsync: 1 };
+      const collection = db.collection('findAndModifyTEST', writeConcern);
+      return collection.findOneAndUpdate({}, { $set: { a: 1 } }, writeConcern, err => {
+        expect(err).to.not.exist;
+        expect(events[0].command.writeConcern).to.deep.equal(writeConcern);
+        return collection.findOneAndReplace({}, { b: 1 }, writeConcern, err => {
+          expect(err).to.not.exist;
+          expect(events[1].command.writeConcern).to.deep.equal(writeConcern);
+          return collection.findOneAndDelete({}, writeConcern, err => {
+            expect(err).to.not.exist;
+            expect(events[2].command.writeConcern).to.deep.equal(writeConcern);
+            return done();
           });
         });
       });
-    }
+    })
   });
 
   it('should pass through writeConcern to all findAndModify at collection level', {
@@ -78,59 +43,25 @@ describe('Find and Modify', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
-      var started = [];
-      var succeeded = [];
-
-      var listener = require('../..').instrument(function(err) {
-        test.equal(null, err);
-      });
-
-      listener.on('started', function(event) {
-        if (event.commandName === 'findAndModify') started.push(event);
-      });
-
-      listener.on('succeeded', function(event) {
-        if (event.commandName === 'findAndModify') succeeded.push(event);
-      });
-
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
-        var db = client.db(configuration.db);
-        test.equal(null, err);
-
-        var collection = db.collection('findAndModifyTEST', { fsync: 1 });
-        // Execute findOneAndUpdate
-        collection.findOneAndUpdate({}, { $set: { a: 1 } }, function(err) {
-          test.equal(null, err);
-          test.deepEqual({ fsync: 1 }, started[0].command.writeConcern);
-
-          // Cleanup
-          started = [];
-          succeeded = [];
-
-          // Execute findOneAndReplace
-          collection.findOneAndReplace({}, { b: 1 }, function(err) {
-            test.equal(null, err);
-            test.deepEqual({ fsync: 1 }, started[0].command.writeConcern);
-
-            // Cleanup
-            started = [];
-            succeeded = [];
-
-            // Execute findOneAndReplace
-            collection.findOneAndDelete({}, function(err) {
-              test.equal(null, err);
-              test.deepEqual({ fsync: 1 }, started[0].command.writeConcern);
-
-              listener.uninstrument();
-              client.close(done);
-            });
+    test: withMonitoredClient(['findAndModify'], function(client, events, done) {
+      const configuration = this.configuration;
+      const db = client.db(configuration.db);
+      const writeConcern = { fsync: 1 };
+      const collection = db.collection('findAndModifyTEST', writeConcern);
+      return collection.findOneAndUpdate({}, { $set: { a: 1 } }, err => {
+        expect(err).to.not.exist;
+        expect(events[0].command.writeConcern).to.deep.equal(writeConcern);
+        return collection.findOneAndReplace({}, { b: 1 }, err => {
+          expect(err).to.not.exist;
+          expect(events[1].command.writeConcern).to.deep.equal(writeConcern);
+          return collection.findOneAndDelete({}, err => {
+            expect(err).to.not.exist;
+            expect(events[2].command.writeConcern).to.deep.equal(writeConcern);
+            return done();
           });
         });
       });
-    }
+    })
   });
 
   it('should pass through writeConcern to all findAndModify at db level', {
@@ -140,62 +71,29 @@ describe('Find and Modify', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
-      var configuration = this.configuration;
-      var started = [];
-      var succeeded = [];
-
-      var listener = require('../..').instrument(function(err) {
-        test.equal(null, err);
-      });
-
-      listener.on('started', function(event) {
-        if (event.commandName === 'findAndModify') started.push(event);
-      });
-
-      listener.on('succeeded', function(event) {
-        if (event.commandName === 'findAndModify') succeeded.push(event);
-      });
-
-      var url = configuration.url();
-      url = url.indexOf('?') !== -1 ? f('%s&%s', url, 'fsync=true') : f('%s?%s', url, 'fsync=true');
-
-      // Establish connection to db
-      const client = configuration.newClient(url, { sslValidate: false });
-      client.connect(function(err, client) {
-        test.equal(null, err);
-        var db = client.db(configuration.db);
-        var collection = db.collection('findAndModifyTEST');
-        // Execute findOneAndUpdate
-        collection.findOneAndUpdate({}, { $set: { a: 1 } }, function(err) {
-          test.equal(null, err);
-          test.deepEqual({ fsync: true }, started[0].command.writeConcern);
-
-          // Cleanup
-          started = [];
-          succeeded = [];
-
-          // Execute findOneAndReplace
-          collection.findOneAndReplace({}, { b: 1 }, function(err) {
-            test.equal(null, err);
-            test.deepEqual({ fsync: true }, started[0].command.writeConcern);
-
-            // Cleanup
-            started = [];
-            succeeded = [];
-
-            // Execute findOneAndReplace
-            collection.findOneAndDelete({}, function(err) {
-              test.equal(null, err);
-              test.deepEqual({ fsync: true }, started[0].command.writeConcern);
-
-              listener.uninstrument();
-              client.close(done);
-            });
+    test: withMonitoredClient(['findAndModify'], { queryOptions: { fsync: true } }, function(
+      client,
+      events,
+      done
+    ) {
+      const configuration = this.configuration;
+      const db = client.db(configuration.db);
+      const writeConcern = { fsync: true };
+      const collection = db.collection('findAndModifyTEST');
+      return collection.findOneAndUpdate({}, { $set: { a: 1 } }, err => {
+        expect(err).to.not.exist;
+        expect(events[0].command.writeConcern).to.deep.equal(writeConcern);
+        return collection.findOneAndReplace({}, { b: 1 }, err => {
+          expect(err).to.not.exist;
+          expect(events[1].command.writeConcern).to.deep.equal(writeConcern);
+          return collection.findOneAndDelete({}, err => {
+            expect(err).to.not.exist;
+            expect(events[2].command.writeConcern).to.deep.equal(writeConcern);
+            return done();
           });
         });
       });
-    }
+    })
   });
 
   it('should allow all findAndModify commands with non-primary readPreference', {

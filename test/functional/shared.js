@@ -164,6 +164,7 @@ function withClient(client, callback) {
  *
  * @param {string|Array|Function} commands commands to filter for
  * @param {object} [options] options to pass on to configuration.newClient
+ * @param {Function | object} [options.connectionString] connection string options
  * @param {object} [options.queryOptions] connection string options
  * @param {object} [options.clientOptions] MongoClient options
  * @param {withMonitoredClientCallback} callback the test function
@@ -177,14 +178,29 @@ function withMonitoredClient(commands, options, callback) {
     throw new Error('withMonitoredClient callback can not be arrow function');
   }
   return function() {
-    const monitoredClient = this.configuration.newClient(
-      Object.assign({}, options.queryOptions),
+    const self = this;
+
+    function resolveConnectionString() {
+      if (options.queryOptions) {
+        return Object.assign({}, options.queryOptions);
+      }
+      if (typeof options.connectionString === 'string') {
+        return options.connectionString;
+      }
+      if (typeof options.connectionString === 'function') {
+        return options.connectionString(self);
+      }
+      return {};
+    }
+
+    const monitoredClient = self.configuration.newClient(
+      resolveConnectionString(),
       Object.assign({ monitorCommands: true }, options.clientOptions)
     );
     const events = [];
     monitoredClient.on('commandStarted', filterForCommands(commands, events));
     return withClient(monitoredClient, (client, done) =>
-      callback.bind(this)(client, events, done)
+      callback.bind(self)(client, events, done)
     )();
   };
 }
@@ -233,7 +249,7 @@ function withCursor(cursor, body, done) {
  *   });
  * });
  */
-class APMEventCollector {
+class EventCollector {
   constructor(client, eventName, options) {
     this._client = client;
     this._eventName = eventName;
@@ -287,5 +303,5 @@ module.exports = {
   withClient,
   withMonitoredClient,
   withCursor,
-  APMEventCollector
+  EventCollector
 };
