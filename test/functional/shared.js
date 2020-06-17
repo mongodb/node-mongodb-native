@@ -249,7 +249,7 @@ function withCursor(cursor, body, done) {
  *   });
  * });
  */
-class EventCollector {
+class APMEventCollector {
   constructor(client, eventName, options) {
     this._client = client;
     this._eventName = eventName;
@@ -303,5 +303,5 @@ module.exports = {
   withClient,
   withMonitoredClient,
   withCursor,
-  EventCollector
+  APMEventCollector
 };
