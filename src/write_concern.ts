@@ -1,3 +1,4 @@
+'use strict';
 const kWriteConcernKeys = new Set(['w', 'wtimeout', 'j', 'fsync']);
 
 /**
@@ -11,11 +12,6 @@ const kWriteConcernKeys = new Set(['w', 'wtimeout', 'j', 'fsync']);
  * @see https://docs.mongodb.com/manual/reference/write-concern/index.html
  */
 class WriteConcern {
-  w?: number | string
-  wtimeout?: number
-  j?: boolean
-  fsync?: boolean
-
   /**
    * Constructs a WriteConcern from the write concern properties.
    *
@@ -24,7 +20,7 @@ class WriteConcern {
    * @param {boolean} [j] The journal write concern
    * @param {boolean} [fsync] The file sync write concern
    */
-  constructor(w?: number | string, wtimeout?: number, j?: boolean, fsync?: boolean) {
+  constructor(w, wtimeout, j, fsync) {
     if (w != null) {
       this.w = w;
     }
@@ -42,10 +38,10 @@ class WriteConcern {
   /**
    * Construct a WriteConcern given an options object.
    *
-   * @param {object} options The options object from which to extract the write concern.
-   * @returns {WriteConcern}
+   * @param {any} options The options object from which to extract the write concern.
+   * @returns {WriteConcern|undefined}
    */
-  static fromOptions(options: any) {
+  static fromOptions(options) {
     if (
       options == null ||
       (options.writeConcern == null &&
