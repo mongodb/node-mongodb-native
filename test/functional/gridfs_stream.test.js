@@ -6,7 +6,7 @@ const crypto = require('crypto');
 const { EJSON } = require('bson');
 const fs = require('fs');
 const { assert: test } = require('./shared');
-const { setupDatabase } = require('./shared');
+const { setupDatabase, withClient } = require('./shared');
 const { expect } = require('chai');
 const { GridFSBucket, ObjectId } = require('../..');
 
@@ -1399,6 +1399,36 @@ describe('GridFS Stream', function() {
           done();
         });
       });
+    });
+  });
+
+  it('NODE-2623 downloadStream should emit error on end > size', function() {
+    const configuration = this.configuration;
+    return withClient.bind(this)((client, done) => {
+      const db = client.db(configuration.db);
+      const bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload' });
+      const readStream = fs.createReadStream('./LICENSE.md');
+
+      const uploadStream = bucket.openUploadStream('test.dat');
+
+      const actualSize = fs.fstatSync(fs.openSync('./LICENSE.md', 'r')).size;
+      const wrongExpectedSize = Math.floor(actualSize * 1.1);
+
+      const id = uploadStream.id;
+
+      uploadStream.once('finish', function() {
+        const downloadStream = bucket.openDownloadStream(id, { end: wrongExpectedSize });
+        downloadStream.on('data', function() {});
+
+        downloadStream.on('error', function(err) {
+          expect(err.message).to.equal(
+            `Stream end (${wrongExpectedSize}) must not be more than the length of the file (${actualSize})`
+          );
+          done();
+        });
+      });
+
+      readStream.pipe(uploadStream);
     });
   });
 });
