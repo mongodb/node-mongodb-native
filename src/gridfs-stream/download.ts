@@ -265,6 +265,7 @@ function init(self: any) {
     if (error) {
       return __handleError(self, error);
     }
+
     if (!doc) {
       var identifier = self.s.filter._id ? self.s.filter._id.toString() : self.s.filter.filename;
       var errmsg = 'FileNotFound: file ' + identifier + ' was not found';
@@ -288,7 +289,11 @@ function init(self: any) {
       return;
     }
 
-    self.s.bytesToSkip = handleStartOption(self, doc, self.s.options);
+    try {
+      self.s.bytesToSkip = handleStartOption(self, doc, self.s.options);
+    } catch (error) {
+      return __handleError(self, error);
+    }
 
     var filter: any = { files_id: doc._id };
 
@@ -309,7 +314,13 @@ function init(self: any) {
 
     self.s.expectedEnd = Math.ceil(doc.length / doc.chunkSize);
     self.s.file = doc;
-    self.s.bytesToTrim = handleEndOption(self, doc, self.s.cursor, self.s.options);
+
+    try {
+      self.s.bytesToTrim = handleEndOption(self, doc, self.s.cursor, self.s.options);
+    } catch (error) {
+      return __handleError(self, error);
+    }
+
     self.emit('file', doc);
   });
 }
