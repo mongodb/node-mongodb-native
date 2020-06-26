@@ -12,6 +12,11 @@ const kWriteConcernKeys = new Set(['w', 'wtimeout', 'j', 'fsync']);
  * @see https://docs.mongodb.com/manual/reference/write-concern/index.html
  */
 class WriteConcern {
+  w?: any;
+  wtimeout?: any;
+  j?: any;
+  fsync?: any;
+
   /**
    * Constructs a WriteConcern from the write concern properties.
    *
@@ -20,7 +25,7 @@ class WriteConcern {
    * @param {boolean} [j] The journal write concern
    * @param {boolean} [fsync] The file sync write concern
    */
-  constructor(w, wtimeout, j, fsync) {
+  constructor(w?: any, wtimeout?: number, j?: boolean, fsync?: boolean) {
     if (w != null) {
       this.w = w;
     }
@@ -34,14 +39,13 @@ class WriteConcern {
       this.fsync = fsync;
     }
   }
-
   /**
    * Construct a WriteConcern given an options object.
    *
    * @param {any} options The options object from which to extract the write concern.
    * @returns {WriteConcern|undefined}
    */
-  static fromOptions(options) {
+  static fromOptions(options: any): WriteConcern | undefined {
     if (
       options == null ||
       (options.writeConcern == null &&
@@ -52,16 +56,13 @@ class WriteConcern {
     ) {
       return;
     }
-
     if (options.writeConcern) {
       if (typeof options.writeConcern === 'string') {
         return new WriteConcern(options.writeConcern);
       }
-
-      if (!Object.keys(options.writeConcern).some(key => kWriteConcernKeys.has(key))) {
+      if (!Object.keys(options.writeConcern).some((key: any) => kWriteConcernKeys.has(key))) {
         return;
       }
-
       return new WriteConcern(
         options.writeConcern.w,
         options.writeConcern.wtimeout,
@@ -69,9 +70,7 @@ class WriteConcern {
         options.writeConcern.fsync
       );
     }
-
     return new WriteConcern(options.w, options.wtimeout, options.j, options.fsync);
   }
 }
-
-module.exports = WriteConcern;
+export = WriteConcern;

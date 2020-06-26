@@ -14,12 +14,14 @@ const Aspect = {
  * a specific aspect.
  */
 class OperationBase {
-  constructor(options) {
+  options: any;
+
+  constructor(options: any) {
     this.options = Object.assign({}, options);
   }
 
-  hasAspect(aspect) {
-    const ctor = this.constructor;
+  hasAspect(aspect: any) {
+    const ctor: any = this.constructor;
     if (ctor.aspects == null) {
       return false;
     }
@@ -27,7 +29,7 @@ class OperationBase {
     return ctor.aspects.has(aspect);
   }
 
-  set session(session) {
+  set session(session: any) {
     Object.assign(this.options, { session });
   }
 
@@ -48,25 +50,23 @@ class OperationBase {
    * @param {any} [callback]
    */
   // eslint-disable-next-line
-  execute(server, callback) {
+  execute(server?: any, callback?: any) {
     throw new TypeError('`execute` must be implemented for OperationBase subclasses');
   }
 }
 
-function defineAspects(operation, aspects) {
+function defineAspects(operation: any, aspects: any) {
   if (!Array.isArray(aspects) && !(aspects instanceof Set)) {
     aspects = [aspects];
   }
+
   aspects = new Set(aspects);
   Object.defineProperty(operation, 'aspects', {
     value: aspects,
     writable: false
   });
+
   return aspects;
 }
 
-module.exports = {
-  Aspect,
-  defineAspects,
-  OperationBase
-};
+export { Aspect, defineAspects, OperationBase };

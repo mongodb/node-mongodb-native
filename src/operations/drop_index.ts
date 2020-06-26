@@ -1,13 +1,13 @@
 'use strict';
-
-const Aspect = require('./operation').Aspect;
-const defineAspects = require('./operation').defineAspects;
-const CommandOperation = require('./command');
-const applyWriteConcern = require('../utils').applyWriteConcern;
-const handleCallback = require('../utils').handleCallback;
+import { Aspect, defineAspects } from './operation';
+import CommandOperation = require('./command');
+import { applyWriteConcern, handleCallback } from '../utils';
 
 class DropIndexOperation extends CommandOperation {
-  constructor(collection, indexName, options) {
+  collection: any;
+  indexName: any;
+
+  constructor(collection: any, indexName: any, options: any) {
     super(collection.s.db, options, collection);
 
     this.collection = collection;
@@ -27,9 +27,9 @@ class DropIndexOperation extends CommandOperation {
     return cmd;
   }
 
-  execute(callback) {
+  execute(callback: Function) {
     // Execute command
-    super.execute((err, result) => {
+    super.execute((err?: any, result?: any) => {
       if (typeof callback !== 'function') return;
       if (err) return handleCallback(callback, err, null);
       handleCallback(callback, null, result);
@@ -39,4 +39,4 @@ class DropIndexOperation extends CommandOperation {
 
 defineAspects(DropIndexOperation, Aspect.WRITE_OPERATION);
 
-module.exports = DropIndexOperation;
+export = DropIndexOperation;

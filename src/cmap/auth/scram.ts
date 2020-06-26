@@ -1,12 +1,11 @@
 'use strict';
-const crypto = require('crypto');
-const {
-  BSON: { Binary }
-} = require('../../deps');
-const { MongoError } = require('../../error');
-const { AuthProvider } = require('./auth_provider');
+import crypto = require('crypto');
+import { BSON } from '../../deps';
+const { Binary } = BSON;
+import { MongoError } from '../../error';
+import { AuthProvider } from './auth_provider';
 
-let saslprep;
+let saslprep: any;
 try {
   saslprep = require('saslprep');
 } catch (e) {
@@ -14,18 +13,19 @@ try {
 }
 
 class ScramSHA extends AuthProvider {
-  constructor(cryptoMethod) {
+  cryptoMethod: any;
+  constructor(cryptoMethod: any) {
     super();
     this.cryptoMethod = cryptoMethod || 'sha1';
   }
 
-  prepare(handshakeDoc, authContext, callback) {
+  prepare(handshakeDoc: any, authContext: any, callback: Function) {
     const cryptoMethod = this.cryptoMethod;
     if (cryptoMethod === 'sha256' && saslprep == null) {
       console.warn('Warning: no saslprep library specified. Passwords will not be sanitized');
     }
 
-    crypto.randomBytes(24, (err, nonce) => {
+    crypto.randomBytes(24, (err?: any, nonce?: any) => {
       if (err) {
         return callback(err);
       }
@@ -44,7 +44,7 @@ class ScramSHA extends AuthProvider {
     });
   }
 
-  auth(authContext, callback) {
+  auth(authContext: any, callback: Function) {
     const response = authContext.response;
     if (response && response.speculativeAuthenticate) {
       continueScramConversation(
@@ -61,11 +61,11 @@ class ScramSHA extends AuthProvider {
   }
 }
 
-function cleanUsername(username) {
+function cleanUsername(username: any) {
   return username.replace('=', '=3D').replace(',', '=2C');
 }
 
-function clientFirstMessageBare(username, nonce) {
+function clientFirstMessageBare(username: any, nonce: any) {
   // NOTE: This is done b/c Javascript uses UTF-16, but the server is hashing in UTF-8.
   // Since the username is not sasl-prep-d, we need to do this here.
   return Buffer.concat([
@@ -76,7 +76,7 @@ function clientFirstMessageBare(username, nonce) {
   ]);
 }
 
-function makeFirstMessage(cryptoMethod, credentials, nonce) {
+function makeFirstMessage(cryptoMethod: any, credentials: any, nonce: any) {
   const username = cleanUsername(credentials.username);
   const mechanism = cryptoMethod === 'sha1' ? 'SCRAM-SHA-1' : 'SCRAM-SHA-256';
 
@@ -93,14 +93,14 @@ function makeFirstMessage(cryptoMethod, credentials, nonce) {
   };
 }
 
-function executeScram(cryptoMethod, authContext, callback) {
+function executeScram(cryptoMethod: any, authContext: any, callback: Function) {
   const connection = authContext.connection;
   const credentials = authContext.credentials;
   const nonce = authContext.nonce;
   const db = credentials.source;
 
   const saslStartCmd = makeFirstMessage(cryptoMethod, credentials, nonce);
-  connection.command(`${db}.$cmd`, saslStartCmd, (_err, result) => {
+  connection.command(`${db}.$cmd`, saslStartCmd, (_err?: any, result?: any) => {
     const err = resolveError(_err, result);
     if (err) {
       return callback(err);
@@ -110,7 +110,12 @@ function executeScram(cryptoMethod, authContext, callback) {
   });
 }
 
-function continueScramConversation(cryptoMethod, response, authContext, callback) {
+function continueScramConversation(
+  cryptoMethod: any,
+  response: any,
+  authContext: any,
+  callback: Function
+) {
   const connection = authContext.connection;
   const credentials = authContext.credentials;
   const nonce = authContext.nonce;
@@ -177,7 +182,7 @@ function continueScramConversation(cryptoMethod, response, authContext, callback
     payload: new Binary(Buffer.from(clientFinal))
   };
 
-  connection.command(`${db}.$cmd`, saslContinueCmd, (_err, result) => {
+  connection.command(`${db}.$cmd`, saslContinueCmd, (_err?: any, result?: any) => {
     const err = resolveError(_err, result);
     if (err) {
       return callback(err);
@@ -204,8 +209,8 @@ function continueScramConversation(cryptoMethod, response, authContext, callback
   });
 }
 
-function parsePayload(payload) {
-  const dict = {};
+function parsePayload(payload: any) {
+  const dict: any = {};
   const parts = payload.split(',');
   for (let i = 0; i < parts.length; i++) {
     const valueParts = parts[i].split('=');
@@ -215,7 +220,7 @@ function parsePayload(payload) {
   return dict;
 }
 
-function passwordDigest(username, password) {
+function passwordDigest(username: any, password: any) {
   if (typeof username !== 'string') {
     throw new MongoError('username must be a string');
   }
@@ -234,7 +239,7 @@ function passwordDigest(username, password) {
 }
 
 // XOR two buffers
-function xor(a, b) {
+function xor(a: any, b: any) {
   if (!Buffer.isBuffer(a)) {
     a = Buffer.from(a);
   }
@@ -253,33 +258,33 @@ function xor(a, b) {
   return Buffer.from(res).toString('base64');
 }
 
-function H(method, text) {
+function H(method: any, text: any) {
   return crypto
     .createHash(method)
     .update(text)
     .digest();
 }
 
-function HMAC(method, key, text) {
+function HMAC(method: any, key: any, text: any) {
   return crypto
     .createHmac(method, key)
     .update(text)
     .digest();
 }
 
-let _hiCache = {};
+let _hiCache: any = {};
 let _hiCacheCount = 0;
 function _hiCachePurge() {
   _hiCache = {};
   _hiCacheCount = 0;
 }
 
-const hiLengthMap = {
+const hiLengthMap: any = {
   sha256: 32,
   sha1: 20
 };
 
-function HI(data, salt, iterations, cryptoMethod) {
+function HI(data: any, salt: any, iterations: any, cryptoMethod: any) {
   // omit the work if already generated
   const key = [data, salt.toString('base64'), iterations].join('_');
   if (_hiCache[key] !== undefined) {
@@ -305,7 +310,7 @@ function HI(data, salt, iterations, cryptoMethod) {
   return saltedData;
 }
 
-function compareDigest(lhs, rhs) {
+function compareDigest(lhs: any, rhs: any) {
   if (lhs.length !== rhs.length) {
     return false;
   }
@@ -322,7 +327,7 @@ function compareDigest(lhs, rhs) {
   return result === 0;
 }
 
-function resolveError(err, result) {
+function resolveError(err?: any, result?: any) {
   if (err) return err;
 
   const r = result.result;
@@ -341,4 +346,4 @@ class ScramSHA256 extends ScramSHA {
   }
 }
 
-module.exports = { ScramSHA1, ScramSHA256 };
+export { ScramSHA1, ScramSHA256 };

@@ -1,9 +1,9 @@
 'use strict';
-const { AuthProvider } = require('./auth_provider');
-const { Kerberos, kModuleError } = require('../../deps');
+import { AuthProvider } from './auth_provider';
+import { Kerberos, kModuleError } from '../../deps';
 
 class GSSAPI extends AuthProvider {
-  auth(authContext, callback) {
+  auth(authContext: any, callback: Function) {
     if (Kerberos[kModuleError]) {
       callback(Kerberos[kModuleError]);
       return;
@@ -26,10 +26,9 @@ class GSSAPI extends AuthProvider {
       mechanismProperties
     );
 
-    authProcess.init(username, password, err => {
+    authProcess.init(username, password, (err: any) => {
       if (err) return callback(err, false);
-
-      authProcess.transition('', (err, payload) => {
+      authProcess.transition('', (err?: any, payload?: any) => {
         if (err) return callback(err, false);
 
         const command = {
@@ -39,11 +38,11 @@ class GSSAPI extends AuthProvider {
           autoAuthorize: 1
         };
 
-        connection.command('$external.$cmd', command, (err, result) => {
+        connection.command('$external.$cmd', command, (err?: any, result?: any) => {
           if (err) return callback(err, false);
 
           const doc = result.result;
-          authProcess.transition(doc.payload, (err, payload) => {
+          authProcess.transition(doc.payload, (err?: any, payload?: any) => {
             if (err) return callback(err, false);
             const command = {
               saslContinue: 1,
@@ -51,11 +50,11 @@ class GSSAPI extends AuthProvider {
               payload
             };
 
-            connection.command('$external.$cmd', command, (err, result) => {
+            connection.command('$external.$cmd', command, (err?: any, result?: any) => {
               if (err) return callback(err, false);
 
               const doc = result.result;
-              authProcess.transition(doc.payload, (err, payload) => {
+              authProcess.transition(doc.payload, (err?: any, payload?: any) => {
                 if (err) return callback(err, false);
                 const command = {
                   saslContinue: 1,
@@ -63,11 +62,11 @@ class GSSAPI extends AuthProvider {
                   payload
                 };
 
-                connection.command('$external.$cmd', command, (err, result) => {
+                connection.command('$external.$cmd', command, (err?: any, result?: any) => {
                   if (err) return callback(err, false);
 
                   const response = result.result;
-                  authProcess.transition(null, err => {
+                  authProcess.transition(null, (err: any) => {
                     if (err) return callback(err, null);
                     callback(null, response);
                   });
@@ -81,4 +80,4 @@ class GSSAPI extends AuthProvider {
   }
 }
 
-module.exports = GSSAPI;
+export = GSSAPI;

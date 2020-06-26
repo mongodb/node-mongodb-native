@@ -1,12 +1,10 @@
 'use strict';
-
-const Aspect = require('./operation').Aspect;
-const CommandOperation = require('./command');
-const defineAspects = require('./operation').defineAspects;
-const handleCallback = require('../utils').handleCallback;
+import { Aspect, defineAspects } from './operation';
+import CommandOperation = require('./command');
+import { handleCallback } from '../utils';
 
 class DropOperation extends CommandOperation {
-  constructor(db, options) {
+  constructor(db: any, options: any) {
     const finalOptions = Object.assign({}, options, db.s.options);
 
     if (options.session) {
@@ -16,8 +14,8 @@ class DropOperation extends CommandOperation {
     super(db, finalOptions);
   }
 
-  execute(callback) {
-    super.execute((err, result) => {
+  execute(callback: Function) {
+    super.execute((err?: any, result?: any) => {
       if (err) return handleCallback(callback, err);
       if (result.ok) return handleCallback(callback, null, true);
       handleCallback(callback, null, false);
@@ -28,7 +26,9 @@ class DropOperation extends CommandOperation {
 defineAspects(DropOperation, Aspect.WRITE_OPERATION);
 
 class DropCollectionOperation extends DropOperation {
-  constructor(db, name, options) {
+  name: any;
+
+  constructor(db: any, name: any, options: any) {
     super(db, options);
 
     this.name = name;
@@ -46,8 +46,4 @@ class DropDatabaseOperation extends DropOperation {
   }
 }
 
-module.exports = {
-  DropOperation,
-  DropCollectionOperation,
-  DropDatabaseOperation
-};
+export { DropOperation, DropCollectionOperation, DropDatabaseOperation };

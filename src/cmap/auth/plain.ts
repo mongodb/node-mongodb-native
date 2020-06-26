@@ -1,11 +1,10 @@
 'use strict';
-const {
-  BSON: { Binary }
-} = require('../../deps');
-const AuthProvider = require('./auth_provider').AuthProvider;
+import { BSON } from '../../deps';
+const { Binary } = BSON;
+import { AuthProvider } from './auth_provider';
 
 class Plain extends AuthProvider {
-  auth(authContext, callback) {
+  auth(authContext: any, callback: Function) {
     const { connection, credentials } = authContext;
     const username = credentials.username;
     const password = credentials.password;
@@ -22,4 +21,4 @@ class Plain extends AuthProvider {
   }
 }
 
-module.exports = Plain;
+export = Plain;

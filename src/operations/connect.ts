@@ -1,19 +1,18 @@
 'use strict';
+import fs = require('fs');
+import Logger = require('../logger');
+import ReadPreference = require('../read_preference');
+import { MongoError } from '../error';
+import NativeTopology = require('../topologies/native_topology');
+import { parseConnectionString } from '../connection_string';
+import ReadConcern = require('../read_concern');
+import { ServerSessionPool } from '../sessions';
+import { emitDeprecationWarning } from '../utils';
+import { CMAP_EVENT_NAMES } from '../cmap/events';
+import { MongoCredentials } from '../cmap/auth/mongo_credentials';
+import { BSON } from '../deps';
 
-const fs = require('fs');
-const Logger = require('../logger');
-const ReadPreference = require('../read_preference');
-const { MongoError } = require('../error');
-const NativeTopology = require('../topologies/native_topology');
-const { parseConnectionString } = require('../connection_string');
-const ReadConcern = require('../read_concern');
-const { ServerSessionPool } = require('../sessions');
-const { emitDeprecationWarning } = require('../utils');
-const { CMAP_EVENT_NAMES } = require('../cmap/events');
-const { MongoCredentials } = require('../cmap/auth/mongo_credentials');
-const { BSON } = require('../deps');
-
-const AUTH_MECHANISM_INTERNAL_MAP = {
+const AUTH_MECHANISM_INTERNAL_MAP: any = {
   DEFAULT: 'default',
   PLAIN: 'plain',
   GSSAPI: 'gssapi',
@@ -126,7 +125,7 @@ const ignoreOptionNames = ['native_parser'];
 const legacyOptionNames = ['server', 'replset', 'replSet', 'mongos', 'db'];
 
 // Validate options object
-function validOptions(options) {
+function validOptions(options: any) {
   const _validOptions = validOptionNames.concat(legacyOptionNames);
 
   for (const name in options) {
@@ -151,12 +150,12 @@ function validOptions(options) {
   }
 }
 
-const LEGACY_OPTIONS_MAP = validOptionNames.reduce((obj, name) => {
+const LEGACY_OPTIONS_MAP: any = validOptionNames.reduce((obj: any, name: any) => {
   obj[name.toLowerCase()] = name;
   return obj;
 }, {});
 
-function addListeners(mongoClient, topology) {
+function addListeners(mongoClient: any, topology: any) {
   topology.on('authenticated', createListener(mongoClient, 'authenticated'));
   topology.on('error', createListener(mongoClient, 'error'));
   topology.on('timeout', createListener(mongoClient, 'timeout'));
@@ -168,7 +167,7 @@ function addListeners(mongoClient, topology) {
   topology.on('reconnect', createListener(mongoClient, 'reconnect'));
 }
 
-function assignTopology(client, topology) {
+function assignTopology(client: any, topology: any) {
   client.topology = topology;
 
   if (!(topology instanceof NativeTopology)) {
@@ -176,19 +175,19 @@ function assignTopology(client, topology) {
   }
 }
 
-function resolveTLSOptions(options) {
+function resolveTLSOptions(options: any) {
   if (options.tls == null) {
     return;
   }
 
-  ['sslCA', 'sslKey', 'sslCert'].forEach(optionName => {
+  ['sslCA', 'sslKey', 'sslCert'].forEach((optionName: any) => {
     if (options[optionName]) {
       options[optionName] = fs.readFileSync(options[optionName]);
     }
   });
 }
 
-function connect(mongoClient, url, options, callback) {
+function connect(mongoClient: any, url: any, options: any, callback: Function) {
   options = Object.assign({}, options);
 
   // If callback is null throw an exception
@@ -199,7 +198,7 @@ function connect(mongoClient, url, options, callback) {
   let didRequestAuthentication = false;
   const logger = new Logger('MongoClient', options);
 
-  parseConnectionString(url, options, (err, _object) => {
+  parseConnectionString(url, options, (err?: any, _object?: any) => {
     // Do not attempt to connect if parsing error
     if (err) return callback(err);
 
@@ -254,7 +253,7 @@ function connect(mongoClient, url, options, callback) {
     return createTopology(mongoClient, _finalOptions, connectCallback);
   });
 
-  function connectCallback(err, topology) {
+  function connectCallback(err?: any, topology?: any) {
     const warningMessage = `seed list contains no mongos proxies, replicaset connections requires the parameter replicaSet to be supplied in the URI or options object, mongodb://server:port/db?replicaSet=name`;
     if (err && err.message === 'no mongos proxies found in seed list') {
       if (logger.isWarn()) {
@@ -274,9 +273,9 @@ function connect(mongoClient, url, options, callback) {
   }
 }
 
-function createListener(mongoClient, event) {
+function createListener(mongoClient: any, event: any) {
   const eventSet = new Set(['all', 'fullsetup', 'open', 'reconnect']);
-  return (v1, v2) => {
+  return (v1: any, v2: any) => {
     if (eventSet.has(event)) {
       return mongoClient.emit(event, mongoClient);
     }
@@ -298,8 +297,8 @@ const DEPRECATED_UNIFIED_EVENTS = new Set([
   'open'
 ]);
 
-function registerDeprecatedEventNotifiers(client) {
-  client.on('newListener', eventName => {
+function registerDeprecatedEventNotifiers(client: any) {
+  client.on('newListener', (eventName: any) => {
     if (DEPRECATED_UNIFIED_EVENTS.has(eventName)) {
       emitDeprecationWarning(
         `The \`${eventName}\` event is no longer supported by the unified topology, please read more by visiting http://bit.ly/2D8WfT6`
@@ -308,7 +307,7 @@ function registerDeprecatedEventNotifiers(client) {
   });
 }
 
-function createTopology(mongoClient, options, callback) {
+function createTopology(mongoClient: any, options: any, callback: Function) {
   // Set default options
   translateOptions(options);
 
@@ -327,7 +326,7 @@ function createTopology(mongoClient, options, callback) {
     }
 
     try {
-      let mongodbClientEncryption = require('mongodb-client-encryption');
+      const mongodbClientEncryption = require('mongodb-client-encryption');
       if (typeof mongodbClientEncryption.extension !== 'function') {
         callback(
           new MongoError(
@@ -360,13 +359,13 @@ function createTopology(mongoClient, options, callback) {
 
   // initialize CSFLE if requested
   if (options.autoEncrypter) {
-    options.autoEncrypter.init(err => {
+    options.autoEncrypter.init((err: any) => {
       if (err) {
         callback(err);
         return;
       }
 
-      topology.connect(options, err => {
+      topology.connect(options, (err: any) => {
         if (err) {
           topology.close(true);
           callback(err);
@@ -381,7 +380,7 @@ function createTopology(mongoClient, options, callback) {
   }
 
   // otherwise connect normally
-  topology.connect(options, err => {
+  topology.connect(options, (err: any) => {
     if (err) {
       topology.close(true);
       return callback(err);
@@ -392,7 +391,7 @@ function createTopology(mongoClient, options, callback) {
   });
 }
 
-function createUnifiedOptions(finalOptions, options) {
+function createUnifiedOptions(finalOptions: any, options: any) {
   const childOptions = [
     'mongos',
     'server',
@@ -427,7 +426,7 @@ function createUnifiedOptions(finalOptions, options) {
   return finalOptions;
 }
 
-function generateCredentials(client, username, password, options) {
+function generateCredentials(client: any, username: any, password: any, options: any) {
   options = Object.assign({}, options);
 
   // the default db to authenticate against is 'self'
@@ -455,7 +454,7 @@ function generateCredentials(client, username, password, options) {
   });
 }
 
-function mergeOptions(target, source, flatten) {
+function mergeOptions(target: any, source: any, flatten: any) {
   for (const name in source) {
     if (source[name] && typeof source[name] === 'object' && flatten) {
       target = mergeOptions(target, source[name], flatten);
@@ -467,7 +466,7 @@ function mergeOptions(target, source, flatten) {
   return target;
 }
 
-function relayEvents(mongoClient, topology) {
+function relayEvents(mongoClient: any, topology: any) {
   const serverOrCommandEvents = [
     // APM
     'commandStarted',
@@ -492,14 +491,14 @@ function relayEvents(mongoClient, topology) {
     'ha'
   ].concat(CMAP_EVENT_NAMES);
 
-  serverOrCommandEvents.forEach(event => {
-    topology.on(event, (object1, object2) => {
+  serverOrCommandEvents.forEach((event: any) => {
+    topology.on(event, (object1: any, object2: any) => {
       mongoClient.emit(event, object1, object2);
     });
   });
 }
 
-function transformUrlOptions(_object) {
+function transformUrlOptions(_object: any) {
   let object = Object.assign({ servers: _object.hosts }, _object.options);
   for (let name in object) {
     const camelCaseName = LEGACY_OPTIONS_MAP[name];
@@ -544,7 +543,7 @@ function transformUrlOptions(_object) {
   return object;
 }
 
-function translateOptions(options) {
+function translateOptions(options: any) {
   // If we have a readPreference passed in by the db options
   if (typeof options.readPreference === 'string' || typeof options.read_preference === 'string') {
     options.readPreference = new ReadPreference(options.readPreference || options.read_preference);
@@ -565,4 +564,4 @@ function translateOptions(options) {
   if (options.connectTimeoutMS == null) options.connectTimeoutMS = 10000;
 }
 
-module.exports = { validOptions, connect };
+export { validOptions, connect };

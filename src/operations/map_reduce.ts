@@ -1,20 +1,18 @@
 'use strict';
-
-const {
-  BSON: { Code }
-} = require('../deps');
-const { executeCommand } = require('./db_ops');
-const { loadDb } = require('../dynamic_loaders');
-const { OperationBase } = require('./operation');
-const {
+import { BSON } from '../deps';
+const { Code } = BSON;
+import { executeCommand } from './db_ops';
+import { loadDb } from '../dynamic_loaders';
+import { OperationBase } from './operation';
+import {
   applyWriteConcern,
   decorateWithCollation,
   decorateWithReadConcern,
   handleCallback,
   isObject,
   toError
-} = require('../utils');
-const ReadPreference = require('../read_preference');
+} from '../utils';
+import ReadPreference = require('../read_preference');
 
 const exclusionList = [
   'readPreference',
@@ -37,6 +35,10 @@ const exclusionList = [
  * @property {object} [options] Optional settings. See Collection.prototype.mapReduce for a list of options.
  */
 class MapReduceOperation extends OperationBase {
+  collection: any;
+  map: any;
+  reduce: any;
+
   /**
    * Constructs a MapReduce operation.
    *
@@ -45,7 +47,7 @@ class MapReduceOperation extends OperationBase {
    * @param {(Function|string)} reduce The reduce function.
    * @param {object} [options] Optional settings. See Collection.prototype.mapReduce for a list of options.
    */
-  constructor(collection, map, reduce, options) {
+  constructor(collection: any, map: any, reduce: any, options?: object) {
     super(options);
 
     this.collection = collection;
@@ -58,17 +60,17 @@ class MapReduceOperation extends OperationBase {
    *
    * @param {Collection~resultCallback} [callback] The command result callback
    */
-  execute(callback) {
+  execute(callback: Function) {
     const coll = this.collection;
     const map = this.map;
     const reduce = this.reduce;
     let options = this.options;
 
-    const mapCommandHash = {
+    const mapCommandHash: any = {
       mapReduce: coll.collectionName,
       map: map,
       reduce: reduce
-    };
+    } as any;
 
     if (options.scope) {
       mapCommandHash.scope = processScope(options.scope);
@@ -116,7 +118,7 @@ class MapReduceOperation extends OperationBase {
     }
 
     // Execute command
-    executeCommand(coll.s.db, mapCommandHash, options, (err, result) => {
+    executeCommand(coll.s.db, mapCommandHash, options, (err?: any, result?: any) => {
       if (err) return handleCallback(callback, err);
       // Check if we have an error
       if (1 !== result.ok || result.err || result.errmsg) {
@@ -124,7 +126,7 @@ class MapReduceOperation extends OperationBase {
       }
 
       // Create statistics value
-      const stats = {};
+      const stats: any = {};
       if (result.timeMillis) stats['processtime'] = result.timeMillis;
       if (result.counts) stats['counts'] = result.counts;
       if (result.timing) stats['timing'] = result.timing;
@@ -172,12 +174,12 @@ class MapReduceOperation extends OperationBase {
  *
  * @param {any} scope
  */
-function processScope(scope) {
+function processScope(scope: any) {
   if (!isObject(scope) || scope._bsontype === 'ObjectID') {
     return scope;
   }
 
-  const newScope = {};
+  const newScope: any = {};
 
   for (const key of Object.keys(scope)) {
     if ('function' === typeof scope[key]) {
@@ -192,4 +194,4 @@ function processScope(scope) {
   return newScope;
 }
 
-module.exports = MapReduceOperation;
+export = MapReduceOperation;

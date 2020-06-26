@@ -9,7 +9,7 @@
  * @property {ServerDescription} newDescription The new server description
  */
 class ServerDescriptionChangedEvent {
-  constructor(topologyId, address, previousDescription, newDescription) {
+  constructor(topologyId: any, address: any, previousDescription: any, newDescription: any) {
     Object.assign(this, { topologyId, address, previousDescription, newDescription });
   }
 }
@@ -21,7 +21,7 @@ class ServerDescriptionChangedEvent {
  * @property {ServerAddress} address The address (host/port pair) of the server
  */
 class ServerOpeningEvent {
-  constructor(topologyId, address) {
+  constructor(topologyId: any, address: any) {
     Object.assign(this, { topologyId, address });
   }
 }
@@ -33,7 +33,7 @@ class ServerOpeningEvent {
  * @property {object} topologyId A unique identifier for the topology
  */
 class ServerClosedEvent {
-  constructor(topologyId, address) {
+  constructor(topologyId: any, address: any) {
     Object.assign(this, { topologyId, address });
   }
 }
@@ -46,7 +46,7 @@ class ServerClosedEvent {
  * @property {TopologyDescription} newDescription The new topology description
  */
 class TopologyDescriptionChangedEvent {
-  constructor(topologyId, previousDescription, newDescription) {
+  constructor(topologyId: any, previousDescription: any, newDescription: any) {
     Object.assign(this, { topologyId, previousDescription, newDescription });
   }
 }
@@ -57,7 +57,7 @@ class TopologyDescriptionChangedEvent {
  * @param {object} topologyId A unique identifier for the topology
  */
 class TopologyOpeningEvent {
-  constructor(topologyId) {
+  constructor(topologyId: any) {
     Object.assign(this, { topologyId });
   }
 }
@@ -68,7 +68,7 @@ class TopologyOpeningEvent {
  * @param {object} topologyId A unique identifier for the topology
  */
 class TopologyClosedEvent {
-  constructor(topologyId) {
+  constructor(topologyId: any) {
     Object.assign(this, { topologyId });
   }
 }
@@ -80,7 +80,7 @@ class TopologyClosedEvent {
  * @property {object} connectionId The connection id for the command
  */
 class ServerHeartbeatStartedEvent {
-  constructor(connectionId) {
+  constructor(connectionId: any) {
     Object.assign(this, { connectionId });
   }
 }
@@ -93,7 +93,7 @@ class ServerHeartbeatStartedEvent {
  * @param {object} connectionId The connection id for the command
  */
 class ServerHeartbeatSucceededEvent {
-  constructor(duration, reply, connectionId) {
+  constructor(duration: any, reply: any, connectionId: any) {
     Object.assign(this, { connectionId, duration, reply });
   }
 }
@@ -106,12 +106,12 @@ class ServerHeartbeatSucceededEvent {
  * @param {object} connectionId The connection id for the command
  */
 class ServerHeartbeatFailedEvent {
-  constructor(duration, failure, connectionId) {
+  constructor(duration: any, failure: any, connectionId: any) {
     Object.assign(this, { connectionId, duration, failure });
   }
 }
 
-module.exports = {
+export {
   ServerDescriptionChangedEvent,
   ServerOpeningEvent,
   ServerClosedEvent,

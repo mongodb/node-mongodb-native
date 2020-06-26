@@ -1,10 +1,9 @@
 'use strict';
-
-const { emitDeprecatedOptionWarning } = require('./utils');
-const PromiseProvider = require('./promise_provider');
-const ReadPreference = require('./read_preference');
-const { deprecate } = require('util');
-const {
+import { emitDeprecatedOptionWarning } from './utils';
+import PromiseProvider = require('./promise_provider');
+import ReadPreference = require('./read_preference');
+import { deprecate } from 'util';
+import {
   toError,
   normalizeHintField,
   decorateCommand,
@@ -15,63 +14,99 @@ const {
   deprecateOptions,
   executeLegacyOperation,
   MongoDBNamespace
-} = require('./utils');
-const {
-  BSON: { ObjectId }
-} = require('./deps');
-const { MongoError } = require('./error');
-const unordered = require('./bulk/unordered');
-const ordered = require('./bulk/ordered');
-const ChangeStream = require('./change_stream');
-const WriteConcern = require('./write_concern');
-const ReadConcern = require('./read_concern');
-const { AggregationCursor, CommandCursor } = require('./cursor');
-
-// Operations
-const {
+} from './utils';
+import { BSON } from './deps';
+const { ObjectId } = BSON;
+import { MongoError } from './error';
+import unordered = require('./bulk/unordered');
+import ordered = require('./bulk/ordered');
+import ChangeStream = require('./change_stream');
+import WriteConcern = require('./write_concern');
+import ReadConcern = require('./read_concern');
+import { AggregationCursor, CommandCursor } from './cursor';
+import {
   ensureIndex,
   group,
   parallelCollectionScan,
   save,
   checkForAtomicOperators
-} = require('./operations/collection_ops');
-const { removeDocuments, updateDocuments } = require('./operations/common_functions');
-
-const AggregateOperation = require('./operations/aggregate');
-const BulkWriteOperation = require('./operations/bulk_write');
-const CountDocumentsOperation = require('./operations/count_documents');
-const CreateIndexesOperation = require('./operations/create_indexes');
-const DeleteManyOperation = require('./operations/delete_many');
-const DeleteOneOperation = require('./operations/delete_one');
-const DistinctOperation = require('./operations/distinct');
-const { DropCollectionOperation } = require('./operations/drop');
-const DropIndexOperation = require('./operations/drop_index');
-const DropIndexesOperation = require('./operations/drop_indexes');
-const EstimatedDocumentCountOperation = require('./operations/estimated_document_count');
-const FindOperation = require('./operations/find');
-const FindOneOperation = require('./operations/find_one');
-const FindAndModifyOperation = require('./operations/find_and_modify');
-const FindOneAndDeleteOperation = require('./operations/find_one_and_delete');
-const FindOneAndReplaceOperation = require('./operations/find_one_and_replace');
-const FindOneAndUpdateOperation = require('./operations/find_one_and_update');
-const IndexesOperation = require('./operations/indexes');
-const IndexExistsOperation = require('./operations/index_exists');
-const IndexInformationOperation = require('./operations/index_information');
-const InsertManyOperation = require('./operations/insert_many');
-const InsertOneOperation = require('./operations/insert_one');
-const IsCappedOperation = require('./operations/is_capped');
-const ListIndexesOperation = require('./operations/list_indexes');
-const MapReduceOperation = require('./operations/map_reduce');
-const OptionsOperation = require('./operations/options_operation');
-const RenameOperation = require('./operations/rename');
-const ReplaceOneOperation = require('./operations/replace_one');
-const StatsOperation = require('./operations/stats');
-const UpdateManyOperation = require('./operations/update_many');
-const UpdateOneOperation = require('./operations/update_one');
-
-const executeOperation = require('./operations/execute_operation');
-
+} from './operations/collection_ops';
+import { removeDocuments, updateDocuments } from './operations/common_functions';
+import AggregateOperation = require('./operations/aggregate');
+import BulkWriteOperation = require('./operations/bulk_write');
+import CountDocumentsOperation = require('./operations/count_documents');
+import CreateIndexesOperation = require('./operations/create_indexes');
+import DeleteManyOperation = require('./operations/delete_many');
+import DeleteOneOperation = require('./operations/delete_one');
+import DistinctOperation = require('./operations/distinct');
+import { DropCollectionOperation } from './operations/drop';
+import DropIndexOperation = require('./operations/drop_index');
+import DropIndexesOperation = require('./operations/drop_indexes');
+import EstimatedDocumentCountOperation = require('./operations/estimated_document_count');
+import FindOperation = require('./operations/find');
+import FindOneOperation = require('./operations/find_one');
+import FindAndModifyOperation = require('./operations/find_and_modify');
+import FindOneAndDeleteOperation = require('./operations/find_one_and_delete');
+import FindOneAndReplaceOperation = require('./operations/find_one_and_replace');
+import FindOneAndUpdateOperation = require('./operations/find_one_and_update');
+import IndexesOperation = require('./operations/indexes');
+import IndexExistsOperation = require('./operations/index_exists');
+import IndexInformationOperation = require('./operations/index_information');
+import InsertManyOperation = require('./operations/insert_many');
+import InsertOneOperation = require('./operations/insert_one');
+import IsCappedOperation = require('./operations/is_capped');
+import ListIndexesOperation = require('./operations/list_indexes');
+import MapReduceOperation = require('./operations/map_reduce');
+import OptionsOperation = require('./operations/options_operation');
+import RenameOperation = require('./operations/rename');
+import ReplaceOneOperation = require('./operations/replace_one');
+import StatsOperation = require('./operations/stats');
+import UpdateManyOperation = require('./operations/update_many');
+import UpdateOneOperation = require('./operations/update_one');
+import executeOperation = require('./operations/execute_operation');
 const mergeKeys = ['ignoreUndefined'];
+
+interface Collection {
+  find(query: any, options: any): void;
+  insert(docs: any, options: any, callback: any): void;
+  update(selector: any, update: any, options: any, callback: any): void;
+  remove(selector: any, options: any, callback: any): void;
+  save(doc: any, options: any, callback: any): void;
+  findOne(query: any, options: any, callback: any): void;
+  dropAllIndexes(): void;
+  ensureIndex(fieldOrSpec: any, options: any, callback: any): void;
+  count(query: any, options: any, callback: any): void;
+  findAndRemove(query: any, sort: any, options: any, callback: any): void;
+  parallelCollectionScan(options: any, callback: any): void;
+  group(
+    keys: any,
+    condition: any,
+    initial: any,
+    reduce: any,
+    finalize: any,
+    command: any,
+    options: any,
+    callback: any
+  ): void;
+  removeMany(filter: object, options?: any, callback?: Function): Promise<void>;
+  removeOne(filter: object, options?: any, callback?: Function): Promise<void>;
+  findAndModify(
+    this: any,
+    query: any,
+    sort: any,
+    doc: any,
+    options: any,
+    callback: Function
+  ): any;
+  _findAndModify(
+    this: any,
+    query: any,
+    sort: any,
+    doc: any,
+    options: any,
+    callback: Function
+  ): any;
+}
 
 /**
  * The **Collection** class is an internal class that embodies a MongoDB collection
@@ -99,6 +134,8 @@ const mergeKeys = ['ignoreUndefined'];
  * });
  */
 class Collection {
+  s: any;
+
   /**
    * Create a new Collection instance (INTERNAL TYPE, do not instantiate directly)
    *
@@ -110,7 +147,7 @@ class Collection {
    * @param {any} pkFactory
    * @param {any} options
    */
-  constructor(db, topology, dbName, name, pkFactory, options) {
+  constructor(db: any, topology: any, dbName: any, name: any, pkFactory: any, options: any) {
     checkCollectionName(name);
     emitDeprecatedOptionWarning(options, ['promiseLibrary']);
 
@@ -267,7 +304,7 @@ class Collection {
     return this.s.collectionHint;
   }
 
-  set hint(v) {
+  set hint(v: any) {
     this.s.collectionHint = normalizeHintField(v);
   }
 
@@ -291,7 +328,7 @@ class Collection {
    * @param {Collection~insertOneWriteOpCallback} [callback] The command result callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  insertOne(doc, options, callback) {
+  insertOne(doc: object, options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -327,7 +364,7 @@ class Collection {
    * @param {Collection~insertWriteOpCallback} [callback] The command result callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  insertMany(docs, options, callback) {
+  insertMany(docs: any, options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options ? Object.assign({}, options) : { ordered: true };
 
@@ -395,7 +432,7 @@ class Collection {
    * @param {Collection~bulkWriteOpCallback} [callback] The command result callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  bulkWrite(operations, options, callback) {
+  bulkWrite(operations: any, options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || { ordered: true };
 
@@ -457,7 +494,7 @@ class Collection {
    * @param {Collection~updateWriteOpCallback} [callback] The command result callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  updateOne(filter, update, options, callback) {
+  updateOne(filter: object, update: object, options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
     const Promise = PromiseProvider.get();
@@ -502,7 +539,7 @@ class Collection {
    * @param {Collection~updateWriteOpCallback} [callback] The command result callback
    * @returns {Promise<void><Collection~updateWriteOpResult>} returns Promise if no callback passed
    */
-  replaceOne(filter, doc, options, callback) {
+  replaceOne(filter: object, doc: object, options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, options);
 
@@ -539,7 +576,7 @@ class Collection {
    * @param {Collection~updateWriteOpCallback} [callback] The command result callback
    * @returns {Promise<void><Collection~updateWriteOpResult>} returns Promise if no callback passed
    */
-  updateMany(filter, update, options, callback) {
+  updateMany(filter: object, update: object, options?: any, callback?: Function): Promise<void> {
     const Promise = PromiseProvider.get();
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
@@ -598,7 +635,7 @@ class Collection {
    * @param {Collection~deleteWriteOpCallback} [callback] The command result callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  deleteOne(filter, options, callback) {
+  deleteOne(filter: object, options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, options);
 
@@ -631,7 +668,7 @@ class Collection {
    * @param {Collection~deleteWriteOpCallback} [callback] The command result callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  deleteMany(filter, options, callback) {
+  deleteMany(filter: object, options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, options);
 
@@ -665,7 +702,7 @@ class Collection {
    * @param {Collection~collectionResultCallback} [callback] The results callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  rename(newName, options, callback) {
+  rename(newName: string, options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, options, { readPreference: ReadPreference.PRIMARY });
 
@@ -687,7 +724,7 @@ class Collection {
    * @param {Collection~resultCallback} [callback] The results callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  drop(options, callback) {
+  drop(options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -709,7 +746,7 @@ class Collection {
    * @param {Collection~resultCallback} [callback] The results callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  options(options, callback) {
+  options(options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -727,7 +764,7 @@ class Collection {
    * @param {Collection~resultCallback} [callback] The results callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  isCapped(options, callback) {
+  isCapped(options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -780,7 +817,7 @@ class Collection {
    * // Equivalent to { j: 1, k: -1, l: 2d }
    * await collection.createIndex(['j', ['k', -1], { l: '2d' }])
    */
-  createIndex(fieldOrSpec, options, callback) {
+  createIndex(fieldOrSpec: any, options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -827,7 +864,7 @@ class Collection {
    *   }
    * ]);
    */
-  createIndexes(indexSpecs, options, callback) {
+  createIndexes(indexSpecs: any, options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
 
     options = options ? Object.assign({}, options) : {};
@@ -858,7 +895,7 @@ class Collection {
    * @param {Collection~resultCallback} [callback] The command result callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  dropIndex(indexName, options, callback) {
+  dropIndex(indexName: string, options?: any, callback?: Function): Promise<void> {
     const args = Array.prototype.slice.call(arguments, 1);
     callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
 
@@ -881,7 +918,7 @@ class Collection {
    * @param {Collection~resultCallback} [callback] The command result callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  dropIndexes(options, callback) {
+  dropIndexes(options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options ? Object.assign({}, options) : {};
 
@@ -902,7 +939,7 @@ class Collection {
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @returns {CommandCursor}
    */
-  listIndexes(options) {
+  listIndexes(options?: any): CommandCursor {
     const cursor = new CommandCursor(
       this.s.topology,
       new ListIndexesOperation(this, options),
@@ -922,7 +959,7 @@ class Collection {
    * @param {Collection~resultCallback} [callback] The command result callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  indexExists(indexes, options, callback) {
+  indexExists(indexes: any, options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -941,7 +978,7 @@ class Collection {
    * @param {Collection~resultCallback} [callback] The command result callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  indexInformation(options, callback) {
+  indexInformation(options?: any, callback?: Function): Promise<void> {
     const args = Array.prototype.slice.call(arguments, 0);
     callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
     options = args.length ? args.shift() || {} : {};
@@ -964,7 +1001,7 @@ class Collection {
    * @param {Collection~countCallback} [callback] The command result callback.
    * @returns {Promise<void>} returns Promise if no callback passed.
    */
-  estimatedDocumentCount(options, callback) {
+  estimatedDocumentCount(options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -1005,7 +1042,7 @@ class Collection {
    * @see https://docs.mongodb.com/manual/reference/operator/query/centerSphere/#op._S_centerSphere
    */
 
-  countDocuments(query, options, callback) {
+  countDocuments(query: any, options: any, callback: Function) {
     const args = Array.prototype.slice.call(arguments, 0);
     callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
     query = args.length ? args.shift() || {} : {};
@@ -1030,7 +1067,7 @@ class Collection {
    * @param {Collection~resultCallback} [callback] The command result callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  distinct(key, query, options, callback) {
+  distinct(key: string, query?: object, options?: any, callback?: Function): Promise<void> {
     const args = Array.prototype.slice.call(arguments, 1);
     callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
     const queryOption = args.length ? args.shift() || {} : {};
@@ -1050,7 +1087,7 @@ class Collection {
    * @param {Collection~resultCallback} [callback] The command result callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  indexes(options, callback) {
+  indexes(options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -1069,7 +1106,7 @@ class Collection {
    * @param {Collection~resultCallback} [callback] The collection result callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  stats(options, callback) {
+  stats(options?: any, callback?: Function): Promise<void> {
     const args = Array.prototype.slice.call(arguments, 0);
     callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
     options = args.length ? args.shift() || {} : {};
@@ -1111,7 +1148,7 @@ class Collection {
    * @param {Collection~findAndModifyCallback} [callback] The collection result callback
    * @returns {Promise<void><Collection~findAndModifyWriteOpResultObject>} returns Promise if no callback passed
    */
-  findOneAndDelete(filter, options, callback) {
+  findOneAndDelete(filter: object, options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -1146,7 +1183,12 @@ class Collection {
    * @param {Collection~findAndModifyCallback} [callback] The collection result callback
    * @returns {Promise<void><Collection~findAndModifyWriteOpResultObject>} returns Promise if no callback passed
    */
-  findOneAndReplace(filter, replacement, options, callback) {
+  findOneAndReplace(
+    filter: object,
+    replacement: object,
+    options?: any,
+    callback?: Function
+  ): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -1196,7 +1238,12 @@ class Collection {
    * @param {Collection~findAndModifyCallback} [callback] The collection result callback
    * @returns {Promise<void><Collection~findAndModifyWriteOpResultObject>} returns Promise if no callback passed
    */
-  findOneAndUpdate(filter, update, options, callback) {
+  findOneAndUpdate(
+    filter: object,
+    update: object,
+    options?: any,
+    callback?: Function
+  ): Promise<void> {
     const Promise = PromiseProvider.get();
 
     if (typeof options === 'function') (callback = options), (options = {});
@@ -1244,7 +1291,7 @@ class Collection {
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @returns {AggregationCursor}
    */
-  aggregate(pipeline, options) {
+  aggregate(pipeline?: object, options?: any): AggregationCursor {
     if (arguments.length > 2) {
       throw new TypeError('Third parameter to `collection.aggregate()` must be undefined');
     }
@@ -1269,13 +1316,13 @@ class Collection {
       // If it contains any of the admissible options pop it of the args
       options =
         opts &&
-        (opts.readPreference ||
-          opts.explain ||
-          opts.cursor ||
-          opts.out ||
-          opts.maxTimeMS ||
-          opts.hint ||
-          opts.allowDiskUse)
+          (opts.readPreference ||
+            opts.explain ||
+            opts.cursor ||
+            opts.out ||
+            opts.maxTimeMS ||
+            opts.hint ||
+            opts.allowDiskUse)
           ? args.pop()
           : {};
       // Left over arguments is the pipeline
@@ -1308,7 +1355,7 @@ class Collection {
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @returns {ChangeStream} a ChangeStream instance.
    */
-  watch(pipeline, options) {
+  watch(pipeline?: any[], options?: any): ChangeStream {
     pipeline = pipeline || [];
     options = options || {};
 
@@ -1344,7 +1391,7 @@ class Collection {
    * @throws {MongoError}
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  mapReduce(map, reduce, options, callback) {
+  mapReduce(map: any, reduce: any, options?: any, callback?: Function): Promise<void> {
     if ('function' === typeof options) (callback = options), (options = {});
     // Out must allways be defined (make sure we don't break weirdly on pre 1.8+ servers)
     if (null == options.out) {
@@ -1381,7 +1428,7 @@ class Collection {
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @returns {UnorderedBulkOperation}
    */
-  initializeUnorderedBulkOp(options) {
+  initializeUnorderedBulkOp(options?: any): any {
     options = options || {};
     // Give function's options precedence over session options.
     if (options.ignoreUndefined == null) {
@@ -1403,7 +1450,7 @@ class Collection {
    * @param {boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
    * @returns {OrderedBulkOperation}
    */
-  initializeOrderedBulkOp(options) {
+  initializeOrderedBulkOp(options?: any): any {
     options = options || {};
     // Give function's options precedence over session's options.
     if (options.ignoreUndefined == null) {
@@ -1419,7 +1466,7 @@ class Collection {
    * @function
    * @returns {Logger} return the db logger
    */
-  getLogger() {
+  getLogger(): any {
     return this.s.db.s.logger;
   }
 }
@@ -1471,7 +1518,7 @@ Collection.prototype.find = deprecateOptions(
     deprecatedOptions: DEPRECATED_FIND_OPTIONS,
     optionsIndex: 1
   },
-  function(query, options) {
+  function (this: any, query: any, options: any) {
     if (arguments.length > 2) {
       throw new TypeError('Third parameter to `collection.find()` must be undefined');
     }
@@ -1492,10 +1539,10 @@ Collection.prototype.find = deprecateOptions(
       if (object_size !== object.length) {
         const error = new Error(
           'query selector raw message size does not match message header size [' +
-            object.length +
-            '] != [' +
-            object_size +
-            ']'
+          object.length +
+          '] != [' +
+          object_size +
+          ']'
         );
         error.name = 'MongoError';
         throw error;
@@ -1513,10 +1560,10 @@ Collection.prototype.find = deprecateOptions(
 
     if (projection && !Buffer.isBuffer(projection) && Array.isArray(projection)) {
       projection = projection.length
-        ? projection.reduce((result, field) => {
-            result[field] = 1;
-            return result;
-          }, {})
+        ? projection.reduce((result: any, field: any) => {
+          result[field] = 1;
+          return result;
+        }, {})
         : { _id: 1 };
     }
 
@@ -1562,7 +1609,7 @@ Collection.prototype.find = deprecateOptions(
       limit: newOptions.limit,
       skip: newOptions.skip,
       query: selector
-    };
+    } as any;
 
     if (typeof options.allowDiskUse === 'boolean') {
       findCommand.allowDiskUse = options.allowDiskUse;
@@ -1686,7 +1733,12 @@ Collection.prototype.find = deprecateOptions(
  * @returns {Promise<void>} returns Promise if no callback passed
  * @deprecated Use insertOne, insertMany or bulkWrite
  */
-Collection.prototype.insert = deprecate(function(docs, options, callback) {
+Collection.prototype.insert = deprecate(function (
+  this: any,
+  docs: any,
+  options: any,
+  callback: Function
+) {
   if (typeof options === 'function') (callback = options), (options = {});
   options = options || { ordered: false };
   docs = !Array.isArray(docs) ? [docs] : docs;
@@ -1696,7 +1748,8 @@ Collection.prototype.insert = deprecate(function(docs, options, callback) {
   }
 
   return this.insertMany(docs, options, callback);
-}, 'collection.insert is deprecated. Use insertOne, insertMany or bulkWrite instead.');
+},
+  'collection.insert is deprecated. Use insertOne, insertMany or bulkWrite instead.');
 
 /**
  * Updates documents.
@@ -1720,7 +1773,13 @@ Collection.prototype.insert = deprecate(function(docs, options, callback) {
  * @returns {Promise<void>} returns Promise if no callback passed
  * @deprecated use updateOne, updateMany or bulkWrite
  */
-Collection.prototype.update = deprecate(function(selector, update, options, callback) {
+Collection.prototype.update = deprecate(function (
+  this: any,
+  selector: any,
+  update: any,
+  options: any,
+  callback: Function
+) {
   if (typeof options === 'function') (callback = options), (options = {});
   options = options || {};
 
@@ -1737,10 +1796,10 @@ Collection.prototype.update = deprecate(function(selector, update, options, call
     options,
     callback
   ]);
-}, 'collection.update is deprecated. Use updateOne, updateMany, or bulkWrite instead.');
+},
+  'collection.update is deprecated. Use updateOne, updateMany, or bulkWrite instead.');
 
 Collection.prototype.removeOne = Collection.prototype.deleteOne;
-
 Collection.prototype.removeMany = Collection.prototype.deleteMany;
 
 /**
@@ -1759,7 +1818,12 @@ Collection.prototype.removeMany = Collection.prototype.deleteMany;
  * @returns {Promise<void>} returns Promise if no callback passed
  * @deprecated use deleteOne, deleteMany or bulkWrite
  */
-Collection.prototype.remove = deprecate(function(selector, options, callback) {
+Collection.prototype.remove = deprecate(function (
+  this: any,
+  selector: any,
+  options: any,
+  callback: Function
+) {
   if (typeof options === 'function') (callback = options), (options = {});
   options = options || {};
 
@@ -1775,7 +1839,8 @@ Collection.prototype.remove = deprecate(function(selector, options, callback) {
     options,
     callback
   ]);
-}, 'collection.remove is deprecated. Use deleteOne, deleteMany, or bulkWrite instead.');
+},
+  'collection.remove is deprecated. Use deleteOne, deleteMany, or bulkWrite instead.');
 
 /**
  * Save a document. Simple full document replacement function. Not recommended for efficiency, use atomic
@@ -1792,7 +1857,12 @@ Collection.prototype.remove = deprecate(function(selector, options, callback) {
  * @returns {Promise<void>} returns Promise if no callback passed
  * @deprecated use insertOne, insertMany, updateOne or updateMany
  */
-Collection.prototype.save = deprecate(function(doc, options, callback) {
+Collection.prototype.save = deprecate(function (
+  this: any,
+  doc: any,
+  options: any,
+  callback: Function
+) {
   if (typeof options === 'function') (callback = options), (options = {});
   options = options || {};
 
@@ -1803,7 +1873,8 @@ Collection.prototype.save = deprecate(function(doc, options, callback) {
   }
 
   return executeLegacyOperation(this.s.topology, save, [this, doc, options, callback]);
-}, 'collection.save is deprecated. Use insertOne, insertMany, updateOne, or updateMany instead.');
+},
+  'collection.save is deprecated. Use insertOne, insertMany, updateOne, or updateMany instead.');
 
 /**
  * The callback format for results
@@ -1862,7 +1933,7 @@ Collection.prototype.findOne = deprecateOptions(
     deprecatedOptions: DEPRECATED_FIND_OPTIONS,
     optionsIndex: 1
   },
-  function(query, options, callback) {
+  function (this: any, query: any, options: any, callback: Function) {
     if (callback !== undefined && typeof callback !== 'function') {
       throw new TypeError('Third parameter to `findOne()` must be a callback or undefined');
     }
@@ -1915,7 +1986,12 @@ Collection.prototype.dropAllIndexes = deprecate(
  * @param {Collection~resultCallback} [callback] The command result callback
  * @returns {Promise<void>} returns Promise if no callback passed
  */
-Collection.prototype.ensureIndex = deprecate(function(fieldOrSpec, options, callback) {
+Collection.prototype.ensureIndex = deprecate(function (
+  this: any,
+  fieldOrSpec: any,
+  options: any,
+  callback: Function
+) {
   if (typeof options === 'function') (callback = options), (options = {});
   options = options || {};
 
@@ -1925,7 +2001,8 @@ Collection.prototype.ensureIndex = deprecate(function(fieldOrSpec, options, call
     options,
     callback
   ]);
-}, 'collection.ensureIndex is deprecated. Use createIndexes instead.');
+},
+  'collection.ensureIndex is deprecated. Use createIndexes instead.');
 
 /**
  * The callback format for results
@@ -1956,7 +2033,12 @@ Collection.prototype.ensureIndex = deprecate(function(fieldOrSpec, options, call
  * @returns {Promise<void>} returns Promise if no callback passed
  * @deprecated use {@link Collection#countDocuments countDocuments} or {@link Collection#estimatedDocumentCount estimatedDocumentCount} instead
  */
-Collection.prototype.count = deprecate(function(query, options, callback) {
+Collection.prototype.count = deprecate(function (
+  this: any,
+  query: any,
+  options: any,
+  callback: Function
+) {
   const args = Array.prototype.slice.call(arguments, 0);
   callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
   query = args.length ? args.shift() || {} : {};
@@ -1970,8 +2052,8 @@ Collection.prototype.count = deprecate(function(query, options, callback) {
     new EstimatedDocumentCountOperation(this, query, options),
     callback
   );
-}, 'collection.count is deprecated, and will be removed in a future version.' +
-  ' Use Collection.countDocuments or Collection.estimatedDocumentCount instead');
+},
+  'collection.count is deprecated, and will be removed in a future version.' + ' Use Collection.countDocuments or Collection.estimatedDocumentCount instead');
 
 /**
  * Find and update a document.
@@ -2002,7 +2084,14 @@ Collection.prototype.findAndModify = deprecate(
 
 Collection.prototype._findAndModify = _findAndModify;
 
-function _findAndModify(query, sort, doc, options, callback) {
+function _findAndModify(
+  this: any,
+  query: any,
+  sort: any,
+  doc: any,
+  options: any,
+  callback: Function
+) {
   const args = Array.prototype.slice.call(arguments, 1);
   callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
   sort = args.length ? args.shift() || [] : [];
@@ -2036,7 +2125,13 @@ function _findAndModify(query, sort, doc, options, callback) {
  * @returns {Promise<void>} returns Promise if no callback passed
  * @deprecated use findOneAndDelete instead
  */
-Collection.prototype.findAndRemove = deprecate(function(query, sort, options, callback) {
+Collection.prototype.findAndRemove = deprecate(function (
+  this: any,
+  query: any,
+  sort: any,
+  options: any,
+  callback: Function
+) {
   const args = Array.prototype.slice.call(arguments, 1);
   callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
   sort = args.length ? args.shift() || [] : [];
@@ -2050,7 +2145,8 @@ Collection.prototype.findAndRemove = deprecate(function(query, sort, options, ca
     new FindAndModifyOperation(this, query, sort, null, options),
     callback
   );
-}, 'collection.findAndRemove is deprecated. Use findOneAndDelete instead.');
+},
+  'collection.findAndRemove is deprecated. Use findOneAndDelete instead.');
 
 /**
  * The callback format for results
@@ -2073,7 +2169,11 @@ Collection.prototype.findAndRemove = deprecate(function(query, sort, options, ca
  * @param {Collection~parallelCollectionScanCallback} [callback] The command result callback
  * @returns {Promise<void>} returns Promise if no callback passed
  */
-Collection.prototype.parallelCollectionScan = deprecate(function(options, callback) {
+Collection.prototype.parallelCollectionScan = deprecate(function (
+  this: any,
+  options: any,
+  callback: Function
+) {
   if (typeof options === 'function') (callback = options), (options = { numCursors: 1 });
   // Set number of cursors to 1
   options.numCursors = options.numCursors || 1;
@@ -2093,7 +2193,8 @@ Collection.prototype.parallelCollectionScan = deprecate(function(options, callba
     [this, options, callback],
     { skipSessions: true }
   );
-}, 'parallelCollectionScan is deprecated in MongoDB v4.1');
+},
+  'parallelCollectionScan is deprecated in MongoDB v4.1');
 
 /**
  * Run a group command across a collection
@@ -2112,15 +2213,16 @@ Collection.prototype.parallelCollectionScan = deprecate(function(options, callba
  * @returns {Promise<void>} returns Promise if no callback passed
  * @deprecated MongoDB 3.6 or higher no longer supports the group command. We recommend rewriting using the aggregation framework.
  */
-Collection.prototype.group = deprecate(function(
-  keys,
-  condition,
-  initial,
-  reduce,
-  finalize,
-  command,
-  options,
-  callback
+Collection.prototype.group = deprecate(function (
+  this: any,
+  keys: any,
+  condition: any,
+  initial: any,
+  reduce: any,
+  finalize: any,
+  command: any,
+  options: any,
+  callback: Function
 ) {
   const args = Array.prototype.slice.call(arguments, 3);
   callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
@@ -2167,6 +2269,6 @@ Collection.prototype.group = deprecate(function(
     callback
   ]);
 },
-'MongoDB 3.6 or higher no longer supports the group command. We recommend rewriting using the aggregation framework.');
+  'MongoDB 3.6 or higher no longer supports the group command. We recommend rewriting using the aggregation framework.');
 
-module.exports = Collection;
+export = Collection;

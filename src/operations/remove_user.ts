@@ -1,14 +1,14 @@
 'use strict';
-
-const Aspect = require('./operation').Aspect;
-const CommandOperation = require('./command');
-const defineAspects = require('./operation').defineAspects;
-const handleCallback = require('../utils').handleCallback;
-const WriteConcern = require('../write_concern');
+import { Aspect, defineAspects } from './operation';
+import CommandOperation = require('./command');
+import { handleCallback } from '../utils';
+import WriteConcern = require('../write_concern');
 
 class RemoveUserOperation extends CommandOperation {
-  constructor(db, username, options) {
-    const commandOptions = {};
+  username: any;
+
+  constructor(db: any, username: any, options: any) {
+    const commandOptions = {} as any;
 
     const writeConcern = WriteConcern.fromOptions(options);
     if (writeConcern != null) {
@@ -38,9 +38,9 @@ class RemoveUserOperation extends CommandOperation {
     return command;
   }
 
-  execute(callback) {
+  execute(callback: Function) {
     // Attempt to execute command
-    super.execute((err, result) => {
+    super.execute((err?: any, result?: any) => {
       if (err) return handleCallback(callback, err, null);
       handleCallback(callback, err, result.ok ? true : false);
     });
@@ -48,5 +48,4 @@ class RemoveUserOperation extends CommandOperation {
 }
 
 defineAspects(RemoveUserOperation, Aspect.WRITE_OPERATION);
-
-module.exports = RemoveUserOperation;
+export = RemoveUserOperation;

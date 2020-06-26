@@ -1,11 +1,13 @@
 'use strict';
+import { CoreCursor, CursorState } from './core_cursor';
+import Cursor = require('./cursor');
+import CommandCursor = require('./command_cursor');
+import AggregationCursor = require('./aggregation_cursor');
 
-const { CoreCursor, CursorState } = require('./core_cursor');
-
-module.exports = {
-  Cursor: require('./cursor'),
-  CommandCursor: require('./command_cursor'),
-  AggregationCursor: require('./aggregation_cursor'),
+export {
+  Cursor,
+  CommandCursor,
+  AggregationCursor,
 
   // internal
   CoreCursor,

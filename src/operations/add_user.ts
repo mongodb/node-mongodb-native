@@ -1,14 +1,14 @@
 'use strict';
-
-const Aspect = require('./operation').Aspect;
-const CommandOperation = require('./command');
-const defineAspects = require('./operation').defineAspects;
-const crypto = require('crypto');
-const handleCallback = require('../utils').handleCallback;
-const toError = require('../utils').toError;
+import { Aspect, defineAspects } from './operation';
+import CommandOperation = require('./command');
+import crypto = require('crypto');
+import { handleCallback, toError } from '../utils';
 
 class AddUserOperation extends CommandOperation {
-  constructor(db, username, password, options) {
+  username: any;
+  password: any;
+
+  constructor(db: any, username: any, password: any, options: any) {
     super(db, options);
 
     this.username = username;
@@ -58,7 +58,7 @@ class AddUserOperation extends CommandOperation {
       customData: options.customData || {},
       roles: roles,
       digestPassword
-    };
+    } as any;
 
     // No password
     if (typeof password === 'string') {
@@ -68,7 +68,7 @@ class AddUserOperation extends CommandOperation {
     return command;
   }
 
-  execute(callback) {
+  execute(callback: Function) {
     const options = this.options;
 
     // Error out if digestPassword set
@@ -81,7 +81,7 @@ class AddUserOperation extends CommandOperation {
     }
 
     // Attempt to execute auth command
-    super.execute((err, r) => {
+    super.execute((err?: any, r?: any) => {
       if (!err) {
         return handleCallback(callback, err, r);
       }
@@ -93,4 +93,4 @@ class AddUserOperation extends CommandOperation {
 
 defineAspects(AddUserOperation, Aspect.WRITE_OPERATION);
 
-module.exports = AddUserOperation;
+export = AddUserOperation;

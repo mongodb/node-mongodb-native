@@ -1,11 +1,10 @@
 'use strict';
-
-const CommandOperation = require('./command');
-const ReadPreference = require('../read_preference');
-const { Aspect, defineAspects } = require('./operation');
-const { applyWriteConcern } = require('../utils');
-const { loadCollection } = require('../dynamic_loaders');
-const { MongoError } = require('../error');
+import CommandOperation = require('./command');
+import ReadPreference = require('../read_preference');
+import { Aspect, defineAspects } from './operation';
+import { applyWriteConcern } from '../utils';
+import { loadCollection } from '../dynamic_loaders';
+import { MongoError } from '../error';
 
 const ILLEGAL_COMMAND_FIELDS = new Set([
   'w',
@@ -24,7 +23,9 @@ const ILLEGAL_COMMAND_FIELDS = new Set([
 ]);
 
 class CreateCollectionOperation extends CommandOperation {
-  constructor(db, name, options) {
+  name: any;
+
+  constructor(db: any, name: any, options: any) {
     super(db, options);
     this.name = name;
   }
@@ -33,7 +34,7 @@ class CreateCollectionOperation extends CommandOperation {
     const name = this.name;
     const options = this.options;
 
-    const cmd = { create: name };
+    const cmd: any = { create: name };
     for (let n in options) {
       if (
         options[n] != null &&
@@ -47,7 +48,7 @@ class CreateCollectionOperation extends CommandOperation {
     return cmd;
   }
 
-  execute(callback) {
+  execute(callback: Function) {
     const db = this.db;
     const name = this.name;
     const options = this.options;
@@ -56,7 +57,7 @@ class CreateCollectionOperation extends CommandOperation {
     let listCollectionOptions = Object.assign({ nameOnly: true, strict: false }, options);
     listCollectionOptions = applyWriteConcern(listCollectionOptions, { db }, listCollectionOptions);
 
-    function done(err) {
+    function done(err: any) {
       if (err) {
         return callback(err);
       }
@@ -75,7 +76,7 @@ class CreateCollectionOperation extends CommandOperation {
     if (strictMode) {
       db.listCollections({ name }, listCollectionOptions)
         .setReadPreference(ReadPreference.PRIMARY)
-        .toArray((err, collections) => {
+        .toArray((err?: any, collections?: any) => {
           if (err) {
             return callback(err);
           }
@@ -98,4 +99,4 @@ class CreateCollectionOperation extends CommandOperation {
 }
 
 defineAspects(CreateCollectionOperation, Aspect.WRITE_OPERATION);
-module.exports = CreateCollectionOperation;
+export = CreateCollectionOperation;

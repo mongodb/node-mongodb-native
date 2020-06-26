@@ -1,16 +1,15 @@
 'use strict';
-
 const BufferList = require('bl');
-const { Duplex } = require('stream');
-const { Response, Msg, BinMsg } = require('./commands');
-const { MongoError, MongoParseError } = require('../error');
-const { OP_COMPRESSED, OP_MSG } = require('./wire_protocol/constants');
-const {
+import { Duplex } from 'stream';
+import { Response, Msg, BinMsg } from './commands';
+import { MongoError, MongoParseError } from '../error';
+import { OP_COMPRESSED, OP_MSG } from './wire_protocol/constants';
+import {
   compress,
   decompress,
   compressorIDs,
   uncompressibleCommands
-} = require('./wire_protocol/compression');
+} from './wire_protocol/compression';
 
 const MESSAGE_HEADER_SIZE = 16;
 const COMPRESSION_DETAILS_SIZE = 9; // originalOpcode + uncompressedSize, compressorID
@@ -23,7 +22,10 @@ const kBuffer = Symbol('buffer');
  * support for optional compression
  */
 class MessageStream extends Duplex {
-  constructor(options) {
+  maxBsonMessageSize: any;
+  [kBuffer]: any;
+
+  constructor(options: any) {
     options = options || {};
     super(options);
 
@@ -32,7 +34,7 @@ class MessageStream extends Duplex {
     this[kBuffer] = new BufferList();
   }
 
-  _write(chunk, _, callback) {
+  _write(chunk: any, _: any, callback: Function) {
     const buffer = this[kBuffer];
     buffer.append(chunk);
 
@@ -45,7 +47,7 @@ class MessageStream extends Duplex {
     return;
   }
 
-  writeCommand(command, operationDescription) {
+  writeCommand(command: any, operationDescription: any) {
     // TODO: agreed compressor should live in `StreamDescription`
     const shouldCompress = operationDescription && !!operationDescription.agreedCompressor;
     if (!shouldCompress || !canCompress(command)) {
@@ -62,7 +64,10 @@ class MessageStream extends Duplex {
     const originalCommandOpCode = concatenatedOriginalCommandBuffer.readInt32LE(12);
 
     // Compress the message body
-    compress({ options: operationDescription }, messageToBeCompressed, (err, compressedMessage) => {
+    compress(
+      { options: operationDescription },
+      messageToBeCompressed,
+      (err?: any, compressedMessage?: any) => {
       if (err) {
         operationDescription.cb(err, null);
         return;
@@ -83,21 +88,21 @@ class MessageStream extends Duplex {
       compressionDetails.writeInt32LE(originalCommandOpCode, 0); // originalOpcode
       compressionDetails.writeInt32LE(messageToBeCompressed.length, 4); // Size of the uncompressed compressedMessage, excluding the MsgHeader
       compressionDetails.writeUInt8(compressorIDs[operationDescription.agreedCompressor], 8); // compressorID
-
       this.push(Buffer.concat([msgHeader, compressionDetails, compressedMessage]));
-    });
+      }
+    );
   }
 }
 
 // Return whether a command contains an uncompressible command term
 // Will return true if command contains no uncompressible command terms
-function canCompress(command) {
+function canCompress(command: any) {
   const commandDoc = command instanceof Msg ? command.command : command.query;
   const commandName = Object.keys(commandDoc)[0];
   return !uncompressibleCommands.has(commandName);
 }
 
-function processIncomingData(stream, callback) {
+function processIncomingData(stream: any, callback: Function) {
   const buffer = stream[kBuffer];
   if (buffer.length < 4) {
     callback();
@@ -132,7 +137,7 @@ function processIncomingData(stream, callback) {
     requestId: message.readInt32LE(4),
     responseTo: message.readInt32LE(8),
     opCode: message.readInt32LE(12)
-  };
+  } as any;
 
   let ResponseType = messageHeader.opCode === OP_MSG ? BinMsg : Response;
   const responseOptions = stream.responseOptions;
@@ -157,8 +162,7 @@ function processIncomingData(stream, callback) {
 
   // recalculate based on wrapped opcode
   ResponseType = messageHeader.opCode === OP_MSG ? BinMsg : Response;
-
-  decompress(compressorID, compressedBuffer, (err, messageBody) => {
+  decompress(compressorID, compressedBuffer, (err?: any, messageBody?: any) => {
     if (err) {
       callback(err);
       return;
@@ -184,4 +188,4 @@ function processIncomingData(stream, callback) {
   });
 }
 
-module.exports = MessageStream;
+export = MessageStream;

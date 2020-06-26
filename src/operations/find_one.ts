@@ -1,18 +1,19 @@
 'use strict';
-
-const handleCallback = require('../utils').handleCallback;
-const OperationBase = require('./operation').OperationBase;
-const toError = require('../utils').toError;
+import { handleCallback, toError } from '../utils';
+import { OperationBase } from './operation';
 
 class FindOneOperation extends OperationBase {
-  constructor(collection, query, options) {
+  collection: any;
+  query: any;
+
+  constructor(collection: any, query: any, options: any) {
     super(options);
 
     this.collection = collection;
     this.query = query;
   }
 
-  execute(callback) {
+  execute(callback: Function) {
     const coll = this.collection;
     const query = this.query;
     const options = this.options;
@@ -24,7 +25,7 @@ class FindOneOperation extends OperationBase {
         .batchSize(1);
 
       // Return the item
-      cursor.next((err, item) => {
+      cursor.next((err?: any, item?: any) => {
         if (err != null) return handleCallback(callback, toError(err), null);
         handleCallback(callback, null, item);
       });
@@ -34,4 +35,4 @@ class FindOneOperation extends OperationBase {
   }
 }
 
-module.exports = FindOneOperation;
+export = FindOneOperation;

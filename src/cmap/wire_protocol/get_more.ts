@@ -1,19 +1,24 @@
 'use strict';
+import { GetMore } from '../commands';
+import { BSON } from '../../deps';
+const { Long } = BSON;
+import { MongoError, MongoNetworkError } from '../../error';
+import { applyCommonQueryOptions } from './shared';
+import { maxWireVersion, collectionNamespace } from '../../utils';
+import command = require('./command');
 
-const { GetMore } = require('../commands');
-const {
-  BSON: { Long }
-} = require('../../deps');
-const { MongoError, MongoNetworkError } = require('../../error');
-const { applyCommonQueryOptions } = require('./shared');
-const { maxWireVersion, collectionNamespace } = require('../../utils');
-const command = require('./command');
-
-function getMore(server, ns, cursorState, batchSize, options, callback) {
+function getMore(
+  server: any,
+  ns: any,
+  cursorState: any,
+  batchSize: any,
+  options: any,
+  callback: Function
+) {
   options = options || {};
 
   const wireVersion = maxWireVersion(server);
-  function queryCallback(err, result) {
+  function queryCallback(err?: any, result?: any) {
     if (err) return callback(err);
     const response = result.message;
 
@@ -68,7 +73,7 @@ function getMore(server, ns, cursorState, batchSize, options, callback) {
     getMore: cursorId,
     collection: collectionNamespace(ns),
     batchSize: Math.abs(batchSize)
-  };
+  } as any;
 
   if (cursorState.cmd.tailable && typeof cursorState.cmd.maxAwaitTimeMS === 'number') {
     getMoreCmd.maxTimeMS = cursorState.cmd.maxAwaitTimeMS;
@@ -89,4 +94,4 @@ function getMore(server, ns, cursorState, batchSize, options, callback) {
   command(server, ns, getMoreCmd, commandOptions, queryCallback);
 }
 
-module.exports = getMore;
+export = getMore;

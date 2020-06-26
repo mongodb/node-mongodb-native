@@ -1,20 +1,24 @@
 'use strict';
-
-const ReadPreference = require('../read_preference');
-const { OperationBase } = require('./operation');
-const {
+import ReadPreference = require('../read_preference');
+import { OperationBase } from './operation';
+import {
   maxWireVersion,
   applyRetryableWrites,
   decorateWithCollation,
   applyWriteConcern,
   formattedOrderClause,
   handleCallback
-} = require('../utils');
-const { executeCommand } = require('./db_ops');
-const { MongoError } = require('../error');
+} from '../utils';
+import { executeCommand } from './db_ops';
+import { MongoError } from '../error';
 
 class FindAndModifyOperation extends OperationBase {
-  constructor(collection, query, sort, doc, options) {
+  collection: any;
+  query: any;
+  sort: any;
+  doc: any;
+
+  constructor(collection: any, query: any, sort: any, doc: any, options: any) {
     super(options);
 
     this.collection = collection;
@@ -23,7 +27,7 @@ class FindAndModifyOperation extends OperationBase {
     this.doc = doc;
   }
 
-  execute(callback) {
+  execute(callback: Function) {
     const coll = this.collection;
     const query = this.query;
     const sort = formattedOrderClause(this.sort);
@@ -34,7 +38,7 @@ class FindAndModifyOperation extends OperationBase {
     const queryObject = {
       findAndModify: coll.collectionName,
       query: query
-    };
+    } as any;
 
     if (sort) {
       queryObject.sort = sort;
@@ -106,7 +110,7 @@ class FindAndModifyOperation extends OperationBase {
     }
 
     // Execute the command
-    executeCommand(coll.s.db, queryObject, options, (err, result) => {
+    executeCommand(coll.s.db, queryObject, options, (err?: any, result?: any) => {
       if (err) return handleCallback(callback, err, null);
 
       return handleCallback(callback, null, result);
@@ -114,4 +118,4 @@ class FindAndModifyOperation extends OperationBase {
   }
 }
 
-module.exports = FindAndModifyOperation;
+export = FindAndModifyOperation;

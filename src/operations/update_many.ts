@@ -1,11 +1,13 @@
 'use strict';
-
-const OperationBase = require('./operation').OperationBase;
-const updateCallback = require('./common_functions').updateCallback;
-const updateDocuments = require('./common_functions').updateDocuments;
+import { OperationBase } from './operation';
+import { updateCallback, updateDocuments } from './common_functions';
 
 class UpdateManyOperation extends OperationBase {
-  constructor(collection, filter, update, options) {
+  collection: any;
+  filter: any;
+  update: any;
+
+  constructor(collection: any, filter: any, update: any, options: any) {
     super(options);
 
     this.collection = collection;
@@ -13,7 +15,7 @@ class UpdateManyOperation extends OperationBase {
     this.update = update;
   }
 
-  execute(callback) {
+  execute(callback: Function) {
     const coll = this.collection;
     const filter = this.filter;
     const update = this.update;
@@ -22,8 +24,10 @@ class UpdateManyOperation extends OperationBase {
     // Set single document update
     options.multi = true;
     // Execute update
-    updateDocuments(coll, filter, update, options, (err, r) => updateCallback(err, r, callback));
+    updateDocuments(coll, filter, update, options, (err?: any, r?: any) =>
+      updateCallback(err, r, callback)
+    );
   }
 }
 
-module.exports = UpdateManyOperation;
+export = UpdateManyOperation;

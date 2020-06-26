@@ -1,10 +1,7 @@
 'use strict';
-
-const Aspect = require('./operation').Aspect;
-const defineAspects = require('./operation').defineAspects;
-const CommandOperationV2 = require('./command_v2');
-const decorateWithCollation = require('../utils').decorateWithCollation;
-const decorateWithReadConcern = require('../utils').decorateWithReadConcern;
+import { Aspect, defineAspects } from './operation';
+import CommandOperationV2 = require('./command_v2');
+import { decorateWithCollation, decorateWithReadConcern } from '../utils';
 
 /**
  * Return a list of distinct values for the given key across a collection.
@@ -16,6 +13,10 @@ const decorateWithReadConcern = require('../utils').decorateWithReadConcern;
  * @property {object} [options] Optional settings. See Collection.prototype.distinct for a list of options.
  */
 class DistinctOperation extends CommandOperationV2 {
+  collection: any;
+  key: any;
+  query: any;
+
   /**
    * Construct a Distinct operation.
    *
@@ -24,7 +25,7 @@ class DistinctOperation extends CommandOperationV2 {
    * @param {object} query The query for filtering the set of documents to which we apply the distinct filter.
    * @param {object} [options] Optional settings. See Collection.prototype.distinct for a list of options.
    */
-  constructor(collection, key, query, options) {
+  constructor(collection: any, key: string, query: object, options?: object) {
     super(collection, options);
 
     this.collection = collection;
@@ -38,7 +39,7 @@ class DistinctOperation extends CommandOperationV2 {
    * @param {any} server
    * @param {Collection~resultCallback} [callback] The command result callback
    */
-  execute(server, callback) {
+  execute(server: any, callback: Function) {
     const coll = this.collection;
     const key = this.key;
     const query = this.query;
@@ -49,7 +50,7 @@ class DistinctOperation extends CommandOperationV2 {
       distinct: coll.collectionName,
       key: key,
       query: query
-    };
+    } as any;
 
     // Add maxTimeMS if defined
     if (typeof options.maxTimeMS === 'number') {
@@ -66,7 +67,7 @@ class DistinctOperation extends CommandOperationV2 {
       return callback(err, null);
     }
 
-    super.executeCommand(server, cmd, (err, result) => {
+    super.executeCommand(server, cmd, (err?: any, result?: any) => {
       if (err) {
         callback(err);
         return;
@@ -83,4 +84,4 @@ defineAspects(DistinctOperation, [
   Aspect.EXECUTE_WITH_SELECTION
 ]);
 
-module.exports = DistinctOperation;
+export = DistinctOperation;

@@ -1,8 +1,7 @@
 'use strict';
-
-const { BSON } = require('../deps');
-const { BulkOperationBase, Batch, INSERT, UPDATE, REMOVE } = require('./common');
-const { toError } = require('../utils');
+import { BSON } from '../deps';
+import { BulkOperationBase, Batch, INSERT, UPDATE, REMOVE } from './common';
+import { toError } from '../utils';
 
 /**
  * Add to internal list of Operations
@@ -12,7 +11,11 @@ const { toError } = require('../utils');
  * @param {any} document
  * @returns {UnorderedBulkOperation}
  */
-function addToOperationsList(bulkOperation, docType, document) {
+function addToOperationsList(
+  bulkOperation: UnorderedBulkOperation,
+  docType: number,
+  document: any
+): UnorderedBulkOperation {
   // Get the bsonSize
   const bsonSize = BSON.calculateObjectSize(document, {
     checkKeys: false,
@@ -99,7 +102,9 @@ function addToOperationsList(bulkOperation, docType, document) {
  * @returns {UnorderedBulkOperation} a UnorderedBulkOperation instance.
  */
 class UnorderedBulkOperation extends BulkOperationBase {
-  constructor(topology, collection, options) {
+  s: any;
+
+  constructor(topology: any, collection: any, options: any) {
     options = options || {};
     options = Object.assign(options, { addToOperationsList });
 
@@ -111,7 +116,7 @@ class UnorderedBulkOperation extends BulkOperationBase {
    * @param {any} writeResult
    * @returns {boolean|undefined}
    */
-  handleWriteError(callback, writeResult) {
+  handleWriteError(callback: Function, writeResult: any): boolean | undefined {
     if (this.s.batches.length) {
       return false;
     }
@@ -127,10 +132,8 @@ class UnorderedBulkOperation extends BulkOperationBase {
  * @param {any} collection
  * @param {any} options
  */
-function initializeUnorderedBulkOp(topology, collection, options) {
+function initializeUnorderedBulkOp(topology: any, collection: any, options: any) {
   return new UnorderedBulkOperation(topology, collection, options);
 }
 
-initializeUnorderedBulkOp.UnorderedBulkOperation = UnorderedBulkOperation;
-module.exports = initializeUnorderedBulkOp;
-module.exports.Bulk = UnorderedBulkOperation;
+export = initializeUnorderedBulkOp;

@@ -1,11 +1,11 @@
 'use strict';
-const command = require('./command');
-const { Query } = require('../commands');
-const { MongoError } = require('../../error');
-const { maxWireVersion, collectionNamespace } = require('../../utils');
-const { getReadPreference, isSharded, applyCommonQueryOptions } = require('./shared');
+import command = require('./command');
+import { Query } from '../commands';
+import { MongoError } from '../../error';
+import { maxWireVersion, collectionNamespace } from '../../utils';
+import { getReadPreference, isSharded, applyCommonQueryOptions } from './shared';
 
-function query(server, ns, cmd, cursorState, options, callback) {
+function query(server: any, ns: any, cmd: any, cursorState: any, options: any, callback: Function) {
   options = options || {};
   if (cursorState.cursorId != null) {
     return callback();
@@ -27,7 +27,7 @@ function query(server, ns, cmd, cursorState, options, callback) {
   }
 
   const readPreference = getReadPreference(cmd, options);
-  const findCmd = prepareFindCommand(server, ns, cmd, cursorState, options);
+  const findCmd = prepareFindCommand(server, ns, cmd, cursorState);
 
   // NOTE: This actually modifies the passed in cmd, and our code _depends_ on this
   //       side-effect. Change this ASAP
@@ -53,11 +53,11 @@ function query(server, ns, cmd, cursorState, options, callback) {
   command(server, ns, findCmd, commandOptions, callback);
 }
 
-function prepareFindCommand(server, ns, cmd, cursorState) {
+function prepareFindCommand(server: any, ns: any, cmd: any, cursorState: any) {
   cursorState.batchSize = cmd.batchSize || cursorState.batchSize;
   let findCmd = {
     find: collectionNamespace(ns)
-  };
+  } as any;
 
   if (cmd.query) {
     if (cmd.query['$query']) {
@@ -69,7 +69,7 @@ function prepareFindCommand(server, ns, cmd, cursorState) {
 
   let sortValue = cmd.sort;
   if (Array.isArray(sortValue)) {
-    const sortObject = {};
+    const sortObject: any = {};
 
     if (sortValue.length > 0 && !Array.isArray(sortValue[0])) {
       let sortDirection = sortValue[1];
@@ -150,7 +150,7 @@ function prepareFindCommand(server, ns, cmd, cursorState) {
   return findCmd;
 }
 
-function prepareLegacyFindQuery(server, ns, cmd, cursorState, options) {
+function prepareLegacyFindQuery(server: any, ns: any, cmd: any, cursorState: any, options: any): any {
   options = options || {};
   const readPreference = getReadPreference(cmd, options);
   cursorState.batchSize = cmd.batchSize || cursorState.batchSize;
@@ -168,7 +168,7 @@ function prepareLegacyFindQuery(server, ns, cmd, cursorState, options) {
 
   const numberToSkip = cursorState.skip || 0;
 
-  const findCmd = {};
+  const findCmd: any = {};
   if (isSharded(server) && readPreference) {
     findCmd['$readPreference'] = readPreference.toJSON();
   }
@@ -227,4 +227,4 @@ function prepareLegacyFindQuery(server, ns, cmd, cursorState, options) {
   return query;
 }
 
-module.exports = query;
+export = query;

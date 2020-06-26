@@ -1,18 +1,19 @@
 'use strict';
-
-const { applyRetryableWrites, applyWriteConcern } = require('../utils');
-const { MongoError } = require('../error');
-const { OperationBase } = require('./operation');
-
+import { applyRetryableWrites, applyWriteConcern } from '../utils';
+import { MongoError } from '../error';
+import { OperationBase } from './operation';
 class BulkWriteOperation extends OperationBase {
-  constructor(collection, operations, options) {
+  collection: any;
+  operations: any;
+
+  constructor(collection: any, operations: any, options: any) {
     super(options);
 
     this.collection = collection;
     this.operations = operations;
   }
 
-  execute(callback) {
+  execute(callback: Function) {
     const coll = this.collection;
     const operations = this.operations;
     let options = this.options;
@@ -63,7 +64,7 @@ class BulkWriteOperation extends OperationBase {
     }
 
     // Execute the bulk
-    bulk.execute(writeCon, finalOptions, (err, r) => {
+    bulk.execute(writeCon, finalOptions, (err?: any, r?: any) => {
       // We have connection level error
       if (!r && err) {
         return callback(err, null);
@@ -100,4 +101,4 @@ class BulkWriteOperation extends OperationBase {
   }
 }
 
-module.exports = BulkWriteOperation;
+export = BulkWriteOperation;

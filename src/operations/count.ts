@@ -1,17 +1,19 @@
 'use strict';
-
-const buildCountCommand = require('./common_functions').buildCountCommand;
-const OperationBase = require('./operation').OperationBase;
+import { buildCountCommand } from './common_functions';
+import { OperationBase } from './operation';
 
 class CountOperation extends OperationBase {
-  constructor(cursor, applySkipLimit, options) {
+  cursor: any;
+  applySkipLimit: any;
+
+  constructor(cursor: any, applySkipLimit: any, options: any) {
     super(options);
 
     this.cursor = cursor;
     this.applySkipLimit = applySkipLimit;
   }
 
-  execute(callback) {
+  execute(callback: Function) {
     const cursor = this.cursor;
     const applySkipLimit = this.applySkipLimit;
     const options = this.options;
@@ -34,7 +36,7 @@ class CountOperation extends OperationBase {
       options.maxTimeMS = cursor.cmd.maxTimeMS;
     }
 
-    let finalOptions = {};
+    let finalOptions = {} as any;
     finalOptions.skip = options.skip;
     finalOptions.limit = options.limit;
     finalOptions.hint = options.hint;
@@ -58,11 +60,11 @@ class CountOperation extends OperationBase {
       cursor.namespace.withCollection('$cmd'),
       command,
       cursor.options,
-      (err, result) => {
+      (err?: any, result?: any) => {
         callback(err, result ? result.result.n : null);
       }
     );
   }
 }
 
-module.exports = CountOperation;
+export = CountOperation;

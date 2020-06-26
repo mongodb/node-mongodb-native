@@ -1,8 +1,8 @@
 'use strict';
-const { AuthProvider } = require('./auth_provider');
+import { AuthProvider } from './auth_provider';
 
 class X509 extends AuthProvider {
-  prepare(handshakeDoc, authContext, callback) {
+  prepare(handshakeDoc: any, authContext: any, callback: Function) {
     const { credentials } = authContext;
     Object.assign(handshakeDoc, {
       speculativeAuthenticate: x509AuthenticateCommand(credentials)
@@ -11,7 +11,7 @@ class X509 extends AuthProvider {
     callback(undefined, handshakeDoc);
   }
 
-  auth(authContext, callback) {
+  auth(authContext: any, callback: Function) {
     const connection = authContext.connection;
     const credentials = authContext.credentials;
     const response = authContext.response;
@@ -23,13 +23,13 @@ class X509 extends AuthProvider {
   }
 }
 
-function x509AuthenticateCommand(credentials) {
-  const command = { authenticate: 1, mechanism: 'MONGODB-X509' };
+function x509AuthenticateCommand(credentials: any) {
+  const command: any = { authenticate: 1, mechanism: 'MONGODB-X509' };
   if (credentials.username) {
-    Object.apply(command, { user: credentials.username });
+    command.user = credentials.username;
   }
 
   return command;
 }
 
-module.exports = X509;
+export = X509;

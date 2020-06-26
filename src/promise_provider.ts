@@ -1,5 +1,4 @@
 'use strict';
-
 const kPromise = Symbol('promise');
 
 const store = {
@@ -13,7 +12,7 @@ class PromiseProvider {
    *
    * @param {Function} lib promise implementation
    */
-  static validate(lib) {
+  static validate(lib: Function) {
     if (typeof lib !== 'function') throw new Error(`Promise must be a function, got ${lib}`);
     return lib;
   }
@@ -23,8 +22,8 @@ class PromiseProvider {
    *
    * @param {Function} lib promise implementation
    */
-  static set(lib) {
-    store[kPromise] = PromiseProvider.validate(lib);
+  static set(lib: Function) {
+    (store as any)[kPromise] = PromiseProvider.validate(lib);
   }
 
   /**
@@ -32,11 +31,11 @@ class PromiseProvider {
    *
    * @returns {any}
    */
-  static get() {
+  static get(): any {
     return store[kPromise];
   }
 }
 
 PromiseProvider.set(global.Promise);
 
-module.exports = PromiseProvider;
+export = PromiseProvider;

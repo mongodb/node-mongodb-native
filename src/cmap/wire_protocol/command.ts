@@ -1,17 +1,17 @@
 'use strict';
-const { Query, Msg } = require('../commands');
-const { getReadPreference, isSharded } = require('./shared');
-const { isTransactionCommand } = require('../../transactions');
-const { applySession } = require('../../sessions');
-const { maxWireVersion, databaseNamespace } = require('../../utils');
-const { MongoError, MongoNetworkError } = require('../../error');
+import { Query, Msg } from '../commands';
+import { getReadPreference, isSharded } from './shared';
+import { isTransactionCommand } from '../../transactions';
+import { applySession } from '../../sessions';
+import { maxWireVersion, databaseNamespace } from '../../utils';
+import { MongoError, MongoNetworkError } from '../../error';
 
-function isClientEncryptionEnabled(server) {
+function isClientEncryptionEnabled(server: any) {
   const wireVersion = maxWireVersion(server);
   return wireVersion && server.autoEncrypter;
 }
 
-function command(server, ns, cmd, options, callback) {
+function command(server: any, ns: any, cmd: any, options: any, callback: Function) {
   if (typeof options === 'function') (callback = options), (options = {});
   options = options || {};
 
@@ -33,7 +33,7 @@ function command(server, ns, cmd, options, callback) {
   _cryptCommand(server, ns, cmd, options, callback);
 }
 
-function _command(server, ns, cmd, options, callback) {
+function _command(server: any, ns: any, cmd: any, options: any, callback: Function) {
   const pool = server.s.pool;
   const readPreference = getReadPreference(cmd, options);
   const shouldUseOpMsg = supportsOpMsg(server);
@@ -87,7 +87,7 @@ function _command(server, ns, cmd, options, callback) {
 
   const inTransaction = session && (session.inTransaction() || isTransactionCommand(finalCmd));
   const commandResponseHandler = inTransaction
-    ? function(err) {
+    ? function(err: any) {
         // We need to add a TransientTransactionError errorLabel, as stated in the transaction spec.
         if (
           err &&
@@ -117,7 +117,7 @@ function _command(server, ns, cmd, options, callback) {
   }
 }
 
-function hasSessionSupport(topology) {
+function hasSessionSupport(topology: any) {
   if (topology == null) return false;
   if (topology.description) {
     return topology.description.maxWireVersion >= 6;
@@ -126,7 +126,7 @@ function hasSessionSupport(topology) {
   return topology.ismaster == null ? false : topology.ismaster.maxWireVersion >= 6;
 }
 
-function supportsOpMsg(topologyOrServer) {
+function supportsOpMsg(topologyOrServer: any) {
   const description = topologyOrServer.ismaster
     ? topologyOrServer.ismaster
     : topologyOrServer.description;
@@ -138,15 +138,15 @@ function supportsOpMsg(topologyOrServer) {
   return description.maxWireVersion >= 6 && description.__nodejs_mock_server__ == null;
 }
 
-function _cryptCommand(server, ns, cmd, options, callback) {
+function _cryptCommand(server: any, ns: any, cmd: any, options: any, callback: Function) {
   const autoEncrypter = server.autoEncrypter;
-  function commandResponseHandler(err, response) {
+  function commandResponseHandler(err?: any, response?: any) {
     if (err || response == null) {
       callback(err, response);
       return;
     }
 
-    autoEncrypter.decrypt(response.result, options, (err, decrypted) => {
+    autoEncrypter.decrypt(response.result, options, (err?: any, decrypted?: any) => {
       if (err) {
         callback(err, null);
         return;
@@ -158,7 +158,7 @@ function _cryptCommand(server, ns, cmd, options, callback) {
     });
   }
 
-  autoEncrypter.encrypt(ns, cmd, options, (err, encrypted) => {
+  autoEncrypter.encrypt(ns, cmd, options, (err?: any, encrypted?: any) => {
     if (err) {
       callback(err, null);
       return;
@@ -168,4 +168,4 @@ function _cryptCommand(server, ns, cmd, options, callback) {
   });
 }
 
-module.exports = command;
+export = command;

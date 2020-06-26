@@ -1,9 +1,8 @@
 'use strict';
-
-const ReadPreference = require('../read_preference');
-const { BSON } = require('../deps');
-const { databaseNamespace } = require('../utils');
-const { OP_QUERY, OP_GETMORE, OP_KILL_CURSORS, OP_MSG } = require('./wire_protocol/constants');
+import ReadPreference = require('../read_preference');
+import { BSON } from '../deps';
+import { databaseNamespace } from '../utils';
+import { OP_QUERY, OP_GETMORE, OP_KILL_CURSORS, OP_MSG } from './wire_protocol/constants';
 
 // Incrementing request id
 let _requestId = 0;
@@ -27,7 +26,27 @@ const AWAIT_CAPABLE = 8;
  * QUERY
  **************************************************************/
 class Query {
-  constructor(ns, query, options) {
+  ns: any;
+  query: any;
+  numberToSkip: any;
+  numberToReturn: any;
+  returnFieldSelector: any;
+  requestId: any;
+  pre32Limit: any;
+  serializeFunctions: any;
+  ignoreUndefined: any;
+  maxBsonSize: any;
+  checkKeys: any;
+  batchSize: any;
+  tailable: any;
+  slaveOk: any;
+  oplogReplay: any;
+  noCursorTimeout: any;
+  awaitData: any;
+  exhaust: any;
+  partial: any;
+
+  constructor(ns: any, query: any, options: any) {
     var self = this;
     // Basic options needed to be passed in
     if (ns == null) throw new Error('ns must be specified for query');
@@ -227,7 +246,12 @@ class Query {
  * GETMORE
  **************************************************************/
 class GetMore {
-  constructor(ns, cursorId, opts) {
+  numberToReturn: any;
+  requestId: any;
+  ns: any;
+  cursorId: any;
+
+  constructor(ns: any, cursorId: any, opts: any) {
     opts = opts || {};
     this.numberToReturn = opts.numberToReturn || 0;
     this.requestId = _requestId++;
@@ -316,7 +340,11 @@ class GetMore {
  * KILLCURSOR
  **************************************************************/
 class KillCursor {
-  constructor(ns, cursorIds) {
+  ns: any;
+  requestId: any;
+  cursorIds: any;
+
+  constructor(ns: any, cursorIds: any) {
     this.ns = ns;
     this.requestId = _requestId++;
     this.cursorIds = cursorIds;
@@ -399,7 +427,30 @@ class KillCursor {
 }
 
 class Response {
-  constructor(message, msgHeader, msgBody, opts) {
+  parsed: boolean;
+  raw: any;
+  data: any;
+  opts: any;
+  length: any;
+  requestId: any;
+  responseTo: any;
+  opCode: any;
+  fromCompressed: any;
+  responseFlags: any;
+  cursorId: any;
+  startingFrom: any;
+  numberReturned: any;
+  documents: any;
+  cursorNotFound: any;
+  queryFailure: any;
+  shardConfigStale: any;
+  awaitCapable: any;
+  promoteLongs: any;
+  promoteValues: any;
+  promoteBuffers: any;
+  index: any;
+
+  constructor(message: any, msgHeader: any, msgBody: any, opts: any) {
     opts = opts || { promoteLongs: true, promoteValues: true, promoteBuffers: false };
     this.parsed = false;
     this.raw = message;
@@ -436,7 +487,7 @@ class Response {
     return this.parsed;
   }
 
-  parse(options) {
+  parse(options: any) {
     // Don't parse again if not needed
     if (this.parsed) return;
     options = options || {};
@@ -452,10 +503,10 @@ class Response {
       typeof options.promoteBuffers === 'boolean'
         ? options.promoteBuffers
         : this.opts.promoteBuffers;
-    var bsonSize, _options;
+    var bsonSize;
 
     // Set up the options
-    _options = {
+    const _options: any = {
       promoteLongs: promoteLongs,
       promoteValues: promoteValues,
       promoteBuffers: promoteBuffers
@@ -490,7 +541,7 @@ class Response {
     }
 
     if (this.documents.length === 1 && documentsReturnedIn != null && raw) {
-      const fieldsAsRaw = {};
+      const fieldsAsRaw: any = {};
       fieldsAsRaw[documentsReturnedIn] = true;
       _options.fieldsAsRaw = fieldsAsRaw;
 
@@ -536,7 +587,19 @@ const OPTS_MORE_TO_COME = 2;
 const OPTS_EXHAUST_ALLOWED = 1 << 16;
 
 class Msg {
-  constructor(ns, command, options) {
+  ns: any;
+  command: any;
+  options: any;
+  requestId: any;
+  serializeFunctions: any;
+  ignoreUndefined: any;
+  checkKeys: any;
+  maxBsonSize: any;
+  checksumPresent: any;
+  moreToCome: any;
+  exhaustAllowed: any;
+
+  constructor(ns: any, command: any, options: any) {
     // Basic options needed to be passed in
     if (command == null) throw new Error('query must be specified for query');
 
@@ -605,7 +668,7 @@ class Msg {
     return buffers;
   }
 
-  makeDocumentSegment(buffers, document) {
+  makeDocumentSegment(buffers: any, document: any) {
     const payloadTypeBuffer = Buffer.alloc(1);
     payloadTypeBuffer[0] = 0;
 
@@ -616,7 +679,7 @@ class Msg {
     return payloadTypeBuffer.length + documentBuffer.length;
   }
 
-  serializeBson(document) {
+  serializeBson(document: any) {
     return BSON.serialize(document, {
       checkKeys: this.checkKeys,
       serializeFunctions: this.serializeFunctions,
@@ -631,7 +694,26 @@ class Msg {
 }
 
 class BinMsg {
-  constructor(message, msgHeader, msgBody, opts) {
+  parsed: any;
+  raw: any;
+  data: any;
+  opts: any;
+  length: any;
+  requestId: any;
+  responseTo: any;
+  opCode: any;
+  fromCompressed : any;
+  responseFlags: any;
+  checksumPresent: any;
+  moreToCome: any;
+  exhaustAllowed: any;
+  promoteLongs: any;
+  promoteValues: any;
+  promoteBuffers: any;
+  documents: any;
+  index: any;
+
+  constructor(message: any, msgHeader: any, msgBody: any, opts: any) {
     opts = opts || { promoteLongs: true, promoteValues: true, promoteBuffers: false };
     this.parsed = false;
     this.raw = message;
@@ -661,7 +743,7 @@ class BinMsg {
     return this.parsed;
   }
 
-  parse(options) {
+  parse(options: any) {
     // Don't parse again if not needed
     if (this.parsed) return;
     options = options || {};
@@ -684,7 +766,7 @@ class BinMsg {
       promoteLongs: promoteLongs,
       promoteValues: promoteValues,
       promoteBuffers: promoteBuffers
-    };
+    } as any;
 
     while (this.index < this.data.length) {
       const payloadType = this.data.readUInt8(this.index++);
@@ -700,7 +782,7 @@ class BinMsg {
     }
 
     if (this.documents.length === 1 && documentsReturnedIn != null && raw) {
-      const fieldsAsRaw = {};
+      const fieldsAsRaw: any = {};
       fieldsAsRaw[documentsReturnedIn] = true;
       _options.fieldsAsRaw = fieldsAsRaw;
 
@@ -721,7 +803,11 @@ class BinMsg {
  * @returns {CommandResult} A cursor instance
  */
 class CommandResult {
-  constructor(result, connection, message) {
+  result: any;
+  connection: any;
+  message: any;
+
+  constructor(result: any, connection: any, message: any) {
     this.result = result;
     this.connection = connection;
     this.message = message;
@@ -733,7 +819,7 @@ class CommandResult {
    * @function
    * @returns {object}
    */
-  toJSON() {
+  toJSON(): object {
     let result = Object.assign({}, this, this.result);
     delete result.message;
     return result;
@@ -745,17 +831,9 @@ class CommandResult {
    * @function
    * @returns {string}
    */
-  toString() {
+  toString(): string {
     return JSON.stringify(this.toJSON());
   }
 }
 
-module.exports = {
-  Query,
-  GetMore,
-  Response,
-  KillCursor,
-  Msg,
-  BinMsg,
-  CommandResult
-};
+export { Query, GetMore, Response, KillCursor, Msg, BinMsg, CommandResult };

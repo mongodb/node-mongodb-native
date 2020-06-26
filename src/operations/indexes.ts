@@ -1,16 +1,17 @@
 'use strict';
-
-const OperationBase = require('./operation').OperationBase;
-const indexInformation = require('./common_functions').indexInformation;
+import { OperationBase } from './operation';
+import { indexInformation } from './common_functions';
 
 class IndexesOperation extends OperationBase {
-  constructor(collection, options) {
+  collection: any;
+
+  constructor(collection: any, options: any) {
     super(options);
 
     this.collection = collection;
   }
 
-  execute(callback) {
+  execute(callback: Function) {
     const coll = this.collection;
     let options = this.options;
 
@@ -19,4 +20,4 @@ class IndexesOperation extends OperationBase {
   }
 }
 
-module.exports = IndexesOperation;
+export = IndexesOperation;

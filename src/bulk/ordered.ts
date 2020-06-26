@@ -1,7 +1,7 @@
 'use strict';
-const { BSON } = require('../deps');
-const { BulkOperationBase, Batch, INSERT } = require('./common');
-const { toError } = require('../utils');
+import { BSON } from '../deps';
+import { BulkOperationBase, Batch, INSERT } from './common';
+import { toError } from '../utils';
 
 /**
  * Add to internal list of Operations
@@ -11,11 +11,14 @@ const { toError } = require('../utils');
  * @param {any} document
  * @returns {OrderedBulkOperation}
  */
-function addToOperationsList(bulkOperation, docType, document) {
+function addToOperationsList(
+  bulkOperation: OrderedBulkOperation,
+  docType: number,
+  document: any
+): OrderedBulkOperation {
   // Get the bsonSize
   const bsonSize = BSON.calculateObjectSize(document, {
     checkKeys: false,
-
     // Since we don't know what the user selected for BSON options here,
     // err on the safe side, and check the size with ignoreUndefined: false.
     ignoreUndefined: false
@@ -85,7 +88,7 @@ function addToOperationsList(bulkOperation, docType, document) {
  * @returns {OrderedBulkOperation} a OrderedBulkOperation instance.
  */
 class OrderedBulkOperation extends BulkOperationBase {
-  constructor(topology, collection, options) {
+  constructor(topology: any, collection: any, options: any) {
     options = options || {};
     options = Object.assign(options, { addToOperationsList });
 
@@ -100,10 +103,8 @@ class OrderedBulkOperation extends BulkOperationBase {
  * @param {any} collection
  * @param {any} options
  */
-function initializeOrderedBulkOp(topology, collection, options) {
+function initializeOrderedBulkOp(topology: any, collection: any, options: any) {
   return new OrderedBulkOperation(topology, collection, options);
 }
 
-initializeOrderedBulkOp.OrderedBulkOperation = OrderedBulkOperation;
-module.exports = initializeOrderedBulkOp;
-module.exports.Bulk = OrderedBulkOperation;
+export = initializeOrderedBulkOp;

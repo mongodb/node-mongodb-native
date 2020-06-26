@@ -1,18 +1,20 @@
 'use strict';
-
-const { MongoError } = require('../error');
-const { OperationBase } = require('./operation');
-const { insertDocuments } = require('./common_functions');
+import { MongoError } from '../error';
+import { OperationBase } from './operation';
+import { insertDocuments } from './common_functions';
 
 class InsertOneOperation extends OperationBase {
-  constructor(collection, doc, options) {
+  collection: any;
+  doc: any;
+
+  constructor(collection: any, doc: any, options: any) {
     super(options);
 
     this.collection = collection;
     this.doc = doc;
   }
 
-  execute(callback) {
+  execute(callback: Function) {
     const coll = this.collection;
     const doc = this.doc;
     const options = this.options;
@@ -23,7 +25,7 @@ class InsertOneOperation extends OperationBase {
       );
     }
 
-    insertDocuments(coll, [doc], options, (err, r) => {
+    insertDocuments(coll, [doc], options, (err?: any, r?: any) => {
       if (callback == null) return;
       if (err && callback) return callback(err);
       // Workaround for pre 2.6 servers
@@ -36,4 +38,4 @@ class InsertOneOperation extends OperationBase {
   }
 }
 
-module.exports = InsertOneOperation;
+export = InsertOneOperation;

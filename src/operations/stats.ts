@@ -1,8 +1,6 @@
 'use strict';
-
-const Aspect = require('./operation').Aspect;
-const CommandOperation = require('./command');
-const defineAspects = require('./operation').defineAspects;
+import { Aspect, defineAspects } from './operation';
+import CommandOperation = require('./command');
 
 /**
  * Get all the collection statistics.
@@ -18,7 +16,7 @@ class StatsOperation extends CommandOperation {
    * @param {Collection} collection Collection instance
    * @param {object} [options] Optional settings. See Collection.prototype.stats for a list of options.
    */
-  constructor(collection, options) {
+  constructor(collection: any, options?: object) {
     super(collection.s.db, options, collection);
   }
 
@@ -27,7 +25,7 @@ class StatsOperation extends CommandOperation {
     const options = this.options;
 
     // Build command object
-    const command = {
+    const command: any = {
       collStats: collection.collectionName
     };
 
@@ -42,4 +40,4 @@ class StatsOperation extends CommandOperation {
 
 defineAspects(StatsOperation, Aspect.READ_OPERATION);
 
-module.exports = StatsOperation;
+export = StatsOperation;

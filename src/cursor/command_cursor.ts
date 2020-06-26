@@ -1,9 +1,8 @@
 'use strict';
-
-const ReadPreference = require('../read_preference');
-const { MongoError } = require('../error');
-const Cursor = require('./cursor');
-const { CursorState } = require('./core_cursor');
+import ReadPreference = require('../read_preference');
+import { MongoError } from '../error';
+import Cursor = require('./cursor');
+import { CursorState } from './core_cursor';
 
 /**
  * @file The **CommandCursor** class is an internal class that embodies a
@@ -37,13 +36,13 @@ const { CursorState } = require('./core_cursor');
  * });
  */
 
-/**
+ /**
  * Namespace provided by the browser.
  *
  * @external Readable
  */
 
-/**
+ /**
  * Creates a new Command Cursor instance (INTERNAL TYPE, do not instantiate directly)
  *
  * @class CommandCursor
@@ -61,7 +60,7 @@ class CommandCursor extends Cursor {
    * @param {any} cmd
    * @param {any} [options]
    */
-  constructor(topology, ns, cmd, options) {
+  constructor(topology: any, ns: any, cmd: any, options?: any) {
     super(topology, ns, cmd, options);
   }
 
@@ -73,7 +72,7 @@ class CommandCursor extends Cursor {
    * @throws {MongoError}
    * @returns {Cursor}
    */
-  setReadPreference(readPreference) {
+  setReadPreference(readPreference: any): Cursor {
     if (this.s.state === CursorState.CLOSED || this.isDead()) {
       throw MongoError.create({ message: 'Cursor is closed', driver: true });
     }
@@ -104,7 +103,7 @@ class CommandCursor extends Cursor {
    * @throws {MongoError}
    * @returns {CommandCursor}
    */
-  batchSize(value) {
+  batchSize(value: number): CommandCursor {
     if (this.s.state === CursorState.CLOSED || this.isDead()) {
       throw MongoError.create({ message: 'Cursor is closed', driver: true });
     }
@@ -128,27 +127,15 @@ class CommandCursor extends Cursor {
    * @param {number} value The state maxTimeMS value.
    * @returns {CommandCursor}
    */
-  maxTimeMS(value) {
+  maxTimeMS(value: number): CommandCursor {
     if (this.topology.lastIsMaster().minWireVersion > 2) {
       this.cmd.maxTimeMS = value;
     }
 
     return this;
   }
-
-  /**
-   * Return the cursor logger
-   *
-   * @function
-   * @returns {Logger} return the cursor logger
-   */
-  getLogger() {
-    return this.logger;
-  }
 }
 
-// aliases
-CommandCursor.prototype.get = CommandCursor.prototype.toArray;
 
 /**
  * CommandCursor stream data event, fired for each document in the cursor.
@@ -184,7 +171,7 @@ CommandCursor.prototype.get = CommandCursor.prototype.toArray;
  * @function CommandCursor.prototype.next
  * @param {CommandCursor~resultCallback} [callback] The result callback.
  * @throws {MongoError}
- * @returns {Promise<void>} returns Promise if no callback passed
+ * @returns {Promise} returns Promise if no callback passed
  */
 
 /**
@@ -193,7 +180,7 @@ CommandCursor.prototype.get = CommandCursor.prototype.toArray;
  * @function CommandCursor.prototype.hasNext
  * @param {CommandCursor~resultCallback} [callback] The result callback.
  * @throws {MongoError}
- * @returns {Promise<void>} returns Promise if no callback passed
+ * @returns {Promise} returns Promise if no callback passed
  */
 
 /**
@@ -212,7 +199,7 @@ CommandCursor.prototype.get = CommandCursor.prototype.toArray;
  * @function CommandCursor.prototype.toArray
  * @param {CommandCursor~toArrayResultCallback} [callback] The result callback.
  * @throws {MongoError}
- * @returns {Promise<void>} returns Promise if no callback passed
+ * @returns {Promise} returns Promise if no callback passed
  */
 
 /**
@@ -242,7 +229,7 @@ CommandCursor.prototype.get = CommandCursor.prototype.toArray;
  *
  * @function CommandCursor.prototype.close
  * @param {CommandCursor~resultCallback} [callback] The result callback.
- * @returns {Promise<void>} returns Promise if no callback passed
+ * @returns {Promise} returns Promise if no callback passed
  */
 
 /**
@@ -289,4 +276,4 @@ CommandCursor.prototype.get = CommandCursor.prototype.toArray;
  * @return {null}
  */
 
-module.exports = CommandCursor;
+export = CommandCursor;

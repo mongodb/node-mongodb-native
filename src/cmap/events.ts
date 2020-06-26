@@ -1,6 +1,6 @@
 'use strict';
-const { GetMore, KillCursor, Msg } = require('./commands');
-const { calculateDurationInMs } = require('../utils');
+import { GetMore, KillCursor, Msg } from './commands';
+import { calculateDurationInMs } from '../utils';
 
 /**
  * The base class for all monitoring events published from the connection pool
@@ -9,7 +9,10 @@ const { calculateDurationInMs } = require('../utils');
  * @property {string} address The address (host/port pair) of the pool
  */
 class ConnectionPoolMonitoringEvent {
-  constructor(pool) {
+  time: any;
+  address: any;
+
+  constructor(pool: any) {
     this.time = new Date();
     this.address = pool.address;
   }
@@ -21,7 +24,9 @@ class ConnectionPoolMonitoringEvent {
  * @property {object} options The options used to create this connection pool
  */
 class ConnectionPoolCreatedEvent extends ConnectionPoolMonitoringEvent {
-  constructor(pool) {
+  options: any;
+
+  constructor(pool: any) {
     super(pool);
     this.options = pool.options;
   }
@@ -31,7 +36,7 @@ class ConnectionPoolCreatedEvent extends ConnectionPoolMonitoringEvent {
  * An event published when a connection pool is closed
  */
 class ConnectionPoolClosedEvent extends ConnectionPoolMonitoringEvent {
-  constructor(pool) {
+  constructor(pool: any) {
     super(pool);
   }
 }
@@ -42,7 +47,9 @@ class ConnectionPoolClosedEvent extends ConnectionPoolMonitoringEvent {
  * @property {number} connectionId A monotonically increasing, per-pool id for the newly created connection
  */
 class ConnectionCreatedEvent extends ConnectionPoolMonitoringEvent {
-  constructor(pool, connection) {
+  connectionId: any;
+
+  constructor(pool: any, connection: any) {
     super(pool);
     this.connectionId = connection.id;
   }
@@ -54,7 +61,9 @@ class ConnectionCreatedEvent extends ConnectionPoolMonitoringEvent {
  * @property {number} connectionId The id of the connection
  */
 class ConnectionReadyEvent extends ConnectionPoolMonitoringEvent {
-  constructor(pool, connection) {
+  connectionId: any;
+
+  constructor(pool: any, connection: any) {
     super(pool);
     this.connectionId = connection.id;
   }
@@ -67,7 +76,10 @@ class ConnectionReadyEvent extends ConnectionPoolMonitoringEvent {
  * @property {string} reason The reason the connection was closed
  */
 class ConnectionClosedEvent extends ConnectionPoolMonitoringEvent {
-  constructor(pool, connection, reason) {
+  connectionId: any;
+  reason: any;
+
+  constructor(pool: any, connection: any, reason: any) {
     super(pool);
     this.connectionId = connection.id;
     this.reason = reason || 'unknown';
@@ -78,7 +90,7 @@ class ConnectionClosedEvent extends ConnectionPoolMonitoringEvent {
  * An event published when a request to check a connection out begins
  */
 class ConnectionCheckOutStartedEvent extends ConnectionPoolMonitoringEvent {
-  constructor(pool) {
+  constructor(pool: any) {
     super(pool);
   }
 }
@@ -89,7 +101,8 @@ class ConnectionCheckOutStartedEvent extends ConnectionPoolMonitoringEvent {
  * @property {string} reason The reason the attempt to check out failed
  */
 class ConnectionCheckOutFailedEvent extends ConnectionPoolMonitoringEvent {
-  constructor(pool, reason) {
+  reason: any;
+  constructor(pool: any, reason: any) {
     super(pool);
     this.reason = reason;
   }
@@ -101,7 +114,9 @@ class ConnectionCheckOutFailedEvent extends ConnectionPoolMonitoringEvent {
  * @property {number} connectionId The id of the connection
  */
 class ConnectionCheckedOutEvent extends ConnectionPoolMonitoringEvent {
-  constructor(pool, connection) {
+  connectionId: any;
+
+  constructor(pool: any, connection: any) {
     super(pool);
     this.connectionId = connection.id;
   }
@@ -113,7 +128,9 @@ class ConnectionCheckedOutEvent extends ConnectionPoolMonitoringEvent {
  * @property {number} connectionId The id of the connection
  */
 class ConnectionCheckedInEvent extends ConnectionPoolMonitoringEvent {
-  constructor(pool, connection) {
+  connectionId: any;
+
+  constructor(pool: any, connection: any) {
     super(pool);
     this.connectionId = connection.id;
   }
@@ -123,7 +140,7 @@ class ConnectionCheckedInEvent extends ConnectionPoolMonitoringEvent {
  * An event published when a connection pool is cleared
  */
 class ConnectionPoolClearedEvent extends ConnectionPoolMonitoringEvent {
-  constructor(pool) {
+  constructor(pool: any) {
     super(pool);
   }
 }
@@ -143,13 +160,15 @@ const CMAP_EVENT_NAMES = [
 
 /** An event indicating the start of a given command */
 class CommandStartedEvent {
+  commandObj: any;
+
   /**
    * Create a started event
    *
    * @param {Pool} pool the pool that originated the command
    * @param {object} command the command
    */
-  constructor(pool, command) {
+  constructor(pool: any, command: any) {
     const cmd = extractCommand(command);
     const commandName = extractCommandName(cmd);
     const connectionDetails = extractConnectionDetails(pool);
@@ -179,7 +198,7 @@ class CommandSucceededEvent {
    * @param {object} reply the reply for this command from the server
    * @param {Array} started a high resolution tuple timestamp of when the command was first sent, to calculate duration
    */
-  constructor(pool, command, reply, started) {
+  constructor(pool: any, command: any, reply: object, started: any[]) {
     const cmd = extractCommand(command);
     const commandName = extractCommandName(cmd);
     const connectionDetails = extractConnectionDetails(pool);
@@ -203,7 +222,7 @@ class CommandFailedEvent {
    * @param {MongoError|object} error the generated error or a server error response
    * @param {Array} started a high resolution tuple timestamp of when the command was first sent, to calculate duration
    */
-  constructor(pool, command, error, started) {
+  constructor(pool: any, command: any, error: any, started: any[]) {
     const cmd = extractCommand(command);
     const commandName = extractCommandName(cmd);
     const connectionDetails = extractConnectionDetails(pool);
@@ -231,13 +250,14 @@ const SENSITIVE_COMMANDS = new Set([
 ]);
 
 // helper methods
-const extractCommandName = commandDoc => Object.keys(commandDoc)[0];
-const namespace = command => command.ns;
-const databaseName = command => command.ns.split('.')[0];
-const collectionName = command => command.ns.split('.')[1];
-const maybeRedact = (commandName, result) => (SENSITIVE_COMMANDS.has(commandName) ? {} : result);
+const extractCommandName = (commandDoc: any) => Object.keys(commandDoc)[0];
+const namespace = (command: any) => command.ns;
+const databaseName = (command: any) => command.ns.split('.')[0];
+const collectionName = (command: any) => command.ns.split('.')[1];
+const maybeRedact = (commandName: any, result: any) =>
+  SENSITIVE_COMMANDS.has(commandName) ? {} : result;
 
-const LEGACY_FIND_QUERY_MAP = {
+const LEGACY_FIND_QUERY_MAP: any = {
   $query: 'filter',
   $orderby: 'sort',
   $hint: 'hint',
@@ -251,7 +271,7 @@ const LEGACY_FIND_QUERY_MAP = {
   $snapshot: 'snapshot'
 };
 
-const LEGACY_FIND_OPTIONS_MAP = {
+const LEGACY_FIND_OPTIONS_MAP: any = {
   numberToSkip: 'skip',
   numberToReturn: 'batchSize',
   returnFieldsSelector: 'projection'
@@ -272,7 +292,7 @@ const OP_QUERY_KEYS = [
  *
  * @param {object} command the command
  */
-const extractCommand = command => {
+const extractCommand = (command: any) => {
   if (command instanceof GetMore) {
     return {
       getMore: command.cursorId,
@@ -293,24 +313,24 @@ const extractCommand = command => {
   }
 
   if (command.query && command.query.$query) {
-    let result;
+    let result: any;
     if (command.ns === 'admin.$cmd') {
       // upconvert legacy command
       result = Object.assign({}, command.query.$query);
     } else {
       // upconvert legacy find command
       result = { find: collectionName(command) };
-      Object.keys(LEGACY_FIND_QUERY_MAP).forEach(key => {
+      Object.keys(LEGACY_FIND_QUERY_MAP).forEach((key: any) => {
         if (typeof command.query[key] !== 'undefined')
           result[LEGACY_FIND_QUERY_MAP[key]] = command.query[key];
       });
     }
 
-    Object.keys(LEGACY_FIND_OPTIONS_MAP).forEach(key => {
+    Object.keys(LEGACY_FIND_OPTIONS_MAP).forEach((key: any) => {
       if (typeof command[key] !== 'undefined') result[LEGACY_FIND_OPTIONS_MAP[key]] = command[key];
     });
 
-    OP_QUERY_KEYS.forEach(key => {
+    OP_QUERY_KEYS.forEach((key: any) => {
       if (command[key]) result[key] = command[key];
     });
 
@@ -324,11 +344,10 @@ const extractCommand = command => {
 
     return result;
   }
-
   return command.query ? command.query : command;
 };
 
-const extractReply = (command, reply) => {
+const extractReply = (command: any, reply: any) => {
   if (command instanceof GetMore) {
     return {
       ok: 1,
@@ -362,14 +381,14 @@ const extractReply = (command, reply) => {
   return reply && reply.result ? reply.result : reply;
 };
 
-const extractConnectionDetails = connection => {
+const extractConnectionDetails = (connection: any) => {
   return {
     address: connection.address,
     connectionId: connection.id
   };
 };
 
-module.exports = {
+export {
   CMAP_EVENT_NAMES,
   ConnectionPoolCreatedEvent,
   ConnectionPoolClosedEvent,

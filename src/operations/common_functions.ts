@@ -1,10 +1,9 @@
 'use strict';
-
-const ReadPreference = require('../read_preference');
-const { executeCommand } = require('./db_ops');
-const { MongoError } = require('../error');
-const { CursorState } = require('../cursor');
-const {
+import ReadPreference = require('../read_preference');
+import { executeCommand } from './db_ops';
+import { MongoError } from '../error';
+import { CursorState } from '../cursor';
+import {
   applyRetryableWrites,
   applyWriteConcern,
   decorateWithCollation,
@@ -12,7 +11,7 @@ const {
   formattedOrderClause,
   handleCallback,
   toError
-} = require('../utils');
+} from '../utils';
 
 /**
  * Build the count command.
@@ -22,7 +21,7 @@ const {
  * @param {any} query The query for the count.
  * @param {any} [options] Optional settings. See Collection.prototype.count and Cursor.prototype.count for a list of options.
  */
-function buildCountCommand(collectionOrCursor, query, options) {
+function buildCountCommand(collectionOrCursor: any, query: any, options?: any) {
   const skip = options.skip;
   const limit = options.limit;
   let hint = options.hint;
@@ -33,7 +32,7 @@ function buildCountCommand(collectionOrCursor, query, options) {
   const cmd = {
     count: options.collectionName,
     query: query
-  };
+  } as any;
 
   if (collectionOrCursor.s.numberOfRetries) {
     // collectionOrCursor is a cursor
@@ -59,7 +58,7 @@ function buildCountCommand(collectionOrCursor, query, options) {
   return cmd;
 }
 
-function deleteCallback(err, r, callback) {
+function deleteCallback(err: any, r: any, callback: Function) {
   if (callback == null) return;
   if (err && callback) return callback(err);
   if (r == null) return callback(null, { result: { ok: 1 } });
@@ -79,12 +78,19 @@ function deleteCallback(err, r, callback) {
  * @param {Collection~findAndModifyCallback} [callback] The command result callback
  * @deprecated use findOneAndUpdate, findOneAndReplace or findOneAndDelete instead
  */
-function findAndModify(coll, query, sort, doc, options, callback) {
+function findAndModify(
+  coll: any,
+  query: object,
+  sort: any,
+  doc: object,
+  options?: any,
+  callback?: Function
+) {
   // Create findAndModify command object
   const queryObject = {
     findAndModify: coll.collectionName,
     query: query
-  };
+  } as any;
 
   sort = formattedOrderClause(sort);
   if (sort) {
@@ -140,14 +146,14 @@ function findAndModify(coll, query, sort, doc, options, callback) {
   try {
     decorateWithCollation(queryObject, coll, finalOptions);
   } catch (err) {
-    return callback(err, null);
+    return callback!(err, null);
   }
 
   // Execute the command
-  executeCommand(coll.s.db, queryObject, finalOptions, (err, result) => {
-    if (err) return handleCallback(callback, err, null);
+  executeCommand(coll.s.db, queryObject, finalOptions, (err?: any, result?: any) => {
+    if (err) return handleCallback(callback!, err, null);
 
-    return handleCallback(callback, null, result);
+    return handleCallback(callback!, null, result);
   });
 }
 
@@ -160,17 +166,17 @@ function findAndModify(coll, query, sort, doc, options, callback) {
  * @param {object} [options] Optional settings. See Db.prototype.indexInformation for a list of options.
  * @param {Db~resultCallback} [callback] The command result callback
  */
-function indexInformation(db, name, options, callback) {
+function indexInformation(db: any, name: string, options?: any, callback?: Function) {
   // If we specified full information
   const full = options['full'] == null ? false : options['full'];
 
   // Did the user destroy the topology
   if (db.serverConfig && db.serverConfig.isDestroyed())
-    return callback(new MongoError('topology was destroyed'));
+    return callback!(new MongoError('topology was destroyed'));
   // Process all the results from the index command and collection
-  function processResults(indexes) {
+  function processResults(indexes: any) {
     // Contains all the information
-    let info = {};
+    let info: any = {};
     // Process all the indexes
     for (let i = 0; i < indexes.length; i++) {
       const index = indexes[i];
@@ -187,15 +193,15 @@ function indexInformation(db, name, options, callback) {
   // Get the list of indexes of the specified collection
   db.collection(name)
     .listIndexes(options)
-    .toArray((err, indexes) => {
-      if (err) return callback(toError(err));
-      if (!Array.isArray(indexes)) return handleCallback(callback, null, []);
-      if (full) return handleCallback(callback, null, indexes);
-      handleCallback(callback, null, processResults(indexes));
+    .toArray((err?: any, indexes?: any) => {
+      if (err) return callback!(toError(err));
+      if (!Array.isArray(indexes)) return handleCallback(callback!, null, []);
+      if (full) return handleCallback(callback!, null, indexes);
+      handleCallback(callback!, null, processResults(indexes));
     });
 }
 
-function prepareDocs(coll, docs, options) {
+function prepareDocs(coll: any, docs: any, options: any) {
   const forceServerObjectId =
     typeof options.forceServerObjectId === 'boolean'
       ? options.forceServerObjectId
@@ -206,7 +212,7 @@ function prepareDocs(coll, docs, options) {
     return docs;
   }
 
-  return docs.map(doc => {
+  return docs.map((doc: any) => {
     if (forceServerObjectId !== true && doc._id == null) {
       doc._id = coll.s.pkFactory.createPk();
     }
@@ -216,7 +222,7 @@ function prepareDocs(coll, docs, options) {
 }
 
 // Get the next available document from the cursor, returns null if no more documents are available.
-function nextObject(cursor, callback) {
+function nextObject(cursor: any, callback: Function) {
   if (cursor.s.state === CursorState.CLOSED || (cursor.isDead && cursor.isDead())) {
     return handleCallback(
       callback,
@@ -233,14 +239,14 @@ function nextObject(cursor, callback) {
   }
 
   // Get the next object
-  cursor._next((err, doc) => {
+  cursor._next((err?: any, doc?: any) => {
     cursor.s.state = CursorState.OPEN;
     if (err) return handleCallback(callback, err);
     handleCallback(callback, null, doc);
   });
 }
 
-function insertDocuments(coll, docs, options, callback) {
+function insertDocuments(coll: any, docs: any, options: any, callback: Function) {
   if (typeof options === 'function') (callback = options), (options = {});
   options = options || {};
   // Ensure we are operating on an array op docs
@@ -258,7 +264,7 @@ function insertDocuments(coll, docs, options, callback) {
   docs = prepareDocs(coll, docs, options);
 
   // File inserts
-  coll.s.topology.insert(coll.s.namespace, docs, finalOptions, (err, result) => {
+  coll.s.topology.insert(coll.s.namespace, docs, finalOptions, (err?: any, result?: any) => {
     if (callback == null) return;
     if (err) return handleCallback(callback, err);
     if (result == null) return handleCallback(callback, null, null);
@@ -272,7 +278,7 @@ function insertDocuments(coll, docs, options, callback) {
   });
 }
 
-function removeDocuments(coll, selector, options, callback) {
+function removeDocuments(coll: any, selector: any, options: any, callback: Function) {
   if (typeof options === 'function') {
     (callback = options), (options = {});
   } else if (typeof selector === 'function') {
@@ -293,7 +299,7 @@ function removeDocuments(coll, selector, options, callback) {
   if (selector == null) selector = {};
 
   // Build the op
-  const op = { q: selector, limit: 0 };
+  const op = { q: selector, limit: 0 } as any;
   if (options.single) {
     op.limit = 1;
   } else if (finalOptions.retryWrites) {
@@ -311,7 +317,7 @@ function removeDocuments(coll, selector, options, callback) {
   }
 
   // Execute the remove
-  coll.s.topology.remove(coll.s.namespace, [op], finalOptions, (err, result) => {
+  coll.s.topology.remove(coll.s.namespace, [op], finalOptions, (err?: any, result?: any) => {
     if (callback == null) return;
     if (err) return handleCallback(callback, err, null);
     if (result == null) return handleCallback(callback, null, null);
@@ -325,16 +331,22 @@ function removeDocuments(coll, selector, options, callback) {
   });
 }
 
-function updateDocuments(coll, selector, document, options, callback) {
+function updateDocuments(
+  coll: any,
+  selector: any,
+  document: any,
+  options: any,
+  callback?: Function
+) {
   if ('function' === typeof options) (callback = options), (options = null);
   if (options == null) options = {};
-  if (!('function' === typeof callback)) callback = null;
+  if (!('function' === typeof callback)) callback = undefined;
 
   // If we are not providing a selector or document throw
   if (selector == null || typeof selector !== 'object')
-    return callback(toError('selector must be a valid JavaScript object'));
+    return callback!(toError('selector must be a valid JavaScript object'));
   if (document == null || typeof document !== 'object')
-    return callback(toError('document must be a valid JavaScript object'));
+    return callback!(toError('document must be a valid JavaScript object'));
 
   // Final options for retryable writes and write concern
   let finalOptions = Object.assign({}, options);
@@ -347,7 +359,7 @@ function updateDocuments(coll, selector, document, options, callback) {
   finalOptions.serializeFunctions = options.serializeFunctions || coll.s.serializeFunctions;
 
   // Execute the operation
-  const op = { q: selector, u: document };
+  const op = { q: selector, u: document } as any;
   op.upsert = options.upsert !== void 0 ? !!options.upsert : false;
   op.multi = options.multi !== void 0 ? !!options.multi : false;
 
@@ -368,11 +380,11 @@ function updateDocuments(coll, selector, document, options, callback) {
   try {
     decorateWithCollation(finalOptions, coll, options);
   } catch (err) {
-    return callback(err, null);
+    return callback!(err, null);
   }
 
   // Update options
-  coll.s.topology.update(coll.s.namespace, [op], finalOptions, (err, result) => {
+  coll.s.topology.update(coll.s.namespace, [op], finalOptions, (err?: any, result?: any) => {
     if (callback == null) return;
     if (err) return handleCallback(callback, err, null);
     if (result == null) return handleCallback(callback, null, null);
@@ -384,7 +396,7 @@ function updateDocuments(coll, selector, document, options, callback) {
   });
 }
 
-function updateCallback(err, r, callback) {
+function updateCallback(err: any, r: any, callback: Function) {
   if (callback == null) return;
   if (err) return callback(err);
   if (r == null) return callback(null, { result: { ok: 1 } });
@@ -400,7 +412,7 @@ function updateCallback(err, r, callback) {
   callback(null, r);
 }
 
-module.exports = {
+export {
   buildCountCommand,
   deleteCallback,
   findAndModify,

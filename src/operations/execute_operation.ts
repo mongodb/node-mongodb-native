@@ -1,10 +1,9 @@
 'use strict';
-
-const PromiseProvider = require('../promise_provider');
-const ReadPreference = require('../read_preference');
-const { MongoError, isRetryableError } = require('../error');
-const { Aspect, OperationBase } = require('./operation');
-const { maxWireVersion } = require('../utils');
+import PromiseProvider = require('../promise_provider');
+import ReadPreference = require('../read_preference');
+import { MongoError, isRetryableError } from '../error';
+import { Aspect, OperationBase } from './operation';
+import { maxWireVersion } from '../utils';
 
 /**
  * Executes the given operation with provided arguments.
@@ -19,7 +18,7 @@ const { maxWireVersion } = require('../utils');
  * @param {Operation} operation The operation to execute
  * @param {Function} callback The command result callback
  */
-function executeOperation(topology, operation, callback) {
+function executeOperation(topology: any, operation: any, callback?: Function) {
   const Promise = PromiseProvider.get();
 
   if (topology == null) {
@@ -31,12 +30,12 @@ function executeOperation(topology, operation, callback) {
   }
 
   if (topology.shouldCheckForSessionSupport()) {
-    return selectServerForSessionSupport(topology, operation, callback);
+    return selectServerForSessionSupport(topology, operation, callback!);
   }
 
   // The driver sessions spec mandates that we implicitly create sessions for operations
   // that are not explicitly provided with a session.
-  let session, owner;
+  let session: any, owner: any;
   if (topology.hasSessionSupport()) {
     if (operation.session == null) {
       owner = Symbol();
@@ -49,15 +48,15 @@ function executeOperation(topology, operation, callback) {
 
   let result;
   if (typeof callback !== 'function') {
-    result = new Promise((resolve, reject) => {
-      callback = (err, res) => {
+    result = new Promise((resolve: any, reject: any) => {
+      callback = (err?: any, res?: any) => {
         if (err) return reject(err);
         resolve(res);
       };
     });
   }
 
-  function executeCallback(err, result) {
+  function executeCallback(err?: any, result?: any) {
     if (session && session.owner === owner) {
       session.endSession();
       if (operation.session === session) {
@@ -65,7 +64,7 @@ function executeOperation(topology, operation, callback) {
       }
     }
 
-    callback(err, result);
+    callback!(err, result);
   }
 
   try {
@@ -88,11 +87,11 @@ function executeOperation(topology, operation, callback) {
   return result;
 }
 
-function supportsRetryableReads(server) {
+function supportsRetryableReads(server: any) {
   return maxWireVersion(server) >= 6;
 }
 
-function executeWithServerSelection(topology, operation, callback) {
+function executeWithServerSelection(topology: any, operation: any, callback: Function) {
   const readPreference = operation.readPreference || ReadPreference.primary;
   const inTransaction = operation.session && operation.session.inTransaction();
 
@@ -111,7 +110,7 @@ function executeWithServerSelection(topology, operation, callback) {
     session: operation.session
   };
 
-  function callbackWithRetry(err, result) {
+  function callbackWithRetry(err?: any, result?: any) {
     if (err == null) {
       return callback(null, result);
     }
@@ -121,7 +120,7 @@ function executeWithServerSelection(topology, operation, callback) {
     }
 
     // select a new server, and attempt to retry the operation
-    topology.selectServer(serverSelectionOptions, (err, server) => {
+    topology.selectServer(serverSelectionOptions, (err?: any, server?: any) => {
       if (err || !supportsRetryableReads(server)) {
         callback(err, null);
         return;
@@ -132,7 +131,7 @@ function executeWithServerSelection(topology, operation, callback) {
   }
 
   // select a server, and execute the operation against it
-  topology.selectServer(serverSelectionOptions, (err, server) => {
+  topology.selectServer(serverSelectionOptions, (err?: any, server?: any) => {
     if (err) {
       callback(err, null);
       return;
@@ -156,20 +155,20 @@ function executeWithServerSelection(topology, operation, callback) {
 
 // TODO: This is only supported for unified topology, it should go away once
 //       we remove support for legacy topology types.
-function selectServerForSessionSupport(topology, operation, callback) {
+function selectServerForSessionSupport(topology: any, operation: any, callback: Function) {
   const Promise = PromiseProvider.get();
 
   let result;
   if (typeof callback !== 'function') {
-    result = new Promise((resolve, reject) => {
-      callback = (err, result) => {
+    result = new Promise((resolve: any, reject: any) => {
+      callback = (err?: any, result?: any) => {
         if (err) return reject(err);
         resolve(result);
       };
     });
   }
 
-  topology.selectServer(ReadPreference.primaryPreferred, err => {
+  topology.selectServer(ReadPreference.primaryPreferred, (err: any) => {
     if (err) {
       callback(err);
       return;
@@ -181,4 +180,4 @@ function selectServerForSessionSupport(topology, operation, callback) {
   return result;
 }
 
-module.exports = executeOperation;
+export = executeOperation;

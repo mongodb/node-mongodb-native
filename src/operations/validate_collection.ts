@@ -1,11 +1,12 @@
 'use strict';
-
-const CommandOperation = require('./command');
+import CommandOperation = require('./command');
 
 class ValidateCollectionOperation extends CommandOperation {
-  constructor(admin, collectionName, options) {
+  collectionName: string;
+
+  constructor(admin: any, collectionName: any, options: any) {
     // Decorate command with extra options
-    let command = { validate: collectionName };
+    let command: any = { validate: collectionName };
     const keys = Object.keys(options);
     for (let i = 0; i < keys.length; i++) {
       if (Object.prototype.hasOwnProperty.call(options, keys[i]) && keys[i] !== 'session') {
@@ -17,10 +18,10 @@ class ValidateCollectionOperation extends CommandOperation {
     this.collectionName = collectionName;
   }
 
-  execute(callback) {
+  execute(callback: Function) {
     const collectionName = this.collectionName;
 
-    super.execute((err, doc) => {
+    super.execute((err?: any, doc?: any) => {
       if (err != null) return callback(err, null);
 
       if (doc.ok === 0) return callback(new Error('Error with validate command'), null);
@@ -36,4 +37,4 @@ class ValidateCollectionOperation extends CommandOperation {
   }
 }
 
-module.exports = ValidateCollectionOperation;
+export = ValidateCollectionOperation;

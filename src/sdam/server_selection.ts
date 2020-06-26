@@ -1,7 +1,7 @@
 'use strict';
-const { ServerType, TopologyType } = require('./common');
-const ReadPreference = require('../read_preference');
-const { MongoError } = require('../error');
+import { ServerType, TopologyType } from './common';
+import ReadPreference = require('../read_preference');
+import { MongoError } from '../error';
 
 // max staleness constants
 const IDLE_WRITE_PERIOD = 10000;
@@ -11,10 +11,10 @@ const SMALLEST_MAX_STALENESS_SECONDS = 90;
  * Returns a server selector that selects for writable servers
  */
 function writableServerSelector() {
-  return function(topologyDescription, servers) {
+  return function(topologyDescription: any, servers: any) {
     return latencyWindowReducer(
       topologyDescription,
-      servers.filter(s => s.isWritable)
+      servers.filter((s: any) => s.isWritable)
     );
   };
 }
@@ -28,7 +28,11 @@ function writableServerSelector() {
  * @param {ServerDescription[]} servers The list of server descriptions to be reduced
  * @returns {ServerDescription[]} The list of servers that satisfy the requirements of max staleness
  */
-function maxStalenessReducer(readPreference, topologyDescription, servers) {
+function maxStalenessReducer(
+  readPreference: any,
+  topologyDescription: any,
+  servers: any
+): any {
   if (readPreference.maxStalenessSeconds == null || readPreference.maxStalenessSeconds < 0) {
     return servers;
   }
@@ -47,8 +51,8 @@ function maxStalenessReducer(readPreference, topologyDescription, servers) {
   }
 
   if (topologyDescription.type === TopologyType.ReplicaSetWithPrimary) {
-    const primary = Array.from(topologyDescription.servers.values()).filter(primaryFilter)[0];
-    return servers.reduce((result, server) => {
+    const primary: any = Array.from(topologyDescription.servers.values()).filter(primaryFilter)[0];
+    return servers.reduce((result: any, server: any) => {
       const stalenessMS =
         server.lastUpdateTime -
         server.lastWriteDate -
@@ -66,8 +70,11 @@ function maxStalenessReducer(readPreference, topologyDescription, servers) {
       return servers;
     }
 
-    const sMax = servers.reduce((max, s) => (s.lastWriteDate > max.lastWriteDate ? s : max));
-    return servers.reduce((result, server) => {
+    const sMax = servers.reduce((max: any, s: any) =>
+      s.lastWriteDate > max.lastWriteDate ? s : max
+    );
+
+    return servers.reduce((result: any, server: any) => {
       const stalenessMS =
         sMax.lastWriteDate - server.lastWriteDate + topologyDescription.heartbeatFrequencyMS;
 
@@ -86,7 +93,7 @@ function maxStalenessReducer(readPreference, topologyDescription, servers) {
  * @param {string[]} tagSet The requested tag set to match
  * @param {string[]} serverTags The server's tags
  */
-function tagSetMatch(tagSet, serverTags) {
+function tagSetMatch(tagSet: any, serverTags: any) {
   const keys = Object.keys(tagSet);
   const serverTagKeys = Object.keys(serverTags);
   for (let i = 0; i < keys.length; ++i) {
@@ -106,7 +113,7 @@ function tagSetMatch(tagSet, serverTags) {
  * @param {ServerDescription[]} servers The list of server descriptions to reduce
  * @returns {ServerDescription[]} The list of servers matching the requested tags
  */
-function tagSetReducer(readPreference, servers) {
+function tagSetReducer(readPreference: any, servers: any): any {
   if (
     readPreference.tags == null ||
     (Array.isArray(readPreference.tags) && readPreference.tags.length === 0)
@@ -116,7 +123,7 @@ function tagSetReducer(readPreference, servers) {
 
   for (let i = 0; i < readPreference.tags.length; ++i) {
     const tagSet = readPreference.tags[i];
-    const serversMatchingTagset = servers.reduce((matched, server) => {
+    const serversMatchingTagset = servers.reduce((matched: any, server: any) => {
       if (tagSetMatch(tagSet, server.tags)) matched.push(server);
       return matched;
     }, []);
@@ -138,34 +145,34 @@ function tagSetReducer(readPreference, servers) {
  * @param {ServerDescription[]} servers The list of servers to reduce
  * @returns {ServerDescription[]} The servers which fall within an acceptable latency window
  */
-function latencyWindowReducer(topologyDescription, servers) {
+function latencyWindowReducer(topologyDescription: any, servers: any): any {
   const low = servers.reduce(
-    (min, server) => (min === -1 ? server.roundTripTime : Math.min(server.roundTripTime, min)),
+    (min: any, server: any) =>
+      min === -1 ? server.roundTripTime : Math.min(server.roundTripTime, min),
     -1
   );
 
   const high = low + topologyDescription.localThresholdMS;
-
-  return servers.reduce((result, server) => {
+  return servers.reduce((result: any, server: any) => {
     if (server.roundTripTime <= high && server.roundTripTime >= low) result.push(server);
     return result;
   }, []);
 }
 
 // filters
-function primaryFilter(server) {
+function primaryFilter(server: any) {
   return server.type === ServerType.RSPrimary;
 }
 
-function secondaryFilter(server) {
+function secondaryFilter(server: any) {
   return server.type === ServerType.RSSecondary;
 }
 
-function nearestFilter(server) {
+function nearestFilter(server: any) {
   return server.type === ServerType.RSSecondary || server.type === ServerType.RSPrimary;
 }
 
-function knownFilter(server) {
+function knownFilter(server: any) {
   return server.type !== ServerType.Unknown;
 }
 
@@ -174,12 +181,12 @@ function knownFilter(server) {
  *
  * @param {ReadPreference} readPreference The read preference to select with
  */
-function readPreferenceServerSelector(readPreference) {
+function readPreferenceServerSelector(readPreference: any) {
   if (!readPreference.isValid()) {
     throw new TypeError('Invalid read preference specified');
   }
 
-  return function(topologyDescription, servers) {
+  return function(topologyDescription: any, servers: any) {
     const commonWireVersion = topologyDescription.commonWireVersion;
     if (
       commonWireVersion &&
@@ -231,7 +238,4 @@ function readPreferenceServerSelector(readPreference) {
   };
 }
 
-module.exports = {
-  writableServerSelector,
-  readPreferenceServerSelector
-};
+export { writableServerSelector, readPreferenceServerSelector };

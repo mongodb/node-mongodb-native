@@ -1,14 +1,11 @@
 'use strict';
-
-const applyWriteConcern = require('./utils').applyWriteConcern;
-
-const AddUserOperation = require('./operations/add_user');
-const ExecuteDbAdminCommandOperation = require('./operations/execute_db_admin_command');
-const RemoveUserOperation = require('./operations/remove_user');
-const ValidateCollectionOperation = require('./operations/validate_collection');
-const ListDatabasesOperation = require('./operations/list_databases');
-
-const executeOperation = require('./operations/execute_operation');
+import { applyWriteConcern } from './utils';
+import AddUserOperation = require('./operations/add_user');
+import ExecuteDbAdminCommandOperation = require('./operations/execute_db_admin_command');
+import RemoveUserOperation = require('./operations/remove_user');
+import ValidateCollectionOperation = require('./operations/validate_collection');
+import ListDatabasesOperation = require('./operations/list_databases');
+import executeOperation = require('./operations/execute_operation');
 
 /**
  * The **Admin** class is an internal class that allows convenient access to
@@ -39,6 +36,8 @@ const executeOperation = require('./operations/execute_operation');
  */
 
 class Admin {
+  s: any;
+
   /**
    * Create a new Admin instance (INTERNAL TYPE, do not instantiate directly)
    *
@@ -46,7 +45,7 @@ class Admin {
    * @param {any} topology
    * @returns {Admin} a collection instance.
    */
-  constructor(db, topology) {
+  constructor(db: any, topology: any) {
     this.s = {
       db,
       topology
@@ -72,7 +71,7 @@ class Admin {
    * @param {Admin~resultCallback} [callback] The command result callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  command(command, options, callback) {
+  command(command: object, options?: any, callback?: Function): Promise<void> {
     const args = Array.prototype.slice.call(arguments, 1);
     callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
     options = args.length ? args.shift() : {};
@@ -90,7 +89,7 @@ class Admin {
    * @param {Admin~resultCallback} [callback] The command result callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  buildInfo(options, callback) {
+  buildInfo(options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -108,7 +107,7 @@ class Admin {
    * @param {Admin~resultCallback} [callback] The command result callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  serverInfo(options, callback) {
+  serverInfo(options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -125,7 +124,7 @@ class Admin {
    * @param {Admin~resultCallback} [callback] The command result callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  serverStatus(options, callback) {
+  serverStatus(options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -146,7 +145,7 @@ class Admin {
    * @param {Admin~resultCallback} [callback] The command result callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  ping(options, callback) {
+  ping(options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -173,7 +172,7 @@ class Admin {
    * @param {Admin~resultCallback} [callback] The command result callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  addUser(username, password, options, callback) {
+  addUser(username: string, password?: string, options?: any, callback?: Function): Promise<void> {
     const args = Array.prototype.slice.call(arguments, 2);
     callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
 
@@ -208,7 +207,7 @@ class Admin {
    * @param {Admin~resultCallback} [callback] The command result callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  removeUser(username, options, callback) {
+  removeUser(username: string, options?: any, callback?: Function): Promise<void> {
     const args = Array.prototype.slice.call(arguments, 1);
     callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
 
@@ -233,7 +232,7 @@ class Admin {
    * @param {Admin~resultCallback} [callback] The command result callback.
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  validateCollection(collectionName, options, callback) {
+  validateCollection(collectionName: string, options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -255,7 +254,7 @@ class Admin {
    * @param {Admin~resultCallback} [callback] The command result callback.
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  listDatabases(options, callback) {
+  listDatabases(options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -274,7 +273,7 @@ class Admin {
    * @param {Admin~resultCallback} [callback] The command result callback.
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  replSetGetStatus(options, callback) {
+  replSetGetStatus(options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -288,4 +287,4 @@ class Admin {
   }
 }
 
-module.exports = Admin;
+export = Admin;

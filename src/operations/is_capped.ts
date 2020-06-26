@@ -1,19 +1,18 @@
 'use strict';
-
-const OptionsOperation = require('./options_operation');
-const handleCallback = require('../utils').handleCallback;
+import OptionsOperation = require('./options_operation');
+import { handleCallback } from '../utils';
 
 class IsCappedOperation extends OptionsOperation {
-  constructor(collection, options) {
+  constructor(collection: any, options: any) {
     super(collection, options);
   }
 
-  execute(callback) {
-    super.execute((err, document) => {
+  execute(callback: Function) {
+    super.execute((err?: any, document?: any) => {
       if (err) return handleCallback(callback, err);
       handleCallback(callback, null, !!(document && document.capped));
     });
   }
 }
 
-module.exports = IsCappedOperation;
+export = IsCappedOperation;

@@ -1,8 +1,7 @@
 'use strict';
-
-const { arrayStrictEqual, tagsStrictEqual, errorStrictEqual } = require('../utils');
-const { ServerType } = require('./common');
-const { now } = require('../utils');
+import { arrayStrictEqual, tagsStrictEqual, errorStrictEqual } from '../utils';
+import { ServerType } from './common';
+import { now } from '../utils';
 
 const WRITABLE_SERVER_TYPES = new Set([
   ServerType.RSPrimary,
@@ -45,6 +44,28 @@ const ISMASTER_FIELDS = [
  * Internal type, not meant to be directly instantiated
  */
 class ServerDescription {
+  address: any;
+  error: any;
+  roundTripTime: any;
+  lastUpdateTime: any;
+  lastWriteDate: any;
+  opTime: any;
+  type: any;
+  topologyVersion: any;
+  me: any;
+  hosts: any;
+  passives: any;
+  arbiters: any;
+  minWireVersion: any;
+  maxWireVersion: any;
+  tags: any;
+  setName: any;
+  setVersion: any;
+  electionId: any;
+  primary: any;
+  logicalSessionTimeoutMinutes: any;
+  $clusterTime: any;
+
   /**
    * Create a ServerDescription
    *
@@ -55,7 +76,7 @@ class ServerDescription {
    * @param {Error} [options.error] An Error used for better reporting debugging
    * @param {any} [options.topologyVersion] The topologyVersion
    */
-  constructor(address, ismaster, options) {
+  constructor(address: string, ismaster?: any, options?: any) {
     options = options || {};
     ismaster = Object.assign(
       {
@@ -79,15 +100,15 @@ class ServerDescription {
     this.topologyVersion = options.topologyVersion || ismaster.topologyVersion;
 
     // direct mappings
-    ISMASTER_FIELDS.forEach(field => {
-      if (typeof ismaster[field] !== 'undefined') this[field] = ismaster[field];
+    ISMASTER_FIELDS.forEach((field: any) => {
+      if (typeof ismaster[field] !== 'undefined') (this as any)[field] = ismaster[field];
     });
 
     // normalize case for hosts
     if (this.me) this.me = this.me.toLowerCase();
-    this.hosts = this.hosts.map(host => host.toLowerCase());
-    this.passives = this.passives.map(host => host.toLowerCase());
-    this.arbiters = this.arbiters.map(host => host.toLowerCase());
+    this.hosts = this.hosts.map((host: any) => host.toLowerCase());
+    this.passives = this.passives.map((host: any) => host.toLowerCase());
+    this.arbiters = this.arbiters.map((host: any) => host.toLowerCase());
   }
 
   get allHosts() {
@@ -122,7 +143,7 @@ class ServerDescription {
    * @param {ServerDescription} other
    * @returns {boolean}
    */
-  equals(other) {
+  equals(other: ServerDescription): boolean {
     const topologyVersionsEqual =
       this.topologyVersion === other.topologyVersion ||
       compareTopologyVersion(this.topologyVersion, other.topologyVersion) === 0;
@@ -153,7 +174,7 @@ class ServerDescription {
  * @param {any} ismaster The `ismaster` message to parse
  * @returns {string}
  */
-function parseServerType(ismaster) {
+function parseServerType(ismaster: any): string {
   if (!ismaster || !ismaster.ok) {
     return ServerType.Unknown;
   }
@@ -190,7 +211,7 @@ function parseServerType(ismaster) {
  * @param {any} rhs
  * @returns A negative number if `lhs` is older than `rhs`; positive if `lhs` is newer than `rhs`; 0 if they are equivalent.
  */
-function compareTopologyVersion(lhs, rhs) {
+function compareTopologyVersion(lhs: any, rhs: any) {
   if (lhs == null || rhs == null) {
     return -1;
   }
@@ -209,8 +230,4 @@ function compareTopologyVersion(lhs, rhs) {
   return -1;
 }
 
-module.exports = {
-  ServerDescription,
-  parseServerType,
-  compareTopologyVersion
-};
+export { ServerDescription, parseServerType, compareTopologyVersion };

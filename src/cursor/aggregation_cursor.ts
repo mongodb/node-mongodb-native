@@ -1,9 +1,8 @@
 'use strict';
-
-const { MongoError } = require('../error');
-const Cursor = require('./cursor');
-const { CursorState } = require('./core_cursor');
-const { deprecate } = require('util');
+import { MongoError } from '../error';
+import Cursor = require('./cursor');
+import { CursorState } from './core_cursor';
+import { deprecate } from 'util';
 
 /**
  * @file The **AggregationCursor** class is an internal class that embodies an aggregation cursor on MongoDB
@@ -44,7 +43,7 @@ const { deprecate } = require('util');
  * @external Readable
  */
 
-/**
+ /**
  * Creates a new Aggregation Cursor instance (INTERNAL TYPE, do not instantiate directly)
  *
  * @class AggregationCursor
@@ -56,7 +55,7 @@ const { deprecate } = require('util');
  * @returns {AggregationCursor} an AggregationCursor instance.
  */
 class AggregationCursor extends Cursor {
-  constructor(topology, operation, options) {
+  constructor(topology: any, operation: any, options: any) {
     super(topology, operation, options);
   }
 
@@ -68,7 +67,7 @@ class AggregationCursor extends Cursor {
    * @throws {MongoError}
    * @returns {AggregationCursor}
    */
-  batchSize(value) {
+  batchSize(value: number): AggregationCursor {
     if (this.s.state === CursorState.CLOSED || this.isDead()) {
       throw MongoError.create({ message: 'Cursor is closed', driver: true });
     }
@@ -89,7 +88,7 @@ class AggregationCursor extends Cursor {
    * @param {object} document The geoNear stage document.
    * @returns {AggregationCursor}
    */
-  geoNear(document) {
+  geoNear(document: object): AggregationCursor {
     this.operation.addToPipeline({ $geoNear: document });
     return this;
   }
@@ -101,7 +100,7 @@ class AggregationCursor extends Cursor {
    * @param {object} document The group stage document.
    * @returns {AggregationCursor}
    */
-  group(document) {
+  group(document: object): AggregationCursor {
     this.operation.addToPipeline({ $group: document });
     return this;
   }
@@ -113,7 +112,7 @@ class AggregationCursor extends Cursor {
    * @param {number} value The state limit value.
    * @returns {AggregationCursor}
    */
-  limit(value) {
+  limit(value: number): AggregationCursor {
     this.operation.addToPipeline({ $limit: value });
     return this;
   }
@@ -125,7 +124,7 @@ class AggregationCursor extends Cursor {
    * @param {object} document The match stage document.
    * @returns {AggregationCursor}
    */
-  match(document) {
+  match(document: object): AggregationCursor {
     this.operation.addToPipeline({ $match: document });
     return this;
   }
@@ -137,7 +136,7 @@ class AggregationCursor extends Cursor {
    * @param {number} value The state maxTimeMS value.
    * @returns {AggregationCursor}
    */
-  maxTimeMS(value) {
+  maxTimeMS(value: number): AggregationCursor {
     this.operation.options.maxTimeMS = value;
     return this;
   }
@@ -149,7 +148,7 @@ class AggregationCursor extends Cursor {
    * @param {number} destination The destination name.
    * @returns {AggregationCursor}
    */
-  out(destination) {
+  out(destination: number): AggregationCursor {
     this.operation.addToPipeline({ $out: destination });
     return this;
   }
@@ -161,7 +160,7 @@ class AggregationCursor extends Cursor {
    * @param {object} document The project stage document.
    * @returns {AggregationCursor}
    */
-  project(document) {
+  project(document: object): AggregationCursor {
     this.operation.addToPipeline({ $project: document });
     return this;
   }
@@ -173,7 +172,7 @@ class AggregationCursor extends Cursor {
    * @param {object} document The lookup stage document.
    * @returns {AggregationCursor}
    */
-  lookup(document) {
+  lookup(document: object): AggregationCursor {
     this.operation.addToPipeline({ $lookup: document });
     return this;
   }
@@ -185,7 +184,7 @@ class AggregationCursor extends Cursor {
    * @param {object} document The redact stage document.
    * @returns {AggregationCursor}
    */
-  redact(document) {
+  redact(document: object): AggregationCursor {
     this.operation.addToPipeline({ $redact: document });
     return this;
   }
@@ -197,7 +196,7 @@ class AggregationCursor extends Cursor {
    * @param {number} value The state skip value.
    * @returns {AggregationCursor}
    */
-  skip(value) {
+  skip(value: number): AggregationCursor {
     this.operation.addToPipeline({ $skip: value });
     return this;
   }
@@ -209,7 +208,7 @@ class AggregationCursor extends Cursor {
    * @param {object} document The sort stage document.
    * @returns {AggregationCursor}
    */
-  sort(document) {
+  sort(document: object): AggregationCursor {
     this.operation.addToPipeline({ $sort: document });
     return this;
   }
@@ -221,24 +220,11 @@ class AggregationCursor extends Cursor {
    * @param {number} field The unwind field name.
    * @returns {AggregationCursor}
    */
-  unwind(field) {
+  unwind(field: number): AggregationCursor {
     this.operation.addToPipeline({ $unwind: field });
     return this;
   }
-
-  /**
-   * Return the cursor logger
-   *
-   * @function
-   * @returns {Logger} return the cursor logger
-   */
-  getLogger() {
-    return this.logger;
-  }
 }
-
-// aliases
-AggregationCursor.prototype.get = AggregationCursor.prototype.toArray;
 
 // deprecated methods
 deprecate(
@@ -280,7 +266,7 @@ deprecate(
  * @function AggregationCursor.prototype.next
  * @param {AggregationCursor~resultCallback} [callback] The result callback.
  * @throws {MongoError}
- * @returns {Promise<void>} returns Promise if no callback passed
+ * @returns {Promise} returns Promise if no callback passed
  */
 
 /**
@@ -289,7 +275,7 @@ deprecate(
  * @function AggregationCursor.prototype.hasNext
  * @param {AggregationCursor~resultCallback} [callback] The result callback.
  * @throws {MongoError}
- * @returns {Promise<void>} returns Promise if no callback passed
+ * @returns {Promise} returns Promise if no callback passed
  */
 
 /**
@@ -309,7 +295,7 @@ deprecate(
  * @function AggregationCursor.prototype.toArray
  * @param {AggregationCursor~toArrayResultCallback} [callback] The result callback.
  * @throws {MongoError}
- * @returns {Promise<void>} returns Promise if no callback passed
+ * @returns {Promise} returns Promise if no callback passed
  */
 
 /**
@@ -340,7 +326,7 @@ deprecate(
  *
  * @function AggregationCursor.prototype.close
  * @param {AggregationCursor~resultCallback} [callback] The result callback.
- * @returns {Promise<void>} returns Promise if no callback passed
+ * @returns {Promise} returns Promise if no callback passed
  */
 
 /**
@@ -355,7 +341,7 @@ deprecate(
  *
  * @function AggregationCursor.prototype.explain
  * @param {AggregationCursor~resultCallback} [callback] The result callback.
- * @returns {Promise<void>} returns Promise if no callback passed
+ * @returns {Promise} returns Promise if no callback passed
  */
 
 /**
@@ -396,4 +382,4 @@ deprecate(
  * @returns {null}
  */
 
-module.exports = AggregationCursor;
+export = AggregationCursor;

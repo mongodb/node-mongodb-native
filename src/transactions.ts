@@ -1,11 +1,11 @@
 'use strict';
-const ReadPreference = require('./read_preference');
-const { MongoError } = require('./error');
-const ReadConcern = require('./read_concern');
-const WriteConcern = require('./write_concern');
+import ReadPreference = require('./read_preference');
+import { MongoError } from './error';
+import ReadConcern = require('./read_concern');
+import WriteConcern = require('./write_concern');
 
-let TxnState;
-let stateMachine;
+let TxnState: any;
+let stateMachine: any;
 
 (() => {
   const NO_TRANSACTION = 'NO_TRANSACTION';
@@ -83,12 +83,17 @@ let stateMachine;
  * A class maintaining state related to a server transaction. Internal Only
  */
 class Transaction {
+  state: any;
+  options: any;
+  _pinnedServer: any;
+  _recoveryToken: any;
+
   /**
    * Create a transaction
    *
    * @param {TransactionOptions} [options] Optional settings
    */
-  constructor(options) {
+  constructor(options?: any) {
     options = options || {};
 
     this.state = TxnState.NO_TRANSACTION;
@@ -146,7 +151,7 @@ class Transaction {
    *
    * @param {TxnState} nextState The new state to transition to
    */
-  transition(nextState) {
+  transition(nextState: any) {
     const nextStates = stateMachine[this.state];
     if (nextStates && nextStates.indexOf(nextState) !== -1) {
       this.state = nextState;
@@ -161,7 +166,7 @@ class Transaction {
     );
   }
 
-  pinServer(server) {
+  pinServer(server: any) {
     if (this.isActive) {
       this._pinnedServer = server;
     }
@@ -172,8 +177,8 @@ class Transaction {
   }
 }
 
-function isTransactionCommand(command) {
+function isTransactionCommand(command: any) {
   return !!(command.commitTransaction || command.abortTransaction);
 }
 
-module.exports = { TxnState, Transaction, isTransactionCommand };
+export { TxnState, Transaction, isTransactionCommand };

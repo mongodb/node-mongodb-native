@@ -1,20 +1,20 @@
 'use strict';
-const net = require('net');
-const tls = require('tls');
-const { Connection } = require('./connection');
-const { MongoError, MongoNetworkError, MongoNetworkTimeoutError } = require('../error');
-const { defaultAuthProviders } = require('./auth/defaultAuthProviders');
-const { AuthContext } = require('./auth/auth_provider');
-const { makeClientMetadata } = require('../utils');
-const {
+import net = require('net');
+import tls = require('tls');
+import { Connection } from './connection';
+import { MongoError, MongoNetworkError, MongoNetworkTimeoutError } from '../error';
+import { defaultAuthProviders } from './auth/defaultAuthProviders';
+import { AuthContext } from './auth/auth_provider';
+import { makeClientMetadata } from '../utils';
+import {
   MAX_SUPPORTED_WIRE_VERSION,
   MAX_SUPPORTED_SERVER_VERSION,
   MIN_SUPPORTED_WIRE_VERSION,
   MIN_SUPPORTED_SERVER_VERSION
-} = require('./wire_protocol/constants');
-const AUTH_PROVIDERS = defaultAuthProviders();
+} from './wire_protocol/constants';
+const AUTH_PROVIDERS: any = defaultAuthProviders();
 
-function connect(options, cancellationToken, callback) {
+function connect(options: any, cancellationToken: any, callback: Function) {
   if (typeof cancellationToken === 'function') {
     callback = cancellationToken;
     cancellationToken = undefined;
@@ -22,7 +22,7 @@ function connect(options, cancellationToken, callback) {
 
   const ConnectionType = options && options.connectionType ? options.connectionType : Connection;
   const family = options.family !== void 0 ? options.family : 0;
-  makeConnection(family, options, cancellationToken, (err, socket) => {
+  makeConnection(family, options, cancellationToken, (err?: any, socket?: any) => {
     if (err) {
       callback(err, socket); // in the error case, `socket` is the originating error event name
       return;
@@ -32,7 +32,7 @@ function connect(options, cancellationToken, callback) {
   });
 }
 
-function checkSupportedServer(ismaster, options) {
+function checkSupportedServer(ismaster: any, options: any) {
   const serverVersionHighEnough =
     ismaster &&
     typeof ismaster.maxWireVersion === 'number' &&
@@ -58,8 +58,8 @@ function checkSupportedServer(ismaster, options) {
   return new MongoError(message);
 }
 
-function performInitialHandshake(conn, options, _callback) {
-  const callback = function(err, ret) {
+function performInitialHandshake(conn: any, options: any, _callback: any) {
+  const callback = function(err?: any, ret?: any) {
     if (err && conn) {
       conn.destroy();
     }
@@ -75,7 +75,7 @@ function performInitialHandshake(conn, options, _callback) {
   }
 
   const authContext = new AuthContext(conn, credentials, options);
-  prepareHandshakeDocument(authContext, (err, handshakeDoc) => {
+  prepareHandshakeDocument(authContext, (err?: any, handshakeDoc?: any) => {
     if (err) {
       return callback(err);
     }
@@ -87,7 +87,7 @@ function performInitialHandshake(conn, options, _callback) {
     }
 
     const start = new Date().getTime();
-    conn.command('admin.$cmd', handshakeDoc, handshakeOptions, (err, result) => {
+    conn.command('admin.$cmd', handshakeDoc, handshakeOptions, (err?: any, result?: any) => {
       if (err) {
         callback(err);
         return;
@@ -117,7 +117,7 @@ function performInitialHandshake(conn, options, _callback) {
 
         const resolvedCredentials = credentials.resolveAuthMechanism(response);
         const authProvider = AUTH_PROVIDERS[resolvedCredentials.mechanism];
-        authProvider.auth(authContext, err => {
+        authProvider.auth(authContext, (err: any) => {
           if (err) return callback(err);
           callback(undefined, conn);
         });
@@ -130,7 +130,7 @@ function performInitialHandshake(conn, options, _callback) {
   });
 }
 
-function prepareHandshakeDocument(authContext, callback) {
+function prepareHandshakeDocument(authContext: any, callback: Function) {
   const options = authContext.options;
   const compressors =
     options.compression && options.compression.compressors ? options.compression.compressors : [];
@@ -179,7 +179,7 @@ const LEGAL_SSL_SOCKET_OPTIONS = [
   'rejectUnauthorized'
 ];
 
-function parseConnectOptions(family, options) {
+function parseConnectOptions(family: any, options: any) {
   const host = typeof options.host === 'string' ? options.host : 'localhost';
   if (host.indexOf('/') !== -1) {
     return { path: host };
@@ -195,9 +195,8 @@ function parseConnectOptions(family, options) {
   return result;
 }
 
-function parseSslOptions(family, options) {
-  const result = parseConnectOptions(family, options);
-
+function parseSslOptions(family: any, options: any) {
+  const result: any = parseConnectOptions(family, options);
   // Merge in valid SSL options
   for (const name in options) {
     if (options[name] != null && LEGAL_SSL_SOCKET_OPTIONS.indexOf(name) !== -1) {
@@ -225,7 +224,7 @@ function parseSslOptions(family, options) {
 }
 
 const SOCKET_ERROR_EVENTS = new Set(['error', 'close', 'timeout', 'parseError']);
-function makeConnection(family, options, cancellationToken, _callback) {
+function makeConnection(family: any, options: any, cancellationToken: any, _callback: any) {
   const useSsl = typeof options.ssl === 'boolean' ? options.ssl : false;
   const keepAlive = typeof options.keepAlive === 'boolean' ? options.keepAlive : true;
   let keepAliveInitialDelay =
@@ -245,8 +244,8 @@ function makeConnection(family, options, cancellationToken, _callback) {
     keepAliveInitialDelay = Math.round(socketTimeout / 2);
   }
 
-  let socket;
-  const callback = function(err, ret) {
+  let socket: any;
+  const callback = function(err?: any, ret?: any) {
     if (err && socket) {
       socket.destroy();
     }
@@ -272,10 +271,10 @@ function makeConnection(family, options, cancellationToken, _callback) {
   socket.setNoDelay(noDelay);
 
   const connectEvent = useSsl ? 'secureConnect' : 'connect';
-  let cancellationHandler;
-  function errorHandler(eventName) {
-    return err => {
-      SOCKET_ERROR_EVENTS.forEach(event => socket.removeAllListeners(event));
+  let cancellationHandler: any;
+  function errorHandler(eventName: any) {
+    return (err: any) => {
+      SOCKET_ERROR_EVENTS.forEach((event: any) => socket.removeAllListeners(event));
       if (cancellationHandler) {
         cancellationToken.removeListener('cancel', cancellationHandler);
       }
@@ -286,7 +285,7 @@ function makeConnection(family, options, cancellationToken, _callback) {
   }
 
   function connectHandler() {
-    SOCKET_ERROR_EVENTS.forEach(event => socket.removeAllListeners(event));
+    SOCKET_ERROR_EVENTS.forEach((event: any) => socket.removeAllListeners(event));
     if (cancellationHandler) {
       cancellationToken.removeListener('cancel', cancellationHandler);
     }
@@ -299,7 +298,7 @@ function makeConnection(family, options, cancellationToken, _callback) {
     callback(null, socket);
   }
 
-  SOCKET_ERROR_EVENTS.forEach(event => socket.once(event, errorHandler(event)));
+  SOCKET_ERROR_EVENTS.forEach((event: any) => socket.once(event, errorHandler(event)));
   if (cancellationToken) {
     cancellationHandler = errorHandler('cancel');
     cancellationToken.once('cancel', cancellationHandler);
@@ -308,7 +307,7 @@ function makeConnection(family, options, cancellationToken, _callback) {
   socket.once(connectEvent, connectHandler);
 }
 
-function connectionFailureError(type, err) {
+function connectionFailureError(type: any, err?: any) {
   switch (type) {
     case 'error':
       return new MongoNetworkError(err);
@@ -323,4 +322,4 @@ function connectionFailureError(type, err) {
   }
 }
 
-module.exports = connect;
+export = connect;

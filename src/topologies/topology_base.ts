@@ -1,16 +1,17 @@
 'use strict';
-
-const { EventEmitter } = require('events');
-const { MongoError } = require('../error');
-const { format: f } = require('util');
-const ReadPreference = require('../read_preference');
-const { ClientSession } = require('../sessions');
+import { EventEmitter } from 'events';
+import { MongoError } from '../error';
+import { format as f } from 'util';
+import ReadPreference = require('../read_preference');
+import { ClientSession } from '../sessions';
 
 // The store of ops
 class Store {
-  constructor(topology, storeOptions) {
+  s: any;
+
+  constructor(topology: any, storeOptions: any) {
     var self = this;
-    var storedOps = [];
+    var storedOps: any = [];
     storeOptions = storeOptions || { force: false, bufferMaxEntries: -1 };
 
     // Internal state
@@ -28,7 +29,7 @@ class Store {
     });
   }
 
-  add(opType, ns, ops, options, callback) {
+  add(opType: any, ns: any, ops: any, options: any, callback: Function) {
     if (this.s.storeOptions.force) {
       return callback(MongoError.create({ message: 'db closed by application', driver: true }));
     }
@@ -68,7 +69,7 @@ class Store {
     this.s.storedOps.push({ t: opType, n: ns, o: ops, op: options, c: callback });
   }
 
-  addObjectAndMethod(opType, object, method, params, callback) {
+  addObjectAndMethod(opType: any, object: any, method: any, params: any, callback: Function) {
     if (this.s.storeOptions.force) {
       return callback(MongoError.create({ message: 'db closed by application', driver: true }));
     }
@@ -108,7 +109,7 @@ class Store {
     this.s.storedOps.push({ t: opType, m: method, o: object, p: params, c: callback });
   }
 
-  flush(err) {
+  flush(err: any) {
     while (this.s.storedOps.length > 0) {
       this.s.storedOps
         .shift()
@@ -119,7 +120,7 @@ class Store {
     }
   }
 
-  execute(options) {
+  execute(options: any) {
     options = options || {};
     // Get current ops
     var ops = this.s.storedOps;
@@ -190,7 +191,7 @@ const secondaryOptions = ['secondary', 'secondaryPreferred'];
 
 // Server capabilities
 class ServerCapabilities {
-  constructor(ismaster) {
+  constructor(ismaster: any) {
     // Capabilities
     let aggregationCursor = false;
     let writeCommands = false;
@@ -234,7 +235,7 @@ class ServerCapabilities {
       ismaster.maxWireVersion = 0;
     }
 
-    function setup_get_property(object, name, value) {
+    function setup_get_property(object: any, name: any, value: any) {
       Object.defineProperty(object, name, {
         enumerable: true,
         get() {
@@ -259,6 +260,9 @@ class ServerCapabilities {
 }
 
 class TopologyBase extends EventEmitter {
+  s?: any;
+  logicalSessionTimeoutMinutes?: boolean;
+
   constructor() {
     super();
     this.setMaxListeners(Infinity);
@@ -269,7 +273,7 @@ class TopologyBase extends EventEmitter {
     return this.logicalSessionTimeoutMinutes != null;
   }
 
-  startSession(options, clientOptions) {
+  startSession(options: any, clientOptions: any) {
     const session = new ClientSession(this, this.s.sessionPool, options, clientOptions);
 
     session.once('ended', () => {
@@ -280,7 +284,7 @@ class TopologyBase extends EventEmitter {
     return session;
   }
 
-  endSessions(sessions, callback) {
+  endSessions(sessions: any, callback: Function) {
     return this.s.coreTopology.endSessions(sessions, callback);
   }
 
@@ -297,27 +301,27 @@ class TopologyBase extends EventEmitter {
   }
 
   // Command
-  command(ns, cmd, options, callback) {
+  command(ns: any, cmd: any, options: any, callback: Function) {
     this.s.coreTopology.command(ns.toString(), cmd, ReadPreference.translate(options), callback);
   }
 
   // Insert
-  insert(ns, ops, options, callback) {
+  insert(ns: any, ops: any, options: any, callback: Function) {
     this.s.coreTopology.insert(ns.toString(), ops, options, callback);
   }
 
   // Update
-  update(ns, ops, options, callback) {
+  update(ns: any, ops: any, options: any, callback: Function) {
     this.s.coreTopology.update(ns.toString(), ops, options, callback);
   }
 
   // Remove
-  remove(ns, ops, options, callback) {
+  remove(ns: any, ops: any, options: any, callback: Function) {
     this.s.coreTopology.remove(ns.toString(), ops, options, callback);
   }
 
   // IsConnected
-  isConnected(options) {
+  isConnected(options: any) {
     options = options || {};
     options = ReadPreference.translate(options);
 
@@ -330,7 +334,7 @@ class TopologyBase extends EventEmitter {
   }
 
   // Cursor
-  cursor(ns, cmd, options) {
+  cursor(ns: any, cmd: any, options: any) {
     options = options || {};
     options = ReadPreference.translate(options);
     options.disconnectHandler = this.s.store;
@@ -343,7 +347,7 @@ class TopologyBase extends EventEmitter {
     return this.s.coreTopology.lastIsMaster();
   }
 
-  selectServer(selector, options, callback) {
+  selectServer(selector: any, options: any, callback: Function) {
     return this.s.coreTopology.selectServer(selector, options, callback);
   }
 
@@ -362,14 +366,14 @@ class TopologyBase extends EventEmitter {
    * @function
    * @returns {any[]}
    */
-  connections() {
+  connections(): any[] {
     return this.s.coreTopology.connections();
   }
 
-  close(forceClosed, callback) {
+  close(forceClosed: any, callback: Function) {
     // If we have sessions, we want to individually move them to the session pool,
     // and then send a single endSessions call.
-    this.s.sessions.forEach(session => session.endSession());
+    this.s.sessions.forEach((session: any) => session.endSession());
 
     if (this.s.sessionPool) {
       this.s.sessionPool.endAllPooledSessions();
@@ -404,8 +408,4 @@ Object.defineProperty(TopologyBase.prototype, 'type', {
   }
 });
 
-module.exports = {
-  Store,
-  ServerCapabilities,
-  TopologyBase
-};
+export { Store, ServerCapabilities, TopologyBase };

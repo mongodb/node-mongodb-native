@@ -1,14 +1,14 @@
 'use strict';
-const http = require('http');
-const crypto = require('crypto');
-const url = require('url');
-const { BSON } = require('../../deps');
-const { AuthProvider } = require('./auth_provider');
-const { MongoCredentials } = require('./mongo_credentials');
-const { MongoError } = require('../../error');
-const { maxWireVersion } = require('../../utils');
+import http = require('http');
+import crypto = require('crypto');
+import url = require('url');
+import { BSON } from '../../deps';
+import { AuthProvider } from './auth_provider';
+import { MongoCredentials } from './mongo_credentials';
+import { MongoError } from '../../error';
+import { maxWireVersion } from '../../utils';
 
-let aws4;
+let aws4: any;
 try {
   aws4 = require('aws4');
 } catch (e) {
@@ -22,7 +22,7 @@ const AWS_EC2_PATH = '/latest/meta-data/iam/security-credentials';
 const bsonOptions = { promoteLongs: true, promoteValues: true, promoteBuffers: false };
 
 class MongoDBAWS extends AuthProvider {
-  auth(authContext, callback) {
+  auth(authContext: any, callback: Function) {
     const { connection, credentials } = authContext;
     if (maxWireVersion(connection) < 9) {
       callback(new MongoError('MONGODB-AWS authentication requires MongoDB version 4.4 or later'));
@@ -40,7 +40,7 @@ class MongoDBAWS extends AuthProvider {
     }
 
     if (credentials.username == null) {
-      makeTempCredentials(credentials, (err, tempCredentials) => {
+      makeTempCredentials(credentials, (err?: any, tempCredentials?: any) => {
         if (err) return callback(err);
 
         authContext.credentials = tempCredentials;
@@ -54,8 +54,7 @@ class MongoDBAWS extends AuthProvider {
     const password = credentials.password;
     const db = credentials.source;
     const token = credentials.mechanismProperties.AWS_SESSION_TOKEN;
-
-    crypto.randomBytes(32, (err, nonce) => {
+    crypto.randomBytes(32, (err?: any, nonce?: any) => {
       if (err) {
         callback(err);
         return;
@@ -67,7 +66,7 @@ class MongoDBAWS extends AuthProvider {
         payload: BSON.serialize({ r: nonce, p: ASCII_N }, bsonOptions)
       };
 
-      connection.command(`${db}.$cmd`, saslStart, (err, result) => {
+      connection.command(`${db}.$cmd`, saslStart, (err?: any, result?: any) => {
         if (err) return callback(err);
 
         const res = result.result;
@@ -78,6 +77,7 @@ class MongoDBAWS extends AuthProvider {
           callback(
             new MongoError(`Invalid server nonce length ${serverNonce.length}, expected 64`)
           );
+
           return;
         }
 
@@ -116,7 +116,7 @@ class MongoDBAWS extends AuthProvider {
 
         const authorization = options.headers.Authorization;
         const date = options.headers['X-Amz-Date'];
-        const payload = { a: authorization, d: date };
+        const payload = { a: authorization, d: date } as any;
         if (token) {
           payload.t = token;
         }
@@ -133,8 +133,8 @@ class MongoDBAWS extends AuthProvider {
   }
 }
 
-function makeTempCredentials(credentials, callback) {
-  function done(creds) {
+function makeTempCredentials(credentials: any, callback: Function) {
+  function done(creds: any) {
     if (creds.AccessKeyId == null || creds.SecretAccessKey == null || creds.Token == null) {
       callback(new MongoError('Could not obtain temporary MONGODB-AWS credentials'));
       return;
@@ -159,7 +159,7 @@ function makeTempCredentials(credentials, callback) {
   if (process.env.AWS_CONTAINER_CREDENTIALS_RELATIVE_URI) {
     request(
       `${AWS_RELATIVE_URI}${process.env.AWS_CONTAINER_CREDENTIALS_RELATIVE_URI}`,
-      (err, res) => {
+      (err?: any, res?: any) => {
         if (err) return callback(err);
         done(res);
       }
@@ -171,25 +171,24 @@ function makeTempCredentials(credentials, callback) {
   // Otherwise assume we are on an EC2 instance
 
   // get a token
-
   request(
     `${AWS_EC2_URI}/latest/api/token`,
     { method: 'PUT', json: false, headers: { 'X-aws-ec2-metadata-token-ttl-seconds': 30 } },
-    (err, token) => {
+    (err?: any, token?: any) => {
       if (err) return callback(err);
 
       // get role name
       request(
         `${AWS_EC2_URI}/${AWS_EC2_PATH}`,
         { json: false, headers: { 'X-aws-ec2-metadata-token': token } },
-        (err, roleName) => {
+        (err?: any, roleName?: any) => {
           if (err) return callback(err);
 
           // get temp credentials
           request(
             `${AWS_EC2_URI}/${AWS_EC2_PATH}/${roleName}`,
             { headers: { 'X-aws-ec2-metadata-token': token } },
-            (err, creds) => {
+            (err?: any, creds?: any) => {
               if (err) return callback(err);
               done(creds);
             }
@@ -200,7 +199,7 @@ function makeTempCredentials(credentials, callback) {
   );
 }
 
-function deriveRegion(host) {
+function deriveRegion(host: any) {
   const parts = host.split('.');
   if (parts.length === 1 || parts[1] === 'amazonaws') {
     return 'us-east-1';
@@ -209,7 +208,7 @@ function deriveRegion(host) {
   return parts[1];
 }
 
-function request(uri, options, callback) {
+function request(uri: any, options: any, callback?: Function) {
   if (typeof options === 'function') {
     callback = options;
     options = {};
@@ -225,28 +224,28 @@ function request(uri, options, callback) {
     options
   );
 
-  const req = http.request(options, res => {
+  const req = http.request(options, (res: any) => {
     res.setEncoding('utf8');
 
     let data = '';
-    res.on('data', d => (data += d));
+    res.on('data', (d: any) => (data += d));
     res.on('end', () => {
       if (options.json === false) {
-        callback(undefined, data);
+        callback!(undefined, data);
         return;
       }
 
       try {
         const parsed = JSON.parse(data);
-        callback(undefined, parsed);
+        callback!(undefined, parsed);
       } catch (err) {
-        callback(new MongoError(`Invalid JSON response: "${data}"`));
+        callback!(new MongoError(`Invalid JSON response: "${data}"`));
       }
     });
   });
 
-  req.on('error', err => callback(err));
+  req.on('error', (err: any) => callback!(err));
   req.end();
 }
 
-module.exports = MongoDBAWS;
+export = MongoDBAWS;

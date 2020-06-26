@@ -1,11 +1,10 @@
 'use strict';
+import { ServerType } from '../../sdam/common';
+import { TopologyDescription } from '../../sdam/topology_description';
+import ReadPreference = require('../../read_preference');
+import { MongoError } from '../../error';
 
-const { ServerType } = require('../../sdam/common');
-const { TopologyDescription } = require('../../sdam/topology_description');
-const ReadPreference = require('../../read_preference');
-const { MongoError } = require('../../error');
-
-var getReadPreference = function(cmd, options) {
+var getReadPreference = function(cmd: any, options: any) {
   // Default to command version of the readPreference
   var readPreference = cmd.readPreference || new ReadPreference('primary');
   // If we have an option readPreference override the command one
@@ -24,7 +23,7 @@ var getReadPreference = function(cmd, options) {
   return readPreference;
 };
 
-function applyCommonQueryOptions(queryOptions, options) {
+function applyCommonQueryOptions(queryOptions: any, options: any) {
   Object.assign(queryOptions, {
     raw: typeof options.raw === 'boolean' ? options.raw : false,
     promoteLongs: typeof options.promoteLongs === 'boolean' ? options.promoteLongs : true,
@@ -49,7 +48,7 @@ function applyCommonQueryOptions(queryOptions, options) {
   return queryOptions;
 }
 
-function isSharded(topologyOrServer) {
+function isSharded(topologyOrServer: any) {
   if (topologyOrServer.type === 'mongos') return true;
   if (topologyOrServer.description && topologyOrServer.description.type === ServerType.Mongos) {
     return true;
@@ -59,14 +58,10 @@ function isSharded(topologyOrServer) {
   //       happens based on `Server` not `Topology`.
   if (topologyOrServer.description && topologyOrServer.description instanceof TopologyDescription) {
     const servers = Array.from(topologyOrServer.description.servers.values());
-    return servers.some(server => server.type === ServerType.Mongos);
+    return servers.some((server: any) => server.type === ServerType.Mongos);
   }
 
   return false;
 }
 
-module.exports = {
-  getReadPreference,
-  applyCommonQueryOptions,
-  isSharded
-};
+export { getReadPreference, applyCommonQueryOptions, isSharded };

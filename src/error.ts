@@ -1,5 +1,4 @@
 'use strict';
-
 const kErrorLabels = Symbol('errorLabels');
 
 // From spec@https://github.com/mongodb/specifications/blob/f93d78191f3db2898a59013a7ed5650352ef6da8/source/change-streams/change-streams.rst#resumable-error
@@ -32,7 +31,10 @@ const GET_MORE_RESUMABLE_CODES = new Set([
  * @property {string} stack The error call stack
  */
 class MongoError extends Error {
-  constructor(message) {
+  [kErrorLabels]: any;
+  code?: number;
+
+  constructor(message: any) {
     if (message instanceof Error) {
       super(message.message);
       this.stack = message.stack;
@@ -50,7 +52,7 @@ class MongoError extends Error {
             continue;
           }
 
-          this[name] = message[name];
+          (this as any)[name] = message[name];
         }
       }
 
@@ -74,7 +76,7 @@ class MongoError extends Error {
    * @returns {MongoError} A MongoError instance
    * @deprecated Use `new MongoError()` instead.
    */
-  static create(options) {
+  static create(options: any): MongoError {
     return new MongoError(options);
   }
 
@@ -84,7 +86,7 @@ class MongoError extends Error {
    * @param {string} label The error label to check for
    * @returns {boolean} returns true if the error has the provided error label
    */
-  hasErrorLabel(label) {
+  hasErrorLabel(label: string): boolean {
     if (this[kErrorLabels] == null) {
       return false;
     }
@@ -92,7 +94,7 @@ class MongoError extends Error {
     return this[kErrorLabels].has(label);
   }
 
-  addErrorLabel(label) {
+  addErrorLabel(label: any) {
     if (this[kErrorLabels] == null) {
       this[kErrorLabels] = new Set();
     }
@@ -106,7 +108,7 @@ class MongoError extends Error {
 }
 
 const kBeforeHandshake = Symbol('beforeHandshake');
-function isNetworkErrorBeforeHandshake(err) {
+function isNetworkErrorBeforeHandshake(err: any) {
   return err[kBeforeHandshake] === true;
 }
 
@@ -120,13 +122,15 @@ function isNetworkErrorBeforeHandshake(err) {
  * @extends MongoError
  */
 class MongoNetworkError extends MongoError {
+  [kBeforeHandshake]?: boolean;
+
   /**
    * Create a network error
    *
    * @param {any} message
    * @param {any} [options]
    */
-  constructor(message, options) {
+  constructor(message: any, options?: any) {
     super(message);
     this.name = 'MongoNetworkError';
 
@@ -152,7 +156,7 @@ class MongoNetworkTimeoutError extends MongoNetworkError {
    * @param {any} message
    * @param {object} [options]
    */
-  constructor(message, options) {
+  constructor(message: any, options?: object) {
     super(message, options);
     this.name = 'MongoNetworkTimeoutError';
   }
@@ -166,7 +170,7 @@ class MongoNetworkTimeoutError extends MongoNetworkError {
  * @extends MongoError
  */
 class MongoParseError extends MongoError {
-  constructor(message) {
+  constructor(message: any) {
     super(message);
     this.name = 'MongoParseError';
   }
@@ -182,7 +186,9 @@ class MongoParseError extends MongoError {
  * @extends MongoError
  */
 class MongoTimeoutError extends MongoError {
-  constructor(message, reason) {
+  reason?: string;
+
+  constructor(message: any, reason: any) {
     if (reason && reason.error) {
       super(reason.error.message || reason.error);
     } else {
@@ -206,13 +212,13 @@ class MongoTimeoutError extends MongoError {
  * @extends MongoError
  */
 class MongoServerSelectionError extends MongoTimeoutError {
-  constructor(message, reason) {
+  constructor(message: any, reason: any) {
     super(message, reason);
     this.name = 'MongoServerSelectionError';
   }
 }
 
-function makeWriteConcernResultObject(input) {
+function makeWriteConcernResultObject(input: any) {
   const output = Object.assign({}, input);
 
   if (output.ok === 0) {
@@ -235,7 +241,9 @@ function makeWriteConcernResultObject(input) {
  * @extends MongoError
  */
 class MongoWriteConcernError extends MongoError {
-  constructor(message, result) {
+  result?: any;
+
+  constructor(message: any, result: any) {
     super(message);
     this.name = 'MongoWriteConcernError';
 
@@ -279,7 +287,7 @@ const RETRYABLE_WRITE_ERROR_CODES = new Set([
   262 // ExceededTimeLimit
 ]);
 
-function isRetryableWriteError(error) {
+function isRetryableWriteError(error: any) {
   if (error instanceof MongoWriteConcernError) {
     return RETRYABLE_WRITE_ERROR_CODES.has(error.result.code);
   }
@@ -292,7 +300,7 @@ function isRetryableWriteError(error) {
  *
  * @param {MongoError|Error} error
  */
-function isRetryableError(error) {
+function isRetryableError(error: any) {
   return (
     RETRYABLE_ERROR_CODES.has(error.code) ||
     error instanceof MongoNetworkError ||
@@ -319,7 +327,7 @@ const SDAM_NODE_SHUTTING_DOWN_ERROR_CODES = new Set([
   91 // ShutdownInProgress
 ]);
 
-function isRecoveringError(err) {
+function isRecoveringError(err: any) {
   if (err.code && SDAM_RECOVERING_CODES.has(err.code)) {
     return true;
   }
@@ -327,7 +335,7 @@ function isRecoveringError(err) {
   return err.message.match(/not master or secondary/) || err.message.match(/node is recovering/);
 }
 
-function isNotMasterError(err) {
+function isNotMasterError(err: any) {
   if (err.code && SDAM_NOTMASTER_CODES.has(err.code)) {
     return true;
   }
@@ -339,7 +347,7 @@ function isNotMasterError(err) {
   return err.message.match(/not master/);
 }
 
-function isNodeShuttingDownError(err) {
+function isNodeShuttingDownError(err: any) {
   return err.code && SDAM_NODE_SHUTTING_DOWN_ERROR_CODES.has(err.code);
 }
 
@@ -351,7 +359,7 @@ function isNodeShuttingDownError(err) {
  * @see https://github.com/mongodb/specifications/blob/master/source/server-discovery-and-monitoring/server-discovery-and-monitoring.rst#not-master-and-node-is-recovering
  * @param {MongoError|Error} error
  */
-function isSDAMUnrecoverableError(error) {
+function isSDAMUnrecoverableError(error: any) {
   // NOTE: null check is here for a strictly pre-CMAP world, a timeout or
   //       close event are considered unrecoverable
   if (error instanceof MongoParseError || error == null) {
@@ -365,7 +373,7 @@ function isSDAMUnrecoverableError(error) {
   return false;
 }
 
-function isNetworkTimeoutError(err) {
+function isNetworkTimeoutError(err: any) {
   return err instanceof MongoNetworkError && err.message.match(/timed out/);
 }
 
@@ -381,7 +389,7 @@ function isNetworkTimeoutError(err) {
 //
 // An error on an aggregate command is not a resumable error. Only errors on a getMore command may be considered resumable errors.
 
-function isResumableError(error, wireVersion) {
+function isResumableError(error?: any, wireVersion?: any) {
   if (error instanceof MongoNetworkError) {
     return true;
   }
@@ -393,7 +401,7 @@ function isResumableError(error, wireVersion) {
   return GET_MORE_RESUMABLE_CODES.has(error.code);
 }
 
-module.exports = {
+export {
   GET_MORE_RESUMABLE_CODES,
   MongoError,
   MongoNetworkError,

@@ -1,22 +1,22 @@
 'use strict';
-
-const { ServerType, STATE_CLOSED, STATE_CLOSING } = require('./common');
-const {
+import { ServerType, STATE_CLOSED, STATE_CLOSING } from './common';
+import {
   now,
   makeStateMachine,
   calculateDurationInMs,
   makeInterruptableAsyncInterval
-} = require('../utils');
-const { EventEmitter } = require('events');
-const connect = require('../cmap/connect');
-const { Connection } = require('../cmap/connection');
-const { MongoNetworkError } = require('../error');
-const { Long } = require('bson');
-const {
+} from '../utils';
+import { EventEmitter } from 'events';
+import connect = require('../cmap/connect');
+import { Connection } from '../cmap/connection';
+import { MongoNetworkError } from '../error';
+import { BSON } from '../deps';
+const { Long } = BSON;
+import {
   ServerHeartbeatStartedEvent,
   ServerHeartbeatSucceededEvent,
   ServerHeartbeatFailedEvent
-} = require('./events');
+} from './events';
 
 const kServer = Symbol('server');
 const kMonitorId = Symbol('monitorId');
@@ -35,15 +35,22 @@ const stateTransition = makeStateMachine({
 });
 
 const INVALID_REQUEST_CHECK_STATES = new Set([STATE_CLOSING, STATE_CLOSED, STATE_MONITORING]);
-
-function isInCloseState(monitor) {
+function isInCloseState(monitor: any) {
   return monitor.s.state === STATE_CLOSED || monitor.s.state === STATE_CLOSING;
 }
 
 class Monitor extends EventEmitter {
-  constructor(server, options) {
-    super(options);
+  s: any;
+  address: any;
+  options: any;
+  connectOptions: any;
+  [kServer]: any;
+  [kConnection]: any;
+  [kCancellationToken]: any;
+  [kMonitorId]: any;
 
+  constructor(server: any, options: any) {
+    super(options);
     this[kServer] = server;
     this[kConnection] = undefined;
     this[kCancellationToken] = new EventEmitter();
@@ -151,7 +158,7 @@ class Monitor extends EventEmitter {
   }
 }
 
-function resetMonitorState(monitor) {
+function resetMonitorState(monitor: any) {
   stateTransition(monitor, STATE_CLOSING);
   if (monitor[kMonitorId]) {
     monitor[kMonitorId].stop();
@@ -174,11 +181,10 @@ function resetMonitorState(monitor) {
   }
 }
 
-function checkServer(monitor, callback) {
+function checkServer(monitor: any, callback: Function) {
   let start = now();
   monitor.emit('serverHeartbeatStarted', new ServerHeartbeatStartedEvent(monitor.address));
-
-  function failureHandler(err) {
+  function failureHandler(err: any) {
     if (monitor[kConnection]) {
       monitor[kConnection].destroy({ force: true });
       monitor[kConnection] = undefined;
@@ -212,7 +218,7 @@ function checkServer(monitor, callback) {
       monitor[kRTTPinger] = new RTTPinger(monitor[kCancellationToken], monitor.connectOptions);
     }
 
-    monitor[kConnection].command('admin.$cmd', cmd, options, (err, result) => {
+    monitor[kConnection].command('admin.$cmd', cmd, options, (err?: any, result?: any) => {
       if (err) {
         failureHandler(err);
         return;
@@ -247,7 +253,7 @@ function checkServer(monitor, callback) {
   }
 
   // connecting does an implicit `ismaster`
-  connect(monitor.connectOptions, monitor[kCancellationToken], (err, conn) => {
+  connect(monitor.connectOptions, monitor[kCancellationToken], (err?: any, conn?: any) => {
     if (conn && isInCloseState(monitor)) {
       conn.destroy({ force: true });
       return;
@@ -279,8 +285,8 @@ function checkServer(monitor, callback) {
   });
 }
 
-function monitorServer(monitor) {
-  return callback => {
+function monitorServer(monitor: any) {
+  return (callback: Function) => {
     stateTransition(monitor, STATE_MONITORING);
     function done() {
       if (!isInCloseState(monitor)) {
@@ -292,8 +298,7 @@ function monitorServer(monitor) {
 
     // TODO: the next line is a legacy event, remove in v4
     process.nextTick(() => monitor.emit('monitoring', monitor[kServer]));
-
-    checkServer(monitor, (err, isMaster) => {
+    checkServer(monitor, (err?: any, isMaster?: any) => {
       if (err) {
         // otherwise an error occured on initial discovery, also bail
         if (monitor[kServer].description.type === ServerType.Unknown) {
@@ -316,7 +321,7 @@ function monitorServer(monitor) {
   };
 }
 
-function makeTopologyVersion(tv) {
+function makeTopologyVersion(tv: any) {
   return {
     processId: tv.processId,
     counter: Long.fromNumber(tv.counter)
@@ -324,7 +329,13 @@ function makeTopologyVersion(tv) {
 }
 
 class RTTPinger {
-  constructor(cancellationToken, options) {
+  [kConnection]?: any;
+  [kCancellationToken]: any;
+  [kRoundTripTime]: any;
+  [kMonitorId]?: any;
+  closed: boolean;
+
+  constructor(cancellationToken: any, options: any) {
     this[kConnection] = null;
     this[kCancellationToken] = cancellationToken;
     this[kRoundTripTime] = 0;
@@ -350,15 +361,16 @@ class RTTPinger {
   }
 }
 
-function measureRoundTripTime(rttPinger, options) {
+function measureRoundTripTime(rttPinger: any, options: any) {
   const start = now();
   const cancellationToken = rttPinger[kCancellationToken];
   const heartbeatFrequencyMS = options.heartbeatFrequencyMS;
+
   if (rttPinger.closed) {
     return;
   }
 
-  function measureAndReschedule(conn) {
+  function measureAndReschedule(conn: any) {
     if (rttPinger.closed) {
       conn.destroy({ force: true });
       return;
@@ -376,7 +388,7 @@ function measureRoundTripTime(rttPinger, options) {
   }
 
   if (rttPinger[kConnection] == null) {
-    connect(options, cancellationToken, (err, conn) => {
+    connect(options, cancellationToken, (err?: any, conn?: any) => {
       if (err) {
         rttPinger[kConnection] = undefined;
         rttPinger[kRoundTripTime] = 0;
@@ -389,7 +401,7 @@ function measureRoundTripTime(rttPinger, options) {
     return;
   }
 
-  rttPinger[kConnection].command('admin.$cmd', { ismaster: 1 }, err => {
+  rttPinger[kConnection].command('admin.$cmd', { ismaster: 1 }, (err: any) => {
     if (err) {
       rttPinger[kConnection] = undefined;
       rttPinger[kRoundTripTime] = 0;
@@ -400,6 +412,4 @@ function measureRoundTripTime(rttPinger, options) {
   });
 }
 
-module.exports = {
-  Monitor
-};
+export { Monitor };

@@ -1,12 +1,13 @@
 'use strict';
-
-const { Topology } = require('../sdam/topology');
-const { ServerCapabilities } = require('./topology_base');
-const { Cursor } = require('../cursor');
-const { translateOptions } = require('../utils');
+import { Topology } from '../sdam/topology';
+import { ServerCapabilities } from './topology_base';
+import { Cursor } from '../cursor';
+import { translateOptions } from '../utils';
 
 class NativeTopology extends Topology {
-  constructor(servers, options) {
+  s: any
+
+  constructor(servers: any, options: any) {
     options = options || {};
 
     let clonedOptions = Object.assign(
@@ -55,24 +56,24 @@ class NativeTopology extends Topology {
   }
 
   // Command
-  command(ns, cmd, options, callback) {
+  command(ns: any, cmd: any, options: any, callback: Function) {
     super.command(ns.toString(), cmd, options, callback);
   }
 
   // Insert
-  insert(ns, ops, options, callback) {
+  insert(ns: any, ops: any, options: any, callback: Function) {
     super.insert(ns.toString(), ops, options, callback);
   }
 
   // Update
-  update(ns, ops, options, callback) {
+  update(ns: any, ops: any, options: any, callback: Function) {
     super.update(ns.toString(), ops, options, callback);
   }
 
   // Remove
-  remove(ns, ops, options, callback) {
+  remove(ns: any, ops: any, options: any, callback: Function) {
     super.remove(ns.toString(), ops, options, callback);
   }
 }
 
-module.exports = NativeTopology;
+export = NativeTopology;

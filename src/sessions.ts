@@ -1,29 +1,22 @@
 'use strict';
-
-const PromiseProvider = require('./promise_provider');
-const { EventEmitter } = require('events');
-const {
-  BSON: { Binary, Long }
-} = require('./deps');
-const ReadPreference = require('./read_preference');
-const { isTransactionCommand, TxnState, Transaction } = require('./transactions');
-const { resolveClusterTime } = require('./sdam/common');
-const { isSharded } = require('./cmap/wire_protocol/shared');
-const { isPromiseLike, uuidV4, maxWireVersion } = require('./utils');
-const {
-  MongoError,
-  isRetryableError,
-  MongoNetworkError,
-  MongoWriteConcernError
-} = require('./error');
-const { now, calculateDurationInMs } = require('./utils');
+import PromiseProvider = require('./promise_provider');
+import { EventEmitter } from 'events';
+import { BSON } from './deps';
+const { Binary, Long } = BSON;
+import ReadPreference = require('./read_preference');
+import { isTransactionCommand, TxnState, Transaction } from './transactions';
+import { resolveClusterTime } from './sdam/common';
+import { isSharded } from './cmap/wire_protocol/shared';
+import { isPromiseLike, uuidV4, maxWireVersion } from './utils';
+import { MongoError, isRetryableError, MongoNetworkError, MongoWriteConcernError } from './error';
+import { now, calculateDurationInMs } from './utils';
 const minWireVersionForShardedTransactions = 8;
 
 /**
  * @param {ClientSession} session
  * @param {Function} [callback]
  */
-function assertAlive(session, callback) {
+function assertAlive(session: any, callback?: Function) {
   if (session.serverSession == null) {
     const error = new MongoError('Cannot use a session that has ended');
     if (typeof callback === 'function') {
@@ -53,6 +46,19 @@ function assertAlive(session, callback) {
  * @hideconstructor
  */
 class ClientSession extends EventEmitter {
+  topology: any;
+  sessionPool: any;
+  hasEnded: any;
+  serverSession: any;
+  clientOptions: any;
+  supports: any;
+  clusterTime: any;
+  operationTime: any;
+  explicit: any;
+  owner: any;
+  defaultTransactionOptions: any;
+  transaction: any;
+
   /**
    * Create a client session.
    * WARNING: not meant to be instantiated directly
@@ -62,7 +68,7 @@ class ClientSession extends EventEmitter {
    * @param {SessionOptions} [options] Optional settings
    * @param {object} [clientOptions] Optional settings provided when creating a client in the porcelain driver
    */
-  constructor(topology, sessionPool, options, clientOptions) {
+  constructor(topology: any, sessionPool: any, options?: any, clientOptions?: object) {
     super();
 
     if (topology == null) {
@@ -112,7 +118,7 @@ class ClientSession extends EventEmitter {
    * @param {object} [options] Optional settings. Currently reserved for future use
    * @param {Function} [callback] Optional callback for completion of this operation
    */
-  endSession(options, callback) {
+  endSession(options?: object, callback?: Function) {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -142,7 +148,7 @@ class ClientSession extends EventEmitter {
    *
    * @param {Timestamp} operationTime the `BSON.Timestamp` of the operation type it is desired to advance to
    */
-  advanceOperationTime(operationTime) {
+  advanceOperationTime(operationTime: any) {
     if (this.operationTime == null) {
       this.operationTime = operationTime;
       return;
@@ -159,7 +165,7 @@ class ClientSession extends EventEmitter {
    * @param {ClientSession} session
    * @returns {boolean} true if the sessions are equal
    */
-  equals(session) {
+  equals(session: any): boolean {
     if (!(session instanceof ClientSession)) {
       return false;
     }
@@ -177,7 +183,7 @@ class ClientSession extends EventEmitter {
   /**
    * @returns {boolean} whether this session is currently in a transaction or not
    */
-  inTransaction() {
+  inTransaction(): boolean {
     return this.transaction.isActive;
   }
 
@@ -186,7 +192,7 @@ class ClientSession extends EventEmitter {
    *
    * @param {TransactionOptions} options Options for the transaction
    */
-  startTransaction(options) {
+  startTransaction(options: any) {
     assertAlive(this);
     if (this.inTransaction()) {
       throw new MongoError('Transaction already in progress');
@@ -218,7 +224,7 @@ class ClientSession extends EventEmitter {
    * @param {Function} [callback] optional callback for completion of this operation
    * @returns {Promise<void>|undefined} A promise is returned if no callback is provided
    */
-  commitTransaction(callback) {
+  commitTransaction(callback?: Function): Promise<void> | undefined {
     const Promise = PromiseProvider.get();
 
     if (typeof callback === 'function') {
@@ -226,8 +232,8 @@ class ClientSession extends EventEmitter {
       return;
     }
 
-    return new Promise((resolve, reject) => {
-      endTransaction(this, 'commitTransaction', (err, reply) =>
+    return new Promise((resolve: any, reject: any) => {
+      endTransaction(this, 'commitTransaction', (err?: any, reply?: any) =>
         err ? reject(err) : resolve(reply)
       );
     });
@@ -239,7 +245,7 @@ class ClientSession extends EventEmitter {
    * @param {Function} [callback] optional callback for completion of this operation
    * @returns {Promise<void>|undefined} A promise is returned if no callback is provided
    */
-  abortTransaction(callback) {
+  abortTransaction(callback?: Function): Promise<void> | undefined {
     const Promise = PromiseProvider.get();
 
     if (typeof callback === 'function') {
@@ -247,8 +253,8 @@ class ClientSession extends EventEmitter {
       return;
     }
 
-    return new Promise((resolve, reject) => {
-      endTransaction(this, 'abortTransaction', (err, reply) =>
+    return new Promise((resolve: any, reject: any) => {
+      endTransaction(this, 'abortTransaction', (err?: any, reply?: any) =>
         err ? reject(err) : resolve(reply)
       );
     });
@@ -280,7 +286,7 @@ class ClientSession extends EventEmitter {
    * @param {WithTransactionCallback} fn
    * @param {TransactionOptions} [options] Optional settings for the transaction
    */
-  withTransaction(fn, options) {
+  withTransaction(fn: any, options?: any) {
     const startTime = now();
     return attemptTransaction(this, startTime, fn, options);
   }
@@ -296,11 +302,11 @@ const NON_DETERMINISTIC_WRITE_CONCERN_ERRORS = new Set([
   'UnsatisfiableWriteConcern'
 ]);
 
-function hasNotTimedOut(startTime, max) {
+function hasNotTimedOut(startTime: any, max: any) {
   return calculateDurationInMs(startTime) < max;
 }
 
-function isUnknownTransactionCommitResult(err) {
+function isUnknownTransactionCommitResult(err: any) {
   return (
     isMaxTimeMSExpiredError(err) ||
     (!NON_DETERMINISTIC_WRITE_CONCERN_ERRORS.has(err.codeName) &&
@@ -309,7 +315,7 @@ function isUnknownTransactionCommitResult(err) {
   );
 }
 
-function isMaxTimeMSExpiredError(err) {
+function isMaxTimeMSExpiredError(err: any) {
   if (err == null) {
     return false;
   }
@@ -320,8 +326,8 @@ function isMaxTimeMSExpiredError(err) {
   );
 }
 
-function attemptTransactionCommit(session, startTime, fn, options) {
-  return session.commitTransaction().catch(err => {
+function attemptTransactionCommit(session: any, startTime: any, fn: any, options: any) {
+  return session.commitTransaction().catch((err: any) => {
     if (
       err instanceof MongoError &&
       hasNotTimedOut(startTime, MAX_WITH_TRANSACTION_TIMEOUT) &&
@@ -346,11 +352,11 @@ const USER_EXPLICIT_TXN_END_STATES = new Set([
   TxnState.TRANSACTION_ABORTED
 ]);
 
-function userExplicitlyEndedTransaction(session) {
+function userExplicitlyEndedTransaction(session: any) {
   return USER_EXPLICIT_TXN_END_STATES.has(session.transaction.state);
 }
 
-function attemptTransaction(session, startTime, fn, options) {
+function attemptTransaction(session: any, startTime: any, fn: any, options: any) {
   const Promise = PromiseProvider.get();
   session.startTransaction(options);
 
@@ -374,8 +380,8 @@ function attemptTransaction(session, startTime, fn, options) {
 
       return attemptTransactionCommit(session, startTime, fn, options);
     })
-    .catch(err => {
-      function maybeRetryOrThrow(err) {
+    .catch((err: any) => {
+      function maybeRetryOrThrow(err: any) {
         if (
           err instanceof MongoError &&
           err.hasErrorLabel('TransientTransactionError') &&
@@ -399,7 +405,7 @@ function attemptTransaction(session, startTime, fn, options) {
     });
 }
 
-function endTransaction(session, commandName, callback) {
+function endTransaction(session: any, commandName: any, callback: Function) {
   if (!assertAlive(session, callback)) {
     // checking result in case callback was called
     return;
@@ -451,7 +457,7 @@ function endTransaction(session, commandName, callback) {
   }
 
   // construct and send the command
-  const command = { [commandName]: 1 };
+  const command = { [commandName]: 1 } as any;
 
   // apply a writeConcern if specified
   let writeConcern;
@@ -473,7 +479,7 @@ function endTransaction(session, commandName, callback) {
     Object.assign(command, { maxTimeMS: session.transaction.options.maxTimeMS });
   }
 
-  function commandHandler(e, r) {
+  function commandHandler(e: any, r: any) {
     if (commandName === 'commitTransaction') {
       session.transaction.transition(TxnState.TRANSACTION_COMMITTED);
 
@@ -499,7 +505,7 @@ function endTransaction(session, commandName, callback) {
   }
 
   // The spec indicates that we should ignore all errors on `abortTransaction`
-  function transactionError(err) {
+  function transactionError(err: any) {
     return commandName === 'commitTransaction' ? err : null;
   }
 
@@ -512,7 +518,7 @@ function endTransaction(session, commandName, callback) {
   }
 
   // send the command
-  session.topology.command('admin.$cmd', command, { session }, (err, reply) => {
+  session.topology.command('admin.$cmd', command, { session }, (err?: any, reply?: any) => {
     if (err && isRetryableError(err)) {
       // SPEC-1185: apply majority write concern when retrying commitTransaction
       if (command.commitTransaction) {
@@ -524,8 +530,11 @@ function endTransaction(session, commandName, callback) {
         });
       }
 
-      return session.topology.command('admin.$cmd', command, { session }, (_err, _reply) =>
-        commandHandler(transactionError(_err), _reply)
+      return session.topology.command(
+        'admin.$cmd',
+        command,
+        { session },
+        (_err?: any, _reply?: any) => commandHandler(transactionError(_err), _reply)
       );
     }
 
@@ -533,7 +542,7 @@ function endTransaction(session, commandName, callback) {
   });
 }
 
-function supportsRecoveryToken(session) {
+function supportsRecoveryToken(session: any) {
   const topology = session.topology;
   return !!topology.s.options.useRecoveryToken;
 }
@@ -543,6 +552,11 @@ function supportsRecoveryToken(session) {
  * WARNING: not meant to be instantiated directly. For internal use only.
  */
 class ServerSession {
+  id: any;
+  lastUse: any;
+  txnNumber: any;
+  isDirty: any;
+
   constructor() {
     this.id = { id: new Binary(uuidV4(), Binary.SUBTYPE_UUID) };
     this.lastUse = now();
@@ -556,7 +570,7 @@ class ServerSession {
    * @param {number} sessionTimeoutMinutes The server's "logicalSessionTimeoutMinutes"
    * @returns {boolean} true if the session has timed out.
    */
-  hasTimedOut(sessionTimeoutMinutes) {
+  hasTimedOut(sessionTimeoutMinutes: number): boolean {
     // Take the difference of the lastUse timestamp and now, which will result in a value in
     // milliseconds, and then convert milliseconds to minutes to compare to `sessionTimeoutMinutes`
     const idleTimeMinutes = Math.round(
@@ -572,7 +586,10 @@ class ServerSession {
  * For internal use only
  */
 class ServerSessionPool {
-  constructor(topology) {
+  topology: any;
+  sessions: any;
+
+  constructor(topology: any) {
     if (topology == null) {
       throw new Error('ServerSessionPool requires a topology');
     }
@@ -586,10 +603,10 @@ class ServerSessionPool {
    *
    * @param {any} callback
    */
-  endAllPooledSessions(callback) {
+  endAllPooledSessions(callback: any) {
     if (this.sessions.length) {
       this.topology.endSessions(
-        this.sessions.map(session => session.id),
+        this.sessions.map((session: any) => session.id),
         () => {
           this.sessions = [];
           if (typeof callback === 'function') {
@@ -615,7 +632,7 @@ class ServerSessionPool {
    *
    * @returns {ServerSession}
    */
-  acquire() {
+  acquire(): ServerSession {
     const sessionTimeoutMinutes = this.topology.logicalSessionTimeoutMinutes;
     while (this.sessions.length) {
       const session = this.sessions.shift();
@@ -634,7 +651,7 @@ class ServerSessionPool {
    *
    * @param {ServerSession} session The session to release to the pool
    */
-  release(session) {
+  release(session: ServerSession) {
     const sessionTimeoutMinutes = this.topology.logicalSessionTimeoutMinutes;
     while (this.sessions.length) {
       const pooledSession = this.sessions[this.sessions.length - 1];
@@ -662,7 +679,7 @@ class ServerSessionPool {
  * @param {any} command
  * @param {any} [options]
  */
-function commandSupportsReadConcern(command, options) {
+function commandSupportsReadConcern(command: any, options?: any) {
   if (
     command.aggregate ||
     command.count ||
@@ -694,7 +711,7 @@ function commandSupportsReadConcern(command, options) {
  * @param {any} [options] Optional settings passed to calling operation
  * @returns {MongoError|undefined} An error, if some error condition was met
  */
-function applySession(session, command, options) {
+function applySession(session: any, command: any, options?: any): MongoError | undefined {
   const serverSession = session.serverSession;
   if (serverSession == null) {
     // TODO: merge this with `assertAlive`, did not want to throw a try/catch here
@@ -756,7 +773,7 @@ function applySession(session, command, options) {
   }
 }
 
-function updateSessionFromResponse(session, document) {
+function updateSessionFromResponse(session: any, document: any) {
   if (document.$clusterTime) {
     resolveClusterTime(session, document.$clusterTime);
   }
@@ -770,7 +787,7 @@ function updateSessionFromResponse(session, document) {
   }
 }
 
-module.exports = {
+export {
   ClientSession,
   ServerSession,
   ServerSessionPool,

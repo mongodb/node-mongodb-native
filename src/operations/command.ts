@@ -1,9 +1,8 @@
 'use strict';
-
-const ReadPreference = require('../read_preference');
-const { Aspect, OperationBase } = require('./operation');
-const { MongoError } = require('../error');
-const { applyWriteConcern, debugOptions, handleCallback, MongoDBNamespace } = require('../utils');
+import ReadPreference = require('../read_preference');
+import { Aspect, OperationBase } from './operation';
+import { MongoError } from '../error';
+import { applyWriteConcern, debugOptions, handleCallback, MongoDBNamespace } from '../utils';
 
 const debugFields = [
   'authSource',
@@ -27,13 +26,18 @@ const debugFields = [
 ];
 
 class CommandOperation extends OperationBase {
+  db?: any;
+  command?: any;
+  collection?: any;
+  namespace?: any;
+
   /**
    * @param {Db} db
    * @param {any} options
    * @param {Collection} [collection]
    * @param {any} [command]
    */
-  constructor(db, options, collection, command) {
+  constructor(db: any, options: any, collection?: any, command?: any) {
     super(options);
 
     if (!this.hasAspect(Aspect.WRITE_OPERATION)) {
@@ -48,6 +52,7 @@ class CommandOperation extends OperationBase {
       } else {
         applyWriteConcern(this.options, { db }, this.options);
       }
+
       this.options.readPreference = ReadPreference.primary;
     }
 
@@ -68,7 +73,7 @@ class CommandOperation extends OperationBase {
     }
   }
 
-  execute(callback) {
+  execute(callback: Function) {
     const db = this.db;
     const options = Object.assign({}, this.options);
 
@@ -109,7 +114,7 @@ class CommandOperation extends OperationBase {
       this.namespace != null ? this.namespace : new MongoDBNamespace(dbName, '$cmd');
 
     // Execute command
-    db.s.topology.command(namespace, command, options, (err, result) => {
+    db.s.topology.command(namespace, command, options, (err?: any, result?: any) => {
       if (err) return handleCallback(callback, err);
       if (options.full) return handleCallback(callback, null, result);
       handleCallback(callback, null, result.result);
@@ -117,4 +122,4 @@ class CommandOperation extends OperationBase {
   }
 }
 
-module.exports = CommandOperation;
+export = CommandOperation;

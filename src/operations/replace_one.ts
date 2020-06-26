@@ -1,10 +1,13 @@
 'use strict';
-
-const OperationBase = require('./operation').OperationBase;
-const updateDocuments = require('./common_functions').updateDocuments;
+import { OperationBase } from './operation';
+import { updateDocuments } from './common_functions';
 
 class ReplaceOneOperation extends OperationBase {
-  constructor(collection, filter, doc, options) {
+  collection: any;
+  filter: any;
+  doc: any;
+
+  constructor(collection: any, filter: any, doc: any, options: any) {
     super(options);
 
     this.collection = collection;
@@ -12,7 +15,7 @@ class ReplaceOneOperation extends OperationBase {
     this.doc = doc;
   }
 
-  execute(callback) {
+  execute(callback: Function) {
     const coll = this.collection;
     const filter = this.filter;
     const doc = this.doc;
@@ -22,11 +25,13 @@ class ReplaceOneOperation extends OperationBase {
     options.multi = false;
 
     // Execute update
-    updateDocuments(coll, filter, doc, options, (err, r) => replaceCallback(err, r, doc, callback));
+    updateDocuments(coll, filter, doc, options, (err?: any, r?: any) =>
+      replaceCallback(err, r, doc, callback)
+    );
   }
 }
 
-function replaceCallback(err, r, doc, callback) {
+function replaceCallback(err: any, r: any, doc: any, callback: Function) {
   if (callback == null) return;
   if (err && callback) return callback(err);
   if (r == null) return callback(null, { result: { ok: 1 } });
@@ -44,4 +49,4 @@ function replaceCallback(err, r, doc, callback) {
   if (callback) callback(null, r);
 }
 
-module.exports = ReplaceOneOperation;
+export = ReplaceOneOperation;

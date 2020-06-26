@@ -2,7 +2,7 @@
 
 // Resolves the default auth mechanism according to
 // https://github.com/mongodb/specifications/blob/master/source/auth/auth.rst
-function getDefaultAuthMechanism(ismaster) {
+function getDefaultAuthMechanism(ismaster: any) {
   if (ismaster) {
     // If ismaster contains saslSupportedMechs, use scram-sha-256
     // if it is available, else scram-sha-1
@@ -33,6 +33,12 @@ function getDefaultAuthMechanism(ismaster) {
  * @property {object} [mechanismProperties] Special properties used by some types of auth mechanisms
  */
 class MongoCredentials {
+  username: any;
+  password: any;
+  source: any;
+  mechanism: any;
+  mechanismProperties: any;
+
   /**
    * Creates a new MongoCredentials object
    *
@@ -43,7 +49,7 @@ class MongoCredentials {
    * @param {string} [options.mechanism] The method used to authenticate
    * @param {object} [options.mechanismProperties] Special properties used by some types of auth mechanisms
    */
-  constructor(options) {
+  constructor(options?: any) {
     options = options || {};
     this.username = options.username;
     this.password = options.password;
@@ -75,7 +81,7 @@ class MongoCredentials {
    * @param {MongoCredentials} other another MongoCredentials object
    * @returns {boolean} true if the two objects are equal.
    */
-  equals(other) {
+  equals(other: MongoCredentials): boolean {
     return (
       this.mechanism === other.mechanism &&
       this.username === other.username &&
@@ -91,7 +97,7 @@ class MongoCredentials {
    * @param {object} [ismaster] An ismaster response from the server
    * @returns {MongoCredentials}
    */
-  resolveAuthMechanism(ismaster) {
+  resolveAuthMechanism(ismaster?: object): MongoCredentials {
     // If the mechanism is not "default", then it does not need to be resolved
     if (this.mechanism.match(/DEFAULT/i)) {
       return new MongoCredentials({
@@ -107,4 +113,4 @@ class MongoCredentials {
   }
 }
 
-module.exports = { MongoCredentials };
+export { MongoCredentials };

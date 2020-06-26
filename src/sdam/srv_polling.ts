@@ -1,8 +1,8 @@
 'use strict';
+import Logger = require('../logger');
+import { EventEmitter } from 'events';
+import dns = require('dns');
 
-const Logger = require('../logger');
-const { EventEmitter } = require('events');
-const dns = require('dns');
 /**
  * Determines whether a provided address matches the provided parent domain in order
  * to avoid certain attack vectors.
@@ -11,7 +11,7 @@ const dns = require('dns');
  * @param {string} parentDomain The domain to check the provided address against
  * @returns {boolean} Whether the provided address matches the parent domain
  */
-function matchesParentDomain(srvAddress, parentDomain) {
+function matchesParentDomain(srvAddress: string, parentDomain: string): boolean {
   const regex = /^.*?\./;
   const srv = `.${srvAddress.replace(regex, '')}`;
   const parent = `.${parentDomain.replace(regex, '')}`;
@@ -19,16 +19,25 @@ function matchesParentDomain(srvAddress, parentDomain) {
 }
 
 class SrvPollingEvent {
-  constructor(srvRecords) {
+  srvRecords: any;
+  constructor(srvRecords: any) {
     this.srvRecords = srvRecords;
   }
 
   addresses() {
-    return new Set(this.srvRecords.map(record => `${record.name}:${record.port}`));
+    return new Set(this.srvRecords.map((record: any) => `${record.name}:${record.port}`));
   }
 }
 
 class SrvPoller extends EventEmitter {
+  srvHost: any;
+  rescanSrvIntervalMS: any;
+  heartbeatFrequencyMS: any;
+  logger: any;
+  haMode: any;
+  generation: any;
+  _timeout: any;
+
   /**
    * @param {object} options
    * @param {string} options.srvHost
@@ -36,7 +45,7 @@ class SrvPoller extends EventEmitter {
    * @param {Function} [options.logger]
    * @param {string} [options.loggerLevel]
    */
-  constructor(options) {
+  constructor(options: any) {
     super();
 
     if (!options || !options.srvHost) {
@@ -81,7 +90,7 @@ class SrvPoller extends EventEmitter {
     this._timeout = setTimeout(() => this._poll(), this.intervalMS);
   }
 
-  success(srvRecords) {
+  success(srvRecords: any) {
     this.haMode = false;
     this.schedule();
     this.emit('srvRecordDiscovery', new SrvPollingEvent(srvRecords));
@@ -91,13 +100,13 @@ class SrvPoller extends EventEmitter {
    * @param {any} message
    * @param {any} [obj]
    */
-  failure(message, obj) {
+  failure(message: any, obj?: any) {
     this.logger.warn(message, obj);
     this.haMode = true;
     this.schedule();
   }
 
-  parentDomainMismatch(srvRecord) {
+  parentDomainMismatch(srvRecord: any) {
     this.logger.warn(
       `parent domain mismatch on SRV record (${srvRecord.name}:${srvRecord.port})`,
       srvRecord
@@ -106,7 +115,7 @@ class SrvPoller extends EventEmitter {
 
   _poll() {
     const generation = this.generation;
-    dns.resolveSrv(this.srvAddress, (err, srvRecords) => {
+    dns.resolveSrv(this.srvAddress, (err?: any, srvRecords?: any) => {
       if (generation !== this.generation) {
         return;
       }
@@ -116,8 +125,8 @@ class SrvPoller extends EventEmitter {
         return;
       }
 
-      const finalAddresses = [];
-      srvRecords.forEach(record => {
+      const finalAddresses: any = [];
+      srvRecords.forEach((record: any) => {
         if (matchesParentDomain(record.name, this.srvHost)) {
           finalAddresses.push(record);
         } else {
@@ -135,4 +144,4 @@ class SrvPoller extends EventEmitter {
   }
 }
 
-module.exports = { SrvPollingEvent, SrvPoller };
+export { SrvPollingEvent, SrvPoller };

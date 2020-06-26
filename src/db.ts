@@ -1,21 +1,19 @@
 'use strict';
-
-const { deprecate } = require('util');
-const { emitDeprecatedOptionWarning } = require('./utils');
-const { loadAdmin } = require('./dynamic_loaders');
-const { AggregationCursor, CommandCursor } = require('./cursor');
-const {
-  BSON: { ObjectId }
-} = require('./deps');
-const ReadPreference = require('./read_preference');
-const { MongoError } = require('./error');
-const Collection = require('./collection');
-const ChangeStream = require('./change_stream');
-const CONSTANTS = require('./constants');
-const WriteConcern = require('./write_concern');
-const ReadConcern = require('./read_concern');
-const Logger = require('./logger');
-const {
+import { deprecate } from 'util';
+import { emitDeprecatedOptionWarning } from './utils';
+import { loadAdmin } from './dynamic_loaders';
+import { AggregationCursor, CommandCursor } from './cursor';
+import { BSON } from './deps';
+const { ObjectId } = BSON;
+import ReadPreference = require('./read_preference');
+import { MongoError } from './error';
+import Collection = require('./collection');
+import ChangeStream = require('./change_stream');
+import CONSTANTS = require('./constants');
+import WriteConcern = require('./write_concern');
+import ReadConcern = require('./read_concern');
+import Logger = require('./logger');
+import {
   getSingleProperty,
   handleCallback,
   filterOptions,
@@ -24,32 +22,23 @@ const {
   executeLegacyOperation,
   deprecateOptions,
   MongoDBNamespace
-} = require('./utils');
-
-// Operations
-const {
-  ensureIndex,
-  evaluate,
-  profilingInfo,
-  validateDatabaseName
-} = require('./operations/db_ops');
-
-const AggregateOperation = require('./operations/aggregate');
-const AddUserOperation = require('./operations/add_user');
-const CollectionsOperation = require('./operations/collections');
-const CommandOperation = require('./operations/command');
-const CreateCollectionOperation = require('./operations/create_collection');
-const CreateIndexesOperation = require('./operations/create_indexes');
-const { DropCollectionOperation, DropDatabaseOperation } = require('./operations/drop');
-const ExecuteDbAdminCommandOperation = require('./operations/execute_db_admin_command');
-const IndexInformationOperation = require('./operations/index_information');
-const ListCollectionsOperation = require('./operations/list_collections');
-const ProfilingLevelOperation = require('./operations/profiling_level');
-const RemoveUserOperation = require('./operations/remove_user');
-const RenameOperation = require('./operations/rename');
-const SetProfilingLevelOperation = require('./operations/set_profiling_level');
-
-const executeOperation = require('./operations/execute_operation');
+} from './utils';
+import { ensureIndex, evaluate, profilingInfo, validateDatabaseName } from './operations/db_ops';
+import AggregateOperation = require('./operations/aggregate');
+import AddUserOperation = require('./operations/add_user');
+import CollectionsOperation = require('./operations/collections');
+import CommandOperation = require('./operations/command');
+import CreateCollectionOperation = require('./operations/create_collection');
+import CreateIndexesOperation = require('./operations/create_indexes');
+import { DropCollectionOperation, DropDatabaseOperation } from './operations/drop';
+import ExecuteDbAdminCommandOperation = require('./operations/execute_db_admin_command');
+import IndexInformationOperation = require('./operations/index_information');
+import ListCollectionsOperation = require('./operations/list_collections');
+import ProfilingLevelOperation = require('./operations/profiling_level');
+import RemoveUserOperation = require('./operations/remove_user');
+import RenameOperation = require('./operations/rename');
+import SetProfilingLevelOperation = require('./operations/set_profiling_level');
+import executeOperation = require('./operations/execute_operation');
 
 // Allowed parameters
 const legalOptionNames = [
@@ -81,6 +70,13 @@ const legalOptionNames = [
   'retryWrites'
 ];
 
+interface Db {
+  createCollection(name: any, options: any, callback: any): void;
+  eval(code: any, parameters: any, options: any, callback: any): void;
+  ensureIndex(name: any, fieldOrSpec: any, options: any, callback: any): void;
+  profilingInfo(options: any, callback: any): void;
+}
+
 /**
  * The **Db** class is a class that represents a MongoDB Database.
  *
@@ -99,6 +95,17 @@ const legalOptionNames = [
  * });
  */
 class Db {
+  s: any;
+  databaseName: any;
+  serverConfig: any;
+
+  public static SYSTEM_NAMESPACE_COLLECTION = CONSTANTS.SYSTEM_NAMESPACE_COLLECTION;
+  public static SYSTEM_INDEX_COLLECTION = CONSTANTS.SYSTEM_INDEX_COLLECTION;
+  public static SYSTEM_PROFILE_COLLECTION = CONSTANTS.SYSTEM_PROFILE_COLLECTION;
+  public static SYSTEM_USER_COLLECTION = CONSTANTS.SYSTEM_USER_COLLECTION;
+  public static SYSTEM_COMMAND_COLLECTION = CONSTANTS.SYSTEM_COMMAND_COLLECTION;
+  public static SYSTEM_JS_COLLECTION = CONSTANTS.SYSTEM_JS_COLLECTION;
+
   /**
    * Creates a new Db instance
    *
@@ -132,7 +139,7 @@ class Db {
    * @property {object} topology Access the topology object (single server, replicaset or mongos).
    * @returns {Db} a Db instance.
    */
-  constructor(databaseName, topology, options) {
+  constructor(databaseName: string, topology: any, options?: any) {
     options = options || {};
     if (!(this instanceof Db)) return new Db(databaseName, topology, options);
     emitDeprecatedOptionWarning(options, ['promiseLibrary']);
@@ -232,7 +239,7 @@ class Db {
    * @param {Db~resultCallback} [callback] The command result callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  command(command, options, callback) {
+  command(command: object, options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, options);
 
@@ -266,7 +273,7 @@ class Db {
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @returns {AggregationCursor}
    */
-  aggregate(pipeline, options) {
+  aggregate(pipeline?: object, options?: any): AggregationCursor {
     if (arguments.length > 2) {
       throw new TypeError('Third parameter to `db.aggregate()` must be undefined');
     }
@@ -294,7 +301,7 @@ class Db {
    * @function
    * @returns {Admin} return the new Admin db instance
    */
-  admin() {
+  admin(): any {
     const Admin = loadAdmin();
     return new Admin(this, this.s.topology);
   }
@@ -319,7 +326,7 @@ class Db {
    * @param {Db~collectionResultCallback} [callback] The collection result callback
    * @returns {Collection} return the new Collection instance if not in strict mode
    */
-  collection(name, options, callback) {
+  collection(name: string, options?: any, callback?: Function): any {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
     options = Object.assign({}, options);
@@ -369,25 +376,34 @@ class Db {
     const listCollectionOptions = Object.assign({}, options, { nameOnly: true });
 
     // Strict mode
-    this.listCollections({ name }, listCollectionOptions).toArray((err, collections) => {
-      if (err != null) return handleCallback(callback, err, null);
-      if (collections.length === 0)
-        return handleCallback(
-          callback,
-          toError(`Collection ${name} does not exist. Currently in strict mode.`),
-          null
-        );
+    this.listCollections({ name }, listCollectionOptions).toArray(
+      (err?: any, collections?: any) => {
+        if (err != null) return handleCallback(callback!, err, null);
+        if (collections.length === 0)
+          return handleCallback(
+            callback!,
+            toError(`Collection ${name} does not exist. Currently in strict mode.`),
+            null
+          );
 
-      try {
-        return handleCallback(
-          callback,
-          null,
-          new Collection(this, this.s.topology, this.databaseName, name, this.s.pkFactory, options)
-        );
-      } catch (err) {
-        return handleCallback(callback, err, null);
+        try {
+          return handleCallback(
+            callback!,
+            null,
+            new Collection(
+              this,
+              this.s.topology,
+              this.databaseName,
+              name,
+              this.s.pkFactory,
+              options
+            )
+          );
+        } catch (err) {
+          return handleCallback(callback!, err, null);
+        }
       }
-    });
+    );
   }
 
   /**
@@ -400,11 +416,11 @@ class Db {
    * @param {Db~resultCallback} [callback] The collection result callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  stats(options, callback) {
+  stats(options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
     // Build command object
-    const commandObject = { dbStats: true };
+    const commandObject: any = { dbStats: true };
     // Check if we have the scale value
     if (options['scale'] != null) commandObject['scale'] = options['scale'];
 
@@ -431,7 +447,7 @@ class Db {
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @returns {CommandCursor}
    */
-  listCollections(filter, options) {
+  listCollections(filter?: object, options?: any): CommandCursor {
     filter = filter || {};
     options = options || {};
 
@@ -454,7 +470,12 @@ class Db {
    * @param {Db~collectionResultCallback} [callback] The results callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  renameCollection(fromCollection, toCollection, options, callback) {
+  renameCollection(
+    fromCollection: string,
+    toCollection: string,
+    options?: any,
+    callback?: Function
+  ): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, options, { readPreference: ReadPreference.PRIMARY });
 
@@ -484,7 +505,7 @@ class Db {
    * @param {Db~resultCallback} [callback] The results callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  dropCollection(name, options, callback) {
+  dropCollection(name: string, options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -502,7 +523,7 @@ class Db {
    * @param {Db~resultCallback} [callback] The results callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  dropDatabase(options, callback) {
+  dropDatabase(options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -520,7 +541,7 @@ class Db {
    * @param {Db~collectionsResultCallback} [callback] The results callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  collections(options, callback) {
+  collections(options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -540,7 +561,7 @@ class Db {
    * @param {Db~resultCallback} [callback] The command result callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  executeDbAdminCommand(selector, options, callback) {
+  executeDbAdminCommand(selector: object, options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
     options.readPreference = ReadPreference.resolve(this, options);
@@ -579,7 +600,7 @@ class Db {
    * @param {Db~resultCallback} [callback] The command result callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  createIndex(name, fieldOrSpec, options, callback) {
+  createIndex(name: string, fieldOrSpec: any, options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options ? Object.assign({}, options) : {};
 
@@ -604,7 +625,7 @@ class Db {
    * @param {Db~resultCallback} [callback] The command result callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  addUser(username, password, options, callback) {
+  addUser(username: string, password: any, options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -632,7 +653,7 @@ class Db {
    * @param {Db~resultCallback} [callback] The command result callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  removeUser(username, options, callback) {
+  removeUser(username: string, options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -650,7 +671,7 @@ class Db {
    * @param {Db~resultCallback} [callback] The command result callback.
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  setProfilingLevel(level, options, callback) {
+  setProfilingLevel(level: string, options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -667,7 +688,7 @@ class Db {
    * @param {Db~resultCallback} [callback] The command result callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  profilingLevel(options, callback) {
+  profilingLevel(options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -688,7 +709,7 @@ class Db {
    * @param {Db~resultCallback} [callback] The command result callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  indexInformation(name, options, callback) {
+  indexInformation(name: string, options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -723,7 +744,7 @@ class Db {
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @returns {ChangeStream} a ChangeStream instance.
    */
-  watch(pipeline, options) {
+  watch(pipeline?: any[], options?: any): ChangeStream {
     pipeline = pipeline || [];
     options = options || {};
 
@@ -742,7 +763,7 @@ class Db {
    * @function
    * @returns {Logger} return the db logger
    */
-  getLogger() {
+  getLogger(): Logger {
     return this.s.logger;
   }
 }
@@ -813,7 +834,7 @@ Db.prototype.createCollection = deprecateOptions(
     deprecatedOptions: ['autoIndexId'],
     optionsIndex: 1
   },
-  function(name, options, callback) {
+  function(this: any, name: any, options: any, callback: Function) {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
     options.readConcern = options.readConcern
@@ -838,7 +859,13 @@ Db.prototype.createCollection = deprecateOptions(
  * @deprecated Eval is deprecated on MongoDB 3.2 and forward
  * @returns {Promise<void>} returns Promise if no callback passed
  */
-Db.prototype.eval = deprecate(function(code, parameters, options, callback) {
+Db.prototype.eval = deprecate(function(
+  this: any,
+  code: any,
+  parameters: any,
+  options: any,
+  callback: Function
+) {
   const args = Array.prototype.slice.call(arguments, 1);
   callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
   parameters = args.length ? args.shift() : parameters;
@@ -851,7 +878,8 @@ Db.prototype.eval = deprecate(function(code, parameters, options, callback) {
     options,
     callback
   ]);
-}, 'Db.eval is deprecated as of MongoDB version 3.2');
+},
+'Db.eval is deprecated as of MongoDB version 3.2');
 
 /**
  * Ensures that an index exists, if it does not it creates it
@@ -877,7 +905,13 @@ Db.prototype.eval = deprecate(function(code, parameters, options, callback) {
  * @param {Db~resultCallback} [callback] The command result callback
  * @returns {Promise<void>} returns Promise if no callback passed
  */
-Db.prototype.ensureIndex = deprecate(function(name, fieldOrSpec, options, callback) {
+Db.prototype.ensureIndex = deprecate(function(
+  this: any,
+  name: any,
+  fieldOrSpec: any,
+  options: any,
+  callback: Function
+) {
   if (typeof options === 'function') (callback = options), (options = {});
   options = options || {};
 
@@ -888,7 +922,8 @@ Db.prototype.ensureIndex = deprecate(function(name, fieldOrSpec, options, callba
     options,
     callback
   ]);
-}, 'Db.ensureIndex is deprecated as of MongoDB version 3.0 / driver version 2.0');
+},
+'Db.ensureIndex is deprecated as of MongoDB version 3.0 / driver version 2.0');
 
 /**
  * Retrieve the current profiling information for MongoDB
@@ -899,19 +934,11 @@ Db.prototype.ensureIndex = deprecate(function(name, fieldOrSpec, options, callba
  * @returns {Promise<void>} returns Promise if no callback passed
  * @deprecated Query the system.profile collection directly.
  */
-Db.prototype.profilingInfo = deprecate(function(options, callback) {
+Db.prototype.profilingInfo = deprecate(function(this: any, options: any, callback: Function) {
   if (typeof options === 'function') (callback = options), (options = {});
   options = options || {};
 
   return executeLegacyOperation(this.s.topology, profilingInfo, [this, options, callback]);
 }, 'Db.profilingInfo is deprecated. Query the system.profile collection directly.');
 
-// Constants
-Db.SYSTEM_NAMESPACE_COLLECTION = CONSTANTS.SYSTEM_NAMESPACE_COLLECTION;
-Db.SYSTEM_INDEX_COLLECTION = CONSTANTS.SYSTEM_INDEX_COLLECTION;
-Db.SYSTEM_PROFILE_COLLECTION = CONSTANTS.SYSTEM_PROFILE_COLLECTION;
-Db.SYSTEM_USER_COLLECTION = CONSTANTS.SYSTEM_USER_COLLECTION;
-Db.SYSTEM_COMMAND_COLLECTION = CONSTANTS.SYSTEM_COMMAND_COLLECTION;
-Db.SYSTEM_JS_COLLECTION = CONSTANTS.SYSTEM_JS_COLLECTION;
-
-module.exports = Db;
+export = Db;

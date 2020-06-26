@@ -1,18 +1,16 @@
 'use strict';
-
-const CommandOperationV2 = require('./command_v2');
-const Aspect = require('./operation').Aspect;
-const defineAspects = require('./operation').defineAspects;
-const MongoDBNamespace = require('../utils').MongoDBNamespace;
+import CommandOperationV2 = require('./command_v2');
+import { Aspect, defineAspects } from './operation';
+import { MongoDBNamespace } from '../utils';
 
 class ListDatabasesOperation extends CommandOperationV2 {
-  constructor(db, options) {
+  constructor(db: any, options: any) {
     super(db, options);
     this.ns = new MongoDBNamespace('admin', '$cmd');
   }
 
-  execute(server, callback) {
-    const cmd = { listDatabases: 1 };
+  execute(server: any, callback: Function) {
+    const cmd = { listDatabases: 1 } as any;
     if (this.options.nameOnly) {
       cmd.nameOnly = Number(cmd.nameOnly);
     }
@@ -35,4 +33,4 @@ defineAspects(ListDatabasesOperation, [
   Aspect.EXECUTE_WITH_SELECTION
 ]);
 
-module.exports = ListDatabasesOperation;
+export = ListDatabasesOperation;

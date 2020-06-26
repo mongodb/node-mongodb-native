@@ -1,10 +1,8 @@
 'use strict';
-
-const CommandOperation = require('./command');
+import CommandOperation = require('./command');
 
 class ProfilingLevelOperation extends CommandOperation {
-
-  constructor(db, options) {
+  constructor(db: any, options: any) {
     super(db, options);
   }
 
@@ -13,8 +11,8 @@ class ProfilingLevelOperation extends CommandOperation {
     return command;
   }
 
-  execute(callback) {
-    super.execute((err, doc) => {
+  execute(callback: Function) {
+    super.execute((err?: any, doc?: any) => {
       if (err == null && doc.ok === 1) {
         const was = doc.was;
         if (was === 0) return callback(null, 'off');
@@ -28,4 +26,4 @@ class ProfilingLevelOperation extends CommandOperation {
   }
 }
 
-module.exports = ProfilingLevelOperation;
+export = ProfilingLevelOperation;

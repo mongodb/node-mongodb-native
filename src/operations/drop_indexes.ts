@@ -1,17 +1,15 @@
 'use strict';
-
-const Aspect = require('./operation').Aspect;
-const defineAspects = require('./operation').defineAspects;
-const DropIndexOperation = require('./drop_index');
-const handleCallback = require('../utils').handleCallback;
+import { Aspect, defineAspects } from './operation';
+import DropIndexOperation = require('./drop_index');
+import { handleCallback } from '../utils';
 
 class DropIndexesOperation extends DropIndexOperation {
-  constructor(collection, options) {
+  constructor(collection: any, options: any) {
     super(collection, '*', options);
   }
 
-  execute(callback) {
-    super.execute(err => {
+  execute(callback: Function) {
+    super.execute((err: any) => {
       if (err) return handleCallback(callback, err, false);
       handleCallback(callback, null, true);
     });
@@ -20,4 +18,4 @@ class DropIndexesOperation extends DropIndexOperation {
 
 defineAspects(DropIndexesOperation, Aspect.WRITE_OPERATION);
 
-module.exports = DropIndexesOperation;
+export = DropIndexesOperation;

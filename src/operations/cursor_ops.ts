@@ -1,9 +1,8 @@
 'use strict';
-
-const { buildCountCommand } = require('./common_functions');
-const { handleCallback } = require('../utils');
-const { MongoError } = require('../error');
-const { CursorState } = require('../cursor/core_cursor');
+import { buildCountCommand } from './common_functions';
+import { handleCallback } from '../utils';
+import { MongoError } from '../error';
+import { CursorState } from '../cursor/core_cursor';
 const push = Array.prototype.push;
 
 /**
@@ -15,7 +14,7 @@ const push = Array.prototype.push;
  * @param {any} [opts] Optional settings. See Cursor.prototype.count for a list of options.
  * @param {Cursor~countResultCallback} [callback] The result callback.
  */
-function count(cursor, applySkipLimit, opts, callback) {
+function count(cursor: any, applySkipLimit?: boolean, opts?: any, callback?: Function) {
   if (applySkipLimit) {
     if (typeof cursor.cursorSkip() === 'number') opts.skip = cursor.cursorSkip();
     if (typeof cursor.cursorLimit() === 'number') opts.limit = cursor.cursorLimit();
@@ -34,7 +33,7 @@ function count(cursor, applySkipLimit, opts, callback) {
     opts.maxTimeMS = cursor.cmd.maxTimeMS;
   }
 
-  let options = {};
+  let options = {} as any;
   options.skip = opts.skip;
   options.limit = opts.limit;
   options.hint = opts.hint;
@@ -47,7 +46,7 @@ function count(cursor, applySkipLimit, opts, callback) {
   try {
     command = buildCountCommand(cursor, cursor.cmd.query, options);
   } catch (err) {
-    return callback(err);
+    return callback!(err);
   }
 
   // Set cursor server to the same as the topology
@@ -58,8 +57,8 @@ function count(cursor, applySkipLimit, opts, callback) {
     cursor.namespace.withCollection('$cmd'),
     command,
     cursor.options,
-    (err, result) => {
-      callback(err, result ? result.result.n : null);
+    (err?: any, result?: any) => {
+      callback!(err, result ? result.result.n : null);
     }
   );
 }
@@ -72,7 +71,7 @@ function count(cursor, applySkipLimit, opts, callback) {
  * @param {Cursor} cursor The Cursor instance on which to run.
  * @param {Cursor~resultCallback} callback The result callback.
  */
-function each(cursor, callback) {
+function each(cursor: any, callback: Function) {
   if (!callback) throw MongoError.create({ message: 'callback is mandatory', driver: true });
   if (cursor.isNotified()) return;
   if (cursor.s.state === CursorState.CLOSED || cursor.isDead()) {
@@ -93,7 +92,7 @@ function each(cursor, callback) {
     while ((fn = loop(cursor, callback))) fn(cursor, callback);
     each(cursor, callback);
   } else {
-    cursor.next((err, item) => {
+    cursor.next((err?: any, item?: any) => {
       if (err) return handleCallback(callback, err);
       if (item == null) {
         return cursor.close({ skipKillCursors: true }, () => handleCallback(callback, null, null));
@@ -107,7 +106,7 @@ function each(cursor, callback) {
 
 // Trampoline emptying the number of retrieved items
 // without incurring a nextTick operation
-function loop(cursor, callback) {
+function loop(cursor: any, callback: Function) {
   // No more items we are done
   if (cursor.bufferedCount() === 0) return;
   // Get the next document
@@ -123,8 +122,8 @@ function loop(cursor, callback) {
  * @param {Cursor} cursor The Cursor instance from which to get the next document.
  * @param {Cursor~toArrayResultCallback} [callback] The result callback.
  */
-function toArray(cursor, callback) {
-  const items = [];
+function toArray(cursor: any, callback: Function) {
+  const items: any = [];
 
   // Reset cursor
   cursor.rewind();
@@ -132,7 +131,7 @@ function toArray(cursor, callback) {
 
   // Fetch all the documents
   const fetchDocs = () => {
-    cursor._next((err, doc) => {
+    cursor._next((err?: any, doc?: any) => {
       if (err) {
         return handleCallback(callback, err);
       }
@@ -164,4 +163,4 @@ function toArray(cursor, callback) {
   fetchDocs();
 }
 
-module.exports = { count, each, toArray };
+export { count, each, toArray };

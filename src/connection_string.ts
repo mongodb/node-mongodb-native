@@ -1,9 +1,9 @@
 'use strict';
-const URL = require('url');
-const qs = require('querystring');
-const dns = require('dns');
-const ReadPreference = require('./read_preference');
-const { MongoParseError } = require('./error');
+import URL = require('url');
+import qs = require('querystring');
+import dns = require('dns');
+import ReadPreference = require('./read_preference');
+import { MongoParseError } from './error';
 
 /**
  * The following regular expression validates a connection string and breaks the
@@ -19,7 +19,7 @@ const HOSTS_RX = /(mongodb(?:\+srv|)):\/\/(?: (?:[^:]*) (?: : ([^@]*) )? @ )?([^
  * @param {string} parentDomain The domain to check the provided address against
  * @returns {boolean} Whether the provided address matches the parent domain
  */
-function matchesParentDomain(srvAddress, parentDomain) {
+function matchesParentDomain(srvAddress: string, parentDomain: string): boolean {
   const regex = /^.*?\./;
   const srv = `.${srvAddress.replace(regex, '')}`;
   const parent = `.${parentDomain.replace(regex, '')}`;
@@ -34,8 +34,8 @@ function matchesParentDomain(srvAddress, parentDomain) {
  * @param {object} options Optional user provided connection string options
  * @param {Function} callback
  */
-function parseSrvConnectionString(uri, options, callback) {
-  const result = URL.parse(uri, true);
+function parseSrvConnectionString(uri: string, options: any, callback: Function) {
+  const result: any = URL.parse(uri, true);
 
   if (options.directConnection) {
     return callback(new MongoParseError('directConnection not supported with SRV URI'));
@@ -56,7 +56,7 @@ function parseSrvConnectionString(uri, options, callback) {
 
   // Resolve the SRV record and use the result as the list of hosts to connect to.
   const lookupAddress = result.host;
-  dns.resolveSrv(`_mongodb._tcp.${lookupAddress}`, (err, addresses) => {
+  dns.resolveSrv(`_mongodb._tcp.${lookupAddress}`, (err?: any, addresses?: any) => {
     if (err) return callback(err);
 
     if (addresses.length === 0) {
@@ -73,7 +73,7 @@ function parseSrvConnectionString(uri, options, callback) {
 
     // Convert the original URL to a non-SRV URL.
     result.protocol = 'mongodb';
-    result.host = addresses.map(address => `${address.name}:${address.port}`).join(',');
+    result.host = addresses.map((address: any) => `${address.name}:${address.port}`).join(',');
 
     // Default to SSL true if it's not specified.
     if (
@@ -84,7 +84,7 @@ function parseSrvConnectionString(uri, options, callback) {
     }
 
     // Resolve TXT record and add options from there if they exist.
-    dns.resolveTxt(lookupAddress, (err, record) => {
+    dns.resolveTxt(lookupAddress, (err?: any, record?: any) => {
       if (err) {
         if (err.code !== 'ENODATA') {
           return callback(err);
@@ -98,7 +98,7 @@ function parseSrvConnectionString(uri, options, callback) {
         }
 
         record = qs.parse(record[0].join(''));
-        if (Object.keys(record).some(key => key !== 'authSource' && key !== 'replicaSet')) {
+        if (Object.keys(record).some((key: any) => key !== 'authSource' && key !== 'replicaSet')) {
           return callback(
             new MongoParseError('Text record must only set `authSource` or `replicaSet`')
           );
@@ -111,7 +111,7 @@ function parseSrvConnectionString(uri, options, callback) {
       result.search = qs.stringify(result.query);
 
       const finalString = URL.format(result);
-      parseConnectionString(finalString, options, (err, ret) => {
+      parseConnectionString(finalString, options, (err?: any, ret?: any) => {
         if (err) {
           callback(err);
           return;
@@ -130,19 +130,19 @@ function parseSrvConnectionString(uri, options, callback) {
  * @param {any[]|string} value The value to parse
  * @returns {any[]|object|string} The parsed value
  */
-function parseQueryStringItemValue(key, value) {
+function parseQueryStringItemValue(key: string, value: any): any[] | object | string {
   if (Array.isArray(value)) {
     // deduplicate and simplify arrays
-    value = value.filter((v, idx) => value.indexOf(v) === idx);
+    value = value.filter((v: any, idx: any) => value.indexOf(v) === idx);
     if (value.length === 1) value = value[0];
   } else if (value.indexOf(':') > 0) {
-    value = value.split(',').reduce((result, pair) => {
+    value = value.split(',').reduce((result: any, pair: any) => {
       const parts = pair.split(':');
       result[parts[0]] = parseQueryStringItemValue(key, parts[1]);
       return result;
     }, {});
   } else if (value.indexOf(',') > 0) {
-    value = value.split(',').map(v => {
+    value = value.split(',').map((v: any) => {
       return parseQueryStringItemValue(key, v);
     });
   } else if (value.toLowerCase() === 'true' || value.toLowerCase() === 'false') {
@@ -186,7 +186,7 @@ const AUTH_MECHANISMS = new Set([
 
 // Lookup table used to translate normalized (lower-cased) forms of connection string
 // options to their expected camelCase version
-const CASE_TRANSLATION = {
+const CASE_TRANSLATION: any = {
   replicaset: 'replicaSet',
   connecttimeoutms: 'connectTimeoutMS',
   sockettimeoutms: 'socketTimeoutMS',
@@ -233,7 +233,7 @@ const CASE_TRANSLATION = {
  * @param {any} value The value to set
  * @param {any} options The options used for option parsing
  */
-function applyConnectionStringOption(obj, key, value, options) {
+function applyConnectionStringOption(obj: any, key: string, value: any, options: any) {
   // simple key translation
   if (key === 'journal') {
     key = 'j';
@@ -256,7 +256,7 @@ function applyConnectionStringOption(obj, key, value, options) {
   if (key === 'compressors') {
     value = Array.isArray(value) ? value : [value];
 
-    if (!value.every(c => c === 'snappy' || c === 'zlib')) {
+    if (!value.every((c: any) => c === 'snappy' || c === 'zlib')) {
       throw new MongoParseError(
         'Value for `compressors` must be at least one of: `snappy`, `zlib`'
       );
@@ -316,12 +316,12 @@ const USERNAME_REQUIRED_MECHANISMS = new Set([
   'SCRAM-SHA-256'
 ]);
 
-function splitArrayOfMultipleReadPreferenceTags(value) {
-  const parsedTags = [];
+function splitArrayOfMultipleReadPreferenceTags(value: any) {
+  const parsedTags: any = [];
 
   for (let i = 0; i < value.length; i++) {
     parsedTags[i] = {};
-    value[i].split(',').forEach(individualTag => {
+    value[i].split(',').forEach((individualTag: any) => {
       const splitTag = individualTag.split(':');
       parsedTags[i][splitTag[0]] = splitTag[1];
     });
@@ -337,7 +337,7 @@ function splitArrayOfMultipleReadPreferenceTags(value) {
  * @param {any} parsed The parsed connection string result
  * @returns The parsed connection string result possibly modified for auth expectations
  */
-function applyAuthExpectations(parsed) {
+function applyAuthExpectations(parsed: any) {
   if (parsed.options == null) {
     return;
   }
@@ -413,8 +413,8 @@ function applyAuthExpectations(parsed) {
  * @param {object} [options] The options used for options parsing
  * @returns {object|Error} The parsed query string as an object, or an error if one was encountered
  */
-function parseQueryString(query, options) {
-  const result = {};
+function parseQueryString(query: string, options?: object): object | Error {
+  const result = {} as any;
   let parsedQueryString = qs.parse(query);
 
   checkTLSQueryString(parsedQueryString);
@@ -440,7 +440,7 @@ function parseQueryString(query, options) {
 }
 
 /// Adds support for modern `tls` variants of out `ssl` options
-function translateTLSOptions(queryString) {
+function translateTLSOptions(queryString: any) {
   if (queryString.tls) {
     queryString.ssl = queryString.tls;
   }
@@ -485,7 +485,7 @@ function translateTLSOptions(queryString) {
  * @param {any} queryString The parsed query string
  * @throws {MongoParseError}
  */
-function checkTLSQueryString(queryString) {
+function checkTLSQueryString(queryString: any) {
   const queryStringKeys = Object.keys(queryString);
 
   const tlsValue = assertTlsOptionsAreEqual('tls', queryString, queryStringKeys);
@@ -506,7 +506,7 @@ function checkTLSQueryString(queryString) {
  * @param {string} optionKeyB B options key
  * @throws {MongoParseError}
  */
-function assertRepelOptions(options, optionKeyA, optionKeyB) {
+function assertRepelOptions(options: object, optionKeyA: string, optionKeyB: string) {
   if (
     Object.prototype.hasOwnProperty.call(options, optionKeyA) &&
     Object.prototype.hasOwnProperty.call(options, optionKeyB)
@@ -521,9 +521,9 @@ function assertRepelOptions(options, optionKeyA, optionKeyB) {
  * @param {object} options The options used for options parsing
  * @throws {MongoParseError}
  */
-function checkTLSOptions(options) {
+function checkTLSOptions(options: object) {
   if (!options) return null;
-  const check = (a, b) => assertRepelOptions(options, a, b);
+  const check = (a: any, b: any) => assertRepelOptions(options, a, b);
   check('tlsInsecure', 'tlsAllowInvalidCertificates');
   check('tlsInsecure', 'tlsAllowInvalidHostnames');
   check('tlsInsecure', 'tlsDisableCertificateRevocationCheck');
@@ -542,7 +542,7 @@ function checkTLSOptions(options) {
  * @throws {MongoParseError}
  * @returns The value of the tls/ssl option
  */
-function assertTlsOptionsAreEqual(optionName, queryString, queryStringKeys) {
+function assertTlsOptionsAreEqual(optionName: string, queryString: any, queryStringKeys: any) {
   const queryStringHasTLSOption = queryStringKeys.indexOf(optionName) !== -1;
 
   let optionValue;
@@ -555,7 +555,7 @@ function assertTlsOptionsAreEqual(optionName, queryString, queryStringKeys) {
   if (queryStringHasTLSOption) {
     if (Array.isArray(queryString[optionName])) {
       const firstValue = queryString[optionName][0];
-      queryString[optionName].forEach(tlsValue => {
+      queryString[optionName].forEach((tlsValue: any) => {
         if (tlsValue !== firstValue) {
           throw new MongoParseError(`All values of ${optionName} must be the same.`);
         }
@@ -578,7 +578,7 @@ const SUPPORTED_PROTOCOLS = [PROTOCOL_MONGODB, PROTOCOL_MONGODB_SRV];
  * @param {boolean} [options.caseTranslate] Whether the parser should translate options back into camelCase after normalization
  * @param {parseCallback} callback
  */
-function parseConnectionString(uri, options, callback) {
+function parseConnectionString(uri: string, options?: any, callback?: any) {
   if (typeof options === 'function') (callback = options), (options = {});
   options = Object.assign({}, { caseTranslate: true }, options);
 
@@ -606,7 +606,7 @@ function parseConnectionString(uri, options, callback) {
   let parsedOptions;
   try {
     // this just parses the query string NOT the connection options object
-    parsedOptions = parseQueryString(query, options);
+    parsedOptions = parseQueryString(query!, options);
     // this merges the options object with the query string object above
     parsedOptions = Object.assign({}, parsedOptions, options);
     checkTLSOptions(parsedOptions);
@@ -620,7 +620,7 @@ function parseConnectionString(uri, options, callback) {
     return parseSrvConnectionString(uri, parsedOptions, callback);
   }
 
-  const auth = { username: null, password: null, db: db && db !== '' ? qs.unescape(db) : null };
+  const auth: any = { username: null, password: null, db: db && db !== '' ? qs.unescape(db) : null };
   if (parsedOptions.auth) {
     // maintain support for legacy options passed into `MongoClient`
     if (parsedOptions.auth.username) auth.username = parsedOptions.auth.username;
@@ -636,7 +636,7 @@ function parseConnectionString(uri, options, callback) {
     return callback(new MongoParseError('Unescaped slash in userinfo section'));
   }
 
-  const authorityParts = cap[3].split('@');
+  const authorityParts: any = cap[3].split('@');
   if (authorityParts.length > 2) {
     return callback(new MongoParseError('Unescaped at-sign in authority section'));
   }
@@ -663,8 +663,8 @@ function parseConnectionString(uri, options, callback) {
   const hosts = authorityParts
     .shift()
     .split(',')
-    .map(host => {
-      let parsedHost = URL.parse(`mongodb://${host}`);
+    .map((host: any) => {
+      let parsedHost: any = URL.parse(`mongodb://${host}`);
       if (parsedHost.path === '/:') {
         hostParsingError = new MongoParseError('Double colon in host identifier');
         return null;
@@ -703,7 +703,7 @@ function parseConnectionString(uri, options, callback) {
 
       return result;
     })
-    .filter(host => !!host);
+    .filter((host: any) => !!host);
 
   if (hostParsingError) {
     return callback(hostParsingError);
@@ -724,7 +724,7 @@ function parseConnectionString(uri, options, callback) {
     hosts: hosts,
     auth: auth.db || auth.username ? auth : null,
     options: Object.keys(parsedOptions).length ? parsedOptions : null
-  };
+  } as any;
 
   if (result.auth && result.auth.db) {
     result.defaultDatabase = result.auth.db;
@@ -744,6 +744,4 @@ function parseConnectionString(uri, options, callback) {
   callback(null, result);
 }
 
-module.exports = {
-  parseConnectionString
-};
+export { parseConnectionString };

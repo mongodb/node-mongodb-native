@@ -1,10 +1,10 @@
 'use strict';
-const { KillCursor } = require('../commands');
-const { maxWireVersion, collectionNamespace } = require('../../utils');
-const command = require('./command');
-const { MongoError, MongoNetworkError } = require('../../error');
+import { KillCursor } from '../commands';
+import { maxWireVersion, collectionNamespace } from '../../utils';
+import command = require('./command');
+import { MongoError, MongoNetworkError } from '../../error';
 
-function killCursors(server, ns, cursorState, callback) {
+function killCursors(server: any, ns: any, cursorState: any, callback: Function) {
   callback = typeof callback === 'function' ? callback : () => {};
   const cursorId = cursorState.cursorId;
 
@@ -14,7 +14,7 @@ function killCursors(server, ns, cursorState, callback) {
     const options = {
       immediateRelease: true,
       noResponse: true
-    };
+    } as any;
 
     if (typeof cursorState.session === 'object') {
       options.session = cursorState.session;
@@ -40,10 +40,10 @@ function killCursors(server, ns, cursorState, callback) {
     cursors: [cursorId]
   };
 
-  const options = {};
+  const options = {} as any;
   if (typeof cursorState.session === 'object') options.session = cursorState.session;
 
-  command(server, ns, killCursorCmd, options, (err, result) => {
+  command(server, ns, killCursorCmd, options, (err?: any, result?: any) => {
     if (err) {
       return callback(err);
     }
@@ -63,4 +63,4 @@ function killCursors(server, ns, cursorState, callback) {
   });
 }
 
-module.exports = killCursors;
+export = killCursors;

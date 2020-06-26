@@ -1,12 +1,9 @@
 'use strict';
-
-const PromiseProvider = require('../promise_provider');
-const crypto = require('crypto');
-const { Writable } = require('stream');
-const {
-  BSON: { ObjectId }
-} = require('../deps');
-
+import PromiseProvider = require('../promise_provider');
+import crypto = require('crypto');
+import { Writable } from 'stream';
+import { BSON } from '../deps';
+const { ObjectId } = BSON;
 const ERROR_NAMESPACE_NOT_FOUND = 26;
 
 /**
@@ -30,7 +27,22 @@ const ERROR_NAMESPACE_NOT_FOUND = 26;
  */
 
 class GridFSBucketWriteStream extends Writable {
-  constructor(bucket, filename, options) {
+  bucket: any;
+  chunks: any;
+  filename: any;
+  files: any;
+  options: any;
+  done: any;
+  id: any;
+  chunkSizeBytes: any;
+  bufToStore: any;
+  length: any;
+  md5: any;
+  n: any;
+  pos: any;
+  state: any;
+
+  constructor(bucket: any, filename: any, options: any) {
     super();
 
     options = options || {};
@@ -92,7 +104,7 @@ class GridFSBucketWriteStream extends Writable {
    * @returns {boolean} False if this write required flushing a chunk to MongoDB. True otherwise.
    */
 
-  write(chunk, encoding, callback) {
+  write(chunk: any, encoding: any, callback?: Function) {
     var _this = this;
     return waitForIndexes(this, () => doWrite(_this, chunk, encoding, callback));
   }
@@ -106,7 +118,7 @@ class GridFSBucketWriteStream extends Writable {
    * @returns {Promise<void>} if no callback specified
    */
 
-  abort(callback) {
+  abort(callback: Function) {
     const Promise = PromiseProvider.get();
     if (this.state.streamEnd) {
       var error = new Error('Cannot abort a stream that has already completed');
@@ -123,7 +135,7 @@ class GridFSBucketWriteStream extends Writable {
       return Promise.reject(error);
     }
     this.state.aborted = true;
-    this.chunks.deleteMany({ files_id: this.id }, error => {
+    this.chunks.deleteMany({ files_id: this.id }, (error: any) => {
       if (typeof callback === 'function') callback(error);
     });
   }
@@ -139,7 +151,7 @@ class GridFSBucketWriteStream extends Writable {
    * @param {GridFSBucket~errorCallback} callback Function to call when all files and chunks have been persisted to MongoDB
    */
 
-  end(chunk, encoding, callback) {
+  end(chunk: any, encoding?: any, callback?: Function) {
     var _this = this;
     if (typeof chunk === 'function') {
       (callback = chunk), (chunk = null), (encoding = null);
@@ -153,8 +165,8 @@ class GridFSBucketWriteStream extends Writable {
     this.state.streamEnd = true;
 
     if (callback) {
-      this.once('finish', result => {
-        callback(null, result);
+      this.once('finish', (result: any) => {
+        callback!(null, result);
       });
     }
 
@@ -171,7 +183,7 @@ class GridFSBucketWriteStream extends Writable {
   }
 }
 
-function __handleError(_this, error, callback) {
+function __handleError(_this: any, error: any, callback?: Function) {
   if (_this.state.errored) {
     return;
   }
@@ -182,7 +194,7 @@ function __handleError(_this, error, callback) {
   _this.emit('error', error);
 }
 
-function createChunkDoc(filesId, n, data) {
+function createChunkDoc(filesId: any, n: any, data: any) {
   return {
     _id: new ObjectId(),
     files_id: filesId,
@@ -191,13 +203,13 @@ function createChunkDoc(filesId, n, data) {
   };
 }
 
-function checkChunksIndex(_this, callback) {
-  _this.chunks.listIndexes().toArray((error, indexes) => {
+function checkChunksIndex(_this: any, callback: Function) {
+  _this.chunks.listIndexes().toArray((error?: any, indexes?: any) => {
     if (error) {
       // Collection doesn't exist so create index
       if (error.code === ERROR_NAMESPACE_NOT_FOUND) {
         var index = { files_id: 1, n: 1 };
-        _this.chunks.createIndex(index, { background: false, unique: true }, error => {
+        _this.chunks.createIndex(index, { background: false, unique: true }, (error: any) => {
           if (error) {
             return callback(error);
           }
@@ -210,7 +222,7 @@ function checkChunksIndex(_this, callback) {
     }
 
     var hasChunksIndex = false;
-    indexes.forEach(index => {
+    indexes.forEach((index: any) => {
       if (index.key) {
         var keys = Object.keys(index.key);
         if (keys.length === 2 && index.key.files_id === 1 && index.key.n === 1) {
@@ -228,7 +240,7 @@ function checkChunksIndex(_this, callback) {
       indexOptions.background = false;
       indexOptions.unique = true;
 
-      _this.chunks.createIndex(index, indexOptions, error => {
+      _this.chunks.createIndex(index, indexOptions, (error: any) => {
         if (error) {
           return callback(error);
         }
@@ -239,7 +251,7 @@ function checkChunksIndex(_this, callback) {
   });
 }
 
-function checkDone(_this, callback) {
+function checkDone(_this: any, callback?: Function) {
   if (_this.done) return true;
   if (_this.state.streamEnd && _this.state.outstandingRequests === 0 && !_this.state.errored) {
     // Set done so we dont' trigger duplicate createFilesDoc
@@ -260,7 +272,7 @@ function checkDone(_this, callback) {
       return false;
     }
 
-    _this.files.insertOne(filesDoc, getWriteOptions(_this), error => {
+    _this.files.insertOne(filesDoc, getWriteOptions(_this), (error: any) => {
       if (error) {
         return __handleError(_this, error, callback);
       }
@@ -273,8 +285,8 @@ function checkDone(_this, callback) {
   return false;
 }
 
-function checkIndexes(_this, callback) {
-  _this.files.findOne({}, { _id: 1 }, (error, doc) => {
+function checkIndexes(_this: any, callback: Function) {
+  _this.files.findOne({}, { _id: 1 }, (error?: any, doc?: any) => {
     if (error) {
       return callback(error);
     }
@@ -282,12 +294,12 @@ function checkIndexes(_this, callback) {
       return callback();
     }
 
-    _this.files.listIndexes().toArray((error, indexes) => {
+    _this.files.listIndexes().toArray((error?: any, indexes?: any) => {
       if (error) {
         // Collection doesn't exist so create index
         if (error.code === ERROR_NAMESPACE_NOT_FOUND) {
           var index = { filename: 1, uploadDate: 1 };
-          _this.files.createIndex(index, { background: false }, error => {
+          _this.files.createIndex(index, { background: false }, (error: any) => {
             if (error) {
               return callback(error);
             }
@@ -300,7 +312,7 @@ function checkIndexes(_this, callback) {
       }
 
       var hasFileIndex = false;
-      indexes.forEach(index => {
+      indexes.forEach((index: any) => {
         var keys = Object.keys(index.key);
         if (keys.length === 2 && index.key.filename === 1 && index.key.uploadDate === 1) {
           hasFileIndex = true;
@@ -316,7 +328,7 @@ function checkIndexes(_this, callback) {
 
         indexOptions.background = false;
 
-        _this.files.createIndex(index, indexOptions, error => {
+        _this.files.createIndex(index, indexOptions, (error: any) => {
           if (error) {
             return callback(error);
           }
@@ -328,14 +340,23 @@ function checkIndexes(_this, callback) {
   });
 }
 
-function createFilesDoc(_id, length, chunkSize, md5, filename, contentType, aliases, metadata) {
+function createFilesDoc(
+  _id: any,
+  length: any,
+  chunkSize: any,
+  md5: any,
+  filename: any,
+  contentType: any,
+  aliases: any,
+  metadata: any
+) {
   var ret = {
     _id,
     length,
     chunkSize,
     uploadDate: new Date(),
     filename
-  };
+  } as any;
 
   if (md5) {
     ret.md5 = md5;
@@ -356,7 +377,7 @@ function createFilesDoc(_id, length, chunkSize, md5, filename, contentType, alia
   return ret;
 }
 
-function doWrite(_this, chunk, encoding, callback) {
+function doWrite(_this: any, chunk: any, encoding: any, callback?: Function) {
   if (checkAborted(_this, callback)) {
     return false;
   }
@@ -401,7 +422,7 @@ function doWrite(_this, chunk, encoding, callback) {
         return false;
       }
 
-      _this.chunks.insertOne(doc, getWriteOptions(_this), error => {
+      _this.chunks.insertOne(doc, getWriteOptions(_this), (error: any) => {
         if (error) {
           return __handleError(_this, error);
         }
@@ -429,8 +450,8 @@ function doWrite(_this, chunk, encoding, callback) {
   return false;
 }
 
-function getWriteOptions(_this) {
-  var obj = {};
+function getWriteOptions(_this: any) {
+  var obj = {} as any;
   if (_this.options.writeConcern) {
     obj.w = _this.options.writeConcern.w;
     obj.wtimeout = _this.options.writeConcern.wtimeout;
@@ -439,7 +460,7 @@ function getWriteOptions(_this) {
   return obj;
 }
 
-function waitForIndexes(_this, callback) {
+function waitForIndexes(_this: any, callback: Function) {
   if (_this.bucket.s.checkedIndexes) {
     return callback(false);
   }
@@ -451,7 +472,7 @@ function waitForIndexes(_this, callback) {
   return true;
 }
 
-function writeRemnant(_this, callback) {
+function writeRemnant(_this: any, callback?: Function) {
   // Buffer is empty, so don't bother to insert
   if (_this.pos === 0) {
     return checkDone(_this, callback);
@@ -473,7 +494,7 @@ function writeRemnant(_this, callback) {
     return false;
   }
 
-  _this.chunks.insertOne(doc, getWriteOptions(_this), error => {
+  _this.chunks.insertOne(doc, getWriteOptions(_this), (error: any) => {
     if (error) {
       return __handleError(_this, error);
     }
@@ -482,7 +503,7 @@ function writeRemnant(_this, callback) {
   });
 }
 
-function checkAborted(_this, callback) {
+function checkAborted(_this: any, callback?: Function) {
   if (_this.state.aborted) {
     if (typeof callback === 'function') {
       callback(new Error('this stream has been aborted'));
@@ -492,4 +513,4 @@ function checkAborted(_this, callback) {
   return false;
 }
 
-module.exports = GridFSBucketWriteStream;
+export = GridFSBucketWriteStream;

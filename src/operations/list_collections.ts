@@ -1,17 +1,16 @@
 'use strict';
-
-const CommandOperationV2 = require('./command_v2');
-const { Aspect, defineAspects } = require('./operation');
-const { maxWireVersion } = require('../utils');
-const CONSTANTS = require('../constants');
+import CommandOperationV2 = require('./command_v2');
+import { Aspect, defineAspects } from './operation';
+import { maxWireVersion } from '../utils';
+import CONSTANTS = require('../constants');
 
 const LIST_COLLECTIONS_WIRE_VERSION = 3;
 
-function listCollectionsTransforms(databaseName) {
+function listCollectionsTransforms(databaseName: any) {
   const matching = `${databaseName}.`;
 
   return {
-    doc: doc => {
+    doc: (doc: any) => {
       const index = doc.name.indexOf(matching);
       // Remove database name if available
       if (doc.name && index === 0) {
@@ -24,7 +23,12 @@ function listCollectionsTransforms(databaseName) {
 }
 
 class ListCollectionsOperation extends CommandOperationV2 {
-  constructor(db, filter, options) {
+  db: any;
+  filter: any;
+  nameOnly: boolean;
+  batchSize?: number;
+
+  constructor(db: any, filter: any, options: any) {
     super(db, options, { fullResponse: true });
 
     this.db = db;
@@ -36,7 +40,7 @@ class ListCollectionsOperation extends CommandOperationV2 {
     }
   }
 
-  execute(server, callback) {
+  execute(server: any, callback: Function) {
     if (maxWireVersion(server) < LIST_COLLECTIONS_WIRE_VERSION) {
       let filter = this.filter;
       const databaseName = this.db.s.namespace.db;
@@ -68,7 +72,7 @@ class ListCollectionsOperation extends CommandOperationV2 {
         { query: filter },
         { batchSize: this.batchSize || 1000 },
         {},
-        (err, result) => {
+        (err?: any, result?: any) => {
           if (
             result &&
             result.message &&
@@ -102,4 +106,4 @@ defineAspects(ListCollectionsOperation, [
   Aspect.EXECUTE_WITH_SELECTION
 ]);
 
-module.exports = ListCollectionsOperation;
+export = ListCollectionsOperation;

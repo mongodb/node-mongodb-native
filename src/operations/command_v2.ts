@@ -1,22 +1,30 @@
 'use strict';
-
-const { Aspect, OperationBase } = require('./operation');
-const ReadConcern = require('../read_concern');
-const WriteConcern = require('../write_concern');
-const { maxWireVersion } = require('../utils');
-const ReadPreference = require('../read_preference');
-const { commandSupportsReadConcern } = require('../sessions');
-const { MongoError } = require('../error');
+import { Aspect, OperationBase } from './operation';
+import ReadConcern = require('../read_concern');
+import WriteConcern = require('../write_concern');
+import { maxWireVersion } from '../utils';
+import ReadPreference = require('../read_preference');
+import { commandSupportsReadConcern } from '../sessions';
+import { MongoError } from '../error';
 
 const SUPPORTS_WRITE_CONCERN_AND_COLLATION = 5;
 
 class CommandOperationV2 extends OperationBase {
+  ns: any;
+  readPreference: any;
+  readConcern: any;
+  writeConcern: any;
+  explain: boolean;
+  fullResponse?: boolean;
+  logger?: any;
+  server?: any;
+
   /**
    * @param {any} parent
    * @param {any} [options]
    * @param {any} [operationOptions]
    */
-  constructor(parent, options, operationOptions) {
+  constructor(parent: any, options?: any, operationOptions?: any) {
     super(options);
 
     this.ns = parent.s.namespace.withCollection('$cmd');
@@ -41,7 +49,7 @@ class CommandOperationV2 extends OperationBase {
     }
   }
 
-  executeCommand(server, cmd, callback) {
+  executeCommand(server: any, cmd: any, callback: Function) {
     // TODO: consider making this a non-enumerable property
     this.server = server;
 
@@ -84,7 +92,7 @@ class CommandOperationV2 extends OperationBase {
       this.logger.debug(`executing command ${JSON.stringify(cmd)} against ${this.ns}`);
     }
 
-    server.command(this.ns.toString(), cmd, this.options, (err, result) => {
+    server.command(this.ns.toString(), cmd, this.options, (err?: any, result?: any) => {
       if (err) {
         callback(err, null);
         return;
@@ -100,12 +108,12 @@ class CommandOperationV2 extends OperationBase {
   }
 }
 
-function resolveWriteConcern(parent, options) {
+function resolveWriteConcern(parent: any, options: any) {
   return WriteConcern.fromOptions(options) || parent.writeConcern;
 }
 
-function resolveReadConcern(parent, options) {
+function resolveReadConcern(parent: any, options: any) {
   return ReadConcern.fromOptions(options) || parent.readConcern;
 }
 
-module.exports = CommandOperationV2;
+export = CommandOperationV2;

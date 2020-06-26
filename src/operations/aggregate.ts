@@ -1,16 +1,19 @@
 'use strict';
-
-const CommandOperationV2 = require('./command_v2');
-const ReadPreference = require('../read_preference');
-const { MongoError } = require('../error');
-const { maxWireVersion } = require('../utils');
-const { Aspect, defineAspects } = require('./operation');
+import CommandOperationV2 = require('./command_v2');
+import ReadPreference = require('../read_preference');
+import { MongoError } from '../error';
+import { maxWireVersion } from '../utils';
+import { Aspect, defineAspects } from './operation';
 
 const DB_AGGREGATE_COLLECTION = 1;
 const MIN_WIRE_VERSION_$OUT_READ_CONCERN_SUPPORT = 8;
 
 class AggregateOperation extends CommandOperationV2 {
-  constructor(parent, pipeline, options) {
+  target: any;
+  pipeline: any;
+  hasWriteStage: boolean;
+
+  constructor(parent: any, pipeline: any, options: any) {
     super(parent, options, { fullResponse: true });
 
     this.target =
@@ -51,14 +54,14 @@ class AggregateOperation extends CommandOperationV2 {
     return !this.hasWriteStage;
   }
 
-  addToPipeline(stage) {
+  addToPipeline(stage: any) {
     this.pipeline.push(stage);
   }
 
-  execute(server, callback) {
+  execute(server: any, callback: Function) {
     const options = this.options;
     const serverWireVersion = maxWireVersion(server);
-    const command = { aggregate: this.target, pipeline: this.pipeline };
+    const command = { aggregate: this.target, pipeline: this.pipeline } as any;
 
     if (this.hasWriteStage && serverWireVersion < MIN_WIRE_VERSION_$OUT_READ_CONCERN_SUPPORT) {
       this.readConcern = null;
@@ -102,4 +105,4 @@ defineAspects(AggregateOperation, [
   Aspect.EXECUTE_WITH_SELECTION
 ]);
 
-module.exports = AggregateOperation;
+export = AggregateOperation;

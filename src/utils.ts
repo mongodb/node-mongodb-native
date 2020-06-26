@@ -1,13 +1,14 @@
 'use strict';
+import PromiseProvider = require('./promise_provider');
+import os = require('os');
+import crypto = require('crypto');
+import { MongoError } from './error';
+import WriteConcern = require('./write_concern');
 
-const PromiseProvider = require('./promise_provider');
-const os = require('os');
-const crypto = require('crypto');
-const { MongoError } = require('./error');
-const WriteConcern = require('./write_concern');
+const MAX_JS_INT = Number.MAX_SAFE_INTEGER + 1;
 
 // Set simple property
-var getSingleProperty = function(obj, name, value) {
+var getSingleProperty = function(obj: any, name: any, value: any) {
   Object.defineProperty(obj, name, {
     enumerable: true,
     get: function() {
@@ -16,7 +17,7 @@ var getSingleProperty = function(obj, name, value) {
   });
 };
 
-var formatSortValue = (exports.formatSortValue = function(sortDirection) {
+var formatSortValue = (exports.formatSortValue = function(sortDirection: any) {
   var value = ('' + sortDirection).toLowerCase();
 
   switch (value) {
@@ -37,8 +38,8 @@ var formatSortValue = (exports.formatSortValue = function(sortDirection) {
   }
 });
 
-var formattedOrderClause = (exports.formattedOrderClause = function(sortValue) {
-  var orderBy = {};
+var formattedOrderClause = (exports.formattedOrderClause = function(sortValue: any) {
+  var orderBy: any = {};
   if (sortValue == null) return null;
   if (Array.isArray(sortValue)) {
     if (sortValue.length === 0) {
@@ -66,7 +67,7 @@ var formattedOrderClause = (exports.formattedOrderClause = function(sortValue) {
   return orderBy;
 });
 
-var checkCollectionName = function checkCollectionName(collectionName) {
+var checkCollectionName = function checkCollectionName(collectionName: any) {
   if ('string' !== typeof collectionName) {
     throw new MongoError('collection name must be a String');
   }
@@ -101,7 +102,7 @@ var checkCollectionName = function checkCollectionName(collectionName) {
  * @param {any} [value1]
  * @param {any} [value2]
  */
-function handleCallback(callback, err, value1, value2) {
+function handleCallback(callback: Function, err: any, value1?: any, value2?: any) {
   try {
     if (callback == null) return;
 
@@ -123,11 +124,11 @@ function handleCallback(callback, err, value1, value2) {
  *
  * @param {any} error
  */
-var toError = function(error) {
+var toError = function(error: any) {
   if (error instanceof Error) return error;
 
   var msg = error.err || error.errmsg || error.errMessage || error;
-  var e = MongoError.create({ message: msg, driver: true });
+  var e: any = MongoError.create({ message: msg, driver: true });
 
   // Get all object keys
   var keys = typeof error === 'object' ? Object.keys(error) : [];
@@ -146,15 +147,15 @@ var toError = function(error) {
 /**
  * @param {any} hint
  */
-var normalizeHintField = function normalizeHintField(hint) {
-  var finalHint = null;
+var normalizeHintField = function normalizeHintField(hint: any) {
+  var finalHint: any = null;
 
   if (typeof hint === 'string') {
     finalHint = hint;
   } else if (Array.isArray(hint)) {
     finalHint = {};
 
-    hint.forEach(function(param) {
+    hint.forEach(function(param: any) {
       finalHint[param] = 1;
     });
   } else if (hint != null && typeof hint === 'object') {
@@ -172,8 +173,8 @@ var normalizeHintField = function normalizeHintField(hint) {
  *
  * @param {any} fieldOrSpec
  */
-var parseIndexOptions = function(fieldOrSpec) {
-  var fieldHash = {};
+var parseIndexOptions = function(fieldOrSpec: any) {
+  var fieldHash: any = {};
   var indexes = [];
   var keys;
 
@@ -183,7 +184,7 @@ var parseIndexOptions = function(fieldOrSpec) {
     indexes.push(fieldOrSpec + '_' + 1);
     fieldHash[fieldOrSpec] = 1;
   } else if (Array.isArray(fieldOrSpec)) {
-    fieldOrSpec.forEach(function(f) {
+    fieldOrSpec.forEach(function(f: any) {
       if ('string' === typeof f) {
         // [{location:'2d'}, 'type']
         indexes.push(f + '_' + 1);
@@ -195,7 +196,7 @@ var parseIndexOptions = function(fieldOrSpec) {
       } else if (isObject(f)) {
         // [{location:'2d'}, {type:1}]
         keys = Object.keys(f);
-        keys.forEach(function(k) {
+        keys.forEach(function(k: any) {
           indexes.push(k + '_' + f[k]);
           fieldHash[k] = f[k];
         });
@@ -206,7 +207,7 @@ var parseIndexOptions = function(fieldOrSpec) {
   } else if (isObject(fieldOrSpec)) {
     // {location:'2d', type:1}
     keys = Object.keys(fieldOrSpec);
-    keys.forEach(function(key) {
+    keys.forEach(function(key: any) {
       indexes.push(key + '_' + fieldOrSpec[key]);
       fieldHash[key] = fieldOrSpec[key];
     });
@@ -219,20 +220,20 @@ var parseIndexOptions = function(fieldOrSpec) {
   };
 };
 
-var isObject = (exports.isObject = function(arg) {
+var isObject = (exports.isObject = function(arg: any) {
   return '[object Object]' === Object.prototype.toString.call(arg);
 });
 
-var debugOptions = function(debugFields, options) {
-  var finaloptions = {};
-  debugFields.forEach(function(n) {
+var debugOptions = function(debugFields: any, options: any) {
+  var finaloptions: any = {};
+  debugFields.forEach(function(n: any) {
     finaloptions[n] = options[n];
   });
 
   return finaloptions;
 };
 
-var decorateCommand = function(command, options, exclude) {
+var decorateCommand = function(command: any, options: any, exclude: any) {
   for (var name in options) {
     if (exclude.indexOf(name) === -1) command[name] = options[name];
   }
@@ -240,7 +241,7 @@ var decorateCommand = function(command, options, exclude) {
   return command;
 };
 
-var mergeOptions = function(target, source) {
+var mergeOptions = function(target: any, source: any) {
   for (var name in source) {
     target[name] = source[name];
   }
@@ -249,8 +250,8 @@ var mergeOptions = function(target, source) {
 };
 
 // Merge options with translation
-var translateOptions = function(target, source) {
-  var translations = {
+var translateOptions = function(target: any, source: any) {
+  var translations: any = {
     // SSL translation options
     sslCA: 'ca',
     sslCRL: 'crl',
@@ -281,8 +282,8 @@ var translateOptions = function(target, source) {
   return target;
 };
 
-var filterOptions = function(options, names) {
-  var filterOptions = {};
+var filterOptions = function(options: any, names: any) {
+  var filterOptions: any = {};
 
   for (var name in options) {
     if (names.indexOf(name) !== -1) filterOptions[name] = options[name];
@@ -296,7 +297,12 @@ var filterOptions = function(options, names) {
 var writeConcernKeys = ['w', 'j', 'wtimeout', 'fsync'];
 
 // Merge the write concern options
-var mergeOptionsAndWriteConcern = function(targetOptions, sourceOptions, keys, mergeWriteConcern) {
+var mergeOptionsAndWriteConcern = function(
+  targetOptions: any,
+  sourceOptions: any,
+  keys: any,
+  mergeWriteConcern: any
+) {
   // Mix in any allowed options
   for (var i = 0; i < keys.length; i++) {
     if (!targetOptions[keys[i]] && sourceOptions[keys[i]] !== undefined) {
@@ -336,12 +342,12 @@ var mergeOptionsAndWriteConcern = function(targetOptions, sourceOptions, keys, m
  * are required by the Driver Sessions specification in the event that a ClientSession is
  * not provided
  *
- * @param {Topology} topology The topology to execute this operation on
+ * @param {any} topology The topology to execute this operation on
  * @param {Function} operation The operation to execute
  * @param {any[]} args Arguments to apply the provided operation
  * @param {any} [options] Options that modify the behavior of the method
  */
-const executeLegacyOperation = (topology, operation, args, options) => {
+const executeLegacyOperation = (topology: any, operation: Function, args: any, options?: any) => {
   const Promise = PromiseProvider.get();
 
   if (topology == null) {
@@ -358,7 +364,7 @@ const executeLegacyOperation = (topology, operation, args, options) => {
 
   // The driver sessions spec mandates that we implicitly create sessions for operations
   // that are not explicitly provided with a session.
-  let session, opOptions, owner;
+  let session: any, opOptions: any, owner: any;
   if (!options.skipSessions && topology.hasSessionSupport()) {
     opOptions = args[args.length - 2];
     if (opOptions == null || opOptions.session == null) {
@@ -371,8 +377,8 @@ const executeLegacyOperation = (topology, operation, args, options) => {
     }
   }
 
-  const makeExecuteCallback = (resolve, reject) =>
-    function executeCallback(err, result) {
+  const makeExecuteCallback = (resolve: any, reject: any) =>
+    function executeCallback(err?: any, result?: any) {
       if (session && session.owner === owner && !options.returnsCursor) {
         session.endSession(() => {
           delete opOptions.session;
@@ -389,8 +395,8 @@ const executeLegacyOperation = (topology, operation, args, options) => {
   if (typeof callback === 'function') {
     callback = args.pop();
     const handler = makeExecuteCallback(
-      result => callback(null, result),
-      err => callback(err, null)
+      (result: any) => callback(null, result),
+      (err: any) => callback(err, null)
     );
     args.push(handler);
 
@@ -407,7 +413,7 @@ const executeLegacyOperation = (topology, operation, args, options) => {
     throw new TypeError('final argument to `executeLegacyOperation` must be a callback');
   }
 
-  return new Promise(function(resolve, reject) {
+  return new Promise(function(resolve: any, reject: any) {
     const handler = makeExecuteCallback(resolve, reject);
     args[args.length - 1] = handler;
 
@@ -425,7 +431,7 @@ const executeLegacyOperation = (topology, operation, args, options) => {
  * @param {any} target The target command to which we will apply retryWrites.
  * @param {any} db The database from which we can inherit a retryWrites value.
  */
-function applyRetryableWrites(target, db) {
+function applyRetryableWrites(target: any, db: any) {
   if (db && db.s.options.retryWrites) {
     target.retryWrites = true;
   }
@@ -442,7 +448,7 @@ function applyRetryableWrites(target, db) {
  * @param {any} [options] optional settings passed into a command for write concern overrides
  * @returns {any} the (now) decorated target
  */
-function applyWriteConcern(target, sources, options) {
+function applyWriteConcern(target: any, sources: any, options?: any): any {
   options = options || {};
   const db = sources.db;
   const coll = sources.collection;
@@ -478,7 +484,7 @@ function applyWriteConcern(target, sources, options) {
  * @param {any} maybePromise
  * @returns true if the provided value is a Promise
  */
-function isPromiseLike(maybePromise) {
+function isPromiseLike(maybePromise: any) {
   return maybePromise && typeof maybePromise.then === 'function';
 }
 
@@ -489,7 +495,7 @@ function isPromiseLike(maybePromise) {
  * @param {(Cursor|Collection)} [target] target of command
  * @param {any} [options] options containing collation settings
  */
-function decorateWithCollation(command, target, options) {
+function decorateWithCollation(command?: any, target?: any, options?: any) {
   const topology = (target.s && target.s.topology) || target.topology;
 
   if (!topology) {
@@ -513,7 +519,7 @@ function decorateWithCollation(command, target, options) {
  * @param {Collection} coll the parent collection of the operation calling this method
  * @param {any} [options]
  */
-function decorateWithReadConcern(command, coll, options) {
+function decorateWithReadConcern(command: any, coll: any, options?: any) {
   if (options && options.session && options.session.inTransaction()) {
     return;
   }
@@ -527,8 +533,8 @@ function decorateWithReadConcern(command, coll, options) {
   }
 }
 
-const emitProcessWarning = msg => process.emitWarning(msg, 'DeprecationWarning');
-const emitConsoleWarning = msg => console.error(msg);
+const emitProcessWarning = (msg: any) => process.emitWarning(msg, 'DeprecationWarning');
+const emitConsoleWarning = (msg: any) => console.error(msg);
 const emitDeprecationWarning = process.emitWarning ? emitProcessWarning : emitConsoleWarning;
 
 /**
@@ -537,7 +543,7 @@ const emitDeprecationWarning = process.emitWarning ? emitProcessWarning : emitCo
  * @param {string} name function name
  * @param {string} option option name
  * @returns {string} warning message */
-function defaultMsgHandler(name, option) {
+function defaultMsgHandler(name: string, option: string): string {
   return `${name} option [${option}] is deprecated and will be removed in a later version.`;
 }
 
@@ -551,15 +557,15 @@ function defaultMsgHandler(name, option) {
  * @param {Function} [config.msgHandler] optional custom message handler to generate warnings
  * @param {Function} fn the target function of deprecation
  * @returns {any} modified function that warns once per deprecated option, and executes original function */
-function deprecateOptions(config, fn) {
-  if (process.noDeprecation === true) {
+function deprecateOptions(config: any, fn: Function): any {
+  if ((process as any).noDeprecation === true) {
     return fn;
   }
 
   const msgHandler = config.msgHandler ? config.msgHandler : defaultMsgHandler;
 
   const optionsWarned = new Set();
-  function deprecated() {
+  function deprecated(this: any) {
     const options = arguments[config.optionsIndex];
 
     // ensure options is a valid, non-empty object, otherwise short-circuit
@@ -568,7 +574,7 @@ function deprecateOptions(config, fn) {
     }
 
     const self = this;
-    config.deprecatedOptions.forEach(function(deprecatedOption) {
+    config.deprecatedOptions.forEach(function(deprecatedOption: any) {
       if (
         Object.prototype.hasOwnProperty.call(options, deprecatedOption) &&
         !optionsWarned.has(deprecatedOption)
@@ -602,13 +608,15 @@ function deprecateOptions(config, fn) {
 }
 
 class MongoDBNamespace {
+  db: any;
+  collection: any;
   /**
    * Create a namespace object
    *
    * @param {string} db The database name
    * @param {string} [collection] An optional collection name
    */
-  constructor(db, collection) {
+  constructor(db: string, collection?: string) {
     this.db = db;
     this.collection = collection;
   }
@@ -617,11 +625,11 @@ class MongoDBNamespace {
     return this.collection ? `${this.db}.${this.collection}` : this.db;
   }
 
-  withCollection(collection) {
+  withCollection(collection: any) {
     return new MongoDBNamespace(this.db, collection);
   }
 
-  static fromString(namespace) {
+  static fromString(namespace: any) {
     if (!namespace) {
       throw new Error(`Cannot parse namespace from "${namespace}"`);
     }
@@ -631,7 +639,7 @@ class MongoDBNamespace {
   }
 }
 
-function* makeCounter(seed) {
+function* makeCounter(seed: any) {
   let count = seed || 0;
   while (true) {
     const newCount = count;
@@ -647,23 +655,23 @@ function* makeCounter(seed) {
  * @param {Function} wrapper A function that wraps the callback
  * @returns {any|void} Returns nothing if a callback is supplied, else returns a Promise.
  */
-function maybePromise(callback, wrapper) {
+function maybePromise(callback: Function | undefined, wrapper: Function): any | void {
   const Promise = PromiseProvider.get();
 
   let result;
   if (typeof callback !== 'function') {
-    result = new Promise((resolve, reject) => {
-      callback = (err, res) => {
+    result = new Promise((resolve: any, reject: any) => {
+      callback = (err?: any, res?: any) => {
         if (err) return reject(err);
         resolve(res);
       };
     });
   }
 
-  wrapper(function(err, res) {
+  wrapper(function(err?: any, res?: any) {
     if (err != null) {
       try {
-        callback(err);
+        callback!(err);
       } catch (error) {
         return process.nextTick(() => {
           throw error;
@@ -672,17 +680,17 @@ function maybePromise(callback, wrapper) {
       return;
     }
 
-    callback(err, res);
+    callback!(err, res);
   });
 
   return result;
 }
 
-function databaseNamespace(ns) {
+function databaseNamespace(ns: any) {
   return ns.split('.')[0];
 }
 
-function collectionNamespace(ns) {
+function collectionNamespace(ns: any) {
   return ns
     .split('.')
     .slice(1)
@@ -706,8 +714,10 @@ const uuidV4 = () => {
  * @param {EventEmitter} emitter the EventEmitter to relay the events to
  * @param {any} events
  */
-function relayEvents(listener, emitter, events) {
-  events.forEach(eventName => listener.on(eventName, event => emitter.emit(eventName, event)));
+function relayEvents(listener: any, emitter: any, events: any) {
+  events.forEach((eventName: any) =>
+    listener.on(eventName, (event: any) => emitter.emit(eventName, event))
+  );
 }
 
 /**
@@ -717,7 +727,7 @@ function relayEvents(listener, emitter, events) {
  * @private
  * @param {(Topology|Server)} topologyOrServer
  */
-function maxWireVersion(topologyOrServer) {
+function maxWireVersion(topologyOrServer: any) {
   if (topologyOrServer) {
     if (topologyOrServer.ismaster) {
       return topologyOrServer.ismaster.maxWireVersion;
@@ -746,7 +756,7 @@ function maxWireVersion(topologyOrServer) {
  * @param {function} [callback] callback function
  * @return true if server does not support collation
  */
-function collationNotSupported(server, cmd) {
+function collationNotSupported(server: any, cmd: any) {
   return cmd && cmd.collation && maxWireVersion(server) < 5;
 }
 
@@ -757,7 +767,7 @@ function collationNotSupported(server, cmd) {
  * @param {Function} eachFn A function to call on each item of the array. The callback signature is `(item, callback)`, where the callback indicates iteration is complete.
  * @param {Function} callback The callback called after every item has been iterated
  */
-function eachAsync(arr, eachFn, callback) {
+function eachAsync(arr: any[], eachFn: Function, callback: Function) {
   arr = arr || [];
 
   let idx = 0;
@@ -772,7 +782,7 @@ function eachAsync(arr, eachFn, callback) {
     return;
   }
 
-  function eachCallback(err) {
+  function eachCallback(err: any) {
     awaiting--;
     if (err) {
       callback(err);
@@ -785,7 +795,7 @@ function eachAsync(arr, eachFn, callback) {
   }
 }
 
-function eachAsyncSeries(arr, eachFn, callback) {
+function eachAsyncSeries(arr: any, eachFn: any, callback: Function) {
   arr = arr || [];
 
   let idx = 0;
@@ -795,7 +805,7 @@ function eachAsyncSeries(arr, eachFn, callback) {
     return;
   }
 
-  function eachCallback(err) {
+  function eachCallback(err: any) {
     idx++;
     awaiting--;
     if (err) {
@@ -814,21 +824,23 @@ function eachAsyncSeries(arr, eachFn, callback) {
   eachFn(arr[idx], eachCallback);
 }
 
-function arrayStrictEqual(arr, arr2) {
+function arrayStrictEqual(arr: any, arr2: any) {
   if (!Array.isArray(arr) || !Array.isArray(arr2)) {
     return false;
   }
 
-  return arr.length === arr2.length && arr.every((elt, idx) => elt === arr2[idx]);
+  return arr.length === arr2.length && arr.every((elt: any, idx: any) => elt === arr2[idx]);
 }
 
-function tagsStrictEqual(tags, tags2) {
+function tagsStrictEqual(tags: any, tags2: any) {
   const tagsKeys = Object.keys(tags);
   const tags2Keys = Object.keys(tags2);
-  return tagsKeys.length === tags2Keys.length && tagsKeys.every(key => tags2[key] === tags[key]);
+  return (
+    tagsKeys.length === tags2Keys.length && tagsKeys.every((key: any) => tags2[key] === tags[key])
+  );
 }
 
-function errorStrictEqual(lhs, rhs) {
+function errorStrictEqual(lhs: any, rhs: any) {
   if (lhs === rhs) {
     return true;
   }
@@ -848,8 +860,8 @@ function errorStrictEqual(lhs, rhs) {
   return true;
 }
 
-function makeStateMachine(stateTable) {
-  return function stateTransition(target, newState) {
+function makeStateMachine(stateTable: any) {
+  return function stateTransition(target: any, newState: any) {
     const legalStates = stateTable[target.s.state];
     if (legalStates && legalStates.indexOf(newState) < 0) {
       throw new TypeError(
@@ -862,7 +874,7 @@ function makeStateMachine(stateTable) {
   };
 }
 
-function makeClientMetadata(options) {
+function makeClientMetadata(options: any) {
   options = options || {};
 
   const metadata = {
@@ -877,7 +889,7 @@ function makeClientMetadata(options) {
       version: os.release()
     },
     platform: `'Node.js ${process.version}, ${os.endianness} (unified)`
-  };
+  } as any;
 
   // support optionally provided wrapping driver info
   if (options.driverInfo) {
@@ -913,8 +925,8 @@ const noop = () => {};
  * @param {any} options an object of options
  * @param {string[]} list deprecated option keys
  */
-function emitDeprecatedOptionWarning(options, list) {
-  list.forEach(option => {
+function emitDeprecatedOptionWarning(options: any, list: any) {
+  list.forEach((option: any) => {
     if (options && typeof options[option] !== 'undefined') {
       emitDeprecationWarning(`option [${option}] is deprecated`);
     }
@@ -926,7 +938,7 @@ function now() {
   return Math.floor(hrtime[0] * 1000 + hrtime[1] / 1000000);
 }
 
-function calculateDurationInMs(started) {
+function calculateDurationInMs(started: any) {
   if (typeof started !== 'number') {
     throw TypeError('numeric value required to calculate duration');
   }
@@ -947,10 +959,10 @@ function calculateDurationInMs(started) {
  * @param {number} [options.minInterval] The minimum time which must pass between invocations of the provided function
  * @param {boolean} [options.immediate] Execute the function immediately when the interval is started
  */
-function makeInterruptableAsyncInterval(fn, options) {
-  let timerId;
-  let lastCallTime;
-  let lastWakeTime;
+function makeInterruptableAsyncInterval(fn: Function, options?: any) {
+  let timerId: any;
+  let lastCallTime: any;
+  let lastWakeTime: any;
   let stopped = false;
 
   options = options || {};
@@ -994,7 +1006,7 @@ function makeInterruptableAsyncInterval(fn, options) {
     lastWakeTime = 0;
   }
 
-  function reschedule(ms) {
+  function reschedule(ms: any) {
     if (stopped) return;
     clearTimeout(timerId);
     timerId = setTimeout(executeAndReschedule, ms || interval);
@@ -1004,7 +1016,7 @@ function makeInterruptableAsyncInterval(fn, options) {
     lastWakeTime = 0;
     lastCallTime = now();
 
-    fn(err => {
+    fn((err: any) => {
       if (err) throw err;
       reschedule(interval);
     });
@@ -1020,7 +1032,7 @@ function makeInterruptableAsyncInterval(fn, options) {
   return { wake, stop };
 }
 
-module.exports = {
+export {
   filterOptions,
   mergeOptions,
   translateOptions,
@@ -1034,7 +1046,7 @@ module.exports = {
   decorateCommand,
   isObject,
   debugOptions,
-  MAX_JS_INT: Number.MAX_SAFE_INTEGER + 1,
+  MAX_JS_INT,
   mergeOptionsAndWriteConcern,
   executeLegacyOperation,
   applyRetryableWrites,

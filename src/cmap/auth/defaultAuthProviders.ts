@@ -1,19 +1,17 @@
 'use strict';
-
-const MongoCR = require('./mongocr');
-const X509 = require('./x509');
-const Plain = require('./plain');
-const GSSAPI = require('./gssapi');
-const ScramSHA1 = require('./scram').ScramSHA1;
-const ScramSHA256 = require('./scram').ScramSHA256;
-const MongoDBAWS = require('./mongodb_aws');
+import MongoCR = require('./mongocr');
+import X509 = require('./x509');
+import Plain = require('./plain');
+import GSSAPI = require('./gssapi');
+import { ScramSHA1, ScramSHA256 } from './scram';
+import MongoDBAWS = require('./mongodb_aws');
 
 /**
  * Returns the default authentication providers.
  *
  * @returns {object} a mapping of auth names to auth types
  */
-function defaultAuthProviders() {
+function defaultAuthProviders(): object {
   return {
     'mongodb-aws': new MongoDBAWS(),
     mongocr: new MongoCR(),
@@ -25,4 +23,4 @@ function defaultAuthProviders() {
   };
 }
 
-module.exports = { defaultAuthProviders };
+export { defaultAuthProviders };

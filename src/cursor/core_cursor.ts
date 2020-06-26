@@ -1,15 +1,13 @@
 'use strict';
-
-const Logger = require('../logger');
-const ReadPreference = require('../read_preference');
-const { handleCallback, collationNotSupported, MongoDBNamespace } = require('../utils');
-const executeOperation = require('../operations/execute_operation');
-const { Readable } = require('stream');
-const { OperationBase } = require('../operations/operation');
-const { MongoError, MongoNetworkError } = require('../error');
-const {
-  BSON: { Long }
-} = require('../deps');
+import Logger = require('../logger');
+import ReadPreference = require('../read_preference');
+import { handleCallback, collationNotSupported, MongoDBNamespace } from '../utils';
+import executeOperation = require('../operations/execute_operation');
+import { Readable } from 'stream';
+import { OperationBase } from '../operations/operation';
+import { MongoError, MongoNetworkError } from '../error';
+import { BSON } from '../deps';
+const { Long } = BSON;
 
 // Possible states for a cursor
 const CursorState = {
@@ -19,6 +17,10 @@ const CursorState = {
   GET_MORE: 3
 };
 
+interface CoreCursor {
+  close(options?: any, callback?: Function): Promise<void>;
+}
+
 /**
  * This is a cursor results callback
  *
@@ -27,7 +29,7 @@ const CursorState = {
  * @param {object} document
  */
 
-/**
+ /**
  * The **CoreCursor** class is an internal class that embodies a cursor on MongoDB
  * allowing for iteration over the results returned from the underlying query.
  *
@@ -38,6 +40,20 @@ const CursorState = {
  * @property {number} cursorSkip The current cursorSkip for the cursor
  */
 class CoreCursor extends Readable {
+  operation: any;
+  pool: any;
+  server: any;
+  disconnectHandler: any;
+  ns: any;
+  namespace: any;
+  cmd: any;
+  options: any;
+  topology: any;
+  cursorState: any;
+  logger: any;
+  s: any;
+  query: any;
+
   /**
    * Create a new core `Cursor` instance.
    * **NOTE** Not to be instantiated directly
@@ -52,7 +68,7 @@ class CoreCursor extends Readable {
    * @param {Function} [options.transforms.query] Transform the value returned from the initial query
    * @param {Function} [options.transforms.doc] Transform each document returned from Cursor.prototype._next
    */
-  constructor(topology, ns, cmd, options) {
+  constructor(topology: any, ns: any, cmd: any, options?: any) {
     super({ objectMode: true });
     options = options || {};
 
@@ -146,7 +162,7 @@ class CoreCursor extends Readable {
     }
   }
 
-  setCursorBatchSize(value) {
+  setCursorBatchSize(value: any) {
     this.cursorState.batchSize = value;
   }
 
@@ -154,7 +170,7 @@ class CoreCursor extends Readable {
     return this.cursorState.batchSize;
   }
 
-  setCursorLimit(value) {
+  setCursorLimit(value: any) {
     this.cursorState.limit = value;
   }
 
@@ -162,7 +178,7 @@ class CoreCursor extends Readable {
     return this.cursorState.limit;
   }
 
-  setCursorSkip(value) {
+  setCursorSkip(value: any) {
     this.cursorState.skip = value;
   }
 
@@ -176,7 +192,7 @@ class CoreCursor extends Readable {
    * @function
    * @param {resultCallback} callback A callback function
    */
-  _next(callback) {
+  _next(callback: any) {
     nextFunction(this, callback);
   }
 
@@ -186,7 +202,7 @@ class CoreCursor extends Readable {
    * @function
    * @returns {CoreCursor}
    */
-  clone() {
+  clone(): CoreCursor {
     return this.topology.cursor(this.ns, this.cmd, this.options);
   }
 
@@ -196,7 +212,7 @@ class CoreCursor extends Readable {
    * @function
    * @returns {boolean} A boolean signifying if the cursor is dead or not
    */
-  isDead() {
+  isDead(): boolean {
     return this.cursorState.dead === true;
   }
 
@@ -206,7 +222,7 @@ class CoreCursor extends Readable {
    * @function
    * @returns {boolean} A boolean signifying if the cursor was killed by the application
    */
-  isKilled() {
+  isKilled(): boolean {
     return this.cursorState.killed === true;
   }
 
@@ -216,7 +232,7 @@ class CoreCursor extends Readable {
    * @function
    * @returns {boolean} A boolean signifying if the cursor notified the callback
    */
-  isNotified() {
+  isNotified(): boolean {
     return this.cursorState.notified === true;
   }
 
@@ -226,7 +242,7 @@ class CoreCursor extends Readable {
    * @function
    * @returns {number} The number of items in the buffered documents
    */
-  bufferedCount() {
+  bufferedCount(): number {
     return this.cursorState.documents.length - this.cursorState.cursorIndex;
   }
 
@@ -237,7 +253,7 @@ class CoreCursor extends Readable {
    * @param {any} number
    * @returns {any[]} An array of buffered documents
    */
-  readBufferedDocuments(number) {
+  readBufferedDocuments(number: any): any[] {
     const unreadDocumentsLength = this.cursorState.documents.length - this.cursorState.cursorIndex;
     const length = number < unreadDocumentsLength ? number : unreadDocumentsLength;
     let elements = this.cursorState.documents.slice(
@@ -276,7 +292,7 @@ class CoreCursor extends Readable {
    *
    * @param {resultCallback} [callback] A callback function
    */
-  kill(callback) {
+  kill(callback?: any) {
     // Set cursor to dead
     this.cursorState.dead = true;
     this.cursorState.killed = true;
@@ -323,7 +339,7 @@ class CoreCursor extends Readable {
     }
 
     // Get the next item
-    this._next((err, result) => {
+    this._next((err?: any, result?: any) => {
       if (err) {
         if (this.listeners('error') && this.listeners('error').length > 0) {
           this.emit('error', err);
@@ -360,7 +376,7 @@ class CoreCursor extends Readable {
    * @param {any} [options]
    * @param {Function} [callback]
    */
-  _endSession(options, callback) {
+  _endSession(options?: any, callback?: Function) {
     if (typeof options === 'function') {
       callback = options;
       options = {};
@@ -387,7 +403,7 @@ class CoreCursor extends Readable {
     return false;
   }
 
-  _getMore(callback) {
+  _getMore(callback: Function) {
     if (this.logger.isDebug()) {
       this.logger.debug(`schedule getMore call for query [${JSON.stringify(this.query)}]`);
     }
@@ -402,22 +418,27 @@ class CoreCursor extends Readable {
     }
 
     const cursorState = this.cursorState;
-    this.server.getMore(this.ns, cursorState, batchSize, this.options, (err, result, conn) => {
-      // NOTE: `getMore` modifies `cursorState`, would be very ideal not to do so in the future
-      if (err || (cursorState.cursorId && cursorState.cursorId.isZero())) {
-        this._endSession();
+    this.server.getMore(
+      this.ns,
+      cursorState,
+      batchSize,
+      this.options,
+      (err: any, result: any, conn: any) => {
+        // NOTE: `getMore` modifies `cursorState`, would be very ideal not to do so in the future
+        if (err || (cursorState.cursorId && cursorState.cursorId.isZero())) {
+          this._endSession();
+        }
+        callback(err, result, conn);
       }
-
-      callback(err, result, conn);
-    });
+    );
   }
 
-  _initializeCursor(callback) {
+  _initializeCursor(callback: Function) {
     const cursor = this;
 
     // NOTE: this goes away once cursors use `executeOperation`
     if (cursor.topology.shouldCheckForSessionSupport()) {
-      cursor.topology.selectServer(ReadPreference.primaryPreferred, err => {
+      cursor.topology.selectServer(ReadPreference.primaryPreferred, (err: any) => {
         if (err) {
           callback(err);
           return;
@@ -429,7 +450,7 @@ class CoreCursor extends Readable {
       return;
     }
 
-    function done(err, result) {
+    function done(err?: any, result?: any) {
       const cursorState = cursor.cursorState;
       if (err || (cursorState.cursorId && cursorState.cursorId.isZero())) {
         cursor._endSession();
@@ -448,7 +469,7 @@ class CoreCursor extends Readable {
       callback(err, result);
     }
 
-    const queryCallback = (err, r) => {
+    const queryCallback = (err?: any, r?: any) => {
       if (err) {
         return done(err);
       }
@@ -527,7 +548,7 @@ class CoreCursor extends Readable {
         );
       }
 
-      executeOperation(cursor.topology, cursor.operation, (err, result) => {
+      executeOperation(cursor.topology, cursor.operation, (err?: any, result?: any) => {
         if (err) {
           done(err);
           return;
@@ -548,7 +569,7 @@ class CoreCursor extends Readable {
     }
 
     // Very explicitly choose what is passed to selectServer
-    const serverSelectOptions = {};
+    const serverSelectOptions = {} as any;
     if (cursor.cursorState.session) {
       serverSelectOptions.session = cursor.cursorState.session;
     }
@@ -559,7 +580,7 @@ class CoreCursor extends Readable {
       serverSelectOptions.readPreference = cursor.options.readPreference;
     }
 
-    return cursor.topology.selectServer(serverSelectOptions, (err, server) => {
+    return cursor.topology.selectServer(serverSelectOptions, (err?: any, server?: any) => {
       if (err) {
         const disconnectHandler = cursor.disconnectHandler;
         if (disconnectHandler != null) {
@@ -611,7 +632,7 @@ class CoreCursor extends Readable {
  * @param {any} self
  * @param {any} callback
  */
-function isConnectionDead(self, callback) {
+function isConnectionDead(self: any, callback: any) {
   if (self.pool && self.pool.isDestroyed()) {
     self.cursorState.killed = true;
     const err = new MongoNetworkError(
@@ -631,7 +652,7 @@ function isConnectionDead(self, callback) {
  * @param {any} self
  * @param {any} callback
  */
-function isCursorDeadButNotkilled(self, callback) {
+function isCursorDeadButNotkilled(self: any, callback: any) {
   // Cursor is dead but not marked killed, return null
   if (self.cursorState.dead && !self.cursorState.killed) {
     self.cursorState.killed = true;
@@ -648,7 +669,7 @@ function isCursorDeadButNotkilled(self, callback) {
  * @param {any} self
  * @param {any} callback
  */
-function isCursorDeadAndKilled(self, callback) {
+function isCursorDeadAndKilled(self: any, callback: any) {
   if (self.cursorState.dead && self.cursorState.killed) {
     handleCallback(callback, new MongoError('cursor is dead'));
     return true;
@@ -663,7 +684,7 @@ function isCursorDeadAndKilled(self, callback) {
  * @param {any} self
  * @param {any} callback
  */
-function isCursorKilled(self, callback) {
+function isCursorKilled(self: any, callback: any) {
   if (self.cursorState.killed) {
     setCursorNotified(self, callback);
     return true;
@@ -678,7 +699,7 @@ function isCursorKilled(self, callback) {
  * @param {any} self
  * @param {any} callback
  */
-function setCursorDeadAndNotified(self, callback) {
+function setCursorDeadAndNotified(self: any, callback: any) {
   self.cursorState.dead = true;
   setCursorNotified(self, callback);
 }
@@ -689,11 +710,11 @@ function setCursorDeadAndNotified(self, callback) {
  * @param {any} self
  * @param {any} callback
  */
-function setCursorNotified(self, callback) {
+function setCursorNotified(self: any, callback: any) {
   _setCursorNotifiedImpl(self, () => handleCallback(callback, null, null));
 }
 
-function _setCursorNotifiedImpl(self, callback) {
+function _setCursorNotifiedImpl(self: any, callback: Function) {
   self.cursorState.notified = true;
   self.cursorState.documents = [];
   self.cursorState.cursorIndex = 0;
@@ -706,7 +727,7 @@ function _setCursorNotifiedImpl(self, callback) {
   return callback();
 }
 
-function nextFunction(self, callback) {
+function nextFunction(self: any, callback: Function) {
   // We have notified about it
   if (self.cursorState.notified) {
     return callback(new Error('cursor is exhausted'));
@@ -744,7 +765,7 @@ function nextFunction(self, callback) {
       }
     }
 
-    self._initializeCursor((err, result) => {
+    self._initializeCursor((err?: any, result?: any) => {
       if (err || result === null) {
         callback(err, result);
         return;
@@ -780,7 +801,7 @@ function nextFunction(self, callback) {
     if (isConnectionDead(self, callback)) return;
 
     // Execute the next get more
-    self._getMore(function(err, doc, connection) {
+    self._getMore(function(err: any, doc: any, connection: any) {
       if (err) {
         return handleCallback(callback, err);
       }
@@ -871,7 +892,4 @@ function nextFunction(self, callback) {
   }
 }
 
-module.exports = {
-  CursorState,
-  CoreCursor
-};
+export { CursorState, CoreCursor };

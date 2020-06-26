@@ -1,5 +1,5 @@
 'use strict';
-const { MongoError } = require('../error');
+import { MongoError } from '../error';
 
 /**
  * An error indicating a connection pool is closed
@@ -8,7 +8,8 @@ const { MongoError } = require('../error');
  * @extends MongoError
  */
 class PoolClosedError extends MongoError {
-  constructor(pool) {
+  address: any;
+  constructor(pool: any) {
     super('Attempted to check out a connection from closed connection pool');
     this.name = 'MongoPoolClosedError';
     this.address = pool.address;
@@ -22,14 +23,13 @@ class PoolClosedError extends MongoError {
  * @extends MongoError
  */
 class WaitQueueTimeoutError extends MongoError {
-  constructor(pool) {
+  address: any;
+
+  constructor(pool: any) {
     super('Timed out while checking out a connection from connection pool');
     this.name = 'MongoWaitQueueTimeoutError';
     this.address = pool.address;
   }
 }
 
-module.exports = {
-  PoolClosedError,
-  WaitQueueTimeoutError
-};
+export { PoolClosedError, WaitQueueTimeoutError };

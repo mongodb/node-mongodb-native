@@ -1,24 +1,18 @@
 'use strict';
-
-const OperationBase = require('./operation').OperationBase;
-const handleCallback = require('../utils').handleCallback;
-
-let collection;
-function loadCollection() {
-  if (!collection) {
-    collection = require('../collection');
-  }
-  return collection;
-}
+import { OperationBase } from './operation';
+import { handleCallback } from '../utils';
+import { loadCollection } from '../dynamic_loaders';
 
 class CollectionsOperation extends OperationBase {
-  constructor(db, options) {
+  db: any;
+
+  constructor(db: any, options: any) {
     super(options);
 
     this.db = db;
   }
 
-  execute(callback) {
+  execute(callback: Function) {
     const db = this.db;
     let options = this.options;
 
@@ -26,10 +20,10 @@ class CollectionsOperation extends OperationBase {
 
     options = Object.assign({}, options, { nameOnly: true });
     // Let's get the collection names
-    db.listCollections({}, options).toArray((err, documents) => {
+    db.listCollections({}, options).toArray((err?: any, documents?: any) => {
       if (err != null) return handleCallback(callback, err, null);
       // Filter collections removing any illegal ones
-      documents = documents.filter(doc => {
+      documents = documents.filter((doc: any) => {
         return doc.name.indexOf('$') === -1;
       });
 
@@ -37,7 +31,7 @@ class CollectionsOperation extends OperationBase {
       handleCallback(
         callback,
         null,
-        documents.map(d => {
+        documents.map((d: any) => {
           return new Collection(
             db,
             db.s.topology,
@@ -52,4 +46,4 @@ class CollectionsOperation extends OperationBase {
   }
 }
 
-module.exports = CollectionsOperation;
+export = CollectionsOperation;

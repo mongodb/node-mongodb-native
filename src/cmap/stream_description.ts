@@ -1,5 +1,5 @@
 'use strict';
-const { parseServerType } = require('../sdam/server_description');
+import { parseServerType } from '../sdam/server_description';
 
 const RESPONSE_FIELDS = [
   'minWireVersion',
@@ -11,7 +11,17 @@ const RESPONSE_FIELDS = [
 ];
 
 class StreamDescription {
-  constructor(address, options) {
+  address: any;
+  type: any;
+  minWireVersion: any;
+  maxWireVersion: any;
+  maxBsonObjectSize: any;
+  maxMessageSizeBytes: any;
+  maxWriteBatchSize: any;
+  compressors: any;
+  compressor: any;
+
+  constructor(address: any, options: any) {
     this.address = address;
     this.type = parseServerType(null);
     this.minWireVersion = undefined;
@@ -25,21 +35,20 @@ class StreamDescription {
         : [];
   }
 
-  receiveResponse(response) {
+  receiveResponse(response: any) {
     this.type = parseServerType(response);
-
-    RESPONSE_FIELDS.forEach(field => {
+    RESPONSE_FIELDS.forEach((field: any) => {
       if (typeof response[field] !== 'undefined') {
-        this[field] = response[field];
+        (this as any)[field] = response[field];
       }
     });
 
     if (response.compression) {
-      this.compressor = this.compressors.filter(c => response.compression.indexOf(c) !== -1)[0];
+      this.compressor = this.compressors.filter(
+        (c: any) => response.compression.indexOf(c) !== -1
+      )[0];
     }
   }
 }
 
-module.exports = {
-  StreamDescription
-};
+export { StreamDescription };

@@ -1,16 +1,15 @@
 'use strict';
-
-const { emitDeprecatedOptionWarning } = require('../utils');
-const PromiseProvider = require('../promise_provider');
-const ReadPreference = require('../read_preference');
-const { Transform, PassThrough } = require('stream');
-const { deprecate } = require('util');
-const { MongoError } = require('../error');
-const { CoreCursor, CursorState } = require('./core_cursor');
-const { handleCallback, maybePromise, formattedOrderClause } = require('../utils');
-const executeOperation = require('../operations/execute_operation');
-const { each } = require('../operations/cursor_ops');
-const CountOperation = require('../operations/count');
+import { emitDeprecatedOptionWarning } from '../utils';
+import PromiseProvider = require('../promise_provider');
+import ReadPreference = require('../read_preference');
+import { Transform, PassThrough } from 'stream';
+import { deprecate } from 'util';
+import { MongoError } from '../error';
+import { CoreCursor, CursorState } from './core_cursor';
+import { handleCallback, maybePromise, formattedOrderClause } from '../utils';
+import executeOperation = require('../operations/execute_operation');
+import { each } from '../operations/cursor_ops';
+import CountOperation = require('../operations/count');
 
 /**
  * @file The **Cursor** class is an internal class that embodies a cursor on MongoDB
@@ -45,14 +44,14 @@ const CountOperation = require('../operations/count');
  * });
  */
 
-/**
+ /**
  * Namespace provided by the code module
  *
  * @external CoreCursor
  * @external Readable
  */
 
-// Flags allowed for cursor
+ // Flags allowed for cursor
 const flags = ['tailable', 'oplogReplay', 'noCursorTimeout', 'awaitData', 'exhaust', 'partial'];
 const fields = ['numberOfRetries', 'tailableRetryInterval'];
 
@@ -103,7 +102,7 @@ class Cursor extends CoreCursor {
    * @param {any} [cmd]
    * @param {any} [options]
    */
-  constructor(topology, ns, cmd, options) {
+  constructor(topology: any, ns: any, cmd?: any, options?: any) {
     super(topology, ns, cmd, options);
     if (this.operation) {
       options = this.operation.options;
@@ -164,7 +163,7 @@ class Cursor extends CoreCursor {
     return this.cmd.sort;
   }
 
-  _initializeCursor(callback) {
+  _initializeCursor(callback: Function) {
     if (this.operation && this.operation.session != null) {
       this.cursorState.session = this.operation.session;
     } else {
@@ -193,18 +192,18 @@ class Cursor extends CoreCursor {
    * @throws {MongoError}
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  hasNext(callback) {
+  hasNext(callback: Function): Promise<void> {
     if (this.s.state === CursorState.CLOSED || (this.isDead && this.isDead())) {
       throw MongoError.create({ message: 'Cursor is closed', driver: true });
     }
 
-    return maybePromise(callback, cb => {
+    return maybePromise(callback, (cb: any) => {
       const cursor = this;
       if (cursor.isNotified()) {
         return cb(null, false);
       }
 
-      cursor._next((err, doc) => {
+      cursor._next((err?: any, doc?: any) => {
         if (err) return cb(err);
         if (doc == null || cursor.s.state === CursorState.CLOSED || cursor.isDead()) {
           return cb(null, false);
@@ -225,8 +224,8 @@ class Cursor extends CoreCursor {
    * @throws {MongoError}
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  next(callback) {
-    return maybePromise(callback, cb => {
+  next(callback: Function): Promise<void> {
+    return maybePromise(callback, (cb: any) => {
       const cursor = this;
       if (cursor.s.state === CursorState.CLOSED || (cursor.isDead && cursor.isDead())) {
         cb(MongoError.create({ message: 'Cursor is closed', driver: true }));
@@ -241,7 +240,7 @@ class Cursor extends CoreCursor {
         }
       }
 
-      cursor._next((err, doc) => {
+      cursor._next((err?: any, doc?: any) => {
         if (err) return cb(err);
         cursor.s.state = CursorState.OPEN;
         cb(null, doc);
@@ -256,7 +255,7 @@ class Cursor extends CoreCursor {
    * @param {object} filter The filter object used for the cursor.
    * @returns {Cursor}
    */
-  filter(filter) {
+  filter(filter: object): Cursor {
     if (this.s.state === CursorState.CLOSED || this.s.state === CursorState.OPEN || this.isDead()) {
       throw MongoError.create({ message: 'Cursor is closed', driver: true });
     }
@@ -273,7 +272,7 @@ class Cursor extends CoreCursor {
    * @deprecated as of MongoDB 4.0
    * @returns {Cursor}
    */
-  maxScan(maxScan) {
+  maxScan(maxScan: object): Cursor {
     if (this.s.state === CursorState.CLOSED || this.s.state === CursorState.OPEN || this.isDead()) {
       throw MongoError.create({ message: 'Cursor is closed', driver: true });
     }
@@ -289,7 +288,7 @@ class Cursor extends CoreCursor {
    * @param {object} hint If specified, then the query system will only consider plans using the hinted index.
    * @returns {Cursor}
    */
-  hint(hint) {
+  hint(hint: object): Cursor {
     if (this.s.state === CursorState.CLOSED || this.s.state === CursorState.OPEN || this.isDead()) {
       throw MongoError.create({ message: 'Cursor is closed', driver: true });
     }
@@ -305,7 +304,7 @@ class Cursor extends CoreCursor {
    * @param {object} min Specify a $min value to specify the inclusive lower bound for a specific index in order to constrain the results of find(). The $min specifies the lower bound for all keys of a specific index in order.
    * @returns {Cursor}
    */
-  min(min) {
+  min(min: object): Cursor {
     if (this.s.state === CursorState.CLOSED || this.s.state === CursorState.OPEN || this.isDead()) {
       throw MongoError.create({ message: 'Cursor is closed', driver: true });
     }
@@ -321,7 +320,7 @@ class Cursor extends CoreCursor {
    * @param {object} max Specify a $max value to specify the exclusive upper bound for a specific index in order to constrain the results of find(). The $max specifies the upper bound for all keys of a specific index in order.
    * @returns {Cursor}
    */
-  max(max) {
+  max(max: object): Cursor {
     if (this.s.state === CursorState.CLOSED || this.s.state === CursorState.OPEN || this.isDead()) {
       throw MongoError.create({ message: 'Cursor is closed', driver: true });
     }
@@ -337,7 +336,7 @@ class Cursor extends CoreCursor {
    * @param {boolean} value the returnKey value.
    * @returns {Cursor}
    */
-  returnKey(value) {
+  returnKey(value: boolean): Cursor {
     if (this.s.state === CursorState.CLOSED || this.s.state === CursorState.OPEN || this.isDead()) {
       throw MongoError.create({ message: 'Cursor is closed', driver: true });
     }
@@ -353,7 +352,7 @@ class Cursor extends CoreCursor {
    * @param {object} value The $showDiskLoc option has now been deprecated and replaced with the showRecordId field. $showDiskLoc will still be accepted for OP_QUERY stye find.
    * @returns {Cursor}
    */
-  showRecordId(value) {
+  showRecordId(value: object): Cursor {
     if (this.s.state === CursorState.CLOSED || this.s.state === CursorState.OPEN || this.isDead()) {
       throw MongoError.create({ message: 'Cursor is closed', driver: true });
     }
@@ -370,7 +369,7 @@ class Cursor extends CoreCursor {
    * @deprecated as of MongoDB 4.0
    * @returns {Cursor}
    */
-  snapshot(value) {
+  snapshot(value: object): Cursor {
     if (this.s.state === CursorState.CLOSED || this.s.state === CursorState.OPEN || this.isDead()) {
       throw MongoError.create({ message: 'Cursor is closed', driver: true });
     }
@@ -388,7 +387,7 @@ class Cursor extends CoreCursor {
    * @throws {MongoError}
    * @returns {Cursor}
    */
-  setCursorOption(field, value) {
+  setCursorOption(field: string, value: object): Cursor {
     if (this.s.state === CursorState.CLOSED || this.s.state === CursorState.OPEN || this.isDead()) {
       throw MongoError.create({ message: 'Cursor is closed', driver: true });
     }
@@ -414,7 +413,7 @@ class Cursor extends CoreCursor {
    * @throws {MongoError}
    * @returns {Cursor}
    */
-  addCursorFlag(flag, value) {
+  addCursorFlag(flag: string, value: boolean): Cursor {
     if (this.s.state === CursorState.CLOSED || this.s.state === CursorState.OPEN || this.isDead()) {
       throw MongoError.create({ message: 'Cursor is closed', driver: true });
     }
@@ -443,7 +442,7 @@ class Cursor extends CoreCursor {
    * @throws {MongoError}
    * @returns {Cursor}
    */
-  addQueryModifier(name, value) {
+  addQueryModifier(name: string, value: any): Cursor {
     if (this.s.state === CursorState.CLOSED || this.s.state === CursorState.OPEN || this.isDead()) {
       throw MongoError.create({ message: 'Cursor is closed', driver: true });
     }
@@ -469,7 +468,7 @@ class Cursor extends CoreCursor {
    * @throws {MongoError}
    * @returns {Cursor}
    */
-  comment(value) {
+  comment(value: string): Cursor {
     if (this.s.state === CursorState.CLOSED || this.s.state === CursorState.OPEN || this.isDead()) {
       throw MongoError.create({ message: 'Cursor is closed', driver: true });
     }
@@ -486,7 +485,7 @@ class Cursor extends CoreCursor {
    * @throws {MongoError}
    * @returns {Cursor}
    */
-  maxAwaitTimeMS(value) {
+  maxAwaitTimeMS(value: number): Cursor {
     if (typeof value !== 'number') {
       throw MongoError.create({ message: 'maxAwaitTimeMS must be a number', driver: true });
     }
@@ -507,7 +506,7 @@ class Cursor extends CoreCursor {
    * @throws {MongoError}
    * @returns {Cursor}
    */
-  maxTimeMS(value) {
+  maxTimeMS(value: number): Cursor {
     if (typeof value !== 'number') {
       throw MongoError.create({ message: 'maxTimeMS must be a number', driver: true });
     }
@@ -528,7 +527,7 @@ class Cursor extends CoreCursor {
    * @throws {MongoError}
    * @returns {Cursor}
    */
-  project(value) {
+  project(value: object): Cursor {
     if (this.s.state === CursorState.CLOSED || this.s.state === CursorState.OPEN || this.isDead()) {
       throw MongoError.create({ message: 'Cursor is closed', driver: true });
     }
@@ -546,7 +545,7 @@ class Cursor extends CoreCursor {
    * @throws {MongoError}
    * @returns {Cursor}
    */
-  sort(keyOrList, direction) {
+  sort(keyOrList: any, direction?: number): Cursor {
     if (this.options.tailable) {
       throw MongoError.create({ message: "Tailable cursor doesn't support sorting", driver: true });
     }
@@ -561,8 +560,8 @@ class Cursor extends CoreCursor {
     // so we will us a Map
     if (Array.isArray(order) && Array.isArray(order[0])) {
       order = new Map(
-        order.map(x => {
-          const value = [x[0], null];
+        order.map((x: any) => {
+          const value: any = [x[0], null];
           if (x[1] === 'asc') {
             value[1] = 1;
           } else if (x[1] === 'desc') {
@@ -596,7 +595,7 @@ class Cursor extends CoreCursor {
    * @throws {MongoError}
    * @returns {Cursor}
    */
-  batchSize(value) {
+  batchSize(value: number): Cursor {
     if (this.options.tailable) {
       throw MongoError.create({
         message: "Tailable cursor doesn't support batchSize",
@@ -625,7 +624,7 @@ class Cursor extends CoreCursor {
    * @throws {MongoError}
    * @returns {Cursor}
    */
-  collation(value) {
+  collation(value: object): Cursor {
     this.cmd.collation = value;
     return this;
   }
@@ -638,7 +637,7 @@ class Cursor extends CoreCursor {
    * @throws {MongoError}
    * @returns {Cursor}
    */
-  limit(value) {
+  limit(value: number): Cursor {
     if (this.options.tailable) {
       throw MongoError.create({ message: "Tailable cursor doesn't support limit", driver: true });
     }
@@ -664,7 +663,7 @@ class Cursor extends CoreCursor {
    * @throws {MongoError}
    * @returns {Cursor}
    */
-  skip(value) {
+  skip(value: number): Cursor {
     if (this.options.tailable) {
       throw MongoError.create({ message: "Tailable cursor doesn't support skip", driver: true });
     }
@@ -718,7 +717,7 @@ class Cursor extends CoreCursor {
    * @throws {MongoError}
    * @returns {void}
    */
-  each(callback) {
+  each(callback: Function): void {
     // Rewind cursor state
     this.rewind();
     // Set current cursor to INIT
@@ -750,7 +749,7 @@ class Cursor extends CoreCursor {
    * @throws {MongoError}
    * @returns {Promise<void>|undefined} if no callback supplied
    */
-  forEach(iterator, callback) {
+  forEach(iterator: any, callback?: Function): Promise<void> | undefined {
     const Promise = PromiseProvider.get();
     // Rewind cursor state
     this.rewind();
@@ -759,25 +758,27 @@ class Cursor extends CoreCursor {
     this.s.state = CursorState.INIT;
 
     if (typeof callback === 'function') {
-      each(this, (err, doc) => {
+      each(this, (err?: any, doc?: any) => {
         if (err) {
-          callback(err);
+          callback!(err);
           return false;
         }
+
         if (doc != null) {
           iterator(doc);
           return true;
         }
+
         if (doc == null && callback) {
           const internalCallback = callback;
-          callback = null;
+          callback = undefined;
           internalCallback(null);
           return false;
         }
       });
     } else {
-      return new Promise((fulfill, reject) => {
-        each(this, (err, doc) => {
+      return new Promise((fulfill: any, reject: any) => {
+        each(this, (err?: any, doc?: any) => {
           if (err) {
             reject(err);
             return false;
@@ -801,7 +802,7 @@ class Cursor extends CoreCursor {
    * @throws {MongoError}
    * @returns {Cursor}
    */
-  setReadPreference(readPreference) {
+  setReadPreference(readPreference: any): Cursor {
     if (this.s.state !== CursorState.INIT) {
       throw MongoError.create({
         message: 'cannot change cursor readPreference after cursor has been accessed',
@@ -839,24 +840,24 @@ class Cursor extends CoreCursor {
    * @throws {MongoError}
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  toArray(callback) {
+  toArray(callback: Function): Promise<void> {
     if (this.options.tailable) {
       throw MongoError.create({
         message: 'Tailable cursor cannot be converted to array',
         driver: true
       });
     }
-    return maybePromise(callback, cb => {
-      const cursor = this;
-      const items = [];
 
+    return maybePromise(callback, (cb: any) => {
+      const cursor = this;
+      const items: any = [];
       // Reset cursor
       cursor.rewind();
       cursor.s.state = CursorState.INIT;
 
       // Fetch all the documents
       const fetchDocs = () => {
-        cursor._next((err, doc) => {
+        cursor._next((err?: any, doc?: any) => {
           if (err) {
             return handleCallback(cb, err);
           }
@@ -905,12 +906,13 @@ class Cursor extends CoreCursor {
    * @param {Cursor~countResultCallback} [callback] The result callback.
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  count(applySkipLimit, options, callback) {
+  count(applySkipLimit?: boolean, options?: any, callback?: Function): Promise<void> {
     if (this.cmd.query == null)
       throw MongoError.create({
         message: 'count can only be used with find command',
         driver: true
       });
+
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -937,11 +939,10 @@ class Cursor extends CoreCursor {
    * @param {Cursor~resultCallback} [callback] The result callback.
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  close(options, callback) {
+  close(options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, { skipKillCursors: false }, options);
-
-    return maybePromise(callback, cb => {
+    return maybePromise(callback!, (cb: any) => {
       this.s.state = CursorState.CLOSED;
       if (!options.skipKillCursors) {
         // Kill the cursor
@@ -962,11 +963,11 @@ class Cursor extends CoreCursor {
    * @param {Function} [transform] The mapping transformation method.
    * @returns {Cursor}
    */
-  map(transform) {
+  map(transform?: Function): Cursor {
     if (this.cursorState.transforms && this.cursorState.transforms.doc) {
       const oldTransform = this.cursorState.transforms.doc;
-      this.cursorState.transforms.doc = doc => {
-        return transform(oldTransform(doc));
+      this.cursorState.transforms.doc = (doc: any) => {
+        return transform!(oldTransform(doc));
       };
     } else {
       this.cursorState.transforms = { doc: transform };
@@ -981,11 +982,11 @@ class Cursor extends CoreCursor {
    * @function
    * @returns {boolean}
    */
-  isClosed() {
+  isClosed(): boolean {
     return this.isDead();
   }
 
-  destroy(err) {
+  destroy(err: any) {
     if (err) this.emit('error', err);
     this.pause();
     this.close();
@@ -1000,7 +1001,7 @@ class Cursor extends CoreCursor {
    * @returns {Cursor}
    * TODO: replace this method with transformStream in next major release
    */
-  stream(options) {
+  stream(options?: any): Cursor {
     this.cursorState.streamOptions = options || {};
     return this;
   }
@@ -1013,12 +1014,12 @@ class Cursor extends CoreCursor {
    * @param {object} [options] Optional settings.
    * @param {Function} [options.transform] A transformation method applied to each document emitted by the stream.
    */
-  transformStream(options) {
+  transformStream(options?: any) {
     const streamOptions = options || {};
     if (typeof streamOptions.transform === 'function') {
       const stream = new Transform({
         objectMode: true,
-        transform: function(chunk, encoding, callback) {
+        transform: function(chunk: any, encoding: any, callback: Function) {
           this.push(streamOptions.transform(chunk));
           callback();
         }
@@ -1037,7 +1038,7 @@ class Cursor extends CoreCursor {
    * @param {Cursor~resultCallback} [callback] The result callback.
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  explain(callback) {
+  explain(callback: Function): Promise<void> {
     // NOTE: the next line includes a special case for operations which do not
     //       subclass `CommandOperationV2`. To be removed asap.
     if (this.operation && this.operation.cmd == null) {
@@ -1052,7 +1053,8 @@ class Cursor extends CoreCursor {
     if (this.cmd.readConcern) {
       delete this.cmd['readConcern'];
     }
-    return maybePromise(callback, cb => {
+
+    return maybePromise(callback, (cb: any) => {
       CoreCursor.prototype._next.apply(this, [cb]);
     });
   }
@@ -1063,7 +1065,7 @@ class Cursor extends CoreCursor {
    * @function
    * @returns {Logger} return the cursor logger
    */
-  getLogger() {
+  getLogger(): any {
     return this.logger;
   }
 }
@@ -1108,67 +1110,4 @@ deprecate(
   'Cursor Snapshot is deprecated, and will be removed in a later version'
 );
 
-/**
- * The read() method pulls some data out of the internal buffer and returns it. If there is no data available, then it will return null.
- *
- * @function external:Readable#read
- * @param {number} size Optional argument to specify how much data to read.
- * @returns {(string|Buffer|null)}
- */
-
-/**
- * Call this function to cause the stream to return strings of the specified encoding instead of Buffer objects.
- *
- * @function external:Readable#setEncoding
- * @param {string} encoding The encoding to use.
- * @returns {null}
- */
-
-/**
- * This method will cause the readable stream to resume emitting data events.
- *
- * @function external:Readable#resume
- * @returns {null}
- */
-
-/**
- * This method will cause a stream in flowing-mode to stop emitting data events. Any data that becomes available will remain in the internal buffer.
- *
- * @function external:Readable#pause
- * @returns {null}
- */
-
-/**
- * This method pulls all the data out of a readable stream, and writes it to the supplied destination, automatically managing the flow so that the destination is not overwhelmed by a fast readable stream.
- *
- * @function external:Readable#pipe
- * @param {Writable} destination The destination for writing data
- * @param {object} [options] Pipe options
- * @returns {null}
- */
-
-/**
- * This method will remove the hooks set up for a previous pipe() call.
- *
- * @function external:Readable#unpipe
- * @param {Writable} [destination] The destination for writing data
- * @returns {null}
- */
-
-/**
- * This is useful in certain cases where a stream is being consumed by a parser, which needs to "un-consume" some data that it has optimistically pulled out of the source, so that the stream can be passed on to some other party.
- *
- * @function external:Readable#unshift
- * @param {(Buffer|string)} chunk Chunk of data to unshift onto the read queue.
- * @returns {null}
- */
-
-/**
- * Versions of Node prior to v0.10 had streams that did not implement the entire Streams API as it is today. (See "Compatibility" below for more information.)
- *
- * @function external:Readable#wrap
- * @param {Stream} stream An "old style" readable stream.
- * @returns {null}
- */
-
-module.exports = Cursor;
+export = Cursor;

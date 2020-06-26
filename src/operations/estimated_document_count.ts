@@ -1,16 +1,17 @@
 'use strict';
-
-const Aspect = require('./operation').Aspect;
-const defineAspects = require('./operation').defineAspects;
-const CommandOperationV2 = require('./command_v2');
+import { Aspect, defineAspects } from './operation';
+import CommandOperationV2 = require('./command_v2');
 
 class EstimatedDocumentCountOperation extends CommandOperationV2 {
+  collectionName: string;
+  query?: any;
+
   /**
    * @param {Collection} collection
    * @param {object} [query]
    * @param {object} [options]
    */
-  constructor(collection, query, options) {
+  constructor(collection: any, query?: object, options?: object) {
     if (typeof options === 'undefined') {
       options = query;
       query = undefined;
@@ -23,9 +24,9 @@ class EstimatedDocumentCountOperation extends CommandOperationV2 {
     }
   }
 
-  execute(server, callback) {
+  execute(server: any, callback: Function) {
     const options = this.options;
-    const cmd = { count: this.collectionName };
+    const cmd = { count: this.collectionName } as any;
 
     if (this.query) {
       cmd.query = this.query;
@@ -43,7 +44,7 @@ class EstimatedDocumentCountOperation extends CommandOperationV2 {
       cmd.hint = options.hint;
     }
 
-    super.executeCommand(server, cmd, (err, response) => {
+    super.executeCommand(server, cmd, (err?: any, response?: any) => {
       if (err) {
         callback(err);
         return;
@@ -60,4 +61,4 @@ defineAspects(EstimatedDocumentCountOperation, [
   Aspect.EXECUTE_WITH_SELECTION
 ]);
 
-module.exports = EstimatedDocumentCountOperation;
+export = EstimatedDocumentCountOperation;

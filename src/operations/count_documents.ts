@@ -1,9 +1,8 @@
 'use strict';
-
-const AggregateOperation = require('./aggregate');
+import AggregateOperation = require('./aggregate');
 
 class CountDocumentsOperation extends AggregateOperation {
-  constructor(collection, query, options) {
+  constructor(collection: any, query: any, options: any) {
     const pipeline = [];
     pipeline.push({ $match: query });
 
@@ -20,8 +19,8 @@ class CountDocumentsOperation extends AggregateOperation {
     super(collection, pipeline, options);
   }
 
-  execute(server, callback) {
-    super.execute(server, (err, result) => {
+  execute(server: any, callback: Function) {
+    super.execute(server, (err?: any, result?: any) => {
       if (err) {
         callback(err, null);
         return;
@@ -40,4 +39,4 @@ class CountDocumentsOperation extends AggregateOperation {
   }
 }
 
-module.exports = CountDocumentsOperation;
+export = CountDocumentsOperation;

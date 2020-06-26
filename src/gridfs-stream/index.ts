@@ -1,11 +1,9 @@
 'use strict';
-const { EventEmitter } = require('events');
-const GridFSBucketReadStream = require('./download');
-const GridFSBucketWriteStream = require('./upload');
-const toError = require('../utils').toError;
-const { executeLegacyOperation } = require('../utils');
-
-const DEFAULT_GRIDFS_BUCKET_OPTIONS = {
+import { EventEmitter } from 'events';
+import GridFSBucketReadStream = require('./download');
+import GridFSBucketWriteStream = require('./upload');
+import { toError, executeLegacyOperation } from '../utils';
+const DEFAULT_GRIDFS_BUCKET_OPTIONS: any = {
   bucketName: 'fs',
   chunkSizeBytes: 255 * 1024
 };
@@ -25,7 +23,9 @@ const DEFAULT_GRIDFS_BUCKET_OPTIONS = {
  */
 
 class GridFSBucket extends EventEmitter {
-  constructor(db, options) {
+  s: any;
+
+  constructor(db: any, options: any) {
     super();
     this.setMaxListeners(0);
 
@@ -78,7 +78,7 @@ class GridFSBucket extends EventEmitter {
    * @returns {GridFSBucketWriteStream}
    */
 
-  openUploadStream(filename, options) {
+  openUploadStream(filename: any, options: any) {
     if (options) {
       options = Object.assign({}, options);
     } else {
@@ -107,7 +107,7 @@ class GridFSBucket extends EventEmitter {
    * @returns {GridFSBucketWriteStream}
    */
 
-  openUploadStreamWithId(id, filename, options) {
+  openUploadStreamWithId(id: any, filename: any, options: any) {
     if (options) {
       options = Object.assign({}, options);
     } else {
@@ -135,7 +135,7 @@ class GridFSBucket extends EventEmitter {
    * @returns {GridFSBucketReadStream}
    */
 
-  openDownloadStream(id, options) {
+  openDownloadStream(id: any, options: any) {
     var filter = { _id: id };
     options = {
       start: options && options.start,
@@ -159,7 +159,7 @@ class GridFSBucket extends EventEmitter {
    * @param {GridFSBucket~errorCallback} [callback]
    */
 
-  delete(id, callback) {
+  delete(id: any, callback: Function) {
     return executeLegacyOperation(this.s.db.s.topology, _delete, [this, id, callback], {
       skipSessions: true
     });
@@ -180,7 +180,7 @@ class GridFSBucket extends EventEmitter {
    * @returns {Cursor}
    */
 
-  find(filter, options) {
+  find(filter: any, options: any) {
     filter = filter || {};
     options = options || {};
 
@@ -224,7 +224,7 @@ class GridFSBucket extends EventEmitter {
    * @returns {GridFSBucketReadStream}
    */
 
-  openDownloadStreamByName(filename, options) {
+  openDownloadStreamByName(filename: any, options: any) {
     var sort = { uploadDate: -1 };
     var skip = null;
     if (options && options.revision != null) {
@@ -261,7 +261,7 @@ class GridFSBucket extends EventEmitter {
    * @param {GridFSBucket~errorCallback} [callback]
    */
 
-  rename(id, filename, callback) {
+  rename(id: any, filename: any, callback: Function) {
     return executeLegacyOperation(this.s.db.s.topology, _rename, [this, id, filename, callback], {
       skipSessions: true
     });
@@ -274,7 +274,7 @@ class GridFSBucket extends EventEmitter {
    * @param {GridFSBucket~errorCallback} [callback]
    */
 
-  drop(callback) {
+  drop(callback: Function) {
     return executeLegacyOperation(this.s.db.s.topology, _drop, [this, callback], {
       skipSessions: true
     });
@@ -286,18 +286,18 @@ class GridFSBucket extends EventEmitter {
    * @function
    * @returns {Logger} return the db logger
    */
-  getLogger() {
+  getLogger(): any {
     return this.s.db.s.logger;
   }
 }
 
-function _delete(_this, id, callback) {
-  _this.s._filesCollection.deleteOne({ _id: id }, (error, res) => {
+function _delete(_this: any, id: any, callback: Function) {
+  _this.s._filesCollection.deleteOne({ _id: id }, (error?: any, res?: any) => {
     if (error) {
       return callback(error);
     }
 
-    _this.s._chunksCollection.deleteMany({ files_id: id }, error => {
+    _this.s._chunksCollection.deleteMany({ files_id: id }, (error: any) => {
       if (error) {
         return callback(error);
       }
@@ -313,10 +313,10 @@ function _delete(_this, id, callback) {
   });
 }
 
-function _rename(_this, id, filename, callback) {
+function _rename(_this: any, id: any, filename: any, callback: Function) {
   var filter = { _id: id };
   var update = { $set: { filename } };
-  _this.s._filesCollection.updateOne(filter, update, (error, res) => {
+  _this.s._filesCollection.updateOne(filter, update, (error?: any, res?: any) => {
     if (error) {
       return callback(error);
     }
@@ -327,12 +327,12 @@ function _rename(_this, id, filename, callback) {
   });
 }
 
-function _drop(_this, callback) {
-  _this.s._filesCollection.drop(error => {
+function _drop(_this: any, callback: Function) {
+  _this.s._filesCollection.drop((error: any) => {
     if (error) {
       return callback(error);
     }
-    _this.s._chunksCollection.drop(error => {
+    _this.s._chunksCollection.drop((error: any) => {
       if (error) {
         return callback(error);
       }
@@ -342,12 +342,4 @@ function _drop(_this, callback) {
   });
 }
 
-/**
- * Callback format for all GridFSBucket methods that can accept a callback.
- *
- * @callback GridFSBucket~errorCallback
- * @param {MongoError|undefined} error If present, an error instance representing any errors that occurred
- * @param {any} result If present, a returned result for the method
- */
-
-module.exports = GridFSBucket;
+export = GridFSBucket;

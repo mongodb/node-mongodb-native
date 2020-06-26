@@ -1,22 +1,24 @@
 'use strict';
-const { EventEmitter } = require('events');
-
+import { EventEmitter } from 'events';
 class Instrumentation extends EventEmitter {
+  $MongoClient: any;
+  $prototypeConnect: any;
+
   constructor() {
     super();
   }
 
-  instrument(MongoClient, callback) {
+  instrument(MongoClient: any, callback: Function) {
     // store a reference to the original functions
     this.$MongoClient = MongoClient;
     const $prototypeConnect = (this.$prototypeConnect = MongoClient.prototype.connect);
 
     const instrumentation = this;
-    MongoClient.prototype.connect = function(callback) {
+    MongoClient.prototype.connect = function(callback: Function) {
       this.s.options.monitorCommands = true;
-      this.on('commandStarted', event => instrumentation.emit('started', event));
-      this.on('commandSucceeded', event => instrumentation.emit('succeeded', event));
-      this.on('commandFailed', event => instrumentation.emit('failed', event));
+      this.on('commandStarted', (event: any) => instrumentation.emit('started', event));
+      this.on('commandSucceeded', (event: any) => instrumentation.emit('succeeded', event));
+      this.on('commandFailed', (event: any) => instrumentation.emit('failed', event));
       return $prototypeConnect.call(this, callback);
     };
 
@@ -28,4 +30,4 @@ class Instrumentation extends EventEmitter {
   }
 }
 
-module.exports = Instrumentation;
+export = Instrumentation;

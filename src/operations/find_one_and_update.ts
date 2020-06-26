@@ -1,9 +1,8 @@
 'use strict';
-
-const FindAndModifyOperation = require('./find_and_modify');
+import FindAndModifyOperation = require('./find_and_modify');
 
 class FindOneAndUpdateOperation extends FindAndModifyOperation {
-  constructor(collection, filter, update, options) {
+  constructor(collection: any, filter: any, update: any, options: any) {
     // Final options
     const finalOptions = Object.assign({}, options);
     finalOptions.fields = options.projection;
@@ -16,4 +15,4 @@ class FindOneAndUpdateOperation extends FindAndModifyOperation {
   }
 }
 
-module.exports = FindOneAndUpdateOperation;
+export = FindOneAndUpdateOperation;

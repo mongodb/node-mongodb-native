@@ -1,20 +1,19 @@
 'use strict';
-
-const { EventEmitter } = require('events');
-const MessageStream = require('./message_stream');
-const { CommandResult } = require('./commands');
-const { StreamDescription } = require('./stream_description');
-const wp = require('./wire_protocol');
-const { CommandStartedEvent, CommandFailedEvent, CommandSucceededEvent } = require('./events');
-const { updateSessionFromResponse } = require('../sessions');
-const { uuidV4 } = require('../utils');
-const {
+import { EventEmitter } from 'events';
+import MessageStream = require('./message_stream');
+import { CommandResult } from './commands';
+import { StreamDescription } from './stream_description';
+import wp = require('./wire_protocol');
+import { CommandStartedEvent, CommandFailedEvent, CommandSucceededEvent } from './events';
+import { updateSessionFromResponse } from '../sessions';
+import { uuidV4 } from '../utils';
+import {
   MongoError,
   MongoNetworkError,
   MongoNetworkTimeoutError,
   MongoWriteConcernError
-} = require('../error');
-const { now, calculateDurationInMs } = require('../utils');
+} from '../error';
+import { now, calculateDurationInMs } from '../utils';
 
 const kStream = Symbol('stream');
 const kQueue = Symbol('queue');
@@ -27,9 +26,24 @@ const kIsMaster = Symbol('ismaster');
 const kAutoEncrypter = Symbol('autoEncrypter');
 
 class Connection extends EventEmitter {
-  constructor(stream, options) {
-    super(options);
+  id: any;
+  address: any;
+  socketTimeout: any;
+  monitorCommands: any;
+  closed: any;
+  destroyed: any;
+  [kDescription]: any;
+  [kGeneration]: any;
+  [kLastUseTime]: any;
+  [kAutoEncrypter]: any;
+  [kQueue]: any;
+  [kMessageStream]: any;
+  [kStream]: any;
+  [kIsMaster]: any;
+  [kClusterTime]: any;
 
+  constructor(stream: any, options: any) {
+    super(options);
     this.id = options.id;
     this.address = streamIdentifier(stream);
     this.socketTimeout = typeof options.socketTimeout === 'number' ? options.socketTimeout : 360000;
@@ -62,7 +76,7 @@ class Connection extends EventEmitter {
       }
 
       this.closed = true;
-      this[kQueue].forEach(op =>
+      this[kQueue].forEach((op: any) =>
         op.cb(new MongoNetworkError(`connection ${this.id} to ${this.address} closed`))
       );
       this[kQueue].clear();
@@ -77,7 +91,7 @@ class Connection extends EventEmitter {
 
       stream.destroy();
       this.closed = true;
-      this[kQueue].forEach(op =>
+      this[kQueue].forEach((op: any) =>
         op.cb(
           new MongoNetworkTimeoutError(`connection ${this.id} to ${this.address} timed out`, {
             beforeHandshake: this[kIsMaster] == null
@@ -103,7 +117,7 @@ class Connection extends EventEmitter {
   }
 
   // the `connect` method stores the result of the handshake ismaster on the connection
-  set ismaster(response) {
+  set ismaster(response: any) {
     this[kDescription].receiveResponse(response);
 
     // TODO: remove this, and only use the `StreamDescription` in the future
@@ -130,7 +144,7 @@ class Connection extends EventEmitter {
     this[kLastUseTime] = now();
   }
 
-  destroy(options, callback) {
+  destroy(options: any, callback: Function) {
     if (typeof options === 'function') {
       callback = options;
       options = {};
@@ -156,7 +170,7 @@ class Connection extends EventEmitter {
       return;
     }
 
-    this[kStream].end(err => {
+    this[kStream].end((err: any) => {
       this.destroyed = true;
       if (typeof callback === 'function') {
         callback(err);
@@ -165,31 +179,31 @@ class Connection extends EventEmitter {
   }
 
   // Wire protocol methods
-  command(ns, cmd, options, callback) {
+  command(ns: any, cmd: any, options: any, callback: Function) {
     wp.command(makeServerTrampoline(this), ns, cmd, options, callback);
   }
 
-  query(ns, cmd, cursorState, options, callback) {
+  query(ns: any, cmd: any, cursorState: any, options: any, callback: Function) {
     wp.query(makeServerTrampoline(this), ns, cmd, cursorState, options, callback);
   }
 
-  getMore(ns, cursorState, batchSize, options, callback) {
+  getMore(ns: any, cursorState: any, batchSize: any, options: any, callback: Function) {
     wp.getMore(makeServerTrampoline(this), ns, cursorState, batchSize, options, callback);
   }
 
-  killCursors(ns, cursorState, callback) {
+  killCursors(ns: any, cursorState: any, callback: Function) {
     wp.killCursors(makeServerTrampoline(this), ns, cursorState, callback);
   }
 
-  insert(ns, ops, options, callback) {
+  insert(ns: any, ops: any, options: any, callback: Function) {
     wp.insert(makeServerTrampoline(this), ns, ops, options, callback);
   }
 
-  update(ns, ops, options, callback) {
+  update(ns: any, ops: any, options: any, callback: Function) {
     wp.update(makeServerTrampoline(this), ns, ops, options, callback);
   }
 
-  remove(ns, ops, options, callback) {
+  remove(ns: any, ops: any, options: any, callback: Function) {
     wp.remove(makeServerTrampoline(this), ns, ops, options, callback);
   }
 }
@@ -197,14 +211,14 @@ class Connection extends EventEmitter {
 /// This lets us emulate a legacy `Server` instance so we can work with the existing wire
 /// protocol methods. Eventually, the operation executor will return a `Connection` to execute
 /// against.
-function makeServerTrampoline(connection) {
+function makeServerTrampoline(connection: any) {
   const server = {
     description: connection.description,
     clusterTime: connection[kClusterTime],
     s: {
       pool: { write: write.bind(connection), isConnected: () => true }
     }
-  };
+  } as any;
 
   if (connection[kAutoEncrypter]) {
     server.autoEncrypter = connection[kAutoEncrypter];
@@ -213,8 +227,8 @@ function makeServerTrampoline(connection) {
   return server;
 }
 
-function messageHandler(conn) {
-  return function messageHandler(message) {
+function messageHandler(conn: any) {
+  return function messageHandler(message: any) {
     // always emit the message, in case we are streaming
     conn.emit('message', message);
     if (!conn[kQueue].has(message.responseTo)) {
@@ -282,7 +296,7 @@ function messageHandler(conn) {
   };
 }
 
-function streamIdentifier(stream) {
+function streamIdentifier(stream: any) {
   if (typeof stream.address === 'function') {
     return `${stream.remoteAddress}:${stream.remotePort}`;
   }
@@ -291,7 +305,7 @@ function streamIdentifier(stream) {
 }
 
 // Not meant to be called directly, the wire protocol methods call this assuming it is a `Pool` instance
-function write(command, options, callback) {
+function write(this: any, command: any, options: any, callback: Function) {
   const connection = this;
   if (typeof options === 'function') {
     callback = options;
@@ -312,7 +326,7 @@ function write(command, options, callback) {
     promoteValues: typeof options.promoteValues === 'boolean' ? options.promoteValues : true,
     promoteBuffers: typeof options.promoteBuffers === 'boolean' ? options.promoteBuffers : false,
     raw: typeof options.raw === 'boolean' ? options.raw : false
-  };
+  } as any;
 
   if (connection[kDescription] && connection[kDescription].compressor) {
     operationDescription.agreedCompressor = connection[kDescription].compressor;
@@ -332,7 +346,7 @@ function write(command, options, callback) {
     connection.emit('commandStarted', new CommandStartedEvent(connection, command));
 
     operationDescription.started = now();
-    operationDescription.cb = (err, reply) => {
+    operationDescription.cb = (err?: any, reply?: any) => {
       if (err) {
         connection.emit(
           'commandFailed',
@@ -377,6 +391,4 @@ function write(command, options, callback) {
   }
 }
 
-module.exports = {
-  Connection
-};
+export { Connection };

@@ -1,19 +1,20 @@
 'use strict';
-
-const CommandOperationV2 = require('./command_v2');
-const { Aspect, defineAspects } = require('./operation');
-const { maxWireVersion } = require('../utils');
+import CommandOperationV2 = require('./command_v2');
+import { Aspect, defineAspects } from './operation';
+import { maxWireVersion } from '../utils';
 
 const LIST_INDEXES_WIRE_VERSION = 3;
 
 class ListIndexesOperation extends CommandOperationV2 {
-  constructor(collection, options) {
+  collectionNamespace: any;
+
+  constructor(collection: any, options: any) {
     super(collection, options, { fullResponse: true });
 
     this.collectionNamespace = collection.s.namespace;
   }
 
-  execute(server, callback) {
+  execute(server: any, callback: Function) {
     const serverWireVersion = maxWireVersion(server);
     if (serverWireVersion < LIST_INDEXES_WIRE_VERSION) {
       const systemIndexesNS = this.collectionNamespace.withCollection('system.indexes').toString();
@@ -38,4 +39,4 @@ defineAspects(ListIndexesOperation, [
   Aspect.EXECUTE_WITH_SELECTION
 ]);
 
-module.exports = ListIndexesOperation;
+export = ListIndexesOperation;

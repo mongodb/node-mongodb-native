@@ -1,14 +1,18 @@
 'use strict';
-
-const OperationBase = require('./operation').OperationBase;
-const Aspect = require('./operation').Aspect;
-const defineAspects = require('./operation').defineAspects;
-const ReadPreference = require('../read_preference');
-const maxWireVersion = require('../utils').maxWireVersion;
-const MongoError = require('../error').MongoError;
+import { OperationBase } from './operation';
+import { Aspect, defineAspects } from './operation';
+import ReadPreference = require('../read_preference');
+import { maxWireVersion } from '../utils';
+import { MongoError } from '../error';
 
 class FindOperation extends OperationBase {
-  constructor(collection, ns, command, options) {
+  ns: any;
+  cmd: any;
+  readPreference: any;
+  cursorState: any;
+  server: any;
+
+  constructor(collection: any, ns: any, command: any, options: any) {
     super(options);
 
     this.ns = ns;
@@ -16,7 +20,7 @@ class FindOperation extends OperationBase {
     this.readPreference = ReadPreference.resolve(collection, this.options);
   }
 
-  execute(server, callback) {
+  execute(server: any, callback: Function) {
     // copied from `CommandOperationV2`, to be subclassed in the future
     this.server = server;
 
@@ -37,4 +41,4 @@ defineAspects(FindOperation, [
   Aspect.EXECUTE_WITH_SELECTION
 ]);
 
-module.exports = FindOperation;
+export = FindOperation;

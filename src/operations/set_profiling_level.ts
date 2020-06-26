@@ -1,10 +1,12 @@
 'use strict';
-
-const CommandOperation = require('./command');
+import CommandOperation = require('./command');
 const levelValues = new Set(['off', 'slow_only', 'all']);
 
 class SetProfilingLevelOperation extends CommandOperation {
-  constructor(db, level, options) {
+  level: any;
+  profile: any;
+
+  constructor(db: any, level: any, options: any) {
     let profile = 0;
 
     if (level === 'off') {
@@ -29,14 +31,14 @@ class SetProfilingLevelOperation extends CommandOperation {
     return command;
   }
 
-  execute(callback) {
+  execute(callback: Function) {
     const level = this.level;
 
     if (!levelValues.has(level)) {
       return callback(new Error('Error: illegal profiling level value ' + level));
     }
 
-    super.execute((err, doc) => {
+    super.execute((err?: any, doc?: any) => {
       if (err == null && doc.ok === 1) return callback(null, level);
       return err != null
         ? callback(err, null)
@@ -45,4 +47,4 @@ class SetProfilingLevelOperation extends CommandOperation {
   }
 }
 
-module.exports = SetProfilingLevelOperation;
+export = SetProfilingLevelOperation;

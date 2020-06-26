@@ -1,10 +1,17 @@
 'use strict';
+import { MongoError } from '../../error';
+import { collectionNamespace } from '../../utils';
+import command = require('./command');
 
-const { MongoError } = require('../../error');
-const { collectionNamespace } = require('../../utils');
-const command = require('./command');
-
-function writeCommand(server, type, opsField, ns, ops, options, callback) {
+function writeCommand(
+  server: any,
+  type: any,
+  opsField: any,
+  ns: any,
+  ops: any,
+  options: any,
+  callback: Function
+) {
   if (ops.length === 0) throw new MongoError(`${type} must contain at least one document`);
   if (typeof options === 'function') {
     callback = options;
@@ -14,8 +21,7 @@ function writeCommand(server, type, opsField, ns, ops, options, callback) {
   options = options || {};
   const ordered = typeof options.ordered === 'boolean' ? options.ordered : true;
   const writeConcern = options.writeConcern;
-
-  const writeCommand = {};
+  const writeCommand: any = {} as any;
   writeCommand[type] = collectionNamespace(ns);
   writeCommand[opsField] = ops;
   writeCommand.ordered = ordered;
@@ -47,4 +53,4 @@ function writeCommand(server, type, opsField, ns, ops, options, callback) {
   command(server, ns, writeCommand, commandOptions, callback);
 }
 
-module.exports = writeCommand;
+export = writeCommand;

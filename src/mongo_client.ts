@@ -1,15 +1,14 @@
 'use strict';
-
-const Db = require('./db');
-const { EventEmitter } = require('events');
-const ChangeStream = require('./change_stream');
-const ReadPreference = require('./read_preference');
-const { MongoError } = require('./error');
-const WriteConcern = require('./write_concern');
-const { maybePromise, MongoDBNamespace } = require('./utils');
-const { deprecate } = require('util');
-const { connect, validOptions } = require('./operations/connect');
-const PromiseProvider = require('./promise_provider');
+import Db = require('./db');
+import { EventEmitter } from 'events';
+import ChangeStream = require('./change_stream');
+import ReadPreference = require('./read_preference');
+import { MongoError } from './error';
+import WriteConcern = require('./write_concern');
+import { maybePromise, MongoDBNamespace } from './utils';
+import { deprecate } from 'util';
+import { connect, validOptions } from './operations/connect';
+import PromiseProvider = require('./promise_provider');
 
 /**
  * A string specifying the level of a ReadConcern
@@ -35,6 +34,10 @@ const PromiseProvider = require('./promise_provider');
  * @property {string} [version] The version of the driver
  * @property {string} [platform] Optional platform information
  */
+
+interface MongoClient {
+  logout(options: any, callback: Function): void;
+}
 
 /**
  * The **MongoClient** class is a class that allows for making Connections to MongoDB.
@@ -69,6 +72,9 @@ const PromiseProvider = require('./promise_provider');
  * });
  */
 class MongoClient extends EventEmitter {
+  s: any;
+  topology: any;
+
   /**
    * Creates a new MongoClient instance
    *
@@ -155,7 +161,7 @@ class MongoClient extends EventEmitter {
    * @param {AutoEncrypter~AutoEncryptionOptions} [options.autoEncryption] Optionally enable client side auto encryption
    * @returns {MongoClient} a MongoClient instance
    */
-  constructor(url, options) {
+  constructor(url: string, options?: any) {
     super();
 
     if (options && options.promiseLibrary) {
@@ -200,17 +206,17 @@ class MongoClient extends EventEmitter {
    * @param {MongoClient~connectCallback} [callback] The command result callback
    * @returns {Promise<MongoClient>} returns Promise if no callback passed
    */
-  connect(callback) {
+  connect(callback: Function): Promise<MongoClient> {
     if (typeof callback === 'string') {
       throw new TypeError('`connect` only accepts a callback');
     }
 
     const client = this;
-    return maybePromise(callback, cb => {
+    return maybePromise(callback, (cb: any) => {
       const err = validOptions(client.s.options);
       if (err) return cb(err);
 
-      connect(client, client.s.url, client.s.options, err => {
+      connect(client, client.s.url, client.s.options, (err: any) => {
         if (err) return cb(err);
         cb(null, client);
       });
@@ -225,27 +231,27 @@ class MongoClient extends EventEmitter {
    * @param {Db~noResultCallback} [callback] The result callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  close(force, callback) {
+  close(force?: boolean, callback?: Function): Promise<void> {
     if (typeof force === 'function') {
       callback = force;
       force = false;
     }
 
     const client = this;
-    return maybePromise(callback, cb => {
+    return maybePromise(callback, (cb: any) => {
       if (client.topology == null) {
         cb();
         return;
       }
 
-      client.topology.close(force, err => {
+      client.topology.close(force, (err: any) => {
         const autoEncrypter = client.topology.s.options.autoEncrypter;
         if (!autoEncrypter) {
           cb(err);
           return;
         }
 
-        autoEncrypter.teardown(force, err2 => cb(err || err2));
+        autoEncrypter.teardown(force, (err2: any) => cb(err || err2));
       });
     });
   }
@@ -262,7 +268,7 @@ class MongoClient extends EventEmitter {
    * @param {boolean} [options.returnNonCachedInstance=false] Control if you want to return a cached instance or have a new one created
    * @returns {Db}
    */
-  db(dbName, options) {
+  db(dbName: string, options?: any): Db {
     options = options || {};
 
     // Default to db from connection string if not provided
@@ -301,7 +307,7 @@ class MongoClient extends EventEmitter {
    * @param {boolean} [options.returnNonCachedInstance=false] Control if you want to return a cached instance or have a new one created
    * @returns {boolean}
    */
-  isConnected(options) {
+  isConnected(options?: any): boolean {
     options = options || {};
 
     if (!this.topology) return false;
@@ -398,7 +404,7 @@ class MongoClient extends EventEmitter {
    * @param {MongoClient~connectCallback} [callback] The command result callback
    * @returns {Promise<MongoClient>} returns Promise if no callback passed
    */
-  static connect(url, options, callback) {
+  static connect(url: string, options?: any, callback?: Function): Promise<MongoClient> {
     const args = Array.prototype.slice.call(arguments, 1);
     callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
     options = args.length ? args.shift() : null;
@@ -411,7 +417,7 @@ class MongoClient extends EventEmitter {
     // Create client
     const mongoClient = new MongoClient(url, options);
     // Execute the connect method
-    return mongoClient.connect(callback);
+    return mongoClient.connect(callback!);
   }
 
   /**
@@ -420,7 +426,7 @@ class MongoClient extends EventEmitter {
    * @param {SessionOptions} [options] optional settings for a driver session
    * @returns {ClientSession} the newly established session
    */
-  startSession(options) {
+  startSession(options?: any): any {
     options = Object.assign({ explicit: true }, options);
     if (!this.topology) {
       throw new MongoError('Must connect to a server before calling this method');
@@ -443,12 +449,12 @@ class MongoClient extends EventEmitter {
    * @param {Function} operation An operation to execute with an implicitly created session. The signature of this MUST be `(session) => {}`
    * @returns {Promise<void>}
    */
-  withSession(options, operation) {
+  withSession(options?: object, operation?: Function): Promise<void> {
     if (typeof options === 'function') (operation = options), (options = undefined);
     const session = this.startSession(options);
     const Promise = PromiseProvider.get();
 
-    let cleanupHandler = (err, result, opts) => {
+    let cleanupHandler = (err: any, result: any, opts: any) => {
       // prevent multiple calls to cleanupHandler
       cleanupHandler = () => {
         throw new ReferenceError('cleanupHandler was called too many times');
@@ -464,10 +470,10 @@ class MongoClient extends EventEmitter {
     };
 
     try {
-      const result = operation(session);
+      const result = operation!(session);
       return Promise.resolve(result)
-        .then(result => cleanupHandler(null, result, undefined))
-        .catch(err => cleanupHandler(err, null, { throw: true }));
+        .then((result: any) => cleanupHandler(null, result, undefined))
+        .catch((err: any) => cleanupHandler(err, null, { throw: true }));
     } catch (err) {
       return cleanupHandler(err, null, { throw: false });
     }
@@ -491,7 +497,7 @@ class MongoClient extends EventEmitter {
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @returns {ChangeStream} a ChangeStream instance.
    */
-  watch(pipeline, options) {
+  watch(pipeline?: any[], options?: any): ChangeStream {
     pipeline = pipeline || [];
     options = options || {};
 
@@ -510,14 +516,14 @@ class MongoClient extends EventEmitter {
    * @function
    * @returns {Logger} return the mongo client logger
    */
-  getLogger() {
+  getLogger(): any {
     return this.s.options.logger;
   }
 }
 
-MongoClient.prototype.logout = deprecate((options, callback) => {
+MongoClient.prototype.logout = deprecate((options: any, callback: Function) => {
   if (typeof options === 'function') (callback = options), (options = {});
   if (typeof callback === 'function') callback(null, true);
 }, 'Multiple authentication is prohibited on a connected client, please only authenticate once per MongoClient');
 
-module.exports = MongoClient;
+export = MongoClient;

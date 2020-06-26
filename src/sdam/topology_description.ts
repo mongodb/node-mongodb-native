@@ -1,7 +1,7 @@
 'use strict';
-const { ServerDescription } = require('./server_description');
-const WIRE_CONSTANTS = require('../cmap/wire_protocol/constants');
-const { TopologyType, ServerType } = require('./common');
+import { ServerDescription } from './server_description';
+import WIRE_CONSTANTS = require('../cmap/wire_protocol/constants');
+import { TopologyType, ServerType } from './common';
 
 // contstants related to compatability checks
 const MIN_SUPPORTED_SERVER_VERSION = WIRE_CONSTANTS.MIN_SUPPORTED_SERVER_VERSION;
@@ -11,6 +11,20 @@ const MAX_SUPPORTED_WIRE_VERSION = WIRE_CONSTANTS.MAX_SUPPORTED_WIRE_VERSION;
 
 // Representation of a deployment of servers
 class TopologyDescription {
+  type: any;
+  setName: any;
+  maxSetVersion: any;
+  maxElectionId: any;
+  servers: any;
+  stale: any;
+  compatible: any;
+  compatibilityError: any;
+  logicalSessionTimeoutMinutes: any;
+  heartbeatFrequencyMS: any;
+  localThresholdMS: any;
+  commonWireVersion: any;
+  options: any;
+
   /**
    * Create a TopologyDescription
    *
@@ -23,13 +37,13 @@ class TopologyDescription {
    * @param {any} [options]
    */
   constructor(
-    topologyType,
-    serverDescriptions,
-    setName,
-    maxSetVersion,
-    maxElectionId,
-    commonWireVersion,
-    options
+    topologyType: string,
+    serverDescriptions?: any,
+    setName?: string,
+    maxSetVersion?: number,
+    maxElectionId?: any,
+    commonWireVersion?: any,
+    options?: any
   ) {
     options = options || {};
 
@@ -73,11 +87,11 @@ class TopologyDescription {
     // value among ServerDescriptions of all data-bearing server types. If any have a null
     // logicalSessionTimeoutMinutes, then TopologyDescription.logicalSessionTimeoutMinutes MUST be
     // set to null.
-    const readableServers = Array.from(this.servers.values()).filter(s => s.isReadable);
-    this.logicalSessionTimeoutMinutes = readableServers.reduce((result, server) => {
+    const readableServers = Array.from(this.servers.values()).filter((s: any) => s.isReadable);
+    this.logicalSessionTimeoutMinutes = readableServers.reduce((result: any, server: any) => {
       if (server.logicalSessionTimeoutMinutes == null) return null;
       if (result == null) return server.logicalSessionTimeoutMinutes;
-      return Math.min(result, server.logicalSessionTimeoutMinutes);
+      return Math.min(result!, server.logicalSessionTimeoutMinutes);
     }, null);
   }
 
@@ -86,7 +100,7 @@ class TopologyDescription {
    *
    * @param {SrvPollingEvent} ev The event
    */
-  updateFromSrvPollingEvent(ev) {
+  updateFromSrvPollingEvent(ev: any) {
     const newAddresses = ev.addresses();
     const serverDescriptions = new Map(this.servers);
     for (const server of this.servers) {
@@ -121,7 +135,7 @@ class TopologyDescription {
    *
    * @param {ServerDescription} serverDescription
    */
-  update(serverDescription) {
+  update(serverDescription: ServerDescription) {
     const address = serverDescription.address;
     // NOTE: there are a number of prime targets for refactoring here
     //       once we support destructuring assignments
@@ -247,7 +261,9 @@ class TopologyDescription {
   }
 
   get error() {
-    const descriptionsWithError = Array.from(this.servers.values()).filter(sd => sd.error);
+    const descriptionsWithError: any = Array.from(this.servers.values()).filter(
+      (sd: any) => sd.error
+    );
     if (descriptionsWithError.length > 0) {
       return descriptionsWithError[0].error;
     }
@@ -258,14 +274,14 @@ class TopologyDescription {
    * Determines if the topology description has any known servers
    */
   get hasKnownServers() {
-    return Array.from(this.servers.values()).some(sd => sd.type !== ServerType.Unknown);
+    return Array.from(this.servers.values()).some((sd: any) => sd.type !== ServerType.Unknown);
   }
 
   /**
    * Determines if this topology description has a data-bearing server available.
    */
   get hasDataBearingServers() {
-    return Array.from(this.servers.values()).some(sd => sd.isDataBearing);
+    return Array.from(this.servers.values()).some((sd: any) => sd.isDataBearing);
   }
 
   /**
@@ -274,12 +290,12 @@ class TopologyDescription {
    * @param {string} address
    * @returns {boolean} Whether the topology knows about this server
    */
-  hasServer(address) {
+  hasServer(address: string): boolean {
     return this.servers.has(address);
   }
 }
 
-function topologyTypeForServerType(serverType) {
+function topologyTypeForServerType(serverType: any) {
   switch (serverType) {
     case ServerType.Standalone:
       return TopologyType.Single;
@@ -295,7 +311,7 @@ function topologyTypeForServerType(serverType) {
   }
 }
 
-function compareObjectId(oid1, oid2) {
+function compareObjectId(oid1: any, oid2: any) {
   if (oid1 == null) {
     return -1;
   }
@@ -316,11 +332,11 @@ function compareObjectId(oid1, oid2) {
 }
 
 function updateRsFromPrimary(
-  serverDescriptions,
-  setName,
-  serverDescription,
-  maxSetVersion,
-  maxElectionId
+  serverDescriptions: any,
+  setName: any,
+  serverDescription: any,
+  maxSetVersion: any,
+  maxElectionId: any
 ) {
   setName = setName || serverDescription.setName;
   if (setName !== serverDescription.setName) {
@@ -369,7 +385,7 @@ function updateRsFromPrimary(
   }
 
   // Discover new hosts from this primary's response.
-  serverDescription.allHosts.forEach(address => {
+  serverDescription.allHosts.forEach((address: any) => {
     if (!serverDescriptions.has(address)) {
       serverDescriptions.set(address, new ServerDescription(address));
     }
@@ -379,15 +395,19 @@ function updateRsFromPrimary(
   const currentAddresses = Array.from(serverDescriptions.keys());
   const responseAddresses = serverDescription.allHosts;
   currentAddresses
-    .filter(addr => responseAddresses.indexOf(addr) === -1)
-    .forEach(address => {
+    .filter((addr: any) => responseAddresses.indexOf(addr) === -1)
+    .forEach((address: any) => {
       serverDescriptions.delete(address);
     });
 
   return [checkHasPrimary(serverDescriptions), setName, maxSetVersion, maxElectionId];
 }
 
-function updateRsWithPrimaryFromMember(serverDescriptions, setName, serverDescription) {
+function updateRsWithPrimaryFromMember(
+  serverDescriptions: any,
+  setName: any,
+  serverDescription: any
+) {
   if (setName == null) {
     throw new TypeError('setName is required');
   }
@@ -402,7 +422,11 @@ function updateRsWithPrimaryFromMember(serverDescriptions, setName, serverDescri
   return checkHasPrimary(serverDescriptions);
 }
 
-function updateRsNoPrimaryFromMember(serverDescriptions, setName, serverDescription) {
+function updateRsNoPrimaryFromMember(
+  serverDescriptions: any,
+  setName: any,
+  serverDescription: any
+) {
   let topologyType = TopologyType.ReplicaSetNoPrimary;
 
   setName = setName || serverDescription.setName;
@@ -411,7 +435,7 @@ function updateRsNoPrimaryFromMember(serverDescriptions, setName, serverDescript
     return [topologyType, setName];
   }
 
-  serverDescription.allHosts.forEach(address => {
+  serverDescription.allHosts.forEach((address: any) => {
     if (!serverDescriptions.has(address)) {
       serverDescriptions.set(address, new ServerDescription(address));
     }
@@ -424,7 +448,7 @@ function updateRsNoPrimaryFromMember(serverDescriptions, setName, serverDescript
   return [topologyType, setName];
 }
 
-function checkHasPrimary(serverDescriptions) {
+function checkHasPrimary(serverDescriptions: any) {
   for (const addr of serverDescriptions.keys()) {
     if (serverDescriptions.get(addr).type === ServerType.RSPrimary) {
       return TopologyType.ReplicaSetWithPrimary;
@@ -434,6 +458,4 @@ function checkHasPrimary(serverDescriptions) {
   return TopologyType.ReplicaSetNoPrimary;
 }
 
-module.exports = {
-  TopologyDescription
-};
+export { TopologyDescription };

@@ -1,9 +1,8 @@
 'use strict';
-
-const { Aspect, defineAspects } = require('./operation');
-const { MongoError } = require('../error');
-const CommandOperationV2 = require('./command_v2');
-const { maxWireVersion, parseIndexOptions } = require('../utils');
+import { Aspect, defineAspects } from './operation';
+import { MongoError } from '../error';
+import CommandOperationV2 = require('./command_v2');
+import { maxWireVersion, parseIndexOptions } from '../utils';
 
 const validIndexOptions = new Set([
   'unique',
@@ -16,7 +15,11 @@ const validIndexOptions = new Set([
 ]);
 
 class CreateIndexesOperation extends CommandOperationV2 {
-  constructor(parent, collection, indexes, options) {
+  collection: any;
+  onlyReturnNameOfCreatedIndex?: boolean;
+  indexes: any;
+
+  constructor(parent: any, collection: any, indexes: any, options: any) {
     super(parent, options);
     this.collection = collection;
 
@@ -33,7 +36,7 @@ class CreateIndexesOperation extends CommandOperationV2 {
       // Generate the index name
       const name = typeof options.name === 'string' ? options.name : indexParameters.name;
       // Set up the index
-      const indexSpec = { name, key: indexParameters.fieldHash };
+      const indexSpec: any = { name, key: indexParameters.fieldHash };
       // merge valid index options into the index spec
       for (let optionName in options) {
         if (validIndexOptions.has(optionName)) {
@@ -47,7 +50,7 @@ class CreateIndexesOperation extends CommandOperationV2 {
     this.indexes = indexes;
   }
 
-  execute(server, callback) {
+  execute(server: any, callback: Function) {
     const options = this.options;
     const indexes = this.indexes;
 
@@ -77,7 +80,7 @@ class CreateIndexesOperation extends CommandOperationV2 {
       }
     }
 
-    const cmd = { createIndexes: this.collection, indexes };
+    const cmd = { createIndexes: this.collection, indexes } as any;
 
     if (options.commitQuorum != null) {
       if (serverWireVersion < 9) {
@@ -92,7 +95,7 @@ class CreateIndexesOperation extends CommandOperationV2 {
     // collation is set on each index, it should not be defined at the root
     this.options.collation = undefined;
 
-    super.executeCommand(server, cmd, (err, result) => {
+    super.executeCommand(server, cmd, (err?: any, result?: any) => {
       if (err) {
         callback(err);
         return;
@@ -105,4 +108,4 @@ class CreateIndexesOperation extends CommandOperationV2 {
 
 defineAspects(CreateIndexesOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
 
-module.exports = CreateIndexesOperation;
+export = CreateIndexesOperation;
