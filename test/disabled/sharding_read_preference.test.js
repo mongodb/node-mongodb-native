@@ -1,9 +1,9 @@
 'use strict';
 const setupDatabase = require('./shared').setupDatabase;
 const expect = require('chai').expect;
-const MongoClient = require('../../index').MongoClient;
-const ReadPreference = require('../../index').ReadPreference;
-const Logger = require('../../index').Logger;
+const MongoClient = require('../..').MongoClient;
+const ReadPreference = require('../..').ReadPreference;
+const Logger = require('../..').Logger;
 
 describe('Sharding (Read Preference)', function() {
   before(function() {

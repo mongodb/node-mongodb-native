@@ -3,7 +3,7 @@ const test = require('./shared').assert,
   setupDatabase = require('./shared').setupDatabase,
   expect = require('chai').expect;
 
-const MongoError = require('../../index').MongoError;
+const MongoError = require('../..').MongoError;
 const ignoreNsNotFound = require('./shared').ignoreNsNotFound;
 
 describe('Bulk', function() {

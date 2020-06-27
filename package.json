@@ -2,9 +2,8 @@
   "name": "mongodb",
   "version": "3.5.4",
   "description": "The official MongoDB driver for Node.js",
-  "main": "index.js",
+  "main": "lib/index.js",
   "files": [
-    "index.js",
     "lib"
   ],
   "repository": {
@@ -75,7 +74,7 @@
     "check:atlas": "node test/tools/atlas_connectivity_tests.js",
     "check:bench": "node test/benchmarks/driverBench",
     "check:coverage": "nyc mocha --timeout 60000 --recursive test/functional test/unit",
-    "check:lint": "eslint -v && eslint index.js lib test",
+    "check:lint": "eslint -v && eslint lib test",
     "check:test": "mocha --recursive test/functional test/unit",
     "check:ts": "tsc --noEmit",
     "release": "standard-version -i HISTORY.md",

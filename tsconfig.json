@@ -12,7 +12,7 @@
     "lib": ["ES2018"],
     "noEmitHelpers": true,
     "noEmitOnError": true,
-    "outDir": "dist"
+    "outDir": "lib"
   },
   "include": ["src/**/*"]
 }

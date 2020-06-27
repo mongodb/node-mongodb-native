@@ -2,7 +2,7 @@
 const test = require('./shared').assert,
   setupDatabase = require('./shared').setupDatabase,
   expect = require('chai').expect;
-const { connect } = require('../..');
+const { MongoClient } = require('../..');
 
 describe('MongoClient Options', function() {
   before(function() {
@@ -14,7 +14,7 @@ describe('MongoClient Options', function() {
 
     test: function(done) {
       var configuration = this.configuration;
-      connect(
+      MongoClient.connect(
         configuration.url(),
         {
           autoReconnect: true,

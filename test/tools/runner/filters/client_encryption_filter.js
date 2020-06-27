@@ -1,6 +1,6 @@
 'use strict';
 
-const mongodb = require('../../../../index');
+const mongodb = require('../../../..');
 const semver = require('semver');
 
 /**
