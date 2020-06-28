@@ -333,7 +333,7 @@ function createTopology(mongoClient: any, options: any, callback: Function) {
           )
         );
       }
-      AutoEncrypter = mongodbClientEncryption.extension(require('../../index')).AutoEncrypter;
+      AutoEncrypter = mongodbClientEncryption.extension(require('../../src')).AutoEncrypter;
     } catch (err) {
       callback(err);
       return;
