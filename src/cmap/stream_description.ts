@@ -1,4 +1,3 @@
-'use strict';
 import { parseServerType } from '../sdam/server_description';
 
 const RESPONSE_FIELDS = [

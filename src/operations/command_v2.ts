@@ -1,4 +1,3 @@
-'use strict';
 import { Aspect, OperationBase } from './operation';
 import ReadConcern = require('../read_concern');
 import WriteConcern = require('../write_concern');

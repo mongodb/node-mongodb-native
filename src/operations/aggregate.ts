@@ -1,4 +1,3 @@
-'use strict';
 import CommandOperationV2 = require('./command_v2');
 import ReadPreference = require('../read_preference');
 import { MongoError } from '../error';

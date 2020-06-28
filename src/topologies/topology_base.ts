@@ -1,4 +1,3 @@
-'use strict';
 import { EventEmitter } from 'events';
 import { MongoError } from '../error';
 import { format as f } from 'util';

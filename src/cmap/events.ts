@@ -1,4 +1,3 @@
-'use strict';
 import { GetMore, KillCursor, Msg } from './commands';
 import { calculateDurationInMs } from '../utils';
 

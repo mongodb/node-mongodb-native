@@ -1,4 +1,3 @@
-'use strict';
 import { emitDeprecatedOptionWarning } from '../utils';
 import PromiseProvider = require('../promise_provider');
 import ReadPreference = require('../read_preference');
@@ -44,14 +43,14 @@ import CountOperation = require('../operations/count');
  * });
  */
 
- /**
+/**
  * Namespace provided by the code module
  *
  * @external CoreCursor
  * @external Readable
  */
 
- // Flags allowed for cursor
+// Flags allowed for cursor
 const flags = ['tailable', 'oplogReplay', 'noCursorTimeout', 'awaitData', 'exhaust', 'partial'];
 const fields = ['numberOfRetries', 'tailableRetryInterval'];
 

@@ -1,4 +1,3 @@
-'use strict';
 import { OperationBase } from './operation';
 import { applyWriteConcern, checkCollectionName, handleCallback, toError } from '../utils';
 import { executeDbAdminCommand } from './db_ops';

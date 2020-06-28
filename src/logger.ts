@@ -1,9 +1,8 @@
-'use strict';
 import { format as f } from 'util';
 import { MongoError } from './error';
 
 // Filters for classes
-let classFilters: any = {};
+const classFilters: any = {};
 let filteredClasses: any = {};
 let level: any = null;
 

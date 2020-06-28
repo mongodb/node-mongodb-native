@@ -1,5 +1,3 @@
-'use strict';
-
 // Resolves the default auth mechanism according to
 // https://github.com/mongodb/specifications/blob/master/source/auth/auth.rst
 function getDefaultAuthMechanism(ismaster: any) {

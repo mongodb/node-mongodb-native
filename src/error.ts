@@ -1,4 +1,3 @@
-'use strict';
 const kErrorLabels = Symbol('errorLabels');
 
 // From spec@https://github.com/mongodb/specifications/blob/f93d78191f3db2898a59013a7ed5650352ef6da8/source/change-streams/change-streams.rst#resumable-error

@@ -1,4 +1,3 @@
-'use strict';
 import { EventEmitter } from 'events';
 import Logger = require('../logger');
 import ReadPreference = require('../read_preference');

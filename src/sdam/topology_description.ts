@@ -1,4 +1,3 @@
-'use strict';
 import { ServerDescription } from './server_description';
 import WIRE_CONSTANTS = require('../cmap/wire_protocol/constants');
 import { TopologyType, ServerType } from './common';

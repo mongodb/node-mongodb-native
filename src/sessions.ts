@@ -1,4 +1,3 @@
-'use strict';
 import PromiseProvider = require('./promise_provider');
 import { EventEmitter } from 'events';
 import { BSON } from './deps';

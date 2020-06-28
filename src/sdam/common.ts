@@ -1,5 +1,3 @@
-'use strict';
-
 // shared state names
 const STATE_CLOSING = 'closing';
 const STATE_CLOSED = 'closed';

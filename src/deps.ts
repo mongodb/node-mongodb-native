@@ -1,4 +1,3 @@
-'use strict';
 const kModuleError = Symbol('moduleError');
 
 function makeErrorModule(error: any) {

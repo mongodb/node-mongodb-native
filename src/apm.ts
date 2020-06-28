@@ -1,4 +1,3 @@
-'use strict';
 import { EventEmitter } from 'events';
 class Instrumentation extends EventEmitter {
   $MongoClient: any;

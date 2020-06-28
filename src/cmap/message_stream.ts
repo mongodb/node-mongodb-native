@@ -1,4 +1,3 @@
-'use strict';
 const BufferList = require('bl');
 import { Duplex } from 'stream';
 import { Response, Msg, BinMsg } from './commands';
@@ -68,27 +67,27 @@ class MessageStream extends Duplex {
       { options: operationDescription },
       messageToBeCompressed,
       (err?: any, compressedMessage?: any) => {
-      if (err) {
-        operationDescription.cb(err, null);
-        return;
-      }
+        if (err) {
+          operationDescription.cb(err, null);
+          return;
+        }
 
-      // Create the msgHeader of OP_COMPRESSED
-      const msgHeader = Buffer.alloc(MESSAGE_HEADER_SIZE);
-      msgHeader.writeInt32LE(
-        MESSAGE_HEADER_SIZE + COMPRESSION_DETAILS_SIZE + compressedMessage.length,
-        0
-      ); // messageLength
-      msgHeader.writeInt32LE(command.requestId, 4); // requestID
-      msgHeader.writeInt32LE(0, 8); // responseTo (zero)
-      msgHeader.writeInt32LE(OP_COMPRESSED, 12); // opCode
+        // Create the msgHeader of OP_COMPRESSED
+        const msgHeader = Buffer.alloc(MESSAGE_HEADER_SIZE);
+        msgHeader.writeInt32LE(
+          MESSAGE_HEADER_SIZE + COMPRESSION_DETAILS_SIZE + compressedMessage.length,
+          0
+        ); // messageLength
+        msgHeader.writeInt32LE(command.requestId, 4); // requestID
+        msgHeader.writeInt32LE(0, 8); // responseTo (zero)
+        msgHeader.writeInt32LE(OP_COMPRESSED, 12); // opCode
 
-      // Create the compression details of OP_COMPRESSED
-      const compressionDetails = Buffer.alloc(COMPRESSION_DETAILS_SIZE);
-      compressionDetails.writeInt32LE(originalCommandOpCode, 0); // originalOpcode
-      compressionDetails.writeInt32LE(messageToBeCompressed.length, 4); // Size of the uncompressed compressedMessage, excluding the MsgHeader
-      compressionDetails.writeUInt8(compressorIDs[operationDescription.agreedCompressor], 8); // compressorID
-      this.push(Buffer.concat([msgHeader, compressionDetails, compressedMessage]));
+        // Create the compression details of OP_COMPRESSED
+        const compressionDetails = Buffer.alloc(COMPRESSION_DETAILS_SIZE);
+        compressionDetails.writeInt32LE(originalCommandOpCode, 0); // originalOpcode
+        compressionDetails.writeInt32LE(messageToBeCompressed.length, 4); // Size of the uncompressed compressedMessage, excluding the MsgHeader
+        compressionDetails.writeUInt8(compressorIDs[operationDescription.agreedCompressor], 8); // compressorID
+        this.push(Buffer.concat([msgHeader, compressionDetails, compressedMessage]));
       }
     );
   }

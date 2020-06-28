@@ -1,4 +1,3 @@
-'use strict';
 import { MongoError } from '../error';
 import { OperationBase } from './operation';
 import { insertDocuments } from './common_functions';

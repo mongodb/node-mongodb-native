@@ -1,4 +1,3 @@
-'use strict';
 import crypto = require('crypto');
 import { AuthProvider } from './auth_provider';
 

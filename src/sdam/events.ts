@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Published when server description changes, but does NOT include changes to the RTT.
  *

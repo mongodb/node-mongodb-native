@@ -1,4 +1,3 @@
-'use strict';
 import { arrayStrictEqual, tagsStrictEqual, errorStrictEqual } from '../utils';
 import { ServerType } from './common';
 import { now } from '../utils';

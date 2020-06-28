@@ -1,4 +1,3 @@
-'use strict';
 import { Aspect, defineAspects } from './operation';
 import CommandOperationV2 = require('./command_v2');
 

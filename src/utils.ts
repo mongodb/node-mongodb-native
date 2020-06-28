@@ -1,4 +1,3 @@
-'use strict';
 import PromiseProvider = require('./promise_provider');
 import os = require('os');
 import crypto = require('crypto');

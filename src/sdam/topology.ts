@@ -1,4 +1,3 @@
-'use strict';
 import { emitDeprecatedOptionWarning } from '../utils';
 import Denque = require('denque');
 import { EventEmitter } from 'events';

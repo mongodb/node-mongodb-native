@@ -1,4 +1,3 @@
-'use strict';
 import { BSON } from '../deps';
 import { BulkOperationBase, Batch, INSERT } from './common';
 import { toError } from '../utils';

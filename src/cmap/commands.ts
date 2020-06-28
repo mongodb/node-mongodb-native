@@ -1,4 +1,3 @@
-'use strict';
 import ReadPreference = require('../read_preference');
 import { BSON } from '../deps';
 import { databaseNamespace } from '../utils';
@@ -702,7 +701,7 @@ class BinMsg {
   requestId: any;
   responseTo: any;
   opCode: any;
-  fromCompressed : any;
+  fromCompressed: any;
   responseFlags: any;
   checksumPresent: any;
   moreToCome: any;

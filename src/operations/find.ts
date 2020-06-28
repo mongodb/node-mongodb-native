@@ -1,4 +1,3 @@
-'use strict';
 import { OperationBase } from './operation';
 import { Aspect, defineAspects } from './operation';
 import ReadPreference = require('../read_preference');

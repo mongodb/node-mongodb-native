@@ -1,4 +1,3 @@
-'use strict';
 import { OperationBase } from './operation';
 import { updateDocuments } from './common_functions';
 

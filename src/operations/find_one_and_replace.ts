@@ -1,4 +1,3 @@
-'use strict';
 import FindAndModifyOperation = require('./find_and_modify');
 
 class FindOneAndReplaceOperation extends FindAndModifyOperation {

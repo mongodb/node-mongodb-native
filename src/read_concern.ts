@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * The **ReadConcern** class is a class that represents a MongoDB ReadConcern.
  *

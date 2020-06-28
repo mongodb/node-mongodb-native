@@ -1,4 +1,3 @@
-'use strict';
 const needSlaveOk = ['primaryPreferred', 'secondary', 'secondaryPreferred', 'nearest'];
 
 /**

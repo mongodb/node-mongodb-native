@@ -1,4 +1,3 @@
-'use strict';
 import MongoCR = require('./mongocr');
 import X509 = require('./x509');
 import Plain = require('./plain');

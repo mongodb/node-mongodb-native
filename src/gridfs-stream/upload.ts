@@ -1,4 +1,3 @@
-'use strict';
 import PromiseProvider = require('../promise_provider');
 import crypto = require('crypto');
 import { Writable } from 'stream';

@@ -1,4 +1,3 @@
-'use strict';
 import { applyWriteConcern } from './utils';
 import AddUserOperation = require('./operations/add_user');
 import ExecuteDbAdminCommandOperation = require('./operations/execute_db_admin_command');

@@ -1,4 +1,3 @@
-'use strict';
 import { AuthProvider } from './auth_provider';
 
 class X509 extends AuthProvider {

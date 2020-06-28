@@ -1,11 +1,10 @@
-'use strict';
 import { Topology } from '../sdam/topology';
 import { ServerCapabilities } from './topology_base';
 import { Cursor } from '../cursor';
 import { translateOptions } from '../utils';
 
 class NativeTopology extends Topology {
-  s: any
+  s: any;
 
   constructor(servers: any, options: any) {
     options = options || {};

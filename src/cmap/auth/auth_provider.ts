@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Context used during authentication
  *

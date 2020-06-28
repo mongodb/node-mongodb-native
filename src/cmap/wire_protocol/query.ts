@@ -1,4 +1,3 @@
-'use strict';
 import command = require('./command');
 import { Query } from '../commands';
 import { MongoError } from '../../error';
@@ -150,7 +149,13 @@ function prepareFindCommand(server: any, ns: any, cmd: any, cursorState: any) {
   return findCmd;
 }
 
-function prepareLegacyFindQuery(server: any, ns: any, cmd: any, cursorState: any, options: any): any {
+function prepareLegacyFindQuery(
+  server: any,
+  ns: any,
+  cmd: any,
+  cursorState: any,
+  options: any
+): any {
   options = options || {};
   const readPreference = getReadPreference(cmd, options);
   cursorState.batchSize = cmd.batchSize || cursorState.batchSize;

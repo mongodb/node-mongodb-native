@@ -1,4 +1,3 @@
-'use strict';
 import { EventEmitter } from 'events';
 import MessageStream = require('./message_stream');
 import { CommandResult } from './commands';

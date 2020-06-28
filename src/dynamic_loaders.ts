@@ -1,4 +1,3 @@
-'use strict';
 let collection: any;
 let cursor: any;
 let db: any;

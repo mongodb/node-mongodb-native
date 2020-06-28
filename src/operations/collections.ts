@@ -1,4 +1,3 @@
-'use strict';
 import { OperationBase } from './operation';
 import { handleCallback } from '../utils';
 import { loadCollection } from '../dynamic_loaders';

@@ -1,4 +1,3 @@
-'use strict';
 import { Query, Msg } from '../commands';
 import { getReadPreference, isSharded } from './shared';
 import { isTransactionCommand } from '../../transactions';

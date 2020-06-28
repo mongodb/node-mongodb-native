@@ -1,4 +1,3 @@
-'use strict';
 import { OperationBase } from './operation';
 import BulkWriteOperation = require('./bulk_write');
 import { MongoError } from '../error';

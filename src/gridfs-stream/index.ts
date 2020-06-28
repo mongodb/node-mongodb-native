@@ -1,4 +1,3 @@
-'use strict';
 import { EventEmitter } from 'events';
 import GridFSBucketReadStream = require('./download');
 import GridFSBucketWriteStream = require('./upload');

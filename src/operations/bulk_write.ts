@@ -1,4 +1,3 @@
-'use strict';
 import { applyRetryableWrites, applyWriteConcern } from '../utils';
 import { MongoError } from '../error';
 import { OperationBase } from './operation';

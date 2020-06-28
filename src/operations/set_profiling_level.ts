@@ -1,4 +1,3 @@
-'use strict';
 import CommandOperation = require('./command');
 const levelValues = new Set(['off', 'slow_only', 'all']);
 

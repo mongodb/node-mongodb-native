@@ -1,4 +1,3 @@
-'use strict';
 import Denque = require('denque');
 import { EventEmitter } from 'events';
 import Logger = require('../logger');
@@ -110,7 +109,7 @@ function resolveOptions(options: any, defaults: any) {
  * @property {number} [waitQueueTimeoutMS=0] The maximum amount of time operation execution should wait for a connection to become available. The default is 0 which means there is no limit.
  */
 
- /**
+/**
  * A pool of connections which dynamically resizes, and emit events related to pool activity
  *
  * @property {number} generation An integer representing the SDAM generation of the pool
@@ -507,7 +506,6 @@ function processWaitQueue(pool: any) {
     return;
   }
 }
-
 
 /**
  * A callback provided to `withConnection`

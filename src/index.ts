@@ -1,4 +1,3 @@
-'use strict';
 import Instrumentation = require('./apm');
 import { BSON } from './deps';
 import { Cursor, AggregationCursor, CommandCursor } from './cursor';
@@ -39,7 +38,7 @@ function instrument(options: any, callback: Function) {
   const instrumentation = new Instrumentation();
   instrumentation.instrument(MongoClient, callback);
   return instrumentation;
-};
+}
 
 export {
   MongoError,
@@ -55,7 +54,6 @@ export {
   // Utils
   instrument,
   PromiseProvider as Promise,
-
   // Actual driver classes exported
   Admin,
   MongoClient,
@@ -67,7 +65,6 @@ export {
   CommandCursor,
   Cursor,
   GridFSBucket,
-
   // BSON types exported
   Binary,
   Code,
@@ -84,4 +81,4 @@ export {
   Timestamp,
   BSONRegExp,
   Decimal128
-}
+};

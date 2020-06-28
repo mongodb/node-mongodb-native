@@ -1,4 +1,3 @@
-'use strict';
 import ReadPreference = require('../read_preference');
 import { Aspect, OperationBase } from './operation';
 import { MongoError } from '../error';

@@ -1,4 +1,3 @@
-'use strict';
 import { ServerType } from '../../sdam/common';
 import { TopologyDescription } from '../../sdam/topology_description';
 import ReadPreference = require('../../read_preference');

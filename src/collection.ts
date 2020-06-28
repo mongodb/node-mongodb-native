@@ -1,4 +1,3 @@
-'use strict';
 import { emitDeprecatedOptionWarning } from './utils';
 import PromiseProvider = require('./promise_provider');
 import ReadPreference = require('./read_preference');
@@ -90,22 +89,8 @@ interface Collection {
   ): void;
   removeMany(filter: object, options?: any, callback?: Function): Promise<void>;
   removeOne(filter: object, options?: any, callback?: Function): Promise<void>;
-  findAndModify(
-    this: any,
-    query: any,
-    sort: any,
-    doc: any,
-    options: any,
-    callback: Function
-  ): any;
-  _findAndModify(
-    this: any,
-    query: any,
-    sort: any,
-    doc: any,
-    options: any,
-    callback: Function
-  ): any;
+  findAndModify(this: any, query: any, sort: any, doc: any, options: any, callback: Function): any;
+  _findAndModify(this: any, query: any, sort: any, doc: any, options: any, callback: Function): any;
 }
 
 /**
@@ -1316,13 +1301,13 @@ class Collection {
       // If it contains any of the admissible options pop it of the args
       options =
         opts &&
-          (opts.readPreference ||
-            opts.explain ||
-            opts.cursor ||
-            opts.out ||
-            opts.maxTimeMS ||
-            opts.hint ||
-            opts.allowDiskUse)
+        (opts.readPreference ||
+          opts.explain ||
+          opts.cursor ||
+          opts.out ||
+          opts.maxTimeMS ||
+          opts.hint ||
+          opts.allowDiskUse)
           ? args.pop()
           : {};
       // Left over arguments is the pipeline
@@ -1518,7 +1503,7 @@ Collection.prototype.find = deprecateOptions(
     deprecatedOptions: DEPRECATED_FIND_OPTIONS,
     optionsIndex: 1
   },
-  function (this: any, query: any, options: any) {
+  function(this: any, query: any, options: any) {
     if (arguments.length > 2) {
       throw new TypeError('Third parameter to `collection.find()` must be undefined');
     }
@@ -1539,10 +1524,10 @@ Collection.prototype.find = deprecateOptions(
       if (object_size !== object.length) {
         const error = new Error(
           'query selector raw message size does not match message header size [' +
-          object.length +
-          '] != [' +
-          object_size +
-          ']'
+            object.length +
+            '] != [' +
+            object_size +
+            ']'
         );
         error.name = 'MongoError';
         throw error;
@@ -1561,9 +1546,9 @@ Collection.prototype.find = deprecateOptions(
     if (projection && !Buffer.isBuffer(projection) && Array.isArray(projection)) {
       projection = projection.length
         ? projection.reduce((result: any, field: any) => {
-          result[field] = 1;
-          return result;
-        }, {})
+            result[field] = 1;
+            return result;
+          }, {})
         : { _id: 1 };
     }
 
@@ -1733,7 +1718,7 @@ Collection.prototype.find = deprecateOptions(
  * @returns {Promise<void>} returns Promise if no callback passed
  * @deprecated Use insertOne, insertMany or bulkWrite
  */
-Collection.prototype.insert = deprecate(function (
+Collection.prototype.insert = deprecate(function(
   this: any,
   docs: any,
   options: any,
@@ -1749,7 +1734,7 @@ Collection.prototype.insert = deprecate(function (
 
   return this.insertMany(docs, options, callback);
 },
-  'collection.insert is deprecated. Use insertOne, insertMany or bulkWrite instead.');
+'collection.insert is deprecated. Use insertOne, insertMany or bulkWrite instead.');
 
 /**
  * Updates documents.
@@ -1773,7 +1758,7 @@ Collection.prototype.insert = deprecate(function (
  * @returns {Promise<void>} returns Promise if no callback passed
  * @deprecated use updateOne, updateMany or bulkWrite
  */
-Collection.prototype.update = deprecate(function (
+Collection.prototype.update = deprecate(function(
   this: any,
   selector: any,
   update: any,
@@ -1797,7 +1782,7 @@ Collection.prototype.update = deprecate(function (
     callback
   ]);
 },
-  'collection.update is deprecated. Use updateOne, updateMany, or bulkWrite instead.');
+'collection.update is deprecated. Use updateOne, updateMany, or bulkWrite instead.');
 
 Collection.prototype.removeOne = Collection.prototype.deleteOne;
 Collection.prototype.removeMany = Collection.prototype.deleteMany;
@@ -1818,7 +1803,7 @@ Collection.prototype.removeMany = Collection.prototype.deleteMany;
  * @returns {Promise<void>} returns Promise if no callback passed
  * @deprecated use deleteOne, deleteMany or bulkWrite
  */
-Collection.prototype.remove = deprecate(function (
+Collection.prototype.remove = deprecate(function(
   this: any,
   selector: any,
   options: any,
@@ -1840,7 +1825,7 @@ Collection.prototype.remove = deprecate(function (
     callback
   ]);
 },
-  'collection.remove is deprecated. Use deleteOne, deleteMany, or bulkWrite instead.');
+'collection.remove is deprecated. Use deleteOne, deleteMany, or bulkWrite instead.');
 
 /**
  * Save a document. Simple full document replacement function. Not recommended for efficiency, use atomic
@@ -1857,7 +1842,7 @@ Collection.prototype.remove = deprecate(function (
  * @returns {Promise<void>} returns Promise if no callback passed
  * @deprecated use insertOne, insertMany, updateOne or updateMany
  */
-Collection.prototype.save = deprecate(function (
+Collection.prototype.save = deprecate(function(
   this: any,
   doc: any,
   options: any,
@@ -1874,7 +1859,7 @@ Collection.prototype.save = deprecate(function (
 
   return executeLegacyOperation(this.s.topology, save, [this, doc, options, callback]);
 },
-  'collection.save is deprecated. Use insertOne, insertMany, updateOne, or updateMany instead.');
+'collection.save is deprecated. Use insertOne, insertMany, updateOne, or updateMany instead.');
 
 /**
  * The callback format for results
@@ -1933,7 +1918,7 @@ Collection.prototype.findOne = deprecateOptions(
     deprecatedOptions: DEPRECATED_FIND_OPTIONS,
     optionsIndex: 1
   },
-  function (this: any, query: any, options: any, callback: Function) {
+  function(this: any, query: any, options: any, callback: Function) {
     if (callback !== undefined && typeof callback !== 'function') {
       throw new TypeError('Third parameter to `findOne()` must be a callback or undefined');
     }
@@ -1986,7 +1971,7 @@ Collection.prototype.dropAllIndexes = deprecate(
  * @param {Collection~resultCallback} [callback] The command result callback
  * @returns {Promise<void>} returns Promise if no callback passed
  */
-Collection.prototype.ensureIndex = deprecate(function (
+Collection.prototype.ensureIndex = deprecate(function(
   this: any,
   fieldOrSpec: any,
   options: any,
@@ -2002,7 +1987,7 @@ Collection.prototype.ensureIndex = deprecate(function (
     callback
   ]);
 },
-  'collection.ensureIndex is deprecated. Use createIndexes instead.');
+'collection.ensureIndex is deprecated. Use createIndexes instead.');
 
 /**
  * The callback format for results
@@ -2033,7 +2018,7 @@ Collection.prototype.ensureIndex = deprecate(function (
  * @returns {Promise<void>} returns Promise if no callback passed
  * @deprecated use {@link Collection#countDocuments countDocuments} or {@link Collection#estimatedDocumentCount estimatedDocumentCount} instead
  */
-Collection.prototype.count = deprecate(function (
+Collection.prototype.count = deprecate(function(
   this: any,
   query: any,
   options: any,
@@ -2053,7 +2038,7 @@ Collection.prototype.count = deprecate(function (
     callback
   );
 },
-  'collection.count is deprecated, and will be removed in a future version.' + ' Use Collection.countDocuments or Collection.estimatedDocumentCount instead');
+'collection.count is deprecated, and will be removed in a future version.' + ' Use Collection.countDocuments or Collection.estimatedDocumentCount instead');
 
 /**
  * Find and update a document.
@@ -2125,7 +2110,7 @@ function _findAndModify(
  * @returns {Promise<void>} returns Promise if no callback passed
  * @deprecated use findOneAndDelete instead
  */
-Collection.prototype.findAndRemove = deprecate(function (
+Collection.prototype.findAndRemove = deprecate(function(
   this: any,
   query: any,
   sort: any,
@@ -2146,7 +2131,7 @@ Collection.prototype.findAndRemove = deprecate(function (
     callback
   );
 },
-  'collection.findAndRemove is deprecated. Use findOneAndDelete instead.');
+'collection.findAndRemove is deprecated. Use findOneAndDelete instead.');
 
 /**
  * The callback format for results
@@ -2169,7 +2154,7 @@ Collection.prototype.findAndRemove = deprecate(function (
  * @param {Collection~parallelCollectionScanCallback} [callback] The command result callback
  * @returns {Promise<void>} returns Promise if no callback passed
  */
-Collection.prototype.parallelCollectionScan = deprecate(function (
+Collection.prototype.parallelCollectionScan = deprecate(function(
   this: any,
   options: any,
   callback: Function
@@ -2194,7 +2179,7 @@ Collection.prototype.parallelCollectionScan = deprecate(function (
     { skipSessions: true }
   );
 },
-  'parallelCollectionScan is deprecated in MongoDB v4.1');
+'parallelCollectionScan is deprecated in MongoDB v4.1');
 
 /**
  * Run a group command across a collection
@@ -2213,7 +2198,7 @@ Collection.prototype.parallelCollectionScan = deprecate(function (
  * @returns {Promise<void>} returns Promise if no callback passed
  * @deprecated MongoDB 3.6 or higher no longer supports the group command. We recommend rewriting using the aggregation framework.
  */
-Collection.prototype.group = deprecate(function (
+Collection.prototype.group = deprecate(function(
   this: any,
   keys: any,
   condition: any,
@@ -2269,6 +2254,6 @@ Collection.prototype.group = deprecate(function (
     callback
   ]);
 },
-  'MongoDB 3.6 or higher no longer supports the group command. We recommend rewriting using the aggregation framework.');
+'MongoDB 3.6 or higher no longer supports the group command. We recommend rewriting using the aggregation framework.');
 
 export = Collection;

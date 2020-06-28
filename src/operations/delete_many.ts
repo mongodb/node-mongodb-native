@@ -1,4 +1,3 @@
-'use strict';
 import { OperationBase } from './operation';
 import { deleteCallback, removeDocuments } from './common_functions';
 

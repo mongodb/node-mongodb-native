@@ -1,4 +1,3 @@
-'use strict';
 import { AuthProvider } from './auth_provider';
 import { Kerberos, kModuleError } from '../../deps';
 

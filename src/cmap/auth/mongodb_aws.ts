@@ -1,4 +1,3 @@
-'use strict';
 import http = require('http');
 import crypto = require('crypto');
 import url = require('url');

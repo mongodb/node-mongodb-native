@@ -1,4 +1,3 @@
-'use strict';
 import Logger = require('../logger');
 import { EventEmitter } from 'events';
 import dns = require('dns');

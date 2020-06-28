@@ -1,4 +1,3 @@
-'use strict';
 import PromiseProvider = require('../promise_provider');
 import ReadPreference = require('../read_preference');
 import { MongoError, isRetryableError } from '../error';

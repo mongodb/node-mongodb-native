@@ -1,4 +1,3 @@
-'use strict';
 import ReadPreference = require('../read_preference');
 import { OperationBase } from './operation';
 import {

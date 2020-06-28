@@ -1,4 +1,3 @@
-'use strict';
 import { buildCountCommand } from './common_functions';
 import { OperationBase } from './operation';
 

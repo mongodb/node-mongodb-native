@@ -1,4 +1,3 @@
-'use strict';
 import { OperationBase } from './operation';
 import { handleCallback, MongoDBNamespace } from '../utils';
 import { MongoError } from '../error';

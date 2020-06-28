@@ -1,4 +1,3 @@
-'use strict';
 import crypto = require('crypto');
 import { BSON } from '../../deps';
 const { Binary } = BSON;

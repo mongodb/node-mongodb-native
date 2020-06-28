@@ -1,4 +1,3 @@
-'use strict';
 import { handleCallback, toError } from '../utils';
 import { OperationBase } from './operation';
 

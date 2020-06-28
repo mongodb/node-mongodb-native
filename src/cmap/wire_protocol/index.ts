@@ -1,5 +1,3 @@
-'use strict';
-
 const insert = function insert(server: any, ns: any, ops: any, options: any, callback: Function) {
   writeCommand(server, 'insert', 'documents', ns, ops, options, callback);
 };

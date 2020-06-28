@@ -1,4 +1,3 @@
-'use strict';
 import { executeCommand, executeDbAdminCommand } from './db_ops';
 
 /**

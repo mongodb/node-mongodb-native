@@ -1,4 +1,3 @@
-'use strict';
 import { ServerType, TopologyType } from './common';
 import ReadPreference = require('../read_preference');
 import { MongoError } from '../error';
@@ -28,11 +27,7 @@ function writableServerSelector() {
  * @param {ServerDescription[]} servers The list of server descriptions to be reduced
  * @returns {ServerDescription[]} The list of servers that satisfy the requirements of max staleness
  */
-function maxStalenessReducer(
-  readPreference: any,
-  topologyDescription: any,
-  servers: any
-): any {
+function maxStalenessReducer(readPreference: any, topologyDescription: any, servers: any): any {
   if (readPreference.maxStalenessSeconds == null || readPreference.maxStalenessSeconds < 0) {
     return servers;
   }

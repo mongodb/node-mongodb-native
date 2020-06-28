@@ -1,4 +1,3 @@
-'use strict';
 import ReadPreference = require('./read_preference');
 import { MongoError } from './error';
 import ReadConcern = require('./read_concern');

@@ -1,4 +1,3 @@
-'use strict';
 import { deprecate } from 'util';
 import { emitDeprecatedOptionWarning } from './utils';
 import { loadAdmin } from './dynamic_loaders';

@@ -1,4 +1,3 @@
-'use strict';
 import { MongoError } from '../error';
 import Cursor = require('./cursor');
 import { CursorState } from './core_cursor';
@@ -43,7 +42,7 @@ import { deprecate } from 'util';
  * @external Readable
  */
 
- /**
+/**
  * Creates a new Aggregation Cursor instance (INTERNAL TYPE, do not instantiate directly)
  *
  * @class AggregationCursor

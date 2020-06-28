@@ -1,4 +1,3 @@
-'use strict';
 import { buildCountCommand } from './common_functions';
 import { handleCallback } from '../utils';
 import { MongoError } from '../error';

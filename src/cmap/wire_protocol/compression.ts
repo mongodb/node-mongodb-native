@@ -1,4 +1,3 @@
-'use strict';
 import { Snappy, kModuleError } from '../../deps';
 import zlib = require('zlib');
 

@@ -1,4 +1,3 @@
-'use strict';
 import AggregateOperation = require('./aggregate');
 
 class CountDocumentsOperation extends AggregateOperation {

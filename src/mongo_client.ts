@@ -1,4 +1,3 @@
-'use strict';
 import Db = require('./db');
 import { EventEmitter } from 'events';
 import ChangeStream = require('./change_stream');

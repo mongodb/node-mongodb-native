@@ -1,4 +1,3 @@
-'use strict';
 const kWriteConcernKeys = new Set(['w', 'wtimeout', 'j', 'fsync']);
 
 /**

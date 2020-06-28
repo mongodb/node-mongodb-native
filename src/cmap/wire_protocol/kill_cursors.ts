@@ -1,4 +1,3 @@
-'use strict';
 import { KillCursor } from '../commands';
 import { maxWireVersion, collectionNamespace } from '../../utils';
 import command = require('./command');

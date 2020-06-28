@@ -1,4 +1,3 @@
-'use strict';
 import { BSON } from '../deps';
 const { Code } = BSON;
 import { executeCommand } from './db_ops';

@@ -1,4 +1,3 @@
-'use strict';
 import PromiseProvider = require('../promise_provider');
 const {
   BSON: { Long, ObjectId }

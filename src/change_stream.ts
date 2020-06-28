@@ -1,4 +1,3 @@
-'use strict';
 import Denque = require('denque');
 import { EventEmitter } from 'events';
 import { MongoError, isResumableError } from './error';

@@ -1,4 +1,3 @@
-'use strict';
 import { ServerType, STATE_CLOSED, STATE_CLOSING } from './common';
 import {
   now,

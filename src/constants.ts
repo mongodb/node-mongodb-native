@@ -1,4 +1,3 @@
-'use strict';
 const SYSTEM_NAMESPACE_COLLECTION = 'system.namespaces';
 const SYSTEM_INDEX_COLLECTION = 'system.indexes';
 const SYSTEM_PROFILE_COLLECTION = 'system.profile';

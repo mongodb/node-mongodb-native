@@ -1,4 +1,3 @@
-'use strict';
 import URL = require('url');
 import qs = require('querystring');
 import dns = require('dns');
@@ -620,7 +619,11 @@ function parseConnectionString(uri: string, options?: any, callback?: any) {
     return parseSrvConnectionString(uri, parsedOptions, callback);
   }
 
-  const auth: any = { username: null, password: null, db: db && db !== '' ? qs.unescape(db) : null };
+  const auth: any = {
+    username: null,
+    password: null,
+    db: db && db !== '' ? qs.unescape(db) : null
+  };
   if (parsedOptions.auth) {
     // maintain support for legacy options passed into `MongoClient`
     if (parsedOptions.auth.username) auth.username = parsedOptions.auth.username;

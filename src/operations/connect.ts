@@ -1,4 +1,3 @@
-'use strict';
 import fs = require('fs');
 import Logger = require('../logger');
 import ReadPreference = require('../read_preference');

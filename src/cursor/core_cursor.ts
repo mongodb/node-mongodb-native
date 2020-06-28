@@ -1,4 +1,3 @@
-'use strict';
 import Logger = require('../logger');
 import ReadPreference = require('../read_preference');
 import { handleCallback, collationNotSupported, MongoDBNamespace } from '../utils';
@@ -29,7 +28,7 @@ interface CoreCursor {
  * @param {object} document
  */
 
- /**
+/**
  * The **CoreCursor** class is an internal class that embodies a cursor on MongoDB
  * allowing for iteration over the results returned from the underlying query.
  *

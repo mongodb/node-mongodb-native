@@ -1,4 +1,3 @@
-'use strict';
 import OptionsOperation = require('./options_operation');
 import { handleCallback } from '../utils';
 

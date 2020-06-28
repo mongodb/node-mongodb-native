@@ -1,4 +1,3 @@
-'use strict';
 import ReadPreference = require('../read_preference');
 import { BSON } from '../deps';
 const { Code } = BSON;
@@ -370,12 +369,7 @@ function validateDatabaseName(databaseName: any) {
  * @param {object} [options] Optional settings. See Db.prototype.createIndex for a list of options.
  * @returns {object} The insert command object.
  */
-function createCreateIndexCommand(
-  db: any,
-  name: string,
-  fieldOrSpec: any,
-  options?: any
-): any {
+function createCreateIndexCommand(db: any, name: string, fieldOrSpec: any, options?: any): any {
   const indexParameters = parseIndexOptions(fieldOrSpec);
   const fieldHash = indexParameters.fieldHash;
 

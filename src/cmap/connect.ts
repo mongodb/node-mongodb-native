@@ -1,4 +1,3 @@
-'use strict';
 import net = require('net');
 import tls = require('tls');
 import { Connection } from './connection';

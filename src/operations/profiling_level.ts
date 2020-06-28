@@ -1,4 +1,3 @@
-'use strict';
 import CommandOperation = require('./command');
 
 class ProfilingLevelOperation extends CommandOperation {

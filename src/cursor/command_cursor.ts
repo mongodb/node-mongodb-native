@@ -1,4 +1,3 @@
-'use strict';
 import ReadPreference = require('../read_preference');
 import { MongoError } from '../error';
 import Cursor = require('./cursor');
@@ -36,13 +35,13 @@ import { CursorState } from './core_cursor';
  * });
  */
 
- /**
+/**
  * Namespace provided by the browser.
  *
  * @external Readable
  */
 
- /**
+/**
  * Creates a new Command Cursor instance (INTERNAL TYPE, do not instantiate directly)
  *
  * @class CommandCursor
@@ -135,7 +134,6 @@ class CommandCursor extends Cursor {
     return this;
   }
 }
-
 
 /**
  * CommandCursor stream data event, fired for each document in the cursor.

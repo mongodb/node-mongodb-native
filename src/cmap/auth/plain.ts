@@ -1,4 +1,3 @@
-'use strict';
 import { BSON } from '../../deps';
 const { Binary } = BSON;
 import { AuthProvider } from './auth_provider';

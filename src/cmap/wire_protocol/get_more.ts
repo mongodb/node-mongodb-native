@@ -1,4 +1,3 @@
-'use strict';
 import { GetMore } from '../commands';
 import { BSON } from '../../deps';
 const { Long } = BSON;

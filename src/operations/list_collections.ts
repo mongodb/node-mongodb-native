@@ -1,4 +1,3 @@
-'use strict';
 import CommandOperationV2 = require('./command_v2');
 import { Aspect, defineAspects } from './operation';
 import { maxWireVersion } from '../utils';

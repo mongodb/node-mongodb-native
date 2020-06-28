@@ -1,4 +1,3 @@
-'use strict';
 import { MongoError } from '../../error';
 import { collectionNamespace } from '../../utils';
 import command = require('./command');

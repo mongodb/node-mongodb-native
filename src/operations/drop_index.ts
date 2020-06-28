@@ -1,4 +1,3 @@
-'use strict';
 import { Aspect, defineAspects } from './operation';
 import CommandOperation = require('./command');
 import { applyWriteConcern, handleCallback } from '../utils';

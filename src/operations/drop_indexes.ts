@@ -1,4 +1,3 @@
-'use strict';
 import { Aspect, defineAspects } from './operation';
 import DropIndexOperation = require('./drop_index');
 import { handleCallback } from '../utils';
