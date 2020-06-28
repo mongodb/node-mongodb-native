@@ -1,7 +1,7 @@
 'use strict';
 const fs = require('fs');
 const path = require('path');
-const parseConnectionString = require('../../../lib/connection_string').parseConnectionString;
+const parseConnectionString = require('../../../src/connection_string').parseConnectionString;
 const expect = require('chai').expect;
 
 describe('mongodb+srv', function() {

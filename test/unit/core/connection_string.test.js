@@ -1,8 +1,8 @@
 'use strict';
 
-const { parseConnectionString } = require('../../../lib/connection_string');
+const { parseConnectionString } = require('../../../src/connection_string');
 const punycode = require('punycode');
-const { MongoParseError } = require('../../../lib/error');
+const { MongoParseError } = require('../../../src/error');
 const { loadSpecTests } = require('../../spec');
 const chai = require('chai');
 const expect = chai.expect;

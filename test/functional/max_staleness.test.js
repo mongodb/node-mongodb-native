@@ -2,7 +2,7 @@
 const { Long } = require('bson');
 const { expect } = require('chai');
 const mock = require('mongodb-mock-server');
-const { ReadPreference } = require('../..');
+const { ReadPreference } = require('../../src');
 
 const test = {};
 describe('Max Staleness', function() {

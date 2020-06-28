@@ -2,8 +2,8 @@
 
 const expect = require('chai').expect;
 const mock = require('mongodb-mock-server');
-const Server = require('../../../lib/core/topologies/server');
-const { MongoWriteConcernError } = require('../../../lib/error');
+const Server = require('../../../src/core/topologies/server');
+const { MongoWriteConcernError } = require('../../../src/error');
 const sinon = require('sinon');
 
 const test = {};

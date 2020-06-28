@@ -1,7 +1,7 @@
 'use strict';
 
 const setupDatabase = require('../functional/shared').setupDatabase;
-const MongoClient = require('../..').MongoClient;
+const MongoClient = require('../../src').MongoClient;
 
 describe('examples(transactions):', function() {
   let client;

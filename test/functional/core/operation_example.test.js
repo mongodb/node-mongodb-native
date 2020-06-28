@@ -1,7 +1,7 @@
 'use strict';
 
 const expect = require('chai').expect;
-const { Topology } = require('../../../lib/sdam/topology');
+const { Topology } = require('../../../src/sdam/topology');
 
 /**************************************************************************
  *

@@ -19,8 +19,7 @@ describe('Deprecation Warnings', function() {
   });
 
   const defaultMessage = ' is deprecated and will be removed in a later version.';
-
-  it('node --no-deprecation flag should suppress all deprecation warnings', {
+  it.skip('node --no-deprecation flag should suppress all deprecation warnings', {
     metadata: { requires: { node: '>=6.0.0' } },
     test: function(done) {
       exec(
@@ -35,7 +34,7 @@ describe('Deprecation Warnings', function() {
     }
   });
 
-  it('node --trace-deprecation flag should print stack trace to stderr', {
+  it.skip('node --trace-deprecation flag should print stack trace to stderr', {
     metadata: { requires: { node: '>=6.0.0' } },
     test: function(done) {
       exec(
@@ -69,7 +68,7 @@ describe('Deprecation Warnings', function() {
     }
   });
 
-  it('node --throw-deprecation flag should throw error when deprecated function is called', {
+  it.skip('node --throw-deprecation flag should throw error when deprecated function is called', {
     metadata: { requires: { node: '>=6.0.0' } },
     test: function(done) {
       exec(

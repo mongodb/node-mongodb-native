@@ -3,9 +3,9 @@
 const mock = require('mongodb-mock-server');
 const { expect } = require('chai');
 const sinon = require('sinon');
-const { Topology } = require('../../../lib/sdam/topology');
-const { Server } = require('../../../lib/sdam/server');
-const { ServerDescription } = require('../../../lib/sdam/server_description');
+const { Topology } = require('../../../src/sdam/topology');
+const { Server } = require('../../../src/sdam/server');
+const { ServerDescription } = require('../../../src/sdam/server_description');
 
 describe('Topology (unit)', function() {
   describe('client metadata', function() {

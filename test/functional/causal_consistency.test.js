@@ -1,5 +1,5 @@
 'use strict';
-const mongo = require('../..'),
+const mongo = require('../../src'),
   setupDatabase = require('./shared').setupDatabase,
   expect = require('chai').expect;
 

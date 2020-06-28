@@ -1,12 +1,12 @@
 'use strict';
 
 const expect = require('chai').expect;
-const ReplSet = require('../../../../lib/core/topologies/replset');
-const ReadPreference = require('../../../../lib/core/topologies/read_preference');
+const ReplSet = require('../../../../src/core/topologies/replset');
+const ReadPreference = require('../../../../srccore/topologies/read_preference');
 const mock = require('mongodb-mock-server');
 const ReplSetFixture = require('../common').ReplSetFixture;
-const ReplSetState = require('../../../../lib/core/topologies/replset_state');
-const MongoError = require('../../../..').MongoError;
+const ReplSetState = require('../../../../src/core/topologies/replset_state');
+const MongoError = require('../../../../src').MongoError;
 
 describe('ReadPreference (ReplSet)', function() {
   let test;

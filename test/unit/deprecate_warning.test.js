@@ -1,5 +1,5 @@
 'use strict';
-const deprecateOptions = require('../../lib/utils').deprecateOptions;
+const deprecateOptions = require('../../src/utils').deprecateOptions;
 const chai = require('chai');
 const expect = chai.expect;
 const sinonChai = require('sinon-chai');

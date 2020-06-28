@@ -2,10 +2,10 @@
 
 const path = require('path');
 const fs = require('fs');
-const { MongoClient } = require('../../..');
+const { MongoClient } = require('../../../src');
 const TestConfiguration = require('./config');
-const { parseConnectionString } = require('../../../lib/connection_string');
-const { eachAsync } = require('../../../lib/utils');
+const { parseConnectionString } = require('../../../src/connection_string');
+const { eachAsync } = require('../../../src/utils');
 const mock = require('mongodb-mock-server');
 const wtfnode = require('wtfnode');
 

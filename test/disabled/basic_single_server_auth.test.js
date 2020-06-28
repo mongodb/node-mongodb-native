@@ -3,9 +3,9 @@
 const { expect } = require('chai');
 const { locateAuthMethod } = require('./shared');
 const { executeCommand } = require('./shared');
-const Connection = require('../../../lib/cmap/connection');
+const Connection = require('../../../src/cmap/connection');
 
-const { MongoCredentials } = require('../../../lib/core/auth/mongo_credentials');
+const { MongoCredentials } = require('../../../src/core/auth/mongo_credentials');
 
 describe('Basic single server auth tests', function() {
   it('should correctly authenticate server using scram-sha-256 using connect auth', {

@@ -1,7 +1,7 @@
 'use strict';
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
-const { Decimal128 } = require('../..');
+const { Decimal128 } = require('../../src');
 
 describe('Decimal128', function() {
   before(function() {

@@ -2,7 +2,7 @@
 var f = require('util').format;
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
-const { Code } = require('../..');
+const { Code } = require('../../src');
 
 var delay = function(ms) {
   return new Promise(function(resolve) {

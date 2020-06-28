@@ -1,16 +1,16 @@
 'use strict';
 const fs = require('fs');
 const path = require('path');
-const { Topology } = require('../../../lib/sdam/topology');
-const { Server } = require('../../../lib/sdam/server');
-const { ServerDescription } = require('../../../lib/sdam/server_description');
-const sdamEvents = require('../../../lib/sdam/events');
-const parse = require('../../../lib/connection_string').parseConnectionString;
+const { Topology } = require('../../../src/sdam/topology');
+const { Server } = require('../../../src/sdam/server');
+const { ServerDescription } = require('../../../src/sdam/server_description');
+const sdamEvents = require('../../../src/sdam/events');
+const parse = require('../../../src/connection_string').parseConnectionString;
 const sinon = require('sinon');
 const { EJSON } = require('bson');
-const { ConnectionPool } = require('../../../lib/cmap/connection_pool');
-const { MongoError, MongoNetworkError, MongoNetworkTimeoutError } = require('../../../lib/error');
-const { eachAsyncSeries } = require('../../../lib/utils');
+const { ConnectionPool } = require('../../../src/cmap/connection_pool');
+const { MongoError, MongoNetworkError, MongoNetworkTimeoutError } = require('../../../src/error');
+const { eachAsyncSeries } = require('../../../src/utils');
 
 const chai = require('chai');
 chai.use(require('chai-subset'));

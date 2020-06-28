@@ -16,7 +16,7 @@ const {
   MinKey,
   MaxKey,
   Code
-} = require('../..');
+} = require('../../src');
 
 /**
  * Module for parsing an ISO 8601 formatted string into a Date object.
@@ -2394,7 +2394,7 @@ describe('Insert', function() {
       var started = [];
       var succeeded = [];
 
-      var listener = require('../..').instrument(function(err) {
+      var listener = require('../../src').instrument(function(err) {
         test.equal(null, err);
       });
 
@@ -2431,7 +2431,7 @@ describe('Insert', function() {
       var started = [];
       var succeeded = [];
 
-      var listener = require('../..').instrument(function(err) {
+      var listener = require('../../src').instrument(function(err) {
         test.equal(null, err);
       });
 
@@ -2468,7 +2468,7 @@ describe('Insert', function() {
       var started = [];
       var succeeded = [];
 
-      var listener = require('../..').instrument(function(err) {
+      var listener = require('../../src').instrument(function(err) {
         test.equal(null, err);
       });
 

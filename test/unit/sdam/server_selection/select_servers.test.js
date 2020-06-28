@@ -1,7 +1,7 @@
 'use strict';
-const { Topology } = require('../../../../lib/sdam/topology');
-const { Server } = require('../../../../lib/sdam/server');
-const ReadPreference = require('../../../../lib/read_preference');
+const { Topology } = require('../../../../src/sdam/topology');
+const { Server } = require('../../../../src/sdam/server');
+const ReadPreference = require('../../../../src/read_preference');
 const { expect } = require('chai');
 const sinon = require('sinon');
 

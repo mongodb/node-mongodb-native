@@ -1,5 +1,5 @@
 'use strict';
-const Timeout = require('../../../../lib/core/topologies/shared').Timeout;
+const Timeout = require('../../../../src/core/topologies/shared').Timeout;
 const expect = require('chai').expect;
 
 describe('', function() {

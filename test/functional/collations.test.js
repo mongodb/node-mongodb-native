@@ -2,7 +2,7 @@
 const setupDatabase = require('./shared').setupDatabase;
 const mock = require('mongodb-mock-server');
 const expect = require('chai').expect;
-const { Long, Code } = require('../..');
+const { Long, Code } = require('../../src');
 
 const testContext = {};
 describe('Collation', function() {

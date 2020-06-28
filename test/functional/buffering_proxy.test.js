@@ -2,7 +2,7 @@
 var test = require('./shared').assert;
 var co = require('co');
 var mock = require('mongodb-mock-server');
-const { ReadPreference, ObjectId } = require('../..');
+const { ReadPreference, ObjectId } = require('../../src');
 
 var extend = function(template, fields) {
   var object = {};

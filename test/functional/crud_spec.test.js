@@ -6,7 +6,7 @@ const chai = require('chai');
 const expect = chai.expect;
 chai.use(require('chai-subset'));
 
-const BulkWriteError = require('../../lib/bulk/common').BulkWriteError;
+const BulkWriteError = require('../../src/bulk/common').BulkWriteError;
 
 const TestRunnerContext = require('./spec-runner').TestRunnerContext;
 const gatherTestSuites = require('./spec-runner').gatherTestSuites;

@@ -1,11 +1,11 @@
 'use strict';
 
-const Mongos = require('../../../../lib/core/topologies/mongos');
+const Mongos = require('../../../../src/core/topologies/mongos');
 const expect = require('chai').expect;
 const mock = require('mongodb-mock-server');
 const genClusterTime = require('../common').genClusterTime;
 
-const Connection = require('../../../../lib/core/connection/connection');
+const Connection = require('../../../../src/core/connection/connection');
 const ConnectionSpy = require('../../../functional/shared').ConnectionSpy;
 
 describe.skip('Reconnect (Mongos)', function() {

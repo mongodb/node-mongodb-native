@@ -3,7 +3,7 @@
 const expect = require('chai').expect;
 const f = require('util').format;
 
-const core = require('../../../lib/core');
+const core = require('../../../src/core');
 const Connection = core.Connection;
 const Server = core.Server;
 const ReplSet = core.ReplSet;

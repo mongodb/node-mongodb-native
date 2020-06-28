@@ -3,7 +3,7 @@
 const EventEmitter = require('events');
 const chai = require('chai');
 const expect = chai.expect;
-const Db = require('../../lib/db');
+const Db = require('../../src/db');
 
 class MockTopology extends EventEmitter {
   constructor() {

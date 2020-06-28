@@ -1,11 +1,11 @@
 'use strict';
 
 const { expect } = require('chai');
-const { Topology } = require('../../lib/sdam/topology');
-const { ClientSession } = require('../../lib/sessions');
+const { Topology } = require('../../src/sdam/topology');
+const { ClientSession } = require('../../src/sessions');
 const { TestRunnerContext, generateTopologyTests } = require('./spec-runner');
 const { loadSpecTests } = require('../spec');
-const { MongoNetworkError } = require('../../lib/error');
+const { MongoNetworkError } = require('../../src/error');
 const semver = require('semver');
 
 function ignoreNsNotFoundForListIndexes(err) {

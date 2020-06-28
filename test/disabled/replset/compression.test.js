@@ -1,6 +1,6 @@
 'use strict';
 
-const ReplSet = require('../../../../lib/core/topologies/replset');
+const ReplSet = require('../../../../src/core/topologies/replset');
 const mock = require('mongodb-mock-server');
 const ReplSetFixture = require('../common').ReplSetFixture;
 const expect = require('chai').expect;

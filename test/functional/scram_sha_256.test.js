@@ -2,8 +2,8 @@
 
 const sinon = require('sinon');
 const { expect } = require('chai');
-const { Connection } = require('../../lib/cmap/connection');
-const { ScramSHA256 } = require('../../lib/cmap/auth/scram');
+const { Connection } = require('../../src/cmap/connection');
+const { ScramSHA256 } = require('../../src/cmap/auth/scram');
 const { setupDatabase, withClient } = require('./shared');
 
 describe('SCRAM-SHA-256 auth', function() {

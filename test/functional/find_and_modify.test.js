@@ -20,7 +20,7 @@ describe('Find and Modify', function() {
       var started = [];
       var succeeded = [];
 
-      var listener = require('../..').instrument(function(err) {
+      var listener = require('../../src').instrument(function(err) {
         test.equal(null, err);
       });
 
@@ -82,7 +82,7 @@ describe('Find and Modify', function() {
       var started = [];
       var succeeded = [];
 
-      var listener = require('../..').instrument(function(err) {
+      var listener = require('../../src').instrument(function(err) {
         test.equal(null, err);
       });
 
@@ -145,7 +145,7 @@ describe('Find and Modify', function() {
       var started = [];
       var succeeded = [];
 
-      var listener = require('../..').instrument(function(err) {
+      var listener = require('../../src').instrument(function(err) {
         test.equal(null, err);
       });
 

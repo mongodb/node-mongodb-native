@@ -2,8 +2,8 @@
 const { assert: test } = require('./shared');
 const { setupDatabase } = require('./shared');
 const { format: f } = require('util');
-const { Topology } = require('../../lib/sdam/topology');
-const { Code, ObjectID } = require('../..');
+const { Topology } = require('../../src/sdam/topology');
+const { Code, ObjectID } = require('../../src');
 
 const chai = require('chai');
 const expect = chai.expect;

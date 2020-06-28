@@ -4,7 +4,7 @@ const co = require('co');
 const mock = require('mongodb-mock-server');
 const ConnectionSpy = require('../shared').ConnectionSpy;
 
-const core = require('../../../../lib/core');
+const core = require('../../../../src/core');
 const Connection = core.Connection;
 const Server = core.Server;
 const ReplSet = core.ReplSet;

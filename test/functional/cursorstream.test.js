@@ -1,7 +1,7 @@
 'use strict';
 var expect = require('chai').expect;
 const setupDatabase = require('./shared').setupDatabase;
-const { Binary } = require('../..');
+const { Binary } = require('../../src');
 
 describe('Cursor Streams', function() {
   before(function() {

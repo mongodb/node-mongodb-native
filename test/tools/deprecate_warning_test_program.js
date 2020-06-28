@@ -5,8 +5,7 @@ if (require.main !== module) {
   return;
 }
 
-const deprecateOptions = require('../../lib/utils.js').deprecateOptions;
-
+const deprecateOptions = require('../../src/utils').deprecateOptions;
 const testDeprecationFlags = deprecateOptions(
   {
     name: 'testDeprecationFlags',

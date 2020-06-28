@@ -2,7 +2,7 @@
 
 const expect = require('chai').expect;
 const sinon = require('sinon');
-const NativeTopology = require('../../lib/topologies/native_topology');
+const NativeTopology = require('../../src/topologies/native_topology');
 
 describe('URI', function() {
   it('should correctly allow for w:0 overriding on the connect url', {
