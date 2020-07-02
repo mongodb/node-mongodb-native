@@ -532,9 +532,7 @@ function decorateWithReadConcern(command: any, coll: any, options?: any) {
   }
 }
 
-const emitProcessWarning = (msg: any) => process.emitWarning(msg, 'DeprecationWarning');
-const emitConsoleWarning = (msg: any) => console.error(msg);
-const emitDeprecationWarning = process.emitWarning ? emitProcessWarning : emitConsoleWarning;
+const emitDeprecationWarning = (msg: any) => process.emitWarning(msg, 'DeprecationWarning');
 
 /**
  * Default message handler for generating deprecation warnings.
