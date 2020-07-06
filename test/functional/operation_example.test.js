@@ -3,7 +3,7 @@ const { assert: test } = require('./shared');
 const { setupDatabase } = require('./shared');
 const { format: f } = require('util');
 const { Topology } = require('../../src/sdam/topology');
-const { Code, ObjectID } = require('../../src');
+const { Code, ObjectId } = require('../../src');
 
 const chai = require('chai');
 const expect = chai.expect;
@@ -6038,7 +6038,7 @@ describe('Operation Examples', function() {
    * Generate 12 byte binary string representation using a second based timestamp or
    * default value
    *
-   * @example-class ObjectID
+   * @example-class ObjectId
    * @example-method getTimestamp
    */
   it('shouldCorrectlyGenerate12ByteStringFromTimestamp', {
@@ -6047,7 +6047,7 @@ describe('Operation Examples', function() {
     },
 
     test: function(done) {
-      // LINE var ObjectID = require('mongodb').ObjectID,
+      // LINE var ObjectId = require('mongodb').ObjectId,
       // LINE   test = require('assert');
       // REPLACE configuration.writeConcernMax() WITH {w:1}
       // REMOVE-LINE done();
@@ -6057,8 +6057,8 @@ describe('Operation Examples', function() {
       // Create a date with the timestamp
       var timestampDate = new Date(timestamp * 1000);
 
-      // Create a new ObjectID with a specific timestamp
-      var objectId = new ObjectID(timestamp);
+      // Create a new ObjectId with a specific timestamp
+      var objectId = new ObjectId(timestamp);
 
       // Get the timestamp and validate correctness
       test.equal(timestampDate.toString(), objectId.getTimestamp().toString());
@@ -6068,9 +6068,9 @@ describe('Operation Examples', function() {
   });
 
   /**
-   * Generate a 24 character hex string representation of the ObjectID
+   * Generate a 24 character hex string representation of the ObjectId
    *
-   * @example-class ObjectID
+   * @example-class ObjectId
    * @example-method toHexString
    */
   it('shouldCorrectlyRetrieve24CharacterHexStringFromToHexString', {
@@ -6079,13 +6079,13 @@ describe('Operation Examples', function() {
     },
 
     test: function(done) {
-      // LINE var ObjectID = require('mongodb').ObjectID,
+      // LINE var ObjectId = require('mongodb').ObjectId,
       // LINE   test = require('assert');
       // REPLACE configuration.writeConcernMax() WITH {w:1}
       // REMOVE-LINE done();
       // BEGIN
-      // Create a new ObjectID
-      var objectId = new ObjectID();
+      // Create a new ObjectId
+      var objectId = new ObjectId();
       // Verify that the hex string is 24 characters long
       test.equal(24, objectId.toHexString().length);
       done();
@@ -6094,24 +6094,24 @@ describe('Operation Examples', function() {
   });
 
   /**
-   * Get and set the generation time for an ObjectID
+   * Get and set the generation time for an ObjectId
    *
-   * @example-class ObjectID
+   * @example-class ObjectId
    * @example-method generationTime
    */
-  it('shouldCorrectlyGetAndSetObjectIDUsingGenerationTimeProperty', {
+  it('shouldCorrectlyGetAndSetObjectIdUsingGenerationTimeProperty', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
     test: function(done) {
-      // LINE var ObjectID = require('mongodb').ObjectID,
+      // LINE var ObjectId = require('mongodb').ObjectId,
       // LINE   test = require('assert');
       // REPLACE configuration.writeConcernMax() WITH {w:1}
       // REMOVE-LINE done();
       // BEGIN
-      // Create a new ObjectID
-      var objectId = new ObjectID();
+      // Create a new ObjectId
+      var objectId = new ObjectId();
       // Get the generation time
       var generationTime = objectId.generationTime;
       // Add 1000 milliseconds to the generation time
@@ -6129,29 +6129,29 @@ describe('Operation Examples', function() {
   });
 
   /**
-   * Convert a ObjectID into a hex string representation and then back to an ObjectID
+   * Convert a ObjectId into a hex string representation and then back to an ObjectId
    *
-   * @example-class ObjectID
+   * @example-class ObjectId
    * @example-method createFromHexString
    */
-  it('shouldCorrectlyTransformObjectIDToHexAndObjectId', {
+  it('shouldCorrectlyTransformObjectIdToHexAndObjectId', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
     test: function(done) {
-      // LINE var ObjectID = require('mongodb').ObjectID,
+      // LINE var ObjectId = require('mongodb').ObjectId,
       // LINE   test = require('assert');
       // REPLACE configuration.writeConcernMax() WITH {w:1}
       // REMOVE-LINE done();
       // BEGIN
-      // Create a new ObjectID
-      var objectId = new ObjectID();
+      // Create a new ObjectId
+      var objectId = new ObjectId();
       // Convert the object id to a hex string
       var originalHex = objectId.toHexString();
-      // Create a new ObjectID using the createFromHexString function
-      var newObjectId = ObjectID.createFromHexString(originalHex);
-      // Convert the new ObjectID back into a hex string using the toHexString function
+      // Create a new ObjectId using the createFromHexString function
+      var newObjectId = ObjectId.createFromHexString(originalHex);
+      // Convert the new ObjectId back into a hex string using the toHexString function
       var newHex = newObjectId.toHexString();
       // Compare the two hex strings
       test.equal(originalHex, newHex);
@@ -6161,9 +6161,9 @@ describe('Operation Examples', function() {
   });
 
   /**
-   * Compare two different ObjectID's using the equals method
+   * Compare two different ObjectId's using the equals method
    *
-   * @example-class ObjectID
+   * @example-class ObjectId
    * @example-method equals
    */
   it('shouldCorrectlyDifferentiateBetweenObjectIdInstances', {
@@ -6172,17 +6172,17 @@ describe('Operation Examples', function() {
     },
 
     test: function(done) {
-      // LINE var ObjectID = require('mongodb').ObjectID,
+      // LINE var ObjectId = require('mongodb').ObjectId,
       // LINE   test = require('assert');
       // REPLACE configuration.writeConcernMax() WITH {w:1}
       // REMOVE-LINE done();
       // BEGIN
-      // Create a new ObjectID
-      var objectId = new ObjectID();
-      // Create a new ObjectID Based on the first ObjectID
-      var objectId2 = new ObjectID(objectId.id);
-      // Create another ObjectID
-      var objectId3 = new ObjectID();
+      // Create a new ObjectId
+      var objectId = new ObjectId();
+      // Create a new ObjectId Based on the first ObjectId
+      var objectId2 = new ObjectId(objectId.id);
+      // Create another ObjectId
+      var objectId3 = new ObjectId();
       // objectId and objectId2 should be the same
       test.ok(objectId.equals(objectId2));
       // objectId and objectId2 should be different
@@ -6195,8 +6195,8 @@ describe('Operation Examples', function() {
   /**
    * Show the usage of the Objectid createFromTime function
    *
-   * @example-class ObjectID
-   * @example-method ObjectID.createFromTime
+   * @example-class ObjectId
+   * @example-method ObjectId.createFromTime
    */
   it('shouldCorrectlyUseCreateFromTime', {
     metadata: {
@@ -6204,12 +6204,12 @@ describe('Operation Examples', function() {
     },
 
     test: function(done) {
-      // LINE var ObjectID = require('mongodb').ObjectID,
+      // LINE var ObjectId = require('mongodb').ObjectId,
       // LINE   test = require('assert');
       // REPLACE configuration.writeConcernMax() WITH {w:1}
       // REMOVE-LINE done();
       // BEGIN
-      var objectId = ObjectID.createFromTime(1);
+      var objectId = ObjectId.createFromTime(1);
       test.equal('000000010000000000000000', objectId.toHexString());
       done();
       // END

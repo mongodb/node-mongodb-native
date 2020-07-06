@@ -9,8 +9,7 @@ import { EventEmitter } from 'events';
 import connect = require('../cmap/connect');
 import { Connection } from '../cmap/connection';
 import { MongoNetworkError } from '../error';
-import { BSON } from '../deps';
-const { Long } = BSON;
+import { Long } from '../bson';
 import {
   ServerHeartbeatStartedEvent,
   ServerHeartbeatSucceededEvent,

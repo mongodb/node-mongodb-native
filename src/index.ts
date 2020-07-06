@@ -1,5 +1,4 @@
 import Instrumentation = require('./apm');
-import { BSON } from './deps';
 import { Cursor, AggregationCursor, CommandCursor } from './cursor';
 import PromiseProvider = require('./promise_provider');
 import Admin = require('./admin');
@@ -9,24 +8,6 @@ import Collection = require('./collection');
 import ReadPreference = require('./read_preference');
 import Logger = require('./logger');
 import GridFSBucket = require('./gridfs-stream');
-
-const {
-  Binary,
-  Code,
-  Map,
-  DBRef,
-  Double,
-  Int32,
-  Long,
-  MinKey,
-  MaxKey,
-  ObjectID,
-  ObjectId,
-  BSONSymbol,
-  Timestamp,
-  BSONRegExp,
-  Decimal128
-} = BSON;
 
 // Set up the instrumentation method
 function instrument(options: any, callback: Function) {
@@ -41,6 +22,24 @@ function instrument(options: any, callback: Function) {
 }
 
 export {
+  Binary,
+  Code,
+  DBRef,
+  Double,
+  Int32,
+  Long,
+  MinKey,
+  MaxKey,
+  ObjectId,
+  Timestamp,
+  Decimal128
+} from './bson';
+
+// NOTE: fix this up after ts-bson lands
+const { Map, BSONSymbol, BSONRegExp } = require('./bson');
+export { Map, BSONSymbol, BSONRegExp };
+
+export {
   MongoError,
   MongoNetworkError,
   MongoTimeoutError,
@@ -49,7 +48,6 @@ export {
   MongoWriteConcernError
 } from './error';
 export { BulkWriteError as MongoBulkWriteError } from './bulk/common';
-
 export {
   // Utils
   instrument,
@@ -64,21 +62,5 @@ export {
   AggregationCursor,
   CommandCursor,
   Cursor,
-  GridFSBucket,
-  // BSON types exported
-  Binary,
-  Code,
-  Map,
-  DBRef,
-  Double,
-  Int32,
-  Long,
-  MinKey,
-  MaxKey,
-  ObjectID,
-  ObjectId,
-  BSONSymbol,
-  Timestamp,
-  BSONRegExp,
-  Decimal128
+  GridFSBucket
 };

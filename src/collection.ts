@@ -14,8 +14,7 @@ import {
   executeLegacyOperation,
   MongoDBNamespace
 } from './utils';
-import { BSON } from './deps';
-const { ObjectId } = BSON;
+import { ObjectId } from './bson';
 import { MongoError } from './error';
 import unordered = require('./bulk/unordered');
 import ordered = require('./bulk/ordered');

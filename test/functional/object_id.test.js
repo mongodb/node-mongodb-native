@@ -1,14 +1,14 @@
 'use strict';
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
-const { ObjectID } = require('../../src');
+const { ObjectId } = require('../../src');
 
-describe('ObjectID', function() {
+describe('ObjectId', function() {
   before(function() {
     return setupDatabase(this.configuration);
   });
 
-  it('shouldCorrectlyGenerateObjectID', {
+  it('shouldCorrectlyGenerateObjectId', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
@@ -44,7 +44,7 @@ describe('ObjectID', function() {
         });
 
         // Manually created id
-        var objectId = new ObjectID(null);
+        var objectId = new ObjectId(null);
         // Insert a manually created document with generated oid
         collection.insert({ _id: objectId, name: 'Donald', age: 95 }, { w: 1 }, function(err, r) {
           test.equal(1, r.ops.length);
@@ -74,8 +74,8 @@ describe('ObjectID', function() {
     },
 
     test: function(done) {
-      // Create a new ObjectID
-      var objectId = new ObjectID();
+      // Create a new ObjectId
+      var objectId = new ObjectId();
       // Verify that the hex string is 24 characters long
       test.equal(24, objectId.toString().length);
       done();
@@ -88,15 +88,15 @@ describe('ObjectID', function() {
     },
 
     test: function(done) {
-      // Create a new ObjectID
-      var objectId = new ObjectID();
+      // Create a new ObjectId
+      var objectId = new ObjectId();
       // Verify that the hex string is 24 characters long
       test.equal(24, objectId.toJSON().length);
       done();
     }
   });
 
-  it('shouldCorrectlyCreateOIDNotUsingObjectID', {
+  it('shouldCorrectlyCreateOIDNotUsingObjectId', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
@@ -128,28 +128,28 @@ describe('ObjectID', function() {
     }
   });
 
-  it('shouldCorrectlyGenerateObjectIDFromTimestamp', {
+  it('shouldCorrectlyGenerateObjectIdFromTimestamp', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
     test: function(done) {
       var timestamp = Math.floor(new Date().getTime() / 1000);
-      var objectID = new ObjectID(timestamp);
+      var objectID = new ObjectId(timestamp);
       var time2 = objectID.generationTime;
       test.equal(timestamp, time2);
       done();
     }
   });
 
-  it('shouldCorrectlyCreateAnObjectIDAndOverrideTheTimestamp', {
+  it('shouldCorrectlyCreateAnObjectIdAndOverrideTheTimestamp', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
     test: function(done) {
       var timestamp = 1000;
-      var objectID = new ObjectID();
+      var objectID = new ObjectId();
       var id1 = objectID.id;
       // Override the timestamp
       objectID.generationTime = timestamp;
