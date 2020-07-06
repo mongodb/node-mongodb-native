@@ -9,7 +9,7 @@ import { ServerSessionPool } from '../sessions';
 import { emitDeprecationWarning } from '../utils';
 import { CMAP_EVENT_NAMES } from '../cmap/events';
 import { MongoCredentials } from '../cmap/auth/mongo_credentials';
-import { BSON } from '../deps';
+import * as BSON from '../bson';
 
 const AUTH_MECHANISM_INTERNAL_MAP: any = {
   DEFAULT: 'default',

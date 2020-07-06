@@ -1,4 +1,4 @@
-import { BSON } from '../deps';
+import * as BSON from '../bson';
 import { BulkOperationBase, Batch, INSERT, UPDATE, REMOVE } from './common';
 import { toError } from '../utils';
 
@@ -22,7 +22,7 @@ function addToOperationsList(
     // Since we don't know what the user selected for BSON options here,
     // err on the safe side, and check the size with ignoreUndefined: false.
     ignoreUndefined: false
-  });
+  } as any);
   // Throw error if the doc is bigger than the max BSON size
   if (bsonSize >= bulkOperation.s.maxBsonObjectSize)
     throw toError('document is larger than the maximum size ' + bulkOperation.s.maxBsonObjectSize);

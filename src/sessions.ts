@@ -1,7 +1,6 @@
 import PromiseProvider = require('./promise_provider');
 import { EventEmitter } from 'events';
-import { BSON } from './deps';
-const { Binary, Long } = BSON;
+import { Binary, Long } from './bson';
 import ReadPreference = require('./read_preference');
 import { isTransactionCommand, TxnState, Transaction } from './transactions';
 import { resolveClusterTime } from './sdam/common';

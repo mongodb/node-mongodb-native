@@ -1,5 +1,4 @@
-import { BSON } from '../deps';
-const { Code } = BSON;
+import { Code } from '../bson';
 import { executeCommand } from './db_ops';
 import { loadDb } from '../dynamic_loaders';
 import { OperationBase } from './operation';

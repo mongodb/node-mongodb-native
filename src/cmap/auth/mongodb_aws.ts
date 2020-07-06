@@ -1,7 +1,7 @@
 import http = require('http');
 import crypto = require('crypto');
 import url = require('url');
-import { BSON } from '../../deps';
+import * as BSON from '../../bson';
 import { AuthProvider } from './auth_provider';
 import { MongoCredentials } from './mongo_credentials';
 import { MongoError } from '../../error';
@@ -18,7 +18,7 @@ const ASCII_N = 110;
 const AWS_RELATIVE_URI = 'http://169.254.170.2';
 const AWS_EC2_URI = 'http://169.254.169.254';
 const AWS_EC2_PATH = '/latest/meta-data/iam/security-credentials';
-const bsonOptions = { promoteLongs: true, promoteValues: true, promoteBuffers: false };
+const bsonOptions: any = { promoteLongs: true, promoteValues: true, promoteBuffers: false };
 
 class MongoDBAWS extends AuthProvider {
   auth(authContext: any, callback: Function) {

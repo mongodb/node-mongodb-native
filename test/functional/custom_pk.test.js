@@ -1,7 +1,7 @@
 'use strict';
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
-const { ObjectID } = require('../../src');
+const { ObjectId } = require('../../src');
 
 describe('Custom PK', function() {
   before(function() {
@@ -20,7 +20,7 @@ describe('Custom PK', function() {
       var CustomPKFactory = function() {};
       CustomPKFactory.prototype = new Object();
       CustomPKFactory.createPk = function() {
-        return new ObjectID('aaaaaaaaaaaa');
+        return new ObjectId('aaaaaaaaaaaa');
       };
 
       var client = configuration.newClient(
@@ -39,7 +39,7 @@ describe('Custom PK', function() {
 
         collection.insert({ a: 1 }, { w: 1 }, function(err) {
           test.equal(null, err);
-          collection.find({ _id: new ObjectID('aaaaaaaaaaaa') }).toArray(function(err, items) {
+          collection.find({ _id: new ObjectId('aaaaaaaaaaaa') }).toArray(function(err, items) {
             test.equal(1, items.length);
 
             client.close(done);

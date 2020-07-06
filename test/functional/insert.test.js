@@ -8,7 +8,7 @@ const { normalizedFunctionString } = require('bson/lib/parser/utils');
 const {
   Long,
   Timestamp,
-  ObjectID,
+  ObjectId,
   DBRef,
   BSONSymbol,
   Double,
@@ -232,7 +232,7 @@ describe('Insert', function() {
         var collection = db.collection('test_all_serialization_types');
 
         var date = new Date();
-        var oid = new ObjectID();
+        var oid = new ObjectId();
         var string = 'binstring';
         var bin = new Binary();
         for (var index = 0; index < string.length; index++) {
@@ -379,7 +379,7 @@ describe('Insert', function() {
           "motherOfAllDocuments['array'] = [1,2,3];" +
           "motherOfAllDocuments['hash'] = {'a':1, 'b':2};" +
           "motherOfAllDocuments['date'] = date;" +
-          "motherOfAllDocuments['oid'] = new mongo.ObjectID();" +
+          "motherOfAllDocuments['oid'] = new mongo.ObjectId();" +
           "motherOfAllDocuments['binary'] = bin;" +
           "motherOfAllDocuments['int'] = 42;" +
           "motherOfAllDocuments['float'] = 33.3333;" +
@@ -392,7 +392,7 @@ describe('Insert', function() {
         var context = {
           motherOfAllDocuments: {},
           mongo: {
-            ObjectID: ObjectID,
+            ObjectId: ObjectId,
             Binary: Binary,
             Code: Code,
             DBRef: DBRef
@@ -570,7 +570,7 @@ describe('Insert', function() {
     },
 
     test: function(done) {
-      var dbref = new DBRef('foo', ObjectID.createFromHexString('fc24a04d4560531f00000000'), null);
+      var dbref = new DBRef('foo', ObjectId.createFromHexString('fc24a04d4560531f00000000'), null);
       JSON.stringify(dbref);
       done();
     }
@@ -749,9 +749,9 @@ describe('Insert', function() {
         var db = client.db(configuration.db);
         var collection = db.collection('shouldCorrectlyInsertDBRefWithDbNotDefined');
 
-        var doc = { _id: new ObjectID() };
-        var doc2 = { _id: new ObjectID() };
-        var doc3 = { _id: new ObjectID() };
+        var doc = { _id: new ObjectId() };
+        var doc2 = { _id: new ObjectId() };
+        var doc3 = { _id: new ObjectId() };
 
         collection.insert(doc, configuration.writeConcernMax(), function(err, result) {
           test.equal(null, err);
@@ -877,7 +877,7 @@ describe('Insert', function() {
         var collection = db.collection('shouldCorrectlyFailWhenNoObjectToUpdate');
 
         collection.update(
-          { _id: new ObjectID() },
+          { _id: new ObjectId() },
           { email: 'update' },
           configuration.writeConcernMax(),
           function(err, result) {
@@ -899,7 +899,7 @@ describe('Insert', function() {
     test: function(done) {
       var configuration = this.configuration;
       var doc = {
-        _id: new ObjectID('4e886e687ff7ef5e00000162'),
+        _id: new ObjectId('4e886e687ff7ef5e00000162'),
         str: 'foreign',
         type: 2,
         timestamp: ISODate('2011-10-02T14:00:08.383Z'),
@@ -939,7 +939,7 @@ describe('Insert', function() {
     test: function(done) {
       var configuration = this.configuration;
       var doc = {
-        _id: new ObjectID('4e886e687ff7ef5e00000162'),
+        _id: new ObjectId('4e886e687ff7ef5e00000162'),
         str: 'foreign',
         type: 2,
         timestamp: new Timestamp(10000),
@@ -978,7 +978,7 @@ describe('Insert', function() {
     test: function(done) {
       var configuration = this.configuration;
       var doc = {
-        _id: new ObjectID('4e886e687ff7ef5e00000162'),
+        _id: new ObjectId('4e886e687ff7ef5e00000162'),
         $key: 'foreign'
       };
 
@@ -1150,7 +1150,7 @@ describe('Insert', function() {
     test: function(done) {
       var configuration = this.configuration;
       var doc = {
-        _id: new ObjectID(),
+        _id: new ObjectId(),
         Prop1: 'p1',
         Prop2: 'p2',
         More: {
@@ -1552,7 +1552,7 @@ describe('Insert', function() {
 
         var document = {
           symbol: new BSONSymbol('abcdefghijkl'),
-          objid: new ObjectID('abcdefghijkl'),
+          objid: new ObjectId('abcdefghijkl'),
           double: new Double(1),
           binary: new Binary(Buffer.from('hello world')),
           minkey: new MinKey(),
@@ -1568,7 +1568,7 @@ describe('Insert', function() {
             test.equal(null, err);
             test.equal('abcdefghijkl', doc.symbol.toString());
 
-            collection.findOne({ objid: new ObjectID('abcdefghijkl') }, function(err, doc) {
+            collection.findOne({ objid: new ObjectId('abcdefghijkl') }, function(err, doc) {
               test.equal(null, err);
               test.equal('6162636465666768696a6b6c', doc.objid.toString());
 
@@ -1629,7 +1629,7 @@ describe('Insert', function() {
 
         var document = {
           symbol: new BSONSymbol('abcdefghijkl'),
-          objid: new ObjectID('abcdefghijkl'),
+          objid: new ObjectId('abcdefghijkl'),
           double: new Double(1),
           binary: new Binary(Buffer.from('hello world')),
           minkey: new MinKey(),
@@ -1645,7 +1645,7 @@ describe('Insert', function() {
             test.equal(null, err);
             test.equal('abcdefghijkl', doc.symbol.toString());
 
-            collection.findOne({ objid: new ObjectID('abcdefghijkl') }, function(err, doc) {
+            collection.findOne({ objid: new ObjectId('abcdefghijkl') }, function(err, doc) {
               test.equal(null, err);
               test.equal('6162636465666768696a6b6c', doc.objid.toString());
 

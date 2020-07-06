@@ -4,7 +4,7 @@ const chai = require('chai');
 const expect = chai.expect;
 const sinonChai = require('sinon-chai');
 const mock = require('mongodb-mock-server');
-const { Long, ObjectID } = require('../../src');
+const { Long, ObjectId } = require('../../src');
 chai.use(sinonChai);
 
 describe('Collection', function() {
@@ -538,7 +538,7 @@ describe('Collection', function() {
 
                   // Update again
                   collection.updateOne(
-                    { _id: new ObjectID(user._id.toString()) },
+                    { _id: new ObjectId(user._id.toString()) },
                     { $set: { friends: user.friends } },
                     { upsert: true, w: 1 },
                     (err, result) => {

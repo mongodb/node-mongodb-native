@@ -1,6 +1,5 @@
 import { GetMore } from '../commands';
-import { BSON } from '../../deps';
-const { Long } = BSON;
+import { Long } from '../../bson';
 import { MongoError, MongoNetworkError } from '../../error';
 import { applyCommonQueryOptions } from './shared';
 import { maxWireVersion, collectionNamespace } from '../../utils';

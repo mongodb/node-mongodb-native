@@ -15,11 +15,6 @@ function makeErrorModule(error: any) {
   });
 }
 
-let BSON = require('bson');
-try {
-  BSON = require('bson-ext');
-} catch (_) {} // eslint-disable-line
-
 let Kerberos = makeErrorModule(
   new Error(
     'Optional module `kerberos` not found. Please install it to enable kerberos authentication'
@@ -38,4 +33,4 @@ try {
   Snappy = require('snappy');
 } catch (_) {} // eslint-disable-line
 
-export { BSON, Kerberos, Snappy, kModuleError };
+export { Kerberos, Snappy, kModuleError };

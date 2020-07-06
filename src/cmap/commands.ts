@@ -1,5 +1,5 @@
 import ReadPreference = require('../read_preference');
-import { BSON } from '../deps';
+import * as BSON from '../bson';
 import { databaseNamespace } from '../utils';
 import { OP_QUERY, OP_GETMORE, OP_KILL_CURSORS, OP_MSG } from './wire_protocol/constants';
 

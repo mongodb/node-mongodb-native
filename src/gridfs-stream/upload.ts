@@ -1,8 +1,7 @@
 import PromiseProvider = require('../promise_provider');
 import crypto = require('crypto');
 import { Writable } from 'stream';
-import { BSON } from '../deps';
-const { ObjectId } = BSON;
+import { ObjectId } from '../bson';
 const ERROR_NAMESPACE_NOT_FOUND = 26;
 
 /**

@@ -1,5 +1,4 @@
-import { BSON } from '../../deps';
-const { Binary } = BSON;
+import { Binary } from '../../bson';
 import { AuthProvider } from './auth_provider';
 
 class Plain extends AuthProvider {
@@ -8,7 +7,7 @@ class Plain extends AuthProvider {
     const username = credentials.username;
     const password = credentials.password;
 
-    const payload = new Binary(`\x00${username}\x00${password}`);
+    const payload = new Binary(Buffer.from(`\x00${username}\x00${password}`));
     const command = {
       saslStart: 1,
       mechanism: 'PLAIN',

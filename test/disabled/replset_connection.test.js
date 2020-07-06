@@ -679,7 +679,7 @@ describe.skip('ReplSet (Connection)', function() {
         var configuration = this.configuration;
         var mongo = configuration.require,
           GridStore = mongo.GridStore,
-          ObjectID = mongo.ObjectID,
+          ObjectId = mongo.ObjectId,
           CoreServer = configuration.require.CoreServer,
           CoreConnection = configuration.require.CoreConnection;
 
@@ -700,7 +700,7 @@ describe.skip('ReplSet (Connection)', function() {
         const client = configuration.newClient(url);
         client.connect(function(err, client) {
           var db = client.db(configuration.db);
-          var gs = new GridStore(db, new ObjectID());
+          var gs = new GridStore(db, new ObjectId());
           test.equal('majority', gs.writeConcern.w);
           test.equal(5000, gs.writeConcern.wtimeout);
           client.close();

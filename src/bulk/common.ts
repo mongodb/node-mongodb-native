@@ -1,7 +1,5 @@
 import PromiseProvider = require('../promise_provider');
-const {
-  BSON: { Long, ObjectId }
-} = require('../deps');
+import { Long, ObjectId } from '../bson';
 import { MongoError, MongoWriteConcernError } from '../error';
 import {
   toError,

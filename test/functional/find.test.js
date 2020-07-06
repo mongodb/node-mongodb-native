@@ -3,7 +3,7 @@ const test = require('./shared').assert;
 const setupDatabase = require('./shared').setupDatabase;
 const expect = require('chai').expect;
 const sinon = require('sinon');
-const { Code, ObjectID, Long, Binary } = require('../../src');
+const { Code, ObjectId, Long, Binary } = require('../../src');
 
 describe('Find', function() {
   before(function() {
@@ -615,7 +615,7 @@ describe('Find', function() {
     }
   });
 
-  it('shouldCorrectlyPerformFindByObjectID', {
+  it('shouldCorrectlyPerformFindByObjectId', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
@@ -629,15 +629,15 @@ describe('Find', function() {
           collection.save({ hello: 'mike' }, configuration.writeConcernMax(), function(err, r) {
             var docs = r.ops[0];
             test.ok(
-              docs._id instanceof ObjectID ||
-                Object.prototype.toString.call(docs._id) === '[object ObjectID]'
+              docs._id instanceof ObjectId ||
+                Object.prototype.toString.call(docs._id) === '[object ObjectId]'
             );
 
             collection.findOne({ _id: docs._id }, function(err, doc) {
               test.equal('mike', doc.hello);
 
               var id = doc._id.toString();
-              collection.findOne({ _id: new ObjectID(id) }, function(err, doc) {
+              collection.findOne({ _id: new ObjectId(id) }, function(err, doc) {
                 test.equal('mike', doc.hello);
                 // Let's close the db
                 client.close(done);
@@ -660,13 +660,13 @@ describe('Find', function() {
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
         db.createCollection('test_find_by_oid_with_subdocs', function(err, collection) {
-          var c1 = { _id: new ObjectID(), comments: [], title: 'number 1' };
-          var c2 = { _id: new ObjectID(), comments: [], title: 'number 2' };
+          var c1 = { _id: new ObjectId(), comments: [], title: 'number 1' };
+          var c2 = { _id: new ObjectId(), comments: [], title: 'number 2' };
           var doc = {
             numbers: [],
             owners: [],
             comments: [c1, c2],
-            _id: new ObjectID()
+            _id: new ObjectId()
           };
 
           collection.insert(doc, configuration.writeConcernMax(), function(err) {
@@ -733,7 +733,7 @@ describe('Find', function() {
           // is the error handling of the findOne Method
           try {
             collection.findOne(
-              { _id: ObjectID.createFromHexString('5e9bd59248305adf18ebc15703a1') },
+              { _id: ObjectId.createFromHexString('5e9bd59248305adf18ebc15703a1') },
               function() {}
             );
           } catch (err) {
@@ -1279,7 +1279,7 @@ describe('Find', function() {
           err,
           collection
         ) {
-          var id = new ObjectID();
+          var id = new ObjectId();
           var doc = { _id: id, a: 1, b: 1, c: { a: 1, b: 1 } };
 
           collection.insert(doc, configuration.writeConcernMax(), function(err) {
@@ -1321,7 +1321,7 @@ describe('Find', function() {
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
         db.createCollection('execute_find_and_modify', function(err, collection) {
-          var self = { _id: new ObjectID() };
+          var self = { _id: new ObjectId() };
           var _uuid = 'sddffdss';
 
           collection.findAndModify(
@@ -1353,8 +1353,8 @@ describe('Find', function() {
           err,
           collection
         ) {
-          var _lowerId = new ObjectID();
-          var _higherId = new ObjectID();
+          var _lowerId = new ObjectId();
+          var _higherId = new ObjectId();
           var lowerId = new Long.fromString('133118461172916224', 10);
           var higherId = new Long.fromString('133118461172916225', 10);
 
@@ -1402,7 +1402,7 @@ describe('Find', function() {
         db.createCollection(
           'Should_Correctly_find_a_Document_using_findOne_excluding__id_field',
           function(err, collection) {
-            var doc = { _id: new ObjectID(), a: 1, c: 2 };
+            var doc = { _id: new ObjectId(), a: 1, c: 2 };
             // insert doc
             collection.insert(doc, configuration.writeConcernMax(), function(err) {
               test.equal(null, err);
@@ -1441,7 +1441,7 @@ describe('Find', function() {
         db.createCollection(
           'Should_correctly_execute_find_and_findOne_queries_in_the_same_way',
           function(err, collection) {
-            var doc = { _id: new ObjectID(), a: 1, c: 2, comments: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] };
+            var doc = { _id: new ObjectId(), a: 1, c: 2, comments: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] };
             // insert doc
             collection.insert(doc, configuration.writeConcernMax(), function(err) {
               test.equal(null, err);
@@ -1499,8 +1499,8 @@ describe('Find', function() {
         var transaction = {};
         transaction.document = {};
         transaction.document.type = 'documentType';
-        transaction.document.id = new ObjectID();
-        transaction.transactionId = new ObjectID();
+        transaction.document.id = new ObjectId();
+        transaction.transactionId = new ObjectId();
         transaction.amount = 12.3333;
 
         var transactions = [];
@@ -1624,10 +1624,10 @@ describe('Find', function() {
           'shouldCorrectlyReturnErrorFromMongodbOnFindAndModifyForcedError',
           function(err, collection) {
             var q = { x: 1 };
-            var set = { y: 2, _id: new ObjectID() };
+            var set = { y: 2, _id: new ObjectId() };
             var opts = { new: true, upsert: true };
             // Original doc
-            var doc = { _id: new ObjectID(), x: 1 };
+            var doc = { _id: new ObjectId(), x: 1 };
 
             // Insert original doc
             collection.insert(doc, configuration.writeConcernMax(), function(err) {
@@ -1661,7 +1661,7 @@ describe('Find', function() {
         db.collection('collection1', function(err, collection) {
           // Wait a bit and then execute something that will throw a duplicate error
           setTimeout(function() {
-            var id = new ObjectID();
+            var id = new ObjectId();
 
             collection.insert({ _id: id, a: 1 }, configuration.writeConcernMax(), function(err) {
               test.equal(null, err);
