@@ -13,6 +13,8 @@ const expect = chai.expect;
 const sinon = require('sinon');
 const fs = require('fs');
 const crypto = require('crypto');
+const BSON = require('bson');
+const Long = BSON.Long;
 
 chai.use(require('chai-subset'));
 
@@ -2828,5 +2830,51 @@ describe('Change Stream Resume Error Tests', function() {
         });
       });
     })
+  });
+});
+context('NODE-2626', function() {
+  let mockServer;
+  afterEach(() => mock.cleanup());
+  beforeEach(() => mock.createServer().then(server => (mockServer = server)));
+  it('changeStream should close if cursor id for initial aggregate is Long.ZERO', function(done) {
+    mockServer.setMessageHandler(req => {
+      const doc = req.document;
+      if (doc.ismaster) {
+        return req.reply(mock.DEFAULT_ISMASTER_36);
+      }
+      if (doc.aggregate) {
+        return req.reply({
+          ok: 1,
+          cursor: {
+            id: Long.ZERO,
+            firstBatch: []
+          }
+        });
+      }
+      if (doc.getMore) {
+        return req.reply({
+          ok: 1,
+          cursor: {
+            id: new Long(1407, 1407),
+            nextBatch: []
+          }
+        });
+      }
+      req.reply({ ok: 1 });
+    });
+    const client = this.configuration.newClient(`mongodb://${mockServer.uri()}/`, {
+      useUnifiedTopology: true
+    });
+    client.connect(err => {
+      expect(err).to.not.exist;
+      const collection = client.db('cs').collection('test');
+      const changeStream = collection.watch();
+      changeStream.next((err, doc) => {
+        expect(err).to.exist;
+        expect(doc).to.not.exist;
+        expect(err.message).to.equal('ChangeStream is closed');
+        changeStream.close(() => client.close(done));
+      });
+    });
   });
 });
