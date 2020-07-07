@@ -348,8 +348,8 @@ class ChangeStreamCursor extends Cursor {
 
   _initializeCursor(callback: Function) {
     super._initializeCursor((err?: any, result?: any) => {
-      if (err) {
-        callback(err);
+      if (err || result == null) {
+        callback(err, result);
         return;
       }
 
@@ -503,6 +503,11 @@ function waitForTopologyConnected(topology: any, options: any, callback: Functio
 
 function processNewChange(changeStream: any, change: any, callback?: Function) {
   const cursor = changeStream.cursor;
+
+  // a null change means the cursor has been notified, implicitly closing the change stream
+  if (change == null) {
+    changeStream.closed = true;
+  }
 
   if (changeStream.closed) {
     if (callback) callback(new MongoError('ChangeStream is closed'));
