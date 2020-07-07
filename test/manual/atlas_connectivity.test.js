@@ -1,28 +1,39 @@
 'use strict';
 const { MongoClient } = require('../../src');
-const CONFIGS = ['ATLAS_REPL', 'ATLAS_SHRD', 'ATLAS_FREE', 'ATLAS_TLS11', 'ATLAS_TLS12'].map(
-  name => {
-    return {
-      name,
-      url: process.env[name]
-    };
-  }
-);
 
 describe('Atlas Connectivity', function() {
-  CONFIGS.forEach(config => {
-    it(`${config.name}`, function() {
-      const client = new MongoClient(config.url);
-      return Promise.resolve()
-        .then(() => client.connect())
-        .then(() => client.db('admin').command({ ismaster: 1 }))
-        .then(() =>
-          client
-            .db('test')
-            .collection('test')
-            .findOne({})
-        )
-        .finally(() => client.close());
+  if (process.env.ATLAS_CONNECTIVITY == null) {
+    console.log(
+      'skipping atlas connectivity tests, ATLAS_CONNECTIVITY environment variable is not defined'
+    );
+
+    return;
+  }
+
+  const CONFIGS = JSON.parse(process.env.ATLAS_CONNECTIVITY);
+  Object.keys(CONFIGS).forEach(configName => {
+    context(configName, function() {
+      CONFIGS[configName].forEach(connectionString => {
+        const name = connectionString.indexOf('mongodb+srv') >= 0 ? 'mongodb+srv' : 'normal';
+        it(`${name}`, makeConnectionTest(connectionString));
+      });
     });
   });
 });
+
+function makeConnectionTest(connectionString, clientOptions) {
+  return function() {
+    const client = new MongoClient(connectionString, clientOptions);
+
+    return client
+      .connect()
+      .then(() => client.db('admin').command({ ismaster: 1 }))
+      .then(() =>
+        client
+          .db('test')
+          .collection('test')
+          .findOne({})
+      )
+      .then(() => client.close());
+  };
+}
