@@ -6,7 +6,7 @@ import MongoClient = require('../mongo_client');
 import { Server } from '../sdam/server';
 
 class RunCommandOperation extends CommandOperationV2 {
-  command: any
+  command: any;
   constructor(parent: MongoClient | Db | Collection, command: any, options: any) {
     super(parent, options);
     this.command = command;
