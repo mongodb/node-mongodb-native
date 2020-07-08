@@ -127,7 +127,7 @@ class ReadPreference {
     options = options || {};
     const session = options.session;
 
-    const inheritedReadPreference = parent.readPreference;
+    const inheritedReadPreference = parent && parent.readPreference;
 
     let readPreference;
     if (options.readPreference) {
@@ -138,7 +138,7 @@ class ReadPreference {
     } else if (inheritedReadPreference != null) {
       readPreference = inheritedReadPreference;
     } else {
-      throw new Error('No readPreference was provided or inherited.');
+      readPreference = ReadPreference.primary;
     }
 
     return typeof readPreference === 'string' ? new ReadPreference(readPreference) : readPreference;
@@ -148,12 +148,22 @@ class ReadPreference {
    * Replaces options.readPreference with a ReadPreference instance
    */
   static translate(options: any) {
-    if (options.readPreference == null) return undefined;
+    if (options.readPreference == null) return options;
     const r = options.readPreference;
-    options.readPreference = ReadPreference.fromOptions(options);
-    if (!(options.readPreference instanceof ReadPreference)) {
+
+    if (typeof r === 'string') {
+      options.readPreference = new ReadPreference(r);
+    } else if (r && !(r instanceof ReadPreference) && typeof r === 'object') {
+      const mode = r.mode || r.preference;
+      if (mode && typeof mode === 'string') {
+        options.readPreference = new ReadPreference(mode, r.tags, {
+          maxStalenessSeconds: r.maxStalenessSeconds
+        });
+      }
+    } else if (!(r instanceof ReadPreference)) {
       throw new TypeError('Invalid read preference: ' + r);
     }
+
     return options;
   }
 
