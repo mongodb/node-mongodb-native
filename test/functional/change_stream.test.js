@@ -11,8 +11,6 @@ const sinon = require('sinon');
 const { ObjectId, Timestamp, Long, ReadPreference } = require('../../src');
 const fs = require('fs');
 const crypto = require('crypto');
-const BSON = require('bson');
-const Long = BSON.Long;
 
 chai.use(require('chai-subset'));
 
