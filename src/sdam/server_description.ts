@@ -43,7 +43,7 @@ const ISMASTER_FIELDS = [
  * Internal type, not meant to be directly instantiated
  */
 class ServerDescription {
-  address: any;
+  address: string;
   error: any;
   roundTripTime: any;
   lastUpdateTime: any;
@@ -133,6 +133,16 @@ class ServerDescription {
    */
   get isWritable() {
     return WRITABLE_SERVER_TYPES.has(this.type);
+  }
+
+  get host() {
+    const chopLength = `:${this.port}`.length;
+    return this.address.slice(0, -chopLength);
+  }
+
+  get port() {
+    const addressParts = this.address.split(':');
+    return Number.parseInt(addressParts[addressParts.length - 1], 10);
   }
 
   /**
