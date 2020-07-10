@@ -1,6 +1,5 @@
 import crypto = require('crypto');
-import { BSON } from '../../deps';
-const { Binary } = BSON;
+import { Binary } from '../../bson';
 import { MongoError } from '../../error';
 import { AuthProvider } from './auth_provider';
 

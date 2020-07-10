@@ -277,11 +277,11 @@ describe.skip('ReplSet (ReadPreference)', function() {
     test: function(done) {
       var configuration = this.configuration;
       var GridStore = configuration.require.GridStore,
-        ObjectID = configuration.require.ObjectID,
+        ObjectId = configuration.require.ObjectId,
         ReadPreference = configuration.require.ReadPreference;
 
       // Create an id
-      var id = new ObjectID();
+      var id = new ObjectId();
       // Open the database
       var client = configuration.newClient(
         {},

@@ -5,8 +5,7 @@ import executeOperation = require('../operations/execute_operation');
 import { Readable } from 'stream';
 import { OperationBase } from '../operations/operation';
 import { MongoError, MongoNetworkError } from '../error';
-import { BSON } from '../deps';
-const { Long } = BSON;
+import { Long } from '../bson';
 
 // Possible states for a cursor
 const CursorState = {

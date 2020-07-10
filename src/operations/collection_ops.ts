@@ -1,6 +1,5 @@
 import ReadPreference = require('../read_preference');
-import { BSON } from '../deps';
-const { Code, Long } = BSON;
+import { Code, Long } from '../bson';
 import { MongoError } from '../error';
 import { insertDocuments, updateDocuments } from './common_functions';
 import {
