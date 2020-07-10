@@ -18,4 +18,4 @@ class RunCommandOperation extends CommandOperationV2 {
 }
 defineAspects(RunCommandOperation, [Aspect.EXECUTE_WITH_SELECTION, Aspect.NO_INHERIT_OPTIONS]);
 
-export = RunCommandOperation
+export = RunCommandOperation;
