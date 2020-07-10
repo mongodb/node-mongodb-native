@@ -154,14 +154,23 @@ functions:
     - command: shell.exec
       type: test
       params:
-        working_dir: src
         silent: true
-        script: >
-          # DO NOT ECHO WITH XTRACE (which PREPARE_SHELL does)
+        working_dir: src
+        script: |
+          cat <<EOT > prepare_atlas_connectivity.sh
+          export ATLAS_CONNECTIVITY='${ATLAS_CONNECTIVITY}'
+          EOT
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: src
+        script: |
+          # Disable xtrace (just in case it was accidentally set).
+          set +x
+          . ./prepare_atlas_connectivity.sh
+          rm -f ./prepare_atlas_connectivity.sh
 
-          NODE_LTS_NAME='${NODE_LTS_NAME}' ATLAS_REPL='${atlas_repl}' ATLAS_SHRD='${atlas_shrd}'
-          ATLAS_FREE='${atlas_free}' ATLAS_TLS11='${atlas_tls11}' ATLAS_TLS12='${atlas_tls12}' bash
-          ${PROJECT_DIRECTORY}/.evergreen/run-atlas-tests.sh
+          NODE_LTS_NAME='${NODE_LTS_NAME}' bash ${PROJECT_DIRECTORY}/.evergreen/run-atlas-tests.sh
 pre:
   - func: fetch source
   - func: prepare resources
