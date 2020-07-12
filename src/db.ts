@@ -26,6 +26,7 @@ import AggregateOperation = require('./operations/aggregate');
 import AddUserOperation = require('./operations/add_user');
 import CollectionsOperation = require('./operations/collections');
 import CommandOperation = require('./operations/command');
+import RunCommandOperation = require('./operations/run_command');
 import CreateCollectionOperation = require('./operations/create_collection');
 import CreateIndexesOperation = require('./operations/create_indexes');
 import { DropCollectionOperation, DropDatabaseOperation } from './operations/drop';
@@ -241,7 +242,7 @@ class Db {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, options);
 
-    const commandOperation = new CommandOperation(this, options, null, command);
+    const commandOperation = new RunCommandOperation(this, command, options);
 
     return executeOperation(this.s.topology, commandOperation, callback);
   }

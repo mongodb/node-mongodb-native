@@ -27,9 +27,10 @@ class CommandOperationV2 extends OperationBase {
     super(options);
 
     this.ns = parent.s.namespace.withCollection('$cmd');
-    this.readPreference = ReadPreference.resolve(parent, this.options);
-    this.readConcern = resolveReadConcern(parent, this.options);
-    this.writeConcern = resolveWriteConcern(parent, this.options);
+    const propertyProvider = this.hasAspect(Aspect.NO_INHERIT_OPTIONS) ? undefined : parent;
+    this.readPreference = ReadPreference.resolve(propertyProvider, this.options);
+    this.readConcern = resolveReadConcern(propertyProvider, this.options);
+    this.writeConcern = resolveWriteConcern(propertyProvider, this.options);
     this.explain = false;
 
     if (operationOptions && typeof operationOptions.fullResponse === 'boolean') {
@@ -108,11 +109,11 @@ class CommandOperationV2 extends OperationBase {
 }
 
 function resolveWriteConcern(parent: any, options: any) {
-  return WriteConcern.fromOptions(options) || parent.writeConcern;
+  return WriteConcern.fromOptions(options) || (parent && parent.writeConcern);
 }
 
 function resolveReadConcern(parent: any, options: any) {
-  return ReadConcern.fromOptions(options) || parent.readConcern;
+  return ReadConcern.fromOptions(options) || (parent && parent.readConcern);
 }
 
 export = CommandOperationV2;
