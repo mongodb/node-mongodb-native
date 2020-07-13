@@ -61,6 +61,7 @@
     "through2": "^3.0.1",
     "ts-node": "^8.10.2",
     "typescript": "^3.9.6",
+    "typescript-cached-transpile": "^0.0.6",
     "worker-farm": "^1.5.0",
     "wtfnode": "^0.8.0",
     "yargs": "^14.2.0"
