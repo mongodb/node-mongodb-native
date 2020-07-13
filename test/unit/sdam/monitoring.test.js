@@ -4,6 +4,7 @@ const { ServerType } = require('../../../src/sdam/common');
 const { Topology } = require('../../../src/sdam/topology');
 const { Monitor } = require('../../../src/sdam/monitor');
 const { expect } = require('chai');
+const { ServerDescription } = require('../../../src/sdam/server_description');
 
 class MockServer {
   constructor(options) {
@@ -97,7 +98,7 @@ describe('monitoring', function() {
     });
   });
 
-  describe('Monitor', function() {
+  describe('Monitor class', function() {
     it('should connect and issue an initial server check', function(done) {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
@@ -192,7 +193,8 @@ describe('monitoring', function() {
       });
 
       const server = new MockServer(mockServer.address());
-      const monitor = new Monitor(server, {
+      const serverDescription = new ServerDescription(server.description.address);
+      const monitor = new Monitor(serverDescription, {
         heartbeatFrequencyMS: 250,
         minHeartbeatFrequencyMS: 50
       });
