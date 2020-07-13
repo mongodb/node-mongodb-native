@@ -1,6 +1,7 @@
 'use strict';
 const { eachAsync, now, makeInterruptableAsyncInterval } = require('../../src/utils');
 const { expect } = require('chai');
+const sinon = require('sinon');
 
 describe('utils', function() {
   context('eachAsync', function() {
@@ -35,7 +36,13 @@ describe('utils', function() {
   });
 
   context('makeInterruptableAsyncInterval', function() {
-    const roundToNearestMultipleOfTen = x => Math.round(x / 10) * 10;
+    before(function() {
+      this.clock = sinon.useFakeTimers();
+    });
+
+    after(function() {
+      this.clock.restore();
+    });
 
     it('should execute a method in an repeating interval', function(done) {
       let lastTime = now();
@@ -50,11 +57,13 @@ describe('utils', function() {
       );
 
       setTimeout(() => {
-        const roundedMarks = marks.map(roundToNearestMultipleOfTen);
-        expect(roundedMarks.every(mark => roundedMarks[0] === mark)).to.be.true;
+        expect(marks).to.eql([10, 10, 10, 10, 10]);
+        expect(marks.every(mark => marks[0] === mark)).to.be.true;
         executor.stop();
         done();
-      }, 50);
+      }, 51);
+
+      this.clock.tick(51);
     });
 
     it('should schedule execution sooner if requested within min interval threshold', function(done) {
@@ -73,11 +82,12 @@ describe('utils', function() {
       executor.wake();
 
       setTimeout(() => {
-        const roundedMarks = marks.map(roundToNearestMultipleOfTen);
-        expect(roundedMarks[0]).to.be.lessThan(50);
+        expect(marks).to.eql([10, 50]);
         executor.stop();
         done();
-      }, 50);
+      }, 100);
+
+      this.clock.tick(100);
     });
 
     it('should debounce multiple requests to wake the interval sooner', function(done) {
@@ -97,12 +107,12 @@ describe('utils', function() {
       }
 
       setTimeout(() => {
-        const roundedMarks = marks.map(roundToNearestMultipleOfTen);
-        expect(roundedMarks[0]).to.be.lessThan(50);
-        expect(roundedMarks.slice(1).every(mark => mark === 50)).to.be.true;
+        expect(marks).to.eql([10, 50, 50, 50, 50]);
         executor.stop();
         done();
       }, 250);
+
+      this.clock.tick(250);
     });
   });
 });
