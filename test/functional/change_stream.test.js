@@ -2799,7 +2799,7 @@ describe('Change Stream Resume Error Tests', function() {
     })
   });
 });
-context('NODE-2626', function() {
+context('NODE-2626 - handle null changes without error', function() {
   let mockServer;
   afterEach(() => mock.cleanup());
   beforeEach(() => mock.createServer().then(server => (mockServer = server)));

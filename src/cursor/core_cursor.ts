@@ -502,7 +502,7 @@ class CoreCursor extends Readable {
 
             // If we have a firstBatch set it
             if (Array.isArray(document.cursor.firstBatch)) {
-              cursor.cursorState.documents = document.cursor.firstBatch; //.reverse();
+              cursor.cursorState.documents = document.cursor.firstBatch;
             }
 
             // Return after processing command cursor
