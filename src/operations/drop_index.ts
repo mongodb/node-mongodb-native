@@ -1,34 +1,20 @@
 import { Aspect, defineAspects } from './operation';
 import CommandOperation = require('./command');
-import { applyWriteConcern, handleCallback } from '../utils';
+import { handleCallback } from '../utils';
 
 class DropIndexOperation extends CommandOperation {
   collection: any;
   indexName: any;
 
   constructor(collection: any, indexName: any, options: any) {
-    super(collection.s.db, options, collection);
-
+    super(collection, options);
     this.collection = collection;
     this.indexName = indexName;
   }
 
-  _buildCommand() {
-    const collection = this.collection;
-    const indexName = this.indexName;
-    const options = this.options;
-
-    let cmd = { dropIndexes: collection.collectionName, index: indexName };
-
-    // Decorate command with writeConcern if supported
-    cmd = applyWriteConcern(cmd, { db: collection.s.db, collection }, options);
-
-    return cmd;
-  }
-
-  execute(callback: Function) {
-    // Execute command
-    super.execute((err?: any, result?: any) => {
+  execute(server: any, callback: Function) {
+    const cmd = { dropIndexes: this.collection.collectionName, index: this.indexName };
+    super.executeCommand(server, cmd, (err?: any, result?: any) => {
       if (typeof callback !== 'function') return;
       if (err) return handleCallback(callback, err, null);
       handleCallback(callback, null, result);
@@ -36,6 +22,5 @@ class DropIndexOperation extends CommandOperation {
   }
 }
 
-defineAspects(DropIndexOperation, Aspect.WRITE_OPERATION);
-
+defineAspects(DropIndexOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
 export = DropIndexOperation;

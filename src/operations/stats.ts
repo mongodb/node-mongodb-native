@@ -8,7 +8,9 @@ import CommandOperation = require('./command');
  * @property {Collection} collection Collection instance.
  * @property {object} [options] Optional settings. See Collection.prototype.stats for a list of options.
  */
-class StatsOperation extends CommandOperation {
+class CollStatsOperation extends CommandOperation {
+  collectionName: string;
+
   /**
    * Construct a Stats operation.
    *
@@ -16,27 +18,31 @@ class StatsOperation extends CommandOperation {
    * @param {object} [options] Optional settings. See Collection.prototype.stats for a list of options.
    */
   constructor(collection: any, options?: object) {
-    super(collection.s.db, options, collection);
+    super(collection, options);
+    this.collectionName = collection.collectionName;
   }
 
-  _buildCommand() {
-    const collection = this.collection;
-    const options = this.options;
-
-    // Build command object
-    const command: any = {
-      collStats: collection.collectionName
-    };
-
-    // Check if we have the scale value
-    if (options['scale'] != null) {
-      command['scale'] = options['scale'];
+  execute(server: any, callback: Function) {
+    const command: any = { collStats: this.collectionName };
+    if (this.options.scale != null) {
+      command.scale = this.options.scale;
     }
 
-    return command;
+    super.executeCommand(server, command, callback);
   }
 }
 
-defineAspects(StatsOperation, Aspect.READ_OPERATION);
+class DbStatsOperation extends CommandOperation {
+  execute(server: any, callback: Function) {
+    const command: any = { dbStats: true };
+    if (this.options.scale != null) {
+      command.scale = this.options.scale;
+    }
 
-export = StatsOperation;
+    super.executeCommand(server, command, callback);
+  }
+}
+
+defineAspects(CollStatsOperation, [Aspect.READ_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
+defineAspects(DbStatsOperation, [Aspect.READ_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
+export { DbStatsOperation, CollStatsOperation };

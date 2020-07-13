@@ -1,11 +1,11 @@
-import CommandOperationV2 = require('./command_v2');
+import CommandOperation = require('./command');
 import { defineAspects, Aspect } from './operation';
 import Db = require('../db');
 import Collection = require('../collection');
 import MongoClient = require('../mongo_client');
 import { Server } from '../sdam/server';
 
-class RunCommandOperation extends CommandOperationV2 {
+class RunCommandOperation extends CommandOperation {
   command: any;
   constructor(parent: MongoClient | Db | Collection, command: any, options: any) {
     super(parent, options);

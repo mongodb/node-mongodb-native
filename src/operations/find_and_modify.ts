@@ -94,7 +94,7 @@ class FindAndModifyOperation extends OperationBase {
     }
 
     if (options.hint) {
-      // TODO: once this method becomes a CommandOperationV2 we will have the server
+      // TODO: once this method becomes a CommandOperation we will have the server
       // in place to check.
       const unacknowledgedWrite = options.writeConcern && options.writeConcern.w === 0;
       if (unacknowledgedWrite || maxWireVersion(coll.s.topology) < 8) {

@@ -1,4 +1,4 @@
-import CommandOperationV2 = require('./command_v2');
+import CommandOperation = require('./command');
 import ReadPreference = require('../read_preference');
 import { MongoError } from '../error';
 import { maxWireVersion } from '../utils';
@@ -7,7 +7,7 @@ import { Aspect, defineAspects } from './operation';
 const DB_AGGREGATE_COLLECTION = 1;
 const MIN_WIRE_VERSION_$OUT_READ_CONCERN_SUPPORT = 8;
 
-class AggregateOperation extends CommandOperationV2 {
+class AggregateOperation extends CommandOperation {
   target: any;
   pipeline: any;
   hasWriteStage: boolean;
@@ -63,7 +63,7 @@ class AggregateOperation extends CommandOperationV2 {
     const command = { aggregate: this.target, pipeline: this.pipeline } as any;
 
     if (this.hasWriteStage && serverWireVersion < MIN_WIRE_VERSION_$OUT_READ_CONCERN_SUPPORT) {
-      this.readConcern = null;
+      this.readConcern = undefined;
     }
 
     if (serverWireVersion >= 5) {

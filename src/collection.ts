@@ -58,7 +58,7 @@ import MapReduceOperation = require('./operations/map_reduce');
 import OptionsOperation = require('./operations/options_operation');
 import RenameOperation = require('./operations/rename');
 import ReplaceOneOperation = require('./operations/replace_one');
-import StatsOperation = require('./operations/stats');
+import { CollStatsOperation } from './operations/stats';
 import UpdateManyOperation = require('./operations/update_many');
 import UpdateOneOperation = require('./operations/update_one');
 import executeOperation = require('./operations/execute_operation');
@@ -1095,8 +1095,7 @@ class Collection {
     callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
     options = args.length ? args.shift() || {} : {};
 
-    const statsOperation = new StatsOperation(this, options);
-
+    const statsOperation = new CollStatsOperation(this, options);
     return executeOperation(this.s.topology, statsOperation, callback);
   }
 

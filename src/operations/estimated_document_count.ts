@@ -1,7 +1,7 @@
 import { Aspect, defineAspects } from './operation';
-import CommandOperationV2 = require('./command_v2');
+import CommandOperation = require('./command');
 
-class EstimatedDocumentCountOperation extends CommandOperationV2 {
+class EstimatedDocumentCountOperation extends CommandOperation {
   collectionName: string;
   query?: any;
 

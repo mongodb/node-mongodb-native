@@ -7,14 +7,13 @@ class DropIndexesOperation extends DropIndexOperation {
     super(collection, '*', options);
   }
 
-  execute(callback: Function) {
-    super.execute((err: any) => {
+  execute(server: any, callback: Function) {
+    super.execute(server, (err: any) => {
       if (err) return handleCallback(callback, err, false);
       handleCallback(callback, null, true);
     });
   }
 }
 
-defineAspects(DropIndexesOperation, Aspect.WRITE_OPERATION);
-
+defineAspects(DropIndexesOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
 export = DropIndexesOperation;

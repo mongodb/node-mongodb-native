@@ -1,20 +1,17 @@
 import { Aspect, defineAspects } from './operation';
-import CommandOperation = require('./command');
 import { handleCallback } from '../utils';
+import CommandOperation = require('./command');
 
-class DropOperation extends CommandOperation {
-  constructor(db: any, options: any) {
-    const finalOptions = Object.assign({}, options, db.s.options);
+class DropCollectionOperation extends CommandOperation {
+  name: any;
 
-    if (options.session) {
-      finalOptions.session = options.session;
-    }
-
-    super(db, finalOptions);
+  constructor(db: any, name: any, options: any) {
+    super(db, options);
+    this.name = name;
   }
 
-  execute(callback: Function) {
-    super.execute((err?: any, result?: any) => {
+  execute(server: any, callback: Function) {
+    super.executeCommand(server, { drop: this.name }, (err?: any, result?: any) => {
       if (err) return handleCallback(callback, err);
       if (result.ok) return handleCallback(callback, null, true);
       handleCallback(callback, null, false);
@@ -22,27 +19,16 @@ class DropOperation extends CommandOperation {
   }
 }
 
-defineAspects(DropOperation, Aspect.WRITE_OPERATION);
-
-class DropCollectionOperation extends DropOperation {
-  name: any;
-
-  constructor(db: any, name: any, options: any) {
-    super(db, options);
-
-    this.name = name;
-    this.namespace = `${db.namespace}.${name}`;
-  }
-
-  _buildCommand() {
-    return { drop: this.name };
+class DropDatabaseOperation extends CommandOperation {
+  execute(server: any, callback: Function) {
+    super.executeCommand(server, { dropDatabase: 1 }, (err?: any, result?: any) => {
+      if (err) return handleCallback(callback, err);
+      if (result.ok) return handleCallback(callback, null, true);
+      handleCallback(callback, null, false);
+    });
   }
 }
 
-class DropDatabaseOperation extends DropOperation {
-  _buildCommand() {
-    return { dropDatabase: 1 };
-  }
-}
-
-export { DropOperation, DropCollectionOperation, DropDatabaseOperation };
+defineAspects(DropCollectionOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
+defineAspects(DropDatabaseOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
+export { DropCollectionOperation, DropDatabaseOperation };

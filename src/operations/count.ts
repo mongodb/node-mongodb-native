@@ -1,18 +1,19 @@
+import { Aspect, defineAspects } from './operation';
 import { buildCountCommand } from './common_functions';
-import { OperationBase } from './operation';
+import CommandOperation = require('./command');
 
-class CountOperation extends OperationBase {
+class CountOperation extends CommandOperation {
   cursor: any;
   applySkipLimit: any;
 
   constructor(cursor: any, applySkipLimit: any, options: any) {
-    super(options);
+    super({ s: cursor }, options);
 
     this.cursor = cursor;
     this.applySkipLimit = applySkipLimit;
   }
 
-  execute(callback: Function) {
+  execute(server: any, callback: Function) {
     const cursor = this.cursor;
     const applySkipLimit = this.applySkipLimit;
     const options = this.options;
@@ -20,11 +21,6 @@ class CountOperation extends OperationBase {
     if (applySkipLimit) {
       if (typeof cursor.cursorSkip() === 'number') options.skip = cursor.cursorSkip();
       if (typeof cursor.cursorLimit() === 'number') options.limit = cursor.cursorLimit();
-    }
-
-    // Ensure we have the right read preference inheritance
-    if (options.readPreference) {
-      cursor.setReadPreference(options.readPreference);
     }
 
     if (
@@ -51,19 +47,16 @@ class CountOperation extends OperationBase {
       return callback(err);
     }
 
-    // Set cursor server to the same as the topology
-    cursor.server = cursor.topology.s.coreTopology;
-
-    // Execute the command
-    cursor.topology.command(
-      cursor.namespace.withCollection('$cmd'),
-      command,
-      cursor.options,
-      (err?: any, result?: any) => {
-        callback(err, result ? result.result.n : null);
-      }
-    );
+    super.executeCommand(server, command, (err?: any, result?: any) => {
+      callback(err, result ? result.n : null);
+    });
   }
 }
+
+defineAspects(CountOperation, [
+  Aspect.READ_OPERATION,
+  Aspect.RETRYABLE,
+  Aspect.EXECUTE_WITH_SELECTION
+]);
 
 export = CountOperation;
