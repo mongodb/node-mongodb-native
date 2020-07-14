@@ -72,24 +72,21 @@ tests:
     result:
       error:
         code: 280
-        errorLabels: [ "NonResumableChangeStreamError" ]
   -
-    description: change stream errors on MaxTimeMSExpired
+    description: change stream errors on ElectionInProgress
     minServerVersion: "4.2"
     failPoint:
       configureFailPoint: failCommand
       mode: { times: 1 }
       data:
           failCommands: ["getMore"]
-          errorCode: 50 # An error code that's not on the old blacklist or whitelist
+          errorCode: 216 # An error code that's not on the old blacklist or whitelist
           closeConnection: false
     target: collection
     topology:
       - replicaset
       - sharded
-    changeStreamPipeline:
-      -
-        $project: { _id: 0 }
+    changeStreamPipeline: []
     changeStreamOptions: {}
     operations:
       -
@@ -101,4 +98,4 @@ tests:
             z: 3
     result:
       error:
-        code: 50
+        code: 216
