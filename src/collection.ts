@@ -12,7 +12,9 @@ import {
   checkCollectionName,
   deprecateOptions,
   executeLegacyOperation,
-  MongoDBNamespace
+  MongoDBNamespace,
+  handleCallback,
+  applyWriteConcern
 } from './utils';
 import { ObjectId } from './bson';
 import { MongoError } from './error';
@@ -22,32 +24,37 @@ import ChangeStream = require('./change_stream');
 import WriteConcern = require('./write_concern');
 import ReadConcern = require('./read_concern');
 import { AggregationCursor, CommandCursor } from './cursor';
-import { ensureIndex, group, save, checkForAtomicOperators } from './operations/collection_ops';
-import { removeDocuments, updateDocuments } from './operations/common_functions';
+import { removeDocuments, updateDocuments, insertDocuments } from './operations/common_functions';
 import AggregateOperation = require('./operations/aggregate');
 import BulkWriteOperation = require('./operations/bulk_write');
 import CountDocumentsOperation = require('./operations/count_documents');
-import CreateIndexesOperation = require('./operations/create_indexes');
+import {
+  CreateIndexesOperation,
+  CreateIndexOperation,
+  DropIndexOperation,
+  DropIndexesOperation,
+  EnsureIndexOperation,
+  IndexesOperation,
+  IndexExistsOperation,
+  IndexInformationOperation,
+  ListIndexesOperation
+} from './operations/indexes';
 import DeleteManyOperation = require('./operations/delete_many');
 import DeleteOneOperation = require('./operations/delete_one');
 import DistinctOperation = require('./operations/distinct');
 import { DropCollectionOperation } from './operations/drop';
-import DropIndexOperation = require('./operations/drop_index');
-import DropIndexesOperation = require('./operations/drop_indexes');
 import EstimatedDocumentCountOperation = require('./operations/estimated_document_count');
 import FindOperation = require('./operations/find');
 import FindOneOperation = require('./operations/find_one');
-import FindAndModifyOperation = require('./operations/find_and_modify');
-import FindOneAndDeleteOperation = require('./operations/find_one_and_delete');
-import FindOneAndReplaceOperation = require('./operations/find_one_and_replace');
-import FindOneAndUpdateOperation = require('./operations/find_one_and_update');
-import IndexesOperation = require('./operations/indexes');
-import IndexExistsOperation = require('./operations/index_exists');
-import IndexInformationOperation = require('./operations/index_information');
+import {
+  FindAndModifyOperation,
+  FindOneAndDeleteOperation,
+  FindOneAndReplaceOperation,
+  FindOneAndUpdateOperation
+} from './operations/find_and_modify';
 import InsertManyOperation = require('./operations/insert_many');
 import InsertOneOperation = require('./operations/insert_one');
 import IsCappedOperation = require('./operations/is_capped');
-import ListIndexesOperation = require('./operations/list_indexes');
 import MapReduceOperation = require('./operations/map_reduce');
 import OptionsOperation = require('./operations/options_operation');
 import RenameOperation = require('./operations/rename');
@@ -56,6 +63,7 @@ import { CollStatsOperation } from './operations/stats';
 import UpdateManyOperation = require('./operations/update_many');
 import UpdateOneOperation = require('./operations/update_one');
 import executeOperation = require('./operations/execute_operation');
+import { EvalGroupOperation, GroupOperation } from './operations/group';
 const mergeKeys = ['ignoreUndefined'];
 
 interface Collection {
@@ -199,7 +207,7 @@ class Collection {
    * @memberof Collection#
    * @readonly
    */
-  get dbName() {
+  get dbName(): string {
     return this.s.namespace.db;
   }
 
@@ -210,7 +218,7 @@ class Collection {
    * @memberof Collection#
    * @readonly
    */
-  get collectionName() {
+  get collectionName(): string {
     return this.s.namespace.collection;
   }
 
@@ -798,7 +806,7 @@ class Collection {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    const createIndexesOperation = new CreateIndexesOperation(
+    const createIndexesOperation = new CreateIndexOperation(
       this,
       this.collectionName,
       fieldOrSpec,
@@ -1971,12 +1979,11 @@ Collection.prototype.ensureIndex = deprecate(function(
   if (typeof options === 'function') (callback = options), (options = {});
   options = options || {};
 
-  return executeLegacyOperation(this.s.topology, ensureIndex, [
-    this,
-    fieldOrSpec,
-    options,
+  return executeOperation(
+    this.s.topology,
+    new EnsureIndexOperation(this.s.db, this.collectionName, fieldOrSpec, options),
     callback
-  ]);
+  );
 },
 'collection.ensureIndex is deprecated. Use createIndexes instead.');
 
@@ -2185,18 +2192,71 @@ Collection.prototype.group = deprecate(function(
   // Set up the command as default
   command = command == null ? true : command;
 
-  return executeLegacyOperation(this.s.topology, group, [
-    this,
-    keys,
-    condition,
-    initial,
-    reduce,
-    finalize,
-    command,
-    options,
+  if (command == null) {
+    return executeOperation(
+      this.s.topology,
+      new EvalGroupOperation(this, keys, condition, initial, reduce, finalize, options),
+      callback
+    );
+  }
+
+  return executeOperation(
+    this.s.topology,
+    new GroupOperation(this, keys, condition, initial, reduce, finalize, options),
     callback
-  ]);
+  );
 },
 'MongoDB 3.6 or higher no longer supports the group command. We recommend rewriting using the aggregation framework.');
+
+
+// Check the update operation to ensure it has atomic operators.
+function checkForAtomicOperators(update: any): any {
+  if (Array.isArray(update)) {
+    return update.reduce((err?: any, u?: any) => err || checkForAtomicOperators(u), null);
+  }
+
+  const keys = Object.keys(update);
+
+  // same errors as the server would give for update doc lacking atomic operators
+  if (keys.length === 0) {
+    return toError('The update operation document must contain at least one atomic operator.');
+  }
+
+  if (keys[0][0] !== '$') {
+    return toError('the update operation document must contain atomic operators.');
+  }
+}
+
+/**
+ * Save a document.
+ *
+ * @function
+ * @param {Collection} coll Collection instance.
+ * @param {any} doc Document to save
+ * @param {any} [options] Optional settings. See Collection.prototype.save for a list of options.
+ * @param {Collection~writeOpCallback} [callback] The command result callback
+ * @deprecated use insertOne, insertMany, updateOne or updateMany
+ */
+function save(coll: any, doc: any, options?: any, callback?: Function) {
+  // Get the write concern options
+  const finalOptions = applyWriteConcern(
+    Object.assign({}, options),
+    { db: coll.s.db, collection: coll },
+    options
+  );
+  // Establish if we need to perform an insert or update
+  if (doc._id != null) {
+    finalOptions.upsert = true;
+    return updateDocuments(coll, { _id: doc._id }, doc, finalOptions, callback);
+  }
+
+  // Insert the document
+  insertDocuments(coll, [doc], finalOptions, (err?: any, result?: any) => {
+    if (callback == null) return;
+    if (doc == null) return handleCallback(callback, null, null);
+    if (err) return handleCallback(callback, err, null);
+    handleCallback(callback, null, result);
+  });
+}
 
 export = Collection;

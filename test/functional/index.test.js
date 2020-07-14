@@ -306,11 +306,13 @@ describe('Indexes', function() {
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
         db.createCollection('test_ensure_index', function(err, collection) {
+          expect(err).to.not.exist;
           // Create an index on the collection
           db.ensureIndex(collection.collectionName, 'a', configuration.writeConcernMax(), function(
             err,
             indexName
           ) {
+            expect(err).to.not.exist;
             test.equal('a_1', indexName);
             // Let's fetch the index information
             db.indexInformation(collection.collectionName, function(err, collectionInfo) {
@@ -356,6 +358,7 @@ describe('Indexes', function() {
         db.createCollection('create_and_use_sparse_index_test', function(err) {
           test.equal(null, err);
           db.collection('create_and_use_sparse_index_test', function(err, collection) {
+            expect(err).to.not.exist;
             collection.ensureIndex({ title: 1 }, { sparse: true, w: 1 }, function(err) {
               test.equal(null, err);
               collection.insert(

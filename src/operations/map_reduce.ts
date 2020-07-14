@@ -1,7 +1,5 @@
 import { Code } from '../bson';
-import { executeCommand } from './db_ops';
 import { loadDb } from '../dynamic_loaders';
-import { OperationBase } from './operation';
 import {
   applyWriteConcern,
   decorateWithCollation,
@@ -11,6 +9,8 @@ import {
   toError
 } from '../utils';
 import ReadPreference = require('../read_preference');
+import CommandOperation = require('./command');
+import { defineAspects, Aspect } from './operation';
 
 const exclusionList = [
   'readPreference',
@@ -32,7 +32,7 @@ const exclusionList = [
  * @property {(Function|string)} reduce The reduce function.
  * @property {object} [options] Optional settings. See Collection.prototype.mapReduce for a list of options.
  */
-class MapReduceOperation extends OperationBase {
+class MapReduceOperation extends CommandOperation {
   collection: any;
   map: any;
   reduce: any;
@@ -46,19 +46,14 @@ class MapReduceOperation extends OperationBase {
    * @param {object} [options] Optional settings. See Collection.prototype.mapReduce for a list of options.
    */
   constructor(collection: any, map: any, reduce: any, options?: object) {
-    super(options);
+    super(collection, options);
 
     this.collection = collection;
     this.map = map;
     this.reduce = reduce;
   }
 
-  /**
-   * Execute the operation.
-   *
-   * @param {Collection~resultCallback} [callback] The command result callback
-   */
-  execute(callback: Function) {
+  execute(server: any, callback: Function) {
     const coll = this.collection;
     const map = this.map;
     const reduce = this.reduce;
@@ -116,7 +111,7 @@ class MapReduceOperation extends OperationBase {
     }
 
     // Execute command
-    executeCommand(coll.s.db, mapCommandHash, options, (err?: any, result?: any) => {
+    super.executeCommand(server, mapCommandHash, (err?: any, result?: any) => {
       if (err) return handleCallback(callback, err);
       // Check if we have an error
       if (1 !== result.ok || result.err || result.errmsg) {
@@ -192,4 +187,5 @@ function processScope(scope: any) {
   return newScope;
 }
 
+defineAspects(MapReduceOperation, [Aspect.EXECUTE_WITH_SELECTION]);
 export = MapReduceOperation;

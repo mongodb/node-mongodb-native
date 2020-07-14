@@ -1,66 +1,7 @@
-import { buildCountCommand } from './common_functions';
 import { handleCallback } from '../utils';
 import { MongoError } from '../error';
 import { CursorState } from '../cursor/core_cursor';
 const push = Array.prototype.push;
-
-/**
- * Get the count of documents for this cursor.
- *
- * @function
- * @param {Cursor} cursor The Cursor instance on which to count.
- * @param {boolean} [applySkipLimit=true] Specifies whether the count command apply limit and skip settings should be applied on the cursor or in the provided options.
- * @param {any} [opts] Optional settings. See Cursor.prototype.count for a list of options.
- * @param {Cursor~countResultCallback} [callback] The result callback.
- */
-function count(cursor: any, applySkipLimit?: boolean, opts?: any, callback?: Function) {
-  if (applySkipLimit) {
-    if (typeof cursor.cursorSkip() === 'number') opts.skip = cursor.cursorSkip();
-    if (typeof cursor.cursorLimit() === 'number') opts.limit = cursor.cursorLimit();
-  }
-
-  // Ensure we have the right read preference inheritance
-  if (opts.readPreference) {
-    cursor.setReadPreference(opts.readPreference);
-  }
-
-  if (
-    typeof opts.maxTimeMS !== 'number' &&
-    cursor.cmd &&
-    typeof cursor.cmd.maxTimeMS === 'number'
-  ) {
-    opts.maxTimeMS = cursor.cmd.maxTimeMS;
-  }
-
-  let options = {} as any;
-  options.skip = opts.skip;
-  options.limit = opts.limit;
-  options.hint = opts.hint;
-  options.maxTimeMS = opts.maxTimeMS;
-
-  // Command
-  options.collectionName = cursor.namespace.collection;
-
-  let command;
-  try {
-    command = buildCountCommand(cursor, cursor.cmd.query, options);
-  } catch (err) {
-    return callback!(err);
-  }
-
-  // Set cursor server to the same as the topology
-  cursor.server = cursor.topology.s.coreTopology;
-
-  // Execute the command
-  cursor.topology.command(
-    cursor.namespace.withCollection('$cmd'),
-    command,
-    cursor.options,
-    (err?: any, result?: any) => {
-      callback!(err, result ? result.result.n : null);
-    }
-  );
-}
 
 /**
  * Iterates over all the documents for this cursor. See Cursor.prototype.each for more information.
@@ -162,4 +103,4 @@ function toArray(cursor: any, callback: Function) {
   fetchDocs();
 }
 
-export { count, each, toArray };
+export { each, toArray };

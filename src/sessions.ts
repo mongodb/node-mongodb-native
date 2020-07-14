@@ -678,7 +678,14 @@ class ServerSessionPool {
  * @param {any} [options]
  */
 function commandSupportsReadConcern(command: any, options?: any) {
-  if (command.aggregate || command.count || command.distinct || command.find || command.geoNear) {
+  if (
+    command.aggregate ||
+    command.count ||
+    command.distinct ||
+    command.find ||
+    command.geoNear ||
+    command.group
+  ) {
     return true;
   }
 
