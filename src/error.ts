@@ -18,7 +18,8 @@ const GET_MORE_RESUMABLE_CODES = new Set([
   150, // StaleEpoch
   13388, // StaleConfig
   234, // RetryChangeStream
-  133 // FailedToSatisfyReadPreference
+  133, // FailedToSatisfyReadPreference
+  43 // CursorNotFound
 ]);
 
 /**
@@ -394,6 +395,10 @@ function isResumableError(error?: any, wireVersion?: any) {
   }
 
   if (wireVersion >= 9) {
+    // DRIVERS-1308: For 4.4 drivers running against 4.4 servers, drivers will add a special case to treat the CursorNotFound error code as resumable
+    if (error.code === 43) {
+      return true;
+    }
     return error.hasErrorLabel('ResumableChangeStreamError');
   }
 
