@@ -1,5 +1,5 @@
 'use strict';
-const { assert: test } = require('./shared');
+const { assert: test, filterForCommands } = require('./shared');
 const { setupDatabase } = require('./shared');
 const fs = require('fs');
 const { expect } = require('chai');
@@ -7,6 +7,7 @@ const BSON = require('bson');
 const sinon = require('sinon');
 const { Writable } = require('stream');
 const ReadPreference = require('../../src/read_preference');
+const { ServerType } = require('../../src/sdam/common');
 
 describe('Cursor', function() {
   before(function() {
@@ -261,22 +262,28 @@ describe('Cursor', function() {
 
     test: function(done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), {
+        poolSize: 1,
+        monitorCommands: true
+      });
+
+      const bag = [];
+      client.on('commandStarted', filterForCommands(['count'], bag));
 
       client.connect((err, client) => {
         expect(err).to.not.exist;
         const db = client.db(configuration.db);
 
-        const internalClientCursor = sinon.spy(client.topology, 'cursor');
-        const expectedReadPreference = new ReadPreference(ReadPreference.SECONDARY);
         const cursor = db.collection('countTEST').find({ qty: { $gt: 4 } });
         cursor.count(true, { readPreference: ReadPreference.SECONDARY }, err => {
           expect(err).to.be.null;
 
-          const operation = internalClientCursor.getCall(0).args[0];
-          expect(operation.options)
-            .to.have.nested.property('readPreference')
-            .that.deep.equals(expectedReadPreference);
+          const selectedServerAddress = bag[0].address.replace('127.0.0.1', 'localhost');
+          const selectedServer = client.topology.description.servers.get(selectedServerAddress);
+          expect(selectedServer)
+            .property('type')
+            .to.equal(ServerType.RSSecondary);
+
           client.close(done);
         });
       });

@@ -925,7 +925,6 @@ class Cursor extends CoreCursor {
     }
 
     const countOperation = new CountOperation(this, applySkipLimit, options);
-
     return executeOperation(this.topology, countOperation, callback);
   }
 

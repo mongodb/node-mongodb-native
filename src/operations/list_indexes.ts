@@ -1,10 +1,10 @@
-import CommandOperationV2 = require('./command_v2');
+import CommandOperation = require('./command');
 import { Aspect, defineAspects } from './operation';
 import { maxWireVersion } from '../utils';
 
 const LIST_INDEXES_WIRE_VERSION = 3;
 
-class ListIndexesOperation extends CommandOperationV2 {
+class ListIndexesOperation extends CommandOperation {
   collectionNamespace: any;
 
   constructor(collection: any, options: any) {

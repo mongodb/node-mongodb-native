@@ -1,5 +1,5 @@
 import { Aspect, defineAspects } from './operation';
-import CommandOperationV2 = require('./command_v2');
+import CommandOperation = require('./command');
 import { decorateWithCollation, decorateWithReadConcern } from '../utils';
 
 /**
@@ -11,7 +11,7 @@ import { decorateWithCollation, decorateWithReadConcern } from '../utils';
  * @property {object} query The query for filtering the set of documents to which we apply the distinct filter.
  * @property {object} [options] Optional settings. See Collection.prototype.distinct for a list of options.
  */
-class DistinctOperation extends CommandOperationV2 {
+class DistinctOperation extends CommandOperation {
   collection: any;
   key: any;
   query: any;

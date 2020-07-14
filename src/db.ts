@@ -25,7 +25,7 @@ import { ensureIndex, evaluate, profilingInfo, validateDatabaseName } from './op
 import AggregateOperation = require('./operations/aggregate');
 import AddUserOperation = require('./operations/add_user');
 import CollectionsOperation = require('./operations/collections');
-import CommandOperation = require('./operations/command');
+import { DbStatsOperation } from './operations/stats';
 import RunCommandOperation = require('./operations/run_command');
 import CreateCollectionOperation = require('./operations/create_collection');
 import CreateIndexesOperation = require('./operations/create_indexes');
@@ -418,19 +418,8 @@ class Db {
   stats(options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
-    // Build command object
-    const commandObject: any = { dbStats: true };
-    // Check if we have the scale value
-    if (options['scale'] != null) commandObject['scale'] = options['scale'];
 
-    // If we have a readPreference set
-    if (options.readPreference == null && this.s.readPreference) {
-      options.readPreference = this.s.readPreference;
-    }
-
-    const statsOperation = new CommandOperation(this, options, null, commandObject);
-
-    // Execute the command
+    const statsOperation = new DbStatsOperation(this, options);
     return executeOperation(this.s.topology, statsOperation, callback);
   }
 

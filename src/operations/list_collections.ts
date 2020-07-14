@@ -1,4 +1,4 @@
-import CommandOperationV2 = require('./command_v2');
+import CommandOperation = require('./command');
 import { Aspect, defineAspects } from './operation';
 import { maxWireVersion } from '../utils';
 import CONSTANTS = require('../constants');
@@ -21,7 +21,7 @@ function listCollectionsTransforms(databaseName: any) {
   };
 }
 
-class ListCollectionsOperation extends CommandOperationV2 {
+class ListCollectionsOperation extends CommandOperation {
   db: any;
   filter: any;
   nameOnly: boolean;

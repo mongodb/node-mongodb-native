@@ -1,3 +1,4 @@
+import { defineAspects, Aspect } from './operation';
 import CommandOperation = require('./command');
 
 class ProfilingLevelOperation extends CommandOperation {
@@ -5,13 +6,8 @@ class ProfilingLevelOperation extends CommandOperation {
     super(db, options);
   }
 
-  _buildCommand() {
-    const command = { profile: -1 };
-    return command;
-  }
-
-  execute(callback: Function) {
-    super.execute((err?: any, doc?: any) => {
+  execute(server: any, callback: Function) {
+    super.executeCommand(server, { profile: -1 }, (err?: any, doc?: any) => {
       if (err == null && doc.ok === 1) {
         const was = doc.was;
         if (was === 0) return callback(null, 'off');
@@ -25,4 +21,5 @@ class ProfilingLevelOperation extends CommandOperation {
   }
 }
 
+defineAspects(ProfilingLevelOperation, [Aspect.EXECUTE_WITH_SELECTION]);
 export = ProfilingLevelOperation;

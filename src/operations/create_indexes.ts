@@ -1,6 +1,6 @@
 import { Aspect, defineAspects } from './operation';
 import { MongoError } from '../error';
-import CommandOperationV2 = require('./command_v2');
+import CommandOperation = require('./command');
 import { maxWireVersion, parseIndexOptions } from '../utils';
 
 const validIndexOptions = new Set([
@@ -13,7 +13,7 @@ const validIndexOptions = new Set([
   'collation'
 ]);
 
-class CreateIndexesOperation extends CommandOperationV2 {
+class CreateIndexesOperation extends CommandOperation {
   collection: any;
   onlyReturnNameOfCreatedIndex?: boolean;
   indexes: any;

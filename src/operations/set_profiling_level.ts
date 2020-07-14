@@ -1,3 +1,4 @@
+import { defineAspects, Aspect } from './operation';
 import CommandOperation = require('./command');
 const levelValues = new Set(['off', 'slow_only', 'all']);
 
@@ -7,7 +8,6 @@ class SetProfilingLevelOperation extends CommandOperation {
 
   constructor(db: any, level: any, options: any) {
     let profile = 0;
-
     if (level === 'off') {
       profile = 0;
     } else if (level === 'slow_only') {
@@ -21,23 +21,14 @@ class SetProfilingLevelOperation extends CommandOperation {
     this.profile = profile;
   }
 
-  _buildCommand() {
-    const profile = this.profile;
-
-    // Set up the profile number
-    const command = { profile };
-
-    return command;
-  }
-
-  execute(callback: Function) {
+  execute(server: any, callback: Function) {
     const level = this.level;
 
     if (!levelValues.has(level)) {
       return callback(new Error('Error: illegal profiling level value ' + level));
     }
 
-    super.execute((err?: any, doc?: any) => {
+    super.executeCommand(server, { profile: this.profile }, (err?: any, doc?: any) => {
       if (err == null && doc.ok === 1) return callback(null, level);
       return err != null
         ? callback(err, null)
@@ -46,4 +37,5 @@ class SetProfilingLevelOperation extends CommandOperation {
   }
 }
 
+defineAspects(SetProfilingLevelOperation, [Aspect.EXECUTE_WITH_SELECTION]);
 export = SetProfilingLevelOperation;

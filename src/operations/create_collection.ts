@@ -22,32 +22,16 @@ const ILLEGAL_COMMAND_FIELDS = new Set([
 ]);
 
 class CreateCollectionOperation extends CommandOperation {
+  db: any;
   name: any;
 
   constructor(db: any, name: any, options: any) {
     super(db, options);
+    this.db = db;
     this.name = name;
   }
 
-  _buildCommand() {
-    const name = this.name;
-    const options = this.options;
-
-    const cmd: any = { create: name };
-    for (let n in options) {
-      if (
-        options[n] != null &&
-        typeof options[n] !== 'function' &&
-        !ILLEGAL_COMMAND_FIELDS.has(n)
-      ) {
-        cmd[n] = options[n];
-      }
-    }
-
-    return cmd;
-  }
-
-  execute(callback: Function) {
+  execute(server: any, callback: Function) {
     const db = this.db;
     const name = this.name;
     const options = this.options;
@@ -71,6 +55,17 @@ class CreateCollectionOperation extends CommandOperation {
       }
     }
 
+    const cmd: any = { create: name };
+    for (let n in options) {
+      if (
+        options[n] != null &&
+        typeof options[n] !== 'function' &&
+        !ILLEGAL_COMMAND_FIELDS.has(n)
+      ) {
+        cmd[n] = options[n];
+      }
+    }
+
     const strictMode = listCollectionOptions.strict;
     if (strictMode) {
       db.listCollections({ name }, listCollectionOptions)
@@ -86,16 +81,16 @@ class CreateCollectionOperation extends CommandOperation {
             );
           }
 
-          super.execute(done);
+          super.executeCommand(server, cmd, done);
         });
 
       return;
     }
 
     // otherwise just execute the command
-    super.execute(done);
+    super.executeCommand(server, cmd, done);
   }
 }
 
-defineAspects(CreateCollectionOperation, Aspect.WRITE_OPERATION);
+defineAspects(CreateCollectionOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
 export = CreateCollectionOperation;

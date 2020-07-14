@@ -1,7 +1,9 @@
+import { defineAspects, Aspect } from './operation';
 import CommandOperation = require('./command');
 
 class ValidateCollectionOperation extends CommandOperation {
   collectionName: string;
+  command: any;
 
   constructor(admin: any, collectionName: any, options: any) {
     // Decorate command with extra options
@@ -13,14 +15,15 @@ class ValidateCollectionOperation extends CommandOperation {
       }
     }
 
-    super(admin.s.db, options, null, command);
+    super(admin.s.db, options);
+    this.command = command;
     this.collectionName = collectionName;
   }
 
-  execute(callback: Function) {
+  execute(server: any, callback: Function) {
     const collectionName = this.collectionName;
 
-    super.execute((err?: any, doc?: any) => {
+    super.executeCommand(server, this.command, (err?: any, doc?: any) => {
       if (err != null) return callback(err, null);
 
       if (doc.ok === 0) return callback(new Error('Error with validate command'), null);
@@ -36,4 +39,5 @@ class ValidateCollectionOperation extends CommandOperation {
   }
 }
 
+defineAspects(ValidateCollectionOperation, [Aspect.EXECUTE_WITH_SELECTION]);
 export = ValidateCollectionOperation;
