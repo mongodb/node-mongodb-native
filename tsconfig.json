@@ -14,5 +14,9 @@
     "noEmitOnError": true,
     "outDir": "lib"
   },
+  "ts-node": {
+    "transpileOnly": true,
+    "compiler": "typescript-cached-transpile"
+  },
   "include": ["src/**/*"]
 }
