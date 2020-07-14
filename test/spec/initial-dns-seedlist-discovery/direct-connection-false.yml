@@ -7,3 +7,4 @@ hosts:
     - localhost:27019
 options:
     ssl: true
+    directConnection: false
