@@ -3,12 +3,18 @@
 
 const { MongoClient } = require('../../src');
 const visualizeMonitoringEvents = require('./utils').visualizeMonitoringEvents;
+const { now, calculateDurationInMs } = require('../../lib/utils');
 const chalk = require('chalk');
 const argv = require('yargs')
   .usage('Usage: $0 [options] <connection string>')
   .demandCommand(1)
   .help('h')
   .describe('workload', 'Simulate a read workload')
+  .describe('writeWorkload', 'Simulate a write workload')
+  .describe('writeWorkloadInterval', 'Time interval between write workload write attempts')
+  .describe('writeWorkloadSampleSize', 'Sample size between status display for write workload')
+  .describe('legacy', 'Use the legacy topology types')
+  .alias('l', 'legacy')
   .alias('w', 'workload')
   .alias('h', 'help').argv;
 
@@ -27,6 +33,10 @@ async function run() {
 
   if (argv.workload) {
     scheduleWorkload(client);
+  }
+
+  if (argv.writeWorkload) {
+    scheduleWriteWorkload(client);
   }
 }
 
@@ -58,6 +68,35 @@ async function scheduleWorkload(client) {
   }
 }
 
+let writeWorkloadTimer;
+let writeWorkloadCounter = 0;
+let averageWriteMS = 0;
+let completedWriteWorkloads = 0;
+const writeWorkloadSampleSize = argv.writeWorkloadSampleSize || 100;
+const writeWorkloadInterval = argv.writeWorkloadInterval || 100;
+async function scheduleWriteWorkload(client) {
+  if (!workloadInterrupt) {
+    // immediately reschedule work
+    writeWorkloadTimer = setTimeout(() => scheduleWriteWorkload(client), writeWorkloadInterval);
+  }
+
+  const currentWriteWorkload = writeWorkloadCounter++;
+
+  try {
+    const start = now();
+    const result = await client.db('test').collection('test').insertOne({ a: 42 });
+    averageWriteMS = 0.2 * calculateDurationInMs(start) + 0.8 * averageWriteMS;
+
+    completedWriteWorkloads++;
+    if (completedWriteWorkloads % writeWorkloadSampleSize === 0) {
+      print(`${chalk.yellow(`workload#${currentWriteWorkload}`)} completed ${completedWriteWorkloads} writes with average time: ${averageWriteMS}`);
+    }
+
+  } catch (e) {
+    print(`${chalk.yellow(`workload#${currentWriteWorkload}`)} write failed: ${e.message}`);
+  }
+}
+
 let exitRequestCount = 0;
 process.on('SIGINT', async function() {
   exitRequestCount++;
@@ -68,6 +107,7 @@ process.on('SIGINT', async function() {
 
   workloadInterrupt = true;
   clearTimeout(workloadTimer);
+  clearTimeout(writeWorkloadTimer);
   await client.close();
 });
 
