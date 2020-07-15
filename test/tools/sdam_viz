@@ -3,12 +3,14 @@
 
 const { MongoClient } = require('../..');
 const visualizeMonitoringEvents = require('./utils').visualizeMonitoringEvents;
+const { now, calculateDurationInMs } = require('../../lib/utils');
 const chalk = require('chalk');
 const argv = require('yargs')
   .usage('Usage: $0 [options] <connection string>')
   .demandCommand(1)
   .help('h')
   .describe('workload', 'Simulate a read workload')
+  .describe('writeWorkload', 'Simulate a write workload')
   .describe('legacy', 'Use the legacy topology types')
   .alias('l', 'legacy')
   .alias('w', 'workload')
@@ -36,6 +38,10 @@ async function run() {
 
   if (argv.workload) {
     scheduleWorkload(client);
+  }
+
+  if (argv.writeWorkload) {
+    scheduleWriteWorkload(client);
   }
 }
 
@@ -67,6 +73,31 @@ async function scheduleWorkload(client) {
   }
 }
 
+let writeWorkloadTimer;
+let writeWorkloadCounter = 0;
+let averageWriteMS = 0;
+async function scheduleWriteWorkload(client) {
+  if (!workloadInterrupt) {
+    // immediately reschedule work
+    writeWorkloadTimer = setTimeout(() => scheduleWriteWorkload(client), 200);
+  }
+
+  const currentWriteWorkload = writeWorkloadCounter++;
+
+  try {
+    const start = now();
+    const result = await client.db('test').collection('test').insertOne({ a: 42 });
+    averageWriteMS = 0.2 * calculateDurationInMs(start) + 0.8 * averageWriteMS;
+
+    if (currentWriteWorkload % 100) {
+      print(`${chalk.yellow(`workload#${currentWriteWorkload}`)} completed 100 writes with average time: ${averageWriteMS}`);
+    }
+
+  } catch (e) {
+    print(`${chalk.yellow(`workload#${currentWriteWorkload}`)} write failed: ${e.message}`);
+  }
+}
+
 let exitRequestCount = 0;
 process.on('SIGINT', async function() {
   exitRequestCount++;
@@ -77,6 +108,7 @@ process.on('SIGINT', async function() {
 
   workloadInterrupt = true;
   clearTimeout(workloadTimer);
+  clearTimeout(writeWorkloadTimer);
   await client.close();
 });
 
