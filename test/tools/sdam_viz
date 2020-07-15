@@ -11,6 +11,8 @@ const argv = require('yargs')
   .help('h')
   .describe('workload', 'Simulate a read workload')
   .describe('writeWorkload', 'Simulate a write workload')
+  .describe('writeWorkloadInterval', 'Time interval between write workload write attempts')
+  .describe('writeWorkloadSampleSize', 'Sample size between status display for write workload')
   .describe('legacy', 'Use the legacy topology types')
   .alias('l', 'legacy')
   .alias('w', 'workload')
@@ -76,10 +78,13 @@ async function scheduleWorkload(client) {
 let writeWorkloadTimer;
 let writeWorkloadCounter = 0;
 let averageWriteMS = 0;
+let completedWriteWorkloads = 0;
+const writeWorkloadSampleSize = argv.writeWorkloadSampleSize || 100;
+const writeWorkloadInterval = argv.writeWorkloadInterval || 100;
 async function scheduleWriteWorkload(client) {
   if (!workloadInterrupt) {
     // immediately reschedule work
-    writeWorkloadTimer = setTimeout(() => scheduleWriteWorkload(client), 200);
+    writeWorkloadTimer = setTimeout(() => scheduleWriteWorkload(client), writeWorkloadInterval);
   }
 
   const currentWriteWorkload = writeWorkloadCounter++;
@@ -89,8 +94,9 @@ async function scheduleWriteWorkload(client) {
     const result = await client.db('test').collection('test').insertOne({ a: 42 });
     averageWriteMS = 0.2 * calculateDurationInMs(start) + 0.8 * averageWriteMS;
 
-    if (currentWriteWorkload % 100) {
-      print(`${chalk.yellow(`workload#${currentWriteWorkload}`)} completed 100 writes with average time: ${averageWriteMS}`);
+    completedWriteWorkloads++;
+    if (completedWriteWorkloads % writeWorkloadSampleSize === 0) {
+      print(`${chalk.yellow(`workload#${currentWriteWorkload}`)} completed ${completedWriteWorkloads} writes with average time: ${averageWriteMS}`);
     }
 
   } catch (e) {
