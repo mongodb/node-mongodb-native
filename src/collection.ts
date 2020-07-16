@@ -22,13 +22,7 @@ import ChangeStream = require('./change_stream');
 import WriteConcern = require('./write_concern');
 import ReadConcern = require('./read_concern');
 import { AggregationCursor, CommandCursor } from './cursor';
-import {
-  ensureIndex,
-  group,
-  parallelCollectionScan,
-  save,
-  checkForAtomicOperators
-} from './operations/collection_ops';
+import { ensureIndex, group, save, checkForAtomicOperators } from './operations/collection_ops';
 import { removeDocuments, updateDocuments } from './operations/common_functions';
 import AggregateOperation = require('./operations/aggregate');
 import BulkWriteOperation = require('./operations/bulk_write');
@@ -75,7 +69,6 @@ interface Collection {
   ensureIndex(fieldOrSpec: any, options: any, callback: any): void;
   count(query: any, options: any, callback: any): void;
   findAndRemove(query: any, sort: any, options: any, callback: any): void;
-  parallelCollectionScan(options: any, callback: any): void;
   group(
     keys: any,
     condition: any,
@@ -2130,54 +2123,6 @@ Collection.prototype.findAndRemove = deprecate(function(
   );
 },
 'collection.findAndRemove is deprecated. Use findOneAndDelete instead.');
-
-/**
- * The callback format for results
- *
- * @callback Collection~parallelCollectionScanCallback
- * @param {MongoError} error An error instance representing the error during the execution.
- * @param {Cursor[]} cursors A list of cursors returned allowing for parallel reading of collection.
- */
-
-/**
- * Return N number of parallel cursors for a collection allowing parallel reading of entire collection. There are
- * no ordering guarantees for returned results.
- *
- * @function
- * @param {object} [options] Optional settings.
- * @param {(ReadPreference|string)} [options.readPreference] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
- * @param {number} [options.batchSize=1000] Set the batchSize for the getMoreCommand when iterating over the query results.
- * @param {number} [options.numCursors=1] The maximum number of parallel command cursors to return (the number of returned cursors will be in the range 1:numCursors)
- * @param {boolean} [options.raw=false] Return all BSON documents as Raw Buffer documents.
- * @param {Collection~parallelCollectionScanCallback} [callback] The command result callback
- * @returns {Promise<void>} returns Promise if no callback passed
- */
-Collection.prototype.parallelCollectionScan = deprecate(function(
-  this: any,
-  options: any,
-  callback: Function
-) {
-  if (typeof options === 'function') (callback = options), (options = { numCursors: 1 });
-  // Set number of cursors to 1
-  options.numCursors = options.numCursors || 1;
-  options.batchSize = options.batchSize || 1000;
-
-  options = Object.assign({}, options);
-  // Ensure we have the right read preference inheritance
-  options.readPreference = ReadPreference.resolve(this, options);
-
-  if (options.session) {
-    options.session = undefined;
-  }
-
-  return executeLegacyOperation(
-    this.s.topology,
-    parallelCollectionScan,
-    [this, options, callback],
-    { skipSessions: true }
-  );
-},
-'parallelCollectionScan is deprecated in MongoDB v4.1');
 
 /**
  * Run a group command across a collection

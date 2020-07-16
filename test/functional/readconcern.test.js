@@ -189,12 +189,6 @@ describe('ReadConcern', function() {
       commandName: 'group',
       mongodbVersion: '>= 3.2 <=4.1.0',
       readConcern: { level: 'majority' }
-    },
-    {
-      description: 'Should set majority readConcern parallelCollectionScan command',
-      commandName: 'parallelCollectionScan',
-      mongodbVersion: '>= 3.2 <=4.1.0',
-      readConcern: { level: 'majority' }
     }
   ];
 
@@ -269,12 +263,6 @@ describe('ReadConcern', function() {
                     done();
                   }
                 );
-              } else if (test.commandName === 'parallelCollectionScan') {
-                collection.parallelCollectionScan({ numCursors: 1 }, err => {
-                  expect(err).to.not.exist;
-                  validateTestResults(started, succeeded, test.commandName, test.readConcern.level);
-                  done();
-                });
               }
             }
           );

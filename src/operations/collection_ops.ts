@@ -1,5 +1,5 @@
 import ReadPreference = require('../read_preference');
-import { Code, Long } from '../bson';
+import { Code } from '../bson';
 import { MongoError } from '../error';
 import { insertDocuments, updateDocuments } from './common_functions';
 import {
@@ -286,57 +286,6 @@ function indexInformation(coll: any, options?: object, callback?: Function) {
 }
 
 /**
- * Return N parallel cursors for a collection to allow parallel reading of the entire collection. There are
- * no ordering guarantees for returned results.
- *
- * @function
- * @param {Collection} coll Collection instance.
- * @param {any} [options] Optional settings. See Collection.prototype.parallelCollectionScan for a list of options.
- * @param {Collection~parallelCollectionScanCallback} [callback] The command result callback
- */
-function parallelCollectionScan(coll: any, options?: any, callback?: Function) {
-  // Create command object
-  const commandObject = {
-    parallelCollectionScan: coll.collectionName,
-    numCursors: options.numCursors
-  };
-
-  // Do we have a readConcern specified
-  decorateWithReadConcern(commandObject, coll, options);
-
-  // Store the raw value
-  const raw = options.raw;
-  delete options['raw'];
-
-  // Execute the command
-  executeCommand(coll.s.db, commandObject, options, (err?: any, result?: any) => {
-    if (err) return handleCallback(callback!, err, null);
-    if (result == null)
-      return handleCallback(
-        callback!,
-        new Error('no result returned for parallelCollectionScan'),
-        null
-      );
-
-    options = Object.assign({ explicitlyIgnoreSession: true }, options);
-
-    const cursors = [];
-    // Add the raw back to the option
-    if (raw) options.raw = raw;
-    // Create command cursors for each item
-    for (let i = 0; i < result.cursors.length; i++) {
-      const rawId = result.cursors[i].cursor.id;
-      // Convert cursorId to Long if needed
-      const cursorId = typeof rawId === 'number' ? Long.fromNumber(rawId) : rawId;
-      // Add a command cursor
-      cursors.push(coll.s.topology.cursor(coll.namespace, cursorId, options));
-    }
-
-    handleCallback(callback!, null, cursors);
-  });
-}
-
-/**
  * Save a document.
  *
  * @function
@@ -377,6 +326,5 @@ export {
   indexes,
   indexExists,
   indexInformation,
-  parallelCollectionScan,
   save
 };
