@@ -137,8 +137,7 @@ class Monitor extends EventEmitter {
     const minHeartbeatFrequencyMS = this.options.minHeartbeatFrequencyMS;
     this[kMonitorId] = makeInterruptableAsyncInterval(monitorServer(this), {
       interval: heartbeatFrequencyMS,
-      minInterval: minHeartbeatFrequencyMS,
-      immediate: true
+      minInterval: minHeartbeatFrequencyMS
     });
   }
 
