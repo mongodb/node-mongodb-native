@@ -96,7 +96,7 @@ describe('monitoring', function() {
     });
   });
 
-  describe('Monitor class', function() {
+  describe('Monitor', function() {
     it('should connect and issue an initial server check', function(done) {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
