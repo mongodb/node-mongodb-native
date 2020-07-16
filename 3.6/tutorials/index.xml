@@ -104,9 +104,9 @@ const gs = new GridStore(db, filename, mode[, options])  Where:
       <pubDate>Thu, 19 Mar 2015 14:27:51 -0400</pubDate>
       
       <guid>/node-mongodb-native/3.6/tutorials/text-search/</guid>
-      <description>Text Search Use the $text operator to perform text searches on fields which have a text index.
-To create a text index on a collection, pass a document containing the name of the field to be indexed with the value &amp;lsquo;text&amp;rsquo; to the createIndex() method.
-function createTextIndex(db, callback) { // Get the restaurants collection const collection = db.collection(&#39;restaurants&#39;); // Create the index collection.createIndex( { name : &amp;quot;text&amp;quot; }, function(err, result) { console.</description>
+      <description>Text Search  Atlas Search makes it easy to build fast, relevance-based search capabilities on top of your MongoDB data. Try it today on MongoDB Atlas, our fully managed database as a service.
+ Use the $text operator to perform text searches on fields which have a text index.
+To create a text index on a collection, pass a document containing the name of the field to be indexed with the value &amp;lsquo;text&amp;rsquo; to the createIndex() method.</description>
     </item>
     
     <item>
