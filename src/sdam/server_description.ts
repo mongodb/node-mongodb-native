@@ -141,8 +141,8 @@ class ServerDescription {
   }
 
   get port() {
-    const addressParts = this.address.split(':');
-    return Number.parseInt(addressParts[addressParts.length - 1], 10);
+    const port = this.address.split(':').pop();
+    return port ? Number.parseInt(port, 10) : port;
   }
 
   /**
