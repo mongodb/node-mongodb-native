@@ -3,8 +3,8 @@ import { defineAspects, Aspect } from './operation';
 import Db = require('../db');
 import Collection = require('../collection');
 import MongoClient = require('../mongo_client');
-import { Server } from '../sdam/server';
 import { MongoDBNamespace } from '../utils';
+import type { Server } from '../sdam/server';
 
 class RunCommandOperation extends CommandOperation {
   command: any;

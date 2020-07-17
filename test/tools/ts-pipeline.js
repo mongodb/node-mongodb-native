@@ -7,7 +7,7 @@ const prettier = require('gulp-prettier');
 const through = require('through2');
 
 function preserveNewlines() {
-  return through.obj(function(file, encoding, callback) {
+  return through.obj(function (file, encoding, callback) {
     const data = file.contents.toString('utf8');
     const fixedUp = data.replace(/\n\n/g, '\n/** THIS_IS_A_NEWLINE **/');
     file.contents = Buffer.from(fixedUp, 'utf8');
@@ -16,7 +16,7 @@ function preserveNewlines() {
 }
 
 function restoreNewlines() {
-  return through.obj(function(file, encoding, callback) {
+  return through.obj(function (file, encoding, callback) {
     const data = file.contents.toString('utf8');
     const fixedUp = data.replace(/\/\*\* THIS_IS_A_NEWLINE \*\*\//g, '\n');
     file.contents = Buffer.from(fixedUp, 'utf8');
@@ -25,9 +25,9 @@ function restoreNewlines() {
 }
 
 const tsConfig = JSON.parse(fs.readFileSync(path.join(__dirname, '../../tsconfig.json')));
-const prettierConfig = JSON.parse(fs.readFileSync(path.join(__dirname, '../../.prettierrc')));
+const prettierConfig = JSON.parse(fs.readFileSync(path.join(__dirname, '../../.prettierrc.json')));
 
-gulp.task('default', function() {
+gulp.task('default', function () {
   return gulp
     .src('../../src/**/*.ts')
     .pipe(preserveNewlines())

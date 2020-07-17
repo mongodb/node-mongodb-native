@@ -7,9 +7,7 @@ import { commandSupportsReadConcern } from '../sessions';
 import { MongoError } from '../error';
 import Logger = require('../logger');
 
-/* eslint-disable */
 import type { Server } from '../sdam/server';
-/* eslint-enable */
 
 const SUPPORTS_WRITE_CONCERN_AND_COLLATION = 5;
 

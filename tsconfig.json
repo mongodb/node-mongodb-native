@@ -12,7 +12,8 @@
     "lib": ["ES2018"],
     "noEmitHelpers": true,
     "noEmitOnError": true,
-    "outDir": "lib"
+    "outDir": "lib",
+    "importsNotUsedAsValues": "error"
   },
   "ts-node": {
     "transpileOnly": true,

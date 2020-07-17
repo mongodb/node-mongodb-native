@@ -1,4 +1,4 @@
-import * as _BSON from 'bson';
+import type * as _BSON from 'bson';
 let BSON: typeof _BSON = require('bson');
 try {
   BSON = require('bson-ext');
