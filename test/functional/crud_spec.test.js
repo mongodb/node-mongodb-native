@@ -396,45 +396,74 @@ describe('CRUD spec', function() {
       );
     }
 
+    function promiseTry(callback) {
+      return new Promise((resolve, reject) => {
+        try {
+          resolve(callback());
+        } catch (e) {
+          reject(e);
+        }
+      });
+    }
+
+    const outcome = scenarioTest.outcome;
     return Promise.all(dropPromises)
       .then(() =>
         scenario.data && scenario.data.length
           ? collection.insertMany(scenario.data)
           : Promise.resolve()
       )
-      .then(() => {
-        switch (scenarioTest.operation.name) {
-          case 'aggregate':
-            return executeAggregateTest(scenarioTest, context.db, collection);
-          case 'count':
-            return executeCountTest(scenarioTest, context.db, collection);
-          case 'countDocuments':
-            return executeCountDocumentsTest(scenarioTest, context.db, collection);
-          case 'estimatedDocumentCount':
-            return executeEstimatedDocumentCountTest(scenarioTest, context.db, collection);
-          case 'distinct':
-            return executeDistinctTest(scenarioTest, context.db, collection);
-          case 'find':
-            return executeFindTest(scenarioTest, context.db, collection);
-          case 'deleteOne':
-          case 'deleteMany':
-            return executeDeleteTest(scenarioTest, context.db, collection);
-          case 'replaceOne':
-            return executeReplaceTest(scenarioTest, context.db, collection);
-          case 'updateOne':
-          case 'updateMany':
-            return executeUpdateTest(scenarioTest, context.db, collection);
-          case 'findOneAndReplace':
-          case 'findOneAndUpdate':
-          case 'findOneAndDelete':
-            return executeFindOneTest(scenarioTest, context.db, collection);
-          case 'insertOne':
-          case 'insertMany':
-            return executeInsertTest(scenarioTest, context.db, collection);
-          case 'bulkWrite':
-            return executeBulkTest(scenarioTest, context.db, collection);
+      .then(() =>
+        promiseTry(() => {
+          switch (scenarioTest.operation.name) {
+            case 'aggregate':
+              return executeAggregateTest(scenarioTest, context.db, collection);
+            case 'count':
+              return executeCountTest(scenarioTest, context.db, collection);
+            case 'countDocuments':
+              return executeCountDocumentsTest(scenarioTest, context.db, collection);
+            case 'estimatedDocumentCount':
+              return executeEstimatedDocumentCountTest(scenarioTest, context.db, collection);
+            case 'distinct':
+              return executeDistinctTest(scenarioTest, context.db, collection);
+            case 'find':
+              return executeFindTest(scenarioTest, context.db, collection);
+            case 'deleteOne':
+            case 'deleteMany':
+              return executeDeleteTest(scenarioTest, context.db, collection);
+            case 'replaceOne':
+              return executeReplaceTest(scenarioTest, context.db, collection);
+            case 'updateOne':
+            case 'updateMany':
+              return executeUpdateTest(scenarioTest, context.db, collection);
+            case 'findOneAndReplace':
+            case 'findOneAndUpdate':
+            case 'findOneAndDelete':
+              return executeFindOneTest(scenarioTest, context.db, collection);
+            case 'insertOne':
+            case 'insertMany':
+              return executeInsertTest(scenarioTest, context.db, collection);
+            case 'bulkWrite':
+              return executeBulkTest(scenarioTest, context.db, collection);
+          }
+        })
+      )
+      .then(
+        () => {
+          if (
+            outcome.error === true &&
+            scenarioTest.operation.name !== 'bulkWrite' &&
+            scenarioTest.operation.name !== 'insertMany'
+          ) {
+            throw new Error('Error expected!');
+          }
+        },
+        err => {
+          if (outcome && (outcome.error == null || outcome.error === false)) {
+            throw err;
+          }
         }
-      });
+      );
   }
 });
 

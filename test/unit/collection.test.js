@@ -26,7 +26,7 @@ describe('Collection', function() {
       const collection = db.collection('test');
       expect(() => {
         collection.findOneAndReplace({ a: 1 }, { $set: { a: 14 } });
-      }).to.throw('The replacement document must not contain atomic operators.');
+      }).to.throw(/must not contain atomic operators/);
     }
   });
 });
