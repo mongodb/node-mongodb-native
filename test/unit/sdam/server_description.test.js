@@ -41,4 +41,10 @@ describe('ServerDescription', function() {
       });
     });
   });
+
+  it('should sensibly parse an ipv6 address', function() {
+    const description = new ServerDescription('abcd:f::abcd:abcd:abcd:abcd:27017');
+    expect(description.host).to.equal('abcd:f::abcd:abcd:abcd:abcd');
+    expect(description.port).to.equal(27017);
+  });
 });

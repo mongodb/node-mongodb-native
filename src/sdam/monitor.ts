@@ -15,6 +15,7 @@ import {
   ServerHeartbeatSucceededEvent,
   ServerHeartbeatFailedEvent
 } from './events';
+import { Server } from './server';
 
 const kServer = Symbol('server');
 const kMonitorId = Symbol('monitorId');
@@ -47,7 +48,7 @@ class Monitor extends EventEmitter {
   [kCancellationToken]: any;
   [kMonitorId]: any;
 
-  constructor(server: any, options: any) {
+  constructor(server: Server, options: any) {
     super(options);
     this[kServer] = server;
     this[kConnection] = undefined;
@@ -73,12 +74,11 @@ class Monitor extends EventEmitter {
     });
 
     // TODO: refactor this to pull it directly from the pool, requires new ConnectionPool integration
-    const addressParts = server.description.address.split(':');
     const connectOptions = Object.assign(
       {
         id: '<monitor>',
-        host: addressParts[0],
-        port: parseInt(addressParts[1], 10),
+        host: server.description.host,
+        port: server.description.port,
         connectionType: Connection
       },
       server.s.options,

@@ -102,11 +102,7 @@ class Server extends EventEmitter {
 
     // create the connection pool
     // NOTE: this used to happen in `connect`, we supported overriding pool options there
-    const addressParts = this.description.address.split(':');
-    const poolOptions = Object.assign(
-      { host: addressParts[0], port: parseInt(addressParts[1], 10) },
-      options
-    );
+    const poolOptions = Object.assign({ host: description.host, port: description.port }, options);
 
     this.s.pool = new ConnectionPool(poolOptions);
     relayEvents(
@@ -150,7 +146,7 @@ class Server extends EventEmitter {
     });
   }
 
-  get description() {
+  get description(): ServerDescription {
     return this.s.description;
   }
 

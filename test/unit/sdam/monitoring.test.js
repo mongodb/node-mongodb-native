@@ -4,14 +4,13 @@ const { ServerType } = require('../../../src/sdam/common');
 const { Topology } = require('../../../src/sdam/topology');
 const { Monitor } = require('../../../src/sdam/monitor');
 const { expect } = require('chai');
+const { ServerDescription } = require('../../../src/sdam/server_description');
 
 class MockServer {
   constructor(options) {
     this.s = {};
-    this.description = {
-      type: ServerType.Unknown,
-      address: `${options.host}:${options.port}`
-    };
+    this.description = new ServerDescription(`${options.host}:${options.port}`);
+    this.description.type = ServerType.Unknown;
   }
 }
 
@@ -192,6 +191,7 @@ describe('monitoring', function() {
       });
 
       const server = new MockServer(mockServer.address());
+      server.description = new ServerDescription(server.description.address);
       const monitor = new Monitor(server, {
         heartbeatFrequencyMS: 250,
         minHeartbeatFrequencyMS: 50
