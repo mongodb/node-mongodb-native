@@ -234,7 +234,10 @@ describe('ReplSet (Operations)', function () {
             // Initialize the Ordered Batch
             const batch = col.initializeUnorderedBulkOp();
             batch.insert({ a: 1 });
-            batch.find({ a: 3 }).upsert().updateOne({ a: 3, b: 1 });
+            batch
+              .find({ a: 3 })
+              .upsert()
+              .updateOne({ $set: { a: 3, b: 1 } });
             batch.insert({ a: 2 });
 
             // Execute the operations

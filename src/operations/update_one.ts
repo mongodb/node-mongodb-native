@@ -1,5 +1,6 @@
 import { OperationBase } from './operation';
 import { updateDocuments } from './common_functions';
+import { hasAtomicOperators } from '../utils';
 
 class UpdateOneOperation extends OperationBase {
   collection: any;
@@ -8,6 +9,10 @@ class UpdateOneOperation extends OperationBase {
 
   constructor(collection: any, filter: any, update: any, options: any) {
     super(options);
+
+    if (!hasAtomicOperators(update)) {
+      throw new TypeError('Update document requires atomic operators');
+    }
 
     this.collection = collection;
     this.filter = filter;

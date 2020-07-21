@@ -1,0 +1,110 @@
+{
+  "runOn": [
+    {
+      "maxServerVersion": "3.5.5"
+    }
+  ],
+  "data": [
+    {
+      "_id": 1,
+      "y": [
+        {
+          "b": 3
+        },
+        {
+          "b": 1
+        }
+      ]
+    },
+    {
+      "_id": 2,
+      "y": [
+        {
+          "b": 0
+        },
+        {
+          "b": 1
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "BulkWrite on server that doesn't support arrayFilters",
+      "operations": [
+        {
+          "name": "bulkWrite",
+          "arguments": {
+            "requests": [
+              {
+                "name": "updateOne",
+                "arguments": {
+                  "filter": {},
+                  "update": {
+                    "$set": {
+                      "y.0.b": 2
+                    }
+                  },
+                  "arrayFilters": [
+                    {
+                      "i.b": 1
+                    }
+                  ]
+                }
+              }
+            ],
+            "options": {
+              "ordered": true
+            }
+          },
+          "error": true
+        }
+      ],
+      "expectations": []
+    },
+    {
+      "description": "BulkWrite on server that doesn't support arrayFilters with arrayFilters on second op",
+      "operations": [
+        {
+          "name": "bulkWrite",
+          "arguments": {
+            "requests": [
+              {
+                "name": "updateOne",
+                "arguments": {
+                  "filter": {},
+                  "update": {
+                    "$set": {
+                      "y.0.b": 2
+                    }
+                  }
+                }
+              },
+              {
+                "name": "updateMany",
+                "arguments": {
+                  "filter": {},
+                  "update": {
+                    "$set": {
+                      "y.$[i].b": 2
+                    }
+                  },
+                  "arrayFilters": [
+                    {
+                      "i.b": 1
+                    }
+                  ]
+                }
+              }
+            ],
+            "options": {
+              "ordered": true
+            }
+          },
+          "error": true
+        }
+      ],
+      "expectations": []
+    }
+  ]
+}

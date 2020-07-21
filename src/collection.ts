@@ -3,7 +3,6 @@ import PromiseProvider = require('./promise_provider');
 import ReadPreference = require('./read_preference');
 import { deprecate } from 'util';
 import {
-  toError,
   normalizeHintField,
   decorateCommand,
   decorateWithCollation,
@@ -323,9 +322,7 @@ class Collection {
       options.ignoreUndefined = this.s.options.ignoreUndefined;
     }
 
-    const insertOneOperation = new InsertOneOperation(this, doc, options);
-
-    return executeOperation(this.s.topology, insertOneOperation, callback);
+    return executeOperation(this.s.topology, new InsertOneOperation(this, doc, options), callback);
   }
 
   /**
@@ -353,9 +350,11 @@ class Collection {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options ? Object.assign({}, options) : { ordered: true };
 
-    const insertManyOperation = new InsertManyOperation(this, docs, options);
-
-    return executeOperation(this.s.topology, insertManyOperation, callback);
+    return executeOperation(
+      this.s.topology,
+      new InsertManyOperation(this, docs, options),
+      callback
+    );
   }
 
   /**
@@ -428,9 +427,11 @@ class Collection {
       });
     }
 
-    const bulkWriteOperation = new BulkWriteOperation(this, operations, options);
-
-    return executeOperation(this.s.topology, bulkWriteOperation, callback);
+    return executeOperation(
+      this.s.topology,
+      new BulkWriteOperation(this, operations, options),
+      callback
+    );
   }
 
   /**
@@ -481,15 +482,6 @@ class Collection {
    */
   updateOne(filter: object, update: object, options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
-    const Promise = PromiseProvider.get();
-
-    const err = checkForAtomicOperators(update);
-    if (err) {
-      if (typeof callback === 'function') return callback(err);
-      return Promise.reject(err);
-    }
-
     options = Object.assign({}, options);
 
     // Add ignoreUndefined
@@ -498,9 +490,11 @@ class Collection {
       options.ignoreUndefined = this.s.options.ignoreUndefined;
     }
 
-    const updateOneOperation = new UpdateOneOperation(this, filter, update, options);
-
-    return executeOperation(this.s.topology, updateOneOperation, callback);
+    return executeOperation(
+      this.s.topology,
+      new UpdateOneOperation(this, filter, update, options),
+      callback
+    );
   }
 
   /**
@@ -534,9 +528,11 @@ class Collection {
       options.ignoreUndefined = this.s.options.ignoreUndefined;
     }
 
-    const replaceOneOperation = new ReplaceOneOperation(this, filter, doc, options);
-
-    return executeOperation(this.s.topology, replaceOneOperation, callback);
+    return executeOperation(
+      this.s.topology,
+      new ReplaceOneOperation(this, filter, doc, options),
+      callback
+    );
   }
 
   /**
@@ -564,14 +560,6 @@ class Collection {
   updateMany(filter: object, update: object, options?: any, callback?: Function): Promise<void> {
     const Promise = PromiseProvider.get();
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
-
-    const err = checkForAtomicOperators(update);
-    if (err) {
-      if (typeof callback === 'function') return callback(err);
-      return Promise.reject(err);
-    }
-
     options = Object.assign({}, options);
 
     // Add ignoreUndefined
@@ -580,9 +568,11 @@ class Collection {
       options.ignoreUndefined = this.s.options.ignoreUndefined;
     }
 
-    const updateManyOperation = new UpdateManyOperation(this, filter, update, options);
-
-    return executeOperation(this.s.topology, updateManyOperation, callback);
+    return executeOperation(
+      this.s.topology,
+      new UpdateManyOperation(this, filter, update, options),
+      callback
+    );
   }
 
   /**
@@ -630,9 +620,11 @@ class Collection {
       options.ignoreUndefined = this.s.options.ignoreUndefined;
     }
 
-    const deleteOneOperation = new DeleteOneOperation(this, filter, options);
-
-    return executeOperation(this.s.topology, deleteOneOperation, callback);
+    return executeOperation(
+      this.s.topology,
+      new DeleteOneOperation(this, filter, options),
+      callback
+    );
   }
 
   /**
@@ -663,9 +655,11 @@ class Collection {
       options.ignoreUndefined = this.s.options.ignoreUndefined;
     }
 
-    const deleteManyOperation = new DeleteManyOperation(this, filter, options);
-
-    return executeOperation(this.s.topology, deleteManyOperation, callback);
+    return executeOperation(
+      this.s.topology,
+      new DeleteManyOperation(this, filter, options),
+      callback
+    );
   }
 
   /**
@@ -691,9 +685,7 @@ class Collection {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, options, { readPreference: ReadPreference.PRIMARY });
 
-    const renameOperation = new RenameOperation(this, newName, options);
-
-    return executeOperation(this.s.topology, renameOperation, callback);
+    return executeOperation(this.s.topology, new RenameOperation(this, newName, options), callback);
   }
 
   /**
@@ -713,13 +705,11 @@ class Collection {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    const dropCollectionOperation = new DropCollectionOperation(
-      this.s.db,
-      this.collectionName,
-      options
+    return executeOperation(
+      this.s.topology,
+      new DropCollectionOperation(this.s.db, this.collectionName, options),
+      callback
     );
-
-    return executeOperation(this.s.topology, dropCollectionOperation, callback);
   }
 
   /**
@@ -735,9 +725,7 @@ class Collection {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    const optionsOperation = new OptionsOperation(this, options);
-
-    return executeOperation(this.s.topology, optionsOperation, callback);
+    return executeOperation(this.s.topology, new OptionsOperation(this, options), callback);
   }
 
   /**
@@ -753,9 +741,7 @@ class Collection {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    const isCappedOperation = new IsCappedOperation(this, options);
-
-    return executeOperation(this.s.topology, isCappedOperation, callback);
+    return executeOperation(this.s.topology, new IsCappedOperation(this, options), callback);
   }
 
   /**
@@ -806,14 +792,11 @@ class Collection {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    const createIndexesOperation = new CreateIndexOperation(
-      this,
-      this.collectionName,
-      fieldOrSpec,
-      options
+    return executeOperation(
+      this.s.topology,
+      new CreateIndexOperation(this, this.collectionName, fieldOrSpec, options),
+      callback
     );
-
-    return executeOperation(this.s.topology, createIndexesOperation, callback);
   }
 
   /**
@@ -851,19 +834,14 @@ class Collection {
    */
   createIndexes(indexSpecs: any, options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
-
     options = options ? Object.assign({}, options) : {};
-
     if (typeof options.maxTimeMS !== 'number') delete options.maxTimeMS;
 
-    const createIndexesOperation = new CreateIndexesOperation(
-      this,
-      this.collectionName,
-      indexSpecs,
-      options
+    return executeOperation(
+      this.s.topology,
+      new CreateIndexesOperation(this, this.collectionName, indexSpecs, options),
+      callback
     );
-
-    return executeOperation(this.s.topology, createIndexesOperation, callback);
   }
 
   /**
@@ -883,14 +861,16 @@ class Collection {
   dropIndex(indexName: string, options?: any, callback?: Function): Promise<void> {
     const args = Array.prototype.slice.call(arguments, 1);
     callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
-
     options = args.length ? args.shift() || {} : {};
+
     // Run only against primary
     options.readPreference = ReadPreference.PRIMARY;
 
-    const dropIndexOperation = new DropIndexOperation(this, indexName, options);
-
-    return executeOperation(this.s.topology, dropIndexOperation, callback);
+    return executeOperation(
+      this.s.topology,
+      new DropIndexOperation(this, indexName, options),
+      callback
+    );
   }
 
   /**
@@ -906,12 +886,9 @@ class Collection {
   dropIndexes(options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options ? Object.assign({}, options) : {};
-
     if (typeof options.maxTimeMS !== 'number') delete options.maxTimeMS;
 
-    const dropIndexesOperation = new DropIndexesOperation(this, options);
-
-    return executeOperation(this.s.topology, dropIndexesOperation, callback);
+    return executeOperation(this.s.topology, new DropIndexesOperation(this, options), callback);
   }
 
   /**
@@ -948,9 +925,11 @@ class Collection {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    const indexExistsOperation = new IndexExistsOperation(this, indexes, options);
-
-    return executeOperation(this.s.topology, indexExistsOperation, callback);
+    return executeOperation(
+      this.s.topology,
+      new IndexExistsOperation(this, indexes, options),
+      callback
+    );
   }
 
   /**
@@ -968,13 +947,11 @@ class Collection {
     callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
     options = args.length ? args.shift() || {} : {};
 
-    const indexInformationOperation = new IndexInformationOperation(
-      this.s.db,
-      this.collectionName,
-      options
+    return executeOperation(
+      this.s.topology,
+      new IndexInformationOperation(this.s.db, this.collectionName, options),
+      callback
     );
-
-    return executeOperation(this.s.topology, indexInformationOperation, callback);
   }
 
   /**
@@ -990,9 +967,11 @@ class Collection {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    const estimatedDocumentCountOperation = new EstimatedDocumentCountOperation(this, options);
-
-    return executeOperation(this.s.topology, estimatedDocumentCountOperation, callback);
+    return executeOperation(
+      this.s.topology,
+      new EstimatedDocumentCountOperation(this, options),
+      callback
+    );
   }
 
   /**
@@ -1033,9 +1012,11 @@ class Collection {
     query = args.length ? args.shift() || {} : {};
     options = args.length ? args.shift() || {} : {};
 
-    const countDocumentsOperation = new CountDocumentsOperation(this, query, options);
-
-    return executeOperation(this.s.topology, countDocumentsOperation, callback);
+    return executeOperation(
+      this.s.topology,
+      new CountDocumentsOperation(this, query, options),
+      callback
+    );
   }
 
   /**
@@ -1058,9 +1039,11 @@ class Collection {
     const queryOption = args.length ? args.shift() || {} : {};
     const optionsOption = args.length ? args.shift() || {} : {};
 
-    const distinctOperation = new DistinctOperation(this, key, queryOption, optionsOption);
-
-    return executeOperation(this.s.topology, distinctOperation, callback);
+    return executeOperation(
+      this.s.topology,
+      new DistinctOperation(this, key, queryOption, optionsOption),
+      callback
+    );
   }
 
   /**
@@ -1076,9 +1059,7 @@ class Collection {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    const indexesOperation = new IndexesOperation(this, options);
-
-    return executeOperation(this.s.topology, indexesOperation, callback);
+    return executeOperation(this.s.topology, new IndexesOperation(this, options), callback);
   }
 
   /**
@@ -1096,8 +1077,7 @@ class Collection {
     callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
     options = args.length ? args.shift() || {} : {};
 
-    const statsOperation = new CollStatsOperation(this, options);
-    return executeOperation(this.s.topology, statsOperation, callback);
+    return executeOperation(this.s.topology, new CollStatsOperation(this, options), callback);
   }
 
   /**
@@ -1136,13 +1116,11 @@ class Collection {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    // Basic validation
-    if (filter == null || typeof filter !== 'object')
-      throw toError('filter parameter must be an object');
-
-    const findOneAndDeleteOperation = new FindOneAndDeleteOperation(this, filter, options);
-
-    return executeOperation(this.s.topology, findOneAndDeleteOperation, callback);
+    return executeOperation(
+      this.s.topology,
+      new FindOneAndDeleteOperation(this, filter, options),
+      callback
+    );
   }
 
   /**
@@ -1176,27 +1154,11 @@ class Collection {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    // Basic validation
-    if (filter == null || typeof filter !== 'object')
-      throw toError('filter parameter must be an object');
-    if (replacement == null || typeof replacement !== 'object')
-      throw toError('replacement parameter must be an object');
-
-    // Check that there are no atomic operators
-    const keys = Object.keys(replacement);
-
-    if (keys[0] && keys[0][0] === '$') {
-      throw toError('The replacement document must not contain atomic operators.');
-    }
-
-    const findOneAndReplaceOperation = new FindOneAndReplaceOperation(
-      this,
-      filter,
-      replacement,
-      options
+    return executeOperation(
+      this.s.topology,
+      new FindOneAndReplaceOperation(this, filter, replacement, options),
+      callback
     );
-
-    return executeOperation(this.s.topology, findOneAndReplaceOperation, callback);
   }
 
   /**
@@ -1228,26 +1190,14 @@ class Collection {
     options?: any,
     callback?: Function
   ): Promise<void> {
-    const Promise = PromiseProvider.get();
-
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    // Basic validation
-    if (filter == null || typeof filter !== 'object')
-      throw toError('filter parameter must be an object');
-    if (update == null || typeof update !== 'object')
-      throw toError('update parameter must be an object');
-
-    const err = checkForAtomicOperators(update);
-    if (err) {
-      if (typeof callback === 'function') return callback(err);
-      return Promise.reject(err);
-    }
-
-    const findOneAndUpdateOperation = new FindOneAndUpdateOperation(this, filter, update, options);
-
-    return executeOperation(this.s.topology, findOneAndUpdateOperation, callback);
+    return executeOperation(
+      this.s.topology,
+      new FindOneAndUpdateOperation(this, filter, update, options),
+      callback
+    );
   }
 
   /**
@@ -1395,9 +1345,12 @@ class Collection {
     if ('function' === typeof options.finalize) {
       options.finalize = options.finalize.toString();
     }
-    const mapReduceOperation = new MapReduceOperation(this, map, reduce, options);
 
-    return executeOperation(this.s.topology, mapReduceOperation, callback);
+    return executeOperation(
+      this.s.topology,
+      new MapReduceOperation(this, map, reduce, options),
+      callback
+    );
   }
 
   /**
@@ -1927,9 +1880,7 @@ Collection.prototype.findOne = deprecateOptions(
     query = query || {};
     options = options || {};
 
-    const findOneOperation = new FindOneOperation(this, query, options);
-
-    return executeOperation(this.s.topology, findOneOperation, callback);
+    return executeOperation(this.s.topology, new FindOneOperation(this, query, options), callback);
   }
 );
 
@@ -2207,25 +2158,6 @@ Collection.prototype.group = deprecate(function(
   );
 },
 'MongoDB 3.6 or higher no longer supports the group command. We recommend rewriting using the aggregation framework.');
-
-
-// Check the update operation to ensure it has atomic operators.
-function checkForAtomicOperators(update: any): any {
-  if (Array.isArray(update)) {
-    return update.reduce((err?: any, u?: any) => err || checkForAtomicOperators(u), null);
-  }
-
-  const keys = Object.keys(update);
-
-  // same errors as the server would give for update doc lacking atomic operators
-  if (keys.length === 0) {
-    return toError('The update operation document must contain at least one atomic operator.');
-  }
-
-  if (keys[0][0] !== '$') {
-    return toError('the update operation document must contain atomic operators.');
-  }
-}
 
 /**
  * Save a document.

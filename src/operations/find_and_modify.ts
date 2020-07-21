@@ -5,7 +5,8 @@ import {
   decorateWithCollation,
   applyWriteConcern,
   formattedOrderClause,
-  handleCallback
+  handleCallback,
+  hasAtomicOperators
 } from '../utils';
 import { MongoError } from '../error';
 import { OperationBase } from './operation';
@@ -154,6 +155,11 @@ class FindOneAndDeleteOperation extends FindAndModifyOperation {
     finalOptions.fields = options.projection;
     finalOptions.remove = true;
 
+    // Basic validation
+    if (filter == null || typeof filter !== 'object') {
+      throw new TypeError('Filter parameter must be an object');
+    }
+
     super(collection, filter, finalOptions.sort, null, finalOptions);
   }
 }
@@ -166,6 +172,18 @@ class FindOneAndReplaceOperation extends FindAndModifyOperation {
     finalOptions.update = true;
     finalOptions.new = options.returnOriginal !== void 0 ? !options.returnOriginal : false;
     finalOptions.upsert = options.upsert !== void 0 ? !!options.upsert : false;
+
+    if (filter == null || typeof filter !== 'object') {
+      throw new TypeError('Filter parameter must be an object');
+    }
+
+    if (replacement == null || typeof replacement !== 'object') {
+      throw new TypeError('Replacement parameter must be an object');
+    }
+
+    if (hasAtomicOperators(replacement)) {
+      throw new TypeError('Replacement document must not contain atomic operators');
+    }
 
     super(collection, filter, finalOptions.sort, replacement, finalOptions);
   }
@@ -180,6 +198,18 @@ class FindOneAndUpdateOperation extends FindAndModifyOperation {
     finalOptions.new =
       typeof options.returnOriginal === 'boolean' ? !options.returnOriginal : false;
     finalOptions.upsert = typeof options.upsert === 'boolean' ? options.upsert : false;
+
+    if (filter == null || typeof filter !== 'object') {
+      throw new TypeError('Filter parameter must be an object');
+    }
+
+    if (update == null || typeof update !== 'object') {
+      throw new TypeError('Update parameter must be an object');
+    }
+
+    if (!hasAtomicOperators(update)) {
+      throw new TypeError('Update document requires atomic operators');
+    }
 
     super(collection, filter, finalOptions.sort, update, finalOptions);
   }

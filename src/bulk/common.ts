@@ -7,8 +7,11 @@ import {
   applyWriteConcern,
   applyRetryableWrites,
   executeLegacyOperation,
-  isPromiseLike
+  isPromiseLike,
+  hasAtomicOperators,
+  maxWireVersion
 } from '../utils';
+
 // Error codes
 const WRITE_CONCERN_ERROR = 64;
 
@@ -663,6 +666,10 @@ class FindOperators {
       document.hint = updateDocument.hint;
     }
 
+    if (!hasAtomicOperators(updateDocument)) {
+      throw new TypeError('Update document requires atomic operators');
+    }
+
     // Clear out current Op
     this.s.currentOp = null;
     return this.s.options.addToOperationsList(this, UPDATE, document);
@@ -671,13 +678,33 @@ class FindOperators {
   /**
    * Add a replace one operation to the bulk operation
    *
-   * @function
-   * @param {object} updateDocument the new document to replace the existing one with
+   * @param {object} replacement the new document to replace the existing one with
    * @throws {MongoError} If operation cannot be added to bulk write
    * @returns {void} A reference to the parent BulkOperation
    */
-  replaceOne(updateDocument: object): void {
-    this.updateOne(updateDocument);
+  replaceOne(replacement: any) {
+    // Perform upsert
+    const upsert = typeof this.s.currentOp.upsert === 'boolean' ? this.s.currentOp.upsert : false;
+
+    // Establish the update command
+    const document = {
+      q: this.s.currentOp.selector,
+      u: replacement,
+      multi: false,
+      upsert: upsert
+    } as any;
+
+    if (replacement.hint) {
+      document.hint = replacement.hint;
+    }
+
+    if (hasAtomicOperators(replacement)) {
+      throw new TypeError('Replacement document must not use atomic operators');
+    }
+
+    // Clear out current Op
+    this.s.currentOp = null;
+    return this.s.options.addToOperationsList(this, UPDATE, document);
   }
 
   /**
@@ -965,6 +992,12 @@ class BulkOperationBase {
 
     // Crud spec update format
     if (op.updateOne || op.updateMany || op.replaceOne) {
+      if (op.replaceOne && hasAtomicOperators(op[key].replacement)) {
+        throw new TypeError('Replacement document must not use atomic operators');
+      } else if ((op.updateOne || op.updateMany) && !hasAtomicOperators(op[key].update)) {
+        throw new TypeError('Update document requires atomic operators');
+      }
+
       const multi = op.updateOne || op.replaceOne ? false : true;
       const operation = {
         q: op[key].filter,
@@ -982,7 +1015,15 @@ class BulkOperationBase {
       } else {
         if (op[key].upsert) operation.upsert = true;
       }
-      if (op[key].arrayFilters) operation.arrayFilters = op[key].arrayFilters;
+      if (op[key].arrayFilters) {
+        // TODO: this check should be done at command construction against a connection, not a topology
+        if (maxWireVersion(this.s.topology) < 6) {
+          throw new TypeError('arrayFilters are only supported on MongoDB 3.6+');
+        }
+
+        operation.arrayFilters = op[key].arrayFilters;
+      }
+
       return this.s.options.addToOperationsList(this, UPDATE, operation);
     }
 

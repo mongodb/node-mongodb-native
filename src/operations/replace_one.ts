@@ -1,31 +1,36 @@
 import { OperationBase } from './operation';
 import { updateDocuments } from './common_functions';
+import { hasAtomicOperators } from '../utils';
 
 class ReplaceOneOperation extends OperationBase {
   collection: any;
   filter: any;
-  doc: any;
+  replacement: any;
 
-  constructor(collection: any, filter: any, doc: any, options: any) {
+  constructor(collection: any, filter: any, replacement: any, options: any) {
     super(options);
+
+    if (hasAtomicOperators(replacement)) {
+      throw new TypeError('Replacement document must not contain atomic operators');
+    }
 
     this.collection = collection;
     this.filter = filter;
-    this.doc = doc;
+    this.replacement = replacement;
   }
 
   execute(callback: Function) {
     const coll = this.collection;
     const filter = this.filter;
-    const doc = this.doc;
+    const replacement = this.replacement;
     const options = this.options;
 
     // Set single document update
     options.multi = false;
 
     // Execute update
-    updateDocuments(coll, filter, doc, options, (err?: any, r?: any) =>
-      replaceCallback(err, r, doc, callback)
+    updateDocuments(coll, filter, replacement, options, (err: Error, r: any) =>
+      replaceCallback(err, r, replacement, callback)
     );
   }
 }
