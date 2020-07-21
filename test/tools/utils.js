@@ -31,7 +31,7 @@ ClassWithLogger.prototype.f = makeTestFunction({
   optionsIndex: 0
 });
 
-ClassWithLogger.prototype.getLogger = function() {
+ClassWithLogger.prototype.getLogger = function () {
   return this.logger;
 };
 
@@ -53,7 +53,7 @@ ClassWithUndefinedLogger.prototype.f = makeTestFunction({
   optionsIndex: 0
 });
 
-ClassWithUndefinedLogger.prototype.getLogger = function() {
+ClassWithUndefinedLogger.prototype.getLogger = function () {
   return undefined;
 };
 

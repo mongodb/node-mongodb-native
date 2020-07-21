@@ -15,7 +15,7 @@ const mock = require('mongodb-mock-server');
 const expect = chai.expect;
 chai.use(require('sinon-chai'));
 
-describe('Mongos SRV Polling', function() {
+describe('Mongos SRV Polling', function () {
   const context = {};
   const SRV_HOST = 'darmok.tanagra.com';
 
@@ -43,39 +43,37 @@ describe('Mongos SRV Polling', function() {
   }
 
   function stubDns(err, records) {
-    context.sinon.stub(dns, 'resolveSrv').callsFake(function(_srvAddress, callback) {
+    context.sinon.stub(dns, 'resolveSrv').callsFake(function (_srvAddress, callback) {
       process.nextTick(() => callback(err, records));
     });
   }
 
-  before(function() {
+  before(function () {
     context.sinon = sinon.createSandbox();
   });
 
-  afterEach(function() {
+  afterEach(function () {
     context.sinon.restore();
   });
 
-  after(function() {
+  after(function () {
     delete context.sinon;
   });
 
-  describe('SrvPoller', function() {
+  describe('SrvPoller', function () {
     function stubPoller(poller) {
       context.sinon.stub(poller, 'success');
       context.sinon.stub(poller, 'failure');
       context.sinon.stub(poller, 'parentDomainMismatch');
     }
 
-    it('should always return a valid value for `intervalMS`', function() {
+    it('should always return a valid value for `intervalMS`', function () {
       const poller = new SrvPoller({ srvHost: SRV_HOST });
-      expect(poller)
-        .property('intervalMS')
-        .to.equal(60000);
+      expect(poller).property('intervalMS').to.equal(60000);
     });
 
-    describe('success', function() {
-      it('should emit event, disable haMode, and schedule another poll', function(done) {
+    describe('success', function () {
+      it('should emit event, disable haMode, and schedule another poll', function (done) {
         const records = [srvRecord('jalad.tanagra.com'), srvRecord('thebeast.tanagra.com')];
         const poller = new SrvPoller({ srvHost: SRV_HOST });
 
@@ -99,8 +97,8 @@ describe('Mongos SRV Polling', function() {
       });
     });
 
-    describe('failure', function() {
-      it('should enable haMode and schedule', function() {
+    describe('failure', function () {
+      it('should enable haMode and schedule', function () {
         const poller = new SrvPoller({ srvHost: SRV_HOST });
 
         context.sinon.stub(poller, 'schedule');
@@ -111,13 +109,13 @@ describe('Mongos SRV Polling', function() {
       });
     });
 
-    describe('poll', function() {
-      it('should throw if srvHost is not passed in', function() {
+    describe('poll', function () {
+      it('should throw if srvHost is not passed in', function () {
         expect(() => new SrvPoller()).to.throw(TypeError);
         expect(() => new SrvPoller({})).to.throw(TypeError);
       });
 
-      it('should poll dns srv records', function() {
+      it('should poll dns srv records', function () {
         const poller = new SrvPoller({ srvHost: SRV_HOST });
 
         context.sinon.stub(dns, 'resolveSrv');
@@ -130,7 +128,7 @@ describe('Mongos SRV Polling', function() {
         );
       });
 
-      it('should not succeed or fail if poller was stopped', function(done) {
+      it('should not succeed or fail if poller was stopped', function (done) {
         const poller = new SrvPoller({ srvHost: SRV_HOST });
 
         stubDns(null, []);
@@ -146,7 +144,7 @@ describe('Mongos SRV Polling', function() {
         });
       });
 
-      it('should fail if dns returns error', function(done) {
+      it('should fail if dns returns error', function (done) {
         const poller = new SrvPoller({ srvHost: SRV_HOST });
 
         stubDns(new Error('Some Error'));
@@ -161,7 +159,7 @@ describe('Mongos SRV Polling', function() {
         });
       });
 
-      it('should fail if dns returns no records', function(done) {
+      it('should fail if dns returns no records', function (done) {
         const poller = new SrvPoller({ srvHost: SRV_HOST });
 
         stubDns(null, []);
@@ -178,7 +176,7 @@ describe('Mongos SRV Polling', function() {
         });
       });
 
-      it('should fail if dns returns no records that match parent domain', function(done) {
+      it('should fail if dns returns no records that match parent domain', function (done) {
         const poller = new SrvPoller({ srvHost: SRV_HOST });
         const records = [srvRecord('jalad.tanagra.org'), srvRecord('shaka.walls.com')];
 
@@ -198,7 +196,7 @@ describe('Mongos SRV Polling', function() {
         });
       });
 
-      it('should succeed when valid records are returned by dns', function(done) {
+      it('should succeed when valid records are returned by dns', function (done) {
         const poller = new SrvPoller({ srvHost: SRV_HOST });
         const records = [srvRecord('jalad.tanagra.com'), srvRecord('thebeast.tanagra.com')];
 
@@ -214,7 +212,7 @@ describe('Mongos SRV Polling', function() {
         });
       });
 
-      it('should succeed when some valid records are returned and some do not match parent domain', function(done) {
+      it('should succeed when some valid records are returned and some do not match parent domain', function (done) {
         const poller = new SrvPoller({ srvHost: SRV_HOST });
         const records = [srvRecord('jalad.tanagra.com'), srvRecord('thebeast.walls.com')];
 
@@ -232,7 +230,7 @@ describe('Mongos SRV Polling', function() {
     });
   });
 
-  describe('topology', function() {
+  describe('topology', function () {
     class FakeSrvPoller extends EventEmitter {
       start() {}
       stop() {}
@@ -241,7 +239,7 @@ describe('Mongos SRV Polling', function() {
       }
     }
 
-    it('should not make an srv poller if there is no srv host', function() {
+    it('should not make an srv poller if there is no srv host', function () {
       const srvPoller = new FakeSrvPoller({ srvHost: SRV_HOST });
 
       const topology = new Topology(['localhost:27017,localhost:27018'], { srvPoller });
@@ -249,7 +247,7 @@ describe('Mongos SRV Polling', function() {
       expect(topology).to.not.have.property('srvPoller');
     });
 
-    it('should make an srvPoller if there is an srvHost', function() {
+    it('should make an srvPoller if there is an srvHost', function () {
       const srvPoller = new FakeSrvPoller({ srvHost: SRV_HOST });
 
       const topology = new Topology(['localhost:27017,localhost:27018'], {
@@ -257,12 +255,10 @@ describe('Mongos SRV Polling', function() {
         srvPoller
       });
 
-      expect(topology.s)
-        .to.have.property('srvPoller')
-        .that.equals(srvPoller);
+      expect(topology.s).to.have.property('srvPoller').that.equals(srvPoller);
     });
 
-    it('should only start polling if topology description changes to sharded', function() {
+    it('should only start polling if topology description changes to sharded', function () {
       const srvPoller = new FakeSrvPoller({ srvHost: SRV_HOST });
       sinon.stub(srvPoller, 'start');
 
@@ -294,7 +290,7 @@ describe('Mongos SRV Polling', function() {
       expect(srvPoller.start).to.have.been.calledOnce;
     });
 
-    describe('prose tests', function() {
+    describe('prose tests', function () {
       function srvAddresses(records) {
         return records.map(r => `${r.name}:${r.port}`);
       }
@@ -303,7 +299,7 @@ describe('Mongos SRV Polling', function() {
         msg: 'isdbgrid'
       });
 
-      beforeEach(function() {
+      beforeEach(function () {
         return Promise.all(Array.from({ length: 4 }).map(() => mock.createServer())).then(
           servers => {
             context.servers = servers;
@@ -311,11 +307,11 @@ describe('Mongos SRV Polling', function() {
         );
       });
 
-      afterEach(function() {
+      afterEach(function () {
         return mock.cleanup();
       });
 
-      afterEach(function(done) {
+      afterEach(function (done) {
         if (context.topology) {
           context.topology.close(done);
         } else {
@@ -351,8 +347,8 @@ describe('Mongos SRV Polling', function() {
 
             expect(servers).to.deep.equal(srvAddresses(recordSets[0]));
 
-            topology.once('topologyDescriptionChanged', function() {
-              tryDone(done, function() {
+            topology.once('topologyDescriptionChanged', function () {
+              tryDone(done, function () {
                 const servers = Array.from(topology.description.servers.keys());
 
                 expect(servers).to.deep.equal(srvAddresses(recordSets[1]));
@@ -368,7 +364,7 @@ describe('Mongos SRV Polling', function() {
 
       // The addition of a new DNS record:
       // _mongodb._tcp.test1.test.build.10gen.cc.  86400  IN SRV  27019  localhost.test.build.10gen.cc.
-      it('should handle the addition of a new DNS record', function(done) {
+      it('should handle the addition of a new DNS record', function (done) {
         const recordSets = [
           [srvRecord(context.servers[0]), srvRecord(context.servers[1])],
           [
@@ -382,7 +378,7 @@ describe('Mongos SRV Polling', function() {
 
       // The removal of an existing DNS record:
       // _mongodb._tcp.test1.test.build.10gen.cc.  86400  IN SRV  27018  localhost.test.build.10gen.cc.
-      it('should handle the removal of an existing DNS record', function(done) {
+      it('should handle the removal of an existing DNS record', function (done) {
         const recordSets = [
           [srvRecord(context.servers[0]), srvRecord(context.servers[1])],
           [srvRecord(context.servers[0])]
@@ -394,7 +390,7 @@ describe('Mongos SRV Polling', function() {
       // _mongodb._tcp.test1.test.build.10gen.cc.  86400  IN SRV  27018  localhost.test.build.10gen.cc.
       // replace by:
       // _mongodb._tcp.test1.test.build.10gen.cc.  86400  IN SRV  27019  localhost.test.build.10gen.cc.
-      it('should handle the replacement of a DNS record', function(done) {
+      it('should handle the replacement of a DNS record', function (done) {
         const recordSets = [
           [srvRecord(context.servers[0]), srvRecord(context.servers[1])],
           [srvRecord(context.servers[0]), srvRecord(context.servers[2])]
@@ -404,7 +400,7 @@ describe('Mongos SRV Polling', function() {
 
       // The replacement of both existing DNS records with one new record:
       // _mongodb._tcp.test1.test.build.10gen.cc.  86400  IN SRV  27019  localhost.test.build.10gen.cc.
-      it('should handle the replacement of both existing DNS records with one new record', function(done) {
+      it('should handle the replacement of both existing DNS records with one new record', function (done) {
         const recordSets = [
           [srvRecord(context.servers[0]), srvRecord(context.servers[1])],
           [srvRecord(context.servers[2])]
@@ -415,7 +411,7 @@ describe('Mongos SRV Polling', function() {
       // The replacement of both existing DNS records with two new records:
       // _mongodb._tcp.test1.test.build.10gen.cc.  86400  IN SRV  27019  localhost.test.build.10gen.cc.
       // _mongodb._tcp.test1.test.build.10gen.cc.  86400  IN SRV  27020  localhost.test.build.10gen.cc.
-      it('should handle the replacement of both existing DNS records with two new records', function(done) {
+      it('should handle the replacement of both existing DNS records with two new records', function (done) {
         const recordSets = [
           [srvRecord(context.servers[0]), srvRecord(context.servers[1])],
           [srvRecord(context.servers[2]), srvRecord(context.servers[3])]

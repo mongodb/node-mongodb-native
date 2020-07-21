@@ -5,12 +5,12 @@ const connect = require('../../../src/cmap/connect');
 const expect = require('chai').expect;
 const setupDatabase = require('../../functional/shared').setupDatabase;
 
-describe('Connection', function() {
-  before(function() {
+describe('Connection', function () {
+  before(function () {
     return setupDatabase(this.configuration);
   });
 
-  it('should execute a command against a server', function(done) {
+  it('should execute a command against a server', function (done) {
     const connectOptions = Object.assign(
       { connectionType: Connection },
       this.configuration.options
@@ -32,7 +32,7 @@ describe('Connection', function() {
     });
   });
 
-  it('should emit command monitoring events', function(done) {
+  it('should emit command monitoring events', function (done) {
     const connectOptions = Object.assign(
       { connectionType: Connection, monitorCommands: true },
       this.configuration.options
@@ -60,7 +60,7 @@ describe('Connection', function() {
     });
   });
 
-  it('should support socket timeouts', function(done) {
+  it('should support socket timeouts', function (done) {
     const connectOptions = Object.assign({
       host: '240.0.0.1',
       connectionType: Connection,
@@ -76,7 +76,7 @@ describe('Connection', function() {
 
   it('should support calling back multiple times on exhaust commands', {
     metadata: { requires: { mongodb: '>=4.2.0', topology: ['single'] } },
-    test: function(done) {
+    test: function (done) {
       const ns = `${this.configuration.db}.$cmd`;
       const connectOptions = Object.assign(
         { connectionType: Connection },
@@ -93,9 +93,7 @@ describe('Connection', function() {
 
         conn.command(ns, { insert: 'test', documents }, (err, res) => {
           expect(err).to.not.exist;
-          expect(res)
-            .nested.property('result.n')
-            .to.equal(documents.length);
+          expect(res).nested.property('result.n').to.equal(documents.length);
 
           let totalDocumentsRead = 0;
           conn.command(ns, { find: 'test', batchSize: 100 }, (err, result) => {

@@ -3,15 +3,15 @@ const setupDatabase = require('./shared').setupDatabase;
 const expect = require('chai').expect;
 const { MongoClient, ReadPreference, Logger } = require('../../src');
 
-describe('Sharding (Read Preference)', function() {
-  before(function() {
+describe('Sharding (Read Preference)', function () {
+  before(function () {
     return setupDatabase(this.configuration);
   });
 
   it.skip('Should correctly perform a Mongos secondary read using the read preferences', {
     metadata: { requires: { topology: 'sharded' } },
 
-    test: function(done) {
+    test: function (done) {
       // NOTE: this test is skipped because it directly mucks with the connection string, which isn't
       // guaranteed to be present with mongo-orchestration. This behavior should be unit tested.
 
@@ -22,14 +22,14 @@ describe('Sharding (Read Preference)', function() {
       const url = `mongodb://${host}:${port}/sharded_test_db?w=1`;
       // Connect using the mongos connections
       var client = new MongoClient(url, { w: 0, monitorCommands: true });
-      client.connect(function(err) {
+      client.connect(function (err) {
         expect(err).to.not.exist;
         const db = client.db(configuration.db);
 
         // Perform a simple insert into a collection
         const collection = db.collection('shard_test1');
         // Insert a simple doc
-        collection.insertOne({ test: 1 }, { w: 'majority', wtimeout: 10000 }, function(err) {
+        collection.insertOne({ test: 1 }, { w: 'majority', wtimeout: 10000 }, function (err) {
           expect(err).to.not.exist;
 
           // Set debug level for the driver
@@ -38,7 +38,7 @@ describe('Sharding (Read Preference)', function() {
           let gotMessage = false;
 
           // Get the current logger
-          Logger.setCurrentLogger(function(message, options) {
+          Logger.setCurrentLogger(function (message, options) {
             if (
               options.type === 'debug' &&
               options.className === 'Cursor' &&
@@ -51,7 +51,7 @@ describe('Sharding (Read Preference)', function() {
           collection.findOne(
             { test: 1 },
             { readPreference: new ReadPreference(ReadPreference.SECONDARY) },
-            function(err, item) {
+            function (err, item) {
               expect(err).to.not.exist;
               expect(item).to.exist.and.to.have.property('test', 1);
               expect(gotMessage).to.equal(true);
@@ -70,7 +70,7 @@ describe('Sharding (Read Preference)', function() {
   it('Should fail a Mongos secondary read using the read preference and tags that dont exist', {
     metadata: { requires: { topology: 'sharded' } },
 
-    test: function(done) {
+    test: function (done) {
       const configuration = this.configuration;
       const host = configuration.host;
       const port = configuration.port;
@@ -78,14 +78,14 @@ describe('Sharding (Read Preference)', function() {
       const url = `mongodb://${host}:${port}/sharded_test_db?w=1`;
       // Connect using the mongos connections
       const client = new MongoClient(url, { w: 0 });
-      client.connect(function(err) {
+      client.connect(function (err) {
         expect(err).to.not.exist;
         const db = client.db(configuration.db);
 
         // Perform a simple insert into a collection
         const collection = db.collection('shard_test3');
         // Insert a simple doc
-        collection.insertOne({ test: 1 }, { w: 'majority', wtimeout: 10000 }, function(err) {
+        collection.insertOne({ test: 1 }, { w: 'majority', wtimeout: 10000 }, function (err) {
           expect(err).to.not.exist;
 
           // Set debug level for the driver
@@ -93,7 +93,7 @@ describe('Sharding (Read Preference)', function() {
 
           let gotMessage = false;
           // Get the current logger
-          Logger.setCurrentLogger(function(message, options) {
+          Logger.setCurrentLogger(function (message, options) {
             if (
               options.type === 'debug' &&
               options.className === 'Cursor' &&
@@ -113,7 +113,7 @@ describe('Sharding (Read Preference)', function() {
                 { dc: 'ma', s: '2' }
               ])
             },
-            function(err) {
+            function (err) {
               expect(err).to.exist;
               expect(gotMessage).to.equal(true);
               // Set error level for the driver
@@ -131,20 +131,20 @@ describe('Sharding (Read Preference)', function() {
     // NOTE: skipped because mongo-orchestration will not set up these tags
     metadata: { requires: { topology: 'sharded' } },
 
-    test: function(done) {
+    test: function (done) {
       const configuration = this.configuration;
       // Set up mongos connection
 
       // Connect using the mongos connections
       const client = new MongoClient(configuration.url(), { w: 0 });
-      client.connect(function(err) {
+      client.connect(function (err) {
         expect(err).to.not.exist;
         const db = client.db(configuration.db);
 
         // Perform a simple insert into a collection
         const collection = db.collection('shard_test4');
         // Insert a simple doc
-        collection.insertOne({ test: 1 }, { w: 'majority', wtimeout: 10000 }, function(err) {
+        collection.insertOne({ test: 1 }, { w: 'majority', wtimeout: 10000 }, function (err) {
           expect(err).to.not.exist;
 
           // Set debug level for the driver
@@ -152,7 +152,7 @@ describe('Sharding (Read Preference)', function() {
 
           let gotMessage = false;
           // Get the current logger
-          Logger.setCurrentLogger(function(message, options) {
+          Logger.setCurrentLogger(function (message, options) {
             if (
               options.type === 'debug' &&
               options.className === 'Cursor' &&
@@ -171,7 +171,7 @@ describe('Sharding (Read Preference)', function() {
                 { loc: 'sf' }
               ])
             },
-            function(err, item) {
+            function (err, item) {
               expect(err).to.not.exist;
               expect(item).to.exist.and.to.have.a.property('test', 1);
               expect(gotMessage).to.equal(true);
@@ -189,7 +189,7 @@ describe('Sharding (Read Preference)', function() {
   it('shouldCorrectlyEmitOpenEvent', {
     metadata: { requires: { topology: 'sharded' } },
 
-    test: function(done) {
+    test: function (done) {
       const configuration = this.configuration;
 
       let openCalled = false;
@@ -197,7 +197,7 @@ describe('Sharding (Read Preference)', function() {
       const client = new MongoClient(configuration.url(), { w: 0 });
       client.once('open', () => (openCalled = true));
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         expect(err).to.not.exist;
         expect(client).to.exist;
         expect(openCalled).to.equal(true);
@@ -210,25 +210,25 @@ describe('Sharding (Read Preference)', function() {
   it('Should correctly apply readPreference when performing inline mapReduce', {
     metadata: { requires: { topology: 'sharded' } },
 
-    test: function(done) {
+    test: function (done) {
       const configuration = this.configuration;
 
       // Connect using the mongos connections
       const client = new MongoClient(configuration.url());
-      client.connect(function(err) {
+      client.connect(function (err) {
         expect(err).to.not.exist;
         const db = client.db(configuration.db);
 
         // Get the collection
         const col = db.collection('items');
         // Insert some items
-        col.insertMany([{ a: 1 }, { a: 2 }, { a: 3 }], function(err) {
+        col.insertMany([{ a: 1 }, { a: 2 }, { a: 3 }], function (err) {
           expect(err).to.not.exist;
 
-          client.db('admin').command({ enableSharding: 'integration_test_2' }, function(err) {
+          client.db('admin').command({ enableSharding: 'integration_test_2' }, function (err) {
             expect(err).to.not.exist;
 
-            col.createIndex({ _id: 'hashed' }, function(err) {
+            col.createIndex({ _id: 'hashed' }, function (err) {
               expect(err).to.not.exist;
 
               client.db('admin').command(
@@ -236,14 +236,14 @@ describe('Sharding (Read Preference)', function() {
                   shardCollection: 'integration_test_2.items',
                   key: { _id: 'hashed' }
                 },
-                function(err) {
+                function (err) {
                   expect(err).to.not.exist;
 
-                  var map = function() {
+                  var map = function () {
                     emit(this._id, this._id); // eslint-disable-line
                   };
 
-                  var reduce = function() {
+                  var reduce = function () {
                     return 123;
                   };
 
@@ -256,7 +256,7 @@ describe('Sharding (Read Preference)', function() {
                       },
                       readPreference: ReadPreference.SECONDARY_PREFERRED
                     },
-                    function(err, r) {
+                    function (err, r) {
                       expect(err).to.not.exist;
                       expect(r).to.have.a.lengthOf(3);
                       client.close(done);

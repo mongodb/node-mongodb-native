@@ -790,7 +790,7 @@ function nextFunction(self: any, callback: Function) {
     if (isConnectionDead(self, callback)) return;
 
     // Execute the next get more
-    self._getMore(function(err: any, doc: any, connection: any) {
+    self._getMore(function (err: any, doc: any, connection: any) {
       if (err) {
         return handleCallback(callback, err);
       }
@@ -866,9 +866,9 @@ function nextFunction(self: any, callback: Function) {
       // Ensure we kill the cursor on the server
       self.kill();
       // Set cursor in dead and notified state
-      return setCursorDeadAndNotified(self, function() {
-        handleCallback(callback, new MongoError(doc ? doc.$err : undefined));
-      });
+      return setCursorDeadAndNotified(self, () =>
+        handleCallback(callback, new MongoError(doc ? doc.$err : undefined))
+      );
     }
 
     // Transform the doc with passed in transformation method if provided

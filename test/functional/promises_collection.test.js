@@ -3,8 +3,8 @@ var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 var f = require('util').format;
 
-describe('Promises (Collection)', function() {
-  before(function() {
+describe('Promises (Collection)', function () {
+  before(function () {
     return setupDatabase(this.configuration);
   });
 
@@ -15,7 +15,7 @@ describe('Promises (Collection)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var url = configuration.url();
       url =
@@ -24,12 +24,12 @@ describe('Promises (Collection)', function() {
           : f('%s?%s', url, 'maxPoolSize=100');
 
       const client = configuration.newClient(url);
-      client.connect().then(function(client) {
+      client.connect().then(function (client) {
         var db = client.db(configuration.db);
 
         db.collection('insertOne')
           .insertOne({ a: 1 })
-          .then(function(r) {
+          .then(function (r) {
             test.equal(1, r.insertedCount);
 
             client.close(done);
@@ -45,14 +45,14 @@ describe('Promises (Collection)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
         poolSize: 1,
         auto_reconnect: false
       });
 
-      client.connect().then(function(client) {
+      client.connect().then(function (client) {
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -65,18 +65,18 @@ describe('Promises (Collection)', function() {
         // BEGIN
         // Get the collection
         var col = db.collection('find_one_and_delete_with_promise_no_option');
-        col.insertMany([{ a: 1, b: 1 }], { w: 1 }).then(function(r) {
+        col.insertMany([{ a: 1, b: 1 }], { w: 1 }).then(function (r) {
           test.equal(1, r.result.n);
 
           col
             .findOneAndDelete({ a: 1 })
-            .then(function(r) {
+            .then(function (r) {
               test.equal(1, r.lastErrorObject.n);
               test.equal(1, r.value.b);
 
               client.close(done);
             })
-            .catch(function(err) {
+            .catch(function (err) {
               test.ok(err != null);
             });
         });
@@ -92,14 +92,14 @@ describe('Promises (Collection)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
         poolSize: 1,
         auto_reconnect: false
       });
 
-      client.connect().then(function(client) {
+      client.connect().then(function (client) {
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -112,18 +112,18 @@ describe('Promises (Collection)', function() {
         // BEGIN
         // Get the collection
         var col = db.collection('find_one_and_update_with_promise_no_option');
-        col.insertMany([{ a: 1, b: 1 }], { w: 1 }).then(function(r) {
+        col.insertMany([{ a: 1, b: 1 }], { w: 1 }).then(function (r) {
           test.equal(1, r.result.n);
 
           col
             .findOneAndUpdate({ a: 1 }, { $set: { a: 1 } })
-            .then(function(r) {
+            .then(function (r) {
               test.equal(1, r.lastErrorObject.n);
               test.equal(1, r.value.b);
 
               client.close(done);
             })
-            .catch(function(err) {
+            .catch(function (err) {
               test.ok(err != null);
             });
         });
@@ -141,14 +141,14 @@ describe('Promises (Collection)', function() {
         }
       },
 
-      test: function(done) {
+      test: function (done) {
         var configuration = this.configuration;
         var client = configuration.newClient(configuration.writeConcernMax(), {
           poolSize: 1,
           auto_reconnect: false
         });
 
-        client.connect().then(function(client) {
+        client.connect().then(function (client) {
           var db = client.db(configuration.db);
           // LINE var MongoClient = require('mongodb').MongoClient,
           // LINE   test = require('assert');
@@ -161,18 +161,18 @@ describe('Promises (Collection)', function() {
           // BEGIN
           // Get the collection
           var col = db.collection('find_one_and_replace_with_promise_no_option');
-          col.insertMany([{ a: 1, b: 1 }], { w: 1 }).then(function(r) {
+          col.insertMany([{ a: 1, b: 1 }], { w: 1 }).then(function (r) {
             test.equal(1, r.result.n);
 
             col
               .findOneAndReplace({ a: 1 }, { a: 1 })
-              .then(function(r) {
+              .then(function (r) {
                 test.equal(1, r.lastErrorObject.n);
                 test.equal(1, r.value.b);
 
                 client.close(done);
               })
-              .catch(function(err) {
+              .catch(function (err) {
                 test.ok(err != null);
               });
           });
@@ -189,7 +189,7 @@ describe('Promises (Collection)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
         poolSize: 1,
@@ -200,19 +200,19 @@ describe('Promises (Collection)', function() {
 
       client
         .connect()
-        .then(function(client) {
+        .then(function (client) {
           var db = client.db(configuration.db);
           // Get the collection
           var col = db.collection('find_one_and_replace_with_promise_no_option');
           return col.bulkWrite([{ insertOne: { document: { a: 1 } } }]);
         })
-        .then(function(r) {
+        .then(function (r) {
           result = r;
         })
-        .catch(function(err) {
+        .catch(function (err) {
           error = err;
         })
-        .then(function() {
+        .then(function () {
           test.equal(null, error);
           test.ok(result != null);
 
@@ -228,7 +228,7 @@ describe('Promises (Collection)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var url = configuration.url();
       url =
@@ -237,12 +237,12 @@ describe('Promises (Collection)', function() {
           : f('%s?%s', url, 'maxPoolSize=100');
 
       const client = configuration.newClient(url);
-      client.connect().then(function(client) {
+      client.connect().then(function (client) {
         var db = client.db(configuration.db);
         db.collection('insertMany_Promise_error')
           .insertMany({ a: 1 })
-          .then(function() {})
-          .catch(function(e) {
+          .then(function () {})
+          .catch(function (e) {
             test.ok(e != null);
 
             client.close(done);
@@ -258,7 +258,7 @@ describe('Promises (Collection)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var url = configuration.url();
       url =
@@ -267,12 +267,12 @@ describe('Promises (Collection)', function() {
           : f('%s?%s', url, 'maxPoolSize=100');
 
       const client = configuration.newClient(url);
-      client.connect().then(function(client) {
+      client.connect().then(function (client) {
         var db = client.db(configuration.db);
         db.collection('insertOne_Promise_error')
           .insertOne([{ a: 1 }])
-          .then(function() {})
-          .catch(function(e) {
+          .then(function () {})
+          .catch(function (e) {
             test.ok(e != null);
 
             client.close(done);
@@ -288,7 +288,7 @@ describe('Promises (Collection)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var url = configuration.url();
       url =
@@ -297,13 +297,13 @@ describe('Promises (Collection)', function() {
           : f('%s?%s', url, 'maxPoolSize=100');
 
       const client = configuration.newClient(url);
-      client.connect().then(function(client) {
+      client.connect().then(function (client) {
         var db = client.db(configuration.db);
         var bulk = db.collection('unordered_bulk_promise_form').initializeUnorderedBulkOp({ w: 1 });
         bulk.insert({ a: 1 });
         return bulk
           .execute()
-          .then(function(r) {
+          .then(function (r) {
             test.ok(r);
             test.deepEqual({ w: 1 }, bulk.s.writeConcern);
 
@@ -321,7 +321,7 @@ describe('Promises (Collection)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var url = configuration.url();
       url =
@@ -330,13 +330,13 @@ describe('Promises (Collection)', function() {
           : f('%s?%s', url, 'maxPoolSize=100');
 
       const client = configuration.newClient(url);
-      client.connect().then(function(client) {
+      client.connect().then(function (client) {
         var db = client.db(configuration.db);
         var bulk = db.collection('unordered_bulk_promise_form').initializeOrderedBulkOp({ w: 1 });
         bulk.insert({ a: 1 });
         return bulk
           .execute()
-          .then(function(r) {
+          .then(function (r) {
             test.ok(r);
             test.deepEqual({ w: 1 }, bulk.s.writeConcern);
 

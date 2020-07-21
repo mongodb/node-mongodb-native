@@ -5,7 +5,7 @@ const { ObjectId } = require('bson');
 const Logger = require('../../src/logger');
 
 const test = {};
-describe('ReplSet (mocks)', function() {
+describe('ReplSet (mocks)', function () {
   afterEach(() => mock.cleanup());
   beforeEach(() => {
     // Default message fields
@@ -61,11 +61,11 @@ describe('ReplSet (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var logger = Logger.currentLogger();
       Logger.setLevel('warn');
-      Logger.setCurrentLogger(function(msg, state) {
+      Logger.setCurrentLogger(function (msg, state) {
         expect(state.type).to.equal('warn');
         expect(state.message).to.equal(
           `expected mongos proxy, but found replicaset member mongod for server ${test.mongos2.uri()}`
@@ -75,7 +75,7 @@ describe('ReplSet (mocks)', function() {
       const client = configuration.newClient(
         `mongodb://${test.mongos1.uri()},${test.mongos2.uri()}/test`
       );
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         Logger.setCurrentLogger(logger);
         Logger.reset();
         expect(err).to.not.exist;
@@ -94,12 +94,12 @@ describe('ReplSet (mocks)', function() {
       ignore: { travis: true }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var warnings = [];
       var logger = Logger.currentLogger();
       Logger.setLevel('warn');
-      Logger.setCurrentLogger(function(msg, state) {
+      Logger.setCurrentLogger(function (msg, state) {
         expect(state.type).to.equal('warn');
         warnings.push(state);
       });
@@ -108,7 +108,7 @@ describe('ReplSet (mocks)', function() {
         `mongodb://${test.mongos1.uri()},${test.mongos2.uri()}/test`
       );
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         Logger.setCurrentLogger(logger);
         Logger.reset();
 

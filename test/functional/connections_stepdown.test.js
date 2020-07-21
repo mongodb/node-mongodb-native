@@ -25,13 +25,13 @@ function expectPoolWasNotCleared(initialCount) {
   return count => expect(count).to.equal(initialCount);
 }
 
-describe('Connections survive primary step down', function() {
+describe('Connections survive primary step down', function () {
   let client;
   let checkClient;
   let db;
   let collection;
 
-  beforeEach(function() {
+  beforeEach(function () {
     const clientOptions = {
       poolSize: 1,
       retryWrites: false,
@@ -62,7 +62,7 @@ describe('Connections survive primary step down', function() {
   });
 
   let deferred = [];
-  afterEach(function() {
+  afterEach(function () {
     return Promise.all(deferred.map(d => d())).then(() => {
       deferred = [];
       return Promise.all([client.close(), checkClient.close()]);
@@ -72,7 +72,7 @@ describe('Connections survive primary step down', function() {
   it('getMore iteration', {
     metadata: { requires: { mongodb: '>=4.2.0', topology: 'replicaset' } },
 
-    test: function() {
+    test: function () {
       return collection
         .insertMany([{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4 }, { a: 5 }], {
           w: 'majority'
@@ -132,28 +132,28 @@ describe('Connections survive primary step down', function() {
 
   it('Not Master - Keep Connection Pool', {
     metadata: { requires: { mongodb: '>=4.2.0', topology: 'replicaset' } },
-    test: function() {
+    test: function () {
       return runStepownScenario(10107, expectPoolWasNotCleared);
     }
   });
 
   it('Not Master - Reset Connection Pool', {
     metadata: { requires: { mongodb: '4.0.x', topology: 'replicaset' } },
-    test: function() {
+    test: function () {
       return runStepownScenario(10107, expectPoolWasCleared);
     }
   });
 
   it('Shutdown in progress - Reset Connection Pool', {
     metadata: { requires: { mongodb: '>=4.0.0', topology: 'replicaset' } },
-    test: function() {
+    test: function () {
       return runStepownScenario(91, expectPoolWasCleared);
     }
   });
 
   it('Interrupted at shutdown - Reset Connection Pool', {
     metadata: { requires: { mongodb: '>=4.0.0', topology: 'replicaset' } },
-    test: function() {
+    test: function () {
       return runStepownScenario(11600, expectPoolWasCleared);
     }
   });

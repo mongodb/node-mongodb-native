@@ -14,10 +14,10 @@ var Mocha = require('mocha'),
  *
  * @param {any} suite
  */
-module.exports = Mocha.interfaces.metadata_ui = function(suite) {
+module.exports = Mocha.interfaces.metadata_ui = function (suite) {
   var suites = [suite];
 
-  suite.on('pre-require', function(context, file, mocha) {
+  suite.on('pre-require', function (context, file, mocha) {
     var common = require('mocha/lib/interfaces/common')(suites, context, mocha);
 
     context.before = common.before;
@@ -31,7 +31,7 @@ module.exports = Mocha.interfaces.metadata_ui = function(suite) {
      *
      * @param {any} args
      */
-    var _parseArgs = function(args) {
+    var _parseArgs = function (args) {
       var testData = {};
       if (typeof args[0] !== 'string') {
         throw new Error('First argument must be a string.');
@@ -90,7 +90,7 @@ module.exports = Mocha.interfaces.metadata_ui = function(suite) {
      *
      * @param {any} opts
      */
-    var _create = function(opts) {
+    var _create = function (opts) {
       var testData = _parseArgs(opts.args);
 
       // Creating the Suite object
@@ -125,7 +125,7 @@ module.exports = Mocha.interfaces.metadata_ui = function(suite) {
      * and callback `fn` containing nested suites
      * and/or tests.
      */
-    context.describe = context.context = function() {
+    context.describe = context.context = function () {
       return _create({
         args: arguments
       });
@@ -134,7 +134,7 @@ module.exports = Mocha.interfaces.metadata_ui = function(suite) {
     /**
      * Pending describe.
      */
-    context.xdescribe = context.xcontext = context.describe.skip = function() {
+    context.xdescribe = context.xcontext = context.describe.skip = function () {
       return _create({
         args: arguments,
         pending: true
@@ -144,7 +144,7 @@ module.exports = Mocha.interfaces.metadata_ui = function(suite) {
     /**
      * Exclusive suite.
      */
-    context.describe.only = function() {
+    context.describe.only = function () {
       return _create({
         args: arguments,
         isOnly: true
@@ -156,7 +156,7 @@ module.exports = Mocha.interfaces.metadata_ui = function(suite) {
      * with the given `title` and callback `fn`
      * acting as a thunk.
      */
-    context.it = context.specify = function() {
+    context.it = context.specify = function () {
       var testData = _parseArgs(arguments);
 
       var testSuite = suites[0];
@@ -174,7 +174,7 @@ module.exports = Mocha.interfaces.metadata_ui = function(suite) {
     /**
      * Exclusive test-case
      */
-    context.it.only = function() {
+    context.it.only = function () {
       if (arguments.length === 1) {
         return common.test.only(mocha, context.it(arguments[0]));
       } else if (arguments.length === 2) {
@@ -191,7 +191,7 @@ module.exports = Mocha.interfaces.metadata_ui = function(suite) {
      *
      * @param {any} title
      */
-    context.xit = context.xspecify = context.it.skip = function(title) {
+    context.xit = context.xspecify = context.it.skip = function (title) {
       context.it(title);
     };
 
@@ -200,7 +200,7 @@ module.exports = Mocha.interfaces.metadata_ui = function(suite) {
      *
      * @param {any} n
      */
-    context.it.retries = function(n) {
+    context.it.retries = function (n) {
       context.retries(n);
     };
   });

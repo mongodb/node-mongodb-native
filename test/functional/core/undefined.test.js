@@ -4,21 +4,21 @@ const { expect } = require('chai');
 const { format: f } = require('util');
 const { ObjectId } = require('bson');
 
-describe('A server', function() {
+describe('A server', function () {
   it('should correctly execute insert culling undefined', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       const config = this.configuration;
       const server = config.newTopology();
 
       // Add event listeners
-      server.on('connect', function(_server) {
+      server.on('connect', function (_server) {
         // Drop collection
-        _server.command(f('%s.$cmd', self.configuration.db), { drop: 'insert1' }, function() {
+        _server.command(f('%s.$cmd', self.configuration.db), { drop: 'insert1' }, function () {
           var ns = f('%s.insert1', self.configuration.db);
           var objectId = new ObjectId();
           // Execute the write
@@ -30,7 +30,7 @@ describe('A server', function() {
               ordered: true,
               ignoreUndefined: true
             },
-            function(insertErr, results) {
+            function (insertErr, results) {
               expect(insertErr).to.be.null;
               expect(results.result.n).to.eql(1);
 
@@ -42,7 +42,7 @@ describe('A server', function() {
               });
 
               // Execute next
-              cursor._next(function(nextErr, d) {
+              cursor._next(function (nextErr, d) {
                 expect(nextErr).to.be.null;
                 expect(d.b).to.be.undefined;
 
@@ -66,15 +66,15 @@ describe('A server', function() {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       const config = this.configuration;
       const server = config.newTopology();
 
       // Add event listeners
-      server.on('connect', function(_server) {
+      server.on('connect', function (_server) {
         // Drop collection
-        _server.command(f('%s.$cmd', self.configuration.db), { drop: 'update1' }, function() {
+        _server.command(f('%s.$cmd', self.configuration.db), { drop: 'update1' }, function () {
           var ns = f('%s.update1', self.configuration.db);
           var objectId = new ObjectId();
           // Execute the write
@@ -90,7 +90,7 @@ describe('A server', function() {
               ordered: true,
               ignoreUndefined: true
             },
-            function(insertErr, results) {
+            function (insertErr, results) {
               expect(insertErr).to.be.null;
               expect(results.result.n).to.eql(1);
 
@@ -102,7 +102,7 @@ describe('A server', function() {
               });
 
               // Execute next
-              cursor._next(function(nextErr, d) {
+              cursor._next(function (nextErr, d) {
                 expect(nextErr).to.be.null;
                 expect(d.b).to.be.undefined;
 
@@ -126,17 +126,17 @@ describe('A server', function() {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       const config = this.configuration;
       const server = config.newTopology();
 
       // Add event listeners
-      server.on('connect', function(_server) {
+      server.on('connect', function (_server) {
         var ns = f('%s.remove1', self.configuration.db);
         var objectId = new ObjectId();
 
-        _server.command(f('%s.$cmd', self.configuration.db), { drop: 'remove1' }, function() {
+        _server.command(f('%s.$cmd', self.configuration.db), { drop: 'remove1' }, function () {
           // Execute the write
           _server.insert(
             ns,
@@ -148,7 +148,7 @@ describe('A server', function() {
               writeConcern: { w: 1 },
               ordered: true
             },
-            function(insertErr, results) {
+            function (insertErr, results) {
               expect(insertErr).to.be.null;
               expect(results.result.n).to.eql(2);
 
@@ -166,7 +166,7 @@ describe('A server', function() {
                   ordered: true,
                   ignoreUndefined: true
                 },
-                function(removeErr, removeResults) {
+                function (removeErr, removeResults) {
                   expect(removeErr).to.be.null;
                   expect(removeResults.result.n).to.eql(2);
 
@@ -191,17 +191,17 @@ describe('A server', function() {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       const config = this.configuration;
       const server = config.newTopology();
 
       // Add event listeners
-      server.on('connect', function(_server) {
+      server.on('connect', function (_server) {
         var ns = f('%s.remove2', self.configuration.db);
         var objectId = new ObjectId();
 
-        _server.command(f('%s.$cmd', self.configuration.db), { drop: 'remove2' }, function() {
+        _server.command(f('%s.$cmd', self.configuration.db), { drop: 'remove2' }, function () {
           // Execute the write
           _server.insert(
             ns,
@@ -213,7 +213,7 @@ describe('A server', function() {
               writeConcern: { w: 1 },
               ordered: true
             },
-            function(insertErr, results) {
+            function (insertErr, results) {
               expect(insertErr).to.be.null;
               expect(results.result.n).to.eql(2);
 
@@ -230,7 +230,7 @@ describe('A server', function() {
                   writeConcern: { w: 1 },
                   ordered: true
                 },
-                function(removeErr, removeResults) {
+                function (removeErr, removeResults) {
                   expect(removeErr).to.be.null;
                   expect(removeResults.result.n).to.eql(1);
 

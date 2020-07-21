@@ -8,7 +8,7 @@ import {
   handleCallback
 } from '../utils';
 import { MongoError } from '../error';
-import { defineAspects, Aspect, OperationBase } from './operation';
+import { OperationBase } from './operation';
 
 class FindAndModifyOperation extends OperationBase {
   collection: any;

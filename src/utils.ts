@@ -7,16 +7,16 @@ import WriteConcern = require('./write_concern');
 const MAX_JS_INT = Number.MAX_SAFE_INTEGER + 1;
 
 // Set simple property
-var getSingleProperty = function(obj: any, name: any, value: any) {
+function getSingleProperty(obj: any, name: any, value: any) {
   Object.defineProperty(obj, name, {
     enumerable: true,
-    get: function() {
+    get() {
       return value;
     }
   });
-};
+}
 
-var formatSortValue = (exports.formatSortValue = function(sortDirection: any) {
+function formatSortValue(sortDirection: any) {
   var value = ('' + sortDirection).toLowerCase();
 
   switch (value) {
@@ -35,9 +35,9 @@ var formatSortValue = (exports.formatSortValue = function(sortDirection: any) {
           "['field2', '(ascending|descending)']]"
       );
   }
-});
+}
 
-var formattedOrderClause = (exports.formattedOrderClause = function(sortValue: any) {
+function formattedOrderClause(sortValue: any) {
   var orderBy: any = {};
   if (sortValue == null) return null;
   if (Array.isArray(sortValue)) {
@@ -64,9 +64,9 @@ var formattedOrderClause = (exports.formattedOrderClause = function(sortValue: a
   }
 
   return orderBy;
-});
+}
 
-var checkCollectionName = function checkCollectionName(collectionName: any) {
+function checkCollectionName(collectionName: any) {
   if ('string' !== typeof collectionName) {
     throw new MongoError('collection name must be a String');
   }
@@ -90,7 +90,7 @@ var checkCollectionName = function checkCollectionName(collectionName: any) {
   if (collectionName.indexOf('\x00') !== -1) {
     throw new MongoError('collection names cannot contain a null character');
   }
-};
+}
 
 /**
  * Tries to call a provided callback with an error or some result with logic to
@@ -109,7 +109,7 @@ function handleCallback(callback: Function, err: any, value1?: any, value2?: any
       return value2 ? callback(err, value1, value2) : callback(err, value1);
     }
   } catch (err) {
-    process.nextTick(function() {
+    process.nextTick(function () {
       throw err;
     });
     return false;
@@ -123,7 +123,7 @@ function handleCallback(callback: Function, err: any, value1?: any, value2?: any
  *
  * @param {any} error
  */
-var toError = function(error: any) {
+function toError(error: any) {
   if (error instanceof Error) return error;
 
   var msg = error.err || error.errmsg || error.errMessage || error;
@@ -141,12 +141,12 @@ var toError = function(error: any) {
   }
 
   return e;
-};
+}
 
 /**
  * @param {any} hint
  */
-var normalizeHintField = function normalizeHintField(hint: any) {
+function normalizeHintField(hint: any) {
   var finalHint: any = null;
 
   if (typeof hint === 'string') {
@@ -154,7 +154,7 @@ var normalizeHintField = function normalizeHintField(hint: any) {
   } else if (Array.isArray(hint)) {
     finalHint = {};
 
-    hint.forEach(function(param: any) {
+    hint.forEach(function (param: any) {
       finalHint[param] = 1;
     });
   } else if (hint != null && typeof hint === 'object') {
@@ -165,14 +165,14 @@ var normalizeHintField = function normalizeHintField(hint: any) {
   }
 
   return finalHint;
-};
+}
 
 /**
  * Create index name based on field spec
  *
  * @param {any} fieldOrSpec
  */
-var parseIndexOptions = function(fieldOrSpec: any) {
+function parseIndexOptions(fieldOrSpec: any) {
   var fieldHash: any = {};
   var indexes = [];
   var keys;
@@ -183,7 +183,7 @@ var parseIndexOptions = function(fieldOrSpec: any) {
     indexes.push(fieldOrSpec + '_' + 1);
     fieldHash[fieldOrSpec] = 1;
   } else if (Array.isArray(fieldOrSpec)) {
-    fieldOrSpec.forEach(function(f: any) {
+    fieldOrSpec.forEach(function (f: any) {
       if ('string' === typeof f) {
         // [{location:'2d'}, 'type']
         indexes.push(f + '_' + 1);
@@ -195,7 +195,7 @@ var parseIndexOptions = function(fieldOrSpec: any) {
       } else if (isObject(f)) {
         // [{location:'2d'}, {type:1}]
         keys = Object.keys(f);
-        keys.forEach(function(k: any) {
+        keys.forEach(function (k: any) {
           indexes.push(k + '_' + f[k]);
           fieldHash[k] = f[k];
         });
@@ -206,7 +206,7 @@ var parseIndexOptions = function(fieldOrSpec: any) {
   } else if (isObject(fieldOrSpec)) {
     // {location:'2d', type:1}
     keys = Object.keys(fieldOrSpec);
-    keys.forEach(function(key: any) {
+    keys.forEach(function (key: any) {
       indexes.push(key + '_' + fieldOrSpec[key]);
       fieldHash[key] = fieldOrSpec[key];
     });
@@ -217,39 +217,39 @@ var parseIndexOptions = function(fieldOrSpec: any) {
     keys: keys,
     fieldHash: fieldHash
   };
-};
+}
 
-var isObject = (exports.isObject = function(arg: any) {
+function isObject(arg: any) {
   return '[object Object]' === Object.prototype.toString.call(arg);
-});
+}
 
-var debugOptions = function(debugFields: any, options: any) {
+function debugOptions(debugFields: any, options: any) {
   var finaloptions: any = {};
-  debugFields.forEach(function(n: any) {
+  debugFields.forEach(function (n: any) {
     finaloptions[n] = options[n];
   });
 
   return finaloptions;
-};
+}
 
-var decorateCommand = function(command: any, options: any, exclude: any) {
+function decorateCommand(command: any, options: any, exclude: any) {
   for (var name in options) {
     if (exclude.indexOf(name) === -1) command[name] = options[name];
   }
 
   return command;
-};
+}
 
-var mergeOptions = function(target: any, source: any) {
+function mergeOptions(target: any, source: any) {
   for (var name in source) {
     target[name] = source[name];
   }
 
   return target;
-};
+}
 
 // Merge options with translation
-var translateOptions = function(target: any, source: any) {
+function translateOptions(target: any, source: any) {
   var translations: any = {
     // SSL translation options
     sslCA: 'ca',
@@ -279,9 +279,9 @@ var translateOptions = function(target: any, source: any) {
   }
 
   return target;
-};
+}
 
-var filterOptions = function(options: any, names: any) {
+function filterOptions(options: any, names: any) {
   var filterOptions: any = {};
 
   for (var name in options) {
@@ -290,13 +290,13 @@ var filterOptions = function(options: any, names: any) {
 
   // Filtered options
   return filterOptions;
-};
+}
 
 // Write concern keys
 var writeConcernKeys = ['w', 'j', 'wtimeout', 'fsync'];
 
 // Merge the write concern options
-var mergeOptionsAndWriteConcern = function(
+function mergeOptionsAndWriteConcern(
   targetOptions: any,
   sourceOptions: any,
   keys: any,
@@ -330,7 +330,7 @@ var mergeOptionsAndWriteConcern = function(
   }
 
   return targetOptions;
-};
+}
 
 /**
  * Executes the given operation with provided arguments.
@@ -412,7 +412,7 @@ const executeLegacyOperation = (topology: any, operation: Function, args: any, o
     throw new TypeError('final argument to `executeLegacyOperation` must be a callback');
   }
 
-  return new Promise(function(resolve: any, reject: any) {
+  return new Promise(function (resolve: any, reject: any) {
     const handler = makeExecuteCallback(resolve, reject);
     args[args.length - 1] = handler;
 
@@ -571,7 +571,7 @@ function deprecateOptions(config: any, fn: Function): any {
     }
 
     const self = this;
-    config.deprecatedOptions.forEach(function(deprecatedOption: any) {
+    config.deprecatedOptions.forEach(function (deprecatedOption: any) {
       if (
         Object.prototype.hasOwnProperty.call(options, deprecatedOption) &&
         !optionsWarned.has(deprecatedOption)
@@ -665,7 +665,7 @@ function maybePromise(callback: Function | undefined, wrapper: Function): any | 
     });
   }
 
-  wrapper(function(err?: any, res?: any) {
+  wrapper(function (err?: any, res?: any) {
     if (err != null) {
       try {
         callback!(err);
@@ -688,10 +688,7 @@ function databaseNamespace(ns: any) {
 }
 
 function collectionNamespace(ns: any) {
-  return ns
-    .split('.')
-    .slice(1)
-    .join('.');
+  return ns.split('.').slice(1).join('.');
 }
 
 /**
@@ -1036,6 +1033,7 @@ export {
   getSingleProperty,
   checkCollectionName,
   toError,
+  formatSortValue,
   formattedOrderClause,
   parseIndexOptions,
   normalizeHintField,

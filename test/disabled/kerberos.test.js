@@ -9,15 +9,15 @@ var setupDatabase = require('./shared').setupDatabase;
 // kinit -p drivers@LDAPTEST.10GEN.CC
 // password: (not shown)
 
-describe('Kerberos', function() {
-  before(function() {
+describe('Kerberos', function () {
+  before(function () {
     return setupDatabase(this.configuration);
   });
 
   it('Should Correctly Authenticate using kerberos with MongoClient', {
     metadata: { requires: { topology: 'kerberos', os: '!win32' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
 
       // KDC Server
@@ -31,13 +31,13 @@ describe('Kerberos', function() {
       );
 
       const client = configuration.newClient(url);
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
         var db = client.db('kerberos');
 
         db.collection('test')
           .find()
-          .toArray(function(err, docs) {
+          .toArray(function (err, docs) {
             test.equal(null, err);
             test.ok(true, docs[0].kerberos);
 
@@ -50,7 +50,7 @@ describe('Kerberos', function() {
   it('Validate that SERVICE_REALM and CANONICALIZE_HOST_NAME is passed in', {
     metadata: { requires: { topology: 'kerberos', os: '!win32' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
 
       // KDC Server
@@ -64,13 +64,13 @@ describe('Kerberos', function() {
       );
 
       const client = configuration.newClient(url);
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
         var db = client.db('kerberos');
 
         db.collection('test')
           .find()
-          .toArray(function(err, docs) {
+          .toArray(function (err, docs) {
             test.equal(null, err);
             test.ok(true, docs[0].kerberos);
 
@@ -85,7 +85,7 @@ describe('Kerberos', function() {
     {
       metadata: { requires: { topology: 'kerberos', os: '!win32' } },
 
-      test: function(done) {
+      test: function (done) {
         var configuration = this.configuration;
 
         // KDC Server
@@ -99,13 +99,13 @@ describe('Kerberos', function() {
         );
 
         const client = configuration.newClient(url);
-        client.connect(function(err, client) {
+        client.connect(function (err, client) {
           test.equal(null, err);
           var db = client.db('kerberos');
 
           db.collection('test')
             .find()
-            .toArray(function(err, docs) {
+            .toArray(function (err, docs) {
               test.equal(null, err);
               test.ok(true, docs[0].kerberos);
 
@@ -119,7 +119,7 @@ describe('Kerberos', function() {
   it('Should Correctly Authenticate using kerberos with MongoClient and then reconnect', {
     metadata: { requires: { topology: 'kerberos', os: '!win32' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
 
       // KDC Server
@@ -133,22 +133,22 @@ describe('Kerberos', function() {
       );
 
       const client = configuration.newClient(url);
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         client
           .db('kerberos')
           .collection('test')
-          .findOne(function(err, doc) {
+          .findOne(function (err, doc) {
             test.equal(null, err);
             test.equal(true, doc.kerberos);
 
-            client.topology.once('reconnect', function() {
+            client.topology.once('reconnect', function () {
               // Await reconnect and re-authentication
               client
                 .db('kerberos')
                 .collection('test')
-                .findOne(function(err, doc) {
+                .findOne(function (err, doc) {
                   test.equal(null, err);
                   test.equal(true, doc.kerberos);
 
@@ -159,7 +159,7 @@ describe('Kerberos', function() {
                   client
                     .db('kerberos')
                     .collection('test')
-                    .findOne(function(err, doc) {
+                    .findOne(function (err, doc) {
                       test.equal(null, err);
                       test.equal(true, doc.kerberos);
 
@@ -178,7 +178,7 @@ describe('Kerberos', function() {
   it('Should Correctly Authenticate authenticate method manually', {
     metadata: { requires: { topology: 'kerberos', os: '!win32' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var MongoClient = configuration.require.MongoClient,
         Server = configuration.require.Server;
@@ -192,14 +192,14 @@ describe('Kerberos', function() {
         user: principal,
         authMechanism: 'GSSAPI'
       });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         // Await reconnect and re-authentication
         client
           .db('kerberos')
           .collection('test')
-          .findOne(function(err, doc) {
+          .findOne(function (err, doc) {
             test.equal(null, err);
             test.equal(true, doc.kerberos);
 
@@ -212,7 +212,7 @@ describe('Kerberos', function() {
   it('Should Fail to Authenticate due to illegal service name', {
     metadata: { requires: { topology: 'kerberos', os: '!win32' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
 
       // KDC Server
@@ -226,7 +226,7 @@ describe('Kerberos', function() {
       );
 
       const client = configuration.newClient(url);
-      client.connect(function(err) {
+      client.connect(function (err) {
         test.ok(err != null);
         done();
       });
@@ -236,7 +236,7 @@ describe('Kerberos', function() {
   it('Should Correctly Authenticate on Win32 using kerberos with MongoClient', {
     metadata: { requires: { topology: 'kerberos', os: 'win32' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
 
       // KDC Server
@@ -254,13 +254,13 @@ describe('Kerberos', function() {
       );
 
       const client = configuration.newClient(url);
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
         var db = client.db('kerberos');
 
         db.collection('test')
           .find()
-          .toArray(function(err, docs) {
+          .toArray(function (err, docs) {
             test.equal(null, err);
             test.ok(true, docs[0].kerberos);
 
@@ -273,7 +273,7 @@ describe('Kerberos', function() {
   it('Should Correctly Authenticate using kerberos on Win32 with MongoClient and then reconnect', {
     metadata: { requires: { topology: 'kerberos', os: 'win32' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
 
       // KDC Server
@@ -290,22 +290,22 @@ describe('Kerberos', function() {
       );
 
       const client = configuration.newClient(url);
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         client
           .db('kerberos')
           .collection('test')
-          .findOne(function(err, doc) {
+          .findOne(function (err, doc) {
             test.equal(null, err);
             test.equal(true, doc.kerberos);
 
-            client.topology.once('reconnect', function() {
+            client.topology.once('reconnect', function () {
               // Await reconnect and re-authentication
               client
                 .db('kerberos')
                 .collection('test')
-                .findOne(function(err, doc) {
+                .findOne(function (err, doc) {
                   test.equal(null, err);
                   test.equal(true, doc.kerberos);
 
@@ -316,7 +316,7 @@ describe('Kerberos', function() {
                   client
                     .db('kerberos')
                     .collection('test')
-                    .findOne(function(err, doc) {
+                    .findOne(function (err, doc) {
                       test.equal(null, err);
                       test.equal(true, doc.kerberos);
 
@@ -335,7 +335,7 @@ describe('Kerberos', function() {
   it('Should Correctly Authenticate on Win32 authenticate method manually', {
     metadata: { requires: { topology: 'kerberos', os: 'win32' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var MongoClient = configuration.require.MongoClient,
         Server = configuration.require.Server;
@@ -352,13 +352,13 @@ describe('Kerberos', function() {
         authMechanism: 'GSSAPI'
       });
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
         var db = client.db('kerberos');
 
         db.collection('test')
           .find()
-          .toArray(function(err, docs) {
+          .toArray(function (err, docs) {
             test.equal(null, err);
             test.ok(true, docs[0].kerberos);
 
@@ -371,7 +371,7 @@ describe('Kerberos', function() {
   it('Should Fail to Authenticate due to illegal service name on win32', {
     metadata: { requires: { topology: 'kerberos', os: 'win32' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
 
       // KDC Server
@@ -389,7 +389,7 @@ describe('Kerberos', function() {
       );
 
       const client = configuration.newClient(url);
-      client.connect(function(err) {
+      client.connect(function (err) {
         test.ok(err != null);
         done();
       });

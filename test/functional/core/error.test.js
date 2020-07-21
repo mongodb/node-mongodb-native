@@ -3,13 +3,13 @@
 const { expect } = require('chai');
 const { MongoError, MongoNetworkError } = require('../../../src/error');
 
-describe('Error tests', function() {
+describe('Error tests', function () {
   it('should create a MongoError from string', {
     metadata: {
       requires: { topology: ['single'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var errorMessage = 'A test error';
       var err = new MongoError(errorMessage);
       expect(err).to.be.an.instanceof(Error);
@@ -25,7 +25,7 @@ describe('Error tests', function() {
       requires: { topology: ['single'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var errorMessage = 'A test error';
       var err = new MongoError(new Error(errorMessage));
       expect(err).to.be.an.instanceof(Error);
@@ -41,7 +41,7 @@ describe('Error tests', function() {
       requires: { topology: ['single'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var errorMessage = 'A test error';
       var err = new MongoError({ message: errorMessage, someData: 12345 });
       expect(err).to.be.an.instanceof(Error);
@@ -58,7 +58,7 @@ describe('Error tests', function() {
       requires: { topology: ['single'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var errorMessage = 'A test error';
       var err = new MongoNetworkError(errorMessage);
       expect(err).to.be.an.instanceof(Error);

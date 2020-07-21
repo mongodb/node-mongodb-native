@@ -3,15 +3,15 @@
 const setupDatabase = require('../functional/shared').setupDatabase;
 const expect = require('chai').expect;
 
-describe('examples(remove-documents):', function() {
+describe('examples(remove-documents):', function () {
   let client;
   let db;
 
-  before(async function() {
+  before(async function () {
     await setupDatabase(this.configuration);
   });
 
-  beforeEach(async function() {
+  beforeEach(async function () {
     client = await this.configuration.newClient().connect();
     db = client.db(this.configuration.db);
 
@@ -52,7 +52,7 @@ describe('examples(remove-documents):', function() {
     // End Example 55
   });
 
-  afterEach(async function() {
+  afterEach(async function () {
     await client.close();
     client = undefined;
     db = undefined;
@@ -60,7 +60,7 @@ describe('examples(remove-documents):', function() {
 
   it('Delete All Documents', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function() {
+    test: async function () {
       // Start Example 56
       await db.collection('inventory').deleteMany({});
       // End Example 56
@@ -71,7 +71,7 @@ describe('examples(remove-documents):', function() {
 
   it('Delete All Documents that Match a Condition', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function() {
+    test: async function () {
       // Start Example 57
       await db.collection('inventory').deleteMany({ status: 'A' });
       // End Example 57
@@ -82,7 +82,7 @@ describe('examples(remove-documents):', function() {
 
   it('Delete Only One Document that Matches a Condition', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function() {
+    test: async function () {
       // Start Example 58
       await db.collection('inventory').deleteOne({ status: 'D' });
       // End Example 58

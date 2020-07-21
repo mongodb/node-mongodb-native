@@ -7,17 +7,17 @@ const mock = require('mongodb-mock-server');
 const { Long, ObjectId } = require('../../src');
 chai.use(sinonChai);
 
-describe('Collection', function() {
+describe('Collection', function () {
   let configuration;
-  before(function() {
+  before(function () {
     configuration = this.configuration;
     return setupDatabase(configuration, ['listCollectionsDb', 'listCollectionsDb2', 'test_db']);
   });
 
-  describe('standard collection tests', function() {
+  describe('standard collection tests', function () {
     let client;
     let db;
-    beforeEach(function() {
+    beforeEach(function () {
       client = configuration.newClient(configuration.writeConcernMax(), {
         poolSize: 1
       });
@@ -26,12 +26,12 @@ describe('Collection', function() {
       });
     });
 
-    afterEach(function() {
+    afterEach(function () {
       db = undefined;
       return client.close();
     });
 
-    it('should correctly execute basic collection methods', function(done) {
+    it('should correctly execute basic collection methods', function (done) {
       db.createCollection('test_collection_methods', (err, collection) => {
         // Verify that all the result are correct coming back (should contain the value ok)
         expect(collection.collectionName).to.equal('test_collection_methods');
@@ -79,7 +79,7 @@ describe('Collection', function() {
       });
     });
 
-    it('should correctly access collection names', function(done) {
+    it('should correctly access collection names', function (done) {
       // Create two collections
       db.createCollection('test.spiderman', () => {
         db.createCollection('test.mario', () => {
@@ -118,7 +118,7 @@ describe('Collection', function() {
       });
     });
 
-    it('should correctly retrieve listCollections', function(done) {
+    it('should correctly retrieve listCollections', function (done) {
       db.createCollection('test_collection_names', err => {
         expect(err).to.not.exist;
 
@@ -165,7 +165,7 @@ describe('Collection', function() {
       });
     });
 
-    it('should ensure strict access collection', function(done) {
+    it('should ensure strict access collection', function (done) {
       db.collection('does-not-exist', { strict: true }, err => {
         expect(err).to.be.an.instanceof(Error);
         expect(err.message).to.equal(
@@ -182,7 +182,7 @@ describe('Collection', function() {
       });
     });
 
-    it('should perform strict create collection', function(done) {
+    it('should perform strict create collection', function (done) {
       db.createCollection('test_strict_create_collection', (err, collection) => {
         expect(err).to.not.exist;
         expect(collection.collectionName).to.equal('test_strict_create_collection');
@@ -199,7 +199,7 @@ describe('Collection', function() {
       });
     });
 
-    it('should fail to insert due to illegal keys', function(done) {
+    it('should fail to insert due to illegal keys', function (done) {
       db.createCollection('test_invalid_key_names', (err, collection) => {
         // Legal inserts
         collection.insertMany(
@@ -285,7 +285,7 @@ describe('Collection', function() {
       });
     });
 
-    it('should fail due to illegal listCollections', function(done) {
+    it('should fail due to illegal listCollections', function (done) {
       db.collection(5, err => {
         expect(err.message).to.equal('collection name must be a String');
       });
@@ -312,7 +312,7 @@ describe('Collection', function() {
       });
     });
 
-    it('should return invalid collection name error by callback for createCollection', function(done) {
+    it('should return invalid collection name error by callback for createCollection', function (done) {
       db.dropDatabase(err => {
         expect(err).to.not.exist;
 
@@ -323,7 +323,7 @@ describe('Collection', function() {
         });
       });
     });
-    it('should correctly count on non-existent collection', function(done) {
+    it('should correctly count on non-existent collection', function (done) {
       db.collection('test_multiple_insert_2', (err, collection) => {
         collection.countDocuments((err, count) => {
           expect(count).to.equal(0);
@@ -333,7 +333,7 @@ describe('Collection', function() {
       });
     });
 
-    it('should correctly execute save', function(done) {
+    it('should correctly execute save', function (done) {
       db.createCollection('test_save', (err, collection) => {
         const doc = { hello: 'world' };
         collection.save(doc, configuration.writeConcernMax(), (err, r) => {
@@ -384,7 +384,7 @@ describe('Collection', function() {
       });
     });
 
-    it('should correctly save document with Long value', function(done) {
+    it('should correctly save document with Long value', function (done) {
       db.createCollection('test_save_long', (err, collection) => {
         collection.insertOne(
           { x: Long.fromNumber(9223372036854775807) },
@@ -402,7 +402,7 @@ describe('Collection', function() {
       });
     });
 
-    it('should save object that has id but does not exist in collection', function(done) {
+    it('should save object that has id but does not exist in collection', function (done) {
       db.createCollection(
         'test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection',
         (err, collection) => {
@@ -435,7 +435,7 @@ describe('Collection', function() {
       );
     });
 
-    it('should correctly execute insert update delete safe mode', function(done) {
+    it('should correctly execute insert update delete safe mode', function (done) {
       db.createCollection(
         'test_should_execute_insert_update_delete_safe_mode',
         (err, collection) => {
@@ -469,7 +469,7 @@ describe('Collection', function() {
       );
     });
 
-    it('should perform multiple saves', function(done) {
+    it('should perform multiple saves', function (done) {
       db.createCollection('multiple_save_test', (err, collection) => {
         const doc = {
           name: 'amit',
@@ -502,7 +502,7 @@ describe('Collection', function() {
       });
     });
 
-    it('should correctly save document with nested array', function(done) {
+    it('should correctly save document with nested array', function (done) {
       db.createCollection('save_error_on_save_test', (err, collection) => {
         // Create unique index for username
         collection.createIndex([['username', 1]], configuration.writeConcernMax(), err => {
@@ -555,7 +555,7 @@ describe('Collection', function() {
       });
     });
 
-    it('should perform collection remove with no callback', function(done) {
+    it('should perform collection remove with no callback', function (done) {
       db.collection('remove_with_no_callback_bug_test', (err, collection) => {
         expect(err).to.not.exist;
         collection.insertOne({ a: 1 }, configuration.writeConcernMax(), err => {
@@ -579,7 +579,7 @@ describe('Collection', function() {
       });
     });
 
-    it('should correctly read back document with null', function(done) {
+    it('should correctly read back document with null', function (done) {
       db.createCollection('shouldCorrectlyReadBackDocumentWithNull', {}, (err, collection) => {
         // Insert a document with a date
         collection.insertOne({ test: null }, configuration.writeConcernMax(), err => {
@@ -594,7 +594,7 @@ describe('Collection', function() {
       });
     });
 
-    it('should throw error due to illegal update', function(done) {
+    it('should throw error due to illegal update', function (done) {
       db.createCollection('shouldThrowErrorDueToIllegalUpdate', {}, (err, coll) => {
         coll.update({}, null, err => {
           expect(err.message).to.equal('document must be a valid JavaScript object');
@@ -607,7 +607,7 @@ describe('Collection', function() {
       });
     });
 
-    it('should correctly handle 0 as id for save', function(done) {
+    it('should correctly handle 0 as id for save', function (done) {
       db.collection('shouldCorrectlyHandle0asIdForSave').save({ _id: 0 }, err => {
         expect(err).to.not.exist;
 
@@ -634,7 +634,7 @@ describe('Collection', function() {
     ];
 
     selectorTests.forEach(test => {
-      it(test.title, function(done) {
+      it(test.title, function (done) {
         db.collection(test.collectionName).updateOne(
           test.filterObject,
           test.updateObject,
@@ -663,7 +663,7 @@ describe('Collection', function() {
     ];
 
     updateTests.forEach(test => {
-      it(test.title, function(done) {
+      it(test.title, function (done) {
         db.createCollection(test.collectionName, (err, collection) => {
           collection.updateOne(
             test.filterObject,
@@ -680,7 +680,7 @@ describe('Collection', function() {
       });
     });
 
-    it('should fail due to existing collection', function(done) {
+    it('should fail due to existing collection', function (done) {
       db.createCollection('shouldFailDueToExistingCollection', { strict: true }, (err, coll) => {
         expect(err).to.not.exist;
         expect(coll).to.exist;
@@ -707,7 +707,7 @@ describe('Collection', function() {
     ];
 
     listCollectionsTests.forEach(test => {
-      it(test.title, function(done) {
+      it(test.title, function (done) {
         db.createCollection(test.collectionName, (err, collection) => {
           expect(err).to.not.exist;
           expect(collection.collectionName).to.equal(test.collectionName);
@@ -725,7 +725,7 @@ describe('Collection', function() {
       });
     });
 
-    it('should filter correctly with index during list', function(done) {
+    it('should filter correctly with index during list', function (done) {
       const testCollection = 'collection_124';
       // Create a collection
       db.createCollection(testCollection, err => {
@@ -752,7 +752,7 @@ describe('Collection', function() {
       });
     });
 
-    it('should correctly list multipleCollections', function(done) {
+    it('should correctly list multipleCollections', function (done) {
       const emptyDb = client.db('listCollectionsDb');
       emptyDb.createCollection('test1', err => {
         expect(err).to.not.exist;
@@ -779,7 +779,7 @@ describe('Collection', function() {
       });
     });
 
-    it('should correctly handle namespace when using collections method', function(done) {
+    it('should correctly handle namespace when using collections method', function (done) {
       const emptyDb = client.db('listCollectionsDb2');
       emptyDb.createCollection('test1', err => {
         expect(err).to.not.exist;
@@ -816,7 +816,7 @@ describe('Collection', function() {
       });
     });
 
-    it('should provide access to the database name', function() {
+    it('should provide access to the database name', function () {
       return client
         .db('test_db')
         .createCollection('test1')
@@ -837,7 +837,7 @@ describe('Collection', function() {
     ];
 
     collectionTTLtests.forEach(test => {
-      it(test.title, function(done) {
+      it(test.title, function (done) {
         db.createCollection(test.collectionName, (err, collection) => {
           const errorCallBack = err => {
             expect(err).to.not.exist;
@@ -885,7 +885,7 @@ describe('Collection', function() {
       });
     });
 
-    it('should support createIndex with no options', function(done) {
+    it('should support createIndex with no options', function (done) {
       db.createCollection('create_index_without_options', {}, (err, collection) => {
         collection.createIndex({ createdAt: 1 }, err => {
           expect(err).to.not.exist;
@@ -902,11 +902,11 @@ describe('Collection', function() {
     });
   });
 
-  describe('(countDocuments)', function() {
+  describe('(countDocuments)', function () {
     let client;
     let db;
     let collection;
-    beforeEach(function() {
+    beforeEach(function () {
       client = configuration.newClient({}, { w: 1 });
 
       return client.connect().then(client => {
@@ -914,7 +914,7 @@ describe('Collection', function() {
         collection = db.collection('test_coll');
       });
     });
-    afterEach(function() {
+    afterEach(function () {
       return client.close();
     });
 
@@ -928,7 +928,7 @@ describe('Collection', function() {
     ];
 
     nonMatchQueryTests.forEach(test => {
-      it(test.title, function(done) {
+      it(test.title, function (done) {
         const close = e => client.close(() => done(e));
         let thenFunction;
         if (
@@ -946,7 +946,7 @@ describe('Collection', function() {
       });
     });
 
-    it('countDocuments should return Promise that resolves when no callback passed', function(done) {
+    it('countDocuments should return Promise that resolves when no callback passed', function (done) {
       const docsPromise = collection.countDocuments();
       const close = e => client.close(() => done(e));
 
@@ -958,7 +958,7 @@ describe('Collection', function() {
         .catch(e => close(e));
     });
 
-    it('countDocuments should not return a promise if callback given', function(done) {
+    it('countDocuments should not return a promise if callback given', function (done) {
       const close = e => client.close(() => done(e));
 
       const notPromise = collection.countDocuments({ a: 1 }, () => {
@@ -967,7 +967,7 @@ describe('Collection', function() {
       });
     });
 
-    it('countDocuments should correctly call the given callback', function(done) {
+    it('countDocuments should correctly call the given callback', function (done) {
       const docs = [{ a: 1 }, { a: 2 }];
       const close = e => client.close(() => done(e));
 
@@ -980,7 +980,7 @@ describe('Collection', function() {
     });
   });
 
-  describe('countDocuments with mock server', function() {
+  describe('countDocuments with mock server', function () {
     let server;
 
     beforeEach(() => {
@@ -1021,7 +1021,7 @@ describe('Collection', function() {
       });
     }
 
-    it('countDocuments should return appropriate error if aggregation fails with callback given', function(done) {
+    it('countDocuments should return appropriate error if aggregation fails with callback given', function (done) {
       const replyHandler = () => {};
       const executeCountDocuments = (collection, close) => {
         collection.countDocuments(err => {
@@ -1042,7 +1042,7 @@ describe('Collection', function() {
       );
     });
 
-    it('countDocuments should error if aggregation fails using Promises', function(done) {
+    it('countDocuments should error if aggregation fails using Promises', function (done) {
       const replyHandler = () => {};
       const executeCountDocuments = (collection, close) => {
         collection
@@ -1065,7 +1065,7 @@ describe('Collection', function() {
       );
     });
 
-    it('countDocuments pipeline should be correct with skip and limit applied', function(done) {
+    it('countDocuments pipeline should be correct with skip and limit applied', function (done) {
       const replyHandler = doc => {
         expect(doc.pipeline).to.deep.include({ $skip: 1 });
         expect(doc.pipeline).to.deep.include({ $limit: 1 });
@@ -1105,7 +1105,7 @@ describe('Collection', function() {
     });
   }
 
-  it('isCapped should return false for uncapped collections', function(done) {
+  it('isCapped should return false for uncapped collections', function (done) {
     testCapped(
       configuration,
       { config: configuration, collName: 'uncapped', opts: { capped: false } },
@@ -1113,18 +1113,18 @@ describe('Collection', function() {
     );
   });
 
-  it('isCapped should return false for collections instantiated without specifying capped', function(done) {
+  it('isCapped should return false for collections instantiated without specifying capped', function (done) {
     testCapped(configuration, { config: configuration, collName: 'uncapped2', opts: {} }, done);
   });
 
-  describe('Retryable Writes on bulk ops', function() {
+  describe('Retryable Writes on bulk ops', function () {
     let client;
     let db;
     let collection;
 
     const metadata = { requires: { topology: ['replicaset'], mongodb: '>=3.6.0' } };
 
-    beforeEach(function() {
+    beforeEach(function () {
       client = configuration.newClient({}, { retryWrites: true });
       return client.connect().then(() => {
         db = client.db('test_retry_writes');
@@ -1136,20 +1136,20 @@ describe('Collection', function() {
       });
     });
 
-    afterEach(function() {
+    afterEach(function () {
       return client.close();
     });
 
     it('should succeed with retryWrite=true when using updateMany', {
       metadata,
-      test: function() {
+      test: function () {
         return collection.updateMany({ name: 'foobar' }, { $set: { name: 'fizzbuzz' } });
       }
     });
 
     it('should succeed with retryWrite=true when using update with multi=true', {
       metadata,
-      test: function() {
+      test: function () {
         return collection.updateOne(
           { name: 'foobar' },
           { $set: { name: 'fizzbuzz' } },
@@ -1160,14 +1160,14 @@ describe('Collection', function() {
 
     it('should succeed with retryWrite=true when using remove without option single', {
       metadata,
-      test: function() {
+      test: function () {
         return collection.deleteOne({ name: 'foobar' });
       }
     });
 
     it('should succeed with retryWrite=true when using deleteMany', {
       metadata,
-      test: function() {
+      test: function () {
         return collection.deleteMany({ name: 'foobar' });
       }
     });
@@ -1175,7 +1175,7 @@ describe('Collection', function() {
 
   it('should allow an empty replacement document for findOneAndReplace', {
     metadata: { requires: { mongodb: '>=3.0.0' } },
-    test: function(done) {
+    test: function (done) {
       const configuration = this.configuration;
       const client = configuration.newClient({}, { w: 1 });
 
@@ -1208,7 +1208,7 @@ describe('Collection', function() {
       requires: { mongodb: '>=4.2.0' }
     },
 
-    test: function(done) {
+    test: function (done) {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {
         poolSize: 1

@@ -37,12 +37,12 @@ function closePool(pool) {
   });
 }
 
-describe('Connection Pool', function() {
+describe('Connection Pool', function () {
   let server;
   after(() => mock.cleanup());
   before(() => mock.createServer().then(s => (server = s)));
 
-  it('should destroy connections which have been closed', function(done) {
+  it('should destroy connections which have been closed', function (done) {
     server.setMessageHandler(request => {
       const doc = request.document;
       if (doc.ismaster) {
@@ -69,9 +69,7 @@ describe('Connection Pool', function() {
 
         expect(events).to.have.length(1);
         const closeEvent = events[0];
-        expect(closeEvent)
-          .have.property('reason')
-          .equal('error');
+        expect(closeEvent).have.property('reason').equal('error');
       });
     });
 
@@ -86,7 +84,7 @@ describe('Connection Pool', function() {
     );
   });
 
-  it('should propagate socket timeouts to connections', function(done) {
+  it('should propagate socket timeouts to connections', function (done) {
     server.setMessageHandler(request => {
       const doc = request.document;
       if (doc.ismaster) {
@@ -114,7 +112,7 @@ describe('Connection Pool', function() {
     );
   });
 
-  it('should clear timed out wait queue members if no connections are available', function(done) {
+  it('should clear timed out wait queue members if no connections are available', function (done) {
     server.setMessageHandler(request => {
       const doc = request.document;
       if (doc.ismaster) {
@@ -141,17 +139,15 @@ describe('Connection Pool', function() {
         sinon.stub(pool, 'availableConnectionCount').get(() => 0);
         pool.checkIn(conn);
 
-        expect(pool)
-          .property('waitQueueSize')
-          .to.equal(0);
+        expect(pool).property('waitQueueSize').to.equal(0);
 
         done();
       });
     });
   });
 
-  describe('withConnection', function() {
-    it('should manage a connection for a successful operation', function(done) {
+  describe('withConnection', function () {
+    it('should manage a connection for a successful operation', function (done) {
       server.setMessageHandler(request => {
         const doc = request.document;
         if (doc.ismaster) {
@@ -176,7 +172,7 @@ describe('Connection Pool', function() {
       }, callback);
     });
 
-    it('should allow user interaction with an error', function(done) {
+    it('should allow user interaction with an error', function (done) {
       server.setMessageHandler(request => {
         const doc = request.document;
         if (doc.ismaster) {
@@ -199,7 +195,7 @@ describe('Connection Pool', function() {
       }, callback);
     });
 
-    it('should return an error to the original callback', function(done) {
+    it('should return an error to the original callback', function (done) {
       server.setMessageHandler(request => {
         const doc = request.document;
         if (doc.ismaster) {
@@ -221,7 +217,7 @@ describe('Connection Pool', function() {
       }, callback);
     });
 
-    it('should still manage a connection if no callback is provided', function(done) {
+    it('should still manage a connection if no callback is provided', function (done) {
       server.setMessageHandler(request => {
         const doc = request.document;
         if (doc.ismaster) {
@@ -249,7 +245,7 @@ describe('Connection Pool', function() {
     });
   });
 
-  describe('spec tests', function() {
+  describe('spec tests', function () {
     const threads = new Map();
     const connections = new Map();
     const orphans = new Set();
@@ -284,7 +280,7 @@ describe('Connection Pool', function() {
     }
 
     const OPERATION_FUNCTIONS = {
-      checkOut: function(op) {
+      checkOut: function (op) {
         return PROMISIFIED_POOL_FUNCTIONS.checkOut.call(pool).then(connection => {
           if (op.label != null) {
             connections.set(op.label, connection);
@@ -293,7 +289,7 @@ describe('Connection Pool', function() {
           }
         });
       },
-      checkIn: function(op) {
+      checkIn: function (op) {
         const connection = connections.get(op.connection);
         connections.delete(op.connection);
 
@@ -303,22 +299,22 @@ describe('Connection Pool', function() {
 
         return pool.checkIn(connection);
       },
-      clear: function() {
+      clear: function () {
         return pool.clear();
       },
-      close: function() {
+      close: function () {
         return PROMISIFIED_POOL_FUNCTIONS.close.call(pool);
       },
-      wait: function(options) {
+      wait: function (options) {
         const ms = options.ms;
         return new Promise(r => setTimeout(r, ms));
       },
-      start: function(options) {
+      start: function (options) {
         const target = options.target;
         const thread = getThread(target);
         thread.start();
       },
-      waitForThread: function(options) {
+      waitForThread: function (options) {
         const name = options.name;
         const target = options.target;
         const suppressError = options.suppressError;
@@ -335,7 +331,7 @@ describe('Connection Pool', function() {
           }
         });
       },
-      waitForEvent: function(options) {
+      waitForEvent: function (options) {
         const event = options.event;
         const count = options.count;
         return new Promise(resolve => {
@@ -428,7 +424,7 @@ describe('Connection Pool', function() {
     });
 
     loadSpecTests('connection-monitoring-and-pooling').forEach(test => {
-      it(test.description, function() {
+      it(test.description, function () {
         const operations = test.operations;
         const expectedEvents = test.events || [];
         const ignoreEvents = test.ignore || [];
@@ -471,9 +467,7 @@ describe('Connection Pool', function() {
 
             if (expectedError) {
               expect(actualError).to.exist;
-              expect(actualError)
-                .property('message')
-                .to.equal(expectedError.message);
+              expect(actualError).property('message').to.equal(expectedError.message);
             } else if (actualError) {
               throw actualError;
             }

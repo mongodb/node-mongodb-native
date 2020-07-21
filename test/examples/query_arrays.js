@@ -3,15 +3,15 @@
 const setupDatabase = require('../functional/shared').setupDatabase;
 const expect = require('chai').expect;
 
-describe('examples(query-arrays):', function() {
+describe('examples(query-arrays):', function () {
   let client;
   let db;
 
-  before(async function() {
+  before(async function () {
     await setupDatabase(this.configuration);
   });
 
-  beforeEach(async function() {
+  beforeEach(async function () {
     client = await this.configuration.newClient().connect();
     db = client.db(this.configuration.db);
 
@@ -52,7 +52,7 @@ describe('examples(query-arrays):', function() {
     // End Example 20
   });
 
-  afterEach(async function() {
+  afterEach(async function () {
     await client.close();
     client = undefined;
     db = undefined;
@@ -60,7 +60,7 @@ describe('examples(query-arrays):', function() {
 
   it('Match an Array', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function() {
+    test: async function () {
       // Start Example 21
       const cursor = db.collection('inventory').find({
         tags: ['red', 'blank']
@@ -73,7 +73,7 @@ describe('examples(query-arrays):', function() {
 
   it('Match an Array: $all', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function() {
+    test: async function () {
       // Start Example 22
       const cursor = db.collection('inventory').find({
         tags: { $all: ['red', 'blank'] }
@@ -86,7 +86,7 @@ describe('examples(query-arrays):', function() {
 
   it('Query an Array for an Element', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function() {
+    test: async function () {
       // Start Example 23
       const cursor = db.collection('inventory').find({
         tags: 'red'
@@ -99,7 +99,7 @@ describe('examples(query-arrays):', function() {
 
   it('Query an Array for an Element w/ operators', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function() {
+    test: async function () {
       // Start Example 24
       const cursor = db.collection('inventory').find({
         dim_cm: { $gt: 25 }
@@ -112,7 +112,7 @@ describe('examples(query-arrays):', function() {
 
   it('Query an Array with Compound Filter Conditions on the Array Elements', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function() {
+    test: async function () {
       // Start Example 25
       const cursor = db.collection('inventory').find({
         dim_cm: { $gt: 15, $lt: 20 }
@@ -125,7 +125,7 @@ describe('examples(query-arrays):', function() {
 
   it('Query for an Array Element that Meets Multiple Criteria', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function() {
+    test: async function () {
       // Start Example 26
       const cursor = db.collection('inventory').find({
         dim_cm: { $elemMatch: { $gt: 22, $lt: 30 } }
@@ -138,7 +138,7 @@ describe('examples(query-arrays):', function() {
 
   it('Query for an Element by the Array Index Position', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function() {
+    test: async function () {
       // Start Example 27
       const cursor = db.collection('inventory').find({
         'dim_cm.1': { $gt: 25 }
@@ -151,7 +151,7 @@ describe('examples(query-arrays):', function() {
 
   it('Query an Array by Array Length', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function() {
+    test: async function () {
       // Start Example 28
       const cursor = db.collection('inventory').find({
         tags: { $size: 3 }

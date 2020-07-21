@@ -7,7 +7,7 @@ const { Topology } = require('../../../src/sdam/topology');
 const { Long } = require('bson');
 
 const test = {};
-describe('Response', function() {
+describe('Response', function () {
   afterEach(() => mock.cleanup());
   beforeEach(() => {
     return mock.createServer().then(mockServer => {
@@ -17,7 +17,7 @@ describe('Response', function() {
 
   it('should throw when document is error', {
     metadata: { requires: { topology: ['single'] } },
-    test: function(done) {
+    test: function (done) {
       const errdoc = {
         errmsg: 'Cursor not found (namespace: "liveearth.entityEvents", id: 2018648316188432590).'
       };
@@ -51,7 +51,7 @@ describe('Response', function() {
         const cursor = client.cursor('test.test', { find: 'test' });
 
         // Execute next
-        cursor._next(function(err) {
+        cursor._next(function (err) {
           expect(err).to.exist;
           expect(err).to.be.instanceof(MongoError);
           expect(err.message).to.equal(errdoc.errmsg);

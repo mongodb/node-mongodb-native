@@ -3,7 +3,7 @@
 const setupDatabase = require('./shared').setupDatabase;
 const withClient = require('./shared').withClient;
 
-describe('SASLPrep', function() {
+describe('SASLPrep', function () {
   // Step 4
   // To test SASLprep behavior, create two users:
   // username: "IX", password "IX"
@@ -32,11 +32,11 @@ describe('SASLPrep', function() {
     }
   ];
 
-  before(function() {
+  before(function () {
     return setupDatabase(this.configuration);
   });
 
-  before(function() {
+  before(function () {
     return withClient(this.configuration.newClient(), client => {
       const db = client.db('admin');
 
@@ -51,7 +51,7 @@ describe('SASLPrep', function() {
     });
   });
 
-  after(function() {
+  after(function () {
     return withClient(this.configuration.newClient(), client => {
       const db = client.db('admin');
 
@@ -77,7 +77,7 @@ describe('SASLPrep', function() {
           node: '>=6'
         }
       },
-      test: function() {
+      test: function () {
         const options = {
           user: username,
           password: password,

@@ -7,8 +7,8 @@ const OCSP_TLS_SHOULD_SUCCEED = process.env.OCSP_TLS_SHOULD_SUCCEED;
 const CA_FILE = process.env.CA_FILE;
 
 // NOTE: this file is NOT run through the normal test runner
-describe('OCSP Support', function() {
-  before(function() {
+describe('OCSP Support', function () {
+  before(function () {
     if (OCSP_TLS_SHOULD_SUCCEED == null || CA_FILE == null) {
       this.skip();
     }
@@ -28,17 +28,17 @@ describe('OCSP Support', function() {
     });
   }
 
-  it('should support OCSP with tlsInsecure', function(done) {
+  it('should support OCSP with tlsInsecure', function (done) {
     // should always succeed
     connect('tls=true&tlsInsecure=true', done);
   });
 
-  it('should support OCSP with tlsAllowInvalidCertificates', function(done) {
+  it('should support OCSP with tlsAllowInvalidCertificates', function (done) {
     // should always succeed
     connect('tls=true&tlsAllowInvalidCertificates=true', done);
   });
 
-  it('should support OCSP with `tls=true`', function(done) {
+  it('should support OCSP with `tls=true`', function (done) {
     connect('tls=true', err => {
       if (OCSP_TLS_SHOULD_SUCCEED) {
         expect(err).to.not.exist;

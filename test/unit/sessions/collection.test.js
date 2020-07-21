@@ -4,8 +4,8 @@ const { expect } = require('chai');
 const mock = require('mongodb-mock-server');
 
 const test = {};
-describe('Sessions', function() {
-  describe('Collection', function() {
+describe('Sessions', function () {
+  describe('Collection', function () {
     afterEach(() => mock.cleanup());
     beforeEach(() => {
       return mock.createServer().then(server => {
@@ -16,7 +16,7 @@ describe('Sessions', function() {
     it('should include `afterClusterTime` in read command with causal consistency', {
       metadata: { requires: { topology: 'single' } },
 
-      test: function() {
+      test: function () {
         let findCommand;
         let insertOperationTime = Timestamp.fromNumber(Date.now());
         test.server.setMessageHandler(request => {
@@ -55,7 +55,7 @@ describe('Sessions', function() {
     it('does not mutate command options', {
       metadata: { requires: { topology: 'single' } },
 
-      test: function() {
+      test: function () {
         const options = Object.freeze({});
         test.server.setMessageHandler(request => {
           const doc = request.document;

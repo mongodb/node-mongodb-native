@@ -13,7 +13,7 @@ const ReadPreference = core.ReadPreference;
 const Long = core.BSON.Long;
 
 let test = {};
-describe('ReplSet Read Preferences (mocks)', function() {
+describe('ReplSet Read Preferences (mocks)', function () {
   beforeEach(() => {
     test.spy = new ConnectionSpy();
     Connection.enableConnectionAccounting(test.spy);
@@ -34,7 +34,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
@@ -77,7 +77,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
       ];
 
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const primaryServer = yield mock.createServer(32000, 'localhost');
         const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
         const secondSecondaryServer = yield mock.createServer(32002, 'localhost');
@@ -127,7 +127,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
         );
 
         // Add event listeners
-        server.on('connect', function(_server) {
+        server.on('connect', function (_server) {
           // Set up a write
           function schedule() {
             // Perform a find
@@ -140,7 +140,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
               {
                 readPreference: new ReadPreference('secondary', { loc: 'dc' })
               },
-              function(err, r) {
+              function (err, r) {
                 expect(err).to.be.null;
                 expect(r.connection.port).to.equal(32002);
 
@@ -151,7 +151,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
           }
 
           // Schedule an insert
-          setTimeout(function() {
+          setTimeout(function () {
             schedule();
           }, 2000);
         });
@@ -169,7 +169,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
@@ -212,7 +212,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
       ];
 
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const primaryServer = yield mock.createServer(32000, 'localhost');
         const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
         const secondSecondaryServer = yield mock.createServer(32002, 'localhost');
@@ -261,10 +261,10 @@ describe('ReplSet Read Preferences (mocks)', function() {
         );
 
         // Add event listeners
-        server.on('connect', function(_server) {
+        server.on('connect', function (_server) {
           // Set up a write
           function schedule() {
-            setTimeout(function() {
+            setTimeout(function () {
               // Perform a find
               _server.command(
                 'test.test',
@@ -275,7 +275,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
                 {
                   readPreference: new ReadPreference('primaryPreferred')
                 },
-                function(err, r) {
+                function (err, r) {
                   expect(err).to.be.null;
                   expect(r.connection.port).to.equal(32000);
 
@@ -303,7 +303,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
@@ -346,7 +346,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
       ];
 
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const primaryServer = yield mock.createServer(32000, 'localhost');
         const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
         const secondSecondaryServer = yield mock.createServer(32002, 'localhost');
@@ -396,10 +396,10 @@ describe('ReplSet Read Preferences (mocks)', function() {
 
         // Add event listeners
         var port = 0;
-        server.on('connect', function(_server) {
+        server.on('connect', function (_server) {
           // Set up a write
           function schedule() {
-            setTimeout(function() {
+            setTimeout(function () {
               // Perform a find
               _server.command(
                 'test.test',
@@ -410,7 +410,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
                 {
                   readPreference: new ReadPreference('secondary')
                 },
-                function(err, r) {
+                function (err, r) {
                   expect(err).to.be.null;
                   port = r.connection.port;
 
@@ -424,7 +424,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
                     {
                       readPreference: new ReadPreference('secondary')
                     },
-                    function(_err, _r) {
+                    function (_err, _r) {
                       expect(_err).to.be.null;
                       expect(_r.connection.port).to.not.equal(port);
                       port = _r.connection.port;
@@ -439,7 +439,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
                         {
                           readPreference: new ReadPreference('secondary')
                         },
-                        function(__err, __r) {
+                        function (__err, __r) {
                           expect(__err).to.be.null;
                           expect(__r.connection.port).to.not.equal(port);
 
@@ -471,7 +471,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
@@ -501,7 +501,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
       ];
 
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const primaryServer = yield mock.createServer(32000, 'localhost');
         const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
 
@@ -525,15 +525,15 @@ describe('ReplSet Read Preferences (mocks)', function() {
 
         // mock ops store from node-mongodb-native for handling repl set disconnects
         var mockDisconnectHandler = {
-          add: function(opType, ns, ops, options, callback) {
+          add: function (opType, ns, ops, options, callback) {
             // Command issued to replSet will fail immediately if !server.isConnected()
             return callback(new MongoError({ message: 'no connection available', driver: true }));
           },
-          execute: function() {
+          execute: function () {
             // method needs to be called, so provide a dummy version
             return;
           },
-          flush: function() {
+          flush: function () {
             // method needs to be called, so provide a dummy version
             return;
           }
@@ -559,9 +559,9 @@ describe('ReplSet Read Preferences (mocks)', function() {
         );
 
         // Add event listeners
-        server.on('connect', function(_server) {
+        server.on('connect', function (_server) {
           function schedule() {
-            setTimeout(function() {
+            setTimeout(function () {
               // Perform a find
               _server.command(
                 'test.test',
@@ -572,14 +572,14 @@ describe('ReplSet Read Preferences (mocks)', function() {
                 {
                   readPreference: new ReadPreference('primaryPreferred')
                 },
-                function(err, r) {
+                function (err, r) {
                   expect(err).to.be.null;
                   expect(r.connection.port).to.equal(32000);
                   primaryServer;
 
                   _server.on(
                     'left',
-                    function() {
+                    function () {
                       // Perform another find, after primary is gone
                       _server.command(
                         'test.test',
@@ -590,7 +590,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
                         {
                           readPreference: new ReadPreference('primaryPreferred')
                         },
-                        function(_err, _r) {
+                        function (_err, _r) {
                           expect(_err).to.be.null;
                           expect(_r.connection.port).to.equal(32001); // reads from secondary while primary down
 
@@ -623,7 +623,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
@@ -666,7 +666,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
       ];
 
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const primaryServer = yield mock.createServer(32000, 'localhost');
         const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
         const secondSecondaryServer = yield mock.createServer(32002, 'localhost');
@@ -716,7 +716,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
 
         // Add event listeners
         let joinCount = 0;
-        server.on('joined', function() {
+        server.on('joined', function () {
           joinCount++;
           if (joinCount !== 3) return;
 
@@ -732,11 +732,11 @@ describe('ReplSet Read Preferences (mocks)', function() {
               {
                 readPreference: new ReadPreference('primaryPreferred')
               },
-              function(err) {
+              function (err) {
                 expect(err).to.exist;
 
                 // Let all sockets properly close
-                process.nextTick(function() {
+                process.nextTick(function () {
                   // Test primaryPreferred
                   server.command(
                     'test.test',
@@ -747,7 +747,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
                     {
                       readPreference: new ReadPreference('primaryPreferred')
                     },
-                    function(_err, _r) {
+                    function (_err, _r) {
                       expect(_err).to.be.null;
                       expect(_r.connection.port).to.not.equal(32000);
 
@@ -761,7 +761,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
                         {
                           readPreference: new ReadPreference('secondaryPreferred')
                         },
-                        function(__err, __r) {
+                        function (__err, __r) {
                           expect(__err).to.be.null;
                           expect(__r.connection.port).to.not.equal(32000);
 
@@ -793,7 +793,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
@@ -836,7 +836,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
       ];
 
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const primaryServer = yield mock.createServer(32000, 'localhost');
         const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
         const secondSecondaryServer = yield mock.createServer(32002, 'localhost');
@@ -888,7 +888,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
         function runTest(_server) {
           _server.s.replicaSetState.secondaries = _server.s.replicaSetState.secondaries
             .sort((a, b) => Number(a.name.split(':')[1]) > Number(b.name.split(':')[1]))
-            .map(function(x, i) {
+            .map(function (x, i) {
               x.lastIsMasterMS = i * 50;
               return x;
             });
@@ -903,7 +903,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
             {
               readPreference: new ReadPreference('nearest')
             },
-            function(err, r) {
+            function (err, r) {
               expect(err).to.be.null;
               expect(r.connection.port).to.be.oneOf([32000, 32001]);
 
@@ -914,7 +914,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
         }
 
         let joinCount = 0;
-        server.on('joined', function() {
+        server.on('joined', function () {
           joinCount++;
           if (joinCount !== 3) return;
           runTest(server);
@@ -933,7 +933,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
@@ -976,7 +976,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
       ];
 
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const primaryServer = yield mock.createServer(32000, 'localhost');
         const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
         const secondSecondaryServer = yield mock.createServer(32002, 'localhost');
@@ -1028,7 +1028,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
         function runTest(_server) {
           _server.s.replicaSetState.secondaries = _server.s.replicaSetState.secondaries
             .sort((a, b) => Number(a.name.split(':')[1]) > Number(b.name.split(':')[1]))
-            .map(function(x, i) {
+            .map(function (x, i) {
               x.lastIsMasterMS = i * 50;
               return x;
             });
@@ -1043,7 +1043,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
             {
               readPreference: new ReadPreference('nearest', { loc: 'dc' })
             },
-            function(err, r) {
+            function (err, r) {
               expect(err).to.be.null;
               expect(r.connection.port).to.be.oneOf([32001, 32002]);
 
@@ -1055,7 +1055,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
 
         // Add event listeners
         let joinCount = 0;
-        server.on('joined', function() {
+        server.on('joined', function () {
           joinCount++;
           if (joinCount !== 3) return;
           runTest(server);
@@ -1076,7 +1076,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
         }
       },
 
-      test: function(done) {
+      test: function (done) {
         var electionIds = [new ObjectId(), new ObjectId()];
         var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
           setName: 'rs',
@@ -1097,7 +1097,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
         ];
 
         // Boot the mock
-        co(function*() {
+        co(function* () {
           const primaryServer = yield mock.createServer(32000, 'localhost');
 
           primaryServer.setMessageHandler(request => {
@@ -1119,10 +1119,10 @@ describe('ReplSet Read Preferences (mocks)', function() {
           });
 
           // Add event listeners
-          server.on('connect', function(_server) {
+          server.on('connect', function (_server) {
             // Set up a write
             function schedule() {
-              setTimeout(function() {
+              setTimeout(function () {
                 // Perform a find
                 _server.command(
                   'test.test',
@@ -1133,7 +1133,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
                   {
                     readPreference: new ReadPreference('secondaryPreferred')
                   },
-                  function(err, r) {
+                  function (err, r) {
                     expect(err).to.be.null;
                     expect(r.connection.port).to.equal(32000);
 
@@ -1162,7 +1162,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
@@ -1205,7 +1205,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
       ];
 
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const primaryServer = yield mock.createServer(32000, 'localhost');
         const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
         const secondSecondaryServer = yield mock.createServer(32002, 'localhost');
@@ -1254,13 +1254,13 @@ describe('ReplSet Read Preferences (mocks)', function() {
         );
 
         // Add event listeners
-        server.on('all', function(_server) {
+        server.on('all', function (_server) {
           // Execute more operations than there is servers connected
-          setTimeout(function() {
+          setTimeout(function () {
             var count = 50;
             var portsSeen = {};
 
-            var checkHandler = function(err, r) {
+            var checkHandler = function (err, r) {
               count = count - 1;
               expect(err).to.be.null;
 

@@ -23,7 +23,7 @@ const {
  *
  * @param {any} string
  */
-var ISODate = function(string) {
+var ISODate = function (string) {
   var match;
 
   if (typeof string.getTime === 'function') return string;
@@ -58,8 +58,8 @@ var ISODate = function(string) {
   } else throw new Error('Invalid ISO 8601 date given.', __filename);
 };
 
-describe('Insert', function() {
-  before(function() {
+describe('Insert', function () {
+  before(function () {
     return setupDatabase(this.configuration);
   });
 
@@ -70,16 +70,16 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('shouldCorrectlyPerformSingleInsert');
-        collection.insert({ a: 1 }, configuration.writeConcernMax(), function(err) {
+        collection.insert({ a: 1 }, configuration.writeConcernMax(), function (err) {
           test.equal(null, err);
 
-          collection.findOne(function(err, item) {
+          collection.findOne(function (err, item) {
             test.equal(1, item.a);
             client.close(done);
           });
@@ -95,15 +95,15 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('test_multiple_insert');
         var docs = [{ a: 1 }, { a: 2 }];
 
-        collection.insert(docs, configuration.writeConcernMax(), function(err, r) {
+        collection.insert(docs, configuration.writeConcernMax(), function (err, r) {
           test.equal(2, r.result.n);
           test.equal(2, r.ops.length);
           test.equal(2, r.insertedCount);
@@ -111,7 +111,7 @@ describe('Insert', function() {
           test.ok(r.insertedIds[0]._bsontype === 'ObjectID');
           test.ok(r.insertedIds[1]._bsontype === 'ObjectID');
 
-          r.ops.forEach(function(doc) {
+          r.ops.forEach(function (doc) {
             test.ok(
               doc['_id']._bsontype === 'ObjectID' ||
                 Object.prototype.toString.call(doc['_id']) === '[object ObjectID]'
@@ -119,11 +119,11 @@ describe('Insert', function() {
           });
 
           // Let's ensure we have both documents
-          collection.find().toArray(function(err, docs) {
+          collection.find().toArray(function (err, docs) {
             test.equal(2, docs.length);
             var results = [];
             // Check that we have all the results we want
-            docs.forEach(function(doc) {
+            docs.forEach(function (doc) {
               if (doc.a === 1 || doc.a === 2) results.push(1);
             });
             test.equal(2, results.length);
@@ -142,21 +142,21 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('shouldCorrectlyExecuteSaveInsertUpdate');
 
-        collection.save({ email: 'save' }, configuration.writeConcernMax(), function() {
-          collection.insert({ email: 'insert' }, configuration.writeConcernMax(), function() {
+        collection.save({ email: 'save' }, configuration.writeConcernMax(), function () {
+          collection.insert({ email: 'insert' }, configuration.writeConcernMax(), function () {
             collection.update(
               { email: 'update' },
               { email: 'update' },
               { upsert: true, w: 1 },
-              function() {
-                collection.find().toArray(function(e, a) {
+              function () {
+                collection.find().toArray(function (e, a) {
                   test.equal(3, a.length);
                   client.close(done);
                 });
@@ -175,10 +175,10 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('test_should_deserialize_large_integrated_array');
 
@@ -204,10 +204,10 @@ describe('Insert', function() {
           ]
         };
         // Insert the collection
-        collection.insert(doc, configuration.writeConcernMax(), function(err) {
+        collection.insert(doc, configuration.writeConcernMax(), function (err) {
           test.equal(null, err);
           // Fetch and check the collection
-          collection.findOne({ a: 0 }, function(err, result) {
+          collection.findOne({ a: 0 }, function (err, result) {
             test.deepEqual(doc.a, result.a);
             test.deepEqual(doc.b, result.b);
             client.close(done);
@@ -224,10 +224,10 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('test_all_serialization_types');
 
@@ -255,9 +255,9 @@ describe('Insert', function() {
           dbref: new DBRef('namespace', oid, 'integration_tests_')
         };
 
-        collection.insert(motherOfAllDocuments, configuration.writeConcernMax(), function(err) {
+        collection.insert(motherOfAllDocuments, configuration.writeConcernMax(), function (err) {
           test.equal(null, err);
-          collection.findOne(function(err, doc) {
+          collection.findOne(function (err, doc) {
             // Assert correct deserialization of the values
             test.equal(motherOfAllDocuments.string, doc.string);
             test.deepEqual(motherOfAllDocuments.array, doc.array);
@@ -294,15 +294,15 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
 
         //convience curried handler for functions of type 'a -> (err, result)
         function getResult(callback) {
-          return function(error, result) {
+          return function (error, result) {
             test.ok(error == null);
             return callback(result);
           };
@@ -310,8 +310,8 @@ describe('Insert', function() {
 
         db.collection(
           'users',
-          getResult(function(user_collection) {
-            user_collection.remove({}, configuration.writeConcernMax(), function(err) {
+          getResult(function (user_collection) {
+            user_collection.remove({}, configuration.writeConcernMax(), function (err) {
               test.equal(null, err);
 
               //first, create a user object
@@ -319,7 +319,7 @@ describe('Insert', function() {
               user_collection.insert(
                 [newUser],
                 configuration.writeConcernMax(),
-                getResult(function(r) {
+                getResult(function (r) {
                   var user = r.ops[0];
 
                   var scriptCode = "settings.block = []; settings.block.push('test');";
@@ -334,9 +334,9 @@ describe('Insert', function() {
                     { _id: user._id },
                     updateCommand,
                     configuration.writeConcernMax(),
-                    getResult(function() {
+                    getResult(function () {
                       // Fetch the object and check that the changes are persisted
-                      user_collection.findOne({ _id: user._id }, function(err, doc) {
+                      user_collection.findOne({ _id: user._id }, function (err, doc) {
                         test.ok(err == null);
                         test.equal('Test Account', doc.name);
                         test.equal('somestring', doc.settings.thisOneWorks);
@@ -361,10 +361,10 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('test_all_serialization_types_new_context');
 
@@ -405,12 +405,12 @@ describe('Insert', function() {
         // sys.puts(sys.inspect(context.motherOfAllDocuments))
         var motherOfAllDocuments = context.motherOfAllDocuments;
 
-        collection.insert(context.motherOfAllDocuments, configuration.writeConcernMax(), function(
+        collection.insert(context.motherOfAllDocuments, configuration.writeConcernMax(), function (
           err,
           docs
         ) {
           test.ok(docs);
-          collection.findOne(function(err, doc) {
+          collection.findOne(function (err, doc) {
             // Assert correct deserialization of the values
             test.equal(motherOfAllDocuments.string, doc.string);
             test.deepEqual(motherOfAllDocuments.array, doc.array);
@@ -446,19 +446,19 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('test_to_json_for_long');
 
         collection.insert(
           [{ value: Long.fromNumber(32222432) }],
           configuration.writeConcernMax(),
-          function(err, ids) {
+          function (err, ids) {
             test.ok(ids);
-            collection.findOne({}, function(err, item) {
+            collection.findOne({}, function (err, item) {
               test.equal(32222432, item.value);
               client.close(done);
             });
@@ -475,10 +475,10 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('test_insert_and_update_no_callback');
 
@@ -488,9 +488,9 @@ describe('Insert', function() {
         collection.update({ i: 1 }, { $set: { i: 2 } });
 
         // Make sure we leave enough time for mongodb to record the data
-        setTimeout(function() {
+        setTimeout(function () {
           // Locate document
-          collection.findOne({}, function(err, item) {
+          collection.findOne({}, function (err, item) {
             test.equal(2, item.i);
             client.close(done);
           });
@@ -506,10 +506,10 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('test_insert_and_query_timestamp');
 
@@ -517,10 +517,10 @@ describe('Insert', function() {
         collection.insert(
           { i: Timestamp.fromNumber(100), j: Long.fromNumber(200) },
           configuration.writeConcernMax(),
-          function(err, r) {
+          function (err, r) {
             test.ok(r);
             // Locate document
-            collection.findOne({}, function(err, item) {
+            collection.findOne({}, function (err, item) {
               test.ok(item.i._bsontype === 'Timestamp');
               test.equal(100, item.i.toInt());
               test.equal(200, item.j);
@@ -539,20 +539,20 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('test_insert_and_query_undefined');
 
         // Insert the update
-        collection.insert({ i: undefined }, configuration.writeConcernMax(), function(err, r) {
+        collection.insert({ i: undefined }, configuration.writeConcernMax(), function (err, r) {
           test.equal(null, err);
           test.ok(r);
 
           // Locate document
-          collection.findOne({}, function(err, item) {
+          collection.findOne({}, function (err, item) {
             test.equal(null, item.i);
 
             client.close(done);
@@ -569,7 +569,7 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var dbref = new DBRef('foo', ObjectId.createFromHexString('fc24a04d4560531f00000000'), null);
       JSON.stringify(dbref);
       done();
@@ -583,23 +583,23 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('test_should_throw_error_if_serializing_function');
-        var func = function() {
+        var func = function () {
           return 1;
         };
         // Insert the update
-        collection.insert({ i: 1, z: func }, { w: 1, serializeFunctions: true }, function(
+        collection.insert({ i: 1, z: func }, { w: 1, serializeFunctions: true }, function (
           err,
           result
         ) {
           test.equal(null, err);
 
-          collection.findOne({ _id: result.ops[0]._id }, function(err, object) {
+          collection.findOne({ _id: result.ops[0]._id }, function (err, object) {
             test.equal(normalizedFunctionString(func), object.z.code);
             test.equal(1, object.i);
             client.close(done);
@@ -616,23 +616,23 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('test_should_throw_error_if_serializing_function_1');
-        var func = function() {
+        var func = function () {
           return 1;
         };
         // Insert the update
         collection.insert(
           { i: 1, z: func },
           { w: 1, serializeFunctions: true, ordered: false },
-          function(err, result) {
+          function (err, result) {
             test.equal(null, err);
 
-            collection.findOne({ _id: result.ops[0]._id }, function(err, object) {
+            collection.findOne({ _id: result.ops[0]._id }, function (err, object) {
               test.equal(normalizedFunctionString(func), object.z.code);
               test.equal(1, object.i);
               client.close(done);
@@ -650,23 +650,23 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('insert_doc_with_uuid');
 
         collection.insert(
           { _id: '12345678123456781234567812345678', field: '1' },
           configuration.writeConcernMax(),
-          function(err, result) {
+          function (err, result) {
             test.equal(null, err);
             test.ok(result);
 
             collection
               .find({ _id: '12345678123456781234567812345678' })
-              .toArray(function(err, items) {
+              .toArray(function (err, items) {
                 test.equal(null, err);
                 test.equal(items[0]._id, '12345678123456781234567812345678');
                 test.equal(items[0].field, '1');
@@ -680,11 +680,11 @@ describe('Insert', function() {
                 collection.insert(
                   { _id: binaryUUID, field: '2' },
                   configuration.writeConcernMax(),
-                  function(err, result) {
+                  function (err, result) {
                     test.equal(null, err);
                     test.ok(result);
 
-                    collection.find({ _id: binaryUUID }).toArray(function(err, items) {
+                    collection.find({ _id: binaryUUID }).toArray(function (err, items) {
                       test.equal(null, err);
                       test.equal(items[0].field, '2');
                       client.close(done);
@@ -705,17 +705,17 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('test_insert_and_update_no_callback_strict');
 
         collection.insert(
           { _id: '12345678123456781234567812345678', field: '1' },
           configuration.writeConcernMax(),
-          function(err, result) {
+          function (err, result) {
             test.equal(null, err);
             test.ok(result);
 
@@ -723,7 +723,7 @@ describe('Insert', function() {
               { _id: '12345678123456781234567812345678' },
               { $set: { field: 0 } },
               configuration.writeConcernMax(),
-              function(err, r) {
+              function (err, r) {
                 test.equal(null, err);
                 test.equal(1, r.result.n);
                 client.close(done);
@@ -742,10 +742,10 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('shouldCorrectlyInsertDBRefWithDbNotDefined');
 
@@ -753,7 +753,7 @@ describe('Insert', function() {
         var doc2 = { _id: new ObjectId() };
         var doc3 = { _id: new ObjectId() };
 
-        collection.insert(doc, configuration.writeConcernMax(), function(err, result) {
+        collection.insert(doc, configuration.writeConcernMax(), function (err, result) {
           test.equal(null, err);
           test.ok(result);
 
@@ -765,12 +765,12 @@ describe('Insert', function() {
             configuration.db_name
           );
 
-          collection.insert([doc2, doc3], configuration.writeConcernMax(), function(err, result) {
+          collection.insert([doc2, doc3], configuration.writeConcernMax(), function (err, result) {
             test.equal(null, err);
             test.ok(result);
 
             // Get all items
-            collection.find().toArray(function(err, items) {
+            collection.find().toArray(function (err, items) {
               test.equal('shouldCorrectlyInsertDBRefWithDbNotDefined', items[1].ref.namespace);
               test.equal(doc._id.toString(), items[1].ref.oid.toString());
               expect(items[1].ref.db).to.be.null;
@@ -794,29 +794,29 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('shouldCorrectlyInsertUpdateRemoveWithNoOptions');
 
-        collection.insert({ a: 1 }, configuration.writeConcernMax(), function(err, result) {
+        collection.insert({ a: 1 }, configuration.writeConcernMax(), function (err, result) {
           test.equal(null, err);
           test.ok(result);
 
-          collection.update({ a: 1 }, { a: 2 }, configuration.writeConcernMax(), function(
+          collection.update({ a: 1 }, { a: 2 }, configuration.writeConcernMax(), function (
             err,
             result
           ) {
             test.equal(null, err);
             test.ok(result);
 
-            collection.remove({ a: 2 }, configuration.writeConcernMax(), function(err, result) {
+            collection.remove({ a: 2 }, configuration.writeConcernMax(), function (err, result) {
               test.equal(null, err);
               test.ok(result);
 
-              collection.count(function(err, count) {
+              collection.count(function (err, count) {
                 test.equal(0, count);
                 client.close(done);
               });
@@ -834,24 +834,24 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       // Search parameter
       var to = 'ralph';
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('shouldCorrectlyExecuteMultipleFetches');
         // Execute query
         collection.insert(
           { addresses: { localPart: 'ralph' } },
           configuration.writeConcernMax(),
-          function(err, result) {
+          function (err, result) {
             test.equal(null, err);
             test.ok(result);
 
             // Let's find our user
-            collection.findOne({ 'addresses.localPart': to }, function(err, doc) {
+            collection.findOne({ 'addresses.localPart': to }, function (err, doc) {
               test.equal(null, err);
               test.equal(to, doc.addresses.localPart);
               client.close(done);
@@ -869,10 +869,10 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('shouldCorrectlyFailWhenNoObjectToUpdate');
 
@@ -880,7 +880,7 @@ describe('Insert', function() {
           { _id: new ObjectId() },
           { email: 'update' },
           configuration.writeConcernMax(),
-          function(err, result) {
+          function (err, result) {
             test.equal(0, result.result.n);
             client.close(done);
           }
@@ -896,7 +896,7 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var doc = {
         _id: new ObjectId('4e886e687ff7ef5e00000162'),
@@ -909,17 +909,17 @@ describe('Insert', function() {
       };
 
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection(
           'Should_correctly_insert_object_and_retrieve_it_when_containing_array_and_IsoDate'
         );
 
-        collection.insert(doc, configuration.writeConcernMax(), function(err, result) {
+        collection.insert(doc, configuration.writeConcernMax(), function (err, result) {
           test.ok(err == null);
           test.ok(result);
 
-          collection.findOne(function(err, item) {
+          collection.findOne(function (err, item) {
             test.ok(err == null);
             test.deepEqual(doc, item);
             client.close(done);
@@ -936,7 +936,7 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var doc = {
         _id: new ObjectId('4e886e687ff7ef5e00000162'),
@@ -950,15 +950,15 @@ describe('Insert', function() {
       };
 
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('Should_correctly_insert_object_with_timestamps');
 
-        collection.insert(doc, configuration.writeConcernMax(), function(err, result) {
+        collection.insert(doc, configuration.writeConcernMax(), function (err, result) {
           test.ok(err == null);
           test.ok(result);
 
-          collection.findOne(function(err, item) {
+          collection.findOne(function (err, item) {
             test.ok(err == null);
             test.deepEqual(doc, item);
             client.close(done);
@@ -975,7 +975,7 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var doc = {
         _id: new ObjectId('4e886e687ff7ef5e00000162'),
@@ -983,10 +983,10 @@ describe('Insert', function() {
       };
 
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('Should_fail_on_insert_due_to_key_starting_with');
-        collection.insert(doc, configuration.writeConcernMax(), function(err, result) {
+        collection.insert(doc, configuration.writeConcernMax(), function (err, result) {
           test.ok(err != null);
           test.equal(null, result);
 
@@ -1003,41 +1003,41 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
 
       var doc = {
         str: 'String',
-        func: function() {}
+        func: function () {}
       };
 
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection(
           'Should_Correctly_allow_for_control_of_serialization_of_functions_on_command_level'
         );
-        collection.insert(doc, configuration.writeConcernMax(), function(err, result) {
+        collection.insert(doc, configuration.writeConcernMax(), function (err, result) {
           test.equal(null, err);
           test.ok(result);
 
           collection.update(
             { str: 'String' },
-            { $set: { c: 1, d: function() {} } },
+            { $set: { c: 1, d: function () {} } },
             { w: 1, serializeFunctions: false },
-            function(err, result) {
+            function (err, result) {
               test.equal(1, result.result.n);
 
-              collection.findOne({ str: 'String' }, function(err, item) {
+              collection.findOne({ str: 'String' }, function (err, item) {
                 test.equal(undefined, item.d);
 
                 // Execute a safe insert with replication to two servers
                 collection.findAndModify(
                   { str: 'String' },
                   [['a', 1]],
-                  { $set: { f: function() {} } },
+                  { $set: { f: function () {} } },
                   { new: true, safe: true, serializeFunctions: true },
-                  function(err, result) {
+                  function (err, result) {
                     test.ok(result.value.f._bsontype === 'Code');
                     client.close(done);
                   }
@@ -1057,26 +1057,26 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
 
       var doc = {
         str: 'String',
-        func: function() {}
+        func: function () {}
       };
 
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection(
           'Should_Correctly_allow_for_control_of_serialization_of_functions_on_collection_level',
           { serializeFunctions: true }
         );
-        collection.insert(doc, configuration.writeConcernMax(), function(err, result) {
+        collection.insert(doc, configuration.writeConcernMax(), function (err, result) {
           test.equal(null, err);
           test.ok(result);
 
-          collection.findOne({ str: 'String' }, function(err, item) {
+          collection.findOne({ str: 'String' }, function (err, item) {
             test.ok(item.func._bsontype === 'Code');
             client.close(done);
           });
@@ -1092,7 +1092,7 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var doc = {
         _id: new Date(),
         str: 'hello'
@@ -1100,14 +1100,14 @@ describe('Insert', function() {
 
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('Should_Correctly_allow_for_using_a_Date_object_as__id');
-        collection.insert(doc, configuration.writeConcernMax(), function(err, result) {
+        collection.insert(doc, configuration.writeConcernMax(), function (err, result) {
           test.equal(null, err);
           test.ok(result);
 
-          collection.findOne({ str: 'hello' }, function(err, item) {
+          collection.findOne({ str: 'hello' }, function (err, item) {
             test.ok(item._id instanceof Date);
             client.close(done);
           });
@@ -1123,13 +1123,13 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('Should_Correctly_fail_to_update_returning_0_results');
-        collection.update({ a: 1 }, { $set: { a: 1 } }, configuration.writeConcernMax(), function(
+        collection.update({ a: 1 }, { $set: { a: 1 } }, configuration.writeConcernMax(), function (
           err,
           r
         ) {
@@ -1147,7 +1147,7 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var doc = {
         _id: new ObjectId(),
@@ -1161,10 +1161,10 @@ describe('Insert', function() {
       };
 
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('Should_Correctly_update_two_fields_including_a_sub_field');
-        collection.insert(doc, configuration.writeConcernMax(), function(err, result) {
+        collection.insert(doc, configuration.writeConcernMax(), function (err, result) {
           test.equal(null, err);
           test.ok(result);
 
@@ -1173,11 +1173,11 @@ describe('Insert', function() {
             { _id: doc._id },
             { $set: { Prop1: 'p1_2', 'More.Sub2': 's2_2' } },
             configuration.writeConcernMax(),
-            function(err, r) {
+            function (err, r) {
               test.equal(null, err);
               test.equal(1, r.result.n);
 
-              collection.findOne({ _id: doc._id }, function(err, item) {
+              collection.findOne({ _id: doc._id }, function (err, item) {
                 test.equal(null, err);
                 test.equal('p1_2', item.Prop1);
                 test.equal('s2_2', item.More.Sub2);
@@ -1197,21 +1197,21 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection(
           'Should_Correctly_update_two_fields_including_a_sub_field_2'
         );
 
-        collection.insert({ _id: 1 }, configuration.writeConcernMax(), function(err, result) {
+        collection.insert({ _id: 1 }, configuration.writeConcernMax(), function (err, result) {
           test.equal(null, err);
           test.ok(result);
 
           // Update two fields
-          collection.insert({ _id: 1 }, configuration.writeConcernMax(), function(err, r) {
+          collection.insert({ _id: 1 }, configuration.writeConcernMax(), function (err, r) {
             test.equal(r, null);
             test.ok(err != null);
             test.ok(err.result);
@@ -1230,21 +1230,21 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('shouldCorrectlyInsertDocWithCustomId');
         // Insert the update
-        collection.insert({ _id: 0, test: 'hello' }, configuration.writeConcernMax(), function(
+        collection.insert({ _id: 0, test: 'hello' }, configuration.writeConcernMax(), function (
           err,
           result
         ) {
           test.equal(null, err);
           test.ok(result);
 
-          collection.findOne({ _id: 0 }, function(err, item) {
+          collection.findOne({ _id: 0 }, function (err, item) {
             test.equal(0, item._id);
             test.equal('hello', item.test);
             client.close(done);
@@ -1261,23 +1261,23 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection(
           'shouldCorrectlyPerformUpsertAgainstNewDocumentAndExistingOne'
         );
 
         // Upsert a new doc
-        collection.update({ a: 1 }, { a: 1 }, { upsert: true, w: 1 }, function(err, result) {
+        collection.update({ a: 1 }, { a: 1 }, { upsert: true, w: 1 }, function (err, result) {
           if (result.result.updatedExisting) test.equal(false, result.result.updatedExisting);
           test.equal(1, result.result.n);
           test.ok(result.result.upserted != null);
 
           // Upsert an existing doc
-          collection.update({ a: 1 }, { a: 1 }, { upsert: true, w: 1 }, function(err, result) {
+          collection.update({ a: 1 }, { a: 1 }, { upsert: true, w: 1 }, function (err, result) {
             if (result.updatedExisting) test.equal(true, result.updatedExisting);
             test.equal(1, result.result.n);
             client.close(done);
@@ -1294,10 +1294,10 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('shouldCorrectlyPerformLargeTextInsert');
 
@@ -1308,14 +1308,14 @@ describe('Insert', function() {
           string = string + 'a';
         }
 
-        collection.insert({ a: 1, string: string }, configuration.writeConcernMax(), function(
+        collection.insert({ a: 1, string: string }, configuration.writeConcernMax(), function (
           err,
           result
         ) {
           test.equal(null, err);
           test.ok(result);
 
-          collection.findOne({ a: 1 }, function(err, doc) {
+          collection.findOne({ a: 1 }, function (err, doc) {
             test.equal(null, err);
             test.equal(50000, doc.string.length);
             client.close(done);
@@ -1332,24 +1332,24 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('shouldCorrectlyPerformInsertOfObjectsUsingToBSON');
 
         // Create document with toBSON method
         var doc = { a: 1, b: 1 };
-        doc.toBSON = function() {
+        doc.toBSON = function () {
           return { c: this.a };
         };
 
-        collection.insert(doc, configuration.writeConcernMax(), function(err, result) {
+        collection.insert(doc, configuration.writeConcernMax(), function (err, result) {
           test.equal(null, err);
           test.ok(result);
 
-          collection.findOne({ c: 1 }, function(err, doc) {
+          collection.findOne({ c: 1 }, function (err, doc) {
             test.equal(null, err);
             test.deepEqual(1, doc.c);
             client.close(done);
@@ -1366,12 +1366,12 @@ describe('Insert', function() {
       requires: { topology: 'single' }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        db.createCollection('shouldAttempToForceBsonSize', function(err, collection) {
+        db.createCollection('shouldAttempToForceBsonSize', function (err, collection) {
           // var doc = {a:1, b:new Binary(Buffer.alloc(16777216)/5)}
           var doc = [
             { a: 1, b: new Binary(Buffer.alloc(16777216 / 3)) },
@@ -1379,11 +1379,11 @@ describe('Insert', function() {
             { a: 1, b: new Binary(Buffer.alloc(16777216 / 3)) }
           ];
 
-          collection.insert(doc, configuration.writeConcernMax(), function(err, result) {
+          collection.insert(doc, configuration.writeConcernMax(), function (err, result) {
             test.equal(null, err);
             test.ok(result);
 
-            collection.findOne({ a: 1 }, function(err, doc) {
+            collection.findOne({ a: 1 }, function (err, doc) {
               test.equal(null, err);
               test.deepEqual(1, doc.a);
 
@@ -1402,14 +1402,14 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('shouldCorrectlyUseCustomObjectToUpdateDocument');
 
-        collection.insert({ a: { b: { c: 1 } } }, configuration.writeConcernMax(), function(
+        collection.insert({ a: { b: { c: 1 } } }, configuration.writeConcernMax(), function (
           err,
           result
         ) {
@@ -1427,7 +1427,7 @@ describe('Insert', function() {
             query,
             { $set: { 'a.b.d': 1 } },
             configuration.writeConcernMax(),
-            function(err, r) {
+            function (err, r) {
               test.equal(null, err);
               test.equal(1, r.result.n);
 
@@ -1446,10 +1446,10 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('shouldExecuteInsertWithNoCallbackAndWriteConcern');
         collection.insert({ a: { b: { c: 1 } } }).then(
@@ -1471,7 +1471,7 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       function cb(err) {
         test.equal(null, err);
         client.close(done);
@@ -1479,7 +1479,7 @@ describe('Insert', function() {
 
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('gh-completely2');
         collection.insert({ a: 1 }, { w: 0 }, cb);
@@ -1494,7 +1494,7 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       function cb(err) {
         test.equal(null, err);
         client.close(done);
@@ -1502,7 +1502,7 @@ describe('Insert', function() {
 
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('gh-completely3');
         collection.update({ a: 1 }, { a: 2 }, { upsert: true, w: 0 }, cb);
@@ -1517,7 +1517,7 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       function cb(err) {
         test.equal(null, err);
         client.close(done);
@@ -1525,7 +1525,7 @@ describe('Insert', function() {
 
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('gh-completely1');
         collection.remove({ a: 1 }, { w: 0 }, cb);
@@ -1543,10 +1543,10 @@ describe('Insert', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('bson_types_insert');
 
@@ -1560,38 +1560,38 @@ describe('Insert', function() {
           code: new Code('function () {}', { a: 55 })
         };
 
-        collection.insert(document, configuration.writeConcernMax(), function(err, result) {
+        collection.insert(document, configuration.writeConcernMax(), function (err, result) {
           test.equal(null, err);
           test.ok(result);
 
-          collection.findOne({ symbol: new BSONSymbol('abcdefghijkl') }, function(err, doc) {
+          collection.findOne({ symbol: new BSONSymbol('abcdefghijkl') }, function (err, doc) {
             test.equal(null, err);
             test.equal('abcdefghijkl', doc.symbol.toString());
 
-            collection.findOne({ objid: new ObjectId('abcdefghijkl') }, function(err, doc) {
+            collection.findOne({ objid: new ObjectId('abcdefghijkl') }, function (err, doc) {
               test.equal(null, err);
               test.equal('6162636465666768696a6b6c', doc.objid.toString());
 
-              collection.findOne({ double: new Double(1) }, function(err, doc) {
+              collection.findOne({ double: new Double(1) }, function (err, doc) {
                 test.equal(null, err);
                 test.equal(1, doc.double);
 
-                collection.findOne({ binary: new Binary(Buffer.from('hello world')) }, function(
+                collection.findOne({ binary: new Binary(Buffer.from('hello world')) }, function (
                   err,
                   doc
                 ) {
                   test.equal(null, err);
                   test.equal('hello world', doc.binary.toString());
 
-                  collection.findOne({ minkey: new MinKey() }, function(err, doc) {
+                  collection.findOne({ minkey: new MinKey() }, function (err, doc) {
                     test.equal(null, err);
                     test.ok(doc.minkey._bsontype === 'MinKey');
 
-                    collection.findOne({ maxkey: new MaxKey() }, function(err, doc) {
+                    collection.findOne({ maxkey: new MaxKey() }, function (err, doc) {
                       test.equal(null, err);
                       test.ok(doc.maxkey._bsontype === 'MaxKey');
 
-                      collection.findOne({ code: new Code('function () {}', { a: 55 }) }, function(
+                      collection.findOne({ code: new Code('function () {}', { a: 55 }) }, function (
                         err,
                         doc
                       ) {
@@ -1620,10 +1620,10 @@ describe('Insert', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('bson_types_insert_1');
 
@@ -1637,38 +1637,38 @@ describe('Insert', function() {
           code: new Code('function () {}', { a: 55 })
         };
 
-        collection.insert(document, configuration.writeConcernMax(), function(err, result) {
+        collection.insert(document, configuration.writeConcernMax(), function (err, result) {
           test.equal(null, err);
           test.ok(result);
 
-          collection.findOne({ symbol: new BSONSymbol('abcdefghijkl') }, function(err, doc) {
+          collection.findOne({ symbol: new BSONSymbol('abcdefghijkl') }, function (err, doc) {
             test.equal(null, err);
             test.equal('abcdefghijkl', doc.symbol.toString());
 
-            collection.findOne({ objid: new ObjectId('abcdefghijkl') }, function(err, doc) {
+            collection.findOne({ objid: new ObjectId('abcdefghijkl') }, function (err, doc) {
               test.equal(null, err);
               test.equal('6162636465666768696a6b6c', doc.objid.toString());
 
-              collection.findOne({ double: new Double(1) }, function(err, doc) {
+              collection.findOne({ double: new Double(1) }, function (err, doc) {
                 test.equal(null, err);
                 test.equal(1, doc.double);
 
-                collection.findOne({ binary: new Binary(Buffer.from('hello world')) }, function(
+                collection.findOne({ binary: new Binary(Buffer.from('hello world')) }, function (
                   err,
                   doc
                 ) {
                   test.equal(null, err);
                   test.equal('hello world', doc.binary.toString());
 
-                  collection.findOne({ minkey: new MinKey() }, function(err, doc) {
+                  collection.findOne({ minkey: new MinKey() }, function (err, doc) {
                     test.equal(null, err);
                     test.ok(doc.minkey._bsontype === 'MinKey');
 
-                    collection.findOne({ maxkey: new MaxKey() }, function(err, doc) {
+                    collection.findOne({ maxkey: new MaxKey() }, function (err, doc) {
                       test.equal(null, err);
                       test.ok(doc.maxkey._bsontype === 'MaxKey');
 
-                      collection.findOne({ code: new Code('function () {}', { a: 55 }) }, function(
+                      collection.findOne({ code: new Code('function () {}', { a: 55 }) }, function (
                         err,
                         doc
                       ) {
@@ -1694,25 +1694,25 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('timestamp_date');
 
         var d = new Date();
         var documents = [{ x: new Timestamp(1, 2) }, { x: d }];
 
-        collection.insert(documents, configuration.writeConcernMax(), function(err, result) {
+        collection.insert(documents, configuration.writeConcernMax(), function (err, result) {
           test.equal(null, err);
           test.ok(result);
 
-          collection.findOne({ x: new Timestamp(1, 2) }, function(err, doc) {
+          collection.findOne({ x: new Timestamp(1, 2) }, function (err, doc) {
             test.equal(null, err);
             test.ok(doc != null);
 
-            collection.findOne({ x: d }, function(err, doc) {
+            collection.findOne({ x: d }, function (err, doc) {
               test.equal(null, err);
               test.ok(doc != null);
               client.close(done);
@@ -1730,10 +1730,10 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('negative_pos');
 
@@ -1742,11 +1742,11 @@ describe('Insert', function() {
           neg: Number.NEGATIVE_INFINITY
         };
 
-        collection.insert(document, configuration.writeConcernMax(), function(err, result) {
+        collection.insert(document, configuration.writeConcernMax(), function (err, result) {
           test.equal(null, err);
           test.ok(result);
 
-          collection.findOne({}, function(err, doc) {
+          collection.findOne({}, function (err, doc) {
             test.equal(null, err);
             test.equal(Number.POSITIVE_INFINITY, doc.pos);
             test.equal(Number.NEGATIVE_INFINITY, doc.neg);
@@ -1764,22 +1764,22 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var regexp = /foobar/i;
 
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        db.createCollection('test_regex', function(err, collection) {
-          collection.insert({ b: regexp }, configuration.writeConcernMax(), function(err, ids) {
+        db.createCollection('test_regex', function (err, collection) {
+          collection.insert({ b: regexp }, configuration.writeConcernMax(), function (err, ids) {
             test.equal(null, err);
             test.ok(ids);
 
             collection
               .find({})
               .project({ b: 1 })
-              .toArray(function(err, items) {
+              .toArray(function (err, items) {
                 test.equal('' + regexp, '' + items[0].b);
                 // Let's close the db
                 client.close(done);
@@ -1797,23 +1797,23 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var regexp = /foobaré/;
 
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('shouldCorrectlyInsertSimpleUTF8Regexp');
 
-        collection.insert({ b: regexp }, configuration.writeConcernMax(), function(err, ids) {
+        collection.insert({ b: regexp }, configuration.writeConcernMax(), function (err, ids) {
           test.equal(null, err);
           test.ok(ids);
 
           collection
             .find({})
             .project({ b: 1 })
-            .toArray(function(err, items) {
+            .toArray(function (err, items) {
               test.equal(null, err);
               test.equal('' + regexp, '' + items[0].b);
               // Let's close the db
@@ -1831,10 +1831,10 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var k = Buffer.alloc(15);
         for (var i = 0; i < 15; i++) k[i] = 0;
@@ -1860,7 +1860,7 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var o = configuration.writeConcernMax();
       o.promoteLongs = false;
@@ -1868,18 +1868,18 @@ describe('Insert', function() {
         poolSize: 1,
         promoteLongs: false
       });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         db.collection('shouldCorrectlyHonorPromoteLong').insert(
           {
             doc: Long.fromNumber(10),
             array: [[Long.fromNumber(10)]]
           },
-          function(err, doc) {
+          function (err, doc) {
             test.equal(null, err);
             test.ok(doc);
 
-            db.collection('shouldCorrectlyHonorPromoteLong').findOne(function(err, doc) {
+            db.collection('shouldCorrectlyHonorPromoteLong').findOne(function (err, doc) {
               test.equal(null, err);
               test.ok(doc.doc._bsontype === 'Long');
               test.ok(doc.array[0][0]._bsontype === 'Long');
@@ -1898,7 +1898,7 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var o = configuration.writeConcernMax();
       o.promoteLongs = false;
@@ -1907,7 +1907,7 @@ describe('Insert', function() {
         poolSize: 1,
         promoteLongs: false
       });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         db.collection('shouldCorrectlyHonorPromoteLongFalseNativeBSONWithGetMore').insertMany(
           [
@@ -1936,14 +1936,14 @@ describe('Insert', function() {
             { a: Long.fromNumber(10) },
             { a: Long.fromNumber(10) }
           ],
-          function(err, doc) {
+          function (err, doc) {
             test.equal(null, err);
             test.ok(doc);
 
             db.collection('shouldCorrectlyHonorPromoteLongFalseNativeBSONWithGetMore')
               .find({})
               .batchSize(2)
-              .toArray(function(err, docs) {
+              .toArray(function (err, docs) {
                 test.equal(null, err);
                 var doc = docs.pop();
 
@@ -1963,21 +1963,21 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         db.collection('shouldCorrectlyHonorPromoteLongTrueNativeBSON').insert(
           {
             doc: Long.fromNumber(10),
             array: [[Long.fromNumber(10)]]
           },
-          function(err, doc) {
+          function (err, doc) {
             test.equal(null, err);
             test.ok(doc);
 
-            db.collection('shouldCorrectlyHonorPromoteLongTrueNativeBSON').findOne(function(
+            db.collection('shouldCorrectlyHonorPromoteLongTrueNativeBSON').findOne(function (
               err,
               doc
             ) {
@@ -2000,24 +2000,27 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
         poolSize: 1,
         promoteLongs: false
       });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         db.collection('shouldCorrectlyHonorPromoteLongFalseJSBSON').insert(
           {
             doc: Long.fromNumber(10),
             array: [[Long.fromNumber(10)]]
           },
-          function(err, doc) {
+          function (err, doc) {
             test.equal(null, err);
             test.ok(doc);
 
-            db.collection('shouldCorrectlyHonorPromoteLongFalseJSBSON').findOne(function(err, doc) {
+            db.collection('shouldCorrectlyHonorPromoteLongFalseJSBSON').findOne(function (
+              err,
+              doc
+            ) {
               test.equal(null, err);
               test.equal(null, err);
               test.ok(doc.doc._bsontype === 'Long');
@@ -2037,21 +2040,21 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         db.collection('shouldCorrectlyHonorPromoteLongTrueJSBSON').insert(
           {
             doc: Long.fromNumber(10),
             array: [[Long.fromNumber(10)]]
           },
-          function(err, doc) {
+          function (err, doc) {
             test.equal(null, err);
             test.ok(doc);
 
-            db.collection('shouldCorrectlyHonorPromoteLongTrueJSBSON').findOne(function(err, doc) {
+            db.collection('shouldCorrectlyHonorPromoteLongTrueJSBSON').findOne(function (err, doc) {
               test.equal(null, err);
               test.equal(null, err);
               test.ok('number', typeof doc.doc);
@@ -2071,11 +2074,11 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
 
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         db.collection('shouldCorrectlyOverrideCheckKeysJSOnUpdate').update(
           {
@@ -2083,7 +2086,7 @@ describe('Insert', function() {
           },
           { $set: { b: 1 } },
           { checkKeys: false },
-          function(err, doc) {
+          function (err, doc) {
             test.equal(null, err);
             test.ok(doc);
 
@@ -2101,22 +2104,22 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var col = db.collection('shouldCorrectlyApplyBitOperator');
 
-        col.insert({ a: 1, b: 1 }, function(err, result) {
+        col.insert({ a: 1, b: 1 }, function (err, result) {
           test.equal(null, err);
           test.ok(result);
 
-          col.update({ a: 1 }, { $bit: { b: { and: 0 } } }, function(err, result) {
+          col.update({ a: 1 }, { $bit: { b: { and: 0 } } }, function (err, result) {
             test.equal(null, err);
             test.ok(result);
 
-            col.findOne({ a: 1 }, function(err, doc) {
+            col.findOne({ a: 1 }, function (err, doc) {
               test.equal(null, err);
               test.equal(1, doc.a);
               test.equal(0, doc.b);
@@ -2140,10 +2143,10 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var col = db.collection('shouldCorrectlyPerformInsertAndUpdateWithFunctionSerialization', {
           serializeFunctions: true
@@ -2152,11 +2155,11 @@ describe('Insert', function() {
         col.insert(
           {
             a: 1,
-            f: function(x) {
+            f: function (x) {
               return x;
             }
           },
-          function(err, doc) {
+          function (err, doc) {
             test.equal(null, err);
             test.ok(doc);
 
@@ -2164,16 +2167,16 @@ describe('Insert', function() {
               { a: 1 },
               {
                 $set: {
-                  f: function(y) {
+                  f: function (y) {
                     return y;
                   }
                 }
               },
-              function(err, doc) {
+              function (err, doc) {
                 test.equal(null, err);
                 test.ok(doc);
 
-                col.findOne({ a: 1 }, function(err, doc) {
+                col.findOne({ a: 1 }, function (err, doc) {
                   test.equal(null, err);
                   test.equal(trim('function (y){return y;}'), trim(doc.f.code));
                   client.close(done);
@@ -2193,10 +2196,10 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var col = db.collection('shouldCorrectlyAllowforMoreThanAThousandDocsInsert', {
           serializeFunctions: true
@@ -2207,7 +2210,7 @@ describe('Insert', function() {
           docs.push({ a: i });
         }
 
-        col.insert(docs, function(err, doc) {
+        col.insert(docs, function (err, doc) {
           test.equal(null, err);
           test.equal(2000, doc.result.n);
           docs = [];
@@ -2216,7 +2219,7 @@ describe('Insert', function() {
             docs.push({ a: i });
           }
 
-          col.insertMany(docs, function(err, doc) {
+          col.insertMany(docs, function (err, doc) {
             test.equal(null, err);
             test.equal(2000, doc.result.n);
 
@@ -2234,25 +2237,25 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         // Get collection
         var col = db.collection('insertManyMultipleWriteErrors');
-        col.drop(function(err, r) {
+        col.drop(function (err, r) {
           expect(r).to.not.exist;
 
           // Create unique index
-          col.createIndex({ a: 1 }, { unique: true }, function(err, r) {
+          col.createIndex({ a: 1 }, { unique: true }, function (err, r) {
             test.equal(null, err);
             test.ok(r);
 
             col.insertMany(
               [{ a: 1 }, { a: 2 }, { a: 1 }, { a: 3 }, { a: 1 }],
               { ordered: false },
-              function(err, r) {
+              function (err, r) {
                 expect(r).to.not.exist;
                 expect(err).to.exist;
                 expect(err.result).to.exist;
@@ -2274,25 +2277,25 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         // Get collection
         var col = db.collection('insertManyMultipleWriteErrors1');
-        col.drop(function(err, r) {
+        col.drop(function (err, r) {
           expect(r).to.not.exist;
 
           // Create unique index
-          col.createIndex({ a: 1 }, { unique: true }, function(err, r) {
+          col.createIndex({ a: 1 }, { unique: true }, function (err, r) {
             test.equal(null, err);
             test.ok(r);
 
             col.insert(
               [{ a: 1 }, { a: 2 }, { a: 1 }, { a: 3 }, { a: 1 }],
               { ordered: false },
-              function(err, r) {
+              function (err, r) {
                 expect(r).to.not.exist;
                 expect(err).to.exist;
                 expect(err.result).to.exist;
@@ -2314,26 +2317,26 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         // Get collection
         var col = db.collection('insertManyMultipleWriteErrors2');
-        col.drop(function(/*err, r*/) {
+        col.drop(function (/*err, r*/) {
           // TODO: reenable once SERVER-36317 is resolved
           // expect(r).to.not.exist;
 
           // Create unique index
-          col.createIndex({ a: 1 }, { unique: true }, function(err, r) {
+          col.createIndex({ a: 1 }, { unique: true }, function (err, r) {
             test.equal(null, err);
             test.ok(r);
 
             col.insertMany(
               [{ a: 1 }, { a: 2 }, { a: 1 }, { a: 3 }, { a: 1 }],
               { ordered: true },
-              function(err, r) {
+              function (err, r) {
                 test.equal(r, null);
                 test.ok(err != null);
                 test.ok(err.result);
@@ -2354,26 +2357,26 @@ describe('Insert', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         // Get collection
         var col = db.collection('insertManyMultipleWriteErrors3');
-        col.drop(function(/*err, r*/) {
+        col.drop(function (/*err, r*/) {
           // TODO: reenable once SERVER-36317 is resolved
           // expect(r).to.not.exist;
 
           // Create unique index
-          col.createIndex({ a: 1 }, { unique: true }, function(err, r) {
+          col.createIndex({ a: 1 }, { unique: true }, function (err, r) {
             test.equal(null, err);
             test.ok(r);
 
             col.insert(
               [{ a: 1 }, { a: 2 }, { a: 1 }, { a: 3 }, { a: 1 }],
               { ordered: true },
-              function(err, r) {
+              function (err, r) {
                 test.equal(r, null);
                 test.ok(err != null);
                 test.ok(err.result);
@@ -2390,31 +2393,31 @@ describe('Insert', function() {
   it('Correctly allow forceServerObjectId for insertOne', {
     metadata: { requires: { topology: ['single'] } },
 
-    test: function(done) {
+    test: function (done) {
       var started = [];
       var succeeded = [];
 
-      var listener = require('../../src').instrument(function(err) {
+      var listener = require('../../src').instrument(function (err) {
         test.equal(null, err);
       });
 
-      listener.on('started', function(event) {
+      listener.on('started', function (event) {
         if (event.commandName === 'insert') started.push(event);
       });
 
-      listener.on('succeeded', function(event) {
+      listener.on('succeeded', function (event) {
         if (event.commandName === 'insert') succeeded.push(event);
       });
 
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         test.equal(null, err);
 
         db.collection('apm_test')
           .insertOne({ a: 1 }, { forceServerObjectId: true })
-          .then(function() {
+          .then(function () {
             test.equal(undefined, started[0].command.documents[0]._id);
             listener.uninstrument();
 
@@ -2427,31 +2430,31 @@ describe('Insert', function() {
   it('Correctly allow forceServerObjectId for insertMany', {
     metadata: { requires: { topology: ['single'] } },
 
-    test: function(done) {
+    test: function (done) {
       var started = [];
       var succeeded = [];
 
-      var listener = require('../../src').instrument(function(err) {
+      var listener = require('../../src').instrument(function (err) {
         test.equal(null, err);
       });
 
-      listener.on('started', function(event) {
+      listener.on('started', function (event) {
         if (event.commandName === 'insert') started.push(event);
       });
 
-      listener.on('succeeded', function(event) {
+      listener.on('succeeded', function (event) {
         if (event.commandName === 'insert') succeeded.push(event);
       });
 
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         test.equal(null, err);
 
         db.collection('apm_test')
           .insertMany([{ a: 1 }], { forceServerObjectId: true })
-          .then(function() {
+          .then(function () {
             test.equal(undefined, started[0].command.documents[0]._id);
 
             listener.uninstrument();
@@ -2464,31 +2467,31 @@ describe('Insert', function() {
   it('Correctly allow forceServerObjectId for insertMany', {
     metadata: { requires: { topology: ['single'] } },
 
-    test: function(done) {
+    test: function (done) {
       var started = [];
       var succeeded = [];
 
-      var listener = require('../../src').instrument(function(err) {
+      var listener = require('../../src').instrument(function (err) {
         test.equal(null, err);
       });
 
-      listener.on('started', function(event) {
+      listener.on('started', function (event) {
         if (event.commandName === 'insert') started.push(event);
       });
 
-      listener.on('succeeded', function(event) {
+      listener.on('succeeded', function (event) {
         if (event.commandName === 'insert') succeeded.push(event);
       });
 
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         test.equal(null, err);
 
         db.collection('apm_test')
           .insertMany([{ a: 1 }], { forceServerObjectId: true })
-          .then(function() {
+          .then(function () {
             test.equal(undefined, started[0].command.documents[0]._id);
 
             listener.uninstrument();
@@ -2500,15 +2503,15 @@ describe('Insert', function() {
 
   it('should return correct number of ids for insertMany { ordered: true }', {
     metadata: { requires: { topology: ['single'] } },
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         test.equal(null, err);
         db.collection('inserted_ids_test')
           .insertMany([{}, {}, {}], { ordered: true })
-          .then(function(r) {
+          .then(function (r) {
             test.equal(3, Object.keys(r.insertedIds).length);
             client.close(done);
           });
@@ -2518,15 +2521,15 @@ describe('Insert', function() {
 
   it('should return correct number of ids for insertMany { ordered: false }', {
     metadata: { requires: { topology: ['single'] } },
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         test.equal(null, err);
         db.collection('inserted_ids_test')
           .insertMany([{}, {}, {}], { ordered: false })
-          .then(function(r) {
+          .then(function (r) {
             test.equal(null, err);
             test.equal(3, Object.keys(r.insertedIds).length);
             client.close(done);
@@ -2538,10 +2541,10 @@ describe('Insert', function() {
   it('Insert document including sub documents', {
     metadata: { requires: { topology: ['single'] } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         test.equal(null, err);
 
@@ -2562,13 +2565,13 @@ describe('Insert', function() {
           products: [product]
         };
 
-        db.collection('sub_documents').insertOne(doc, function(err, r) {
+        db.collection('sub_documents').insertOne(doc, function (err, r) {
           test.equal(null, err);
           test.ok(r);
 
           db.collection('sub_documents')
             .find({})
-            .next(function(err, v) {
+            .next(function (err, v) {
               test.equal(null, err);
               test.equal('a', v.products[0].suppliers[0].shipments[0].shipment1);
 
@@ -2582,11 +2585,11 @@ describe('Insert', function() {
   it('should return result using toJSON', {
     metadata: { requires: { topology: ['single'] } },
 
-    test: function(done) {
+    test: function (done) {
       const configuration = this.configuration;
       const client = configuration.newClient();
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         const db = client.db(configuration.db);
         db.collection('to_json').insertOne({ _id: 0 }, (err, result) => {
           const jsonResult = result.toJSON();

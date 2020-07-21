@@ -7,10 +7,10 @@ const Connection = require('../../../src/cmap/connection');
 
 const { MongoCredentials } = require('../../../src/core/auth/mongo_credentials');
 
-describe('Basic single server auth tests', function() {
+describe('Basic single server auth tests', function () {
   it('should correctly authenticate server using scram-sha-256 using connect auth', {
     metadata: { requires: { topology: 'auth', mongodb: '>=3.7.3' } },
-    test: function(done) {
+    test: function (done) {
       const config = this.configuration;
       const mechanism = 'scram-sha-256';
       const source = 'admin';
@@ -64,15 +64,15 @@ describe('Basic single server auth tests', function() {
   it('should fail to authenticate server using scram-sha-1 using connect auth', {
     metadata: { requires: { topology: 'auth' } },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
 
       // Enable connections accounting
       Connection.enableConnectionAccounting();
 
       // Restart instance
-      self.configuration.manager.restart(true).then(function() {
-        locateAuthMethod(self.configuration, function(err, method) {
+      self.configuration.manager.restart(true).then(function () {
+        locateAuthMethod(self.configuration, function (err, method) {
           expect(err).to.be.null;
 
           const credentials = new MongoCredentials({
@@ -91,7 +91,7 @@ describe('Basic single server auth tests', function() {
               roles: [{ role: 'root', db: 'admin' }],
               digestPassword: true
             },
-            function(cmdErr, r) {
+            function (cmdErr, r) {
               expect(r).to.exist;
               expect(cmdErr).to.be.null;
 
@@ -100,7 +100,7 @@ describe('Basic single server auth tests', function() {
                 this.configuration.port
               );
 
-              server.on('error', function() {
+              server.on('error', function () {
                 // console.log('=================== ' + Object.keys(Connection.connections()).length)
                 expect(Object.keys(Connection.connections()).length).to.equal(0);
                 Connection.disableConnectionAccounting();
@@ -119,7 +119,7 @@ describe('Basic single server auth tests', function() {
   it('should correctly authenticate server using scram-sha-1 using connect auth', {
     metadata: { requires: { topology: 'auth' } },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       const config = this.configuration;
 
@@ -127,8 +127,8 @@ describe('Basic single server auth tests', function() {
       Connection.enableConnectionAccounting();
 
       // Restart instance
-      self.configuration.manager.restart(true).then(function() {
-        locateAuthMethod(self.configuration, function(err, method) {
+      self.configuration.manager.restart(true).then(function () {
+        locateAuthMethod(self.configuration, function (err, method) {
           expect(err).to.be.null;
 
           executeCommand(
@@ -140,7 +140,7 @@ describe('Basic single server auth tests', function() {
               roles: [{ role: 'root', db: 'admin' }],
               digestPassword: true
             },
-            function(cmdErr, r) {
+            function (cmdErr, r) {
               expect(r).to.exist;
               expect(cmdErr).to.be.null;
 
@@ -153,13 +153,13 @@ describe('Basic single server auth tests', function() {
                 password: 'root'
               });
 
-              server.on('connect', function(_server) {
+              server.on('connect', function (_server) {
                 executeCommand(
                   self.configuration,
                   'admin',
                   { dropUser: 'root' },
                   { credentials },
-                  function(dropUserErr, dropUserRes) {
+                  function (dropUserErr, dropUserRes) {
                     expect(dropUserRes).to.exist;
                     expect(dropUserErr).to.be.null;
 
@@ -185,7 +185,7 @@ describe('Basic single server auth tests', function() {
     {
       metadata: { requires: { topology: 'auth' } },
 
-      test: function(done) {
+      test: function (done) {
         var self = this;
         const config = this.configuration;
 
@@ -193,8 +193,8 @@ describe('Basic single server auth tests', function() {
         Connection.enableConnectionAccounting();
 
         // Restart instance
-        self.configuration.manager.restart(true).then(function() {
-          locateAuthMethod(self.configuration, function(err, method) {
+        self.configuration.manager.restart(true).then(function () {
+          locateAuthMethod(self.configuration, function (err, method) {
             expect(err).to.be.null;
 
             executeCommand(
@@ -206,7 +206,7 @@ describe('Basic single server auth tests', function() {
                 roles: [{ role: 'root', db: 'admin' }],
                 digestPassword: true
               },
-              function(cmdErr, r) {
+              function (cmdErr, r) {
                 expect(r).to.exist;
                 expect(cmdErr).to.be.null;
 
@@ -227,7 +227,7 @@ describe('Basic single server auth tests', function() {
                     digestPassword: true
                   },
                   { credentials },
-                  function(createUserErr, createUserRes) {
+                  function (createUserErr, createUserRes) {
                     expect(createUserRes).to.exist;
                     expect(createUserErr).to.be.null;
 
@@ -239,7 +239,7 @@ describe('Basic single server auth tests', function() {
 
                     var index = 0;
 
-                    var messageHandler = function(messageHandlerErr, result) {
+                    var messageHandler = function (messageHandlerErr, result) {
                       index = index + 1;
 
                       // Tests
@@ -257,9 +257,9 @@ describe('Basic single server auth tests', function() {
                     };
 
                     // Add event listeners
-                    server.on('connect', function() {
+                    server.on('connect', function () {
                       for (var i = 0; i < 10; i++) {
-                        process.nextTick(function() {
+                        process.nextTick(function () {
                           server.insert('test.test', [{ a: 1 }], messageHandler);
                           server.insert('test.test', [{ a: 1 }], messageHandler);
                           server.insert('test.test', [{ a: 1 }], messageHandler);
@@ -289,7 +289,7 @@ describe('Basic single server auth tests', function() {
   it('should correctly authenticate server using scram-sha-1 using auth method', {
     metadata: { requires: { topology: 'auth' } },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       const config = this.configuration;
 
@@ -297,8 +297,8 @@ describe('Basic single server auth tests', function() {
       Connection.enableConnectionAccounting();
 
       // Restart instance
-      self.configuration.manager.restart(true).then(function() {
-        locateAuthMethod(self.configuration, function(err, method) {
+      self.configuration.manager.restart(true).then(function () {
+        locateAuthMethod(self.configuration, function (err, method) {
           expect(err).to.be.null;
 
           executeCommand(
@@ -310,7 +310,7 @@ describe('Basic single server auth tests', function() {
               roles: [{ role: 'root', db: 'admin' }],
               digestPassword: true
             },
-            function(cmdErr, r) {
+            function (cmdErr, r) {
               expect(r).to.exist;
               expect(cmdErr).to.be.null;
 
@@ -331,7 +331,7 @@ describe('Basic single server auth tests', function() {
                   digestPassword: true
                 },
                 { credentials },
-                function(createUserErr, createUserRes) {
+                function (createUserErr, createUserRes) {
                   expect(createUserRes).to.exist;
                   expect(createUserErr).to.be.null;
 
@@ -341,7 +341,7 @@ describe('Basic single server auth tests', function() {
                   var index = 0;
                   var error = false;
 
-                  var messageHandler = function(messageHandlerErr, result) {
+                  var messageHandler = function (messageHandlerErr, result) {
                     index = index + 1;
 
                     // Tests
@@ -361,20 +361,20 @@ describe('Basic single server auth tests', function() {
                   };
 
                   // Add event listeners
-                  server.on('connect', function(_server) {
-                    _server.auth(credentials, function(authErr, authRes) {
+                  server.on('connect', function (_server) {
+                    _server.auth(credentials, function (authErr, authRes) {
                       expect(authRes).to.exist;
                       expect(authErr).to.not.exist;
 
                       for (var i = 0; i < 100; i++) {
-                        process.nextTick(function() {
+                        process.nextTick(function () {
                           server.insert('test.test', [{ a: 1 }], messageHandler);
                         });
                       }
                     });
 
-                    var executeIsMaster = function() {
-                      _server.command('admin.$cmd', { ismaster: true }, function(
+                    var executeIsMaster = function () {
+                      _server.command('admin.$cmd', { ismaster: true }, function (
                         adminErr,
                         adminRes
                       ) {
@@ -404,7 +404,7 @@ describe('Basic single server auth tests', function() {
   it.skip('should correctly authenticate server using scram-sha-1 using connect auth then logout', {
     metadata: { requires: { topology: 'auth' } },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       const config = this.configuration;
 
@@ -412,8 +412,8 @@ describe('Basic single server auth tests', function() {
       Connection.enableConnectionAccounting();
 
       // Restart instance
-      self.configuration.manager.restart(true).then(function() {
-        locateAuthMethod(self.configuration, function(err, method) {
+      self.configuration.manager.restart(true).then(function () {
+        locateAuthMethod(self.configuration, function (err, method) {
           expect(err).to.be.null;
 
           executeCommand(
@@ -425,7 +425,7 @@ describe('Basic single server auth tests', function() {
               roles: [{ role: 'root', db: 'admin' }],
               digestPassword: true
             },
-            function(cmdErr, r) {
+            function (cmdErr, r) {
               expect(r).to.exist;
               expect(cmdErr).to.be.null;
 
@@ -446,7 +446,7 @@ describe('Basic single server auth tests', function() {
                   digestPassword: true
                 },
                 { credentials },
-                function(createUserErr, createUserRes) {
+                function (createUserErr, createUserRes) {
                   expect(createUserRes).to.exist;
                   expect(createUserErr).to.be.null;
 
@@ -454,16 +454,16 @@ describe('Basic single server auth tests', function() {
                   var server = config.newTopology(this.configuration.host, this.configuration.port);
 
                   // Add event listeners
-                  server.on('connect', function(_server) {
-                    _server.insert('test.test', [{ a: 1 }], function(insertErr, insertRes) {
+                  server.on('connect', function (_server) {
+                    _server.insert('test.test', [{ a: 1 }], function (insertErr, insertRes) {
                       expect(insertRes).to.exist;
                       expect(insertErr).to.be.null;
 
                       // Logout pool
-                      _server.logout('test', function(logoutErr) {
+                      _server.logout('test', function (logoutErr) {
                         expect(logoutErr).to.be.null;
 
-                        _server.insert('test.test', [{ a: 1 }], function(
+                        _server.insert('test.test', [{ a: 1 }], function (
                           secondInsertErr,
                           secondInsertRes
                         ) {
@@ -495,7 +495,7 @@ describe('Basic single server auth tests', function() {
   it('should correctly have server auth wait for logout to finish', {
     metadata: { requires: { topology: 'auth' } },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       const config = this.configuration;
 
@@ -503,8 +503,8 @@ describe('Basic single server auth tests', function() {
       Connection.enableConnectionAccounting();
 
       // Restart instance
-      self.configuration.manager.restart(true).then(function() {
-        locateAuthMethod(self.configuration, function(err, method) {
+      self.configuration.manager.restart(true).then(function () {
+        locateAuthMethod(self.configuration, function (err, method) {
           expect(err).to.be.null;
 
           executeCommand(
@@ -516,7 +516,7 @@ describe('Basic single server auth tests', function() {
               roles: [{ role: 'root', db: 'admin' }],
               digestPassword: true
             },
-            function(ercmdErrr, r) {
+            function (ercmdErrr, r) {
               expect(r).to.exist;
               expect(err).to.be.null;
 
@@ -537,28 +537,28 @@ describe('Basic single server auth tests', function() {
                   digestPassword: true
                 },
                 { credentials },
-                function(createUserErr, createUserRes) {
+                function (createUserErr, createUserRes) {
                   expect(createUserRes).to.exist;
                   expect(createUserErr).to.be.null;
                   // Attempt to connect
                   var server = config.newTopology(this.configuration.host, this.configuration.port);
 
                   // Add event listeners
-                  server.on('connect', function(_server) {
-                    _server.insert('test.test', [{ a: 1 }], function(insertErr, insertRes) {
+                  server.on('connect', function (_server) {
+                    _server.insert('test.test', [{ a: 1 }], function (insertErr, insertRes) {
                       expect(insertRes).to.exist;
                       expect(insertErr).to.be.null;
 
                       // Logout pool
-                      _server.logout('test', function(logoutErr) {
+                      _server.logout('test', function (logoutErr) {
                         expect(logoutErr).to.be.null;
                       });
 
-                      _server.auth(credentials, function(authErr, authRes) {
+                      _server.auth(credentials, function (authErr, authRes) {
                         expect(authRes).to.exist;
                         expect(authErr).to.be.null;
 
-                        _server.insert('test.test', [{ a: 1 }], function(
+                        _server.insert('test.test', [{ a: 1 }], function (
                           secondInsertErr,
                           secondInsertRes
                         ) {

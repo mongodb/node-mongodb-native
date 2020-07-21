@@ -5,7 +5,7 @@ const chalk = require('chalk');
 
 let activeClients = [];
 const $newClient = TestConfiguration.prototype.newClient;
-TestConfiguration.prototype.newClient = function() {
+TestConfiguration.prototype.newClient = function () {
   const client = $newClient.apply(this, arguments);
   client.trace = new Error().stack;
   activeClients.push(client);
@@ -29,7 +29,7 @@ function unifiedTopologyIsConnected(client) {
   );
 }
 
-after(function() {
+after(function () {
   const traces = [];
   const openClientCount = activeClients.reduce((count, client) => {
     if (unifiedTopologyIsConnected(client)) {

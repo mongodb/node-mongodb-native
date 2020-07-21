@@ -3,15 +3,15 @@
 const setupDatabase = require('../functional/shared').setupDatabase;
 const expect = require('chai').expect;
 
-describe('examples(query):', function() {
+describe('examples(query):', function () {
   let client;
   let db;
 
-  before(async function() {
+  before(async function () {
     await setupDatabase(this.configuration);
   });
 
-  beforeEach(async function() {
+  beforeEach(async function () {
     client = await this.configuration.newClient().connect();
     db = client.db(this.configuration.db);
 
@@ -52,7 +52,7 @@ describe('examples(query):', function() {
     // End Example 6
   });
 
-  afterEach(async function() {
+  afterEach(async function () {
     await client.close();
     client = undefined;
     db = undefined;
@@ -60,7 +60,7 @@ describe('examples(query):', function() {
 
   it('select all documents in a collection', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function() {
+    test: async function () {
       // Start Example 7
       const cursor = db.collection('inventory').find({});
       // End Example 7
@@ -71,7 +71,7 @@ describe('examples(query):', function() {
 
   it('Specify Equality Condition', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function() {
+    test: async function () {
       // Start Example 9
       const cursor = db.collection('inventory').find({ status: 'D' });
       // End Example 9
@@ -82,7 +82,7 @@ describe('examples(query):', function() {
 
   it('Specify Conditions Using Query Operators', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function() {
+    test: async function () {
       // Start Example 10
       const cursor = db.collection('inventory').find({
         status: { $in: ['A', 'D'] }
@@ -94,7 +94,7 @@ describe('examples(query):', function() {
 
   it('Specify ``AND`` Condition', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function() {
+    test: async function () {
       // Start Example 11
       const cursor = db.collection('inventory').find({
         status: 'A',
@@ -107,7 +107,7 @@ describe('examples(query):', function() {
 
   it('Specify ``OR`` Condition', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function() {
+    test: async function () {
       // Start Example 12
       const cursor = db.collection('inventory').find({
         $or: [{ status: 'A' }, { qty: { $lt: 30 } }]
@@ -119,7 +119,7 @@ describe('examples(query):', function() {
 
   it('Specify ``AND`` as well as ``OR`` Conditions', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function() {
+    test: async function () {
       // Start Example 13
       const cursor = db.collection('inventory').find({
         status: 'A',

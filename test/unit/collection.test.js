@@ -15,10 +15,10 @@ class MockTopology extends EventEmitter {
   }
 }
 
-describe('Collection', function() {
+describe('Collection', function () {
   it('should not allow atomic operators for findOneAndReplace', {
     metadata: { requires: { topology: 'single' } },
-    test: function() {
+    test: function () {
       const db = new Db('fakeDb', new MockTopology());
       const collection = db.collection('test');
       expect(() => {

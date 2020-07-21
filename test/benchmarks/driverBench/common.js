@@ -62,7 +62,7 @@ function dropBucket() {
 }
 
 function makeLoadJSON(name) {
-  return function() {
+  return function () {
     this.doc = JSON.parse(loadSpecString(['single_and_multi_document', name]));
   };
 }

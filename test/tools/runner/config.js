@@ -32,7 +32,7 @@ class NativeConfiguration {
       parsedURI.options
     );
 
-    this.writeConcern = function() {
+    this.writeConcern = function () {
       return { w: 1 };
     };
   }

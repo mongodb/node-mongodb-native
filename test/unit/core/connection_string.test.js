@@ -28,8 +28,8 @@ const skipTests = [
   'may support deprecated gssapiServiceName option (GSSAPI)'
 ];
 
-describe('Connection String', function() {
-  it('should support auth passed in through options', function(done) {
+describe('Connection String', function () {
+  it('should support auth passed in through options', function (done) {
     const optionsWithUser = {
       authMechanism: 'SCRAM-SHA-1',
       auth: { user: 'testing', password: 'llamas' }
@@ -61,32 +61,32 @@ describe('Connection String', function() {
     });
   });
 
-  it('should provide a default port if one is not provided', function(done) {
-    parseConnectionString('mongodb://hostname', function(err, result) {
+  it('should provide a default port if one is not provided', function (done) {
+    parseConnectionString('mongodb://hostname', function (err, result) {
       expect(err).to.not.exist;
       expect(result.hosts[0].port).to.equal(27017);
       done();
     });
   });
 
-  it('should correctly parse arrays', function(done) {
-    parseConnectionString('mongodb://hostname?foo=bar&foo=baz', function(err, result) {
+  it('should correctly parse arrays', function (done) {
+    parseConnectionString('mongodb://hostname?foo=bar&foo=baz', function (err, result) {
       expect(err).to.not.exist;
       expect(result.options.foo).to.deep.equal(['bar', 'baz']);
       done();
     });
   });
 
-  it('should parse boolean values', function(done) {
-    parseConnectionString('mongodb://hostname?retryWrites=1', function(err, result) {
+  it('should parse boolean values', function (done) {
+    parseConnectionString('mongodb://hostname?retryWrites=1', function (err, result) {
       expect(err).to.not.exist;
       expect(result.options.retryWrites).to.equal(false);
 
-      parseConnectionString('mongodb://hostname?retryWrites=false', function(err, result) {
+      parseConnectionString('mongodb://hostname?retryWrites=false', function (err, result) {
         expect(err).to.not.exist;
         expect(result.options.retryWrites).to.equal(false);
 
-        parseConnectionString('mongodb://hostname?retryWrites=true', function(err, result) {
+        parseConnectionString('mongodb://hostname?retryWrites=true', function (err, result) {
           expect(err).to.not.exist;
           expect(result.options.retryWrites).to.equal(true);
           done();
@@ -95,7 +95,7 @@ describe('Connection String', function() {
     });
   });
 
-  it('should parse compression options', function(done) {
+  it('should parse compression options', function (done) {
     parseConnectionString(
       'mongodb://localhost/?compressors=zlib&zlibCompressionLevel=4',
       (err, result) => {
@@ -111,7 +111,7 @@ describe('Connection String', function() {
     );
   });
 
-  it('should parse `readConcernLevel`', function(done) {
+  it('should parse `readConcernLevel`', function (done) {
     parseConnectionString('mongodb://localhost/?readConcernLevel=local', (err, result) => {
       expect(err).to.not.exist;
       expect(result.options).to.have.property('readConcern');
@@ -120,7 +120,7 @@ describe('Connection String', function() {
     });
   });
 
-  it('should parse `authMechanismProperties`', function(done) {
+  it('should parse `authMechanismProperties`', function (done) {
     parseConnectionString(
       'mongodb://user%40EXAMPLE.COM:secret@localhost/?authMechanismProperties=SERVICE_NAME:other,SERVICE_REALM:blah,CANONICALIZE_HOST_NAME:true&authMechanism=GSSAPI',
       (err, result) => {
@@ -141,7 +141,7 @@ describe('Connection String', function() {
     );
   });
 
-  it('should parse a numeric authSource with variable width', function(done) {
+  it('should parse a numeric authSource with variable width', function (done) {
     parseConnectionString('mongodb://test@localhost/?authSource=0001', (err, result) => {
       expect(err).to.not.exist;
       expect(result.options).to.have.property('authSource');
@@ -151,7 +151,7 @@ describe('Connection String', function() {
     });
   });
 
-  it('should parse a replicaSet with a leading number', function(done) {
+  it('should parse a replicaSet with a leading number', function (done) {
     parseConnectionString('mongodb://localhost/?replicaSet=123abc', (err, result) => {
       expect(err).to.not.exist;
       expect(result.options).to.have.property('replicaSet');
@@ -161,7 +161,7 @@ describe('Connection String', function() {
     });
   });
 
-  it('should parse multiple readPreferenceTags', function(done) {
+  it('should parse multiple readPreferenceTags', function (done) {
     parseConnectionString(
       'mongodb://localhost/?readPreferenceTags=dc:ny,rack:1&readPreferenceTags=dc:ny',
       (err, result) => {
@@ -177,8 +177,8 @@ describe('Connection String', function() {
     );
   });
 
-  describe('validation', function() {
-    it('should validate compression options', function(done) {
+  describe('validation', function () {
+    it('should validate compression options', function (done) {
       parseConnectionString('mongodb://localhost/?zlibCompressionLevel=15', err => {
         expect(err).to.exist;
 
@@ -190,21 +190,21 @@ describe('Connection String', function() {
       });
     });
 
-    it('should validate authMechanism', function(done) {
+    it('should validate authMechanism', function (done) {
       parseConnectionString('mongodb://localhost/?authMechanism=DOGS', err => {
         expect(err).to.exist;
         done();
       });
     });
 
-    it('should validate readPreference', function(done) {
+    it('should validate readPreference', function (done) {
       parseConnectionString('mongodb://localhost/?readPreference=llamasPreferred', err => {
         expect(err).to.exist;
         done();
       });
     });
 
-    it('should validate non-equal tls values', function(done) {
+    it('should validate non-equal tls values', function (done) {
       parseConnectionString('mongodb://localhost/?tls=true&tls=false', err => {
         expect(err).to.have.property('message', 'All values of tls must be the same.');
         done();
@@ -212,21 +212,21 @@ describe('Connection String', function() {
     });
   });
 
-  describe('spec tests', function() {
+  describe('spec tests', function () {
     const suites = loadSpecTests('connection-string').concat(loadSpecTests('auth'));
 
     suites.forEach(suite => {
-      describe(suite.name, function() {
+      describe(suite.name, function () {
         suite.tests.forEach(test => {
           it(test.description, {
             metadata: { requires: { topology: 'single' } },
-            test: function(done) {
+            test: function (done) {
               if (skipTests.indexOf(test.description) !== -1) {
                 return this.skip();
               }
 
               const valid = test.valid;
-              parseConnectionString(test.uri, { caseTranslate: false }, function(err, result) {
+              parseConnectionString(test.uri, { caseTranslate: false }, function (err, result) {
                 if (valid === false) {
                   expect(err).to.exist;
                   expect(err).to.be.instanceOf(MongoParseError);

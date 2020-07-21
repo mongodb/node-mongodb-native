@@ -2,8 +2,8 @@
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 
-describe('Generators', function() {
-  before(function() {
+describe('Generators', function () {
+  before(function () {
     return setupDatabase(this.configuration);
   });
 
@@ -13,11 +13,11 @@ describe('Generators', function() {
       requires: { generators: true, topology: 'single', node: '>6.0.0', mongodb: '>=2.6.0' }
     },
 
-    test: function(done) {
+    test: function (done) {
       var co = require('co');
       var configuration = this.configuration;
 
-      co(function*() {
+      co(function* () {
         var instance = configuration.newClient({ w: 1 }, { poolSize: 1 });
         var client = yield instance.connect();
         var db = client.db(configuration.db);

@@ -9,8 +9,8 @@ const { Code } = require('../../src');
  *
  *************************************************************************/
 
-describe('Operation (Generators)', function() {
-  before(function() {
+describe('Operation (Generators)', function () {
+  before(function () {
     return setupDatabase(this.configuration);
   });
 
@@ -25,11 +25,11 @@ describe('Operation (Generators)', function() {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { generators: true, mongodb: '>2.1.0', topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -109,11 +109,11 @@ describe('Operation (Generators)', function() {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { generators: true, mongodb: '>2.1.0', topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -192,11 +192,11 @@ describe('Operation (Generators)', function() {
   it('shouldCorrectlyDoSimpleCountExamplesWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -243,11 +243,11 @@ describe('Operation (Generators)', function() {
   it('shouldCreateComplexIndexOnTwoFieldsWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -303,11 +303,11 @@ describe('Operation (Generators)', function() {
   it('shouldCorrectlyHandleDistinctIndexesWithSubQueryFilterWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -360,11 +360,11 @@ describe('Operation (Generators)', function() {
   it('shouldCorrectlyHandleDistinctIndexesWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -418,11 +418,11 @@ describe('Operation (Generators)', function() {
   it('shouldCorrectlyDropCollectionWithDropFunctionWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -453,7 +453,7 @@ describe('Operation (Generators)', function() {
         var found = false;
         // For each collection in the list of collection names in this db look for the
         // dropped collection
-        replies.forEach(function(document) {
+        replies.forEach(function (document) {
           if (document.name === 'test_other_drop_with_generators') {
             found = true;
             return;
@@ -479,11 +479,11 @@ describe('Operation (Generators)', function() {
   it('dropAllIndexesExample1WithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -519,11 +519,11 @@ describe('Operation (Generators)', function() {
   it('shouldCorrectlyCreateAndDropIndexWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -579,11 +579,11 @@ describe('Operation (Generators)', function() {
   it('shouldCreateComplexEnsureIndexWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -642,11 +642,11 @@ describe('Operation (Generators)', function() {
   it('ensureIndexExampleWithCompountIndexWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -702,11 +702,11 @@ describe('Operation (Generators)', function() {
   it('shouldPerformASimpleQueryWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -753,11 +753,11 @@ describe('Operation (Generators)', function() {
   it('shouldPerformASimpleExplainQueryWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -802,11 +802,11 @@ describe('Operation (Generators)', function() {
   it('shouldPerformASimpleLimitSkipQueryWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -837,12 +837,7 @@ describe('Operation (Generators)', function() {
         );
 
         // Perform a simple find and return all the documents
-        var docs = yield collection
-          .find({})
-          .skip(1)
-          .limit(1)
-          .project({ b: 1 })
-          .toArray();
+        var docs = yield collection.find({}).skip(1).limit(1).project({ b: 1 }).toArray();
 
         test.equal(1, docs.length);
         test.equal(undefined, docs[0].a);
@@ -868,11 +863,11 @@ describe('Operation (Generators)', function() {
   it('shouldPerformSimpleFindAndModifyOperationsWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -947,11 +942,11 @@ describe('Operation (Generators)', function() {
   it('shouldPerformSimpleFindAndRemoveWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -1003,11 +998,11 @@ describe('Operation (Generators)', function() {
   it('shouldPerformASimpleLimitSkipFindOneQueryWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -1059,11 +1054,11 @@ describe('Operation (Generators)', function() {
   it('shouldPerformSimpleMapReduceFunctionsWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -1088,7 +1083,7 @@ describe('Operation (Generators)', function() {
         yield collection.insertMany([{ user_id: 1 }, { user_id: 2 }], { w: 1 });
 
         // Map function
-        var map = function() {
+        var map = function () {
           emit(this.user_id, 1); // eslint-disable-line
         };
         // Reduce function
@@ -1126,11 +1121,11 @@ describe('Operation (Generators)', function() {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { generators: true, mongodb: '>1.7.6', topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -1155,7 +1150,7 @@ describe('Operation (Generators)', function() {
         yield collection.insertMany([{ user_id: 1 }, { user_id: 2 }], { w: 1 });
 
         // Map function
-        var map = function() {
+        var map = function () {
           emit(this.user_id, 1); // eslint-disable-line
         };
         // Reduce function
@@ -1190,11 +1185,11 @@ describe('Operation (Generators)', function() {
   it('shouldPerformMapReduceWithContextWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -1225,12 +1220,12 @@ describe('Operation (Generators)', function() {
         );
 
         // Map function
-        var map = function() {
+        var map = function () {
           emit(fn(this.timestamp.getYear()), 1); // eslint-disable-line
         };
 
         // Reduce function
-        var reduce = function(k, v) {
+        var reduce = function (k, v) {
           var count = 0;
           for (var i = 0; i < v.length; i++) {
             count += v[i];
@@ -1240,7 +1235,7 @@ describe('Operation (Generators)', function() {
         };
 
         // Javascript function available in the map reduce scope
-        var t = function(val) {
+        var t = function (val) {
           return val + 1;
         };
 
@@ -1281,11 +1276,11 @@ describe('Operation (Generators)', function() {
   it.skip('shouldPerformMapReduceInContextObjectsWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -1316,12 +1311,12 @@ describe('Operation (Generators)', function() {
         );
 
         // Map function
-        var map = function() {
+        var map = function () {
           emit(obj.fn(this.timestamp.getYear()), 1); // eslint-disable-line
         };
 
         // Reduce function
-        var reduce = function(k, v) {
+        var reduce = function (k, v) {
           var count = 0;
           for (var i = 0; i < v.length; i++) {
             count += v[i];
@@ -1331,7 +1326,7 @@ describe('Operation (Generators)', function() {
         };
 
         // Javascript function available in the map reduce scope
-        var t = function(val) {
+        var t = function (val) {
           return val + 1;
         };
 
@@ -1372,11 +1367,11 @@ describe('Operation (Generators)', function() {
   it('shouldCorrectlyRetrieveACollectionsIndexesWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -1421,11 +1416,11 @@ describe('Operation (Generators)', function() {
   it('shouldCorrectlyExecuteIndexExistsWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -1479,11 +1474,11 @@ describe('Operation (Generators)', function() {
       requires: { generators: true, topology: ['single'] }
     },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -1551,11 +1546,11 @@ describe('Operation (Generators)', function() {
   it('shouldCorrectlyShowAllTheResultsFromIndexInformationWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -1621,11 +1616,11 @@ describe('Operation (Generators)', function() {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { generators: true, topology: ['single'] } },
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -1665,11 +1660,11 @@ describe('Operation (Generators)', function() {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -1715,11 +1710,11 @@ describe('Operation (Generators)', function() {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -1744,7 +1739,7 @@ describe('Operation (Generators)', function() {
         o.serializeFunctions = true;
 
         // Insert a single document
-        yield collection.insertOne({ hello: 'world', func: function() {} }, o);
+        yield collection.insertOne({ hello: 'world', func: function () {} }, o);
 
         // Fetch the document
         var item = yield collection.findOne({ hello: 'world' });
@@ -1766,11 +1761,11 @@ describe('Operation (Generators)', function() {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { generators: true, mongodb: '>1.9.1', topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -1830,11 +1825,11 @@ describe('Operation (Generators)', function() {
   it('shouldCorrectlyExecuteIsCappedWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -1878,11 +1873,11 @@ describe('Operation (Generators)', function() {
   it('shouldCorrectlyRetrieveCollectionOptionsWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -1927,11 +1922,11 @@ describe('Operation (Generators)', function() {
   it('shouldRemoveAllDocumentsNoSafeWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -1976,11 +1971,11 @@ describe('Operation (Generators)', function() {
   it('shouldRemoveSubsetOfDocumentsSafeModeWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -2022,11 +2017,11 @@ describe('Operation (Generators)', function() {
       requires: { generators: true, topology: ['single'] }
     },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -2127,11 +2122,11 @@ describe('Operation (Generators)', function() {
   it('shouldCorrectlySaveASimpleDocumentWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -2172,11 +2167,11 @@ describe('Operation (Generators)', function() {
   it('shouldCorrectlySaveASimpleDocumentModifyItAndResaveItWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -2232,11 +2227,11 @@ describe('Operation (Generators)', function() {
   it('shouldCorrectlyUpdateASimpleDocumentWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -2283,11 +2278,11 @@ describe('Operation (Generators)', function() {
   it('shouldCorrectlyUpsertASimpleDocumentWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -2334,11 +2329,11 @@ describe('Operation (Generators)', function() {
   it('shouldCorrectlyUpdateMultipleDocumentsWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -2394,11 +2389,11 @@ describe('Operation (Generators)', function() {
   it('shouldCorrectlyReturnACollectionsStatsWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -2444,11 +2439,11 @@ describe('Operation (Generators)', function() {
   it('shouldCorrectlyCreateAndDropAllIndexWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -2520,11 +2515,11 @@ describe('Operation (Generators)', function() {
       requires: { generators: true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] }
     },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -2573,11 +2568,11 @@ describe('Operation (Generators)', function() {
   it('shouldCorrectlyRetrieveAllCollectionsWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -2613,11 +2608,11 @@ describe('Operation (Generators)', function() {
   it('shouldCorrectlyAddUserToDbWithGenerators', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -2654,11 +2649,11 @@ describe('Operation (Generators)', function() {
   it('shouldCorrectlyAddAndRemoveUserWithGenerators', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -2715,11 +2710,11 @@ describe('Operation (Generators)', function() {
   it('shouldCorrectlyCreateACollectionWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -2761,11 +2756,11 @@ describe('Operation (Generators)', function() {
   it('shouldCorrectlyExecuteACommandAgainstTheServerWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -2818,11 +2813,11 @@ describe('Operation (Generators)', function() {
   it('shouldCorrectlyCreateDropAndVerifyThatCollectionIsGoneWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -2856,11 +2851,11 @@ describe('Operation (Generators)', function() {
   it('shouldCorrectlyRenameACollectionWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -2927,11 +2922,11 @@ describe('Operation (Generators)', function() {
   it('shouldCreateOnDbComplexIndexOnTwoFieldsWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -2992,11 +2987,11 @@ describe('Operation (Generators)', function() {
   it('shouldCreateComplexEnsureIndexDbWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -3057,11 +3052,11 @@ describe('Operation (Generators)', function() {
   it('shouldCorrectlyDropTheDatabaseWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -3128,11 +3123,11 @@ describe('Operation (Generators)', function() {
   it('shouldCorrectlyRetrieveDbStatsWithGeneratorsWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -3167,11 +3162,11 @@ describe('Operation (Generators)', function() {
   it('shouldCorrectlyShareConnectionPoolsAcrossMultipleDbInstancesWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -3228,11 +3223,11 @@ describe('Operation (Generators)', function() {
   it('shouldCorrectlyRetrieveBuildInfoWithGenerators', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -3271,11 +3266,11 @@ describe('Operation (Generators)', function() {
   it('shouldCorrectlyRetrieveBuildInfoUsingCommandWithGenerators', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -3315,11 +3310,11 @@ describe('Operation (Generators)', function() {
   it('shouldCorrectlyChangeProfilingLevelWithGenerators', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -3389,11 +3384,11 @@ describe('Operation (Generators)', function() {
   it('shouldCorrectlySetAndExtractProfilingInfoWithGenerators', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -3450,11 +3445,11 @@ describe('Operation (Generators)', function() {
   it('shouldCorrectlyCallValidateCollectionWithGenerators', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -3500,11 +3495,11 @@ describe('Operation (Generators)', function() {
   it('shouldCorrectlyPingTheMongoDbInstanceWithGenerators', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -3543,11 +3538,11 @@ describe('Operation (Generators)', function() {
   it('shouldCorrectlyAddAUserToAdminDbWithGenerators', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -3588,11 +3583,11 @@ describe('Operation (Generators)', function() {
   it('shouldCorrectlyAddAUserAndRemoveItFromAdminDbWithGenerators', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -3635,11 +3630,11 @@ describe('Operation (Generators)', function() {
   it('shouldCorrectlyListAllAvailableDatabasesWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -3679,11 +3674,11 @@ describe('Operation (Generators)', function() {
   it('shouldCorrectlyRetrieveServerInfoWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -3730,11 +3725,11 @@ describe('Operation (Generators)', function() {
   it('shouldCorrectlyRetrieveReplSetGetStatusWithGenerators', {
     metadata: { requires: { generators: true, topology: ['replicaset'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -3789,11 +3784,11 @@ describe('Operation (Generators)', function() {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -3839,11 +3834,11 @@ describe('Operation (Generators)', function() {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -3888,11 +3883,11 @@ describe('Operation (Generators)', function() {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -3949,11 +3944,11 @@ describe('Operation (Generators)', function() {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -3999,11 +3994,11 @@ describe('Operation (Generators)', function() {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -4061,11 +4056,11 @@ describe('Operation (Generators)', function() {
   it('Should correctly execute ordered batch with no errors using write commands with Generators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -4131,11 +4126,11 @@ describe('Operation (Generators)', function() {
   it('Should correctly execute unordered batch with no errors with Generators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -4207,11 +4202,11 @@ describe('Operation (Generators)', function() {
   it('Should correctly execute insertOne operation with Generators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -4248,11 +4243,11 @@ describe('Operation (Generators)', function() {
   it('Should correctly execute insertMany operation with Generators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -4289,11 +4284,11 @@ describe('Operation (Generators)', function() {
   it('Should correctly execute updateOne operation with Generators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -4331,11 +4326,11 @@ describe('Operation (Generators)', function() {
   it('Should correctly execute updateMany operation with Generators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -4378,11 +4373,11 @@ describe('Operation (Generators)', function() {
   it('Should correctly execute removeOne operation with Generators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -4422,11 +4417,11 @@ describe('Operation (Generators)', function() {
   it('Should correctly execute removeMany operation with Generators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -4468,11 +4463,11 @@ describe('Operation (Generators)', function() {
   it('Should correctly execute bulkWrite operation with Generators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -4531,11 +4526,11 @@ describe('Operation (Generators)', function() {
   it('Should correctly execute findOneAndDelete operation with Generators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -4576,11 +4571,11 @@ describe('Operation (Generators)', function() {
   it('Should correctly execute findOneAndReplace operation with Generators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -4631,11 +4626,11 @@ describe('Operation (Generators)', function() {
   it('Should correctly execute findOneAndUpdate operation with Generators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -4686,11 +4681,11 @@ describe('Operation (Generators)', function() {
   it('Should correctly add capped collection options to cursor with Generators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         // Connect
         var client = yield configuration
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
@@ -4728,7 +4723,7 @@ describe('Operation (Generators)', function() {
             .addCursorFlag('tailable', true)
             .addCursorFlag('awaitData', true);
 
-          cursor.on('data', function() {
+          cursor.on('data', function () {
             total = total + 1;
 
             if (total === 1000) {
@@ -4736,7 +4731,7 @@ describe('Operation (Generators)', function() {
             }
           });
 
-          cursor.on('end', function() {
+          cursor.on('end', function () {
             // TODO: forced because the cursor is still open/active
             client.close(true, err => {
               if (err) return reject(err);
@@ -4764,11 +4759,11 @@ describe('Operation (Generators)', function() {
       ignore: { travis: true }
     },
 
-    test: function() {
+    test: function () {
       var configuration = this.configuration;
       var co = require('co');
 
-      return co(function*() {
+      return co(function* () {
         var client = configuration.newClient({ w: 1 }, { poolSize: 1 });
         client = yield client.connect();
         var db = client.db(configuration.db);
@@ -4804,15 +4799,15 @@ describe('Operation (Generators)', function() {
             options
           )
           .batchSize(10)
-          .on('error', function() {
+          .on('error', function () {
             client.close();
           })
-          .on('data', function() {
+          .on('data', function () {
             index = index + 1;
           })
           // `end` sometimes emits before any `data` events have been emitted,
           // depending on document size.
-          .on('end', function() {
+          .on('end', function () {
             test.equal(100, index);
 
             client.close();

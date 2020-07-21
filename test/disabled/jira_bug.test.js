@@ -18,7 +18,7 @@ var setupDatabase = require('./shared').setupDatabase;
 //   etRep   tRep  etReplsetRep setRep       lsetReplset  plsetRepl   ReplsetRepls    plsetRe
 // **********************************************************************************************/
 
-var setUp = function(configuration, options, callback) {
+var setUp = function (configuration, options, callback) {
   var ReplSetManager = require('mongodb-topology-manager').ReplSet;
 
   // Check if we have any options
@@ -76,36 +76,36 @@ var setUp = function(configuration, options, callback) {
   // Create a manager
   var replicasetManager = new ReplSetManager('mongod', nodes, rsOptions.client);
   // Purge the set
-  replicasetManager.purge().then(function() {
+  replicasetManager.purge().then(function () {
     // Start the server
     replicasetManager
       .start()
-      .then(function() {
-        setTimeout(function() {
+      .then(function () {
+        setTimeout(function () {
           callback(null, replicasetManager);
         }, 10000);
       })
-      .catch(function(e) {
+      .catch(function (e) {
         callback(e, null);
       });
   });
 };
 
-describe('JIRA bugs', function() {
-  before(function() {
+describe('JIRA bugs', function () {
+  before(function () {
     return setupDatabase(this.configuration);
   });
 
   it('NODE-746 should correctly connect to single primary/secondary with both hosts in uri', {
     metadata: { requires: { topology: ['auth'] } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var Db = configuration.require.Db,
         Server = configuration.require.Server,
         ReplSet = configuration.require.ReplSet;
 
-      setUp(configuration, function(err, replicasetManager) {
+      setUp(configuration, function (err, replicasetManager) {
         var replSet = new ReplSet(
           [new Server('localhost', 31000), new Server('localhost', 31001)],
           {
@@ -115,14 +115,14 @@ describe('JIRA bugs', function() {
         );
 
         // Connect
-        new Db('replicaset_test_auth', replSet, { w: 1 }).open(function(err, db) {
+        new Db('replicaset_test_auth', replSet, { w: 1 }).open(function (err, db) {
           // Add a user
-          db.admin().addUser('root', 'root', { w: 3, wtimeout: 25000 }, function(err) {
+          db.admin().addUser('root', 'root', { w: 3, wtimeout: 25000 }, function (err) {
             test.equal(null, err);
             db.close();
 
             // shut down one of the secondaries
-            replicasetManager.secondaries().then(function(managers) {
+            replicasetManager.secondaries().then(function (managers) {
               // Remove the secondary server
               replicasetManager
                 .removeMember(
@@ -139,16 +139,16 @@ describe('JIRA bugs', function() {
                     password: 'root'
                   }
                 )
-                .then(function() {
+                .then(function () {
                   // Attempt to connect
                   const client = configuration.newClient(
                     'mongodb://root:root@localhost:31000,localhost:31001/admin?replicaSet=rs'
                   );
-                  client.connect(function(err, db) {
+                  client.connect(function (err, db) {
                     test.equal(null, err);
                     db.close();
 
-                    replicasetManager.stop().then(function() {
+                    replicasetManager.stop().then(function () {
                       done();
                     });
                   });

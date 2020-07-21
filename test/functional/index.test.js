@@ -2,8 +2,8 @@
 const { expect } = require('chai');
 const { assert: test, setupDatabase, withClient, withMonitoredClient } = require('./shared');
 
-describe('Indexes', function() {
-  before(function() {
+describe('Indexes', function () {
+  before(function () {
     return setupDatabase(this.configuration);
   });
 
@@ -12,13 +12,13 @@ describe('Indexes', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        db.createCollection('test_index_information', function(err, collection) {
-          collection.insert({ a: 1 }, configuration.writeConcernMax(), function(err) {
+        db.createCollection('test_index_information', function (err, collection) {
+          collection.insert({ a: 1 }, configuration.writeConcernMax(), function (err) {
             test.equal(null, err);
 
             // Create an index on the collection
@@ -26,19 +26,19 @@ describe('Indexes', function() {
               collection.collectionName,
               'a',
               configuration.writeConcernMax(),
-              function(err, indexName) {
+              function (err, indexName) {
                 test.equal(null, err);
                 test.equal('a_1', indexName);
 
                 // Let's fetch the index information
-                db.indexInformation(collection.collectionName, function(err, collectionInfo) {
+                db.indexInformation(collection.collectionName, function (err, collectionInfo) {
                   test.equal(null, err);
                   test.ok(collectionInfo['_id_'] != null);
                   test.equal('_id', collectionInfo['_id_'][0][0]);
                   test.ok(collectionInfo['a_1'] != null);
                   test.deepEqual([['a', 1]], collectionInfo['a_1']);
 
-                  db.indexInformation(collection.collectionName, function(err, collectionInfo2) {
+                  db.indexInformation(collection.collectionName, function (err, collectionInfo2) {
                     var count1 = Object.keys(collectionInfo).length,
                       count2 = Object.keys(collectionInfo2).length;
 
@@ -68,13 +68,13 @@ describe('Indexes', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        db.createCollection('test_multiple_index_cols', function(err, collection) {
-          collection.insert({ a: 1 }, function(err) {
+        db.createCollection('test_multiple_index_cols', function (err, collection) {
+          collection.insert({ a: 1 }, function (err) {
             test.equal(null, err);
             // Create an index on the collection
             db.createIndex(
@@ -85,11 +85,11 @@ describe('Indexes', function() {
                 ['c', -1]
               ],
               configuration.writeConcernMax(),
-              function(err, indexName) {
+              function (err, indexName) {
                 expect(err).to.not.exist;
                 test.equal('a_-1_b_1_c_-1', indexName);
                 // Let's fetch the index information
-                db.indexInformation(collection.collectionName, function(err, collectionInfo) {
+                db.indexInformation(collection.collectionName, function (err, collectionInfo) {
                   var count1 = Object.keys(collectionInfo).length;
 
                   // Test
@@ -120,39 +120,39 @@ describe('Indexes', function() {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { topology: 'single' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         // Create a non-unique index and test inserts
-        db.createCollection('test_unique_index', function(err, collection) {
+        db.createCollection('test_unique_index', function (err, collection) {
           db.createIndex(
             collection.collectionName,
             'hello',
             configuration.writeConcernMax(),
-            function(err) {
+            function (err) {
               test.equal(null, err);
               // Insert some docs
               collection.insert(
                 [{ hello: 'world' }, { hello: 'mike' }, { hello: 'world' }],
                 configuration.writeConcernMax(),
-                function(err) {
+                function (err) {
                   test.equal(null, err);
 
                   // Create a unique index and test that insert fails
-                  db.createCollection('test_unique_index2', function(err, collection) {
+                  db.createCollection('test_unique_index2', function (err, collection) {
                     db.createIndex(
                       collection.collectionName,
                       'hello',
                       { unique: true, w: 1 },
-                      function(err) {
+                      function (err) {
                         test.equal(null, err);
                         // Insert some docs
                         collection.insert(
                           [{ hello: 'world' }, { hello: 'mike' }, { hello: 'world' }],
                           configuration.writeConcernMax(),
-                          function(err) {
+                          function (err) {
                             test.ok(err != null);
                             test.equal(11000, err.code);
                             client.close(done);
@@ -175,26 +175,26 @@ describe('Indexes', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         // Create a non-unique index and test inserts
-        db.createCollection('test_index_on_subfield', function(err, collection) {
+        db.createCollection('test_index_on_subfield', function (err, collection) {
           collection.insert(
             [{ hello: { a: 4, b: 5 } }, { hello: { a: 7, b: 2 } }, { hello: { a: 4, b: 10 } }],
             configuration.writeConcernMax(),
-            function(err) {
+            function (err) {
               test.equal(null, err);
 
               // Create a unique subfield index and test that insert fails
-              db.createCollection('test_index_on_subfield2', function(err, collection) {
+              db.createCollection('test_index_on_subfield2', function (err, collection) {
                 db.createIndex(
                   collection.collectionName,
                   'hello_a',
                   { w: 1, unique: true },
-                  function(err) {
+                  function (err) {
                     test.equal(null, err);
 
                     collection.insert(
@@ -204,7 +204,7 @@ describe('Indexes', function() {
                         { hello: { a: 4, b: 10 } }
                       ],
                       configuration.writeConcernMax(),
-                      function(err) {
+                      function (err) {
                         // Assert that we have erros
                         test.ok(err != null);
                         client.close(done);
@@ -225,26 +225,26 @@ describe('Indexes', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        db.createCollection('test_drop_indexes', function(err, collection) {
-          collection.insert({ a: 1 }, configuration.writeConcernMax(), function(err) {
+        db.createCollection('test_drop_indexes', function (err, collection) {
+          collection.insert({ a: 1 }, configuration.writeConcernMax(), function (err) {
             test.equal(null, err);
             // Create an index on the collection
             db.createIndex(
               collection.collectionName,
               'a',
               configuration.writeConcernMax(),
-              function(err, indexName) {
+              function (err, indexName) {
                 test.equal('a_1', indexName);
                 // Drop all the indexes
-                collection.dropAllIndexes(function(err, result) {
+                collection.dropAllIndexes(function (err, result) {
                   test.equal(true, result);
 
-                  collection.indexInformation(function(err, result) {
+                  collection.indexInformation(function (err, result) {
                     test.ok(result['a_1'] == null);
                     client.close(done);
                   });
@@ -262,12 +262,12 @@ describe('Indexes', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        db.createCollection('test_distinct_queries', function(err, collection) {
+        db.createCollection('test_distinct_queries', function (err, collection) {
           collection.insert(
             [
               { a: 0, b: { c: 'a' } },
@@ -278,12 +278,12 @@ describe('Indexes', function() {
               { a: 3 }
             ],
             configuration.writeConcernMax(),
-            function(err) {
+            function (err) {
               test.equal(null, err);
-              collection.distinct('a', function(err, docs) {
+              collection.distinct('a', function (err, docs) {
                 test.deepEqual([0, 1, 2, 3], docs.sort());
 
-                collection.distinct('b.c', function(err, docs) {
+                collection.distinct('b.c', function (err, docs) {
                   test.deepEqual(['a', 'b', 'c'], docs.sort());
                   client.close(done);
                 });
@@ -300,22 +300,22 @@ describe('Indexes', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        db.createCollection('test_ensure_index', function(err, collection) {
+        db.createCollection('test_ensure_index', function (err, collection) {
           expect(err).to.not.exist;
           // Create an index on the collection
-          db.ensureIndex(collection.collectionName, 'a', configuration.writeConcernMax(), function(
+          db.ensureIndex(collection.collectionName, 'a', configuration.writeConcernMax(), function (
             err,
             indexName
           ) {
             expect(err).to.not.exist;
             test.equal('a_1', indexName);
             // Let's fetch the index information
-            db.indexInformation(collection.collectionName, function(err, collectionInfo) {
+            db.indexInformation(collection.collectionName, function (err, collectionInfo) {
               test.ok(collectionInfo['_id_'] != null);
               test.equal('_id', collectionInfo['_id_'][0][0]);
               test.ok(collectionInfo['a_1'] != null);
@@ -325,10 +325,10 @@ describe('Indexes', function() {
                 collection.collectionName,
                 'a',
                 configuration.writeConcernMax(),
-                function(err, indexName) {
+                function (err, indexName) {
                   test.equal('a_1', indexName);
                   // Let's fetch the index information
-                  db.indexInformation(collection.collectionName, function(err, collectionInfo) {
+                  db.indexInformation(collection.collectionName, function (err, collectionInfo) {
                     test.ok(collectionInfo['_id_'] != null);
                     test.equal('_id', collectionInfo['_id_'][0][0]);
                     test.ok(collectionInfo['a_1'] != null);
@@ -350,31 +350,31 @@ describe('Indexes', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        db.createCollection('create_and_use_sparse_index_test', function(err) {
+        db.createCollection('create_and_use_sparse_index_test', function (err) {
           test.equal(null, err);
-          db.collection('create_and_use_sparse_index_test', function(err, collection) {
+          db.collection('create_and_use_sparse_index_test', function (err, collection) {
             expect(err).to.not.exist;
-            collection.ensureIndex({ title: 1 }, { sparse: true, w: 1 }, function(err) {
+            collection.ensureIndex({ title: 1 }, { sparse: true, w: 1 }, function (err) {
               test.equal(null, err);
               collection.insert(
                 [{ name: 'Jim' }, { name: 'Sarah', title: 'Princess' }],
                 configuration.writeConcernMax(),
-                function(err) {
+                function (err) {
                   test.equal(null, err);
                   collection
                     .find({ title: { $ne: null } })
                     .sort({ title: 1 })
-                    .toArray(function(err, items) {
+                    .toArray(function (err, items) {
                       test.equal(1, items.length);
                       test.equal('Sarah', items[0].name);
 
                       // Fetch the info for the indexes
-                      collection.indexInformation({ full: true }, function(err, indexInfo) {
+                      collection.indexInformation({ full: true }, function (err, indexInfo) {
                         test.equal(null, err);
                         test.equal(2, indexInfo.length);
                         client.close(done);
@@ -399,22 +399,22 @@ describe('Indexes', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        db.createCollection('geospatial_index_test', function(err) {
+        db.createCollection('geospatial_index_test', function (err) {
           test.equal(null, err);
-          db.collection('geospatial_index_test', function(err, collection) {
-            collection.ensureIndex({ loc: '2d' }, configuration.writeConcernMax(), function(err) {
+          db.collection('geospatial_index_test', function (err, collection) {
+            collection.ensureIndex({ loc: '2d' }, configuration.writeConcernMax(), function (err) {
               test.equal(null, err);
-              collection.insert({ loc: [-100, 100] }, configuration.writeConcernMax(), function(
+              collection.insert({ loc: [-100, 100] }, configuration.writeConcernMax(), function (
                 err
               ) {
                 test.equal(err, null);
 
-                collection.insert({ loc: [200, 200] }, configuration.writeConcernMax(), function(
+                collection.insert({ loc: [200, 200] }, configuration.writeConcernMax(), function (
                   err
                 ) {
                   test.ok(err.errmsg.indexOf('point not in interval of') !== -1);
@@ -440,28 +440,28 @@ describe('Indexes', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        db.createCollection('geospatial_index_altered_test', function(err) {
+        db.createCollection('geospatial_index_altered_test', function (err) {
           test.equal(null, err);
-          db.collection('geospatial_index_altered_test', function(err, collection) {
-            collection.ensureIndex({ loc: '2d' }, { min: 0, max: 1024, w: 1 }, function(err) {
+          db.collection('geospatial_index_altered_test', function (err, collection) {
+            collection.ensureIndex({ loc: '2d' }, { min: 0, max: 1024, w: 1 }, function (err) {
               test.equal(null, err);
-              collection.insert({ loc: [100, 100] }, configuration.writeConcernMax(), function(
+              collection.insert({ loc: [100, 100] }, configuration.writeConcernMax(), function (
                 err
               ) {
                 test.equal(err, null);
-                collection.insert({ loc: [200, 200] }, configuration.writeConcernMax(), function(
+                collection.insert({ loc: [200, 200] }, configuration.writeConcernMax(), function (
                   err
                 ) {
                   test.equal(err, null);
                   collection.insert(
                     { loc: [-200, -200] },
                     configuration.writeConcernMax(),
-                    function(err) {
+                    function (err) {
                       test.ok(err.errmsg.indexOf('point not in interval of') !== -1);
                       test.ok(err.errmsg.indexOf('0') !== -1);
                       test.ok(err.errmsg.indexOf('1024') !== -1);
@@ -482,19 +482,19 @@ describe('Indexes', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        db.createCollection('shouldThrowDuplicateKeyErrorWhenCreatingIndex', function(
+        db.createCollection('shouldThrowDuplicateKeyErrorWhenCreatingIndex', function (
           err,
           collection
         ) {
-          collection.insert([{ a: 1 }, { a: 1 }], configuration.writeConcernMax(), function(err) {
+          collection.insert([{ a: 1 }, { a: 1 }], configuration.writeConcernMax(), function (err) {
             test.equal(null, err);
 
-            collection.ensureIndex({ a: 1 }, { unique: true, w: 1 }, function(err) {
+            collection.ensureIndex({ a: 1 }, { unique: true, w: 1 }, function (err) {
               test.ok(err != null);
               client.close(done);
             });
@@ -509,19 +509,19 @@ describe('Indexes', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        db.createCollection('shouldThrowDuplicateKeyErrorWhenDriverInStrictMode', function(
+        db.createCollection('shouldThrowDuplicateKeyErrorWhenDriverInStrictMode', function (
           err,
           collection
         ) {
-          collection.insert([{ a: 1 }, { a: 1 }], configuration.writeConcernMax(), function(err) {
+          collection.insert([{ a: 1 }, { a: 1 }], configuration.writeConcernMax(), function (err) {
             test.equal(null, err);
 
-            collection.ensureIndex({ a: 1 }, { unique: true, w: 1 }, function(err) {
+            collection.ensureIndex({ a: 1 }, { unique: true, w: 1 }, function (err) {
               test.ok(err != null);
               client.close(done);
             });
@@ -536,22 +536,22 @@ describe('Indexes', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         // Establish connection to db
-        db.createCollection('shouldCorrectlyUseMinMaxForSettingRangeInEnsureIndex', function(
+        db.createCollection('shouldCorrectlyUseMinMaxForSettingRangeInEnsureIndex', function (
           err,
           collection
         ) {
           test.equal(null, err);
 
-          collection.ensureIndex({ loc: '2d' }, { min: 200, max: 1400, w: 1 }, function(err) {
+          collection.ensureIndex({ loc: '2d' }, { min: 200, max: 1400, w: 1 }, function (err) {
             test.equal(null, err);
 
-            collection.insert({ loc: [600, 600] }, configuration.writeConcernMax(), function(err) {
+            collection.insert({ loc: [600, 600] }, configuration.writeConcernMax(), function (err) {
               test.equal(null, err);
               client.close(done);
             });
@@ -566,23 +566,23 @@ describe('Indexes', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         // Establish connection to db
-        db.createCollection('shouldCorrectlyCreateAnIndexWithOverridenName', function(
+        db.createCollection('shouldCorrectlyCreateAnIndexWithOverridenName', function (
           err,
           collection
         ) {
           test.equal(null, err);
 
-          collection.ensureIndex('name', { name: 'myfunky_name' }, function(err) {
+          collection.ensureIndex('name', { name: 'myfunky_name' }, function (err) {
             test.equal(null, err);
 
             // Fetch full index information
-            collection.indexInformation({ full: false }, function(err, indexInformation) {
+            collection.indexInformation({ full: false }, function (err, indexInformation) {
               test.ok(indexInformation['myfunky_name'] != null);
               client.close(done);
             });
@@ -597,18 +597,18 @@ describe('Indexes', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var shared = require('./contexts');
 
-        db.collection('indexcontext').ensureIndex(shared.object, { background: true }, function(
+        db.collection('indexcontext').ensureIndex(shared.object, { background: true }, function (
           err
         ) {
           test.equal(null, err);
-          db.collection('indexcontext').ensureIndex(shared.array, { background: true }, function(
+          db.collection('indexcontext').ensureIndex(shared.array, { background: true }, function (
             err
           ) {
             test.equal(null, err);
@@ -624,22 +624,24 @@ describe('Indexes', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('should_throw_error_due_to_duplicates');
-        collection.insert([{ a: 1 }, { a: 1 }, { a: 1 }], configuration.writeConcernMax(), function(
-          err
-        ) {
-          test.equal(null, err);
+        collection.insert(
+          [{ a: 1 }, { a: 1 }, { a: 1 }],
+          configuration.writeConcernMax(),
+          function (err) {
+            test.equal(null, err);
 
-          collection.ensureIndex({ a: 1 }, { w: 1, unique: true }, function(err) {
-            test.ok(err != null);
-            client.close(done);
-          });
-        });
+            collection.ensureIndex({ a: 1 }, { w: 1, unique: true }, function (err) {
+              test.ok(err != null);
+              client.close(done);
+            });
+          }
+        );
       });
     }
   });
@@ -649,16 +651,16 @@ describe('Indexes', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('should_correctly_drop_index');
-        collection.insert([{ a: 1 }], configuration.writeConcernMax(), function(err) {
+        collection.insert([{ a: 1 }], configuration.writeConcernMax(), function (err) {
           test.equal(null, err);
 
-          collection.ensureIndex({ a: 1 }, configuration.writeConcernMax(), function(err) {
+          collection.ensureIndex({ a: 1 }, configuration.writeConcernMax(), function (err) {
             test.equal(null, err);
             collection
               .dropIndex('a_1')
@@ -680,22 +682,22 @@ describe('Indexes', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('should_correctly_apply_hint');
-        collection.insert([{ a: 1 }], configuration.writeConcernMax(), function(err) {
+        collection.insert([{ a: 1 }], configuration.writeConcernMax(), function (err) {
           test.equal(null, err);
 
-          collection.ensureIndex({ a: 1 }, configuration.writeConcernMax(), function(err) {
+          collection.ensureIndex({ a: 1 }, configuration.writeConcernMax(), function (err) {
             test.equal(null, err);
 
-            collection.indexInformation({ full: false }, function(err) {
+            collection.indexInformation({ full: false }, function (err) {
               test.equal(null, err);
 
-              collection.find({}, { hint: 'a_1' }).toArray(function(err, docs) {
+              collection.find({}, { hint: 'a_1' }).toArray(function (err, docs) {
                 test.equal(null, err);
                 test.equal(1, docs[0].a);
                 client.close(done);
@@ -715,13 +717,13 @@ describe('Indexes', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('should_correctly_set_language_override');
-        collection.insert([{ text: 'Lorem ipsum dolor sit amet.', langua: 'italian' }], function(
+        collection.insert([{ text: 'Lorem ipsum dolor sit amet.', langua: 'italian' }], function (
           err
         ) {
           test.equal(null, err);
@@ -729,10 +731,10 @@ describe('Indexes', function() {
           collection.ensureIndex(
             { text: 'text' },
             { language_override: 'langua', name: 'language_override_index' },
-            function(err) {
+            function (err) {
               test.equal(null, err);
 
-              collection.indexInformation({ full: true }, function(err, indexInformation) {
+              collection.indexInformation({ full: true }, function (err, indexInformation) {
                 test.equal(null, err);
                 for (var i = 0; i < indexInformation.length; i++) {
                   if (indexInformation[i].name === 'language_override_index')
@@ -753,18 +755,18 @@ describe('Indexes', function() {
       requires: { mongodb: '>=2.4.0', topology: ['single', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        db.collection('testListIndexes').ensureIndex({ a: 1 }, function(err) {
+        db.collection('testListIndexes').ensureIndex({ a: 1 }, function (err) {
           test.equal(null, err);
 
           // Get the list of indexes
           db.collection('testListIndexes')
             .listIndexes()
-            .toArray(function(err, indexes) {
+            .toArray(function (err, indexes) {
               test.equal(null, err);
               test.equal(2, indexes.length);
 
@@ -780,18 +782,18 @@ describe('Indexes', function() {
       requires: { mongodb: '>=2.4.0', topology: ['single', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        db.collection('testListIndexes_2').ensureIndex({ a: 1 }, function(err) {
+        db.collection('testListIndexes_2').ensureIndex({ a: 1 }, function (err) {
           test.equal(null, err);
 
           // Get the list of indexes
           db.collection('testListIndexes_2')
             .listIndexes()
-            .hasNext(function(err, result) {
+            .hasNext(function (err, result) {
               test.equal(null, err);
               test.equal(true, result);
 
@@ -807,18 +809,18 @@ describe('Indexes', function() {
       requires: { mongodb: '>=2.4.0', topology: ['single', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        db.collection('ensureIndexWithNestedStyleIndex').ensureIndex({ 'c.d': 1 }, function(err) {
+        db.collection('ensureIndexWithNestedStyleIndex').ensureIndex({ 'c.d': 1 }, function (err) {
           test.equal(null, err);
 
           // Get the list of indexes
           db.collection('ensureIndexWithNestedStyleIndex')
             .listIndexes()
-            .toArray(function(err, indexes) {
+            .toArray(function (err, indexes) {
               test.equal(null, err);
               test.equal(2, indexes.length);
 
@@ -834,20 +836,20 @@ describe('Indexes', function() {
       requires: { mongodb: '>=2.6.0', topology: ['single', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         db.collection('createIndexes').createIndexes(
           [{ key: { a: 1 } }, { key: { b: 1 }, name: 'hello1' }],
-          function(err, r) {
+          function (err, r) {
             test.equal(null, err);
             test.equal(3, r.numIndexesAfter);
 
             db.collection('createIndexes')
               .listIndexes()
-              .toArray(function(err, docs) {
+              .toArray(function (err, docs) {
                 test.equal(null, err);
                 var keys = {};
 
@@ -871,12 +873,12 @@ describe('Indexes', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        db.collection('text_index').createIndex({ '$**': 'text' }, { name: 'TextIndex' }, function(
+        db.collection('text_index').createIndex({ '$**': 'text' }, { name: 'TextIndex' }, function (
           err,
           r
         ) {
@@ -897,31 +899,31 @@ describe('Indexes', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var started = [];
       var succeeded = [];
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
 
-      var listener = require('../../src').instrument(function(err) {
+      var listener = require('../../src').instrument(function (err) {
         test.equal(null, err);
       });
 
-      listener.on('started', function(event) {
+      listener.on('started', function (event) {
         if (event.commandName === 'createIndexes') started.push(event);
       });
 
-      listener.on('succeeded', function(event) {
+      listener.on('succeeded', function (event) {
         if (event.commandName === 'createIndexes') succeeded.push(event);
       });
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
 
         db.collection('partialIndexes').createIndex(
           { a: 1 },
           { partialFilterExpression: { a: 1 } },
-          function(err) {
+          function (err) {
             test.equal(null, err);
             test.deepEqual({ a: 1 }, started[0].command.indexes[0].partialFilterExpression);
             listener.uninstrument();
@@ -940,16 +942,16 @@ describe('Indexes', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(error, client) {
+      client.connect(function (error, client) {
         var db = client.db(configuration.db);
         test.equal(error, null);
         // Can't use $exists: false in partial filter expression, see
         // https://jira.mongodb.org/browse/SERVER-17853
         var opts = { partialFilterExpression: { a: { $exists: false } } };
-        db.collection('partialIndexes').createIndex({ a: 1 }, opts, function(err) {
+        db.collection('partialIndexes').createIndex({ a: 1 }, opts, function (err) {
           test.ok(err);
           test.equal(err.code, 67);
           var msg = "key $exists must not start with '$'";
@@ -966,10 +968,10 @@ describe('Indexes', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         test.equal(null, err);
         var collection = db.collection('embedded_key_indes');
@@ -983,10 +985,10 @@ describe('Indexes', function() {
               a: { a: 2 }
             }
           ],
-          function(err) {
+          function (err) {
             test.equal(null, err);
 
-            collection.ensureIndex({ 'a.a': 1 }, function(err) {
+            collection.ensureIndex({ 'a.a': 1 }, function (err) {
               test.equal(null, err);
               client.close(done);
             });
@@ -1001,17 +1003,17 @@ describe('Indexes', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         test.equal(null, err);
         var collection = db.collection('embedded_key_indes_1');
         collection.createIndex(
           { 'key.external_id': 1, 'key.type': 1 },
           { unique: true, sparse: true, name: 'indexname' },
-          function(err) {
+          function (err) {
             test.equal(null, err);
 
             client.close(done);
@@ -1026,10 +1028,10 @@ describe('Indexes', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         test.equal(null, err);
         var collection = db.collection('embedded_key_indes_2');
@@ -1042,12 +1044,12 @@ describe('Indexes', function() {
               key: { external_id: 1, type: 1 }
             }
           ],
-          function(err) {
+          function (err) {
             test.equal(null, err);
             collection.createIndex(
               { 'key.external_id': 1, 'key.type': 1 },
               { unique: true, sparse: true, name: 'indexname' },
-              function(err) {
+              function (err) {
                 test.equal(11000, err.code);
 
                 client.close(done);
@@ -1099,16 +1101,16 @@ describe('Indexes', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         // insert a doc
         db.collection('messed_up_index').createIndex(
           { temporary: 1, 'store.addressLines': 1, lifecycleStatus: 1 },
           configuration.writeConcernMax(),
-          function(err) {
+          function (err) {
             test.equal(null, err);
 
             client.close(done);
@@ -1126,26 +1128,28 @@ describe('Indexes', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('messed_up_options');
 
-        collection.ensureIndex({ 'a.one': 1, 'a.two': 1 }, { name: 'n1', sparse: false }, function(
+        collection.ensureIndex({ 'a.one': 1, 'a.two': 1 }, { name: 'n1', sparse: false }, function (
           err
         ) {
           test.equal(null, err);
 
-          collection.ensureIndex({ 'a.one': 1, 'a.two': 1 }, { name: 'n2', sparse: true }, function(
-            err
-          ) {
-            test.ok(err);
-            test.equal(85, err.code);
+          collection.ensureIndex(
+            { 'a.one': 1, 'a.two': 1 },
+            { name: 'n2', sparse: true },
+            function (err) {
+              test.ok(err);
+              test.equal(85, err.code);
 
-            client.close(done);
-          });
+              client.close(done);
+            }
+          );
         });
       });
     }
@@ -1159,17 +1163,17 @@ describe('Indexes', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('messed_up_options');
 
-        collection.createIndex({ 'b.one': 1, 'b.two': 1 }, { name: 'test' }, function(err) {
+        collection.createIndex({ 'b.one': 1, 'b.two': 1 }, { name: 'test' }, function (err) {
           test.equal(null, err);
 
-          collection.createIndex({ 'b.one': -1, 'b.two': -1 }, { name: 'test' }, function(err) {
+          collection.createIndex({ 'b.one': -1, 'b.two': -1 }, { name: 'test' }, function (err) {
             test.ok(err);
             test.equal(86, err.code);
 
@@ -1185,16 +1189,16 @@ describe('Indexes', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         // insert a doc
         db.collection('messed_up_index_2').createIndex(
           { 'accessControl.get': 1 },
           { background: true },
-          function(err) {
+          function (err) {
             test.equal(null, err);
 
             client.close(done);
@@ -1204,7 +1208,7 @@ describe('Indexes', function() {
     }
   });
 
-  context('commitQuorum', function() {
+  context('commitQuorum', function () {
     function throwErrorTest(testCommand) {
       return {
         metadata: { requires: { mongodb: '<4.4' } },
@@ -1248,19 +1252,15 @@ describe('Indexes', function() {
     function commitQuorumTest(testCommand) {
       return {
         metadata: { requires: { mongodb: '>=4.4', topology: ['replicaset', 'sharded'] } },
-        test: withMonitoredClient('createIndexes', function(client, events, done) {
+        test: withMonitoredClient('createIndexes', function (client, events, done) {
           const db = client.db('test');
           const collection = db.collection('commitQuorum');
-          collection.insertOne({ a: 1 }, function(err) {
+          collection.insertOne({ a: 1 }, function (err) {
             expect(err).to.not.exist;
             testCommand(db, collection, err => {
               expect(err).to.not.exist;
-              expect(events)
-                .to.be.an('array')
-                .with.lengthOf(1);
-              expect(events[0])
-                .nested.property('command.commitQuorum')
-                .to.equal(0);
+              expect(events).to.be.an('array').with.lengthOf(1);
+              expect(events[0]).nested.property('command.commitQuorum').to.equal(0);
               collection.drop(err => {
                 expect(err).to.not.exist;
                 done();

@@ -9,7 +9,7 @@ const ReplSet = core.ReplSet;
 const ClientSession = core.Sessions.ClientSession;
 const ServerSessionPool = core.Sessions.ServerSessionPool;
 
-describe('Transaction Feature Decoration', function() {
+describe('Transaction Feature Decoration', function () {
   let test;
   const ns = 'db.foo';
   const noop = () => {};
@@ -74,7 +74,7 @@ describe('Transaction Feature Decoration', function() {
     .forEach(config => {
       it(config.description, {
         metadata: { requires: { topology: 'single', mongodb: '>=3.7.3' } },
-        test: function(done) {
+        test: function (done) {
           const replSet = new ReplSet(
             [test.primaryServer.address(), test.firstSecondaryServer.address()],
             {

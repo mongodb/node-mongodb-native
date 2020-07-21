@@ -4,11 +4,11 @@ var expect = require('chai').expect,
   co = require('co');
 const { Long } = require('../../src');
 
-describe('Views', function() {
+describe('Views', function () {
   it('should successfully pass through collation to findAndModify command', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       const configuration = this.configuration;
 
@@ -19,7 +19,7 @@ describe('Views', function() {
       var primary = [Object.assign({}, defaultFields)];
 
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const singleServer = yield mock.createServer();
 
         singleServer.setMessageHandler(request => {
@@ -47,12 +47,12 @@ describe('Views', function() {
 
         // Connect to the mocks
         const client = configuration.newClient(`mongodb://${singleServer.uri()}/test`);
-        client.connect(function(err, client) {
+        client.connect(function (err, client) {
           expect(err).to.not.exist;
           var db = client.db(self.configuration.db);
 
           // Simple findAndModify command returning the new document
-          db.createCollection('test', { viewOn: 'users', pipeline: [{ $match: {} }] }, function(
+          db.createCollection('test', { viewOn: 'users', pipeline: [{ $match: {} }] }, function (
             err,
             r
           ) {

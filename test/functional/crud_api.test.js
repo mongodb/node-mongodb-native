@@ -8,8 +8,8 @@ var test = require('./shared').assert,
 // backwards compatibility in a fundamental way
 //
 
-describe('CRUD API', function() {
-  before(function() {
+describe('CRUD API', function () {
+  before(function () {
     return setupDatabase(this.configuration);
   });
 
@@ -20,13 +20,13 @@ describe('CRUD API', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
 
-        db.collection('t').insert([{ a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }], function(err) {
+        db.collection('t').insert([{ a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }], function (err) {
           test.equal(null, err);
 
           //
@@ -49,9 +49,9 @@ describe('CRUD API', function() {
           //
           // Exercise count method
           // -------------------------------------------------
-          var countMethod = function() {
+          var countMethod = function () {
             // Execute the different methods supported by the cursor
-            cursor.count(function(err, count) {
+            cursor.count(function (err, count) {
               test.equal(null, err);
               test.equal(2, count);
               eachMethod();
@@ -61,10 +61,10 @@ describe('CRUD API', function() {
           //
           // Exercise legacy method each
           // -------------------------------------------------
-          var eachMethod = function() {
+          var eachMethod = function () {
             var count = 0;
 
-            cursor.each(function(err, doc) {
+            cursor.each(function (err, doc) {
               test.equal(null, err);
               if (doc) count = count + 1;
               if (doc == null) {
@@ -77,8 +77,8 @@ describe('CRUD API', function() {
           //
           // Exercise toArray
           // -------------------------------------------------
-          var toArrayMethod = function() {
-            cursor.toArray(function(err, docs) {
+          var toArrayMethod = function () {
+            cursor.toArray(function (err, docs) {
               test.equal(null, err);
               test.equal(2, docs.length);
               nextMethod();
@@ -88,17 +88,17 @@ describe('CRUD API', function() {
           //
           // Exercise next method
           // -------------------------------------------------
-          var nextMethod = function() {
+          var nextMethod = function () {
             var clonedCursor = cursor.clone();
-            clonedCursor.next(function(err, doc) {
+            clonedCursor.next(function (err, doc) {
               test.equal(null, err);
               test.ok(doc != null);
 
-              clonedCursor.next(function(err, doc) {
+              clonedCursor.next(function (err, doc) {
                 test.equal(null, err);
                 test.ok(doc != null);
 
-                clonedCursor.next(function(err, doc) {
+                clonedCursor.next(function (err, doc) {
                   test.equal(null, err);
                   test.equal(null, doc);
                   streamMethod();
@@ -110,14 +110,14 @@ describe('CRUD API', function() {
           //
           // Exercise stream
           // -------------------------------------------------
-          var streamMethod = function() {
+          var streamMethod = function () {
             var count = 0;
             var clonedCursor = cursor.clone();
-            clonedCursor.on('data', function() {
+            clonedCursor.on('data', function () {
               count = count + 1;
             });
 
-            clonedCursor.once('end', function() {
+            clonedCursor.once('end', function () {
               test.equal(2, count);
               explainMethod();
             });
@@ -126,9 +126,9 @@ describe('CRUD API', function() {
           //
           // Explain method
           // -------------------------------------------------
-          var explainMethod = function() {
+          var explainMethod = function () {
             var clonedCursor = cursor.clone();
-            clonedCursor.explain(function(err, result) {
+            clonedCursor.explain(function (err, result) {
               test.equal(null, err);
               test.ok(result != null);
 
@@ -150,16 +150,16 @@ describe('CRUD API', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
 
-        db.collection('t1').insert([{ a: 1 }, { a: 1 }, { a: 2 }, { a: 1 }], function(err) {
+        db.collection('t1').insert([{ a: 1 }, { a: 1 }, { a: 2 }, { a: 1 }], function (err) {
           test.equal(null, err);
 
-          var testAllMethods = function() {
+          var testAllMethods = function () {
             // Get the cursor
             var cursor = db.collection('t1').aggregate({
               pipeline: [{ $match: {} }],
@@ -185,7 +185,7 @@ describe('CRUD API', function() {
 
             // Execute the command with all steps defined
             // will fail
-            cursor.toArray(function(err) {
+            cursor.toArray(function (err) {
               test.ok(err != null);
               testToArray();
             });
@@ -194,10 +194,10 @@ describe('CRUD API', function() {
           //
           // Exercise toArray
           // -------------------------------------------------
-          var testToArray = function() {
+          var testToArray = function () {
             var cursor = db.collection('t1').aggregate();
             cursor.match({ a: 1 });
-            cursor.toArray(function(err, docs) {
+            cursor.toArray(function (err, docs) {
               test.equal(null, err);
               test.equal(3, docs.length);
               testNext();
@@ -207,10 +207,10 @@ describe('CRUD API', function() {
           //
           // Exercise next
           // -------------------------------------------------
-          var testNext = function() {
+          var testNext = function () {
             var cursor = db.collection('t1').aggregate();
             cursor.match({ a: 1 });
-            cursor.next(function(err) {
+            cursor.next(function (err) {
               test.equal(null, err);
               testEach();
             });
@@ -219,11 +219,11 @@ describe('CRUD API', function() {
           //
           // Exercise each
           // -------------------------------------------------
-          var testEach = function() {
+          var testEach = function () {
             var count = 0;
             var cursor = db.collection('t1').aggregate();
             cursor.match({ a: 1 });
-            cursor.each(function(err, doc) {
+            cursor.each(function (err, doc) {
               test.equal(null, err);
               if (doc) count = count + 1;
               if (doc == null) {
@@ -236,15 +236,15 @@ describe('CRUD API', function() {
           //
           // Exercise stream
           // -------------------------------------------------
-          var testStream = function() {
+          var testStream = function () {
             var cursor = db.collection('t1').aggregate();
             var count = 0;
             cursor.match({ a: 1 });
-            cursor.on('data', function() {
+            cursor.on('data', function () {
               count = count + 1;
             });
 
-            cursor.once('end', function() {
+            cursor.once('end', function () {
               test.equal(3, count);
               testExplain();
             });
@@ -253,9 +253,9 @@ describe('CRUD API', function() {
           //
           // Explain method
           // -------------------------------------------------
-          var testExplain = function() {
+          var testExplain = function () {
             var cursor = db.collection('t1').aggregate();
-            cursor.explain(function(err, result) {
+            cursor.explain(function (err, result) {
               test.equal(null, err);
               test.ok(result != null);
 
@@ -276,17 +276,17 @@ describe('CRUD API', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
 
         //
         // Legacy insert method
         // -------------------------------------------------
-        var legacyInsert = function() {
-          db.collection('t2_1').insert([{ a: 1 }, { a: 2 }], function(err, r) {
+        var legacyInsert = function () {
+          db.collection('t2_1').insert([{ a: 1 }, { a: 2 }], function (err, r) {
             test.equal(null, err);
             test.equal(2, r.result.n);
 
@@ -297,11 +297,11 @@ describe('CRUD API', function() {
         //
         // Bulk api insert method
         // -------------------------------------------------
-        var bulkAPIInsert = function() {
+        var bulkAPIInsert = function () {
           var bulk = db.collection('t2_2').initializeOrderedBulkOp();
           bulk.insert({ a: 1 });
           bulk.insert({ a: 1 });
-          bulk.execute(function(err) {
+          bulk.execute(function (err) {
             test.equal(null, err);
 
             insertOne();
@@ -311,8 +311,8 @@ describe('CRUD API', function() {
         //
         // Insert one method
         // -------------------------------------------------
-        var insertOne = function() {
-          db.collection('t2_3').insertOne({ a: 1 }, { w: 1 }, function(err, r) {
+        var insertOne = function () {
+          db.collection('t2_3').insertOne({ a: 1 }, { w: 1 }, function (err, r) {
             test.equal(null, err);
             test.equal(1, r.result.n);
             test.equal(1, r.insertedCount);
@@ -325,9 +325,9 @@ describe('CRUD API', function() {
         //
         // Insert many method
         // -------------------------------------------------
-        var insertMany = function() {
+        var insertMany = function () {
           var docs = [{ a: 1 }, { a: 1 }];
-          db.collection('t2_4').insertMany(docs, { w: 1 }, function(err, r) {
+          db.collection('t2_4').insertMany(docs, { w: 1 }, function (err, r) {
             test.equal(null, err);
             test.equal(2, r.result.n);
             test.equal(2, r.insertedCount);
@@ -341,8 +341,8 @@ describe('CRUD API', function() {
         //
         // Bulk write method unordered
         // -------------------------------------------------
-        var bulkWriteUnOrdered = function() {
-          db.collection('t2_5').insertMany([{ c: 1 }], { w: 1 }, function(err, r) {
+        var bulkWriteUnOrdered = function () {
+          db.collection('t2_5').insertMany([{ c: 1 }], { w: 1 }, function (err, r) {
             test.equal(null, err);
             test.equal(1, r.result.n);
 
@@ -356,7 +356,7 @@ describe('CRUD API', function() {
                 { deleteMany: { q: { c: 1 } } }
               ],
               { ordered: false, w: 1 },
-              function(err, r) {
+              function (err, r) {
                 test.equal(null, err);
                 test.equal(3, r.nInserted);
                 test.equal(1, r.nUpserted);
@@ -380,8 +380,8 @@ describe('CRUD API', function() {
         //
         // Bulk write method unordered
         // -------------------------------------------------
-        var bulkWriteUnOrderedSpec = function() {
-          db.collection('t2_6').insertMany([{ c: 1 }, { c: 2 }, { c: 3 }], { w: 1 }, function(
+        var bulkWriteUnOrderedSpec = function () {
+          db.collection('t2_6').insertMany([{ c: 1 }, { c: 2 }, { c: 3 }], { w: 1 }, function (
             err,
             r
           ) {
@@ -398,7 +398,7 @@ describe('CRUD API', function() {
                 { replaceOne: { filter: { c: 3 }, replacement: { c: 4 }, upsert: true } }
               ],
               { ordered: false, w: 1 },
-              function(err, r) {
+              function (err, r) {
                 test.equal(null, err);
                 test.equal(1, r.nInserted);
                 test.equal(2, r.nUpserted);
@@ -422,8 +422,8 @@ describe('CRUD API', function() {
         //
         // Bulk write method ordered
         // -------------------------------------------------
-        var bulkWriteOrdered = function() {
-          db.collection('t2_7').insertMany([{ c: 1 }], { w: 1 }, function(err, r) {
+        var bulkWriteOrdered = function () {
+          db.collection('t2_7').insertMany([{ c: 1 }], { w: 1 }, function (err, r) {
             test.equal(null, err);
             test.equal(1, r.result.n);
 
@@ -437,7 +437,7 @@ describe('CRUD API', function() {
                 { deleteMany: { q: { c: 1 } } }
               ],
               { ordered: true, w: 1 },
-              function(err, r) {
+              function (err, r) {
                 test.equal(null, err);
                 test.equal(3, r.nInserted);
                 test.equal(1, r.nUpserted);
@@ -460,8 +460,8 @@ describe('CRUD API', function() {
         //
         // Bulk write method ordered
         // -------------------------------------------------
-        var bulkWriteOrderedCrudSpec = function() {
-          db.collection('t2_8').insertMany([{ c: 1 }], { w: 1 }, function(err, r) {
+        var bulkWriteOrderedCrudSpec = function () {
+          db.collection('t2_8').insertMany([{ c: 1 }], { w: 1 }, function (err, r) {
             test.equal(null, err);
             test.equal(1, r.result.n);
 
@@ -475,7 +475,7 @@ describe('CRUD API', function() {
                 { replaceOne: { filter: { c: 3 }, replacement: { c: 4 }, upsert: true } }
               ],
               { ordered: true, w: 1 },
-              function(err, r) {
+              function (err, r) {
                 // test.equal(null, err);
                 test.equal(1, r.nInserted);
                 test.equal(2, r.nUpserted);
@@ -507,17 +507,17 @@ describe('CRUD API', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
 
         //
         // Legacy update method
         // -------------------------------------------------
-        var legacyUpdate = function() {
-          db.collection('t3_1').update({ a: 1 }, { $set: { a: 2 } }, { upsert: true }, function(
+        var legacyUpdate = function () {
+          db.collection('t3_1').update({ a: 1 }, { $set: { a: 2 } }, { upsert: true }, function (
             err,
             r
           ) {
@@ -531,8 +531,8 @@ describe('CRUD API', function() {
         //
         // Update one method
         // -------------------------------------------------
-        var updateOne = function() {
-          db.collection('t3_2').insertMany([{ c: 1 }], { w: 1 }, function(err, r) {
+        var updateOne = function () {
+          db.collection('t3_2').insertMany([{ c: 1 }], { w: 1 }, function (err, r) {
             test.equal(null, err);
             test.equal(1, r.result.n);
 
@@ -540,13 +540,13 @@ describe('CRUD API', function() {
               { a: 1 },
               { $set: { a: 1 } },
               { upsert: true },
-              function(err, r) {
+              function (err, r) {
                 test.equal(null, err);
                 test.equal(1, r.result.n);
                 test.equal(0, r.matchedCount);
                 test.ok(r.upsertedId != null);
 
-                db.collection('t3_2').updateOne({ c: 1 }, { $set: { a: 1 } }, function(err, r) {
+                db.collection('t3_2').updateOne({ c: 1 }, { $set: { a: 1 } }, function (err, r) {
                   test.equal(null, err);
                   test.equal(1, r.result.n);
                   test.equal(1, r.matchedCount);
@@ -562,15 +562,15 @@ describe('CRUD API', function() {
         //
         // Replace one method
         // -------------------------------------------------
-        var replaceOne = function() {
-          db.collection('t3_3').replaceOne({ a: 1 }, { a: 2 }, { upsert: true }, function(err, r) {
+        var replaceOne = function () {
+          db.collection('t3_3').replaceOne({ a: 1 }, { a: 2 }, { upsert: true }, function (err, r) {
             test.equal(null, err);
             test.equal(1, r.result.n);
             test.equal(0, r.matchedCount);
             test.equal(1, r.ops.length);
             test.ok(r.upsertedId != null);
 
-            db.collection('t3_3').replaceOne({ a: 2 }, { a: 3 }, { upsert: true }, function(
+            db.collection('t3_3').replaceOne({ a: 2 }, { a: 3 }, { upsert: true }, function (
               err,
               r
             ) {
@@ -590,8 +590,8 @@ describe('CRUD API', function() {
         //
         // Update many method
         // -------------------------------------------------
-        var updateMany = function() {
-          db.collection('t3_4').insertMany([{ a: 1 }, { a: 1 }], { w: 1 }, function(err, r) {
+        var updateMany = function () {
+          db.collection('t3_4').insertMany([{ a: 1 }, { a: 1 }], { w: 1 }, function (err, r) {
             test.equal(null, err);
             test.equal(2, r.result.n);
 
@@ -599,7 +599,7 @@ describe('CRUD API', function() {
               { a: 1 },
               { $set: { a: 2 } },
               { upsert: true, w: 1 },
-              function(err, r) {
+              function (err, r) {
                 test.equal(null, err);
                 test.equal(2, r.result.n);
                 test.equal(2, r.matchedCount);
@@ -609,7 +609,7 @@ describe('CRUD API', function() {
                   { c: 1 },
                   { $set: { d: 2 } },
                   { upsert: true, w: 1 },
-                  function(err, r) {
+                  function (err, r) {
                     test.equal(null, err);
                     test.equal(0, r.matchedCount);
                     test.ok(r.upsertedId != null);
@@ -634,21 +634,21 @@ describe('CRUD API', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
 
         //
         // Legacy update method
         // -------------------------------------------------
-        var legacyRemove = function() {
-          db.collection('t4_1').insertMany([{ a: 1 }, { a: 1 }], { w: 1 }, function(err, r) {
+        var legacyRemove = function () {
+          db.collection('t4_1').insertMany([{ a: 1 }, { a: 1 }], { w: 1 }, function (err, r) {
             test.equal(null, err);
             test.equal(2, r.result.n);
 
-            db.collection('t4_1').remove({ a: 1 }, { single: true }, function(err, r) {
+            db.collection('t4_1').remove({ a: 1 }, { single: true }, function (err, r) {
               test.equal(null, err);
               test.equal(1, r.result.n);
 
@@ -660,12 +660,12 @@ describe('CRUD API', function() {
         //
         // Update one method
         // -------------------------------------------------
-        var deleteOne = function() {
-          db.collection('t4_2').insertMany([{ a: 1 }, { a: 1 }], { w: 1 }, function(err, r) {
+        var deleteOne = function () {
+          db.collection('t4_2').insertMany([{ a: 1 }, { a: 1 }], { w: 1 }, function (err, r) {
             test.equal(null, err);
             test.equal(2, r.result.n);
 
-            db.collection('t4_2').deleteOne({ a: 1 }, function(err, r) {
+            db.collection('t4_2').deleteOne({ a: 1 }, function (err, r) {
               test.equal(null, err);
               test.equal(1, r.result.n);
               test.equal(1, r.deletedCount);
@@ -678,12 +678,12 @@ describe('CRUD API', function() {
         //
         // Update many method
         // -------------------------------------------------
-        var deleteMany = function() {
-          db.collection('t4_3').insertMany([{ a: 1 }, { a: 1 }], { w: 1 }, function(err, r) {
+        var deleteMany = function () {
+          db.collection('t4_3').insertMany([{ a: 1 }, { a: 1 }], { w: 1 }, function (err, r) {
             test.equal(null, err);
             test.equal(2, r.result.n);
 
-            db.collection('t4_3').deleteMany({ a: 1 }, function(err, r) {
+            db.collection('t4_3').deleteMany({ a: 1 }, function (err, r) {
               test.equal(null, err);
               test.equal(2, r.result.n);
               test.equal(2, r.deletedCount);
@@ -705,24 +705,24 @@ describe('CRUD API', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
 
         //
         // findOneAndRemove method
         // -------------------------------------------------
-        var findOneAndRemove = function() {
-          db.collection('t5_1').insertMany([{ a: 1, b: 1 }], { w: 1 }, function(err, r) {
+        var findOneAndRemove = function () {
+          db.collection('t5_1').insertMany([{ a: 1, b: 1 }], { w: 1 }, function (err, r) {
             test.equal(null, err);
             test.equal(1, r.result.n);
 
             db.collection('t5_1').findOneAndDelete(
               { a: 1 },
               { projection: { b: 1 }, sort: { a: 1 } },
-              function(err, r) {
+              function (err, r) {
                 test.equal(null, err);
                 test.equal(1, r.lastErrorObject.n);
                 test.equal(1, r.value.b);
@@ -736,8 +736,8 @@ describe('CRUD API', function() {
         //
         // findOneAndRemove method
         // -------------------------------------------------
-        var findOneAndReplace = function() {
-          db.collection('t5_2').insertMany([{ a: 1, b: 1 }], { w: 1 }, function(err, r) {
+        var findOneAndReplace = function () {
+          db.collection('t5_2').insertMany([{ a: 1, b: 1 }], { w: 1 }, function (err, r) {
             test.equal(null, err);
             test.equal(1, r.result.n);
 
@@ -750,7 +750,7 @@ describe('CRUD API', function() {
                 returnOriginal: false,
                 upsert: true
               },
-              function(err, r) {
+              function (err, r) {
                 test.equal(null, err);
                 test.equal(1, r.lastErrorObject.n);
                 test.equal(1, r.value.b);
@@ -765,8 +765,8 @@ describe('CRUD API', function() {
         //
         // findOneAndRemove method
         // -------------------------------------------------
-        var findOneAndUpdate = function() {
-          db.collection('t5_3').insertMany([{ a: 1, b: 1 }], { w: 1 }, function(err, r) {
+        var findOneAndUpdate = function () {
+          db.collection('t5_3').insertMany([{ a: 1, b: 1 }], { w: 1 }, function (err, r) {
             test.equal(null, err);
             test.equal(1, r.result.n);
 
@@ -779,7 +779,7 @@ describe('CRUD API', function() {
                 returnOriginal: false,
                 upsert: true
               },
-              function(err, r) {
+              function (err, r) {
                 test.equal(null, err);
                 test.equal(1, r.lastErrorObject.n);
                 test.equal(1, r.value.b);
@@ -803,15 +803,15 @@ describe('CRUD API', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         test.equal(null, err);
 
         // Delete all items with no selector
-        db.collection('t6_1').deleteMany({}, function(err) {
+        db.collection('t6_1').deleteMany({}, function (err) {
           test.equal(null, err);
 
           client.close(done);
@@ -827,35 +827,35 @@ describe('CRUD API', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         test.equal(null, err);
 
         var col = db.collection('shouldCorrectlyExecuteInsertOneWithW0');
-        col.insertOne({ a: 1 }, { w: 0 }, function(err, result) {
+        col.insertOne({ a: 1 }, { w: 0 }, function (err, result) {
           test.equal(null, err);
           test.equal(1, result.result.ok);
 
-          col.insertMany([{ a: 1 }], { w: 0 }, function(err, result) {
+          col.insertMany([{ a: 1 }], { w: 0 }, function (err, result) {
             test.equal(null, err);
             test.equal(1, result.result.ok);
 
-            col.updateOne({ a: 1 }, { $set: { b: 1 } }, { w: 0 }, function(err, result) {
+            col.updateOne({ a: 1 }, { $set: { b: 1 } }, { w: 0 }, function (err, result) {
               test.equal(null, err);
               test.equal(1, result.result.ok);
 
-              col.updateMany({ a: 1 }, { $set: { b: 1 } }, { w: 0 }, function(err, result) {
+              col.updateMany({ a: 1 }, { $set: { b: 1 } }, { w: 0 }, function (err, result) {
                 test.equal(null, err);
                 test.equal(1, result.result.ok);
 
-                col.deleteOne({ a: 1 }, { w: 0 }, function(err, result) {
+                col.deleteOne({ a: 1 }, { w: 0 }, function (err, result) {
                   test.equal(null, err);
                   test.equal(1, result.result.ok);
 
-                  col.deleteMany({ a: 1 }, { w: 0 }, function(err, result) {
+                  col.deleteMany({ a: 1 }, { w: 0 }, function (err, result) {
                     test.equal(null, err);
                     test.equal(1, result.result.ok);
 
@@ -877,10 +877,10 @@ describe('CRUD API', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         test.equal(null, err);
 
@@ -888,7 +888,7 @@ describe('CRUD API', function() {
           { _id: 1 },
           { $set: { x: 1 } },
           { upsert: true, w: 0 },
-          function(err, r) {
+          function (err, r) {
             test.equal(null, err);
             test.ok(r != null);
 
@@ -906,15 +906,15 @@ describe('CRUD API', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         test.equal(null, err);
 
         var collection = db.collection('w0crudoperations');
-        collection.insertOne({}, function(err) {
+        collection.insertOne({}, function (err) {
           test.equal(null, err);
           client.close(done);
         });
@@ -941,7 +941,7 @@ describe('CRUD API', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
 
@@ -953,11 +953,11 @@ describe('CRUD API', function() {
 
       ops.push({ insertOne: { _id: 0, a: i } });
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         test.equal(null, err);
 
-        db.collection('t20_1').bulkWrite(ops, { ordered: false, w: 1 }, function(err) {
+        db.collection('t20_1').bulkWrite(ops, { ordered: false, w: 1 }, function (err) {
           test.ok(err !== null);
           client.close(done);
         });
@@ -972,7 +972,7 @@ describe('CRUD API', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
 
@@ -984,11 +984,11 @@ describe('CRUD API', function() {
 
       ops.push({ insertOne: { _id: 0, a: i } });
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         test.equal(null, err);
 
-        db.collection('t20_1').bulkWrite(ops, { ordered: true, w: 1 }, function(err) {
+        db.collection('t20_1').bulkWrite(ops, { ordered: true, w: 1 }, function (err) {
           test.ok(err !== null);
           client.close(done);
         });
@@ -996,24 +996,24 @@ describe('CRUD API', function() {
     }
   });
 
-  it('should correctly throw error if update doc for findOneAndUpdate lacks atomic operator', function(done) {
+  it('should correctly throw error if update doc for findOneAndUpdate lacks atomic operator', function (done) {
     let configuration = this.configuration;
     let client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-    client.connect(function(err, client) {
+    client.connect(function (err, client) {
       expect(err).to.not.exist;
       let db = client.db(configuration.db);
       let col = db.collection('t21_1');
-      col.insertOne({ a: 1, b: 2, c: 3 }, function(err, r) {
+      col.insertOne({ a: 1, b: 2, c: 3 }, function (err, r) {
         expect(err).to.not.exist;
         expect(r.insertedCount).to.equal(1);
 
         // empty update document
-        col.findOneAndUpdate({ a: 1 }, {}, function(err, r) {
+        col.findOneAndUpdate({ a: 1 }, {}, function (err, r) {
           expect(err).to.exist;
           expect(r).to.not.exist;
 
           // update document non empty but still lacks atomic operator
-          col.findOneAndUpdate({ a: 1 }, { b: 5 }, function(err, r) {
+          col.findOneAndUpdate({ a: 1 }, { b: 5 }, function (err, r) {
             expect(err).to.exist;
             expect(r).to.not.exist;
 
@@ -1031,24 +1031,24 @@ describe('CRUD API', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         expect(err).to.not.exist;
         var db = client.db(configuration.db);
         var col = db.collection('t21_1');
-        col.insertOne({ a: 1, b: 2, c: 3 }, function(err, r) {
+        col.insertOne({ a: 1, b: 2, c: 3 }, function (err, r) {
           expect(err).to.not.exist;
           expect(r.insertedCount).to.equal(1);
 
           // empty update document
-          col.updateOne({ a: 1 }, {}, function(err, r) {
+          col.updateOne({ a: 1 }, {}, function (err, r) {
             expect(err).to.exist;
             expect(r).to.not.exist;
 
             // update document non empty but still lacks atomic operator
-            col.updateOne({ a: 1 }, { b: 5 }, function(err, r) {
+            col.updateOne({ a: 1 }, { b: 5 }, function (err, r) {
               expect(err).to.exist;
               expect(r).to.not.exist;
 
@@ -1067,10 +1067,10 @@ describe('CRUD API', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         expect(err).to.not.exist;
         var db = client.db(configuration.db);
         var col = db.collection('t22_1');
@@ -1080,17 +1080,17 @@ describe('CRUD API', function() {
             { a: 1, b: 3 },
             { a: 1, b: 4 }
           ],
-          function(err, r) {
+          function (err, r) {
             expect(err).to.not.exist;
             expect(r.insertedCount).to.equal(3);
 
             // empty update document
-            col.updateMany({ a: 1 }, {}, function(err, r) {
+            col.updateMany({ a: 1 }, {}, function (err, r) {
               expect(err).to.exist;
               expect(r).to.not.exist;
 
               // update document non empty but still lacks atomic operator
-              col.updateMany({ a: 1 }, { b: 5 }, function(err, r) {
+              col.updateMany({ a: 1 }, { b: 5 }, function (err, r) {
                 expect(err).to.exist;
                 expect(r).to.not.exist;
 

@@ -11,7 +11,7 @@ const ReplSet = core.ReplSet;
 const ObjectId = core.BSON.ObjectId;
 
 let test = {};
-describe('ReplSet All Servers Close (mocks)', function() {
+describe('ReplSet All Servers Close (mocks)', function () {
   beforeEach(() => {
     test.spy = new ConnectionSpy();
     Connection.enableConnectionAccounting(test.spy);
@@ -32,7 +32,7 @@ describe('ReplSet All Servers Close (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var electionIds = [new ObjectId(), new ObjectId()];
       var die = false;
 
@@ -79,7 +79,7 @@ describe('ReplSet All Servers Close (mocks)', function() {
       ];
 
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const primaryServer = yield mock.createServer(32000, 'localhost');
         const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
         const arbiterServer = yield mock.createServer(32002, 'localhost');
@@ -137,15 +137,15 @@ describe('ReplSet All Servers Close (mocks)', function() {
           }
         );
 
-        server.on('connect', function(_server) {
-          setTimeout(function() {
+        server.on('connect', function (_server) {
+          setTimeout(function () {
             die = true;
 
-            setTimeout(function() {
+            setTimeout(function () {
               die = false;
 
-              setTimeout(function() {
-                _server.command('admin.$cmd', { ismaster: true }, function(err, r) {
+              setTimeout(function () {
+                _server.command('admin.$cmd', { ismaster: true }, function (err, r) {
                   expect(r).to.exist;
                   expect(err).to.be.null;
                   expect(_server.s.replicaSetState.primary).to.not.be.null;
@@ -176,7 +176,7 @@ describe('ReplSet All Servers Close (mocks)', function() {
         }
       },
 
-      test: function(done) {
+      test: function (done) {
         var electionIds = [new ObjectId(), new ObjectId()];
         var die = false;
 
@@ -223,7 +223,7 @@ describe('ReplSet All Servers Close (mocks)', function() {
         ];
 
         // Boot the mock
-        co(function*() {
+        co(function* () {
           const primaryServer = yield mock.createServer(34000, 'localhost');
           const firstSecondaryServer = yield mock.createServer(34001, 'localhost');
           const arbiterServer = yield mock.createServer(34002, 'localhost');
@@ -277,20 +277,20 @@ describe('ReplSet All Servers Close (mocks)', function() {
             }
           );
 
-          server.on('connect', function() {
-            setTimeout(function() {
+          server.on('connect', function () {
+            setTimeout(function () {
               die = true;
 
-              var intervalId = setInterval(function() {
-                server.command('admin.$cmd', { ismaster: true }, function() {});
+              var intervalId = setInterval(function () {
+                server.command('admin.$cmd', { ismaster: true }, function () {});
               }, 500);
 
-              setTimeout(function() {
+              setTimeout(function () {
                 die = false;
-                setTimeout(function() {
+                setTimeout(function () {
                   clearInterval(intervalId);
 
-                  server.command('admin.$cmd', { ismaster: true }, function(err, r) {
+                  server.command('admin.$cmd', { ismaster: true }, function (err, r) {
                     expect(r).to.exist;
                     expect(err).to.be.null;
                     expect(server.s.replicaSetState.primary).to.not.be.null;

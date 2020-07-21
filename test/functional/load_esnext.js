@@ -11,10 +11,10 @@ function loadTests() {
     .forEach(x => require(x));
 }
 
-describe('ES2017', function() {
+describe('ES2017', function () {
   loadTests(__dirname, '..', 'examples');
 });
 
-describe('ES2018', function() {
+describe('ES2018', function () {
   loadTests(__dirname, '..', 'node-next', 'es2018');
 });

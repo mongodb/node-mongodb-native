@@ -1,8 +1,8 @@
 'use strict';
 const expect = require('chai').expect;
 
-describe('Topology', function() {
-  it('should correctly track states of a topology', function(done) {
+describe('Topology', function () {
+  it('should correctly track states of a topology', function (done) {
     const topology = this.configuration.newTopology();
 
     const states = [];

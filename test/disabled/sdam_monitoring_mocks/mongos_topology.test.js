@@ -6,7 +6,7 @@ const mock = require('mongodb-mock-server');
 const core = require('../../../../src/core');
 const Mongos = core.Mongos;
 
-describe.skip('Mongos SDAM Monitoring (mocks)', function() {
+describe.skip('Mongos SDAM Monitoring (mocks)', function () {
   it('SDAM Monitoring Should correctly connect to two proxies', {
     metadata: {
       requires: {
@@ -15,7 +15,7 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       // Contain mock server
       var mongos1 = null;
       var mongos2 = null;
@@ -30,7 +30,7 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
       // Primary server states
       var serverIsMaster = [Object.assign({}, defaultFields)];
       // Boot the mock
-      co(function*() {
+      co(function* () {
         mongos1 = yield mock.createServer();
         mongos2 = yield mock.createServer();
 
@@ -62,9 +62,9 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
       });
 
       // Add event listeners
-      server.once('fullsetup', function(_server) {
-        var intervalId = setInterval(function() {
-          server.insert('test.test', [{ created: new Date() }], function(err, r) {
+      server.once('fullsetup', function (_server) {
+        var intervalId = setInterval(function () {
+          server.insert('test.test', [{ created: new Date() }], function (err, r) {
             // If we have a successful insert
             // validate that it's the expected proxy
             if (r) {
@@ -75,11 +75,11 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
               var proxies = {};
 
               // Perform interval inserts waiting for both proxies to come back
-              var intervalId2 = setInterval(function() {
+              var intervalId2 = setInterval(function () {
                 // Bring back the missing proxy
                 if (currentStep === 0) currentStep = currentStep + 1;
                 // Perform inserts
-                server.insert('test.test', [{ created: new Date() }], function(_err, _r) {
+                server.insert('test.test', [{ created: new Date() }], function (_err, _r) {
                   expect(_err).to.be.null;
                   if (_r) {
                     proxies[_r.connection.port] = true;
@@ -91,7 +91,7 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
                     server.destroy();
 
                     mock.cleanup().then(() => {
-                      setTimeout(function() {
+                      setTimeout(function () {
                         var results = [
                           {
                             topologyId: _server.s.id,
@@ -160,49 +160,49 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
       });
 
       var responses = {};
-      var add = function(a) {
+      var add = function (a) {
         if (!responses[a.type]) responses[a.type] = [];
         responses[a.type].push(a.event);
       };
 
-      server.on('serverOpening', function(event) {
+      server.on('serverOpening', function (event) {
         add({ type: 'serverOpening', event: event });
       });
 
-      server.on('serverClosed', function(event) {
+      server.on('serverClosed', function (event) {
         add({ type: 'serverClosed', event: event });
       });
 
-      server.on('serverDescriptionChanged', function(event) {
+      server.on('serverDescriptionChanged', function (event) {
         add({ type: 'serverDescriptionChanged', event: event });
       });
 
-      server.on('topologyOpening', function(event) {
+      server.on('topologyOpening', function (event) {
         add({ type: 'topologyOpening', event: event });
       });
 
-      server.on('topologyClosed', function(event) {
+      server.on('topologyClosed', function (event) {
         add({ type: 'topologyClosed', event: event });
       });
 
-      server.on('topologyDescriptionChanged', function(event) {
+      server.on('topologyDescriptionChanged', function (event) {
         add({ type: 'topologyDescriptionChanged', event: event });
       });
 
-      server.on('serverHeartbeatStarted', function(event) {
+      server.on('serverHeartbeatStarted', function (event) {
         add({ type: 'serverHeartbeatStarted', event: event });
       });
 
-      server.on('serverHeartbeatSucceeded', function(event) {
+      server.on('serverHeartbeatSucceeded', function (event) {
         add({ type: 'serverHeartbeatSucceeded', event: event });
       });
 
-      server.on('serverHeartbeatFailed', function(event) {
+      server.on('serverHeartbeatFailed', function (event) {
         add({ type: 'serverHeartbeatFailed', event: event });
       });
 
       server.on('error', done);
-      setTimeout(function() {
+      setTimeout(function () {
         server.connect();
       }, 100);
     }
@@ -216,7 +216,7 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       // Contain mock server
       var mongos1 = null;
       var mongos2 = null;
@@ -229,7 +229,7 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
       // Primary server states
       var serverIsMaster = [Object.assign({}, defaultFields)];
       // Boot the mock
-      co(function*() {
+      co(function* () {
         mongos1 = yield mock.createServer();
         mongos2 = yield mock.createServer();
 
@@ -263,21 +263,21 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
       });
 
       // Add event listeners
-      server.once('fullsetup', function(_server) {
-        var intervalId = setInterval(function() {
-          server.insert('test.test', [{ created: new Date() }], function(err, r) {
+      server.once('fullsetup', function (_server) {
+        var intervalId = setInterval(function () {
+          server.insert('test.test', [{ created: new Date() }], function (err, r) {
             // If we have a successful insert
             // validate that it's the expected proxy
             if (r) {
               clearInterval(intervalId);
               // Wait to allow at least one heartbeat to pass
-              setTimeout(function() {
+              setTimeout(function () {
                 expect(r.connection.port).to.equal(62003);
                 server.destroy();
 
                 mock.cleanup().then(() => {
                   // Wait for a little bit to let all events fire
-                  setTimeout(function() {
+                  setTimeout(function () {
                     expect(responses.serverOpening.length).to.be.at.least(2);
                     expect(responses.serverClosed.length).to.be.at.least(2);
                     expect(responses.topologyOpening).to.have.length(1);
@@ -350,44 +350,44 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
       });
 
       var responses = {};
-      var add = function(a) {
+      var add = function (a) {
         if (!responses[a.type]) responses[a.type] = [];
         responses[a.type].push(a.event);
       };
 
-      server.on('serverOpening', function(event) {
+      server.on('serverOpening', function (event) {
         add({ type: 'serverOpening', event: event });
       });
 
-      server.on('serverClosed', function(event) {
+      server.on('serverClosed', function (event) {
         add({ type: 'serverClosed', event: event });
       });
 
-      server.on('serverDescriptionChanged', function(event) {
+      server.on('serverDescriptionChanged', function (event) {
         add({ type: 'serverDescriptionChanged', event: event });
       });
 
-      server.on('topologyOpening', function(event) {
+      server.on('topologyOpening', function (event) {
         add({ type: 'topologyOpening', event: event });
       });
 
-      server.on('topologyClosed', function(event) {
+      server.on('topologyClosed', function (event) {
         add({ type: 'topologyClosed', event: event });
       });
 
-      server.on('topologyDescriptionChanged', function(event) {
+      server.on('topologyDescriptionChanged', function (event) {
         add({ type: 'topologyDescriptionChanged', event: event });
       });
 
-      server.on('serverHeartbeatStarted', function(event) {
+      server.on('serverHeartbeatStarted', function (event) {
         add({ type: 'serverHeartbeatStarted', event: event });
       });
 
-      server.on('serverHeartbeatSucceeded', function(event) {
+      server.on('serverHeartbeatSucceeded', function (event) {
         add({ type: 'serverHeartbeatSucceeded', event: event });
       });
 
-      server.on('serverHeartbeatFailed', function(event) {
+      server.on('serverHeartbeatFailed', function (event) {
         add({ type: 'serverHeartbeatFailed', event: event });
       });
 
@@ -404,7 +404,7 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       // Contain mock server
       var mongos1 = null;
       var mongos2 = null;
@@ -419,7 +419,7 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
       // Primary server states
       var serverIsMaster = [Object.assign({}, defaultFields)];
       // Boot the mock
-      co(function*() {
+      co(function* () {
         mongos1 = yield mock.createServer();
         mongos2 = yield mock.createServer();
 
@@ -440,13 +440,13 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
         });
 
         // Start dropping the packets
-        setTimeout(function() {
+        setTimeout(function () {
           currentStep = 1;
 
-          setTimeout(function() {
+          setTimeout(function () {
             currentStep = 0;
 
-            setTimeout(function() {
+            setTimeout(function () {
               expect(responses.topologyDescriptionChanged.length).to.be.greaterThan(0);
               server.destroy();
               mock.cleanup().then(() => done());
@@ -464,44 +464,44 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
       });
 
       var responses = {};
-      var add = function(a) {
+      var add = function (a) {
         if (!responses[a.type]) responses[a.type] = [];
         responses[a.type].push(a.event);
       };
 
-      server.on('serverOpening', function(event) {
+      server.on('serverOpening', function (event) {
         add({ type: 'serverOpening', event: event });
       });
 
-      server.on('serverClosed', function(event) {
+      server.on('serverClosed', function (event) {
         add({ type: 'serverClosed', event: event });
       });
 
-      server.on('serverDescriptionChanged', function(event) {
+      server.on('serverDescriptionChanged', function (event) {
         add({ type: 'serverDescriptionChanged', event: event });
       });
 
-      server.on('topologyOpening', function(event) {
+      server.on('topologyOpening', function (event) {
         add({ type: 'topologyOpening', event: event });
       });
 
-      server.on('topologyClosed', function(event) {
+      server.on('topologyClosed', function (event) {
         add({ type: 'topologyClosed', event: event });
       });
 
-      server.on('topologyDescriptionChanged', function(event) {
+      server.on('topologyDescriptionChanged', function (event) {
         add({ type: 'topologyDescriptionChanged', event: event });
       });
 
-      server.on('serverHeartbeatStarted', function(event) {
+      server.on('serverHeartbeatStarted', function (event) {
         add({ type: 'serverHeartbeatStarted', event: event });
       });
 
-      server.on('serverHeartbeatSucceeded', function(event) {
+      server.on('serverHeartbeatSucceeded', function (event) {
         add({ type: 'serverHeartbeatSucceeded', event: event });
       });
 
-      server.on('serverHeartbeatFailed', function(event) {
+      server.on('serverHeartbeatFailed', function (event) {
         add({ type: 'serverHeartbeatFailed', event: event });
       });
 

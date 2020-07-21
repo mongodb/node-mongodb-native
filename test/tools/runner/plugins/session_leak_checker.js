@@ -27,13 +27,13 @@ beforeEach('Session Leak Before Each - Set up clean test environment', () => {
   activeSessionsBeforeClose = new Set();
 });
 
-beforeEach('Session Leak Before Each - setup session tracking', function() {
+beforeEach('Session Leak Before Each - setup session tracking', function () {
   if (!this.currentTest || getSessionLeakMetadata(this.currentTest).skipLeakTests) {
     return;
   }
 
   const _acquire = ServerSessionPool.prototype.acquire;
-  sandbox.stub(ServerSessionPool.prototype, 'acquire').callsFake(function() {
+  sandbox.stub(ServerSessionPool.prototype, 'acquire').callsFake(function () {
     const session = _acquire.apply(this, arguments);
     session.trace = new Error().stack;
     activeSessions.add(session);
@@ -41,7 +41,7 @@ beforeEach('Session Leak Before Each - setup session tracking', function() {
   });
 
   const _release = ServerSessionPool.prototype.release;
-  sandbox.stub(ServerSessionPool.prototype, 'release').callsFake(function(session) {
+  sandbox.stub(ServerSessionPool.prototype, 'release').callsFake(function (session) {
     activeSessions.delete(session);
     pooledSessions.add(session);
 
@@ -49,14 +49,14 @@ beforeEach('Session Leak Before Each - setup session tracking', function() {
   });
 
   const _endAllPooledSessions = ServerSessionPool.prototype.endAllPooledSessions;
-  sandbox.stub(ServerSessionPool.prototype, 'endAllPooledSessions').callsFake(function() {
+  sandbox.stub(ServerSessionPool.prototype, 'endAllPooledSessions').callsFake(function () {
     pooledSessions.clear();
     return _endAllPooledSessions.apply(this, arguments);
   });
 
   [Topology].forEach(topology => {
     const _endSessions = topology.prototype.endSessions;
-    sandbox.stub(topology.prototype, 'endSessions').callsFake(function(sessions) {
+    sandbox.stub(topology.prototype, 'endSessions').callsFake(function (sessions) {
       sessions = Array.isArray(sessions) ? sessions : [sessions];
       sessions.forEach(session => pooledSessions.delete(session));
       return _endSessions.apply(this, arguments);
@@ -64,13 +64,13 @@ beforeEach('Session Leak Before Each - setup session tracking', function() {
   });
 
   const _close = MongoClient.prototype.close;
-  sandbox.stub(MongoClient.prototype, 'close').callsFake(function() {
+  sandbox.stub(MongoClient.prototype, 'close').callsFake(function () {
     activeSessionsBeforeClose = new Set(activeSessions);
     return _close.apply(this, arguments);
   });
 });
 
-afterEach('Session Leak After Each - ensure no leaks', function() {
+afterEach('Session Leak After Each - ensure no leaks', function () {
   if (
     this.currentTest == null ||
     this.currentTest.state === 'failed' ||

@@ -5,13 +5,13 @@ const mock = require('mongodb-mock-server');
 const ReplSetFixture = require('../common').ReplSetFixture;
 const expect = require('chai').expect;
 
-describe('Compression (ReplSet)', function() {
+describe('Compression (ReplSet)', function () {
   let test;
   before(() => (test = new ReplSetFixture()));
   afterEach(() => mock.cleanup());
   beforeEach(() => test.setup());
 
-  it('should pass compression information to child server instances on connect', function(done) {
+  it('should pass compression information to child server instances on connect', function (done) {
     const compressionData = [];
     test.primaryServer.setMessageHandler(request => {
       const doc = request.document;

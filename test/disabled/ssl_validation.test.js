@@ -5,7 +5,7 @@ var f = require('util').format;
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 
-var setUp = function(configuration, options, callback) {
+var setUp = function (configuration, options, callback) {
   var ReplSetManager = require('mongodb-topology-manager').ReplSet;
 
   // Check if we have any options
@@ -73,36 +73,36 @@ var setUp = function(configuration, options, callback) {
   var replicasetManager = new ReplSetManager('mongod', nodes, rsOptions.client);
 
   // Purge the set
-  replicasetManager.purge().then(function() {
+  replicasetManager.purge().then(function () {
     // Start the server
     replicasetManager
       .start()
-      .then(function() {
-        setTimeout(function() {
+      .then(function () {
+        setTimeout(function () {
           callback(null, replicasetManager);
         }, 10000);
       })
-      .catch(function(e) {
+      .catch(function (e) {
         test.ok(e != null);
       });
   });
 };
 
-describe('SSL Validation', function() {
-  before(function() {
+describe('SSL Validation', function () {
+  before(function () {
     return setupDatabase(this.configuration);
   });
 
   it('shouldFailDuePresentingWrongCredentialsToServer', {
     metadata: { requires: { topology: 'ssl' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var Server = configuration.require.Server,
         ReplSet = configuration.require.ReplSet,
         MongoClient = configuration.require.MongoClient;
 
-      setUp(configuration, function(e, replicasetManager) {
+      setUp(configuration, function (e, replicasetManager) {
         // Read the ca
         var ca = [fs.readFileSync(__dirname + '/ssl/ca.pem')];
         var cert = fs.readFileSync(__dirname + '/ssl/mycert.pem');
@@ -128,10 +128,10 @@ describe('SSL Validation', function() {
 
         // Connect to the replicaset
         var client = new MongoClient(replSet, configuration.writeConcernMax());
-        client.connect(function(err) {
+        client.connect(function (err) {
           test.ok(err != null);
 
-          replicasetManager.stop().then(function() {
+          replicasetManager.stop().then(function () {
             done();
           });
         });
@@ -142,13 +142,13 @@ describe('SSL Validation', function() {
   it('Should correctly receive ping and ha events using ssl', {
     metadata: { requires: { topology: 'ssl' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var Server = configuration.require.Server,
         ReplSet = configuration.require.ReplSet,
         MongoClient = configuration.require.MongoClient;
 
-      setUp(configuration, function(e, replicasetManager) {
+      setUp(configuration, function (e, replicasetManager) {
         // Read the ca
         var ca = [fs.readFileSync(__dirname + '/ssl/ca.pem')];
         var cert = fs.readFileSync(__dirname + '/ssl/client.pem');
@@ -172,20 +172,20 @@ describe('SSL Validation', function() {
 
         // Connect to the replicaset
         var client = new MongoClient(replSet, configuration.writeConcernMax());
-        client.connect(function(err, client) {
+        client.connect(function (err, client) {
           test.equal(null, err);
           var ha = false;
-          client.topology.once('serverHeartbeatSucceeded', function(e) {
+          client.topology.once('serverHeartbeatSucceeded', function (e) {
             test.equal(null, e);
             ha = true;
           });
 
-          var interval = setInterval(function() {
+          var interval = setInterval(function () {
             if (ha) {
               clearInterval(interval);
               client.close();
 
-              replicasetManager.stop().then(function() {
+              replicasetManager.stop().then(function () {
                 done();
               });
             }
@@ -198,7 +198,7 @@ describe('SSL Validation', function() {
   it('shouldFailToValidateServerSSLCertificate', {
     metadata: { requires: { topology: 'ssl' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var Server = configuration.require.Server,
         ReplSet = configuration.require.ReplSet,
@@ -207,7 +207,7 @@ describe('SSL Validation', function() {
       var ca = [fs.readFileSync(__dirname + '/ssl/mycert.pem')];
 
       // Startup replicaset
-      setUp(configuration, function(e, replicasetManager) {
+      setUp(configuration, function (e, replicasetManager) {
         // Create new
         var replSet = new ReplSet(
           [
@@ -225,10 +225,10 @@ describe('SSL Validation', function() {
 
         // Connect to the replicaset
         var client = new MongoClient(replSet, configuration.writeConcernMax());
-        client.connect(function(err) {
+        client.connect(function (err) {
           test.ok(err != null);
 
-          replicasetManager.stop().then(function() {
+          replicasetManager.stop().then(function () {
             done();
           });
         });
@@ -239,13 +239,13 @@ describe('SSL Validation', function() {
   it('shouldCorrectlyValidateAndPresentCertificateReplSet', {
     metadata: { requires: { topology: 'ssl' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var Server = configuration.require.Server,
         ReplSet = configuration.require.ReplSet,
         MongoClient = configuration.require.MongoClient;
 
-      setUp(configuration, function(e, replicasetManager) {
+      setUp(configuration, function (e, replicasetManager) {
         // Read the ca
         var ca = [fs.readFileSync(__dirname + '/ssl/ca.pem')];
         var cert = fs.readFileSync(__dirname + '/ssl/client.pem');
@@ -269,30 +269,30 @@ describe('SSL Validation', function() {
 
         // Connect to the replicaset
         var client = new MongoClient(replSet, configuration.writeConcernMax());
-        client.connect(function(err, client) {
+        client.connect(function (err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
-          setInterval(function() {
-            db.collection('test').count(function() {});
+          setInterval(function () {
+            db.collection('test').count(function () {});
           }, 1000);
 
           // Create a collection
-          db.createCollection('shouldCorrectlyValidateAndPresentCertificateReplSet1', function(
+          db.createCollection('shouldCorrectlyValidateAndPresentCertificateReplSet1', function (
             err,
             collection
           ) {
-            collection.remove({}, configuration.writeConcernMax(), function() {
+            collection.remove({}, configuration.writeConcernMax(), function () {
               collection.insert(
                 [{ a: 1 }, { b: 2 }, { c: 'hello world' }],
                 configuration.writeConcernMax(),
-                function(err) {
+                function (err) {
                   test.equal(null, err);
-                  collection.find({}).toArray(function(err, items) {
+                  collection.find({}).toArray(function (err, items) {
                     test.equal(3, items.length);
                     client.close();
 
-                    replicasetManager.stop().then(function() {
+                    replicasetManager.stop().then(function () {
                       done();
                     });
                   });
@@ -308,7 +308,7 @@ describe('SSL Validation', function() {
   it('shouldCorrectlyConnectToSSLBasedReplicaset', {
     metadata: { requires: { topology: 'ssl' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var Server = configuration.require.Server,
         ReplSet = configuration.require.ReplSet,
@@ -336,7 +336,7 @@ describe('SSL Validation', function() {
             rejectUnauthorized: false
           }
         },
-        function(e, replicasetManager) {
+        function (e, replicasetManager) {
           // Read the ca
           var ca = [fs.readFileSync(__dirname + '/ssl/ca.pem')];
           // Create new
@@ -355,15 +355,15 @@ describe('SSL Validation', function() {
 
           // Connect to the replicaset
           var client = new MongoClient(replSet, configuration.writeConcernMax());
-          client.connect(function(err, client) {
+          client.connect(function (err, client) {
             test.equal(null, err);
             var db = client.db(configuration.db);
 
-            db.collection('test').find({}, function(error) {
+            db.collection('test').find({}, function (error) {
               test.equal(null, error);
               client.close();
 
-              replicasetManager.stop().then(function() {
+              replicasetManager.stop().then(function () {
                 done();
               });
             });
@@ -376,13 +376,13 @@ describe('SSL Validation', function() {
   it('shouldFailToValidateServerSSLCertificate', {
     metadata: { requires: { topology: 'ssl' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var Server = configuration.require.Server,
         ReplSet = configuration.require.ReplSet,
         MongoClient = configuration.require.MongoClient;
 
-      setUp(configuration, function(e, replicasetManager) {
+      setUp(configuration, function (e, replicasetManager) {
         // Read the ca
         var ca = [fs.readFileSync(__dirname + '/ssl/mycert.pem')];
         // Create new
@@ -402,11 +402,11 @@ describe('SSL Validation', function() {
 
         // Connect to the replicaset
         var client = new MongoClient(replSet, configuration.writeConcernMax());
-        client.connect(function(err) {
+        client.connect(function (err) {
           test.ok(err != null);
           test.ok(err instanceof Error);
 
-          replicasetManager.stop().then(function() {
+          replicasetManager.stop().then(function () {
             done();
           });
         });
@@ -417,13 +417,13 @@ describe('SSL Validation', function() {
   it('shouldFailDueToNotPresentingCertificateToServer', {
     metadata: { requires: { topology: 'ssl' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var Server = configuration.require.Server,
         ReplSet = configuration.require.ReplSet,
         MongoClient = configuration.require.MongoClient;
 
-      setUp(configuration, function(e, replicasetManager) {
+      setUp(configuration, function (e, replicasetManager) {
         // Read the ca
         var ca = [fs.readFileSync(__dirname + '/ssl/mycert.pem')];
         var cert = fs.readFileSync(__dirname + '/ssl/client.pem');
@@ -445,10 +445,10 @@ describe('SSL Validation', function() {
 
         // Connect to the replicaset
         var client = new MongoClient(replSet, configuration.writeConcernMax());
-        client.connect(function(err) {
+        client.connect(function (err) {
           test.ok(err != null);
 
-          replicasetManager.stop().then(function() {
+          replicasetManager.stop().then(function () {
             done();
           });
         });
@@ -459,7 +459,7 @@ describe('SSL Validation', function() {
   it('shouldCorrectlyPresentPasswordProtectedCertificate', {
     metadata: { requires: { topology: 'ssl' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var Server = configuration.require.Server,
         ReplSet = configuration.require.ReplSet,
@@ -492,7 +492,7 @@ describe('SSL Validation', function() {
             replSet: 'rs'
           }
         },
-        function(e, replicasetManager) {
+        function (e, replicasetManager) {
           // Create new
           var replSet = new ReplSet(
             [
@@ -513,26 +513,26 @@ describe('SSL Validation', function() {
 
           // Connect to the replicaset
           var client = new MongoClient(replSet, configuration.writeConcernMax());
-          client.connect(function(err, client) {
+          client.connect(function (err, client) {
             test.equal(null, err);
             var db = client.db(configuration.db);
 
             // Create a collection
-            db.createCollection('shouldCorrectlyValidateAndPresentCertificate2', function(
+            db.createCollection('shouldCorrectlyValidateAndPresentCertificate2', function (
               err,
               collection
             ) {
-              collection.remove({}, configuration.writeConcernMax(), function() {
+              collection.remove({}, configuration.writeConcernMax(), function () {
                 collection.insert(
                   [{ a: 1 }, { b: 2 }, { c: 'hello world' }],
                   configuration.writeConcernMax(),
-                  function(err) {
+                  function (err) {
                     test.equal(null, err);
-                    collection.find({}).toArray(function(err, items) {
+                    collection.find({}).toArray(function (err, items) {
                       test.equal(3, items.length);
                       client.close();
 
-                      replicasetManager.stop().then(function() {
+                      replicasetManager.stop().then(function () {
                         done();
                       });
                     });
@@ -549,7 +549,7 @@ describe('SSL Validation', function() {
   it('shouldCorrectlyValidateServerSSLCertificate', {
     metadata: { requires: { topology: 'ssl' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var Server = configuration.require.Server,
         ReplSet = configuration.require.ReplSet,
@@ -573,7 +573,7 @@ describe('SSL Validation', function() {
             replSet: 'rs'
           }
         },
-        function(e, replicasetManager) {
+        function (e, replicasetManager) {
           // Create new
           var replSet = new ReplSet(
             [
@@ -591,26 +591,26 @@ describe('SSL Validation', function() {
 
           // Connect to the replicaset
           var client = new MongoClient(replSet, configuration.writeConcernMax());
-          client.connect(function(err, client) {
+          client.connect(function (err, client) {
             test.equal(null, err);
             var db = client.db(configuration.db);
 
             // Create a collection
-            db.createCollection('shouldCorrectlyCommunicateUsingSSLSocket', function(
+            db.createCollection('shouldCorrectlyCommunicateUsingSSLSocket', function (
               err,
               collection
             ) {
-              collection.remove({}, configuration.writeConcernMax(), function() {
+              collection.remove({}, configuration.writeConcernMax(), function () {
                 collection.insert(
                   [{ a: 1 }, { b: 2 }, { c: 'hello world' }],
                   configuration.writeConcernMax(),
-                  function(err) {
+                  function (err) {
                     test.equal(null, err);
-                    collection.find({}).toArray(function(err, items) {
+                    collection.find({}).toArray(function (err, items) {
                       test.equal(3, items.length);
                       client.close();
 
-                      replicasetManager.stop().then(function() {
+                      replicasetManager.stop().then(function () {
                         done();
                       });
                     });

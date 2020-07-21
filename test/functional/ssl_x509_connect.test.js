@@ -5,15 +5,15 @@ var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 const { MongoClient } = require('../../src');
 
-describe('SSL (x509)', function() {
-  before(function() {
+describe('SSL (x509)', function () {
+  before(function () {
     return setupDatabase(this.configuration);
   });
 
   it('Should correctly authenticate using x509', {
     metadata: { requires: { topology: 'ssl' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var ServerManager = require('mongodb-topology-manager').Server;
 
@@ -47,9 +47,9 @@ describe('SSL (x509)', function() {
       );
 
       // Purge the set
-      serverManager.purge().then(function() {
+      serverManager.purge().then(function () {
         // Start the server
-        serverManager.start().then(function() {
+        serverManager.start().then(function () {
           // Connect and validate the server certificate
           MongoClient.connect(
             'mongodb://server:27019/test?ssl=true&maxPoolSize=1',
@@ -60,12 +60,12 @@ describe('SSL (x509)', function() {
                 sslValidate: false
               }
             },
-            function(err, client) {
+            function (err, client) {
               test.equal(null, err);
               var db = client.db(configuration.db);
 
               // Execute build info
-              db.command({ buildInfo: 1 }, function(err, result) {
+              db.command({ buildInfo: 1 }, function (err, result) {
                 test.equal(null, err);
                 var version = parseInt(result.versionArray.slice(0, 3).join(''), 10);
                 if (version < 253) {
@@ -83,7 +83,7 @@ describe('SSL (x509)', function() {
                       { role: 'userAdminAnyDatabase', db: 'admin' }
                     ]
                   },
-                  function(err, result) {
+                  function (err, result) {
                     test.equal(null, err);
                     test.equal(userName, result[0].user);
                     test.equal('', result[0].pwd);
@@ -103,12 +103,12 @@ describe('SSL (x509)', function() {
                           sslValidate: false
                         }
                       },
-                      function(err, client) {
+                      function (err, client) {
                         test.equal(null, err);
 
                         client.close();
 
-                        serverManager.stop().then(function() {
+                        serverManager.stop().then(function () {
                           done();
                         });
                       }
@@ -126,7 +126,7 @@ describe('SSL (x509)', function() {
   it('Should correctly handle bad x509 certificate', {
     metadata: { requires: { topology: 'ssl' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var ServerManager = require('mongodb-topology-manager').Server;
 
@@ -161,9 +161,9 @@ describe('SSL (x509)', function() {
       );
 
       // Purge the set
-      serverManager.purge().then(function() {
+      serverManager.purge().then(function () {
         // Start the server
-        serverManager.start().then(function() {
+        serverManager.start().then(function () {
           // Connect and validate the server certificate
           MongoClient.connect(
             'mongodb://server:27019/test?ssl=true&maxPoolSize=1',
@@ -174,12 +174,12 @@ describe('SSL (x509)', function() {
                 sslValidate: false
               }
             },
-            function(err, client) {
+            function (err, client) {
               test.equal(null, err);
               var db = client.db(configuration.db);
 
               // Execute build info
-              db.command({ buildInfo: 1 }, function(err, result) {
+              db.command({ buildInfo: 1 }, function (err, result) {
                 test.equal(null, err);
                 var version = parseInt(result.versionArray.slice(0, 3).join(''), 10);
                 if (version < 253) {
@@ -197,7 +197,7 @@ describe('SSL (x509)', function() {
                       { role: 'userAdminAnyDatabase', db: 'admin' }
                     ]
                   },
-                  function(err, result) {
+                  function (err, result) {
                     test.equal(null, err);
                     test.equal(userName, result[0].user);
                     test.equal('', result[0].pwd);
@@ -217,11 +217,11 @@ describe('SSL (x509)', function() {
                           sslValidate: false
                         }
                       },
-                      function(err) {
+                      function (err) {
                         test.equal(0, err.ok);
                         test.equal('auth failed', err.errmsg);
 
-                        serverManager.stop().then(function() {
+                        serverManager.stop().then(function () {
                           done();
                         });
                       }
@@ -239,7 +239,7 @@ describe('SSL (x509)', function() {
   it('Should give reasonable error on x509 authentication failure', {
     metadata: { requires: { topology: 'ssl' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var ServerManager = require('mongodb-topology-manager').Server;
 
@@ -273,9 +273,9 @@ describe('SSL (x509)', function() {
       );
 
       // Purge the set
-      serverManager.purge().then(function() {
+      serverManager.purge().then(function () {
         // Start the server
-        serverManager.start().then(function() {
+        serverManager.start().then(function () {
           // Connect and validate the server certificate
           MongoClient.connect(
             'mongodb://server:27019/test?ssl=true&maxPoolSize=1',
@@ -286,12 +286,12 @@ describe('SSL (x509)', function() {
                 sslValidate: false
               }
             },
-            function(err, client) {
+            function (err, client) {
               test.equal(null, err);
               var db = client.db(configuration.db);
 
               // Execute build info
-              db.command({ buildInfo: 1 }, function(err, result) {
+              db.command({ buildInfo: 1 }, function (err, result) {
                 test.equal(null, err);
                 var version = parseInt(result.versionArray.slice(0, 3).join(''), 10);
                 if (version < 253) {
@@ -309,7 +309,7 @@ describe('SSL (x509)', function() {
                       { role: 'userAdminAnyDatabase', db: 'admin' }
                     ]
                   },
-                  function(err, result) {
+                  function (err, result) {
                     test.equal(null, err);
                     test.equal(userName, result[0].user);
                     test.equal('', result[0].pwd);
@@ -329,11 +329,11 @@ describe('SSL (x509)', function() {
                           sslValidate: false
                         }
                       },
-                      function(err) {
+                      function (err) {
                         test.equal(0, err.ok);
                         test.equal('auth failed', err.errmsg);
 
-                        serverManager.stop().then(function() {
+                        serverManager.stop().then(function () {
                           done();
                         });
                       }
@@ -351,7 +351,7 @@ describe('SSL (x509)', function() {
   it('Should give helpful error when attempting to use x509 without SSL', {
     metadata: { requires: { topology: 'ssl' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var ServerManager = require('mongodb-topology-manager').Server;
 
@@ -375,9 +375,9 @@ describe('SSL (x509)', function() {
       );
 
       // Purge the set
-      serverManager.purge().then(function() {
+      serverManager.purge().then(function () {
         // Start the server
-        serverManager.start().then(function() {
+        serverManager.start().then(function () {
           // Connect and validate the server certificate
           MongoClient.connect(
             'mongodb://server:27019/test?ssl=false&maxPoolSize=1',
@@ -388,12 +388,12 @@ describe('SSL (x509)', function() {
                 sslValidate: false
               }
             },
-            function(err, client) {
+            function (err, client) {
               test.equal(null, err);
               var db = client.db(configuration.db);
 
               // Execute build info
-              db.command({ buildInfo: 1 }, function(err, result) {
+              db.command({ buildInfo: 1 }, function (err, result) {
                 test.equal(null, err);
                 var version = parseInt(result.versionArray.slice(0, 3).join(''), 10);
                 if (version < 253) {
@@ -411,7 +411,7 @@ describe('SSL (x509)', function() {
                       { role: 'userAdminAnyDatabase', db: 'admin' }
                     ]
                   },
-                  function(err, result) {
+                  function (err, result) {
                     test.equal(null, err);
                     test.equal(userName, result[0].user);
                     test.equal('', result[0].pwd);
@@ -431,7 +431,7 @@ describe('SSL (x509)', function() {
                           sslValidate: false
                         }
                       },
-                      function(err) {
+                      function (err) {
                         test.ok(!!err);
                         test.equal(0, err.ok);
                         test.equal(
@@ -439,7 +439,7 @@ describe('SSL (x509)', function() {
                           err.errmsg
                         );
 
-                        serverManager.stop().then(function() {
+                        serverManager.stop().then(function () {
                           done();
                         });
                       }
@@ -457,7 +457,7 @@ describe('SSL (x509)', function() {
   it('Should correctly reauthenticate against x509', {
     metadata: { requires: { topology: 'ssl' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var ServerManager = require('mongodb-topology-manager').Server;
 
@@ -491,9 +491,9 @@ describe('SSL (x509)', function() {
       );
 
       // Purge the set
-      serverManager.purge().then(function() {
+      serverManager.purge().then(function () {
         // Start the server
-        serverManager.start().then(function() {
+        serverManager.start().then(function () {
           // Connect and validate the server certificate
           MongoClient.connect(
             'mongodb://server:27019/test?ssl=true&maxPoolSize=1',
@@ -504,12 +504,12 @@ describe('SSL (x509)', function() {
                 sslValidate: false
               }
             },
-            function(err, client) {
+            function (err, client) {
               test.equal(null, err);
               var db = client.db(configuration.db);
 
               // Execute build info
-              db.command({ buildInfo: 1 }, function(err, result) {
+              db.command({ buildInfo: 1 }, function (err, result) {
                 test.equal(null, err);
                 var version = parseInt(result.versionArray.slice(0, 3).join(''), 10);
                 if (version < 253) {
@@ -527,7 +527,7 @@ describe('SSL (x509)', function() {
                       { role: 'userAdminAnyDatabase', db: 'admin' }
                     ]
                   },
-                  function(err, result) {
+                  function (err, result) {
                     test.equal(null, err);
                     test.equal(userName, result[0].user);
                     test.equal('', result[0].pwd);
@@ -547,20 +547,20 @@ describe('SSL (x509)', function() {
                           sslValidate: false
                         }
                       },
-                      function(err, client) {
+                      function (err, client) {
                         test.equal(null, err);
                         var db = client.db(configuration.db);
 
-                        db.collection('x509collection').insert({ a: 1 }, function(err) {
+                        db.collection('x509collection').insert({ a: 1 }, function (err) {
                           test.equal(null, err);
 
-                          db.collection('x509collection').findOne(function(err, doc) {
+                          db.collection('x509collection').findOne(function (err, doc) {
                             test.equal(null, err);
                             test.equal(1, doc.a);
 
-                            client.topology.once('reconnect', function() {
+                            client.topology.once('reconnect', function () {
                               // Await reconnect and re-authentication
-                              db.collection('x509collection').findOne(function(err, doc) {
+                              db.collection('x509collection').findOne(function (err, doc) {
                                 test.equal(null, err);
                                 test.equal(1, doc.a);
 
@@ -568,13 +568,13 @@ describe('SSL (x509)', function() {
                                 client.topology.connections()[0].destroy();
 
                                 // Await reconnect and re-authentication
-                                db.collection('x509collection').findOne(function(err, doc) {
+                                db.collection('x509collection').findOne(function (err, doc) {
                                   test.equal(null, err);
                                   test.equal(1, doc.a);
 
                                   client.close();
 
-                                  serverManager.stop().then(function() {
+                                  serverManager.stop().then(function () {
                                     done();
                                   });
                                 });

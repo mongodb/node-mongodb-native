@@ -3,10 +3,10 @@ const setupDatabase = require('./shared').setupDatabase;
 const filterForCommands = require('./shared').filterForCommands;
 const expect = require('chai').expect;
 
-describe('ReadConcern', function() {
+describe('ReadConcern', function () {
   let client;
 
-  before(function() {
+  before(function () {
     return setupDatabase(this.configuration);
   });
 
@@ -57,7 +57,7 @@ describe('ReadConcern', function() {
     it(test.description, {
       metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2' } },
 
-      test: function(done) {
+      test: function (done) {
         const started = [];
         const succeeded = [];
         // Get a new instance
@@ -102,7 +102,7 @@ describe('ReadConcern', function() {
     });
   });
 
-  describe('client-url specific ReadConcern', function() {
+  describe('client-url specific ReadConcern', function () {
     const urlTests = [
       {
         description: 'Should set local readConcern using MongoClient',
@@ -123,7 +123,7 @@ describe('ReadConcern', function() {
     urlTests.forEach(test => {
       it(test.description, {
         metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2' } },
-        test: function(done) {
+        test: function (done) {
           const started = [];
           const succeeded = [];
           // Get a new instance
@@ -196,7 +196,7 @@ describe('ReadConcern', function() {
     it(test.description, {
       metadata: { requires: { topology: 'replicaset', mongodb: test.mongodbVersion } },
 
-      test: function(done) {
+      test: function (done) {
         const started = [];
         const succeeded = [];
         // Get a new instance
@@ -274,7 +274,7 @@ describe('ReadConcern', function() {
   it('Should set majority readConcern aggregate command but ignore due to out', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2 < 4.1' } },
 
-    test: function(done) {
+    test: function (done) {
       const started = [];
       const succeeded = [];
       // Get a new instance
@@ -322,7 +322,7 @@ describe('ReadConcern', function() {
   it('Should set majority readConcern aggregate command against server >= 4.1', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>= 4.1' } },
 
-    test: function(done) {
+    test: function (done) {
       const started = [];
       const succeeded = [];
       // Get a new instance
@@ -370,7 +370,7 @@ describe('ReadConcern', function() {
   it('Should set majority readConcern mapReduce command but be ignored', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2' } },
 
-    test: function(done) {
+    test: function (done) {
       const started = [];
       const succeeded = [];
       // Get a new instance
@@ -415,7 +415,7 @@ describe('ReadConcern', function() {
   it('Should set local readConcern on db level when using createCollection method', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2' } },
 
-    test: function(done) {
+    test: function (done) {
       // Get a new instance
       const configuration = this.configuration;
       client = configuration.newClient({ w: 1 }, { poolSize: 1, readConcern: { level: 'local' } });

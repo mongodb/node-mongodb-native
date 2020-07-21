@@ -4,7 +4,7 @@ const expect = require('chai').expect;
 const loadSpecTests = require('../spec').loadSpecTests;
 const parseRunOn = require('../functional/spec-runner').parseRunOn;
 
-describe('Retryable Writes', function() {
+describe('Retryable Writes', function () {
   let ctx = {};
 
   loadSpecTests('retryable-writes').forEach(suite => {
@@ -14,9 +14,9 @@ describe('Retryable Writes', function() {
 
       describe(suiteName, {
         metadata: { requires },
-        test: function() {
+        test: function () {
           // Step 3: Test Teardown. Turn off failpoints, and close client
-          afterEach(function() {
+          afterEach(function () {
             if (!ctx.db || !ctx.client) {
               return;
             }
@@ -28,7 +28,7 @@ describe('Retryable Writes', function() {
           });
 
           suite.tests.forEach(test => {
-            it(test.description, function() {
+            it(test.description, function () {
               // Step 1: Test Setup. Includes a lot of boilerplate stuff
               // like creating a client, dropping and refilling data collections,
               // and enabling failpoints

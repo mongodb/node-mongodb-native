@@ -5,7 +5,7 @@ var mock = require('mongodb-mock-server');
 const { ObjectId, Long, Code } = require('../../src');
 
 // Extend the object
-var extend = function(template, fields) {
+var extend = function (template, fields) {
   var object = {};
   for (var name in template) {
     object[name] = template[name];
@@ -18,7 +18,7 @@ var extend = function(template, fields) {
   return object;
 };
 
-describe('Command Write Concern', function() {
+describe('Command Write Concern', function () {
   afterEach(() => mock.cleanup());
 
   it('successfully pass through writeConcern to aggregate command', {
@@ -29,7 +29,7 @@ describe('Command Write Concern', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
@@ -74,7 +74,7 @@ describe('Command Write Concern', function() {
       ];
 
       // Boot the mock
-      co(function*() {
+      co(function* () {
         let primaryServer = yield mock.createServer(32000, 'localhost');
         let firstSecondaryServer = yield mock.createServer(32001, 'localhost');
         let arbiterServer = yield mock.createServer(32002, 'localhost');
@@ -114,7 +114,7 @@ describe('Command Write Concern', function() {
           'mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs'
         );
 
-        client.connect(function(err, client) {
+        client.connect(function (err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -123,7 +123,7 @@ describe('Command Write Concern', function() {
               w: 2,
               wtimeout: 1000
             })
-            .toArray(function(err) {
+            .toArray(function (err) {
               test.equal(null, err);
               test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
 
@@ -142,7 +142,7 @@ describe('Command Write Concern', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
@@ -187,7 +187,7 @@ describe('Command Write Concern', function() {
       ];
 
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const primaryServer = yield mock.createServer(32000, 'localhost');
         const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
         const arbiterServer = yield mock.createServer(32002, 'localhost');
@@ -239,11 +239,11 @@ describe('Command Write Concern', function() {
           'mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs'
         );
 
-        client.connect(function(err, client) {
+        client.connect(function (err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
-          db.createCollection('test_collection_methods', { w: 2, wtimeout: 1000 }, function(err) {
+          db.createCollection('test_collection_methods', { w: 2, wtimeout: 1000 }, function (err) {
             test.equal(null, err);
             test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
 
@@ -262,7 +262,7 @@ describe('Command Write Concern', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
@@ -307,7 +307,7 @@ describe('Command Write Concern', function() {
       ];
 
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const primaryServer = yield mock.createServer(32000, 'localhost');
         const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
         const arbiterServer = yield mock.createServer(32002, 'localhost');
@@ -350,7 +350,7 @@ describe('Command Write Concern', function() {
           'mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs'
         );
 
-        client.connect(function(err, client) {
+        client.connect(function (err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -361,7 +361,7 @@ describe('Command Write Concern', function() {
               w: 2,
               wtimeout: 1000
             },
-            function(err) {
+            function (err) {
               test.equal(null, err);
               test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
 
@@ -381,7 +381,7 @@ describe('Command Write Concern', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
@@ -426,7 +426,7 @@ describe('Command Write Concern', function() {
       ];
 
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const primaryServer = yield mock.createServer(32000, 'localhost');
         const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
         const arbiterServer = yield mock.createServer(32002, 'localhost');
@@ -468,7 +468,7 @@ describe('Command Write Concern', function() {
           'mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs'
         );
 
-        client.connect(function(err, client) {
+        client.connect(function (err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -477,7 +477,7 @@ describe('Command Write Concern', function() {
               w: 2,
               wtimeout: 1000
             },
-            function(err) {
+            function (err) {
               test.equal(null, err);
               test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
 
@@ -497,7 +497,7 @@ describe('Command Write Concern', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
@@ -542,7 +542,7 @@ describe('Command Write Concern', function() {
       ];
 
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const primaryServer = yield mock.createServer(32000, 'localhost');
         const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
         const arbiterServer = yield mock.createServer(32002, 'localhost');
@@ -584,7 +584,7 @@ describe('Command Write Concern', function() {
           'mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs'
         );
 
-        client.connect(function(err, client) {
+        client.connect(function (err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -593,7 +593,7 @@ describe('Command Write Concern', function() {
               w: 2,
               wtimeout: 1000
             },
-            function(err) {
+            function (err) {
               test.equal(null, err);
               test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
 
@@ -613,7 +613,7 @@ describe('Command Write Concern', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
@@ -658,7 +658,7 @@ describe('Command Write Concern', function() {
       ];
 
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const primaryServer = yield mock.createServer(32000, 'localhost');
         const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
         const arbiterServer = yield mock.createServer(32002, 'localhost');
@@ -700,7 +700,7 @@ describe('Command Write Concern', function() {
           'mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs'
         );
 
-        client.connect(function(err, client) {
+        client.connect(function (err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -709,7 +709,7 @@ describe('Command Write Concern', function() {
               w: 2,
               wtimeout: 1000
             },
-            function(err) {
+            function (err) {
               test.equal(null, err);
               test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
 
@@ -729,7 +729,7 @@ describe('Command Write Concern', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
@@ -774,7 +774,7 @@ describe('Command Write Concern', function() {
       ];
 
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const primaryServer = yield mock.createServer(32000, 'localhost');
         const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
         const arbiterServer = yield mock.createServer(32002, 'localhost');
@@ -816,7 +816,7 @@ describe('Command Write Concern', function() {
           'mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs'
         );
 
-        client.connect(function(err, client) {
+        client.connect(function (err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -833,7 +833,7 @@ describe('Command Write Concern', function() {
               w: 2,
               wtimeout: 1000
             },
-            function(err) {
+            function (err) {
               test.equal(null, err);
               test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
 
@@ -853,7 +853,7 @@ describe('Command Write Concern', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
@@ -898,7 +898,7 @@ describe('Command Write Concern', function() {
       ];
 
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const primaryServer = yield mock.createServer(32000, 'localhost');
         const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
         const arbiterServer = yield mock.createServer(32002, 'localhost');
@@ -940,11 +940,11 @@ describe('Command Write Concern', function() {
           'mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs'
         );
 
-        client.connect(function(err, client) {
+        client.connect(function (err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
-          db.admin().addUser('kay:kay', 'abc123', { w: 2, wtimeout: 1000 }, function(err) {
+          db.admin().addUser('kay:kay', 'abc123', { w: 2, wtimeout: 1000 }, function (err) {
             test.equal(null, err);
             test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
 
@@ -963,7 +963,7 @@ describe('Command Write Concern', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
@@ -1008,7 +1008,7 @@ describe('Command Write Concern', function() {
       ];
 
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const primaryServer = yield mock.createServer(32000, 'localhost');
         const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
         const arbiterServer = yield mock.createServer(32002, 'localhost');
@@ -1050,11 +1050,11 @@ describe('Command Write Concern', function() {
           'mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs'
         );
 
-        client.connect(function(err, client) {
+        client.connect(function (err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
-          db.admin().removeUser('kay:kay', { w: 2, wtimeout: 1000 }, function(err) {
+          db.admin().removeUser('kay:kay', { w: 2, wtimeout: 1000 }, function (err) {
             test.equal(null, err);
             test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
 
@@ -1073,7 +1073,7 @@ describe('Command Write Concern', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
@@ -1118,7 +1118,7 @@ describe('Command Write Concern', function() {
       ];
 
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const primaryServer = yield mock.createServer(32000, 'localhost');
         const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
         const arbiterServer = yield mock.createServer(32002, 'localhost');
@@ -1160,7 +1160,7 @@ describe('Command Write Concern', function() {
           'mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs'
         );
 
-        client.connect(function(err, client) {
+        client.connect(function (err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -1170,7 +1170,7 @@ describe('Command Write Concern', function() {
             [['a', 1]],
             { $set: { b1: 1 } },
             { new: true, w: 2, wtimeout: 1000 },
-            function(err) {
+            function (err) {
               test.equal(null, err);
               test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
 

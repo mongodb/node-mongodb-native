@@ -8,7 +8,7 @@ const genClusterTime = require('../common').genClusterTime;
 const Connection = require('../../../../src/core/connection/connection');
 const ConnectionSpy = require('../../../functional/shared').ConnectionSpy;
 
-describe.skip('Reconnect (Mongos)', function() {
+describe.skip('Reconnect (Mongos)', function () {
   const fixture = {};
 
   function startServer() {
@@ -38,7 +38,7 @@ describe.skip('Reconnect (Mongos)', function() {
   afterEach(() => stopServer());
 
   // NOTE: skipped due to flakiness and extremely long test runs
-  it.skip('should not connection swarm when reconnecting', function(done) {
+  it.skip('should not connection swarm when reconnecting', function (done) {
     const reconnectInterval = 500;
     const socketTimeout = reconnectInterval * 5;
     const haInterval = reconnectInterval * 10;

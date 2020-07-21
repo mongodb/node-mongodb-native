@@ -4,8 +4,8 @@ var setupDatabase = require('./shared').setupDatabase;
 const { Code } = require('../../src');
 const { expect } = require('chai');
 
-describe('MapReduce', function() {
-  before(function() {
+describe('MapReduce', function () {
+  before(function () {
     return setupDatabase(this.configuration, ['outputCollectionDb']);
   });
 
@@ -17,40 +17,40 @@ describe('MapReduce', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        db.createCollection('test_group2', function(err, collection) {
+        db.createCollection('test_group2', function (err, collection) {
           collection.group(
             [],
             {},
             { count: 0 },
             'function (obj, prev) { prev.count++; }',
             true,
-            function(err, results) {
+            function (err, results) {
               test.deepEqual([], results);
 
               // Trigger some inserts
               collection.insert(
                 [{ a: 2 }, { b: 5, a: 0 }, { a: 1 }, { c: 2, a: 0 }],
                 configuration.writeConcernMax(),
-                function(err) {
+                function (err) {
                   test.equal(null, err);
                   collection.group(
                     [],
                     {},
                     { count: 0, running_average: 0 },
-                    function(doc, out) {
+                    function (doc, out) {
                       out.count++;
                       out.running_average += doc.a;
                     },
-                    function(out) {
+                    function (out) {
                       out.average = out.running_average / out.count;
                     },
                     true,
-                    function(err, results) {
+                    function (err, results) {
                       test.equal(3, results[0].running_average);
                       test.equal(0.75, results[0].average);
                       client.close(done);
@@ -73,30 +73,30 @@ describe('MapReduce', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        db.createCollection('test_map_reduce', function(err, collection) {
+        db.createCollection('test_map_reduce', function (err, collection) {
           collection.insert(
             [{ user_id: 1 }, { user_id: 2 }],
             configuration.writeConcernMax(),
-            function(err) {
+            function (err) {
               test.equal(null, err);
 
               // String functions
               var map = 'function() { emit(this.user_id, 1); }';
               var reduce = 'function(k,vals) { return 1; }';
 
-              collection.mapReduce(map, reduce, { out: { replace: 'tempCollection' } }, function(
+              collection.mapReduce(map, reduce, { out: { replace: 'tempCollection' } }, function (
                 err,
                 collection
               ) {
-                collection.findOne({ _id: 1 }, function(err, result) {
+                collection.findOne({ _id: 1 }, function (err, result) {
                   test.equal(1, result.value);
 
-                  collection.findOne({ _id: 2 }, function(err, result) {
+                  collection.findOne({ _id: 2 }, function (err, result) {
                     test.equal(1, result.value);
                     client.close(done);
                   });
@@ -122,23 +122,23 @@ describe('MapReduce', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         expect(err).to.not.exist;
         var db = client.db(configuration.db);
-        db.createCollection('should_force_map_reduce_error', function(err, collection) {
+        db.createCollection('should_force_map_reduce_error', function (err, collection) {
           collection.insert(
             [{ user_id: 1 }, { user_id: 2 }],
             configuration.writeConcernMax(),
-            function(err) {
+            function (err) {
               test.equal(null, err);
               // String functions
               var map = 'function() { emiddft(this.user_id, 1); }';
               var reduce = 'function(k,vals) { return 1; }';
 
-              collection.mapReduce(map, reduce, { out: { inline: 1 } }, function(err) {
+              collection.mapReduce(map, reduce, { out: { inline: 1 } }, function (err) {
                 test.ok(err != null);
                 client.close(done);
               });
@@ -154,12 +154,12 @@ describe('MapReduce', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        db.createCollection('test_map_reduce_with_functions_as_arguments', function(
+        db.createCollection('test_map_reduce_with_functions_as_arguments', function (
           err,
           collection
         ) {
@@ -167,25 +167,25 @@ describe('MapReduce', function() {
           collection.insert(
             [{ user_id: 1 }, { user_id: 2 }],
             configuration.writeConcernMax(),
-            function(err) {
+            function (err) {
               test.equal(null, err);
 
               // String functions
-              var map = function() {
+              var map = function () {
                 emit(this.user_id, 1); // eslint-disable-line
               };
-              var reduce = function() {
+              var reduce = function () {
                 return 1;
               };
 
-              collection.mapReduce(map, reduce, { out: { replace: 'tempCollection' } }, function(
+              collection.mapReduce(map, reduce, { out: { replace: 'tempCollection' } }, function (
                 err,
                 collection
               ) {
-                collection.findOne({ _id: 1 }, function(err, result) {
+                collection.findOne({ _id: 1 }, function (err, result) {
                   test.equal(1, result.value);
 
-                  collection.findOne({ _id: 2 }, function(err, result) {
+                  collection.findOne({ _id: 2 }, function (err, result) {
                     test.equal(1, result.value);
                     client.close(done);
                   });
@@ -203,30 +203,30 @@ describe('MapReduce', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        db.createCollection('test_map_reduce_with_code_objects', function(err, collection) {
+        db.createCollection('test_map_reduce_with_code_objects', function (err, collection) {
           collection.insert(
             [{ user_id: 1 }, { user_id: 2 }],
             configuration.writeConcernMax(),
-            function(err) {
+            function (err) {
               test.equal(null, err);
               // String functions
               var map = new Code('function() { emit(this.user_id, 1); }');
               var reduce = new Code('function(k,vals) { return 1; }');
 
-              collection.mapReduce(map, reduce, { out: { replace: 'tempCollection' } }, function(
+              collection.mapReduce(map, reduce, { out: { replace: 'tempCollection' } }, function (
                 err,
                 collection
               ) {
-                collection.findOne({ _id: 1 }, function(err, result) {
+                collection.findOne({ _id: 1 }, function (err, result) {
                   test.equal(1, result.value);
                 });
 
-                collection.findOne({ _id: 2 }, function(err, result) {
+                collection.findOne({ _id: 2 }, function (err, result) {
                   test.equal(1, result.value);
                   client.close(done);
                 });
@@ -243,16 +243,16 @@ describe('MapReduce', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        db.createCollection('test_map_reduce_with_options', function(err, collection) {
+        db.createCollection('test_map_reduce_with_options', function (err, collection) {
           collection.insert(
             [{ user_id: 1 }, { user_id: 2 }, { user_id: 3 }],
             configuration.writeConcernMax(),
-            function(err) {
+            function (err) {
               test.equal(null, err);
               // String functions
               var map = new Code('function() { emit(this.user_id, 1); }');
@@ -262,15 +262,15 @@ describe('MapReduce', function() {
                 map,
                 reduce,
                 { out: { replace: 'tempCollection' }, query: { user_id: { $gt: 1 } } },
-                function(err, collection) {
-                  collection.count(function(err, count) {
+                function (err, collection) {
+                  collection.count(function (err, count) {
                     test.equal(2, count);
 
-                    collection.findOne({ _id: 2 }, function(err, result) {
+                    collection.findOne({ _id: 2 }, function (err, result) {
                       test.equal(1, result.value);
                     });
 
-                    collection.findOne({ _id: 3 }, function(err, result) {
+                    collection.findOne({ _id: 3 }, function (err, result) {
                       test.equal(1, result.value);
                       client.close(done);
                     });
@@ -289,16 +289,16 @@ describe('MapReduce', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        db.createCollection('test_map_reduce_error', function(err, collection) {
+        db.createCollection('test_map_reduce_error', function (err, collection) {
           collection.insert(
             [{ user_id: 1 }, { user_id: 2 }, { user_id: 3 }],
             configuration.writeConcernMax(),
-            function(err) {
+            function (err) {
               test.equal(null, err);
               // String functions
               var map = new Code("function() { throw 'error'; }");
@@ -308,7 +308,7 @@ describe('MapReduce', function() {
                 map,
                 reduce,
                 { out: { inline: 1 }, query: { user_id: { $gt: 1 } } },
-                function(err) {
+                function (err) {
                   test.ok(err != null);
                   client.close(done);
                 }
@@ -328,15 +328,15 @@ describe('MapReduce', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         const outDb = client.db('outputCollectionDb');
 
         // Create a test collection
-        db.createCollection('test_map_reduce_functions', function(err, collection) {
+        db.createCollection('test_map_reduce_functions', function (err, collection) {
           // create the output collection
           outDb.createCollection('tempCollection', err => {
             test.equal(null, err);
@@ -345,14 +345,14 @@ describe('MapReduce', function() {
             collection.insert(
               [{ user_id: 1 }, { user_id: 2 }],
               configuration.writeConcernMax(),
-              function(err) {
+              function (err) {
                 test.equal(null, err);
                 // Map function
-                var map = function() {
+                var map = function () {
                   emit(this.user_id, 1); // eslint-disable-line
                 };
                 // Reduce function
-                var reduce = function() {
+                var reduce = function () {
                   return 1;
                 };
 
@@ -361,15 +361,15 @@ describe('MapReduce', function() {
                   map,
                   reduce,
                   { out: { replace: 'test_map_reduce_functions_temp', db: 'outputCollectionDb' } },
-                  function(err, collection) {
+                  function (err, collection) {
                     test.equal(null, err);
 
                     // Mapreduce returns the temporary collection with the results
-                    collection.findOne({ _id: 1 }, function(err, result) {
+                    collection.findOne({ _id: 1 }, function (err, result) {
                       test.equal(null, err);
                       test.equal(1, result.value);
 
-                      collection.findOne({ _id: 2 }, function(err, result) {
+                      collection.findOne({ _id: 2 }, function (err, result) {
                         test.equal(null, err);
                         test.equal(1, result.value);
 
@@ -394,10 +394,10 @@ describe('MapReduce', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var start = new Date().setTime(new Date().getTime() - 10000);
         var end = new Date().setTime(new Date().getTime() + 10000);
@@ -419,12 +419,12 @@ describe('MapReduce', function() {
           count: 0
         };
 
-        var reduce = function(doc, output) {
+        var reduce = function (doc, output) {
           output.count++;
         };
 
         // Execute the group
-        db.createCollection('data', function(err, collection) {
+        db.createCollection('data', function (err, collection) {
           collection.insert(
             {
               data: {
@@ -433,10 +433,10 @@ describe('MapReduce', function() {
               }
             },
             configuration.writeConcernMax(),
-            function(err) {
+            function (err) {
               test.equal(null, err);
               // Execute the group
-              collection.group(keys, condition, initial, reduce, true, function(err, r) {
+              collection.group(keys, condition, initial, reduce, true, function (err, r) {
                 test.equal(1, r[0].count);
                 test.equal('smith', r[0]['data.lastname']);
                 client.close(done);
@@ -456,22 +456,22 @@ describe('MapReduce', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var util = {
-        times_one_hundred: function(x) {
+        times_one_hundred: function (x) {
           return x * 100;
         }
       };
 
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        db.createCollection('test_map_reduce', function(err, collection) {
+        db.createCollection('test_map_reduce', function (err, collection) {
           collection.insert(
             [{ user_id: 1 }, { user_id: 2 }],
             configuration.writeConcernMax(),
-            function(err) {
+            function (err) {
               test.equal(null, err);
               // String functions
               var map = 'function() { emit(this.user_id, util.times_one_hundred(this.user_id)); }';
@@ -484,11 +484,11 @@ describe('MapReduce', function() {
                 map,
                 reduce,
                 { scope: { util: util }, out: { replace: 'test_map_reduce_temp' } },
-                function(err, collection) {
+                function (err, collection) {
                   // After MapReduce
                   test.equal(200, util.times_one_hundred(2));
 
-                  collection.findOne({ _id: 2 }, function(err, result) {
+                  collection.findOne({ _id: 2 }, function (err, result) {
                     // During MapReduce
                     test.equal(200, result.value);
 

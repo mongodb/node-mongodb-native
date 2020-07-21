@@ -4,8 +4,8 @@ var expect = require('chai').expect,
   f = require('util').format;
 const setupDatabase = require('./shared').setupDatabase;
 
-describe('Tailable cursor tests', function() {
-  before(function() {
+describe('Tailable cursor tests', function () {
+  before(function () {
     return setupDatabase(this.configuration);
   });
 
@@ -14,19 +14,19 @@ describe('Tailable cursor tests', function() {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       const config = this.configuration;
       const server = config.newTopology();
 
       var ns = f('%s.cursor_tailable', self.configuration.db);
       // Add event listeners
-      server.on('connect', function(_server) {
+      server.on('connect', function (_server) {
         // Create a capped collection
         _server.command(
           f('%s.$cmd', self.configuration.db),
           { create: 'cursor_tailable', capped: true, size: 10000 },
-          function(cmdErr, cmdRes) {
+          function (cmdErr, cmdRes) {
             expect(cmdErr).to.not.exist;
             expect(cmdRes).to.exist;
 
@@ -38,7 +38,7 @@ describe('Tailable cursor tests', function() {
                 writeConcern: { w: 1 },
                 ordered: true
               },
-              function(insertErr, results) {
+              function (insertErr, results) {
                 expect(insertErr).to.be.null;
                 expect(results.result.n).to.equal(1);
 
@@ -52,13 +52,13 @@ describe('Tailable cursor tests', function() {
                 });
 
                 // Execute next
-                cursor._next(function(cursorErr, cursorD) {
+                cursor._next(function (cursorErr, cursorD) {
                   expect(cursorErr).to.be.null;
                   expect(cursorD).to.exist;
 
                   var s = new Date();
 
-                  cursor._next(function() {
+                  cursor._next(function () {
                     var e = new Date();
                     expect(e.getTime() - s.getTime()).to.be.at.least(300);
 
@@ -66,7 +66,7 @@ describe('Tailable cursor tests', function() {
                     _server.destroy(done);
                   });
 
-                  setTimeout(function() {
+                  setTimeout(function () {
                     cursor.kill();
                   }, 300);
                 });

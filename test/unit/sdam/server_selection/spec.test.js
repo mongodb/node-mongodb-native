@@ -49,10 +49,10 @@ function collectSelectionTests(specDir) {
   return tests;
 }
 
-describe('Server Selection (spec)', function() {
+describe('Server Selection (spec)', function () {
   let serverConnect;
   before(() => {
-    serverConnect = sinon.stub(Server.prototype, 'connect').callsFake(function() {
+    serverConnect = sinon.stub(Server.prototype, 'connect').callsFake(function () {
       this.s.state = 'connected';
     });
   });
@@ -63,25 +63,25 @@ describe('Server Selection (spec)', function() {
 
   const specTests = collectSelectionTests(selectionSpecDir);
   Object.keys(specTests).forEach(topologyType => {
-    describe(topologyType, function() {
+    describe(topologyType, function () {
       Object.keys(specTests[topologyType]).forEach(subType => {
-        describe(subType, function() {
+        describe(subType, function () {
           specTests[topologyType][subType].forEach(test => {
             // NOTE: node does not support PossiblePrimary
             const maybeIt = test.name.match(/Possible/) ? it.skip : it;
 
-            maybeIt(test.name, function(done) {
+            maybeIt(test.name, function (done) {
               executeServerSelectionTest(test, { checkLatencyWindow: false }, done);
             });
           });
         });
 
-        describe(subType + ' (within latency window)', function() {
+        describe(subType + ' (within latency window)', function () {
           specTests[topologyType][subType].forEach(test => {
             // NOTE: node does not support PossiblePrimary
             const maybeIt = test.name.match(/Possible/) ? it.skip : it;
 
-            maybeIt(test.name, function(done) {
+            maybeIt(test.name, function (done) {
               executeServerSelectionTest(test, { checkLatencyWindow: true }, done);
             });
           });
@@ -115,10 +115,10 @@ function collectStalenessTests(specDir) {
   return tests;
 }
 
-describe('Max Staleness (spec)', function() {
+describe('Max Staleness (spec)', function () {
   let serverConnect;
   before(() => {
-    serverConnect = sinon.stub(Server.prototype, 'connect').callsFake(function() {
+    serverConnect = sinon.stub(Server.prototype, 'connect').callsFake(function () {
       this.s.state = 'connected';
     });
   });
@@ -133,7 +133,7 @@ describe('Max Staleness (spec)', function() {
       specTests[specTestName].forEach(testData => {
         it(testData.description, {
           metadata: { requires: { topology: 'single' } },
-          test: function(done) {
+          test: function (done) {
             executeServerSelectionTest(testData, { checkLatencyWindow: false }, done);
           }
         });
@@ -240,7 +240,7 @@ function executeServerSelectionTest(testDefinition, options, testDone) {
   // call to `selectServers` call a fake, and then immediately restore the original behavior.
   let topologySelectServers = sinon
     .stub(Topology.prototype, 'selectServer')
-    .callsFake(function(selector, options, callback) {
+    .callsFake(function (selector, options, callback) {
       topologySelectServers.restore();
 
       const fakeServer = { s: { state: 'connected' }, removeListener: () => {} };

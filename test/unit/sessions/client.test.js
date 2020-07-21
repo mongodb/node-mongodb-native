@@ -4,8 +4,8 @@ const expect = require('chai').expect;
 const mock = require('mongodb-mock-server');
 
 const test = {};
-describe('Sessions', function() {
-  describe('Client', function() {
+describe('Sessions', function () {
+  describe('Client', function () {
     afterEach(() => mock.cleanup());
     beforeEach(() => {
       return mock.createServer().then(server => {
@@ -15,7 +15,7 @@ describe('Sessions', function() {
 
     it('should throw an exception if sessions are not supported', {
       metadata: { requires: { topology: 'single' } },
-      test: function(done) {
+      test: function (done) {
         test.server.setMessageHandler(request => {
           var doc = request.document;
           if (doc.ismaster) {
@@ -26,7 +26,7 @@ describe('Sessions', function() {
         });
 
         const client = this.configuration.newClient(`mongodb://${test.server.uri()}/test`);
-        client.connect(function(err, client) {
+        client.connect(function (err, client) {
           expect(err).to.not.exist;
           expect(() => {
             client.startSession();
@@ -40,7 +40,7 @@ describe('Sessions', function() {
     it('should return a client session when requested if the topology supports it', {
       metadata: { requires: { topology: 'single' } },
 
-      test: function(done) {
+      test: function (done) {
         test.server.setMessageHandler(request => {
           var doc = request.document;
           if (doc.ismaster) {
@@ -55,7 +55,7 @@ describe('Sessions', function() {
         });
 
         const client = this.configuration.newClient(`mongodb://${test.server.uri()}/test`);
-        client.connect(function(err, client) {
+        client.connect(function (err, client) {
           expect(err).to.not.exist;
           let session = client.startSession();
           expect(session).to.exist;

@@ -2,7 +2,7 @@
 const expect = require('chai').expect;
 const mock = require('mongodb-mock-server');
 
-describe('Single Compression (mocks)', function() {
+describe('Single Compression (mocks)', function () {
   let server;
   afterEach(() => mock.cleanup());
   beforeEach(() => mock.createServer().then(s => (server = s)));
@@ -15,7 +15,7 @@ describe('Single Compression (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       // Prepare the server's response
       var serverResponse = Object.assign({}, mock.DEFAULT_ISMASTER);
       const config = this.configuration;
@@ -32,7 +32,7 @@ describe('Single Compression (mocks)', function() {
         compression: { compressors: ['snappy', 'zlib'], zlibCompressionLevel: -1 }
       });
 
-      client.on('connect', function() {
+      client.on('connect', function () {
         client.destroy(done);
       });
 
@@ -50,7 +50,7 @@ describe('Single Compression (mocks)', function() {
         }
       },
 
-      test: function(done) {
+      test: function (done) {
         const config = this.configuration;
         var currentStep = 0;
 
@@ -109,20 +109,23 @@ describe('Single Compression (mocks)', function() {
         // Connect and try inserting, updating, and removing
         // All outbound messages from the driver will be uncompressed
         // Inbound messages from the server should be OP_COMPRESSED with no compression
-        client.on('connect', function(_server) {
-          _server.insert('test.test', [{ a: 1, created: new Date() }], function(err, r) {
+        client.on('connect', function (_server) {
+          _server.insert('test.test', [{ a: 1, created: new Date() }], function (err, r) {
             expect(err).to.be.null;
             expect(r.result.n).to.equal(1);
 
-            _server.update('test.test', { q: { a: 1 }, u: { $set: { b: 1 } } }, function(_err, _r) {
+            _server.update('test.test', { q: { a: 1 }, u: { $set: { b: 1 } } }, function (
+              _err,
+              _r
+            ) {
               expect(_err).to.be.null;
               expect(_r.result.n).to.equal(1);
 
-              _server.remove('test.test', { q: { a: 1 } }, function(__err, __r) {
+              _server.remove('test.test', { q: { a: 1 } }, function (__err, __r) {
                 expect(__err).to.be.null;
                 expect(__r.result.n).to.equal(1);
 
-                _server.command('system.$cmd', { ping: 1 }, function(___err, ___r) {
+                _server.command('system.$cmd', { ping: 1 }, function (___err, ___r) {
                   expect(___err).to.be.null;
                   expect(___r.result.ok).to.equal(1);
 
@@ -148,7 +151,7 @@ describe('Single Compression (mocks)', function() {
         }
       },
 
-      test: function(done) {
+      test: function (done) {
         const config = this.configuration;
         var currentStep = 0;
 
@@ -203,20 +206,23 @@ describe('Single Compression (mocks)', function() {
         // Connect and try inserting, updating, and removing
         // All outbound messages from the driver (after initial connection) will be OP_COMPRESSED using snappy
         // Inbound messages from the server should be OP_COMPRESSED with snappy
-        client.on('connect', function(_server) {
-          _server.insert('test.test', [{ a: 1, created: new Date() }], function(err, r) {
+        client.on('connect', function (_server) {
+          _server.insert('test.test', [{ a: 1, created: new Date() }], function (err, r) {
             expect(err).to.be.null;
             expect(r.result.n).to.equal(1);
 
-            _server.update('test.test', { q: { a: 1 }, u: { $set: { b: 1 } } }, function(_err, _r) {
+            _server.update('test.test', { q: { a: 1 }, u: { $set: { b: 1 } } }, function (
+              _err,
+              _r
+            ) {
               expect(_err).to.be.null;
               expect(_r.result.n).to.equal(1);
 
-              _server.remove('test.test', { q: { a: 1 } }, function(__err, __r) {
+              _server.remove('test.test', { q: { a: 1 } }, function (__err, __r) {
                 expect(__err).to.be.null;
                 expect(__r.result.n).to.equal(1);
 
-                _server.command('system.$cmd', { ping: 1 }, function(___err, ___r) {
+                _server.command('system.$cmd', { ping: 1 }, function (___err, ___r) {
                   expect(___err).to.be.null;
                   expect(___r.result.ok).to.equal(1);
 
@@ -242,7 +248,7 @@ describe('Single Compression (mocks)', function() {
         }
       },
 
-      test: function(done) {
+      test: function (done) {
         const config = this.configuration;
         var currentStep = 0;
 
@@ -299,20 +305,23 @@ describe('Single Compression (mocks)', function() {
         // Connect and try inserting, updating, and removing
         // All outbound messages from the driver (after initial connection) will be OP_COMPRESSED using zlib
         // Inbound messages from the server should be OP_COMPRESSED with zlib
-        client.on('connect', function(_server) {
-          _server.insert('test.test', [{ a: 1, created: new Date() }], function(err, r) {
+        client.on('connect', function (_server) {
+          _server.insert('test.test', [{ a: 1, created: new Date() }], function (err, r) {
             expect(err).to.be.null;
             expect(r.result.n).to.equal(1);
 
-            _server.update('test.test', { q: { a: 1 }, u: { $set: { b: 1 } } }, function(_err, _r) {
+            _server.update('test.test', { q: { a: 1 }, u: { $set: { b: 1 } } }, function (
+              _err,
+              _r
+            ) {
               expect(_err).to.be.null;
               expect(_r.result.n).to.equal(1);
 
-              _server.remove('test.test', { q: { a: 1 } }, function(__err, __r) {
+              _server.remove('test.test', { q: { a: 1 } }, function (__err, __r) {
                 expect(__err).to.be.null;
                 expect(__r.result.n).to.equal(1);
 
-                _server.command('system.$cmd', { ping: 1 }, function(___err, ___r) {
+                _server.command('system.$cmd', { ping: 1 }, function (___err, ___r) {
                   expect(___err).to.be.null;
                   expect(___r.result.ok).to.equal(1);
 
@@ -336,7 +345,7 @@ describe('Single Compression (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       const config = this.configuration;
       var currentStep = 0;
 
@@ -389,20 +398,20 @@ describe('Single Compression (mocks)', function() {
       });
 
       // Connect and try some commands, checking that uncompressible commands are indeed not compressed
-      client.on('connect', function(_server) {
-        _server.command('system.$cmd', { ping: 1 }, function(err, r) {
+      client.on('connect', function (_server) {
+        _server.command('system.$cmd', { ping: 1 }, function (err, r) {
           expect(err).to.be.null;
           expect(r.result.ok).to.equal(1);
 
-          _server.command('system.$cmd', { ismaster: 1 }, function(_err, _r) {
+          _server.command('system.$cmd', { ismaster: 1 }, function (_err, _r) {
             expect(_err).to.be.null;
             expect(_r.result.ok).to.equal(1);
 
-            _server.command('system.$cmd', { getnonce: 1 }, function(__err, __r) {
+            _server.command('system.$cmd', { getnonce: 1 }, function (__err, __r) {
               expect(__err).to.be.null;
               expect(__r.result.ok).to.equal(1);
 
-              _server.command('system.$cmd', { ismaster: 1 }, function(___err, ___r) {
+              _server.command('system.$cmd', { ismaster: 1 }, function (___err, ___r) {
                 expect(___err).to.be.null;
                 expect(___r.result.ok).to.equal(1);
 

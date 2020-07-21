@@ -124,12 +124,12 @@ function generateTopologyTests(testSuites, testContext, filter) {
       const suiteName = `${testSuite.name} - ${requires.topology.join()}`;
       describe(suiteName, {
         metadata: { requires },
-        test: function() {
+        test: function () {
           beforeEach(() => prepareDatabaseForSuite(testSuite, testContext));
           afterEach(() => testContext.cleanupAfterSuite());
 
           testSuite.tests.forEach(spec => {
-            it(spec.description, function() {
+            it(spec.description, function () {
               if (
                 spec.skipReason ||
                 (filter && typeof filter === 'function' && !filter(spec, this.configuration))
@@ -395,9 +395,7 @@ function validateExpectations(commandEvents, spec, savedSessionData) {
     const actualCommand = actual.command;
     const expectedCommand = expected.command;
 
-    expect(actualCommand)
-      .withSessionData(savedSessionData)
-      .to.matchMongoSpec(expectedCommand);
+    expect(actualCommand).withSessionData(savedSessionData).to.matchMongoSpec(expectedCommand);
   });
 }
 

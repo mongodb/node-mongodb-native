@@ -39,7 +39,7 @@ function decodeBSON() {
 }
 
 function makeBSONLoader(fileName) {
-  return function() {
+  return function () {
     this.dataString = EJSON.parse(loadSpecString(['extended_bson', `${fileName}.json`]));
     this.data = BSON.serialize(this.dataString);
   };
@@ -50,7 +50,7 @@ function loadGridFs() {
 }
 
 function makeTestInsertOne(numberOfOps) {
-  return function(done) {
+  return function (done) {
     const loop = _id => {
       if (_id > numberOfOps) {
         return done();
@@ -66,7 +66,7 @@ function makeTestInsertOne(numberOfOps) {
 }
 
 function makeLoadTweets(makeId) {
-  return function() {
+  return function () {
     const doc = this.doc;
     const tweets = [];
     for (let _id = 1; _id <= 10000; _id += 1) {
@@ -78,7 +78,7 @@ function makeLoadTweets(makeId) {
 }
 
 function makeLoadInsertDocs(numberOfOperations) {
-  return function() {
+  return function () {
     this.docs = [];
     for (let i = 0; i < numberOfOperations; i += 1) {
       this.docs.push(Object.assign({}, this.doc));
@@ -131,40 +131,22 @@ const benchmarkRunner = new Runner()
   .suite('bsonBench', suite =>
     suite
       .benchmark('flatBsonEncoding', benchmark =>
-        benchmark
-          .taskSize(75.31)
-          .setup(makeBSONLoader('flat_bson'))
-          .task(encodeBSON)
+        benchmark.taskSize(75.31).setup(makeBSONLoader('flat_bson')).task(encodeBSON)
       )
       .benchmark('flatBsonDecoding', benchmark =>
-        benchmark
-          .taskSize(75.31)
-          .setup(makeBSONLoader('flat_bson'))
-          .task(decodeBSON)
+        benchmark.taskSize(75.31).setup(makeBSONLoader('flat_bson')).task(decodeBSON)
       )
       .benchmark('deepBsonEncoding', benchmark =>
-        benchmark
-          .taskSize(19.64)
-          .setup(makeBSONLoader('deep_bson'))
-          .task(encodeBSON)
+        benchmark.taskSize(19.64).setup(makeBSONLoader('deep_bson')).task(encodeBSON)
       )
       .benchmark('deepBsonDecoding', benchmark =>
-        benchmark
-          .taskSize(19.64)
-          .setup(makeBSONLoader('deep_bson'))
-          .task(decodeBSON)
+        benchmark.taskSize(19.64).setup(makeBSONLoader('deep_bson')).task(decodeBSON)
       )
       .benchmark('fullBsonEncoding', benchmark =>
-        benchmark
-          .taskSize(57.34)
-          .setup(makeBSONLoader('full_bson'))
-          .task(encodeBSON)
+        benchmark.taskSize(57.34).setup(makeBSONLoader('full_bson')).task(encodeBSON)
       )
       .benchmark('fullBsonDecoding', benchmark =>
-        benchmark
-          .taskSize(57.34)
-          .setup(makeBSONLoader('full_bson'))
-          .task(decodeBSON)
+        benchmark.taskSize(57.34).setup(makeBSONLoader('full_bson')).task(decodeBSON)
       )
   )
   .suite('singleBench', suite =>
@@ -297,7 +279,7 @@ const benchmarkRunner = new Runner()
           .beforeTask(initBucket)
           .beforeTask(gridFsInitUploadStream)
           .beforeTask(writeSingleByteToUploadStream)
-          .task(function(done) {
+          .task(function (done) {
             this.stream.on('error', done).end(this.bin, null, () => done());
           })
           .teardown(dropDb)
@@ -316,7 +298,7 @@ const benchmarkRunner = new Runner()
           .setup(dropBucket)
           .setup(initBucket)
           .setup(gridFsInitUploadStream)
-          .setup(function() {
+          .setup(function () {
             return new Promise((resolve, reject) => {
               this.stream.end(this.bin, null, err => {
                 if (err) {
@@ -329,11 +311,8 @@ const benchmarkRunner = new Runner()
               });
             });
           })
-          .task(function(done) {
-            this.bucket
-              .openDownloadStream(this.id)
-              .resume()
-              .on('end', done);
+          .task(function (done) {
+            this.bucket.openDownloadStream(this.id).resume().on('end', done);
           })
           .teardown(dropDb)
           .teardown(disconnectClient)

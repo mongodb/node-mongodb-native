@@ -8,7 +8,7 @@ const Mongos = core.Mongos;
 const ReadPreference = core.ReadPreference;
 const Long = core.BSON.Long;
 
-describe('Mongos Proxy Read Preference (mocks)', function() {
+describe('Mongos Proxy Read Preference (mocks)', function () {
   afterEach(() => mock.cleanup());
 
   it('Should correctly set query and readpreference field on wire protocol for 3.2', {
@@ -19,7 +19,7 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       // Default message fields
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         msg: 'isdbgrid'
@@ -30,7 +30,7 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
       // Received command on server
       var command = null;
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const mongos1 = yield mock.createServer();
 
         mongos1.setMessageHandler(request => {
@@ -61,7 +61,7 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
         });
 
         // Add event listeners
-        server.once('fullsetup', function() {
+        server.once('fullsetup', function () {
           // Execute find
           var cursor = server.cursor(
             'test.test',
@@ -74,7 +74,7 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
           );
 
           // Execute next
-          cursor._next(function(err, d) {
+          cursor._next(function (err, d) {
             expect(err).to.not.exist;
             expect(d).to.be.null;
             expect(command).to.have.keys(['$query', '$readPreference']);
@@ -99,7 +99,7 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       // Default message fields
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         msg: 'isdbgrid'
@@ -110,7 +110,7 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
       // Received command on server
       var command = null;
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const mongos1 = yield mock.createServer();
 
         mongos1.setMessageHandler(request => {
@@ -140,7 +140,7 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
         });
 
         // Add event listeners
-        server.once('fullsetup', function() {
+        server.once('fullsetup', function () {
           // Execute find
           var cursor = server.cursor(
             'test.test',
@@ -153,7 +153,7 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
           );
 
           // Execute next
-          cursor._next(function(err, d) {
+          cursor._next(function (err, d) {
             expect(err).to.be.null;
             expect(d).to.be.null;
             expect(command).to.have.keys(['$query', '$readPreference']);
@@ -179,7 +179,7 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       // Default message fields
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         msg: 'isdbgrid'
@@ -190,7 +190,7 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
       // Received command on server
       var command = null;
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const mongos1 = yield mock.createServer();
 
         mongos1.setMessageHandler(request => {
@@ -212,7 +212,7 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
         });
 
         // Add event listeners
-        server.once('connect', function() {
+        server.once('connect', function () {
           // Execute find
           var cursor = server.cursor(
             'test.test',
@@ -225,7 +225,7 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
           );
 
           // Execute next
-          cursor._next(function(err, d) {
+          cursor._next(function (err, d) {
             expect(err).to.be.null;
             expect(d).to.be.null;
             expect(command).to.have.keys(['$query', '$readPreference']);

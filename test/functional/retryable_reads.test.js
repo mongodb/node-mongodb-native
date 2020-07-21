@@ -4,12 +4,12 @@ const TestRunnerContext = require('./spec-runner').TestRunnerContext;
 const generateTopologyTests = require('./spec-runner').generateTopologyTests;
 const loadSpecTests = require('../spec').loadSpecTests;
 
-describe('Retryable Reads', function() {
+describe('Retryable Reads', function () {
   const testContext = new TestRunnerContext();
   const testSuites = loadSpecTests('retryable-reads');
 
   after(() => testContext.teardown());
-  before(function() {
+  before(function () {
     return testContext.setup(this.configuration);
   });
 

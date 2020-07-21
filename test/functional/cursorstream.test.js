@@ -3,8 +3,8 @@ var expect = require('chai').expect;
 const setupDatabase = require('./shared').setupDatabase;
 const { Binary } = require('../../src');
 
-describe('Cursor Streams', function() {
-  before(function() {
+describe('Cursor Streams', function () {
+  before(function () {
     return setupDatabase(this.configuration);
   });
 
@@ -13,7 +13,7 @@ describe('Cursor Streams', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       var docs = [];
       var j = 0;
@@ -31,15 +31,15 @@ describe('Cursor Streams', function() {
         poolSize: 1
       });
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(self.configuration.db);
-        db.createCollection('test_streaming_function_with_limit_for_fetching2', function(
+        db.createCollection('test_streaming_function_with_limit_for_fetching2', function (
           err,
           collection
         ) {
           var left = allDocs.length;
           for (var i = 0; i < allDocs.length; i++) {
-            collection.insert(allDocs[i], { w: 1 }, function(err) {
+            collection.insert(allDocs[i], { w: 1 }, function (err) {
               expect(err).to.not.exist;
 
               left = left - 1;
@@ -50,19 +50,19 @@ describe('Cursor Streams', function() {
                 var data = [];
 
                 // For each data item
-                stream.on('data', function() {
+                stream.on('data', function () {
                   data.push(1);
                   j = j + 1;
                   stream.pause();
 
-                  collection.findOne({}, function(err) {
+                  collection.findOne({}, function (err) {
                     expect(err).to.not.exist;
                     stream.resume();
                   });
                 });
 
                 // When the stream is done
-                stream.on('end', function() {
+                stream.on('end', function () {
                   setTimeout(() => {
                     let err;
                     try {
@@ -87,7 +87,7 @@ describe('Cursor Streams', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       var docs = [];
 
@@ -106,15 +106,15 @@ describe('Cursor Streams', function() {
         poolSize: 1
       });
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(self.configuration.db);
-        db.createCollection('test_streaming_function_with_limit_for_fetching_2', function(
+        db.createCollection('test_streaming_function_with_limit_for_fetching_2', function (
           err,
           collection
         ) {
           var left = allDocs.length;
           for (var i = 0; i < allDocs.length; i++) {
-            collection.insert(allDocs[i], { w: 1 }, function(err) {
+            collection.insert(allDocs[i], { w: 1 }, function (err) {
               expect(err).to.not.exist;
               left = left - 1;
 
@@ -124,19 +124,19 @@ describe('Cursor Streams', function() {
                 var data = [];
 
                 // For each data item
-                stream.on('data', function() {
+                stream.on('data', function () {
                   j = j + 1;
                   stream.pause();
                   data.push(1);
 
-                  collection.findOne({}, function(err) {
+                  collection.findOne({}, function (err) {
                     expect(err).to.not.exist;
                     stream.resume();
                   });
                 });
 
                 // When the stream is done
-                stream.on('end', function() {
+                stream.on('end', function () {
                   setTimeout(() => {
                     let err;
                     try {
@@ -161,7 +161,7 @@ describe('Cursor Streams', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       var docs = [];
       var counter = 0;
@@ -175,20 +175,20 @@ describe('Cursor Streams', function() {
         poolSize: 1
       });
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(self.configuration.db);
-        db.createCollection('test_streaming_function_with_limit_for_fetching_3', function(
+        db.createCollection('test_streaming_function_with_limit_for_fetching_3', function (
           err,
           collection
         ) {
-          collection.insert(docs, { w: 1 }, function(err) {
+          collection.insert(docs, { w: 1 }, function (err) {
             expect(err).to.not.exist;
 
             // Perform a find to get a cursor
             var stream = collection.find({}).stream();
 
             // For each data item
-            stream.on('data', function() {
+            stream.on('data', function () {
               counter++;
               stream.pause();
               stream.resume();
@@ -196,7 +196,7 @@ describe('Cursor Streams', function() {
             });
 
             // When the stream is done
-            stream.on('end', function() {
+            stream.on('end', function () {
               expect(counter).to.equal(1000);
               expect(counter2).to.equal(1000);
               client.close(done);
@@ -212,13 +212,13 @@ describe('Cursor Streams', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
         poolSize: 1
       });
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(self.configuration.db);
         var docs = [];
 
@@ -238,7 +238,7 @@ describe('Cursor Streams', function() {
 
         var left = allDocs.length;
         for (i = 0; i < allDocs.length; i++) {
-          collection.insert(allDocs[i], { w: 1 }, function(err) {
+          collection.insert(allDocs[i], { w: 1 }, function (err) {
             expect(err).to.not.exist;
             left = left - 1;
 
@@ -247,8 +247,8 @@ describe('Cursor Streams', function() {
               // Execute find on all the documents
               var stream = cursor.stream();
 
-              stream.on('end', function() {
-                updateCollection.findOne({ id: 1 }, function(err, doc) {
+              stream.on('end', function () {
+                updateCollection.findOne({ id: 1 }, function (err, doc) {
                   expect(err).to.not.exist;
                   expect(doc.count).to.equal(2000);
 
@@ -256,14 +256,14 @@ describe('Cursor Streams', function() {
                 });
               });
 
-              stream.on('data', function() {
+              stream.on('data', function () {
                 stream.pause();
 
                 updateCollection.update(
                   { id: 1 },
                   { $inc: { count: 1 } },
                   { w: 1, upsert: true },
-                  function(err) {
+                  function (err) {
                     expect(err).to.not.exist;
                     stream.resume();
                   }
@@ -281,13 +281,13 @@ describe('Cursor Streams', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
         poolSize: 1
       });
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(self.configuration.db);
         var cursor = db.collection('myCollection').find({
           timestamp: { $ltx: '1111' } // Error in query.
@@ -295,16 +295,16 @@ describe('Cursor Streams', function() {
 
         var error, streamIsClosed;
 
-        cursor.on('error', function(err) {
+        cursor.on('error', function (err) {
           error = err;
         });
 
-        cursor.on('close', function() {
+        cursor.on('close', function () {
           expect(error).to.exist;
           streamIsClosed = true;
         });
 
-        cursor.on('end', function() {
+        cursor.on('end', function () {
           expect(error).to.exist;
           expect(streamIsClosed).to.be.true;
           client.close(done);
@@ -320,13 +320,13 @@ describe('Cursor Streams', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
         poolSize: 1
       });
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(self.configuration.db);
         var docs = [];
         var received = [];
@@ -335,7 +335,7 @@ describe('Cursor Streams', function() {
           docs.push({ a: i, field: 'hello world' });
         }
 
-        db.collection('cursor_sort_stream').insertMany(docs, function(err) {
+        db.collection('cursor_sort_stream').insertMany(docs, function (err) {
           expect(err).to.not.exist;
 
           var cursor = db
@@ -344,13 +344,13 @@ describe('Cursor Streams', function() {
             .project({ a: 1 })
             .sort({ a: -1 });
 
-          cursor.on('end', function() {
+          cursor.on('end', function () {
             expect(received).to.have.length(1000);
 
             client.close(done);
           });
 
-          cursor.on('data', function(d) {
+          cursor.on('data', function (d) {
             received.push(d);
           });
         });

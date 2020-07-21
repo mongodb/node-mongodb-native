@@ -5,7 +5,7 @@ const ReplSet = require('../../../../src/core/topologies/replset');
 const mock = require('mongodb-mock-server');
 const ReplSetFixture = require('../common').ReplSetFixture;
 
-describe('Step Down (ReplSet)', function() {
+describe('Step Down (ReplSet)', function () {
   class MyFixture extends ReplSetFixture {
     constructor() {
       super();
@@ -102,7 +102,7 @@ describe('Step Down (ReplSet)', function() {
         topology: 'single'
       }
     },
-    test: function(done) {
+    test: function (done) {
       const replSet = makeReplicaSet();
 
       replSet.on('error', done);
@@ -113,7 +113,7 @@ describe('Step Down (ReplSet)', function() {
         };
 
         // Should successfully insert since we have a primary
-        replSet.insert('foo.bar', [{ a: 1 }], function(err, result) {
+        replSet.insert('foo.bar', [{ a: 1 }], function (err, result) {
           try {
             expect(err).to.not.exist;
             expect(result).to.exist;
@@ -124,7 +124,7 @@ describe('Step Down (ReplSet)', function() {
           test.nextState();
 
           // Should issue a "not master", since primary has stepped down
-          replSet.insert('foo.bar', [{ b: 2 }], function(err, result) {
+          replSet.insert('foo.bar', [{ b: 2 }], function (err, result) {
             try {
               expect(err).to.exist;
               expect(err.message).to.match(/not master/);
@@ -135,7 +135,7 @@ describe('Step Down (ReplSet)', function() {
 
             // Should issue a "no primary server found", as monitoring has not
             // found a new primary
-            replSet.insert('foo.bar', [{ b: 2 }], function(err, result) {
+            replSet.insert('foo.bar', [{ b: 2 }], function (err, result) {
               try {
                 expect(err).to.exist;
                 expect(err.message).to.match(/no primary server found/);
@@ -148,7 +148,7 @@ describe('Step Down (ReplSet)', function() {
 
               setTimeout(() => {
                 // Now that we have given time for SDAM, insert should succeed
-                replSet.insert('foo.bar', [{ c: 3 }], function(err, result) {
+                replSet.insert('foo.bar', [{ c: 3 }], function (err, result) {
                   try {
                     expect(err).to.not.exist;
                     expect(result).to.exist;
@@ -173,7 +173,7 @@ describe('Step Down (ReplSet)', function() {
         topology: 'single'
       }
     },
-    test: function(done) {
+    test: function (done) {
       const replSet = makeReplicaSet();
 
       replSet.on('error', done);

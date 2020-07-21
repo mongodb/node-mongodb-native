@@ -6,8 +6,8 @@ const test = require('./shared').assert,
 const MongoError = require('../../src/error').MongoError;
 const ignoreNsNotFound = require('./shared').ignoreNsNotFound;
 
-describe('Bulk', function() {
-  before(function() {
+describe('Bulk', function () {
+  before(function () {
     return setupDatabase(this.configuration);
   });
 
@@ -16,18 +16,18 @@ describe('Bulk', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
         poolSize: 1
       });
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(self.configuration.db);
         var col = db.collection('batch_write_ordered_ops_10');
 
         // Add unique index on b field causing all updates to fail
-        col.ensureIndex({ a: 1 }, { unique: true, sparse: false }, function(err) {
+        col.ensureIndex({ a: 1 }, { unique: true, sparse: false }, function (err) {
           test.equal(err, null);
 
           var batch = col.initializeOrderedBulkOp();
@@ -38,7 +38,7 @@ describe('Bulk', function() {
             .updateOne({ $set: { a: 1 } });
           batch.insert({ b: 3, a: 2 });
 
-          batch.execute(function(err, result) {
+          batch.execute(function (err, result) {
             expect(err).to.exist;
             expect(result).to.not.exist;
 
@@ -75,7 +75,7 @@ describe('Bulk', function() {
 
   it('should use arrayFilters for updateMany', {
     metadata: { requires: { mongodb: '>=3.6.x' } },
-    test: function(done) {
+    test: function (done) {
       const configuration = this.configuration;
       const client = configuration.newClient({}, { w: 1 });
 
@@ -105,7 +105,7 @@ describe('Bulk', function() {
       requires: { topology: ['single'] }
     },
 
-    test: function() {
+    test: function () {
       const client = this.configuration.newClient(this.configuration.writeConcernMax(), {
         poolSize: 1
       });
@@ -135,7 +135,7 @@ describe('Bulk', function() {
       requires: { topology: ['single'] }
     },
 
-    test: function() {
+    test: function () {
       var client = this.configuration.newClient(this.configuration.writeConcernMax(), {
         poolSize: 1
       });
@@ -163,18 +163,18 @@ describe('Bulk', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
         poolSize: 1
       });
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(self.configuration.db);
         var col = db.collection('batch_write_ordered_ops_2');
 
         // Add unique index on field `a` causing all updates to fail
-        col.ensureIndex({ a: 1 }, { unique: true, sparse: false }, function(err) {
+        col.ensureIndex({ a: 1 }, { unique: true, sparse: false }, function (err) {
           test.equal(err, null);
 
           var batch = col.initializeOrderedBulkOp();
@@ -194,7 +194,7 @@ describe('Bulk', function() {
           batch.insert({ b: 4, a: 3 });
           batch.insert({ b: 5, a: 1 });
 
-          batch.execute(function(err, result) {
+          batch.execute(function (err, result) {
             expect(err).to.exist;
             expect(result).to.not.exist;
 
@@ -228,13 +228,13 @@ describe('Bulk', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
         poolSize: 1
       });
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(self.configuration.db);
         var coll = db.collection('batch_write_ordered_ops_3');
         // Set up a giant string to blow through the max message size
@@ -264,13 +264,13 @@ describe('Bulk', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
         poolSize: 1
       });
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(self.configuration.db);
         var coll = db.collection('batch_write_ordered_ops_4');
 
@@ -291,7 +291,7 @@ describe('Bulk', function() {
         batch.insert({ a: 6, b: hugeString });
 
         // Execute the operations
-        batch.execute(function(err, result) {
+        batch.execute(function (err, result) {
           // Basic properties check
           test.equal(6, result.nInserted);
           test.equal(false, result.hasWriteErrors());
@@ -313,18 +313,18 @@ describe('Bulk', function() {
         }
       },
 
-      test: function(done) {
+      test: function (done) {
         var self = this;
         var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
           poolSize: 1
         });
 
-        client.connect(function(err, client) {
+        client.connect(function (err, client) {
           var db = client.db(self.configuration.db);
           var col = db.collection('batch_write_ordered_ops_5');
 
           // Add unique index on b field causing all updates to fail
-          col.ensureIndex({ b: 1 }, { unique: true, sparse: false }, function(err) {
+          col.ensureIndex({ b: 1 }, { unique: true, sparse: false }, function (err) {
             test.equal(err, null);
 
             var batch = col.initializeOrderedBulkOp();
@@ -333,21 +333,21 @@ describe('Bulk', function() {
             batch.insert({ $set: { a: 1 } });
 
             // Execute the operations
-            batch.execute(function(err) {
+            batch.execute(function (err) {
               test.ok(err != null);
 
               var batch = col.initializeOrderedBulkOp();
               // Add illegal remove
               batch.find({ $set: { a: 1 } }).removeOne();
               // Execute the operations
-              batch.execute(function(err) {
+              batch.execute(function (err) {
                 test.ok(err != null);
 
                 var batch = col.initializeOrderedBulkOp();
                 // Add illegal update
                 batch.find({ a: { $set2: 1 } }).updateOne({ c: { $set: { a: 1 } } });
                 // Execute the operations
-                batch.execute(function(err) {
+                batch.execute(function (err) {
                   test.ok(err != null);
 
                   client.close(done);
@@ -367,18 +367,18 @@ describe('Bulk', function() {
         requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
       },
 
-      test: function(done) {
+      test: function (done) {
         var self = this;
         var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
           poolSize: 1
         });
 
-        client.connect(function(err, client) {
+        client.connect(function (err, client) {
           var db = client.db(self.configuration.db);
           var col = db.collection('batch_write_ordered_ops_6');
 
           // Add unique index on b field causing all updates to fail
-          col.ensureIndex({ b: 1 }, { unique: true, sparse: false }, function(err) {
+          col.ensureIndex({ b: 1 }, { unique: true, sparse: false }, function (err) {
             test.equal(err, null);
 
             var batch = col.initializeOrderedBulkOp();
@@ -389,7 +389,7 @@ describe('Bulk', function() {
             batch.insert({ b: 1 });
 
             // Execute the operations
-            batch.execute(function(err, result) {
+            batch.execute(function (err, result) {
               expect(err).to.exist;
               expect(result).to.not.exist;
 
@@ -423,18 +423,18 @@ describe('Bulk', function() {
         requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
       },
 
-      test: function(done) {
+      test: function (done) {
         var self = this;
         var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
           poolSize: 1
         });
 
-        client.connect(function(err, client) {
+        client.connect(function (err, client) {
           var db = client.db(self.configuration.db);
           var col = db.collection('batch_write_ordered_ops_7');
 
           // Add unique index on b field causing all updates to fail
-          col.ensureIndex({ b: 1 }, { unique: true, sparse: false }, function(err) {
+          col.ensureIndex({ b: 1 }, { unique: true, sparse: false }, function (err) {
             test.equal(err, null);
 
             var batch = col.initializeOrderedBulkOp();
@@ -451,7 +451,7 @@ describe('Bulk', function() {
             batch.insert({ b: 1 });
 
             // Execute the operations
-            batch.execute(function(err, result) {
+            batch.execute(function (err, result) {
               expect(err).to.exist;
               expect(result).to.not.exist;
 
@@ -492,13 +492,13 @@ describe('Bulk', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
         poolSize: 1
       });
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(self.configuration.db);
         var col = db.collection('batch_write_ordered_ops_8');
         var batch = col.initializeOrderedBulkOp();
@@ -510,7 +510,7 @@ describe('Bulk', function() {
           .updateOne({ $set: { b: 2 } });
 
         // Execute the operations
-        batch.execute(function(err, result) {
+        batch.execute(function (err, result) {
           // Check state of result
           test.equal(1, result.nUpserted);
           test.equal(0, result.nInserted);
@@ -535,15 +535,15 @@ describe('Bulk', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       var client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(self.configuration.db);
         var col = db.collection('batch_write_ordered_ops_8');
 
-        col.initializeOrderedBulkOp().execute(function(err) {
+        col.initializeOrderedBulkOp().execute(function (err) {
           test.equal(err instanceof Error, true);
           test.equal(err.message, 'Invalid Operation, no operations specified');
 
@@ -558,13 +558,13 @@ describe('Bulk', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
         poolSize: 1
       });
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(self.configuration.db);
         var col = db.collection('batch_write_ordered_ops_9');
 
@@ -573,13 +573,10 @@ describe('Bulk', function() {
           bulk.insert({ a: 1 });
         }
 
-        bulk
-          .find({ b: 1 })
-          .upsert()
-          .update({ b: 1 });
+        bulk.find({ b: 1 }).upsert().update({ b: 1 });
         bulk.find({ c: 1 }).remove();
 
-        bulk.execute({ w: 0 }, function(err, result) {
+        bulk.execute({ w: 0 }, function (err, result) {
           test.equal(null, err);
           test.equal(0, result.nUpserted);
           test.equal(0, result.nInserted);
@@ -597,18 +594,18 @@ describe('Bulk', function() {
   it('should correctly handle single unordered batch API', {
     metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
         poolSize: 1
       });
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(self.configuration.db);
         var col = db.collection('batch_write_unordered_ops_legacy_1');
 
         // Add unique index on b field causing all updates to fail
-        col.ensureIndex({ a: 1 }, { unique: true, sparse: false }, function(err) {
+        col.ensureIndex({ a: 1 }, { unique: true, sparse: false }, function (err) {
           test.equal(err, null);
 
           // Initialize the unordered Batch
@@ -623,7 +620,7 @@ describe('Bulk', function() {
           batch.insert({ b: 3, a: 2 });
 
           // Execute the operations
-          batch.execute(function(err, result) {
+          batch.execute(function (err, result) {
             expect(err).to.exist;
             expect(result).to.not.exist;
 
@@ -661,7 +658,7 @@ describe('Bulk', function() {
     }
   });
 
-  it('should correctly handle multiple unordered batch API', function(done) {
+  it('should correctly handle multiple unordered batch API', function (done) {
     const configuration = this.configuration;
     const client = configuration.newClient(configuration.writeConcernMax(), {
       poolSize: 1
@@ -710,13 +707,13 @@ describe('Bulk', function() {
   it('should fail due to document being to big for unordered batch', {
     metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
         poolSize: 1
       });
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(self.configuration.db);
         var coll = db.collection('batch_write_unordered_ops_legacy_3');
         // Set up a giant string to blow through the max message size
@@ -744,13 +741,13 @@ describe('Bulk', function() {
   it('should correctly split up messages into more batches for unordered batches', {
     metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
         poolSize: 1
       });
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(self.configuration.db);
         var coll = db.collection('batch_write_unordered_ops_legacy_4');
 
@@ -771,7 +768,7 @@ describe('Bulk', function() {
         batch.insert({ a: 6, b: hugeString });
 
         // Execute the operations
-        batch.execute(function(err, result) {
+        batch.execute(function (err, result) {
           // Basic properties check
           test.equal(6, result.nInserted);
           test.equal(false, result.hasWriteErrors());
@@ -791,13 +788,13 @@ describe('Bulk', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
         poolSize: 1
       });
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(self.configuration.db);
         var col = db.collection('batch_write_unordered_ops_legacy_5');
 
@@ -807,7 +804,7 @@ describe('Bulk', function() {
         writeConcern.sparse = false;
 
         // Add unique index on b field causing all updates to fail
-        col.ensureIndex({ b: 1 }, writeConcern, function(err) {
+        col.ensureIndex({ b: 1 }, writeConcern, function (err) {
           test.equal(err, null);
 
           // Initialize the unordered Batch
@@ -817,7 +814,7 @@ describe('Bulk', function() {
           batch.insert({ $set: { a: 1 } });
 
           // Execute the operations
-          batch.execute(function(err) {
+          batch.execute(function (err) {
             test.ok(err != null);
 
             // Initialize the unordered Batch
@@ -825,7 +822,7 @@ describe('Bulk', function() {
             // Add illegal remove
             batch.find({ $set: { a: 1 } }).removeOne();
             // Execute the operations
-            batch.execute(function(err) {
+            batch.execute(function (err) {
               test.ok(err != null);
 
               // Initialize the unordered Batch
@@ -833,7 +830,7 @@ describe('Bulk', function() {
               // Add illegal update
               batch.find({ $set: { a: 1 } }).updateOne({ c: { $set: { a: 1 } } });
               // Execute the operations
-              batch.execute(function(err) {
+              batch.execute(function (err) {
                 test.ok(err != null);
 
                 client.close(done);
@@ -848,13 +845,13 @@ describe('Bulk', function() {
   it('should Correctly Execute Unordered Batch with duplicate key errors on updates', {
     metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
         poolSize: 1
       });
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(self.configuration.db);
         var col = db.collection('batch_write_unordered_ops_legacy_6');
 
@@ -864,7 +861,7 @@ describe('Bulk', function() {
         writeConcern.sparse = false;
 
         // Add unique index on b field causing all updates to fail
-        col.ensureIndex({ b: 1 }, writeConcern, function(err) {
+        col.ensureIndex({ b: 1 }, writeConcern, function (err) {
           test.equal(err, null);
 
           // Initialize the unordered Batch
@@ -879,7 +876,7 @@ describe('Bulk', function() {
           batch.insert({ b: 1 });
 
           // Execute the operations
-          batch.execute(self.configuration.writeConcernMax(), function(err, result) {
+          batch.execute(self.configuration.writeConcernMax(), function (err, result) {
             expect(err).to.exist;
             expect(result).to.not.exist;
 
@@ -901,7 +898,7 @@ describe('Bulk', function() {
     }
   });
 
-  it('should provide descriptive error message for unordered batch with duplicate key errors on inserts', function(done) {
+  it('should provide descriptive error message for unordered batch with duplicate key errors on inserts', function (done) {
     const configuration = this.configuration;
     const client = configuration.newClient(configuration.writeConcernMax(), {
       poolSize: 1
@@ -959,18 +956,18 @@ describe('Bulk', function() {
     {
       metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
-      test: function(done) {
+      test: function (done) {
         var self = this;
         var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
           poolSize: 1
         });
 
-        client.connect(function(err, client) {
+        client.connect(function (err, client) {
           var db = client.db(self.configuration.db);
           var col = db.collection('batch_write_unordered_ops_legacy_7');
 
           // Add unique index on b field causing all updates to fail
-          col.ensureIndex({ b: 1 }, { unique: true, sparse: false }, function(err) {
+          col.ensureIndex({ b: 1 }, { unique: true, sparse: false }, function (err) {
             test.equal(err, null);
 
             // Initialize the unordered Batch
@@ -991,7 +988,7 @@ describe('Bulk', function() {
             batch.insert({ b: 1 });
 
             // Execute the operations
-            batch.execute(self.configuration.writeConcernMax(), function(err, result) {
+            batch.execute(self.configuration.writeConcernMax(), function (err, result) {
               expect(err).to.exist;
               expect(result).to.not.exist;
 
@@ -1029,13 +1026,13 @@ describe('Bulk', function() {
   it('should correctly perform unordered upsert with custom _id', {
     metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
         poolSize: 1
       });
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(self.configuration.db);
         var col = db.collection('batch_write_unordered_ops_legacy_8');
         var batch = col.initializeUnorderedBulkOp();
@@ -1047,7 +1044,7 @@ describe('Bulk', function() {
           .updateOne({ $set: { b: 2 } });
 
         // Execute the operations
-        batch.execute(self.configuration.writeConcernMax(), function(err, result) {
+        batch.execute(self.configuration.writeConcernMax(), function (err, result) {
           // Check state of result
           test.equal(1, result.nUpserted);
           test.equal(0, result.nInserted);
@@ -1070,13 +1067,13 @@ describe('Bulk', function() {
   it('should prohibit batch finds with no selector', {
     metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
         poolSize: 1
       });
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(self.configuration.db);
         var col = db.collection('batch_write_unordered_ops_legacy_9');
 
@@ -1105,17 +1102,17 @@ describe('Bulk', function() {
   it('should return an error when no operations in unordered batch', {
     metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       var client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(self.configuration.db);
         var col = db.collection('batch_write_ordered_ops_8');
 
         col
           .initializeUnorderedBulkOp()
-          .execute(self.configuration.writeConcernMax(), function(err) {
+          .execute(self.configuration.writeConcernMax(), function (err) {
             test.equal(err instanceof Error, true);
             test.equal(err.message, 'Invalid Operation, no operations specified');
 
@@ -1128,13 +1125,13 @@ describe('Bulk', function() {
   it('should correctly execute unordered batch using w:0', {
     metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
         poolSize: 1
       });
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(self.configuration.db);
         var col = db.collection('batch_write_ordered_ops_9');
         var bulk = col.initializeUnorderedBulkOp();
@@ -1142,13 +1139,10 @@ describe('Bulk', function() {
           bulk.insert({ a: 1 });
         }
 
-        bulk
-          .find({ b: 1 })
-          .upsert()
-          .update({ b: 1 });
+        bulk.find({ b: 1 }).upsert().update({ b: 1 });
         bulk.find({ c: 1 }).remove();
 
-        bulk.execute({ w: 0 }, function(err, result) {
+        bulk.execute({ w: 0 }, function (err, result) {
           test.equal(null, err);
           test.equal(0, result.nUpserted);
           test.equal(0, result.nInserted);
@@ -1171,20 +1165,20 @@ describe('Bulk', function() {
   it('should fail with w:2 and wtimeout write concern due single mongod instance ordered', {
     metadata: { requires: { topology: 'single', mongodb: '>2.5.4' } },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
         poolSize: 1
       });
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(self.configuration.db);
         var col = db.collection('batch_write_concerns_ops_1');
         var batch = col.initializeOrderedBulkOp();
         batch.insert({ a: 1 });
         batch.insert({ a: 2 });
 
-        batch.execute({ w: 2, wtimeout: 1000 }, function(err) {
+        batch.execute({ w: 2, wtimeout: 1000 }, function (err) {
           test.ok(err != null);
           test.ok(err.code != null);
           test.ok(err.errmsg != null);
@@ -1205,13 +1199,13 @@ describe('Bulk', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
         poolSize: 1
       });
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(self.configuration.db);
         var docs = [];
         for (var i = 0; i < 5; i++) {
@@ -1220,10 +1214,10 @@ describe('Bulk', function() {
           });
         }
 
-        db.collection('bigdocs_ordered').insertMany(docs, function(err) {
+        db.collection('bigdocs_ordered').insertMany(docs, function (err) {
           test.equal(null, err);
 
-          db.collection('bigdocs_ordered').count(function(err, c) {
+          db.collection('bigdocs_ordered').count(function (err, c) {
             test.equal(null, err);
             test.equal(5, c);
 
@@ -1242,20 +1236,20 @@ describe('Bulk', function() {
   it('should fail with w:2 and wtimeout write concern due single mongod instance unordered', {
     metadata: { requires: { topology: 'single', mongodb: '>2.5.4' } },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
         poolSize: 1
       });
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(self.configuration.db);
         var col = db.collection('batch_write_concerns_ops_1');
         var batch = col.initializeUnorderedBulkOp();
         batch.insert({ a: 1 });
         batch.insert({ a: 2 });
 
-        batch.execute({ w: 2, wtimeout: 1000 }, function(err) {
+        batch.execute({ w: 2, wtimeout: 1000 }, function (err) {
           test.ok(err != null);
           test.ok(err.code != null);
           test.ok(err.errmsg != null);
@@ -1269,13 +1263,13 @@ describe('Bulk', function() {
   it('should correctly return the number of operations in the bulk', {
     metadata: { requires: { topology: 'single', mongodb: '>2.5.4' } },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
         poolSize: 1
       });
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(self.configuration.db);
         var col = db.collection('batch_write_concerns_ops_1');
         var batch = col.initializeOrderedBulkOp();
@@ -1302,13 +1296,13 @@ describe('Bulk', function() {
   it('should correctly split unordered bulk batch', {
     metadata: { requires: { topology: 'single', mongodb: '>2.5.4' } },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
         poolSize: 1
       });
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(self.configuration.db);
         var insertFirst = false;
         var batchSize = 1000;
@@ -1322,7 +1316,7 @@ describe('Bulk', function() {
           operation.insert(document);
         }
 
-        operation.execute(function(err) {
+        operation.execute(function (err) {
           test.equal(null, err);
 
           operation = collection.initializeUnorderedBulkOp();
@@ -1337,7 +1331,7 @@ describe('Bulk', function() {
             insertDocuments();
           }
 
-          operation.execute(function(err) {
+          operation.execute(function (err) {
             test.equal(null, err);
 
             client.close(done);
@@ -1362,13 +1356,13 @@ describe('Bulk', function() {
   it('should correctly split ordered bulk batch', {
     metadata: { requires: { topology: 'single', mongodb: '>2.5.4' } },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
         poolSize: 1
       });
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(self.configuration.db);
         var insertFirst = false;
         var batchSize = 1000;
@@ -1382,7 +1376,7 @@ describe('Bulk', function() {
           operation.insert(document);
         }
 
-        operation.execute(function(err) {
+        operation.execute(function (err) {
           test.equal(null, err);
 
           operation = collection.initializeOrderedBulkOp();
@@ -1397,7 +1391,7 @@ describe('Bulk', function() {
             insertDocuments();
           }
 
-          operation.execute(function(err) {
+          operation.execute(function (err) {
             test.equal(null, err);
 
             client.close(done);
@@ -1429,13 +1423,13 @@ describe('Bulk', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
         poolSize: 1
       });
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(self.configuration.db);
         var docs = [];
         for (var i = 0; i < 5; i++) {
@@ -1444,10 +1438,10 @@ describe('Bulk', function() {
           });
         }
 
-        db.collection('bigdocs_unordered').insertMany(docs, { ordered: false }, function(err) {
+        db.collection('bigdocs_unordered').insertMany(docs, { ordered: false }, function (err) {
           test.equal(null, err);
 
-          db.collection('bigdocs_unordered').count(function(err, c) {
+          db.collection('bigdocs_unordered').count(function (err, c) {
             test.equal(null, err);
             test.equal(5, c);
 
@@ -1462,12 +1456,12 @@ describe('Bulk', function() {
     'should return an error instead of throwing when no operations are provided for ordered bulk operation execute',
     {
       metadata: { requires: { mongodb: '>=2.6.0', topology: 'single' } },
-      test: function(done) {
+      test: function (done) {
         var self = this;
         var client = self.configuration.newClient({ w: 1 }, { poolSize: 1 });
-        client.connect(function(err, client) {
+        client.connect(function (err, client) {
           var db = client.db(self.configuration.db);
-          db.collection('doesnt_matter').insertMany([], function(err) {
+          db.collection('doesnt_matter').insertMany([], function (err) {
             test.equal(err instanceof Error, true);
             test.equal(err.message, 'Invalid Operation, no operations specified');
             client.close(done);
@@ -1481,13 +1475,13 @@ describe('Bulk', function() {
     'should return an error instead of throwing when no operations are provided for unordered bulk operation execute',
     {
       metadata: { requires: { mongodb: '>=2.6.0', topology: 'single' } },
-      test: function(done) {
+      test: function (done) {
         var self = this;
         var client = self.configuration.newClient({ w: 1 }, { poolSize: 1 });
 
-        client.connect(function(err, client) {
+        client.connect(function (err, client) {
           var db = client.db(self.configuration.db);
-          db.collection('doesnt_matter').insertMany([], { ordered: false }, function(err) {
+          db.collection('doesnt_matter').insertMany([], { ordered: false }, function (err) {
             test.equal(err instanceof Error, true);
             test.equal(err.message, 'Invalid Operation, no operations specified');
             client.close(done);
@@ -1497,29 +1491,29 @@ describe('Bulk', function() {
     }
   );
 
-  it('should return an error instead of throwing when an empty bulk operation is submitted (with promise)', function() {
+  it('should return an error instead of throwing when an empty bulk operation is submitted (with promise)', function () {
     var self = this;
     var client = self.configuration.newClient({ w: 1 }, { poolSize: 1 });
 
     return client
       .connect()
-      .then(function() {
+      .then(function () {
         var db = client.db(self.configuration.db);
         return db.collection('doesnt_matter').insertMany([]);
       })
-      .then(function() {
+      .then(function () {
         test.equal(false, true); // this should not happen!
       })
-      .catch(function(err) {
+      .catch(function (err) {
         test.equal(err instanceof Error, true);
         test.equal(err.message, 'Invalid Operation, no operations specified');
       })
-      .then(function() {
+      .then(function () {
         return client.close();
       });
   });
 
-  it('should properly account for array key size in bulk unordered inserts', function(done) {
+  it('should properly account for array key size in bulk unordered inserts', function (done) {
     const client = this.configuration.newClient();
     const documents = new Array(20000).fill('').map(() => ({
       arr: new Array(19).fill('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
@@ -1548,7 +1542,7 @@ describe('Bulk', function() {
       });
   });
 
-  it('should properly account for array key size in bulk ordered inserts', function(done) {
+  it('should properly account for array key size in bulk ordered inserts', function (done) {
     const client = this.configuration.newClient();
     const documents = new Array(20000).fill('').map(() => ({
       arr: new Array(19).fill('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
@@ -1591,7 +1585,7 @@ describe('Bulk', function() {
     );
   }
 
-  it('should propagate the proper error from executing an empty ordered batch', function() {
+  it('should propagate the proper error from executing an empty ordered batch', function () {
     const client = this.configuration.newClient();
 
     return client
@@ -1604,7 +1598,7 @@ describe('Bulk', function() {
       .then(() => client.close());
   });
 
-  it('should propagate the proper error from executing an empty unordered batch', function() {
+  it('should propagate the proper error from executing an empty unordered batch', function () {
     const client = this.configuration.newClient();
 
     return client
@@ -1617,7 +1611,7 @@ describe('Bulk', function() {
       .then(() => client.close());
   });
 
-  it('should promote a single error to the top-level message, and preserve writeErrors', function() {
+  it('should promote a single error to the top-level message, and preserve writeErrors', function () {
     const client = this.configuration.newClient();
     return client.connect().then(() => {
       this.defer(() => client.close());
@@ -1638,15 +1632,13 @@ describe('Bulk', function() {
             expect(err)
               .property('message')
               .to.match(/E11000/);
-            expect(err)
-              .to.have.property('writeErrors')
-              .with.length(1);
+            expect(err).to.have.property('writeErrors').with.length(1);
           }
         );
     });
   });
 
-  it('should preserve order of operation index in unordered bulkWrite', function() {
+  it('should preserve order of operation index in unordered bulkWrite', function () {
     const client = this.configuration.newClient();
     return client.connect().then(() => {
       this.defer(() => client.close());
@@ -1676,9 +1668,7 @@ describe('Bulk', function() {
             throw new Error('expected a bulk error');
           },
           err => {
-            expect(err)
-              .to.have.property('writeErrors')
-              .with.length(2);
+            expect(err).to.have.property('writeErrors').with.length(2);
 
             expect(err).to.have.nested.property('writeErrors[0].err.index', 0);
             expect(err).to.have.nested.property('writeErrors[1].err.index', 2);
@@ -1687,7 +1677,7 @@ describe('Bulk', function() {
     });
   });
 
-  it('should preserve order of operation index in unordered bulk operation', function() {
+  it('should preserve order of operation index in unordered bulk operation', function () {
     const client = this.configuration.newClient();
     return client.connect().then(() => {
       this.defer(() => client.close());
@@ -1709,9 +1699,7 @@ describe('Bulk', function() {
             throw new Error('expected a bulk error');
           },
           err => {
-            expect(err)
-              .to.have.property('writeErrors')
-              .with.length(2);
+            expect(err).to.have.property('writeErrors').with.length(2);
 
             expect(err).to.have.nested.property('writeErrors[0].err.index', 1);
             expect(err).to.have.nested.property('writeErrors[1].err.index', 3);
@@ -1720,7 +1708,7 @@ describe('Bulk', function() {
     });
   });
 
-  it('should not fail on the first error in an unorderd bulkWrite', function() {
+  it('should not fail on the first error in an unorderd bulkWrite', function () {
     const client = this.configuration.newClient();
     return client.connect().then(() => {
       this.defer(() => client.close());
@@ -1768,17 +1756,10 @@ describe('Bulk', function() {
           () => {
             throw new Error('expected a bulk error');
           },
-          err =>
-            expect(err)
-              .property('code')
-              .to.equal(11000)
+          err => expect(err).property('code').to.equal(11000)
         )
         .then(() => coll.findOne({ email: 'adam@gmail.com' }))
-        .then(updatedAdam =>
-          expect(updatedAdam)
-            .property('age')
-            .to.equal(39)
-        );
+        .then(updatedAdam => expect(updatedAdam).property('age').to.equal(39));
     });
   });
 });

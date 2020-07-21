@@ -3,31 +3,31 @@ var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 const { ObjectId } = require('../../src');
 
-describe('Ignore Undefined', function() {
-  before(function() {
+describe('Ignore Undefined', function () {
+  before(function () {
     return setupDatabase(this.configuration);
   });
 
   it('Should correctly insert document ignoring undefined field', {
     metadata: { requires: { topology: ['single'] } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
         poolSize: 1,
         ignoreUndefined: true
       });
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('shouldCorrectlyIgnoreUndefinedValue');
 
         // Ignore the undefined field
-        collection.insert({ a: 1, b: undefined }, configuration.writeConcernMax(), function(err) {
+        collection.insert({ a: 1, b: undefined }, configuration.writeConcernMax(), function (err) {
           test.equal(null, err);
 
           // Locate the doument
-          collection.findOne(function(err, item) {
+          collection.findOne(function (err, item) {
             test.equal(1, item.a);
             test.ok(item.b === undefined);
             client.close(done);
@@ -42,7 +42,7 @@ describe('Ignore Undefined', function() {
     {
       metadata: { requires: { topology: ['single'] } },
 
-      test: function(done) {
+      test: function (done) {
         var configuration = this.configuration;
         const client = configuration.newClient(
           {},
@@ -53,27 +53,27 @@ describe('Ignore Undefined', function() {
           }
         );
 
-        client.connect(function(err, client) {
+        client.connect(function (err, client) {
           var db = client.db(configuration.db);
           var collection = db.collection('shouldCorrectlyIgnoreUndefinedValue1');
-          collection.insert({ a: 1, b: undefined }, function(err) {
+          collection.insert({ a: 1, b: undefined }, function (err) {
             test.equal(null, err);
 
-            collection.findOne(function(err, item) {
+            collection.findOne(function (err, item) {
               test.equal(1, item.a);
               test.ok(item.b === undefined);
 
-              collection.insertOne({ a: 2, b: undefined }, function(err) {
+              collection.insertOne({ a: 2, b: undefined }, function (err) {
                 test.equal(null, err);
 
-                collection.findOne({ a: 2 }, function(err, item) {
+                collection.findOne({ a: 2 }, function (err, item) {
                   test.equal(2, item.a);
                   test.ok(item.b === undefined);
 
-                  collection.insertMany([{ a: 3, b: undefined }], function(err) {
+                  collection.insertMany([{ a: 3, b: undefined }], function (err) {
                     test.equal(null, err);
 
-                    collection.findOne({ a: 3 }, function(err, item) {
+                    collection.findOne({ a: 3 }, function (err, item) {
                       test.equal(3, item.a);
                       test.ok(item.b === undefined);
                       client.close(done);
@@ -91,14 +91,14 @@ describe('Ignore Undefined', function() {
   it('Should correctly update document ignoring undefined field', {
     metadata: { requires: { topology: ['single'] } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
         poolSize: 1,
         ignoreUndefined: true
       });
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('shouldCorrectlyIgnoreUndefinedValue2');
         var id = new ObjectId();
@@ -107,9 +107,9 @@ describe('Ignore Undefined', function() {
           { _id: id, a: 1, b: undefined },
           { $set: { a: 1, b: undefined } },
           { upsert: true },
-          function(err) {
+          function (err) {
             test.equal(null, err);
-            collection.findOne({ _id: id }, function(err, item) {
+            collection.findOne({ _id: id }, function (err, item) {
               test.equal(1, item.a);
               test.ok(item.b === undefined);
               var id = new ObjectId();
@@ -118,9 +118,9 @@ describe('Ignore Undefined', function() {
                 { _id: id, a: 1, b: undefined },
                 { $set: { a: 1, b: undefined } },
                 { upsert: true },
-                function(err) {
+                function (err) {
                   test.equal(null, err);
-                  collection.findOne({ _id: id }, function(err, item) {
+                  collection.findOne({ _id: id }, function (err, item) {
                     test.equal(1, item.a);
                     test.ok(item.b === undefined);
                     var id = new ObjectId();
@@ -129,9 +129,9 @@ describe('Ignore Undefined', function() {
                       { _id: id, a: 1, b: undefined },
                       { $set: { a: 1, b: undefined } },
                       { upsert: true },
-                      function(err) {
+                      function (err) {
                         test.equal(null, err);
-                        collection.findOne({ _id: id }, function(err, item) {
+                        collection.findOne({ _id: id }, function (err, item) {
                           test.equal(1, item.a);
                           test.ok(item.b === undefined);
                           client.close(done);

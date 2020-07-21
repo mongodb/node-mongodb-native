@@ -15,7 +15,8 @@ import {
   ServerHeartbeatSucceededEvent,
   ServerHeartbeatFailedEvent
 } from './events';
-import { Server } from './server';
+
+import type { Server } from './server';
 
 const kServer = Symbol('server');
 const kMonitorId = Symbol('monitorId');

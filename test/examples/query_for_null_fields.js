@@ -3,15 +3,15 @@
 const setupDatabase = require('../functional/shared').setupDatabase;
 const expect = require('chai').expect;
 
-describe('examples(query-for-null-fields):', function() {
+describe('examples(query-for-null-fields):', function () {
   let client;
   let db;
 
-  before(async function() {
+  before(async function () {
     await setupDatabase(this.configuration);
   });
 
-  beforeEach(async function() {
+  beforeEach(async function () {
     client = await this.configuration.newClient().connect();
     db = client.db(this.configuration.db);
 
@@ -21,7 +21,7 @@ describe('examples(query-for-null-fields):', function() {
     // End Example 38
   });
 
-  afterEach(async function() {
+  afterEach(async function () {
     await client.close();
     client = undefined;
     db = undefined;
@@ -29,7 +29,7 @@ describe('examples(query-for-null-fields):', function() {
 
   it('Equality Filter', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function() {
+    test: async function () {
       // Start Example 39
       const cursor = db.collection('inventory').find({
         item: null
@@ -42,7 +42,7 @@ describe('examples(query-for-null-fields):', function() {
 
   it('Type Check', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function() {
+    test: async function () {
       // Start Example 40
       const cursor = db.collection('inventory').find({
         item: { $type: 10 }
@@ -55,7 +55,7 @@ describe('examples(query-for-null-fields):', function() {
 
   it('Existence Check', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function() {
+    test: async function () {
       // Start Example 41
       const cursor = db.collection('inventory').find({
         item: { $exists: false }

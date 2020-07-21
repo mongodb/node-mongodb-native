@@ -9,12 +9,12 @@ const Connection = core.Connection;
 const ReplSet = core.ReplSet;
 const ObjectId = core.BSON.ObjectId;
 
-var delay = function(timeout) {
+var delay = function (timeout) {
   return new Promise(resolve => setTimeout(() => resolve(), timeout));
 };
 
 let test = {};
-describe('ReplSet Monitoring (mocks)', function() {
+describe('ReplSet Monitoring (mocks)', function () {
   beforeEach(() => {
     test.spy = new ConnectionSpy();
     Connection.enableConnectionAccounting(test.spy);
@@ -37,7 +37,7 @@ describe('ReplSet Monitoring (mocks)', function() {
         }
       },
 
-      test: function(done) {
+      test: function (done) {
         // NOTE: skipped because we now force close connections in these situations
         var electionIds = [new ObjectId(), new ObjectId()];
         var currentIsMasterState = 0;
@@ -103,7 +103,7 @@ describe('ReplSet Monitoring (mocks)', function() {
         var leftPrimaries = {};
 
         // Boot the mock
-        co(function*() {
+        co(function* () {
           const primaryServer = yield mock.createServer(32000, 'localhost');
           const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
           const secondSecondaryServer = yield mock.createServer(32002, 'localhost');
@@ -160,7 +160,7 @@ describe('ReplSet Monitoring (mocks)', function() {
           });
 
           // Start dropping the packets
-          setTimeout(function() {
+          setTimeout(function () {
             stopRespondingPrimary = true;
             currentIsMasterState = 1;
           }, 500);
@@ -182,11 +182,11 @@ describe('ReplSet Monitoring (mocks)', function() {
           );
 
           // Add event listeners
-          server.on('connect', function(_server) {
+          server.on('connect', function (_server) {
             // Set up a write
             function schedule() {
-              setTimeout(function() {
-                _server.insert('test.test', [{ created: new Date() }], function(err, r) {
+              setTimeout(function () {
+                _server.insert('test.test', [{ created: new Date() }], function (err, r) {
                   // Did we switch servers
                   if (r && r.connection.port === 32001) {
                     expect(stopRespondingPrimary).to.be.true;
@@ -214,12 +214,12 @@ describe('ReplSet Monitoring (mocks)', function() {
           });
 
           server.on('error', done);
-          server.on('joined', function(type, _server) {
+          server.on('joined', function (type, _server) {
             if (type === 'primary') joinedPrimaries[_server.name] = 1;
             if (type === 'secondary') joinedSecondaries[_server.name] = 1;
           });
 
-          server.on('left', function(type, _server) {
+          server.on('left', function (type, _server) {
             if (type === 'primary') leftPrimaries[_server.name] = 1;
           });
 
@@ -237,7 +237,7 @@ describe('ReplSet Monitoring (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var electionIds = [new ObjectId(), new ObjectId()];
       var currentIsMasterState = 0;
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
@@ -296,7 +296,7 @@ describe('ReplSet Monitoring (mocks)', function() {
       ];
 
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const primaryServer = yield mock.createServer(32000, 'localhost');
         const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
         const secondSecondaryServer = yield mock.createServer(32002, 'localhost');
@@ -339,8 +339,8 @@ describe('ReplSet Monitoring (mocks)', function() {
         );
 
         // Add event listeners
-        server.on('connect', function(_server) {
-          setTimeout(function() {
+        server.on('connect', function (_server) {
+          setTimeout(function () {
             expect(_server.intervalIds.length).to.be.greaterThan(1);
 
             server.destroy();

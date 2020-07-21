@@ -5,7 +5,7 @@ const TestRunnerContext = require('../spec-runner').TestRunnerContext;
 const gatherTestSuites = require('../spec-runner').gatherTestSuites;
 const generateTopologyTests = require('../spec-runner').generateTopologyTests;
 
-describe('Client Side Encryption', function() {
+describe('Client Side Encryption', function () {
   // TODO: Replace this with using the filter once the filter works on describe blocks
   const skipTests =
     process.env.AWS_ACCESS_KEY_ID == null || process.env.AWS_SECRET_ACCESS_KEY == null;
@@ -26,7 +26,7 @@ describe('Client Side Encryption', function() {
   const testContext = new TestRunnerContext();
   const testSuites = gatherTestSuites(path.join(__dirname, '../../spec/client-side-encryption'));
   after(() => testContext.teardown());
-  before(function() {
+  before(function () {
     return testContext.setup(this.configuration);
   });
 

@@ -7,8 +7,8 @@ const { Topology } = require('../../../src/sdam/topology');
 const { Server } = require('../../../src/sdam/server');
 const { ServerDescription } = require('../../../src/sdam/server_description');
 
-describe('Topology (unit)', function() {
-  describe('client metadata', function() {
+describe('Topology (unit)', function () {
+  describe('client metadata', function () {
     let mockServer;
     before(() => mock.createServer().then(server => (mockServer = server)));
     after(() => mock.cleanup());
@@ -16,7 +16,7 @@ describe('Topology (unit)', function() {
     it('should correctly pass appname', {
       metadata: { requires: { topology: 'single' } },
 
-      test: function(done) {
+      test: function (done) {
         // Attempt to connect
         var server = new Topology(
           [{ host: this.configuration.host, port: this.configuration.port }],
@@ -30,7 +30,7 @@ describe('Topology (unit)', function() {
       }
     });
 
-    it('should report the correct platform in client metadata', function(done) {
+    it('should report the correct platform in client metadata', function (done) {
       const ismasters = [];
       mockServer.setMessageHandler(request => {
         const doc = request.document;
@@ -63,15 +63,15 @@ describe('Topology (unit)', function() {
     });
   });
 
-  describe('shouldCheckForSessionSupport', function() {
-    beforeEach(function() {
+  describe('shouldCheckForSessionSupport', function () {
+    beforeEach(function () {
       this.sinon = sinon.sandbox.create();
 
       // these are mocks we want across all tests
       this.sinon.stub(Server.prototype, 'requestCheck');
       this.sinon
         .stub(Topology.prototype, 'selectServer')
-        .callsFake(function(selector, options, callback) {
+        .callsFake(function (selector, options, callback) {
           setTimeout(() => {
             const server = Array.from(this.s.servers.values())[0];
             callback(null, server);
@@ -79,13 +79,13 @@ describe('Topology (unit)', function() {
         });
     });
 
-    afterEach(function() {
+    afterEach(function () {
       this.sinon.restore();
     });
 
-    it('should check for sessions if connected to a single server and has no known servers', function(done) {
+    it('should check for sessions if connected to a single server and has no known servers', function (done) {
       const topology = new Topology('someserver:27019');
-      this.sinon.stub(Server.prototype, 'connect').callsFake(function() {
+      this.sinon.stub(Server.prototype, 'connect').callsFake(function () {
         this.s.state = 'connected';
         this.emit('connect');
       });
@@ -96,9 +96,9 @@ describe('Topology (unit)', function() {
       });
     });
 
-    it('should not check for sessions if connected to a single server', function(done) {
+    it('should not check for sessions if connected to a single server', function (done) {
       const topology = new Topology('someserver:27019');
-      this.sinon.stub(Server.prototype, 'connect').callsFake(function() {
+      this.sinon.stub(Server.prototype, 'connect').callsFake(function () {
         this.s.state = 'connected';
         this.emit('connect');
 
@@ -116,9 +116,9 @@ describe('Topology (unit)', function() {
       });
     });
 
-    it('should check for sessions if there are no data-bearing nodes', function(done) {
+    it('should check for sessions if there are no data-bearing nodes', function (done) {
       const topology = new Topology('mongos:27019,mongos:27018,mongos:27017');
-      this.sinon.stub(Server.prototype, 'connect').callsFake(function() {
+      this.sinon.stub(Server.prototype, 'connect').callsFake(function () {
         this.s.state = 'connected';
         this.emit('connect');
 
@@ -137,12 +137,12 @@ describe('Topology (unit)', function() {
     });
   });
 
-  describe('black holes', function() {
+  describe('black holes', function () {
     let mockServer;
     beforeEach(() => mock.createServer().then(server => (mockServer = server)));
     afterEach(() => mock.cleanup());
 
-    it('should time out operations against servers that have been blackholed', function(done) {
+    it('should time out operations against servers that have been blackholed', function (done) {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
 
@@ -170,12 +170,12 @@ describe('Topology (unit)', function() {
     });
   });
 
-  describe('error handling', function() {
+  describe('error handling', function () {
     let mockServer;
     beforeEach(() => mock.createServer().then(server => (mockServer = server)));
     afterEach(() => mock.cleanup());
 
-    it('should set server to unknown and reset pool on `node is recovering` error', function(done) {
+    it('should set server to unknown and reset pool on `node is recovering` error', function (done) {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
         if (doc.ismaster) {
@@ -212,7 +212,7 @@ describe('Topology (unit)', function() {
       });
     });
 
-    it('should set server to unknown and NOT reset pool on stepdown errors', function(done) {
+    it('should set server to unknown and NOT reset pool on stepdown errors', function (done) {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
         if (doc.ismaster) {
@@ -249,7 +249,7 @@ describe('Topology (unit)', function() {
       });
     });
 
-    it('should set server to unknown on non-timeout network error', function(done) {
+    it('should set server to unknown on non-timeout network error', function (done) {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
         if (doc.ismaster) {

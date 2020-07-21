@@ -4,13 +4,13 @@ const expect = require('chai').expect;
 const sinon = require('sinon');
 const NativeTopology = require('../../src/topologies/native_topology');
 
-describe('URI', function() {
+describe('URI', function () {
   it('should correctly allow for w:0 overriding on the connect url', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { topology: 'single' } },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
 
       // Connect using the connection string
@@ -18,11 +18,11 @@ describe('URI', function() {
         'mongodb://localhost:27017/integration_tests?w=0'
       );
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         expect(err).to.not.exist;
         var db = client.db(self.configuration.db);
 
-        db.collection('mongoclient_test').update({ a: 1 }, { b: 1 }, { upsert: true }, function(
+        db.collection('mongoclient_test').update({ a: 1 }, { b: 1 }, { upsert: true }, function (
           err,
           result
         ) {
@@ -45,7 +45,7 @@ describe('URI', function() {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { topology: 'single' } },
 
-    test: function(done) {
+    test: function (done) {
       if (process.platform === 'win32') {
         return done();
       }
@@ -54,7 +54,7 @@ describe('URI', function() {
         'mongodb://%2Ftmp%2Fmongodb-27017.sock?safe=false'
       );
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         expect(err).to.not.exist;
         client.close(done);
       });
@@ -66,7 +66,7 @@ describe('URI', function() {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { topology: 'single' } },
 
-    test: function(done) {
+    test: function (done) {
       const client = this.configuration.newClient('mongodb://127.0.0.1:27017/?fsync=true');
       client.connect((err, client) => {
         var db = client.db(this.configuration.db);
@@ -81,20 +81,20 @@ describe('URI', function() {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { topology: 'single' } },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       const configuration = this.configuration;
       const client = configuration.newClient('mongodb://localhost:27017/integration_tests', {
         native_parser: true
       });
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         expect(err).to.not.exist;
         var user = 'u$ser',
           pass = '$specialch@rs';
         var db = client.db(self.configuration.db);
 
-        db.addUser(user, pass, function(err) {
+        db.addUser(user, pass, function (err) {
           expect(err).to.not.exist;
           var uri =
             'mongodb://' +
@@ -104,7 +104,7 @@ describe('URI', function() {
             '@localhost:27017/integration_tests';
 
           const aclient = configuration.newClient(uri, { native_parser: true });
-          aclient.connect(function(err, aclient) {
+          aclient.connect(function (err, aclient) {
             expect(err).to.not.exist;
 
             client.close(() => aclient.close(done));
@@ -116,7 +116,7 @@ describe('URI', function() {
 
   it('should correctly translate uri options using new parser', {
     metadata: { requires: { topology: 'replicaset' } },
-    test: function(done) {
+    test: function (done) {
       const config = this.configuration;
       const uri = `mongodb://${config.host}:${config.port}/${config.db}?replicaSet=${config.replicasetName}`;
 
@@ -133,7 +133,7 @@ describe('URI', function() {
 
   it('should generate valid credentials with X509 and the new parser', {
     metadata: { requires: { topology: 'single' } },
-    test: function(done) {
+    test: function (done) {
       function validateConnect(options /*, callback */) {
         expect(options).to.have.property('credentials');
         expect(options.credentials.mechanism).to.eql('x509');

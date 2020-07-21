@@ -9,7 +9,7 @@ chai.config.showDiff = true;
 chai.config.truncateThreshold = 0;
 chai.use(require('chai-subset'));
 
-describe('Client Side Encryption Functional', function() {
+describe('Client Side Encryption Functional', function () {
   const dataDbName = 'db';
   const dataCollName = 'coll';
   const keyVaultDbName = 'keyvault';
@@ -23,8 +23,8 @@ describe('Client Side Encryption Functional', function() {
     }
   };
 
-  describe('BSON Options', function() {
-    beforeEach(function() {
+  describe('BSON Options', function () {
+    beforeEach(function () {
       this.client = this.configuration.newClient();
 
       const noop = () => {};
@@ -87,7 +87,7 @@ describe('Client Side Encryption Functional', function() {
         });
     });
 
-    afterEach(function() {
+    afterEach(function () {
       return Promise.resolve()
         .then(() => this.encryptedClient && this.encryptedClient.close())
         .then(() => this.client.close());
@@ -120,7 +120,7 @@ describe('Client Side Encryption Functional', function() {
     testCases.forEach(bsonOptions => {
       const name = `should respect bson options ${JSON.stringify(bsonOptions)}`;
 
-      it(name, metadata, function() {
+      it(name, metadata, function () {
         const data = {
           a: 12,
           b: new BSON.Int32(12),

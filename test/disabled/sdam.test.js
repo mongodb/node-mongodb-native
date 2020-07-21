@@ -2,15 +2,15 @@
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 
-describe.skip('SDAM', function() {
-  before(function() {
+describe.skip('SDAM', function () {
+  before(function () {
     return setupDatabase(this.configuration);
   });
 
   it('Should correctly emit all Replicaset SDAM operations', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var operations = {
         serverDescriptionChanged: [],
@@ -34,16 +34,16 @@ describe.skip('SDAM', function() {
         'topologyDescriptionChanged',
         'topologyClosed'
       ];
-      events.forEach(function(e) {
-        client.on(e, function(result) {
+      events.forEach(function (e) {
+        client.on(e, function (result) {
           operations[e].push(result);
         });
       });
 
-      client.connect(function(err) {
+      client.connect(function (err) {
         test.equal(null, err);
 
-        client.close(true, function() {
+        client.close(true, function () {
           setTimeout(() => {
             for (var name in operations) {
               test.ok(operations[name].length > 0);
@@ -59,7 +59,7 @@ describe.skip('SDAM', function() {
   it('Should correctly emit all Mongos SDAM operations', {
     metadata: { requires: { topology: 'sharded' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var operations = {
         serverDescriptionChanged: [],
@@ -83,14 +83,14 @@ describe.skip('SDAM', function() {
         'topologyDescriptionChanged',
         'topologyClosed'
       ];
-      events.forEach(function(e) {
-        client.on(e, function(result) {
+      events.forEach(function (e) {
+        client.on(e, function (result) {
           operations[e].push(result);
         });
       });
 
-      client.on('fullsetup', function(topology) {
-        setTimeout(function() {
+      client.on('fullsetup', function (topology) {
+        setTimeout(function () {
           topology.close();
 
           for (var name in operations) {
@@ -101,7 +101,7 @@ describe.skip('SDAM', function() {
         }, 1000);
       });
 
-      client.connect(function(err) {
+      client.connect(function (err) {
         test.equal(null, err);
       });
     }
@@ -110,7 +110,7 @@ describe.skip('SDAM', function() {
   it('Should correctly emit all Server SDAM operations', {
     metadata: { requires: { topology: 'single' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var operations = {
         serverDescriptionChanged: [],
@@ -130,13 +130,13 @@ describe.skip('SDAM', function() {
         'topologyDescriptionChanged',
         'topologyClosed'
       ];
-      events.forEach(function(e) {
-        client.on(e, function(result) {
+      events.forEach(function (e) {
+        client.on(e, function (result) {
           operations[e].push(result);
         });
       });
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
         client.close(true);
 

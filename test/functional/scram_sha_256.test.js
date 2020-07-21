@@ -6,7 +6,7 @@ const { Connection } = require('../../src/cmap/connection');
 const { ScramSHA256 } = require('../../src/cmap/auth/scram');
 const { setupDatabase, withClient } = require('./shared');
 
-describe('SCRAM-SHA-256 auth', function() {
+describe('SCRAM-SHA-256 auth', function () {
   const test = {};
   const userMap = {
     sha1: {
@@ -37,12 +37,12 @@ describe('SCRAM-SHA-256 auth', function() {
 
   afterEach(() => test.sandbox.restore());
 
-  before(function() {
+  before(function () {
     test.sandbox = sinon.sandbox.create();
     return setupDatabase(this.configuration);
   });
 
-  before(function() {
+  before(function () {
     return withClient(this.configuration.newClient(), client => {
       test.oldDbName = this.configuration.db;
       this.configuration.db = 'admin';
@@ -59,7 +59,7 @@ describe('SCRAM-SHA-256 auth', function() {
     });
   });
 
-  after(function() {
+  after(function () {
     return withClient(this.configuration.newClient(), client => {
       const db = client.db(this.configuration.db);
       this.configuration.db = test.oldDbName;
@@ -77,7 +77,7 @@ describe('SCRAM-SHA-256 auth', function() {
     user.mechanisms.forEach(mechanism => {
       it(`should auth ${user.description} when explicitly specifying ${mechanism}`, {
         metadata: { requires: { mongodb: '>=3.7.3' } },
-        test: function() {
+        test: function () {
           const options = {
             auth: {
               user: user.username,
@@ -95,7 +95,7 @@ describe('SCRAM-SHA-256 auth', function() {
 
       it(`should auth ${user.description} when explicitly specifying ${mechanism} in url`, {
         metadata: { requires: { mongodb: '>=3.7.3' } },
-        test: function() {
+        test: function () {
           const username = encodeURIComponent(user.username);
           const password = encodeURIComponent(user.password);
 
@@ -116,7 +116,7 @@ describe('SCRAM-SHA-256 auth', function() {
 
     it(`should auth ${user.description} using mechanism negotiaton`, {
       metadata: { requires: { mongodb: '>=3.7.3' } },
-      test: function() {
+      test: function () {
         const options = {
           auth: {
             user: user.username,
@@ -133,7 +133,7 @@ describe('SCRAM-SHA-256 auth', function() {
 
     it(`should auth ${user.description} using mechanism negotiaton and url`, {
       metadata: { requires: { mongodb: '>=3.7.3' } },
-      test: function() {
+      test: function () {
         const username = encodeURIComponent(user.username);
         const password = encodeURIComponent(user.password);
         const url = makeConnectionString(this.configuration, username, password);
@@ -151,7 +151,7 @@ describe('SCRAM-SHA-256 auth', function() {
   // drivers should verify that negotation selects SCRAM-SHA-256..
   it('should select SCRAM-SHA-256 for a user that supports both auth mechanisms', {
     metadata: { requires: { mongodb: '>=3.7.3' } },
-    test: function() {
+    test: function () {
       const options = {
         auth: {
           user: userMap.both.username,
@@ -170,7 +170,7 @@ describe('SCRAM-SHA-256 auth', function() {
 
   it('should shorten SCRAM conversations if the server supports it', {
     metadata: { requires: { mongodb: '>=4.4', topology: ['single'] } },
-    test: function() {
+    test: function () {
       const options = {
         auth: {
           user: userMap.both.username,
@@ -180,7 +180,7 @@ describe('SCRAM-SHA-256 auth', function() {
       };
 
       let runCommandSpy;
-      test.sandbox.stub(ScramSHA256.prototype, 'auth').callsFake(function(authContext, callback) {
+      test.sandbox.stub(ScramSHA256.prototype, 'auth').callsFake(function (authContext, callback) {
         const connection = authContext.connection;
         const auth = ScramSHA256.prototype.auth.wrappedMethod;
         runCommandSpy = test.sandbox.spy(connection, 'command');
@@ -202,7 +202,7 @@ describe('SCRAM-SHA-256 auth', function() {
   // For test users that support only one mechanism, verify that explictly specifying the other mechanism fails.
   it('should fail to connect if incorrect auth mechanism is explicitly specified', {
     metadata: { requires: { mongodb: '>=3.7.3' } },
-    test: function() {
+    test: function () {
       const options = {
         auth: {
           user: userMap.sha256.username,
@@ -226,7 +226,7 @@ describe('SCRAM-SHA-256 auth', function() {
   // authentication errors, not as a network or database command error.)
   it('should fail for a nonexistent username with same error type as bad password', {
     metadata: { requires: { mongodb: '>=3.7.3' } },
-    test: function() {
+    test: function () {
       const noUsernameOptions = {
         auth: {
           user: 'roth',
@@ -256,7 +256,7 @@ describe('SCRAM-SHA-256 auth', function() {
 
   it('should send speculativeAuthenticate on initial handshake on MongoDB 4.4+', {
     metadata: { requires: { mongodb: '>=4.4', topology: ['single'] } },
-    test: function() {
+    test: function () {
       const options = {
         auth: {
           user: userMap.both.username,

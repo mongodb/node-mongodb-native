@@ -18,10 +18,7 @@ class FindOneOperation extends OperationBase {
     const options = this.options;
 
     try {
-      const cursor = coll
-        .find(query, options)
-        .limit(-1)
-        .batchSize(1);
+      const cursor = coll.find(query, options).limit(-1).batchSize(1);
 
       // Return the item
       cursor.next((err?: any, item?: any) => {

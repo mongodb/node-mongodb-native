@@ -407,10 +407,10 @@ class Server extends EventEmitter {
 }
 
 Object.defineProperty(Server.prototype, 'clusterTime', {
-  get: function() {
+  get() {
     return this.s.topology.clusterTime;
   },
-  set: function(clusterTime: any) {
+  set(clusterTime: any) {
     this.s.topology.clusterTime = clusterTime;
   }
 });

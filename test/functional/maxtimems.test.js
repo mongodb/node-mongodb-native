@@ -2,8 +2,8 @@
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 
-describe('Unicode', function() {
-  before(function() {
+describe('Unicode', function () {
+  before(function () {
     return setupDatabase(this.configuration);
   });
 
@@ -18,10 +18,10 @@ describe('Unicode', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var col = db.collection('max_time_ms');
 
@@ -29,14 +29,14 @@ describe('Unicode', function() {
         var docs_1 = [{ agg_pipe: 1 }];
 
         // Simple insert
-        col.insert(docs_1, { w: 1 }, function(err) {
+        col.insert(docs_1, { w: 1 }, function (err) {
           test.equal(null, err);
 
           // Execute a find command
           col
             .find({ $where: 'sleep(100) || true' })
             .maxTimeMS(50)
-            .count(function(err) {
+            .count(function (err) {
               test.ok(err != null);
               client.close(done);
             });
@@ -56,10 +56,10 @@ describe('Unicode', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var col = db.collection('max_time_ms_2');
 
@@ -67,14 +67,14 @@ describe('Unicode', function() {
         var docs_1 = [{ agg_pipe: 1 }];
 
         // Simple insert
-        col.insert(docs_1, { w: 1 }, function(err) {
+        col.insert(docs_1, { w: 1 }, function (err) {
           test.equal(null, err);
 
           // Execute a find command
           col
             .find({ $where: 'sleep(100) || true' })
             .maxTimeMS(50)
-            .toArray(function(err) {
+            .toArray(function (err) {
               test.ok(err != null);
               client.close(done);
             });
@@ -93,10 +93,10 @@ describe('Unicode', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var col = db.collection('max_time_ms_5');
 
@@ -104,24 +104,24 @@ describe('Unicode', function() {
         var docs_1 = [{ agg_pipe: 10 }];
 
         // Simple insert
-        col.insert(docs_1, { w: 1 }, function(err) {
+        col.insert(docs_1, { w: 1 }, function (err) {
           test.equal(null, err);
 
           db.admin().command(
             { configureFailPoint: 'maxTimeAlwaysTimeOut', mode: 'alwaysOn' },
-            function(err, result) {
+            function (err, result) {
               test.equal(null, err);
               test.equal(1, result.ok);
 
               col
                 .find({})
                 .maxTimeMS(10)
-                .toArray(function(err) {
+                .toArray(function (err) {
                   test.ok(err != null);
 
                   db.admin().command(
                     { configureFailPoint: 'maxTimeAlwaysTimeOut', mode: 'off' },
-                    function(err, result) {
+                    function (err, result) {
                       test.equal(null, err);
                       test.equal(1, result.ok);
                       client.close(done);

@@ -3,20 +3,20 @@
 
 const setupDatabase = require('../functional/shared').setupDatabase;
 
-describe('examples.aggregaton:', function() {
+describe('examples.aggregaton:', function () {
   let client;
   let collection;
 
-  before(async function() {
+  before(async function () {
     await setupDatabase(this.configuration);
   });
 
-  beforeEach(async function() {
+  beforeEach(async function () {
     client = await this.configuration.newClient().connect();
     collection = client.db(this.configuration.db).collection('aggregateExample');
   });
 
-  afterEach(async function() {
+  afterEach(async function () {
     await client.close();
     client = undefined;
     collection = undefined;
@@ -24,7 +24,7 @@ describe('examples.aggregaton:', function() {
 
   it('supports simple aggregation', {
     metadata: { requires: { mongodb: '>=2.8.0', topology: ['single'] } },
-    test: async function() {
+    test: async function () {
       // Start aggregate example 1
       const cursor = collection.aggregate([
         { $match: { 'items.fruit': 'banana' } },
@@ -36,7 +36,7 @@ describe('examples.aggregaton:', function() {
 
   it('supports $match, $group, $project, $unwind, $sum, $sort, $dayOfWeek', {
     metadata: { requires: { mongodb: '>=2.8.0', topology: ['single'] } },
-    test: async function() {
+    test: async function () {
       // Start aggregate example 2
       const cursor = collection.aggregate([
         {
@@ -70,7 +70,7 @@ describe('examples.aggregaton:', function() {
 
   it('supports $unwind, $group, $sum, $dayOfWeek, $multiply, $project, $cond', {
     metadata: { requires: { mongodb: '>=2.8.0', topology: ['single'] } },
-    test: async function() {
+    test: async function () {
       // Start aggregate example 3
       const cursor = collection.aggregate([
         {
@@ -100,7 +100,7 @@ describe('examples.aggregaton:', function() {
 
   it('supports $lookup, $filter, $match', {
     metadata: { requires: { mongodb: '>=3.6.0', topology: ['single'] } },
-    test: async function() {
+    test: async function () {
       // Start aggregate example 4
       const cursor = collection.aggregate([
         {

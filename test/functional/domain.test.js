@@ -2,8 +2,8 @@
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 
-describe('Domains', function() {
-  before(function() {
+describe('Domains', function () {
+  before(function () {
     return setupDatabase(this.configuration);
   });
 
@@ -12,7 +12,7 @@ describe('Domains', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var Domain = require('domain');
       var domainInstance = Domain.create();
       var configuration = this.configuration;
@@ -20,13 +20,13 @@ describe('Domains', function() {
         poolSize: 1,
         domainsEnabled: true
       });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         test.ok(!err);
         var collection = db.collection('test');
 
-        domainInstance.run(function() {
-          collection.count({}, function(err) {
+        domainInstance.run(function () {
+          collection.count({}, function (err) {
             test.ok(!err);
             test.ok(domainInstance === process.domain);
             domainInstance.exit();
@@ -42,18 +42,18 @@ describe('Domains', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var Domain = require('domain');
       var domainInstance = Domain.create();
 
       const client = configuration.newClient({}, { domainsEnabled: true });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.ok(!err);
         var db = client.db(configuration.db);
         var collection = db.collection('test');
-        domainInstance.run(function() {
-          collection.count({}, function(err) {
+        domainInstance.run(function () {
+          collection.count({}, function (err) {
             test.ok(!err);
             test.ok(domainInstance === process.domain);
             domainInstance.exit();
@@ -69,7 +69,7 @@ describe('Domains', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var Domain = require('domain');
       var domainInstance = Domain.create();
       var configuration = this.configuration;
@@ -78,12 +78,12 @@ describe('Domains', function() {
         { poolSize: 1, auto_reconnect: true, domainsEnabled: true }
       );
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.ok(!err);
         var db = client.db(configuration.db);
         var collection = db.collection('test');
-        domainInstance.run(function() {
-          collection.insert({ field: 123 }, function(err) {
+        domainInstance.run(function () {
+          collection.insert({ field: 123 }, function (err) {
             test.ok(!err);
             test.ok(domainInstance === process.domain);
             domainInstance.exit();

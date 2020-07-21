@@ -1017,7 +1017,7 @@ class Cursor extends CoreCursor {
     if (typeof streamOptions.transform === 'function') {
       const stream = new Transform({
         objectMode: true,
-        transform: function(chunk: any, encoding: any, callback: Function) {
+        transform(chunk: any, encoding: any, callback: Function) {
           this.push(streamOptions.transform(chunk));
           callback();
         }

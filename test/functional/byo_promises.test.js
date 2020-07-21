@@ -5,8 +5,8 @@ var expect = require('chai').expect;
 class CustomPromise extends Promise {}
 CustomPromise.prototype.isCustomMongo = true;
 
-describe('Optional PromiseLibrary / maybePromise', function() {
-  it('should correctly implement custom dependency-less promise', function(done) {
+describe('Optional PromiseLibrary / maybePromise', function () {
+  it('should correctly implement custom dependency-less promise', function (done) {
     const getCustomPromise = v => new CustomPromise(resolve => resolve(v));
     const getNativePromise = v => new Promise(resolve => resolve(v));
     expect(getNativePromise()).to.not.have.property('isCustomMongo');
@@ -16,7 +16,7 @@ describe('Optional PromiseLibrary / maybePromise', function() {
     done();
   });
 
-  it('should have cursor return native promise', function(done) {
+  it('should have cursor return native promise', function (done) {
     const configuration = this.configuration;
     const client = this.configuration.newClient({ w: 1 }, { poolSize: 1 });
     client.connect((err, client) => {
@@ -31,7 +31,7 @@ describe('Optional PromiseLibrary / maybePromise', function() {
     });
   });
 
-  it('should have cursor return custom promise from new client options', function(done) {
+  it('should have cursor return custom promise from new client options', function (done) {
     const configuration = this.configuration;
     const client = this.configuration.newClient(
       { w: 1 },

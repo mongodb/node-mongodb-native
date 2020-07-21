@@ -11,7 +11,7 @@ const ReadPreference = core.ReadPreference;
 const Mongos = core.Mongos;
 
 const test = {};
-describe('Sessions (Mongos)', function() {
+describe('Sessions (Mongos)', function () {
   afterEach(() => mock.cleanup());
   beforeEach(() => {
     return mock.createServer().then(mockServer => {
@@ -21,7 +21,7 @@ describe('Sessions (Mongos)', function() {
 
   it('should recognize and set `clusterTime` on the topology', {
     metadata: { requires: { topology: 'single' } },
-    test: function(done) {
+    test: function (done) {
       const clusterTime = genClusterTime(Date.now());
       test.server.setMessageHandler(request => {
         request.reply(
@@ -52,7 +52,7 @@ describe('Sessions (Mongos)', function() {
 
   it('should report the deployment `clusterTime` for all servers in the topology', {
     metadata: { requires: { topology: 'single' } },
-    test: function(done) {
+    test: function (done) {
       const clusterTime = genClusterTime(Date.now());
       test.server.setMessageHandler(request => {
         request.reply(
@@ -86,7 +86,7 @@ describe('Sessions (Mongos)', function() {
 
   it('should track the highest `$clusterTime` seen', {
     metadata: { requires: { topology: 'single' } },
-    test: function(done) {
+    test: function (done) {
       const clusterTime = genClusterTime(Date.now()),
         futureClusterTime = genClusterTime(Date.now() + 10 * 60 * 1000);
 
@@ -115,7 +115,7 @@ describe('Sessions (Mongos)', function() {
         expect(mongos.clusterTime).to.exist;
         expect(mongos.clusterTime).to.eql(clusterTime);
 
-        mongos.insert('test.test', [{ created: new Date() }], function(err) {
+        mongos.insert('test.test', [{ created: new Date() }], function (err) {
           expect(err).to.not.exist;
           expect(mongos.clusterTime).to.exist;
           expect(mongos.clusterTime).to.not.eql(clusterTime);
@@ -132,7 +132,7 @@ describe('Sessions (Mongos)', function() {
 
   it('should default `logicalSessionTimeoutMinutes` to `null`', {
     metadata: { requires: { topology: 'single' } },
-    test: function() {
+    test: function () {
       const mongos = new Mongos([test.server.address()]);
       expect(mongos.logicalSessionTimeoutMinutes).to.equal(null);
     }
@@ -140,7 +140,7 @@ describe('Sessions (Mongos)', function() {
 
   it('should track `logicalSessionTimeoutMinutes`', {
     metadata: { requires: { topology: 'single' } },
-    test: function(done) {
+    test: function (done) {
       test.server.setMessageHandler(request => {
         request.reply(
           Object.assign({}, mock.DEFAULT_ISMASTER, {
@@ -172,7 +172,7 @@ describe('Sessions (Mongos)', function() {
     'should ensure that lsid is received within the query object of a find request when read preference is not primary',
     {
       metadata: { requires: { topology: 'single' } },
-      test: function(done) {
+      test: function (done) {
         const clusterTime = genClusterTime(Date.now());
         test.server.setMessageHandler(request => {
           const doc = request.document;

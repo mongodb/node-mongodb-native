@@ -9,7 +9,7 @@ const { MongoCredentials } = require('../../../src/cmap/auth/mongo_credentials')
 const { genClusterTime } = require('./common');
 const { MongoNetworkError } = require('../../../src/error');
 
-describe('Connect Tests', function() {
+describe('Connect Tests', function () {
   const test = {};
   beforeEach(() => {
     return mock.createServer().then(mockServer => {
@@ -28,7 +28,7 @@ describe('Connect Tests', function() {
   });
 
   afterEach(() => mock.cleanup());
-  it('should auth against a non-arbiter', function(done) {
+  it('should auth against a non-arbiter', function (done) {
     const whatHappened = {};
 
     test.server.setMessageHandler(request => {
@@ -60,7 +60,7 @@ describe('Connect Tests', function() {
     });
   });
 
-  it('should not auth against an arbiter', function(done) {
+  it('should not auth against an arbiter', function (done) {
     const whatHappened = {};
     test.server.setMessageHandler(request => {
       const doc = request.document;
@@ -91,14 +91,14 @@ describe('Connect Tests', function() {
     });
   });
 
-  it('should emit `MongoNetworkError` for network errors', function(done) {
+  it('should emit `MongoNetworkError` for network errors', function (done) {
     connect({ host: 'non-existent', port: 27018 }, err => {
       expect(err).to.be.instanceOf(MongoNetworkError);
       done();
     });
   });
 
-  it('should allow a cancellaton token', function(done) {
+  it('should allow a cancellaton token', function (done) {
     const cancellationToken = new EventEmitter();
     setTimeout(() => cancellationToken.emit('cancel'), 500);
     // set no response handler for mock server, effecively blackhole requests
