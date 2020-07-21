@@ -3,21 +3,21 @@
 const setupDatabase = require('../functional/shared').setupDatabase;
 const expect = require('chai').expect;
 
-describe('examples(causal-consistency):', function() {
+describe('examples(causal-consistency):', function () {
   let client;
   let collection;
   let session;
 
-  before(async function() {
+  before(async function () {
     await setupDatabase(this.configuration);
   });
 
-  beforeEach(async function() {
+  beforeEach(async function () {
     client = await this.configuration.newClient().connect();
     collection = client.db(this.configuration.db).collection('arrayFilterUpdateExample');
   });
 
-  afterEach(async function() {
+  afterEach(async function () {
     if (session) {
       await session.endSession();
       session = undefined;
@@ -34,7 +34,7 @@ describe('examples(causal-consistency):', function() {
       sessions: { skipLeakTests: true }
     },
 
-    test: async function() {
+    test: async function () {
       const session = client.startSession({ causalConsistency: true });
 
       collection.insertOne({ darmok: 'jalad' }, { session });

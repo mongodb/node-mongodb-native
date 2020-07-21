@@ -169,11 +169,11 @@ function generateMatchAndDiff(expected, actual, metadata) {
 }
 
 function matchMongoSpec(chai, utils) {
-  chai.Assertion.addMethod('withSessionData', function(sessionData) {
+  chai.Assertion.addMethod('withSessionData', function (sessionData) {
     utils.flag(this, 'testRunnerSessionData', sessionData);
   });
 
-  chai.Assertion.addMethod('matchMongoSpec', function(expected) {
+  chai.Assertion.addMethod('matchMongoSpec', function (expected) {
     const actual = utils.flag(this, 'object');
 
     const sessionData = utils.flag(this, 'testRunnerSessionData');
@@ -191,7 +191,7 @@ function matchMongoSpec(chai, utils) {
     );
   });
 
-  chai.assert.matchMongoSpec = function(val, exp, msg) {
+  chai.assert.matchMongoSpec = function (val, exp, msg) {
     new chai.Assertion(val, msg).to.matchMongoSpec(exp);
   };
 }

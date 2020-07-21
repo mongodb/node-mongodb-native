@@ -4,8 +4,8 @@ var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 const expect = require('chai').expect;
 
-describe('Find and Modify', function() {
-  before(function() {
+describe('Find and Modify', function () {
+  before(function () {
     return setupDatabase(this.configuration);
   });
 
@@ -16,31 +16,31 @@ describe('Find and Modify', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var started = [];
       var succeeded = [];
 
-      var listener = require('../../src').instrument(function(err) {
+      var listener = require('../../src').instrument(function (err) {
         test.equal(null, err);
       });
 
-      listener.on('started', function(event) {
+      listener.on('started', function (event) {
         if (event.commandName === 'findAndModify') started.push(event);
       });
 
-      listener.on('succeeded', function(event) {
+      listener.on('succeeded', function (event) {
         if (event.commandName === 'findAndModify') succeeded.push(event);
       });
 
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         test.equal(null, err);
 
         var collection = db.collection('findAndModifyTEST');
         // Execute findOneAndUpdate
-        collection.findOneAndUpdate({}, { $set: { a: 1 } }, { fsync: 1 }, function(err) {
+        collection.findOneAndUpdate({}, { $set: { a: 1 } }, { fsync: 1 }, function (err) {
           test.equal(null, err);
           test.deepEqual({ fsync: 1 }, started[0].command.writeConcern);
 
@@ -49,7 +49,7 @@ describe('Find and Modify', function() {
           succeeded = [];
 
           // Execute findOneAndReplace
-          collection.findOneAndReplace({}, { b: 1 }, { fsync: 1 }, function(err) {
+          collection.findOneAndReplace({}, { b: 1 }, { fsync: 1 }, function (err) {
             test.equal(null, err);
             test.deepEqual({ fsync: 1 }, started[0].command.writeConcern);
 
@@ -58,7 +58,7 @@ describe('Find and Modify', function() {
             succeeded = [];
 
             // Execute findOneAndReplace
-            collection.findOneAndDelete({}, { fsync: 1 }, function(err) {
+            collection.findOneAndDelete({}, { fsync: 1 }, function (err) {
               test.equal(null, err);
               test.deepEqual({ fsync: 1 }, started[0].command.writeConcern);
 
@@ -78,31 +78,31 @@ describe('Find and Modify', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var started = [];
       var succeeded = [];
 
-      var listener = require('../../src').instrument(function(err) {
+      var listener = require('../../src').instrument(function (err) {
         test.equal(null, err);
       });
 
-      listener.on('started', function(event) {
+      listener.on('started', function (event) {
         if (event.commandName === 'findAndModify') started.push(event);
       });
 
-      listener.on('succeeded', function(event) {
+      listener.on('succeeded', function (event) {
         if (event.commandName === 'findAndModify') succeeded.push(event);
       });
 
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         test.equal(null, err);
 
         var collection = db.collection('findAndModifyTEST', { fsync: 1 });
         // Execute findOneAndUpdate
-        collection.findOneAndUpdate({}, { $set: { a: 1 } }, function(err) {
+        collection.findOneAndUpdate({}, { $set: { a: 1 } }, function (err) {
           test.equal(null, err);
           test.deepEqual({ fsync: 1 }, started[0].command.writeConcern);
 
@@ -111,7 +111,7 @@ describe('Find and Modify', function() {
           succeeded = [];
 
           // Execute findOneAndReplace
-          collection.findOneAndReplace({}, { b: 1 }, function(err) {
+          collection.findOneAndReplace({}, { b: 1 }, function (err) {
             test.equal(null, err);
             test.deepEqual({ fsync: 1 }, started[0].command.writeConcern);
 
@@ -120,7 +120,7 @@ describe('Find and Modify', function() {
             succeeded = [];
 
             // Execute findOneAndReplace
-            collection.findOneAndDelete({}, function(err) {
+            collection.findOneAndDelete({}, function (err) {
               test.equal(null, err);
               test.deepEqual({ fsync: 1 }, started[0].command.writeConcern);
 
@@ -140,20 +140,20 @@ describe('Find and Modify', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var started = [];
       var succeeded = [];
 
-      var listener = require('../../src').instrument(function(err) {
+      var listener = require('../../src').instrument(function (err) {
         test.equal(null, err);
       });
 
-      listener.on('started', function(event) {
+      listener.on('started', function (event) {
         if (event.commandName === 'findAndModify') started.push(event);
       });
 
-      listener.on('succeeded', function(event) {
+      listener.on('succeeded', function (event) {
         if (event.commandName === 'findAndModify') succeeded.push(event);
       });
 
@@ -162,12 +162,12 @@ describe('Find and Modify', function() {
 
       // Establish connection to db
       const client = configuration.newClient(url, { sslValidate: false });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
         var db = client.db(configuration.db);
         var collection = db.collection('findAndModifyTEST');
         // Execute findOneAndUpdate
-        collection.findOneAndUpdate({}, { $set: { a: 1 } }, function(err) {
+        collection.findOneAndUpdate({}, { $set: { a: 1 } }, function (err) {
           test.equal(null, err);
           test.deepEqual({ fsync: true }, started[0].command.writeConcern);
 
@@ -176,7 +176,7 @@ describe('Find and Modify', function() {
           succeeded = [];
 
           // Execute findOneAndReplace
-          collection.findOneAndReplace({}, { b: 1 }, function(err) {
+          collection.findOneAndReplace({}, { b: 1 }, function (err) {
             test.equal(null, err);
             test.deepEqual({ fsync: true }, started[0].command.writeConcern);
 
@@ -185,7 +185,7 @@ describe('Find and Modify', function() {
             succeeded = [];
 
             // Execute findOneAndReplace
-            collection.findOneAndDelete({}, function(err) {
+            collection.findOneAndDelete({}, function (err) {
               test.equal(null, err);
               test.deepEqual({ fsync: true }, started[0].command.writeConcern);
 
@@ -205,7 +205,7 @@ describe('Find and Modify', function() {
       requires: { topology: 'replicaset' }
     },
 
-    test: function(done) {
+    test: function (done) {
       const configuration = this.configuration;
       const client = configuration.newClient({ readPreference: 'secondary' }, { poolSize: 1 });
       client.connect((err, client) => {

@@ -3,15 +3,15 @@
 const setupDatabase = require('../functional/shared').setupDatabase;
 const expect = require('chai').expect;
 
-describe('examples(query-array-of-documents):', function() {
+describe('examples(query-array-of-documents):', function () {
   let client;
   let db;
 
-  before(async function() {
+  before(async function () {
     await setupDatabase(this.configuration);
   });
 
-  beforeEach(async function() {
+  beforeEach(async function () {
     client = await this.configuration.newClient().connect();
     db = client.db(this.configuration.db);
 
@@ -54,7 +54,7 @@ describe('examples(query-array-of-documents):', function() {
     // End Example 29
   });
 
-  afterEach(async function() {
+  afterEach(async function () {
     await client.close();
     client = undefined;
     db = undefined;
@@ -62,7 +62,7 @@ describe('examples(query-array-of-documents):', function() {
 
   it('Query for a Document Nested in an Array', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function() {
+    test: async function () {
       // Start Example 30
       const cursor = db.collection('inventory').find({
         instock: { warehouse: 'A', qty: 5 }
@@ -75,7 +75,7 @@ describe('examples(query-array-of-documents):', function() {
 
   it('Query for a Document Nested in an Array - document order', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function() {
+    test: async function () {
       // Start Example 31
       const cursor = db.collection('inventory').find({
         instock: { qty: 5, warehouse: 'A' }
@@ -88,7 +88,7 @@ describe('examples(query-array-of-documents):', function() {
 
   it('Use the Array Index to Query for a Field in the Embedded Document', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function() {
+    test: async function () {
       // Start Example 32
       const cursor = db.collection('inventory').find({
         'instock.0.qty': { $lte: 20 }
@@ -101,7 +101,7 @@ describe('examples(query-array-of-documents):', function() {
 
   it('Specify a Query Condition on a Field Embedded in an Array of Documents', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function() {
+    test: async function () {
       // Start Example 33
       const cursor = db.collection('inventory').find({
         'instock.qty': { $lte: 20 }
@@ -114,7 +114,7 @@ describe('examples(query-array-of-documents):', function() {
 
   it('A Single Nested Document Meets Multiple Query Conditions on Nested Fields', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function() {
+    test: async function () {
       // Start Example 34
       const cursor = db.collection('inventory').find({
         instock: { $elemMatch: { qty: 5, warehouse: 'A' } }
@@ -127,7 +127,7 @@ describe('examples(query-array-of-documents):', function() {
 
   it('A Single Nested Document Meets Multiple Query Conditions on Nested Fields: operators', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function() {
+    test: async function () {
       // Start Example 35
       const cursor = db.collection('inventory').find({
         instock: { $elemMatch: { qty: { $gt: 10, $lte: 20 } } }
@@ -140,7 +140,7 @@ describe('examples(query-array-of-documents):', function() {
 
   it('Combination of Elements Satisfies the Criteria', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function() {
+    test: async function () {
       // Start Example 36
       const cursor = db.collection('inventory').find({
         'instock.qty': { $gt: 10, $lte: 20 }
@@ -153,7 +153,7 @@ describe('examples(query-array-of-documents):', function() {
 
   it('Combination of Elements Satisfies the Criteria 2', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function() {
+    test: async function () {
       // Start Example 37
       const cursor = db.collection('inventory').find({
         'instock.qty': 5,

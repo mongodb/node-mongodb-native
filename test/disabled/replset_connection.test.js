@@ -3,16 +3,16 @@ var f = require('util').format;
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 
-var restartAndDone = function(configuration, done) {
+var restartAndDone = function (configuration, done) {
   var CoreServer = configuration.require.CoreServer,
     CoreConnection = configuration.require.CoreConnection;
 
-  setTimeout(function() {
+  setTimeout(function () {
     // Connection account tests
     CoreServer.disableServerAccounting();
     CoreConnection.disableConnectionAccounting();
 
-    configuration.manager.restart().then(function() {
+    configuration.manager.restart().then(function () {
       done();
     });
   }, 200);
@@ -20,10 +20,10 @@ var restartAndDone = function(configuration, done) {
 
 // NOTE: skipped for dubious benefit over SDAM unit tests, as well as the disruptive nature
 //       of starting and stopping the topology. Look into coverage benefits in the future.
-describe.skip('ReplSet (Connection)', function() {
-  before(function() {
+describe.skip('ReplSet (Connection)', function () {
+  before(function () {
     var configuration = this.configuration;
-    return setupDatabase(configuration).then(function() {
+    return setupDatabase(configuration).then(function () {
       return configuration.manager.restart();
     });
   });
@@ -31,7 +31,7 @@ describe.skip('ReplSet (Connection)', function() {
   it('Should throw error due to mongos connection usage', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var ReplSet = configuration.require.ReplSet,
         Server = configuration.require.Server,
@@ -55,7 +55,7 @@ describe.skip('ReplSet (Connection)', function() {
   it('Should correctly handle error when no server up in replicaset', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var CoreServer = configuration.require.CoreServer,
         CoreConnection = configuration.require.CoreConnection;
@@ -68,10 +68,10 @@ describe.skip('ReplSet (Connection)', function() {
         'mongodb://localhost:28390,localhost:28391,localhost:28392/test?replicaSet=rs',
         { w: 0 }
       );
-      client.connect(function(err) {
+      client.connect(function (err) {
         test.ok(err != null);
 
-        setTimeout(function() {
+        setTimeout(function () {
           // Connection account tests
           test.equal(0, Object.keys(CoreConnection.connections()).length);
           test.equal(0, Object.keys(CoreServer.servers()).length);
@@ -87,24 +87,24 @@ describe.skip('ReplSet (Connection)', function() {
   it('Should correctly connect with default replicaset', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var CoreServer = configuration.require.CoreServer,
         CoreConnection = configuration.require.CoreConnection;
 
       // Replset start port
-      configuration.manager.secondaries().then(function(managers) {
-        managers[0].stop().then(function() {
+      configuration.manager.secondaries().then(function (managers) {
+        managers[0].stop().then(function () {
           // Accounting tests
           CoreServer.enableServerAccounting();
           CoreConnection.enableConnectionAccounting();
 
           const client = configuration.newClient({}, { w: 0 });
-          client.connect(function(err, client) {
+          client.connect(function (err, client) {
             test.equal(null, err);
             client.close();
 
-            setTimeout(function() {
+            setTimeout(function () {
               restartAndDone(configuration, done);
             }, 1000);
           });
@@ -116,20 +116,20 @@ describe.skip('ReplSet (Connection)', function() {
   it('Should correctly connect with default replicaset and no setName specified', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var CoreServer = configuration.require.CoreServer,
         CoreConnection = configuration.require.CoreConnection;
 
       // Replset start port
-      configuration.manager.secondaries().then(function(managers) {
-        managers[0].stop().then(function() {
+      configuration.manager.secondaries().then(function (managers) {
+        managers[0].stop().then(function () {
           // Accounting tests
           CoreServer.enableServerAccounting();
           CoreConnection.enableConnectionAccounting();
 
           const client = configuration.newClient({}, { w: 0 });
-          client.connect(function(err, client) {
+          client.connect(function (err, client) {
             test.equal(null, err);
             client.close();
 
@@ -143,7 +143,7 @@ describe.skip('ReplSet (Connection)', function() {
   it('Should correctly connect with default replicaset and socket options set', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var CoreServer = configuration.require.CoreServer,
         CoreConnection = configuration.require.CoreConnection;
@@ -156,7 +156,7 @@ describe.skip('ReplSet (Connection)', function() {
         { w: 0, keepAlive: true, keepAliveInitialDelay: 100 }
       );
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
         // Get a connection
         var connection = client.topology.connections()[0];
@@ -171,7 +171,7 @@ describe.skip('ReplSet (Connection)', function() {
   it('Should emit close no callback', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var CoreServer = configuration.require.CoreServer,
         CoreConnection = configuration.require.CoreConnection;
@@ -181,17 +181,17 @@ describe.skip('ReplSet (Connection)', function() {
       CoreConnection.enableConnectionAccounting();
 
       const client = configuration.newClient({}, { w: 0 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
         var dbCloseCount = 0;
-        client.on('close', function() {
+        client.on('close', function () {
           ++dbCloseCount;
         });
 
         // Force a close on a socket
         client.close();
 
-        setTimeout(function() {
+        setTimeout(function () {
           // Connection account tests
           test.equal(0, Object.keys(CoreConnection.connections()).length);
           test.equal(0, Object.keys(CoreServer.servers()).length);
@@ -208,7 +208,7 @@ describe.skip('ReplSet (Connection)', function() {
   it('Should emit close with callback', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var CoreServer = configuration.require.CoreServer,
         CoreConnection = configuration.require.CoreConnection;
@@ -218,16 +218,16 @@ describe.skip('ReplSet (Connection)', function() {
       CoreConnection.enableConnectionAccounting();
 
       const client = configuration.newClient({}, { w: 0 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
         var dbCloseCount = 0;
-        client.on('close', function() {
+        client.on('close', function () {
           ++dbCloseCount;
         });
 
-        client.close(function() {
+        client.close(function () {
           // Let all events fire.
-          setTimeout(function() {
+          setTimeout(function () {
             // Connection account tests
             test.equal(0, Object.keys(CoreConnection.connections()).length);
             test.equal(0, Object.keys(CoreServer.servers()).length);
@@ -245,10 +245,10 @@ describe.skip('ReplSet (Connection)', function() {
   it('Should correctly pass error when wrong replicaSet', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       const client = configuration.newClient({}, { rs_name: 'wrong' });
-      client.connect(function(err) {
+      client.connect(function (err) {
         test.notEqual(null, err);
         done();
       });
@@ -256,17 +256,17 @@ describe.skip('ReplSet (Connection)', function() {
   });
 
   var retries = 120;
-  var ensureConnection = function(configuration, numberOfTries, callback) {
+  var ensureConnection = function (configuration, numberOfTries, callback) {
     if (numberOfTries <= 0) {
       return callback(new Error('could not connect correctly'), null);
     }
 
     // Open the db
     const client = configuration.newClient({}, { w: 0, connectTimeoutMS: 1000 });
-    client.connect(function(err, client) {
+    client.connect(function (err, client) {
       if (err != null) {
         // Wait for a sec and retry
-        setTimeout(function() {
+        setTimeout(function () {
           numberOfTries = numberOfTries - 1;
           ensureConnection(configuration, numberOfTries, callback);
         }, 3000);
@@ -280,7 +280,7 @@ describe.skip('ReplSet (Connection)', function() {
   it('Should connect with primary stepped down', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var CoreServer = configuration.require.CoreServer,
         CoreConnection = configuration.require.CoreConnection;
@@ -292,13 +292,13 @@ describe.skip('ReplSet (Connection)', function() {
       // // Step down primary server
       configuration.manager
         .stepDownPrimary(false, { stepDownSecs: 1, force: true })
-        .then(function() {
+        .then(function () {
           // Wait for new primary to pop up
-          ensureConnection(configuration, retries, function(err) {
+          ensureConnection(configuration, retries, function (err) {
             test.equal(null, err);
 
             const client = configuration.newClient({}, { w: 0 });
-            client.connect(function(err, client) {
+            client.connect(function (err, client) {
               test.ok(err == null);
               // Get a connection
               var connection = client.topology.connections()[0];
@@ -316,24 +316,24 @@ describe.skip('ReplSet (Connection)', function() {
   it('Should connect with third node killed', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var CoreServer = configuration.require.CoreServer,
         CoreConnection = configuration.require.CoreConnection;
 
       // Replset start port
-      configuration.manager.secondaries().then(function(managers) {
-        managers[0].stop().then(function() {
+      configuration.manager.secondaries().then(function (managers) {
+        managers[0].stop().then(function () {
           // Accounting tests
           CoreServer.enableServerAccounting();
           CoreConnection.enableConnectionAccounting();
 
           // Wait for new primary to pop up
-          ensureConnection(configuration, retries, function(err) {
+          ensureConnection(configuration, retries, function (err) {
             test.equal(null, err);
 
             const client = configuration.newClient({}, { w: 0 });
-            client.connect(function(err, client) {
+            client.connect(function (err, client) {
               test.ok(err == null);
               // Get a connection
               var connection = client.topology.connections()[0];
@@ -352,24 +352,24 @@ describe.skip('ReplSet (Connection)', function() {
   it('Should connect with primary node killed', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var CoreServer = configuration.require.CoreServer,
         CoreConnection = configuration.require.CoreConnection;
 
       // Replset start port
-      configuration.manager.primary().then(function(primary) {
-        primary.stop().then(function() {
+      configuration.manager.primary().then(function (primary) {
+        primary.stop().then(function () {
           // Accounting tests
           CoreServer.enableServerAccounting();
           CoreConnection.enableConnectionAccounting();
 
           // Wait for new primary to pop up
-          ensureConnection(configuration, retries, function(err) {
+          ensureConnection(configuration, retries, function (err) {
             test.equal(null, err);
 
             const client = configuration.newClient({}, { w: 0 });
-            client.connect(function(err, client) {
+            client.connect(function (err, client) {
               test.ok(err == null);
               // Get a connection
               var connection = client.topology.connections()[0];
@@ -388,7 +388,7 @@ describe.skip('ReplSet (Connection)', function() {
   it('Should correctly emit open signal and full set signal', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var CoreServer = configuration.require.CoreServer,
         CoreConnection = configuration.require.CoreConnection;
@@ -399,18 +399,18 @@ describe.skip('ReplSet (Connection)', function() {
       CoreConnection.enableConnectionAccounting();
 
       const client = configuration.newClient({}, { w: 0 });
-      client.once('open', function(_err) {
+      client.once('open', function (_err) {
         test.equal(null, _err);
         openCalled = true;
       });
 
-      client.once('fullsetup', function(client) {
+      client.once('fullsetup', function (client) {
         test.equal(true, openCalled);
 
         // Close and cleanup
         client.close();
 
-        setTimeout(function() {
+        setTimeout(function () {
           // Connection account tests
           test.equal(0, Object.keys(CoreConnection.connections()).length);
           test.equal(0, Object.keys(CoreServer.servers()).length);
@@ -421,7 +421,7 @@ describe.skip('ReplSet (Connection)', function() {
         }, 200);
       });
 
-      client.connect(function(err) {
+      client.connect(function (err) {
         test.equal(null, err);
       });
     }
@@ -430,7 +430,7 @@ describe.skip('ReplSet (Connection)', function() {
   it('ReplSet honors socketOptions options', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var CoreServer = configuration.require.CoreServer,
         CoreConnection = configuration.require.CoreConnection;
@@ -449,7 +449,7 @@ describe.skip('ReplSet (Connection)', function() {
         }
       );
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
         // Get a connection
         var connection = client.topology.connections()[0];
@@ -458,7 +458,7 @@ describe.skip('ReplSet (Connection)', function() {
         test.equal(false, connection.noDelay);
         client.close();
 
-        setTimeout(function() {
+        setTimeout(function () {
           // Connection account tests
           test.equal(0, Object.keys(CoreConnection.connections()).length);
           test.equal(0, Object.keys(CoreServer.servers()).length);
@@ -474,7 +474,7 @@ describe.skip('ReplSet (Connection)', function() {
   it('Should receive all events for primary and secondary leaving', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var CoreServer = configuration.require.CoreServer,
         CoreConnection = configuration.require.CoreConnection;
@@ -485,11 +485,11 @@ describe.skip('ReplSet (Connection)', function() {
 
       // Connect to the replicaset
       const client = configuration.newClient({}, { w: 0 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // Kill the secondary
         // Replset start port
-        configuration.manager.secondaries().then(function(managers) {
-          managers[0].stop().then(function() {
+        configuration.manager.secondaries().then(function (managers) {
+          managers[0].stop().then(function () {
             test.equal(null, err);
             client.close();
 
@@ -503,7 +503,7 @@ describe.skip('ReplSet (Connection)', function() {
   it('Should Fail due to bufferMaxEntries = 0 not causing any buffering', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var CoreServer = configuration.require.CoreServer,
         CoreConnection = configuration.require.CoreConnection;
@@ -514,14 +514,16 @@ describe.skip('ReplSet (Connection)', function() {
 
       // Connect to the replicaset
       const client = configuration.newClient({}, { w: 1, bufferMaxEntries: 0 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
 
         // Setup
-        client.topology.on('left', function(t) {
+        client.topology.on('left', function (t) {
           if (t === 'primary') {
             // Attempt an insert
-            db.collection('_should_fail_due_to_bufferMaxEntries_0').insert({ a: 1 }, function(err) {
+            db.collection('_should_fail_due_to_bufferMaxEntries_0').insert({ a: 1 }, function (
+              err
+            ) {
               test.ok(err != null);
               test.ok(err.message.indexOf('0') !== -1);
               client.close();
@@ -533,8 +535,8 @@ describe.skip('ReplSet (Connection)', function() {
 
         // Kill the secondary
         // Replset start port
-        configuration.manager.primary().then(function(primary) {
-          primary.stop().then(function() {
+        configuration.manager.primary().then(function (primary) {
+          primary.stop().then(function () {
             test.equal(null, err);
           });
         });
@@ -545,7 +547,7 @@ describe.skip('ReplSet (Connection)', function() {
   it('Should correctly connect to a replicaset with additional options', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       const configuration = this.configuration;
       const CoreServer = configuration.require.CoreServer;
       const CoreConnection = configuration.require.CoreConnection;
@@ -571,7 +573,7 @@ describe.skip('ReplSet (Connection)', function() {
         }
       });
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
         var db = client.db(configuration.db);
 
@@ -582,13 +584,13 @@ describe.skip('ReplSet (Connection)', function() {
           { a: 1 },
           { b: 1 },
           { upsert: true },
-          function(err, result) {
+          function (err, result) {
             test.equal(null, err);
             test.equal(1, result.result.n);
 
             client.close();
 
-            setTimeout(function() {
+            setTimeout(function () {
               // Connection account tests
               test.equal(0, Object.keys(CoreConnection.connections()).length);
               test.equal(0, Object.keys(CoreServer.servers()).length);
@@ -606,7 +608,7 @@ describe.skip('ReplSet (Connection)', function() {
   it('Should correctly connect to a replicaset with readPreference set', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       const configuration = this.configuration;
       const CoreServer = configuration.require.CoreServer;
       const CoreConnection = configuration.require.CoreConnection;
@@ -626,15 +628,15 @@ describe.skip('ReplSet (Connection)', function() {
       CoreConnection.enableConnectionAccounting();
 
       const client = configuration.newClient(url);
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
 
-        db.collection('test_collection').insert({ a: 1 }, function(err) {
+        db.collection('test_collection').insert({ a: 1 }, function (err) {
           test.equal(null, err);
 
           client.close();
 
-          setTimeout(function() {
+          setTimeout(function () {
             // Connection account tests
             test.equal(0, Object.keys(CoreConnection.connections()).length);
             test.equal(0, Object.keys(CoreServer.servers()).length);
@@ -651,7 +653,7 @@ describe.skip('ReplSet (Connection)', function() {
   it('Should give an error for non-existing servers', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var url = f(
         'mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s',
@@ -663,7 +665,7 @@ describe.skip('ReplSet (Connection)', function() {
       );
 
       const client = configuration.newClient(url);
-      client.connect(function(err) {
+      client.connect(function (err) {
         test.ok(err != null);
         done();
       });
@@ -675,7 +677,7 @@ describe.skip('ReplSet (Connection)', function() {
     {
       metadata: { requires: { topology: 'replicaset' } },
 
-      test: function(done) {
+      test: function (done) {
         var configuration = this.configuration;
         var mongo = configuration.require,
           GridStore = mongo.GridStore,
@@ -698,14 +700,14 @@ describe.skip('ReplSet (Connection)', function() {
         CoreConnection.enableConnectionAccounting();
 
         const client = configuration.newClient(url);
-        client.connect(function(err, client) {
+        client.connect(function (err, client) {
           var db = client.db(configuration.db);
           var gs = new GridStore(db, new ObjectId());
           test.equal('majority', gs.writeConcern.w);
           test.equal(5000, gs.writeConcern.wtimeout);
           client.close();
 
-          setTimeout(function() {
+          setTimeout(function () {
             // Connection account tests
             test.equal(0, Object.keys(CoreConnection.connections()).length);
             test.equal(0, Object.keys(CoreServer.servers()).length);
@@ -722,7 +724,7 @@ describe.skip('ReplSet (Connection)', function() {
   it('Should Correctly remove server going into recovery mode', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var CoreServer = configuration.require.CoreServer,
         CoreConnection = configuration.require.CoreConnection;
@@ -733,12 +735,12 @@ describe.skip('ReplSet (Connection)', function() {
 
       // Open the db connection
       const client = configuration.newClient({}, { w: 1, socketTimeoutMS: 5000 });
-      client.on('fullsetup', function(client) {
+      client.on('fullsetup', function (client) {
         var db = client.db(configuration.db);
-        db.command({ ismaster: true }, function(err, result) {
+        db.command({ ismaster: true }, function (err, result) {
           // Filter out the secondaries
           var secondaries = [];
-          result.hosts.forEach(function(s) {
+          result.hosts.forEach(function (s) {
             if (result.primary !== s && result.arbiters.indexOf(s) === -1) secondaries.push(s);
           });
 
@@ -748,17 +750,17 @@ describe.skip('ReplSet (Connection)', function() {
           var client1 = configuration.newClient({}, { host, port, w: 1 });
           var finished = false;
 
-          client.topology.on('left', function(t) {
+          client.topology.on('left', function (t) {
             if (t === 'primary' && !finished) {
               finished = true;
               // Return to working state
-              client1.db('admin').command({ replSetMaintenance: 0 }, function(err) {
+              client1.db('admin').command({ replSetMaintenance: 0 }, function (err) {
                 test.equal(null, err);
                 client.close();
                 client1.close();
 
-                setTimeout(function() {
-                  setTimeout(function() {
+                setTimeout(function () {
+                  setTimeout(function () {
                     // Connection account tests
                     test.equal(0, Object.keys(CoreConnection.connections()).length);
                     test.equal(0, Object.keys(CoreServer.servers()).length);
@@ -772,19 +774,19 @@ describe.skip('ReplSet (Connection)', function() {
             }
           });
 
-          client1.connect(function(err, client1) {
+          client1.connect(function (err, client1) {
             var db1 = client1.db(configuration.db);
             test.equal(null, err);
             global.debug = true;
 
-            db1.admin().command({ replSetMaintenance: 1 }, function(err) {
+            db1.admin().command({ replSetMaintenance: 1 }, function (err) {
               test.equal(null, err);
             });
           });
         });
       });
 
-      client.connect(function(err) {
+      client.connect(function (err) {
         test.equal(null, err);
       });
     }
@@ -793,7 +795,7 @@ describe.skip('ReplSet (Connection)', function() {
   it('Should return single server direct connection when replicaSet not provided', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
         Server = mongo.Server,
@@ -807,12 +809,12 @@ describe.skip('ReplSet (Connection)', function() {
       CoreConnection.enableConnectionAccounting();
 
       const client = configuration.newClient(url);
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
         test.ok(client.topology instanceof Server);
         client.close();
 
-        setTimeout(function() {
+        setTimeout(function () {
           // Connection account tests
           test.equal(0, Object.keys(CoreConnection.connections()).length);
           test.equal(0, Object.keys(CoreServer.servers()).length);
@@ -826,21 +828,21 @@ describe.skip('ReplSet (Connection)', function() {
   });
 
   var waitForPrimary;
-  waitForPrimary = function(count, config, options, callback) {
+  waitForPrimary = function (count, config, options, callback) {
     var ReplSet = require('../../src/core').ReplSet;
     if (count === 0) return callback(new Error('could not connect'));
     // Attempt to connect
     var server = new ReplSet(config, options);
-    server.on('error', function(err) {
+    server.on('error', function (err) {
       test.equal(null, err);
       server.destroy();
 
-      setTimeout(function() {
+      setTimeout(function () {
         waitForPrimary(count - 1, config, options, callback);
       }, 1000);
     });
 
-    server.on('fullsetup', function() {
+    server.on('fullsetup', function () {
       server.destroy();
       callback();
     });
@@ -852,13 +854,13 @@ describe.skip('ReplSet (Connection)', function() {
   it('Should correctly connect to arbiter with single connection', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var CoreServer = configuration.require.CoreServer,
         CoreConnection = configuration.require.CoreConnection;
 
       // Replset start port
-      configuration.manager.arbiters().then(function(managers) {
+      configuration.manager.arbiters().then(function (managers) {
         // Accounting tests
         CoreServer.enableServerAccounting();
         CoreConnection.enableConnectionAccounting();
@@ -868,15 +870,15 @@ describe.skip('ReplSet (Connection)', function() {
         var port = managers[0].port;
 
         var client = configuration.newClient({}, { host, port, w: 1 });
-        client.connect(function(err, client) {
+        client.connect(function (err, client) {
           var db = client.db(configuration.db);
           test.equal(null, err);
 
-          db.command({ ismaster: true }, function(err) {
+          db.command({ ismaster: true }, function (err) {
             test.equal(null, err);
 
             // Should fail
-            db.collection('t').insert({ a: 1 }, function(err) {
+            db.collection('t').insert({ a: 1 }, function (err) {
               test.ok(err != null);
               client.close();
               restartAndDone(configuration, done);
@@ -890,12 +892,12 @@ describe.skip('ReplSet (Connection)', function() {
   it('Should correctly connect to secondary with single connection', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var CoreServer = configuration.require.CoreServer,
         CoreConnection = configuration.require.CoreConnection;
 
-      configuration.manager.secondaries().then(function(managers) {
+      configuration.manager.secondaries().then(function (managers) {
         // Accounting tests
         CoreServer.enableServerAccounting();
         CoreConnection.enableConnectionAccounting();
@@ -905,11 +907,11 @@ describe.skip('ReplSet (Connection)', function() {
         var port = managers[0].port;
 
         var client = configuration.newClient({}, { host, port, w: 1 });
-        client.connect(function(err, client) {
+        client.connect(function (err, client) {
           var db = client.db(configuration.db);
           test.equal(null, err);
 
-          db.command({ ismaster: true }, function(err) {
+          db.command({ ismaster: true }, function (err) {
             test.equal(null, err);
             client.close();
             restartAndDone(configuration, done);
@@ -926,7 +928,7 @@ describe.skip('ReplSet (Connection)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var ReplSet = configuration.require.ReplSet,
         ServerManager = require('mongodb-topology-manager').Server,
@@ -934,7 +936,7 @@ describe.skip('ReplSet (Connection)', function() {
         CoreConnection = configuration.require.CoreConnection;
 
       // Get the primary server
-      configuration.manager.primary().then(function(primaryServerManager) {
+      configuration.manager.primary().then(function (primaryServerManager) {
         var nonReplSetMember = new ServerManager('mongod', {
           bind_ip: primaryServerManager.host,
           port: primaryServerManager.port,
@@ -942,13 +944,13 @@ describe.skip('ReplSet (Connection)', function() {
         });
 
         // Stop the primary
-        primaryServerManager.stop().then(function(err) {
+        primaryServerManager.stop().then(function (err) {
           test.equal(null, err);
 
-          nonReplSetMember.purge().then(function() {
+          nonReplSetMember.purge().then(function () {
             // Start a non replset member
-            nonReplSetMember.start().then(function() {
-              configuration.manager.waitForPrimary().then(function() {
+            nonReplSetMember.start().then(function () {
+              configuration.manager.waitForPrimary().then(function () {
                 var url = f(
                   'mongodb://localhost:%s,localhost:%s,localhost:%s/integration_test_?replicaSet=%s',
                   configuration.port,
@@ -963,13 +965,13 @@ describe.skip('ReplSet (Connection)', function() {
 
                 // Attempt to connect using MongoClient uri
                 const client = configuration.newClient(url);
-                client.connect(function(err, client) {
+                client.connect(function (err, client) {
                   test.equal(null, err);
                   test.ok(client.topology instanceof ReplSet);
                   client.close();
 
                   // Stop the normal server
-                  nonReplSetMember.stop().then(function() {
+                  nonReplSetMember.stop().then(function () {
                     restartAndDone(configuration, done);
                   });
                 });
@@ -984,7 +986,7 @@ describe.skip('ReplSet (Connection)', function() {
   it('Should correctly modify the server reconnectTries for all replset instances', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       const configuration = this.configuration;
       const CoreServer = configuration.require.CoreServer;
       const CoreConnection = configuration.require.CoreConnection;
@@ -1001,7 +1003,7 @@ describe.skip('ReplSet (Connection)', function() {
       CoreConnection.enableConnectionAccounting();
 
       const client = configuration.newClient(url, { reconnectTries: 10 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var servers = client.topology.s.coreTopology.s.replicaSetState.allServers();
@@ -1012,7 +1014,7 @@ describe.skip('ReplSet (Connection)', function() {
         // Destroy the pool
         client.close();
 
-        setTimeout(function() {
+        setTimeout(function () {
           // Connection account tests
           test.equal(0, Object.keys(CoreConnection.connections()).length);
           test.equal(0, Object.keys(CoreServer.servers()).length);
@@ -1030,7 +1032,7 @@ describe.skip('ReplSet (Connection)', function() {
     {
       metadata: { requires: { topology: 'replicaset' } },
 
-      test: function(done) {
+      test: function (done) {
         var configuration = this.configuration;
         var url = f(
           'mongodb://me:secret@localhost:%s,localhost:%s/integration_test_?replicaSet=%s',
@@ -1044,7 +1046,7 @@ describe.skip('ReplSet (Connection)', function() {
           bufferMaxEntries: 0
         });
 
-        client.connect(function(err) {
+        client.connect(function (err) {
           test.ok(err);
           test.ok(
             err.message.indexOf(

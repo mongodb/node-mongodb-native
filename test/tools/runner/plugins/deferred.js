@@ -37,7 +37,7 @@ const kDeferred = Symbol('deferred');
     };
   }
 
-  Context.prototype.defer = function(fn) {
+  Context.prototype.defer = function (fn) {
     const test = this.test;
     if (test[kDeferred] == null) {
       test[kDeferred] = new Set();

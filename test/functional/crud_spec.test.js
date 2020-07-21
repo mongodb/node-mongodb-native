@@ -38,8 +38,8 @@ const readScenarios = findScenarios('v1', 'read');
 const writeScenarios = findScenarios('v1', 'write');
 
 const testContext = {};
-describe('CRUD spec', function() {
-  beforeEach(function() {
+describe('CRUD spec', function () {
+  beforeEach(function () {
     const configuration = this.configuration;
     const client = configuration.newClient();
     return client.connect().then(client => {
@@ -54,7 +54,7 @@ describe('CRUD spec', function() {
     }
   });
 
-  describe('read', function() {
+  describe('read', function () {
     readScenarios.forEach(scenarioData => {
       const scenarioName = scenarioData[0];
       const scenario = scenarioData[1];
@@ -68,12 +68,12 @@ describe('CRUD spec', function() {
 
       enforceServerVersionLimits(metadata.requires, scenario);
 
-      describe(scenarioName, function() {
+      describe(scenarioName, function () {
         scenario.tests.forEach(scenarioTest => {
           beforeEach(() => testContext.db.dropDatabase());
           it(scenarioTest.description, {
             metadata,
-            test: function() {
+            test: function () {
               return executeScenario(scenario, scenarioTest, this.configuration, testContext);
             }
           });
@@ -82,7 +82,7 @@ describe('CRUD spec', function() {
     });
   });
 
-  describe('write', function() {
+  describe('write', function () {
     writeScenarios.forEach(scenarioData => {
       const scenarioName = scenarioData[0];
       const scenario = scenarioData[1];
@@ -96,13 +96,13 @@ describe('CRUD spec', function() {
 
       enforceServerVersionLimits(metadata.requires, scenario);
 
-      describe(scenarioName, function() {
+      describe(scenarioName, function () {
         beforeEach(() => testContext.db.dropDatabase());
 
         scenario.tests.forEach(scenarioTest => {
           it(scenarioTest.description, {
             metadata,
-            test: function() {
+            test: function () {
               return executeScenario(scenario, scenarioTest, this.configuration, testContext);
             }
           });
@@ -151,7 +151,7 @@ describe('CRUD spec', function() {
   }
 
   function assertWriteExpectations(collection, outcome) {
-    return function(result) {
+    return function (result) {
       // TODO: when we fix our bulk write errors, get rid of this
       if (result instanceof BulkWriteError) {
         result = transformBulkWriteResult(result.result);
@@ -178,7 +178,7 @@ describe('CRUD spec', function() {
   }
 
   function assertReadExpectations(db, collection, outcome) {
-    return function(result) {
+    return function (result) {
       if (outcome.result && !outcome.collection) {
         expect(result).to.containSubset(outcome.result);
       }
@@ -389,10 +389,7 @@ describe('CRUD spec', function() {
     dropPromises.push(collection.drop().catch(errorHandler));
     if (scenarioTest.outcome.collection && scenarioTest.outcome.collection.name) {
       dropPromises.push(
-        context.db
-          .collection(scenarioTest.outcome.collection.name)
-          .drop()
-          .catch(errorHandler)
+        context.db.collection(scenarioTest.outcome.collection.name).drop().catch(errorHandler)
       );
     }
 
@@ -438,11 +435,11 @@ describe('CRUD spec', function() {
   }
 });
 
-describe('CRUD v2', function() {
+describe('CRUD v2', function () {
   const testContext = new TestRunnerContext();
   const testSuites = gatherTestSuites(path.resolve(__dirname, '../spec/crud/v2'));
   after(() => testContext.teardown());
-  before(function() {
+  before(function () {
     return testContext.setup(this.configuration);
   });
 

@@ -2,9 +2,9 @@
 
 const { expect } = require('chai');
 
-describe('Cursor Async Iterator Tests', function() {
+describe('Cursor Async Iterator Tests', function () {
   let client, collection;
-  before(async function() {
+  before(async function () {
     client = this.configuration.newClient();
 
     await client.connect();
@@ -17,7 +17,7 @@ describe('Cursor Async Iterator Tests', function() {
     await client.close();
   });
 
-  beforeEach(async function() {
+  beforeEach(async function () {
     client = this.configuration.newClient();
     await client.connect();
     collection = client.db(this.configuration.db).collection('async_cursor_tests');
@@ -27,7 +27,7 @@ describe('Cursor Async Iterator Tests', function() {
 
   it('should be able to use a for-await loop on a find command cursor', {
     metadata: { requires: { node: '>=10.5.0' } },
-    test: async function() {
+    test: async function () {
       const cursor = collection.find({ bar: 1 });
 
       let counter = 0;
@@ -42,7 +42,7 @@ describe('Cursor Async Iterator Tests', function() {
 
   it('should be able to use a for-await loop on an aggregation cursor', {
     metadata: { requires: { node: '>=10.5.0' } },
-    test: async function() {
+    test: async function () {
       const cursor = collection.aggregate([{ $match: { bar: 1 } }]);
 
       let counter = 0;
@@ -57,7 +57,7 @@ describe('Cursor Async Iterator Tests', function() {
 
   it('should be able to use a for-await loop on a command cursor', {
     metadata: { requires: { node: '>=10.5.0', mongodb: '>=3.0.0' } },
-    test: async function() {
+    test: async function () {
       const cursor1 = collection.listIndexes();
       const cursor2 = collection.listIndexes();
 
@@ -74,7 +74,7 @@ describe('Cursor Async Iterator Tests', function() {
 
   it('should properly stop when cursor is closed', {
     metadata: { requires: { node: '>=10.5.0' } },
-    test: async function() {
+    test: async function () {
       const cursor = collection.find();
 
       let count = 0;

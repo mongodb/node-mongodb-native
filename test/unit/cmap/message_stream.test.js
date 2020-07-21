@@ -17,8 +17,8 @@ function bufferToStream(buffer) {
   return stream;
 }
 
-describe('Message Stream', function() {
-  describe('reading', function() {
+describe('Message Stream', function () {
+  describe('reading', function () {
     [
       {
         description: 'valid OP_REPLY',
@@ -85,7 +85,7 @@ describe('Message Stream', function() {
         error: 'Invalid message size: 67108865, max allowed: 67108864'
       }
     ].forEach(test => {
-      it(test.description, function(done) {
+      it(test.description, function (done) {
         const error = test.error;
         const expectedMessageCount = test.expectedMessageCount || 1;
         const inputStream = bufferToStream(test.data);
@@ -102,9 +102,7 @@ describe('Message Stream', function() {
           msg.parse();
 
           if (test.documents) {
-            expect(msg)
-              .to.have.property('documents')
-              .that.deep.equals(test.documents);
+            expect(msg).to.have.property('documents').that.deep.equals(test.documents);
           }
 
           if (messageCount === expectedMessageCount) {
@@ -118,9 +116,7 @@ describe('Message Stream', function() {
             return;
           }
 
-          expect(err)
-            .to.have.property('message')
-            .that.equals(error);
+          expect(err).to.have.property('message').that.equals(error);
 
           done();
         });
@@ -130,8 +126,8 @@ describe('Message Stream', function() {
     });
   });
 
-  describe('writing', function() {
-    it('should write a message to the stream', function(done) {
+  describe('writing', function () {
+    it('should write a message to the stream', function (done) {
       const readableStream = new Readable({ read() {} });
       const writeableStream = new Writable({
         write: (chunk, _, callback) => {

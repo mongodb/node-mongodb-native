@@ -1,7 +1,7 @@
 'use strict';
 var expect = require('chai').expect;
 
-describe('Aggregation', function() {
+describe('Aggregation', function () {
   /**
    * Correctly call the aggregation framework using a pipeline in an Array.
    *
@@ -18,7 +18,7 @@ describe('Aggregation', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var client = this.configuration.newClient({ w: 1 }, { poolSize: 1 }),
         databaseName = this.configuration.db;
 
@@ -27,7 +27,7 @@ describe('Aggregation', function() {
       // REPLACE this.configuration.writeConcernMax() WITH {w:1}
       // REMOVE-LINE test.
       // BEGIN
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         expect(err).to.be.null;
 
         var db = client.db(databaseName);
@@ -50,7 +50,7 @@ describe('Aggregation', function() {
         // Create a collection
         var collection = db.collection('shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray');
         // Insert the docs
-        collection.insert(docs, { w: 1 }, function(err, result) {
+        collection.insert(docs, { w: 1 }, function (err, result) {
           if (err) console.dir({ err });
           expect(result).to.exist;
           expect(err).to.be.null;
@@ -73,7 +73,7 @@ describe('Aggregation', function() {
             { $sort: { _id: -1 } }
           ]);
 
-          cursor.toArray(function(err, result) {
+          cursor.toArray(function (err, result) {
             expect(err).to.be.null;
             expect(result[0]._id.tags).to.equal('good');
             expect(result[0].authors).to.eql(['bob']);
@@ -96,10 +96,10 @@ describe('Aggregation', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       const client = this.configuration.newClient({ w: 1 }, { poolSize: 1 });
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         expect(err).to.not.exist;
 
         const db = client.db('admin');
@@ -136,7 +136,7 @@ describe('Aggregation', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var client = this.configuration.newClient({ w: 1 }, { poolSize: 1 }),
         databaseName = this.configuration.db;
 
@@ -145,7 +145,7 @@ describe('Aggregation', function() {
       // REPLACE this.configuration.writeConcernMax() WITH {w:1}
       // REMOVE-LINE test.
       // BEGIN
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         expect(err).to.be.null;
 
         var db = client.db(databaseName);
@@ -170,7 +170,7 @@ describe('Aggregation', function() {
           'shouldCorrectlyExecuteSimpleAggregationPipelineUsingArguments'
         );
         // Insert the docs
-        collection.insert(docs, { w: 1 }, function(err, result) {
+        collection.insert(docs, { w: 1 }, function (err, result) {
           expect(result).to.exist;
           expect(err).to.be.null;
 
@@ -193,7 +193,7 @@ describe('Aggregation', function() {
             { $sort: { _id: -1 } }
           ]);
 
-          cursor.toArray(function(err, result) {
+          cursor.toArray(function (err, result) {
             expect(err).to.be.null;
             expect(result[0]._id.tags).to.equal('good');
             expect(result[0].authors).to.eql(['bob']);
@@ -224,7 +224,7 @@ describe('Aggregation', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var client = this.configuration.newClient({ w: 1 }, { poolSize: 1 }),
         databaseName = this.configuration.db;
 
@@ -233,7 +233,7 @@ describe('Aggregation', function() {
       // REPLACE this.configuration.writeConcernMax() WITH {w:1}
       // REMOVE-LINE test.
       // BEGIN
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         expect(err).to.be.null;
 
         var db = client.db(databaseName);
@@ -258,7 +258,7 @@ describe('Aggregation', function() {
           'shouldCorrectlyExecuteSimpleAggregationPipelineUsingArguments'
         );
         // Insert the docs
-        collection.insert(docs, { w: 1 }, function(err, result) {
+        collection.insert(docs, { w: 1 }, function (err, result) {
           expect(result).to.exist;
           expect(err).to.be.null;
 
@@ -281,7 +281,7 @@ describe('Aggregation', function() {
             { $sort: { _id: -1 } }
           ]);
 
-          cursor.toArray(function(err, result) {
+          cursor.toArray(function (err, result) {
             expect(err).to.be.null;
             expect(result[0]._id.tags).to.equal('good');
             expect(result[0].authors).to.eql(['bob']);
@@ -312,7 +312,7 @@ describe('Aggregation', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var client = this.configuration.newClient({ w: 1 }, { poolSize: 1 }),
         databaseName = this.configuration.db;
 
@@ -321,7 +321,7 @@ describe('Aggregation', function() {
       // REPLACE this.configuration.writeConcernMax() WITH {w:1}
       // REMOVE-LINE test.
       // BEGIN
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         expect(err).to.be.null;
 
         var db = client.db(databaseName);
@@ -344,7 +344,7 @@ describe('Aggregation', function() {
         // Create a collection
         var collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
         // Insert the docs
-        collection.insert(docs, { w: 1 }, function(err, result) {
+        collection.insert(docs, { w: 1 }, function (err, result) {
           expect(err).to.be.null;
           expect(result).to.exist;
 
@@ -366,7 +366,7 @@ describe('Aggregation', function() {
           ]);
 
           // Iterate over all the items in the cursor
-          cursor.toArray(function(err, result) {
+          cursor.toArray(function (err, result) {
             expect(err).to.be.null;
             expect(result).to.exist;
 
@@ -394,7 +394,7 @@ describe('Aggregation', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var client = this.configuration.newClient({ w: 1 }, { poolSize: 1 }),
         databaseName = this.configuration.db;
 
@@ -403,7 +403,7 @@ describe('Aggregation', function() {
       // REPLACE this.configuration.writeConcernMax() WITH {w:1}
       // REMOVE-LINE test.
       // BEGIN
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         expect(err).to.be.null;
 
         var db = client.db(databaseName);
@@ -426,7 +426,7 @@ describe('Aggregation', function() {
         // Create a collection
         var collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
         // Insert the docs
-        collection.insert(docs, { w: 1 }, function(err, result) {
+        collection.insert(docs, { w: 1 }, function (err, result) {
           expect(result).to.exist;
           expect(err).to.be.null;
 
@@ -453,7 +453,7 @@ describe('Aggregation', function() {
           );
 
           // Iterate over all the items in the cursor
-          cursor.explain(function(err, result) {
+          cursor.explain(function (err, result) {
             expect(err).to.be.null;
             expect(result.stages).to.have.lengthOf.at.least(1);
             expect(result.stages[0]).to.have.key('$cursor');
@@ -482,7 +482,7 @@ describe('Aggregation', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var client = this.configuration.newClient({ w: 1 }, { poolSize: 1 }),
         databaseName = this.configuration.db;
 
@@ -491,7 +491,7 @@ describe('Aggregation', function() {
       // REPLACE this.configuration.writeConcernMax() WITH {w:1}
       // REMOVE-LINE test.
       // BEGIN
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         expect(err).to.be.null;
 
         var db = client.db(databaseName);
@@ -514,7 +514,7 @@ describe('Aggregation', function() {
         // Create a collection
         var collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
         // Insert the docs
-        collection.insert(docs, { w: 1 }, function(err, result) {
+        collection.insert(docs, { w: 1 }, function (err, result) {
           expect(result).to.exist;
           expect(err).to.be.null;
 
@@ -542,7 +542,7 @@ describe('Aggregation', function() {
           );
 
           // Iterate over all the items in the cursor
-          cursor.next(function(err, result) {
+          cursor.next(function (err, result) {
             expect(err).to.be.null;
             expect(result._id.tags).to.equal('good');
             expect(result.authors).to.eql(['bob']);
@@ -574,7 +574,7 @@ describe('Aggregation', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var client = this.configuration.newClient({ w: 1 }, { poolSize: 1 }),
         databaseName = this.configuration.db;
 
@@ -583,7 +583,7 @@ describe('Aggregation', function() {
       // REPLACE this.configuration.writeConcernMax() WITH {w:1}
       // REMOVE-LINE test.
       // BEGIN
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         expect(err).to.be.null;
 
         var db = client.db(databaseName);
@@ -606,7 +606,7 @@ describe('Aggregation', function() {
         // Create a collection
         var collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
         // Insert the docs
-        collection.insert(docs, { w: 1 }, function(err, result) {
+        collection.insert(docs, { w: 1 }, function (err, result) {
           expect(result).to.exist;
           expect(err).to.be.null;
 
@@ -631,7 +631,7 @@ describe('Aggregation', function() {
               out: 'testingOutCollectionForAggregation'
             }
           );
-          cursor.toArray(function(err, results) {
+          cursor.toArray(function (err, results) {
             expect(err).to.be.null;
             expect(results).to.be.empty;
 
@@ -659,7 +659,7 @@ describe('Aggregation', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var client = this.configuration.newClient({ w: 1 }, { poolSize: 1 }),
         databaseName = this.configuration.db;
 
@@ -668,7 +668,7 @@ describe('Aggregation', function() {
       // REPLACE this.configuration.writeConcernMax() WITH {w:1}
       // REMOVE-LINE test.
       // BEGIN
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         expect(err).to.be.null;
 
         var db = client.db(databaseName);
@@ -691,7 +691,7 @@ describe('Aggregation', function() {
         // Create a collection
         var collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
         // Insert the docs
-        collection.insert(docs, { w: 1 }, function(err, result) {
+        collection.insert(docs, { w: 1 }, function (err, result) {
           expect(result).to.exist;
           expect(err).to.be.null;
 
@@ -717,7 +717,7 @@ describe('Aggregation', function() {
               allowDiskUse: true
             }
           );
-          cursor.toArray(function(err, results) {
+          cursor.toArray(function (err, results) {
             expect(err).to.be.null;
             expect(results[0]._id.tags).to.equal('good');
             expect(results[0].authors).to.eql(['bob']);
@@ -745,23 +745,23 @@ describe('Aggregation', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var databaseName = this.configuration.db;
       var client = this.configuration.newClient(this.configuration.writeConcernMax(), {
         poolSize: 1
       });
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         expect(err).to.be.null;
 
         var db = client.db(databaseName);
         // Create a collection
         var col = db.collection('shouldPerformSimpleGroupAggregation');
-        col.remove({}, function(err) {
+        col.remove({}, function (err) {
           expect(err).to.be.null;
 
           // Insert a single document
-          col.insert([{ a: 1 }, { a: 1 }, { a: 1 }], function(err, r) {
+          col.insert([{ a: 1 }, { a: 1 }, { a: 1 }], function (err, r) {
             expect(err).to.be.null;
             expect(r.result.n).to.equal(3);
 
@@ -773,7 +773,7 @@ describe('Aggregation', function() {
                   $group: { _id: '$a', total: { $sum: '$a' } }
                 }
               ])
-              .toArray(function(err, docs) {
+              .toArray(function (err, docs) {
                 expect(err).to.be.null;
                 expect(docs[0].total).to.equal(3);
 
@@ -798,27 +798,27 @@ describe('Aggregation', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var databaseName = this.configuration.db;
       var client = this.configuration.newClient(this.configuration.writeConcernMax(), {
         poolSize: 1
       });
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         expect(err).to.be.null;
 
         var db = client.db(databaseName);
-        db.collection('te.st', function(err, col) {
+        db.collection('te.st', function (err, col) {
           expect(err).to.be.null;
           var count = 0;
 
-          col.insert([{ a: 1 }, { a: 1 }, { a: 1 }], function(err, r) {
+          col.insert([{ a: 1 }, { a: 1 }, { a: 1 }], function (err, r) {
             expect(err).to.be.null;
             expect(r.result.n).to.equal(3);
 
             const cursor = col.aggregate([{ $project: { a: 1 } }]);
 
-            cursor.toArray(function(err, docs) {
+            cursor.toArray(function (err, docs) {
               expect(err).to.be.null;
               expect(docs.length).to.be.greaterThan(0);
 
@@ -828,10 +828,10 @@ describe('Aggregation', function() {
                   cursor: { batchSize: 10000 }
                 })
                 .forEach(
-                  function() {
+                  function () {
                     count = count + 1;
                   },
-                  function(err) {
+                  function (err) {
                     expect(err).to.be.null;
                     expect(count).to.be.greaterThan(0);
 
@@ -858,13 +858,13 @@ describe('Aggregation', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var databaseName = this.configuration.db;
       var client = this.configuration.newClient(this.configuration.writeConcernMax(), {
         poolSize: 1
       });
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         expect(err).to.be.null;
 
         var db = client.db(databaseName);
@@ -887,7 +887,7 @@ describe('Aggregation', function() {
         // Create a collection
         var collection = db.collection('shouldCorrectlyDoAggWithCursorGetStream');
         // Insert the docs
-        collection.insert(docs, { w: 1 }, function(err, result) {
+        collection.insert(docs, { w: 1 }, function (err, result) {
           expect(result).to.exist;
           expect(err).to.be.null;
 
@@ -933,7 +933,7 @@ describe('Aggregation', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var databaseName = this.configuration.db;
       var client = this.configuration.newClient(this.configuration.writeConcernMax(), {
         poolSize: 1
@@ -945,7 +945,7 @@ describe('Aggregation', function() {
         { readConcern: { level: 'local' }, writeConcern: { j: true } }
       ];
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         const wrapup = err => {
           client.close(err2 => done(err || err2));
         };
@@ -1001,13 +1001,13 @@ describe('Aggregation', function() {
         }
       },
 
-      test: function(done) {
+      test: function (done) {
         var client = this.configuration.newClient({ w: 1 }, { poolSize: 1 }),
           databaseName = this.configuration.db;
 
         // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
         // DOC_START
-        client.connect(function(err, client) {
+        client.connect(function (err, client) {
           var db = client.db(databaseName);
 
           // Some docs for insertion
@@ -1029,7 +1029,7 @@ describe('Aggregation', function() {
           // Create a collection
           var collection = db.collection('shouldCorrectlyDoAggWithCursorMaxTimeMSSet');
           // Insert the docs
-          collection.insert(docs, { w: 1 }, function(err, result) {
+          collection.insert(docs, { w: 1 }, function (err, result) {
             expect(result).to.exist;
             expect(err).to.not.exist;
 
@@ -1061,7 +1061,7 @@ describe('Aggregation', function() {
             // is executed
             var cmd = db.command;
             // Validate the command
-            db.command = function(c) {
+            db.command = function (c) {
               expect(err).to.be.null;
               expect(c.maxTimeMS).to.equal(1000);
 
@@ -1070,13 +1070,13 @@ describe('Aggregation', function() {
             };
 
             // Iterate over all the items in the cursor
-            cursor.next(function(err, result) {
+            cursor.next(function (err, result) {
               expect(err).to.be.null;
               expect(result._id.tags).to.equal('good');
               expect(result.authors).to.eql(['bob']);
 
               // Validate the command
-              db.command = function(c) {
+              db.command = function (c) {
                 expect(err).to.be.null;
                 expect(c.maxTimeMS).to.equal(1000);
 
@@ -1128,13 +1128,13 @@ describe('Aggregation', function() {
         node: '>=4.8.5'
       }
     },
-    test: function(done) {
+    test: function (done) {
       const client = this.configuration.newClient({ w: 1 }, { poolSize: 1 });
       const databaseName = this.configuration.db;
 
       const comment = 'Darmok and Jalad at Tanagra';
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         expect(err).to.be.null;
 
         const db = client.db(databaseName);
@@ -1142,11 +1142,9 @@ describe('Aggregation', function() {
 
         const command = db.command;
 
-        db.command = function(c) {
+        db.command = function (c) {
           expect(c).to.be.an('object');
-          expect(c.comment)
-            .to.be.a('string')
-            .and.to.equal('comment');
+          expect(c.comment).to.be.a('string').and.to.equal('comment');
           command.apply(db, Array.prototype.slice.call(arguments, 0));
         };
 
@@ -1171,7 +1169,7 @@ describe('Aggregation', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var databaseName = this.configuration.db;
       var client = this.configuration.newClient(this.configuration.writeConcernMax(), {
         poolSize: 1
@@ -1179,7 +1177,7 @@ describe('Aggregation', function() {
 
       // DOC_LINE var client = new MongoClient(new Server('localhost', 27017));
       // DOC_START
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         expect(err).to.be.null;
 
         var db = client.db(databaseName);
@@ -1201,7 +1199,7 @@ describe('Aggregation', function() {
         // Create a collection
         var collection = db.collection('shouldCorrectlyQueryUsingISODate');
         // Insert the docs
-        collection.insertMany(docs, { w: 1 }, function(err, result) {
+        collection.insertMany(docs, { w: 1 }, function (err, result) {
           expect(result).to.exist;
           expect(err).to.be.null;
 
@@ -1215,7 +1213,7 @@ describe('Aggregation', function() {
           ]);
 
           // Iterate over all the items in the cursor
-          cursor.next(function(err, result) {
+          cursor.next(function (err, result) {
             expect(err).to.be.null;
             expect(result.b).to.equal(1);
 
@@ -1238,7 +1236,7 @@ describe('Aggregation', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var databaseName = this.configuration.db;
       var client = this.configuration.newClient(this.configuration.writeConcernMax(), {
         poolSize: 1
@@ -1246,14 +1244,14 @@ describe('Aggregation', function() {
 
       // DOC_LINE var client = new MongoClient(new Server('localhost', 27017));
       // DOC_START
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         expect(err).to.be.null;
 
         var db = client.db(databaseName);
         // Create a collection
         var collection = db.collection('shouldCorrectlyQueryUsingISODate3');
         // Insert the docs
-        collection.insertMany([{ a: 1 }, { b: 1 }], { w: 1 }, function(err, result) {
+        collection.insertMany([{ a: 1 }, { b: 1 }], { w: 1 }, function (err, result) {
           expect(result).to.exist;
           expect(err).to.be.null;
 
@@ -1265,7 +1263,7 @@ describe('Aggregation', function() {
           ]);
 
           // Iterate over all the items in the cursor
-          cursor.hasNext(function(err, result) {
+          cursor.hasNext(function (err, result) {
             expect(err).to.be.null;
             expect(result).to.equal(true);
 
@@ -1279,7 +1277,7 @@ describe('Aggregation', function() {
 
   it('should not send a batchSize for aggregations with an out stage', {
     metadata: { requires: { topology: ['single', 'replicaset'] } },
-    test: function(done) {
+    test: function (done) {
       const databaseName = this.configuration.db;
       const client = this.configuration.newClient(this.configuration.writeConcernMax(), {
         poolSize: 1,
@@ -1325,9 +1323,7 @@ describe('Aggregation', function() {
           );
         })
         .then(() => {
-          expect(events)
-            .to.be.an('array')
-            .with.a.lengthOf(8);
+          expect(events).to.be.an('array').with.a.lengthOf(8);
           events.forEach(event => {
             expect(event).to.have.property('commandName', 'aggregate');
             expect(event)

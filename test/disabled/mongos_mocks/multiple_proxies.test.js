@@ -6,7 +6,7 @@ const mock = require('mongodb-mock-server');
 const core = require('../../../../src/core');
 const Mongos = core.Mongos;
 
-describe('Mongos Multiple Proxies (mocks)', function() {
+describe('Mongos Multiple Proxies (mocks)', function () {
   afterEach(() => mock.cleanup());
 
   it('Should correctly load-balance the operations', {
@@ -17,7 +17,7 @@ describe('Mongos Multiple Proxies (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       // Contain mock server
       var mongos1 = null;
       var mongos2 = null;
@@ -30,7 +30,7 @@ describe('Mongos Multiple Proxies (mocks)', function() {
       // Primary server states
       var serverIsMaster = [Object.assign({}, defaultFields)];
       // Boot the mock
-      co(function*() {
+      co(function* () {
         mongos1 = yield mock.createServer();
         mongos2 = yield mock.createServer();
 
@@ -64,8 +64,8 @@ describe('Mongos Multiple Proxies (mocks)', function() {
         var lastPort;
 
         // Add event listeners
-        server.once('connect', function(_server) {
-          _server.insert('test.test', [{ created: new Date() }], function(err, r) {
+        server.once('connect', function (_server) {
+          _server.insert('test.test', [{ created: new Date() }], function (err, r) {
             expect(err).to.be.null;
             expect(r.connection.port).to.be.oneOf([mongos1.address().port, mongos2.address().port]);
             lastPort =
@@ -73,7 +73,7 @@ describe('Mongos Multiple Proxies (mocks)', function() {
                 ? mongos2.address().port
                 : mongos1.address().port;
 
-            _server.insert('test.test', [{ created: new Date() }], function(_err, _r) {
+            _server.insert('test.test', [{ created: new Date() }], function (_err, _r) {
               expect(_err).to.be.null;
               expect(_r.connection.port).to.equal(lastPort);
               lastPort =
@@ -81,7 +81,7 @@ describe('Mongos Multiple Proxies (mocks)', function() {
                   ? mongos2.address().port
                   : mongos1.address().port;
 
-              _server.insert('test.test', [{ created: new Date() }], function(__err, __r) {
+              _server.insert('test.test', [{ created: new Date() }], function (__err, __r) {
                 expect(__err).to.be.null;
                 expect(__r.connection.port).to.equal(lastPort);
 
@@ -106,7 +106,7 @@ describe('Mongos Multiple Proxies (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       // Default message fields
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         msg: 'isdbgrid'
@@ -115,7 +115,7 @@ describe('Mongos Multiple Proxies (mocks)', function() {
       // Primary server states
       var serverIsMaster = [Object.assign({}, defaultFields)];
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const mongos1 = yield mock.createServer();
         const mongos2 = yield mock.createServer();
 
@@ -149,12 +149,12 @@ describe('Mongos Multiple Proxies (mocks)', function() {
         });
 
         // Add event listeners
-        server.once('fullsetup', function() {
-          server.insert('test.test', [{ created: new Date() }], function(err, r) {
+        server.once('fullsetup', function () {
+          server.insert('test.test', [{ created: new Date() }], function (err, r) {
             expect(err).to.be.null;
             expect(r.connection.port).to.equal(mongos1.address().port);
 
-            server.insert('test.test', [{ created: new Date() }], function(_err, _r) {
+            server.insert('test.test', [{ created: new Date() }], function (_err, _r) {
               expect(_err).to.be.null;
               expect(_r.connection.port).to.equal(mongos1.address().port);
               server.destroy();
@@ -169,12 +169,12 @@ describe('Mongos Multiple Proxies (mocks)', function() {
               });
 
               // Add event listeners
-              server2.once('fullsetup', function() {
-                server2.insert('test.test', [{ created: new Date() }], function(__err, __r) {
+              server2.once('fullsetup', function () {
+                server2.insert('test.test', [{ created: new Date() }], function (__err, __r) {
                   expect(__err).to.be.null;
                   expect(__r.connection.port).to.equal(mongos1.address().port);
 
-                  server2.insert('test.test', [{ created: new Date() }], function(___err, ___r) {
+                  server2.insert('test.test', [{ created: new Date() }], function (___err, ___r) {
                     expect(___err).to.be.null;
                     expect(___r.connection.port).to.equal(mongos2.address().port);
 
@@ -185,7 +185,7 @@ describe('Mongos Multiple Proxies (mocks)', function() {
                 });
               });
 
-              setTimeout(function() {
+              setTimeout(function () {
                 server2.connect();
               }, 100);
             });

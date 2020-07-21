@@ -7,14 +7,14 @@ const setupDatabase = require('./shared').setupDatabase;
 const delay = require('./shared').delay;
 const expect = chai.expect;
 
-describe('Change Stream Spec', function() {
+describe('Change Stream Spec', function () {
   let globalClient;
   let ctx;
   let events;
 
   const TESTS_TO_SKIP = new Set([]);
 
-  before(function() {
+  before(function () {
     const configuration = this.configuration;
     return setupDatabase(configuration).then(() => {
       globalClient = configuration.newClient();
@@ -22,7 +22,7 @@ describe('Change Stream Spec', function() {
     });
   });
 
-  after(function() {
+  after(function () {
     const gc = globalClient;
     globalClient = undefined;
     return new Promise(r => gc.close(() => r()));
@@ -32,7 +32,7 @@ describe('Change Stream Spec', function() {
     const ALL_DBS = [suite.database_name, suite.database2_name];
 
     describe(suite.name, () => {
-      beforeEach(function() {
+      beforeEach(function () {
         const gc = globalClient;
         const sDB = suite.database_name;
         const sColl = suite.collection_name;
@@ -62,7 +62,7 @@ describe('Change Stream Spec', function() {
           });
       });
 
-      afterEach(function() {
+      afterEach(function () {
         const client = ctx.client;
         ctx = undefined;
         events = undefined;
@@ -126,7 +126,7 @@ describe('Change Stream Spec', function() {
       return () => Promise.resolve();
     }
 
-    return function(ctx) {
+    return function (ctx) {
       return ctx.gc.db('admin').command(test.failPoint);
     };
   }

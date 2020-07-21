@@ -42,10 +42,10 @@ function collectTests() {
   return tests;
 }
 
-describe('Server Discovery and Monitoring (spec)', function() {
+describe('Server Discovery and Monitoring (spec)', function () {
   let serverConnect;
   before(() => {
-    serverConnect = sinon.stub(Server.prototype, 'connect').callsFake(function() {
+    serverConnect = sinon.stub(Server.prototype, 'connect').callsFake(function () {
       this.s.state = 'connected';
       this.emit('connect');
     });
@@ -72,7 +72,7 @@ describe('Server Discovery and Monitoring (spec)', function() {
         const type = skip ? it.skip : it;
         type(testData.description, {
           metadata: { requires: { topology: 'single' } },
-          test: function(done) {
+          test: function (done) {
             executeSDAMTest(testData, done);
           }
         });
@@ -181,7 +181,7 @@ function executeSDAMTest(testData, testDone) {
     // call to `selectServers` call a fake, and then immediately restore the original behavior.
     let topologySelectServers = sinon
       .stub(Topology.prototype, 'selectServer')
-      .callsFake(function(selector, options, callback) {
+      .callsFake(function (selector, options, callback) {
         topologySelectServers.restore();
 
         const fakeServer = { s: { state: 'connected' }, removeListener: () => {} };
@@ -281,7 +281,7 @@ function executeSDAMTest(testData, testDone) {
 }
 
 function withConnectionStubImpl(appError) {
-  return function(fn, callback) {
+  return function (fn, callback) {
     const connectionPool = this; // we are stubbing `withConnection` on the `ConnectionPool` class
     const fakeConnection = {
       generation:

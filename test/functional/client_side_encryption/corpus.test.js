@@ -12,7 +12,7 @@ chai.config.includeStack = true;
 chai.config.showDiff = true;
 chai.config.truncateThreshold = 0;
 
-describe('Client Side Encryption Corpus', function() {
+describe('Client Side Encryption Corpus', function () {
   const metadata = {
     requires: {
       mongodb: '>=4.2.0',
@@ -127,7 +127,7 @@ describe('Client Side Encryption Corpus', function() {
     }
   }
 
-  before(function() {
+  before(function () {
     // 1. Create a MongoClient without encryption enabled (referred to as ``client``).
     client = this.configuration.newClient();
 
@@ -144,7 +144,7 @@ describe('Client Side Encryption Corpus', function() {
       });
   });
 
-  after(function() {
+  after(function () {
     if (client) {
       return client.close();
     }
@@ -152,7 +152,7 @@ describe('Client Side Encryption Corpus', function() {
 
   function defineCorpusTests(corpus, corpusEncryptedExpected, useClientSideSchema) {
     let clientEncrypted, clientEncryption;
-    beforeEach(function() {
+    beforeEach(function () {
       const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
       return Promise.resolve()
         .then(() => {
@@ -213,7 +213,7 @@ describe('Client Side Encryption Corpus', function() {
     it(
       `should pass corpus ${useClientSideSchema ? 'with' : 'without'} client schema`,
       metadata,
-      function() {
+      function () {
         const corpusCopied = {};
         return Promise.resolve()
           .then(() => {
@@ -291,10 +291,7 @@ describe('Client Side Encryption Corpus', function() {
           })
           .then(() => {
             // 6. Using ``client_encrypted``, insert ``corpus_copied`` into ``db.coll``.
-            return clientEncrypted
-              .db(dataDbName)
-              .collection(dataCollName)
-              .insertOne(corpusCopied);
+            return clientEncrypted.db(dataDbName).collection(dataCollName).insertOne(corpusCopied);
           })
           .then(() => {
             // 7. Using ``client_encrypted``, find the inserted document from ``db.coll`` to a variable named ``corpus_decrypted``.

@@ -4,7 +4,7 @@ const expect = require('chai').expect;
 const mock = require('mongodb-mock-server');
 const Connection = require('../../../src/core/connection/connection');
 
-describe('Connection', function() {
+describe('Connection', function () {
   const noop = () => {};
   let server;
   afterEach(() => mock.cleanup());
@@ -13,7 +13,7 @@ describe('Connection', function() {
     const config = options.config;
     const args = {
       metadata: { requires: { topology: ['single'] } },
-      test: function(done) {
+      test: function (done) {
         const connection = new Connection(noop, Object.assign({ port: server.port }, config));
 
         const cleanup = err => {
@@ -60,7 +60,7 @@ describe('Connection', function() {
     }
   }
 
-  describe.skip('IPv4', function() {
+  describe.skip('IPv4', function () {
     beforeEach(() => mock.createServer(0, '127.0.0.1').then(_server => (server = _server)));
 
     testCase('should connect with no family', {
@@ -85,7 +85,7 @@ describe('Connection', function() {
     });
   });
 
-  describe.skip('IPv6', function() {
+  describe.skip('IPv6', function () {
     beforeEach(() => mock.createServer(0, '::').then(_server => (server = _server)));
 
     testCase('should connect with no family', {

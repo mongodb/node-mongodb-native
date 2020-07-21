@@ -9,8 +9,8 @@ const chai = require('chai');
 const expect = chai.expect;
 chai.use(require('chai-subset'));
 
-describe('Operation Examples', function() {
-  before(function() {
+describe('Operation Examples', function () {
+  before(function () {
     return setupDatabase(this.configuration, ['integration_tests_2']);
   });
 
@@ -36,10 +36,10 @@ describe('Operation Examples', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -70,7 +70,7 @@ describe('Operation Examples', function() {
         // Create a collection
         var collection = db.collection('aggregationExample1');
         // Insert the docs
-        collection.insertMany(docs, { w: 1 }, function(err, result) {
+        collection.insertMany(docs, { w: 1 }, function (err, result) {
           test.equal(null, err);
           test.ok(result);
 
@@ -91,7 +91,7 @@ describe('Operation Examples', function() {
             },
             { $sort: { _id: -1 } }
           ]);
-          cursor.toArray(function(err, result) {
+          cursor.toArray(function (err, result) {
             test.equal(null, err);
             test.equal('good', result[0]._id.tags);
             test.deepEqual(['bob'], result[0].authors);
@@ -122,10 +122,10 @@ describe('Operation Examples', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -156,7 +156,7 @@ describe('Operation Examples', function() {
         // Create a collection
         var collection = db.collection('aggregationExample2');
         // Insert the docs
-        collection.insertMany(docs, { w: 1 }, function(err, result) {
+        collection.insertMany(docs, { w: 1 }, function (err, result) {
           test.equal(null, err);
           test.ok(result);
 
@@ -181,7 +181,7 @@ describe('Operation Examples', function() {
           );
 
           // Get all the aggregation results
-          cursor.toArray(function(err, docs) {
+          cursor.toArray(function (err, docs) {
             test.equal(null, err);
             test.equal(2, docs.length);
             client.close(done);
@@ -208,10 +208,10 @@ describe('Operation Examples', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -242,7 +242,7 @@ describe('Operation Examples', function() {
         // Create a collection
         var collection = db.collection('aggregation_toArray_example');
         // Insert the docs
-        collection.insertMany(docs, { w: 1 }, function(err, result) {
+        collection.insertMany(docs, { w: 1 }, function (err, result) {
           test.equal(null, err);
           test.ok(result);
 
@@ -267,7 +267,7 @@ describe('Operation Examples', function() {
           );
 
           // Get all the aggregation results
-          cursor.toArray(function(err, docs) {
+          cursor.toArray(function (err, docs) {
             test.equal(null, err);
             test.equal(2, docs.length);
             client.close(done);
@@ -294,10 +294,10 @@ describe('Operation Examples', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -328,7 +328,7 @@ describe('Operation Examples', function() {
         // Create a collection
         var collection = db.collection('aggregation_next_example');
         // Insert the docs
-        collection.insertMany(docs, { w: 1 }, function(err, result) {
+        collection.insertMany(docs, { w: 1 }, function (err, result) {
           test.ok(result);
           test.equal(null, err);
 
@@ -353,7 +353,7 @@ describe('Operation Examples', function() {
           );
 
           // Get all the aggregation results
-          cursor.next(function(err, docs) {
+          cursor.next(function (err, docs) {
             test.ok(docs);
             test.equal(null, err);
 
@@ -384,10 +384,10 @@ describe('Operation Examples', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -418,7 +418,7 @@ describe('Operation Examples', function() {
         // Create a collection
         var collection = db.collection('aggregation_each_example');
         // Insert the docs
-        collection.insertMany(docs, { w: 1 }, function(err, result) {
+        collection.insertMany(docs, { w: 1 }, function (err, result) {
           test.ok(result);
           test.equal(null, err);
 
@@ -443,7 +443,7 @@ describe('Operation Examples', function() {
           );
 
           // Get all the aggregation results
-          cursor.each(function(err, docs) {
+          cursor.each(function (err, docs) {
             test.equal(null, err);
 
             if (docs == null) {
@@ -472,10 +472,10 @@ describe('Operation Examples', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -506,7 +506,7 @@ describe('Operation Examples', function() {
         // Create a collection
         var collection = db.collection('aggregation_forEach_example');
         // Insert the docs
-        collection.insertMany(docs, { w: 1 }, function(err, result) {
+        collection.insertMany(docs, { w: 1 }, function (err, result) {
           test.ok(result);
           test.equal(null, err);
 
@@ -533,11 +533,11 @@ describe('Operation Examples', function() {
           var count = 0;
           // Get all the aggregation results
           cursor.forEach(
-            function(doc) {
+            function (doc) {
               test.ok(doc != null);
               count = count + 1;
             },
-            function(err) {
+            function (err) {
               test.equal(null, err);
               test.equal(2, count);
 
@@ -566,10 +566,10 @@ describe('Operation Examples', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -600,7 +600,7 @@ describe('Operation Examples', function() {
         // Create a collection
         var collection = db.collection('aggregationExample3');
         // Insert the docs
-        collection.insertMany(docs, { w: 1 }, function(err, result) {
+        collection.insertMany(docs, { w: 1 }, function (err, result) {
           test.ok(result);
           test.equal(null, err);
 
@@ -626,11 +626,11 @@ describe('Operation Examples', function() {
 
           var count = 0;
           // Get all the aggregation results
-          cursor.on('data', function() {
+          cursor.on('data', function () {
             count = count + 1;
           });
 
-          cursor.once('end', function() {
+          cursor.once('end', function () {
             test.equal(2, count);
             client.close(done);
           });
@@ -651,10 +651,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -669,7 +669,7 @@ describe('Operation Examples', function() {
         // Crete the collection for the distinct example
         var collection = db.collection('countExample1');
         // Insert documents to perform distinct against
-        collection.insertMany([{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4, b: 1 }], { w: 1 }, function(
+        collection.insertMany([{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4, b: 1 }], { w: 1 }, function (
           err,
           ids
         ) {
@@ -677,12 +677,12 @@ describe('Operation Examples', function() {
           test.equal(null, err);
 
           // Perform a total count command
-          collection.count(function(err, count) {
+          collection.count(function (err, count) {
             test.equal(null, err);
             test.equal(4, count);
 
             // Perform a partial account where b=1
-            collection.count({ b: 1 }, function(err, count) {
+            collection.count({ b: 1 }, function (err, count) {
               test.equal(null, err);
               test.equal(1, count);
 
@@ -706,10 +706,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -732,7 +732,7 @@ describe('Operation Examples', function() {
             { a: 4, b: 4 }
           ],
           configuration.writeConcernMax(),
-          function(err, result) {
+          function (err, result) {
             test.ok(result);
             test.equal(null, err);
 
@@ -740,17 +740,17 @@ describe('Operation Examples', function() {
             collection.createIndex(
               { a: 1, b: 1 },
               { unique: true, background: true, w: 1 },
-              function(err, indexName) {
+              function (err, indexName) {
                 test.ok(indexName);
                 test.equal(null, err);
 
                 // Show that duplicate records got dropped
-                collection.find({}).toArray(function(err, items) {
+                collection.find({}).toArray(function (err, items) {
                   test.equal(null, err);
                   test.equal(4, items.length);
 
                   // Perform a query, with explain to show we hit the query
-                  collection.find({ a: 2 }).explain(function(err, explanation) {
+                  collection.find({ a: 2 }).explain(function (err, explanation) {
                     test.equal(null, err);
                     test.ok(explanation != null);
 
@@ -777,10 +777,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -795,7 +795,7 @@ describe('Operation Examples', function() {
         // Create a collection we want to drop later
         var collection = db.collection('createIndexExample2');
         // Insert a bunch of documents for the index
-        collection.insertMany([{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4 }], { w: 1 }, function(
+        collection.insertMany([{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4 }], { w: 1 }, function (
           err,
           result
         ) {
@@ -803,11 +803,11 @@ describe('Operation Examples', function() {
           test.equal(null, err);
 
           // Create an index on the a field
-          collection.createIndex('a', { w: 1 }, function(err, indexName) {
+          collection.createIndex('a', { w: 1 }, function (err, indexName) {
             test.equal('a_1', indexName);
 
             // Perform a query, with explain to show we hit the query
-            collection.find({ a: 2 }).explain(function(err, explanation) {
+            collection.find({ a: 2 }).explain(function (err, explanation) {
               test.equal(null, err);
               test.ok(explanation != null);
 
@@ -831,10 +831,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -857,24 +857,24 @@ describe('Operation Examples', function() {
             { a: 4, b: 4 }
           ],
           { w: 1 },
-          function(err, result) {
+          function (err, result) {
             test.ok(result);
             test.equal(null, err);
 
             var options = { unique: true, background: true, w: 1 };
             // Create an index on the a field
-            collection.createIndex({ a: 1, b: 1 }, options, function(err, indexName) {
+            collection.createIndex({ a: 1, b: 1 }, options, function (err, indexName) {
               test.ok(indexName);
               test.equal(null, err);
 
               test.ok(!options.readPreference);
               // Show that duplicate records got dropped
-              collection.find({}).toArray(function(err, items) {
+              collection.find({}).toArray(function (err, items) {
                 test.equal(null, err);
                 test.equal(4, items.length);
 
                 // Perform a query, with explain to show we hit the query
-                collection.find({ a: 2 }).explain(function(err, explanation) {
+                collection.find({ a: 2 }).explain(function (err, explanation) {
                   test.equal(null, err);
                   test.ok(explanation != null);
 
@@ -900,10 +900,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -929,16 +929,16 @@ describe('Operation Examples', function() {
             { a: 3 }
           ],
           configuration.writeConcernMax(),
-          function(err, ids) {
+          function (err, ids) {
             test.ok(ids);
             test.equal(null, err);
 
             // Perform a distinct query against the a field
-            collection.distinct('a', function(err, docs) {
+            collection.distinct('a', function (err, docs) {
               test.deepEqual([0, 1, 2, 3], docs.sort());
 
               // Perform a distinct query against the sub-field b.c
-              collection.distinct('b.c', function(err, docs) {
+              collection.distinct('b.c', function (err, docs) {
                 test.deepEqual(['a', 'b', 'c'], docs.sort());
 
                 client.close(done);
@@ -962,10 +962,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -992,12 +992,12 @@ describe('Operation Examples', function() {
             { a: 5, c: 1 }
           ],
           configuration.writeConcernMax(),
-          function(err, ids) {
+          function (err, ids) {
             test.ok(ids);
             test.equal(null, err);
 
             // Perform a distinct query with a filter against the documents
-            collection.distinct('a', { c: 1 }, function(err, docs) {
+            collection.distinct('a', { c: 1 }, function (err, docs) {
               test.deepEqual([5], docs.sort());
 
               client.close(done);
@@ -1020,10 +1020,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -1039,17 +1039,17 @@ describe('Operation Examples', function() {
         var collection = db.collection('test_other_drop');
 
         // Drop the collection
-        collection.drop(function(/*err, reply*/) {
+        collection.drop(function (/*err, reply*/) {
           // TODO: reenable once SERVER-36317 is resolved
           // expect(err).to.exist;
           // expect(reply).to.not.exist;
 
           // Ensure we don't have the collection in the set of names
-          db.listCollections().toArray(function(err, replies) {
+          db.listCollections().toArray(function (err, replies) {
             var found = false;
             // For each collection in the list of collection names in this db look for the
             // dropped collection
-            replies.forEach(function(document) {
+            replies.forEach(function (document) {
               if (document.name === 'test_other_drop') {
                 found = true;
                 return;
@@ -1079,10 +1079,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -1094,12 +1094,12 @@ describe('Operation Examples', function() {
         // REMOVE-LINE var db = client.db(configuration.db);
         // BEGIN
         var db = client.db(configuration.db);
-        db.createCollection('dropExample1', function(err, r) {
+        db.createCollection('dropExample1', function (err, r) {
           test.ok(r);
           test.equal(null, err);
 
           // Drop the collection
-          db.collection('dropExample1').dropAllIndexes(function(err, reply) {
+          db.collection('dropExample1').dropAllIndexes(function (err, reply) {
             test.ok(reply);
             test.equal(null, err);
 
@@ -1123,10 +1123,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -1148,7 +1148,7 @@ describe('Operation Examples', function() {
             { a: 4, b: 4 }
           ],
           { w: 1 },
-          function(err, result) {
+          function (err, result) {
             test.ok(result);
             test.equal(null, err);
 
@@ -1156,17 +1156,17 @@ describe('Operation Examples', function() {
             collection.ensureIndex(
               { a: 1, b: 1 },
               { unique: true, background: true, w: 1 },
-              function(err, indexName) {
+              function (err, indexName) {
                 test.ok(indexName);
                 test.equal(null, err);
 
                 // Drop the index
-                collection.dropIndex('a_1_b_1', function(err, result) {
+                collection.dropIndex('a_1_b_1', function (err, result) {
                   test.ok(result);
                   test.equal(null, err);
 
                   // Verify that the index is gone
-                  collection.indexInformation(function(err, indexInformation) {
+                  collection.indexInformation(function (err, indexInformation) {
                     test.deepEqual([['_id', 1]], indexInformation._id_);
                     test.equal(undefined, indexInformation.a_1_b_1);
 
@@ -1193,10 +1193,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -1218,7 +1218,7 @@ describe('Operation Examples', function() {
             { a: 4, b: 4 }
           ],
           configuration.writeConcernMax(),
-          function(err, result) {
+          function (err, result) {
             test.ok(result);
             test.equal(null, err);
 
@@ -1227,17 +1227,17 @@ describe('Operation Examples', function() {
               'ensureIndexExample1',
               { a: 1, b: 1 },
               { unique: true, background: true, w: 1 },
-              function(err, indexName) {
+              function (err, indexName) {
                 test.ok(indexName);
                 test.equal(null, err);
 
                 // Show that duplicate records got dropped
-                collection.find({}).toArray(function(err, items) {
+                collection.find({}).toArray(function (err, items) {
                   test.equal(null, err);
                   test.equal(4, items.length);
 
                   // Perform a query, with explain to show we hit the query
-                  collection.find({ a: 2 }).explain(function(err, explanation) {
+                  collection.find({ a: 2 }).explain(function (err, explanation) {
                     test.equal(null, err);
                     test.ok(explanation != null);
 
@@ -1264,10 +1264,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -1289,7 +1289,7 @@ describe('Operation Examples', function() {
             { a: 4, b: 4 }
           ],
           { w: 1 },
-          function(err, result) {
+          function (err, result) {
             test.ok(result);
             test.equal(null, err);
 
@@ -1297,17 +1297,17 @@ describe('Operation Examples', function() {
             collection.ensureIndex(
               { a: 1, b: 1 },
               { unique: true, background: true, w: 1 },
-              function(err, indexName) {
+              function (err, indexName) {
                 test.ok(indexName);
                 test.equal(null, err);
 
                 // Show that duplicate records got dropped
-                collection.find({}).toArray(function(err, items) {
+                collection.find({}).toArray(function (err, items) {
                   test.equal(null, err);
                   test.equal(4, items.length);
 
                   // Perform a query, with explain to show we hit the query
-                  collection.find({ a: 2 }).explain(function(err, explanation) {
+                  collection.find({ a: 2 }).explain(function (err, explanation) {
                     test.equal(null, err);
                     test.ok(explanation != null);
 
@@ -1334,10 +1334,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -1356,12 +1356,12 @@ describe('Operation Examples', function() {
         collection.insertMany(
           [{ a: 1 }, { a: 2 }, { a: 3 }],
           configuration.writeConcernMax(),
-          function(err, result) {
+          function (err, result) {
             test.ok(result);
             test.equal(null, err);
 
             // Perform a simple find and return all the documents
-            collection.find().toArray(function(err, docs) {
+            collection.find().toArray(function (err, docs) {
               test.equal(null, err);
               test.equal(3, docs.length);
 
@@ -1385,10 +1385,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -1406,12 +1406,12 @@ describe('Operation Examples', function() {
         collection.insertMany(
           [{ a: 1 }, { a: 2 }, { a: 3 }],
           configuration.writeConcernMax(),
-          function(err, result) {
+          function (err, result) {
             test.ok(result);
             test.equal(null, err);
 
             // Perform a simple find and return all the documents
-            collection.find({}).explain(function(err, explain) {
+            collection.find({}).explain(function (err, explain) {
               test.equal(null, err);
               test.ok(explain != null);
 
@@ -1435,10 +1435,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -1460,7 +1460,7 @@ describe('Operation Examples', function() {
             { a: 3, b: 3 }
           ],
           configuration.writeConcernMax(),
-          function(err, result) {
+          function (err, result) {
             test.ok(result);
             test.equal(null, err);
 
@@ -1470,7 +1470,7 @@ describe('Operation Examples', function() {
               .skip(1)
               .limit(1)
               .project({ b: 1 })
-              .toArray(function(err, docs) {
+              .toArray(function (err, docs) {
                 test.equal(null, err);
                 test.equal(1, docs.length);
                 test.equal(undefined, docs[0].a);
@@ -1500,10 +1500,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -1522,7 +1522,7 @@ describe('Operation Examples', function() {
         collection.insertMany(
           [{ a: 1 }, { b: 1 }, { c: 1 }],
           configuration.writeConcernMax(),
-          function(err, result) {
+          function (err, result) {
             test.ok(result);
             test.equal(null, err);
 
@@ -1532,7 +1532,7 @@ describe('Operation Examples', function() {
               [['a', 1]],
               { $set: { b1: 1 } },
               { new: true },
-              function(err, doc) {
+              function (err, doc) {
                 test.equal(null, err);
                 test.equal(1, doc.value.a);
                 test.equal(1, doc.value.b1);
@@ -1544,12 +1544,12 @@ describe('Operation Examples', function() {
                   [['b', 1]],
                   { $set: { b: 2 } },
                   { remove: true },
-                  function(err, doc) {
+                  function (err, doc) {
                     test.ok(doc);
                     test.equal(null, err);
 
                     // Verify that the document is gone
-                    collection.findOne({ b: 1 }, function(err, item) {
+                    collection.findOne({ b: 1 }, function (err, item) {
                       test.equal(null, err);
                       test.equal(null, item);
 
@@ -1560,7 +1560,7 @@ describe('Operation Examples', function() {
                         [['b', 1]],
                         { d: 1, f: 1 },
                         { new: true, upsert: true, w: 1 },
-                        function(err, doc) {
+                        function (err, doc) {
                           test.equal(null, err);
                           test.equal(1, doc.value.d);
                           test.equal(1, doc.value.f);
@@ -1591,10 +1591,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -1612,19 +1612,19 @@ describe('Operation Examples', function() {
         collection.insertMany(
           [{ a: 1 }, { b: 1, d: 1 }, { c: 1 }],
           configuration.writeConcernMax(),
-          function(err, result) {
+          function (err, result) {
             test.ok(result);
             test.equal(null, err);
 
             // Simple findAndModify command returning the old document and
             // removing it at the same time
-            collection.findAndRemove({ b: 1 }, [['b', 1]], function(err, doc) {
+            collection.findAndRemove({ b: 1 }, [['b', 1]], function (err, doc) {
               test.equal(null, err);
               test.equal(1, doc.value.b);
               test.equal(1, doc.value.d);
 
               // Verify that the document is gone
-              collection.findOne({ b: 1 }, function(err, item) {
+              collection.findOne({ b: 1 }, function (err, item) {
                 test.equal(null, err);
                 test.equal(null, item);
 
@@ -1649,10 +1649,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -1674,12 +1674,12 @@ describe('Operation Examples', function() {
             { a: 3, b: 3 }
           ],
           configuration.writeConcernMax(),
-          function(err, result) {
+          function (err, result) {
             test.ok(result);
             test.equal(null, err);
 
             // Perform a simple find and return all the documents
-            collection.findOne({ a: 2 }, { fields: { b: 1 } }, function(err, doc) {
+            collection.findOne({ a: 2 }, { fields: { b: 1 } }, function (err, doc) {
               test.equal(null, err);
               test.equal(undefined, doc.a);
               test.equal(2, doc.b);
@@ -1704,7 +1704,7 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
 
@@ -1779,10 +1779,10 @@ describe('Operation Examples', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -1798,12 +1798,12 @@ describe('Operation Examples', function() {
         var collection = db.collection('test_map_reduce_functions_inline');
 
         // Insert some test documents
-        collection.insertMany([{ user_id: 1 }, { user_id: 2 }], { w: 1 }, function(err, r) {
+        collection.insertMany([{ user_id: 1 }, { user_id: 2 }], { w: 1 }, function (err, r) {
           test.ok(r);
           test.equal(null, err);
 
           // Map function
-          var map = function() {
+          var map = function () {
             emit(this.user_id, 1); // eslint-disable-line
           };
 
@@ -1814,7 +1814,7 @@ describe('Operation Examples', function() {
           };
 
           // Execute map reduce and return results inline
-          collection.mapReduce(map, reduce, { out: { inline: 1 }, verbose: true }, function(
+          collection.mapReduce(map, reduce, { out: { inline: 1 }, verbose: true }, function (
             err,
             result
           ) {
@@ -1825,7 +1825,7 @@ describe('Operation Examples', function() {
               map,
               reduce,
               { out: { replace: 'mapreduce_integration_test' }, verbose: true },
-              function(err, result) {
+              function (err, result) {
                 test.ok(result.stats != null);
                 client.close(done);
               }
@@ -1848,10 +1848,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -1873,17 +1873,17 @@ describe('Operation Examples', function() {
             { user_id: 2, timestamp: new Date() }
           ],
           { w: 1 },
-          function(err, r) {
+          function (err, r) {
             test.ok(r);
             test.equal(null, err);
 
             // Map function
-            var map = function() {
+            var map = function () {
               emit(fn(this.timestamp.getYear()), 1); // eslint-disable-line
             };
 
             // Reduce function
-            var reduce = function(k, v) {
+            var reduce = function (k, v) {
               var count = 0;
               for (var i = 0; i < v.length; i++) {
                 count += v[i];
@@ -1892,7 +1892,7 @@ describe('Operation Examples', function() {
             };
 
             // Javascript function available in the map reduce scope
-            var t = function(val) {
+            var t = function (val) {
               return val + 1;
             };
 
@@ -1901,11 +1901,11 @@ describe('Operation Examples', function() {
             o.scope = { fn: new Code(t.toString()) };
             o.out = { replace: 'replacethiscollection' };
 
-            collection.mapReduce(map, reduce, o, function(err, outCollection) {
+            collection.mapReduce(map, reduce, o, function (err, outCollection) {
               expect(err).to.not.exist;
 
               // Find all entries in the map-reduce collection
-              outCollection.find().toArray(function(err, results) {
+              outCollection.find().toArray(function (err, results) {
                 test.equal(null, err);
                 test.equal(2, results[0].value);
 
@@ -1914,11 +1914,11 @@ describe('Operation Examples', function() {
                 o.scope = { fn: t };
                 o.out = { replace: 'replacethiscollection' };
 
-                collection.mapReduce(map, reduce, o, function(err, outCollection) {
+                collection.mapReduce(map, reduce, o, function (err, outCollection) {
                   test.equal(null, err);
 
                   // Find all entries in the map-reduce collection
-                  outCollection.find().toArray(function(err, results) {
+                  outCollection.find().toArray(function (err, results) {
                     expect(err).to.not.exist;
                     test.equal(2, results[0].value);
 
@@ -1945,10 +1945,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -1970,17 +1970,17 @@ describe('Operation Examples', function() {
             { user_id: 2, timestamp: new Date() }
           ],
           { w: 1 },
-          function(err, r) {
+          function (err, r) {
             test.ok(r);
             test.equal(null, err);
 
             // Map function
-            var map = function() {
+            var map = function () {
               emit(obj.fn(this.timestamp.getYear()), 1); // eslint-disable-line
             };
 
             // Reduce function
-            var reduce = function(k, v) {
+            var reduce = function (k, v) {
               var count = 0;
               for (var i = 0; i < v.length; i++) {
                 count += v[i];
@@ -1990,7 +1990,7 @@ describe('Operation Examples', function() {
             };
 
             // Javascript function available in the map reduce scope
-            var t = function(val) {
+            var t = function (val) {
               return val + 1;
             };
 
@@ -1999,11 +1999,11 @@ describe('Operation Examples', function() {
             o.scope = { obj: { fn: new Code(t.toString()) } };
             o.out = { replace: 'replacethiscollection' };
 
-            collection.mapReduce(map, reduce, o, function(err, outCollection) {
+            collection.mapReduce(map, reduce, o, function (err, outCollection) {
               test.equal(null, err);
 
               // Find all entries in the map-reduce collection
-              outCollection.find().toArray(function(err, results) {
+              outCollection.find().toArray(function (err, results) {
                 test.equal(null, err);
                 test.equal(2, results[0].value);
 
@@ -2012,11 +2012,11 @@ describe('Operation Examples', function() {
                 o.scope = { obj: { fn: t } };
                 o.out = { replace: 'replacethiscollection' };
 
-                collection.mapReduce(map, reduce, o, function(err, outCollection) {
+                collection.mapReduce(map, reduce, o, function (err, outCollection) {
                   test.equal(null, err);
 
                   // Find all entries in the map-reduce collection
-                  outCollection.find().toArray(function(err, results) {
+                  outCollection.find().toArray(function (err, results) {
                     test.equal(2, results[0].value);
                     client.close(done);
                   });
@@ -2041,10 +2041,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -2059,7 +2059,7 @@ describe('Operation Examples', function() {
         // Crete the collection for the distinct example
         var collection = db.collection('simple_key_based_distinct');
         // Create a geo 2d index
-        collection.ensureIndex({ loc: '2d' }, configuration.writeConcernMax(), function(
+        collection.ensureIndex({ loc: '2d' }, configuration.writeConcernMax(), function (
           err,
           result
         ) {
@@ -2067,13 +2067,13 @@ describe('Operation Examples', function() {
           test.equal(null, err);
 
           // Create a simple single field index
-          collection.ensureIndex({ a: 1 }, configuration.writeConcernMax(), function(err, result) {
+          collection.ensureIndex({ a: 1 }, configuration.writeConcernMax(), function (err, result) {
             test.ok(result);
             test.equal(null, err);
 
-            setTimeout(function() {
+            setTimeout(function () {
               // List all of the indexes on the collection
-              collection.indexes(function(err, indexes) {
+              collection.indexes(function (err, indexes) {
                 test.equal(3, indexes.length);
 
                 client.close(done);
@@ -2097,10 +2097,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -2120,20 +2120,20 @@ describe('Operation Examples', function() {
         test.equal(null, err);
 
         // Create an index on the collection
-        collection.createIndex('a', configuration.writeConcernMax(), function(err, indexName) {
+        collection.createIndex('a', configuration.writeConcernMax(), function (err, indexName) {
           test.ok(indexName);
           test.equal(null, err);
 
           // Let's test to check if a single index exists
-          collection.indexExists('a_1', function(err, result) {
+          collection.indexExists('a_1', function (err, result) {
             test.equal(true, result);
 
             // Let's test to check if multiple indexes are available
-            collection.indexExists(['a_1', '_id_'], function(err, result) {
+            collection.indexExists(['a_1', '_id_'], function (err, result) {
               test.equal(true, result);
 
               // Check if a non existing index exists
-              collection.indexExists('c_1', function(err, result) {
+              collection.indexExists('c_1', function (err, result) {
                 test.equal(false, result);
 
                 client.close(done);
@@ -2157,10 +2157,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -2183,7 +2183,7 @@ describe('Operation Examples', function() {
             { a: 4, b: 4 }
           ],
           configuration.writeConcernMax(),
-          function(err, result) {
+          function (err, result) {
             test.ok(result);
             test.equal(null, err);
 
@@ -2191,12 +2191,12 @@ describe('Operation Examples', function() {
             collection.ensureIndex(
               { a: 1, b: 1 },
               { unique: true, background: true, w: 1 },
-              function(err, indexName) {
+              function (err, indexName) {
                 test.ok(indexName);
                 test.equal(null, err);
 
                 // Fetch basic indexInformation for collection
-                db.indexInformation('more_index_information_test_2', function(
+                db.indexInformation('more_index_information_test_2', function (
                   err,
                   indexInformation
                 ) {
@@ -2210,7 +2210,7 @@ describe('Operation Examples', function() {
                   );
 
                   // Fetch full index information
-                  collection.indexInformation({ full: true }, function(err, indexInformation) {
+                  collection.indexInformation({ full: true }, function (err, indexInformation) {
                     test.deepEqual({ _id: 1 }, indexInformation[0].key);
                     test.deepEqual({ a: 1, b: 1 }, indexInformation[1].key);
 
@@ -2237,10 +2237,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -2263,7 +2263,7 @@ describe('Operation Examples', function() {
             { a: 4, b: 4 }
           ],
           { w: 1 },
-          function(err, result) {
+          function (err, result) {
             test.ok(result);
             test.equal(null, err);
 
@@ -2271,12 +2271,12 @@ describe('Operation Examples', function() {
             collection.ensureIndex(
               { a: 1, b: 1 },
               { unique: true, background: true, w: 1 },
-              function(err, indexName) {
+              function (err, indexName) {
                 test.ok(indexName);
                 test.equal(null, err);
 
                 // Fetch basic indexInformation for collection
-                collection.indexInformation(function(err, indexInformation) {
+                collection.indexInformation(function (err, indexInformation) {
                   test.deepEqual([['_id', 1]], indexInformation._id_);
                   test.deepEqual(
                     [
@@ -2287,7 +2287,7 @@ describe('Operation Examples', function() {
                   );
 
                   // Fetch full index information
-                  collection.indexInformation({ full: true }, function(err, indexInformation) {
+                  collection.indexInformation({ full: true }, function (err, indexInformation) {
                     test.deepEqual({ _id: 1 }, indexInformation[0].key);
                     test.deepEqual({ a: 1, b: 1 }, indexInformation[1].key);
 
@@ -2315,10 +2315,10 @@ describe('Operation Examples', function() {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -2335,9 +2335,9 @@ describe('Operation Examples', function() {
         collection.insertOne({ hello: 'world_no_safe' });
 
         // Wait for a second before finishing up, to ensure we have written the item to disk
-        setTimeout(function() {
+        setTimeout(function () {
           // Fetch the document
-          collection.findOne({ hello: 'world_no_safe' }, function(err, item) {
+          collection.findOne({ hello: 'world_no_safe' }, function (err, item) {
             test.equal(null, err);
             test.equal('world_no_safe', item.hello);
             client.close(done);
@@ -2361,10 +2361,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -2382,12 +2382,12 @@ describe('Operation Examples', function() {
         collection.insertMany(
           [{ hello: 'world_safe1' }, { hello: 'world_safe2' }],
           configuration.writeConcernMax(),
-          function(err, result) {
+          function (err, result) {
             test.ok(result);
             test.equal(null, err);
 
             // Fetch the document
-            collection.findOne({ hello: 'world_safe2' }, function(err, item) {
+            collection.findOne({ hello: 'world_safe2' }, function (err, item) {
               test.equal(null, err);
               test.equal('world_safe2', item.hello);
               client.close(done);
@@ -2412,10 +2412,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -2436,15 +2436,15 @@ describe('Operation Examples', function() {
         collection.insertOne(
           {
             hello: 'world',
-            func: function() {}
+            func: function () {}
           },
           o,
-          function(err, result) {
+          function (err, result) {
             test.ok(result);
             test.equal(null, err);
 
             // Fetch the document
-            collection.findOne({ hello: 'world' }, function(err, item) {
+            collection.findOne({ hello: 'world' }, function (err, item) {
               test.equal(null, err);
               test.ok('function() {}', item.code);
               client.close(done);
@@ -2472,10 +2472,10 @@ describe('Operation Examples', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -2491,7 +2491,7 @@ describe('Operation Examples', function() {
         var collection = db.collection('keepGoingExample');
 
         // Add an unique index to title to force errors in the batch insert
-        collection.ensureIndex({ title: 1 }, { unique: true }, function(err, indexName) {
+        collection.ensureIndex({ title: 1 }, { unique: true }, function (err, indexName) {
           test.ok(indexName);
           test.equal(null, err);
 
@@ -2499,7 +2499,7 @@ describe('Operation Examples', function() {
           collection.insertMany(
             [{ name: 'Jim' }, { name: 'Sarah', title: 'Princess' }],
             configuration.writeConcernMax(),
-            function(err, result) {
+            function (err, result) {
               test.ok(result);
               test.equal(null, err);
 
@@ -2511,13 +2511,13 @@ describe('Operation Examples', function() {
                   { name: 'Gump', title: 'Gump' }
                 ],
                 { w: 1, keepGoing: true },
-                function(err, result) {
+                function (err, result) {
                   test.equal(result, null);
                   test.ok(err);
                   test.ok(err.result);
 
                   // Count the number of documents left (should not include the duplicates)
-                  collection.count(function(err, count) {
+                  collection.count(function (err, count) {
                     test.equal(3, count);
                     client.close(done);
                   });
@@ -2542,10 +2542,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -2558,14 +2558,14 @@ describe('Operation Examples', function() {
         // BEGIN
         var db = client.db(configuration.db);
         // Create a test collection that we are getting the options back from
-        db.createCollection('test_collection_is_capped', { capped: true, size: 1024 }, function(
+        db.createCollection('test_collection_is_capped', { capped: true, size: 1024 }, function (
           err,
           collection
         ) {
           test.equal('test_collection_is_capped', collection.collectionName);
 
           // Let's fetch the collection options
-          collection.isCapped(function(err, capped) {
+          collection.isCapped(function (err, capped) {
             test.equal(true, capped);
 
             client.close(done);
@@ -2587,10 +2587,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -2603,14 +2603,14 @@ describe('Operation Examples', function() {
         // BEGIN
         var db = client.db(configuration.db);
         // Create a test collection that we are getting the options back from
-        db.createCollection('test_collection_options', { capped: true, size: 1024 }, function(
+        db.createCollection('test_collection_options', { capped: true, size: 1024 }, function (
           err,
           collection
         ) {
           test.equal('test_collection_options', collection.collectionName);
 
           // Let's fetch the collection options
-          collection.options(function(err, options) {
+          collection.options(function (err, options) {
             test.equal(true, options.capped);
             test.ok(options.size >= 1024);
 
@@ -2633,10 +2633,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -2651,7 +2651,7 @@ describe('Operation Examples', function() {
         // Fetch a collection to insert document into
         var collection = db.collection('remove_all_documents_no_safe');
         // Insert a bunch of documents
-        collection.insertMany([{ a: 1 }, { b: 2 }], { w: 1 }, function(err, result) {
+        collection.insertMany([{ a: 1 }, { b: 2 }], { w: 1 }, function (err, result) {
           test.ok(result);
           test.equal(null, err);
 
@@ -2659,7 +2659,7 @@ describe('Operation Examples', function() {
           collection.removeMany();
 
           // Fetch all results
-          collection.find().toArray(function(err, items) {
+          collection.find().toArray(function (err, items) {
             test.equal(null, err);
             test.equal(0, items.length);
             client.close(done);
@@ -2681,10 +2681,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -2701,12 +2701,12 @@ describe('Operation Examples', function() {
         // Fetch a collection to insert document into
         var collection = db.collection('remove_subset_of_documents_safe');
         // Insert a bunch of documents
-        collection.insertMany([{ a: 1 }, { b: 2 }], { w: 1 }, function(err, result) {
+        collection.insertMany([{ a: 1 }, { b: 2 }], { w: 1 }, function (err, result) {
           test.ok(result);
           test.equal(null, err);
 
           // Remove all the document
-          collection.removeOne({ a: 1 }, { w: 1 }, function(err, r) {
+          collection.removeOne({ a: 1 }, { w: 1 }, function (err, r) {
             test.equal(null, err);
             test.equal(1, r.result.n);
             client.close(done);
@@ -2728,10 +2728,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -2744,8 +2744,8 @@ describe('Operation Examples', function() {
         // BEGIN
         var db = client.db(configuration.db);
         // Open a couple of collections
-        db.createCollection('test_rename_collection', function(err, collection1) {
-          db.createCollection('test_rename_collection2', function(err, collection2) {
+        db.createCollection('test_rename_collection', function (err, collection1) {
+          db.createCollection('test_rename_collection2', function (err, collection2) {
             test.ok(collection2);
             test.equal(null, err);
 
@@ -2797,7 +2797,7 @@ describe('Operation Examples', function() {
             }
 
             // Insert a couple of documents
-            collection1.insertMany([{ x: 1 }, { x: 2 }], configuration.writeConcernMax(), function(
+            collection1.insertMany([{ x: 1 }, { x: 2 }], configuration.writeConcernMax(), function (
               err,
               docs
             ) {
@@ -2805,18 +2805,18 @@ describe('Operation Examples', function() {
               test.equal(null, err);
 
               // Attemp to rename the first collection to the second one, this will fail
-              collection1.rename('test_rename_collection2', function(err, collection) {
+              collection1.rename('test_rename_collection2', function (err, collection) {
                 test.equal(null, collection);
                 test.ok(err instanceof Error);
                 test.ok(err.message.length > 0);
 
                 // Attemp to rename the first collection to a name that does not exist
                 // this will be successful
-                collection1.rename('test_rename_collection3', function(err, collection2) {
+                collection1.rename('test_rename_collection3', function (err, collection2) {
                   test.equal('test_rename_collection3', collection2.collectionName);
 
                   // Ensure that the collection is pointing to the new one
-                  collection2.count(function(err, count) {
+                  collection2.count(function (err, count) {
                     test.equal(2, count);
                     client.close(done);
                   });
@@ -2841,10 +2841,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -2862,9 +2862,9 @@ describe('Operation Examples', function() {
         collection.save({ hello: 'world' });
 
         // Wait for a second
-        setTimeout(function() {
+        setTimeout(function () {
           // Find the saved document
-          collection.findOne({ hello: 'world' }, function(err, item) {
+          collection.findOne({ hello: 'world' }, function (err, item) {
             test.equal(null, err);
             test.equal('world', item.hello);
             client.close(done);
@@ -2886,10 +2886,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -2905,12 +2905,15 @@ describe('Operation Examples', function() {
         var collection = db.collection('save_a_simple_document_modify_it_and_resave_it');
 
         // Save a document with no safe option
-        collection.save({ hello: 'world' }, configuration.writeConcernMax(), function(err, result) {
+        collection.save({ hello: 'world' }, configuration.writeConcernMax(), function (
+          err,
+          result
+        ) {
           test.ok(result);
           test.equal(null, err);
 
           // Find the saved document
-          collection.findOne({ hello: 'world' }, function(err, item) {
+          collection.findOne({ hello: 'world' }, function (err, item) {
             test.equal(null, err);
             test.equal('world', item.hello);
 
@@ -2918,12 +2921,12 @@ describe('Operation Examples', function() {
             item['hello2'] = 'world2';
 
             // Save the item with the additional field
-            collection.save(item, configuration.writeConcernMax(), function(err, result) {
+            collection.save(item, configuration.writeConcernMax(), function (err, result) {
               test.ok(result);
               test.equal(null, err);
 
               // Find the changed document
-              collection.findOne({ hello: 'world' }, function(err, item) {
+              collection.findOne({ hello: 'world' }, function (err, item) {
                 test.equal(null, err);
                 test.equal('world', item.hello);
                 test.equal('world2', item.hello2);
@@ -2949,10 +2952,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -2968,7 +2971,7 @@ describe('Operation Examples', function() {
         var collection = db.collection('update_a_simple_document');
 
         // Insert a document, then update it
-        collection.insertOne({ a: 1 }, configuration.writeConcernMax(), function(err, doc) {
+        collection.insertOne({ a: 1 }, configuration.writeConcernMax(), function (err, doc) {
           test.ok(doc);
           test.equal(null, err);
 
@@ -2976,9 +2979,9 @@ describe('Operation Examples', function() {
           collection.updateOne({ a: 1 }, { $set: { b: 2 } });
 
           // Wait for a second then fetch the document
-          setTimeout(function() {
+          setTimeout(function () {
             // Fetch the document that we modified
-            collection.findOne({ a: 1 }, function(err, item) {
+            collection.findOne({ a: 1 }, function (err, item) {
               test.equal(null, err);
               test.equal(1, item.a);
               test.equal(2, item.b);
@@ -3002,10 +3005,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -3020,7 +3023,7 @@ describe('Operation Examples', function() {
         // Get a collection
         var collection = db.collection('update_a_simple_document_upsert');
         // Update the document using an upsert operation, ensuring creation if it does not exist
-        collection.updateOne({ a: 1 }, { $set: { b: 2, a: 1 } }, { upsert: true, w: 1 }, function(
+        collection.updateOne({ a: 1 }, { $set: { b: 2, a: 1 } }, { upsert: true, w: 1 }, function (
           err,
           result
         ) {
@@ -3028,7 +3031,7 @@ describe('Operation Examples', function() {
           test.equal(1, result.result.n);
 
           // Fetch the document that we modified and check if it got inserted correctly
-          collection.findOne({ a: 1 }, function(err, item) {
+          collection.findOne({ a: 1 }, function (err, item) {
             test.equal(null, err);
             test.equal(1, item.a);
             test.equal(2, item.b);
@@ -3051,10 +3054,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -3076,17 +3079,17 @@ describe('Operation Examples', function() {
             { a: 1, b: 2 }
           ],
           configuration.writeConcernMax(),
-          function(err, result) {
+          function (err, result) {
             test.ok(result);
             test.equal(null, err);
 
             var o = configuration.writeConcernMax();
-            collection.updateMany({ a: 1 }, { $set: { b: 0 } }, o, function(err, r) {
+            collection.updateMany({ a: 1 }, { $set: { b: 0 } }, o, function (err, r) {
               test.equal(null, err);
               test.equal(2, r.result.n);
 
               // Fetch all the documents and verify that we have changed the b value
-              collection.find().toArray(function(err, items) {
+              collection.find().toArray(function (err, items) {
                 test.equal(null, err);
                 test.equal(1, items[0].a);
                 test.equal(0, items[0].b);
@@ -3114,10 +3117,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -3136,12 +3139,12 @@ describe('Operation Examples', function() {
         collection.insertMany(
           [{ a: 1 }, { hello: 'world' }],
           configuration.writeConcernMax(),
-          function(err, result) {
+          function (err, result) {
             test.ok(result);
             test.equal(null, err);
 
             // Retrieve the statistics for the collection
-            collection.stats(function(err, stats) {
+            collection.stats(function (err, stats) {
               test.equal(2, stats.count);
 
               client.close(done);
@@ -3164,10 +3167,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -3190,7 +3193,7 @@ describe('Operation Examples', function() {
             { a: 4, b: 4, c: 4 }
           ],
           { w: 1 },
-          function(err, result) {
+          function (err, result) {
             test.ok(result);
             test.equal(null, err);
 
@@ -3198,7 +3201,7 @@ describe('Operation Examples', function() {
             collection.ensureIndex(
               { a: 1, b: 1 },
               { unique: true, background: true, w: 1 },
-              function(err, indexName) {
+              function (err, indexName) {
                 test.ok(indexName);
                 test.equal(null, err);
 
@@ -3206,14 +3209,14 @@ describe('Operation Examples', function() {
                 collection.ensureIndex(
                   { c: 1 },
                   { unique: true, background: true, w: 1 },
-                  function() {
+                  function () {
                     // Drop the index
-                    collection.dropAllIndexes(function(err, result) {
+                    collection.dropAllIndexes(function (err, result) {
                       test.ok(result);
                       test.equal(null, err);
 
                       // Verify that the index is gone
-                      collection.indexInformation(function(err, indexInformation) {
+                      collection.indexInformation(function (err, indexInformation) {
                         test.deepEqual([['_id', 1]], indexInformation._id_);
                         test.equal(undefined, indexInformation.a_1_b_1);
                         test.equal(undefined, indexInformation.c_1);
@@ -3249,10 +3252,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -3285,14 +3288,14 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       // NODE-2484: investigate double close event in Unified Topology environment
       // client.on('close', function() {
       //   done();
       // });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -3322,10 +3325,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         expect(err).to.not.exist;
 
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -3339,7 +3342,7 @@ describe('Operation Examples', function() {
         // REMOVE-LINE var db = client.db(configuration.db);
         // BEGIN
         // Close the connection with a callback that is optional
-        client.close(function(err) {
+        client.close(function (err) {
           expect(err).to.not.exist;
           done();
         });
@@ -3357,10 +3360,10 @@ describe('Operation Examples', function() {
   it('shouldCorrectlyRetrievelistCollections', {
     metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -3378,19 +3381,19 @@ describe('Operation Examples', function() {
         // Create a collection
         var collection = db1.collection('shouldCorrectlyRetrievelistCollections');
         // Ensure the collection was created
-        collection.insertOne({ a: 1 }, function(err, r) {
+        collection.insertOne({ a: 1 }, function (err, r) {
           test.ok(r);
           test.equal(null, err);
 
           // Return the information of a single collection name
           db1
             .listCollections({ name: 'shouldCorrectlyRetrievelistCollections' })
-            .toArray(function(err, items) {
+            .toArray(function (err, items) {
               test.equal(null, err);
               test.equal(1, items.length);
 
               // Return the information of a all collections, using the callback format
-              db1.listCollections().toArray(function(err, items) {
+              db1.listCollections().toArray(function (err, items) {
                 test.equal(null, err);
                 test.ok(items.length >= 1);
 
@@ -3406,10 +3409,10 @@ describe('Operation Examples', function() {
   it('shouldCorrectlyRetrievelistCollectionsWiredTiger', {
     metadata: { requires: { topology: ['wiredtiger'] } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -3426,18 +3429,18 @@ describe('Operation Examples', function() {
         // Create a collection
         var collection = db1.collection('shouldCorrectlyRetrievelistCollections');
         // Ensure the collection was created
-        collection.insertOne({ a: 1 }, function(err, r) {
+        collection.insertOne({ a: 1 }, function (err, r) {
           test.ok(r);
           test.equal(null, err);
 
           // Return the information of a single collection name
           db1
             .listCollections({ name: 'shouldCorrectlyRetrievelistCollections' })
-            .toArray(function(err, items) {
+            .toArray(function (err, items) {
               test.equal(1, items.length);
 
               // Return the information of a all collections, using the callback format
-              db1.listCollections().toArray(function(err, items) {
+              db1.listCollections().toArray(function (err, items) {
                 test.equal(1, items.length);
 
                 client.close(done);
@@ -3459,10 +3462,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -3477,22 +3480,25 @@ describe('Operation Examples', function() {
         test.equal(null, err);
 
         // Grab a collection with a callback but no safe operation
-        db.collection('test_correctly_access_collections', function(err, col2) {
+        db.collection('test_correctly_access_collections', function (err, col2) {
           test.ok(col2);
           test.equal(null, err);
 
           // Grab a collection with a callback in safe mode, ensuring it exists (should fail as it's not created)
-          db.collection('test_correctly_access_collections', { strict: true }, function(err, col3) {
+          db.collection('test_correctly_access_collections', { strict: true }, function (
+            err,
+            col3
+          ) {
             test.equal(null, col3);
             test.ok(err != null);
 
             // Create the collection
-            db.createCollection('test_correctly_access_collections', function(err, result) {
+            db.createCollection('test_correctly_access_collections', function (err, result) {
               test.ok(result);
               test.equal(null, err);
 
               // Retry to get the collection, should work as it's now created
-              db.collection('test_correctly_access_collections', { strict: true }, function(
+              db.collection('test_correctly_access_collections', { strict: true }, function (
                 err,
                 col3
               ) {
@@ -3520,10 +3526,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -3538,7 +3544,7 @@ describe('Operation Examples', function() {
         test.equal(null, err);
 
         // Retry to get the collection, should work as it's now created
-        db.collections(function(err, collections) {
+        db.collections(function (err, collections) {
           test.equal(null, err);
           test.ok(collections.length > 0);
 
@@ -3558,10 +3564,10 @@ describe('Operation Examples', function() {
   it('shouldCorrectlyAddUserToDb', {
     metadata: { requires: { topology: 'single' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -3576,12 +3582,12 @@ describe('Operation Examples', function() {
         test.equal(null, err);
 
         // Add a user to the database
-        db.addUser('user', 'name', function(err, result) {
+        db.addUser('user', 'name', function (err, result) {
           test.ok(result);
           test.equal(null, err);
 
           // Remove the user from the db
-          db.removeUser('user', function(err, result) {
+          db.removeUser('user', function (err, result) {
             test.ok(result);
             test.equal(null, err);
 
@@ -3602,11 +3608,11 @@ describe('Operation Examples', function() {
   it('shouldCorrectlyAddAndRemoveUser', {
     metadata: { requires: { topology: 'single' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
 
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -3621,7 +3627,7 @@ describe('Operation Examples', function() {
         test.equal(null, err);
 
         // Add a user to the database
-        db.addUser('user', 'name', function(err, result) {
+        db.addUser('user', 'name', function (err, result) {
           test.ok(result);
           test.equal(null, err);
           client.close();
@@ -3630,16 +3636,16 @@ describe('Operation Examples', function() {
             'mongodb://user:name@localhost:27017/integration_tests'
           );
 
-          secondClient.connect(function(err) {
+          secondClient.connect(function (err) {
             test.equal(null, err);
             var db = secondClient.db(configuration.db);
 
             // Logout the db
-            secondClient.logout(function(err, result) {
+            secondClient.logout(function (err, result) {
               test.equal(true, result);
 
               // Remove the user from the db
-              db.removeUser('user', function(err, result) {
+              db.removeUser('user', function (err, result) {
                 test.ok(result);
                 test.equal(null, err);
 
@@ -3650,7 +3656,7 @@ describe('Operation Examples', function() {
                 );
 
                 // Authenticate
-                thirdClient.connect(function(err) {
+                thirdClient.connect(function (err) {
                   expect(err).to.exist;
                   oldClient.close();
                   done();
@@ -3675,10 +3681,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -3696,11 +3702,11 @@ describe('Operation Examples', function() {
         db.createCollection(
           'a_simple_collection',
           { capped: true, size: 10000, max: 1000, w: 1 },
-          function(err, collection) {
+          function (err, collection) {
             test.equal(null, err);
 
             // Insert a document in the capped collection
-            collection.insertOne({ a: 1 }, configuration.writeConcernMax(), function(err, result) {
+            collection.insertOne({ a: 1 }, configuration.writeConcernMax(), function (err, result) {
               test.ok(result);
               test.equal(null, err);
 
@@ -3724,10 +3730,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -3742,7 +3748,7 @@ describe('Operation Examples', function() {
         test.equal(null, err);
 
         // Execute ping against the server
-        db.command({ ping: 1 }, function(err, result) {
+        db.command({ ping: 1 }, function (err, result) {
           test.ok(result);
           test.equal(null, err);
 
@@ -3750,11 +3756,11 @@ describe('Operation Examples', function() {
           db.createCollection(
             'a_simple_create_drop_collection',
             { capped: true, size: 10000, max: 1000, w: 1 },
-            function(err, collection) {
+            function (err, collection) {
               test.equal(null, err);
 
               // Insert a document in the capped collection
-              collection.insertOne({ a: 1 }, configuration.writeConcernMax(), function(
+              collection.insertOne({ a: 1 }, configuration.writeConcernMax(), function (
                 err,
                 result
               ) {
@@ -3762,12 +3768,12 @@ describe('Operation Examples', function() {
                 test.equal(null, err);
 
                 // Drop the collection from this world
-                db.dropCollection('a_simple_create_drop_collection', function(err, result) {
+                db.dropCollection('a_simple_create_drop_collection', function (err, result) {
                   test.ok(result);
                   test.equal(null, err);
 
                   // Verify that the collection is gone
-                  db.listCollections({ name: 'a_simple_create_drop_collection' }).toArray(function(
+                  db.listCollections({ name: 'a_simple_create_drop_collection' }).toArray(function (
                     err,
                     names
                   ) {
@@ -3796,10 +3802,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -3814,7 +3820,7 @@ describe('Operation Examples', function() {
         test.equal(null, err);
 
         // Execute ping against the server
-        db.command({ ping: 1 }, function(err, result) {
+        db.command({ ping: 1 }, function (err, result) {
           test.ok(result);
           test.equal(null, err);
 
@@ -3836,10 +3842,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -3854,41 +3860,41 @@ describe('Operation Examples', function() {
         test.equal(null, err);
 
         // Create a collection
-        db.createCollection('simple_rename_collection', configuration.writeConcernMax(), function(
+        db.createCollection('simple_rename_collection', configuration.writeConcernMax(), function (
           err,
           collection
         ) {
           test.equal(null, err);
 
           // Insert a document in the collection
-          collection.insertOne({ a: 1 }, configuration.writeConcernMax(), function(err, result) {
+          collection.insertOne({ a: 1 }, configuration.writeConcernMax(), function (err, result) {
             test.ok(result);
             test.equal(null, err);
 
             // Retrieve the number of documents from the collection
-            collection.count(function(err, count) {
+            collection.count(function (err, count) {
               test.equal(1, count);
 
               // Rename the collection
               db.renameCollection(
                 'simple_rename_collection',
                 'simple_rename_collection_2',
-                function(err, collection2) {
+                function (err, collection2) {
                   test.equal(null, err);
 
                   // Retrieve the number of documents from the collection
-                  collection2.count(function(err, count) {
+                  collection2.count(function (err, count) {
                     test.equal(1, count);
 
                     // Verify that the collection is gone
-                    db.listCollections({ name: 'simple_rename_collection' }).toArray(function(
+                    db.listCollections({ name: 'simple_rename_collection' }).toArray(function (
                       err,
                       names
                     ) {
                       test.equal(0, names.length);
 
                       // Verify that the new collection exists
-                      db.listCollections({ name: 'simple_rename_collection_2' }).toArray(function(
+                      db.listCollections({ name: 'simple_rename_collection_2' }).toArray(function (
                         err,
                         names
                       ) {
@@ -3919,10 +3925,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -3945,7 +3951,7 @@ describe('Operation Examples', function() {
             { a: 4, b: 4 }
           ],
           configuration.writeConcernMax(),
-          function(err, result) {
+          function (err, result) {
             test.ok(result);
             test.equal(null, err);
 
@@ -3954,17 +3960,17 @@ describe('Operation Examples', function() {
               'more_complex_index_test',
               { a: 1, b: 1 },
               { unique: true, background: true, w: 1 },
-              function(err, indexName) {
+              function (err, indexName) {
                 test.ok(indexName);
                 test.equal(null, err);
 
                 // Show that duplicate records got dropped
-                collection.find({}).toArray(function(err, items) {
+                collection.find({}).toArray(function (err, items) {
                   test.equal(null, err);
                   test.equal(4, items.length);
 
                   // Perform a query, with explain to show we hit the query
-                  collection.find({ a: 2 }).explain(function(err, explanation) {
+                  collection.find({ a: 2 }).explain(function (err, explanation) {
                     test.equal(null, err);
                     test.ok(explanation != null);
 
@@ -3991,10 +3997,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -4017,7 +4023,7 @@ describe('Operation Examples', function() {
             { a: 4, b: 4 }
           ],
           configuration.writeConcernMax(),
-          function(err, result) {
+          function (err, result) {
             test.ok(result);
             test.equal(null, err);
 
@@ -4026,17 +4032,17 @@ describe('Operation Examples', function() {
               'more_complex_ensure_index_db_test',
               { a: 1, b: 1 },
               { unique: true, background: true, w: 1 },
-              function(err, indexName) {
+              function (err, indexName) {
                 test.ok(indexName);
                 test.equal(null, err);
 
                 // Show that duplicate records got dropped
-                collection.find({}).toArray(function(err, items) {
+                collection.find({}).toArray(function (err, items) {
                   test.equal(null, err);
                   test.equal(4, items.length);
 
                   // Perform a query, with explain to show we hit the query
-                  collection.find({ a: 2 }).explain(function(err, explanation) {
+                  collection.find({ a: 2 }).explain(function (err, explanation) {
                     test.equal(null, err);
                     test.ok(explanation != null);
 
@@ -4061,10 +4067,10 @@ describe('Operation Examples', function() {
   it('should correctly drop the database', {
     metadata: { requires: { topology: ['single'] } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -4088,19 +4094,19 @@ describe('Operation Examples', function() {
             { a: 4, b: 4 }
           ],
           configuration.writeConcernMax(),
-          function(err, result) {
+          function (err, result) {
             test.ok(result);
             test.equal(null, err);
 
             // Let's drop the database
-            db.dropDatabase(function(err, result) {
+            db.dropDatabase(function (err, result) {
               test.ok(result);
               test.equal(null, err);
 
               // Wait two seconds to let it replicate across
-              setTimeout(function() {
+              setTimeout(function () {
                 // Get the admin database
-                db.admin().listDatabases(function(err, dbs) {
+                db.admin().listDatabases(function (err, dbs) {
                   // Grab the databases
                   dbs = dbs.databases;
                   // Did we find the db
@@ -4136,10 +4142,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -4153,7 +4159,7 @@ describe('Operation Examples', function() {
         var db = client.db(configuration.db);
         test.equal(null, err);
 
-        db.stats(function(err, stats) {
+        db.stats(function (err, stats) {
           test.equal(null, err);
           test.ok(stats != null);
 
@@ -4175,10 +4181,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -4201,19 +4207,19 @@ describe('Operation Examples', function() {
         var multipleColl2 = secondDb.collection('multiple_db_instances');
 
         // Write a record into each and then count the records stored
-        multipleColl1.insertOne({ a: 1 }, { w: 1 }, function(err, result) {
+        multipleColl1.insertOne({ a: 1 }, { w: 1 }, function (err, result) {
           test.ok(result);
           test.equal(null, err);
 
-          multipleColl2.insertOne({ a: 1 }, { w: 1 }, function(err, result) {
+          multipleColl2.insertOne({ a: 1 }, { w: 1 }, function (err, result) {
             test.ok(result);
             test.equal(null, err);
 
             // Count over the results ensuring only on record in each collection
-            multipleColl1.count(function(err, count) {
+            multipleColl1.count(function (err, count) {
               test.equal(1, count);
 
-              multipleColl2.count(function(err, count) {
+              multipleColl2.count(function (err, count) {
                 test.equal(1, count);
 
                 client.close(done);
@@ -4235,7 +4241,7 @@ describe('Operation Examples', function() {
   it('Should correctly connect with default replicasetNoOption', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
 
       // Replica configuration
@@ -4248,7 +4254,7 @@ describe('Operation Examples', function() {
         { replicaSet: configuration.replicasetName }
       );
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         expect(err).to.not.exist;
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -4281,10 +4287,10 @@ describe('Operation Examples', function() {
   it('shouldCorrectlyRetrieveBuildInfo', {
     metadata: { requires: { topology: 'single' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -4301,7 +4307,7 @@ describe('Operation Examples', function() {
         var adminDb = db.admin();
 
         // Retrieve the build information for the MongoDB instance
-        adminDb.buildInfo(function(err, info) {
+        adminDb.buildInfo(function (err, info) {
           test.ok(info);
           test.equal(null, err);
 
@@ -4321,10 +4327,10 @@ describe('Operation Examples', function() {
   it('shouldCorrectlyRetrieveBuildInfoUsingCommand', {
     metadata: { requires: { topology: 'single' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -4340,7 +4346,7 @@ describe('Operation Examples', function() {
         // Use the admin database for the operation
         var adminDb = db.admin();
         // Retrieve the build information using the admin command
-        adminDb.command({ buildInfo: 1 }, function(err, info) {
+        adminDb.command({ buildInfo: 1 }, function (err, info) {
           test.ok(info);
           test.equal(null, err);
 
@@ -4360,10 +4366,10 @@ describe('Operation Examples', function() {
   it('shouldCorrectlySetDefaultProfilingLevel', {
     metadata: { requires: { topology: 'single' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -4381,7 +4387,7 @@ describe('Operation Examples', function() {
 
         // Force the creation of the collection by inserting a document
         // Collections are not created until the first document is inserted
-        collection.insertOne({ a: 1 }, { w: 1 }, function(err, doc) {
+        collection.insertOne({ a: 1 }, { w: 1 }, function (err, doc) {
           test.ok(doc);
           test.equal(null, err);
 
@@ -4389,7 +4395,7 @@ describe('Operation Examples', function() {
           var adminDb = client.db('admin');
 
           // Retrieve the profiling level
-          adminDb.profilingLevel(function(err, level) {
+          adminDb.profilingLevel(function (err, level) {
             test.ok(level);
             test.equal(null, err);
 
@@ -4411,10 +4417,10 @@ describe('Operation Examples', function() {
   it('shouldCorrectlySetAndExtractProfilingInfo', {
     metadata: { requires: { topology: 'single' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -4432,28 +4438,28 @@ describe('Operation Examples', function() {
 
         // Force the creation of the collection by inserting a document
         // Collections are not created until the first document is inserted
-        collection.insertOne({ a: 1 }, { w: 1 }, function(err, doc) {
+        collection.insertOne({ a: 1 }, { w: 1 }, function (err, doc) {
           test.ok(doc);
           test.equal(null, err);
 
           // Use the admin database for the operation
           // Set the profiling level to all
-          db.setProfilingLevel('all', function(err, level) {
+          db.setProfilingLevel('all', function (err, level) {
             test.ok(level);
             test.equal(null, err);
 
             // Execute a query command
-            collection.find().toArray(function(err, items) {
+            collection.find().toArray(function (err, items) {
               test.equal(null, err);
               test.ok(items.length > 0);
 
               // Turn off profiling
-              db.setProfilingLevel('off', function(err, level) {
+              db.setProfilingLevel('off', function (err, level) {
                 test.ok(level);
                 test.equal(null, err);
 
                 // Retrieve the profiling information
-                db.profilingInfo(function(err, infos) {
+                db.profilingInfo(function (err, infos) {
                   test.equal(null, err);
                   test.ok(infos.constructor === Array);
                   test.ok(infos.length >= 1);
@@ -4481,10 +4487,10 @@ describe('Operation Examples', function() {
   it('shouldCorrectlyCallValidateCollection', {
     metadata: { requires: { topology: 'single' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -4501,7 +4507,7 @@ describe('Operation Examples', function() {
 
         // Force the creation of the collection by inserting a document
         // Collections are not created until the first document is inserted
-        collection.insertOne({ a: 1 }, { w: 1 }, function(err, doc) {
+        collection.insertOne({ a: 1 }, { w: 1 }, function (err, doc) {
           test.ok(doc);
           test.equal(null, err);
 
@@ -4509,7 +4515,7 @@ describe('Operation Examples', function() {
           var adminDb = db.admin();
 
           // Validate the 'test' collection
-          adminDb.validateCollection('test', function(err, doc) {
+          adminDb.validateCollection('test', function (err, doc) {
             test.ok(doc);
             test.equal(null, err);
 
@@ -4529,10 +4535,10 @@ describe('Operation Examples', function() {
   it('shouldCorrectlyPingTheMongoDbInstance', {
     metadata: { requires: { topology: 'single' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -4548,7 +4554,7 @@ describe('Operation Examples', function() {
         var adminDb = db.admin();
 
         // Ping the server
-        adminDb.ping(function(err, pingResult) {
+        adminDb.ping(function (err, pingResult) {
           test.ok(pingResult);
           test.equal(null, err);
 
@@ -4568,10 +4574,10 @@ describe('Operation Examples', function() {
   it('shouldCorrectlyAddAUserToAdminDb', {
     metadata: { requires: { topology: 'single' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -4587,10 +4593,10 @@ describe('Operation Examples', function() {
         var adminDb = db.admin();
 
         // Add the new user to the admin database
-        adminDb.addUser('admin11', 'admin11', function(err, result) {
+        adminDb.addUser('admin11', 'admin11', function (err, result) {
           test.ok(result);
 
-          adminDb.removeUser('admin11', function(err, result) {
+          adminDb.removeUser('admin11', function (err, result) {
             test.ok(result);
 
             client.close(done);
@@ -4609,10 +4615,10 @@ describe('Operation Examples', function() {
   it('shouldCorrectlyAddAUserAndRemoveItFromAdminDb', {
     metadata: { requires: { topology: 'single' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -4628,11 +4634,11 @@ describe('Operation Examples', function() {
         var adminDb = db.admin();
 
         // Add the new user to the admin database
-        adminDb.addUser('admin12', 'admin12', function(err, result) {
+        adminDb.addUser('admin12', 'admin12', function (err, result) {
           test.ok(result);
 
           // Remove the user
-          adminDb.removeUser('admin12', function(err, result) {
+          adminDb.removeUser('admin12', function (err, result) {
             test.equal(null, err);
             test.equal(true, result);
 
@@ -4655,10 +4661,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -4674,7 +4680,7 @@ describe('Operation Examples', function() {
         var adminDb = db.admin();
 
         // List all the available databases
-        adminDb.listDatabases(function(err, dbs) {
+        adminDb.listDatabases(function (err, dbs) {
           test.equal(null, err);
           test.ok(dbs.databases.length > 0);
 
@@ -4693,10 +4699,10 @@ describe('Operation Examples', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -4712,7 +4718,7 @@ describe('Operation Examples', function() {
         var adminDb = db.admin();
 
         // List all the available databases
-        adminDb.listDatabases({ nameOnly: 1 }, function(err, dbs) {
+        adminDb.listDatabases({ nameOnly: 1 }, function (err, dbs) {
           expect(err).to.not.exist;
           expect(dbs.databases).to.containSubset([{ name: 'admin' }]);
 
@@ -4732,10 +4738,10 @@ describe('Operation Examples', function() {
   it('shouldCorrectlyRetrieveServerInfo', {
     metadata: { requires: { topology: 'single' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -4752,7 +4758,7 @@ describe('Operation Examples', function() {
 
         // Force the creation of the collection by inserting a document
         // Collections are not created until the first document is inserted
-        collection.insertOne({ a: 1 }, { w: 1 }, function(err, doc) {
+        collection.insertOne({ a: 1 }, { w: 1 }, function (err, doc) {
           test.ok(doc);
           test.equal(null, err);
 
@@ -4760,7 +4766,7 @@ describe('Operation Examples', function() {
           var adminDb = db.admin();
 
           // Retrieve the server Info
-          adminDb.serverStatus(function(err, info) {
+          adminDb.serverStatus(function (err, info) {
             test.equal(null, err);
             test.ok(info != null);
 
@@ -4781,10 +4787,10 @@ describe('Operation Examples', function() {
   it('shouldCorrectlyRetrieveReplSetGetStatus', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -4801,7 +4807,7 @@ describe('Operation Examples', function() {
 
         // Force the creation of the collection by inserting a document
         // Collections are not created until the first document is inserted
-        collection.insertOne({ a: 1 }, { w: 1 }, function(err, doc) {
+        collection.insertOne({ a: 1 }, { w: 1 }, function (err, doc) {
           test.ok(doc);
           test.equal(null, err);
 
@@ -4810,7 +4816,7 @@ describe('Operation Examples', function() {
 
           // Retrieve the server Info, returns error if we are not
           // running a replicaset
-          adminDb.replSetGetStatus(function(err, info) {
+          adminDb.replSetGetStatus(function (err, info) {
             test.ok(info);
             test.equal(null, err);
 
@@ -4841,10 +4847,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -4860,12 +4866,15 @@ describe('Operation Examples', function() {
         var collection = db.collection('test_array');
 
         // Insert a test document
-        collection.insertOne({ b: [1, 2, 3] }, configuration.writeConcernMax(), function(err, ids) {
+        collection.insertOne({ b: [1, 2, 3] }, configuration.writeConcernMax(), function (
+          err,
+          ids
+        ) {
           test.ok(ids);
           test.equal(null, err);
 
           // Retrieve all the documents in the collection
-          collection.find().toArray(function(err, documents) {
+          collection.find().toArray(function (err, documents) {
             test.equal(1, documents.length);
             test.deepEqual([1, 2, 3], documents[0].b);
 
@@ -4890,10 +4899,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -4909,18 +4918,18 @@ describe('Operation Examples', function() {
         var collection = db.collection('test_to_a_after_each');
 
         // Insert a document in the collection
-        collection.insertOne({ a: 1 }, configuration.writeConcernMax(), function(err, ids) {
+        collection.insertOne({ a: 1 }, configuration.writeConcernMax(), function (err, ids) {
           test.ok(ids);
           test.equal(null, err);
 
           // Grab a cursor
           var cursor = collection.find();
           // Execute the each command, triggers for each document
-          cursor.each(function(err, item) {
+          cursor.each(function (err, item) {
             // If the item is null then the cursor is exhausted/empty and closed
             if (item == null) {
               // Show that the cursor is closed
-              cursor.toArray(function(err, items) {
+              cursor.toArray(function (err, items) {
                 test.ok(items);
                 test.equal(null, err);
 
@@ -4948,10 +4957,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -4967,7 +4976,7 @@ describe('Operation Examples', function() {
         var collection = db.collection('test_to_a_after_for_each');
 
         // Insert a document in the collection
-        collection.insertOne({ a: 1 }, configuration.writeConcernMax(), function(err, ids) {
+        collection.insertOne({ a: 1 }, configuration.writeConcernMax(), function (err, ids) {
           test.ok(ids);
           test.equal(null, err);
 
@@ -4977,11 +4986,11 @@ describe('Operation Examples', function() {
           var cursor = collection.find();
           // Execute the each command, triggers for each document
           cursor.forEach(
-            function(doc) {
+            function (doc) {
               test.ok(doc != null);
               count = count + 1;
             },
-            function(err) {
+            function (err) {
               test.equal(null, err);
               test.equal(1, count);
               client.close(done);
@@ -5006,10 +5015,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -5033,20 +5042,20 @@ describe('Operation Examples', function() {
         var collection = db.collection('Should_correctly_rewind_and_restart_cursor');
 
         // insert all docs
-        collection.insertMany(docs, configuration.writeConcernMax(), function(err, result) {
+        collection.insertMany(docs, configuration.writeConcernMax(), function (err, result) {
           test.ok(result);
           test.equal(null, err);
 
           // Grab a cursor using the find
           var cursor = collection.find({});
           // Fetch the first object off the cursor
-          cursor.next(function(err, item) {
+          cursor.next(function (err, item) {
             test.equal(0, item.a);
             // Rewind the cursor, resetting it to point to the start of the query
             cursor.rewind();
 
             // Grab the first object again
-            cursor.next(function(err, item) {
+            cursor.next(function (err, item) {
               test.equal(0, item.a);
 
               client.close(done);
@@ -5071,10 +5080,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -5090,7 +5099,7 @@ describe('Operation Examples', function() {
         var collection = db.collection('cursor_count_collection');
 
         // Insert some docs
-        collection.insertMany([{ a: 1 }, { a: 2 }], configuration.writeConcernMax(), function(
+        collection.insertMany([{ a: 1 }, { a: 2 }], configuration.writeConcernMax(), function (
           err,
           docs
         ) {
@@ -5098,7 +5107,7 @@ describe('Operation Examples', function() {
           test.equal(null, err);
 
           // Do a find and get the cursor count
-          collection.find().count(function(err, count) {
+          collection.find().count(function (err, count) {
             test.equal(null, err);
             test.equal(2, count);
 
@@ -5123,10 +5132,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -5145,7 +5154,7 @@ describe('Operation Examples', function() {
         collection.insertMany(
           [{ a: 1 }, { a: 2 }, { a: 3 }],
           configuration.writeConcernMax(),
-          function(err, docs) {
+          function (err, docs) {
             test.ok(docs);
             test.equal(null, err);
 
@@ -5153,7 +5162,7 @@ describe('Operation Examples', function() {
             collection
               .find()
               .sort({ a: 1 })
-              .next(function(err, item) {
+              .next(function (err, item) {
                 test.equal(null, err);
                 test.equal(1, item.a);
 
@@ -5161,7 +5170,7 @@ describe('Operation Examples', function() {
                 collection
                   .find()
                   .sort([['a', -1]])
-                  .next(function(err, item) {
+                  .next(function (err, item) {
                     test.equal(null, err);
                     test.equal(3, item.a);
 
@@ -5188,10 +5197,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -5210,7 +5219,7 @@ describe('Operation Examples', function() {
         collection.insertMany(
           [{ a: 1 }, { a: 2 }, { a: 3 }],
           configuration.writeConcernMax(),
-          function(err, docs) {
+          function (err, docs) {
             test.ok(docs);
             test.equal(null, err);
 
@@ -5218,7 +5227,7 @@ describe('Operation Examples', function() {
             collection
               .find()
               .limit(1)
-              .toArray(function(err, items) {
+              .toArray(function (err, items) {
                 test.equal(null, err);
                 test.equal(1, items.length);
 
@@ -5244,10 +5253,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -5266,7 +5275,7 @@ describe('Operation Examples', function() {
         collection.insertMany(
           [{ a: 1 }, { a: 2 }, { a: 3 }],
           configuration.writeConcernMax(),
-          function(err, docs) {
+          function (err, docs) {
             test.ok(docs);
             test.equal(null, err);
 
@@ -5274,7 +5283,7 @@ describe('Operation Examples', function() {
             collection
               .find()
               .skip(1)
-              .next(function(err, item) {
+              .next(function (err, item) {
                 test.equal(null, err);
                 test.equal(2, item.a);
 
@@ -5301,10 +5310,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -5323,13 +5332,13 @@ describe('Operation Examples', function() {
         collection.insertMany(
           [{ a: 1 }, { a: 2 }, { a: 3 }],
           configuration.writeConcernMax(),
-          function(err, docs) {
+          function (err, docs) {
             test.ok(docs);
             test.equal(null, err);
 
             // Do normal ascending sort
             const cursor = collection.find().batchSize(1);
-            cursor.next(function(err, item) {
+            cursor.next(function (err, item) {
               test.equal(null, err);
               test.equal(1, item.a);
 
@@ -5358,10 +5367,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -5380,38 +5389,38 @@ describe('Operation Examples', function() {
         collection.insertMany(
           [{ a: 1 }, { a: 2 }, { a: 3 }],
           configuration.writeConcernMax(),
-          function(err, docs) {
+          function (err, docs) {
             test.ok(docs);
             test.equal(null, err);
 
             // Do normal ascending sort
             var cursor = collection.find();
             // Perform hasNext check
-            cursor.hasNext(function(err, r) {
+            cursor.hasNext(function (err, r) {
               test.equal(null, err);
               test.ok(r);
 
-              cursor.next(function(err, r) {
+              cursor.next(function (err, r) {
                 test.equal(null, err);
                 test.equal(1, r.a);
 
-                cursor.hasNext(function(err, r) {
+                cursor.hasNext(function (err, r) {
                   test.equal(null, err);
                   test.ok(r);
 
-                  cursor.next(function(err, r) {
+                  cursor.next(function (err, r) {
                     test.equal(null, err);
                     test.equal(2, r.a);
 
-                    cursor.hasNext(function(err, r) {
+                    cursor.hasNext(function (err, r) {
                       test.equal(null, err);
                       test.ok(r);
 
-                      cursor.next(function(err, r) {
+                      cursor.next(function (err, r) {
                         test.equal(null, err);
                         test.equal(3, r.a);
 
-                        cursor.hasNext(function(err, r) {
+                        cursor.hasNext(function (err, r) {
                           test.equal(null, err);
                           test.ok(!r);
 
@@ -5443,10 +5452,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -5465,12 +5474,12 @@ describe('Operation Examples', function() {
         collection.insertMany(
           [{ a: 1 }, { a: 2 }, { a: 3 }],
           configuration.writeConcernMax(),
-          function(err, docs) {
+          function (err, docs) {
             test.ok(docs);
             test.equal(null, err);
 
             // Do normal ascending sort
-            collection.find().explain(function(err, explanation) {
+            collection.find().explain(function (err, explanation) {
               test.ok(explanation);
               test.equal(null, err);
 
@@ -5496,10 +5505,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -5521,7 +5530,7 @@ describe('Operation Examples', function() {
         var collection = db.collection('test_stream_function');
 
         // Insert documents into collection
-        collection.insertMany(docs, configuration.writeConcernMax(), function(err, ids) {
+        collection.insertMany(docs, configuration.writeConcernMax(), function (err, ids) {
           test.ok(ids);
           test.equal(null, err);
 
@@ -5529,11 +5538,11 @@ describe('Operation Examples', function() {
           var stream = collection.find().stream();
 
           // Execute find on all the documents
-          stream.on('end', function() {
+          stream.on('end', function () {
             client.close(done);
           });
 
-          stream.on('data', function(data) {
+          stream.on('data', function (data) {
             test.ok(data != null);
           });
         });
@@ -5555,10 +5564,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -5580,7 +5589,7 @@ describe('Operation Examples', function() {
         var collection = db.collection('test_is_close_function_on_cursor');
 
         // Insert documents into collection
-        collection.insertMany(docs, configuration.writeConcernMax(), function(err, ids) {
+        collection.insertMany(docs, configuration.writeConcernMax(), function (err, ids) {
           test.ok(ids);
           test.equal(null, err);
 
@@ -5588,12 +5597,12 @@ describe('Operation Examples', function() {
           var cursor = collection.find();
 
           // Fetch the first object
-          cursor.next(function(err, object) {
+          cursor.next(function (err, object) {
             test.ok(object);
             test.equal(null, err);
 
             // Close the cursor, this is the same as reseting the query
-            cursor.close(function(err, result) {
+            cursor.close(function (err, result) {
               test.ok(result);
               test.equal(null, err);
               test.equal(true, cursor.isClosed());
@@ -5620,10 +5629,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -5645,7 +5654,7 @@ describe('Operation Examples', function() {
         var collection = db.collection('test_close_function_on_cursor');
 
         // Insert documents into collection
-        collection.insertMany(docs, configuration.writeConcernMax(), function(err, ids) {
+        collection.insertMany(docs, configuration.writeConcernMax(), function (err, ids) {
           test.ok(ids);
           test.equal(null, err);
 
@@ -5653,12 +5662,12 @@ describe('Operation Examples', function() {
           var cursor = collection.find();
 
           // Fetch the first object
-          cursor.next(function(err, object) {
+          cursor.next(function (err, object) {
             test.ok(object);
             test.equal(null, err);
 
             // Close the cursor, this is the same as reseting the query
-            cursor.close(function(err, result) {
+            cursor.close(function (err, result) {
               test.ok(result);
               test.equal(null, err);
 
@@ -5682,10 +5691,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -5708,7 +5717,7 @@ describe('Operation Examples', function() {
         var collection = db.collection('test_cursorstream_pause');
 
         // Insert documents into collection
-        collection.insertMany(docs, { w: 1 }, function(err, ids) {
+        collection.insertMany(docs, { w: 1 }, function (err, ids) {
           test.ok(ids);
           test.equal(null, err);
 
@@ -5716,20 +5725,20 @@ describe('Operation Examples', function() {
           var stream = collection.find().stream();
 
           // For each data item
-          stream.on('data', function(item) {
+          stream.on('data', function (item) {
             fetchedDocs.push(item);
             // Pause stream
             stream.pause();
 
             // Restart the stream after 1 miliscecond
-            setTimeout(function() {
+            setTimeout(function () {
               fetchedDocs.push(null);
               stream.resume();
             }, 1);
           });
 
           // When the stream is done
-          stream.on('end', function() {
+          stream.on('end', function () {
             test.equal(null, fetchedDocs[1]);
             client.close(done);
           });
@@ -5750,10 +5759,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -5775,7 +5784,7 @@ describe('Operation Examples', function() {
         var collection = db.collection('test_cursorstream_destroy');
 
         // Insert documents into collection
-        collection.insertMany(docs, { w: 1 }, function(err, ids) {
+        collection.insertMany(docs, { w: 1 }, function (err, ids) {
           test.ok(ids);
           test.equal(null, err);
 
@@ -5783,13 +5792,13 @@ describe('Operation Examples', function() {
           var stream = collection.find().stream();
 
           // For each data item
-          stream.on('data', function() {
+          stream.on('data', function () {
             // Destroy stream
             stream.destroy();
           });
 
           // When the stream is done
-          stream.on('close', function() {
+          stream.on('close', function () {
             client.close(done);
           });
         });
@@ -5812,7 +5821,7 @@ describe('Operation Examples', function() {
   it('Should correctly connect to a replicaset', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
 
       // Create url
@@ -5826,7 +5835,7 @@ describe('Operation Examples', function() {
       );
 
       const client = configuration.newClient(url);
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -5845,7 +5854,7 @@ describe('Operation Examples', function() {
           { a: 1 },
           { $set: { b: 1 } },
           { upsert: true },
-          function(err, result) {
+          function (err, result) {
             test.equal(null, err);
             test.equal(1, result.result.n);
 
@@ -5865,7 +5874,7 @@ describe('Operation Examples', function() {
   it('Should connect to mongos proxies using connectiong string', {
     metadata: { requires: { topology: 'sharded' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var url = f(
         'mongodb://%s:%s,%s:%s/sharded_test_db?w=1',
@@ -5876,7 +5885,7 @@ describe('Operation Examples', function() {
       );
 
       const client = configuration.newClient(url);
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -5895,7 +5904,7 @@ describe('Operation Examples', function() {
           { a: 1 },
           { $set: { b: 1 } },
           { upsert: true },
-          function(err, result) {
+          function (err, result) {
             test.equal(null, err);
             test.equal(1, result.upsertedCount);
 
@@ -5917,7 +5926,7 @@ describe('Operation Examples', function() {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { topology: 'single' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       const client = configuration.newClient('mongodb://localhost:27017/integration_tests', {
         native_parser: true
@@ -5925,7 +5934,7 @@ describe('Operation Examples', function() {
 
       // DOC_START
       // Connect using the connection string
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -5943,7 +5952,7 @@ describe('Operation Examples', function() {
           { a: 1 },
           { $set: { b: 1 } },
           { upsert: true },
-          function(err, result) {
+          function (err, result) {
             test.equal(null, err);
             test.equal(1, result.result.n);
 
@@ -5973,7 +5982,7 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       // LINE var ObjectId = require('mongodb').ObjectId,
       // LINE   test = require('assert');
       // REPLACE configuration.writeConcernMax() WITH {w:1}
@@ -6005,7 +6014,7 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       // LINE var ObjectId = require('mongodb').ObjectId,
       // LINE   test = require('assert');
       // REPLACE configuration.writeConcernMax() WITH {w:1}
@@ -6031,7 +6040,7 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       // LINE var ObjectId = require('mongodb').ObjectId,
       // LINE   test = require('assert');
       // REPLACE configuration.writeConcernMax() WITH {w:1}
@@ -6066,7 +6075,7 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       // LINE var ObjectId = require('mongodb').ObjectId,
       // LINE   test = require('assert');
       // REPLACE configuration.writeConcernMax() WITH {w:1}
@@ -6098,7 +6107,7 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       // LINE var ObjectId = require('mongodb').ObjectId,
       // LINE   test = require('assert');
       // REPLACE configuration.writeConcernMax() WITH {w:1}
@@ -6130,7 +6139,7 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       // LINE var ObjectId = require('mongodb').ObjectId,
       // LINE   test = require('assert');
       // REPLACE configuration.writeConcernMax() WITH {w:1}
@@ -6160,10 +6169,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -6190,7 +6199,7 @@ describe('Operation Examples', function() {
         batch.find({ a: 3 }).remove({ a: 3 });
 
         // Execute the operations
-        batch.execute(function(err, result) {
+        batch.execute(function (err, result) {
           // Check state of result
           test.equal(2, result.nInserted);
           test.equal(1, result.nUpserted);
@@ -6225,10 +6234,10 @@ describe('Operation Examples', function() {
   it('Should correctly execute unordered batch with no errors', {
     metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -6256,7 +6265,7 @@ describe('Operation Examples', function() {
         batch.find({ a: 3 }).remove({ a: 3 });
 
         // Execute the operations
-        batch.execute(function(err, result) {
+        batch.execute(function (err, result) {
           // Check state of result
           test.equal(2, result.nInserted);
           test.equal(1, result.nUpserted);
@@ -6298,10 +6307,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -6315,7 +6324,7 @@ describe('Operation Examples', function() {
         var db = client.db(configuration.db);
         // Get the collection
         var col = db.collection('insert_one');
-        col.insertOne({ a: 1 }, function(err, r) {
+        col.insertOne({ a: 1 }, function (err, r) {
           test.equal(null, err);
           test.equal(1, r.insertedCount);
           // Finish up test
@@ -6337,10 +6346,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -6354,7 +6363,7 @@ describe('Operation Examples', function() {
         var db = client.db(configuration.db);
         // Get the collection
         var col = db.collection('insert_many');
-        col.insertMany([{ a: 1 }, { a: 2 }], function(err, r) {
+        col.insertMany([{ a: 1 }, { a: 2 }], function (err, r) {
           test.equal(null, err);
           test.equal(2, r.insertedCount);
           // Finish up test
@@ -6376,10 +6385,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -6393,7 +6402,7 @@ describe('Operation Examples', function() {
         var db = client.db(configuration.db);
         // Get the collection
         var col = db.collection('update_one');
-        col.updateOne({ a: 1 }, { $set: { a: 2 } }, { upsert: true }, function(err, r) {
+        col.updateOne({ a: 1 }, { $set: { a: 2 } }, { upsert: true }, function (err, r) {
           test.equal(null, err);
           test.equal(0, r.matchedCount);
           test.equal(1, r.upsertedCount);
@@ -6416,10 +6425,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -6433,12 +6442,12 @@ describe('Operation Examples', function() {
         var db = client.db(configuration.db);
         // Get the collection
         var col = db.collection('update_many');
-        col.insertMany([{ a: 1 }, { a: 1 }], function(err, r) {
+        col.insertMany([{ a: 1 }, { a: 1 }], function (err, r) {
           test.equal(null, err);
           test.equal(2, r.insertedCount);
 
           // Update all documents
-          col.updateMany({ a: 1 }, { $set: { b: 1 } }, function(err, r) {
+          col.updateMany({ a: 1 }, { $set: { b: 1 } }, function (err, r) {
             test.equal(null, err);
             test.equal(2, r.matchedCount);
             test.equal(2, r.modifiedCount);
@@ -6463,10 +6472,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -6480,11 +6489,11 @@ describe('Operation Examples', function() {
         var db = client.db(configuration.db);
         // Get the collection
         var col = db.collection('remove_one');
-        col.insertMany([{ a: 1 }, { a: 1 }], function(err, r) {
+        col.insertMany([{ a: 1 }, { a: 1 }], function (err, r) {
           test.equal(null, err);
           test.equal(2, r.insertedCount);
 
-          col.removeOne({ a: 1 }, function(err, r) {
+          col.removeOne({ a: 1 }, function (err, r) {
             test.equal(null, err);
             test.equal(1, r.deletedCount);
             // Finish up test
@@ -6507,10 +6516,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -6524,12 +6533,12 @@ describe('Operation Examples', function() {
         var db = client.db(configuration.db);
         // Get the collection
         var col = db.collection('remove_many');
-        col.insertMany([{ a: 1 }, { a: 1 }], function(err, r) {
+        col.insertMany([{ a: 1 }, { a: 1 }], function (err, r) {
           test.equal(null, err);
           test.equal(2, r.insertedCount);
 
           // Update all documents
-          col.removeMany({ a: 1 }, function(err, r) {
+          col.removeMany({ a: 1 }, function (err, r) {
             test.equal(null, err);
             test.equal(2, r.deletedCount);
 
@@ -6553,10 +6562,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -6580,7 +6589,7 @@ describe('Operation Examples', function() {
             { replaceOne: { filter: { c: 3 }, replacement: { c: 4 }, upsert: true } }
           ],
           { ordered: true, w: 1 },
-          function(err, r) {
+          function (err, r) {
             test.equal(null, err);
             test.equal(1, r.nInserted);
             test.equal(2, r.nUpserted);
@@ -6615,10 +6624,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -6632,11 +6641,11 @@ describe('Operation Examples', function() {
         var db = client.db(configuration.db);
         // Get the collection
         var col = db.collection('find_one_and_delete');
-        col.insertMany([{ a: 1, b: 1 }], { w: 1 }, function(err, r) {
+        col.insertMany([{ a: 1, b: 1 }], { w: 1 }, function (err, r) {
           test.equal(null, err);
           test.equal(1, r.result.n);
 
-          col.findOneAndDelete({ a: 1 }, { projection: { b: 1 }, sort: { a: 1 } }, function(
+          col.findOneAndDelete({ a: 1 }, { projection: { b: 1 }, sort: { a: 1 } }, function (
             err,
             r
           ) {
@@ -6663,10 +6672,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -6680,7 +6689,7 @@ describe('Operation Examples', function() {
         var db = client.db(configuration.db);
         // Get the collection
         var col = db.collection('find_one_and_replace');
-        col.insertMany([{ a: 1, b: 1 }], { w: 1 }, function(err, r) {
+        col.insertMany([{ a: 1, b: 1 }], { w: 1 }, function (err, r) {
           test.equal(null, err);
           test.equal(1, r.result.n);
 
@@ -6693,7 +6702,7 @@ describe('Operation Examples', function() {
               returnOriginal: false,
               upsert: true
             },
-            function(err, r) {
+            function (err, r) {
               test.equal(null, err);
               test.equal(1, r.lastErrorObject.n);
               test.equal(1, r.value.b);
@@ -6719,10 +6728,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -6736,7 +6745,7 @@ describe('Operation Examples', function() {
         var db = client.db(configuration.db);
         // Get the collection
         var col = db.collection('find_one_and_update');
-        col.insertMany([{ a: 1, b: 1 }], { w: 1 }, function(err, r) {
+        col.insertMany([{ a: 1, b: 1 }], { w: 1 }, function (err, r) {
           test.equal(null, err);
           test.equal(1, r.result.n);
 
@@ -6749,7 +6758,7 @@ describe('Operation Examples', function() {
               returnOriginal: false,
               upsert: true
             },
-            function(err, r) {
+            function (err, r) {
               test.equal(null, err);
               test.equal(1, r.lastErrorObject.n);
               test.equal(1, r.value.b);
@@ -6775,10 +6784,10 @@ describe('Operation Examples', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -6796,14 +6805,14 @@ describe('Operation Examples', function() {
         db.createCollection(
           'a_simple_collection_2',
           { capped: true, size: 100000, max: 10000, w: 1 },
-          function(err, collection) {
+          function (err, collection) {
             test.equal(null, err);
 
             var docs = [];
             for (var i = 0; i < 1000; i++) docs.push({ a: i });
 
             // Insert a document in the capped collection
-            collection.insertMany(docs, configuration.writeConcernMax(), function(err, result) {
+            collection.insertMany(docs, configuration.writeConcernMax(), function (err, result) {
               test.ok(result);
               test.equal(null, err);
 
@@ -6815,7 +6824,7 @@ describe('Operation Examples', function() {
                 .addCursorFlag('tailable', true)
                 .addCursorFlag('awaitData', true);
 
-              cursor.on('data', function() {
+              cursor.on('data', function () {
                 total = total + 1;
 
                 if (total === 1000) {
@@ -6823,7 +6832,7 @@ describe('Operation Examples', function() {
                 }
               });
 
-              cursor.on('end', function() {
+              cursor.on('end', function () {
                 // TODO: forced because the cursor is still open/active
                 client.close(true, done);
               });

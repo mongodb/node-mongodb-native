@@ -10,7 +10,7 @@ const ReplSet = core.ReplSet;
 const ObjectId = core.BSON.ObjectId;
 
 let test = {};
-describe('ReplSet Connection Tests (mocks)', function() {
+describe('ReplSet Connection Tests (mocks)', function () {
   beforeEach(() => {
     test.spy = new ConnectionSpy();
     Connection.enableConnectionAccounting(test.spy);
@@ -31,7 +31,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var electionIds = [new ObjectId(), new ObjectId()];
 
       // Default message fields
@@ -77,7 +77,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
       ];
 
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const primaryServer = yield mock.createServer(32000, 'localhost');
         const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
         const arbiterServer = yield mock.createServer(32002, 'localhost');
@@ -119,7 +119,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
           }
         );
 
-        server.on('joined', function(_type) {
+        server.on('joined', function (_type) {
           if (_type === 'arbiter' || _type === 'secondary' || _type === 'primary') {
             if (
               server.s.replicaSetState.secondaries.length === 1 &&
@@ -156,7 +156,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
         }
       },
 
-      test: function(done) {
+      test: function (done) {
         var electionIds = [new ObjectId(), new ObjectId()];
         var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
           setName: 'rs',
@@ -200,7 +200,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
         ];
 
         // Boot the mock
-        co(function*() {
+        co(function* () {
           const primaryServer = yield mock.createServer(32000, 'localhost');
           const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
           const arbiterServer = yield mock.createServer(32002, 'localhost');
@@ -235,7 +235,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
             size: 1
           });
 
-          server.on('joined', function(_type) {
+          server.on('joined', function (_type) {
             if (_type === 'arbiter' || _type === 'secondary' || _type === 'primary') {
               if (
                 server.s.replicaSetState.secondaries.length === 1 &&
@@ -271,7 +271,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
@@ -304,7 +304,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
       ];
 
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const primaryServer = yield mock.createServer(32000, 'localhost');
         const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
 
@@ -356,12 +356,12 @@ describe('ReplSet Connection Tests (mocks)', function() {
         }
 
         // Joined
-        server.on('joined', function() {
+        server.on('joined', function () {
           numberOfEvents = numberOfEvents + 1;
           if (numberOfEvents === 3) validations();
         });
 
-        server.on('failed', function() {
+        server.on('failed', function () {
           numberOfEvents = numberOfEvents + 1;
           if (numberOfEvents === 3) validations();
         });
@@ -379,7 +379,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
@@ -401,7 +401,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
       ];
 
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
 
         firstSecondaryServer.setMessageHandler(request => {
@@ -427,7 +427,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
           }
         );
 
-        server.on('error', function() {
+        server.on('error', function () {
           server.destroy();
           done();
         });
@@ -447,7 +447,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
         }
       },
 
-      test: function(done) {
+      test: function (done) {
         var electionIds = [new ObjectId(), new ObjectId()];
         var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
           setName: 'rs',
@@ -480,7 +480,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
         ];
 
         // Boot the mock
-        co(function*() {
+        co(function* () {
           const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
           const arbiterServer = yield mock.createServer(32002, 'localhost');
 
@@ -515,7 +515,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
             }
           );
 
-          server.on('joined', function() {
+          server.on('joined', function () {
             if (
               server.s.replicaSetState.secondaries.length === 1 &&
               server.s.replicaSetState.arbiters.length === 1
@@ -549,7 +549,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
         }
       },
 
-      test: function(done) {
+      test: function (done) {
         var electionIds = [new ObjectId(), new ObjectId()];
         var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
           setName: 'rs',
@@ -593,7 +593,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
         ];
 
         // Boot the mock
-        co(function*() {
+        co(function* () {
           const primaryServer = yield mock.createServer(32000, 'localhost');
           const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
           const arbiterServer = yield mock.createServer(32002, 'localhost');
@@ -636,7 +636,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
             }
           );
 
-          server.on('joined', function(_type) {
+          server.on('joined', function (_type) {
             if (_type === 'arbiter' || _type === 'secondary' || _type === 'primary') {
               if (
                 server.s.replicaSetState.secondaries.length === 1 &&
@@ -672,7 +672,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
@@ -716,7 +716,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
       ];
 
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const primaryServer = yield mock.createServer(32000, 'localhost');
         const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
         const arbiterServer = yield mock.createServer(32002, 'localhost');
@@ -758,13 +758,13 @@ describe('ReplSet Connection Tests (mocks)', function() {
           }
         );
 
-        server.on('error', function() {
+        server.on('error', function () {
           server.destroy();
           done();
         });
 
         // Gives proxies a chance to boot up
-        setTimeout(function() {
+        setTimeout(function () {
           server.connect();
         }, 100);
       });
@@ -779,7 +779,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
@@ -812,7 +812,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
       ];
 
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const primaryServer = yield mock.createServer(32000, 'localhost');
         const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
 
@@ -845,7 +845,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
           }
         );
 
-        server.on('joined', function(_type) {
+        server.on('joined', function (_type) {
           if (_type === 'secondary' || _type === 'primary') {
             if (
               server.s.replicaSetState.secondaries.length === 1 &&
@@ -878,7 +878,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
         }
       },
 
-      test: function(done) {
+      test: function (done) {
         var electionIds = [new ObjectId(), new ObjectId()];
         var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
           setName: 'rs',
@@ -922,7 +922,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
         ];
 
         // Boot the mock
-        co(function*() {
+        co(function* () {
           const primaryServer = yield mock.createServer(32000, 'localhost');
           const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
           const arbiterServer = yield mock.createServer(32002, 'localhost');
@@ -963,7 +963,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
             }
           );
 
-          server.on('joined', function(_type) {
+          server.on('joined', function (_type) {
             if (_type === 'arbiter' || _type === 'secondary' || _type === 'primary') {
               if (
                 server.s.replicaSetState.secondaries.length === 1 &&
@@ -999,7 +999,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var electionIds = [new ObjectId(), new ObjectId()];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
@@ -1030,7 +1030,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
       ];
 
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const primaryServer = yield mock.createServer(32000, 'localhost');
         const arbiterServer = yield mock.createServer(32002, 'localhost');
 
@@ -1058,7 +1058,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
         });
 
         server.on('error', done);
-        server.on('joined', function(_type) {
+        server.on('joined', function (_type) {
           if (_type === 'arbiter' || _type === 'secondary' || _type === 'primary') {
             if (
               server.s.replicaSetState.arbiters.length === 1 &&
@@ -1091,7 +1091,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
         }
       },
 
-      test: function(done) {
+      test: function (done) {
         var electionIds = [new ObjectId(), new ObjectId()];
         var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
           setName: 'rs',
@@ -1135,7 +1135,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
         ];
 
         // Boot the mock
-        co(function*() {
+        co(function* () {
           const primaryServer = yield mock.createServer(32000, 'localhost');
           const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
           const arbiterServer = yield mock.createServer(32002, 'localhost');
@@ -1170,15 +1170,15 @@ describe('ReplSet Connection Tests (mocks)', function() {
             size: 1
           });
 
-          server.on('fullsetup', function() {
+          server.on('fullsetup', function () {
             server.__fullsetup = true;
           });
 
-          server.on('connect', function() {
+          server.on('connect', function () {
             server.__connected = true;
           });
 
-          server.on('all', function() {
+          server.on('all', function () {
             expect(server.__connected).to.be.true;
             expect(server.__fullsetup).to.be.true;
 
@@ -1202,7 +1202,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
         }
       },
 
-      test: function(done) {
+      test: function (done) {
         var electionIds = [new ObjectId(), new ObjectId()];
         var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
           setName: 'rs',
@@ -1235,7 +1235,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
         ];
 
         // Boot the mock
-        co(function*() {
+        co(function* () {
           const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
           const arbiterServer = yield mock.createServer(32002, 'localhost');
 
@@ -1270,7 +1270,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
             }
           );
 
-          server.on('connect', function() {
+          server.on('connect', function () {
             var result = server.lastIsMaster();
             expect(result).to.exist;
 

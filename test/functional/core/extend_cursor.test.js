@@ -4,13 +4,13 @@ const { expect } = require('chai');
 const { format: f } = require('util');
 const { CoreCursor } = require('../../../src/cursor');
 
-describe('Extend cursor tests', function() {
+describe('Extend cursor tests', function () {
   it('should correctly extend the cursor with custom implementation', {
     metadata: {
       requires: { topology: ['single'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       const config = this.configuration;
 
@@ -21,8 +21,8 @@ describe('Extend cursor tests', function() {
           var extendedCursorSelf = this;
 
           // Resolve all the next
-          var getAllNexts = function(items, callback) {
-            extendedCursorSelf._next(function(err, item) {
+          var getAllNexts = function (items, callback) {
+            extendedCursorSelf._next(function (err, item) {
               if (err) return callback(err);
               if (item === null) return callback(null, null);
               items.push(item);
@@ -31,10 +31,10 @@ describe('Extend cursor tests', function() {
           };
 
           // Adding a toArray function to the cursor
-          this.toArray = function(callback) {
+          this.toArray = function (callback) {
             var items = [];
 
-            getAllNexts(items, function(err) {
+            getAllNexts(items, function (err) {
               if (err) return callback(err, null);
               callback(null, items);
             });
@@ -48,7 +48,7 @@ describe('Extend cursor tests', function() {
       });
 
       // Add event listeners
-      server.on('connect', function(_server) {
+      server.on('connect', function (_server) {
         // Execute the write
         _server.insert(
           f('%s.inserts_extend_cursors', self.configuration.db),
@@ -57,7 +57,7 @@ describe('Extend cursor tests', function() {
             writeConcern: { w: 1 },
             ordered: true
           },
-          function(err, results) {
+          function (err, results) {
             expect(err).to.be.null;
             expect(results.result.n).to.equal(3);
 
@@ -72,7 +72,7 @@ describe('Extend cursor tests', function() {
             // Set the batch size
             cursor.batchSize = 2;
             // Execute next
-            cursor.toArray(function(cursorErr, cursorItems) {
+            cursor.toArray(function (cursorErr, cursorItems) {
               expect(cursorErr).to.be.null;
               expect(cursorItems.length).to.equal(3);
               // Destroy the connection

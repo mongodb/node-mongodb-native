@@ -8,7 +8,7 @@ const ReplSetFixture = require('../common').ReplSetFixture;
 const ReplSetState = require('../../../../src/core/topologies/replset_state');
 const MongoError = require('../../../../src').MongoError;
 
-describe('ReadPreference (ReplSet)', function() {
+describe('ReadPreference (ReplSet)', function () {
   let test;
   before(() => (test = new ReplSetFixture()));
   afterEach(() => mock.cleanup());
@@ -21,7 +21,7 @@ describe('ReadPreference (ReplSet)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       const replSet = new ReplSet(
         [test.primaryServer.address(), test.firstSecondaryServer.address()],
         {
@@ -51,7 +51,7 @@ describe('ReadPreference (ReplSet)', function() {
     }
   });
 
-  it('should correctly sort servers by `lastIsMasterMS` during nearest selection', function() {
+  it('should correctly sort servers by `lastIsMasterMS` during nearest selection', function () {
     const state = new ReplSetState();
     const sampleData = [
       { type: 'RSPrimary', lastIsMasterMS: 5 },

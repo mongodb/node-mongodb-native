@@ -7,13 +7,13 @@ const generateTopologyTests = require('./spec-runner').generateTopologyTests;
 const loadSpecTests = require('../spec').loadSpecTests;
 const { withMonitoredClient } = require('./shared');
 
-describe('Write Concern', function() {
-  describe('spec tests', function() {
+describe('Write Concern', function () {
+  describe('spec tests', function () {
     const testContext = new TestRunnerContext();
     const testSuites = loadSpecTests('read-write-concern/operation');
 
     after(() => testContext.teardown());
-    before(function() {
+    before(function () {
       return testContext.setup(this.configuration);
     });
 
@@ -21,7 +21,7 @@ describe('Write Concern', function() {
   });
 
   // TODO: once `read-write-concern/connection-string` spec tests are implemented these can likely be removed
-  describe('test journal connection string option', function() {
+  describe('test journal connection string option', function () {
     function journalOptionTest(client, events, done) {
       expect(client).to.have.nested.property('s.options');
       const clientOptions = client.s.options;
@@ -32,9 +32,7 @@ describe('Write Concern', function() {
         .insertOne({ a: 1 }, (err, result) => {
           expect(err).to.not.exist;
           expect(result).to.exist;
-          expect(events)
-            .to.be.an('array')
-            .with.lengthOf(1);
+          expect(events).to.be.an('array').with.lengthOf(1);
           expect(events[0]).to.containSubset({
             commandName: 'insert',
             command: {

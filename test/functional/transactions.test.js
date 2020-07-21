@@ -80,7 +80,7 @@ class TransactionsRunnerContext extends TestRunnerContext {
   }
 }
 
-describe('Transactions', function() {
+describe('Transactions', function () {
   const testContext = new TransactionsRunnerContext();
 
   [
@@ -90,10 +90,10 @@ describe('Transactions', function() {
       specPath: 'transactions/convenient-api'
     }
   ].forEach(suiteSpec => {
-    describe(suiteSpec.name, function() {
+    describe(suiteSpec.name, function () {
       const testSuites = loadSpecTests(suiteSpec.specPath);
       after(() => testContext.teardown());
-      before(function() {
+      before(function () {
         return testContext.setup(this.configuration);
       });
 
@@ -132,7 +132,7 @@ describe('Transactions', function() {
     });
   });
 
-  describe('withTransaction', function() {
+  describe('withTransaction', function () {
     let session, sessionPool;
     beforeEach(() => {
       const topology = new Topology('localhost:27017');
@@ -146,7 +146,7 @@ describe('Transactions', function() {
 
     it('should provide a useful error if a Promise is not returned', {
       metadata: { requires: { topology: ['replicaset', 'sharded'], mongodb: '>=4.1.5' } },
-      test: function(done) {
+      test: function (done) {
         function fnThatDoesntReturnPromise() {
           return false;
         }
@@ -161,7 +161,7 @@ describe('Transactions', function() {
 
     it('should return readable error if promise rejected with no reason', {
       metadata: { requires: { topology: ['replicaset', 'sharded'], mongodb: '>=4.0.2' } },
-      test: function(done) {
+      test: function (done) {
         function fnThatReturnsBadPromise() {
           return Promise.reject();
         }
@@ -177,10 +177,10 @@ describe('Transactions', function() {
     });
   });
 
-  describe('startTransaction', function() {
+  describe('startTransaction', function () {
     it('should error if transactions are not supported', {
       metadata: { requires: { topology: ['sharded'], mongodb: '4.0.x' } },
-      test: function(done) {
+      test: function (done) {
         const configuration = this.configuration;
         const client = configuration.newClient(configuration.url());
 
@@ -204,7 +204,7 @@ describe('Transactions', function() {
 
     it('should not error if transactions are supported', {
       metadata: { requires: { topology: ['sharded'], mongodb: '>=4.1.0' } },
-      test: function(done) {
+      test: function (done) {
         const configuration = this.configuration;
         const client = configuration.newClient(configuration.url());
 
@@ -225,10 +225,10 @@ describe('Transactions', function() {
     });
   });
 
-  describe('TransientTransactionError', function() {
+  describe('TransientTransactionError', function () {
     it('should have a TransientTransactionError label inside of a transaction', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=4.0.0' } },
-      test: function(done) {
+      test: function (done) {
         const configuration = this.configuration;
         const client = configuration.newClient({ w: 1 });
 
@@ -273,7 +273,7 @@ describe('Transactions', function() {
 
     it('should not have a TransientTransactionError label outside of a transaction', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=4.0.0' } },
-      test: function(done) {
+      test: function (done) {
         const configuration = this.configuration;
         const client = configuration.newClient({ w: 1 });
 

@@ -11,16 +11,16 @@ const ReadPreference = core.ReadPreference;
 const MongoCredentials = core.MongoCredentials;
 const Connection = core.Connection;
 
-describe('Server tests', function() {
+describe('Server tests', function () {
   it('should correctly connect server to single instance', {
     metadata: { requires: { topology: 'single' } },
 
-    test: function(done) {
+    test: function (done) {
       const config = this.configuration;
       var server = config.newTopology(this.configuration.host, this.configuration.port);
 
       // Add event listeners
-      server.on('connect', function() {
+      server.on('connect', function () {
         server.destroy();
         done();
       });
@@ -33,13 +33,13 @@ describe('Server tests', function() {
   it('should correctly connect server to single instance and execute ismaster', {
     metadata: { requires: { topology: 'single' } },
 
-    test: function(done) {
+    test: function (done) {
       const config = this.configuration;
       var server = config.newTopology(this.configuration.host, this.configuration.port);
 
       // Add event listeners
-      server.on('connect', function() {
-        server.command('admin.$cmd', { ismaster: true }, function(err, r) {
+      server.on('connect', function () {
+        server.command('admin.$cmd', { ismaster: true }, function (err, r) {
           expect(err).to.be.null;
           expect(r.result.ismaster).to.be.true;
           expect(r.connection).to.not.be.null;
@@ -57,19 +57,19 @@ describe('Server tests', function() {
   it('should correctly connect server to single instance and execute ismaster returning raw', {
     metadata: { requires: { topology: 'single' } },
 
-    test: function(done) {
+    test: function (done) {
       const config = this.configuration;
       var server = config.newTopology(this.configuration.host, this.configuration.port);
 
       // Add event listeners
-      server.on('connect', function() {
+      server.on('connect', function () {
         server.command(
           'admin.$cmd',
           { ismaster: true },
           {
             raw: true
           },
-          function(err, r) {
+          function (err, r) {
             expect(err).to.be.null;
             expect(r.result).to.be.an.instanceof(Buffer);
             expect(r.connection).to.not.be.null;
@@ -88,17 +88,17 @@ describe('Server tests', function() {
   it('should correctly connect server to single instance and execute insert', {
     metadata: { requires: { topology: 'single' } },
 
-    test: function(done) {
+    test: function (done) {
       const config = this.configuration;
       var server = config.newTopology(this.configuration.host, this.configuration.port);
 
       // Add event listeners
-      server.on('connect', function() {
-        server.insert('integration_tests.inserts', { a: 1 }, function(insertOneErr, insertOneR) {
+      server.on('connect', function () {
+        server.insert('integration_tests.inserts', { a: 1 }, function (insertOneErr, insertOneR) {
           expect(insertOneErr).to.be.null;
           expect(insertOneR.result.n).to.equal(1);
 
-          server.insert('integration_tests.inserts', { a: 1 }, { ordered: false }, function(
+          server.insert('integration_tests.inserts', { a: 1 }, { ordered: false }, function (
             insertTwoErr,
             insertTwoR
           ) {
@@ -121,19 +121,19 @@ describe('Server tests', function() {
     {
       metadata: { requires: { topology: 'single' } },
 
-      test: function(done) {
+      test: function (done) {
         const config = this.configuration;
         var server = config.newTopology(this.configuration.host, this.configuration.port, {
           compression: { compressors: ['snappy', 'zlib'] }
         });
 
         // Add event listeners
-        server.on('connect', function() {
+        server.on('connect', function () {
           server.command(
             'system.$cmd',
             { ismaster: true },
             { readPreference: new ReadPreference('primary') },
-            function(err, result) {
+            function (err, result) {
               if (err) {
                 console.log(err);
               }
@@ -155,13 +155,13 @@ describe('Server tests', function() {
   it('should correctly connect server to single instance and execute bulk insert', {
     metadata: { requires: { topology: 'single' } },
 
-    test: function(done) {
+    test: function (done) {
       const config = this.configuration;
       var server = config.newTopology(this.configuration.host, this.configuration.port);
 
       // Add event listeners
-      server.on('connect', function() {
-        server.insert('integration_tests.inserts', [{ a: 1 }, { b: 1 }], function(
+      server.on('connect', function () {
+        server.insert('integration_tests.inserts', [{ a: 1 }, { b: 1 }], function (
           insertOneErr,
           insertOneR
         ) {
@@ -172,7 +172,7 @@ describe('Server tests', function() {
             'integration_tests.inserts',
             [{ a: 1 }, { b: 1 }],
             { ordered: false },
-            function(insertTwoErr, insertTwoR) {
+            function (insertTwoErr, insertTwoR) {
               expect(insertTwoErr).to.be.null;
               expect(insertTwoR.result.n).to.equal(2);
 
@@ -191,13 +191,13 @@ describe('Server tests', function() {
   it('should correctly connect server to single instance and execute insert with w:0', {
     metadata: { requires: { topology: 'single' } },
 
-    test: function(done) {
+    test: function (done) {
       const config = this.configuration;
       var server = config.newTopology(this.configuration.host, this.configuration.port);
 
       // Add event listeners
-      server.on('connect', function() {
-        server.insert('integration_tests.inserts', { a: 1 }, { writeConcern: { w: 0 } }, function(
+      server.on('connect', function () {
+        server.insert('integration_tests.inserts', { a: 1 }, { writeConcern: { w: 0 } }, function (
           insertOneErr,
           insertOneR
         ) {
@@ -208,7 +208,7 @@ describe('Server tests', function() {
             'integration_tests.inserts',
             { a: 1 },
             { ordered: false, writeConcern: { w: 0 } },
-            function(insertTwoErr, insertTwoR) {
+            function (insertTwoErr, insertTwoR) {
               expect(insertTwoErr).to.be.null;
               expect(insertTwoR.result.ok).to.equal(1);
 
@@ -227,12 +227,12 @@ describe('Server tests', function() {
   it('should correctly connect server to single instance and execute update', {
     metadata: { requires: { topology: 'single' } },
 
-    test: function(done) {
+    test: function (done) {
       const config = this.configuration;
       var server = config.newTopology(this.configuration.host, this.configuration.port);
 
       // Add event listeners
-      server.on('connect', function(_server) {
+      server.on('connect', function (_server) {
         _server.update(
           'integration_tests.inserts_example2',
           [
@@ -246,7 +246,7 @@ describe('Server tests', function() {
             writeConcern: { w: 1 },
             ordered: true
           },
-          function(err, results) {
+          function (err, results) {
             expect(err).to.be.null;
             expect(results.result.n).to.equal(1);
 
@@ -264,13 +264,13 @@ describe('Server tests', function() {
   it('should correctly connect server to single instance and execute remove', {
     metadata: { requires: { topology: 'single' } },
 
-    test: function(done) {
+    test: function (done) {
       const config = this.configuration;
       var server = config.newTopology(this.configuration.host, this.configuration.port);
 
       // Add event listeners
-      server.on('connect', function(_server) {
-        server.insert('integration_tests.remove_example', { a: 1 }, function(err, r) {
+      server.on('connect', function (_server) {
+        server.insert('integration_tests.remove_example', { a: 1 }, function (err, r) {
           expect(err).to.be.null;
           expect(r.result.ok).to.equal(1);
 
@@ -281,7 +281,7 @@ describe('Server tests', function() {
               writeConcern: { w: 1 },
               ordered: true
             },
-            function(removeErr, results) {
+            function (removeErr, results) {
               expect(removeErr).to.be.null;
               expect(results.result.n).to.equal(1);
 
@@ -303,7 +303,7 @@ describe('Server tests', function() {
       requires: { topology: ['single'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       var testDone = false;
 
@@ -311,13 +311,13 @@ describe('Server tests', function() {
       var server = config.newTopology(this.configuration.host, this.configuration.port);
 
       // Add event listeners
-      server.on('connect', function(_server) {
+      server.on('connect', function (_server) {
         var count = 1;
         var ns = 'integration_tests.t';
 
-        var execute = function() {
+        var execute = function () {
           if (!testDone) {
-            server.insert(ns, { a: 1, count: count }, function() {
+            server.insert(ns, { a: 1, count: count }, function () {
               count = count + 1;
 
               // Execute find
@@ -328,12 +328,12 @@ describe('Server tests', function() {
               });
 
               // Execute next
-              cursor._next(function() {
+              cursor._next(function () {
                 setTimeout(execute, 500);
               });
             });
           } else {
-            server.insert(ns, { a: 1, count: count }, function(err, r) {
+            server.insert(ns, { a: 1, count: count }, function (err, r) {
               expect(err).to.be.null;
               expect(r).to.exist;
 
@@ -345,7 +345,7 @@ describe('Server tests', function() {
               });
 
               // Execute next
-              cursor._next(function(cursorErr, d) {
+              cursor._next(function (cursorErr, d) {
                 expect(err).to.be.null;
                 expect(d).to.exist;
                 server.destroy();
@@ -360,7 +360,7 @@ describe('Server tests', function() {
 
       var count = 2;
 
-      var restartServer = function() {
+      var restartServer = function () {
         if (count === 0) {
           testDone = true;
           return;
@@ -368,9 +368,9 @@ describe('Server tests', function() {
 
         count = count - 1;
 
-        self.configuration.manager.stop().then(function() {
-          setTimeout(function() {
-            self.configuration.manager.start().then(function() {
+        self.configuration.manager.stop().then(function () {
+          setTimeout(function () {
+            self.configuration.manager.start().then(function () {
               setTimeout(restartServer, 1000);
             });
           }, 2000);
@@ -390,11 +390,11 @@ describe('Server tests', function() {
       ignore: { travis: true }
     },
 
-    test: function(done) {
+    test: function (done) {
       const config = this.configuration;
       const manager = this.configuration.manager;
 
-      manager.stop('SIGINT').then(function() {
+      manager.stop('SIGINT').then(function () {
         // Attempt to connect while server is down
         var server = config.newTopology(this.configuration.host, this.configuration.port, {
           reconnect: true,
@@ -403,20 +403,20 @@ describe('Server tests', function() {
           emitError: true
         });
 
-        server.on('connect', function() {
+        server.on('connect', function () {
           server.destroy();
           done();
         });
 
-        server.on('reconnect', function() {
+        server.on('reconnect', function () {
           server.destroy();
           done();
         });
 
-        server.on('error', function(err) {
+        server.on('error', function (err) {
           expect(err).to.exist;
           expect(err.message.indexOf('failed to')).to.not.equal(-1);
-          manager.start().then(function() {});
+          manager.start().then(function () {});
         });
 
         server.connect();
@@ -432,7 +432,7 @@ describe('Server tests', function() {
       ignore: { travis: true }
     },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       const config = this.configuration;
       var server = config.newTopology(this.configuration.host, this.configuration.port, {
@@ -442,10 +442,10 @@ describe('Server tests', function() {
         emitError: true
       });
 
-      server.on('connect', function() {
+      server.on('connect', function () {
         var left = 5000;
 
-        var leftDecrement = function(err, results) {
+        var leftDecrement = function (err, results) {
           expect(err).to.not.exist;
           expect(results).to.exist;
 
@@ -484,7 +484,7 @@ describe('Server tests', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       const config = this.configuration;
       var server = config.newTopology(this.configuration.host, this.configuration.port, {
         size: 10
@@ -493,8 +493,8 @@ describe('Server tests', function() {
       var ns = 'integration_tests.remove_example';
 
       // Add event listeners
-      server.on('connect', function() {
-        var docs = new Array(150).fill(0).map(function(_, i) {
+      server.on('connect', function () {
+        var docs = new Array(150).fill(0).map(function (_, i) {
           return {
             _id: 'needle_' + i,
             is_even: i % 2,
@@ -504,7 +504,7 @@ describe('Server tests', function() {
           };
         });
 
-        server.insert(ns, docs, function(err, r) {
+        server.insert(ns, docs, function (err, r) {
           expect(err).to.be.null;
           expect(r.result.ok).to.equal(1);
 
@@ -522,7 +522,7 @@ describe('Server tests', function() {
           );
 
           function callNext(_cursor) {
-            _cursor._next(function(cursorErr, doc) {
+            _cursor._next(function (cursorErr, doc) {
               expect(cursorErr).to.not.exist;
               if (!doc) {
                 server.destroy(done);
@@ -552,7 +552,7 @@ describe('Server tests', function() {
   it('should error when invalid compressors are specified', {
     metadata: { requires: { topology: 'single' } },
 
-    test: function(done) {
+    test: function (done) {
       const config = this.configuration;
 
       try {
@@ -572,14 +572,14 @@ describe('Server tests', function() {
     {
       metadata: { requires: { topology: ['auth', 'snappyCompression'] } },
 
-      test: function(done) {
+      test: function (done) {
         var self = this;
         const config = this.configuration;
 
         Connection.enableConnectionAccounting();
 
-        self.configuration.manager.restart(true).then(function() {
-          locateAuthMethod(self.configuration, function(err, method) {
+        self.configuration.manager.restart(true).then(function () {
+          locateAuthMethod(self.configuration, function (err, method) {
             expect(err).to.be.null;
 
             const credentials = new MongoCredentials({
@@ -599,7 +599,7 @@ describe('Server tests', function() {
                 roles: [{ role: 'root', db: 'admin' }],
                 digestPassword: true
               },
-              function(cmdErr, r) {
+              function (cmdErr, r) {
                 expect(cmdErr).to.not.exist;
                 expect(r).to.exist;
 
@@ -608,8 +608,8 @@ describe('Server tests', function() {
                 });
 
                 // Add event listeners
-                server.on('connect', function() {
-                  server.insert('integration_tests.inserts', { a: 1 }, function(
+                server.on('connect', function () {
+                  server.insert('integration_tests.inserts', { a: 1 }, function (
                     insertOneErr,
                     insertOneRes
                   ) {
@@ -620,7 +620,7 @@ describe('Server tests', function() {
                       'integration_tests.inserts',
                       { a: 1 },
                       { ordered: false },
-                      function(insertTwoErr, insertTwoR) {
+                      function (insertTwoErr, insertTwoR) {
                         expect(insertTwoErr).to.be.null;
                         expect(insertTwoR.result.n).to.equal(1);
 
@@ -647,14 +647,14 @@ describe('Server tests', function() {
     {
       metadata: { requires: { topology: ['auth', 'snappyCompression'] } },
 
-      test: function(done) {
+      test: function (done) {
         var self = this;
         const config = this.configuration;
 
         Connection.enableConnectionAccounting();
 
-        this.configuration.manager.restart(true).then(function() {
-          locateAuthMethod(self.configuration, function(err, method) {
+        this.configuration.manager.restart(true).then(function () {
+          locateAuthMethod(self.configuration, function (err, method) {
             expect(err).to.be.null;
 
             const credentials = new MongoCredentials({
@@ -674,7 +674,7 @@ describe('Server tests', function() {
                 roles: [{ role: 'root', db: 'admin' }],
                 digestPassword: true
               },
-              function(cmdErr, r) {
+              function (cmdErr, r) {
                 expect(cmdErr).to.not.exist;
                 expect(r).to.exist;
 
@@ -683,7 +683,7 @@ describe('Server tests', function() {
                 });
 
                 // Add event listeners
-                server.on('error', function() {
+                server.on('error', function () {
                   expect(Object.keys(Connection.connections()).length).to.equal(0);
                   Connection.disableConnectionAccounting();
                   done();
@@ -698,7 +698,7 @@ describe('Server tests', function() {
     }
   );
 
-  describe('Unsupported wire protocols', function() {
+  describe('Unsupported wire protocols', function () {
     let server;
     beforeEach(() => mock.createServer().then(_server => (server = _server)));
     afterEach(() => mock.cleanup());
@@ -706,7 +706,7 @@ describe('Server tests', function() {
     it('errors when unsupported wire protocol is returned from isMaster', {
       metadata: { requires: { topology: ['single'] } },
 
-      test: function(done) {
+      test: function (done) {
         server.setMessageHandler(request => {
           request.reply(Object.assign({}, mock.DEFAULT_ISMASTER, { maxWireVersion: 1 }));
         });
@@ -741,19 +741,19 @@ describe('Server tests', function() {
   it.skip('Should not try to reconnect forever if reconnectTries = 0', {
     metadata: { requires: { topology: 'single' } },
 
-    test: function(done) {
+    test: function (done) {
       const config = this.configuration;
       var server = config.newTopology('doesntexist', 12345, {
         reconnectTries: 0
       });
 
       // Add event listeners
-      server.on('error', function() {});
+      server.on('error', function () {});
 
       // Start connection
       server.connect();
 
-      server.s.pool.on('reconnectFailed', function() {
+      server.s.pool.on('reconnectFailed', function () {
         done();
       });
     }

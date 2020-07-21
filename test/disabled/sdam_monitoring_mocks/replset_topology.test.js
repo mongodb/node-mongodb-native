@@ -7,7 +7,7 @@ const core = require('../../../../src/core');
 const ReplSet = core.ReplSet;
 const ObjectId = core.BSON.ObjectId;
 
-describe.skip('ReplSet SDAM Monitoring (mocks)', function() {
+describe.skip('ReplSet SDAM Monitoring (mocks)', function () {
   afterEach(() => mock.cleanup());
 
   it('Successful emit SDAM monitoring events for replicaset', {
@@ -18,7 +18,7 @@ describe.skip('ReplSet SDAM Monitoring (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       // Contain mock server
       var primaryServer = null;
       var firstSecondaryServer = null;
@@ -110,7 +110,7 @@ describe.skip('ReplSet SDAM Monitoring (mocks)', function() {
       ];
 
       // Boot the mock
-      co(function*() {
+      co(function* () {
         primaryServer = yield mock.createServer(32000, 'localhost');
         firstSecondaryServer = yield mock.createServer(32001, 'localhost');
         arbiterServer = yield mock.createServer(32002, 'localhost');
@@ -155,61 +155,61 @@ describe.skip('ReplSet SDAM Monitoring (mocks)', function() {
 
       var responses = {};
       var step = 0;
-      var add = function(a) {
+      var add = function (a) {
         if (!responses[a.type]) responses[a.type] = [];
         responses[a.type].push(a.event);
       };
 
-      server.on('serverOpening', function(event) {
+      server.on('serverOpening', function (event) {
         add({ type: 'serverOpening', event: event });
       });
 
-      server.on('serverClosed', function(event) {
+      server.on('serverClosed', function (event) {
         add({ type: 'serverClosed', event: event });
       });
 
-      server.on('serverDescriptionChanged', function(event) {
+      server.on('serverDescriptionChanged', function (event) {
         add({ type: 'serverDescriptionChanged', event: event });
       });
 
-      server.on('topologyOpening', function(event) {
+      server.on('topologyOpening', function (event) {
         add({ type: 'topologyOpening', event: event });
       });
 
-      server.on('topologyClosed', function(event) {
+      server.on('topologyClosed', function (event) {
         add({ type: 'topologyClosed', event: event });
       });
 
-      server.on('topologyDescriptionChanged', function(event) {
+      server.on('topologyDescriptionChanged', function (event) {
         add({ type: 'topologyDescriptionChanged', event: event });
       });
 
-      server.on('serverHeartbeatStarted', function(event) {
+      server.on('serverHeartbeatStarted', function (event) {
         add({ type: 'serverHeartbeatStarted', event: event });
       });
 
-      server.on('serverHeartbeatSucceeded', function(event) {
+      server.on('serverHeartbeatSucceeded', function (event) {
         add({ type: 'serverHeartbeatSucceeded', event: event });
       });
 
-      server.on('serverHeartbeatFailed', function(event) {
+      server.on('serverHeartbeatFailed', function (event) {
         add({ type: 'serverHeartbeatFailed', event: event });
       });
 
       // Add event listeners
-      server.on('fullsetup', function(_server) {
-        setTimeout(function() {
+      server.on('fullsetup', function (_server) {
+        setTimeout(function () {
           step = step + 1;
 
-          setTimeout(function() {
+          setTimeout(function () {
             step = step + 1;
 
-            setTimeout(function() {
+            setTimeout(function () {
               expect(responses.serverOpening.length).to.be.at.least(3);
               _server.destroy();
 
               // Wait to ensure all events fired
-              setTimeout(function() {
+              setTimeout(function () {
                 expect(responses.serverOpening.length).to.be.at.least(3);
                 expect(responses.serverClosed.length).to.be.at.least(3);
                 expect(responses.topologyOpening.length).to.equal(1);
@@ -241,7 +241,7 @@ describe.skip('ReplSet SDAM Monitoring (mocks)', function() {
       });
 
       // Gives proxies a chance to boot up
-      setTimeout(function() {
+      setTimeout(function () {
         server.connect();
       }, 100);
 

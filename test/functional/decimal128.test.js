@@ -3,8 +3,8 @@ var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 const { Decimal128 } = require('../../src');
 
-describe('Decimal128', function() {
-  before(function() {
+describe('Decimal128', function () {
+  before(function () {
     return setupDatabase(this.configuration);
   });
 
@@ -18,24 +18,24 @@ describe('Decimal128', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var object = {
           id: 1,
           value: Decimal128.fromString('1')
         };
 
-        db.collection('decimal128').insertOne(object, function(err) {
+        db.collection('decimal128').insertOne(object, function (err) {
           test.equal(null, err);
 
           db.collection('decimal128').findOne(
             {
               id: 1
             },
-            function(err, doc) {
+            function (err, doc) {
               test.equal(null, err);
               test.ok(doc.value instanceof Decimal128);
               test.equal('1', doc.value.toString());

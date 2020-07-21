@@ -9,12 +9,12 @@ chai.use(sinonChai);
 const makeTestFunction = require('../tools/utils').makeTestFunction;
 const ensureCalledWith = require('../tools/utils').ensureCalledWith;
 
-describe('Deprecation Warnings', function() {
+describe('Deprecation Warnings', function () {
   let messages = [];
   const deprecatedOptions = ['maxScan', 'snapshot', 'fields'];
   const defaultMessage = ' is deprecated and will be removed in a later version.';
 
-  before(function() {
+  before(function () {
     if (process.emitWarning) {
       process.on('warning', warning => {
         messages.push(warning.message);
@@ -23,16 +23,16 @@ describe('Deprecation Warnings', function() {
     return;
   });
 
-  beforeEach(function() {
+  beforeEach(function () {
     this.sinon.stub(console, 'error');
   });
 
-  afterEach(function() {
+  afterEach(function () {
     messages.length = 0;
   });
 
-  describe('Mult functions with same options', function() {
-    beforeEach(function() {
+  describe('Mult functions with same options', function () {
+    beforeEach(function () {
       const f1 = makeTestFunction({
         name: 'f1',
         deprecatedOptions: deprecatedOptions,
@@ -49,7 +49,7 @@ describe('Deprecation Warnings', function() {
 
     it('multiple functions with the same deprecated options should both warn', {
       metadata: { requires: { node: '>=6.0.0' } },
-      test: function(done) {
+      test: function (done) {
         process.nextTick(() => {
           expect(messages).to.deep.equal([
             'f1 option [maxScan]' + defaultMessage,
@@ -63,7 +63,7 @@ describe('Deprecation Warnings', function() {
 
     it('multiple functions with the same deprecated options should both warn', {
       metadata: { requires: { node: '<6.0.0' } },
-      test: function(done) {
+      test: function (done) {
         ensureCalledWith(console.error, [
           'f1 option [maxScan]' + defaultMessage,
           'f2 option [maxScan]' + defaultMessage
@@ -74,8 +74,8 @@ describe('Deprecation Warnings', function() {
     });
   });
 
-  describe('Empty options object', function() {
-    beforeEach(function() {
+  describe('Empty options object', function () {
+    beforeEach(function () {
       const f = makeTestFunction({
         name: 'f',
         deprecatedOptions: deprecatedOptions,
@@ -86,7 +86,7 @@ describe('Deprecation Warnings', function() {
 
     it('should not warn if empty options object passed in', {
       metadata: { requires: { node: '>=6.0.0' } },
-      test: function(done) {
+      test: function (done) {
         process.nextTick(() => {
           expect(messages).to.have.a.lengthOf(0);
           done();
@@ -96,15 +96,15 @@ describe('Deprecation Warnings', function() {
 
     it('should not warn if empty options object passed in', {
       metadata: { requires: { node: '<6.0.0' } },
-      test: function(done) {
+      test: function (done) {
         expect(console.error).to.have.not.been.called;
         done();
       }
     });
   });
 
-  describe('Custom Message Handler', function() {
-    beforeEach(function() {
+  describe('Custom Message Handler', function () {
+    beforeEach(function () {
       const customMsgHandler = (name, option) => {
         return 'custom msg for function ' + name + ' and option ' + option;
       };
@@ -121,7 +121,7 @@ describe('Deprecation Warnings', function() {
 
     it('should use user-specified message handler', {
       metadata: { requires: { node: '>=6.0.0' } },
-      test: function(done) {
+      test: function (done) {
         process.nextTick(() => {
           expect(messages).to.deep.equal([
             'custom msg for function f and option maxScan',
@@ -136,7 +136,7 @@ describe('Deprecation Warnings', function() {
 
     it('should use user-specified message handler', {
       metadata: { requires: { node: '<6.0.0' } },
-      test: function(done) {
+      test: function (done) {
         ensureCalledWith(console.error, [
           'custom msg for function f and option maxScan',
           'custom msg for function f and option snapshot',
@@ -148,8 +148,8 @@ describe('Deprecation Warnings', function() {
     });
   });
 
-  describe('Warn once', function() {
-    beforeEach(function() {
+  describe('Warn once', function () {
+    beforeEach(function () {
       const f = makeTestFunction({
         name: 'f',
         deprecatedOptions: deprecatedOptions,
@@ -161,7 +161,7 @@ describe('Deprecation Warnings', function() {
 
     it('each function should only warn once per deprecated option', {
       metadata: { requires: { node: '>=6.0.0' } },
-      test: function(done) {
+      test: function (done) {
         process.nextTick(() => {
           expect(messages).to.deep.equal([
             'f option [maxScan]' + defaultMessage,
@@ -175,7 +175,7 @@ describe('Deprecation Warnings', function() {
 
     it('each function should only warn once per deprecated option', {
       metadata: { requires: { node: '<6.0.0' } },
-      test: function(done) {
+      test: function (done) {
         ensureCalledWith(console.error, [
           'f option [maxScan]' + defaultMessage,
           'f option [fields]' + defaultMessage
@@ -186,8 +186,8 @@ describe('Deprecation Warnings', function() {
     });
   });
 
-  describe('Maintain functionality', function() {
-    beforeEach(function() {
+  describe('Maintain functionality', function () {
+    beforeEach(function () {
       const config = {
         name: 'f',
         deprecatedOptions: ['multiply', 'add'],
@@ -214,7 +214,7 @@ describe('Deprecation Warnings', function() {
 
     it('wrapped functions should maintain original functionality', {
       metadata: { requires: { node: '>=6.0.0' } },
-      test: function(done) {
+      test: function (done) {
         process.nextTick(() => {
           expect(messages).to.deep.equal([
             'f option [multiply]' + defaultMessage,
@@ -228,7 +228,7 @@ describe('Deprecation Warnings', function() {
 
     it('wrapped functions should maintain original functionality', {
       metadata: { requires: { node: '<6.0.0' } },
-      test: function(done) {
+      test: function (done) {
         ensureCalledWith(console.error, [
           'f option [multiply]' + defaultMessage,
           'f option [add]' + defaultMessage
@@ -239,7 +239,7 @@ describe('Deprecation Warnings', function() {
     });
   });
 
-  it('optionsIndex pointing to undefined should not error', function(done) {
+  it('optionsIndex pointing to undefined should not error', function (done) {
     const f = makeTestFunction({
       name: 'f',
       deprecatedOptions: deprecatedOptions,
@@ -249,7 +249,7 @@ describe('Deprecation Warnings', function() {
     done();
   });
 
-  it('optionsIndex not pointing to object should not error', function(done) {
+  it('optionsIndex not pointing to object should not error', function (done) {
     const f = makeTestFunction({
       name: 'f',
       deprecatedOptions: deprecatedOptions,

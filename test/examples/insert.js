@@ -3,22 +3,22 @@
 const setupDatabase = require('../functional/shared').setupDatabase;
 const expect = require('chai').expect;
 
-describe('examples(insert):', function() {
+describe('examples(insert):', function () {
   let client;
   let db;
 
-  before(async function() {
+  before(async function () {
     await setupDatabase(this.configuration);
   });
 
-  beforeEach(async function() {
+  beforeEach(async function () {
     client = await this.configuration.newClient().connect();
     db = client.db(this.configuration.db);
 
     await db.collection('inventory').deleteMany({});
   });
 
-  afterEach(async function() {
+  afterEach(async function () {
     await client.close();
     client = undefined;
     db = undefined;
@@ -26,7 +26,7 @@ describe('examples(insert):', function() {
 
   it('Insert a Single Document', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function() {
+    test: async function () {
       // Start Example 1
       await db.collection('inventory').insertOne({
         item: 'canvas',
@@ -46,7 +46,7 @@ describe('examples(insert):', function() {
 
   it('Insert Multiple Documents', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function() {
+    test: async function () {
       // Start Example 3
       await db.collection('inventory').insertMany([
         {

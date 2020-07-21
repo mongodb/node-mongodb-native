@@ -5,7 +5,7 @@ var fs = require('fs');
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 
-var restartAndDone = function(done) {
+var restartAndDone = function (done) {
   done();
 };
 
@@ -18,15 +18,15 @@ function filterSecondaries(hosts, isMaster) {
 }
 
 // NOTE: skipped because they haven't worked in some time, need refactoring
-describe.skip('ReplSet (ReadPreference)', function() {
-  before(function() {
+describe.skip('ReplSet (ReadPreference)', function () {
+  before(function () {
     return setupDatabase(this.configuration);
   });
 
   it('Should Correctly Pick lowest ping time', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
         ReadPreference = mongo.ReadPreference;
@@ -38,10 +38,10 @@ describe.skip('ReplSet (ReadPreference)', function() {
       );
 
       // Trigger test once whole set is up
-      client.on('fullsetup', function(client) {
+      client.on('fullsetup', function (client) {
         var db = client.db(configuration.db);
 
-        db.command({ ismaster: true }, function(err, result) {
+        db.command({ ismaster: true }, function (err, result) {
           test.equal(null, err);
 
           var time = 10;
@@ -52,7 +52,7 @@ describe.skip('ReplSet (ReadPreference)', function() {
           // Sorted by time
           var byTime = [];
           byTime = client.topology.replset.getServers({ ignoreArbiters: true });
-          byTime.forEach(function(s) {
+          byTime.forEach(function (s) {
             s.lastIsMasterMS = time;
             time = time + 10;
           });
@@ -78,7 +78,7 @@ describe.skip('ReplSet (ReadPreference)', function() {
           // var lastServer = null;
 
           // Pick the server
-          client.topology.replset.once('pickedServer', function(readPreference, server) {
+          client.topology.replset.once('pickedServer', function (readPreference, server) {
             test.equal(byTime[0].name, server.name);
           });
 
@@ -86,11 +86,11 @@ describe.skip('ReplSet (ReadPreference)', function() {
           db.collection('somecollection').findOne(
             {},
             { readPreference: new ReadPreference(ReadPreference.NEAREST) },
-            function(err) {
+            function (err) {
               test.equal(null, err);
 
               // Pick the server
-              client.topology.replset.once('pickedServer', function(readPreference, server) {
+              client.topology.replset.once('pickedServer', function (readPreference, server) {
                 test.ok(secondaries.indexOf(server.name) !== -1);
               });
 
@@ -98,11 +98,11 @@ describe.skip('ReplSet (ReadPreference)', function() {
               db.collection('somecollection').findOne(
                 {},
                 { readPreference: new ReadPreference(ReadPreference.SECONDARY) },
-                function(err) {
+                function (err) {
                   test.equal(null, err);
 
                   // Pick the server
-                  client.topology.replset.once('pickedServer', function(readPreference, server) {
+                  client.topology.replset.once('pickedServer', function (readPreference, server) {
                     test.ok(secondaries.indexOf(server.name) !== -1);
                   });
 
@@ -110,11 +110,11 @@ describe.skip('ReplSet (ReadPreference)', function() {
                   db.collection('somecollection').findOne(
                     {},
                     { readPreference: new ReadPreference(ReadPreference.SECONDARY_PREFERRED) },
-                    function(err) {
+                    function (err) {
                       test.equal(null, err);
 
                       // Pick the server
-                      client.topology.replset.once('pickedServer', function(
+                      client.topology.replset.once('pickedServer', function (
                         readPreference,
                         server
                       ) {
@@ -125,7 +125,7 @@ describe.skip('ReplSet (ReadPreference)', function() {
                       db.collection('somecollection').findOne(
                         {},
                         { readPreference: new ReadPreference(ReadPreference.PRIMARY) },
-                        function(err) {
+                        function (err) {
                           test.equal(null, err);
 
                           // Close db
@@ -142,7 +142,7 @@ describe.skip('ReplSet (ReadPreference)', function() {
         });
       });
 
-      client.connect(function(err) {
+      client.connect(function (err) {
         test.equal(null, err);
       });
     }
@@ -151,7 +151,7 @@ describe.skip('ReplSet (ReadPreference)', function() {
   it('Should Correctly vary read server when using readpreference NEAREST', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
         ReadPreference = mongo.ReadPreference;
@@ -162,33 +162,33 @@ describe.skip('ReplSet (ReadPreference)', function() {
         { w: 1, readPreference: ReadPreference.NEAREST, debug: true }
       );
 
-      client.on('fullsetup', function() {
+      client.on('fullsetup', function () {
         var db = client.db(configuration.db);
         // Servers viewed
         var viewedServers = {};
 
         // Pick the server
-        client.topology.replset.once('pickedServer', function(readPreference, server) {
+        client.topology.replset.once('pickedServer', function (readPreference, server) {
           viewedServers[server.name] = server.name;
         });
 
-        db.collection('nearest_collection_test').findOne({ a: 1 }, function(err) {
+        db.collection('nearest_collection_test').findOne({ a: 1 }, function (err) {
           test.equal(null, err);
 
           // Pick the server
-          client.topology.replset.once('pickedServer', function(readPreference, server) {
+          client.topology.replset.once('pickedServer', function (readPreference, server) {
             viewedServers[server.name] = server.name;
           });
 
-          db.collection('nearest_collection_test').findOne({ a: 1 }, function(err) {
+          db.collection('nearest_collection_test').findOne({ a: 1 }, function (err) {
             test.equal(null, err);
 
             // Pick the server
-            client.topology.replset.once('pickedServer', function(readPreference, server) {
+            client.topology.replset.once('pickedServer', function (readPreference, server) {
               viewedServers[server.name] = server.name;
             });
 
-            db.collection('nearest_collection_test').findOne({ a: 1 }, function(err) {
+            db.collection('nearest_collection_test').findOne({ a: 1 }, function (err) {
               test.equal(null, err);
               test.ok(Object.keys(viewedServers).length > 1);
 
@@ -199,7 +199,7 @@ describe.skip('ReplSet (ReadPreference)', function() {
         });
       });
 
-      client.connect(function(err) {
+      client.connect(function (err) {
         test.equal(null, err);
       });
     }
@@ -210,7 +210,7 @@ describe.skip('ReplSet (ReadPreference)', function() {
     {
       metadata: { requires: { topology: 'replicaset' } },
 
-      test: function(done) {
+      test: function (done) {
         var configuration = this.configuration;
         var mongo = configuration.require,
           ReadPreference = mongo.ReadPreference;
@@ -221,39 +221,39 @@ describe.skip('ReplSet (ReadPreference)', function() {
           { w: 1, readPreference: ReadPreference.NEAREST, debug: true }
         );
 
-        client.on('fullsetup', function() {
+        client.on('fullsetup', function () {
           var db = client.db(configuration.db);
           // Servers viewed
           var viewedServers = {};
 
           // Pick the server
-          client.topology.replset.once('pickedServer', function(readPreference, server) {
+          client.topology.replset.once('pickedServer', function (readPreference, server) {
             viewedServers[server.name] = server.name;
           });
 
           db.collection('nearest_collection_test', {
             readPreference: 'nearest'
-          }).findOne({ a: 1 }, function(err) {
+          }).findOne({ a: 1 }, function (err) {
             test.equal(null, err);
 
             // Pick the server
-            client.topology.replset.once('pickedServer', function(readPreference, server) {
+            client.topology.replset.once('pickedServer', function (readPreference, server) {
               viewedServers[server.name] = server.name;
             });
 
             db.collection('nearest_collection_test', {
               readPreference: 'nearest'
-            }).findOne({ a: 1 }, function(err) {
+            }).findOne({ a: 1 }, function (err) {
               test.equal(null, err);
 
               // Pick the server
-              client.topology.replset.once('pickedServer', function(readPreference, server) {
+              client.topology.replset.once('pickedServer', function (readPreference, server) {
                 viewedServers[server.name] = server.name;
               });
 
               db.collection('nearest_collection_test', {
                 readPreference: 'nearest'
-              }).findOne({ a: 1 }, function(err) {
+              }).findOne({ a: 1 }, function (err) {
                 test.equal(null, err);
                 test.ok(Object.keys(viewedServers).length > 1);
 
@@ -264,7 +264,7 @@ describe.skip('ReplSet (ReadPreference)', function() {
           });
         });
 
-        client.connect(function(err) {
+        client.connect(function (err) {
           test.equal(null, err);
         });
       }
@@ -274,7 +274,7 @@ describe.skip('ReplSet (ReadPreference)', function() {
   it('shouldCorrectlyReadFromGridstoreWithSecondaryReadPreference', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var GridStore = configuration.require.GridStore,
         ObjectId = configuration.require.ObjectId,
@@ -292,10 +292,10 @@ describe.skip('ReplSet (ReadPreference)', function() {
         }
       );
 
-      client.on('fullsetup', function() {
+      client.on('fullsetup', function () {
         var db = client.db(configuration.db);
 
-        db.command({ ismaster: true }, function(err, result) {
+        db.command({ ismaster: true }, function (err, result) {
           test.equal(null, err);
 
           var gridStore = new GridStore(db, id, 'w', { w: 4 });
@@ -305,28 +305,28 @@ describe.skip('ReplSet (ReadPreference)', function() {
           gridStore.chunkSize = 5000;
           var data = fs.readFileSync('./test/functional/data/test_gs_weird_bug.png');
 
-          gridStore.open(function(err, gridStore) {
+          gridStore.open(function (err, gridStore) {
             test.equal(null, err);
 
             // Write the file using write
-            gridStore.write(data, function(err) {
+            gridStore.write(data, function (err) {
               test.equal(null, err);
 
-              gridStore.close(function(err, doc) {
+              gridStore.close(function (err, doc) {
                 test.equal(null, err);
 
                 // Pick the server
-                client.topology.replset.once('pickedServer', function(readPreference, server) {
+                client.topology.replset.once('pickedServer', function (readPreference, server) {
                   test.ok(secondaries[server.name] != null);
                 });
 
                 // Read the file using readBuffer
                 new GridStore(db, doc._id, 'r', {
                   readPreference: ReadPreference.SECONDARY
-                }).open(function(err, gridStore) {
+                }).open(function (err, gridStore) {
                   test.equal(null, err);
 
-                  gridStore.read(function(err, data2) {
+                  gridStore.read(function (err, data2) {
                     test.equal(null, err);
                     test.equal(data.toString('base64'), data2.toString('base64'));
                     client.close();
@@ -339,7 +339,7 @@ describe.skip('ReplSet (ReadPreference)', function() {
         });
       });
 
-      client.connect(function(err) {
+      client.connect(function (err) {
         test.equal(null, err);
       });
     }
@@ -348,7 +348,7 @@ describe.skip('ReplSet (ReadPreference)', function() {
   it('Connection to replicaset with primary read preference', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
         ReadPreference = mongo.ReadPreference;
@@ -361,21 +361,21 @@ describe.skip('ReplSet (ReadPreference)', function() {
 
       // Logger.setLevel('info');
       // Trigger test once whole set is up
-      client.on('fullsetup', function(client) {
+      client.on('fullsetup', function (client) {
         var db = client.db(configuration.db);
 
-        db.command({ ismaster: true }, function(err, result) {
+        db.command({ ismaster: true }, function (err, result) {
           test.equal(null, err);
 
           // Pick the server
-          client.topology.replset.once('pickedServer', function(readPreference, server) {
+          client.topology.replset.once('pickedServer', function (readPreference, server) {
             test.equal(result.primary, server.name);
           });
 
           // Grab the collection
           var collection = db.collection('read_preference_replicaset_test_0');
           // Attempt to read (should fail due to the server not being a primary);
-          collection.find().toArray(function(err) {
+          collection.find().toArray(function (err) {
             test.equal(null, err);
             client.close();
             restartAndDone(done);
@@ -384,7 +384,7 @@ describe.skip('ReplSet (ReadPreference)', function() {
       });
 
       // Connect to the db
-      client.connect(function(err) {
+      client.connect(function (err) {
         test.equal(null, err);
       });
     }
@@ -393,7 +393,7 @@ describe.skip('ReplSet (ReadPreference)', function() {
   it('Should Set read preference at collection level using collection method', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
         ReadPreference = mongo.ReadPreference;
@@ -401,16 +401,16 @@ describe.skip('ReplSet (ReadPreference)', function() {
       // Create db instance
       var client = configuration.newClient({}, { w: 0, debug: true });
       // Connect to the db
-      client.on('fullsetup', function(client) {
+      client.on('fullsetup', function (client) {
         var db = client.db(configuration.db);
-        db.command({ ismaster: true }, function(err, result) {
+        db.command({ ismaster: true }, function (err, result) {
           test.equal(null, err);
 
           // Filter out the secondaries
           var secondaries = filterSecondaries(result.hosts, result);
 
           // Pick the server
-          client.topology.replset.once('pickedServer', function(readPreference, server) {
+          client.topology.replset.once('pickedServer', function (readPreference, server) {
             test.ok(secondaries[server.name] != null);
           });
 
@@ -420,7 +420,7 @@ describe.skip('ReplSet (ReadPreference)', function() {
           });
           // Attempt to read (should fail due to the server not being a primary);
           var cursor = collection.find();
-          cursor.toArray(function(err) {
+          cursor.toArray(function (err) {
             test.equal(null, err);
             test.equal(ReadPreference.SECONDARY, cursor.readPreference.preference);
             client.close();
@@ -430,7 +430,7 @@ describe.skip('ReplSet (ReadPreference)', function() {
       });
 
       // Connect to the db
-      client.connect(function(err) {
+      client.connect(function (err) {
         test.equal(null, err);
       });
     }
@@ -439,7 +439,7 @@ describe.skip('ReplSet (ReadPreference)', function() {
   it('Should Set read preference at collection level using createCollection method', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
         ReadPreference = mongo.ReadPreference;
@@ -447,9 +447,9 @@ describe.skip('ReplSet (ReadPreference)', function() {
       // Create db instance
       var client = configuration.newClient({}, { w: 0, debug: true });
       // Connect to the db
-      client.on('fullsetup', function() {
+      client.on('fullsetup', function () {
         var db = client.db(configuration.db);
-        db.command({ ismaster: true }, function(err, result) {
+        db.command({ ismaster: true }, function (err, result) {
           // Filter out the secondaries
           var secondaries = filterSecondaries(result.hosts, result);
 
@@ -457,17 +457,17 @@ describe.skip('ReplSet (ReadPreference)', function() {
           db.createCollection(
             'read_preferences_all_levels_1',
             { readPreference: ReadPreference.SECONDARY },
-            function(err, collection) {
+            function (err, collection) {
               test.equal(null, err);
 
               // Pick the server
-              client.topology.replset.once('pickedServer', function(readPreference, server) {
+              client.topology.replset.once('pickedServer', function (readPreference, server) {
                 test.ok(secondaries[server.name] != null);
               });
 
               var cursor = collection.find();
               // Attempt to read (should fail due to the server not being a primary);
-              cursor.toArray(function(err) {
+              cursor.toArray(function (err) {
                 test.equal(null, err);
                 // Does not get called or we don't care
                 test.equal(ReadPreference.SECONDARY, cursor.readPreference.preference);
@@ -480,7 +480,7 @@ describe.skip('ReplSet (ReadPreference)', function() {
       });
 
       // Connect to the db
-      client.connect(function(err) {
+      client.connect(function (err) {
         test.equal(null, err);
       });
     }
@@ -489,7 +489,7 @@ describe.skip('ReplSet (ReadPreference)', function() {
   it('Should Set read preference at cursor level', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
         ReadPreference = mongo.ReadPreference;
@@ -497,9 +497,9 @@ describe.skip('ReplSet (ReadPreference)', function() {
       // Create db instance
       var client = configuration.newClient({}, { w: 0, debug: true });
       // Connect to the db
-      client.on('fullsetup', function() {
+      client.on('fullsetup', function () {
         var db = client.db(configuration.db);
-        db.command({ ismaster: true }, function(err, result) {
+        db.command({ ismaster: true }, function (err, result) {
           // Filter out the secondaries
           var secondaries = filterSecondaries(result.hosts, result);
 
@@ -507,8 +507,8 @@ describe.skip('ReplSet (ReadPreference)', function() {
           var collection = db.collection('read_preferences_all_levels_1');
 
           // Pick the server
-          client.topology.replset.once('pickedServer', function() {
-            client.topology.replset.once('pickedServer', function(readPreference, server) {
+          client.topology.replset.once('pickedServer', function () {
+            client.topology.replset.once('pickedServer', function (readPreference, server) {
               test.ok(secondaries[server.name] != null);
             });
           });
@@ -517,7 +517,7 @@ describe.skip('ReplSet (ReadPreference)', function() {
           collection
             .find()
             .setReadPreference(ReadPreference.SECONDARY)
-            .toArray(function(err) {
+            .toArray(function (err) {
               test.equal(null, err);
               client.close();
               restartAndDone(done);
@@ -526,7 +526,7 @@ describe.skip('ReplSet (ReadPreference)', function() {
       });
 
       // Connect to the db
-      client.connect(function(err) {
+      client.connect(function (err) {
         test.equal(null, err);
       });
     }
@@ -535,24 +535,24 @@ describe.skip('ReplSet (ReadPreference)', function() {
   it('Attempt to change read preference at cursor level after object read legacy', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
         ReadPreference = mongo.ReadPreference;
 
       const client = configuration.newClient({}, { w: 0, debug: true });
       // Connect to the db
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         // Grab the collection
         var collection = db.collection('read_preferences_all_levels_2');
         // Insert a bunch of documents
-        collection.insert([{ a: 1 }, { b: 1 }, { c: 1 }], { w: 1 }, function(err) {
+        collection.insert([{ a: 1 }, { b: 1 }, { c: 1 }], { w: 1 }, function (err) {
           test.equal(null, err);
 
           // Set up cursor
           var cursor = collection.find().setReadPreference(ReadPreference.SECONDARY);
-          cursor.each(function(err, result) {
+          cursor.each(function (err, result) {
             if (result == null) {
               client.close();
               restartAndDone(done);
@@ -576,7 +576,7 @@ describe.skip('ReplSet (ReadPreference)', function() {
   it('Set read preference at db level', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
         ReadPreference = mongo.ReadPreference;
@@ -587,14 +587,14 @@ describe.skip('ReplSet (ReadPreference)', function() {
       );
 
       // Connect to the db
-      client.on('fullsetup', function() {
+      client.on('fullsetup', function () {
         var db = client.db(configuration.db);
-        db.command({ ismaster: true }, function(err, result) {
+        db.command({ ismaster: true }, function (err, result) {
           // Filter out the secondaries
           var hosts = result.hosts.concat(result.passives || []);
           var secondaries = filterSecondaries(hosts, result);
 
-          client.topology.replset.once('pickedServer', function(readPreference, server) {
+          client.topology.replset.once('pickedServer', function (readPreference, server) {
             test.ok(secondaries[server.name] != null);
           });
 
@@ -602,7 +602,7 @@ describe.skip('ReplSet (ReadPreference)', function() {
           var collection = db.collection('read_preferences_all_levels_2');
           // Attempt to read (should fail due to the server not being a primary);
           var cursor = collection.find();
-          cursor.toArray(function(err) {
+          cursor.toArray(function (err) {
             test.equal(null, err);
             // Does not get called or we don't care
             test.equal(ReadPreference.SECONDARY, cursor.readPreference.preference);
@@ -613,7 +613,7 @@ describe.skip('ReplSet (ReadPreference)', function() {
       });
 
       // Connect to the db
-      client.connect(function(err) {
+      client.connect(function (err) {
         test.equal(null, err);
       });
     }
@@ -622,7 +622,7 @@ describe.skip('ReplSet (ReadPreference)', function() {
   it('Set read preference at collection level using collection method', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
         ReadPreference = mongo.ReadPreference;
@@ -630,13 +630,13 @@ describe.skip('ReplSet (ReadPreference)', function() {
       const client = configuration.newClient({}, { w: 0, debug: true, haInterval: 100 });
 
       // Connect to the db
-      client.on('fullsetup', function(client) {
+      client.on('fullsetup', function (client) {
         var db = client.db(configuration.db);
-        db.command({ ismaster: true }, function(err, result) {
+        db.command({ ismaster: true }, function (err, result) {
           // Filter out the secondaries
           var secondaries = filterSecondaries(result.hosts, result);
 
-          client.topology.replset.once('pickedServer', function(readPreference, server) {
+          client.topology.replset.once('pickedServer', function (readPreference, server) {
             test.ok(secondaries[server.name] != null);
           });
 
@@ -647,7 +647,7 @@ describe.skip('ReplSet (ReadPreference)', function() {
 
           // Attempt to read (should fail due to the server not being a primary);
           var cursor = collection.find();
-          cursor.toArray(function(err) {
+          cursor.toArray(function (err) {
             test.equal(null, err);
             // Does not get called or we don't care
             test.equal(ReadPreference.SECONDARY, cursor.readPreference.preference);
@@ -658,7 +658,7 @@ describe.skip('ReplSet (ReadPreference)', function() {
       });
 
       // Connect to the db
-      client.connect(function(err) {
+      client.connect(function (err) {
         test.equal(null, err);
       });
     }
@@ -667,7 +667,7 @@ describe.skip('ReplSet (ReadPreference)', function() {
   it('Ensure tag read goes only to the correct server', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
         ReadPreference = mongo.ReadPreference;
@@ -683,8 +683,8 @@ describe.skip('ReplSet (ReadPreference)', function() {
       );
 
       // Trigger test once whole set is up
-      client.on('fullsetup', function() {
-        client.topology.replset.once('pickedServer', function(readPreference) {
+      client.on('fullsetup', function () {
+        client.topology.replset.once('pickedServer', function (readPreference) {
           test.equal('secondary', readPreference.preference);
           test.equal('ny', readPreference.tags['loc']);
         });
@@ -693,14 +693,14 @@ describe.skip('ReplSet (ReadPreference)', function() {
           .db('local')
           .collection('system.replset')
           .find()
-          .toArray(function(err) {
+          .toArray(function (err) {
             test.equal(null, err);
             client.close();
             restartAndDone(done);
           });
       });
 
-      client.connect(function(err) {
+      client.connect(function (err) {
         test.equal(null, err);
       });
     }
@@ -709,7 +709,7 @@ describe.skip('ReplSet (ReadPreference)', function() {
   it('Ensure tag read goes only to the correct servers using nearest', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
         ReadPreference = mongo.ReadPreference;
@@ -726,8 +726,8 @@ describe.skip('ReplSet (ReadPreference)', function() {
 
       var success = false;
       // Trigger test once whole set is up
-      client.on('fullsetup', function(client) {
-        client.topology.replset.once('pickedServer', function(readPreference, server) {
+      client.on('fullsetup', function (client) {
+        client.topology.replset.once('pickedServer', function (readPreference, server) {
           test.equal('ny', server.lastIsMaster().tags.loc);
           // Mark success
           success = true;
@@ -737,7 +737,7 @@ describe.skip('ReplSet (ReadPreference)', function() {
           .db('local')
           .collection('system.replset')
           .find()
-          .toArray(function(err) {
+          .toArray(function (err) {
             test.equal(null, err);
             test.ok(success);
             client.close();
@@ -745,7 +745,7 @@ describe.skip('ReplSet (ReadPreference)', function() {
           });
       });
 
-      client.connect(function(err) {
+      client.connect(function (err) {
         test.equal(null, err);
       });
     }
@@ -754,7 +754,7 @@ describe.skip('ReplSet (ReadPreference)', function() {
   it('Always uses primary readPreference for findAndModify', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
         ReadPreference = mongo.ReadPreference;
@@ -770,16 +770,16 @@ describe.skip('ReplSet (ReadPreference)', function() {
       );
 
       // Trigger test once whole set is up
-      client.on('fullsetup', function(client) {
+      client.on('fullsetup', function (client) {
         var db = client.db(configuration.db);
-        db.collection('test').findAndModify({}, {}, { upsert: false }, function(err) {
+        db.collection('test').findAndModify({}, {}, { upsert: false }, function (err) {
           test.equal(null, err);
           client.close();
           restartAndDone(done);
         });
       });
 
-      client.connect(function(err) {
+      client.connect(function (err) {
         test.equal(null, err);
       });
     }
@@ -788,7 +788,7 @@ describe.skip('ReplSet (ReadPreference)', function() {
   it('should correctly apply read preference for direct secondary connection', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
         Server = mongo.Server,
@@ -802,17 +802,17 @@ describe.skip('ReplSet (ReadPreference)', function() {
         readPreference: ReadPreference.NEAREST
       });
 
-      client.on('fullsetup', function(client) {
+      client.on('fullsetup', function (client) {
         var db = client.db(configuration.db);
 
         db.collection('direct_secondary_read_test').insertMany(
           [{ a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }],
           configuration.writeConcernMax(),
-          function(err) {
+          function (err) {
             test.equal(null, err);
             client.close();
 
-            setTimeout(function() {
+            setTimeout(function () {
               var url = format(
                 'mongodb://localhost:%s/integration_test_?readPreference=nearest',
                 configuration.port + 1
@@ -820,12 +820,12 @@ describe.skip('ReplSet (ReadPreference)', function() {
 
               // Connect using the MongoClient
               const client2 = configuration.newClient(url);
-              client2.connect(url, function(err, client2) {
+              client2.connect(url, function (err, client2) {
                 test.equal(null, err);
                 var db = client2.db(configuration.db);
                 test.ok(client2.topology instanceof Server);
 
-                db.collection('direct_secondary_read_test').count(function(err, n) {
+                db.collection('direct_secondary_read_test').count(function (err, n) {
                   test.equal(null, err);
                   test.ok(n > 0);
 
@@ -838,7 +838,7 @@ describe.skip('ReplSet (ReadPreference)', function() {
         );
       });
 
-      client.connect(function(err) {
+      client.connect(function (err) {
         test.equal(null, err);
       });
     }

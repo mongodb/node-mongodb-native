@@ -5,7 +5,7 @@ const { ReplSetFixture } = require('./common');
 const { MongoWriteConcernError } = require('../../../src/error');
 const { expect } = require('chai');
 
-describe('WriteConcernError', function() {
+describe('WriteConcernError', function () {
   let test;
   const RAW_USER_WRITE_CONCERN_CMD = {
     createUser: 'foo2',
@@ -83,7 +83,7 @@ describe('WriteConcernError', function() {
     replSet.connect();
   }
 
-  it('should expose a user command writeConcern error like a normal WriteConcernError', function(done) {
+  it('should expose a user command writeConcern error like a normal WriteConcernError', function (done) {
     test.primaryServer.setMessageHandler(request => {
       const doc = request.document;
       if (doc.ismaster) {
@@ -120,7 +120,7 @@ describe('WriteConcernError', function() {
     });
   });
 
-  it('should propagate writeConcernError.errInfo ', function(done) {
+  it('should propagate writeConcernError.errInfo ', function (done) {
     test.primaryServer.setMessageHandler(request => {
       const doc = request.document;
       if (doc.ismaster) {

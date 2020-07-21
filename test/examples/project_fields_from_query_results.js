@@ -3,15 +3,15 @@
 const setupDatabase = require('../functional/shared').setupDatabase;
 const expect = require('chai').expect;
 
-describe('examples(project-fields-from-query):', function() {
+describe('examples(project-fields-from-query):', function () {
   let client;
   let db;
 
-  before(async function() {
+  before(async function () {
     await setupDatabase(this.configuration);
   });
 
-  beforeEach(async function() {
+  beforeEach(async function () {
     client = await this.configuration.newClient().connect();
     db = client.db(this.configuration.db);
 
@@ -55,7 +55,7 @@ describe('examples(project-fields-from-query):', function() {
     // End Example 42
   });
 
-  afterEach(async function() {
+  afterEach(async function () {
     await client.close();
     client = undefined;
     db = undefined;
@@ -63,7 +63,7 @@ describe('examples(project-fields-from-query):', function() {
 
   it('Return All Fields in Matching Documents', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function() {
+    test: async function () {
       // Start Example 43
       const cursor = db.collection('inventory').find({
         status: 'A'
@@ -76,7 +76,7 @@ describe('examples(project-fields-from-query):', function() {
 
   it('Return the Specified Fields and the ``_id`` Field Only', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function() {
+    test: async function () {
       // Start Example 44
       const cursor = db
         .collection('inventory')
@@ -87,7 +87,7 @@ describe('examples(project-fields-from-query):', function() {
       // End Example 44
 
       const docs = await cursor.toArray();
-      docs.forEach(function(doc) {
+      docs.forEach(function (doc) {
         expect(doc).to.have.all.keys(['_id', 'item', 'status']);
         expect(doc).to.not.have.all.keys(['size', 'instock']);
       });
@@ -96,7 +96,7 @@ describe('examples(project-fields-from-query):', function() {
 
   it('Suppress ``_id`` Field', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function() {
+    test: async function () {
       // Start Example 45
       const cursor = db
         .collection('inventory')
@@ -106,7 +106,7 @@ describe('examples(project-fields-from-query):', function() {
         .project({ item: 1, status: 1, _id: 0 });
       // End Example 45
       const docs = await cursor.toArray();
-      docs.forEach(function(doc) {
+      docs.forEach(function (doc) {
         expect(doc).to.have.all.keys(['item', 'status']);
         expect(doc).to.not.have.all.keys(['_id', 'size', 'instock']);
       });
@@ -115,7 +115,7 @@ describe('examples(project-fields-from-query):', function() {
 
   it('Return All But the Excluded Fields', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function() {
+    test: async function () {
       // Start Example 46
       const cursor = db
         .collection('inventory')
@@ -125,7 +125,7 @@ describe('examples(project-fields-from-query):', function() {
         .project({ status: 0, instock: 0 });
       // End Example 46
       const docs = await cursor.toArray();
-      docs.forEach(function(doc) {
+      docs.forEach(function (doc) {
         expect(doc).to.have.all.keys(['_id', 'item', 'size']);
         expect(doc).to.not.have.all.keys(['status', 'instock']);
       });
@@ -134,7 +134,7 @@ describe('examples(project-fields-from-query):', function() {
 
   it('Return Specific Fields in Embedded Documents', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function() {
+    test: async function () {
       // Start Example 47
       const cursor = db
         .collection('inventory')
@@ -145,7 +145,7 @@ describe('examples(project-fields-from-query):', function() {
       // End Example 47
       const docs = await cursor.toArray();
 
-      docs.forEach(function(doc) {
+      docs.forEach(function (doc) {
         expect(doc).to.have.all.keys(['_id', 'item', 'status', 'size']);
         expect(doc).to.not.have.property('instock');
 
@@ -158,7 +158,7 @@ describe('examples(project-fields-from-query):', function() {
 
   it('Suppress Specific Fields in Embedded Documents', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function() {
+    test: async function () {
       // Start Example 48
       const cursor = db
         .collection('inventory')
@@ -168,7 +168,7 @@ describe('examples(project-fields-from-query):', function() {
         .project({ 'size.uom': 0 });
       // End Example 48
       const docs = await cursor.toArray();
-      docs.forEach(function(doc) {
+      docs.forEach(function (doc) {
         expect(doc).to.have.all.keys(['_id', 'item', 'status', 'size', 'instock']);
         const size = doc.size;
         expect(size).to.have.all.keys(['h', 'w']);
@@ -179,7 +179,7 @@ describe('examples(project-fields-from-query):', function() {
 
   it('Projection on Embedded Documents in an Array', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function() {
+    test: async function () {
       // Start Example 49
       const cursor = db
         .collection('inventory')
@@ -189,10 +189,10 @@ describe('examples(project-fields-from-query):', function() {
         .project({ item: 1, status: 1, 'instock.qty': 1 });
       // End Example 49
       const docs = await cursor.toArray();
-      docs.forEach(function(doc) {
+      docs.forEach(function (doc) {
         expect(doc).to.have.all.keys(['_id', 'item', 'status', 'instock']);
         expect(doc).to.not.have.property('size');
-        doc.instock.forEach(function(subdoc) {
+        doc.instock.forEach(function (subdoc) {
           expect(subdoc).to.have.property('qty');
           expect(subdoc).to.not.have.property('warehouse');
         });
@@ -202,7 +202,7 @@ describe('examples(project-fields-from-query):', function() {
 
   it('Project Specific Array Elements in the Returned Array', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function() {
+    test: async function () {
       // Start Example 50
       const cursor = db
         .collection('inventory')
@@ -212,12 +212,10 @@ describe('examples(project-fields-from-query):', function() {
         .project({ item: 1, status: 1, instock: { $slice: -1 } });
       // End Example 50
       const docs = await cursor.toArray();
-      docs.forEach(function(doc) {
+      docs.forEach(function (doc) {
         expect(doc).to.have.all.keys(['_id', 'item', 'status', 'instock']);
         expect(doc).to.not.have.property('size');
-        expect(doc)
-          .to.have.property('instock')
-          .with.a.lengthOf(1);
+        expect(doc).to.have.property('instock').with.a.lengthOf(1);
       });
     }
   });

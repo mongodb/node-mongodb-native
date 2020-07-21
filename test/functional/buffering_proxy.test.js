@@ -4,7 +4,7 @@ var co = require('co');
 var mock = require('mongodb-mock-server');
 const { ReadPreference, ObjectId } = require('../../src');
 
-var extend = function(template, fields) {
+var extend = function (template, fields) {
   var object = {};
   for (var name in template) {
     object[name] = template[name];
@@ -17,7 +17,7 @@ var extend = function(template, fields) {
   return object;
 };
 
-describe.skip('Buffering Proxy', function() {
+describe.skip('Buffering Proxy', function () {
   afterEach(() => mock.cleanup());
 
   it('successfully handle buffering store execution for primary server', {
@@ -28,7 +28,7 @@ describe.skip('Buffering Proxy', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var currentIsMasterIndex = 0;
       var electionIds = [new ObjectId(0), new ObjectId(1)];
@@ -125,7 +125,7 @@ describe.skip('Buffering Proxy', function() {
       var dieSecondary = false;
 
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const primaryServer = yield mock.createServer(32000, 'localhost');
         const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
         const secondSecondaryServer = yield mock.createServer(32002, 'localhost');
@@ -184,17 +184,17 @@ describe.skip('Buffering Proxy', function() {
           }
         );
 
-        client.connect(function(err, client) {
+        client.connect(function (err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
           var results = [];
 
-          setTimeout(function() {
+          setTimeout(function () {
             die = true;
             dieSecondary = true;
 
-            setTimeout(function() {
-              db.collection('test').insertOne({ a: 1 }, function(err) {
+            setTimeout(function () {
+              db.collection('test').insertOne({ a: 1 }, function (err) {
                 test.equal(null, err);
                 results.push('insertOne');
               });
@@ -202,7 +202,7 @@ describe.skip('Buffering Proxy', function() {
               db.command(
                 { count: 'test', query: {} },
                 { readPreference: new ReadPreference(ReadPreference.SECONDARY) },
-                function(err) {
+                function (err) {
                   test.equal(null, err);
                   results.push('count');
                 }
@@ -210,7 +210,7 @@ describe.skip('Buffering Proxy', function() {
 
               db.collection('test')
                 .aggregate([{ $match: {} }])
-                .toArray(function(err) {
+                .toArray(function (err) {
                   test.equal(null, err);
                   results.push('aggregate');
                 });
@@ -218,15 +218,15 @@ describe.skip('Buffering Proxy', function() {
               db.collection('test')
                 .find({})
                 .setReadPreference(new ReadPreference(ReadPreference.SECONDARY))
-                .toArray(function(err) {
+                .toArray(function (err) {
                   test.equal(null, err);
                   results.push('find');
                 });
 
-              setTimeout(function() {
+              setTimeout(function () {
                 die = false;
 
-                setTimeout(function() {
+                setTimeout(function () {
                   test.deepEqual(['insertOne', 'aggregate'].sort(), results.sort());
                   client.close(done);
                 }, 1000);
@@ -246,7 +246,7 @@ describe.skip('Buffering Proxy', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var currentIsMasterIndex = 0;
       var electionIds = [new ObjectId(0), new ObjectId(1)];
@@ -343,7 +343,7 @@ describe.skip('Buffering Proxy', function() {
       var diePrimary = false;
 
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const primaryServer = yield mock.createServer(32000, 'localhost');
         const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
         const secondSecondaryServer = yield mock.createServer(32002, 'localhost');
@@ -406,18 +406,18 @@ describe.skip('Buffering Proxy', function() {
           }
         );
 
-        client.connect(function(err, client) {
+        client.connect(function (err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
-          setTimeout(function() {
+          setTimeout(function () {
             die = true;
             diePrimary = true;
 
-            setTimeout(function() {
+            setTimeout(function () {
               var results = [];
 
-              db.collection('test').insertOne({ a: 1 }, function(err) {
+              db.collection('test').insertOne({ a: 1 }, function (err) {
                 test.equal(null, err);
                 results.push('insertOne');
               });
@@ -425,7 +425,7 @@ describe.skip('Buffering Proxy', function() {
               db.command(
                 { count: 'test', query: {} },
                 { readPreference: new ReadPreference(ReadPreference.SECONDARY) },
-                function(err) {
+                function (err) {
                   test.equal(null, err);
                   results.push('count');
                 }
@@ -433,7 +433,7 @@ describe.skip('Buffering Proxy', function() {
 
               db.collection('test')
                 .aggregate([{ $match: {} }])
-                .toArray(function(err) {
+                .toArray(function (err) {
                   test.equal(null, err);
                   results.push('aggregate');
                 });
@@ -441,15 +441,15 @@ describe.skip('Buffering Proxy', function() {
               db.collection('test')
                 .find({})
                 .setReadPreference(new ReadPreference(ReadPreference.SECONDARY))
-                .toArray(function(err) {
+                .toArray(function (err) {
                   test.equal(null, err);
                   results.push('find');
                 });
 
-              setTimeout(function() {
+              setTimeout(function () {
                 die = false;
 
-                setTimeout(function() {
+                setTimeout(function () {
                   test.deepEqual(['count', 'find'].sort(), results.sort());
                   client.close(done);
                 }, 1500);

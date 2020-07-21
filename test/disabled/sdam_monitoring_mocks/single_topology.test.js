@@ -3,7 +3,7 @@ var expect = require('chai').expect,
   co = require('co'),
   mock = require('mongodb-mock-server');
 
-describe.skip('Single SDAM Monitoring (mocks)', function() {
+describe.skip('Single SDAM Monitoring (mocks)', function () {
   afterEach(() => mock.cleanup());
 
   it('Should correctly emit sdam monitoring events for single server', {
@@ -14,7 +14,7 @@ describe.skip('Single SDAM Monitoring (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       const config = this.configuration;
 
       // Contain mock server
@@ -28,7 +28,7 @@ describe.skip('Single SDAM Monitoring (mocks)', function() {
 
       // Boot the mock
       var mockServer;
-      co(function*() {
+      co(function* () {
         mockServer = yield mock.createServer();
 
         mockServer.setMessageHandler(request => {
@@ -51,38 +51,38 @@ describe.skip('Single SDAM Monitoring (mocks)', function() {
       var id = null;
 
       // Add event listeners
-      server.once('connect', function(_server) {
+      server.once('connect', function (_server) {
         id = _server.id;
         _server.destroy({ emitClose: true });
       });
 
-      server.on('serverOpening', function(event) {
+      server.on('serverOpening', function (event) {
         flags[0] = event;
       });
 
-      server.on('serverClosed', function(event) {
+      server.on('serverClosed', function (event) {
         flags[1] = event;
       });
 
-      server.on('serverDescriptionChanged', function(event) {
+      server.on('serverDescriptionChanged', function (event) {
         flags[2] = event;
       });
 
-      server.on('topologyOpening', function(event) {
+      server.on('topologyOpening', function (event) {
         flags[3] = event;
       });
 
-      server.on('topologyClosed', function(event) {
+      server.on('topologyClosed', function (event) {
         flags[4] = event;
       });
 
-      server.on('topologyDescriptionChanged', function(event) {
+      server.on('topologyDescriptionChanged', function (event) {
         flags[5] = event;
       });
 
       server.on('error', done);
-      server.on('close', function() {
-        setTimeout(function() {
+      server.on('close', function () {
+        setTimeout(function () {
           expect({ topologyId: id, address: 'localhost:37018' }).to.eql(flags[0]);
           expect({ topologyId: id, address: 'localhost:37018' }).to.eql(flags[1]);
           expect({
@@ -140,7 +140,7 @@ describe.skip('Single SDAM Monitoring (mocks)', function() {
         }, 100);
       });
 
-      setTimeout(function() {
+      setTimeout(function () {
         server.connect();
       }, 100);
     }
@@ -149,7 +149,7 @@ describe.skip('Single SDAM Monitoring (mocks)', function() {
   it('Should correctly emit sdam monitoring events for single server, with correct server type', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
-    test: function(done) {
+    test: function (done) {
       const config = this.configuration;
 
       // Contain mock server
@@ -165,7 +165,7 @@ describe.skip('Single SDAM Monitoring (mocks)', function() {
 
       // Boot the mock
       var mockServer;
-      co(function*() {
+      co(function* () {
         mockServer = yield mock.createServer();
 
         mockServer.setMessageHandler(request => {
@@ -188,38 +188,38 @@ describe.skip('Single SDAM Monitoring (mocks)', function() {
       var id = null;
 
       // Add event listeners
-      server.once('connect', function(_server) {
+      server.once('connect', function (_server) {
         id = _server.id;
         _server.destroy({ emitClose: true });
       });
 
-      server.on('serverOpening', function(event) {
+      server.on('serverOpening', function (event) {
         flags[0] = event;
       });
 
-      server.on('serverClosed', function(event) {
+      server.on('serverClosed', function (event) {
         flags[1] = event;
       });
 
-      server.on('serverDescriptionChanged', function(event) {
+      server.on('serverDescriptionChanged', function (event) {
         flags[2] = event;
       });
 
-      server.on('topologyOpening', function(event) {
+      server.on('topologyOpening', function (event) {
         flags[3] = event;
       });
 
-      server.on('topologyClosed', function(event) {
+      server.on('topologyClosed', function (event) {
         flags[4] = event;
       });
 
-      server.on('topologyDescriptionChanged', function(event) {
+      server.on('topologyDescriptionChanged', function (event) {
         flags[5] = event;
       });
 
       server.on('error', done);
-      server.on('close', function() {
-        setTimeout(function() {
+      server.on('close', function () {
+        setTimeout(function () {
           expect({ topologyId: id, address: 'localhost:37008' }, flags[0]);
           expect({ topologyId: id, address: 'localhost:37008' }, flags[1]);
           expect({
@@ -276,7 +276,7 @@ describe.skip('Single SDAM Monitoring (mocks)', function() {
         }, 100);
       });
 
-      setTimeout(function() {
+      setTimeout(function () {
         server.connect();
       }, 100);
     }

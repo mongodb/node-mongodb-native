@@ -2,8 +2,8 @@
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 
-describe('Document Validation', function() {
-  before(function() {
+describe('Document Validation', function () {
+  before(function () {
     return setupDatabase(this.configuration);
   });
 
@@ -17,10 +17,10 @@ describe('Document Validation', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         test.equal(null, err);
 
@@ -28,28 +28,28 @@ describe('Document Validation', function() {
         var col = db.collection('createValidationCollection');
 
         // Drop the collection
-        col.drop(function() {
+        col.drop(function () {
           // Create a collection with a validator
           db.createCollection(
             'createValidationCollection',
             { validator: { a: { $exists: true } } },
-            function(err) {
+            function (err) {
               test.equal(null, err);
 
               // Ensure validation was correctly applied
-              col.insert({ b: 1 }, function(err) {
+              col.insert({ b: 1 }, function (err) {
                 test.ok(err != null);
 
                 // Ensure validation was correctly applied
-                col.insert({ b: 1 }, { bypassDocumentValidation: true }, function(err) {
+                col.insert({ b: 1 }, { bypassDocumentValidation: true }, function (err) {
                   test.equal(null, err);
 
                   // Bypass valiation on insert
-                  col.insertOne({ b: 1 }, { bypassDocumentValidation: true }, function(err) {
+                  col.insertOne({ b: 1 }, { bypassDocumentValidation: true }, function (err) {
                     test.equal(null, err);
 
                     // Bypass valiation on insert
-                    col.insertMany([{ b: 1 }], { bypassDocumentValidation: true }, function(err) {
+                    col.insertMany([{ b: 1 }], { bypassDocumentValidation: true }, function (err) {
                       test.equal(null, err);
 
                       client.close(done);
@@ -74,10 +74,10 @@ describe('Document Validation', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         test.equal(null, err);
 
@@ -85,16 +85,16 @@ describe('Document Validation', function() {
         var col = db.collection('createValidationCollection');
 
         // Drop the collection
-        col.drop(function() {
+        col.drop(function () {
           // Create a collection with a validator
           db.createCollection(
             'createValidationCollection',
             { validator: { a: { $exists: true } } },
-            function(err) {
+            function (err) {
               test.equal(null, err);
 
               // Should fail
-              col.update({ b: 1 }, { $set: { b: 1 } }, { upsert: true }, function(err) {
+              col.update({ b: 1 }, { $set: { b: 1 } }, { upsert: true }, function (err) {
                 test.ok(err != null);
 
                 // Ensure validation was correctly applied
@@ -102,7 +102,7 @@ describe('Document Validation', function() {
                   { b: 1 },
                   { $set: { b: 1 } },
                   { upsert: true, bypassDocumentValidation: true },
-                  function(err) {
+                  function (err) {
                     test.equal(null, err);
 
                     // updateOne
@@ -110,7 +110,7 @@ describe('Document Validation', function() {
                       { c: 1 },
                       { $set: { c: 1 } },
                       { upsert: true, bypassDocumentValidation: true },
-                      function(err) {
+                      function (err) {
                         test.equal(null, err);
 
                         // updateMany
@@ -118,7 +118,7 @@ describe('Document Validation', function() {
                           { d: 1 },
                           { $set: { d: 1 } },
                           { upsert: true, bypassDocumentValidation: true },
-                          function(err) {
+                          function (err) {
                             test.equal(null, err);
 
                             // updateMany
@@ -126,7 +126,7 @@ describe('Document Validation', function() {
                               { e: 1 },
                               { e: 1 },
                               { upsert: true, bypassDocumentValidation: true },
-                              function(err) {
+                              function (err) {
                                 test.equal(null, err);
 
                                 client.close(done);
@@ -156,10 +156,10 @@ describe('Document Validation', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         test.equal(null, err);
 
@@ -167,22 +167,22 @@ describe('Document Validation', function() {
         var col = db.collection('createValidationCollection');
 
         // Drop the collection
-        col.drop(function() {
+        col.drop(function () {
           // Create a collection with a validator
           db.createCollection(
             'createValidationCollection',
             { validator: { a: { $exists: true } } },
-            function(err) {
+            function (err) {
               test.equal(null, err);
 
               // Should fail
-              col.bulkWrite([{ insertOne: { b: 1 } }], function(err) {
+              col.bulkWrite([{ insertOne: { b: 1 } }], function (err) {
                 test.ok(err != null);
 
                 col.bulkWrite(
                   [{ insertOne: { b: 1 } }],
                   { bypassDocumentValidation: true },
-                  function(err) {
+                  function (err) {
                     test.equal(null, err);
 
                     client.close(done);
@@ -206,10 +206,10 @@ describe('Document Validation', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         test.equal(null, err);
 
@@ -217,16 +217,16 @@ describe('Document Validation', function() {
         var col = db.collection('createValidationCollection');
 
         // Drop the collection
-        col.drop(function() {
+        col.drop(function () {
           // Create a collection with a validator
           db.createCollection(
             'createValidationCollection',
             { validator: { a: { $exists: true } } },
-            function(err) {
+            function (err) {
               test.equal(null, err);
 
               // Should fail
-              col.findOneAndUpdate({ b: 1 }, { $set: { b: 1 } }, { upsert: true }, function(err) {
+              col.findOneAndUpdate({ b: 1 }, { $set: { b: 1 } }, { upsert: true }, function (err) {
                 test.ok(err != null);
 
                 // Should pass
@@ -234,7 +234,7 @@ describe('Document Validation', function() {
                   { b: 1 },
                   { $set: { b: 1 } },
                   { upsert: true, bypassDocumentValidation: true },
-                  function(err) {
+                  function (err) {
                     test.equal(null, err);
 
                     // Should pass
@@ -242,7 +242,7 @@ describe('Document Validation', function() {
                       { c: 1 },
                       { c: 1 },
                       { upsert: true, bypassDocumentValidation: true },
-                      function(err) {
+                      function (err) {
                         test.equal(null, err);
 
                         client.close(done);
@@ -268,10 +268,10 @@ describe('Document Validation', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         // Some docs for insertion
         var docs = [
@@ -293,16 +293,16 @@ describe('Document Validation', function() {
         var col = db.collection('createValidationCollectionOut');
 
         // Drop the collection
-        col.drop(function() {
+        col.drop(function () {
           // Create a collection with a validator
           db.createCollection(
             'createValidationCollectionOut',
             { validator: { a: { $exists: true } } },
-            function(err) {
+            function (err) {
               test.equal(null, err);
 
               // Insert the docs
-              col.insertMany(docs, { w: 1, bypassDocumentValidation: true }, function(err) {
+              col.insertMany(docs, { w: 1, bypassDocumentValidation: true }, function (err) {
                 test.equal(null, err);
 
                 // Execute aggregate, notice the pipeline is expressed as an Array
@@ -326,7 +326,7 @@ describe('Document Validation', function() {
                   { bypassDocumentValidation: true }
                 );
 
-                cursor.toArray(function(err) {
+                cursor.toArray(function (err) {
                   test.equal(null, err);
 
                   client.close(done);
@@ -349,22 +349,22 @@ describe('Document Validation', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
 
         // Get collection
         var col = db.collection('createValidationCollectionOut');
 
         // Drop the collection
-        col.drop(function() {
+        col.drop(function () {
           // Create a collection with a validator
           db.createCollection(
             'createValidationCollectionOut',
             { validator: { a: { $exists: true } } },
-            function(err) {
+            function (err) {
               test.equal(null, err);
 
               // Get write concern
@@ -375,7 +375,7 @@ describe('Document Validation', function() {
               col.insertMany(
                 [{ user_id: 1 }, { user_id: 2 }],
                 { bypassDocumentValidation: true },
-                function(err) {
+                function (err) {
                   test.equal(null, err);
 
                   // String functions
@@ -389,7 +389,7 @@ describe('Document Validation', function() {
                       out: { replace: 'createValidationCollectionOut' },
                       bypassDocumentValidation: true
                     },
-                    function(err) {
+                    function (err) {
                       test.equal(null, err);
 
                       client.close(done);

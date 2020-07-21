@@ -8,7 +8,7 @@ const { Topology } = require('../../../src/sdam/topology');
  * SERVER TESTS
  *
  *************************************************************************/
-describe('Server operation example tests', function() {
+describe('Server operation example tests', function () {
   /**
    * Correctly insert a document using the Server insert method
    *
@@ -22,7 +22,7 @@ describe('Server operation example tests', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       const config = this.configuration;
 
       // Attempt to connect
@@ -37,7 +37,7 @@ describe('Server operation example tests', function() {
       // REMOVE-LINE done();
       // BEGIN
       // Add event listeners
-      server.on('connect', function(_server) {
+      server.on('connect', function (_server) {
         // Execute the insert
         _server.insert(
           'integration_tests.inserts_example1',
@@ -46,7 +46,7 @@ describe('Server operation example tests', function() {
             writeConcern: { w: 1 },
             ordered: true
           },
-          function(err, results) {
+          function (err, results) {
             expect(err).to.be.null;
             expect(results.result.n).to.equal(1);
 
@@ -75,7 +75,7 @@ describe('Server operation example tests', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       const config = this.configuration;
 
       // Attempt to connect
@@ -90,7 +90,7 @@ describe('Server operation example tests', function() {
       // REMOVE-LINE done();
       // BEGIN
       // Add event listeners
-      server.on('connect', function(_server) {
+      server.on('connect', function (_server) {
         // Execute the insert
         _server.insert(
           'integration_tests.inserts_example2',
@@ -99,7 +99,7 @@ describe('Server operation example tests', function() {
             writeConcern: { w: 1 },
             ordered: true
           },
-          function(err, results) {
+          function (err, results) {
             expect(err).to.be.null;
             expect(results.result.n).to.equal(1);
 
@@ -116,7 +116,7 @@ describe('Server operation example tests', function() {
                 writeConcern: { w: 1 },
                 ordered: true
               },
-              function(updateErr, updateResults) {
+              function (updateErr, updateResults) {
                 expect(updateErr).to.be.null;
                 expect(updateResults.result.n).to.equal(1);
 
@@ -147,7 +147,7 @@ describe('Server operation example tests', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       const config = this.configuration;
 
       // Attempt to connect
@@ -162,7 +162,7 @@ describe('Server operation example tests', function() {
       // REMOVE-LINE done();
       // BEGIN
       // Add event listeners
-      server.on('connect', function(_server) {
+      server.on('connect', function (_server) {
         // Execute the insert
         _server.insert(
           'integration_tests.inserts_example3',
@@ -171,7 +171,7 @@ describe('Server operation example tests', function() {
             writeConcern: { w: 1 },
             ordered: true
           },
-          function(err, results) {
+          function (err, results) {
             expect(err).to.be.null;
             expect(results.result.n).to.equal(1);
 
@@ -188,7 +188,7 @@ describe('Server operation example tests', function() {
                 writeConcern: { w: 1 },
                 ordered: true
               },
-              function(removeErr, removeResults) {
+              function (removeErr, removeResults) {
                 expect(removeErr).to.be.null;
                 expect(removeResults.result.n).to.equal(1);
 
@@ -219,7 +219,7 @@ describe('Server operation example tests', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       const config = this.configuration;
 
       // Attempt to connect
@@ -234,7 +234,7 @@ describe('Server operation example tests', function() {
       // REMOVE-LINE done();
       // BEGIN
       // Add event listeners
-      server.on('connect', function(_server) {
+      server.on('connect', function (_server) {
         // Execute the insert
         _server.insert(
           'integration_tests.inserts_example4',
@@ -243,7 +243,7 @@ describe('Server operation example tests', function() {
             writeConcern: { w: 1 },
             ordered: true
           },
-          function(err, results) {
+          function (err, results) {
             expect(err).to.be.null;
             expect(results.result.n).to.equal(1);
 
@@ -254,7 +254,7 @@ describe('Server operation example tests', function() {
             });
 
             // Get the first document
-            cursor._next(function(cursorErr, doc) {
+            cursor._next(function (cursorErr, doc) {
               expect(cursorErr).to.be.null;
               expect(doc.a).to.equal(1);
 
@@ -284,7 +284,7 @@ describe('Server operation example tests', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       const config = this.configuration;
 
       // Attempt to connect
@@ -299,9 +299,9 @@ describe('Server operation example tests', function() {
       // REMOVE-LINE done();
       // BEGIN
       // Add event listeners
-      server.on('connect', function(_server) {
+      server.on('connect', function (_server) {
         // Execute the command
-        _server.command('system.$cmd', { ismaster: true }, function(err, result) {
+        _server.command('system.$cmd', { ismaster: true }, function (err, result) {
           expect(result).to.exist;
           expect(err).to.be.null;
           _server.destroy();
@@ -322,7 +322,7 @@ describe('Server operation example tests', function() {
  *
  *************************************************************************/
 
-describe('Topology operation example tests', function() {
+describe('Topology operation example tests', function () {
   /**
    * Correctly insert a document using the Topology insert method
    *
@@ -336,7 +336,7 @@ describe('Topology operation example tests', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var config = [
         {
           host: this.configuration.host,
@@ -357,7 +357,7 @@ describe('Topology operation example tests', function() {
       // REMOVE-LINE done();
       // BEGIN
       // Add event listeners
-      server.on('connect', function(_server) {
+      server.on('connect', function (_server) {
         // Execute the insert
         _server.insert(
           'integration_tests.inserts_example_replset_1',
@@ -366,7 +366,7 @@ describe('Topology operation example tests', function() {
             writeConcern: { w: 1 },
             ordered: true
           },
-          function(err, results) {
+          function (err, results) {
             expect(err).to.be.null;
             expect(results.result.n).to.equal(1);
 
@@ -395,7 +395,7 @@ describe('Topology operation example tests', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var config = [
         {
           host: this.configuration.host,
@@ -416,7 +416,7 @@ describe('Topology operation example tests', function() {
       // REMOVE-LINE done();
       // BEGIN
       // Add event listeners
-      server.on('connect', function(_server) {
+      server.on('connect', function (_server) {
         // Execute the insert
         _server.insert(
           'integration_tests.inserts_example_replset_2',
@@ -425,7 +425,7 @@ describe('Topology operation example tests', function() {
             writeConcern: { w: 1 },
             ordered: true
           },
-          function(err, results) {
+          function (err, results) {
             expect(err).to.be.null;
             expect(results.result.n).to.equal(1);
 
@@ -442,7 +442,7 @@ describe('Topology operation example tests', function() {
                 writeConcern: { w: 1 },
                 ordered: true
               },
-              function(updateErr, updateResults) {
+              function (updateErr, updateResults) {
                 expect(updateErr).to.be.null;
                 expect(updateResults.result.n).to.equal(1);
 
@@ -473,7 +473,7 @@ describe('Topology operation example tests', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var config = [
         {
           host: this.configuration.host,
@@ -494,7 +494,7 @@ describe('Topology operation example tests', function() {
       // REMOVE-LINE done();
       // BEGIN
       // Add event listeners
-      server.on('connect', function(_server) {
+      server.on('connect', function (_server) {
         // Execute the insert
         _server.insert(
           'integration_tests.inserts_example_replset_3',
@@ -503,7 +503,7 @@ describe('Topology operation example tests', function() {
             writeConcern: { w: 1 },
             ordered: true
           },
-          function(err, results) {
+          function (err, results) {
             expect(err).to.be.null;
             expect(results.result.n).to.equal(1);
 
@@ -520,7 +520,7 @@ describe('Topology operation example tests', function() {
                 writeConcern: { w: 1 },
                 ordered: true
               },
-              function(removeErr, removeResults) {
+              function (removeErr, removeResults) {
                 expect(removeErr).to.be.null;
                 expect(removeResults.result.n).to.equal(1);
 
@@ -551,7 +551,7 @@ describe('Topology operation example tests', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var config = [
         {
           host: this.configuration.host,
@@ -572,7 +572,7 @@ describe('Topology operation example tests', function() {
       // REMOVE-LINE done();
       // BEGIN
       // Add event listeners
-      server.on('connect', function(_server) {
+      server.on('connect', function (_server) {
         // Execute the insert
         _server.insert(
           'integration_tests.inserts_example_replset_4',
@@ -581,7 +581,7 @@ describe('Topology operation example tests', function() {
             writeConcern: { w: 1 },
             ordered: true
           },
-          function(err, results) {
+          function (err, results) {
             expect(err).to.be.null;
             expect(results.result.n).to.equal(1);
 
@@ -592,7 +592,7 @@ describe('Topology operation example tests', function() {
             });
 
             // Get the first document
-            cursor._next(function(cursorErr, doc) {
+            cursor._next(function (cursorErr, doc) {
               expect(cursorErr).to.be.null;
               expect(doc.a).to.equal(1);
 
@@ -622,7 +622,7 @@ describe('Topology operation example tests', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var config = [
         {
           host: this.configuration.host,
@@ -643,9 +643,9 @@ describe('Topology operation example tests', function() {
       // REMOVE-LINE done();
       // BEGIN
       // Add event listeners
-      server.on('connect', function(_server) {
+      server.on('connect', function (_server) {
         // Execute the command
-        _server.command('system.$cmd', { ismaster: true }, function(err, result) {
+        _server.command('system.$cmd', { ismaster: true }, function (err, result) {
           expect(result).to.exist;
           expect(err).to.be.null;
           server.destroy();
@@ -666,7 +666,7 @@ describe('Topology operation example tests', function() {
  *
  *************************************************************************/
 
-describe.skip('Mongos operation example tests', function() {
+describe.skip('Mongos operation example tests', function () {
   /**
    * Correctly insert a document using the Mongos insert method
    *
@@ -676,7 +676,7 @@ describe.skip('Mongos operation example tests', function() {
   it('simple insert into db using Mongos', {
     metadata: { requires: { topology: 'sharded' } },
 
-    test: function(done) {
+    test: function (done) {
       // Attempt to connect
       var server = new Topology([
         {
@@ -686,7 +686,7 @@ describe.skip('Mongos operation example tests', function() {
       ]);
 
       // Add event listeners
-      server.on('connect', function(_server) {
+      server.on('connect', function (_server) {
         // Execute the insert
         _server.insert(
           'integration_tests.inserts_example_mongos_1',
@@ -695,7 +695,7 @@ describe.skip('Mongos operation example tests', function() {
             writeConcern: { w: 1 },
             ordered: true
           },
-          function(insertErr, insertResults) {
+          function (insertErr, insertResults) {
             expect(insertErr).to.be.null;
             expect(insertResults.result.n).to.equal(1);
 
@@ -723,7 +723,7 @@ describe.skip('Mongos operation example tests', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       // Attempt to connect
       var server = new Topology([
         {
@@ -733,7 +733,7 @@ describe.skip('Mongos operation example tests', function() {
       ]);
 
       // Add event listeners
-      server.on('connect', function(_server) {
+      server.on('connect', function (_server) {
         // Execute the insert
         _server.insert(
           'integration_tests.inserts_example_mongos_2',
@@ -742,7 +742,7 @@ describe.skip('Mongos operation example tests', function() {
             writeConcern: { w: 1 },
             ordered: true
           },
-          function(err, results) {
+          function (err, results) {
             expect(err).to.be.null;
             expect(results.result.n).to.equal(1);
 
@@ -759,7 +759,7 @@ describe.skip('Mongos operation example tests', function() {
                 writeConcern: { w: 1 },
                 ordered: true
               },
-              function(updateErr, updateResults) {
+              function (updateErr, updateResults) {
                 expect(updateErr).to.be.null;
                 expect(updateResults.result.n).to.equal(1);
 
@@ -789,7 +789,7 @@ describe.skip('Mongos operation example tests', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       // Attempt to connect
       var server = new Topology([
         {
@@ -799,7 +799,7 @@ describe.skip('Mongos operation example tests', function() {
       ]);
 
       // Add event listeners
-      server.on('connect', function(_server) {
+      server.on('connect', function (_server) {
         // Execute the insert
         _server.insert(
           'integration_tests.inserts_example_mongos_3',
@@ -808,7 +808,7 @@ describe.skip('Mongos operation example tests', function() {
             writeConcern: { w: 1 },
             ordered: true
           },
-          function(err, results) {
+          function (err, results) {
             expect(err).to.be.null;
             expect(results.result.n).to.equal(1);
 
@@ -825,7 +825,7 @@ describe.skip('Mongos operation example tests', function() {
                 writeConcern: { w: 1 },
                 ordered: true
               },
-              function(removeErr, removeResults) {
+              function (removeErr, removeResults) {
                 expect(removeErr).to.be.null;
                 expect(removeResults.result.n).to.equal(1);
 
@@ -855,7 +855,7 @@ describe.skip('Mongos operation example tests', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       // Attempt to connect
       var server = new Topology([
         {
@@ -865,7 +865,7 @@ describe.skip('Mongos operation example tests', function() {
       ]);
 
       // Add event listeners
-      server.on('connect', function(_server) {
+      server.on('connect', function (_server) {
         // Execute the insert
         _server.insert(
           'integration_tests.inserts_example_mongos_4',
@@ -874,7 +874,7 @@ describe.skip('Mongos operation example tests', function() {
             writeConcern: { w: 1 },
             ordered: true
           },
-          function(err, results) {
+          function (err, results) {
             expect(err).to.be.null;
             expect(results.result.n).to.equal(1);
 
@@ -885,7 +885,7 @@ describe.skip('Mongos operation example tests', function() {
             });
 
             // Get the first document
-            cursor._next(function(cursorErr, doc) {
+            cursor._next(function (cursorErr, doc) {
               expect(cursorErr).to.be.null;
               expect(doc.a).to.equal(1);
 
@@ -914,7 +914,7 @@ describe.skip('Mongos operation example tests', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       // Attempt to connect
       var server = new Topology([
         {
@@ -924,9 +924,9 @@ describe.skip('Mongos operation example tests', function() {
       ]);
 
       // Add event listeners
-      server.on('connect', function(_server) {
+      server.on('connect', function (_server) {
         // Execute the command
-        _server.command('system.$cmd', { ismaster: true }, function(err, result) {
+        _server.command('system.$cmd', { ismaster: true }, function (err, result) {
           expect(result).to.exist;
           expect(err).to.be.null;
           _server.destroy();

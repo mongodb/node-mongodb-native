@@ -52,7 +52,7 @@ function filterOutTests(suite) {
   suite.suites.forEach(suite => filterOutTests(suite));
 }
 
-before(function(_done) {
+before(function (_done) {
   // NOTE: if we first parse the connection string and redact auth, then we can reenable this
   // const usingUnifiedTopology = !!process.env.MONGODB_UNIFIED_TOPOLOGY;
   // console.log(
@@ -112,7 +112,7 @@ chai.config.truncateThreshold = 0;
 // install signal handlers for printing open/active handles
 function dumpAndExit() {
   // let other potential handlers run before exiting
-  process.nextTick(function() {
+  process.nextTick(function () {
     try {
       wtfnode.dump();
     } catch (e) {

@@ -4,8 +4,8 @@ const expect = require('chai').expect;
 const f = require('util').format;
 const setupDatabase = require('./shared').setupDatabase;
 
-describe('Cursor tests', function() {
-  before(function() {
+describe('Cursor tests', function () {
+  before(function () {
     return setupDatabase(this.configuration);
   });
 
@@ -14,9 +14,9 @@ describe('Cursor tests', function() {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       const server = this.configuration.newTopology();
-      server.on('connect', function(_server) {
+      server.on('connect', function (_server) {
         var ns = f('integration_tests.cursor1');
         // Execute the write
         _server.insert(
@@ -26,7 +26,7 @@ describe('Cursor tests', function() {
             writeConcern: { w: 1 },
             ordered: true
           },
-          function(err, results) {
+          function (err, results) {
             expect(err).to.be.null;
             expect(results.result.n).to.equal(3);
 
@@ -38,13 +38,13 @@ describe('Cursor tests', function() {
             });
 
             // Execute next
-            cursor._next(function(nextCursorErr, nextCursorD) {
+            cursor._next(function (nextCursorErr, nextCursorD) {
               expect(nextCursorErr).to.be.null;
               expect(nextCursorD.a).to.equal(1);
               expect(cursor.bufferedCount()).to.equal(1);
 
               // Kill the cursor
-              cursor._next(function(killCursorErr, killCursorD) {
+              cursor._next(function (killCursorErr, killCursorD) {
                 expect(killCursorErr).to.be.null;
                 expect(killCursorD.a).to.equal(2);
                 expect(cursor.bufferedCount()).to.equal(0);
@@ -66,11 +66,11 @@ describe('Cursor tests', function() {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       const server = this.configuration.newTopology();
       var ns = f('%s.cursor2', this.configuration.db);
       // Add event listeners
-      server.on('connect', function(_server) {
+      server.on('connect', function (_server) {
         // Execute the write
         _server.insert(
           ns,
@@ -79,7 +79,7 @@ describe('Cursor tests', function() {
             writeConcern: { w: 1 },
             ordered: true
           },
-          function(err, results) {
+          function (err, results) {
             expect(err).to.be.null;
             expect(results.result.n).to.equal(5);
 
@@ -91,7 +91,7 @@ describe('Cursor tests', function() {
             });
 
             // Execute next
-            cursor._next(function(nextCursorErr, nextCursorD) {
+            cursor._next(function (nextCursorErr, nextCursorD) {
               expect(nextCursorErr).to.be.null;
               expect(nextCursorD.a).to.equal(1);
               expect(cursor.bufferedCount()).to.equal(4);
@@ -100,7 +100,7 @@ describe('Cursor tests', function() {
               cursor.readBufferedDocuments(cursor.bufferedCount());
 
               // Get the next item
-              cursor._next(function(secondCursorErr, secondCursorD) {
+              cursor._next(function (secondCursorErr, secondCursorD) {
                 expect(secondCursorErr).to.be.null;
                 expect(secondCursorD).to.be.null;
 
@@ -122,11 +122,11 @@ describe('Cursor tests', function() {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       const server = this.configuration.newTopology();
       var ns = f('%s.cursor3', this.configuration.db);
       // Add event listeners
-      server.on('connect', function(_server) {
+      server.on('connect', function (_server) {
         // Execute the write
         _server.insert(
           ns,
@@ -135,7 +135,7 @@ describe('Cursor tests', function() {
             writeConcern: { w: 1 },
             ordered: true
           },
-          function(err, results) {
+          function (err, results) {
             expect(err).to.be.null;
             expect(results.result.n).to.equal(1);
 
@@ -143,16 +143,16 @@ describe('Cursor tests', function() {
             var cursor = _server.cursor(ns, { find: ns, query: {}, batchSize: 5 });
 
             // Execute next
-            cursor._next(function(nextCursorErr, nextCursorD) {
+            cursor._next(function (nextCursorErr, nextCursorD) {
               expect(nextCursorErr).to.be.null;
               expect(nextCursorD.a).to.equal(1);
 
               // Get the next item
-              cursor._next(function(secondCursorErr, secondCursorD) {
+              cursor._next(function (secondCursorErr, secondCursorD) {
                 expect(secondCursorErr).to.be.null;
                 expect(secondCursorD).to.be.null;
 
-                cursor._next(function(thirdCursorErr, thirdCursorD) {
+                cursor._next(function (thirdCursorErr, thirdCursorD) {
                   expect(thirdCursorErr).to.be.ok;
                   expect(thirdCursorD).to.be.undefined;
                   // Destroy the server connection
@@ -174,11 +174,11 @@ describe('Cursor tests', function() {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       const server = this.configuration.newTopology();
       var ns = f('%s.cursor4', this.configuration.db);
       // Add event listeners
-      server.on('connect', function(_server) {
+      server.on('connect', function (_server) {
         // Execute the write
         _server.insert(
           ns,
@@ -187,7 +187,7 @@ describe('Cursor tests', function() {
             writeConcern: { w: 1 },
             ordered: true
           },
-          function(err, results) {
+          function (err, results) {
             expect(err).to.be.null;
             expect(results.result.n).to.equal(3);
 
@@ -195,16 +195,16 @@ describe('Cursor tests', function() {
             var cursor = _server.cursor(ns, { find: ns, query: {}, batchSize: 2 });
 
             // Execute next
-            cursor._next(function(nextCursorErr, nextCursorD) {
+            cursor._next(function (nextCursorErr, nextCursorD) {
               expect(nextCursorErr).to.be.null;
               expect(nextCursorD.a).to.equal(1);
 
               // Get the next item
-              cursor._next(function(secondCursorErr, secondCursorD) {
+              cursor._next(function (secondCursorErr, secondCursorD) {
                 expect(secondCursorErr).to.be.null;
                 expect(secondCursorD.a).to.equal(2);
 
-                cursor._next(function(thirdCursorErr, thirdCursorD) {
+                cursor._next(function (thirdCursorErr, thirdCursorD) {
                   expect(thirdCursorErr).to.be.null;
                   expect(thirdCursorD.a).to.equal(3);
                   // Destroy the server connection
@@ -226,11 +226,11 @@ describe('Cursor tests', function() {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       const server = this.configuration.newTopology();
       var ns = f('%s.cursor4', this.configuration.db);
       // Add event listeners
-      server.on('connect', function(_server) {
+      server.on('connect', function (_server) {
         // Execute the write
         _server.insert(
           ns,
@@ -239,7 +239,7 @@ describe('Cursor tests', function() {
             writeConcern: { w: 1 },
             ordered: true
           },
-          function(err, results) {
+          function (err, results) {
             expect(err).to.be.null;
             expect(results.result.n).to.equal(3);
 
@@ -247,19 +247,19 @@ describe('Cursor tests', function() {
             var cursor = _server.cursor(ns, { find: ns, query: {}, batchSize: 2 });
 
             // Execute next
-            cursor._next(function(nextCursorErr, nextCursorD) {
+            cursor._next(function (nextCursorErr, nextCursorD) {
               expect(nextCursorErr).to.be.null;
               expect(nextCursorD.a).to.equal(1);
 
               // Get the next item
-              cursor._next(function(secondCursorErr, secondCursorD) {
+              cursor._next(function (secondCursorErr, secondCursorD) {
                 expect(secondCursorErr).to.be.null;
                 expect(secondCursorD.a).to.equal(2);
 
                 // Kill cursor
-                cursor.kill(function() {
+                cursor.kill(function () {
                   // Should error out
-                  cursor._next(function(thirdCursorErr, thirdCursorD) {
+                  cursor._next(function (thirdCursorErr, thirdCursorD) {
                     expect(thirdCursorErr).to.not.exist;
                     expect(thirdCursorD).to.not.exist;
 
@@ -284,12 +284,12 @@ describe('Cursor tests', function() {
       requires: { topology: ['single'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       const server = this.configuration.newTopology();
       var ns = f('%s.cursor5', this.configuration.db);
       // Add event listeners
-      server.on('connect', function(_server) {
+      server.on('connect', function (_server) {
         // Execute the write
         _server.insert(
           ns,
@@ -298,7 +298,7 @@ describe('Cursor tests', function() {
             writeConcern: { w: 1 },
             ordered: true
           },
-          function(err, results) {
+          function (err, results) {
             expect(err).to.be.null;
             expect(results.result.n).to.equal(3);
 
@@ -306,18 +306,18 @@ describe('Cursor tests', function() {
             var cursor = _server.cursor(ns, { find: ns, query: {}, batchSize: 2 });
 
             // Execute next
-            cursor._next(function(nextCursorErr, nextCursorD) {
+            cursor._next(function (nextCursorErr, nextCursorD) {
               expect(nextCursorErr).to.be.null;
               expect(nextCursorD.a).to.equal(1);
 
               // Get the next item
-              cursor._next(function(secondCursorErr, secondCursorD) {
+              cursor._next(function (secondCursorErr, secondCursorD) {
                 expect(secondCursorErr).to.be.null;
                 expect(secondCursorD.a).to.equal(2);
 
-                self.configuration.manager.restart(false).then(function() {
+                self.configuration.manager.restart(false).then(function () {
                   // Should error out
-                  cursor._next(function(thirdCursorErr, thirdCursorD) {
+                  cursor._next(function (thirdCursorErr, thirdCursorD) {
                     expect(thirdCursorErr).to.be.ok;
                     expect(thirdCursorD).to.be.undefined;
 

@@ -3,25 +3,25 @@ const test = require('./shared').assert,
   setupDatabase = require('./shared').setupDatabase,
   expect = require('chai').expect;
 
-describe('Connection', function() {
-  before(function() {
+describe('Connection', function () {
+  before(function () {
     return setupDatabase(this.configuration);
   });
 
   it('should correctly start monitoring for single server connection', {
     metadata: { requires: { topology: 'single' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(
         { w: 1 },
         { poolSize: 1, host: '/tmp/mongodb-27017.sock', heartbeatFrequencyMS: 250 }
       );
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
-        client.topology.once('monitoring', function() {
+        client.topology.once('monitoring', function () {
           client.close(done);
         });
       });
@@ -31,23 +31,23 @@ describe('Connection', function() {
   it('should correctly connect to server using domain socket', {
     metadata: { requires: { topology: 'single' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(
         { w: 1 },
         { poolSize: 1, host: '/tmp/mongodb-27017.sock' }
       );
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         test.equal(null, err);
 
-        db.collection('domainSocketCollection0').insert({ a: 1 }, { w: 1 }, function(err) {
+        db.collection('domainSocketCollection0').insert({ a: 1 }, { w: 1 }, function (err) {
           test.equal(null, err);
 
           db.collection('domainSocketCollection0')
             .find({ a: 1 })
-            .toArray(function(err, items) {
+            .toArray(function (err, items) {
               test.equal(null, err);
               test.equal(1, items.length);
 
@@ -63,11 +63,11 @@ describe('Connection', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: true });
 
-      client.on('open', function() {
+      client.on('open', function () {
         client.close(done);
       });
 
@@ -81,10 +81,10 @@ describe('Connection', function() {
       ignore: { travis: true }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient({ w: 1 }, { poolSize: 2000, auto_reconnect: true });
-      client.on('open', function() {
+      client.on('open', function () {
         client.close(done);
       });
 
@@ -95,23 +95,23 @@ describe('Connection', function() {
   it('should connect to server using domain socket with undefined port', {
     metadata: { requires: { topology: 'single' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(
         { w: 1 },
         { poolSize: 1, host: '/tmp/mongodb-27017.sock', port: undefined }
       );
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         test.equal(null, err);
 
-        db.collection('domainSocketCollection1').insert({ x: 1 }, { w: 1 }, function(err) {
+        db.collection('domainSocketCollection1').insert({ x: 1 }, { w: 1 }, function (err) {
           test.equal(null, err);
 
           db.collection('domainSocketCollection1')
             .find({ x: 1 })
-            .toArray(function(err, items) {
+            .toArray(function (err, items) {
               test.equal(null, err);
               test.equal(1, items.length);
 
@@ -128,17 +128,17 @@ describe('Connection', function() {
    * @param {any} callback
    */
   function connectionTester(configuration, testName, callback) {
-    return function(err, client) {
+    return function (err, client) {
       var db = client.db(configuration.db);
       test.equal(err, null);
 
-      db.collection(testName, function(err, collection) {
+      db.collection(testName, function (err, collection) {
         test.equal(err, null);
 
-        collection.insert({ foo: 123 }, { w: 1 }, function(err) {
+        collection.insert({ foo: 123 }, { w: 1 }, function (err) {
           test.equal(err, null);
 
-          db.dropDatabase(function(err, dropped) {
+          db.dropDatabase(function (err, dropped) {
             test.equal(err, null);
             test.ok(dropped);
             if (callback) return callback(client);
@@ -151,12 +151,12 @@ describe('Connection', function() {
   it('test connect no options', {
     metadata: { requires: { topology: 'single' } },
 
-    test: function(done) {
+    test: function (done) {
       const configuration = this.configuration;
       const client = configuration.newClient();
 
       client.connect(
-        connectionTester(configuration, 'testConnectNoOptions', function(client) {
+        connectionTester(configuration, 'testConnectNoOptions', function (client) {
           client.close(done);
         })
       );
@@ -166,7 +166,7 @@ describe('Connection', function() {
   it('test connect good auth', {
     metadata: { requires: { topology: 'single' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var user = 'testConnectGoodAuth',
         password = 'password';
@@ -174,11 +174,11 @@ describe('Connection', function() {
       const setupClient = configuration.newClient();
 
       // First add a user.
-      setupClient.connect(function(err, client) {
+      setupClient.connect(function (err, client) {
         test.equal(err, null);
         var db = client.db(configuration.db);
 
-        db.addUser(user, password, function(err) {
+        db.addUser(user, password, function (err) {
           test.equal(err, null);
           client.close(restOfTest);
         });
@@ -187,7 +187,7 @@ describe('Connection', function() {
       function restOfTest() {
         const testClient = configuration.newClient(configuration.url(user, password));
         testClient.connect(
-          connectionTester(configuration, 'testConnectGoodAuth', function(client) {
+          connectionTester(configuration, 'testConnectGoodAuth', function (client) {
             client.close(done);
           })
         );
@@ -198,18 +198,18 @@ describe('Connection', function() {
   it('test connect good auth as option', {
     metadata: { requires: { topology: 'single' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var user = 'testConnectGoodAuthAsOption',
         password = 'password';
 
       // First add a user.
       const setupClient = configuration.newClient();
-      setupClient.connect(function(err, client) {
+      setupClient.connect(function (err, client) {
         test.equal(err, null);
         var db = client.db(configuration.db);
 
-        db.addUser(user, password, function(err) {
+        db.addUser(user, password, function (err) {
           test.equal(err, null);
           client.close(restOfTest);
         });
@@ -224,7 +224,7 @@ describe('Connection', function() {
         );
 
         testClient.connect(
-          connectionTester(configuration, 'testConnectGoodAuthAsOption', function(client) {
+          connectionTester(configuration, 'testConnectGoodAuthAsOption', function (client) {
             client.close(done);
           })
         );
@@ -235,10 +235,10 @@ describe('Connection', function() {
   it('test connect bad auth', {
     metadata: { requires: { topology: 'single' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       const client = configuration.newClient(configuration.url('slithy', 'toves'));
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         expect(err).to.exist;
         expect(client).to.not.exist;
         done();
@@ -249,12 +249,12 @@ describe('Connection', function() {
   it('test connect bad url', {
     metadata: { requires: { topology: 'single' } },
 
-    test: function(done) {
+    test: function (done) {
       const configuration = this.configuration;
       const client = configuration.newClient('mangodb://localhost:27017/test?safe=false');
 
-      test.throws(function() {
-        client.connect(function() {
+      test.throws(function () {
+        client.connect(function () {
           test.ok(false, 'Bad URL!');
         });
       });
@@ -266,7 +266,7 @@ describe('Connection', function() {
   it('should correctly return false on `isConnected` before connection happened', {
     metadata: { requires: { topology: 'single' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
       test.equal(false, client.isConnected());

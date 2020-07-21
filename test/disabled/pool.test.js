@@ -7,7 +7,7 @@ const { MongoWriteConcernError } = require('../../../src/error');
 const sinon = require('sinon');
 
 const test = {};
-describe('Pool (unit)', function() {
+describe('Pool (unit)', function () {
   afterEach(() => mock.cleanup());
   beforeEach(() => {
     return mock.createServer().then(mockServer => {
@@ -15,7 +15,7 @@ describe('Pool (unit)', function() {
     });
   });
 
-  it('should throw a MongoWriteConcernError when a writeConcernError is present', function(done) {
+  it('should throw a MongoWriteConcernError when a writeConcernError is present', function (done) {
     test.server.setMessageHandler(request => {
       const doc = request.document;
       if (doc.ismaster) {
@@ -50,7 +50,7 @@ describe('Pool (unit)', function() {
     client.connect();
   });
 
-  it('should not allow overriding `slaveOk` when connected to a mongos', function(done) {
+  it('should not allow overriding `slaveOk` when connected to a mongos', function (done) {
     test.server.setMessageHandler(request => {
       const doc = request.document;
       if (doc.ismaster) {

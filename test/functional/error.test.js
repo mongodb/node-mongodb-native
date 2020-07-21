@@ -5,21 +5,21 @@ const expect = chai.expect;
 const sinonChai = require('sinon-chai');
 chai.use(sinonChai);
 
-describe('Errors', function() {
-  before(function() {
+describe('Errors', function () {
+  before(function () {
     return setupDatabase(this.configuration);
   });
 
   let client;
-  beforeEach(function() {
+  beforeEach(function () {
     client = this.configuration.newClient(this.configuration.writeConcernMax(), { poolSize: 1 });
     return client.connect();
   });
-  afterEach(function() {
+  afterEach(function () {
     return client.close();
   });
 
-  it('should fail insert due to unique index', function(done) {
+  it('should fail insert due to unique index', function (done) {
     const db = client.db(this.configuration.db);
     const collection = db.collection('test_failing_insert_due_to_unique_index');
     collection.createIndexes(
@@ -46,7 +46,7 @@ describe('Errors', function() {
     );
   });
 
-  it('should fail insert due to unique index strict', function(done) {
+  it('should fail insert due to unique index strict', function (done) {
     const db = client.db(this.configuration.db);
     db.dropCollection('test_failing_insert_due_to_unique_index_strict', () => {
       db.createCollection('test_failing_insert_due_to_unique_index_strict', err => {
@@ -85,7 +85,7 @@ describe('Errors', function() {
 
   it('should return an error object with message when mixing included and excluded fields', {
     metadata: { requires: { mongodb: '>3.0' } },
-    test: function(done) {
+    test: function (done) {
       const db = client.db(this.configuration.db);
       const c = db.collection('test_error_object_should_include_message');
       c.insertOne({ a: 2, b: 5 }, { w: 1 }, err => {
@@ -100,7 +100,7 @@ describe('Errors', function() {
 
   it('should handle error throw in user callback', {
     metadata: { requires: { mongodb: '>3.0' } },
-    test: function(done) {
+    test: function (done) {
       const db = client.db(this.configuration.db);
       const c = db.collection('test_error_object_should_include_message');
       c.findOne({}, { fields: { a: 1, b: 0 } }, err => {

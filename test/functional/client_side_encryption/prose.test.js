@@ -12,7 +12,7 @@ chai.use(require('chai-subset'));
 
 //   Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk
 
-describe('Client Side Encryption Prose Tests', function() {
+describe('Client Side Encryption Prose Tests', function () {
   const metadata = { requires: { clientSideEncryption: true, mongodb: '>=4.2.0' } };
   const dataDbName = 'db';
   const dataCollName = 'coll';
@@ -30,11 +30,11 @@ describe('Client Side Encryption Prose Tests', function() {
     'base64'
   );
 
-  describe('Data key and double encryption', function() {
+  describe('Data key and double encryption', function () {
     // Data key and double encryption
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // First, perform the setup.
-    beforeEach(function() {
+    beforeEach(function () {
       const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
 
       // #. Create a MongoClient without encryption enabled (referred to as ``client``). Enable command monitoring to listen for command_started events.
@@ -115,7 +115,7 @@ describe('Client Side Encryption Prose Tests', function() {
       );
     });
 
-    afterEach(function() {
+    afterEach(function () {
       if (this.commandStartedEvents) {
         this.commandStartedEvents.teardown();
         this.commandStartedEvents = undefined;
@@ -125,7 +125,7 @@ describe('Client Side Encryption Prose Tests', function() {
         .then(() => this.client && this.client.close());
     });
 
-    it('should work for local KMS provider', metadata, function() {
+    it('should work for local KMS provider', metadata, function () {
       let localDatakeyId;
       let localEncrypted;
       return Promise.resolve()
@@ -193,7 +193,7 @@ describe('Client Side Encryption Prose Tests', function() {
         });
     });
 
-    it('should work for aws KMS provider', metadata, function() {
+    it('should work for aws KMS provider', metadata, function () {
       // Then, repeat the above tests with the ``aws`` KMS provider:
       let awsDatakeyId;
       let awsEncrypted;
@@ -271,7 +271,7 @@ describe('Client Side Encryption Prose Tests', function() {
         });
     });
 
-    it('should error on an attempt to double-encrypt a value', metadata, function() {
+    it('should error on an attempt to double-encrypt a value', metadata, function () {
       // Then, run the following final tests:
       // #. Test explicit encrypting an auto encrypted field.
       //    - Use ``client_encrypted`` to attempt to insert ``{ "encrypted_placeholder": (local_encrypted) }``
@@ -301,10 +301,10 @@ describe('Client Side Encryption Prose Tests', function() {
     });
   });
 
-  describe('Custom Endpoint', function() {
+  describe('Custom Endpoint', function () {
     // Data keys created with AWS KMS may specify a custom endpoint to contact (instead of the default endpoint derived from the AWS region).
 
-    beforeEach(function() {
+    beforeEach(function () {
       // 1. Create a ``ClientEncryption`` object (referred to as ``client_encryption``)
       //    Configure with ``aws`` KMS providers as follows:
       //    .. code:: javascript
@@ -324,7 +324,7 @@ describe('Client Side Encryption Prose Tests', function() {
       });
     });
 
-    afterEach(function() {
+    afterEach(function () {
       return this.client && this.client.close();
     });
     const testCases = [
@@ -404,7 +404,7 @@ describe('Client Side Encryption Prose Tests', function() {
     ];
 
     testCases.forEach(testCase => {
-      it(testCase.description, metadata, function() {
+      it(testCase.description, metadata, function () {
         // 2. Call `client_encryption.createDataKey()` with "aws" as the provider and the following masterKey:
         // .. code:: javascript
         //    {
@@ -442,7 +442,7 @@ describe('Client Side Encryption Prose Tests', function() {
     });
   });
 
-  describe('BSON size limits and batch splitting', function() {
+  describe('BSON size limits and batch splitting', function () {
     const fs = require('fs');
     const path = require('path');
     const { EJSON } = BSON;
@@ -456,7 +456,7 @@ describe('Client Side Encryption Prose Tests', function() {
     const limitsKey = loadLimits('limits-key.json');
     const limitsDoc = loadLimits('limits-doc.json');
 
-    before(function() {
+    before(function () {
       // First, perform the setup.
 
       // #. Create a MongoClient without encryption enabled (referred to as ``client``).
@@ -483,7 +483,7 @@ describe('Client Side Encryption Prose Tests', function() {
       );
     });
 
-    beforeEach(function() {
+    beforeEach(function () {
       // #. Create a MongoClient configured with auto encryption (referred to as ``client_encrypted``)
       //    Configure with the ``local`` KMS provider as follows:
       //    .. code:: javascript
@@ -507,7 +507,7 @@ describe('Client Side Encryption Prose Tests', function() {
       });
     });
 
-    afterEach(function() {
+    afterEach(function () {
       if (this.commandStartedEvents) {
         this.commandStartedEvents.teardown();
         this.commandStartedEvents = undefined;
@@ -517,7 +517,7 @@ describe('Client Side Encryption Prose Tests', function() {
       }
     });
 
-    after(function() {
+    after(function () {
       return this.client && this.client.close();
     });
 
@@ -603,7 +603,7 @@ describe('Client Side Encryption Prose Tests', function() {
     ];
 
     testCases.forEach(testCase => {
-      it(testCase.description, metadata, function() {
+      it(testCase.description, metadata, function () {
         return this.encryptedColl.insertMany(testCase.docs()).then(
           () => {
             if (testCase.error) {
@@ -643,8 +643,8 @@ describe('Client Side Encryption Prose Tests', function() {
     }
   });
 
-  describe('Views are prohibited', function() {
-    before(function() {
+  describe('Views are prohibited', function () {
+    before(function () {
       // First, perform the setup.
 
       // #. Create a MongoClient without encryption enabled (referred to as ``client``).
@@ -663,11 +663,11 @@ describe('Client Side Encryption Prose Tests', function() {
         });
     });
 
-    after(function() {
+    after(function () {
       return this.client && this.client.close();
     });
 
-    beforeEach(function() {
+    beforeEach(function () {
       this.clientEncrypted = this.configuration.newClient(
         {},
         {
@@ -681,11 +681,11 @@ describe('Client Side Encryption Prose Tests', function() {
       return this.clientEncrypted.connect();
     });
 
-    afterEach(function() {
+    afterEach(function () {
       return this.clientEncrypted && this.clientEncrypted.close();
     });
 
-    it('should error when inserting into a view with autoEncryption', metadata, function() {
+    it('should error when inserting into a view with autoEncryption', metadata, function () {
       return this.clientEncrypted
         .db(dataDbName)
         .collection('view')
@@ -707,7 +707,7 @@ describe('Client Side Encryption Prose Tests', function() {
   // connect-less client. So instead we are implementing the tests via APM,
   // and confirming that the externalClient is firing off keyVault requests during
   // encrypted operations
-  describe('External Key Vault', function() {
+  describe('External Key Vault', function () {
     const fs = require('fs');
     const path = require('path');
     const { EJSON } = BSON;
@@ -720,7 +720,7 @@ describe('Client Side Encryption Prose Tests', function() {
     const externalKey = loadExternal('external-key.json');
     const externalSchema = loadExternal('external-schema.json');
 
-    beforeEach(function() {
+    beforeEach(function () {
       this.client = this.configuration.newClient();
 
       // #. Create a MongoClient without encryption enabled (referred to as ``client``).
@@ -740,7 +740,7 @@ describe('Client Side Encryption Prose Tests', function() {
       );
     });
 
-    afterEach(function() {
+    afterEach(function () {
       if (this.commandStartedEvents) {
         this.commandStartedEvents.teardown();
         this.commandStartedEvents = undefined;
@@ -755,7 +755,7 @@ describe('Client Side Encryption Prose Tests', function() {
       it(
         `should work ${withExternalKeyVault ? 'with' : 'without'} external key vault`,
         metadata,
-        function() {
+        function () {
           const ClientEncryption = this.configuration.mongodbClientEncryption.ClientEncryption;
           return (
             Promise.resolve()

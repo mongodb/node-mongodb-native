@@ -9,7 +9,7 @@ const ReplSet = core.ReplSet;
 const ObjectId = core.BSON.ObjectId;
 
 let test = {};
-describe('ReplSet Primary Loses Network (mocks)', function() {
+describe('ReplSet Primary Loses Network (mocks)', function () {
   beforeEach(() => {
     test.spy = new ConnectionSpy();
     Connection.enableConnectionAccounting(test.spy);
@@ -30,7 +30,7 @@ describe('ReplSet Primary Loses Network (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var currentIsMasterIndex = 0;
       var step = 0;
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
@@ -95,7 +95,7 @@ describe('ReplSet Primary Loses Network (mocks)', function() {
       ];
 
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const primaryServer = yield mock.createServer(32000, 'localhost');
         const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
         const secondSecondaryServer = yield mock.createServer(32002, 'localhost');
@@ -143,9 +143,9 @@ describe('ReplSet Primary Loses Network (mocks)', function() {
         let intervalId;
         let cleaningUp = false;
         server.on('error', done);
-        server.on('left', function(_type) {
+        server.on('left', function (_type) {
           if (_type === 'primary') {
-            server.on('joined', function(__type, __server) {
+            server.on('joined', function (__type, __server) {
               if (__type === 'primary' && __server.name === 'localhost:32002') {
                 if (cleaningUp) {
                   return;
@@ -159,11 +159,11 @@ describe('ReplSet Primary Loses Network (mocks)', function() {
           }
         });
 
-        server.on('connect', function(_server) {
+        server.on('connect', function (_server) {
           server.__connected = true;
 
-          intervalId = setInterval(function() {
-            _server.command('system.$cmd', { ismaster: 1 }, function(err) {
+          intervalId = setInterval(function () {
+            _server.command('system.$cmd', { ismaster: 1 }, function (err) {
               if (err) {
                 // console.error(err);
               } else {
@@ -173,11 +173,11 @@ describe('ReplSet Primary Loses Network (mocks)', function() {
           }, 1000);
 
           // Primary dies
-          setTimeout(function() {
+          setTimeout(function () {
             step = step + 1;
 
             // Election happened
-            setTimeout(function() {
+            setTimeout(function () {
               step = step + 1;
               currentIsMasterIndex = currentIsMasterIndex + 1;
             }, 1000);

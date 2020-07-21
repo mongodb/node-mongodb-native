@@ -3,7 +3,7 @@
 const expect = require('chai').expect;
 const mock = require('mongodb-mock-server');
 
-describe('Client (unit)', function() {
+describe('Client (unit)', function () {
   let server;
 
   afterEach(() => mock.cleanup());
@@ -11,7 +11,7 @@ describe('Client (unit)', function() {
     return mock.createServer().then(_server => (server = _server));
   });
 
-  it('should let wrapping libraries amend the client metadata', function() {
+  it('should let wrapping libraries amend the client metadata', function () {
     let handshake;
     server.setMessageHandler(request => {
       const doc = request.document;
@@ -35,9 +35,7 @@ describe('Client (unit)', function() {
       this.defer(() => client.close());
 
       expect(handshake).to.have.nested.property('client.driver');
-      expect(handshake)
-        .nested.property('client.driver.name')
-        .to.equal('nodejs|mongoose');
+      expect(handshake).nested.property('client.driver.name').to.equal('nodejs|mongoose');
       expect(handshake)
         .nested.property('client.driver.version')
         .to.match(/|5.7.10/);

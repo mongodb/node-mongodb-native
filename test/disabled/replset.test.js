@@ -9,25 +9,25 @@ const Server = core.Server;
 const ReplSet = core.ReplSet;
 const ReadPreference = core.ReadPreference;
 
-var restartAndDone = function(configuration, done) {
-  configuration.manager.restart(9, { waitMS: 2000 }).then(function() {
+var restartAndDone = function (configuration, done) {
+  configuration.manager.restart(9, { waitMS: 2000 }).then(function () {
     done();
   });
 };
 
-describe.skip('A replica set', function() {
+describe.skip('A replica set', function () {
   this.timeout(0);
 
   it('Discover arbiters', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       this.timeout(0);
       var self = this;
       var manager = this.configuration.manager;
 
       // Get the primary server
-      manager.primary().then(function(_manager) {
+      manager.primary().then(function (_manager) {
         // Enable connections accounting
         Connection.enableConnectionAccounting();
         // Attempt to connect
@@ -48,11 +48,11 @@ describe.skip('A replica set', function() {
           done();
         }
 
-        server.on('joined', function(_type) {
+        server.on('joined', function (_type) {
           if (_type === 'arbiter') {
             server.destroy();
 
-            setTimeout(function() {
+            setTimeout(function () {
               expect(Object.keys(Connection.connections()).length).to.equal(0);
               Connection.disableConnectionAccounting();
               done();
@@ -69,12 +69,12 @@ describe.skip('A replica set', function() {
   it('Discover passives', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       var manager = this.configuration.manager;
 
       // Get the primary server
-      manager.primary().then(function(_manager) {
+      manager.primary().then(function (_manager) {
         // Enable connections accounting
         Connection.enableConnectionAccounting();
         // Attempt to connect
@@ -90,11 +90,11 @@ describe.skip('A replica set', function() {
           }
         );
 
-        server.on('joined', function(_type, _server) {
+        server.on('joined', function (_type, _server) {
           if (_type === 'secondary' && _server.lastIsMaster().passive) {
             server.destroy();
 
-            setTimeout(function() {
+            setTimeout(function () {
               expect(Object.keys(Connection.connections()).length).to.equal(0);
               Connection.disableConnectionAccounting();
               done();
@@ -111,12 +111,12 @@ describe.skip('A replica set', function() {
   it('Discover primary', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       var manager = this.configuration.manager;
 
       // Get the primary server
-      manager.primary().then(function(_manager) {
+      manager.primary().then(function (_manager) {
         // Enable connections accounting
         Connection.enableConnectionAccounting();
         // Attempt to connect
@@ -132,11 +132,11 @@ describe.skip('A replica set', function() {
           }
         );
 
-        server.on('joined', function(_type) {
+        server.on('joined', function (_type) {
           if (_type === 'primary') {
             server.destroy();
 
-            setTimeout(function() {
+            setTimeout(function () {
               expect(Object.keys(Connection.connections()).length).to.equal(0);
               Connection.disableConnectionAccounting();
               done();
@@ -153,12 +153,12 @@ describe.skip('A replica set', function() {
   it('Discover secondaries', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       var manager = this.configuration.manager;
 
       // Get the primary server
-      manager.primary().then(function(_manager) {
+      manager.primary().then(function (_manager) {
         // Enable connections accounting
         Connection.enableConnectionAccounting();
         // Attempt to connect
@@ -175,12 +175,12 @@ describe.skip('A replica set', function() {
         );
 
         var count = 0;
-        server.on('joined', function(_type) {
+        server.on('joined', function (_type) {
           if (_type === 'secondary') count = count + 1;
           if (count === 2) {
             server.destroy();
 
-            setTimeout(function() {
+            setTimeout(function () {
               expect(Object.keys(Connection.connections()).length).to.equal(0);
               Connection.disableConnectionAccounting();
               done();
@@ -197,14 +197,14 @@ describe.skip('A replica set', function() {
   it('Replica set discovery', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       var manager = this.configuration.manager;
 
       // State
       var state = { primary: 1, secondary: 2, arbiter: 1, passive: 1 };
       // Get the primary server
-      manager.primary().then(function(_manager) {
+      manager.primary().then(function (_manager) {
         // Enable connections accounting
         Connection.enableConnectionAccounting();
         // Attempt to connect
@@ -220,7 +220,7 @@ describe.skip('A replica set', function() {
           }
         );
 
-        server.on('joined', function(_type, _server) {
+        server.on('joined', function (_type, _server) {
           if (_type === 'secondary' && _server.lastIsMaster().passive) {
             state.passive = state.passive - 1;
           } else {
@@ -235,7 +235,7 @@ describe.skip('A replica set', function() {
           ) {
             server.destroy();
 
-            setTimeout(function() {
+            setTimeout(function () {
               expect(Object.keys(Connection.connections()).length).to.equal(0);
               Connection.disableConnectionAccounting();
               done();
@@ -256,14 +256,14 @@ describe.skip('A replica set', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       var manager = this.configuration.manager;
 
       // State
       var state = { primary: 1, secondary: 2, arbiter: 1, passive: 1 };
       // Get the primary server
-      manager.primary().then(function(_manager) {
+      manager.primary().then(function (_manager) {
         Connection.enableConnectionAccounting();
         // Attempt to connect
         var server = new ReplSet(
@@ -282,7 +282,7 @@ describe.skip('A replica set', function() {
           }
         );
 
-        server.on('joined', function(_type, _server) {
+        server.on('joined', function (_type, _server) {
           // console.log('======= joined :: ' + _type + ' :: ' + _server.name)
           if (_type === 'secondary' && _server.lastIsMaster().passive) {
             state.passive = state.passive - 1;
@@ -300,7 +300,7 @@ describe.skip('A replica set', function() {
           ) {
             server.destroy();
 
-            setTimeout(function() {
+            setTimeout(function () {
               expect(Object.keys(Connection.connections()).length).to.equal(0);
               Connection.disableConnectionAccounting();
               done();
@@ -321,7 +321,7 @@ describe.skip('A replica set', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       var ServerManager = require('mongodb-topology-manager').Server,
         manager = this.configuration.manager;
@@ -329,13 +329,13 @@ describe.skip('A replica set', function() {
       // State
       var state = { primary: 1, secondary: 1, arbiter: 1, passive: 1 };
       // Get the primary server
-      manager.primary().then(function(primaryManager) {
+      manager.primary().then(function (primaryManager) {
         // Get the secondary server
-        manager.secondaries().then(function(managers) {
+        manager.secondaries().then(function (managers) {
           var serverManager = managers[0];
 
           // Stop the secondary
-          serverManager.stop().then(function() {
+          serverManager.stop().then(function () {
             // Start a new server manager
             var nonReplSetMember = new ServerManager('mongod', {
               bind_ip: serverManager.host,
@@ -344,7 +344,7 @@ describe.skip('A replica set', function() {
             });
 
             // Start a non replset member
-            nonReplSetMember.start().then(function() {
+            nonReplSetMember.start().then(function () {
               // console.log('------------------------ 4')
               var config = [
                 {
@@ -358,12 +358,12 @@ describe.skip('A replica set', function() {
               };
 
               // Wait for primary
-              manager.waitForPrimary().then(function() {
+              manager.waitForPrimary().then(function () {
                 // Enable connections accounting
                 Connection.enableConnectionAccounting();
                 // Attempt to connect
                 var replset = new ReplSet(config, options);
-                replset.on('joined', function(_type, _server) {
+                replset.on('joined', function (_type, _server) {
                   if (_type === 'secondary' && _server.lastIsMaster().passive) {
                     state.passive = state.passive - 1;
                   } else {
@@ -378,14 +378,14 @@ describe.skip('A replica set', function() {
                     state.passive === 0
                   ) {
                     replset.destroy();
-                    setTimeout(function() {
+                    setTimeout(function () {
                       expect(Object.keys(Connection.connections()).length).to.equal(0);
                       Connection.disableConnectionAccounting();
 
                       // Stop the normal server
-                      nonReplSetMember.stop().then(function() {
+                      nonReplSetMember.stop().then(function () {
                         // Restart the secondary server
-                        serverManager.start().then(function() {
+                        serverManager.start().then(function () {
                           restartAndDone(self.configuration, done);
                         });
                       });
@@ -411,14 +411,14 @@ describe.skip('A replica set', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       var manager = this.configuration.manager;
 
       // Get the primary server
-      manager.primary().then(function(primaryServerManager) {
+      manager.primary().then(function (primaryServerManager) {
         // Get the secondary server
-        manager.secondaries().then(function(managers) {
+        manager.secondaries().then(function (managers) {
           var secondaryServerManager = managers[0];
 
           var config = [
@@ -438,13 +438,13 @@ describe.skip('A replica set', function() {
           // console.log('============================= 4')
           // Attempt to connect
           var server = new ReplSet(config, options);
-          server.on('fullsetup', function() {
+          server.on('fullsetup', function () {
             // console.log('------------------------------------------ 0')
             // Save number of secondaries
             var numberOfSecondaries = server.s.replicaSetState.secondaries.length;
 
             // Let's listen to changes
-            server.on('left', function(_t, _server) {
+            server.on('left', function (_t, _server) {
               if (_server.s.options.port === secondaryServerManager.options.port) {
                 expect(server.s.replicaSetState.primary).to.not.be.null;
                 expect(server.s.replicaSetState.secondaries.length).to.be.below(
@@ -453,7 +453,7 @@ describe.skip('A replica set', function() {
                 expect(server.s.replicaSetState.arbiters.length).to.equal(1);
                 server.destroy();
 
-                setTimeout(function() {
+                setTimeout(function () {
                   // console.log('=================== 0')
                   // console.dir(Object.keys(Connection.connections()))
                   expect(Object.keys(Connection.connections()).length).to.equal(0);
@@ -483,12 +483,12 @@ describe.skip('A replica set', function() {
   it('Should not leak any connections after hammering the replicaset with a mix of operations', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       const manager = this.configuration.manager;
 
       // Get the primary server
-      manager.primary().then(function(_manager) {
+      manager.primary().then(function (_manager) {
         // Enable connections accounting
         Connection.enableConnectionAccounting();
         Server.enableServerAccounting();
@@ -516,7 +516,7 @@ describe.skip('A replica set', function() {
             Connection.disableConnectionAccounting();
             Server.disableServerAccounting();
 
-            setTimeout(function() {
+            setTimeout(function () {
               expect(Object.keys(Connection.connections()).length).to.equal(0);
               expect(Object.keys(Server.servers()).length).to.equal(0);
               done();
@@ -524,11 +524,11 @@ describe.skip('A replica set', function() {
           }
         }
 
-        server.on('connect', function(_server) {
+        server.on('connect', function (_server) {
           var insertcount = 10000;
           var querycount = 10000;
 
-          var insertCountDecrement = function() {
+          var insertCountDecrement = function () {
             insertcount = insertcount - 1;
 
             if (insertcount === 0) {
@@ -536,7 +536,7 @@ describe.skip('A replica set', function() {
             }
           };
 
-          var queryCountDecrement = function() {
+          var queryCountDecrement = function () {
             querycount = querycount - 1;
 
             if (querycount === 0) {

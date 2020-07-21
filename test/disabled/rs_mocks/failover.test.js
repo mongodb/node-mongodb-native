@@ -11,7 +11,7 @@ const ReplSet = core.ReplSet;
 const ObjectId = core.BSON.ObjectId;
 
 let test = {};
-describe('ReplSet Failover (mocks)', function() {
+describe('ReplSet Failover (mocks)', function () {
   beforeEach(() => {
     test.spy = new ConnectionSpy();
     Connection.enableConnectionAccounting(test.spy);
@@ -32,7 +32,7 @@ describe('ReplSet Failover (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var currentIsMasterIndex = 0;
       var electionIds = [new ObjectId(0), new ObjectId(1)];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
@@ -125,7 +125,7 @@ describe('ReplSet Failover (mocks)', function() {
       var die = false;
 
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const primaryServer = yield mock.createServer(32000, 'localhost');
         const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
         const secondSecondaryServer = yield mock.createServer(32002, 'localhost');
@@ -181,11 +181,11 @@ describe('ReplSet Failover (mocks)', function() {
 
         Server.enableServerAccounting();
 
-        server.on('connect', function() {
+        server.on('connect', function () {
           server.__connected = true;
 
           // Perform the two steps
-          setTimeout(function() {
+          setTimeout(function () {
             die = true;
             currentIsMasterIndex = currentIsMasterIndex + 1;
 
@@ -193,7 +193,7 @@ describe('ReplSet Failover (mocks)', function() {
             var joinedEvents = 0;
 
             // Add listener
-            server.on('joined', function(_type, _server) {
+            server.on('joined', function (_type, _server) {
               if (_type === 'secondary' && _server.name === 'localhost:32000') {
                 joinedEvents = joinedEvents + 1;
               } else if (_type === 'primary' && _server.name === 'localhost:32001') {
@@ -218,7 +218,7 @@ describe('ReplSet Failover (mocks)', function() {
               }
             });
 
-            setTimeout(function() {
+            setTimeout(function () {
               die = false;
               currentIsMasterIndex = currentIsMasterIndex + 1;
             }, 500);
@@ -239,7 +239,7 @@ describe('ReplSet Failover (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var currentIsMasterIndex = 0;
       var electionIds = [new ObjectId(0), new ObjectId(1)];
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
@@ -332,7 +332,7 @@ describe('ReplSet Failover (mocks)', function() {
       var die = false;
 
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const primaryServer = yield mock.createServer(32000, 'localhost');
         const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
         const secondSecondaryServer = yield mock.createServer(32002, 'localhost');
@@ -388,21 +388,21 @@ describe('ReplSet Failover (mocks)', function() {
 
         Server.enableServerAccounting();
 
-        server.on('connect', function() {
+        server.on('connect', function () {
           server.__connected = true;
 
           // Perform the two steps
-          setTimeout(function() {
+          setTimeout(function () {
             die = true;
             currentIsMasterIndex = currentIsMasterIndex + 1;
 
-            server.on('reconnect', function() {
+            server.on('reconnect', function () {
               server.destroy();
               Server.disableServerAccounting();
               done();
             });
 
-            setTimeout(function() {
+            setTimeout(function () {
               die = false;
               currentIsMasterIndex = currentIsMasterIndex + 1;
             }, 500);

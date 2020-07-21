@@ -5,12 +5,12 @@ const connect = require('../../../src/cmap/connect');
 const Connection = require('../../../src/cmap/connection').Connection;
 const expect = require('chai').expect;
 
-describe('Connection', function() {
+describe('Connection', function () {
   let server;
   after(() => mock.cleanup());
   before(() => mock.createServer().then(s => (server = s)));
 
-  it('should support fire-and-forget messages', function(done) {
+  it('should support fire-and-forget messages', function (done) {
     server.setMessageHandler(request => {
       const doc = request.document;
       if (doc.ismaster) {
@@ -33,7 +33,7 @@ describe('Connection', function() {
     });
   });
 
-  it('should destroy streams which time out', function(done) {
+  it('should destroy streams which time out', function (done) {
     server.setMessageHandler(request => {
       const doc = request.document;
       if (doc.ismaster) {
@@ -51,9 +51,7 @@ describe('Connection', function() {
         expect(err).to.exist;
         expect(result).to.not.exist;
 
-        expect(conn)
-          .property('stream')
-          .property('destroyed').to.be.true;
+        expect(conn).property('stream').property('destroyed').to.be.true;
 
         done();
       });

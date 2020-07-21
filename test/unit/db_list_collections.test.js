@@ -3,7 +3,7 @@
 const mock = require('mongodb-mock-server');
 const expect = require('chai').expect;
 
-describe('db.listCollections', function() {
+describe('db.listCollections', function () {
   const testHarness = {};
   afterEach(() => mock.cleanup());
   beforeEach(() => {

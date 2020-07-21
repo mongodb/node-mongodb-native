@@ -4,15 +4,15 @@ var format = require('util').format;
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 
-describe('LDAP', function() {
-  before(function() {
+describe('LDAP', function () {
+  before(function () {
     return setupDatabase(this.configuration);
   });
 
   it('Should correctly authenticate against ldap', {
     metadata: { requires: { topology: 'ldap' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
 
       // KDC Server
@@ -29,13 +29,13 @@ describe('LDAP', function() {
       );
 
       const client = configuration.newClient(url);
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         client
           .db('ldap')
           .collection('test')
-          .findOne(function(err, doc) {
+          .findOne(function (err, doc) {
             test.equal(null, err);
             test.equal(true, doc.ldap);
 
@@ -48,7 +48,7 @@ describe('LDAP', function() {
   it('Should correctly reauthenticate against ldap', {
     metadata: { requires: { topology: 'ldap' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
 
       // KDC Server
@@ -65,22 +65,22 @@ describe('LDAP', function() {
       );
 
       const client = configuration.newClient(url);
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         client
           .db('ldap')
           .collection('test')
-          .findOne(function(err, doc) {
+          .findOne(function (err, doc) {
             test.equal(null, err);
             test.equal(true, doc.ldap);
 
-            client.topology.once('reconnect', function() {
+            client.topology.once('reconnect', function () {
               // Await reconnect and re-authentication
               client
                 .db('ldap')
                 .collection('test')
-                .findOne(function(err, doc) {
+                .findOne(function (err, doc) {
                   test.equal(null, err);
                   test.equal(true, doc.ldap);
 
@@ -91,7 +91,7 @@ describe('LDAP', function() {
                   client
                     .db('ldap')
                     .collection('test')
-                    .findOne(function(err, doc) {
+                    .findOne(function (err, doc) {
                       test.equal(null, err);
                       test.equal(true, doc.ldap);
 

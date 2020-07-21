@@ -6,7 +6,7 @@ const ReplSetFixture = require('../common').ReplSetFixture;
 const ReadPreference = require('../../../../src/core/topologies/read_preference');
 const MongoCredentials = require('../../../../src/core/auth/mongo_credentials').MongoCredentials;
 
-describe('Auth (ReplSet)', function() {
+describe('Auth (ReplSet)', function () {
   let test;
   before(() => (test = new ReplSetFixture()));
   afterEach(() => mock.cleanup());
@@ -19,7 +19,7 @@ describe('Auth (ReplSet)', function() {
     flush: () => {}
   };
 
-  it('should not stall on authentication when you are connected', function(done) {
+  it('should not stall on authentication when you are connected', function (done) {
     const credentials = new MongoCredentials({
       mechanism: 'default',
       source: 'db',

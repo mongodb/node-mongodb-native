@@ -7,11 +7,11 @@ var f = require('util').format;
 // NOTE: This suite seems to require a special host file configuration on the test
 //       server. Disabling the suite until we can sort this out for everyone.
 
-describe.skip('SSL (MongoClient)', function() {
+describe.skip('SSL (MongoClient)', function () {
   it('shouldCorrectlyCommunicateUsingSSLSocket', {
     metadata: { requires: { topology: 'ssl' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var ServerManager = require('mongodb-topology-manager').Server,
         MongoClient = configuration.require.MongoClient;
@@ -33,20 +33,20 @@ describe.skip('SSL (MongoClient)', function() {
 
       serverManager
         .purge()
-        .then(function() {
+        .then(function () {
           return serverManager.start();
         })
-        .then(function() {
+        .then(function () {
           MongoClient.connect(
             'mongodb://localhost:27019/test?ssl=true',
             {
               sslValidate: false
             },
-            function(err, client) {
+            function (err, client) {
               test.equal(null, err);
               client.close();
 
-              serverManager.stop().then(function() {
+              serverManager.stop().then(function () {
                 done();
               });
             }
@@ -58,7 +58,7 @@ describe.skip('SSL (MongoClient)', function() {
   it('should fail due to CRL list passed in', {
     metadata: { requires: { topology: 'ssl' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var ServerManager = require('mongodb-topology-manager').Server,
         MongoClient = configuration.require.MongoClient;
@@ -84,10 +84,10 @@ describe.skip('SSL (MongoClient)', function() {
 
       serverManager
         .purge()
-        .then(function() {
+        .then(function () {
           return serverManager.start();
         })
-        .then(function() {
+        .then(function () {
           MongoClient.connect(
             'mongodb://localhost:27019/test?ssl=true',
             {
@@ -95,11 +95,11 @@ describe.skip('SSL (MongoClient)', function() {
               sslCA: ca,
               sslCRL: crl
             },
-            function(err) {
+            function (err) {
               test.ok(err);
               test.ok(err.message.indexOf('CRL has expired') !== -1);
 
-              serverManager.stop().then(function() {
+              serverManager.stop().then(function () {
                 done();
               });
             }
@@ -111,7 +111,7 @@ describe.skip('SSL (MongoClient)', function() {
   it('shouldCorrectlyValidateServerCertificate', {
     metadata: { requires: { topology: 'ssl' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var ServerManager = require('mongodb-topology-manager').Server,
         MongoClient = configuration.require.MongoClient;
@@ -132,10 +132,10 @@ describe.skip('SSL (MongoClient)', function() {
 
       serverManager
         .purge()
-        .then(function() {
+        .then(function () {
           return serverManager.start();
         })
-        .then(function() {
+        .then(function () {
           // Connect and validate the server certificate
           MongoClient.connect(
             'mongodb://server:27019/test?ssl=true&maxPoolSize=1',
@@ -143,11 +143,11 @@ describe.skip('SSL (MongoClient)', function() {
               sslValidate: true,
               sslCA: ca
             },
-            function(err, client) {
+            function (err, client) {
               test.equal(null, err);
               client.close();
 
-              serverManager.stop().then(function() {
+              serverManager.stop().then(function () {
                 done();
               });
             }
@@ -159,7 +159,7 @@ describe.skip('SSL (MongoClient)', function() {
   it('Should correctly pass down servername to connection for TLS SNI support', {
     metadata: { requires: { topology: 'ssl' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var ServerManager = require('mongodb-topology-manager').Server,
         MongoClient = configuration.require.MongoClient;
@@ -180,10 +180,10 @@ describe.skip('SSL (MongoClient)', function() {
 
       serverManager
         .purge()
-        .then(function() {
+        .then(function () {
           return serverManager.start();
         })
-        .then(function() {
+        .then(function () {
           MongoClient.connect(
             'mongodb://server:27019/test?ssl=true&maxPoolSize=1',
             {
@@ -191,12 +191,12 @@ describe.skip('SSL (MongoClient)', function() {
               servername: 'server',
               sslCA: ca
             },
-            function(err, client) {
+            function (err, client) {
               test.equal(null, err);
 
               client.close();
 
-              serverManager.stop().then(function() {
+              serverManager.stop().then(function () {
                 done();
               });
             }
@@ -210,7 +210,7 @@ describe.skip('SSL (MongoClient)', function() {
     {
       metadata: { requires: { topology: 'ssl' } },
 
-      test: function(done) {
+      test: function (done) {
         var configuration = this.configuration;
         var ServerManager = require('mongodb-topology-manager').Server,
           MongoClient = configuration.require.MongoClient;
@@ -234,28 +234,28 @@ describe.skip('SSL (MongoClient)', function() {
 
         serverManager
           .purge()
-          .then(function() {
+          .then(function () {
             return serverManager.start();
           })
-          .then(function() {
+          .then(function () {
             // Connect and validate the server certificate
             MongoClient.connect(
               'mongodb://server:27019/test?ssl=true&maxPoolSize=1',
               {
                 sslValidate: true,
-                checkServerIdentity: function() {
+                checkServerIdentity: function () {
                   checkServerIdentityCalled = true;
                   return undefined;
                 },
                 sslCA: ca
               },
-              function(err, client) {
+              function (err, client) {
                 test.equal(null, err);
                 test.ok(checkServerIdentityCalled);
 
                 client.close();
 
-                serverManager.stop().then(function() {
+                serverManager.stop().then(function () {
                   done();
                 });
               }
@@ -268,7 +268,7 @@ describe.skip('SSL (MongoClient)', function() {
   it('should fail to validate certificate due to illegal host name', {
     metadata: { requires: { topology: 'ssl' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var ServerManager = require('mongodb-topology-manager').Server,
         MongoClient = configuration.require.MongoClient;
@@ -289,20 +289,20 @@ describe.skip('SSL (MongoClient)', function() {
 
       serverManager
         .purge()
-        .then(function() {
+        .then(function () {
           return serverManager.start();
         })
-        .then(function() {
+        .then(function () {
           MongoClient.connect(
             'mongodb://localhost:27017/test?ssl=true&maxPoolSize=1',
             {
               sslValidate: true,
               sslCA: ca
             },
-            function(err) {
+            function (err) {
               test.ok(err != null);
 
-              serverManager.stop().then(function() {
+              serverManager.stop().then(function () {
                 done();
               });
             }
@@ -314,7 +314,7 @@ describe.skip('SSL (MongoClient)', function() {
   it('shouldCorrectlyValidatePresentedServerCertificateAndPresentValidCertificate', {
     metadata: { requires: { topology: 'ssl' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var ServerManager = require('mongodb-topology-manager').Server,
         MongoClient = configuration.require.MongoClient;
@@ -339,10 +339,10 @@ describe.skip('SSL (MongoClient)', function() {
 
       serverManager
         .purge()
-        .then(function() {
+        .then(function () {
           return serverManager.start();
         })
-        .then(function() {
+        .then(function () {
           // Connect and validate the server certificate
           MongoClient.connect(
             'mongodb://server:27019/test?ssl=true&maxPoolSize=1',
@@ -353,12 +353,12 @@ describe.skip('SSL (MongoClient)', function() {
               sslCert: cert,
               sslPass: '10gen'
             },
-            function(err, client) {
+            function (err, client) {
               test.equal(null, err);
 
               client.close();
 
-              serverManager.stop().then(function() {
+              serverManager.stop().then(function () {
                 done();
               });
             }
@@ -370,7 +370,7 @@ describe.skip('SSL (MongoClient)', function() {
   it('shouldValidatePresentedServerCertificateButPresentInvalidCertificate', {
     metadata: { requires: { topology: 'ssl' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var ServerManager = require('mongodb-topology-manager').Server,
         MongoClient = configuration.require.MongoClient;
@@ -391,10 +391,10 @@ describe.skip('SSL (MongoClient)', function() {
 
       serverManager
         .purge()
-        .then(function() {
+        .then(function () {
           return serverManager.start();
         })
-        .then(function() {
+        .then(function () {
           // Read the ca
           var cert = fs.readFileSync(__dirname + '/ssl/mycert.pem');
           var key = fs.readFileSync(__dirname + '/ssl/mycert.pem');
@@ -410,10 +410,10 @@ describe.skip('SSL (MongoClient)', function() {
               sslCert: cert,
               sslPass: '10gen'
             },
-            function(err) {
+            function (err) {
               test.ok(err != null);
 
-              serverManager.stop().then(function() {
+              serverManager.stop().then(function () {
                 done();
               });
             }
@@ -425,7 +425,7 @@ describe.skip('SSL (MongoClient)', function() {
   it('shouldCorrectlyValidatePresentedServerCertificateAndInvalidKey', {
     metadata: { requires: { topology: 'ssl' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var ServerManager = require('mongodb-topology-manager').Server,
         MongoClient = configuration.require.MongoClient;
@@ -450,10 +450,10 @@ describe.skip('SSL (MongoClient)', function() {
 
       serverManager
         .purge()
-        .then(function() {
+        .then(function () {
           return serverManager.start();
         })
-        .then(function() {
+        .then(function () {
           // Connect and validate the server certificate
           MongoClient.connect(
             'mongodb://server:27019/test?ssl=true&maxPoolSize=1',
@@ -464,10 +464,10 @@ describe.skip('SSL (MongoClient)', function() {
               sslCert: cert,
               sslPass: '10gen'
             },
-            function(err) {
+            function (err) {
               test.ok(err != null);
 
-              serverManager.stop().then(function() {
+              serverManager.stop().then(function () {
                 done();
               });
             }
@@ -479,7 +479,7 @@ describe.skip('SSL (MongoClient)', function() {
   it('Should correctly shut down if attempting to connect to ssl server with wrong parameters', {
     metadata: { requires: { topology: 'ssl' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var ServerManager = require('mongodb-topology-manager').Server,
         MongoClient = configuration.require.MongoClient;
@@ -498,14 +498,14 @@ describe.skip('SSL (MongoClient)', function() {
       // Start server
       serverManager
         .purge()
-        .then(function() {
+        .then(function () {
           return serverManager.start();
         })
-        .then(function() {
-          MongoClient.connect('mongodb://localhost:27019/test?ssl=false', function(err) {
+        .then(function () {
+          MongoClient.connect('mongodb://localhost:27019/test?ssl=false', function (err) {
             test.ok(err != null);
 
-            serverManager.stop().then(function() {
+            serverManager.stop().then(function () {
               done();
             });
           });
@@ -516,7 +516,7 @@ describe.skip('SSL (MongoClient)', function() {
   it('should correctly connect using SSL to ReplSetManager', {
     metadata: { requires: { topology: 'ssl' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var ReplSetManager = require('mongodb-topology-manager').ReplSet,
         MongoClient = configuration.require.MongoClient;
@@ -564,10 +564,10 @@ describe.skip('SSL (MongoClient)', function() {
 
       replicasetManager
         .purge()
-        .then(function() {
+        .then(function () {
           return replicasetManager.start();
         })
-        .then(function() {
+        .then(function () {
           // Connect and validate the server certificate
           MongoClient.connect(
             'mongodb://server:31000,server:31001,server:31002/test?ssl=true&replicaSet=rs&maxPoolSize=1',
@@ -576,11 +576,11 @@ describe.skip('SSL (MongoClient)', function() {
               sslValidate: false,
               sslCA: ca
             },
-            function(err, client) {
+            function (err, client) {
               test.equal(null, err);
               client.close();
 
-              replicasetManager.stop().then(function() {
+              replicasetManager.stop().then(function () {
                 done();
               });
             }
@@ -592,7 +592,7 @@ describe.skip('SSL (MongoClient)', function() {
   it('shouldCorrectlySendCertificateToReplSetAndValidateServerCertificate', {
     metadata: { requires: { topology: 'ssl' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var ReplSetManager = require('mongodb-topology-manager').ReplSet,
         MongoClient = configuration.require.MongoClient;
@@ -649,10 +649,10 @@ describe.skip('SSL (MongoClient)', function() {
         }
       );
 
-      replicasetManager.purge().then(function() {
+      replicasetManager.purge().then(function () {
         return replicasetManager
           .start()
-          .then(function() {
+          .then(function () {
             // Connect and validate the server certificate
             MongoClient.connect(
               'mongodb://server:31000,server:31001/test?ssl=true&replicaSet=rs&maxPoolSize=1',
@@ -662,17 +662,17 @@ describe.skip('SSL (MongoClient)', function() {
                 sslKey: key,
                 sslCert: cert
               },
-              function(err, client) {
+              function (err, client) {
                 test.equal(null, err);
                 client.close();
 
-                replicasetManager.stop().then(function() {
+                replicasetManager.stop().then(function () {
                   done();
                 });
               }
             );
           })
-          .catch(function(e) {
+          .catch(function (e) {
             done(e);
           });
       });
@@ -682,7 +682,7 @@ describe.skip('SSL (MongoClient)', function() {
   it('should correctly send SNI TLS servername to replicaset members', {
     metadata: { requires: { topology: 'ssl' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var ReplSetManager = require('mongodb-topology-manager').ReplSet,
         MongoClient = configuration.require.MongoClient;
@@ -739,12 +739,12 @@ describe.skip('SSL (MongoClient)', function() {
         }
       );
 
-      replicasetManager.purge().then(function() {
+      replicasetManager.purge().then(function () {
         // Start the server
         replicasetManager
           .start()
-          .then(function() {
-            setTimeout(function() {
+          .then(function () {
+            setTimeout(function () {
               // Connect and validate the server certificate
               MongoClient.connect(
                 'mongodb://server:31000/test?ssl=true&replicaSet=rs&maxPoolSize=1',
@@ -755,19 +755,19 @@ describe.skip('SSL (MongoClient)', function() {
                   sslKey: key,
                   sslCert: cert
                 },
-                function(err, client) {
+                function (err, client) {
                   test.equal(null, err);
 
                   client.close();
 
-                  replicasetManager.stop().then(function() {
+                  replicasetManager.stop().then(function () {
                     done();
                   });
                 }
               );
             }, 10000);
           })
-          .catch(function(e) {
+          .catch(function (e) {
             done(e);
           });
       });
@@ -777,7 +777,7 @@ describe.skip('SSL (MongoClient)', function() {
   it('should correctly send SNI TLS servername to replicaset members with restart', {
     metadata: { requires: { topology: 'ssl' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var ReplSetManager = require('mongodb-topology-manager').ReplSet,
         MongoClient = configuration.require.MongoClient;
@@ -834,12 +834,12 @@ describe.skip('SSL (MongoClient)', function() {
         }
       );
 
-      replicasetManager.purge().then(function() {
+      replicasetManager.purge().then(function () {
         // Start the server
         replicasetManager
           .start()
-          .then(function() {
-            setTimeout(function() {
+          .then(function () {
+            setTimeout(function () {
               // Connect and validate the server certificate
               MongoClient.connect(
                 'mongodb://server:31000/test?ssl=true&replicaSet=rs&maxPoolSize=1',
@@ -851,15 +851,15 @@ describe.skip('SSL (MongoClient)', function() {
                   sslCert: cert,
                   haInterval: 2000
                 },
-                function(err, client) {
+                function (err, client) {
                   test.equal(null, err);
 
-                  replicasetManager.primary().then(function(primary) {
-                    primary.stop().then(function() {
+                  replicasetManager.primary().then(function (primary) {
+                    primary.stop().then(function () {
                       // Restart the old master and wait for the sync to happen
-                      primary.start().then(function() {
+                      primary.start().then(function () {
                         // Wait to allow haInterval to happen
-                        setTimeout(function() {
+                        setTimeout(function () {
                           client.close();
                           var connections = client.topology.connections();
 
@@ -867,7 +867,7 @@ describe.skip('SSL (MongoClient)', function() {
                             test.equal('server', connections[i].options.servername);
                           }
 
-                          replicasetManager.stop().then(function() {
+                          replicasetManager.stop().then(function () {
                             done();
                           });
                         }, 3000);
@@ -878,7 +878,7 @@ describe.skip('SSL (MongoClient)', function() {
               );
             }, 10000);
           })
-          .catch(function(e) {
+          .catch(function (e) {
             done(e);
           });
       });
@@ -888,7 +888,7 @@ describe.skip('SSL (MongoClient)', function() {
   it('shouldSendWrongCertificateToReplSetAndValidateServerCertificate', {
     metadata: { requires: { topology: 'ssl' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var ReplSetManager = require('mongodb-topology-manager').ReplSet,
         MongoClient = configuration.require.MongoClient;
@@ -943,12 +943,12 @@ describe.skip('SSL (MongoClient)', function() {
         }
       );
 
-      replicasetManager.purge().then(function() {
+      replicasetManager.purge().then(function () {
         // Start the server
         replicasetManager
           .start()
-          .then(function() {
-            setTimeout(function() {
+          .then(function () {
+            setTimeout(function () {
               // Present wrong certificate
               var cert = fs.readFileSync(__dirname + '/ssl/mycert.pem');
               var key = fs.readFileSync(__dirname + '/ssl/mycert.pem');
@@ -963,17 +963,17 @@ describe.skip('SSL (MongoClient)', function() {
                   sslCert: cert,
                   sslPass: '10gen'
                 },
-                function(err) {
+                function (err) {
                   test.ok(err != null);
 
-                  replicasetManager.stop().then(function() {
+                  replicasetManager.stop().then(function () {
                     done();
                   });
                 }
               );
             }, 10000);
           })
-          .catch(function(e) {
+          .catch(function (e) {
             done(e);
           });
       });
@@ -983,7 +983,7 @@ describe.skip('SSL (MongoClient)', function() {
   it('should correctly to replicaset using ssl connect with password', {
     metadata: { requires: { topology: 'ssl' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var ReplSetManager = require('mongodb-topology-manager').ReplSet,
         MongoClient = configuration.require.MongoClient;
@@ -1040,10 +1040,10 @@ describe.skip('SSL (MongoClient)', function() {
         }
       );
 
-      replicasetManager.purge().then(function() {
+      replicasetManager.purge().then(function () {
         // Start the server
-        replicasetManager.start().then(function() {
-          setTimeout(function() {
+        replicasetManager.start().then(function () {
+          setTimeout(function () {
             // Connect and validate the server certificate
             MongoClient.connect(
               'mongodb://server:31000,server:31001/test?ssl=true&replicaSet=rs&maxPoolSize=1',
@@ -1054,11 +1054,11 @@ describe.skip('SSL (MongoClient)', function() {
                 sslCert: cert,
                 sslPass: '10gen'
               },
-              function(err, client) {
+              function (err, client) {
                 test.equal(null, err);
                 client.close();
 
-                replicasetManager.stop().then(function() {
+                replicasetManager.stop().then(function () {
                   done();
                 });
               }
@@ -1072,7 +1072,7 @@ describe.skip('SSL (MongoClient)', function() {
   it('should correctly connect using ssl with sslValidation turned off', {
     metadata: { requires: { topology: 'ssl' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var ReplSetManager = require('mongodb-topology-manager').ReplSet,
         MongoClient = configuration.require.MongoClient;
@@ -1119,10 +1119,10 @@ describe.skip('SSL (MongoClient)', function() {
         }
       );
 
-      replicasetManager.purge().then(function() {
+      replicasetManager.purge().then(function () {
         // Start the server
-        replicasetManager.start().then(function() {
-          setTimeout(function() {
+        replicasetManager.start().then(function () {
+          setTimeout(function () {
             // Connect and validate the server certificate
             MongoClient.connect(
               'mongodb://server:31000,server:31001/test?ssl=true&replicaSet=rs&maxPoolSize=1',
@@ -1130,12 +1130,12 @@ describe.skip('SSL (MongoClient)', function() {
                 ssl: true,
                 sslValidate: false
               },
-              function(err, client) {
+              function (err, client) {
                 test.equal(null, err);
 
                 client.close();
 
-                replicasetManager.stop().then(function() {
+                replicasetManager.stop().then(function () {
                   done();
                 });
               }
@@ -1149,7 +1149,7 @@ describe.skip('SSL (MongoClient)', function() {
   it('should correctly connect using SSL to replicaset with requireSSL', {
     metadata: { requires: { topology: 'ssl' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var ReplSetManager = require('mongodb-topology-manager').ReplSet,
         MongoClient = configuration.require.MongoClient;
@@ -1198,12 +1198,12 @@ describe.skip('SSL (MongoClient)', function() {
         }
       );
 
-      replicasetManager.purge().then(function() {
+      replicasetManager.purge().then(function () {
         // Start the server
         replicasetManager
           .start()
-          .then(function() {
-            setTimeout(function() {
+          .then(function () {
+            setTimeout(function () {
               // Connect and validate the server certificate
               MongoClient.connect(
                 'mongodb://server:31000,server:31001,server:31002/test?replicaSet=rs',
@@ -1213,16 +1213,16 @@ describe.skip('SSL (MongoClient)', function() {
                   sslCert: cert,
                   sslCA: ca
                 },
-                function(err, client) {
+                function (err, client) {
                   test.equal(null, err);
                   var sets = [{}];
                   var db = client.db(configuration.db);
 
-                  var interval = setInterval(function() {
+                  var interval = setInterval(function () {
                     db.command(
                       { ismaster: true },
                       { readPreference: 'nearest', full: true },
-                      function(e, r) {
+                      function (e, r) {
                         // Add seen servers to list
                         if (r) {
                           sets[sets.length - 1][r.connection.port] = true;
@@ -1231,14 +1231,14 @@ describe.skip('SSL (MongoClient)', function() {
                     );
                   }, 500);
 
-                  setTimeout(function() {
+                  setTimeout(function () {
                     // Force a reconnect of a server
                     var secondary = client.topology.s.coreTopology.s.replicaSetState.secondaries[0];
                     secondary.destroy({ emitClose: true });
                     sets.push({});
 
-                    client.topology.once('joined', function() {
-                      setTimeout(function() {
+                    client.topology.once('joined', function () {
+                      setTimeout(function () {
                         clearInterval(interval);
 
                         test.ok(sets[0][31000]);
@@ -1251,7 +1251,7 @@ describe.skip('SSL (MongoClient)', function() {
 
                         client.close();
 
-                        replicasetManager.stop().then(function() {
+                        replicasetManager.stop().then(function () {
                           done();
                         });
                       }, 5000);
@@ -1261,7 +1261,7 @@ describe.skip('SSL (MongoClient)', function() {
               );
             });
           }, 10000)
-          .catch(function(err) {
+          .catch(function (err) {
             done(err);
           });
       });
@@ -1271,7 +1271,7 @@ describe.skip('SSL (MongoClient)', function() {
   it('should correctly connect to Replicaset using SSL when secondary down', {
     metadata: { requires: { topology: 'ssl' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var ReplSetManager = require('mongodb-topology-manager').ReplSet,
         MongoClient = configuration.require.MongoClient;
@@ -1317,14 +1317,14 @@ describe.skip('SSL (MongoClient)', function() {
         }
       );
 
-      replicasetManager.purge().then(function() {
+      replicasetManager.purge().then(function () {
         // Start the server
-        replicasetManager.start().then(function() {
-          replicasetManager.secondaries().then(function(managers) {
+        replicasetManager.start().then(function () {
+          replicasetManager.secondaries().then(function (managers) {
             var secondaryServerManager = managers[0];
 
-            secondaryServerManager.stop().then(function() {
-              setTimeout(function() {
+            secondaryServerManager.stop().then(function () {
+              setTimeout(function () {
                 // Connect and validate the server certificate
                 MongoClient.connect(
                   'mongodb://server:31000,server:31001,server:31002/test?ssl=true&replicaSet=rs&maxPoolSize=1',
@@ -1333,11 +1333,11 @@ describe.skip('SSL (MongoClient)', function() {
                     sslValidate: false,
                     sslCA: ca
                   },
-                  function(err, client) {
+                  function (err, client) {
                     test.equal(null, err);
                     client.close();
 
-                    replicasetManager.stop().then(function() {
+                    replicasetManager.stop().then(function () {
                       done();
                     });
                   }

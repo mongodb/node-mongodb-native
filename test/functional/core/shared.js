@@ -22,7 +22,7 @@ function executeCommand(configuration, db, cmd, options, cb) {
   });
 
   // Add event listeners
-  pool.on('connect', function(_pool) {
+  pool.on('connect', function (_pool) {
     var query = new Query(f('%s.$cmd', db), cmd, {
       numberToSkip: 0,
       numberToReturn: 1
@@ -33,7 +33,7 @@ function executeCommand(configuration, db, cmd, options, cb) {
       {
         command: true
       },
-      function(err, result) {
+      function (err, result) {
         if (err) console.log(err.stack);
         // Close the pool
         _pool.destroy();
@@ -64,7 +64,7 @@ function locateAuthMethod(configuration, cb) {
   });
 
   // Add event listeners
-  pool.on('connect', function(_pool) {
+  pool.on('connect', function (_pool) {
     var query = new Query(f('%s.$cmd', db), cmd, {
       numberToSkip: 0,
       numberToReturn: 1
@@ -74,7 +74,7 @@ function locateAuthMethod(configuration, cb) {
       {
         command: true
       },
-      function(err, result) {
+      function (err, result) {
         if (err) console.log(err.stack);
         // Close the pool
         _pool.destroy();
@@ -94,9 +94,9 @@ function locateAuthMethod(configuration, cb) {
   pool.connect.apply(pool);
 }
 
-const delay = function(timeout) {
-  return new Promise(function(resolve) {
-    setTimeout(function() {
+const delay = function (timeout) {
+  return new Promise(function (resolve) {
+    setTimeout(function () {
       resolve();
     }, timeout);
   });
@@ -146,7 +146,7 @@ function setupDatabase(configuration, dbsToClean) {
 
     const topology = configuration.newTopology();
     dbsToClean.push(configDbName);
-    topology.on('connect', function() {
+    topology.on('connect', function () {
       let cleanedCount = 0;
       const dropHandler = err => {
         if (err) return reject(err);

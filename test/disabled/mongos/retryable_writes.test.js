@@ -10,13 +10,13 @@ const ServerSessionPool = core.Sessions.ServerSessionPool;
 const Mongos = core.Mongos;
 
 const test = new MongosFixture();
-describe('Retryable Writes (Mongos)', function() {
+describe('Retryable Writes (Mongos)', function () {
   afterEach(() => mock.cleanup());
   beforeEach(() => test.setup({ ismaster: mock.DEFAULT_ISMASTER_36 }));
 
   it('should add `txnNumber` to write commands where `retryWrites` is true', {
     metadata: { requires: { topology: ['single'] } },
-    test: function(done) {
+    test: function (done) {
       const topology = new Mongos(
         test.servers.map(server => server.address()),
         {
@@ -48,8 +48,8 @@ describe('Retryable Writes (Mongos)', function() {
       test.servers[0].setMessageHandler(messageHandler('MONGOS1'));
       test.servers[1].setMessageHandler(messageHandler('MONGOS2'));
 
-      topology.once('fullsetup', function() {
-        topology.insert('test.test', [{ a: 1 }], { retryWrites: true, session: session }, function(
+      topology.once('fullsetup', function () {
+        topology.insert('test.test', [{ a: 1 }], { retryWrites: true, session: session }, function (
           err
         ) {
           expect(err).to.not.exist;
@@ -68,7 +68,7 @@ describe('Retryable Writes (Mongos)', function() {
 
   it('should retry write commands where `retryWrites` is true, and not increment `txnNumber`', {
     metadata: { requires: { topology: ['single'] } },
-    test: function(done) {
+    test: function (done) {
       const mongos = new Mongos(
         test.servers.map(server => server.address()),
         {
@@ -106,8 +106,8 @@ describe('Retryable Writes (Mongos)', function() {
 
       test.servers[0].setMessageHandler(messageHandler('MONGOS1'));
       test.servers[1].setMessageHandler(messageHandler('MONGOS2'));
-      mongos.once('fullsetup', function() {
-        mongos.insert('test.test', [{ a: 1 }], { retryWrites: true, session: session }, function(
+      mongos.once('fullsetup', function () {
+        mongos.insert('test.test', [{ a: 1 }], { retryWrites: true, session: session }, function (
           err
         ) {
           if (err) console.dir(err);
@@ -125,7 +125,7 @@ describe('Retryable Writes (Mongos)', function() {
 
   it('should retry write commands where `retryWrites` is true, and there is a "not master" error', {
     metadata: { requires: { topology: ['single'] } },
-    test: function(done) {
+    test: function (done) {
       const mongos = new Mongos(
         test.servers.map(server => server.address()),
         {
@@ -163,8 +163,8 @@ describe('Retryable Writes (Mongos)', function() {
 
       test.servers[0].setMessageHandler(messageHandler('MONGOS1'));
       test.servers[1].setMessageHandler(messageHandler('MONGOS2'));
-      mongos.once('fullsetup', function() {
-        mongos.insert('test.test', [{ a: 1 }], { retryWrites: true, session: session }, function(
+      mongos.once('fullsetup', function () {
+        mongos.insert('test.test', [{ a: 1 }], { retryWrites: true, session: session }, function (
           err
         ) {
           expect(err).to.not.exist;

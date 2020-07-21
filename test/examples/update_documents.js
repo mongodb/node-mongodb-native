@@ -3,15 +3,15 @@
 const setupDatabase = require('../functional/shared').setupDatabase;
 const expect = require('chai').expect;
 
-describe('examples(update-documents):', function() {
+describe('examples(update-documents):', function () {
   let client;
   let db;
 
-  before(async function() {
+  before(async function () {
     await setupDatabase(this.configuration);
   });
 
-  beforeEach(async function() {
+  beforeEach(async function () {
     client = await this.configuration.newClient().connect();
     db = client.db(this.configuration.db);
 
@@ -82,7 +82,7 @@ describe('examples(update-documents):', function() {
     // End Example 51
   });
 
-  afterEach(async function() {
+  afterEach(async function () {
     await client.close();
     client = undefined;
     db = undefined;
@@ -90,7 +90,7 @@ describe('examples(update-documents):', function() {
 
   it('Update a Single Document', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function() {
+    test: async function () {
       // Start Example 52
       await db.collection('inventory').updateOne(
         { item: 'paper' },
@@ -105,13 +105,9 @@ describe('examples(update-documents):', function() {
       });
 
       const docs = await cursor.toArray();
-      docs.forEach(function(doc) {
-        expect(doc)
-          .to.have.nested.property('size.uom')
-          .that.equals('cm');
-        expect(doc)
-          .to.have.property('status')
-          .that.equals('P');
+      docs.forEach(function (doc) {
+        expect(doc).to.have.nested.property('size.uom').that.equals('cm');
+        expect(doc).to.have.property('status').that.equals('P');
         expect(doc).to.have.property('lastModified');
       });
     }
@@ -119,7 +115,7 @@ describe('examples(update-documents):', function() {
 
   it('Update Multiple Documents', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function() {
+    test: async function () {
       // Start Example 53
       await db.collection('inventory').updateMany(
         { qty: { $lt: 50 } },
@@ -135,13 +131,9 @@ describe('examples(update-documents):', function() {
       });
 
       const docs = await cursor.toArray();
-      docs.forEach(function(doc) {
-        expect(doc)
-          .to.have.nested.property('size.uom')
-          .that.equals('in');
-        expect(doc)
-          .to.have.property('status')
-          .that.equals('P');
+      docs.forEach(function (doc) {
+        expect(doc).to.have.nested.property('size.uom').that.equals('in');
+        expect(doc).to.have.property('status').that.equals('P');
         expect(doc).to.have.property('lastModified');
       });
     }
@@ -149,7 +141,7 @@ describe('examples(update-documents):', function() {
 
   it('Replace a Document', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function() {
+    test: async function () {
       // Start Example 54
       await db.collection('inventory').replaceOne(
         { item: 'paper' },
@@ -163,18 +155,13 @@ describe('examples(update-documents):', function() {
       );
       // End Example 54
 
-      const cursor = db
-        .collection('inventory')
-        .find({ item: 'paper' })
-        .project({ _id: 0 });
+      const cursor = db.collection('inventory').find({ item: 'paper' }).project({ _id: 0 });
 
       const docs = await cursor.toArray();
-      docs.forEach(function(doc) {
+      docs.forEach(function (doc) {
         expect(Object.keys(doc)).to.have.a.lengthOf(2);
         expect(doc).to.have.property('item');
-        expect(doc)
-          .to.have.property('instock')
-          .that.has.a.lengthOf(2);
+        expect(doc).to.have.property('instock').that.has.a.lengthOf(2);
       });
     }
   });

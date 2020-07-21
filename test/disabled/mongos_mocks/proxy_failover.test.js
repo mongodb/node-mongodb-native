@@ -6,7 +6,7 @@ const mock = require('mongodb-mock-server');
 const core = require('../../../../src/core');
 const Mongos = core.Mongos;
 
-describe('Mongos Proxy Failover (mocks)', function() {
+describe('Mongos Proxy Failover (mocks)', function () {
   afterEach(() => mock.cleanup());
 
   it('Should correctly failover due to proxy going away causing timeout', {
@@ -17,7 +17,7 @@ describe('Mongos Proxy Failover (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       // Default message fields
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         msg: 'isdbgrid'
@@ -26,7 +26,7 @@ describe('Mongos Proxy Failover (mocks)', function() {
       // Primary server states
       var serverIsMaster = [Object.assign({}, defaultFields)];
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const mongos1 = yield mock.createServer();
         const mongos2 = yield mock.createServer();
 
@@ -58,9 +58,9 @@ describe('Mongos Proxy Failover (mocks)', function() {
         });
 
         // Add event listeners
-        server.once('fullsetup', function() {
-          var intervalId = setInterval(function() {
-            server.insert('test.test', [{ created: new Date() }], function(err, r) {
+        server.once('fullsetup', function () {
+          var intervalId = setInterval(function () {
+            server.insert('test.test', [{ created: new Date() }], function (err, r) {
               // If we have a successful insert
               // validate that it's the expected proxy
               if (r) {
@@ -88,7 +88,7 @@ describe('Mongos Proxy Failover (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       // Current index for the ismaster
       var currentStep = 0;
 
@@ -100,7 +100,7 @@ describe('Mongos Proxy Failover (mocks)', function() {
       // Primary server states
       var serverIsMaster = [Object.assign({}, defaultFields)];
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const mongos1 = yield mock.createServer();
         const mongos2 = yield mock.createServer();
 
@@ -133,9 +133,9 @@ describe('Mongos Proxy Failover (mocks)', function() {
         });
 
         // Add event listeners
-        server.once('fullsetup', function() {
-          var intervalId = setInterval(function() {
-            server.insert('test.test', [{ created: new Date() }], function(err, r) {
+        server.once('fullsetup', function () {
+          var intervalId = setInterval(function () {
+            server.insert('test.test', [{ created: new Date() }], function (err, r) {
               // If we have a successful insert
               // validate that it's the expected proxy
               if (r) {
@@ -146,11 +146,11 @@ describe('Mongos Proxy Failover (mocks)', function() {
                 var proxies = {};
 
                 // Perform interval inserts waiting for both proxies to come back
-                var intervalId2 = setInterval(function() {
+                var intervalId2 = setInterval(function () {
                   // Bring back the missing proxy
                   if (currentStep === 0) currentStep = currentStep + 1;
                   // Perform inserts
-                  server.insert('test.test', [{ created: new Date() }], function(_err, _r) {
+                  server.insert('test.test', [{ created: new Date() }], function (_err, _r) {
                     if (_r) {
                       proxies[_r.connection.port] = true;
                     }
@@ -183,7 +183,7 @@ describe('Mongos Proxy Failover (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       // Current index for the ismaster
       var currentStep = 0;
 
@@ -195,7 +195,7 @@ describe('Mongos Proxy Failover (mocks)', function() {
       // Primary server states
       var serverIsMaster = [Object.assign({}, defaultFields)];
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const mongos1 = yield mock.createServer();
         const mongos2 = yield mock.createServer();
 
@@ -230,9 +230,9 @@ describe('Mongos Proxy Failover (mocks)', function() {
         });
 
         // Add event listeners
-        server.once('fullsetup', function() {
-          var intervalId = setInterval(function() {
-            server.insert('test.test', [{ created: new Date() }], function() {
+        server.once('fullsetup', function () {
+          var intervalId = setInterval(function () {
+            server.insert('test.test', [{ created: new Date() }], function () {
               if (intervalId === null) return;
               // Clear out the interval
               clearInterval(intervalId);
@@ -244,9 +244,9 @@ describe('Mongos Proxy Failover (mocks)', function() {
               var proxies = {};
 
               // Perform interval inserts waiting for both proxies to come back
-              var intervalId2 = setInterval(function() {
+              var intervalId2 = setInterval(function () {
                 // Perform inserts
-                server.insert('test.test', [{ created: new Date() }], function(_err, _r) {
+                server.insert('test.test', [{ created: new Date() }], function (_err, _r) {
                   if (intervalId2 === null) return;
                   if (_r) {
                     proxies[_r.connection.port] = true;

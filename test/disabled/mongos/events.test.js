@@ -7,7 +7,7 @@ const MongosFixture = require('../common').MongosFixture;
 
 const test = new MongosFixture();
 
-describe('EventEmitters (Mongos)', function() {
+describe('EventEmitters (Mongos)', function () {
   afterEach(() => mock.cleanup());
   beforeEach(() => {
     return mock.createServer().then(mockServer => {
@@ -17,7 +17,7 @@ describe('EventEmitters (Mongos)', function() {
 
   it('should remove `serverDescriptionChanged` listeners when server is closed', {
     metadata: { requires: { topology: ['single'] } },
-    test: function(done) {
+    test: function (done) {
       test.server.setMessageHandler(req => {
         const doc = req.document;
         if (doc.ismaster) {

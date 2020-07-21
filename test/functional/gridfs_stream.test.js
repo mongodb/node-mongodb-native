@@ -10,8 +10,8 @@ const { setupDatabase, withClient } = require('./shared');
 const { expect } = require('chai');
 const { GridFSBucket, ObjectId } = require('../../src');
 
-describe('GridFS Stream', function() {
-  before(function() {
+describe('GridFS Stream', function () {
+  before(function () {
     return setupDatabase(this.configuration);
   });
 
@@ -24,7 +24,7 @@ describe('GridFS Stream', function() {
   it('shouldUploadFromFileStream', {
     metadata: { requires: { topology: ['single'] } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
 
@@ -37,9 +37,9 @@ describe('GridFS Stream', function() {
       // REMOVE-LINE done();
       // REMOVE-LINE var db = client.db(configuration.db);
       // BEGIN
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        db.dropDatabase(function(error) {
+        db.dropDatabase(function (error) {
           test.equal(error, null);
 
           var bucket = new GridFSBucket(db);
@@ -51,19 +51,19 @@ describe('GridFS Stream', function() {
           var id = uploadStream.id;
 
           // Wait for stream to finish
-          uploadStream.once('finish', function() {
+          uploadStream.once('finish', function () {
             var chunksColl = db.collection('fs.chunks');
             var chunksQuery = chunksColl.find({ files_id: id });
 
             // Get all the chunks
-            chunksQuery.toArray(function(error, docs) {
+            chunksQuery.toArray(function (error, docs) {
               test.equal(error, null);
               test.equal(docs.length, 1);
               test.equal(docs[0].data.toString('hex'), license.toString('hex'));
 
               var filesColl = db.collection('fs.files');
               var filesQuery = filesColl.find({ _id: id });
-              filesQuery.toArray(function(error, docs) {
+              filesQuery.toArray(function (error, docs) {
                 test.equal(error, null);
                 test.equal(docs.length, 1);
 
@@ -72,12 +72,12 @@ describe('GridFS Stream', function() {
                 test.equal(docs[0].md5, hash.digest('hex'));
 
                 // make sure we created indexes
-                filesColl.listIndexes().toArray(function(error, indexes) {
+                filesColl.listIndexes().toArray(function (error, indexes) {
                   test.equal(error, null);
                   test.equal(indexes.length, 2);
                   test.equal(indexes[1].name, 'filename_1_uploadDate_1');
 
-                  chunksColl.listIndexes().toArray(function(error, indexes) {
+                  chunksColl.listIndexes().toArray(function (error, indexes) {
                     test.equal(error, null);
                     test.equal(indexes.length, 2);
                     test.equal(indexes[1].name, 'files_id_1_n_1');
@@ -104,7 +104,7 @@ describe('GridFS Stream', function() {
   it('shouldUploadFromFileStreamWithCustomId', {
     metadata: { requires: { topology: ['single'] } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
@@ -116,9 +116,9 @@ describe('GridFS Stream', function() {
       // REMOVE-LINE done();
       // REMOVE-LINE var db = client.db(configuration.db);
       // BEGIN
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        db.dropDatabase(function(error) {
+        db.dropDatabase(function (error) {
           test.equal(error, null);
 
           var bucket = new GridFSBucket(db);
@@ -131,12 +131,12 @@ describe('GridFS Stream', function() {
           test.equal(1, id);
 
           // Wait for stream to finish
-          uploadStream.once('finish', function() {
+          uploadStream.once('finish', function () {
             var chunksColl = db.collection('fs.chunks');
             var chunksQuery = chunksColl.find({ files_id: id });
 
             // Get all the chunks
-            chunksQuery.toArray(function(error, docs) {
+            chunksQuery.toArray(function (error, docs) {
               test.equal(error, null);
               test.equal(docs.length, 1);
               test.equal(docs[0].data.toString('hex'), license.toString('hex'));
@@ -144,7 +144,7 @@ describe('GridFS Stream', function() {
               var filesColl = db.collection('fs.files');
               var filesQuery = filesColl.find({ _id: id });
 
-              filesQuery.toArray(function(error, docs) {
+              filesQuery.toArray(function (error, docs) {
                 test.equal(error, null);
                 test.equal(docs.length, 1);
 
@@ -153,12 +153,12 @@ describe('GridFS Stream', function() {
                 test.equal(docs[0].md5, hash.digest('hex'));
 
                 // make sure we created indexes
-                filesColl.listIndexes().toArray(function(error, indexes) {
+                filesColl.listIndexes().toArray(function (error, indexes) {
                   test.equal(error, null);
                   test.equal(indexes.length, 2);
                   test.equal(indexes[1].name, 'filename_1_uploadDate_1');
 
-                  chunksColl.listIndexes().toArray(function(error, indexes) {
+                  chunksColl.listIndexes().toArray(function (error, indexes) {
                     test.equal(error, null);
                     test.equal(indexes.length, 2);
                     test.equal(indexes[1].name, 'files_id_1_n_1');
@@ -185,7 +185,7 @@ describe('GridFS Stream', function() {
   it('shouldDownloadToUploadStream', {
     metadata: { requires: { topology: ['single'] } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
@@ -197,7 +197,7 @@ describe('GridFS Stream', function() {
       // REMOVE-LINE done();
       // REMOVE-LINE var db = client.db(configuration.db);
       // BEGIN
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload' });
         var CHUNKS_COLL = 'gridfsdownload.chunks';
@@ -209,20 +209,20 @@ describe('GridFS Stream', function() {
         var license = fs.readFileSync('./LICENSE.md');
         var id = uploadStream.id;
 
-        uploadStream.once('finish', function() {
+        uploadStream.once('finish', function () {
           var downloadStream = bucket.openDownloadStream(id);
           uploadStream = bucket.openUploadStream('test2.dat');
           id = uploadStream.id;
 
-          downloadStream.pipe(uploadStream).once('finish', function() {
+          downloadStream.pipe(uploadStream).once('finish', function () {
             var chunksQuery = db.collection(CHUNKS_COLL).find({ files_id: id });
-            chunksQuery.toArray(function(error, docs) {
+            chunksQuery.toArray(function (error, docs) {
               test.equal(error, null);
               test.equal(docs.length, 1);
               test.equal(docs[0].data.toString('hex'), license.toString('hex'));
 
               var filesQuery = db.collection(FILES_COLL).find({ _id: id });
-              filesQuery.toArray(function(error, docs) {
+              filesQuery.toArray(function (error, docs) {
                 test.equal(error, null);
                 test.equal(docs.length, 1);
 
@@ -247,7 +247,7 @@ describe('GridFS Stream', function() {
   it('should fail to locate gridfs stream', {
     metadata: { requires: { topology: ['single'] } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
@@ -259,15 +259,15 @@ describe('GridFS Stream', function() {
       // REMOVE-LINE done();
       // REMOVE-LINE var db = client.db(configuration.db);
       // BEGIN
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload' });
 
         // Get an unknown file
         var downloadStream = bucket.openDownloadStream(new ObjectId());
-        downloadStream.on('data', function() {});
+        downloadStream.on('data', function () {});
 
-        downloadStream.on('error', function(err) {
+        downloadStream.on('error', function (err) {
           test.equal('ENOENT', err.code);
           client.close(done);
         });
@@ -284,7 +284,7 @@ describe('GridFS Stream', function() {
   it('openDownloadStreamByName', {
     metadata: { requires: { topology: ['single'] } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
@@ -296,23 +296,23 @@ describe('GridFS Stream', function() {
       // REMOVE-LINE done();
       // REMOVE-LINE var db = client.db(configuration.db);
       // BEGIN
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload' });
         var readStream = fs.createReadStream('./LICENSE.md');
         var uploadStream = bucket.openUploadStream('test.dat');
 
-        uploadStream.once('finish', function() {
+        uploadStream.once('finish', function () {
           var downloadStream = bucket.openDownloadStreamByName('test.dat');
 
           var gotData = false;
-          downloadStream.on('data', function(data) {
+          downloadStream.on('data', function (data) {
             test.ok(!gotData);
             gotData = true;
             test.ok(data.toString('utf8').indexOf('TERMS AND CONDITIONS') !== -1);
           });
 
-          downloadStream.on('end', function() {
+          downloadStream.on('end', function () {
             test.ok(gotData);
             client.close(done);
           });
@@ -333,7 +333,7 @@ describe('GridFS Stream', function() {
   it('start/end options for openDownloadStream', {
     metadata: { requires: { topology: ['single'] } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
@@ -345,7 +345,7 @@ describe('GridFS Stream', function() {
       // REMOVE-LINE done();
       // REMOVE-LINE var db = client.db(configuration.db);
       // BEGIN
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var bucket = new GridFSBucket(db, {
           bucketName: 'gridfsdownload',
@@ -355,23 +355,23 @@ describe('GridFS Stream', function() {
         var readStream = fs.createReadStream('./LICENSE.md');
         var uploadStream = bucket.openUploadStream('teststart.dat');
 
-        uploadStream.once('finish', function() {
+        uploadStream.once('finish', function () {
           var downloadStream = bucket
             .openDownloadStreamByName('teststart.dat', { start: 1 })
             .end(6);
 
-          downloadStream.on('error', function(error) {
+          downloadStream.on('error', function (error) {
             test.equal(error, null);
           });
 
           var gotData = 0;
           var str = '';
-          downloadStream.on('data', function(data) {
+          downloadStream.on('data', function (data) {
             ++gotData;
             str += data.toString('utf8');
           });
 
-          downloadStream.on('end', function() {
+          downloadStream.on('end', function () {
             // Depending on different versions of node, we may get
             // different amounts of 'data' events. node 0.10 gives 2,
             // node >= 0.12 gives 3. Either is correct, but we just
@@ -391,7 +391,7 @@ describe('GridFS Stream', function() {
   it('should emit close after all chunks are received', {
     metadata: { requires: { topology: ['single'] } },
 
-    test: function(done) {
+    test: function (done) {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect((err, client) => {
@@ -404,7 +404,7 @@ describe('GridFS Stream', function() {
 
         const readStream = fs.createReadStream('./LICENSE.md');
         const uploadStream = bucket.openUploadStream('teststart.dat');
-        uploadStream.once('finish', function() {
+        uploadStream.once('finish', function () {
           const downloadStream = bucket.openDownloadStreamByName('teststart.dat');
 
           const events = [];
@@ -430,7 +430,7 @@ describe('GridFS Stream', function() {
   it('Deleting a file', {
     metadata: { requires: { topology: ['single'] } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
@@ -442,7 +442,7 @@ describe('GridFS Stream', function() {
       // REMOVE-LINE done();
       // REMOVE-LINE var db = client.db(configuration.db);
       // BEGIN
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload' });
         var CHUNKS_COLL = 'gridfsdownload.chunks';
@@ -452,16 +452,16 @@ describe('GridFS Stream', function() {
         var uploadStream = bucket.openUploadStream('test.dat');
         var id = uploadStream.id;
 
-        uploadStream.once('finish', function() {
-          bucket.delete(id, function(err) {
+        uploadStream.once('finish', function () {
+          bucket.delete(id, function (err) {
             expect(err).to.not.exist;
             var chunksQuery = db.collection(CHUNKS_COLL).find({ files_id: id });
-            chunksQuery.toArray(function(error, docs) {
+            chunksQuery.toArray(function (error, docs) {
               test.equal(error, null);
               test.equal(docs.length, 0);
 
               var filesQuery = db.collection(FILES_COLL).find({ _id: id });
-              filesQuery.toArray(function(error, docs) {
+              filesQuery.toArray(function (error, docs) {
                 test.equal(error, null);
                 test.equal(docs.length, 0);
 
@@ -486,7 +486,7 @@ describe('GridFS Stream', function() {
   it('Aborting an upload', {
     metadata: { requires: { topology: ['single'], node: '>12.0.0' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
@@ -498,7 +498,7 @@ describe('GridFS Stream', function() {
       // REMOVE-LINE done();
       // REMOVE-LINE var db = client.db(configuration.db);
       // BEGIN
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var bucket = new GridFSBucket(db, { bucketName: 'gridfsabort', chunkSizeBytes: 1 });
         var CHUNKS_COLL = 'gridfsabort.chunks';
@@ -506,23 +506,23 @@ describe('GridFS Stream', function() {
 
         var id = uploadStream.id;
         var query = { files_id: id };
-        uploadStream.write('a', 'utf8', function(error) {
+        uploadStream.write('a', 'utf8', function (error) {
           expect(error).to.not.exist;
 
-          db.collection(CHUNKS_COLL).count(query, function(error, c) {
+          db.collection(CHUNKS_COLL).count(query, function (error, c) {
             test.equal(error, null);
             test.equal(c, 1);
-            uploadStream.abort(function(error) {
+            uploadStream.abort(function (error) {
               test.equal(error, null);
-              db.collection(CHUNKS_COLL).count(query, function(error, c) {
+              db.collection(CHUNKS_COLL).count(query, function (error, c) {
                 test.equal(error, null);
                 test.equal(c, 0);
-                uploadStream.write('b', 'utf8', function(error) {
+                uploadStream.write('b', 'utf8', function (error) {
                   test.equal(error.toString(), 'Error: this stream has been aborted');
-                  uploadStream.end('c', 'utf8', function(error) {
+                  uploadStream.end('c', 'utf8', function (error) {
                     test.equal(error.toString(), 'Error: this stream has been aborted');
                     // Fail if user tries to abort an aborted stream
-                    uploadStream.abort().then(null, function(error) {
+                    uploadStream.abort().then(null, function (error) {
                       test.equal(error.toString(), 'Error: Cannot call abort() on a stream twice');
                       client.close(done);
                     });
@@ -543,7 +543,7 @@ describe('GridFS Stream', function() {
   it('Destroy an upload', {
     metadata: { requires: { topology: ['single'], node: '>12.0.0' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
@@ -555,7 +555,7 @@ describe('GridFS Stream', function() {
       // REMOVE-LINE done();
       // REMOVE-LINE var db = client.db(configuration.db);
       // BEGIN
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var bucket = new GridFSBucket(db, { bucketName: 'gridfsabort', chunkSizeBytes: 1 });
         var CHUNKS_COLL = 'gridfsabort.chunks';
@@ -563,23 +563,23 @@ describe('GridFS Stream', function() {
 
         var id = uploadStream.id;
         var query = { files_id: id };
-        uploadStream.write('a', 'utf8', function(error) {
+        uploadStream.write('a', 'utf8', function (error) {
           expect(error).to.not.exist;
 
-          db.collection(CHUNKS_COLL).count(query, function(error, c) {
+          db.collection(CHUNKS_COLL).count(query, function (error, c) {
             test.equal(error, null);
             test.equal(c, 1);
-            uploadStream.abort(function(error) {
+            uploadStream.abort(function (error) {
               test.equal(error, null);
-              db.collection(CHUNKS_COLL).count(query, function(error, c) {
+              db.collection(CHUNKS_COLL).count(query, function (error, c) {
                 test.equal(error, null);
                 test.equal(c, 0);
-                uploadStream.write('b', 'utf8', function(error) {
+                uploadStream.write('b', 'utf8', function (error) {
                   test.equal(error.toString(), 'Error: this stream has been aborted');
-                  uploadStream.end('c', 'utf8', function(error) {
+                  uploadStream.end('c', 'utf8', function (error) {
                     test.equal(error.toString(), 'Error: this stream has been aborted');
                     // Fail if user tries to abort an aborted stream
-                    uploadStream.abort().then(null, function(error) {
+                    uploadStream.abort().then(null, function (error) {
                       test.equal(error.toString(), 'Error: Cannot call abort() on a stream twice');
                       client.close(done);
                     });
@@ -603,7 +603,7 @@ describe('GridFS Stream', function() {
   it('Destroying a download stream', {
     metadata: { requires: { topology: ['single'] } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
@@ -615,26 +615,26 @@ describe('GridFS Stream', function() {
       // REMOVE-LINE done();
       // REMOVE-LINE var db = client.db(configuration.db);
       // BEGIN
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var bucket = new GridFSBucket(db, { bucketName: 'gridfsdestroy', chunkSizeBytes: 10 });
         var readStream = fs.createReadStream('./LICENSE.md');
         var uploadStream = bucket.openUploadStream('test.dat');
 
         // Wait for stream to finish
-        uploadStream.once('finish', function() {
+        uploadStream.once('finish', function () {
           var id = uploadStream.id;
           var downloadStream = bucket.openDownloadStream(id);
           var finished = {};
-          downloadStream.on('data', function() {
+          downloadStream.on('data', function () {
             test.ok(false);
           });
 
-          downloadStream.on('error', function() {
+          downloadStream.on('error', function () {
             test.ok(false);
           });
 
-          downloadStream.on('end', function() {
+          downloadStream.on('end', function () {
             test.equal(downloadStream.s.cursor, null);
             if (finished.close) {
               client.close(done);
@@ -643,7 +643,7 @@ describe('GridFS Stream', function() {
             finished.end = true;
           });
 
-          downloadStream.on('close', function() {
+          downloadStream.on('close', function () {
             if (finished.end) {
               client.close(done);
               return;
@@ -651,7 +651,7 @@ describe('GridFS Stream', function() {
             finished.close = true;
           });
 
-          downloadStream.abort(function(error) {
+          downloadStream.abort(function (error) {
             test.equal(error, undefined);
           });
         });
@@ -671,7 +671,7 @@ describe('GridFS Stream', function() {
   it('Deleting a file using promises', {
     metadata: { requires: { topology: ['single'], node: '>12.0.0' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
@@ -683,7 +683,7 @@ describe('GridFS Stream', function() {
       // REMOVE-LINE done();
       // REMOVE-LINE var db = client.db(configuration.db);
       // BEGIN
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload' });
         var CHUNKS_COLL = 'gridfsdownload.chunks';
@@ -693,15 +693,15 @@ describe('GridFS Stream', function() {
         var uploadStream = bucket.openUploadStream('test.dat');
         var id = uploadStream.id;
 
-        uploadStream.once('finish', function() {
-          bucket.delete(id).then(function() {
+        uploadStream.once('finish', function () {
+          bucket.delete(id).then(function () {
             var chunksQuery = db.collection(CHUNKS_COLL).find({ files_id: id });
-            chunksQuery.toArray(function(error, docs) {
+            chunksQuery.toArray(function (error, docs) {
               test.equal(error, null);
               test.equal(docs.length, 0);
 
               var filesQuery = db.collection(FILES_COLL).find({ _id: id });
-              filesQuery.toArray(function(error, docs) {
+              filesQuery.toArray(function (error, docs) {
                 test.equal(error, null);
                 test.equal(docs.length, 0);
 
@@ -720,7 +720,7 @@ describe('GridFS Stream', function() {
   it('find()', {
     metadata: { requires: { topology: ['single'] } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
@@ -732,7 +732,7 @@ describe('GridFS Stream', function() {
       // REMOVE-LINE done();
       // REMOVE-LINE var db = client.db(configuration.db);
       // BEGIN
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var bucket = new GridFSBucket(db, { bucketName: 'fs' });
 
@@ -761,7 +761,7 @@ describe('GridFS Stream', function() {
   it('drop example', {
     metadata: { requires: { topology: ['single'] } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
@@ -773,7 +773,7 @@ describe('GridFS Stream', function() {
       // REMOVE-LINE done();
       // REMOVE-LINE var db = client.db(configuration.db);
       // BEGIN
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload' });
         var CHUNKS_COLL = 'gridfsdownload.chunks';
@@ -783,17 +783,17 @@ describe('GridFS Stream', function() {
         var uploadStream = bucket.openUploadStream('test.dat');
         var id = uploadStream.id;
 
-        uploadStream.once('finish', function() {
-          bucket.drop(function(err) {
+        uploadStream.once('finish', function () {
+          bucket.drop(function (err) {
             expect(err).to.not.exist;
 
             var chunksQuery = db.collection(CHUNKS_COLL).find({ files_id: id });
-            chunksQuery.toArray(function(error, docs) {
+            chunksQuery.toArray(function (error, docs) {
               test.equal(error, null);
               test.equal(docs.length, 0);
 
               var filesQuery = db.collection(FILES_COLL).find({ _id: id });
-              filesQuery.toArray(function(error, docs) {
+              filesQuery.toArray(function (error, docs) {
                 test.equal(error, null);
                 test.equal(docs.length, 0);
 
@@ -818,7 +818,7 @@ describe('GridFS Stream', function() {
   it('drop using promises', {
     metadata: { requires: { topology: ['single'], node: '>12.0.0' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
@@ -830,7 +830,7 @@ describe('GridFS Stream', function() {
       // REMOVE-LINE done();
       // REMOVE-LINE var db = client.db(configuration.db);
       // BEGIN
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload' });
         var CHUNKS_COLL = 'gridfsdownload.chunks';
@@ -840,15 +840,15 @@ describe('GridFS Stream', function() {
         var uploadStream = bucket.openUploadStream('test.dat');
         var id = uploadStream.id;
 
-        uploadStream.once('finish', function() {
-          bucket.drop().then(function() {
+        uploadStream.once('finish', function () {
+          bucket.drop().then(function () {
             var chunksQuery = db.collection(CHUNKS_COLL).find({ files_id: id });
-            chunksQuery.toArray(function(error, docs) {
+            chunksQuery.toArray(function (error, docs) {
               test.equal(error, null);
               test.equal(docs.length, 0);
 
               var filesQuery = db.collection(FILES_COLL).find({ _id: id });
-              filesQuery.toArray(function(error, docs) {
+              filesQuery.toArray(function (error, docs) {
                 test.equal(error, null);
                 test.equal(docs.length, 0);
 
@@ -873,7 +873,7 @@ describe('GridFS Stream', function() {
   it('find example', {
     metadata: { requires: { topology: ['single'] } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
@@ -885,15 +885,15 @@ describe('GridFS Stream', function() {
       // REMOVE-LINE done();
       // REMOVE-LINE var db = client.db(configuration.db);
       // BEGIN
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload_2' });
         var readStream = fs.createReadStream('./LICENSE.md');
 
         var uploadStream = bucket.openUploadStream('test.dat');
 
-        uploadStream.once('finish', function() {
-          bucket.find({}, { batchSize: 1 }).toArray(function(err, files) {
+        uploadStream.once('finish', function () {
+          bucket.find({}, { batchSize: 1 }).toArray(function (err, files) {
             test.equal(null, err);
             test.equal(1, files.length);
             client.close(done);
@@ -915,7 +915,7 @@ describe('GridFS Stream', function() {
   it('rename example', {
     metadata: { requires: { topology: ['single'] } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
@@ -927,7 +927,7 @@ describe('GridFS Stream', function() {
       // REMOVE-LINE done();
       // REMOVE-LINE var db = client.db(configuration.db);
       // BEGIN
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload_3' });
         var readStream = fs.createReadStream('./LICENSE.md');
@@ -935,9 +935,9 @@ describe('GridFS Stream', function() {
         var uploadStream = bucket.openUploadStream('test.dat');
         var id = uploadStream.id;
 
-        uploadStream.once('finish', function() {
+        uploadStream.once('finish', function () {
           // Rename the file
-          bucket.rename(id, 'renamed_it.dat', function(err) {
+          bucket.rename(id, 'renamed_it.dat', function (err) {
             expect(err).to.not.exist;
             client.close(done);
           });
@@ -952,28 +952,28 @@ describe('GridFS Stream', function() {
   it('download empty doc', {
     metadata: { requires: { topology: ['single'] } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var bucket = new GridFSBucket(db, { bucketName: 'fs' });
 
-        db.collection('fs.files').insert({ length: 0 }, function(error, result) {
+        db.collection('fs.files').insert({ length: 0 }, function (error, result) {
           test.equal(error, null);
           test.equal(Object.keys(result.insertedIds).length, 1);
           var id = result.insertedIds[0];
 
           var stream = bucket.openDownloadStream(id);
-          stream.on('error', function(error) {
+          stream.on('error', function (error) {
             test.equal(error, null);
           });
 
-          stream.on('data', function() {
+          stream.on('data', function () {
             test.ok(false);
           });
 
-          stream.on('end', function() {
+          stream.on('end', function () {
             // As per spec, make sure we didn't actually fire a query
             // because the document length is 0
             test.equal(stream.s.cursor, null);
@@ -987,14 +987,14 @@ describe('GridFS Stream', function() {
   it('should use chunkSize for download', {
     metadata: { requires: { topology: ['single'] } },
 
-    test: function(done) {
+    test: function (done) {
       if (typeof stream.pipeline !== 'function') {
         this.skip();
       }
 
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         const db = client.db(configuration.db);
         const bucket = new GridFSBucket(db, { bucketName: 'gridfs' });
 
@@ -1023,17 +1023,17 @@ describe('GridFS Stream', function() {
   });
 
   var UPLOAD_SPEC = require('../spec/gridfs/gridfs-upload.json');
-  UPLOAD_SPEC.tests.forEach(function(specTest) {
-    (function(testSpec) {
+  UPLOAD_SPEC.tests.forEach(function (specTest) {
+    (function (testSpec) {
       it(testSpec.description, {
         metadata: { requires: { topology: ['single'] } },
 
-        test: function(done) {
+        test: function (done) {
           var configuration = this.configuration;
           var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-          client.connect(function(err, client) {
+          client.connect(function (err, client) {
             var db = client.db(configuration.db);
-            db.dropDatabase(function(error) {
+            db.dropDatabase(function (error) {
               test.equal(error, null);
 
               var bucket = new GridFSBucket(db, { bucketName: 'expected' });
@@ -1043,18 +1043,18 @@ describe('GridFS Stream', function() {
               );
               var buf = Buffer.from(testSpec.act.arguments.source.$hex, 'hex');
 
-              res.on('error', function(err) {
+              res.on('error', function (err) {
                 test.equal(null, err);
               });
 
-              res.on('finish', function() {
+              res.on('finish', function () {
                 var data = testSpec.assert.data;
                 var num = data.length;
-                data.forEach(function(data) {
+                data.forEach(function (data) {
                   var collection = data.insert;
                   db.collection(collection)
                     .find({})
-                    .toArray(function(error, docs) {
+                    .toArray(function (error, docs) {
                       test.equal(data.documents.length, docs.length);
 
                       for (var i = 0; i < docs.length; ++i) {
@@ -1078,21 +1078,21 @@ describe('GridFS Stream', function() {
   });
 
   var DOWNLOAD_SPEC = require('../spec/gridfs/gridfs-download.json');
-  DOWNLOAD_SPEC.tests.forEach(function(specTest) {
-    (function(testSpec) {
+  DOWNLOAD_SPEC.tests.forEach(function (specTest) {
+    (function (testSpec) {
       it(testSpec.description, {
         metadata: { requires: { topology: ['single'] } },
 
-        test: function(done) {
+        test: function (done) {
           var configuration = this.configuration;
           var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-          client.connect(function(err, client) {
+          client.connect(function (err, client) {
             var db = client.db(configuration.db);
-            db.dropDatabase(function(err) {
+            db.dropDatabase(function (err) {
               test.equal(err, null);
               var BUCKET_NAME = 'fs';
 
-              var _runTest = function() {
+              var _runTest = function () {
                 var bucket = new GridFSBucket(db, { bucketName: BUCKET_NAME });
                 var res = Buffer.alloc(0);
 
@@ -1100,12 +1100,12 @@ describe('GridFS Stream', function() {
                   EJSON.parse(JSON.stringify(testSpec.act.arguments.id), { relaxed: true })
                 );
 
-                download.on('data', function(chunk) {
+                download.on('data', function (chunk) {
                   res = Buffer.concat([res, chunk]);
                 });
 
                 let errorReported = false;
-                download.on('error', function(error) {
+                download.on('error', function (error) {
                   errorReported = true;
                   if (!testSpec.assert.error) {
                     test.ok(false);
@@ -1125,7 +1125,7 @@ describe('GridFS Stream', function() {
                   client.close(done);
                 });
 
-                download.on('end', function() {
+                download.on('end', function () {
                   var result = testSpec.assert.result;
                   if (!result) {
                     if (errorReported) {
@@ -1153,19 +1153,19 @@ describe('GridFS Stream', function() {
 
               var keys = Object.keys(DOWNLOAD_SPEC.data);
               var numCollections = Object.keys(DOWNLOAD_SPEC.data).length;
-              keys.forEach(function(collection) {
-                var data = DOWNLOAD_SPEC.data[collection].map(function(v) {
+              keys.forEach(function (collection) {
+                var data = DOWNLOAD_SPEC.data[collection].map(function (v) {
                   return deflateTestDoc(v);
                 });
 
-                db.collection(BUCKET_NAME + '.' + collection).insertMany(data, function(error) {
+                db.collection(BUCKET_NAME + '.' + collection).insertMany(data, function (error) {
                   test.equal(error, null);
 
                   if (--numCollections === 0) {
                     if (testSpec.arrange) {
                       // only support 1 arrange op for now
                       test.equal(testSpec.arrange.data.length, 1);
-                      applyArrange(db, deflateTestDoc(testSpec.arrange.data[0]), function(error) {
+                      applyArrange(db, deflateTestDoc(testSpec.arrange.data[0]), function (error) {
                         test.equal(error, null);
                         _runTest();
                       });
@@ -1216,7 +1216,7 @@ describe('GridFS Stream', function() {
 
   function convert$hexToBuffer(doc) {
     var keys = Object.keys(doc);
-    keys.forEach(function(key) {
+    keys.forEach(function (key) {
       if (doc[key] && typeof doc[key] === 'object') {
         if (doc[key].$hex != null) {
           doc[key] = Buffer.from(doc[key].$hex, 'hex');
@@ -1263,7 +1263,7 @@ describe('GridFS Stream', function() {
   it('should correctly handle calling end function with only a callback', {
     metadata: { requires: { topology: ['single'], node: '>4.0.0' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
@@ -1275,7 +1275,7 @@ describe('GridFS Stream', function() {
       // REMOVE-LINE done();
       // REMOVE-LINE var db = client.db(configuration.db);
       // BEGIN
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var bucket = new GridFSBucket(db, { bucketName: 'gridfsabort', chunkSizeBytes: 1 });
         var CHUNKS_COLL = 'gridfsabort.chunks';
@@ -1283,28 +1283,28 @@ describe('GridFS Stream', function() {
 
         var id = uploadStream.id;
         var query = { files_id: id };
-        uploadStream.write('a', 'utf8', function(error) {
+        uploadStream.write('a', 'utf8', function (error) {
           test.equal(undefined, error);
 
-          db.collection(CHUNKS_COLL).count(query, function(error, c) {
+          db.collection(CHUNKS_COLL).count(query, function (error, c) {
             test.equal(error, null);
             test.equal(c, 1);
 
-            uploadStream.abort(function(error) {
+            uploadStream.abort(function (error) {
               test.equal(error, null);
 
-              db.collection(CHUNKS_COLL).count(query, function(error, c) {
+              db.collection(CHUNKS_COLL).count(query, function (error, c) {
                 test.equal(error, null);
                 test.equal(c, 0);
 
-                uploadStream.write('b', 'utf8', function(error) {
+                uploadStream.write('b', 'utf8', function (error) {
                   test.equal(error.toString(), 'Error: this stream has been aborted');
 
-                  uploadStream.end(function(error) {
+                  uploadStream.end(function (error) {
                     test.equal(error.toString(), 'Error: this stream has been aborted');
 
                     // Fail if user tries to abort an aborted stream
-                    uploadStream.abort().then(null, function(error) {
+                    uploadStream.abort().then(null, function (error) {
                       test.equal(error.toString(), 'Error: Cannot call abort() on a stream twice');
                       client.close(done);
                     });
@@ -1327,7 +1327,7 @@ describe('GridFS Stream', function() {
   it('NODE-829 start/end options for openDownloadStream where start-end is < size of chunk', {
     metadata: { requires: { topology: ['single'] } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
@@ -1339,7 +1339,7 @@ describe('GridFS Stream', function() {
       // REMOVE-LINE done();
       // REMOVE-LINE var db = client.db(configuration.db);
       // BEGIN
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var bucket = new GridFSBucket(db, {
           bucketName: 'gridfsdownload',
@@ -1349,23 +1349,23 @@ describe('GridFS Stream', function() {
         var readStream = fs.createReadStream('./LICENSE.md');
         var uploadStream = bucket.openUploadStream('teststart.dat');
 
-        uploadStream.once('finish', function() {
+        uploadStream.once('finish', function () {
           var downloadStream = bucket
             .openDownloadStreamByName('teststart.dat', { start: 1 })
             .end(6);
 
-          downloadStream.on('error', function(error) {
+          downloadStream.on('error', function (error) {
             test.equal(error, null);
           });
 
           var gotData = 0;
           var str = '';
-          downloadStream.on('data', function(data) {
+          downloadStream.on('data', function (data) {
             ++gotData;
             str += data.toString('utf8');
           });
 
-          downloadStream.on('end', function() {
+          downloadStream.on('end', function () {
             // Depending on different versions of node, we may get
             // different amounts of 'data' events. node 0.10 gives 2,
             // node >= 0.12 gives 3. Either is correct, but we just
@@ -1382,7 +1382,7 @@ describe('GridFS Stream', function() {
     }
   });
 
-  it('should correctly handle indexes create with BSON.Double', function(done) {
+  it('should correctly handle indexes create with BSON.Double', function (done) {
     const configuration = this.configuration;
     const client = configuration.newClient();
     client.connect((err, client) => {
@@ -1402,7 +1402,7 @@ describe('GridFS Stream', function() {
     });
   });
 
-  it('NODE-2623 downloadStream should emit error on end > size', function() {
+  it('NODE-2623 downloadStream should emit error on end > size', function () {
     const configuration = this.configuration;
     return withClient.bind(this)((client, done) => {
       const db = client.db(configuration.db);
@@ -1416,11 +1416,11 @@ describe('GridFS Stream', function() {
 
       const id = uploadStream.id;
 
-      uploadStream.once('finish', function() {
+      uploadStream.once('finish', function () {
         const downloadStream = bucket.openDownloadStream(id, { end: wrongExpectedSize });
-        downloadStream.on('data', function() {});
+        downloadStream.on('data', function () {});
 
-        downloadStream.on('error', function(err) {
+        downloadStream.on('error', function (err) {
           expect(err.message).to.equal(
             `Stream end (${wrongExpectedSize}) must not be more than the length of the file (${actualSize})`
           );

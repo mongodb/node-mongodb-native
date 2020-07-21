@@ -9,7 +9,7 @@ const Mongos = core.Mongos;
 const ObjectId = core.BSON.ObjectId;
 const Long = core.BSON.Long;
 
-describe('Mongos Single Proxy Connection (mocks)', function() {
+describe('Mongos Single Proxy Connection (mocks)', function () {
   afterEach(() => mock.cleanup());
 
   it('Should correctly timeout mongos socket operation and then correctly re-execute', {
@@ -20,7 +20,7 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       // Current index for the ismaster
       var currentStep = 0;
       // Primary stop responding
@@ -35,7 +35,7 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
       var serverIsMaster = [Object.assign({}, defaultFields)];
 
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const server = yield mock.createServer();
 
         server.setMessageHandler(request => {
@@ -59,7 +59,7 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
         });
 
         // Start dropping the packets
-        setTimeout(function() {
+        setTimeout(function () {
           stopRespondingPrimary = true;
         }, 500);
 
@@ -75,10 +75,10 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
         var finished = false;
 
         // Add event listeners
-        mongos.once('connect', function() {
+        mongos.once('connect', function () {
           // Run an interval
-          var intervalId = setInterval(function() {
-            mongos.insert('test.test', [{ created: new Date() }], function(err, r) {
+          var intervalId = setInterval(function () {
+            mongos.insert('test.test', [{ created: new Date() }], function (err, r) {
               if (r && !finished) {
                 finished = true;
                 clearInterval(intervalId);
@@ -104,7 +104,7 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       // Default message fields
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         msg: 'isdbgrid'
@@ -114,7 +114,7 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
       var serverIsMaster = [Object.assign({}, defaultFields)];
 
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const server = yield mock.createServer();
 
         server.setMessageHandler(request => {
@@ -156,7 +156,7 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
         });
 
         // Add event listeners
-        mongos.once('connect', function() {
+        mongos.once('connect', function () {
           // Execute find
           var cursor = mongos.cursor('test.test', {
             find: 'test',
@@ -165,11 +165,11 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
           });
 
           // Execute next
-          cursor._next(function(err, d) {
+          cursor._next(function (err, d) {
             expect(err).to.not.exist;
             expect(d).to.exist;
 
-            cursor._next(function(_err, _d) {
+            cursor._next(function (_err, _d) {
               expect(_err).to.not.exist;
               expect(_d).to.exist;
 

@@ -4,8 +4,8 @@ const { Buffer } = require('buffer');
 
 const BSON = require('bson');
 
-describe('Raw', function() {
-  before(function() {
+describe('Raw', function () {
+  before(function () {
     return setupDatabase(this.configuration);
   });
 
@@ -14,21 +14,21 @@ describe('Raw', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        db.createCollection('shouldCorrectlySaveDocumentsAndReturnAsRaw', function(
+        db.createCollection('shouldCorrectlySaveDocumentsAndReturnAsRaw', function (
           err,
           collection
         ) {
           test.equal(null, err);
           // Insert some documents
-          collection.insert([{ a: 1 }, { b: 2000 }, { c: 2.3 }], { w: 1 }, function(err) {
+          collection.insert([{ a: 1 }, { b: 2000 }, { c: 2.3 }], { w: 1 }, function (err) {
             test.equal(null, err);
             // You have to pass at least query + fields before passing options
-            collection.find({}, { raw: true, batchSize: 2 }).toArray(function(err, items) {
+            collection.find({}, { raw: true, batchSize: 2 }).toArray(function (err, items) {
               var objects = [];
 
               for (var i = 0; i < items.length; i++) {
@@ -41,7 +41,7 @@ describe('Raw', function() {
               test.equal(2.3, objects[2].c);
 
               // Execute findOne
-              collection.findOne({ a: 1 }, { raw: true }, function(err, item) {
+              collection.findOne({ a: 1 }, { raw: true }, function (err, item) {
                 test.ok(Buffer.isBuffer(item));
                 var object = BSON.deserialize(item);
                 test.equal(1, object.a);
@@ -59,40 +59,41 @@ describe('Raw', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        db.createCollection('shouldCorrectlySaveDocumentsAndReturnAsRaw_2', { raw: true }, function(
-          err,
-          collection
-        ) {
-          // Insert some documents
-          collection.insert([{ a: 1 }, { b: 2000 }, { c: 2.3 }], { w: 1 }, function(err) {
-            test.equal(null, err);
+        db.createCollection(
+          'shouldCorrectlySaveDocumentsAndReturnAsRaw_2',
+          { raw: true },
+          function (err, collection) {
+            // Insert some documents
+            collection.insert([{ a: 1 }, { b: 2000 }, { c: 2.3 }], { w: 1 }, function (err) {
+              test.equal(null, err);
 
-            collection.find({}, { batchSize: 2 }).toArray(function(err, items) {
-              var objects = [];
-              for (var i = 0; i < items.length; i++) {
-                test.ok(Buffer.isBuffer(items[i]));
-                objects.push(BSON.deserialize(items[i]));
-              }
+              collection.find({}, { batchSize: 2 }).toArray(function (err, items) {
+                var objects = [];
+                for (var i = 0; i < items.length; i++) {
+                  test.ok(Buffer.isBuffer(items[i]));
+                  objects.push(BSON.deserialize(items[i]));
+                }
 
-              test.equal(1, objects[0].a);
-              test.equal(2000, objects[1].b);
-              test.equal(2.3, objects[2].c);
+                test.equal(1, objects[0].a);
+                test.equal(2000, objects[1].b);
+                test.equal(2.3, objects[2].c);
 
-              // Execute findOne
-              collection.findOne({ a: 1 }, { raw: true }, function(err, item) {
-                test.ok(Buffer.isBuffer(item));
-                var object = BSON.deserialize(item);
-                test.equal(1, object.a);
-                client.close(done);
+                // Execute findOne
+                collection.findOne({ a: 1 }, { raw: true }, function (err, item) {
+                  test.ok(Buffer.isBuffer(item));
+                  var object = BSON.deserialize(item);
+                  test.equal(1, object.a);
+                  client.close(done);
+                });
               });
             });
-          });
-        });
+          }
+        );
       });
     }
   });

@@ -9,8 +9,8 @@ const { Writable } = require('stream');
 const ReadPreference = require('../../src/read_preference');
 const { ServerType } = require('../../src/sdam/common');
 
-describe('Cursor', function() {
-  before(function() {
+describe('Cursor', function () {
+  before(function () {
     return setupDatabase(this.configuration, [
       'cursorkilltest1',
       'cursor_session_tests',
@@ -25,29 +25,29 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
-        db.createCollection('test_to_a', function(err, collection) {
+        db.createCollection('test_to_a', function (err, collection) {
           test.equal(null, err);
 
-          collection.insert({ a: 1 }, configuration.writeConcernMax(), function(err) {
+          collection.insert({ a: 1 }, configuration.writeConcernMax(), function (err) {
             test.equal(null, err);
 
             var cursor = collection.find({});
-            cursor.toArray(function(err) {
+            cursor.toArray(function (err) {
               test.equal(null, err);
 
               // Should fail if called again (cursor should be closed)
-              cursor.toArray(function(err) {
+              cursor.toArray(function (err) {
                 test.equal(null, err);
 
                 // Should fail if called again (cursor should be closed)
-                cursor.each(function(err, item) {
+                cursor.each(function (err, item) {
                   test.equal(null, err);
 
                   // Let's close the db
@@ -70,25 +70,25 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
-        db.createCollection('close_on_next', function(err, collection) {
+        db.createCollection('close_on_next', function (err, collection) {
           test.equal(null, err);
 
           collection.insert(
             [{ a: 1 }, { a: 1 }, { a: 1 }],
             configuration.writeConcernMax(),
-            function(err) {
+            function (err) {
               test.equal(null, err);
 
               var cursor = collection.find({});
               cursor.batchSize(2);
-              cursor.next(function(err) {
+              cursor.next(function (err) {
                 test.equal(null, err);
 
                 cursor.close();
@@ -108,24 +108,24 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
-        db.createCollection('trigger_get_more', function(err, collection) {
+        db.createCollection('trigger_get_more', function (err, collection) {
           test.equal(null, err);
 
           collection.insert(
             [{ a: 1 }, { a: 1 }, { a: 1 }],
             configuration.writeConcernMax(),
-            function(err) {
+            function (err) {
               test.equal(null, err);
               var cursor = collection.find({});
               cursor.batchSize(2);
-              cursor.toArray(function(err) {
+              cursor.toArray(function (err) {
                 test.equal(null, err);
 
                 client.close(done);
@@ -144,20 +144,20 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
-        db.createCollection('test_explain', function(err, collection) {
+        db.createCollection('test_explain', function (err, collection) {
           test.equal(null, err);
 
-          collection.insert({ a: 1 }, configuration.writeConcernMax(), function(err) {
+          collection.insert({ a: 1 }, configuration.writeConcernMax(), function (err) {
             test.equal(null, err);
 
-            collection.find({ a: 1 }).explain(function(err, explaination) {
+            collection.find({ a: 1 }).explain(function (err, explaination) {
               test.equal(null, err);
               test.ok(explaination != null);
 
@@ -177,24 +177,24 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
-        db.createCollection('test_count', function(err, collection) {
+        db.createCollection('test_count', function (err, collection) {
           test.equal(null, err);
 
-          collection.find().count(function(err) {
+          collection.find().count(function (err) {
             test.equal(null, err);
 
             function insert(callback) {
               var total = 10;
 
               for (var i = 0; i < 10; i++) {
-                collection.insert({ x: i }, configuration.writeConcernMax(), function(e) {
+                collection.insert({ x: i }, configuration.writeConcernMax(), function (e) {
                   test.equal(null, e);
                   total = total - 1;
                   if (total === 0) callback();
@@ -203,32 +203,32 @@ describe('Cursor', function() {
             }
 
             function finished() {
-              collection.find().count(function(err, count) {
+              collection.find().count(function (err, count) {
                 test.equal(null, err);
                 test.equal(10, count);
                 test.ok(count.constructor === Number);
 
-                collection.find({}, { limit: 5 }).count(function(err, count) {
+                collection.find({}, { limit: 5 }).count(function (err, count) {
                   test.equal(null, err);
                   test.equal(5, count);
 
-                  collection.find({}, { skip: 5 }).count(function(err, count) {
+                  collection.find({}, { skip: 5 }).count(function (err, count) {
                     test.equal(null, err);
                     test.equal(5, count);
 
-                    db.collection('acollectionthatdoesn').count(function(err, count) {
+                    db.collection('acollectionthatdoesn').count(function (err, count) {
                       test.equal(null, err);
                       test.equal(0, count);
 
                       var cursor = collection.find();
-                      cursor.count(function(err, count) {
+                      cursor.count(function (err, count) {
                         test.equal(null, err);
                         test.equal(10, count);
 
-                        cursor.each(function(err, item) {
+                        cursor.each(function (err, item) {
                           test.equal(null, err);
                           if (item == null) {
-                            cursor.count(function(err, count2) {
+                            cursor.count(function (err, count2) {
                               test.equal(null, err);
                               test.equal(10, count2);
                               test.equal(count, count2);
@@ -244,7 +244,7 @@ describe('Cursor', function() {
               });
             }
 
-            insert(function() {
+            insert(function () {
               finished();
             });
           });
@@ -260,7 +260,7 @@ describe('Cursor', function() {
       requires: { topology: 'replicaset' }
     },
 
-    test: function(done) {
+    test: function (done) {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {
         poolSize: 1,
@@ -280,9 +280,7 @@ describe('Cursor', function() {
 
           const selectedServerAddress = bag[0].address.replace('127.0.0.1', 'localhost');
           const selectedServer = client.topology.description.servers.get(selectedServerAddress);
-          expect(selectedServer)
-            .property('type')
-            .to.equal(ServerType.RSSecondary);
+          expect(selectedServer).property('type').to.equal(ServerType.RSSecondary);
 
           client.close(done);
         });
@@ -297,24 +295,24 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
-        db.createCollection('test_count.ext', function(err, collection) {
+        db.createCollection('test_count.ext', function (err, collection) {
           test.equal(null, err);
 
-          collection.find().count(function(err) {
+          collection.find().count(function (err) {
             test.equal(null, err);
 
             function insert(callback) {
               var total = 10;
 
               for (var i = 0; i < 10; i++) {
-                collection.insert({ x: i }, configuration.writeConcernMax(), function(e) {
+                collection.insert({ x: i }, configuration.writeConcernMax(), function (e) {
                   test.equal(null, e);
                   total = total - 1;
                   if (total === 0) callback();
@@ -323,32 +321,32 @@ describe('Cursor', function() {
             }
 
             function finished() {
-              collection.find().count(function(err, count) {
+              collection.find().count(function (err, count) {
                 test.equal(null, err);
                 test.equal(10, count);
                 test.ok(count.constructor === Number);
 
-                collection.find({}, { limit: 5 }).count(function(err, count) {
+                collection.find({}, { limit: 5 }).count(function (err, count) {
                   test.equal(null, err);
                   test.equal(5, count);
 
-                  collection.find({}, { skip: 5 }).count(function(err, count) {
+                  collection.find({}, { skip: 5 }).count(function (err, count) {
                     test.equal(null, err);
                     test.equal(5, count);
 
-                    db.collection('acollectionthatdoesn').count(function(err, count) {
+                    db.collection('acollectionthatdoesn').count(function (err, count) {
                       test.equal(null, err);
                       test.equal(0, count);
 
                       var cursor = collection.find();
-                      cursor.count(function(err, count) {
+                      cursor.count(function (err, count) {
                         test.equal(null, err);
                         test.equal(10, count);
 
-                        cursor.each(function(err, item) {
+                        cursor.each(function (err, item) {
                           test.equal(null, err);
                           if (item == null) {
-                            cursor.count(function(err, count2) {
+                            cursor.count(function (err, count2) {
                               test.equal(null, err);
                               test.equal(10, count2);
                               test.equal(count, count2);
@@ -364,7 +362,7 @@ describe('Cursor', function() {
               });
             }
 
-            insert(function() {
+            insert(function () {
               finished();
             });
           });
@@ -380,20 +378,20 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
-        db.createCollection('test_sort', function(err, collection) {
+        db.createCollection('test_sort', function (err, collection) {
           test.equal(null, err);
           function insert(callback) {
             var total = 10;
 
             for (var i = 0; i < 10; i++) {
-              collection.insert({ x: i }, configuration.writeConcernMax(), function(e) {
+              collection.insert({ x: i }, configuration.writeConcernMax(), function (e) {
                 test.equal(null, e);
                 total = total - 1;
                 if (total === 0) callback();
@@ -403,7 +401,7 @@ describe('Cursor', function() {
 
           function f() {
             var number_of_functions = 9;
-            var finished = function() {
+            var finished = function () {
               number_of_functions = number_of_functions - 1;
               if (number_of_functions === 0) {
                 client.close(done);
@@ -435,14 +433,11 @@ describe('Cursor', function() {
             test.deepEqual(['b', 1], entries.next().value);
             finished();
 
-            cursor = collection
-              .find()
-              .sort('a', 1)
-              .sort('a', -1);
+            cursor = collection.find().sort('a', 1).sort('a', -1);
             test.deepEqual([['a', -1]], cursor.sortValue);
             finished();
 
-            cursor.next(function(err) {
+            cursor.next(function (err) {
               test.equal(null, err);
               try {
                 cursor.sort(['a']);
@@ -455,7 +450,7 @@ describe('Cursor', function() {
             collection
               .find()
               .sort('a', 25)
-              .next(function(err) {
+              .next(function (err) {
                 test.equal(
                   "Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]",
                   err.message
@@ -466,7 +461,7 @@ describe('Cursor', function() {
             collection
               .find()
               .sort(25)
-              .next(function(err) {
+              .next(function (err) {
                 test.equal(
                   "Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]",
                   err.message
@@ -475,7 +470,7 @@ describe('Cursor', function() {
               });
           }
 
-          insert(function() {
+          insert(function () {
             f();
           });
         });
@@ -490,20 +485,20 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
-        db.createCollection('test_each', function(err, collection) {
+        db.createCollection('test_each', function (err, collection) {
           test.equal(null, err);
           function insert(callback) {
             var total = 10;
 
             for (var i = 0; i < 10; i++) {
-              collection.insert({ x: i }, configuration.writeConcernMax(), function(e) {
+              collection.insert({ x: i }, configuration.writeConcernMax(), function (e) {
                 test.equal(null, e);
                 total = total - 1;
                 if (total === 0) callback();
@@ -514,14 +509,14 @@ describe('Cursor', function() {
           function finished() {
             const cursor = collection.find();
 
-            test.throws(function() {
+            test.throws(function () {
               cursor.each();
             });
 
             client.close(done);
           }
 
-          insert(function() {
+          insert(function () {
             finished();
           });
         });
@@ -536,17 +531,17 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        db.createCollection('test_cursor_limit', function(err, collection) {
+        db.createCollection('test_cursor_limit', function (err, collection) {
           function insert(callback) {
             var total = 10;
 
             for (var i = 0; i < 10; i++) {
-              collection.insert({ x: i }, configuration.writeConcernMax(), function(e) {
+              collection.insert({ x: i }, configuration.writeConcernMax(), function (e) {
                 test.equal(null, e);
                 total = total - 1;
                 if (total === 0) callback();
@@ -558,7 +553,7 @@ describe('Cursor', function() {
             collection
               .find()
               .limit(5)
-              .toArray(function(err, items) {
+              .toArray(function (err, items) {
                 test.equal(5, items.length);
 
                 // Let's close the db
@@ -567,7 +562,7 @@ describe('Cursor', function() {
               });
           }
 
-          insert(function() {
+          insert(function () {
             finished();
           });
         });
@@ -582,20 +577,20 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
-        db.createCollection('test_cursor_negative_one_limit', function(err, collection) {
+        db.createCollection('test_cursor_negative_one_limit', function (err, collection) {
           test.equal(null, err);
           function insert(callback) {
             var total = 10;
 
             for (var i = 0; i < 10; i++) {
-              collection.insert({ x: i }, configuration.writeConcernMax(), function(e) {
+              collection.insert({ x: i }, configuration.writeConcernMax(), function (e) {
                 test.equal(null, e);
                 total = total - 1;
                 if (total === 0) callback();
@@ -607,7 +602,7 @@ describe('Cursor', function() {
             collection
               .find()
               .limit(-1)
-              .toArray(function(err, items) {
+              .toArray(function (err, items) {
                 test.equal(null, err);
                 test.equal(1, items.length);
 
@@ -616,7 +611,7 @@ describe('Cursor', function() {
               });
           }
 
-          insert(function() {
+          insert(function () {
             finished();
           });
         });
@@ -631,20 +626,20 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
-        db.createCollection('test_cursor_any_negative_limit', function(err, collection) {
+        db.createCollection('test_cursor_any_negative_limit', function (err, collection) {
           test.equal(null, err);
           function insert(callback) {
             var total = 10;
 
             for (var i = 0; i < 10; i++) {
-              collection.insert({ x: i }, configuration.writeConcernMax(), function(e) {
+              collection.insert({ x: i }, configuration.writeConcernMax(), function (e) {
                 test.equal(null, e);
                 total = total - 1;
                 if (total === 0) callback();
@@ -656,7 +651,7 @@ describe('Cursor', function() {
             collection
               .find()
               .limit(-5)
-              .toArray(function(err, items) {
+              .toArray(function (err, items) {
                 test.equal(null, err);
                 test.equal(5, items.length);
 
@@ -665,7 +660,7 @@ describe('Cursor', function() {
               });
           }
 
-          insert(function() {
+          insert(function () {
             finished();
           });
         });
@@ -680,17 +675,17 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
-        db.createCollection('test_limit_exceptions_2', function(err, collection) {
+        db.createCollection('test_limit_exceptions_2', function (err, collection) {
           test.equal(null, err);
 
-          collection.insert({ a: 1 }, configuration.writeConcernMax(), function(err) {
+          collection.insert({ a: 1 }, configuration.writeConcernMax(), function (err) {
             test.equal(null, err);
             const cursor = collection.find();
 
@@ -715,23 +710,23 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
-        db.createCollection('test_limit_exceptions', function(err, collection) {
+        db.createCollection('test_limit_exceptions', function (err, collection) {
           test.equal(null, err);
 
-          collection.insert({ a: 1 }, configuration.writeConcernMax(), function(err) {
+          collection.insert({ a: 1 }, configuration.writeConcernMax(), function (err) {
             test.equal(null, err);
           });
 
           const cursor = collection.find();
 
-          cursor.next(function(err) {
+          cursor.next(function (err) {
             test.equal(null, err);
             try {
               cursor.limit(1);
@@ -753,22 +748,22 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
-        db.createCollection('test_limit_exceptions_1', function(err, collection) {
+        db.createCollection('test_limit_exceptions_1', function (err, collection) {
           test.equal(null, err);
 
-          collection.insert({ a: 1 }, configuration.writeConcernMax(), function(err) {
+          collection.insert({ a: 1 }, configuration.writeConcernMax(), function (err) {
             test.equal(null, err);
 
             const cursor = collection.find();
 
-            cursor.close(function(err, cursor) {
+            cursor.close(function (err, cursor) {
               test.equal(null, err);
               try {
                 cursor.limit(1);
@@ -792,21 +787,21 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
-        db.createCollection('test_skip', function(err, collection) {
+        db.createCollection('test_skip', function (err, collection) {
           test.equal(null, err);
 
           function insert(callback) {
             var total = 10;
 
             for (var i = 0; i < 10; i++) {
-              collection.insert({ x: i }, configuration.writeConcernMax(), function(e) {
+              collection.insert({ x: i }, configuration.writeConcernMax(), function (e) {
                 test.equal(null, e);
 
                 total = total - 1;
@@ -817,21 +812,21 @@ describe('Cursor', function() {
 
           function finished() {
             const cursor = collection.find();
-            cursor.count(function(err, count) {
+            cursor.count(function (err, count) {
               test.equal(null, err);
               test.equal(10, count);
             });
 
-            (function() {
+            (function () {
               const cursor = collection.find();
-              cursor.toArray(function(err, items) {
+              cursor.toArray(function (err, items) {
                 test.equal(null, err);
                 test.equal(10, items.length);
 
                 collection
                   .find()
                   .skip(2)
-                  .toArray(function(err, items2) {
+                  .toArray(function (err, items2) {
                     test.equal(null, err);
                     test.equal(8, items2.length);
 
@@ -852,7 +847,7 @@ describe('Cursor', function() {
             })();
           }
 
-          insert(function() {
+          insert(function () {
             finished();
           });
         });
@@ -867,16 +862,16 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
-        db.createCollection('test_skip_exceptions', function(err, collection) {
+        db.createCollection('test_skip_exceptions', function (err, collection) {
           test.equal(null, err);
-          collection.insert({ a: 1 }, configuration.writeConcernMax(), function(err) {
+          collection.insert({ a: 1 }, configuration.writeConcernMax(), function (err) {
             test.equal(null, err);
           });
 
@@ -887,7 +882,7 @@ describe('Cursor', function() {
           }
 
           var cursor = collection.find();
-          cursor.next(function(err) {
+          cursor.next(function (err) {
             test.equal(null, err);
 
             try {
@@ -897,7 +892,7 @@ describe('Cursor', function() {
             }
 
             var cursor2 = collection.find();
-            cursor2.close(function(err) {
+            cursor2.close(function (err) {
               test.equal(null, err);
               try {
                 cursor2.skip(1);
@@ -920,16 +915,16 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
-        db.createCollection('test_batchSize_exceptions', function(err, collection) {
+        db.createCollection('test_batchSize_exceptions', function (err, collection) {
           test.equal(null, err);
-          collection.insert({ a: 1 }, configuration.writeConcernMax(), function(err) {
+          collection.insert({ a: 1 }, configuration.writeConcernMax(), function (err) {
             test.equal(null, err);
           });
           var cursor = collection.find();
@@ -942,10 +937,10 @@ describe('Cursor', function() {
           }
 
           cursor = collection.find();
-          cursor.next(function(err) {
+          cursor.next(function (err) {
             test.equal(null, err);
 
-            cursor.next(function(err) {
+            cursor.next(function (err) {
               test.equal(null, err);
 
               try {
@@ -956,7 +951,7 @@ describe('Cursor', function() {
               }
 
               var cursor2 = collection.find();
-              cursor2.close(function(err) {
+              cursor2.close(function (err) {
                 test.equal(null, err);
                 try {
                   cursor2.batchSize(1);
@@ -981,14 +976,14 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
-        db.createCollection('test_not_multiple_batch_size', function(err, collection) {
+        db.createCollection('test_not_multiple_batch_size', function (err, collection) {
           test.equal(null, err);
 
           var records = 6;
@@ -998,20 +993,20 @@ describe('Cursor', function() {
             docs.push({ a: i });
           }
 
-          collection.insert(docs, configuration.writeConcernMax(), function() {
+          collection.insert(docs, configuration.writeConcernMax(), function () {
             test.equal(null, err);
 
             const cursor = collection.find({}, { batchSize: batchSize });
 
             //1st
-            cursor.next(function(err, items) {
+            cursor.next(function (err, items) {
               test.equal(null, err);
               //cursor.items should contain 1 since nextObject already popped one
               test.equal(1, cursor.bufferedCount());
               test.ok(items != null);
 
               //2nd
-              cursor.next(function(err, items) {
+              cursor.next(function (err, items) {
                 test.equal(null, err);
                 test.equal(0, cursor.bufferedCount());
                 test.ok(items != null);
@@ -1021,31 +1016,31 @@ describe('Cursor', function() {
                 cursor.batchSize(batchSize);
 
                 //3rd
-                cursor.next(function(err, items) {
+                cursor.next(function (err, items) {
                   test.equal(null, err);
                   test.equal(2, cursor.bufferedCount());
                   test.ok(items != null);
 
                   //4th
-                  cursor.next(function(err, items) {
+                  cursor.next(function (err, items) {
                     test.equal(null, err);
                     test.equal(1, cursor.bufferedCount());
                     test.ok(items != null);
 
                     //5th
-                    cursor.next(function(err, items) {
+                    cursor.next(function (err, items) {
                       test.equal(null, err);
                       test.equal(0, cursor.bufferedCount());
                       test.ok(items != null);
 
                       //6th
-                      cursor.next(function(err, items) {
+                      cursor.next(function (err, items) {
                         test.equal(null, err);
                         test.equal(0, cursor.bufferedCount());
                         test.ok(items != null);
 
                         //No more
-                        cursor.next(function(err, items) {
+                        cursor.next(function (err, items) {
                           test.equal(null, err);
                           test.ok(items == null);
                           test.ok(cursor.isClosed());
@@ -1071,14 +1066,14 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
-        db.createCollection('test_multiple_batch_size', function(err, collection) {
+        db.createCollection('test_multiple_batch_size', function (err, collection) {
           test.equal(null, err);
 
           //test with the last batch that is a multiple of batchSize
@@ -1089,37 +1084,37 @@ describe('Cursor', function() {
             docs.push({ a: i });
           }
 
-          collection.insert(docs, configuration.writeConcernMax(), function(err) {
+          collection.insert(docs, configuration.writeConcernMax(), function (err) {
             test.equal(null, err);
 
             const cursor = collection.find({}, { batchSize: batchSize });
 
             //1st
-            cursor.next(function(err, items) {
+            cursor.next(function (err, items) {
               test.equal(null, err);
               test.equal(1, cursor.bufferedCount());
               test.ok(items != null);
 
               //2nd
-              cursor.next(function(err, items) {
+              cursor.next(function (err, items) {
                 test.equal(null, err);
                 test.equal(0, cursor.bufferedCount());
                 test.ok(items != null);
 
                 //3rd
-                cursor.next(function(err, items) {
+                cursor.next(function (err, items) {
                   test.equal(null, err);
                   test.equal(1, cursor.bufferedCount());
                   test.ok(items != null);
 
                   //4th
-                  cursor.next(function(err, items) {
+                  cursor.next(function (err, items) {
                     test.equal(null, err);
                     test.equal(0, cursor.bufferedCount());
                     test.ok(items != null);
 
                     //No more
-                    cursor.next(function(err, items) {
+                    cursor.next(function (err, items) {
                       test.equal(null, err);
                       test.ok(items == null);
                       test.ok(cursor.isClosed());
@@ -1143,14 +1138,14 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
-        db.createCollection('test_limit_greater_than_batch_size', function(err, collection) {
+        db.createCollection('test_limit_greater_than_batch_size', function (err, collection) {
           test.equal(null, err);
 
           var limit = 4;
@@ -1161,31 +1156,31 @@ describe('Cursor', function() {
             docs.push({ a: i });
           }
 
-          collection.insert(docs, configuration.writeConcernMax(), function(err) {
+          collection.insert(docs, configuration.writeConcernMax(), function (err) {
             test.equal(null, err);
 
             var cursor = collection.find({}, { batchSize: batchSize, limit: limit });
             //1st
-            cursor.next(function(err) {
+            cursor.next(function (err) {
               test.equal(null, err);
               test.equal(2, cursor.bufferedCount());
 
               //2nd
-              cursor.next(function(err) {
+              cursor.next(function (err) {
                 test.equal(null, err);
                 test.equal(1, cursor.bufferedCount());
 
                 //3rd
-                cursor.next(function(err) {
+                cursor.next(function (err) {
                   test.equal(null, err);
                   test.equal(0, cursor.bufferedCount());
 
                   //4th
-                  cursor.next(function(err) {
+                  cursor.next(function (err) {
                     test.equal(null, err);
 
                     //No more
-                    cursor.next(function(err, items) {
+                    cursor.next(function (err, items) {
                       test.equal(null, err);
                       test.ok(items == null);
                       test.ok(cursor.isClosed());
@@ -1209,14 +1204,14 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
-        db.createCollection('test_limit_less_than_batch_size', function(err, collection) {
+        db.createCollection('test_limit_less_than_batch_size', function (err, collection) {
           test.equal(null, err);
 
           var limit = 2;
@@ -1227,22 +1222,22 @@ describe('Cursor', function() {
             docs.push({ a: i });
           }
 
-          collection.insert(docs, configuration.writeConcernMax(), function(err) {
+          collection.insert(docs, configuration.writeConcernMax(), function (err) {
             test.equal(null, err);
 
             var cursor = collection.find({}, { batchSize: batchSize, limit: limit });
             //1st
-            cursor.next(function(err) {
+            cursor.next(function (err) {
               test.equal(null, err);
               test.equal(1, cursor.bufferedCount());
 
               //2nd
-              cursor.next(function(err) {
+              cursor.next(function (err) {
                 test.equal(null, err);
                 test.equal(0, cursor.bufferedCount());
 
                 //No more
-                cursor.next(function(err, items) {
+                cursor.next(function (err, items) {
                   test.equal(null, err);
                   test.ok(items == null);
                   test.ok(cursor.isClosed());
@@ -1264,10 +1259,10 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
@@ -1277,7 +1272,7 @@ describe('Cursor', function() {
           var total = 10;
 
           for (var i = 0; i < 10; i++) {
-            collection.insert({ x: i }, configuration.writeConcernMax(), function(e) {
+            collection.insert({ x: i }, configuration.writeConcernMax(), function (e) {
               test.equal(null, e);
               total = total - 1;
               if (total === 0) callback();
@@ -1286,7 +1281,7 @@ describe('Cursor', function() {
         }
 
         function finished() {
-          collection.find().toArray(function(err, items) {
+          collection.find().toArray(function (err, items) {
             test.equal(null, err);
             test.equal(10, items.length);
 
@@ -1294,7 +1289,7 @@ describe('Cursor', function() {
               .find()
               .limit(5)
               .skip(3)
-              .toArray(function(err, items2) {
+              .toArray(function (err, items2) {
                 test.equal(null, err);
                 test.equal(5, items2.length);
 
@@ -1313,7 +1308,7 @@ describe('Cursor', function() {
           });
         }
 
-        insert(function() {
+        insert(function () {
           finished();
         });
       });
@@ -1327,21 +1322,21 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
-        db.createCollection('test_limit_skip_chaining_inline', function(err, collection) {
+        db.createCollection('test_limit_skip_chaining_inline', function (err, collection) {
           test.equal(null, err);
 
           function insert(callback) {
             var total = 10;
 
             for (var i = 0; i < 10; i++) {
-              collection.insert({ x: i }, configuration.writeConcernMax(), function(e) {
+              collection.insert({ x: i }, configuration.writeConcernMax(), function (e) {
                 test.equal(null, e);
                 total = total - 1;
                 if (total === 0) callback();
@@ -1350,7 +1345,7 @@ describe('Cursor', function() {
           }
 
           function finished() {
-            collection.find().toArray(function(err, items) {
+            collection.find().toArray(function (err, items) {
               test.equal(null, err);
               test.equal(10, items.length);
 
@@ -1358,7 +1353,7 @@ describe('Cursor', function() {
                 .find()
                 .limit(5)
                 .skip(3)
-                .toArray(function(err, items2) {
+                .toArray(function (err, items2) {
                   test.equal(null, err);
                   test.equal(5, items2.length);
 
@@ -1377,7 +1372,7 @@ describe('Cursor', function() {
             });
           }
 
-          insert(function() {
+          insert(function () {
             finished();
           });
         });
@@ -1392,17 +1387,17 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
-        db.createCollection('test_close_no_query_sent', function(err, collection) {
+        db.createCollection('test_close_no_query_sent', function (err, collection) {
           test.equal(null, err);
 
-          collection.find().close(function(err, cursor) {
+          collection.find().close(function (err, cursor) {
             test.equal(null, err);
             test.equal(true, cursor.isClosed());
             // Let's close the db
@@ -1420,16 +1415,16 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var COUNT = 1000;
 
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
-        db.createCollection('test_refill_via_get_more', function(err, collection) {
+        db.createCollection('test_refill_via_get_more', function (err, collection) {
           test.equal(null, err);
 
           function insert(callback) {
@@ -1443,36 +1438,36 @@ describe('Cursor', function() {
           }
 
           function finished() {
-            collection.count(function(err, count) {
+            collection.count(function (err, count) {
               test.equal(null, err);
               test.equal(COUNT, count);
             });
 
             var total = 0;
-            collection.find({}, {}).each(function(err, item) {
+            collection.find({}, {}).each(function (err, item) {
               test.equal(null, err);
               if (item != null) {
                 total = total + item.a;
               } else {
                 test.equal(499500, total);
 
-                collection.count(function(err, count) {
+                collection.count(function (err, count) {
                   test.equal(null, err);
                   test.equal(COUNT, count);
                 });
 
-                collection.count(function(err, count) {
+                collection.count(function (err, count) {
                   test.equal(null, err);
                   test.equal(COUNT, count);
 
                   var total2 = 0;
-                  collection.find().each(function(err, item) {
+                  collection.find().each(function (err, item) {
                     test.equal(null, err);
                     if (item != null) {
                       total2 = total2 + item.a;
                     } else {
                       test.equal(499500, total2);
-                      collection.count(function(err, count) {
+                      collection.count(function (err, count) {
                         test.equal(null, err);
                         test.equal(COUNT, count);
                         test.equal(total, total2);
@@ -1487,7 +1482,7 @@ describe('Cursor', function() {
             });
           }
 
-          insert(function() {
+          insert(function () {
             finished();
           });
         });
@@ -1502,14 +1497,14 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
-        db.createCollection('test_refill_via_get_more_alt_coll', function(err, collection) {
+        db.createCollection('test_refill_via_get_more_alt_coll', function (err, collection) {
           test.equal(null, err);
           var COUNT = 1000;
 
@@ -1524,36 +1519,36 @@ describe('Cursor', function() {
           }
 
           function finished() {
-            collection.count(function(err, count) {
+            collection.count(function (err, count) {
               test.equal(null, err);
               test.equal(1000, count);
             });
 
             var total = 0;
-            collection.find().each(function(err, item) {
+            collection.find().each(function (err, item) {
               test.equal(null, err);
               if (item != null) {
                 total = total + item.a;
               } else {
                 test.equal(499500, total);
 
-                collection.count(function(err, count) {
+                collection.count(function (err, count) {
                   test.equal(null, err);
                   test.equal(1000, count);
                 });
 
-                collection.count(function(err, count) {
+                collection.count(function (err, count) {
                   test.equal(null, err);
                   test.equal(1000, count);
 
                   var total2 = 0;
-                  collection.find().each(function(err, item) {
+                  collection.find().each(function (err, item) {
                     test.equal(null, err);
                     if (item != null) {
                       total2 = total2 + item.a;
                     } else {
                       test.equal(499500, total2);
-                      collection.count(function(err, count) {
+                      collection.count(function (err, count) {
                         test.equal(null, err);
                         test.equal(1000, count);
                         test.equal(total, total2);
@@ -1568,7 +1563,7 @@ describe('Cursor', function() {
             });
           }
 
-          insert(function() {
+          insert(function () {
             finished();
           });
         });
@@ -1583,24 +1578,24 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
-        db.createCollection('test_close_after_query_sent', function(err, collection) {
+        db.createCollection('test_close_after_query_sent', function (err, collection) {
           test.equal(null, err);
 
-          collection.insert({ a: 1 }, configuration.writeConcernMax(), function(err) {
+          collection.insert({ a: 1 }, configuration.writeConcernMax(), function (err) {
             test.equal(null, err);
 
             var cursor = collection.find({ a: 1 });
-            cursor.next(function(err) {
+            cursor.next(function (err) {
               test.equal(null, err);
 
-              cursor.close(function(err, cursor) {
+              cursor.close(function (err, cursor) {
                 test.equal(null, err);
                 test.equal(true, cursor.isClosed());
                 // Let's close the db
@@ -1620,23 +1615,23 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
-        db.createCollection('test_count_with_fields', function(err, collection) {
+        db.createCollection('test_count_with_fields', function (err, collection) {
           test.equal(null, err);
 
-          collection.save({ x: 1, a: 2 }, configuration.writeConcernMax(), function(err) {
+          collection.save({ x: 1, a: 2 }, configuration.writeConcernMax(), function (err) {
             test.equal(null, err);
 
             collection
               .find({})
               .project({ a: 1 })
-              .toArray(function(err, items) {
+              .toArray(function (err, items) {
                 test.equal(null, err);
                 test.equal(1, items.length);
                 test.equal(2, items[0].a);
@@ -1656,20 +1651,20 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
-        db.createCollection('test_count_with_fields_using_exclude', function(err, collection) {
+        db.createCollection('test_count_with_fields_using_exclude', function (err, collection) {
           test.equal(null, err);
 
-          collection.save({ x: 1, a: 2 }, configuration.writeConcernMax(), function(err) {
+          collection.save({ x: 1, a: 2 }, configuration.writeConcernMax(), function (err) {
             test.equal(null, err);
 
-            collection.find({}, { fields: { x: 0 } }).toArray(function(err, items) {
+            collection.find({}, { fields: { x: 0 } }).toArray(function (err, items) {
               test.equal(null, err);
               test.equal(1, items.length);
               test.equal(2, items[0].a);
@@ -1689,7 +1684,7 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var docs = [];
 
       for (var i = 0; i < 1000; i++) {
@@ -1699,32 +1694,32 @@ describe('Cursor', function() {
 
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
-        db.createCollection('Should_correctly_execute_count_on_cursor_1', function(
+        db.createCollection('Should_correctly_execute_count_on_cursor_1', function (
           err,
           collection
         ) {
           test.equal(null, err);
 
           // insert all docs
-          collection.insert(docs, configuration.writeConcernMax(), function(err) {
+          collection.insert(docs, configuration.writeConcernMax(), function (err) {
             test.equal(null, err);
 
             var total = 0;
             // Create a cursor for the content
             var cursor = collection.find({});
-            cursor.count(function(err) {
+            cursor.count(function (err) {
               test.equal(null, err);
               // Ensure each returns all documents
-              cursor.each(function(err, item) {
+              cursor.each(function (err, item) {
                 test.equal(null, err);
                 if (item != null) {
                   total++;
                 } else {
-                  cursor.count(function(err, c) {
+                  cursor.count(function (err, c) {
                     test.equal(null, err);
                     test.equal(1000, c);
                     test.equal(1000, total);
@@ -1746,7 +1741,7 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var docs = [];
 
       for (var i = 0; i < 1000; i++) {
@@ -1757,15 +1752,15 @@ describe('Cursor', function() {
 
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
-        db.createCollection('Should_be_able_to_stream_documents', function(err, collection) {
+        db.createCollection('Should_be_able_to_stream_documents', function (err, collection) {
           test.equal(null, err);
 
           // insert all docs
-          collection.insert(docs, configuration.writeConcernMax(), function(err) {
+          collection.insert(docs, configuration.writeConcernMax(), function (err) {
             test.equal(null, err);
 
             var paused = 0,
@@ -1775,7 +1770,7 @@ describe('Cursor', function() {
 
             var stream = collection.find().stream();
 
-            stream.on('data', function(doc) {
+            stream.on('data', function (doc) {
               test.equal(true, !!doc);
               test.equal(true, !!doc.a);
               count = count + 1;
@@ -1789,19 +1784,19 @@ describe('Cursor', function() {
                 stream.pause();
                 paused++;
 
-                setTimeout(function() {
+                setTimeout(function () {
                   stream.resume();
                   resumed++;
                 }, 20);
               }
             });
 
-            stream.once('error', function(er) {
+            stream.once('error', function (er) {
               err = er;
               testDone();
             });
 
-            stream.once('end', function() {
+            stream.once('end', function () {
               closed++;
               testDone();
             });
@@ -1828,29 +1823,29 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var i = 0,
         docs = [{ b: 2 }, { b: 3 }],
         doneCalled = 0;
 
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
         db.createCollection(
           'immediately_destroying_a_stream_prevents_the_query_from_executing',
-          function(err, collection) {
+          function (err, collection) {
             test.equal(null, err);
 
             // insert all docs
-            collection.insert(docs, configuration.writeConcernMax(), function(err) {
+            collection.insert(docs, configuration.writeConcernMax(), function (err) {
               test.equal(null, err);
 
               var stream = collection.find().stream();
 
-              stream.on('data', function() {
+              stream.on('data', function () {
                 i++;
               });
 
@@ -1860,7 +1855,7 @@ describe('Cursor', function() {
               stream.destroy();
 
               function testDone() {
-                return function(err) {
+                return function (err) {
                   ++doneCalled;
 
                   if (doneCalled === 1) {
@@ -1885,21 +1880,21 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         test.equal(null, err);
 
-        db.createCollection('destroying_a_stream_stops_it', function(err, collection) {
+        db.createCollection('destroying_a_stream_stops_it', function (err, collection) {
           test.equal(null, err);
 
           var docs = [];
           for (var ii = 0; ii < 10; ++ii) docs.push({ b: ii + 1 });
 
           // insert all docs
-          collection.insert(docs, configuration.writeConcernMax(), function(err) {
+          collection.insert(docs, configuration.writeConcernMax(), function (err) {
             test.equal(null, err);
 
             var finished = 0,
@@ -1909,7 +1904,7 @@ describe('Cursor', function() {
 
             test.strictEqual(false, stream.isClosed());
 
-            stream.on('data', function() {
+            stream.on('data', function () {
               if (++i === 5) {
                 stream.destroy();
               }
@@ -1920,7 +1915,7 @@ describe('Cursor', function() {
 
             function testDone(err) {
               ++finished;
-              setTimeout(function() {
+              setTimeout(function () {
                 test.strictEqual(undefined, err);
                 test.strictEqual(5, i);
                 test.strictEqual(1, finished);
@@ -1940,21 +1935,21 @@ describe('Cursor', function() {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { topology: ['single'] } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         test.equal(null, err);
 
-        db.createCollection('cursor_stream_errors', function(err, collection) {
+        db.createCollection('cursor_stream_errors', function (err, collection) {
           test.equal(null, err);
 
           var docs = [];
           for (var ii = 0; ii < 10; ++ii) docs.push({ b: ii + 1 });
 
           // insert all docs
-          collection.insert(docs, configuration.writeConcernMax(), function(err) {
+          collection.insert(docs, configuration.writeConcernMax(), function (err) {
             test.equal(null, err);
 
             var finished = 0,
@@ -1962,7 +1957,7 @@ describe('Cursor', function() {
 
             var stream = collection.find({}, { batchSize: 5 }).stream();
 
-            stream.on('data', function() {
+            stream.on('data', function () {
               if (++i === 4) {
                 // Force restart
                 configuration.manager.stop(9);
@@ -1973,16 +1968,16 @@ describe('Cursor', function() {
             stream.once('error', testDone('error'));
 
             function testDone() {
-              return function() {
+              return function () {
                 ++finished;
 
                 if (finished === 2) {
-                  setTimeout(function() {
+                  setTimeout(function () {
                     test.equal(5, i);
                     test.equal(true, stream.isClosed());
                     client.close();
 
-                    configuration.manager.start().then(function() {
+                    configuration.manager.start().then(function () {
                       done();
                     });
                   }, 150);
@@ -2002,23 +1997,23 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
-        db.createCollection('cursor_stream_pipe', function(err, collection) {
+        db.createCollection('cursor_stream_pipe', function (err, collection) {
           test.equal(null, err);
 
           var docs = [];
-          'Aaden Aaron Adrian Aditya Bob Joe'.split(' ').forEach(function(name) {
+          'Aaden Aaron Adrian Aditya Bob Joe'.split(' ').forEach(function (name) {
             docs.push({ name: name });
           });
 
           // insert all docs
-          collection.insert(docs, configuration.writeConcernMax(), function(err) {
+          collection.insert(docs, configuration.writeConcernMax(), function (err) {
             test.equal(null, err);
 
             var filename = '/tmp/_nodemongodbnative_stream_out.txt',
@@ -2033,7 +2028,7 @@ describe('Cursor', function() {
             // }
 
             var stream = collection.find().stream({
-              transform: function(doc) {
+              transform: function (doc) {
                 return JSON.stringify(doc);
               }
             });
@@ -2069,17 +2064,17 @@ describe('Cursor', function() {
       sessions: { skipLeakTests: true }
     },
 
-    test: function(done) {
+    test: function (done) {
       // http://www.mongodb.org/display/DOCS/Tailable+Cursors
 
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
         var options = { capped: true, size: 10000000 };
-        db.createCollection('test_if_dead_tailable_cursors_close', options, function(
+        db.createCollection('test_if_dead_tailable_cursors_close', options, function (
           err,
           collection
         ) {
@@ -2091,7 +2086,7 @@ describe('Cursor', function() {
           var count = 100;
           // Just hammer the server
           for (var i = 0; i < 100; i++) {
-            collection.insert({ id: i }, { w: 'majority', wtimeout: 5000 }, function(err) {
+            collection.insert({ id: i }, { w: 'majority', wtimeout: 5000 }, function (err) {
               test.equal(null, err);
               count = count - 1;
 
@@ -2100,7 +2095,7 @@ describe('Cursor', function() {
                 // let index = 0;
                 stream.resume();
 
-                stream.on('error', function(err) {
+                stream.on('error', function (err) {
                   expect(err).to.exist;
                   errorOccurred = true;
                 });
@@ -2119,8 +2114,8 @@ describe('Cursor', function() {
                 // Just hammer the server
                 for (var i = 0; i < 100; i++) {
                   const id = i;
-                  process.nextTick(function() {
-                    collection.insert({ id }, function(err) {
+                  process.nextTick(function () {
+                    collection.insert({ id }, function (err) {
                       test.equal(null, err);
 
                       if (id === 99) {
@@ -2144,29 +2139,29 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       // http://www.mongodb.org/display/DOCS/Tailable+Cursors
 
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
         var options = { capped: true, size: 8 };
-        db.createCollection('should_await_data_retry_tailable_cursor', options, function(
+        db.createCollection('should_await_data_retry_tailable_cursor', options, function (
           err,
           collection
         ) {
           test.equal(null, err);
 
-          collection.insert({ a: 1 }, configuration.writeConcernMax(), function(err) {
+          collection.insert({ a: 1 }, configuration.writeConcernMax(), function (err) {
             test.equal(null, err);
 
             // Create cursor with awaitdata, and timeout after the period specified
             var cursor = collection.find({}, { tailable: true, awaitdata: true });
             // Execute each
-            cursor.each(function(err, result) {
+            cursor.each(function (err, result) {
               if (result) {
                 cursor.kill();
               }
@@ -2191,28 +2186,28 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       // http://www.mongodb.org/display/DOCS/Tailable+Cursors
 
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
         var options = { capped: true, size: 8 };
-        db.createCollection('should_await_data_no_docs', options, function(err, collection) {
+        db.createCollection('should_await_data_no_docs', options, function (err, collection) {
           test.equal(null, err);
 
           // Create cursor with awaitdata, and timeout after the period specified
           var cursor = collection.find({}, { tailable: true, awaitdata: true });
           var rewind = cursor.rewind;
           var called = false;
-          cursor.rewind = function() {
+          cursor.rewind = function () {
             called = true;
           };
 
-          cursor.each(function(err) {
+          cursor.each(function (err) {
             if (err != null) {
               test.ok(called);
               cursor.rewind = rewind;
@@ -2231,26 +2226,26 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       // http://www.mongodb.org/display/DOCS/Tailable+Cursors
 
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
         var options = { capped: true, size: 8 };
-        db.createCollection('should_await_data_cursor_flag', options, function(err, collection) {
+        db.createCollection('should_await_data_cursor_flag', options, function (err, collection) {
           test.equal(null, err);
 
-          collection.insert({ a: 1 }, configuration.writeConcernMax(), function(err) {
+          collection.insert({ a: 1 }, configuration.writeConcernMax(), function (err) {
             test.equal(null, err);
             // Create cursor with awaitdata, and timeout after the period specified
             var cursor = collection.find({}, {});
             cursor.addCursorFlag('tailable', true);
             cursor.addCursorFlag('awaitData', true);
-            cursor.each(function(err) {
+            cursor.each(function (err) {
               if (err != null) {
                 // Even though cursor is exhausted, should not close session
                 // unless cursor is manually closed, due to awaitdata / tailable
@@ -2300,25 +2295,25 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       // http://www.mongodb.org/display/DOCS/Tailable+Cursors
 
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
         var options = { capped: true, size: 8 };
-        db.createCollection('should_await_data', options, function(err, collection) {
+        db.createCollection('should_await_data', options, function (err, collection) {
           test.equal(null, err);
 
-          collection.insert({ a: 1 }, configuration.writeConcernMax(), function(err) {
+          collection.insert({ a: 1 }, configuration.writeConcernMax(), function (err) {
             test.equal(null, err);
 
             // Create cursor with awaitdata, and timeout after the period specified
             var cursor = collection.find({}, { tailable: true, awaitdata: true });
-            cursor.each(function(err) {
+            cursor.each(function (err) {
               if (err != null) {
                 // kill cursor b/c cursor is tailable / awaitable
                 cursor.close();
@@ -2340,7 +2335,7 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var docs = [];
       docs[0] = {
         _keywords: [
@@ -2520,29 +2515,29 @@ describe('Cursor', function() {
 
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
         // Insert all the docs
         var collection = db.collection('shouldCorrectExecuteExplainHonoringLimit');
-        collection.insert(docs, configuration.writeConcernMax(), function(err) {
+        collection.insert(docs, configuration.writeConcernMax(), function (err) {
           test.equal(null, err);
 
-          collection.ensureIndex({ _keywords: 1 }, configuration.writeConcernMax(), function(err) {
+          collection.ensureIndex({ _keywords: 1 }, configuration.writeConcernMax(), function (err) {
             test.equal(null, err);
 
             collection
               .find({ _keywords: 'red' })
               .limit(10)
-              .toArray(function(err, result) {
+              .toArray(function (err, result) {
                 test.equal(null, err);
                 test.ok(result != null);
 
                 collection
                   .find({ _keywords: 'red' }, {})
                   .limit(10)
-                  .explain(function(err, result) {
+                  .explain(function (err, result) {
                     test.equal(null, err);
                     test.ok(result != null);
 
@@ -2562,23 +2557,23 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var doc = { name: 'camera', _keywords: ['compact', 'ii2gd', 'led', 'red', 'aet'] };
 
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
         var collection = db.collection('shouldNotExplainWhenFalse');
-        collection.insert(doc, configuration.writeConcernMax(), function(err) {
+        collection.insert(doc, configuration.writeConcernMax(), function (err) {
           test.equal(null, err);
 
           collection
             .find({ _keywords: 'red' })
             .limit(10)
-            .toArray(function(err, result) {
+            .toArray(function (err, result) {
               test.equal(null, err);
 
               test.equal('camera', result[0].name);
@@ -2596,10 +2591,10 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         try {
           db.collection('shouldFailToSetReadPreferenceOnCursor')
@@ -2624,14 +2619,14 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
-        db.createCollection('shouldNotFailDueToStackOverflowEach', function(err, collection) {
+        db.createCollection('shouldNotFailDueToStackOverflowEach', function (err, collection) {
           test.equal(null, err);
 
           var docs = [];
@@ -2649,14 +2644,14 @@ describe('Cursor', function() {
 
           // Execute inserts
           for (i = 0; i < left; i++) {
-            collection.insert(allDocs.shift(), configuration.writeConcernMax(), function(err, d) {
+            collection.insert(allDocs.shift(), configuration.writeConcernMax(), function (err, d) {
               test.equal(null, err);
 
               left = left - 1;
               totalI = totalI + d.length;
 
               if (left === 0) {
-                collection.find({}).each(function(err, item) {
+                collection.find({}).each(function (err, item) {
                   test.equal(null, err);
                   if (item == null) {
                     test.equal(30000, total);
@@ -2680,14 +2675,14 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
-        db.createCollection('shouldNotFailDueToStackOverflowToArray', function(err, collection) {
+        db.createCollection('shouldNotFailDueToStackOverflowToArray', function (err, collection) {
           test.equal(null, err);
 
           var docs = [];
@@ -2705,15 +2700,18 @@ describe('Cursor', function() {
 
           // Execute inserts
           for (i = 0; i < left; i++) {
-            setTimeout(function() {
-              collection.insert(allDocs.shift(), configuration.writeConcernMax(), function(err, d) {
+            setTimeout(function () {
+              collection.insert(allDocs.shift(), configuration.writeConcernMax(), function (
+                err,
+                d
+              ) {
                 test.equal(null, err);
 
                 left = left - 1;
                 totalI = totalI + d.length;
 
                 if (left === 0) {
-                  collection.find({}).toArray(function(err, items) {
+                  collection.find({}).toArray(function (err, items) {
                     test.equal(null, err);
 
                     test.equal(30000, items.length);
@@ -2736,10 +2734,10 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
@@ -2747,14 +2745,14 @@ describe('Cursor', function() {
         var docs = [];
         for (var i = 0; i < 100; i++) docs.push({ a: i, OrderNumber: i });
 
-        collection.insert(docs, configuration.writeConcernMax(), function(err) {
+        collection.insert(docs, configuration.writeConcernMax(), function (err) {
           test.equal(null, err);
 
           collection
             .find({}, { OrderNumber: 1 })
             .skip(10)
             .limit(10)
-            .toArray(function(err, items) {
+            .toArray(function (err, items) {
               test.equal(null, err);
               test.equal(10, items[0].OrderNumber);
 
@@ -2762,7 +2760,7 @@ describe('Cursor', function() {
                 .find({}, { OrderNumber: 1 })
                 .skip(10)
                 .limit(10)
-                .count(true, function(err, count) {
+                .count(true, function (err, count) {
                   test.equal(null, err);
                   test.equal(10, count);
                   client.close(done);
@@ -2780,10 +2778,10 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
@@ -2791,11 +2789,11 @@ describe('Cursor', function() {
         var docs = [];
         for (var i = 0; i < 100; i++) docs.push({ a: i, OrderNumber: i });
 
-        collection.insert(docs, configuration.writeConcernMax(), function(err) {
+        collection.insert(docs, configuration.writeConcernMax(), function (err) {
           test.equal(null, err);
 
           const cursor = collection.find({}, { tailable: true });
-          cursor.each(function(err) {
+          cursor.each(function (err) {
             test.ok(err instanceof Error);
             test.ok(typeof err.code === 'number');
 
@@ -2815,14 +2813,14 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
 
       // DOC_LINE var client = new MongoClient(new Server('localhost', 27017));
       // DOC_START
       // Establish connection to db
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
@@ -2834,16 +2832,16 @@ describe('Cursor', function() {
         }
 
         // Create a collection
-        db.createCollection('test_close_function_on_cursor_2', function(err, collection) {
+        db.createCollection('test_close_function_on_cursor_2', function (err, collection) {
           test.equal(null, err);
 
           // Insert documents into collection
-          collection.insert(docs, configuration.writeConcernMax(), function(err) {
+          collection.insert(docs, configuration.writeConcernMax(), function (err) {
             test.equal(null, err);
 
             const cursor = collection.find({});
 
-            cursor.count(function(err, count) {
+            cursor.count(function (err, count) {
               test.equal(null, err);
               test.equal(100, count);
 
@@ -2866,44 +2864,44 @@ describe('Cursor', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
 
       // DOC_LINE var client = new MongoClient(new Server('localhost', 27017));
       // DOC_START
       // Establish connection to db
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
         var col = db.collection('count_hint');
 
-        col.insert([{ i: 1 }, { i: 2 }], { w: 1 }, function(err) {
+        col.insert([{ i: 1 }, { i: 2 }], { w: 1 }, function (err) {
           test.equal(null, err);
 
-          col.ensureIndex({ i: 1 }, function(err) {
+          col.ensureIndex({ i: 1 }, function (err) {
             test.equal(null, err);
 
-            col.find({ i: 1 }, { hint: '_id_' }).count(function(err, count) {
+            col.find({ i: 1 }, { hint: '_id_' }).count(function (err, count) {
               test.equal(null, err);
               test.equal(1, count);
 
-              col.find({}, { hint: '_id_' }).count(function(err, count) {
+              col.find({}, { hint: '_id_' }).count(function (err, count) {
                 test.equal(null, err);
                 test.equal(2, count);
 
-                col.find({ i: 1 }, { hint: 'BAD HINT' }).count(function(err) {
+                col.find({ i: 1 }, { hint: 'BAD HINT' }).count(function (err) {
                   test.ok(err != null);
 
-                  col.ensureIndex({ x: 1 }, { sparse: true }, function(err) {
+                  col.ensureIndex({ x: 1 }, { sparse: true }, function (err) {
                     test.equal(null, err);
 
-                    col.find({ i: 1 }, { hint: 'x_1' }).count(function(err, count) {
+                    col.find({ i: 1 }, { hint: 'x_1' }).count(function (err, count) {
                       test.equal(null, err);
                       test.equal(0, count);
 
-                      col.find({}, { hint: 'i_1' }).count(function(err, count) {
+                      col.find({}, { hint: 'i_1' }).count(function (err, count) {
                         test.equal(null, err);
                         test.equal(2, count);
 
@@ -2928,10 +2926,10 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
@@ -2943,15 +2941,15 @@ describe('Cursor', function() {
         }
 
         // Create a collection
-        db.createCollection('terminate_each_returning_false', function(err, collection) {
+        db.createCollection('terminate_each_returning_false', function (err, collection) {
           test.equal(null, err);
 
           // Insert documents into collection
-          collection.insert(docs, configuration.writeConcernMax(), function(err) {
+          collection.insert(docs, configuration.writeConcernMax(), function (err) {
             test.equal(null, err);
             var finished = false;
 
-            collection.find({}).each(function(err, doc) {
+            collection.find({}).each(function (err, doc) {
               test.equal(null, err);
 
               if (doc) {
@@ -2975,10 +2973,10 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         test.equal(null, err);
 
@@ -2986,13 +2984,13 @@ describe('Cursor', function() {
           color: 'brown'
         };
 
-        db.collection('donkies').insertOne(donkey, function(err, result) {
+        db.collection('donkies').insertOne(donkey, function (err, result) {
           test.equal(null, err);
 
           var query = { _id: result.insertedId };
           var options = { maxTimeMS: 1000 };
 
-          db.collection('donkies').findOne(query, options, function(err, doc) {
+          db.collection('donkies').findOne(query, options, function (err, doc) {
             test.equal(null, err);
             test.equal('brown', doc.color);
 
@@ -3010,26 +3008,26 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         test.equal(null, err);
         const collectionName = 'should_correctly_handle_batchSize_2';
 
-        db.collection(collectionName).insert([{ x: 1 }, { x: 2 }, { x: 3 }], function(err) {
+        db.collection(collectionName).insert([{ x: 1 }, { x: 2 }, { x: 3 }], function (err) {
           test.equal(null, err);
 
           const cursor = db.collection(collectionName).find({}, { batchSize: 2 });
 
-          cursor.next(function(err) {
+          cursor.next(function (err) {
             test.equal(null, err);
 
-            cursor.next(function(err) {
+            cursor.next(function (err) {
               test.equal(null, err);
 
-              cursor.next(function(err) {
+              cursor.next(function (err) {
                 test.equal(null, err);
                 client.close(done);
               });
@@ -3043,10 +3041,10 @@ describe('Cursor', function() {
   it('Should report database name and collection name', {
     metadata: { requires: { topology: ['single'] } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         test.equal(null, err);
 
@@ -3066,7 +3064,7 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var docs = [];
 
       for (var i = 0; i < 1000; i++) {
@@ -3076,25 +3074,25 @@ describe('Cursor', function() {
 
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
-        db.createCollection('Should_correctly_execute_count_on_cursor_2', function(
+        db.createCollection('Should_correctly_execute_count_on_cursor_2', function (
           err,
           collection
         ) {
           test.equal(null, err);
 
           // insert all docs
-          collection.insert(docs, configuration.writeConcernMax(), function(err) {
+          collection.insert(docs, configuration.writeConcernMax(), function (err) {
             test.equal(null, err);
 
             // Create a cursor for the content
             var cursor = collection.find({});
             cursor.limit(100);
             cursor.skip(10);
-            cursor.count(true, { maxTimeMS: 1000 }, function(err) {
+            cursor.count(true, { maxTimeMS: 1000 }, function (err) {
               test.equal(null, err);
 
               // Create a cursor for the content
@@ -3102,7 +3100,7 @@ describe('Cursor', function() {
               cursor.limit(100);
               cursor.skip(10);
               cursor.maxTimeMS(100);
-              cursor.count(function(err) {
+              cursor.count(function (err) {
                 test.equal(null, err);
 
                 client.close(done);
@@ -3121,7 +3119,7 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var docs = [];
 
       for (var i = 0; i < 1000; i++) {
@@ -3131,23 +3129,23 @@ describe('Cursor', function() {
 
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
-        db.createCollection('Should_correctly_execute_count_on_cursor_3', function(
+        db.createCollection('Should_correctly_execute_count_on_cursor_3', function (
           err,
           collection
         ) {
           test.equal(null, err);
 
           // insert all docs
-          collection.insert(docs, configuration.writeConcernMax(), function(err) {
+          collection.insert(docs, configuration.writeConcernMax(), function (err) {
             test.equal(null, err);
 
             // Create a cursor for the content
             var cursor = collection.find({}, { maxTimeMS: 100 });
-            cursor.toArray(function(err) {
+            cursor.toArray(function (err) {
               test.equal(null, err);
 
               client.close(done);
@@ -3165,7 +3163,7 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var docs = [];
 
       for (var i = 0; i < 1000; i++) {
@@ -3175,31 +3173,31 @@ describe('Cursor', function() {
 
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         test.equal(null, err);
 
         var collection = db.collection('map_toArray');
 
         // insert all docs
-        collection.insert(docs, configuration.writeConcernMax(), function(err) {
+        collection.insert(docs, configuration.writeConcernMax(), function (err) {
           test.equal(null, err);
 
           // Create a cursor for the content
           var cursor = collection
             .find({})
-            .map(function() {
+            .map(function () {
               return { a: 1 };
             })
             .batchSize(5)
             .limit(10);
 
-          cursor.toArray(function(err, docs) {
+          cursor.toArray(function (err, docs) {
             test.equal(null, err);
             test.equal(10, docs.length);
 
             // Ensure all docs where mapped
-            docs.forEach(function(x) {
+            docs.forEach(function (x) {
               test.equal(1, x.a);
             });
 
@@ -3217,7 +3215,7 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var docs = [];
 
       for (var i = 0; i < 1000; i++) {
@@ -3227,26 +3225,26 @@ describe('Cursor', function() {
 
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         test.equal(null, err);
 
         var collection = db.collection('map_next');
 
         // insert all docs
-        collection.insert(docs, configuration.writeConcernMax(), function(err) {
+        collection.insert(docs, configuration.writeConcernMax(), function (err) {
           test.equal(null, err);
 
           // Create a cursor for the content
           var cursor = collection
             .find({})
-            .map(function() {
+            .map(function () {
               return { a: 1 };
             })
             .batchSize(5)
             .limit(10);
 
-          cursor.next(function(err, doc) {
+          cursor.next(function (err, doc) {
             test.equal(null, err);
             test.equal(1, doc.a);
 
@@ -3266,7 +3264,7 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var docs = [];
 
       for (var i = 0; i < 1000; i++) {
@@ -3276,26 +3274,26 @@ describe('Cursor', function() {
 
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         test.equal(null, err);
 
         var collection = db.collection('map_each');
 
         // insert all docs
-        collection.insert(docs, configuration.writeConcernMax(), function(err) {
+        collection.insert(docs, configuration.writeConcernMax(), function (err) {
           test.equal(null, err);
 
           // Create a cursor for the content
           var cursor = collection
             .find({})
-            .map(function() {
+            .map(function () {
               return { a: 1 };
             })
             .batchSize(5)
             .limit(10);
 
-          cursor.each(function(err, doc) {
+          cursor.each(function (err, doc) {
             test.equal(null, err);
 
             if (doc) {
@@ -3316,7 +3314,7 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var docs = [];
 
       for (var i = 0; i < 1000; i++) {
@@ -3326,33 +3324,33 @@ describe('Cursor', function() {
 
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         test.equal(null, err);
 
         var collection = db.collection('map_forEach');
 
         // insert all docs
-        collection.insert(docs, configuration.writeConcernMax(), function(err) {
+        collection.insert(docs, configuration.writeConcernMax(), function (err) {
           test.equal(null, err);
 
           // Create a cursor for the content
           var cursor = collection
             .find({})
-            .map(function() {
+            .map(function () {
               return { a: 2 };
             })
-            .map(function(x) {
+            .map(function (x) {
               return { a: x.a * x.a };
             })
             .batchSize(5)
             .limit(10);
 
           cursor.forEach(
-            function(doc) {
+            function (doc) {
               test.equal(4, doc.a);
             },
-            function(err) {
+            function (err) {
               test.equal(null, err);
               client.close(done);
             }
@@ -3369,7 +3367,7 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var docs = [];
 
       for (var i = 0; i < 1000; i++) {
@@ -3379,30 +3377,30 @@ describe('Cursor', function() {
 
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         test.equal(null, err);
 
         var collection = db.collection('map_mapmapforEach');
 
         // insert all docs
-        collection.insert(docs, configuration.writeConcernMax(), function(err) {
+        collection.insert(docs, configuration.writeConcernMax(), function (err) {
           test.equal(null, err);
 
           // Create a cursor for the content
           var cursor = collection
             .find({})
-            .map(function() {
+            .map(function () {
               return { a: 1 };
             })
             .batchSize(5)
             .limit(10);
 
           cursor.forEach(
-            function(doc) {
+            function (doc) {
               test.equal(1, doc.a);
             },
-            function(err) {
+            function (err) {
               test.equal(null, err);
               client.close(done);
             }
@@ -3417,10 +3415,10 @@ describe('Cursor', function() {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         test.equal(null, err);
 
@@ -3433,7 +3431,7 @@ describe('Cursor', function() {
           ordered.insert({ a: i });
         }
 
-        ordered.execute({ w: 1 }, function(err) {
+        ordered.execute({ w: 1 }, function (err) {
           test.equal(null, err);
 
           // Let's attempt to skip and limit
@@ -3441,7 +3439,7 @@ describe('Cursor', function() {
             .find({})
             .limit(2016)
             .skip(2016)
-            .toArray(function(err, docs) {
+            .toArray(function (err, docs) {
               test.equal(null, err);
               test.equal(2016, docs.length);
 
@@ -3457,21 +3455,21 @@ describe('Cursor', function() {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { topology: ['single'], mongodb: '>3.1.9' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
         var options = { capped: true, size: 8 };
-        db.createCollection('should_await_data_max_awaittime_ms', options, function(
+        db.createCollection('should_await_data_max_awaittime_ms', options, function (
           err,
           collection
         ) {
           test.equal(null, err);
 
-          collection.insert({ a: 1 }, configuration.writeConcernMax(), function(err) {
+          collection.insert({ a: 1 }, configuration.writeConcernMax(), function (err) {
             test.equal(null, err);
 
             var s = new Date();
@@ -3482,11 +3480,11 @@ describe('Cursor', function() {
               .addCursorFlag('awaitData', true)
               .maxAwaitTimeMS(500);
 
-            cursor.each(function(err, result) {
+            cursor.each(function (err, result) {
               test.equal(null, err);
 
               if (result) {
-                setTimeout(function() {
+                setTimeout(function () {
                   cursor.kill();
                 }, 300);
               } else {
@@ -3507,10 +3505,10 @@ describe('Cursor', function() {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         test.equal(null, err);
 
@@ -3523,16 +3521,16 @@ describe('Cursor', function() {
           ordered.insert({ a: i });
         }
 
-        ordered.execute({ w: 1 }, function(err) {
+        ordered.execute({ w: 1 }, function (err) {
           test.equal(null, err);
 
           // Let's attempt to skip and limit
           var cursor = collection.find({}).batchSize(10);
-          cursor.on('data', function() {
+          cursor.on('data', function () {
             cursor.destroy();
           });
 
-          cursor.on('close', function() {
+          cursor.on('close', function () {
             client.close(done);
           });
         });
@@ -3547,7 +3545,7 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var docs = [];
 
       for (var i = 0; i < 1; i++) {
@@ -3557,29 +3555,29 @@ describe('Cursor', function() {
 
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
-        db.createCollection('shouldCorrectlyExecuteEnsureIndexWithNoCallback', function(
+        db.createCollection('shouldCorrectlyExecuteEnsureIndexWithNoCallback', function (
           err,
           collection
         ) {
           test.equal(null, err);
 
           // ensure index of createdAt index
-          collection.ensureIndex({ createdAt: 1 }, function(err) {
+          collection.ensureIndex({ createdAt: 1 }, function (err) {
             test.equal(null, err);
 
             // insert all docs
-            collection.insert(docs, configuration.writeConcernMax(), function(err) {
+            collection.insert(docs, configuration.writeConcernMax(), function (err) {
               test.equal(null, err);
 
               // Find with sort
               collection
                 .find()
                 .sort(['createdAt', 'asc'])
-                .toArray(function(err, items) {
+                .toArray(function (err, items) {
                   test.equal(null, err);
 
                   test.equal(1, items.length);
@@ -3599,7 +3597,7 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var docs = [];
 
       for (var i = 0; i < 50; i++) {
@@ -3609,15 +3607,15 @@ describe('Cursor', function() {
 
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
-        db.createCollection('negative_batch_size_and_limit_set', function(err, collection) {
+        db.createCollection('negative_batch_size_and_limit_set', function (err, collection) {
           test.equal(null, err);
 
           // insert all docs
-          collection.insert(docs, configuration.writeConcernMax(), function(err) {
+          collection.insert(docs, configuration.writeConcernMax(), function (err) {
             test.equal(null, err);
 
             // Create a cursor for the content
@@ -3625,7 +3623,7 @@ describe('Cursor', function() {
             cursor
               .limit(100)
               .skip(0)
-              .count(function(err, c) {
+              .count(function (err, c) {
                 test.equal(null, err);
                 test.equal(50, c);
 
@@ -3633,7 +3631,7 @@ describe('Cursor', function() {
                 cursor
                   .limit(100)
                   .skip(0)
-                  .toArray(function(err) {
+                  .toArray(function (err) {
                     test.equal(null, err);
                     test.equal(50, c);
 
@@ -3653,7 +3651,7 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var docs = [];
       var configuration = this.configuration;
 
@@ -3663,23 +3661,23 @@ describe('Cursor', function() {
       }
 
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
-        db.createCollection('Should_correctly_execute_count_on_cursor_1_', function(
+        db.createCollection('Should_correctly_execute_count_on_cursor_1_', function (
           err,
           collection
         ) {
           test.equal(null, err);
 
           // insert all docs
-          collection.insert(docs, configuration.writeConcernMax(), function(err) {
+          collection.insert(docs, configuration.writeConcernMax(), function (err) {
             test.equal(null, err);
 
             // Create a cursor for the content
             var cursor = collection.find({});
-            cursor.batchSize(-10).next(function(err) {
+            cursor.batchSize(-10).next(function (err) {
               test.equal(null, err);
               test.ok(cursor.cursorState.cursorId.equals(BSON.Long.ZERO));
 
@@ -3698,19 +3696,19 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var started = [];
-      var listener = require('../../src').instrument(function(err) {
+      var listener = require('../../src').instrument(function (err) {
         test.equal(null, err);
       });
 
-      listener.on('started', function(event) {
+      listener.on('started', function (event) {
         if (event.commandName === 'count') started.push(event);
       });
 
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         test.equal(null, err);
 
@@ -3719,7 +3717,7 @@ describe('Cursor', function() {
           .limit(5)
           .skip(5)
           .hint({ project: 1 })
-          .count(true, function(err) {
+          .count(true, function (err) {
             test.equal(null, err);
             test.equal(1, started.length);
             if (started[0].command.readConcern)
@@ -3743,20 +3741,20 @@ describe('Cursor', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var started = [];
 
-      var listener = require('../../src').instrument(function(err) {
+      var listener = require('../../src').instrument(function (err) {
         test.equal(null, err);
       });
 
-      listener.on('started', function(event) {
+      listener.on('started', function (event) {
         if (event.commandName === 'count') started.push(event);
       });
 
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         test.equal(null, err);
 
@@ -3770,7 +3768,7 @@ describe('Cursor', function() {
             skip: 5,
             hint: { project: 1 }
           },
-          function(err) {
+          function (err) {
             test.equal(null, err);
             test.equal(1, started.length);
             if (started[0].command.readConcern)
@@ -3796,7 +3794,7 @@ describe('Cursor', function() {
       }
     },
 
-    test: function() {
+    test: function () {
       // Load up the documents
       const docs = [];
       for (let i = 0; i < 1000; i += 1) {
@@ -3814,7 +3812,7 @@ describe('Cursor', function() {
         client
           // Connect
           .connect()
-          .then(function(client) {
+          .then(function (client) {
             cleanup = () => client.close();
             const db = client.db(configuration.db);
             const collection = db.collection('cursorkilltest1');
@@ -3881,10 +3879,10 @@ describe('Cursor', function() {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
@@ -3897,7 +3895,7 @@ describe('Cursor', function() {
         };
 
         var cursor = db.s.topology.cursor(db.namespace, findCommand, { readPreference: 42 });
-        cursor.hasNext(function(err) {
+        cursor.hasNext(function (err) {
           test.ok(err !== null);
           test.equal(err.message, 'readPreference must be a ReadPreference instance');
           done();
@@ -3915,21 +3913,21 @@ describe('Cursor', function() {
           mongodb: '>=3.6.0'
         }
       },
-      test: function(done) {
+      test: function (done) {
         const configuration = this.configuration;
         const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
 
-        client.connect(function(err, client) {
+        client.connect(function (err, client) {
           test.equal(null, err);
 
           const db = client.db(configuration.db);
           const collection = db.collection('cursor_session_tests');
 
-          collection.insertMany([{ a: 1, b: 2 }], function(err) {
+          collection.insertMany([{ a: 1, b: 2 }], function (err) {
             test.equal(null, err);
             const cursor = collection.find({});
 
-            cursor.next(function() {
+            cursor.next(function () {
               test.equal(client.topology.s.sessions.size, 0);
               client.close(done);
             });
@@ -3948,11 +3946,11 @@ describe('Cursor', function() {
           mongodb: '>=3.6.0'
         }
       },
-      test: function(done) {
+      test: function (done) {
         const configuration = this.configuration;
         const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
 
-        client.connect(function(err, client) {
+        client.connect(function (err, client) {
           test.equal(null, err);
 
           const db = client.db(configuration.db);
@@ -3966,16 +3964,16 @@ describe('Cursor', function() {
             { a: 9, b: 10 }
           ];
 
-          collection.insertMany(docs, function(err) {
+          collection.insertMany(docs, function (err) {
             test.equal(null, err);
             const cursor = collection.find({}, { batchSize: 3 });
-            cursor.next(function() {
+            cursor.next(function () {
               test.equal(client.topology.s.sessions.size, 1);
-              cursor.next(function() {
+              cursor.next(function () {
                 test.equal(client.topology.s.sessions.size, 1);
-                cursor.next(function() {
+                cursor.next(function () {
                   test.equal(client.topology.s.sessions.size, 1);
-                  cursor.next(function() {
+                  cursor.next(function () {
                     test.equal(client.topology.s.sessions.size, 0);
                     client.close(done);
                   });
@@ -3988,11 +3986,11 @@ describe('Cursor', function() {
     }
   );
 
-  it('should return a promise when no callback supplied to forEach method', function(done) {
+  it('should return a promise when no callback supplied to forEach method', function (done) {
     const configuration = this.configuration;
     const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
 
-    client.connect(function(err, client) {
+    client.connect(function (err, client) {
       expect(err).to.not.exist;
       const db = client.db(configuration.db);
       const collection = db.collection('cursor_session_tests2');
@@ -4006,23 +4004,23 @@ describe('Cursor', function() {
     });
   });
 
-  it('should return false when exhausted and hasNext called more than once', function(done) {
+  it('should return false when exhausted and hasNext called more than once', function (done) {
     const configuration = this.configuration;
     const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
 
-    client.connect(function(err, client) {
+    client.connect(function (err, client) {
       const db = client.db(configuration.db);
 
-      db.createCollection('cursor_hasNext_test').then(function() {
+      db.createCollection('cursor_hasNext_test').then(function () {
         const cursor = db.collection('cursor_hasNext_test').find();
 
         cursor
           .hasNext()
-          .then(function(val1) {
+          .then(function (val1) {
             expect(val1).to.equal(false);
             return cursor.hasNext();
           })
-          .then(function(val2) {
+          .then(function (val2) {
             expect(val2).to.equal(false);
             cursor.close(() => client.close(() => done()));
           })
@@ -4040,7 +4038,7 @@ describe('Cursor', function() {
     const transformFunc = config.transformFunc;
     const expectedSet = config.expectedSet;
 
-    client.connect(function(err, client) {
+    client.connect(function (err, client) {
       const db = client.db(configuration.db);
       let collection, cursor;
       const docs = [
@@ -4060,16 +4058,16 @@ describe('Cursor', function() {
         .then(_cursor => (cursor = _cursor))
         .then(() => cursor.transformStream(transformParam))
         .then(stream => {
-          stream.on('data', function(doc) {
+          stream.on('data', function (doc) {
             resultSet.add(doc);
           });
 
-          stream.once('end', function() {
+          stream.once('end', function () {
             expect(resultSet).to.deep.equal(expectedSet);
             close();
           });
 
-          stream.once('error', function(e) {
+          stream.once('error', function (e) {
             close(e);
           });
         })
@@ -4077,7 +4075,7 @@ describe('Cursor', function() {
     });
   }
 
-  it('transformStream should apply the supplied transformation function to each document in the stream', function(done) {
+  it('transformStream should apply the supplied transformation function to each document in the stream', function (done) {
     const configuration = this.configuration;
     const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
     const expectedDocs = [
@@ -4096,7 +4094,7 @@ describe('Cursor', function() {
     testTransformStream(config, done);
   });
 
-  it('transformStream should return a stream of unmodified docs if no transform function applied', function(done) {
+  it('transformStream should return a stream of unmodified docs if no transform function applied', function (done) {
     const configuration = this.configuration;
     const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
     const expectedDocs = [
@@ -4115,7 +4113,7 @@ describe('Cursor', function() {
     testTransformStream(config, done);
   });
 
-  it.skip('should apply parent read preference to count command', function(done) {
+  it.skip('should apply parent read preference to count command', function (done) {
     // NOTE: this test is skipped because mongo orchestration does not test sharded clusters
     // with secondaries. This behavior should be unit tested
 
@@ -4125,7 +4123,7 @@ describe('Cursor', function() {
       { poolSize: 1, auto_reconnect: false, connectWithNoPrimary: true }
     );
 
-    client.connect(function(err, client) {
+    client.connect(function (err, client) {
       expect(err).to.not.exist;
 
       const db = client.db(configuration.db);
@@ -4150,7 +4148,7 @@ describe('Cursor', function() {
     });
   });
 
-  it('should not consume first document on hasNext when streaming', function(done) {
+  it('should not consume first document on hasNext when streaming', function (done) {
     const configuration = this.configuration;
     const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
 
@@ -4191,8 +4189,8 @@ describe('Cursor', function() {
     });
   });
 
-  describe('transforms', function() {
-    it('should correctly apply map transform to cursor as readable stream', function(done) {
+  describe('transforms', function () {
+    it('should correctly apply map transform to cursor as readable stream', function (done) {
       const configuration = this.configuration;
       const client = configuration.newClient();
       client.connect(err => {
@@ -4219,7 +4217,7 @@ describe('Cursor', function() {
       });
     });
 
-    it('should correctly apply map transform when converting cursor to array', function(done) {
+    it('should correctly apply map transform when converting cursor to array', function (done) {
       const configuration = this.configuration;
       const client = configuration.newClient();
       client.connect(err => {

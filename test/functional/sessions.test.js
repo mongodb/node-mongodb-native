@@ -8,7 +8,7 @@ const loadSpecTests = require('../spec').loadSpecTests;
 const ignoredCommands = ['ismaster'];
 const test = {
   commands: { started: [], succeeded: [] },
-  setup: function(config) {
+  setup: function (config) {
     this.commands = { started: [], succeeded: [] };
     this.client = config.newClient(
       { w: 1 },
@@ -31,13 +31,13 @@ const test = {
   }
 };
 
-describe('Sessions', function() {
-  before(function() {
+describe('Sessions', function () {
+  before(function () {
     return setupDatabase(this.configuration);
   });
 
-  describe('endSessions', function() {
-    beforeEach(function() {
+  describe('endSessions', function () {
+    beforeEach(function () {
       return test.setup(this.configuration);
     });
 
@@ -47,7 +47,7 @@ describe('Sessions', function() {
         // Skipping session leak tests b/c these are explicit sessions
         sessions: { skipLeakTests: true }
       },
-      test: function(done) {
+      test: function (done) {
         const client = test.client;
         let sessions = [client.startSession(), client.startSession()].map(s => s.id);
 
@@ -66,8 +66,8 @@ describe('Sessions', function() {
 
   describe('withSession', {
     metadata: { requires: { mongodb: '>3.6.0' } },
-    test: function() {
-      beforeEach(function() {
+    test: function () {
+      beforeEach(function () {
         return test.setup(this.configuration);
       });
 
@@ -75,11 +75,7 @@ describe('Sessions', function() {
         {
           description: 'should support operations that return promises',
           operation: client => session => {
-            return client
-              .db('test')
-              .collection('foo')
-              .find({}, { session })
-              .toArray();
+            return client.db('test').collection('foo').find({}, { session }).toArray();
           }
         },
         // {
@@ -113,7 +109,7 @@ describe('Sessions', function() {
           }
         }
       ].forEach(testCase => {
-        it(testCase.description, function() {
+        it(testCase.description, function () {
           const client = test.client;
 
           return client
@@ -130,16 +126,12 @@ describe('Sessions', function() {
         });
       });
 
-      it('supports passing options to ClientSession', function() {
+      it('supports passing options to ClientSession', function () {
         const client = test.client;
 
         const promise = client.withSession({ causalConsistency: false }, session => {
           expect(session.supports.causalConsistency).to.be.false;
-          return client
-            .db('test')
-            .collection('foo')
-            .find({}, { session })
-            .toArray();
+          return client.db('test').collection('foo').find({}, { session }).toArray();
         });
 
         return promise
@@ -155,7 +147,7 @@ describe('Sessions', function() {
     }
   });
 
-  describe('spec tests', function() {
+  describe('spec tests', function () {
     class SessionSpecTestContext extends TestRunnerContext {
       assertSessionNotDirty(options) {
         const session = options.session;
@@ -186,7 +178,7 @@ describe('Sessions', function() {
     const testSuites = loadSpecTests('sessions');
 
     after(() => testContext.teardown());
-    before(function() {
+    before(function () {
       return testContext.setup(this.configuration);
     });
 

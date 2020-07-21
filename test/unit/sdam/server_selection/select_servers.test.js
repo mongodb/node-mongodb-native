@@ -5,29 +5,29 @@ const ReadPreference = require('../../../../src/read_preference');
 const { expect } = require('chai');
 const sinon = require('sinon');
 
-describe('selectServer', function() {
-  beforeEach(function() {
+describe('selectServer', function () {
+  beforeEach(function () {
     this.sinon = sinon.sandbox.create();
   });
 
-  afterEach(function() {
+  afterEach(function () {
     this.sinon.restore();
   });
 
-  it('should schedule monitoring if no suitable server is found', function(done) {
+  it('should schedule monitoring if no suitable server is found', function (done) {
     const topology = new Topology('someserver:27019');
     const requestCheck = this.sinon.stub(Server.prototype, 'requestCheck');
 
     // satisfy the initial connect, then restore the original method
     const selectServer = this.sinon
       .stub(Topology.prototype, 'selectServer')
-      .callsFake(function(selector, options, callback) {
+      .callsFake(function (selector, options, callback) {
         const server = Array.from(this.s.servers.values())[0];
         selectServer.restore();
         callback(null, server);
       });
 
-    this.sinon.stub(Server.prototype, 'connect').callsFake(function() {
+    this.sinon.stub(Server.prototype, 'connect').callsFake(function () {
       this.s.state = 'connected';
       this.emit('connect');
     });
@@ -40,18 +40,16 @@ describe('selectServer', function() {
 
         // When server is created `connect` is called on the monitor. When server selection
         // occurs `requestCheck` will be called for an immediate check.
-        expect(requestCheck)
-          .property('callCount')
-          .to.equal(1);
+        expect(requestCheck).property('callCount').to.equal(1);
 
         topology.close(done);
       });
     });
   });
 
-  it('should disallow selection when the topology is explicitly closed', function(done) {
+  it('should disallow selection when the topology is explicitly closed', function (done) {
     const topology = new Topology('someserver:27019');
-    this.sinon.stub(Server.prototype, 'connect').callsFake(function() {
+    this.sinon.stub(Server.prototype, 'connect').callsFake(function () {
       this.s.state = 'connected';
       this.emit('connect');
     });
@@ -65,18 +63,18 @@ describe('selectServer', function() {
     });
   });
 
-  describe('waitQueue', function() {
-    it('should process all wait queue members, including selection with errors', function(done) {
+  describe('waitQueue', function () {
+    it('should process all wait queue members, including selection with errors', function (done) {
       const topology = new Topology('someserver:27019');
       const selectServer = this.sinon
         .stub(Topology.prototype, 'selectServer')
-        .callsFake(function(selector, options, callback) {
+        .callsFake(function (selector, options, callback) {
           const server = Array.from(this.s.servers.values())[0];
           selectServer.restore();
           callback(null, server);
         });
 
-      this.sinon.stub(Server.prototype, 'connect').callsFake(function() {
+      this.sinon.stub(Server.prototype, 'connect').callsFake(function () {
         this.s.state = 'connected';
         this.emit('connect');
       });

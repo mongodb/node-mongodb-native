@@ -2,8 +2,8 @@
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 
-describe('Promote Buffers', function() {
-  before(function() {
+describe('Promote Buffers', function () {
+  before(function () {
     return setupDatabase(this.configuration);
   });
 
@@ -14,23 +14,23 @@ describe('Promote Buffers', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
         poolSize: 1,
         promoteBuffers: true
       });
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         db.collection('shouldCorrectlyHonorPromoteBuffer1').insert(
           {
             doc: Buffer.alloc(256)
           },
-          function(err) {
+          function (err) {
             test.equal(null, err);
 
-            db.collection('shouldCorrectlyHonorPromoteBuffer1').findOne(function(err, doc) {
+            db.collection('shouldCorrectlyHonorPromoteBuffer1').findOne(function (err, doc) {
               test.equal(null, err);
               test.ok(doc.doc instanceof Buffer);
 
@@ -49,21 +49,21 @@ describe('Promote Buffers', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
 
       const client = configuration.newClient({}, { promoteBuffers: true });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
 
         db.collection('shouldCorrectlyHonorPromoteBuffer2').insert(
           {
             doc: Buffer.alloc(256)
           },
-          function(err) {
+          function (err) {
             test.equal(null, err);
 
-            db.collection('shouldCorrectlyHonorPromoteBuffer2').findOne(function(err, doc) {
+            db.collection('shouldCorrectlyHonorPromoteBuffer2').findOne(function (err, doc) {
               test.equal(null, err);
               test.ok(doc.doc instanceof Buffer);
 
@@ -82,23 +82,23 @@ describe('Promote Buffers', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
 
       const client = configuration.newClient({}, { promoteBuffers: true });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
 
         db.collection('shouldCorrectlyHonorPromoteBuffer3').insert(
           {
             doc: Buffer.alloc(256)
           },
-          function(err) {
+          function (err) {
             test.equal(null, err);
 
             db.collection('shouldCorrectlyHonorPromoteBuffer3')
               .find()
-              .next(function(err, doc) {
+              .next(function (err, doc) {
                 test.equal(null, err);
                 test.ok(doc.doc instanceof Buffer);
 
@@ -117,22 +117,22 @@ describe('Promote Buffers', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
 
       const client = configuration.newClient();
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         db.collection('shouldCorrectlyHonorPromoteBuffer4').insert(
           {
             doc: Buffer.alloc(256)
           },
-          function(err) {
+          function (err) {
             test.equal(null, err);
 
             db.collection('shouldCorrectlyHonorPromoteBuffer4')
               .find({}, { promoteBuffers: true })
-              .next(function(err, doc) {
+              .next(function (err, doc) {
                 test.equal(null, err);
                 test.ok(doc.doc instanceof Buffer);
 
@@ -154,22 +154,22 @@ describe('Promote Buffers', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
 
       const client = configuration.newClient();
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
         db.collection('shouldCorrectlyHonorPromoteBuffer5').insert(
           {
             doc: Buffer.alloc(256)
           },
-          function(err) {
+          function (err) {
             test.equal(null, err);
 
             db.collection('shouldCorrectlyHonorPromoteBuffer5')
               .aggregate([{ $match: {} }], { promoteBuffers: true })
-              .next(function(err, doc) {
+              .next(function (err, doc) {
                 test.equal(null, err);
                 test.ok(doc.doc instanceof Buffer);
 

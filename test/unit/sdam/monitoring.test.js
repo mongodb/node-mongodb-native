@@ -14,15 +14,15 @@ class MockServer {
   }
 }
 
-describe('monitoring', function() {
+describe('monitoring', function () {
   let mockServer;
 
   after(() => mock.cleanup());
-  beforeEach(function() {
+  beforeEach(function () {
     return mock.createServer().then(server => (mockServer = server));
   });
 
-  it('should record roundTripTime', function(done) {
+  it('should record roundTripTime', function (done) {
     mockServer.setMessageHandler(request => {
       const doc = request.document;
       if (doc.ismaster) {
@@ -38,22 +38,17 @@ describe('monitoring', function() {
       expect(err).to.not.exist;
 
       setTimeout(() => {
-        expect(topology)
-          .property('description')
-          .property('servers')
-          .to.have.length(1);
+        expect(topology).property('description').property('servers').to.have.length(1);
 
         const serverDescription = Array.from(topology.description.servers.values())[0];
-        expect(serverDescription)
-          .property('roundTripTime')
-          .to.be.greaterThan(0);
+        expect(serverDescription).property('roundTripTime').to.be.greaterThan(0);
 
         topology.close(done);
       }, 500);
     });
   });
 
-  it('should recover on error during initial connect', function(done) {
+  it('should recover on error during initial connect', function (done) {
     // This test should take ~1s because initial server selection fails and an immediate check
     // is requested. If the behavior of the immediate check is broken, the test will take ~10s
     // to complete. We want to ensure validation of the immediate check behavior, and therefore
@@ -82,22 +77,17 @@ describe('monitoring', function() {
     const topology = new Topology(mockServer.uri());
     topology.connect(err => {
       expect(err).to.not.exist;
-      expect(topology)
-        .property('description')
-        .property('servers')
-        .to.have.length(1);
+      expect(topology).property('description').property('servers').to.have.length(1);
 
       const serverDescription = Array.from(topology.description.servers.values())[0];
-      expect(serverDescription)
-        .property('roundTripTime')
-        .to.be.greaterThan(0);
+      expect(serverDescription).property('roundTripTime').to.be.greaterThan(0);
 
       topology.close(done);
     });
   });
 
-  describe('Monitor', function() {
-    it('should connect and issue an initial server check', function(done) {
+  describe('Monitor', function () {
+    it('should connect and issue an initial server check', function (done) {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
         if (doc.ismaster) {
@@ -114,7 +104,7 @@ describe('monitoring', function() {
       monitor.connect();
     });
 
-    it('should ignore attempts to connect when not already closed', function(done) {
+    it('should ignore attempts to connect when not already closed', function (done) {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
         if (doc.ismaster) {
@@ -132,7 +122,7 @@ describe('monitoring', function() {
       monitor.connect();
     });
 
-    it('should not initiate another check if one is in progress', function(done) {
+    it('should not initiate another check if one is in progress', function (done) {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
         if (doc.ismaster) {
@@ -170,7 +160,7 @@ describe('monitoring', function() {
       });
     });
 
-    it('should not close the monitor on a failed heartbeat', function(done) {
+    it('should not close the monitor on a failed heartbeat', function (done) {
       let isMasterCount = 0;
       mockServer.setMessageHandler(request => {
         const doc = request.document;

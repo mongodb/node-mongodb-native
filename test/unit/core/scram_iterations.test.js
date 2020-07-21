@@ -5,7 +5,7 @@ const mock = require('mongodb-mock-server');
 const { Topology } = require('../../../src/sdam/topology');
 const { MongoCredentials } = require('../../../src/cmap/auth/mongo_credentials');
 
-describe('SCRAM Iterations Tests', function() {
+describe('SCRAM Iterations Tests', function () {
   const test = {};
 
   beforeEach(() => {
@@ -16,7 +16,7 @@ describe('SCRAM Iterations Tests', function() {
 
   afterEach(() => mock.cleanup());
 
-  it('should error if iteration count is less than 4096', function(_done) {
+  it('should error if iteration count is less than 4096', function (_done) {
     const scramResponse =
       'r=IE+xNFeOcslsupAA+zkDVzHd5HfwoRuP7Wi8S4py+erf8PcNm7XIdXQyT52Nj3+M,s=AzomrlMs99A7oFxDLpgFvVb+CSvdyXuNagoWVw==,i=4000';
 
@@ -65,7 +65,7 @@ describe('SCRAM Iterations Tests', function() {
     client.connect();
   });
 
-  it('should error if server digest is invalid', function(_done) {
+  it('should error if server digest is invalid', function (_done) {
     const credentials = new MongoCredentials({
       mechanism: 'default',
       source: 'db',
@@ -112,7 +112,7 @@ describe('SCRAM Iterations Tests', function() {
     client.connect();
   });
 
-  it('should properly handle network errors on `saslContinue`', function(_done) {
+  it('should properly handle network errors on `saslContinue`', function (_done) {
     const credentials = new MongoCredentials({
       mechanism: 'default',
       source: 'db',

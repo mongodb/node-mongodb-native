@@ -13,7 +13,7 @@ const ClientSession = core.Sessions.ClientSession;
 const ServerSessionPool = core.Sessions.ServerSessionPool;
 
 const test = {};
-describe('Sessions (Single)', function() {
+describe('Sessions (Single)', function () {
   afterEach(() => mock.cleanup());
   beforeEach(() => {
     return mock.createServer().then(mockServer => {
@@ -23,7 +23,7 @@ describe('Sessions (Single)', function() {
 
   it('should recognize and set `clusterTime` on the topology', {
     metadata: { requires: { topology: 'single' } },
-    test: function(done) {
+    test: function (done) {
       const clusterTime = genClusterTime(Date.now());
       test.server.setMessageHandler(request => {
         request.reply(
@@ -47,7 +47,7 @@ describe('Sessions (Single)', function() {
 
   it('should track the highest `$clusterTime` seen', {
     metadata: { requires: { topology: 'single' } },
-    test: function(done) {
+    test: function (done) {
       const clusterTime = genClusterTime(Date.now()),
         futureClusterTime = genClusterTime(Date.now() + 10 * 60 * 1000);
 
@@ -75,7 +75,7 @@ describe('Sessions (Single)', function() {
         expect(client.clusterTime).to.exist;
         expect(client.clusterTime).to.eql(clusterTime);
 
-        client.insert('test.test', [{ created: new Date() }], function(err) {
+        client.insert('test.test', [{ created: new Date() }], function (err) {
           expect(err).to.not.exist;
           expect(client.clusterTime).to.exist;
           expect(client.clusterTime).to.not.eql(clusterTime);
@@ -92,7 +92,7 @@ describe('Sessions (Single)', function() {
 
   it('should track the highest `$clusterTime` seen, and store it on a session if available', {
     metadata: { requires: { topology: 'single' } },
-    test: function(_done) {
+    test: function (_done) {
       const clusterTime = genClusterTime(Date.now()),
         futureClusterTime = genClusterTime(Date.now() + 10 * 60 * 1000);
 
@@ -124,7 +124,7 @@ describe('Sessions (Single)', function() {
         expect(client.clusterTime).to.exist;
         expect(client.clusterTime).to.eql(clusterTime);
 
-        client.insert('test.test', [{ created: new Date() }], { session: session }, function(err) {
+        client.insert('test.test', [{ created: new Date() }], { session: session }, function (err) {
           expect(err).to.not.exist;
           expect(client.clusterTime).to.exist;
           expect(client.clusterTime).to.not.eql(clusterTime);
@@ -142,7 +142,7 @@ describe('Sessions (Single)', function() {
 
   it('should send `clusterTime` on outgoing messages', {
     metadata: { requires: { topology: 'single' } },
-    test: function(done) {
+    test: function (done) {
       const clusterTime = genClusterTime(Date.now());
       let sentIsMaster = false,
         command = null;
@@ -181,7 +181,7 @@ describe('Sessions (Single)', function() {
 
   it('should send the highest `clusterTime` between topology and session if it exists', {
     metadata: { requires: { topology: 'single' } },
-    test: function(_done) {
+    test: function (_done) {
       const clusterTime = genClusterTime(Date.now()),
         futureClusterTime = genClusterTime(Date.now() + 10 * 60 * 1000);
 
@@ -227,7 +227,7 @@ describe('Sessions (Single)', function() {
 
   it('should return server sessions to the pool on `endSession`', {
     metadata: { requires: { topology: 'single' } },
-    test: function(_done) {
+    test: function (_done) {
       let sentIsMaster = false;
       test.server.setMessageHandler(request => {
         if (sentIsMaster) {
@@ -273,7 +273,7 @@ describe('Sessions (Single)', function() {
 
   it('should default `logicalSessionTimeoutMinutes` to `null`', {
     metadata: { requires: { topology: 'single' } },
-    test: function() {
+    test: function () {
       const single = new Server();
       expect(single.logicalSessionTimeoutMinutes).to.equal(null);
     }
@@ -281,7 +281,7 @@ describe('Sessions (Single)', function() {
 
   it('should track `logicalSessionTimeoutMinutes`', {
     metadata: { requires: { topology: 'single' } },
-    test: function(done) {
+    test: function (done) {
       test.server.setMessageHandler(request => {
         request.reply(
           Object.assign({}, mock.DEFAULT_ISMASTER, {
@@ -306,7 +306,7 @@ describe('Sessions (Single)', function() {
     'should add `lsid` to commands sent to the server, and update the session `lastUse` when a session is provided',
     {
       metadata: { requires: { topology: 'single' } },
-      test: function(_done) {
+      test: function (_done) {
         const client = new Server(test.server.address());
         const sessionPool = new ServerSessionPool(client);
         const session = new ClientSession(client, sessionPool);
@@ -353,7 +353,7 @@ describe('Sessions (Single)', function() {
 
   it('should use the same session for all getMore issued by a cursor', {
     metadata: { requires: { topology: 'single' } },
-    test: function(_done) {
+    test: function (_done) {
       const client = new Server(test.server.address());
       const sessionPool = new ServerSessionPool(client);
       const session = new ClientSession(client, sessionPool);
@@ -406,11 +406,11 @@ describe('Sessions (Single)', function() {
         );
 
         // Execute next
-        cursor._next(function(err) {
+        cursor._next(function (err) {
           expect(err).to.not.exist;
           expect(commands[0].lsid).to.eql(session.id);
 
-          cursor._next(function(err) {
+          cursor._next(function (err) {
             expect(err).to.not.exist;
             expect(commands[1].lsid).to.eql(session.id);
 
@@ -426,7 +426,7 @@ describe('Sessions (Single)', function() {
 
   it('should use the same session for any killCursor issued by a cursor', {
     metadata: { requires: { topology: 'single' } },
-    test: function(_done) {
+    test: function (_done) {
       const client = new Server(test.server.address());
       const sessionPool = new ServerSessionPool(client);
       const session = new ClientSession(client, sessionPool);
@@ -482,7 +482,7 @@ describe('Sessions (Single)', function() {
         );
 
         // Execute next
-        cursor._next(function(err) {
+        cursor._next(function (err) {
           expect(err).to.not.exist;
 
           cursor.kill(err => {
@@ -501,7 +501,7 @@ describe('Sessions (Single)', function() {
 
   it('should not hang on endSession when topology is closed', {
     metadata: { requires: { topology: 'single' } },
-    test: function(_done) {
+    test: function (_done) {
       const client = new Server(test.server.address());
       const sessionPool = new ServerSessionPool(client);
       const session = new ClientSession(client, sessionPool);
@@ -530,7 +530,7 @@ describe('Sessions (Single)', function() {
 
   it('should not allow use of an expired session', {
     metadata: { requires: { topology: 'single' } },
-    test: function(_done) {
+    test: function (_done) {
       const client = new Server(test.server.address());
       const sessionPool = new ServerSessionPool(client);
       const session = new ClientSession(client, sessionPool);
@@ -567,7 +567,7 @@ describe('Sessions (Single)', function() {
 
   it.skip('should not allow use of session object across clients', {
     metadata: { requires: { topology: 'single' } },
-    test: function(_done) {
+    test: function (_done) {
       const client = new Server(test.server.address());
       const client2 = new Server(test.server.address());
       const sessionPool = new ServerSessionPool(client);
@@ -603,7 +603,7 @@ describe('Sessions (Single)', function() {
 
   it('should track the highest `operationTime` seen, if causal consistency is enabled', {
     metadata: { requires: { topology: 'single' } },
-    test: function(_done) {
+    test: function (_done) {
       const client = new Server(test.server.address()),
         sessionPool = new ServerSessionPool(client),
         session = new ClientSession(client, sessionPool, { causalConsistency: true }),
@@ -650,7 +650,7 @@ describe('Sessions (Single)', function() {
 
   it('should emit an `ended` signal when the session is ended', {
     metadata: { requires: { topology: 'single' } },
-    test: function(_done) {
+    test: function (_done) {
       const client = new Server(test.server.address());
       const sessionPool = new ServerSessionPool(client);
       const session = new ClientSession(client, sessionPool);

@@ -3,9 +3,9 @@ const { eachAsync, now, makeInterruptableAsyncInterval } = require('../../src/ut
 const { expect } = require('chai');
 const sinon = require('sinon');
 
-describe('utils', function() {
-  context('eachAsync', function() {
-    it('should callback with an error', function(done) {
+describe('utils', function () {
+  context('eachAsync', function () {
+    it('should callback with an error', function (done) {
       eachAsync(
         [{ error: false }, { error: true }],
         (item, cb) => {
@@ -18,7 +18,7 @@ describe('utils', function() {
       );
     });
 
-    it('should propagate a synchronously thrown error', function(done) {
+    it('should propagate a synchronously thrown error', function (done) {
       expect(() =>
         eachAsync(
           [{}],
@@ -35,16 +35,16 @@ describe('utils', function() {
     });
   });
 
-  context('makeInterruptableAsyncInterval', function() {
-    before(function() {
+  context('makeInterruptableAsyncInterval', function () {
+    before(function () {
       this.clock = sinon.useFakeTimers();
     });
 
-    after(function() {
+    after(function () {
       this.clock.restore();
     });
 
-    it('should execute a method in an repeating interval', function(done) {
+    it('should execute a method in an repeating interval', function (done) {
       let lastTime = now();
       const marks = [];
       const executor = makeInterruptableAsyncInterval(
@@ -66,7 +66,7 @@ describe('utils', function() {
       this.clock.tick(51);
     });
 
-    it('should schedule execution sooner if requested within min interval threshold', function(done) {
+    it('should schedule execution sooner if requested within min interval threshold', function (done) {
       let lastTime = now();
       const marks = [];
       const executor = makeInterruptableAsyncInterval(
@@ -90,7 +90,7 @@ describe('utils', function() {
       this.clock.tick(100);
     });
 
-    it('should debounce multiple requests to wake the interval sooner', function(done) {
+    it('should debounce multiple requests to wake the interval sooner', function (done) {
       let lastTime = now();
       const marks = [];
       const executor = makeInterruptableAsyncInterval(

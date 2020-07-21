@@ -6,8 +6,8 @@ var setupDatabase = require('./shared').setupDatabase;
 const Db = require('../../src/db');
 const expect = require('chai').expect;
 
-describe('MongoClient', function() {
-  before(function() {
+describe('MongoClient', function () {
+  before(function () {
     return setupDatabase(this.configuration);
   });
 
@@ -18,7 +18,7 @@ describe('MongoClient', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       const client = configuration.newClient(
         {},
@@ -31,7 +31,7 @@ describe('MongoClient', function() {
           readPreferenceTags: { loc: 'ny' },
           native_parser: false,
           forceServerObjectId: true,
-          pkFactory: function() {
+          pkFactory: function () {
             return 1;
           },
           serializeFunctions: true,
@@ -41,7 +41,7 @@ describe('MongoClient', function() {
         }
       );
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db);
 
         test.equal(1, db.writeConcern.w);
@@ -69,11 +69,11 @@ describe('MongoClient', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       const client = configuration.newClient('user:password@localhost:27017/test');
 
-      client.connect(function(err) {
+      client.connect(function (err) {
         expect(err).to.exist.and.to.have.property('message', 'Invalid connection string');
         done();
       });
@@ -85,13 +85,13 @@ describe('MongoClient', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       const client = configuration.newClient('user:password@localhost:27017/test', {
         useNewUrlParser: true
       });
 
-      client.connect(function(err) {
+      client.connect(function (err) {
         test.equal(err.message, 'Invalid connection string');
         done();
       });
@@ -103,13 +103,13 @@ describe('MongoClient', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       const client = configuration.newClient('mongodb://localhost:27088/test', {
         serverSelectionTimeoutMS: 10
       });
 
-      client.connect(function(err) {
+      client.connect(function (err) {
         test.ok(err != null);
 
         done();
@@ -120,10 +120,10 @@ describe('MongoClient', function() {
   it('should correctly connect to mongodb using domain socket', {
     metadata: { requires: { topology: ['single'] } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       const client = configuration.newClient('mongodb://%2Ftmp%2Fmongodb-27017.sock/test');
-      client.connect(function(err) {
+      client.connect(function (err) {
         test.equal(null, err);
         client.close(done);
       });
@@ -137,13 +137,13 @@ describe('MongoClient', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       const client = configuration.newClient('mongodb://unknownhost:36363/ddddd', {
         serverSelectionTimeoutMS: 10
       });
 
-      client.connect(function(err) {
+      client.connect(function (err) {
         test.ok(err != null);
         done();
       });
@@ -157,7 +157,7 @@ describe('MongoClient', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var url = configuration.url();
       if (url.indexOf('replicaSet') !== -1) {
@@ -167,7 +167,7 @@ describe('MongoClient', function() {
       }
 
       const client = configuration.newClient(url);
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
         test.equal('hello world', client.topology.clientMetadata.application.name);
 
@@ -183,7 +183,7 @@ describe('MongoClient', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var url = configuration.url();
 
@@ -204,7 +204,7 @@ describe('MongoClient', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       const client = configuration.newClient(
         {},
@@ -214,7 +214,7 @@ describe('MongoClient', function() {
         }
       );
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
         var db = client.db(configuration.db);
 
@@ -243,16 +243,16 @@ describe('MongoClient', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       const client = configuration.newClient();
-      client.connect(function(err, mongoclient) {
+      client.connect(function (err, mongoclient) {
         test.equal(null, err);
 
         mongoclient
           .db('integration_tests')
           .collection('new_mongo_client_collection')
-          .insertOne({ a: 1 }, function(err, r) {
+          .insertOne({ a: 1 }, function (err, r) {
             test.equal(null, err);
             test.ok(r);
 
@@ -269,15 +269,15 @@ describe('MongoClient', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       const client = configuration.newClient();
-      client.connect().then(function(mongoclient) {
+      client.connect().then(function (mongoclient) {
         mongoclient
           .db('integration_tests')
           .collection('new_mongo_client_collection')
           .insertOne({ a: 1 })
-          .then(function(r) {
+          .then(function (r) {
             test.ok(r);
 
             mongoclient.close(done);
@@ -286,7 +286,7 @@ describe('MongoClient', function() {
     }
   });
 
-  it('should be able to access a database named "constructor"', function() {
+  it('should be able to access a database named "constructor"', function () {
     const client = this.configuration.newClient();
     let err;
     return client

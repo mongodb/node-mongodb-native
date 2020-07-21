@@ -8,7 +8,7 @@ function asyncChain(_chain) {
       throw new TypeError(`${fn} is not a function`);
     }
   });
-  return function() {
+  return function () {
     const context = this;
 
     // Takes an array of async and/or sync functions, and executes them in order.

@@ -5,8 +5,8 @@ const expect = require('chai').expect;
 const { Long, Code } = require('../../src');
 
 const testContext = {};
-describe('Collation', function() {
-  before(function() {
+describe('Collation', function () {
+  before(function () {
     return setupDatabase(this.configuration);
   });
 
@@ -18,7 +18,7 @@ describe('Collation', function() {
   it('Successfully pass through collation to findAndModify command', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
-    test: function() {
+    test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
       const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
@@ -59,7 +59,7 @@ describe('Collation', function() {
   it('Successfully pass through collation to count command', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
-    test: function() {
+    test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
       const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
@@ -95,7 +95,7 @@ describe('Collation', function() {
   it('Successfully pass through collation to aggregation command', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
-    test: function() {
+    test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
       const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
@@ -133,7 +133,7 @@ describe('Collation', function() {
   it('Successfully pass through collation to distinct command', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
-    test: function() {
+    test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
       const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
@@ -169,7 +169,7 @@ describe('Collation', function() {
   it('Successfully pass through collation to group command', {
     metadata: { requires: { generators: true, topology: 'single', mongodb: '<=4.1.0' } },
 
-    test: function() {
+    test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
       const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
@@ -213,7 +213,7 @@ describe('Collation', function() {
   it('Successfully pass through collation to mapReduce command', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
-    test: function() {
+    test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
       const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
@@ -254,7 +254,7 @@ describe('Collation', function() {
   it('Successfully pass through collation to remove command', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
-    test: function() {
+    test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
       const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
@@ -290,7 +290,7 @@ describe('Collation', function() {
   it('Successfully pass through collation to update command', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
-    test: function() {
+    test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
       const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
@@ -328,7 +328,7 @@ describe('Collation', function() {
   it('Successfully pass through collation to find command via options', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
-    test: function() {
+    test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
       const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
@@ -364,7 +364,7 @@ describe('Collation', function() {
 
   it('Successfully pass through collation to find command via cursor', {
     metadata: { requires: { generators: true, topology: 'single' } },
-    test: function() {
+    test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
       const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
@@ -402,7 +402,7 @@ describe('Collation', function() {
 
   it('Successfully pass through collation to findOne', {
     metadata: { requires: { generators: true, topology: 'single' } },
-    test: function() {
+    test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
       const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
@@ -438,7 +438,7 @@ describe('Collation', function() {
 
   it('Successfully pass through collation to createCollection', {
     metadata: { requires: { generators: true, topology: 'single' } },
-    test: function() {
+    test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
       const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
@@ -481,7 +481,7 @@ describe('Collation', function() {
   it('Fail due to no support for collation', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
-    test: function() {
+    test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
       const primary = [Object.assign({}, mock.DEFAULT_ISMASTER, { maxWireVersion: 4 })];
@@ -515,7 +515,7 @@ describe('Collation', function() {
 
   it('Fail command due to no support for collation', {
     metadata: { requires: { generators: true, topology: 'single' } },
-    test: function() {
+    test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
       const primary = [Object.assign({}, mock.DEFAULT_ISMASTER, { maxWireVersion: 4 })];
@@ -551,7 +551,7 @@ describe('Collation', function() {
 
   it('Successfully pass through collation to bulkWrite command', {
     metadata: { requires: { generators: true, topology: 'single' } },
-    test: function() {
+    test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
       const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
@@ -605,7 +605,7 @@ describe('Collation', function() {
 
   it('Successfully fail bulkWrite due to unsupported collation', {
     metadata: { requires: { generators: true, topology: 'single' } },
-    test: function() {
+    test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
       const primary = [Object.assign({}, mock.DEFAULT_ISMASTER, { maxWireVersion: 4 })];
@@ -652,7 +652,7 @@ describe('Collation', function() {
 
   it('Successfully create index with collation', {
     metadata: { requires: { generators: true, topology: 'single' } },
-    test: function() {
+    test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
       const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
@@ -691,7 +691,7 @@ describe('Collation', function() {
   it('Fail to create index with collation due to no capabilities', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
-    test: function() {
+    test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
       const primary = [Object.assign({}, mock.DEFAULT_ISMASTER, { maxWireVersion: 4 })];
@@ -726,7 +726,7 @@ describe('Collation', function() {
   it('Fail to create indexs with collation due to no capabilities', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
-    test: function() {
+    test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
       const primary = [Object.assign({}, mock.DEFAULT_ISMASTER, { maxWireVersion: 4 })];
@@ -759,7 +759,7 @@ describe('Collation', function() {
 
   it('cursor count method should return the correct number when used with collation set', {
     metadata: { requires: { mongodb: '>=3.4.0' } },
-    test: function(done) {
+    test: function (done) {
       const configuration = this.configuration;
       const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
 
@@ -798,7 +798,7 @@ describe('Collation', function() {
   it('Should correctly create index with collation', {
     metadata: { requires: { topology: 'single', mongodb: '>=3.3.12' } },
 
-    test: function() {
+    test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient();
 
@@ -829,7 +829,7 @@ describe('Collation', function() {
   it('Should correctly create collection with collation', {
     metadata: { requires: { topology: 'single', mongodb: '>=3.3.12' } },
 
-    test: function() {
+    test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient();
 

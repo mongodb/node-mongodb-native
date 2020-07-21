@@ -3,22 +3,22 @@
 const setupDatabase = require('../functional/shared').setupDatabase;
 const MongoClient = require('../../src').MongoClient;
 
-describe('examples(transactions):', function() {
+describe('examples(transactions):', function () {
   let client;
   let log;
 
-  before(async function() {
+  before(async function () {
     await setupDatabase(this.configuration);
     log = console.log;
     console.log = () => {};
   });
 
-  after(function() {
+  after(function () {
     console.log = log;
     log = undefined;
   });
 
-  beforeEach(async function() {
+  beforeEach(async function () {
     client = await this.configuration.newClient().connect();
     await client.db('hr').dropDatabase();
     await client.db('hr').createCollection('employees');
@@ -26,14 +26,14 @@ describe('examples(transactions):', function() {
     await client.db('reporting').createCollection('events');
   });
 
-  afterEach(async function() {
+  afterEach(async function () {
     await client.close();
     client = undefined;
   });
 
   it('Transactions Retry Example 1', {
     metadata: { requires: { topology: ['replicaset'], mongodb: '>=3.8.0' } },
-    test: async function() {
+    test: async function () {
       // Start Transactions Retry Example 1
       async function runTransactionWithRetry(txnFunc, client, session) {
         try {
@@ -91,7 +91,7 @@ describe('examples(transactions):', function() {
 
   it('Transactions Retry Example 2', {
     metadata: { requires: { topology: ['replicaset'], mongodb: '>=3.8.0' } },
-    test: async function() {
+    test: async function () {
       // Start Transactions Retry Example 2
       async function commitWithRetry(session) {
         try {
@@ -146,7 +146,7 @@ describe('examples(transactions):', function() {
 
   it('Transaction Retry Example 3', {
     metadata: { requires: { topology: ['replicaset'], mongodb: '>=3.8.0' } },
-    test: async function() {
+    test: async function () {
       // Start Transactions Retry Example 3
       async function commitWithRetry(session) {
         try {
@@ -219,7 +219,7 @@ describe('examples(transactions):', function() {
 
   it('Transactions withTransaction API Example 1', {
     metadata: { requires: { topology: ['replicaset'], mongodb: '>=3.8.0' } },
-    test: async function() {
+    test: async function () {
       const uri = this.configuration.url();
 
       // Start Transactions withTxn API Example 1
@@ -234,15 +234,9 @@ describe('examples(transactions):', function() {
 
       // Prereq: Create collections.
 
-      await client
-        .db('mydb1')
-        .collection('foo')
-        .insertOne({ abc: 0 }, { w: 'majority' });
+      await client.db('mydb1').collection('foo').insertOne({ abc: 0 }, { w: 'majority' });
 
-      await client
-        .db('mydb2')
-        .collection('bar')
-        .insertOne({ xyz: 0 }, { w: 'majority' });
+      await client.db('mydb2').collection('bar').insertOne({ xyz: 0 }, { w: 'majority' });
 
       // Step 1: Start a Client Session
       const session = client.startSession();

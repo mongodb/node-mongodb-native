@@ -74,7 +74,7 @@ class Runner {
     this.minExecutionCount = options.minExecutionCount || CONSTANTS.DEFAULT_MIN_EXECUTION_COUNT;
     this.reporter =
       options.reporter ||
-      function() {
+      function () {
         console.log.apply(console, arguments);
       };
     this.children = {};

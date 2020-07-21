@@ -10,13 +10,13 @@ const ServerSessionPool = core.Sessions.ServerSessionPool;
 const ReplSet = core.ReplSet;
 
 const test = new ReplSetFixture();
-describe('Retryable Writes (ReplSet)', function() {
+describe('Retryable Writes (ReplSet)', function () {
   afterEach(() => mock.cleanup());
   beforeEach(() => test.setup({ ismaster: mock.DEFAULT_ISMASTER_36 }));
 
   it('should add `txnNumber` to write commands where `retryWrites` is true', {
     metadata: { requires: { topology: ['single'] } },
-    test: function(done) {
+    test: function (done) {
       var replset = new ReplSet(
         [test.primaryServer.address(), test.firstSecondaryServer.address()],
         {
@@ -44,7 +44,7 @@ describe('Retryable Writes (ReplSet)', function() {
       });
 
       replset.on('all', () => {
-        replset.insert('test.test', [{ a: 1 }], { retryWrites: true, session: session }, function(
+        replset.insert('test.test', [{ a: 1 }], { retryWrites: true, session: session }, function (
           err
         ) {
           expect(err).to.not.exist;
@@ -63,7 +63,7 @@ describe('Retryable Writes (ReplSet)', function() {
 
   it('should retry write commands where `retryWrites` is true, and not increment `txnNumber`', {
     metadata: { requires: { topology: ['single'] } },
-    test: function(done) {
+    test: function (done) {
       var replset = new ReplSet(
         [test.primaryServer.address(), test.firstSecondaryServer.address()],
         {
@@ -99,7 +99,7 @@ describe('Retryable Writes (ReplSet)', function() {
       });
 
       replset.on('all', () => {
-        replset.insert('test.test', [{ a: 1 }], { retryWrites: true, session: session }, function(
+        replset.insert('test.test', [{ a: 1 }], { retryWrites: true, session: session }, function (
           err
         ) {
           if (err) console.dir(err);
@@ -119,7 +119,7 @@ describe('Retryable Writes (ReplSet)', function() {
 
   it('should retry write commands where `retryWrites` is true, and there is a "not master" error', {
     metadata: { requires: { topology: ['single'] } },
-    test: function(done) {
+    test: function (done) {
       var replset = new ReplSet(
         [test.primaryServer.address(), test.firstSecondaryServer.address()],
         {
@@ -155,7 +155,7 @@ describe('Retryable Writes (ReplSet)', function() {
       });
 
       replset.on('all', () => {
-        replset.insert('test.test', [{ a: 1 }], { retryWrites: true, session: session }, function(
+        replset.insert('test.test', [{ a: 1 }], { retryWrites: true, session: session }, function (
           err
         ) {
           expect(err).to.not.exist;

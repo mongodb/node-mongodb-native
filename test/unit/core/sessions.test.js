@@ -8,11 +8,11 @@ const { ServerSessionPool, ServerSession, ClientSession } = require('../../../sr
 const { now } = require('../../../src/utils');
 
 let test = {};
-describe('Sessions', function() {
-  describe('ClientSession', function() {
+describe('Sessions', function () {
+  describe('ClientSession', function () {
     it('should throw errors with invalid parameters', {
       metadata: { requires: { topology: 'single' } },
-      test: function() {
+      test: function () {
         expect(() => {
           new ClientSession();
         }).to.throw(/ClientSession requires a topology/);
@@ -29,7 +29,7 @@ describe('Sessions', function() {
 
     it('should default to `null` for `clusterTime`', {
       metadata: { requires: { topology: 'single' } },
-      test: function(done) {
+      test: function (done) {
         const client = new Topology('localhost:27017');
         const sessionPool = client.s.sessionPool;
         const session = new ClientSession(client, sessionPool);
@@ -42,7 +42,7 @@ describe('Sessions', function() {
 
     it('should set the internal clusterTime to `initialClusterTime` if provided', {
       metadata: { requires: { topology: 'single' } },
-      test: function(done) {
+      test: function (done) {
         const clusterTime = genClusterTime(Date.now());
         const client = new Topology('localhost:27017');
         const sessionPool = client.s.sessionPool;
@@ -55,7 +55,7 @@ describe('Sessions', function() {
     });
   });
 
-  describe('ServerSessionPool', function() {
+  describe('ServerSessionPool', function () {
     afterEach(() => {
       test.client.destroy();
       return mock.cleanup();
@@ -88,7 +88,7 @@ describe('Sessions', function() {
 
     it('should throw errors with invalid parameters', {
       metadata: { requires: { topology: 'single' } },
-      test: function() {
+      test: function () {
         expect(() => {
           new ServerSessionPool();
         }).to.throw(/ServerSessionPool requires a topology/);
@@ -97,7 +97,7 @@ describe('Sessions', function() {
 
     it('should create a new session if the pool is empty', {
       metadata: { requires: { topology: 'single' } },
-      test: function(done) {
+      test: function (done) {
         const pool = new ServerSessionPool(test.client);
         done = sessionCleanupHandler(null, pool, done);
         expect(pool.sessions).to.have.length(0);
@@ -114,7 +114,7 @@ describe('Sessions', function() {
     it('should reuse sessions which have not timed out yet on acquire', {
       metadata: { requires: { topology: 'single' } },
 
-      test: function(done) {
+      test: function (done) {
         const oldSession = new ServerSession();
         const pool = new ServerSessionPool(test.client);
         done = sessionCleanupHandler(null, pool, done);
@@ -132,7 +132,7 @@ describe('Sessions', function() {
     it('should remove sessions which have timed out on acquire, and return a fresh session', {
       metadata: { requires: { topology: 'single' } },
 
-      test: function(done) {
+      test: function (done) {
         const oldSession = new ServerSession();
         oldSession.lastUse = now() - 30 * 60 * 1000; // add 30min
 
@@ -152,7 +152,7 @@ describe('Sessions', function() {
     it('should remove sessions which have timed out on release', {
       metadata: { requires: { topology: 'single' } },
 
-      test: function(done) {
+      test: function (done) {
         const newSession = new ServerSession();
         const oldSessions = [new ServerSession(), new ServerSession()].map(session => {
           session.lastUse = now() - 30 * 60 * 1000; // add 30min
@@ -173,7 +173,7 @@ describe('Sessions', function() {
     it('should not reintroduce a soon-to-expire session to the pool on release', {
       metadata: { requires: { topology: 'single' } },
 
-      test: function(done) {
+      test: function (done) {
         const session = new ServerSession();
         session.lastUse = now() - 9.5 * 60 * 1000; // add 9.5min
 
@@ -188,7 +188,7 @@ describe('Sessions', function() {
 
     it('should maintain a LIFO queue of sessions', {
       metadata: { requires: { topology: 'single' } },
-      test: function(done) {
+      test: function (done) {
         const pool = new ServerSessionPool(test.client);
         done = sessionCleanupHandler(null, pool, done);
 

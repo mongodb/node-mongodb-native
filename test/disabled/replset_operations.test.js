@@ -4,15 +4,15 @@ var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 const expect = require('chai').expect;
 
-var restartAndDone = function(configuration, done) {
-  configuration.manager.restart().then(function() {
+var restartAndDone = function (configuration, done) {
+  configuration.manager.restart().then(function () {
     done();
   });
 };
 
 // TODO: Remove skips when NODE-1527 is resolved
-describe('ReplSet (Operations)', function() {
-  before(function() {
+describe('ReplSet (Operations)', function () {
+  before(function () {
     return setupDatabase(this.configuration);
   });
 
@@ -30,7 +30,7 @@ describe('ReplSet (Operations)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       const configuration = this.configuration;
 
       // Create url
@@ -110,7 +110,7 @@ describe('ReplSet (Operations)', function() {
         }
       },
 
-      test: function(done) {
+      test: function (done) {
         const configuration = this.configuration;
 
         // Create url
@@ -139,10 +139,7 @@ describe('ReplSet (Operations)', function() {
               // Initialize the Ordered Batch
               const batch = col.initializeOrderedBulkOp();
               batch.insert({ a: 1 });
-              batch
-                .find({ a: 3 })
-                .upsert()
-                .updateOne({ a: 3, b: 1 });
+              batch.find({ a: 3 }).upsert().updateOne({ a: 3, b: 1 });
               batch.insert({ a: 1 });
               batch.insert({ a: 2 });
 
@@ -208,7 +205,7 @@ describe('ReplSet (Operations)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       const configuration = this.configuration;
 
       // Create url
@@ -237,10 +234,7 @@ describe('ReplSet (Operations)', function() {
             // Initialize the Ordered Batch
             const batch = col.initializeUnorderedBulkOp();
             batch.insert({ a: 1 });
-            batch
-              .find({ a: 3 })
-              .upsert()
-              .updateOne({ a: 3, b: 1 });
+            batch.find({ a: 3 }).upsert().updateOne({ a: 3, b: 1 });
             batch.insert({ a: 2 });
 
             // Execute the operations
@@ -293,7 +287,7 @@ describe('ReplSet (Operations)', function() {
         }
       },
 
-      test: function(done) {
+      test: function (done) {
         const configuration = this.configuration;
 
         // Create url
@@ -316,16 +310,13 @@ describe('ReplSet (Operations)', function() {
             expect(err).to.not.exist;
 
             // ensure index
-            col.ensureIndex({ a: 1 }, { unique: true }, function(err) {
+            col.ensureIndex({ a: 1 }, { unique: true }, function (err) {
               expect(err).to.not.exist;
 
               // Initialize the Ordered Batch
               var batch = col.initializeOrderedBulkOp();
               batch.insert({ a: 1 });
-              batch
-                .find({ a: 3 })
-                .upsert()
-                .updateOne({ a: 3, b: 1 });
+              batch.find({ a: 3 }).upsert().updateOne({ a: 3, b: 1 });
               batch.insert({ a: 1 });
               batch.insert({ a: 2 });
 
@@ -388,7 +379,7 @@ describe('ReplSet (Operations)', function() {
   it.skip('Should fail to do map reduce to out collection', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>1.7.6' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
         ReadPreference = mongo.ReadPreference;
@@ -404,7 +395,7 @@ describe('ReplSet (Operations)', function() {
       );
 
       const client = configuration.newClient(url);
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
         var db = client.db(configuration.db);
 
@@ -415,15 +406,15 @@ describe('ReplSet (Operations)', function() {
         });
 
         // Parse version of server if available
-        db.admin().serverInfo(function(err) {
+        db.admin().serverInfo(function (err) {
           test.equal(null, err);
 
           // Map function
-          var map = function() {
+          var map = function () {
             emit(this.user_id, 1); // eslint-disable-line
           };
           // Reduce function
-          var reduce = function(/* k, vals */) {
+          var reduce = function (/* k, vals */) {
             return 1;
           };
 
@@ -432,7 +423,7 @@ describe('ReplSet (Operations)', function() {
             map,
             reduce,
             { out: { replace: 'replacethiscollection' }, readPreference: ReadPreference.SECONDARY },
-            function(err) {
+            function (err) {
               test.equal(null, err);
               client.close(done);
             }
@@ -446,7 +437,7 @@ describe('ReplSet (Operations)', function() {
   it.skip('Should Correctly group using replicaset', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
         ReadPreference = mongo.ReadPreference;
@@ -464,7 +455,7 @@ describe('ReplSet (Operations)', function() {
       var manager = configuration.manager;
 
       const client = configuration.newClient(url);
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
         var db = client.db(configuration.db);
 
@@ -482,13 +473,13 @@ describe('ReplSet (Operations)', function() {
             { key: 3, x: 20 }
           ],
           configuration.writeConcernMax(),
-          function(err) {
+          function (err) {
             test.equal(null, err);
 
             // Kill the primary
-            manager.primary().then(function(m) {
+            manager.primary().then(function (m) {
               // Stop the primary
-              m.stop().then(function() {
+              m.stop().then(function () {
                 // Do a collection find
                 collection.group(
                   ['key'],
@@ -498,7 +489,7 @@ describe('ReplSet (Operations)', function() {
                     memo.sum += record.x;
                   },
                   true,
-                  function(err, items) {
+                  function (err, items) {
                     test.equal(null, err);
                     test.equal(3, items.length);
                     client.close();
@@ -517,7 +508,7 @@ describe('ReplSet (Operations)', function() {
   it.skip('Should Correctly execute createIndex with secondary readPreference', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
         ReadPreference = mongo.ReadPreference;
@@ -533,7 +524,7 @@ describe('ReplSet (Operations)', function() {
       );
 
       const client = configuration.newClient(url);
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         test.equal(null, err);
         var db = client.db(configuration.db);
 
@@ -543,7 +534,7 @@ describe('ReplSet (Operations)', function() {
           wtimeout: 10000
         });
 
-        collection.createIndexes([{ name: 'a_1', key: { a: 1 } }], function(err) {
+        collection.createIndexes([{ name: 'a_1', key: { a: 1 } }], function (err) {
           test.equal(null, err);
 
           client.close();

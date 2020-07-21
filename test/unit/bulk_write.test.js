@@ -3,7 +3,7 @@
 const expect = require('chai').expect;
 const mock = require('mongodb-mock-server');
 
-describe('Bulk Writes', function() {
+describe('Bulk Writes', function () {
   const test = {};
 
   let documents;
@@ -20,7 +20,7 @@ describe('Bulk Writes', function() {
   });
   afterEach(() => mock.cleanup());
 
-  it('should propagate errors', function(done) {
+  it('should propagate errors', function (done) {
     const client = this.configuration.newClient(`mongodb://${test.server.uri()}/test`);
 
     let close = e => {
@@ -47,12 +47,12 @@ describe('Bulk Writes', function() {
       }
     });
 
-    client.connect(function(err) {
+    client.connect(function (err) {
       expect(err).to.be.null;
 
       const coll = client.db('foo').collection('bar');
 
-      coll.insert(documents, { ordered: false }, function(err) {
+      coll.insert(documents, { ordered: false }, function (err) {
         try {
           expect(err).to.be.an.instanceOf(Error);
           close();

@@ -8,7 +8,7 @@ const Logger = core.Logger;
 const Mongos = core.Mongos;
 const ObjectId = core.BSON.ObjectId;
 
-describe('Mongos Mixed Seed List (mocks)', function() {
+describe('Mongos Mixed Seed List (mocks)', function () {
   afterEach(() => mock.cleanup());
 
   it.skip('Should correctly print warning when non mongos proxy passed in seed list', {
@@ -19,7 +19,7 @@ describe('Mongos Mixed Seed List (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       // Contain mock server
       var mongos1 = null;
       var mongos2 = null;
@@ -42,7 +42,7 @@ describe('Mongos Mixed Seed List (mocks)', function() {
       var serverIsMaster = [Object.assign({}, defaultFields), Object.assign({}, defaultRSFields)];
 
       // Boot the mock
-      co(function*() {
+      co(function* () {
         mongos1 = yield mock.createServer();
         mongos2 = yield mock.createServer();
 
@@ -74,7 +74,7 @@ describe('Mongos Mixed Seed List (mocks)', function() {
         });
 
         const logger = Logger.currentLogger();
-        Logger.setCurrentLogger(function(msg, state) {
+        Logger.setCurrentLogger(function (msg, state) {
           expect(state.type).to.equal('warn');
           expect(state.message).to.equal(
             `expected mongos proxy, but found replicaset member mongod for server ${mongos2.uri()}`
@@ -100,7 +100,7 @@ describe('Mongos Mixed Seed List (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       // Contain mock server
       var mongos1 = null;
       var mongos2 = null;
@@ -118,7 +118,7 @@ describe('Mongos Mixed Seed List (mocks)', function() {
       var serverIsMaster = [Object.assign({}, defaultRSFields), Object.assign({}, defaultRSFields)];
 
       // Boot the mock
-      co(function*() {
+      co(function* () {
         mongos1 = yield mock.createServer();
         mongos2 = yield mock.createServer();
 
@@ -151,13 +151,13 @@ describe('Mongos Mixed Seed List (mocks)', function() {
 
         var warnings = [];
         var logger = Logger.currentLogger();
-        Logger.setCurrentLogger(function(msg, state) {
+        Logger.setCurrentLogger(function (msg, state) {
           console.log('pushed: ', state);
           expect(state.type).to.equal('warn');
           warnings.push(state);
         });
 
-        server.on('error', function() {
+        server.on('error', function () {
           Logger.setCurrentLogger(logger);
           var errors = [
             'expected mongos proxy, but found replicaset member mongod for server localhost:52002',

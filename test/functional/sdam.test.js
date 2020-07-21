@@ -39,12 +39,12 @@ class SDAMRunnerContext extends TestRunnerContext {
   }
 }
 
-describe('SDAM', function() {
-  context('integration spec tests', function() {
+describe('SDAM', function () {
+  context('integration spec tests', function () {
     const testContext = new SDAMRunnerContext();
     const testSuites = loadSpecTests('server-discovery-and-monitoring/integration');
     after(() => testContext.teardown());
-    before(function() {
+    before(function () {
       return testContext.setup(this.configuration);
     });
 

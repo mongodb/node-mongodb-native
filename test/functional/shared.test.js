@@ -2,22 +2,22 @@
 const withMonitoredClient = require('./shared').withMonitoredClient;
 const expect = require('chai').expect;
 
-describe('shared test utilities', function() {
-  context('withMonitoredClient', function() {
-    it('should throw if arrow function', function() {
+describe('shared test utilities', function () {
+  context('withMonitoredClient', function () {
+    it('should throw if arrow function', function () {
       expect(() => {
         withMonitoredClient(['find'], () => {});
       }).to.throw();
     });
 
-    it('should not throw if function', function() {
+    it('should not throw if function', function () {
       expect(() => {
         function example() {}
         withMonitoredClient(['find'], example);
       }).to.not.throw();
     });
 
-    it('should call done and close connection with callback', function(done) {
+    it('should call done and close connection with callback', function (done) {
       var c = null;
       var e = [];
       const fakeDone = () => {
@@ -25,7 +25,7 @@ describe('shared test utilities', function() {
         expect(e.length).to.equal(1);
         done();
       };
-      const encapsulatedTest = withMonitoredClient(['find'], function(client, events, innerDone) {
+      const encapsulatedTest = withMonitoredClient(['find'], function (client, events, innerDone) {
         c = client;
         e = events;
         client
@@ -39,7 +39,7 @@ describe('shared test utilities', function() {
       encapsulatedTest().then(fakeDone);
     });
 
-    it('should propagate passed error to done', function(done) {
+    it('should propagate passed error to done', function (done) {
       var c = null;
       var e = [];
       const fakeDone = err => {
@@ -48,7 +48,7 @@ describe('shared test utilities', function() {
         expect(e.length).to.equal(1);
         done();
       };
-      const encapsulatedTest = withMonitoredClient(['find'], function(client, events, innerDone) {
+      const encapsulatedTest = withMonitoredClient(['find'], function (client, events, innerDone) {
         c = client;
         e = events;
         client
@@ -62,7 +62,7 @@ describe('shared test utilities', function() {
       encapsulatedTest().catch(fakeDone);
     });
 
-    it('should call done and close connection with promise', function(done) {
+    it('should call done and close connection with promise', function (done) {
       var c = null;
       var e = [];
       const fakeDone = () => {
@@ -70,7 +70,7 @@ describe('shared test utilities', function() {
         expect(e.length).to.equal(1);
         done();
       };
-      const encapsulatedTest = withMonitoredClient(['find'], function(client, events, innerDone) {
+      const encapsulatedTest = withMonitoredClient(['find'], function (client, events, innerDone) {
         c = client;
         e = events;
         client
@@ -85,7 +85,7 @@ describe('shared test utilities', function() {
       encapsulatedTest().then(fakeDone);
     });
 
-    it('should propagate passed error to done from promise', function(done) {
+    it('should propagate passed error to done from promise', function (done) {
       var c = null;
       var e = [];
       const fakeDone = err => {
@@ -94,7 +94,7 @@ describe('shared test utilities', function() {
         expect(e.length).to.equal(1);
         done();
       };
-      const encapsulatedTest = withMonitoredClient(['find'], function(client, events, innerDone) {
+      const encapsulatedTest = withMonitoredClient(['find'], function (client, events, innerDone) {
         e = events;
         c = client;
         client

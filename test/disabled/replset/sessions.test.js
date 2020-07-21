@@ -6,13 +6,13 @@ var expect = require('chai').expect,
   ReplSetFixture = require('../common').ReplSetFixture;
 
 const test = new ReplSetFixture();
-describe('Sessions (ReplSet)', function() {
+describe('Sessions (ReplSet)', function () {
   afterEach(() => mock.cleanup());
   beforeEach(() => test.setup({ ismaster: mock.DEFAULT_ISMASTER_36 }));
 
   it('should track the highest `clusterTime` seen in a replica set', {
     metadata: { requires: { topology: 'single' } },
-    test: function(done) {
+    test: function (done) {
       const clusterTime = genClusterTime(Date.now()),
         futureClusterTime = genClusterTime(Date.now() + 10 * 60 * 1000);
 
@@ -44,7 +44,7 @@ describe('Sessions (ReplSet)', function() {
 
   it('should report the deployment clusterTime for Server topologies in a ReplSet topology', {
     metadata: { requires: { topology: 'single' } },
-    test: function(done) {
+    test: function (done) {
       const clusterTime = genClusterTime(Date.now()),
         futureClusterTime = genClusterTime(Date.now() + 10 * 60 * 1000);
 
@@ -81,7 +81,7 @@ describe('Sessions (ReplSet)', function() {
 
   it('should set `logicalSessionTimeoutMinutes` to `null` if any incoming server is `null`', {
     metadata: { requires: { topology: 'single' } },
-    test: function(done) {
+    test: function (done) {
       test.firstSecondaryStates[0].logicalSessionTimeoutMinutes = null;
 
       const replset = new ReplSet(
@@ -110,7 +110,7 @@ describe('Sessions (ReplSet)', function() {
     'should track `logicalSessionTimeoutMinutes` for replset topology, choosing the lowest value',
     {
       metadata: { requires: { topology: 'single' } },
-      test: function(done) {
+      test: function (done) {
         test.primaryStates[0].logicalSessionTimeoutMinutes = 426;
         test.firstSecondaryStates[0].logicalSessionTimeoutMinutes = 1;
         test.arbiterStates[0].logicalSessionTimeoutMinutes = 32;
@@ -140,7 +140,7 @@ describe('Sessions (ReplSet)', function() {
 
   it('should exclude arbiters when tracking `logicalSessionTimeoutMinutes`', {
     metadata: { requires: { topology: 'single' } },
-    test: function(done) {
+    test: function (done) {
       test.arbiterServer.setMessageHandler(req => {
         const doc = req.document;
         if (doc.ismaster) {

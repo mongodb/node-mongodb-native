@@ -10,7 +10,7 @@ const ObjectId = core.BSON.ObjectId;
 const ReadPreference = core.ReadPreference;
 
 let test = {};
-describe('ReplSet Operations (mocks)', function() {
+describe('ReplSet Operations (mocks)', function () {
   beforeEach(() => {
     test.spy = new ConnectionSpy();
     Connection.enableConnectionAccounting(test.spy);
@@ -31,7 +31,7 @@ describe('ReplSet Operations (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var currentIsMasterIndex = 0;
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
@@ -52,7 +52,7 @@ describe('ReplSet Operations (mocks)', function() {
       ];
 
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const primaryServer = yield mock.createServer(32000, 'localhost');
 
         primaryServer.setMessageHandler(request => {
@@ -72,13 +72,13 @@ describe('ReplSet Operations (mocks)', function() {
           haInterval: 2000,
           size: 1,
           disconnectHandler: {
-            add: function() {},
-            execute: function() {}
+            add: function () {},
+            execute: function () {}
           }
         });
 
-        server.on('connect', function(_server) {
-          _server.command('test.test', { count: 'test' }, function() {
+        server.on('connect', function (_server) {
+          _server.command('test.test', { count: 'test' }, function () {
             server.destroy();
             done();
           });
@@ -99,7 +99,7 @@ describe('ReplSet Operations (mocks)', function() {
         }
       },
 
-      test: function(done) {
+      test: function (done) {
         var currentIsMasterIndex = 0;
         var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
           setName: 'rs',
@@ -120,7 +120,7 @@ describe('ReplSet Operations (mocks)', function() {
         ];
 
         // Boot the mock
-        co(function*() {
+        co(function* () {
           const primaryServer = yield mock.createServer(32000, 'localhost');
 
           primaryServer.setMessageHandler(request => {
@@ -140,17 +140,17 @@ describe('ReplSet Operations (mocks)', function() {
             haInterval: 2000,
             size: 1,
             disconnectHandler: {
-              add: function() {},
-              execute: function() {}
+              add: function () {},
+              execute: function () {}
             }
           });
 
-          server.on('connect', function() {
+          server.on('connect', function () {
             server.command(
               'test.test',
               { count: 'test' },
               { readPreference: ReadPreference.secondaryPreferred },
-              function() {
+              function () {
                 server.destroy();
                 done();
               }

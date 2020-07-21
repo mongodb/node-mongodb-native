@@ -11,8 +11,8 @@ const { loadSpecTests } = require('../spec');
 const { expect } = require('chai');
 const ReadPreference = require('../../src/read_preference');
 
-describe('APM', function() {
-  before(function() {
+describe('APM', function () {
+  before(function () {
     return setupDatabase(this.configuration);
   });
 
@@ -21,7 +21,7 @@ describe('APM', function() {
     {
       metadata: { requires: { topology: ['single', 'replicaset', 'sharded'] } },
 
-      test: function() {
+      test: function () {
         let started = [];
         let succeeded = [];
 
@@ -37,10 +37,7 @@ describe('APM', function() {
         return client
           .connect()
           .then(client =>
-            client
-              .db(this.configuration.db)
-              .collection('apm_test')
-              .insertOne({ a: 1 })
+            client.db(this.configuration.db).collection('apm_test').insertOne({ a: 1 })
           )
           .then(r => {
             expect(r.insertedCount).to.equal(1);
@@ -61,12 +58,7 @@ describe('APM', function() {
 
             return client.connect();
           })
-          .then(() =>
-            client
-              .db(this.configuration.db)
-              .collection('apm_test')
-              .insertOne({ a: 1 })
-          )
+          .then(() => client.db(this.configuration.db).collection('apm_test').insertOne({ a: 1 }))
           .then(r => {
             expect(r.insertedCount).to.equal(1);
             expect(started.length).to.equal(0);
@@ -80,7 +72,7 @@ describe('APM', function() {
   it('should support legacy `instrument`/`uninstrument` methods with MongoClient `connect`', {
     metadata: { requires: { topology: ['single', 'replicaset', 'sharded'] } },
 
-    test: function() {
+    test: function () {
       let started = [];
       let succeeded = [];
 
@@ -128,7 +120,7 @@ describe('APM', function() {
   it('should correctly receive the APM events for an insert', {
     metadata: { requires: { topology: ['single', 'replicaset', 'sharded'] } },
 
-    test: function() {
+    test: function () {
       const started = [];
       const succeeded = [];
       const client = this.configuration.newClient(
@@ -141,12 +133,7 @@ describe('APM', function() {
 
       return client
         .connect()
-        .then(client =>
-          client
-            .db(this.configuration.db)
-            .collection('apm_test')
-            .insertOne({ a: 1 })
-        )
+        .then(client => client.db(this.configuration.db).collection('apm_test').insertOne({ a: 1 }))
         .then(r => {
           expect(r.insertedCount).to.equal(1);
           expect(started.length).to.equal(1);
@@ -161,7 +148,7 @@ describe('APM', function() {
   it('should correctly handle cursor.close when no cursor existed', {
     metadata: { requires: { topology: ['single', 'replicaset'] } },
 
-    test: function() {
+    test: function () {
       const started = [];
       const succeeded = [];
       const self = this;
@@ -191,7 +178,7 @@ describe('APM', function() {
   it('should correctly receive the APM events for a listCollections command', {
     metadata: { requires: { topology: ['replicaset'], mongodb: '>=3.0.0' } },
 
-    test: function() {
+    test: function () {
       const self = this;
       const started = [];
       const succeeded = [];
@@ -218,9 +205,7 @@ describe('APM', function() {
           )
           .then(() => {
             expect(started).to.have.lengthOf(2);
-            expect(started[0])
-              .property('address')
-              .to.not.equal(started[1].address);
+            expect(started[0]).property('address').to.not.equal(started[1].address);
 
             return client.close();
           });
@@ -231,7 +216,7 @@ describe('APM', function() {
   it('should correctly receive the APM events for a listIndexes command', {
     metadata: { requires: { topology: ['replicaset'], mongodb: '>=3.0.0' } },
 
-    test: function() {
+    test: function () {
       const self = this;
       const started = [];
       const succeeded = [];
@@ -266,9 +251,7 @@ describe('APM', function() {
           )
           .then(() => {
             expect(started).to.have.lengthOf(2);
-            expect(started[0])
-              .property('address')
-              .to.not.equal(started[1].address);
+            expect(started[0]).property('address').to.not.equal(started[1].address);
 
             return client.close();
           });
@@ -281,7 +264,7 @@ describe('APM', function() {
     {
       metadata: { requires: { topology: ['single', 'replicaset'] } },
 
-      test: function() {
+      test: function () {
         const self = this;
         const started = [];
         const succeeded = [];
@@ -348,7 +331,7 @@ describe('APM', function() {
   it('should correctly receive the APM events for a find with getmore and killcursor', {
     metadata: { requires: { topology: ['single', 'replicaset'] } },
 
-    test: function() {
+    test: function () {
       const self = this;
       const started = [];
       const succeeded = [];
@@ -421,7 +404,7 @@ describe('APM', function() {
   it('should correctly receive the APM failure event for find', {
     metadata: { requires: { topology: ['single', 'replicaset'], mongodb: '>=2.6.0' } },
 
-    test: function() {
+    test: function () {
       const self = this;
       const started = [];
       const succeeded = [];
@@ -480,7 +463,7 @@ describe('APM', function() {
   it('should correctly receive the APM events for a bulk operation', {
     metadata: { requires: { topology: ['single', 'replicaset'] } },
 
-    test: function() {
+    test: function () {
       const self = this;
       const started = [];
       const succeeded = [];
@@ -521,7 +504,7 @@ describe('APM', function() {
   it('should correctly receive the APM explain command', {
     metadata: { requires: { topology: ['single', 'replicaset'] } },
 
-    test: function() {
+    test: function () {
       const self = this;
       const started = [];
       const succeeded = [];
@@ -550,10 +533,7 @@ describe('APM', function() {
           )
           .then(r => {
             expect(r.insertedCount).to.equal(6);
-            return db
-              .collection('apm_test_2')
-              .find({ a: 1 })
-              .explain();
+            return db.collection('apm_test_2').find({ a: 1 }).explain();
           })
           .then(explain => {
             expect(explain).to.not.be.null;
@@ -572,7 +552,7 @@ describe('APM', function() {
   it('should correctly filter out sensitive commands', {
     metadata: { requires: { topology: ['single', 'replicaset'] } },
 
-    test: function() {
+    test: function () {
       const self = this;
       const started = [];
       const succeeded = [];
@@ -605,7 +585,7 @@ describe('APM', function() {
   it('should correctly receive the APM events for an updateOne', {
     metadata: { requires: { topology: ['single', 'replicaset'] } },
 
-    test: function() {
+    test: function () {
       const self = this;
       const started = [];
       const succeeded = [];
@@ -640,7 +620,7 @@ describe('APM', function() {
   it('should correctly receive the APM events for an updateMany', {
     metadata: { requires: { topology: ['single', 'replicaset'] } },
 
-    test: function() {
+    test: function () {
       const self = this;
       const started = [];
       const succeeded = [];
@@ -675,7 +655,7 @@ describe('APM', function() {
   it('should correctly receive the APM events for deleteOne', {
     metadata: { requires: { topology: ['single', 'replicaset'] } },
 
-    test: function() {
+    test: function () {
       const self = this;
       const started = [];
       const succeeded = [];
@@ -691,10 +671,7 @@ describe('APM', function() {
       return client
         .connect()
         .then(client =>
-          client
-            .db(self.configuration.db)
-            .collection('apm_test_u_3')
-            .deleteOne({ a: 1 })
+          client.db(self.configuration.db).collection('apm_test_u_3').deleteOne({ a: 1 })
         )
         .then(r => {
           expect(r).to.exist;
@@ -710,7 +687,7 @@ describe('APM', function() {
   it('should ensure killcursor commands are sent on 3.0 or earlier when APM is enabled', {
     metadata: { requires: { topology: ['single', 'replicaset'], mongodb: '<=3.0.x' } },
 
-    test: function() {
+    test: function () {
       const self = this;
       const client = self.configuration.newClient(
         { w: 1 },
@@ -753,7 +730,7 @@ describe('APM', function() {
   it('should correctly decorate the apm result for aggregation with cursorId', {
     metadata: { requires: { topology: ['single', 'replicaset'], mongodb: '>=3.0.0' } },
 
-    test: function() {
+    test: function () {
       const self = this;
       const started = [];
       const succeeded = [];
@@ -804,7 +781,7 @@ describe('APM', function() {
 
   it('should correctly decorate the apm result for listCollections with cursorId', {
     metadata: { requires: { topology: ['single', 'replicaset'], mongodb: '>=3.0.0' } },
-    test: function() {
+    test: function () {
       const self = this;
       const started = [];
       const succeeded = [];
@@ -829,10 +806,7 @@ describe('APM', function() {
           .then(r => {
             expect(r).to.exist;
 
-            return db
-              .listCollections()
-              .batchSize(10)
-              .toArray();
+            return db.listCollections().batchSize(10).toArray();
           })
           .then(r => {
             expect(r).to.exist;
@@ -848,8 +822,8 @@ describe('APM', function() {
     }
   });
 
-  describe('spec tests', function() {
-    before(function() {
+  describe('spec tests', function () {
+    before(function () {
       return setupDatabase(this.configuration);
     });
 
@@ -1057,7 +1031,7 @@ describe('APM', function() {
     }
 
     loadSpecTests('apm').forEach(scenario => {
-      describe(scenario.name, function() {
+      describe(scenario.name, function () {
         scenario.tests.forEach(test => {
           const requirements = { topology: ['single', 'replicaset', 'sharded'] };
           if (test.ignore_if_server_version_greater_than) {
@@ -1074,7 +1048,7 @@ describe('APM', function() {
 
           it(test.description, {
             metadata: { requires: requirements },
-            test: function() {
+            test: function () {
               const client = this.configuration.newClient({}, { monitorCommands: true });
               return client.connect().then(client => {
                 expect(client).to.exist;

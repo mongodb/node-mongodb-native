@@ -11,7 +11,7 @@ const ReplSet = core.ReplSet;
 const ObjectId = core.BSON.ObjectId;
 
 let test = {};
-describe('ReplSet Add Remove (mocks)', function() {
+describe('ReplSet Add Remove (mocks)', function () {
   beforeEach(() => {
     test.spy = new ConnectionSpy();
     Connection.enableConnectionAccounting(test.spy);
@@ -32,7 +32,7 @@ describe('ReplSet Add Remove (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var currentIsMasterIndex = 0;
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
@@ -116,7 +116,7 @@ describe('ReplSet Add Remove (mocks)', function() {
       ];
 
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const primaryServer = yield mock.createServer(32000, 'localhost');
         const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
         const secondSecondaryServer = yield mock.createServer(32003, 'localhost');
@@ -169,7 +169,7 @@ describe('ReplSet Add Remove (mocks)', function() {
         var secondaries = {};
         var arbiters = {};
 
-        server.on('joined', function(_type, _server) {
+        server.on('joined', function (_type, _server) {
           if (_type === 'arbiter') {
             arbiters[_server.name] = _server;
             // Flip the ismaster message
@@ -200,7 +200,7 @@ describe('ReplSet Add Remove (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var currentIsMasterIndex = 0;
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
@@ -292,34 +292,34 @@ describe('ReplSet Add Remove (mocks)', function() {
       ];
 
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const primaryServer = yield mock.createServer(32000, 'localhost');
         const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
         const secondSecondaryServer = yield mock.createServer(32003, 'localhost');
         const arbiterServer = yield mock.createServer(32002, 'localhost');
 
-        primaryServer.setMessageHandler(function(request) {
+        primaryServer.setMessageHandler(function (request) {
           var doc = request.document;
           if (doc.ismaster) {
             request.reply(primary[currentIsMasterIndex]);
           }
         });
 
-        firstSecondaryServer.setMessageHandler(function(request) {
+        firstSecondaryServer.setMessageHandler(function (request) {
           var doc = request.document;
           if (doc.ismaster) {
             request.reply(firstSecondary[currentIsMasterIndex]);
           }
         });
 
-        secondSecondaryServer.setMessageHandler(function(request) {
+        secondSecondaryServer.setMessageHandler(function (request) {
           var doc = request.document;
           if (doc.ismaster) {
             request.reply(secondSecondary[currentIsMasterIndex]);
           }
         });
 
-        arbiterServer.setMessageHandler(function(request) {
+        arbiterServer.setMessageHandler(function (request) {
           var doc = request.document;
           if (doc.ismaster) {
             request.reply(arbiter[currentIsMasterIndex]);
@@ -345,7 +345,7 @@ describe('ReplSet Add Remove (mocks)', function() {
         // Joined
         var joined = 0;
 
-        server.on('joined', function() {
+        server.on('joined', function () {
           joined = joined + 1;
 
           // primary, secondary and arbiter have joined
@@ -363,7 +363,7 @@ describe('ReplSet Add Remove (mocks)', function() {
           }
         });
 
-        server.on('left', function(_type, _server) {
+        server.on('left', function (_type, _server) {
           if (_type === 'secondary' && _server.name === 'localhost:32003') {
             expect(server.s.replicaSetState.secondaries).to.have.length(1);
             expect(server.s.replicaSetState.secondaries[0].name).to.equal('localhost:32001');
@@ -392,7 +392,7 @@ describe('ReplSet Add Remove (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var currentIsMasterIndex = 0;
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
@@ -512,7 +512,7 @@ describe('ReplSet Add Remove (mocks)', function() {
       ];
 
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const primaryServer = yield mock.createServer(32000, 'localhost');
         const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
         const secondSecondaryServer = yield mock.createServer(32003, 'localhost');
@@ -562,7 +562,7 @@ describe('ReplSet Add Remove (mocks)', function() {
           }
         );
 
-        setTimeout(function() {
+        setTimeout(function () {
           expect(server.s.replicaSetState.set['localhost:32000'].type).to.equal('RSPrimary');
           expect(server.s.replicaSetState.set['localhost:32001'].type).to.equal('RSSecondary');
           expect(server.s.replicaSetState.set['localhost:32002'].type).to.equal('RSArbiter');
@@ -570,7 +570,7 @@ describe('ReplSet Add Remove (mocks)', function() {
           currentIsMasterIndex = currentIsMasterIndex + 1;
 
           // Wait for another sweep
-          setTimeout(function() {
+          setTimeout(function () {
             expect(server.s.replicaSetState.set['localhost:32000'].type).to.equal('RSPrimary');
             expect(server.s.replicaSetState.set['localhost:32001'].type).to.equal('RSSecondary');
             expect(server.s.replicaSetState.set['localhost:32002'].type).to.equal('RSArbiter');
@@ -580,12 +580,12 @@ describe('ReplSet Add Remove (mocks)', function() {
             expect(server.s.replicaSetState.primary).to.exist;
 
             // Ensure we have 4 interval ids and
-            var intervalIds = server.intervalIds.filter(function(x) {
+            var intervalIds = server.intervalIds.filter(function (x) {
               return x.__host !== undefined;
             });
 
             expect(intervalIds).to.have.length(4);
-            var hosts = intervalIds.map(function(x) {
+            var hosts = intervalIds.map(function (x) {
               return x.__host;
             });
 
@@ -599,7 +599,7 @@ describe('ReplSet Add Remove (mocks)', function() {
           }, 1000);
         }, 500);
 
-        server.on('left', function(_type, _server) {
+        server.on('left', function (_type, _server) {
           if (_type === 'secondary' && _server.name === 'localhost:32003') {
             expect(server.s.replicaSetState.secondaries).to.have.length(1);
             expect(server.s.replicaSetState.secondaries[0].name).to.equal('localhost:32001');
@@ -628,7 +628,7 @@ describe('ReplSet Add Remove (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var currentIsMasterIndex = 0;
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
@@ -712,7 +712,7 @@ describe('ReplSet Add Remove (mocks)', function() {
       ];
 
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const primaryServer = yield mock.createServer(32000, 'localhost');
         const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
         const secondSecondaryServer = yield mock.createServer(32003, 'localhost');
@@ -766,7 +766,7 @@ describe('ReplSet Add Remove (mocks)', function() {
         var arbiters = {};
         var allservers = {};
 
-        server.on('serverHeartbeatStarted', function(description) {
+        server.on('serverHeartbeatStarted', function (description) {
           allservers[description.connectionId] = true;
           if (allservers['localhost:32003']) {
             server.destroy();
@@ -774,7 +774,7 @@ describe('ReplSet Add Remove (mocks)', function() {
           }
         });
 
-        server.on('joined', function(_type, _server) {
+        server.on('joined', function (_type, _server) {
           if (_type === 'arbiter') {
             arbiters[_server.name] = _server;
             // Flip the ismaster message
@@ -790,8 +790,8 @@ describe('ReplSet Add Remove (mocks)', function() {
           }
         });
 
-        server.on('error', function() {});
-        server.on('connect', function() {
+        server.on('error', function () {});
+        server.on('connect', function () {
           server.__connected = true;
         });
 

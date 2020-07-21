@@ -9,7 +9,7 @@ const ReplSet = core.ReplSet;
 const ObjectId = core.BSON.ObjectId;
 
 let test = {};
-describe('ReplSet No Primary Found (mocks)', function() {
+describe('ReplSet No Primary Found (mocks)', function () {
   beforeEach(() => {
     test.spy = new ConnectionSpy();
     Connection.enableConnectionAccounting(test.spy);
@@ -30,7 +30,7 @@ describe('ReplSet No Primary Found (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
@@ -81,7 +81,7 @@ describe('ReplSet No Primary Found (mocks)', function() {
       ];
 
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const primaryServer = yield mock.createServer(32000, 'localhost');
         const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
         const secondSecondaryServer = yield mock.createServer(32002, 'localhost');
@@ -129,7 +129,7 @@ describe('ReplSet No Primary Found (mocks)', function() {
         });
 
         // Add event listeners
-        server.on('connect', function() {
+        server.on('connect', function () {
           server.destroy();
           done();
         });

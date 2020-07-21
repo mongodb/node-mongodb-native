@@ -10,7 +10,7 @@ const ReplSet = core.ReplSet;
 const ObjectId = core.BSON.ObjectId;
 
 let test = {};
-describe('ReplSet Maintenance Mode (mocks)', function() {
+describe('ReplSet Maintenance Mode (mocks)', function () {
   beforeEach(() => {
     test.spy = new ConnectionSpy();
     Connection.enableConnectionAccounting(test.spy);
@@ -31,7 +31,7 @@ describe('ReplSet Maintenance Mode (mocks)', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var currentIsMasterIndex = 0;
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
@@ -115,7 +115,7 @@ describe('ReplSet Maintenance Mode (mocks)', function() {
       ];
 
       // Boot the mock
-      co(function*() {
+      co(function* () {
         const primaryServer = yield mock.createServer(32000, 'localhost');
         const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
         const secondSecondaryServer = yield mock.createServer(32003, 'localhost');
@@ -168,7 +168,7 @@ describe('ReplSet Maintenance Mode (mocks)', function() {
         // Joined
         var joined = 0;
 
-        server.on('joined', function() {
+        server.on('joined', function () {
           joined = joined + 1;
 
           // primary, secondary and arbiter have joined
@@ -188,7 +188,7 @@ describe('ReplSet Maintenance Mode (mocks)', function() {
           }
         });
 
-        server.on('left', function(_type, _server) {
+        server.on('left', function (_type, _server) {
           if (_type === 'secondary' && _server.name === 'localhost:32003') {
             server.destroy();
             done();

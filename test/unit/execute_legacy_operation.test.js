@@ -3,8 +3,8 @@
 const expect = require('chai').expect;
 const executeLegacyOperation = require('../../src/utils').executeLegacyOperation;
 
-describe('executeLegacyOperation', function() {
-  it('should call callback with errors on throw errors, and rethrow error', function() {
+describe('executeLegacyOperation', function () {
+  it('should call callback with errors on throw errors, and rethrow error', function () {
     const expectedError = new Error('THIS IS AN ERROR');
     let callbackError, caughtError;
 
@@ -28,7 +28,7 @@ describe('executeLegacyOperation', function() {
     expect(caughtError).to.equal(expectedError);
   });
 
-  it('should reject promise with errors on throw errors, and rethrow error', function(done) {
+  it('should reject promise with errors on throw errors, and rethrow error', function (done) {
     const expectedError = new Error('THIS IS AN ERROR');
     let callbackError;
 

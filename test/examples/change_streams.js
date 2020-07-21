@@ -4,15 +4,15 @@
 const setupDatabase = require('../functional/shared').setupDatabase;
 const expect = require('chai').expect;
 
-describe('examples(change-stream):', function() {
+describe('examples(change-stream):', function () {
   let client;
   let db;
 
-  before(async function() {
+  before(async function () {
     await setupDatabase(this.configuration);
   });
 
-  beforeEach(async function() {
+  beforeEach(async function () {
     client = await this.configuration.newClient().connect();
     db = client.db(this.configuration.db);
 
@@ -23,7 +23,7 @@ describe('examples(change-stream):', function() {
     await db.collection('inventory').deleteMany({});
   });
 
-  afterEach(async function() {
+  afterEach(async function () {
     await client.close();
     client = undefined;
     db = undefined;
@@ -56,7 +56,7 @@ describe('examples(change-stream):', function() {
 
   it('Open A Change Stream', {
     metadata: { requires: { topology: ['replicaset'], mongodb: '>=3.6.0' } },
-    test: async function() {
+    test: async function () {
       const looper = new Looper(() => db.collection('inventory').insertOne({ a: 1 }));
       looper.run();
 
@@ -77,15 +77,13 @@ describe('examples(change-stream):', function() {
       await changeStreamIterator.close();
       await looper.stop();
 
-      expect(next)
-        .to.have.property('operationType')
-        .that.equals('insert');
+      expect(next).to.have.property('operationType').that.equals('insert');
     }
   });
 
   it('Lookup Full Document for Update Operations', {
     metadata: { requires: { topology: ['replicaset'], mongodb: '>=3.6.0' } },
-    test: async function() {
+    test: async function () {
       await db.collection('inventory').insertOne({ a: 1, b: 2 });
       const looper = new Looper(() =>
         db.collection('inventory').updateOne({ a: 1 }, { $set: { a: 2 } })
@@ -109,18 +107,14 @@ describe('examples(change-stream):', function() {
       await changeStreamIterator.close();
       await looper.stop();
 
-      expect(next)
-        .to.have.property('operationType')
-        .that.equals('update');
-      expect(next)
-        .to.have.property('fullDocument')
-        .that.has.all.keys(['_id', 'a', 'b']);
+      expect(next).to.have.property('operationType').that.equals('update');
+      expect(next).to.have.property('fullDocument').that.has.all.keys(['_id', 'a', 'b']);
     }
   });
 
   it('Resume a Change Stream', {
     metadata: { requires: { topology: ['replicaset'], mongodb: '>=3.6.0' } },
-    test: async function() {
+    test: async function () {
       const looper = new Looper(async () => {
         await db.collection('inventory').insertOne({ a: 1 });
         await db.collection('inventory').insertOne({ b: 2 });
@@ -172,7 +166,7 @@ describe('examples(change-stream):', function() {
 
   it('Modify Change Stream Output', {
     metadata: { requires: { topology: ['replicaset'], mongodb: '>=3.6.0' } },
-    test: async function() {
+    test: async function () {
       const looper = new Looper(async () => {
         await db.collection('inventory').insertOne({ username: 'alice' });
       });

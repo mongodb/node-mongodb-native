@@ -3,12 +3,12 @@
 const expect = require('chai').expect;
 const mock = require('mongodb-mock-server');
 
-describe('CreateIndexError', function() {
+describe('CreateIndexError', function () {
   const test = {};
   beforeEach(() => mock.createServer().then(_server => (test.server = _server)));
   afterEach(() => mock.cleanup());
 
-  it('should error when createIndex fails', function(done) {
+  it('should error when createIndex fails', function (done) {
     const ERROR_RESPONSE = {
       ok: 0,
       errmsg:

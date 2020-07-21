@@ -5,7 +5,7 @@ const mock = require('mongodb-mock-server');
 const { ReadPreference } = require('../../src');
 
 const test = {};
-describe('Max Staleness', function() {
+describe('Max Staleness', function () {
   afterEach(() => mock.cleanup());
   beforeEach(() => {
     return mock.createServer().then(server => {
@@ -48,20 +48,20 @@ describe('Max Staleness', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       const configuration = this.configuration;
       const client = configuration.newClient(
         `mongodb://${test.server.uri()}/test?readPreference=secondary&maxStalenessSeconds=250`
       );
 
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         expect(err).to.not.exist;
         var db = client.db(self.configuration.db);
 
         db.collection('test')
           .find({})
-          .toArray(function(err) {
+          .toArray(function (err) {
             expect(err).to.not.exist;
             expect(test.checkCommand).to.eql({
               $query: { find: 'test', filter: {}, returnKey: false, showRecordId: false },
@@ -82,10 +82,10 @@ describe('Max Staleness', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${test.server.uri()}/test`);
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         expect(err).to.not.exist;
 
         // Get a db with a new readPreference
@@ -96,7 +96,7 @@ describe('Max Staleness', function() {
         db1
           .collection('test')
           .find({})
-          .toArray(function(err) {
+          .toArray(function (err) {
             expect(err).to.not.exist;
             expect(test.checkCommand).to.eql({
               $query: { find: 'test', filter: {}, returnKey: false, showRecordId: false },
@@ -119,11 +119,11 @@ describe('Max Staleness', function() {
         }
       },
 
-      test: function(done) {
+      test: function (done) {
         var self = this;
         const configuration = this.configuration;
         const client = configuration.newClient(`mongodb://${test.server.uri()}/test`);
-        client.connect(function(err, client) {
+        client.connect(function (err, client) {
           expect(err).to.not.exist;
           var db = client.db(self.configuration.db);
 
@@ -132,7 +132,7 @@ describe('Max Staleness', function() {
             readPreference: new ReadPreference('secondary', null, { maxStalenessSeconds: 250 })
           })
             .find({})
-            .toArray(function(err) {
+            .toArray(function (err) {
               expect(err).to.not.exist;
               expect(test.checkCommand).to.eql({
                 $query: { find: 'test', filter: {}, returnKey: false, showRecordId: false },
@@ -154,11 +154,11 @@ describe('Max Staleness', function() {
       }
     },
 
-    test: function(done) {
+    test: function (done) {
       var self = this;
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${test.server.uri()}/test`);
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         expect(err).to.not.exist;
         var db = client.db(self.configuration.db);
         var readPreference = new ReadPreference('secondary', null, { maxStalenessSeconds: 250 });
@@ -167,7 +167,7 @@ describe('Max Staleness', function() {
         db.collection('test')
           .find({})
           .setReadPreference(readPreference)
-          .toArray(function(err) {
+          .toArray(function (err) {
             expect(err).to.not.exist;
             expect(test.checkCommand).to.eql({
               $query: { find: 'test', filter: {}, returnKey: false, showRecordId: false },

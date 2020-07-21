@@ -4,34 +4,34 @@ const expect = require('chai').expect;
 
 // helpers for using chai.expect in the assert style
 const assert = {
-  equal: function(a, b) {
+  equal: function (a, b) {
     expect(a).to.equal(b);
   },
 
-  deepEqual: function(a, b) {
+  deepEqual: function (a, b) {
     expect(a).to.eql(b);
   },
 
-  strictEqual: function(a, b) {
+  strictEqual: function (a, b) {
     expect(a).to.eql(b);
   },
 
-  notEqual: function(a, b) {
+  notEqual: function (a, b) {
     expect(a).to.not.equal(b);
   },
 
-  ok: function(a) {
+  ok: function (a) {
     expect(a).to.be.ok;
   },
 
-  throws: function(func) {
+  throws: function (func) {
     expect(func).to.throw;
   }
 };
 
 function delay(timeout) {
-  return new Promise(function(resolve) {
-    setTimeout(function() {
+  return new Promise(function (resolve) {
+    setTimeout(function () {
       resolve();
     }, timeout);
   });
@@ -43,24 +43,24 @@ function dropCollection(dbObj, collectionName) {
 
 function filterForCommands(commands, bag) {
   if (typeof commands === 'function') {
-    return function(event) {
+    return function (event) {
       if (commands(event.commandName)) bag.push(event);
     };
   }
   commands = Array.isArray(commands) ? commands : [commands];
-  return function(event) {
+  return function (event) {
     if (commands.indexOf(event.commandName) !== -1) bag.push(event);
   };
 }
 
 function filterOutCommands(commands, bag) {
   if (typeof commands === 'function') {
-    return function(event) {
+    return function (event) {
       if (!commands(event.commandName)) bag.push(event);
     };
   }
   commands = Array.isArray(commands) ? commands : [commands];
-  return function(event) {
+  return function (event) {
     if (commands.indexOf(event.commandName) === -1) bag.push(event);
   };
 }
@@ -176,7 +176,7 @@ function withMonitoredClient(commands, options, callback) {
   if (!Object.prototype.hasOwnProperty.call(callback, 'prototype')) {
     throw new Error('withMonitoredClient callback can not be arrow function');
   }
-  return function() {
+  return function () {
     const monitoredClient = this.configuration.newClient(
       Object.assign({}, options.queryOptions),
       Object.assign({ monitorCommands: true }, options.clientOptions)

@@ -5,12 +5,12 @@ const mongo = require('../../src'),
 
 const ignoredCommands = ['ismaster', 'endSessions'];
 const test = { commands: { started: [], succeeded: [] } };
-describe('Causal Consistency', function() {
-  before(function() {
+describe('Causal Consistency', function () {
+  before(function () {
     return setupDatabase(this.configuration);
   });
 
-  beforeEach(function() {
+  beforeEach(function () {
     test.commands = { started: [], succeeded: [] };
     test.listener = mongo.instrument(err => expect(err).to.be.null);
     test.listener.on('started', event => {
@@ -37,7 +37,7 @@ describe('Causal Consistency', function() {
       sessions: { skipLeakTests: true }
     },
 
-    test: function() {
+    test: function () {
       const session = test.client.startSession({ causalConsistency: true });
       const db = test.client.db(this.configuration.db);
 
@@ -61,7 +61,7 @@ describe('Causal Consistency', function() {
       sessions: { skipLeakTests: true }
     },
 
-    test: function() {
+    test: function () {
       const session = test.client.startSession({ causalConsistency: true });
       const db = test.client.db(this.configuration.db);
       expect(session.operationTime).to.be.null;
@@ -87,7 +87,7 @@ describe('Causal Consistency', function() {
       sessions: { skipLeakTests: true }
     },
 
-    test: function() {
+    test: function () {
       const session = test.client.startSession({ causalConsistency: true });
       const db = test.client.db(this.configuration.db);
       expect(session.operationTime).to.be.null;
@@ -121,7 +121,7 @@ describe('Causal Consistency', function() {
         sessions: { skipLeakTests: true }
       },
 
-      test: function() {
+      test: function () {
         const session = test.client.startSession({ causalConsistency: false });
         const db = test.client.db(this.configuration.db);
         const coll = db.collection('causal_test', { readConcern: { level: 'majority' } });
@@ -146,7 +146,7 @@ describe('Causal Consistency', function() {
       sessions: { skipLeakTests: true }
     },
 
-    test: function() {
+    test: function () {
       const session = test.client.startSession({ causalConsistency: true });
       const db = test.client.db(this.configuration.db);
       expect(session.operationTime).to.be.null;
@@ -173,7 +173,7 @@ describe('Causal Consistency', function() {
     {
       metadata: { requires: { topology: ['single'], mongodb: '>3.6.0-rc0' } },
 
-      test: function() {
+      test: function () {
         const db = test.client.db(this.configuration.db);
         const coll = db.collection('causal_test', { readConcern: { level: 'local' } });
 
@@ -195,7 +195,7 @@ describe('Causal Consistency', function() {
     'should not record `operationTime` for unacknowledged writes in a causally consistent session',
     {
       metadata: { requires: { topology: ['replicaset'], mongodb: '>3.6.0-rc0' } },
-      test: function() {
+      test: function () {
         const session = test.client.startSession({ causalConsistency: true });
         const db = test.client.db(this.configuration.db);
         expect(session.operationTime).to.be.null;

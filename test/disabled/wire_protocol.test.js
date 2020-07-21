@@ -6,12 +6,12 @@ const sinon = require('sinon');
 const { ConnectionPool } = require('../../../src/cmap/connection_pool.js');
 const wireProtocol = require('../../../src/cmap/wire_protocol');
 
-describe('WireProtocol', function() {
-  it('should only set bypassDocumentValidation to true if explicitly set by user to true', function() {
+describe('WireProtocol', function () {
+  it('should only set bypassDocumentValidation to true if explicitly set by user to true', function () {
     testPoolWrite(true, true);
   });
 
-  it('should not set bypassDocumentValidation to anything if not explicitly set by user to true', function() {
+  it('should not set bypassDocumentValidation to anything if not explicitly set by user to true', function () {
     testPoolWrite(false, undefined);
   });
 
