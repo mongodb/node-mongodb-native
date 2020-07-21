@@ -1,0 +1,57 @@
+{
+  "data": [
+    {
+      "_id": 1,
+      "x": 11
+    },
+    {
+      "_id": 2,
+      "x": 22
+    },
+    {
+      "_id": 3,
+      "x": 33
+    }
+  ],
+  "tests": [
+    {
+      "description": "UpdateOne requires atomic modifiers",
+      "operations": [
+        {
+          "object": "collection",
+          "name": "updateMany",
+          "arguments": {
+            "filter": {
+              "_id": {
+                "$gt": 1
+              }
+            },
+            "update": {
+              "x": 44
+            }
+          },
+          "error": true
+        }
+      ],
+      "expectations": [],
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
