@@ -711,7 +711,7 @@ All options are chainable, so you can combine settings in the following way:
 collection.find({}).maxTimeMS(1000).skip(1).toArray(..)
 ```
 
-More information can be found in the [Cursor API documentation](/node-mongodb-native/2.0/api/Cursor.html).
+More information can be found in the [Cursor API documentation](/node-mongodb-native/3.4/api/Cursor.html).
 
 The following example uses the ``next`` method.
 
