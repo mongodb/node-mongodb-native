@@ -17,27 +17,28 @@ import {
   filterOptions,
   toError,
   mergeOptionsAndWriteConcern,
-  executeLegacyOperation,
   deprecateOptions,
   MongoDBNamespace
 } from './utils';
-import { ensureIndex, evaluate, profilingInfo, validateDatabaseName } from './operations/db_ops';
 import AggregateOperation = require('./operations/aggregate');
 import AddUserOperation = require('./operations/add_user');
 import CollectionsOperation = require('./operations/collections');
 import { DbStatsOperation } from './operations/stats';
-import RunCommandOperation = require('./operations/run_command');
+import { RunCommandOperation, RunAdminCommandOperation } from './operations/run_command';
 import CreateCollectionOperation = require('./operations/create_collection');
-import CreateIndexesOperation = require('./operations/create_indexes');
+import {
+  CreateIndexOperation,
+  EnsureIndexOperation,
+  IndexInformationOperation
+} from './operations/indexes';
 import { DropCollectionOperation, DropDatabaseOperation } from './operations/drop';
-import ExecuteDbAdminCommandOperation = require('./operations/execute_db_admin_command');
-import IndexInformationOperation = require('./operations/index_information');
 import ListCollectionsOperation = require('./operations/list_collections');
 import ProfilingLevelOperation = require('./operations/profiling_level');
 import RemoveUserOperation = require('./operations/remove_user');
 import RenameOperation = require('./operations/rename');
 import SetProfilingLevelOperation = require('./operations/set_profiling_level');
 import executeOperation = require('./operations/execute_operation');
+import EvalOperation = require('./operations/eval');
 
 // Allowed parameters
 const legalOptionNames = [
@@ -552,15 +553,12 @@ class Db {
   executeDbAdminCommand(selector: object, options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
-    options.readPreference = ReadPreference.resolve(this, options);
 
-    const executeDbAdminCommandOperation = new ExecuteDbAdminCommandOperation(
-      this,
-      selector,
-      options
+    return executeOperation(
+      this.s.topology,
+      new RunAdminCommandOperation(this, selector, options),
+      callback
     );
-
-    return executeOperation(this.s.topology, executeDbAdminCommandOperation, callback);
   }
 
   /**
@@ -592,9 +590,11 @@ class Db {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options ? Object.assign({}, options) : {};
 
-    const createIndexesOperation = new CreateIndexesOperation(this, name, fieldOrSpec, options);
-
-    return executeOperation(this.s.topology, createIndexesOperation, callback);
+    return executeOperation(
+      this.s.topology,
+      new CreateIndexOperation(this, name, fieldOrSpec, options),
+      callback
+    );
   }
 
   /**
@@ -859,13 +859,11 @@ Db.prototype.eval = deprecate(function(
   parameters = args.length ? args.shift() : parameters;
   options = args.length ? args.shift() || {} : {};
 
-  return executeLegacyOperation(this.s.topology, evaluate, [
-    this,
-    code,
-    parameters,
-    options,
+  return executeOperation(
+    this.s.topology,
+    new EvalOperation(this, code, parameters, options),
     callback
-  ]);
+  );
 },
 'Db.eval is deprecated as of MongoDB version 3.2');
 
@@ -903,13 +901,11 @@ Db.prototype.ensureIndex = deprecate(function(
   if (typeof options === 'function') (callback = options), (options = {});
   options = options || {};
 
-  return executeLegacyOperation(this.s.topology, ensureIndex, [
-    this,
-    name,
-    fieldOrSpec,
-    options,
+  return executeOperation(
+    this.s.topology,
+    new EnsureIndexOperation(this, name, fieldOrSpec, options),
     callback
-  ]);
+  );
 },
 'Db.ensureIndex is deprecated as of MongoDB version 3.0 / driver version 2.0');
 
@@ -926,7 +922,27 @@ Db.prototype.profilingInfo = deprecate(function(this: any, options: any, callbac
   if (typeof options === 'function') (callback = options), (options = {});
   options = options || {};
 
-  return executeLegacyOperation(this.s.topology, profilingInfo, [this, options, callback]);
+  return this.collection('system.profile')
+    .find({}, options)
+    .toArray(callback);
 }, 'Db.profilingInfo is deprecated. Query the system.profile collection directly.');
+
+// Validate the database name
+function validateDatabaseName(databaseName: any) {
+  if (typeof databaseName !== 'string')
+    throw MongoError.create({ message: 'database name must be a string', driver: true });
+  if (databaseName.length === 0)
+    throw MongoError.create({ message: 'database name cannot be the empty string', driver: true });
+  if (databaseName === '$external') return;
+
+  const invalidChars = [' ', '.', '$', '/', '\\'];
+  for (let i = 0; i < invalidChars.length; i++) {
+    if (databaseName.indexOf(invalidChars[i]) !== -1)
+      throw MongoError.create({
+        message: "database names cannot contain the character '" + invalidChars[i] + "'",
+        driver: true
+      });
+  }
+}
 
 export = Db;

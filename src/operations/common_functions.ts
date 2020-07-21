@@ -1,61 +1,13 @@
-import ReadPreference = require('../read_preference');
-import { executeCommand } from './db_ops';
 import { MongoError } from '../error';
 import { CursorState } from '../cursor';
 import {
   applyRetryableWrites,
   applyWriteConcern,
   decorateWithCollation,
-  decorateWithReadConcern,
   formattedOrderClause,
   handleCallback,
   toError
 } from '../utils';
-
-/**
- * Build the count command.
- *
- * @function
- * @param {Collection|Cursor} collectionOrCursor an instance of a collection or cursor
- * @param {any} query The query for the count.
- * @param {any} [options] Optional settings. See Collection.prototype.count and Cursor.prototype.count for a list of options.
- */
-function buildCountCommand(collectionOrCursor: any, query: any, options?: any) {
-  const skip = options.skip;
-  const limit = options.limit;
-  let hint = options.hint;
-  const maxTimeMS = options.maxTimeMS;
-  query = query || {};
-
-  // Final query
-  const cmd = {
-    count: options.collectionName,
-    query: query
-  } as any;
-
-  if (collectionOrCursor.s.numberOfRetries) {
-    // collectionOrCursor is a cursor
-    if (collectionOrCursor.options.hint) {
-      hint = collectionOrCursor.options.hint;
-    } else if (collectionOrCursor.cmd.hint) {
-      hint = collectionOrCursor.cmd.hint;
-    }
-    decorateWithCollation(cmd, collectionOrCursor, collectionOrCursor.cmd);
-  } else {
-    decorateWithCollation(cmd, collectionOrCursor, options);
-  }
-
-  // Add limit, skip and maxTimeMS if defined
-  if (typeof skip === 'number') cmd.skip = skip;
-  if (typeof limit === 'number') cmd.limit = limit;
-  if (typeof maxTimeMS === 'number') cmd.maxTimeMS = maxTimeMS;
-  if (hint) cmd.hint = hint;
-
-  // Do we have a readConcern specified
-  decorateWithReadConcern(cmd, collectionOrCursor);
-
-  return cmd;
-}
 
 function deleteCallback(err: any, r: any, callback: Function) {
   if (callback == null) return;
@@ -63,97 +15,6 @@ function deleteCallback(err: any, r: any, callback: Function) {
   if (r == null) return callback(null, { result: { ok: 1 } });
   r.deletedCount = r.result.n;
   if (callback) callback(null, r);
-}
-
-/**
- * Find and update a document.
- *
- * @function
- * @param {Collection} coll Collection instance.
- * @param {object} query Query object to locate the object to modify.
- * @param {any} sort If multiple docs match, choose the first one in the specified sort order as the object to manipulate.
- * @param {object} doc The fields/vals to be updated.
- * @param {any} [options] Optional settings. See Collection.prototype.findAndModify for a list of options.
- * @param {Collection~findAndModifyCallback} [callback] The command result callback
- * @deprecated use findOneAndUpdate, findOneAndReplace or findOneAndDelete instead
- */
-function findAndModify(
-  coll: any,
-  query: object,
-  sort: any,
-  doc: object,
-  options?: any,
-  callback?: Function
-) {
-  // Create findAndModify command object
-  const queryObject = {
-    findAndModify: coll.collectionName,
-    query: query
-  } as any;
-
-  sort = formattedOrderClause(sort);
-  if (sort) {
-    queryObject.sort = sort;
-  }
-
-  queryObject.new = options.new ? true : false;
-  queryObject.remove = options.remove ? true : false;
-  queryObject.upsert = options.upsert ? true : false;
-
-  const projection = options.projection || options.fields;
-
-  if (projection) {
-    queryObject.fields = projection;
-  }
-
-  if (options.arrayFilters) {
-    queryObject.arrayFilters = options.arrayFilters;
-    delete options.arrayFilters;
-  }
-
-  if (doc && !options.remove) {
-    queryObject.update = doc;
-  }
-
-  if (options.maxTimeMS) queryObject.maxTimeMS = options.maxTimeMS;
-
-  // Either use override on the function, or go back to default on either the collection
-  // level or db
-  options.serializeFunctions = options.serializeFunctions || coll.s.serializeFunctions;
-
-  // No check on the documents
-  options.checkKeys = false;
-
-  // Final options for retryable writes and write concern
-  let finalOptions = Object.assign({}, options);
-  finalOptions = applyRetryableWrites(finalOptions, coll.s.db);
-  finalOptions = applyWriteConcern(finalOptions, { db: coll.s.db, collection: coll }, options);
-
-  // Decorate the findAndModify command with the write Concern
-  if (finalOptions.writeConcern) {
-    queryObject.writeConcern = finalOptions.writeConcern;
-  }
-
-  // Have we specified bypassDocumentValidation
-  if (finalOptions.bypassDocumentValidation === true) {
-    queryObject.bypassDocumentValidation = finalOptions.bypassDocumentValidation;
-  }
-
-  finalOptions.readPreference = ReadPreference.primary;
-
-  // Have we specified collation
-  try {
-    decorateWithCollation(queryObject, coll, finalOptions);
-  } catch (err) {
-    return callback!(err, null);
-  }
-
-  // Execute the command
-  executeCommand(coll.s.db, queryObject, finalOptions, (err?: any, result?: any) => {
-    if (err) return handleCallback(callback!, err, null);
-
-    return handleCallback(callback!, null, result);
-  });
 }
 
 /**
@@ -412,9 +273,7 @@ function updateCallback(err: any, r: any, callback: Function) {
 }
 
 export {
-  buildCountCommand,
   deleteCallback,
-  findAndModify,
   indexInformation,
   nextObject,
   prepareDocs,

@@ -1,5 +1,4 @@
 import ReadPreference = require('../read_preference');
-import { OperationBase } from './operation';
 import {
   maxWireVersion,
   applyRetryableWrites,
@@ -8,8 +7,8 @@ import {
   formattedOrderClause,
   handleCallback
 } from '../utils';
-import { executeCommand } from './db_ops';
 import { MongoError } from '../error';
+import { defineAspects, Aspect, OperationBase } from './operation';
 
 class FindAndModifyOperation extends OperationBase {
   collection: any;
@@ -117,4 +116,78 @@ class FindAndModifyOperation extends OperationBase {
   }
 }
 
-export = FindAndModifyOperation;
+/**
+ * Execute a command
+ *
+ * @function
+ * @param {Db} db The Db instance on which to execute the command.
+ * @param {object} command The command hash
+ * @param {object} [options] Optional settings. See Db.prototype.command for a list of options.
+ * @param {Db~resultCallback} [callback] The command result callback
+ */
+function executeCommand(db: any, command: object, options?: any, callback?: Function) {
+  // Did the user destroy the topology
+  if (db.serverConfig && db.serverConfig.isDestroyed()) {
+    return callback!(new MongoError('topology was destroyed'));
+  }
+
+  // Convert the readPreference if its not a write
+  options.readPreference = ReadPreference.resolve(db, options);
+
+  // Execute command
+  db.s.topology.command(
+    db.s.namespace.withCollection('$cmd'),
+    command,
+    options,
+    (err?: any, result?: any) => {
+      if (err) return handleCallback(callback!, err);
+      if (options.full) return handleCallback(callback!, null, result);
+      handleCallback(callback!, null, result.result);
+    }
+  );
+}
+
+class FindOneAndDeleteOperation extends FindAndModifyOperation {
+  constructor(collection: any, filter: any, options: any) {
+    // Final options
+    const finalOptions = Object.assign({}, options);
+    finalOptions.fields = options.projection;
+    finalOptions.remove = true;
+
+    super(collection, filter, finalOptions.sort, null, finalOptions);
+  }
+}
+
+class FindOneAndReplaceOperation extends FindAndModifyOperation {
+  constructor(collection: any, filter: any, replacement: any, options: any) {
+    // Final options
+    const finalOptions = Object.assign({}, options);
+    finalOptions.fields = options.projection;
+    finalOptions.update = true;
+    finalOptions.new = options.returnOriginal !== void 0 ? !options.returnOriginal : false;
+    finalOptions.upsert = options.upsert !== void 0 ? !!options.upsert : false;
+
+    super(collection, filter, finalOptions.sort, replacement, finalOptions);
+  }
+}
+
+class FindOneAndUpdateOperation extends FindAndModifyOperation {
+  constructor(collection: any, filter: any, update: any, options: any) {
+    // Final options
+    const finalOptions = Object.assign({}, options);
+    finalOptions.fields = options.projection;
+    finalOptions.update = true;
+    finalOptions.new =
+      typeof options.returnOriginal === 'boolean' ? !options.returnOriginal : false;
+    finalOptions.upsert = typeof options.upsert === 'boolean' ? options.upsert : false;
+
+    super(collection, filter, finalOptions.sort, update, finalOptions);
+  }
+}
+
+export {
+  FindAndModifyOperation,
+  FindOneAndDeleteOperation,
+  FindOneAndReplaceOperation,
+  FindOneAndUpdateOperation
+};

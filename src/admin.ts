@@ -1,10 +1,10 @@
 import { applyWriteConcern } from './utils';
 import AddUserOperation = require('./operations/add_user');
-import ExecuteDbAdminCommandOperation = require('./operations/execute_db_admin_command');
 import RemoveUserOperation = require('./operations/remove_user');
 import ValidateCollectionOperation = require('./operations/validate_collection');
 import ListDatabasesOperation = require('./operations/list_databases');
 import executeOperation = require('./operations/execute_operation');
+import { RunCommandOperation } from './operations/run_command';
 
 /**
  * The **Admin** class is an internal class that allows convenient access to
@@ -73,10 +73,12 @@ class Admin {
   command(command: object, options?: any, callback?: Function): Promise<void> {
     const args = Array.prototype.slice.call(arguments, 1);
     callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
-    options = args.length ? args.shift() : {};
-
-    const commandOperation = new ExecuteDbAdminCommandOperation(this.s.db, command, options);
-    return executeOperation(this.s.db.s.topology, commandOperation, callback);
+    options = Object.assign({ dbName: 'admin' }, args.length ? args.shift() : {});
+    return executeOperation(
+      this.s.db.s.topology,
+      new RunCommandOperation(this.s.db, command, options),
+      callback
+    );
   }
 
   /**
@@ -91,10 +93,7 @@ class Admin {
   buildInfo(options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
-
-    const cmd = { buildinfo: 1 };
-    const buildInfoOperation = new ExecuteDbAdminCommandOperation(this.s.db, cmd, options);
-    return executeOperation(this.s.db.s.topology, buildInfoOperation, callback);
+    return this.command({ buildinfo: 1 }, options, callback);
   }
 
   /**
@@ -109,10 +108,7 @@ class Admin {
   serverInfo(options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
-
-    const cmd = { buildinfo: 1 };
-    const serverInfoOperation = new ExecuteDbAdminCommandOperation(this.s.db, cmd, options);
-    return executeOperation(this.s.db.s.topology, serverInfoOperation, callback);
+    return this.command({ buildinfo: 1 }, options, callback);
   }
 
   /**
@@ -126,14 +122,7 @@ class Admin {
   serverStatus(options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
-
-    const serverStatusOperation = new ExecuteDbAdminCommandOperation(
-      this.s.db,
-      { serverStatus: 1 },
-      options
-    );
-
-    return executeOperation(this.s.db.s.topology, serverStatusOperation, callback);
+    return this.command({ serverStatus: 1 }, options, callback);
   }
 
   /**
@@ -147,11 +136,7 @@ class Admin {
   ping(options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
-
-    const cmd = { ping: 1 };
-
-    const pingOperation = new ExecuteDbAdminCommandOperation(this.s.db, cmd, options);
-    return executeOperation(this.s.db.s.topology, pingOperation, callback);
+    return this.command({ ping: 1 }, options, callback);
   }
 
   /**
@@ -275,14 +260,7 @@ class Admin {
   replSetGetStatus(options?: any, callback?: Function): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
-
-    const replSetGetStatusOperation = new ExecuteDbAdminCommandOperation(
-      this.s.db,
-      { replSetGetStatus: 1 },
-      options
-    );
-
-    return executeOperation(this.s.db.s.topology, replSetGetStatusOperation, callback);
+    return this.command({ replSetGetStatus: 1 }, options, callback);
   }
 }
 

@@ -1,38 +1,32 @@
-import { OperationBase } from './operation';
-import { applyWriteConcern, checkCollectionName, handleCallback, toError } from '../utils';
-import { executeDbAdminCommand } from './db_ops';
+import { checkCollectionName, handleCallback, toError } from '../utils';
 import { loadCollection } from '../dynamic_loaders';
+import { RunAdminCommandOperation } from './run_command';
+import { defineAspects, Aspect } from './operation';
 
-class RenameOperation extends OperationBase {
+class RenameOperation extends RunAdminCommandOperation {
   collection: any;
   newName: any;
 
   constructor(collection: any, newName: any, options: any) {
-    super(options);
+    // Check the collection name
+    checkCollectionName(newName);
+
+    // Build the command
+    const renameCollection = collection.namespace;
+    const toCollection = collection.s.namespace.withCollection(newName).toString();
+    const dropTarget = typeof options.dropTarget === 'boolean' ? options.dropTarget : false;
+    const cmd = { renameCollection: renameCollection, to: toCollection, dropTarget: dropTarget };
+    super(collection, cmd, options);
 
     this.collection = collection;
     this.newName = newName;
   }
 
-  execute(callback: Function) {
+  execute(server: any, callback: Function) {
+    const Collection = loadCollection();
     const coll = this.collection;
-    const newName = this.newName;
-    const options = this.options;
 
-    let Collection = loadCollection();
-    // Check the collection name
-    checkCollectionName(newName);
-    // Build the command
-    const renameCollection = coll.namespace;
-    const toCollection = coll.s.namespace.withCollection(newName).toString();
-    const dropTarget = typeof options.dropTarget === 'boolean' ? options.dropTarget : false;
-    const cmd = { renameCollection: renameCollection, to: toCollection, dropTarget: dropTarget };
-
-    // Decorate command with writeConcern if supported
-    applyWriteConcern(cmd, { db: coll.s.db, collection: coll }, options);
-
-    // Execute against admin
-    executeDbAdminCommand(coll.s.db.admin().s.db, cmd, options, (err?: any, doc?: any) => {
+    super.execute(server, (err?: any, doc?: any) => {
       if (err) return handleCallback(callback, err, null);
       // We have an error
       if (doc.errmsg) return handleCallback(callback, toError(doc), null);
@@ -44,7 +38,7 @@ class RenameOperation extends OperationBase {
             coll.s.db,
             coll.s.topology,
             coll.s.namespace.db,
-            newName,
+            this.newName,
             coll.s.pkFactory,
             coll.s.options
           )
@@ -56,4 +50,5 @@ class RenameOperation extends OperationBase {
   }
 }
 
+defineAspects(RenameOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
 export = RenameOperation;
