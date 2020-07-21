@@ -74,7 +74,7 @@ The table below shows all settings and what topology they affect.
 | **maxStalenessSeconds** | Replicaset | number | null | Specify a maxStalenessSeconds value for secondary reads, minimum is 90 seconds |
 | **appname** | Server, Replicaset, Mongos | string | null | The name of the application that created this MongoClient instance. MongoDB 3.4 and newer will print this value in the server log upon establishing each connection. It is also recorded in the slow query log and profile collections. |
 | **loggerLevel** | Server, Replicaset, Mongos | string | null | Specify the log level used by the driver logger (error/warn/info/debug) |
-| **logger** | Server, Replicaset, Mongos | object | null | Specify a customer logger mechanism, can be used to log using your app level logger |
+| **logger** | Server, Replicaset, Mongos | object | null | Specify a custom logger mechanism, can be used to log using your app level logger |
 # Ensure your connection string is valid for Replica Sets
 
 The connection string passed to the driver must use the fully qualified host names for the servers as set in the replicaset config. Given the following configuration settings for your replicaset.
