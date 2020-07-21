@@ -1261,7 +1261,7 @@ class BulkOperationBase {
 
 Object.defineProperty(BulkOperationBase.prototype, 'length', {
   enumerable: true,
-  get: function() {
+  get() {
     return this.s.currentIndex;
   }
 });

@@ -50,15 +50,14 @@ function checkSupportedServer(ismaster: any, options: any) {
     return new MongoError(message);
   }
 
-  const message = `Server at ${options.host}:${
-    options.port
-  } reports maximum wire version ${ismaster.maxWireVersion ||
-    0}, but this version of the Node.js Driver requires at least ${MIN_SUPPORTED_WIRE_VERSION} (MongoDB ${MIN_SUPPORTED_SERVER_VERSION})`;
+  const message = `Server at ${options.host}:${options.port} reports maximum wire version ${
+    ismaster.maxWireVersion || 0
+  }, but this version of the Node.js Driver requires at least ${MIN_SUPPORTED_WIRE_VERSION} (MongoDB ${MIN_SUPPORTED_SERVER_VERSION})`;
   return new MongoError(message);
 }
 
 function performInitialHandshake(conn: any, options: any, _callback: any) {
-  const callback = function(err?: any, ret?: any) {
+  const callback = function (err?: any, ret?: any) {
     if (err && conn) {
       conn.destroy();
     }
@@ -205,11 +204,9 @@ function parseSslOptions(family: any, options: any) {
 
   // Override checkServerIdentity behavior
   if (options.checkServerIdentity === false) {
-    // Skip the identiy check by retuning undefined as per node documents
+    // Skip the identity check by retuning undefined as per node documents
     // https://nodejs.org/api/tls.html#tls_tls_connect_options_callback
-    result.checkServerIdentity = function() {
-      return undefined;
-    };
+    result.checkServerIdentity = () => undefined;
   } else if (typeof options.checkServerIdentity === 'function') {
     result.checkServerIdentity = options.checkServerIdentity;
   }
@@ -244,7 +241,7 @@ function makeConnection(family: any, options: any, cancellationToken: any, _call
   }
 
   let socket: any;
-  const callback = function(err?: any, ret?: any) {
+  const callback = function (err?: any, ret?: any) {
     if (err && socket) {
       socket.destroy();
     }

@@ -39,7 +39,9 @@ class CommandOperation extends OperationBase {
     //       something we'd want to reconsider. Perhaps those commands can use `Admin`
     //       as a parent?
     const dbNameOverride = options?.dbName || options?.authdb;
-    this.ns = dbNameOverride ? new MongoDBNamespace(dbNameOverride, '$cmd') : parent.s.namespace.withCollection('$cmd');
+    this.ns = dbNameOverride
+      ? new MongoDBNamespace(dbNameOverride, '$cmd')
+      : parent.s.namespace.withCollection('$cmd');
 
     const propertyProvider = this.hasAspect(Aspect.NO_INHERIT_OPTIONS) ? undefined : parent;
     this.readPreference = ReadPreference.resolve(propertyProvider, this.options);
