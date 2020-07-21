@@ -4,6 +4,9 @@ title = "MongoDB Node.js Driver"
 theme = "mongodb"
 canonifyurls = false
 
+[params]
+    referenceDocsUrl = "https://docs.mongodb.com/drivers/node"
+
 [blackfriday]
   plainIdAnchors = true
 
