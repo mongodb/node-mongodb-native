@@ -91,9 +91,13 @@ describe('Connections survive primary step down', function() {
             .then(() => {
               return connectionCount(checkClient).then(initialConnectionCount => {
                 return db
-                  .executeDbAdminCommand(
-                    { replSetStepDown: 5, force: true },
-                    { readPreference: 'primary' }
+                  .executeDbAdminCommand({ replSetFreeze: 0 }, { readPreference: 'secondary' })
+                  .then(err => expect(err).to.not.exist)
+                  .then(() =>
+                    db.executeDbAdminCommand(
+                      { replSetStepDown: 30, force: true },
+                      { readPreference: 'primary' }
+                    )
                   )
                   .then(() => cursor.next())
                   .then(item => expect(item.a).to.equal(3))
