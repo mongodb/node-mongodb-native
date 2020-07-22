@@ -1,7 +1,7 @@
 interface CoerceErrorOptions {
-  id?: string,
-  warn?: boolean
-  typeSuffix?: string,
+  id?: string;
+  warn?: boolean;
+  typeSuffix?: string;
 }
 
 export class CoerceError extends Error {

@@ -101,7 +101,7 @@ export type PromiseLibrary = typeof PromiseLibraryAbstract;
 
 export interface ReadPreference {
   hedge?: {
-      enable: boolean;
+    enable: boolean;
   };
   tags?: string[];
   maxStalenessSeconds?: number | undefined;

@@ -30,11 +30,11 @@ export class MongoClientOptions {
     return { protocol, db, queryString, query, username, password, hosts };
   }
   static parse(connectionString: string, options: ClientOptions) {
-    const { query, ...rest } = MongoClientOptions.parseConnectionString(connectionString)
+    const { query, ...rest } = MongoClientOptions.parseConnectionString(connectionString);
     return {
       connectionString,
       ...CoerceCustom.mongoClientOptions(query, options),
       ...rest
-    }
+    };
   }
 }
