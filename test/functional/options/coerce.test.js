@@ -157,4 +157,28 @@ describe('Coerce', () => {
       expect(() => example('hi')).not.to.throw();
     });
   });
+
+  context('.tags()', () => {
+    it('should coerce', () => {
+      const example = Coerce.tags;
+      expect(example('loc:nyc,abc:dc')).to.deep.equal(['loc:nyc', 'abc:dc']);
+      expect(example(['loc:nyc', 'abc:dc'])).to.deep.equal(['loc:nyc', 'abc:dc']);
+      expect(example({ loc: 'nyc', abc: 'dc' })).to.deep.equal(['loc:nyc', 'abc:dc']);
+    });
+  });
+
+  context('.keyValue()', () => {
+    it('should coerce', () => {
+      const value = 'SERVICE_NAME:foo,CANONICALIZE_HOST_NAME:true,SERVICE_REALM:bar';
+      expect(Coerce.keyValue(value)).to.deep.equal({
+        SERVICE_NAME: 'foo',
+        CANONICALIZE_HOST_NAME: 'true',
+        SERVICE_REALM: 'bar'
+      });
+    });
+
+    it('should result in CoerceError', () => {
+      expect(Coerce.keyValue(true)).to.be.instanceOf(CoerceError);
+    });
+  });
 });

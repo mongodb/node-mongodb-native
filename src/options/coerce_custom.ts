@@ -15,12 +15,22 @@ export class CoerceCustom {
   static readPreference = C.warn(C.objectExact(match => ({
     ...match('mode', C.default(C.enum({ ReadPreferenceMode }), 'primary')),
     ...match('maxStalenessSeconds', C.number),
-    ...match('tags', C.array(C.string)),
+    ...match('tags', C.default(C.tags, [])),
     ...match('hedge', C.objectExact(match => ({
       ...match('enable', C.require(C.boolean))
     })))
   })));
   static readPreferenceOption = C.union(C.enum({ ReadPreferenceMode }), CoerceCustom.readPreference);
+  static authMechanismProperties = C.warn(C.objectExact(match => ({
+    ...match('SERVICE_NAME', C.string),
+    ...match('CANONICALIZE_HOST_NAME', C.boolean),
+    ...match('SERVICE_REALM', C.string),
+  })))
+  static authMechanismPropertiesString = C.compose(C.keyValue, CoerceCustom.authMechanismProperties)
+  static authMechanismPropertiesOption = C.union(
+    CoerceCustom.authMechanismPropertiesString,
+    CoerceCustom.authMechanismProperties
+  );
   static uriOptionsDef= (match: CoerceMatch) => ({
     ...match('replicaSet', C.string),
     ...match('tls', C.default(C.boolean, false)),
@@ -49,7 +59,7 @@ export class CoerceCustom {
     ...match('readPreferenceTags', C.tags),
     ...match('authSource', C.string),
     ...match('authMechanism', C.default(C.enum({ AuthMechanism }), AuthMechanism.DEFAULT)),
-    ...match('authMechanismProperties', CoerceCustom.authMechanismProperties),
+    ...match('authMechanismProperties', CoerceCustom.authMechanismPropertiesOption),
     ...match('gssapiServiceName', C.string),
     ...match('localThresholdMS', C.number),
     ...match('serverSelectionTimeoutMS', C.number),
@@ -111,11 +121,6 @@ export class CoerceCustom {
     ...match('autoEncryption', C.any),
     ...match('driverInfo', CoerceCustom.driverInfo),
   })
-  static authMechanismProperties = C.warn(C.objectExact(match => ({
-    ...match('SERVICE_NAME', C.string),
-    ...match('CANONICALIZE_HOST_NAME', C.boolean),
-    ...match('SERVICE_REALM', C.string),
-  })))
   static readConcern = C.warn(C.objectExact(match => ({
     ...match('level', C.default(C.enum({ ReadConcernLevel }), ReadConcernLevel.local))
   })))

@@ -29,6 +29,13 @@ export interface CoerceOptions {
 }
 export type Coercer<T> = (value: any, options?: CoerceOptions) => T | CoerceError;
 
+type LengthOfTuple<T extends Funcs> = T extends { length: infer L } ? L : never;
+// prettier-ignore
+type DropFirstInTuple<T extends Funcs> = ((...args: T) => any) extends (arg: any, ...rest: infer U) => any ? U : T;
+type LastInTuple<T extends Funcs> = T[LengthOfTuple<DropFirstInTuple<T>>];
+type LastFnReturns<Fns extends Funcs> = ReturnType<LastInTuple<Fns>>;
+type ComposeReturn<T extends Funcs> = LastFnReturns<T>;
+
 /** Coerces nested objects into a given shape using primitive coerce functions */
 export class CoerceObject {
   static matchExact<V extends { [key: string]: any }>(
@@ -95,7 +102,7 @@ export class CoerceObject {
       value: V,
       options?: CoerceOptions
     ): ReturnTypeUnion<F> | CoerceError => {
-      if (value === null || value === undefined) {
+      if (!Coerce.isPlainObject(value)) {
         return new CoerceError('object', value, options);
       }
       const results = Object.keys(value).reduce((acq: any, key: keyof V) => {
@@ -132,7 +139,7 @@ export class CoerceObject {
       value: V,
       options?: CoerceOptions
     ): ReturnTypeUnion<F> | CoerceError => {
-      if (value === null || value === undefined) {
+      if (!Coerce.isPlainObject(value)) {
         return new CoerceError('object', value, options);
       }
       const results = Object.keys(value).reduce((acq: any, key: keyof V) => {
@@ -370,4 +377,28 @@ export class Coerce {
   static object = CoerceObject.object;
   /** will coerce array to a type passed in */
   static objectExact = CoerceObject.objectExact;
+  /** will transform comma separated key:value set into object. */
+  static keyValue(value: any, options?: CoerceObject): { [key: string]: string } | CoerceError {
+    if (typeof value === 'string') {
+      const segments = value.split(',');
+      return segments.reduce((acq: { [key: string]: string }, segment: string) => {
+        const [key, value] = segment.split(':');
+        if (key && value) {
+          return { ...acq, [key]: value };
+        }
+        return acq;
+      }, {});
+    }
+    return new CoerceError(`keyValue`, value, options);
+  }
+  static compose<F extends Coercer<any>[]>(...fns: F) {
+    return (value: any, options?: CoerceOptions): ComposeReturn<F> => {
+      return fns.reduce((acq, fn) => {
+        // exit the chain if hit CoerceError
+        if (acq instanceof CoerceError) return acq;
+        const results = fn(acq, options);
+        return results;
+      }, value);
+    };
+  }
 }
