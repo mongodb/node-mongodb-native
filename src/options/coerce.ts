@@ -29,9 +29,11 @@ export interface CoerceOptions {
 }
 export type Coercer<T> = (value: any, options?: CoerceOptions) => T | CoerceError;
 
+/** these are all created to get the last function return type in an array of functions  */
 type LengthOfTuple<T extends Funcs> = T extends { length: infer L } ? L : never;
 // prettier-ignore
-type DropFirstInTuple<T extends Funcs> = ((...args: T) => any) extends (arg: any, ...rest: infer U) => any ? U : T;
+type DropFirstInTuple<T extends Funcs> =
+  ((...args: T) => any) extends (arg: any, ...rest: infer U) => any ? U : T;
 type LastInTuple<T extends Funcs> = T[LengthOfTuple<DropFirstInTuple<T>>];
 type LastFnReturns<Fns extends Funcs> = ReturnType<LastInTuple<Fns>>;
 type ComposeReturn<T extends Funcs> = LastFnReturns<T>;
@@ -391,6 +393,7 @@ export class Coerce {
     }
     return new CoerceError(`keyValue`, value, options);
   }
+  /** iterates Coercers from left to right until finished or encounters error */
   static compose<F extends Coercer<any>[]>(...fns: F) {
     return (value: any, options?: CoerceOptions): ComposeReturn<F> => {
       return fns.reduce((acq, fn) => {
