@@ -5,6 +5,7 @@ const setupDatabase = require('./shared').setupDatabase;
 const withMonitoredClient = require('./shared').withMonitoredClient;
 const expect = require('chai').expect;
 const ReadPreference = require('../../lib/core/topologies/read_preference');
+const { tagSetReducer } = require('../../lib/core/sdam/server_selection');
 
 describe('ReadPreference', function() {
   before(function() {
@@ -653,5 +654,18 @@ describe('ReadPreference', function() {
           });
       })
     });
+  });
+
+  it('should always ensure readPreference.tags are array of strings or undefined', () => {
+    const a = new ReadPreference('secondary', { loc: 'ny' });
+    expect(a.tags).to.deep.equal(['loc:ny']);
+    const b = new ReadPreference('secondary', ['loc:ny']);
+    expect(b.tags).to.deep.equal(['loc:ny']);
+    const c = new ReadPreference('secondary', 'loc:ny');
+    expect(c.tags).to.deep.equal(['loc:ny']);
+    const d = new ReadPreference('secondary', ['loc:ny'], { maxStalenessSeconds: 100 });
+    expect(d.tags).to.deep.equal(['loc:ny']);
+    const e = new ReadPreference('secondary', { maxStalenessSeconds: 100 });
+    expect(e.tags).to.deep.equal(undefined);
   });
 });

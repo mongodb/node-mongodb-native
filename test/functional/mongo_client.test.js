@@ -144,7 +144,7 @@ describe('MongoClient', function() {
         test.equal(true, db.writeConcern.j);
 
         test.equal('nearest', db.s.readPreference.mode);
-        test.deepEqual({ loc: 'ny' }, db.s.readPreference.tags);
+        test.deepEqual(['loc:ny'], db.s.readPreference.tags);
 
         test.equal(false, db.s.nativeParser);
         test.equal(true, db.s.options.forceServerObjectId);
