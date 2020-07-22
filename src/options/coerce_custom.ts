@@ -83,6 +83,7 @@ export class CoerceCustom {
     ...match('acceptableLatencyMS', C.default(C.number, 15)),
     ...match('connectWithNoPrimary', C.default(C.boolean, false)),
     ...match('wtimeout', C.number),
+    ...match('j', C.boolean),
     ...match('forceServerObjectId', C.default(C.boolean, false)),
     ...match('serializeFunctions', C.default(C.boolean, false)),
     ...match('ignoreUndefined', C.default(C.boolean, false)),
@@ -170,6 +171,7 @@ export class CoerceCustom {
     const wtimeoutMS = options.wtimeoutMS ?? options.wtimeout;
     const readPreference = CoerceCustom.readPreferenceFromOptions(options);
     const tls = options.ssl || options.tls;
+    const j = options.j || options.journal;
     const readConcernLevel =
       (options.readConcern?.level !== ReadConcernLevel.local && options.readConcern?.level) ||
       (options.readConcernLevel !== ReadConcernLevel.local && options.readConcernLevel) ||
@@ -185,7 +187,8 @@ export class CoerceCustom {
       auto_reconnect: autoReconnect,
       maxPoolSize: maxPoolSize,
       poolSize: maxPoolSize,
-      j: options.journal,
+      j,
+      journal: j,
       readPreference,
       wtimeoutMS,
       wtimeout: wtimeoutMS,
