@@ -1,6 +1,6 @@
 const url = require('url');
 const qs = require('querystring');
-import { UriOptions, ClientOptions } from './types';
+import type { UriOptions, ClientOptions } from './types';
 import { CoerceCustom } from './coerce_custom';
 
 export class MongoClientOptions {

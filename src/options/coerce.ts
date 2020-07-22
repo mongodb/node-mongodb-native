@@ -1,5 +1,6 @@
 import { CoerceError, CoerceDeprecate, CoerceUnrecognized } from './coerce_error';
 
+// prettier-ignore
 type UnionToIntersection<U> =
   (U extends any ? (k: U) => void : never) extends ((k: infer I) => void) ? I : never
 
@@ -19,18 +20,22 @@ export type CoerceObjectMatchesExact = CoerceObjectMatch[];
 
 export type ReturnTypeUnion<T extends Funcs> = UnionToIntersection<ReturnTypes<T>>;
 export interface CoerceOptions {
-  id?: string,
-  warn?: boolean,
-  typeSuffix?: string,
-  warnDeprecated?: boolean,
-  warnUnrecognized?: boolean,
-  applyDefaults?: boolean
+  id?: string;
+  warn?: boolean;
+  typeSuffix?: string;
+  warnDeprecated?: boolean;
+  warnUnrecognized?: boolean;
+  applyDefaults?: boolean;
 }
 export type Coercer<T> = (value: any, options?: CoerceOptions) => T | CoerceError;
 
 /** Coerces nested objects into a given shape using primitive coerce functions */
 export class CoerceObject {
-  static matchExact<V extends { [key: string]: any }>(value: V, key: keyof V, options?: CoerceOptions) {
+  static matchExact<V extends { [key: string]: any }>(
+    value: V,
+    key: keyof V,
+    options?: CoerceOptions
+  ) {
     return <K extends string, F extends Coercer<any>>(
       matchKey: K,
       fn: F
@@ -171,8 +176,10 @@ export class Coerce {
   /** wraps function and enables warning error */
   static warn<F extends Coercer<any>>(fn: F) {
     return (value: any, options?: CoerceOptions): ReturnType<F> => {
-      const warnDeprecated = typeof options?.warnDeprecated === 'undefined' ? true : options?.warnDeprecated;
-      const warnUnrecognized = typeof options?.warnUnrecognized === 'undefined' ? true : options?.warnUnrecognized;
+      const warnDeprecated =
+        typeof options?.warnDeprecated === 'undefined' ? true : options?.warnDeprecated;
+      const warnUnrecognized =
+        typeof options?.warnUnrecognized === 'undefined' ? true : options?.warnUnrecognized;
       const warn = typeof options?.warn === 'undefined' ? true : options?.warn;
       const result = fn(value, { ...options, warn, warnDeprecated, warnUnrecognized });
       return result;
@@ -215,7 +222,7 @@ export class Coerce {
 
   /** will coerce value to a boolean */
   static boolean(value: any, options?: CoerceOptions): boolean | CoerceError {
-    if (Array.isArray(value)) return this.boolean(value[value.length - 1], options);
+    if (Array.isArray(value)) return Coerce.boolean(value[value.length - 1], options);
     if (typeof value === 'boolean') return value;
     if (value === 'true') return true;
     if (value === 'false') return false;
@@ -223,13 +230,13 @@ export class Coerce {
   }
   /** will coerce value to a string */
   static string(value: any, options?: CoerceOptions): string | CoerceError {
-    if (Array.isArray(value)) return this.string(value[value.length - 1], options);
+    if (Array.isArray(value)) return Coerce.string(value[value.length - 1], options);
     if (typeof value === 'string') return value;
     return new CoerceError('string', value, options);
   }
   /** will coerce value to a number */
   static number(value: any, options?: CoerceOptions): number | CoerceError {
-    if (Array.isArray(value)) return this.number(value[value.length - 1], options);
+    if (Array.isArray(value)) return Coerce.number(value[value.length - 1], options);
     if (typeof value === 'number') return value;
     if (parseInt(value)) return parseInt(value);
     return new CoerceError('number', value, options);
@@ -250,15 +257,12 @@ export class Coerce {
     return new CoerceError('null', value, options);
   }
   /** will match value to null */
-  static any<T>(value: T, options?: CoerceOptions): T {
+  static any<T>(value: T): T {
     return value;
   }
   static isPlainObject = Coerce.validate(Coerce.plainObject);
   /** will coerce value to ensure it's a plainObject */
-  static plainObject(
-    value: any,
-    options?: CoerceOptions
-  ): { [key: string]: any } | CoerceError {
+  static plainObject(value: any, options?: CoerceOptions): { [key: string]: any } | CoerceError {
     const is = (value: any) => {
       if (Object.prototype.toString.call(value) !== '[object Object]') return false;
       const prototype = Object.getPrototypeOf(value);
@@ -274,7 +278,7 @@ export class Coerce {
     if (Coerce.isPlainObject(value)) {
       return Object.keys(value).reduce((acq: string[], key: string) => {
         const val = value[key];
-        const result = Coerce.string(val, { ...options, typeSuffix: 'tag value'});
+        const result = Coerce.string(val, { ...options, typeSuffix: 'tag value' });
         if (!(result instanceof CoerceError)) {
           return [...acq, `${key}:${result}`];
         }
@@ -338,7 +342,7 @@ export class Coerce {
     const inner = (value: any, options?: CoerceOptions): CoerceType<F>[] => {
       if (!Array.isArray(value)) return inner([value], options);
       const results = value.reduce((acq: any[], item: any) => {
-        const result = fn(item, { ...options, typeSuffix: 'array'});
+        const result = fn(item, { ...options, typeSuffix: 'array' });
         if (result instanceof CoerceError) return acq;
         return [...acq, result];
       }, []);
