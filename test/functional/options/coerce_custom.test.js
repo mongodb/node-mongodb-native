@@ -58,4 +58,27 @@ describe('CoerceCustom', () => {
       });
     });
   });
+
+  context('.mongoClientOptions()', () => {
+    it('should work with lowercase key for UriOptions', () => {
+      const results = CoerceCustom.mongoClientOptions({ replicaset: 'rs' }, {});
+      expect(results.replicaSet).to.be.equal('rs');
+    });
+    it('should work with normalized key for ClientOptions', () => {
+      const results = CoerceCustom.mongoClientOptions({}, { replicaSet: 'rs' });
+      expect(results.replicaSet).to.be.equal('rs');
+    });
+    it('should have clientOptions to be case sensitive', () => {
+      const results = CoerceCustom.mongoClientOptions({}, { replicaset: 'rs' }, { warn: false });
+      expect(results.replicaSet).to.be.equal(undefined);
+    });
+    it('should have clientOptions take precedence', () => {
+      const results = CoerceCustom.mongoClientOptions(
+        { replicaSet: 'a' },
+        { replicaSet: 'b' },
+        { warn: false }
+      );
+      expect(results.replicaSet).to.be.equal('b');
+    });
+  });
 });

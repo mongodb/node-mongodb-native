@@ -135,10 +135,10 @@ export class CoerceCustom {
   })))
 
   static uriOptions = (uriOptions: UriOptions, options?: CoerceOptions) => {
-    return C.require(C.warn(C.object(CoerceCustom.uriOptionsDef)))(uriOptions, options);
+    return C.require(C.object(CoerceCustom.uriOptionsDef))(uriOptions, options);
   }
   static clientOptions = (clientOptions: ClientOptions) => {
-    return C.require(C.warn(C.object(CoerceCustom.uriOptionsDef, CoerceCustom.driverOptionsDef)))(clientOptions);
+    return C.require(C.objectExact(CoerceCustom.uriOptionsDef, CoerceCustom.driverOptionsDef))(clientOptions);
   }
 
   static readPreferenceFromOptions (options: ReturnType<typeof CoerceCustom['clientOptions']>) {
