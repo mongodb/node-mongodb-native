@@ -23,9 +23,11 @@
     "bson-ext": "^2.0.0"
   },
   "dependencies": {
+    "@istanbuljs/nyc-config-typescript": "^1.0.1",
     "bl": "^2.2.0",
     "bson": "^4.0.4",
-    "denque": "^1.4.1"
+    "denque": "^1.4.1",
+    "source-map-support": "^0.5.19"
   },
   "devDependencies": {
     "@types/bson": "^4.0.2",

@@ -82,19 +82,21 @@ export class CoerceObject {
       fn(value[matchKey], { id: matchKey, warn: false });
     };
   }
-  static defaultMatch<K extends string, F extends Coercer<any>>(
-    matchKey: K,
-    fn: F
-  ): CoerceError extends ReturnType<F>
-    ? Partial<Record<K, Exclude<ReturnType<F>, CoerceError>>>
-    : Record<K, Exclude<ReturnType<F>, CoerceError>> {
-    try {
-      const result = fn(undefined, { id: matchKey, warn: false });
-      if (result instanceof CoerceError) return {} as any;
-      return { [matchKey]: result } as any;
-    } catch (e) {
-      return {} as any;
-    }
+  static defaultMatch(options?: CoerceOptions) {
+    return <K extends string, F extends Coercer<any>>(
+      matchKey: K,
+      fn: F
+    ): CoerceError extends ReturnType<F>
+      ? Partial<Record<K, Exclude<ReturnType<F>, CoerceError>>>
+      : Record<K, Exclude<ReturnType<F>, CoerceError>> => {
+      try {
+        const result = fn(undefined, { ...options, id: matchKey, warn: false });
+        if (result instanceof CoerceError) return {} as any;
+        return { [matchKey]: result } as any;
+      } catch (e) {
+        return {} as any;
+      }
+    };
   }
   static gatherMatch<K extends string>(matchKey: K) {
     return { [matchKey]: true } as any;
@@ -117,7 +119,7 @@ export class CoerceObject {
       // fire errors for required options
       cbs.map(cb => cb(CoerceObject.requireMatch(results) as any));
       // warn unrecognized properties
-      if (options?.warn && options?.warnUnrecognized) {
+      if (options?.warn !== false && options?.warnUnrecognized !== false) {
         const data = cbs.reduce((acq, cb) => {
           return { ...acq, ...cb(CoerceObject.gatherMatch as any) };
         }, {});
@@ -127,9 +129,9 @@ export class CoerceObject {
         unrecognized.forEach(key => new CoerceUnrecognized(key).warn());
       }
       // set defaults
-      if (options?.applyDefaults === undefined || options?.applyDefaults === true) {
+      if (options?.applyDefaults !== false) {
         const defaultValues = cbs.reduce((acq, cb) => {
-          return { ...acq, ...cb(CoerceObject.defaultMatch as any) };
+          return { ...acq, ...cb(CoerceObject.defaultMatch(options) as any) };
         }, {});
         return { ...defaultValues, ...results };
       }
@@ -155,7 +157,7 @@ export class CoerceObject {
       // fire errors for required options
       cbs.map(cb => cb(CoerceObject.requireMatch(results) as any));
       // warn unrecognized properties
-      if (options?.warn && options?.warnUnrecognized) {
+      if (options?.warn !== false && options?.warnUnrecognized !== false) {
         const data = cbs.reduce((acq, cb) => {
           return { ...acq, ...cb(CoerceObject.gatherMatch as any) };
         }, {});
@@ -168,9 +170,9 @@ export class CoerceObject {
         unrecognized.forEach(key => new CoerceUnrecognized(key).warn());
       }
       // set defaults
-      if (options?.applyDefaults === undefined || options?.applyDefaults === true) {
+      if (options?.applyDefaults !== false) {
         const defaultValues = cbs.reduce((acq, cb) => {
-          return { ...acq, ...cb(CoerceObject.defaultMatch as any) };
+          return { ...acq, ...cb(CoerceObject.defaultMatch(options) as any) };
         }, {});
         return { ...defaultValues, ...results };
       }
@@ -185,26 +187,25 @@ export class Coerce {
   /** wraps function and enables warning error */
   static warn<F extends Coercer<any>>(fn: F) {
     return (value: any, options?: CoerceOptions): ReturnType<F> => {
-      const warnDeprecated =
-        typeof options?.warnDeprecated === 'undefined' ? true : options?.warnDeprecated;
-      const warnUnrecognized =
-        typeof options?.warnUnrecognized === 'undefined' ? true : options?.warnUnrecognized;
-      const warn = typeof options?.warn === 'undefined' ? true : options?.warn;
+      const warn = options?.warn !== false;
+      const warnDeprecated = options?.warnDeprecated !== false;
+      const warnUnrecognized = options?.warnUnrecognized !== false;
       const result = fn(value, { ...options, warn, warnDeprecated, warnUnrecognized });
       return result;
     };
   }
   /** wraps function and provides default if applicable */
-  static default<F extends Coercer<any>>(fn: F, defaultValue: ReturnType<F>) {
-    return (value: Parameters<F>[0] = defaultValue, options?: CoerceOptions): CoerceType<F> => {
+  static default<F extends Coercer<any>>(fn: F, defaultValue: CoerceType<F>) {
+    return (value: Parameters<F>[0], options?: CoerceOptions): CoerceType<F> => {
+      if (options?.applyDefaults !== false && value === undefined) return defaultValue;
       return fn(value, options);
     };
   }
   /** wraps function and warns deprecation notice if applicable */
   static deprecate<F extends Coercer<any>>(fn: F, favor?: string) {
     return (value: any, options?: CoerceOptions): ReturnType<F> => {
-      if (options?.warn !== false && options?.warnDeprecated === true) {
-        if (options?.id) new CoerceDeprecate(options?.id, favor).warn();
+      if (options?.warn !== false && options?.warnDeprecated !== false) {
+        new CoerceDeprecate(options?.id, favor).warn();
       }
       const result = fn(value, options);
       return result;
@@ -352,7 +353,10 @@ export class Coerce {
       if (!Array.isArray(value)) return inner([value], options);
       const results = value.reduce((acq: any[], item: any) => {
         const result = fn(item, { ...options, typeSuffix: 'array' });
-        if (result instanceof CoerceError) return acq;
+        if (result instanceof CoerceError) {
+          if (options?.warn !== false) result.warn();
+          return acq;
+        }
         return [...acq, result];
       }, []);
       return results;
@@ -367,9 +371,11 @@ export class Coerce {
       const result: any = fns.reduce((acq: any, fn: Func) => {
         if (acq !== DEFAULT) return acq;
         const result = fn(value, options);
-        if (!(result instanceof CoerceError)) return result;
-        if (result.typeName) types.push(result.typeName);
-        return acq;
+        if (result instanceof CoerceError) {
+          if (result.typeName) types.push(result.typeName);
+          return acq;
+        }
+        return result;
       }, DEFAULT);
       if (result !== DEFAULT) return result;
       return new CoerceError(`union (${types.join(' | ')})`, value, options);
@@ -399,8 +405,12 @@ export class Coerce {
       return fns.reduce((acq, fn) => {
         // exit the chain if hit CoerceError
         if (acq instanceof CoerceError) return acq;
-        const results = fn(acq, options);
-        return results;
+        try {
+          const results = fn(acq, options);
+          return results;
+        } catch (e) {
+          return e;
+        }
       }, value);
     };
   }

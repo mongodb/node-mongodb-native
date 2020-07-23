@@ -49,9 +49,9 @@ export class CoerceError extends Error {
 }
 
 export class CoerceDeprecate extends Error {
-  id: string;
+  id?: string;
   favor?: string;
-  constructor(id: string, favor?: string) {
+  constructor(id?: string, favor?: string) {
     const msg = CoerceDeprecate.createMessage(id, favor);
     super(msg);
     this.id = id;
@@ -61,7 +61,8 @@ export class CoerceDeprecate extends Error {
     if (id && favor) {
       return `Deprecation notice: '${id}' is deprecated, please use '${favor}' instead`;
     }
-    return `Deprecation notice: '${id}' is deprecated`;
+    if (id) return `Deprecation notice: '${id}' is deprecated`;
+    return `Deprecation notice: something used was deprecated, however no reference was passed`;
   }
   warn() {
     console.warn(this.message);
