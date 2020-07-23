@@ -1,14 +1,6 @@
 import BufferList = require('bl');
 import { Duplex, DuplexOptions } from 'stream';
-import {
-  Response,
-  Msg,
-  BinMsg,
-  Query,
-  CommandResult,
-  CommandTypes,
-  MessageHeader
-} from './commands';
+import { Response, Msg, BinMsg, Query, CommandTypes, MessageHeader } from './commands';
 import { MongoError, MongoParseError } from '../error';
 import { OP_COMPRESSED, OP_MSG } from './wire_protocol/constants';
 import {
