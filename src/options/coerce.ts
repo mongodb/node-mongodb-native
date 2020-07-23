@@ -399,6 +399,12 @@ export class Coerce {
     }
     return new CoerceError(`keyValue`, value, options);
   }
+  static commaSeparated(value: any, options?: CoerceOptions): string[] | CoerceError {
+    if (typeof value === 'string') {
+      return value.split(',');
+    }
+    return new CoerceError(`commaSeparated`, value, options);
+  }
   /** iterates Coercers from left to right until finished or encounters error */
   static compose<F extends Coercer<any>[]>(...fns: F) {
     return (value: any, options?: CoerceOptions): ComposeReturn<F> => {

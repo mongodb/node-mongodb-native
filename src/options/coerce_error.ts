@@ -19,19 +19,11 @@ export class CoerceError extends Error {
     if (options?.warn) this.warn();
   }
   static displayValue(value: any) {
-    if (value === undefined) return '"undefined"';
     if (value === null) return '"null"';
-    if (value === true) return '"true"';
-    if (value === false) return '"false"';
+    if (value === undefined) return '"undefined"';
     if (Array.isArray(value)) return '"[...]"';
     if (typeof value === 'object') return '"{...}"';
-    return `${JSON.stringify(value)}`;
-  }
-  updateMessage(opt: { typeName?: any; value?: any; id?: string }) {
-    if (opt.typeName) this.typeName = opt.typeName;
-    if (typeof opt.value !== 'undefined') this.value = opt.value;
-    if (opt.id) this.id = opt.id;
-    return new CoerceError(this.typeName, this.value, opt);
+    return `"${JSON.stringify(value)}"`;
   }
   static createMessage(typeName?: string, value?: any, id?: string): string {
     const prefix = 'Invalid type';
@@ -40,9 +32,9 @@ export class CoerceError extends Error {
       return `${prefix}: "${id}" with value ${display} is not valid "${typeName}"`;
     }
     if (typeName && display) return `${prefix}: value ${display} is not valid "${typeName}"`;
-    if (typeName) return `${prefix}: not valid "${typeName}"`;
     return `${prefix}`;
   }
+  /* istanbul ignore next */
   warn() {
     console.warn(this.message);
   }
@@ -57,28 +49,33 @@ export class CoerceDeprecate extends Error {
     this.id = id;
     this.favor = favor;
   }
-  static createMessage(id: string, favor?: string) {
+  static createMessage(id?: string, favor?: string) {
     if (id && favor) {
       return `Deprecation notice: '${id}' is deprecated, please use '${favor}' instead`;
     }
     if (id) return `Deprecation notice: '${id}' is deprecated`;
     return `Deprecation notice: something used was deprecated, however no reference was passed`;
   }
+  /* istanbul ignore next */
   warn() {
     console.warn(this.message);
   }
 }
 
 export class CoerceUnrecognized extends Error {
-  id: string;
-  constructor(id: string) {
+  id?: string;
+  constructor(id?: string) {
     const msg = CoerceUnrecognized.createMessage(id);
     super(msg);
     this.id = id;
   }
-  static createMessage(id: string) {
+  static createMessage(id?: string) {
+    if (!id) {
+      return `Unrecognized notice: something used was unrecognized, however no reference was passed`;
+    }
     return `Unrecognized notice: property '${id}' is not recognized`;
   }
+  /* istanbul ignore next */
   warn() {
     console.warn(this.message);
   }

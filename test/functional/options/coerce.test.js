@@ -585,4 +585,14 @@ describe('Coerce', () => {
       expect(example('love:true')).to.be.instanceOf(CoerceError);
     });
   });
+
+  context('.commaSeparated()', () => {
+    it('should coerce comma separated string', () => {
+      expect(Coerce.commaSeparated('snappy,zlib')).to.deep.equal(['snappy', 'zlib']);
+      expect(Coerce.commaSeparated('snappy')).to.deep.equal(['snappy']);
+    });
+    it('should be error', () => {
+      expect(Coerce.commaSeparated(1)).to.be.instanceOf(CoerceError);
+    });
+  });
 });

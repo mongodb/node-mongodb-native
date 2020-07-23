@@ -31,6 +31,12 @@ export class CoerceCustom {
     CoerceCustom.authMechanismPropertiesString,
     CoerceCustom.authMechanismProperties
   );
+
+  static compressorsString = C.compose(C.commaSeparated, C.array(C.enum({ Compressor })));
+  static compressors = C.union(
+    CoerceCustom.compressorsString,
+    C.array(C.enum({ Compressor }))
+  );
   static uriOptionsDef= (match: CoerceMatch) => ({
     ...match('replicaSet', C.string),
     ...match('tls', C.default(C.boolean, false)),
@@ -43,7 +49,7 @@ export class CoerceCustom {
     ...match('tlsInsecure', C.default(C.boolean, false)),
     ...match('connectTimeoutMS', C.default(C.number, 10000)),
     ...match('socketTimeoutMS', C.default(C.number, 360000)),
-    ...match('compressors', C.array(C.enum({ Compressor }))),
+    ...match('compressors', C.default(CoerceCustom.compressors, [])),
     ...match('zlibCompressionLevel', C.default(C.number, 0)),
     ...match('maxPoolSize', C.default(C.number, 5)),
     ...match('minPoolSize', C.default(C.number, 0)),
@@ -141,46 +147,58 @@ export class CoerceCustom {
     return C.require(C.objectExact(CoerceCustom.uriOptionsDef, CoerceCustom.driverOptionsDef))(clientOptions);
   }
 
-  static readPreferenceFromOptions (options: ReturnType<typeof CoerceCustom['clientOptions']>) {
+  static readPreferenceFromOptions (options?: ReturnType<typeof CoerceCustom['clientOptions']>) {
     const tags = (() => {
-      const a = (typeof options.readPreference !== 'string' && options?.readPreference?.tags) || [];
-      const b = options.readPreferenceTags || []
+      const a = (typeof options?.readPreference !== 'string' && options?.readPreference?.tags) || [];
+      const b = options?.readPreferenceTags || []
       return [...a, ...b];
     })()
 
     const hedge = (() => {
-      if (typeof options.readPreference === 'string') return undefined;
+      if (typeof options?.readPreference === 'string') return undefined;
       return options?.readPreference?.hedge;
     })()
 
     const mode = (() => {
-      if (typeof options.readPreference === 'string') return options.readPreference
-      return options?.readPreference.mode
+      if (typeof options?.readPreference === 'string') return options.readPreference
+      return options?.readPreference?.mode
     })()
 
     const maxStalenessSeconds = (() => {
-      if (typeof options.readPreference === 'string') return options.maxStalenessSeconds
-      return options?.readPreference.maxStalenessSeconds
+      if (!options) return undefined;
+      if (typeof options.readPreference !== 'string') {
+        return options.readPreference?.maxStalenessSeconds || options.maxStalenessSeconds
+      }
+      return options.maxStalenessSeconds
     })()
 
     return C.require(CoerceCustom.readPreference)({ mode, hedge, tags, maxStalenessSeconds }, { warn: false } )
   }
 
+  static collide<T>(def: T) {
+    return (...choices: (T | undefined)[]) => {
+      return choices.reduce((acq: T, choice: (T | undefined)) => {
+        if (acq !== def) return acq;
+        if (choice === undefined) return acq;
+        if (choice !== def) return choice as T;
+        return acq;
+      }, def)
+    }
+  }
+
   static mongoClientOptions = (uriOptions: UriOptions, clientOptions: ClientOptions) => {
     const parsedUriOptions = CoerceCustom.uriOptions(uriOptions, { applyDefaults: false, warnDeprecated: false });
-    const options = CoerceCustom.clientOptions(Object.assign({}, parsedUriOptions, clientOptions))
+    const options = CoerceCustom.clientOptions(Object.assign({}, parsedUriOptions, clientOptions));
     // standardizes "tandem" or "alias" properties
-    const appName = options.appName ?? options.appname
-    const autoReconnect = options.autoReconnect ?? options.auto_reconnect;
-    const maxPoolSize = (options.maxPoolSize !== 5 && options.maxPoolSize) || (options.poolSize !== 5 && options.poolSize) || 5
+    const appName = options.appName ?? options.appname;
+    const autoReconnect = CoerceCustom.collide(true)(options.auto_reconnect, options.autoReconnect);
+    const maxPoolSize = CoerceCustom.collide(5)(options.maxPoolSize, options.poolSize);
     const wtimeoutMS = options.wtimeoutMS ?? options.wtimeout;
     const readPreference = CoerceCustom.readPreferenceFromOptions(options);
-    const tls = options.ssl || options.tls;
+    const tls = CoerceCustom.collide(false)(options.tls, options.ssl);
     const j = options.j || options.journal;
-    const readConcernLevel =
-      (options.readConcern?.level !== ReadConcernLevel.local && options.readConcern?.level) ||
-      (options.readConcernLevel !== ReadConcernLevel.local && options.readConcernLevel) ||
-      ReadConcernLevel.local
+    const local: string = ReadConcernLevel.local;
+    const readConcernLevel = CoerceCustom.collide(local)(options.readConcern?.level, options.readConcernLevel);
     const readConcern = { ...options.readConcern, level: readConcernLevel };
     const compressors = [ ...options.compressors, ...(options.compression ? [options.compression]: []) ];
     const writeConcern = { j: options.journal, w: options.w, wtimeout: wtimeoutMS }
