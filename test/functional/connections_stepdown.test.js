@@ -92,10 +92,11 @@ describe('Connections survive primary step down', function() {
               return connectionCount(checkClient).then(initialConnectionCount => {
                 return db
                   .executeDbAdminCommand({ replSetFreeze: 0 }, { readPreference: 'secondary' })
-                  .then(result => {
-                    expect(result).to.have.property('ok', 1);
-                    expect(result).to.have.property('info', 'unfreezing');
-                  })
+                  .then(result =>
+                    expect(result)
+                      .property('info')
+                      .to.equal('unfreezing')
+                  )
                   .then(() =>
                     db.executeDbAdminCommand(
                       { replSetStepDown: 30, force: true },
