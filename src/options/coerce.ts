@@ -19,6 +19,8 @@ export type CoerceObjectMatchExact = (match: CoerceMatchExact) => any;
 export type CoerceObjectMatchesExact = CoerceObjectMatch[];
 
 export type ReturnTypeUnion<T extends Funcs> = UnionToIntersection<ReturnTypes<T>>;
+export type Unionize<K extends string | readonly string[]> = (K extends string ? [K] : K)[number];
+
 export interface CoerceOptions {
   id?: string;
   warn?: boolean;
@@ -430,5 +432,21 @@ export class Coerce {
         return acq;
       }, def);
     };
+  }
+  /** returns empty object if undefined value, and creates {key: value} otherwise  */
+  static spreadValue<K extends string | readonly string[], T>(
+    key: K,
+    value: T
+  ): undefined extends T ? Partial<Record<Unionize<K>, T>> : Record<Unionize<K>, T> {
+    if (value === undefined) return {} as any;
+    if (Array.isArray(key)) {
+      return key.reduce((acq: any, k: string) => {
+        return { ...acq, [k]: value };
+      }, {});
+    }
+    if (typeof key === 'string') {
+      return { [key]: value } as any;
+    }
+    return {} as any;
   }
 }

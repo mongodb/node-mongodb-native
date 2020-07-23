@@ -29,7 +29,7 @@ export class MongoClientOptions {
     const password = authParts[1];
     return { protocol, db, queryString, query, username, password, hosts };
   }
-  static parse(connectionString: string, options: ClientOptions) {
+  static parse(connectionString: string, options: ClientOptions = {}) {
     const { query, ...rest } = MongoClientOptions.parseConnectionString(connectionString);
     return {
       connectionString,

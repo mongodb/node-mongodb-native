@@ -610,4 +610,31 @@ describe('Coerce', () => {
       expect(Coerce.collide('foo')('foo', undefined, 'baz')).to.equal('baz');
     });
   });
+
+  context('.spreadValue()', () => {
+    it('should spread value', () => {
+      const result = {
+        ...Coerce.spreadValue('foo', true),
+        ...Coerce.spreadValue('bar', undefined)
+      };
+      expect(result).to.deep.equal({ foo: true });
+    });
+
+    it('should return empty {} with non-string key', () => {
+      const result = {
+        ...Coerce.spreadValue(1, true)
+      };
+      expect(result).to.deep.equal({});
+    });
+
+    it('should apply to multiple keys', () => {
+      const result = {
+        ...Coerce.spreadValue(['wtimeoutMS', 'wtimeout'], 1000)
+      };
+      expect(result).to.deep.equal({
+        wtimeoutMS: 1000,
+        wtimeout: 1000
+      });
+    });
+  });
 });
