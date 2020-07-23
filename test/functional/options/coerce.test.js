@@ -7,7 +7,6 @@ const chai = require('chai');
 const { CoerceError } = require('../../../src/options/coerce_error');
 const expect = chai.expect;
 const Errors = require('../../../src/options/coerce_error');
-const { match } = require('assert');
 
 describe('Coerce', () => {
   let errorWarningStub;
