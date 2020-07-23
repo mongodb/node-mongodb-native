@@ -5,7 +5,6 @@ const setupDatabase = require('./shared').setupDatabase;
 const withMonitoredClient = require('./shared').withMonitoredClient;
 const expect = require('chai').expect;
 const ReadPreference = require('../../lib/core/topologies/read_preference');
-const { tagSetReducer } = require('../../lib/core/sdam/server_selection');
 
 describe('ReadPreference', function() {
   before(function() {
