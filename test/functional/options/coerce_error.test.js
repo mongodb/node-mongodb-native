@@ -3,7 +3,11 @@
 const sinon = require('sinon');
 const chai = require('chai');
 const expect = chai.expect;
-const { CoerceError, CoerceDeprecate, CoerceUnrecognized } = require('../../../src/options/coerce_error');
+const {
+  CoerceError,
+  CoerceDeprecate,
+  CoerceUnrecognized
+} = require('../../../src/options/coerce_error');
 const Errors = require('../../../src/options/coerce_error');
 
 describe('CoerceError', () => {
