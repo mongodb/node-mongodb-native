@@ -1,6 +1,6 @@
 {
   "extension": ["js"],
-  "require": "ts-node/register",
+  "require": ["ts-node/register", "source-map-support/register"],
   "file": "test/tools/runner",
   "ui": "test/tools/runner/metadata_ui.js",
   "recursive": true,
