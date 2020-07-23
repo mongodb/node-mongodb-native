@@ -1,0 +1,88 @@
+# Test SDAM error handling.
+runOn:
+    # failCommand appName requirements
+    - minServerVersion: "4.4"
+
+database_name: &database_name "sdam-tests"
+collection_name: &collection_name "connectTimeoutMS"
+
+data: []
+
+tests:
+  - description: connectTimeoutMS=0
+    clientOptions:
+      retryWrites: false
+      connectTimeoutMS: 0
+      heartbeatFrequencyMS: 500
+      appname: connectTimeoutMS=0
+    operations:
+      # Perform an operation to ensure the node is discovered.
+      - name: insertMany
+        object: collection
+        arguments:
+          documents:
+            - _id: 1
+            - _id: 2
+      # Block the next streaming isMaster check for longer than
+      # heartbeatFrequencyMS to ensure that the connection timeout remains
+      # unlimited.
+      - name: configureFailPoint
+        object: testRunner
+        arguments:
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+                failCommands: ["isMaster"]
+                appName: connectTimeoutMS=0
+                blockConnection: true
+                blockTimeMS: 550
+      - name: wait
+        object: testRunner
+        arguments:
+          ms: 750
+      # Perform an operation to ensure the node is still selectable.
+      - name: insertMany
+        object: collection
+        arguments:
+          documents:
+            - _id: 3
+            - _id: 4
+      # Assert that the server was never marked Unknown and the pool was never
+      # cleared.
+      - name: assertEventCount
+        object: testRunner
+        arguments:
+          event: ServerMarkedUnknownEvent
+          count: 0
+      - name: assertEventCount
+        object: testRunner
+        arguments:
+          event: PoolClearedEvent
+          count: 0
+
+    expectations:
+      - command_started_event:
+          command:
+            insert: *collection_name
+            documents:
+              - _id: 1
+              - _id: 2
+          command_name: insert
+          database_name: *database_name
+      - command_started_event:
+          command:
+            insert: *collection_name
+            documents:
+              - _id: 3
+              - _id: 4
+          command_name: insert
+          database_name: *database_name
+
+    outcome:
+      collection:
+        data:
+          - {_id: 1}
+          - {_id: 2}
+          - {_id: 3}
+          - {_id: 4}
