@@ -1026,6 +1026,15 @@ function makeInterruptableAsyncInterval(fn: Function, options?: any) {
   return { wake, stop };
 }
 
+function hasAtomicOperators(doc: any): boolean {
+  if (Array.isArray(doc)) {
+    return doc.reduce((err, u) => err || hasAtomicOperators(u), null);
+  }
+
+  const keys = Object.keys(doc);
+  return keys.length > 0 && keys[0][0] === '$';
+}
+
 export {
   filterOptions,
   mergeOptions,
@@ -1071,5 +1080,6 @@ export {
   noop,
   now,
   calculateDurationInMs,
-  makeInterruptableAsyncInterval
+  makeInterruptableAsyncInterval,
+  hasAtomicOperators
 };

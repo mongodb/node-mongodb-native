@@ -304,63 +304,6 @@ describe('Bulk', function () {
   });
 
   it(
-    'should Correctly Fail Ordered Batch Operation due to illegal Operations using write commands',
-    {
-      metadata: {
-        requires: {
-          mongodb: '>2.5.4',
-          topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
-        }
-      },
-
-      test: function (done) {
-        var self = this;
-        var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-          poolSize: 1
-        });
-
-        client.connect(function (err, client) {
-          var db = client.db(self.configuration.db);
-          var col = db.collection('batch_write_ordered_ops_5');
-
-          // Add unique index on b field causing all updates to fail
-          col.ensureIndex({ b: 1 }, { unique: true, sparse: false }, function (err) {
-            test.equal(err, null);
-
-            var batch = col.initializeOrderedBulkOp();
-
-            // Add illegal insert operation
-            batch.insert({ $set: { a: 1 } });
-
-            // Execute the operations
-            batch.execute(function (err) {
-              test.ok(err != null);
-
-              var batch = col.initializeOrderedBulkOp();
-              // Add illegal remove
-              batch.find({ $set: { a: 1 } }).removeOne();
-              // Execute the operations
-              batch.execute(function (err) {
-                test.ok(err != null);
-
-                var batch = col.initializeOrderedBulkOp();
-                // Add illegal update
-                batch.find({ a: { $set2: 1 } }).updateOne({ c: { $set: { a: 1 } } });
-                // Execute the operations
-                batch.execute(function (err) {
-                  test.ok(err != null);
-
-                  client.close(done);
-                });
-              });
-            });
-          });
-        });
-      }
-    }
-  );
-
-  it(
     'should Correctly Execute Ordered Batch of Write Operations with duplicate key errors on updates',
     {
       metadata: {
@@ -775,68 +718,6 @@ describe('Bulk', function () {
 
           // Finish up test
           client.close(done);
-        });
-      });
-    }
-  });
-
-  it('should Correctly Fail Unordered Batch Operation due to illegal Operations', {
-    metadata: {
-      requires: {
-        mongodb: '>2.5.4',
-        topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger']
-      }
-    },
-
-    test: function (done) {
-      var self = this;
-      var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
-      });
-
-      client.connect(function (err, client) {
-        var db = client.db(self.configuration.db);
-        var col = db.collection('batch_write_unordered_ops_legacy_5');
-
-        // Write concern
-        var writeConcern = self.configuration.writeConcernMax();
-        writeConcern.unique = true;
-        writeConcern.sparse = false;
-
-        // Add unique index on b field causing all updates to fail
-        col.ensureIndex({ b: 1 }, writeConcern, function (err) {
-          test.equal(err, null);
-
-          // Initialize the unordered Batch
-          var batch = col.initializeUnorderedBulkOp();
-
-          // Add illegal insert operation
-          batch.insert({ $set: { a: 1 } });
-
-          // Execute the operations
-          batch.execute(function (err) {
-            test.ok(err != null);
-
-            // Initialize the unordered Batch
-            var batch = col.initializeUnorderedBulkOp();
-            // Add illegal remove
-            batch.find({ $set: { a: 1 } }).removeOne();
-            // Execute the operations
-            batch.execute(function (err) {
-              test.ok(err != null);
-
-              // Initialize the unordered Batch
-              var batch = col.initializeUnorderedBulkOp();
-              // Add illegal update
-              batch.find({ $set: { a: 1 } }).updateOne({ c: { $set: { a: 1 } } });
-              // Execute the operations
-              batch.execute(function (err) {
-                test.ok(err != null);
-
-                client.close(done);
-              });
-            });
-          });
         });
       });
     }
