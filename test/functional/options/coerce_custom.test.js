@@ -317,21 +317,6 @@ describe('CoerceCustom', () => {
     });
   });
 
-  context('.collide()', () => {
-    it('should handle collisions', () => {
-      expect(CoerceCustom.collide(true)(false, false)).to.equal(false);
-      expect(CoerceCustom.collide(true)(true, false)).to.equal(false);
-      expect(CoerceCustom.collide(true)(true, false)).to.equal(false);
-      expect(CoerceCustom.collide(true)(true, true)).to.equal(true);
-
-      expect(CoerceCustom.collide('foo')('foo', 'foo')).to.equal('foo');
-      expect(CoerceCustom.collide('foo')('bar', 'baz')).to.equal('bar');
-      expect(CoerceCustom.collide('foo')('foo', 'baz')).to.equal('baz');
-      expect(CoerceCustom.collide('foo')(undefined, 'foo')).to.equal('foo');
-      expect(CoerceCustom.collide('foo')('foo', undefined, 'baz')).to.equal('baz');
-    });
-  });
-
   context('.compressors()', () => {
     it('should deduce compressors', () => {
       [

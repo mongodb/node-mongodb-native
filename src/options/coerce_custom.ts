@@ -175,30 +175,19 @@ export class CoerceCustom {
     return C.require(CoerceCustom.readPreference)({ mode, hedge, tags, maxStalenessSeconds }, { warn: false } )
   }
 
-  static collide<T>(def: T) {
-    return (...choices: (T | undefined)[]) => {
-      return choices.reduce((acq: T, choice: (T | undefined)) => {
-        if (acq !== def) return acq;
-        if (choice === undefined) return acq;
-        if (choice !== def) return choice as T;
-        return acq;
-      }, def)
-    }
-  }
-
   static mongoClientOptions = (uriOptions: UriOptions, clientOptions: ClientOptions) => {
     const parsedUriOptions = CoerceCustom.uriOptions(uriOptions, { applyDefaults: false, warnDeprecated: false });
     const options = CoerceCustom.clientOptions(Object.assign({}, parsedUriOptions, clientOptions));
     // standardizes "tandem" or "alias" properties
     const appName = options.appName ?? options.appname;
-    const autoReconnect = CoerceCustom.collide(true)(options.auto_reconnect, options.autoReconnect);
-    const maxPoolSize = CoerceCustom.collide(5)(options.maxPoolSize, options.poolSize);
+    const autoReconnect = C.collide(true)(options.auto_reconnect, options.autoReconnect);
+    const maxPoolSize = C.collide(5)(options.maxPoolSize, options.poolSize);
     const wtimeoutMS = options.wtimeoutMS ?? options.wtimeout;
     const readPreference = CoerceCustom.readPreferenceFromOptions(options);
-    const tls = CoerceCustom.collide(false)(options.tls, options.ssl);
+    const tls = C.collide(false)(options.tls, options.ssl);
     const j = options.j || options.journal;
     const local: string = ReadConcernLevel.local;
-    const readConcernLevel = CoerceCustom.collide(local)(options.readConcern?.level, options.readConcernLevel);
+    const readConcernLevel = C.collide(local)(options.readConcern?.level, options.readConcernLevel);
     const readConcern = { ...options.readConcern, level: readConcernLevel };
     const compressors = [ ...options.compressors, ...(options.compression ? [options.compression]: []) ];
     const writeConcern = { j: options.journal, w: options.w, wtimeout: wtimeoutMS }

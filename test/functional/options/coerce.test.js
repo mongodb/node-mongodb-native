@@ -595,4 +595,19 @@ describe('Coerce', () => {
       expect(Coerce.commaSeparated(1)).to.be.instanceOf(CoerceError);
     });
   });
+
+  context('.collide()', () => {
+    it('should handle collisions', () => {
+      expect(Coerce.collide(true)(false, false)).to.equal(false);
+      expect(Coerce.collide(true)(true, false)).to.equal(false);
+      expect(Coerce.collide(true)(true, false)).to.equal(false);
+      expect(Coerce.collide(true)(true, true)).to.equal(true);
+
+      expect(Coerce.collide('foo')('foo', 'foo')).to.equal('foo');
+      expect(Coerce.collide('foo')('bar', 'baz')).to.equal('bar');
+      expect(Coerce.collide('foo')('foo', 'baz')).to.equal('baz');
+      expect(Coerce.collide('foo')(undefined, 'foo')).to.equal('foo');
+      expect(Coerce.collide('foo')('foo', undefined, 'baz')).to.equal('baz');
+    });
+  });
 });

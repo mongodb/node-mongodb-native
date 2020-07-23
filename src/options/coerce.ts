@@ -420,4 +420,15 @@ export class Coerce {
       }, value);
     };
   }
+  /** helps find non-default value in set of  functions */
+  static collide<T>(def: T) {
+    return (...choices: (T | undefined)[]) => {
+      return choices.reduce((acq: T, choice: T | undefined) => {
+        if (acq !== def) return acq;
+        if (choice === undefined) return acq;
+        if (choice !== def) return choice as T;
+        return acq;
+      }, def);
+    };
+  }
 }
