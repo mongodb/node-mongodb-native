@@ -31,19 +31,30 @@ tests:
             - _id: 4
       - name: recordPrimary
         object: testRunner
+      # Unfreeze a secondary with replSetFreeze:0 to ensure a speedy election.
+      - name: runAdminCommand
+        object: testRunner
+        command_name: replSetFreeze
+        arguments:
+          command:
+            replSetFreeze: 0
+          readPreference:
+            mode: Secondary
       # Run replSetStepDown on the meta client.
       - name: runAdminCommand
         object: testRunner
         command_name: replSetStepDown
         arguments:
           command:
-            replSetStepDown: 1
-            secondaryCatchUpPeriodSecs: 1
+            replSetStepDown: 30
+            secondaryCatchUpPeriodSecs: 30
             force: false
       - name: waitForPrimaryChange
         object: testRunner
         arguments:
-          timeoutMS: 5000
+          # We use a relatively large timeout here to workaround slow
+          # elections on Windows, possibly caused by SERVER-48154.
+          timeoutMS: 15000
       # Rediscover the new primary.
       - name: insertMany
         object: collection
