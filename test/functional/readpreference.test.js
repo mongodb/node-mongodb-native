@@ -654,17 +654,4 @@ describe('ReadPreference', function() {
       })
     });
   });
-
-  it('should always ensure readPreference.tags are array of strings or undefined', () => {
-    const a = new ReadPreference('secondary', { loc: 'ny' });
-    expect(a.tags).to.deep.equal(['loc:ny']);
-    const b = new ReadPreference('secondary', ['loc:ny']);
-    expect(b.tags).to.deep.equal(['loc:ny']);
-    const c = new ReadPreference('secondary', 'loc:ny');
-    expect(c.tags).to.deep.equal(['loc:ny']);
-    const d = new ReadPreference('secondary', ['loc:ny'], { maxStalenessSeconds: 100 });
-    expect(d.tags).to.deep.equal(['loc:ny']);
-    const e = new ReadPreference('secondary', { maxStalenessSeconds: 100 });
-    expect(e.tags).to.deep.equal(undefined);
-  });
 });
