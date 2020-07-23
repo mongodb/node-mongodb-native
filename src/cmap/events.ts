@@ -1,150 +1,125 @@
-import { GetMore, KillCursor, Msg } from './commands';
+import { GetMore, KillCursor, Msg, Query, CommandResult, CommandTypes } from './commands';
 import { calculateDurationInMs } from '../utils';
+import type { ConnectionPool, ConnectionPoolOptions } from './connection_pool';
+import type { Connection } from './connection';
+import type { MongoError } from '../error';
+import type { Document } from '../types';
 
-/**
- * The base class for all monitoring events published from the connection pool
- *
- * @property {number} time A timestamp when the event was created
- * @property {string} address The address (host/port pair) of the pool
- */
-class ConnectionPoolMonitoringEvent {
-  time: any;
-  address: any;
+/** The base export class for all monitoring events published from the connection pool */
+export class ConnectionPoolMonitoringEvent {
+  /** A timestamp when the event was created  */
+  time: Date;
+  /** The address (host/port pair) of the pool */
+  address: string;
 
-  constructor(pool: any) {
+  constructor(pool: ConnectionPool) {
     this.time = new Date();
     this.address = pool.address;
   }
 }
 
-/**
- * An event published when a connection pool is created
- *
- * @property {object} options The options used to create this connection pool
- */
-class ConnectionPoolCreatedEvent extends ConnectionPoolMonitoringEvent {
-  options: any;
+/** An event published when a connection pool is created */
+export class ConnectionPoolCreatedEvent extends ConnectionPoolMonitoringEvent {
+  /** The options used to create this connection pool */
+  options?: ConnectionPoolOptions;
 
-  constructor(pool: any) {
+  constructor(pool: ConnectionPool) {
     super(pool);
     this.options = pool.options;
   }
 }
 
-/**
- * An event published when a connection pool is closed
- */
-class ConnectionPoolClosedEvent extends ConnectionPoolMonitoringEvent {
-  constructor(pool: any) {
+/** An event published when a connection pool is closed */
+export class ConnectionPoolClosedEvent extends ConnectionPoolMonitoringEvent {
+  constructor(pool: ConnectionPool) {
     super(pool);
   }
 }
 
-/**
- * An event published when a connection pool creates a new connection
- *
- * @property {number} connectionId A monotonically increasing, per-pool id for the newly created connection
- */
-class ConnectionCreatedEvent extends ConnectionPoolMonitoringEvent {
-  connectionId: any;
+/** An event published when a connection pool creates a new connection */
+export class ConnectionCreatedEvent extends ConnectionPoolMonitoringEvent {
+  /** A monotonically increasing, per-pool id for the newly created connection */
+  connectionId: string | number;
 
-  constructor(pool: any, connection: any) {
+  constructor(pool: ConnectionPool, connection: Connection) {
     super(pool);
     this.connectionId = connection.id;
   }
 }
 
-/**
- * An event published when a connection is ready for use
- *
- * @property {number} connectionId The id of the connection
- */
-class ConnectionReadyEvent extends ConnectionPoolMonitoringEvent {
-  connectionId: any;
+/** An event published when a connection is ready for use */
+export class ConnectionReadyEvent extends ConnectionPoolMonitoringEvent {
+  /** The id of the connection */
+  connectionId: string | number;
 
-  constructor(pool: any, connection: any) {
+  constructor(pool: ConnectionPool, connection: Connection) {
     super(pool);
     this.connectionId = connection.id;
   }
 }
 
-/**
- * An event published when a connection is closed
- *
- * @property {number} connectionId The id of the connection
- * @property {string} reason The reason the connection was closed
- */
-class ConnectionClosedEvent extends ConnectionPoolMonitoringEvent {
-  connectionId: any;
-  reason: any;
+/** An event published when a connection is closed */
+export class ConnectionClosedEvent extends ConnectionPoolMonitoringEvent {
+  /** The id of the connection */
+  connectionId: string | number;
+  /** The reason the connection was closed */
+  reason: string;
 
-  constructor(pool: any, connection: any, reason: any) {
+  constructor(pool: ConnectionPool, connection: Connection, reason: string) {
     super(pool);
     this.connectionId = connection.id;
     this.reason = reason || 'unknown';
   }
 }
 
-/**
- * An event published when a request to check a connection out begins
- */
-class ConnectionCheckOutStartedEvent extends ConnectionPoolMonitoringEvent {
-  constructor(pool: any) {
+/** An event published when a request to check a connection out begins */
+export class ConnectionCheckOutStartedEvent extends ConnectionPoolMonitoringEvent {
+  constructor(pool: ConnectionPool) {
     super(pool);
   }
 }
 
-/**
- * An event published when a request to check a connection out fails
- *
- * @property {string} reason The reason the attempt to check out failed
- */
-class ConnectionCheckOutFailedEvent extends ConnectionPoolMonitoringEvent {
-  reason: any;
-  constructor(pool: any, reason: any) {
+/** An event published when a request to check a connection out fails */
+export class ConnectionCheckOutFailedEvent extends ConnectionPoolMonitoringEvent {
+  /** The reason the attempt to check out failed */
+  reason: string | MongoError;
+
+  constructor(pool: ConnectionPool, reason: string | MongoError) {
     super(pool);
     this.reason = reason;
   }
 }
 
-/**
- * An event published when a connection is checked out of the connection pool
- *
- * @property {number} connectionId The id of the connection
- */
-class ConnectionCheckedOutEvent extends ConnectionPoolMonitoringEvent {
-  connectionId: any;
+/** An event published when a connection is checked out of the connection pool */
+export class ConnectionCheckedOutEvent extends ConnectionPoolMonitoringEvent {
+  /** The id of the connection */
+  connectionId: string | number;
 
-  constructor(pool: any, connection: any) {
+  constructor(pool: ConnectionPool, connection: Connection) {
     super(pool);
     this.connectionId = connection.id;
   }
 }
 
-/**
- * An event published when a connection is checked into the connection pool
- *
- * @property {number} connectionId The id of the connection
- */
-class ConnectionCheckedInEvent extends ConnectionPoolMonitoringEvent {
-  connectionId: any;
+/** An event published when a connection is checked into the connection pool */
+export class ConnectionCheckedInEvent extends ConnectionPoolMonitoringEvent {
+  /** The id of the connection */
+  connectionId: string | number;
 
-  constructor(pool: any, connection: any) {
+  constructor(pool: ConnectionPool, connection: Connection) {
     super(pool);
     this.connectionId = connection.id;
   }
 }
 
-/**
- * An event published when a connection pool is cleared
- */
-class ConnectionPoolClearedEvent extends ConnectionPoolMonitoringEvent {
-  constructor(pool: any) {
+/** An event published when a connection pool is cleared */
+export class ConnectionPoolClearedEvent extends ConnectionPoolMonitoringEvent {
+  constructor(pool: ConnectionPool) {
     super(pool);
   }
 }
 
-const CMAP_EVENT_NAMES = [
+export const CMAP_EVENT_NAMES = [
   'connectionPoolCreated',
   'connectionPoolClosed',
   'connectionCreated',
@@ -158,8 +133,14 @@ const CMAP_EVENT_NAMES = [
 ];
 
 /** An event indicating the start of a given command */
-class CommandStartedEvent {
-  commandObj: any;
+export class CommandStartedEvent {
+  commandObj?: Document;
+  requestId: number;
+  databaseName: string;
+  commandName: string;
+  command: Document;
+  address: string;
+  connectionId?: string | number;
 
   /**
    * Create a started event
@@ -167,71 +148,95 @@ class CommandStartedEvent {
    * @param {Pool} pool the pool that originated the command
    * @param {object} command the command
    */
-  constructor(pool: any, command: any) {
+  constructor(pool: Connection | ConnectionPool, command: CommandTypes) {
     const cmd = extractCommand(command);
     const commandName = extractCommandName(cmd);
-    const connectionDetails = extractConnectionDetails(pool);
+    const { address, connectionId } = extractConnectionDetails(pool);
 
-    // NOTE: remove in major revision, this is not spec behavior
+    // TODO: remove in major revision, this is not spec behavior
     if (SENSITIVE_COMMANDS.has(commandName)) {
       this.commandObj = {};
       this.commandObj[commandName] = true;
     }
 
-    Object.assign(this, connectionDetails, {
-      requestId: command.requestId,
-      databaseName: databaseName(command),
-      commandName,
-      command: cmd
-    });
+    this.address = address;
+    this.connectionId = connectionId;
+    this.requestId = command.requestId;
+    this.databaseName = databaseName(command);
+    this.commandName = commandName;
+    this.command = cmd;
   }
 }
 
 /** An event indicating the success of a given command */
-class CommandSucceededEvent {
+export class CommandSucceededEvent {
+  address: string;
+  connectionId?: string | number;
+  requestId: number;
+  duration: number;
+  commandName: string;
+  reply: unknown;
+
   /**
    * Create a succeeded event
    *
    * @param {Pool} pool the pool that originated the command
    * @param {object} command the command
    * @param {object} reply the reply for this command from the server
-   * @param {Array} started a high resolution tuple timestamp of when the command was first sent, to calculate duration
+   * @param {number} started a high resolution tuple timestamp of when the command was first sent, to calculate duration
    */
-  constructor(pool: any, command: any, reply: object, started: any[]) {
+  constructor(
+    pool: Connection | ConnectionPool,
+    command: CommandTypes,
+    reply: CommandResult,
+    started: number
+  ) {
     const cmd = extractCommand(command);
     const commandName = extractCommandName(cmd);
-    const connectionDetails = extractConnectionDetails(pool);
+    const { address, connectionId } = extractConnectionDetails(pool);
 
-    Object.assign(this, connectionDetails, {
-      requestId: command.requestId,
-      commandName,
-      duration: calculateDurationInMs(started),
-      reply: maybeRedact(commandName, extractReply(command, reply))
-    });
+    this.address = address;
+    this.connectionId = connectionId;
+    this.requestId = command.requestId;
+    this.commandName = commandName;
+    this.duration = calculateDurationInMs(started);
+    this.reply = maybeRedact(commandName, extractReply(command as Query, reply));
   }
 }
 
 /** An event indicating the failure of a given command */
-class CommandFailedEvent {
+export class CommandFailedEvent {
+  address: string;
+  connectionId?: string | number;
+  requestId: number;
+  duration: number;
+  commandName: string;
+  failure: unknown;
   /**
    * Create a failure event
    *
-   * @param {Pool} pool the pool that originated the command
+   * @param {Connection | ConnectionPool} pool the pool that originated the command
    * @param {object} command the command
-   * @param {MongoError|object} error the generated error or a server error response
+   * @param {MongoError | object} error the generated error or a server error response
    * @param {Array} started a high resolution tuple timestamp of when the command was first sent, to calculate duration
    */
-  constructor(pool: any, command: any, error: any, started: any[]) {
+  constructor(
+    pool: Connection | ConnectionPool,
+    command: CommandTypes,
+    error: Error | Document,
+    started: number
+  ) {
     const cmd = extractCommand(command);
     const commandName = extractCommandName(cmd);
-    const connectionDetails = extractConnectionDetails(pool);
+    const { address, connectionId } = extractConnectionDetails(pool);
 
-    Object.assign(this, connectionDetails, {
-      requestId: command.requestId,
-      commandName,
-      duration: calculateDurationInMs(started),
-      failure: maybeRedact(commandName, error)
-    });
+    this.address = address;
+    this.connectionId = connectionId;
+
+    this.requestId = command.requestId;
+    this.commandName = commandName;
+    this.duration = calculateDurationInMs(started);
+    this.failure = maybeRedact(commandName, error);
   }
 }
 
@@ -249,14 +254,14 @@ const SENSITIVE_COMMANDS = new Set([
 ]);
 
 // helper methods
-const extractCommandName = (commandDoc: any) => Object.keys(commandDoc)[0];
-const namespace = (command: any) => command.ns;
-const databaseName = (command: any) => command.ns.split('.')[0];
-const collectionName = (command: any) => command.ns.split('.')[1];
-const maybeRedact = (commandName: any, result: any) =>
+const extractCommandName = (commandDoc: Document) => Object.keys(commandDoc)[0];
+const namespace = (command: CommandTypes) => command.ns;
+const databaseName = (command: CommandTypes) => command.ns.split('.')[0];
+const collectionName = (command: CommandTypes) => command.ns.split('.')[1];
+const maybeRedact = (commandName: string, result: CommandResult | Error | Document) =>
   SENSITIVE_COMMANDS.has(commandName) ? {} : result;
 
-const LEGACY_FIND_QUERY_MAP: any = {
+const LEGACY_FIND_QUERY_MAP = {
   $query: 'filter',
   $orderby: 'sort',
   $hint: 'hint',
@@ -268,13 +273,13 @@ const LEGACY_FIND_QUERY_MAP: any = {
   $showDiskLoc: 'showRecordId',
   $maxTimeMS: 'maxTimeMS',
   $snapshot: 'snapshot'
-};
+} as Record<string, string>;
 
-const LEGACY_FIND_OPTIONS_MAP: any = {
+const LEGACY_FIND_OPTIONS_MAP = {
   numberToSkip: 'skip',
   numberToReturn: 'batchSize',
   returnFieldsSelector: 'projection'
-};
+} as Record<string, string>;
 
 const OP_QUERY_KEYS = [
   'tailable',
@@ -285,13 +290,8 @@ const OP_QUERY_KEYS = [
   'exhaust'
 ];
 
-/**
- * Extract the actual command from the query, possibly upconverting if it's a legacy
- * format
- *
- * @param {object} command the command
- */
-const extractCommand = (command: any) => {
+/** Extract the actual command from the query, possibly up-converting if it's a legacy format */
+function extractCommand(command: CommandTypes): Document {
   if (command instanceof GetMore) {
     return {
       getMore: command.cursorId,
@@ -312,41 +312,48 @@ const extractCommand = (command: any) => {
   }
 
   if (command.query && command.query.$query) {
-    let result: any;
-    if (command.ns === 'admin.$cmd') {
-      // upconvert legacy command
+    let result: Document;
+    let commandObject: any = command;
+    if (commandObject.ns === 'admin.$cmd') {
+      // up-convert legacy command
       result = Object.assign({}, command.query.$query);
     } else {
-      // upconvert legacy find command
-      result = { find: collectionName(command) };
-      Object.keys(LEGACY_FIND_QUERY_MAP).forEach((key: any) => {
-        if (typeof command.query[key] !== 'undefined')
+      // up-convert legacy find command
+      result = { find: collectionName(commandObject) };
+      Object.keys(LEGACY_FIND_QUERY_MAP).forEach(key => {
+        if (typeof commandObject.query[key] !== 'undefined') {
           result[LEGACY_FIND_QUERY_MAP[key]] = command.query[key];
+        }
       });
     }
 
-    Object.keys(LEGACY_FIND_OPTIONS_MAP).forEach((key: any) => {
-      if (typeof command[key] !== 'undefined') result[LEGACY_FIND_OPTIONS_MAP[key]] = command[key];
+    Object.keys(LEGACY_FIND_OPTIONS_MAP).forEach(key => {
+      if (typeof commandObject[key] !== 'undefined') {
+        result[LEGACY_FIND_OPTIONS_MAP[key]] = commandObject[key];
+      }
     });
 
-    OP_QUERY_KEYS.forEach((key: any) => {
-      if (command[key]) result[key] = command[key];
+    OP_QUERY_KEYS.forEach(key => {
+      if (commandObject[key]) {
+        result[key] = commandObject[key];
+      }
     });
 
-    if (typeof command.pre32Limit !== 'undefined') {
-      result.limit = command.pre32Limit;
+    if (typeof commandObject.pre32Limit !== 'undefined') {
+      result.limit = commandObject.pre32Limit;
     }
 
-    if (command.query.$explain) {
+    if (commandObject.query.$explain) {
       return { explain: result };
     }
 
     return result;
   }
-  return command.query ? command.query : command;
-};
 
-const extractReply = (command: any, reply: any) => {
+  return command.query ? command.query : command;
+}
+
+function extractReply(command: GetMore | KillCursor | Query, reply: CommandResult) {
   if (command instanceof GetMore) {
     return {
       ok: 1,
@@ -378,28 +385,15 @@ const extractReply = (command: any, reply: any) => {
   }
 
   return reply && reply.result ? reply.result : reply;
-};
+}
 
-const extractConnectionDetails = (connection: any) => {
+function extractConnectionDetails(connection: Connection | ConnectionPool) {
+  let connectionId;
+  if ('id' in connection) {
+    connectionId = connection.id;
+  }
   return {
     address: connection.address,
-    connectionId: connection.id
+    connectionId
   };
-};
-
-export {
-  CMAP_EVENT_NAMES,
-  ConnectionPoolCreatedEvent,
-  ConnectionPoolClosedEvent,
-  ConnectionCreatedEvent,
-  ConnectionReadyEvent,
-  ConnectionClosedEvent,
-  ConnectionCheckOutStartedEvent,
-  ConnectionCheckOutFailedEvent,
-  ConnectionCheckedOutEvent,
-  ConnectionCheckedInEvent,
-  ConnectionPoolClearedEvent,
-  CommandStartedEvent,
-  CommandSucceededEvent,
-  CommandFailedEvent
-};
+}

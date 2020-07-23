@@ -1,4 +1,4 @@
-import { emitDeprecatedOptionWarning } from './utils';
+import { emitDeprecatedOptionWarning, toError } from './utils';
 import PromiseProvider = require('./promise_provider');
 import ReadPreference = require('./read_preference');
 import { deprecate } from 'util';
@@ -17,7 +17,7 @@ import { MongoError } from './error';
 import unordered = require('./bulk/unordered');
 import ordered = require('./bulk/ordered');
 import ChangeStream = require('./change_stream');
-import WriteConcern = require('./write_concern');
+import { WriteConcern } from './write_concern';
 import ReadConcern = require('./read_concern');
 import { AggregationCursor, CommandCursor } from './cursor';
 import AggregateOperation = require('./operations/aggregate');

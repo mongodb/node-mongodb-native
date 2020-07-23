@@ -2,7 +2,7 @@ import Denque = require('denque');
 import { EventEmitter } from 'events';
 import Logger = require('../logger');
 import { Connection } from './connection';
-import connect = require('./connect');
+import { connect } from './connect';
 import { eachAsync, relayEvents, makeCounter } from '../utils';
 import { MongoError } from '../error';
 import { PoolClosedError, WaitQueueTimeoutError } from './errors';
@@ -18,6 +18,7 @@ import {
   ConnectionCheckedInEvent,
   ConnectionPoolClearedEvent
 } from './events';
+import type { Callback, CallbackTypedError } from '../types';
 
 const kLogger = Symbol('logger');
 const kConnections = Symbol('connections');
@@ -29,7 +30,7 @@ const kCancellationToken = Symbol('cancellationToken');
 const kWaitQueue = Symbol('waitQueue');
 const kCancelled = Symbol('cancelled');
 
-const VALID_POOL_OPTIONS = new Set([
+const validPoolOptionsList = [
   // `connect` options
   'ssl',
   'connectionType',
@@ -83,31 +84,51 @@ const VALID_POOL_OPTIONS = new Set([
   'minPoolSize',
   'maxIdleTimeMS',
   'waitQueueTimeoutMS'
-]);
+] as const;
 
-function resolveOptions(options: any, defaults: any) {
-  const newOptions = Array.from(VALID_POOL_OPTIONS).reduce((obj: any, key: any) => {
-    if (Object.prototype.hasOwnProperty.call(options, key)) {
-      obj[key] = options[key];
+type ValidPoolOptions = { [P in typeof validPoolOptionsList[number]]?: unknown };
+
+const VALID_POOL_OPTIONS = new Set(validPoolOptionsList);
+
+function resolveOptions(
+  options: ConnectionPoolOptions,
+  defaults: Partial<ConnectionPoolOptions>
+): Readonly<ConnectionPoolOptions> {
+  const newOptions = {} as ValidPoolOptions;
+
+  for (const key of VALID_POOL_OPTIONS) {
+    if (key in options) {
+      newOptions[key] = options[key];
     }
+  }
 
-    return obj;
-  }, {});
-
-  return Object.freeze(Object.assign({}, defaults, newOptions));
+  return Object.freeze(Object.assign({}, defaults, newOptions)) as ConnectionPoolOptions;
 }
 
-/**
- * Configuration options for drivers wrapping the node driver.
- *
- * @typedef {object} ConnectionPoolOptions
- * @property {string} [host] The host to connect to
- * @property {number} [port] The port to connect to
- * @property {number} [maxPoolSize=100] The maximum number of connections that may be associated with a pool at a given time. This includes in use and available connections.
- * @property {number} [minPoolSize=0] The minimum number of connections that MUST exist at any moment in a single connection pool.
- * @property {number} [maxIdleTimeMS] The maximum amount of time a connection should remain idle in the connection pool before being marked idle.
- * @property {number} [waitQueueTimeoutMS=0] The maximum amount of time operation execution should wait for a connection to become available. The default is 0 which means there is no limit.
- */
+export interface ConnectionPoolOptions extends ValidPoolOptions {
+  connectionType?: typeof Connection;
+  /** The host to connect to */
+  host: string;
+  /** The port to connect to */
+  port: number;
+  /** The maximum number of connections that may be associated with a pool at a given time. This includes in use and available connections. */
+  maxPoolSize?: number;
+  /** The minimum number of connections that MUST exist at any moment in a single connection pool. */
+  minPoolSize?: number;
+  /** The maximum amount of time a connection should remain idle in the connection pool before being marked idle. */
+  maxIdleTimeMS?: number;
+  /** The maximum amount of time operation execution should wait for a connection to become available. The default is 0 which means there is no limit. */
+  waitQueueTimeoutMS?: number;
+
+  autoEncrypter?: unknown;
+  metadata?: unknown;
+}
+
+interface WaitQueueMember {
+  callback: CheckoutCallback;
+  timer?: NodeJS.Timeout;
+  [kCancelled]: boolean;
+}
 
 /**
  * A pool of connections which dynamically resizes, and emit events related to pool activity
@@ -129,25 +150,24 @@ function resolveOptions(options: any, defaults: any) {
  * @fires ConnectionPool#connectionPoolCleared
  */
 class ConnectionPool extends EventEmitter {
-  closed: any;
-  options: any;
-  [kLogger]: any;
-  [kConnections]: any;
-  [kPermits]: any;
-  [kMinPoolSizeTimer]: any;
-  [kGeneration]: any;
-  [kConnectionCounter]: any;
-  [kCancellationToken]: any;
-  [kWaitQueue]: any;
+  closed: boolean;
+  options: Readonly<ConnectionPoolOptions>;
+  [kLogger]: Logger;
+  [kConnections]: Denque<Connection>;
+  [kPermits]: number;
+  [kMinPoolSizeTimer]?: NodeJS.Timeout;
+  [kGeneration]: number;
+  [kConnectionCounter]: Generator<number>;
+  [kCancellationToken]: EventEmitter;
+  [kWaitQueue]: Denque<WaitQueueMember>;
 
   /**
    * Create a new Connection Pool
    *
    * @param {ConnectionPoolOptions} options
    */
-  constructor(options: any) {
+  constructor(options: ConnectionPoolOptions) {
     super();
-    options = options || {};
 
     this.closed = false;
     this.options = resolveOptions(options, {
@@ -161,15 +181,15 @@ class ConnectionPool extends EventEmitter {
       metadata: options.metadata
     });
 
-    if (options.minSize > options.maxSize) {
+    if (options.minPoolSize! > options.maxPoolSize!) {
       throw new TypeError(
-        'Connection pool minimum size must not be greater than maxiumum pool size'
+        'Connection pool minimum size must not be greater than maximum pool size'
       );
     }
 
     this[kLogger] = new Logger('ConnectionPool', options);
     this[kConnections] = new Denque();
-    this[kPermits] = this.options.maxPoolSize;
+    this[kPermits] = this.options.maxPoolSize!;
     this[kMinPoolSizeTimer] = undefined;
     this[kGeneration] = 0;
     this[kConnectionCounter] = makeCounter(1);
@@ -192,7 +212,7 @@ class ConnectionPool extends EventEmitter {
   }
 
   get totalConnectionCount() {
-    return this[kConnections].length + (this.options.maxPoolSize - this[kPermits]);
+    return this[kConnections].length + (this.options.maxPoolSize! - this[kPermits]);
   }
 
   get availableConnectionCount() {
@@ -210,7 +230,7 @@ class ConnectionPool extends EventEmitter {
    *
    * @param {ConnectionPool~checkOutCallback} callback
    */
-  checkOut(callback: Function) {
+  checkOut(callback: CheckoutCallback) {
     this.emit('connectionCheckOutStarted', new ConnectionCheckOutStartedEvent(this));
 
     if (this.closed) {
@@ -220,7 +240,8 @@ class ConnectionPool extends EventEmitter {
     }
 
     // add this request to the wait queue
-    const waitQueueMember: any = { callback } as any;
+    const waitQueueMember = {} as WaitQueueMember;
+    waitQueueMember.callback = callback;
     const pool = this;
     const waitQueueTimeoutMS = this.options.waitQueueTimeoutMS;
     if (waitQueueTimeoutMS) {
@@ -245,7 +266,7 @@ class ConnectionPool extends EventEmitter {
    *
    * @param {Connection} connection The connection to check in
    */
-  checkIn(connection: any) {
+  checkIn(connection: Connection) {
     const poolClosed = this.closed;
     const stale = connectionIsStale(this, connection);
     const willDestroy = !!(poolClosed || stale || connection.closed);
@@ -284,14 +305,16 @@ class ConnectionPool extends EventEmitter {
    * @param {boolean} [options.force] Force close connections
    * @param {Function} callback
    */
-  close(options?: any, callback?: Function) {
+  close(callback: { force?: boolean } | Callback<unknown>): void;
+  close(options: { force?: boolean }, cb?: Callback<void>) {
+    let callback: Callback<void> = cb!;
     if (typeof options === 'function') {
       callback = options;
     }
 
     options = Object.assign({ force: false }, options);
     if (this.closed) {
-      return callback!();
+      return callback();
     }
 
     // immediately cancel any in-flight connections
@@ -300,35 +323,37 @@ class ConnectionPool extends EventEmitter {
     // drain the wait queue
     while (this.waitQueueSize) {
       const waitQueueMember = this[kWaitQueue].pop();
-      clearTimeout(waitQueueMember.timer);
-      if (!waitQueueMember[kCancelled]) {
-        waitQueueMember.callback(new MongoError('connection pool closed'));
+      if (waitQueueMember && waitQueueMember.timer) {
+        clearTimeout(waitQueueMember.timer);
+        if (!waitQueueMember[kCancelled]) {
+          waitQueueMember.callback(new MongoError('connection pool closed'));
+        }
       }
     }
 
     // clear the min pool size timer
     if (this[kMinPoolSizeTimer]) {
-      clearTimeout(this[kMinPoolSizeTimer]);
+      clearTimeout(this[kMinPoolSizeTimer]!); //
     }
 
     // end the connection counter
     if (typeof this[kConnectionCounter].return === 'function') {
-      this[kConnectionCounter].return();
+      this[kConnectionCounter].return(undefined);
     }
 
     // mark the pool as closed immediately
     this.closed = true;
 
-    eachAsync(
+    eachAsync<Connection, MongoError>(
       this[kConnections].toArray(),
-      (conn: any, cb: any) => {
+      (conn, cb) => {
         this.emit('connectionClosed', new ConnectionClosedEvent(this, conn, 'poolClosed'));
         conn.destroy(options, cb);
       },
-      (err: any) => {
+      err => {
         this[kConnections].clear();
         this.emit('connectionPoolClosed', new ConnectionPoolClosedEvent(this));
-        callback!(err);
+        callback(err);
       }
     );
   }
@@ -343,10 +368,10 @@ class ConnectionPool extends EventEmitter {
    * @param {Function} callback The original callback
    * @returns {void}
    */
-  withConnection(fn: any, callback: Function): void {
-    this.checkOut((err?: any, conn?: any) => {
+  withConnection(fn: WithConnectionCallback, callback: Callback<unknown>): void {
+    this.checkOut((err, conn) => {
       // don't callback with `err` here, we might want to act upon it inside `fn`
-      fn(err, conn, (fnErr: any, result: any) => {
+      fn(err, conn, (fnErr, result) => {
         if (typeof callback === 'function') {
           if (fnErr) {
             callback(fnErr);
@@ -363,12 +388,12 @@ class ConnectionPool extends EventEmitter {
   }
 }
 
-function ensureMinPoolSize(pool: any) {
+function ensureMinPoolSize(pool: ConnectionPool) {
   if (pool.closed || pool.options.minPoolSize === 0) {
     return;
   }
 
-  const minPoolSize = pool.options.minPoolSize;
+  const minPoolSize = pool.options.minPoolSize!;
   for (let i = pool.totalConnectionCount; i < minPoolSize; ++i) {
     createConnection(pool);
   }
@@ -376,15 +401,15 @@ function ensureMinPoolSize(pool: any) {
   pool[kMinPoolSizeTimer] = setTimeout(() => ensureMinPoolSize(pool), 10);
 }
 
-function connectionIsStale(pool: any, connection: any) {
+function connectionIsStale(pool: ConnectionPool, connection: Connection) {
   return connection.generation !== pool[kGeneration];
 }
 
-function connectionIsIdle(pool: any, connection: any) {
+function connectionIsIdle(pool: ConnectionPool, connection: Connection) {
   return !!(pool.options.maxIdleTimeMS && connection.idleTime > pool.options.maxIdleTimeMS);
 }
 
-function createConnection(pool: any, callback?: Function) {
+function createConnection(pool: ConnectionPool, callback?: Callback<Connection>) {
   const connectOptions = Object.assign(
     {
       id: pool[kConnectionCounter].next().value,
@@ -394,7 +419,7 @@ function createConnection(pool: any, callback?: Function) {
   );
 
   pool[kPermits]--;
-  connect(connectOptions, pool[kCancellationToken], (err?: any, connection?: any) => {
+  connect(connectOptions as any, pool[kCancellationToken], (err, conn) => {
     if (err) {
       pool[kPermits]++;
       pool[kLogger].debug(`connection attempt failed with error [${JSON.stringify(err)}]`);
@@ -404,6 +429,7 @@ function createConnection(pool: any, callback?: Function) {
 
       return;
     }
+    const connection = conn!;
 
     // The pool might have closed since we started trying to create a connection
     if (pool.closed) {
@@ -436,7 +462,7 @@ function createConnection(pool: any, callback?: Function) {
   });
 }
 
-function destroyConnection(pool: any, connection: any, reason: any) {
+function destroyConnection(pool: ConnectionPool, connection: Connection, reason: string) {
   pool.emit('connectionClosed', new ConnectionClosedEvent(pool, connection, reason));
 
   // allow more connections to be created
@@ -446,14 +472,14 @@ function destroyConnection(pool: any, connection: any, reason: any) {
   process.nextTick(() => connection.destroy());
 }
 
-function processWaitQueue(pool: any) {
+function processWaitQueue(pool: ConnectionPool) {
   if (pool.closed) {
     return;
   }
 
   while (pool.waitQueueSize) {
     const waitQueueMember = pool[kWaitQueue].peekFront();
-    if (waitQueueMember[kCancelled]) {
+    if (waitQueueMember && waitQueueMember[kCancelled]) {
       pool[kWaitQueue].shift();
       continue;
     }
@@ -462,14 +488,14 @@ function processWaitQueue(pool: any) {
       break;
     }
 
-    const connection = pool[kConnections].shift();
+    const connection = pool[kConnections].shift()!;
     const isStale = connectionIsStale(pool, connection);
     const isIdle = connectionIsIdle(pool, connection);
     if (!isStale && !isIdle && !connection.closed) {
       pool.emit('connectionCheckedOut', new ConnectionCheckedOutEvent(pool, connection));
-      clearTimeout(waitQueueMember.timer);
+      clearTimeout(waitQueueMember!.timer!);
       pool[kWaitQueue].shift();
-      waitQueueMember.callback(undefined, connection);
+      waitQueueMember!.callback(undefined, connection);
       return;
     }
 
@@ -477,12 +503,12 @@ function processWaitQueue(pool: any) {
     destroyConnection(pool, connection, reason);
   }
 
-  const maxPoolSize = pool.options.maxPoolSize;
+  const maxPoolSize = pool.options.maxPoolSize!;
   if (pool.waitQueueSize && (maxPoolSize <= 0 || pool.totalConnectionCount < maxPoolSize)) {
-    createConnection(pool, (err?: any, connection?: any) => {
+    createConnection(pool, (err, connection) => {
       const waitQueueMember = pool[kWaitQueue].shift();
       if (waitQueueMember == null) {
-        if (err == null) {
+        if (err == null && connection) {
           pool[kConnections].push(connection);
         }
 
@@ -494,13 +520,16 @@ function processWaitQueue(pool: any) {
       }
 
       if (err) {
-        pool.emit('connectionCheckOutFailed', new ConnectionCheckOutFailedEvent(pool, err));
-      } else {
+        pool.emit(
+          'connectionCheckOutFailed',
+          new ConnectionCheckOutFailedEvent(pool, err as MongoError)
+        );
+      } else if (connection) {
         pool.emit('connectionCheckedOut', new ConnectionCheckedOutEvent(pool, connection));
       }
 
-      clearTimeout(waitQueueMember.timer);
-      waitQueueMember.callback(err, connection);
+      clearTimeout(waitQueueMember.timer!);
+      waitQueueMember.callback(err as MongoError, connection);
     });
 
     return;
@@ -515,6 +544,11 @@ function processWaitQueue(pool: any) {
  * @param {Connection} connection The managed connection which was checked out of the pool.
  * @param {Function} callback A function to call back after connection management is complete
  */
+type WithConnectionCallback = (
+  error?: MongoError | WaitQueueTimeoutError | null,
+  connection?: Connection,
+  callback?: CheckoutCallback
+) => void;
 
 /**
  * A callback provided to `checkOut`
@@ -523,6 +557,7 @@ function processWaitQueue(pool: any) {
  * @param {MongoError} error An error instance representing the error during checkout
  * @param {Connection} connection A connection from the pool
  */
+type CheckoutCallback = CallbackTypedError<WaitQueueTimeoutError | MongoError, Connection>;
 
 /**
  * Emitted once when the connection pool is created

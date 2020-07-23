@@ -3,20 +3,24 @@ import { Long } from '../../bson';
 import { MongoError, MongoNetworkError } from '../../error';
 import { applyCommonQueryOptions } from './shared';
 import { maxWireVersion, collectionNamespace } from '../../utils';
-import command = require('./command');
+import { command } from './command';
+import type { Server } from '../../sdam/server';
+import type { Connection } from '../connection';
+import type { Callback } from '../../types';
+import type { CommandOptions } from '../types';
 
-function getMore(
-  server: any,
-  ns: any,
+export function getMore(
+  server: Server,
+  ns: string,
   cursorState: any,
-  batchSize: any,
-  options: any,
-  callback: Function
+  batchSize: number,
+  options: CommandOptions,
+  callback: (error?: Error, doc?: any, connection?: Connection) => void
 ) {
   options = options || {};
 
   const wireVersion = maxWireVersion(server);
-  function queryCallback(err?: any, result?: any) {
+  const queryCallback = function (err, result) {
     if (err) return callback(err);
     const response = result.message;
 
@@ -34,7 +38,7 @@ function getMore(
       cursorState.documents = response.documents;
       cursorState.cursorId = cursorId;
 
-      callback(null, null, response.connection);
+      callback(undefined, undefined, response.connection);
       return;
     }
 
@@ -52,8 +56,8 @@ function getMore(
     cursorState.documents = response.documents[0].cursor.nextBatch;
     cursorState.cursorId = cursorId;
 
-    callback(null, response.documents[0], response.connection);
-  }
+    callback(undefined, response.documents[0], response.connection);
+  } as Callback;
 
   if (wireVersion < 4) {
     const getMoreOp = new GetMore(ns, cursorState.cursorId, { numberToReturn: batchSize });
@@ -91,5 +95,3 @@ function getMore(
 
   command(server, ns, getMoreCmd, commandOptions, queryCallback);
 }
-
-export = getMore;

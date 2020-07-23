@@ -1,13 +1,14 @@
 import crypto = require('crypto');
-import { AuthProvider } from './auth_provider';
+import { AuthProvider, AuthContext } from './auth_provider';
+import type { Callback } from '../../types';
 
-class MongoCR extends AuthProvider {
-  auth(authContext: any, callback: Function) {
+export class MongoCR extends AuthProvider {
+  auth(authContext: AuthContext, callback: Callback) {
     const { connection, credentials } = authContext;
     const username = credentials.username;
     const password = credentials.password;
     const source = credentials.source;
-    connection.command(`${source}.$cmd`, { getnonce: 1 }, (err?: any, result?: any) => {
+    connection.command(`${source}.$cmd`, { getnonce: 1 }, {}, (err, result) => {
       let nonce = null;
       let key = null;
 
@@ -36,9 +37,7 @@ class MongoCR extends AuthProvider {
         key
       };
 
-      connection.command(`${source}.$cmd`, authenticateCommand, callback);
+      connection.command(`${source}.$cmd`, authenticateCommand, {}, callback);
     });
   }
 }
-
-export = MongoCR;

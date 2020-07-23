@@ -38,6 +38,7 @@ import {
   TopologyClosedEvent,
   TopologyDescriptionChangedEvent
 } from './events';
+import type { MongoDBInitialResponse } from '../cmap/types';
 
 // Global state
 let globalTopologyCounter = 0;
@@ -95,6 +96,7 @@ interface Topology {
 class Topology extends EventEmitter {
   s: any;
   [kWaitQueue]: any;
+  ismaster?: MongoDBInitialResponse;
 
   /**
    * Create a topology

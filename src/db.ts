@@ -8,7 +8,7 @@ import { MongoError } from './error';
 import Collection = require('./collection');
 import ChangeStream = require('./change_stream');
 import CONSTANTS = require('./constants');
-import WriteConcern = require('./write_concern');
+import { WriteConcern } from './write_concern';
 import ReadConcern = require('./read_concern');
 import Logger = require('./logger');
 import {

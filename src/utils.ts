@@ -2,7 +2,8 @@ import PromiseProvider = require('./promise_provider');
 import os = require('os');
 import crypto = require('crypto');
 import { MongoError } from './error';
-import WriteConcern = require('./write_concern');
+import { WriteConcern } from './write_concern';
+import type { CallbackTypedError, Callback } from './types';
 
 const MAX_JS_INT = Number.MAX_SAFE_INTEGER + 1;
 
@@ -224,12 +225,12 @@ function isObject(arg: any) {
 }
 
 function debugOptions(debugFields: any, options: any) {
-  var finaloptions: any = {};
+  var finalOptions: any = {};
   debugFields.forEach(function (n: any) {
-    finaloptions[n] = options[n];
+    finalOptions[n] = options[n];
   });
 
-  return finaloptions;
+  return finalOptions;
 }
 
 function decorateCommand(command: any, options: any, exclude: any) {
@@ -603,8 +604,8 @@ class MongoDBNamespace {
   }
 }
 
-function* makeCounter(seed: any) {
-  let count = seed || 0;
+function* makeCounter(seed = 0) {
+  let count = seed;
   while (true) {
     const newCount = count;
     count += 1;
@@ -650,11 +651,11 @@ function maybePromise(callback: Function | undefined, wrapper: Function): any | 
   return result;
 }
 
-function databaseNamespace(ns: any) {
+function databaseNamespace(ns: string) {
   return ns.split('.')[0];
 }
 
-function collectionNamespace(ns: any) {
+function collectionNamespace(ns: string) {
   return ns.split('.').slice(1).join('.');
 }
 
@@ -688,7 +689,7 @@ function relayEvents(listener: any, emitter: any, events: any) {
  * @private
  * @param {(Topology|Server)} topologyOrServer
  */
-function maxWireVersion(topologyOrServer: any) {
+function maxWireVersion(topologyOrServer?: any) {
   if (topologyOrServer) {
     if (topologyOrServer.ismaster) {
       return topologyOrServer.ismaster.maxWireVersion;
@@ -724,11 +725,15 @@ function collationNotSupported(server: any, cmd: any) {
 /**
  * Applies the function `eachFn` to each item in `arr`, in parallel.
  *
- * @param {Array} arr an array of items to asynchronusly iterate over
+ * @param {Array} arr an array of items to asynchronously iterate over
  * @param {Function} eachFn A function to call on each item of the array. The callback signature is `(item, callback)`, where the callback indicates iteration is complete.
  * @param {Function} callback The callback called after every item has been iterated
  */
-function eachAsync(arr: any[], eachFn: Function, callback: Function) {
+function eachAsync<T, E = any>(
+  arr: T[],
+  eachFn: (item: T, callback: Callback<CallbackTypedError<E>>) => void,
+  callback: CallbackTypedError<E>
+) {
   arr = arr || [];
 
   let idx = 0;
@@ -835,10 +840,37 @@ function makeStateMachine(stateTable: any) {
   };
 }
 
-function makeClientMetadata(options: any) {
+export interface ClientMetadata {
+  driver: {
+    name: string;
+    version: string;
+  };
+  os: {
+    type: string;
+    name: NodeJS.Platform;
+    architecture: string;
+    version: string;
+  };
+  platform: string;
+  version?: string;
+  application?: {
+    name: string;
+  };
+}
+
+export interface ClientMetadataOptions {
+  driverInfo?: {
+    name?: string;
+    version?: string;
+    platform?: string;
+  };
+  appname?: string;
+}
+
+function makeClientMetadata(options: ClientMetadataOptions): ClientMetadata {
   options = options || {};
 
-  const metadata = {
+  const metadata: ClientMetadata = {
     driver: {
       name: 'nodejs',
       version: require('../package.json').version
@@ -850,7 +882,7 @@ function makeClientMetadata(options: any) {
       version: os.release()
     },
     platform: `'Node.js ${process.version}, ${os.endianness} (unified)`
-  } as any;
+  };
 
   // support optionally provided wrapping driver info
   if (options.driverInfo) {
@@ -899,7 +931,7 @@ function now() {
   return Math.floor(hrtime[0] * 1000 + hrtime[1] / 1000000);
 }
 
-function calculateDurationInMs(started: any) {
+function calculateDurationInMs(started: number) {
   if (typeof started !== 'number') {
     throw TypeError('numeric value required to calculate duration');
   }

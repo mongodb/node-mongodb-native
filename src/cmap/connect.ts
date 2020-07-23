@@ -1,37 +1,47 @@
-import net = require('net');
-import tls = require('tls');
-import { Connection } from './connection';
+import * as net from 'net';
+import * as tls from 'tls';
+import { Connection, ConnectionOptions } from './connection';
 import { MongoError, MongoNetworkError, MongoNetworkTimeoutError } from '../error';
 import { defaultAuthProviders } from './auth/defaultAuthProviders';
 import { AuthContext } from './auth/auth_provider';
-import { makeClientMetadata } from '../utils';
+import { makeClientMetadata, ClientMetadataOptions, ClientMetadata } from '../utils';
 import {
   MAX_SUPPORTED_WIRE_VERSION,
   MAX_SUPPORTED_SERVER_VERSION,
   MIN_SUPPORTED_WIRE_VERSION,
   MIN_SUPPORTED_SERVER_VERSION
 } from './wire_protocol/constants';
-const AUTH_PROVIDERS: any = defaultAuthProviders();
+import type { Callback, CallbackTypedError, Document } from '../types';
+import type { EventEmitter } from 'events';
+import type { MongoDBInitialResponse } from './types';
 
-function connect(options: any, cancellationToken: any, callback: Function) {
+const AUTH_PROVIDERS = defaultAuthProviders();
+
+export function connect(
+  options: ConnectionOptions,
+  cancellationToken: EventEmitter | undefined,
+  callback: Callback<Connection>
+) {
   if (typeof cancellationToken === 'function') {
     callback = cancellationToken;
     cancellationToken = undefined;
   }
 
-  const ConnectionType = options && options.connectionType ? options.connectionType : Connection;
-  const family = options.family !== void 0 ? options.family : 0;
-  makeConnection(family, options, cancellationToken, (err?: any, socket?: any) => {
+  const ConnectionType: typeof Connection =
+    options && options.connectionType ? options.connectionType : Connection;
+  const family = options.family !== undefined ? options.family : 0;
+
+  makeConnection(family, options, cancellationToken!, (err, socket) => {
     if (err) {
-      callback(err, socket); // in the error case, `socket` is the originating error event name
+      callback(err, (socket as unknown) as Connection); // in the error case, `socket` is the originating error event name
       return;
     }
 
-    performInitialHandshake(new ConnectionType(socket, options), options, callback);
+    performInitialHandshake(new ConnectionType(socket!, options), options, callback);
   });
 }
 
-function checkSupportedServer(ismaster: any, options: any) {
+function checkSupportedServer(ismaster: MongoDBInitialResponse, options: ConnectionOptions) {
   const serverVersionHighEnough =
     ismaster &&
     typeof ismaster.maxWireVersion === 'number' &&
@@ -56,13 +66,17 @@ function checkSupportedServer(ismaster: any, options: any) {
   return new MongoError(message);
 }
 
-function performInitialHandshake(conn: any, options: any, _callback: any) {
-  const callback = function (err?: any, ret?: any) {
+function performInitialHandshake(
+  conn: Connection,
+  options: ConnectionOptions,
+  _callback: Callback
+) {
+  const callback = function (err, ret) {
     if (err && conn) {
       conn.destroy();
     }
     _callback(err, ret);
-  };
+  } as Callback;
 
   const credentials = options.credentials;
   if (credentials) {
@@ -73,7 +87,7 @@ function performInitialHandshake(conn: any, options: any, _callback: any) {
   }
 
   const authContext = new AuthContext(conn, credentials, options);
-  prepareHandshakeDocument(authContext, (err?: any, handshakeDoc?: any) => {
+  prepareHandshakeDocument(authContext, (err, handshakeDoc) => {
     if (err) {
       return callback(err);
     }
@@ -85,7 +99,7 @@ function performInitialHandshake(conn: any, options: any, _callback: any) {
     }
 
     const start = new Date().getTime();
-    conn.command('admin.$cmd', handshakeDoc, handshakeOptions, (err?: any, result?: any) => {
+    conn.command('admin.$cmd', handshakeDoc!, handshakeOptions, (err, result) => {
       if (err) {
         callback(err);
         return;
@@ -115,7 +129,7 @@ function performInitialHandshake(conn: any, options: any, _callback: any) {
 
         const resolvedCredentials = credentials.resolveAuthMechanism(response);
         const authProvider = AUTH_PROVIDERS[resolvedCredentials.mechanism];
-        authProvider.auth(authContext, (err: any) => {
+        authProvider.auth(authContext, err => {
           if (err) return callback(err);
           callback(undefined, conn);
         });
@@ -128,14 +142,21 @@ function performInitialHandshake(conn: any, options: any, _callback: any) {
   });
 }
 
-function prepareHandshakeDocument(authContext: any, callback: Function) {
+interface HandshakeDocument extends Document {
+  ismaster: boolean;
+  client: ClientMetadata;
+  compression: string[];
+  saslSupportedMechs?: string;
+}
+
+function prepareHandshakeDocument(authContext: AuthContext, callback: Callback<HandshakeDocument>) {
   const options = authContext.options;
   const compressors =
     options.compression && options.compression.compressors ? options.compression.compressors : [];
 
   const handshakeDoc = {
     ismaster: true,
-    client: options.metadata || makeClientMetadata(options),
+    client: options.metadata || makeClientMetadata(options as ClientMetadataOptions),
     compression: compressors
   };
 
@@ -177,7 +198,10 @@ const LEGAL_SSL_SOCKET_OPTIONS = [
   'rejectUnauthorized'
 ];
 
-function parseConnectOptions(family: any, options: any) {
+function parseConnectOptions(
+  family: number,
+  options: ConnectionOptions
+): Partial<ConnectionOptions> {
   const host = typeof options.host === 'string' ? options.host : 'localhost';
   if (host.indexOf('/') !== -1) {
     return { path: host };
@@ -186,15 +210,15 @@ function parseConnectOptions(family: any, options: any) {
   const result = {
     family,
     host,
-    port: typeof options.port === 'number' ? options.port : 27017,
+    port: options.port ?? 27017,
     rejectUnauthorized: false
   };
 
   return result;
 }
 
-function parseSslOptions(family: any, options: any) {
-  const result: any = parseConnectOptions(family, options);
+function parseSslOptions(family: number, options: ConnectionOptions) {
+  const result = parseConnectOptions(family, options);
   // Merge in valid SSL options
   for (const name in options) {
     if (options[name] != null && LEGAL_SSL_SOCKET_OPTIONS.indexOf(name) !== -1) {
@@ -219,8 +243,15 @@ function parseSslOptions(family: any, options: any) {
   return result;
 }
 
-const SOCKET_ERROR_EVENTS = new Set(['error', 'close', 'timeout', 'parseError']);
-function makeConnection(family: any, options: any, cancellationToken: any, _callback: any) {
+const socketErrorEventList = ['error', 'close', 'timeout', 'parseError'] as const;
+const SOCKET_ERROR_EVENTS = new Set(socketErrorEventList);
+
+function makeConnection(
+  family: number,
+  options: ConnectionOptions,
+  cancellationToken: EventEmitter,
+  _callback: CallbackTypedError<Error | MongoError, net.Socket | tls.TLSSocket>
+) {
   const useSsl = typeof options.ssl === 'boolean' ? options.ssl : false;
   const keepAlive = typeof options.keepAlive === 'boolean' ? options.keepAlive : true;
   let keepAliveInitialDelay =
@@ -240,23 +271,23 @@ function makeConnection(family: any, options: any, cancellationToken: any, _call
     keepAliveInitialDelay = Math.round(socketTimeout / 2);
   }
 
-  let socket: any;
-  const callback = function (err?: any, ret?: any) {
+  let socket: net.Socket | tls.TLSSocket;
+  const callback = function (err, ret) {
     if (err && socket) {
       socket.destroy();
     }
 
     _callback(err, ret);
-  };
+  } as CallbackTypedError<Error | MongoError, net.Socket | tls.TLSSocket>;
 
   try {
     if (useSsl) {
       socket = tls.connect(parseSslOptions(family, options));
-      if (typeof socket.disableRenegotiation === 'function') {
-        socket.disableRenegotiation();
+      if (typeof (socket as tls.TLSSocket).disableRenegotiation === 'function') {
+        (socket as tls.TLSSocket).disableRenegotiation();
       }
     } else {
-      socket = net.createConnection(parseConnectOptions(family, options));
+      socket = net.createConnection(parseConnectOptions(family, options) as net.NetConnectOpts);
     }
   } catch (err) {
     return callback(err);
@@ -267,10 +298,10 @@ function makeConnection(family: any, options: any, cancellationToken: any, _call
   socket.setNoDelay(noDelay);
 
   const connectEvent = useSsl ? 'secureConnect' : 'connect';
-  let cancellationHandler: any;
-  function errorHandler(eventName: any) {
-    return (err: any) => {
-      SOCKET_ERROR_EVENTS.forEach((event: any) => socket.removeAllListeners(event));
+  let cancellationHandler: (err: Error) => void;
+  function errorHandler(eventName: typeof socketErrorEventList[number] | 'cancel') {
+    return (err: Error) => {
+      SOCKET_ERROR_EVENTS.forEach(event => socket.removeAllListeners(event));
       if (cancellationHandler) {
         cancellationToken.removeListener('cancel', cancellationHandler);
       }
@@ -281,20 +312,20 @@ function makeConnection(family: any, options: any, cancellationToken: any, _call
   }
 
   function connectHandler() {
-    SOCKET_ERROR_EVENTS.forEach((event: any) => socket.removeAllListeners(event));
+    SOCKET_ERROR_EVENTS.forEach(event => socket.removeAllListeners(event));
     if (cancellationHandler) {
       cancellationToken.removeListener('cancel', cancellationHandler);
     }
 
-    if (socket.authorizationError && rejectUnauthorized) {
-      return callback(socket.authorizationError);
+    if ((socket as tls.TLSSocket).authorizationError && rejectUnauthorized) {
+      return callback((socket as tls.TLSSocket).authorizationError);
     }
 
     socket.setTimeout(socketTimeout);
-    callback(null, socket);
+    callback(undefined, socket);
   }
 
-  SOCKET_ERROR_EVENTS.forEach((event: any) => socket.once(event, errorHandler(event)));
+  SOCKET_ERROR_EVENTS.forEach(event => socket.once(event, errorHandler(event)));
   if (cancellationToken) {
     cancellationHandler = errorHandler('cancel');
     cancellationToken.once('cancel', cancellationHandler);
@@ -303,19 +334,17 @@ function makeConnection(family: any, options: any, cancellationToken: any, _call
   socket.once(connectEvent, connectHandler);
 }
 
-function connectionFailureError(type: any, err?: any) {
+function connectionFailureError(type: string, err?: Error) {
   switch (type) {
     case 'error':
       return new MongoNetworkError(err);
     case 'timeout':
-      return new MongoNetworkTimeoutError(`connection timed out`);
+      return new MongoNetworkTimeoutError('connection timed out');
     case 'close':
-      return new MongoNetworkError(`connection closed`);
+      return new MongoNetworkError('connection closed');
     case 'cancel':
-      return new MongoNetworkError(`connection establishment was cancelled`);
+      return new MongoNetworkError('connection establishment was cancelled');
     default:
-      return new MongoNetworkError(`unknown network error`);
+      return new MongoNetworkError('unknown network error');
   }
 }
-
-export = connect;

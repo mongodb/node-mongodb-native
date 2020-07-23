@@ -1,26 +1,34 @@
 import { parseServerType } from '../sdam/server_description';
+import type { MongoDBInitialResponse } from './types';
 
 const RESPONSE_FIELDS = [
   'minWireVersion',
   'maxWireVersion',
   'maxBsonObjectSize',
   'maxMessageSizeBytes',
-  'maxWriteBatchSize',
-  '__nodejs_mock_server__'
-];
+  'maxWriteBatchSize'
+] as const;
 
-class StreamDescription {
-  address: any;
-  type: any;
-  minWireVersion: any;
-  maxWireVersion: any;
-  maxBsonObjectSize: any;
-  maxMessageSizeBytes: any;
-  maxWriteBatchSize: any;
-  compressors: any;
-  compressor: any;
+export interface StreamDescriptionOptions {
+  compression: {
+    compressors: string[];
+  };
+}
 
-  constructor(address: any, options: any) {
+export class StreamDescription {
+  address: string;
+  type: string;
+  minWireVersion?: number;
+  maxWireVersion?: number;
+  maxBsonObjectSize: number;
+  maxMessageSizeBytes: number;
+  maxWriteBatchSize: number;
+  compressors: string[];
+  compressor?: string;
+
+  zlibCompressionLevel?: number;
+
+  constructor(address: string, options?: StreamDescriptionOptions) {
     this.address = address;
     this.type = parseServerType(null);
     this.minWireVersion = undefined;
@@ -34,20 +42,22 @@ class StreamDescription {
         : [];
   }
 
-  receiveResponse(response: any) {
+  receiveResponse(response: MongoDBInitialResponse) {
     this.type = parseServerType(response);
-    RESPONSE_FIELDS.forEach((field: any) => {
+    RESPONSE_FIELDS.forEach(field => {
       if (typeof response[field] !== 'undefined') {
-        (this as any)[field] = response[field];
+        this[field] = response[field];
+      }
+
+      // testing case
+      if ('__nodejs_mock_server__' in response) {
+        const that = (this as unknown) as { __nodejs_mock_server__: unknown };
+        that.__nodejs_mock_server__ = response['__nodejs_mock_server__'];
       }
     });
 
     if (response.compression) {
-      this.compressor = this.compressors.filter(
-        (c: any) => response.compression.indexOf(c) !== -1
-      )[0];
+      this.compressor = this.compressors.filter(c => response.compression?.includes(c))[0];
     }
   }
 }
-
-export { StreamDescription };

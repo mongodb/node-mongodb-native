@@ -2,8 +2,10 @@ import { ServerType } from '../../sdam/common';
 import { TopologyDescription } from '../../sdam/topology_description';
 import ReadPreference = require('../../read_preference');
 import { MongoError } from '../../error';
+import type { Document } from '../../types';
+import type { CommandOptions } from '../types';
 
-var getReadPreference = function (cmd: any, options: any) {
+export function getReadPreference(cmd: Document, options: CommandOptions) {
   // Default to command version of the readPreference
   var readPreference = cmd.readPreference || new ReadPreference('primary');
   // If we have an option readPreference override the command one
@@ -20,16 +22,16 @@ var getReadPreference = function (cmd: any, options: any) {
   }
 
   return readPreference;
-};
+}
 
-function applyCommonQueryOptions(queryOptions: any, options: any) {
+export function applyCommonQueryOptions(queryOptions: any, options: CommandOptions) {
   Object.assign(queryOptions, {
-    raw: typeof options.raw === 'boolean' ? options.raw : false,
-    promoteLongs: typeof options.promoteLongs === 'boolean' ? options.promoteLongs : true,
-    promoteValues: typeof options.promoteValues === 'boolean' ? options.promoteValues : true,
-    promoteBuffers: typeof options.promoteBuffers === 'boolean' ? options.promoteBuffers : false,
-    monitoring: typeof options.monitoring === 'boolean' ? options.monitoring : false,
-    fullResult: typeof options.fullResult === 'boolean' ? options.fullResult : false
+    raw: options.raw ?? false,
+    promoteLongs: options.promoteLongs ?? true,
+    promoteValues: options.promoteValues ?? true,
+    promoteBuffers: options.promoteBuffers ?? false,
+    monitoring: options.monitoring ?? false,
+    fullResult: options.fullResult ?? false
   });
 
   if (typeof options.socketTimeout === 'number') {
@@ -47,7 +49,7 @@ function applyCommonQueryOptions(queryOptions: any, options: any) {
   return queryOptions;
 }
 
-function isSharded(topologyOrServer: any) {
+export function isSharded(topologyOrServer: any) {
   if (topologyOrServer.type === 'mongos') return true;
   if (topologyOrServer.description && topologyOrServer.description.type === ServerType.Mongos) {
     return true;
@@ -62,5 +64,3 @@ function isSharded(topologyOrServer: any) {
 
   return false;
 }
-
-export { getReadPreference, applyCommonQueryOptions, isSharded };

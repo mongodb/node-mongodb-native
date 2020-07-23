@@ -1,6 +1,9 @@
 // Resolves the default auth mechanism according to
+
+import type { MongoDBInitialResponse } from '../types';
+
 // https://github.com/mongodb/specifications/blob/master/source/auth/auth.rst
-function getDefaultAuthMechanism(ismaster: any) {
+function getDefaultAuthMechanism(ismaster?: MongoDBInitialResponse) {
   if (ismaster) {
     // If ismaster contains saslSupportedMechs, use scram-sha-256
     // if it is available, else scram-sha-1
@@ -31,11 +34,11 @@ function getDefaultAuthMechanism(ismaster: any) {
  * @property {object} [mechanismProperties] Special properties used by some types of auth mechanisms
  */
 class MongoCredentials {
-  username: any;
-  password: any;
-  source: any;
-  mechanism: any;
-  mechanismProperties: any;
+  readonly username: string;
+  readonly password: string;
+  readonly source: string;
+  readonly mechanism: string;
+  readonly mechanismProperties: any;
 
   /**
    * Creates a new MongoCredentials object
@@ -95,7 +98,7 @@ class MongoCredentials {
    * @param {object} [ismaster] An ismaster response from the server
    * @returns {MongoCredentials}
    */
-  resolveAuthMechanism(ismaster?: object): MongoCredentials {
+  resolveAuthMechanism(ismaster?: MongoDBInitialResponse): MongoCredentials {
     // If the mechanism is not "default", then it does not need to be resolved
     if (this.mechanism.match(/DEFAULT/i)) {
       return new MongoCredentials({

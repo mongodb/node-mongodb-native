@@ -1,16 +1,17 @@
-import MongoCR = require('./mongocr');
-import X509 = require('./x509');
-import Plain = require('./plain');
-import GSSAPI = require('./gssapi');
+import { MongoCR } from './mongocr';
+import { X509 } from './x509';
+import { Plain } from './plain';
+import { GSSAPI } from './gssapi';
 import { ScramSHA1, ScramSHA256 } from './scram';
-import MongoDBAWS = require('./mongodb_aws');
+import { MongoDBAWS } from './mongodb_aws';
+import type { AuthProvider } from './auth_provider';
 
 /**
  * Returns the default authentication providers.
  *
- * @returns {object} a mapping of auth names to auth types
+ * @returns {Record<string, AuthProvider>} a mapping of auth names to auth types
  */
-function defaultAuthProviders(): object {
+function defaultAuthProviders(): Record<string, AuthProvider> {
   return {
     'mongodb-aws': new MongoDBAWS(),
     mongocr: new MongoCR(),

@@ -1,8 +1,24 @@
-import { AuthProvider } from './auth_provider';
+import { AuthProvider, AuthContext } from './auth_provider';
 import { Kerberos, kModuleError } from '../../deps';
+import type { Callback } from '../../types';
 
-class GSSAPI extends AuthProvider {
-  auth(authContext: any, callback: Function) {
+interface MongoAuthProcessConstructor {
+  new (host: string, port: number, serviceName: string, options: any): MongoAuthProcessLike;
+}
+
+interface MongoAuthProcessLike {
+  host: string;
+  port: number;
+  serviceName: string;
+  canonicalizeHostName: boolean;
+  retries: number;
+
+  init: (username: string, password: string, callback: Callback) => void;
+  transition: (payload: any, callback: Callback) => void;
+}
+
+export class GSSAPI extends AuthProvider {
+  auth(authContext: AuthContext, callback: Callback) {
     if (Kerberos[kModuleError]) {
       callback(Kerberos[kModuleError]);
       return;
@@ -17,7 +33,7 @@ class GSSAPI extends AuthProvider {
       mechanismProperties['gssapiServiceName'] ||
       'mongodb';
 
-    const MongoAuthProcess = Kerberos.processes.MongoAuthProcess;
+    const MongoAuthProcess: MongoAuthProcessConstructor = Kerberos.processes.MongoAuthProcess;
     const authProcess = new MongoAuthProcess(
       connection.host,
       connection.port,
@@ -25,9 +41,9 @@ class GSSAPI extends AuthProvider {
       mechanismProperties
     );
 
-    authProcess.init(username, password, (err: any) => {
+    authProcess.init(username, password, err => {
       if (err) return callback(err, false);
-      authProcess.transition('', (err?: any, payload?: any) => {
+      authProcess.transition('', (err, payload) => {
         if (err) return callback(err, false);
 
         const command = {
@@ -37,11 +53,11 @@ class GSSAPI extends AuthProvider {
           autoAuthorize: 1
         };
 
-        connection.command('$external.$cmd', command, (err?: any, result?: any) => {
+        connection.command('$external.$cmd', command, {}, (err, result) => {
           if (err) return callback(err, false);
 
           const doc = result.result;
-          authProcess.transition(doc.payload, (err?: any, payload?: any) => {
+          authProcess.transition(doc.payload, (err, payload) => {
             if (err) return callback(err, false);
             const command = {
               saslContinue: 1,
@@ -49,11 +65,11 @@ class GSSAPI extends AuthProvider {
               payload
             };
 
-            connection.command('$external.$cmd', command, (err?: any, result?: any) => {
+            connection.command('$external.$cmd', command, {}, (err, result) => {
               if (err) return callback(err, false);
 
               const doc = result.result;
-              authProcess.transition(doc.payload, (err?: any, payload?: any) => {
+              authProcess.transition(doc.payload, (err, payload) => {
                 if (err) return callback(err, false);
                 const command = {
                   saslContinue: 1,
@@ -61,13 +77,13 @@ class GSSAPI extends AuthProvider {
                   payload
                 };
 
-                connection.command('$external.$cmd', command, (err?: any, result?: any) => {
+                connection.command('$external.$cmd', command, {}, (err, result) => {
                   if (err) return callback(err, false);
 
                   const response = result.result;
-                  authProcess.transition(null, (err: any) => {
+                  authProcess.transition(null, err => {
                     if (err) return callback(err, null);
-                    callback(null, response);
+                    callback(undefined, response);
                   });
                 });
               });
@@ -78,5 +94,3 @@ class GSSAPI extends AuthProvider {
     });
   }
 }
-
-export = GSSAPI;

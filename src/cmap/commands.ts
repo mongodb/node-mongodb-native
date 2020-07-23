@@ -2,6 +2,9 @@ import ReadPreference = require('../read_preference');
 import * as BSON from '../bson';
 import { databaseNamespace } from '../utils';
 import { OP_QUERY, OP_GETMORE, OP_KILL_CURSORS, OP_MSG } from './wire_protocol/constants';
+import type { Long } from 'bson';
+import type { Connection } from './connection';
+import type { Document } from '../types';
 
 // Incrementing request id
 let _requestId = 0;
@@ -21,32 +24,33 @@ const QUERY_FAILURE = 2;
 const SHARD_CONFIG_STALE = 4;
 const AWAIT_CAPABLE = 8;
 
+export type CommandTypes = Query | Msg | GetMore | KillCursor;
+
 /**************************************************************
  * QUERY
  **************************************************************/
-class Query {
-  ns: any;
+export class Query {
+  ns: string;
   query: any;
-  numberToSkip: any;
-  numberToReturn: any;
-  returnFieldSelector: any;
-  requestId: any;
+  numberToSkip: number;
+  numberToReturn: number;
+  returnFieldSelector?: any;
+  requestId: number;
   pre32Limit: any;
   serializeFunctions: any;
-  ignoreUndefined: any;
-  maxBsonSize: any;
-  checkKeys: any;
-  batchSize: any;
-  tailable: any;
-  slaveOk: any;
-  oplogReplay: any;
-  noCursorTimeout: any;
-  awaitData: any;
-  exhaust: any;
-  partial: any;
+  ignoreUndefined: boolean;
+  maxBsonSize: number;
+  checkKeys: boolean;
+  batchSize: number;
+  tailable: boolean;
+  slaveOk: boolean;
+  oplogReplay: boolean;
+  noCursorTimeout: boolean;
+  awaitData: boolean;
+  exhaust: boolean;
+  partial: boolean;
 
-  constructor(ns: any, query: any, options: any) {
-    var self = this;
+  constructor(ns: string, query: Document, options: any) {
     // Basic options needed to be passed in
     if (ns == null) throw new Error('ns must be specified for query');
     if (query == null) throw new Error('query must be specified for query');
@@ -70,17 +74,15 @@ class Query {
     this.pre32Limit = options.pre32Limit;
 
     // Serialization option
-    this.serializeFunctions =
-      typeof options.serializeFunctions === 'boolean' ? options.serializeFunctions : false;
-    this.ignoreUndefined =
-      typeof options.ignoreUndefined === 'boolean' ? options.ignoreUndefined : false;
+    this.serializeFunctions = options.serializeFunctions ?? false;
+    this.ignoreUndefined = options.ignoreUndefined ?? false;
     this.maxBsonSize = options.maxBsonSize || 1024 * 1024 * 16;
-    this.checkKeys = typeof options.checkKeys === 'boolean' ? options.checkKeys : true;
-    this.batchSize = self.numberToReturn;
+    this.checkKeys = options.checkKeys ?? true;
+    this.batchSize = this.numberToReturn;
 
     // Flags
     this.tailable = false;
-    this.slaveOk = typeof options.slaveOk === 'boolean' ? options.slaveOk : false;
+    this.slaveOk = options.slaveOk ?? false;
     this.oplogReplay = false;
     this.noCursorTimeout = false;
     this.awaitData = false;
@@ -244,13 +246,13 @@ class Query {
 /**************************************************************
  * GETMORE
  **************************************************************/
-class GetMore {
-  numberToReturn: any;
-  requestId: any;
-  ns: any;
-  cursorId: any;
+export class GetMore {
+  numberToReturn: number;
+  requestId: number;
+  ns: string;
+  cursorId: Long;
 
-  constructor(ns: any, cursorId: any, opts: any) {
+  constructor(ns: string, cursorId: Long, opts: any) {
     opts = opts || {};
     this.numberToReturn = opts.numberToReturn || 0;
     this.requestId = _requestId++;
@@ -338,12 +340,12 @@ class GetMore {
 /**************************************************************
  * KILLCURSOR
  **************************************************************/
-class KillCursor {
-  ns: any;
-  requestId: any;
-  cursorIds: any;
+export class KillCursor {
+  ns: string;
+  requestId: number;
+  cursorIds: Long[];
 
-  constructor(ns: any, cursorIds: any) {
+  constructor(ns: string, cursorIds: Long[]) {
     this.ns = ns;
     this.requestId = _requestId++;
     this.cursorIds = cursorIds;
@@ -425,31 +427,39 @@ class KillCursor {
   }
 }
 
-class Response {
-  parsed: boolean;
-  raw: any;
-  data: any;
-  opts: any;
-  length: any;
-  requestId: any;
-  responseTo: any;
-  opCode: any;
-  fromCompressed: any;
-  responseFlags: any;
-  cursorId: any;
-  startingFrom: any;
-  numberReturned: any;
-  documents: any;
-  cursorNotFound: any;
-  queryFailure: any;
-  shardConfigStale: any;
-  awaitCapable: any;
-  promoteLongs: any;
-  promoteValues: any;
-  promoteBuffers: any;
-  index: any;
+export interface MessageHeader {
+  length: number;
+  requestId: number;
+  responseTo: number;
+  opCode: number;
+  fromCompressed?: boolean;
+}
 
-  constructor(message: any, msgHeader: any, msgBody: any, opts: any) {
+export class Response {
+  parsed: boolean;
+  raw: Buffer;
+  data: Buffer;
+  opts: any;
+  length: number;
+  requestId: number;
+  responseTo: number;
+  opCode: number;
+  fromCompressed?: boolean;
+  responseFlags: number;
+  cursorId: Long;
+  startingFrom: number;
+  numberReturned: number;
+  documents: (Document | Buffer)[];
+  cursorNotFound: boolean;
+  queryFailure: boolean;
+  shardConfigStale: boolean;
+  awaitCapable: boolean;
+  promoteLongs: boolean;
+  promoteValues: boolean;
+  promoteBuffers: boolean;
+  index?: number;
+
+  constructor(message: Buffer, msgHeader: MessageHeader, msgBody: Buffer, opts: any) {
     opts = opts || { promoteLongs: true, promoteValues: true, promoteBuffers: false };
     this.parsed = false;
     this.raw = message;
@@ -477,9 +487,9 @@ class Response {
     this.queryFailure = (this.responseFlags & QUERY_FAILURE) !== 0;
     this.shardConfigStale = (this.responseFlags & SHARD_CONFIG_STALE) !== 0;
     this.awaitCapable = (this.responseFlags & AWAIT_CAPABLE) !== 0;
-    this.promoteLongs = typeof opts.promoteLongs === 'boolean' ? opts.promoteLongs : true;
-    this.promoteValues = typeof opts.promoteValues === 'boolean' ? opts.promoteValues : true;
-    this.promoteBuffers = typeof opts.promoteBuffers === 'boolean' ? opts.promoteBuffers : false;
+    this.promoteLongs = opts.promoteLongs ?? true;
+    this.promoteValues = opts.promoteValues ?? true;
+    this.promoteBuffers = opts.promoteBuffers ?? false;
   }
 
   isParsed() {
@@ -492,17 +502,12 @@ class Response {
     options = options || {};
 
     // Allow the return of raw documents instead of parsing
-    var raw = options.raw || false;
-    var documentsReturnedIn = options.documentsReturnedIn || null;
-    var promoteLongs =
-      typeof options.promoteLongs === 'boolean' ? options.promoteLongs : this.opts.promoteLongs;
-    var promoteValues =
-      typeof options.promoteValues === 'boolean' ? options.promoteValues : this.opts.promoteValues;
-    var promoteBuffers =
-      typeof options.promoteBuffers === 'boolean'
-        ? options.promoteBuffers
-        : this.opts.promoteBuffers;
-    var bsonSize;
+    let raw = options.raw || false;
+    let documentsReturnedIn = options.documentsReturnedIn || null;
+    let promoteLongs = options.promoteLongs ?? this.opts.promoteLongs;
+    let promoteValues = options.promoteValues ?? this.opts.promoteValues;
+    let promoteBuffers = options.promoteBuffers ?? this.opts.promoteBuffers;
+    let bsonSize;
 
     // Set up the options
     const _options: any = {
@@ -544,7 +549,7 @@ class Response {
       fieldsAsRaw[documentsReturnedIn] = true;
       _options.fieldsAsRaw = fieldsAsRaw;
 
-      const doc = BSON.deserialize(this.documents[0], _options);
+      const doc = BSON.deserialize(this.documents[0] as any, _options);
       this.documents = [doc];
     }
 
@@ -585,20 +590,20 @@ const OPTS_CHECKSUM_PRESENT = 1;
 const OPTS_MORE_TO_COME = 2;
 const OPTS_EXHAUST_ALLOWED = 1 << 16;
 
-class Msg {
-  ns: any;
-  command: any;
+export class Msg {
+  ns: string;
+  command: Document;
   options: any;
-  requestId: any;
-  serializeFunctions: any;
-  ignoreUndefined: any;
-  checkKeys: any;
-  maxBsonSize: any;
-  checksumPresent: any;
-  moreToCome: any;
-  exhaustAllowed: any;
+  requestId: number;
+  serializeFunctions: boolean;
+  ignoreUndefined: boolean;
+  checkKeys: boolean;
+  maxBsonSize: number;
+  checksumPresent: boolean;
+  moreToCome: boolean;
+  exhaustAllowed: boolean;
 
-  constructor(ns: any, command: any, options: any) {
+  constructor(ns: string, command: Document, options: any) {
     // Basic options needed to be passed in
     if (command == null) throw new Error('query must be specified for query');
 
@@ -618,18 +623,15 @@ class Msg {
     this.requestId = options.requestId ? options.requestId : Msg.getRequestId();
 
     // Serialization option
-    this.serializeFunctions =
-      typeof options.serializeFunctions === 'boolean' ? options.serializeFunctions : false;
-    this.ignoreUndefined =
-      typeof options.ignoreUndefined === 'boolean' ? options.ignoreUndefined : false;
-    this.checkKeys = typeof options.checkKeys === 'boolean' ? options.checkKeys : false;
+    this.serializeFunctions = options.serializeFunctions ?? false;
+    this.ignoreUndefined = options.ignoreUndefined ?? false;
+    this.checkKeys = options.checkKeys ?? false;
     this.maxBsonSize = options.maxBsonSize || 1024 * 1024 * 16;
 
     // flags
     this.checksumPresent = false;
     this.moreToCome = options.moreToCome || false;
-    this.exhaustAllowed =
-      typeof options.exhaustAllowed === 'boolean' ? options.exhaustAllowed : false;
+    this.exhaustAllowed = options.exhaustAllowed ?? false;
   }
 
   toBin() {
@@ -692,27 +694,27 @@ class Msg {
   }
 }
 
-class BinMsg {
-  parsed: any;
-  raw: any;
-  data: any;
+export class BinMsg {
+  parsed: boolean;
+  raw: Buffer;
+  data: Buffer;
   opts: any;
-  length: any;
-  requestId: any;
-  responseTo: any;
-  opCode: any;
-  fromCompressed: any;
-  responseFlags: any;
-  checksumPresent: any;
-  moreToCome: any;
-  exhaustAllowed: any;
-  promoteLongs: any;
-  promoteValues: any;
-  promoteBuffers: any;
-  documents: any;
-  index: any;
+  length: number;
+  requestId: number;
+  responseTo: number;
+  opCode: number;
+  fromCompressed?: boolean;
+  responseFlags: number;
+  checksumPresent: boolean;
+  moreToCome: boolean;
+  exhaustAllowed: boolean;
+  promoteLongs: boolean;
+  promoteValues: boolean;
+  promoteBuffers: boolean;
+  documents: Document[];
+  index?: number;
 
-  constructor(message: any, msgHeader: any, msgBody: any, opts: any) {
+  constructor(message: any, msgHeader: MessageHeader, msgBody: any, opts: any) {
     opts = opts || { promoteLongs: true, promoteValues: true, promoteBuffers: false };
     this.parsed = false;
     this.raw = message;
@@ -731,9 +733,9 @@ class BinMsg {
     this.checksumPresent = (this.responseFlags & OPTS_CHECKSUM_PRESENT) !== 0;
     this.moreToCome = (this.responseFlags & OPTS_MORE_TO_COME) !== 0;
     this.exhaustAllowed = (this.responseFlags & OPTS_EXHAUST_ALLOWED) !== 0;
-    this.promoteLongs = typeof opts.promoteLongs === 'boolean' ? opts.promoteLongs : true;
-    this.promoteValues = typeof opts.promoteValues === 'boolean' ? opts.promoteValues : true;
-    this.promoteBuffers = typeof opts.promoteBuffers === 'boolean' ? opts.promoteBuffers : false;
+    this.promoteLongs = opts.promoteLongs ?? true;
+    this.promoteValues = opts.promoteValues ?? true;
+    this.promoteBuffers = opts.promoteBuffers ?? false;
 
     this.documents = [];
   }
@@ -751,14 +753,9 @@ class BinMsg {
     // Allow the return of raw documents instead of parsing
     const raw = options.raw || false;
     const documentsReturnedIn = options.documentsReturnedIn || null;
-    const promoteLongs =
-      typeof options.promoteLongs === 'boolean' ? options.promoteLongs : this.opts.promoteLongs;
-    const promoteValues =
-      typeof options.promoteValues === 'boolean' ? options.promoteValues : this.opts.promoteValues;
-    const promoteBuffers =
-      typeof options.promoteBuffers === 'boolean'
-        ? options.promoteBuffers
-        : this.opts.promoteBuffers;
+    const promoteLongs = options.promoteLongs ?? this.opts.promoteLongs;
+    const promoteValues = options.promoteValues ?? this.opts.promoteValues;
+    const promoteBuffers = options.promoteBuffers ?? this.opts.promoteBuffers;
 
     // Set up the options
     const _options = {
@@ -785,7 +782,7 @@ class BinMsg {
       fieldsAsRaw[documentsReturnedIn] = true;
       _options.fieldsAsRaw = fieldsAsRaw;
 
-      const doc = BSON.deserialize(this.documents[0], _options);
+      const doc = BSON.deserialize((this.documents[0] as unknown) as Buffer, _options);
       this.documents = [doc];
     }
 
@@ -796,17 +793,17 @@ class BinMsg {
 /**
  * Creates a new CommandResult instance
  *
- * @class
  * @param {object} result CommandResult object
  * @param {Connection} connection A connection instance associated with this result
  * @returns {CommandResult} A cursor instance
  */
-class CommandResult {
-  result: any;
-  connection: any;
+export class CommandResult {
+  ok?: number;
+  result: Document;
+  connection: Connection;
   message: any;
 
-  constructor(result: any, connection: any, message: any) {
+  constructor(result: Document, connection: Connection, message: any) {
     this.result = result;
     this.connection = connection;
     this.message = message;
@@ -818,7 +815,7 @@ class CommandResult {
    * @function
    * @returns {object}
    */
-  toJSON(): object {
+  toJSON(): Document {
     let result = Object.assign({}, this, this.result);
     delete result.message;
     return result;
@@ -834,5 +831,3 @@ class CommandResult {
     return JSON.stringify(this.toJSON());
   }
 }
-
-export { Query, GetMore, Response, KillCursor, Msg, BinMsg, CommandResult };

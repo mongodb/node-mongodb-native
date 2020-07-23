@@ -1,8 +1,9 @@
 import { Binary } from '../../bson';
-import { AuthProvider } from './auth_provider';
+import { AuthProvider, AuthContext } from './auth_provider';
+import type { Callback } from '../../types';
 
-class Plain extends AuthProvider {
-  auth(authContext: any, callback: Function) {
+export class Plain extends AuthProvider {
+  auth(authContext: AuthContext, callback: Callback) {
     const { connection, credentials } = authContext;
     const username = credentials.username;
     const password = credentials.password;
@@ -15,8 +16,6 @@ class Plain extends AuthProvider {
       autoAuthorize: 1
     };
 
-    connection.command('$external.$cmd', command, callback);
+    connection.command('$external.$cmd', command, {}, callback);
   }
 }
-
-export = Plain;

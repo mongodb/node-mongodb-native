@@ -1,9 +1,11 @@
 import { KillCursor } from '../commands';
 import { maxWireVersion, collectionNamespace } from '../../utils';
-import command = require('./command');
+import { command } from './command';
 import { MongoError, MongoNetworkError } from '../../error';
+import type { Server } from '../../sdam/server';
+import type { Callback } from '../../types';
 
-function killCursors(server: any, ns: any, cursorState: any, callback: Function) {
+export function killCursors(server: Server, ns: string, cursorState: any, callback: Callback) {
   callback = typeof callback === 'function' ? callback : () => {};
   const cursorId = cursorState.cursorId;
 
@@ -12,8 +14,9 @@ function killCursors(server: any, ns: any, cursorState: any, callback: Function)
     const killCursor = new KillCursor(ns, [cursorId]);
     const options = {
       immediateRelease: true,
-      noResponse: true
-    } as any;
+      noResponse: true,
+      session: undefined
+    };
 
     if (typeof cursorState.session === 'object') {
       options.session = cursorState.session;
@@ -40,9 +43,11 @@ function killCursors(server: any, ns: any, cursorState: any, callback: Function)
   };
 
   const options = {} as any;
-  if (typeof cursorState.session === 'object') options.session = cursorState.session;
+  if (typeof cursorState.session === 'object') {
+    options.session = cursorState.session;
+  }
 
-  command(server, ns, killCursorCmd, options, (err?: any, result?: any) => {
+  command(server, ns, killCursorCmd, options, (err, result) => {
     if (err) {
       return callback(err);
     }
@@ -58,8 +63,6 @@ function killCursors(server: any, ns: any, cursorState: any, callback: Function)
       );
     }
 
-    callback(null, response.documents[0]);
+    callback(undefined, response.documents[0]);
   });
 }
-
-export = killCursors;

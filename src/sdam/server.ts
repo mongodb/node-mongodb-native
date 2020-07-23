@@ -29,6 +29,7 @@ import {
   isNodeShuttingDownError,
   isNetworkErrorBeforeHandshake
 } from '../error';
+import type { MongoDBInitialResponse } from '../cmap/types';
 
 // Used for filtering out fields for logging
 const DEBUG_FIELDS = [
@@ -75,6 +76,7 @@ const kMonitor = Symbol('monitor');
 class Server extends EventEmitter {
   s: any;
   clusterTime: any;
+  ismaster?: MongoDBInitialResponse;
   [kMonitor]: any;
 
   /**
