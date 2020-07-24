@@ -25,15 +25,6 @@ import PromiseProvider = require('./promise_provider');
  * @property {string} [platform] Optional platform information
  */
 
-/**
- * Configuration options for drivers wrapping the node driver.
- *
- * @typedef {object} DriverInfoOptions
- * @property {string} [name] The name of the driver
- * @property {string} [version] The version of the driver
- * @property {string} [platform] Optional platform information
- */
-
 interface MongoClient {
   logout(options: any, callback: Function): void;
 }
