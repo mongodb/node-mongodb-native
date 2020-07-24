@@ -256,6 +256,22 @@ class MongoClient extends EventEmitter {
    * @param {object} [options] Optional settings.
    * @param {boolean} [options.noListener=false] Do not make the db an event listener to the original connection.
    * @param {boolean} [options.returnNonCachedInstance=false] Control if you want to return a cached instance or have a new one created
+   * @param {string} [options.authSource] If the database authentication is dependent on another databaseName.
+   * @param {(number|string)} [options.w] The write concern.
+   * @param {number} [options.wtimeout] The write concern timeout.
+   * @param {boolean} [options.j=false] Specify a journal write concern.
+   * @param {boolean} [options.forceServerObjectId=false] Force server to assign _id values instead of driver.
+   * @param {boolean} [options.serializeFunctions=false] Serialize functions on any object.
+   * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
+   * @param {boolean} [options.raw=false] Return document results as raw BSON buffers.
+   * @param {boolean} [options.promoteLongs=true] Promotes Long values to number if they fit inside the 53 bits resolution.
+   * @param {boolean} [options.promoteBuffers=false] Promotes Binary BSON values to native Node Buffers.
+   * @param {boolean} [options.promoteValues=true] Promotes BSON values to native types where possible, set to false to only receive wrapper types.
+   * @param {number} [options.bufferMaxEntries=-1] Sets a cap on how many operations the driver will buffer up before giving up on getting a working connection, default is -1 which is unlimited.
+   * @param {(ReadPreference|string)} [options.readPreference] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
+   * @param {object} [options.pkFactory] A primary key factory object for generation of custom _id keys.
+   * @param {object} [options.readConcern] Specify a read concern for the collection. (only MongoDB 3.2 or higher supported)
+   * @param {ReadConcernLevel} [options.readConcern.level='local'] Specify a read concern level for the collection operations (only MongoDB 3.2 or higher supported)
    * @returns {Db}
    */
   db(dbName: string, options?: any): Db {
