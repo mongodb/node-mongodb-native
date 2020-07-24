@@ -59,7 +59,7 @@ describe('MongoClientOptions', () => {
       useUnifiedTopology: false,
       autoEncryption: undefined,
       readConcern: { level: 'local' },
-      writeConcern: { j: undefined, w: 1, wtimeout: undefined }
+      writeConcern: { w: 1 }
     };
     it('should assert all defaults ', () => {
       const options = MongoClientOptions.parse('mongodb://localhost:8080');

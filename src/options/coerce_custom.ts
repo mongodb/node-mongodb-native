@@ -219,7 +219,6 @@ export class CoerceCustom {
       ...options.compressors,
       ...(options.compression ? [options.compression] : [])
     ];
-    const writeConcern = { j: options.journal, w: options.w, wtimeout: wtimeoutMS };
     return {
       ...options,
       ...C.spreadValue(['appName', 'appname'] as const, appName),
@@ -233,7 +232,11 @@ export class CoerceCustom {
       ...C.spreadValue('readConcern', readConcern),
       ...C.spreadValue('compressors', compressors),
       ...C.spreadValue('compression', compressors[0]),
-      writeConcern
+      writeConcern: {
+        ...C.spreadValue('journal', options.journal),
+        ...C.spreadValue('w', options.w),
+        ...C.spreadValue('wtimeout', wtimeoutMS)
+      }
     };
   };
 }
