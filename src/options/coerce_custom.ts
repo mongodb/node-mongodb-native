@@ -9,8 +9,8 @@ import {
 } from './types';
 import { Coerce as C, CoerceMatch, CoerceOptions } from './coerce';
 
-// prettier-ignore
 export class CoerceCustom {
+  // prettier-ignore
   /** ensure object is in the shape of a ReadPreference */
   static readPreference = C.warn(C.objectExact(match => ({
     ...match('mode', C.default(C.enum({ ReadPreferenceMode }), 'primary')),
@@ -20,24 +20,33 @@ export class CoerceCustom {
       ...match('enable', C.require(C.boolean))
     })))
   })));
-  static readPreferenceOption = C.union(C.enum({ ReadPreferenceMode }), CoerceCustom.readPreference);
+
+  static readPreferenceOption = C.default(
+    C.union(C.enum({ ReadPreferenceMode }), CoerceCustom.readPreference),
+    ReadPreferenceMode.primary
+  );
+
+  // prettier-ignore
   static authMechanismProperties = C.warn(C.objectExact(match => ({
     ...match('SERVICE_NAME', C.string),
     ...match('CANONICALIZE_HOST_NAME', C.boolean),
     ...match('SERVICE_REALM', C.string),
-  })))
-  static authMechanismPropertiesString = C.compose(C.keyValue, CoerceCustom.authMechanismProperties)
+  })));
+
+  static authMechanismPropertiesString = C.compose(
+    C.keyValue,
+    CoerceCustom.authMechanismProperties
+  );
+
   static authMechanismPropertiesOption = C.union(
     CoerceCustom.authMechanismPropertiesString,
     CoerceCustom.authMechanismProperties
   );
 
   static compressorsString = C.compose(C.commaSeparated, C.array(C.enum({ Compressor })));
-  static compressors = C.union(
-    CoerceCustom.compressorsString,
-    C.array(C.enum({ Compressor }))
-  );
-  static uriOptionsDef= (match: CoerceMatch) => ({
+  static compressors = C.union(CoerceCustom.compressorsString, C.array(C.enum({ Compressor })));
+
+  static uriOptionsDef = (match: CoerceMatch) => ({
     ...match('replicaSet', C.string),
     ...match('tls', C.default(C.boolean, false)),
     ...match('ssl', C.deprecate(C.default(C.boolean, false), 'tls')),
@@ -60,7 +69,7 @@ export class CoerceCustom {
     ...match('wtimeoutMS', C.number),
     ...match('journal', C.boolean),
     ...match('readConcernLevel', C.default(C.enum({ ReadConcernLevel }), ReadConcernLevel.local)),
-    ...match('readPreference', C.default(CoerceCustom.readPreferenceOption, ReadPreferenceMode.primary)),
+    ...match('readPreference', CoerceCustom.readPreferenceOption),
     ...match('maxStalenessSeconds', C.number),
     ...match('readPreferenceTags', C.tags),
     ...match('authSource', C.string),
@@ -75,7 +84,8 @@ export class CoerceCustom {
     ...match('retryWrites', C.default(C.boolean, true)),
     ...match('retryWrites', C.default(C.boolean, true)),
     ...match('directConnection', C.default(C.boolean, true))
-  })
+  });
+
   static driverOptionsDef = (match: CoerceMatch) => ({
     ...match('poolSize', C.default(C.number, 5)),
     ...match('sslValidate', C.default(C.boolean, false)),
@@ -125,58 +135,74 @@ export class CoerceCustom {
     ...match('useNewUrlParser', C.default(C.boolean, true)),
     ...match('useUnifiedTopology', C.default(C.boolean, false)),
     ...match('autoEncryption', C.any),
-    ...match('driverInfo', CoerceCustom.driverInfo),
-  })
+    ...match('driverInfo', CoerceCustom.driverInfo)
+  });
+
+  // prettier-ignore
   static readConcern = C.warn(C.objectExact(match => ({
     ...match('level', C.default(C.enum({ ReadConcernLevel }), ReadConcernLevel.local))
-  })))
+  })));
+
+  // prettier-ignore
   static auth = C.warn(C.objectExact(match => ({
     ...match('user', C.string),
     ...match('pass', C.string)
-  })))
+  })));
+
+  // prettier-ignore
   static driverInfo = C.warn(C.objectExact(match => ({
     ...match('name', C.string),
     ...match('version', C.string),
     ...match('platform', C.string)
-  })))
+  })));
 
   static uriOptions = (uriOptions: UriOptions, options?: CoerceOptions) => {
     return C.require(C.object(CoerceCustom.uriOptionsDef))(uriOptions, options);
-  }
-  static clientOptions = (clientOptions: ClientOptions) => {
-    return C.require(C.objectExact(CoerceCustom.uriOptionsDef, CoerceCustom.driverOptionsDef))(clientOptions);
-  }
+  };
 
-  static readPreferenceFromOptions (options?: ReturnType<typeof CoerceCustom['clientOptions']>) {
+  static clientOptions = (clientOptions: ClientOptions) => {
+    return C.require(C.objectExact(CoerceCustom.uriOptionsDef, CoerceCustom.driverOptionsDef))(
+      clientOptions
+    );
+  };
+
+  static readPreferenceFromOptions(options?: ReturnType<typeof CoerceCustom['clientOptions']>) {
     const tags = (() => {
-      const a = (typeof options?.readPreference !== 'string' && options?.readPreference?.tags) || [];
-      const b = options?.readPreferenceTags || []
+      const a =
+        (typeof options?.readPreference !== 'string' && options?.readPreference?.tags) || [];
+      const b = options?.readPreferenceTags || [];
       return [...a, ...b];
-    })()
+    })();
 
     const hedge = (() => {
       if (typeof options?.readPreference === 'string') return undefined;
       return options?.readPreference?.hedge;
-    })()
+    })();
 
     const mode = (() => {
-      if (typeof options?.readPreference === 'string') return options.readPreference
-      return options?.readPreference?.mode
-    })()
+      if (typeof options?.readPreference === 'string') return options.readPreference;
+      return options?.readPreference?.mode;
+    })();
 
     const maxStalenessSeconds = (() => {
       if (!options) return undefined;
       if (typeof options.readPreference !== 'string') {
-        return options.readPreference?.maxStalenessSeconds || options.maxStalenessSeconds
+        return options.readPreference?.maxStalenessSeconds || options.maxStalenessSeconds;
       }
-      return options.maxStalenessSeconds
-    })()
+      return options.maxStalenessSeconds;
+    })();
 
-    return C.require(CoerceCustom.readPreference)({ mode, hedge, tags, maxStalenessSeconds }, { warn: false } )
+    return C.require(CoerceCustom.readPreference)(
+      { mode, hedge, tags, maxStalenessSeconds },
+      { warn: false }
+    );
   }
 
   static mongoClientOptions = (uriOptions: UriOptions, clientOptions: ClientOptions) => {
-    const parsedUriOptions = CoerceCustom.uriOptions(uriOptions, { applyDefaults: false, warnDeprecated: false });
+    const parsedUriOptions = CoerceCustom.uriOptions(uriOptions, {
+      applyDefaults: false,
+      warnDeprecated: false
+    });
     const options = CoerceCustom.clientOptions(Object.assign({}, parsedUriOptions, clientOptions));
     // standardizes "tandem" or "alias" properties
     const appName = options.appName ?? options.appname;
@@ -189,8 +215,11 @@ export class CoerceCustom {
     const local: string = ReadConcernLevel.local;
     const readConcernLevel = C.collide(local)(options.readConcern?.level, options.readConcernLevel);
     const readConcern = { ...options.readConcern, level: readConcernLevel };
-    const compressors = [ ...options.compressors, ...(options.compression ? [options.compression]: []) ];
-    const writeConcern = { j: options.journal, w: options.w, wtimeout: wtimeoutMS }
+    const compressors = [
+      ...options.compressors,
+      ...(options.compression ? [options.compression] : [])
+    ];
+    const writeConcern = { j: options.journal, w: options.w, wtimeout: wtimeoutMS };
     return {
       ...options,
       ...C.spreadValue(['appName', 'appname'] as const, appName),
@@ -205,6 +234,6 @@ export class CoerceCustom {
       ...C.spreadValue('compressors', compressors),
       ...C.spreadValue('compression', compressors[0]),
       writeConcern
-    }
-  }
+    };
+  };
 }
