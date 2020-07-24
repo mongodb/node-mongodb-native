@@ -1,3 +1,4 @@
+import { CoerceError } from './coerce_error';
 import {
   ReadPreferenceMode,
   Compressor,
@@ -143,11 +144,22 @@ export class CoerceCustom {
     ...match('level', C.default(C.enum({ ReadConcernLevel }), ReadConcernLevel.local))
   })));
 
-  // prettier-ignore
-  static auth = C.warn(C.objectExact(match => ({
-    ...match('user', C.string),
-    ...match('pass', C.string)
-  })));
+  static auth = (value: any, options?: CoerceOptions) => {
+    const authObject = C.objectExact(match => ({
+      ...match('user', C.string),
+      ...match('username', C.string),
+      ...match('pass', C.string),
+      ...match('password', C.string)
+    }));
+    const results = authObject(value, options);
+    if (results instanceof CoerceError) return results;
+    const user = results?.username ?? results?.user;
+    const pass = results?.password ?? results?.pass;
+    return {
+      ...C.spreadValue(['user', 'username'] as const, user),
+      ...C.spreadValue(['pass', 'password'] as const, pass)
+    };
+  };
 
   // prettier-ignore
   static driverInfo = C.warn(C.objectExact(match => ({

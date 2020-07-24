@@ -293,7 +293,9 @@ describe('CoerceCustom', () => {
       });
       expect(result).to.deep.equal({
         user: 'thomas',
-        pass: 'pass'
+        username: 'thomas',
+        pass: 'pass',
+        password: 'pass'
       });
     });
   });
@@ -323,6 +325,25 @@ describe('CoerceCustom', () => {
         CoerceCustom.compressors(['snappy', 'invalid', 'zlib'], { warn: false }),
         CoerceCustom.compressors('snappy,invalid,zlib', { warn: false })
       ].forEach(r => expect(r).to.deep.equal(['snappy', 'zlib']));
+    });
+  });
+
+  context('.auth()', () => {
+    it('should assign user/username #1', () => {
+      const result = CoerceCustom.auth({ user: 'thomas' });
+      expect(result).to.deep.equal({ user: 'thomas', username: 'thomas' });
+    });
+    it('should assign user/username #2', () => {
+      const result = CoerceCustom.auth({ username: 'thomas' });
+      expect(result).to.deep.equal({ user: 'thomas', username: 'thomas' });
+    });
+    it('should assign pass/password #1', () => {
+      const result = CoerceCustom.auth({ pass: 'pass' });
+      expect(result).to.deep.equal({ pass: 'pass', password: 'pass' });
+    });
+    it('should assign pass/password #2', () => {
+      const result = CoerceCustom.auth({ password: 'pass' });
+      expect(result).to.deep.equal({ pass: 'pass', password: 'pass' });
     });
   });
 });
