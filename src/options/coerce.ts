@@ -306,14 +306,14 @@ export class Coerce {
         if (exact.toLowerCase() === value.toLowerCase()) return exact;
       }
       if (value === exact) return value;
-      return new CoerceError(`exact ${CoerceError.displayValue(exact)}`, value, options);
+      return new CoerceError(`${CoerceError.displayValue(exact)}`, value, options);
     };
   }
   /** will that value is exactly matching given value  */
   static givenExact<V>(given: V) {
     return (value: any, options?: CoerceOptions) => {
       if (value === given) return value;
-      return new CoerceError(`exact ${CoerceError.displayValue(given)}`, value, options);
+      return new CoerceError(`${CoerceError.displayValue(given)}`, value, options);
     };
   }
   /** will coerce case-insensitive string to a enum */
