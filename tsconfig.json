@@ -13,7 +13,8 @@
     "noEmitHelpers": true,
     "noEmitOnError": true,
     "outDir": "lib",
-    "importsNotUsedAsValues": "error"
+    "importsNotUsedAsValues": "error",
+    "sourceMap": true
   },
   "ts-node": {
     "transpileOnly": true,
