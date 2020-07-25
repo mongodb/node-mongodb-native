@@ -9,16 +9,20 @@ import {
   hasAtomicOperators
 } from '../utils';
 import { MongoError } from '../error';
-import { OperationBase } from './operation';
+import CommandOperation = require('./command');
+import { defineAspects, Aspect } from './operation';
 
-class FindAndModifyOperation extends OperationBase {
+class FindAndModifyOperation extends CommandOperation {
   collection: any;
   query: any;
   sort: any;
   doc: any;
 
   constructor(collection: any, query: any, sort: any, doc: any, options: any) {
-    super(options);
+    super(collection, options);
+
+    // force primary read preference
+    this.readPreference = ReadPreference.primary;
 
     this.collection = collection;
     this.query = query;
@@ -26,7 +30,7 @@ class FindAndModifyOperation extends OperationBase {
     this.doc = doc;
   }
 
-  execute(callback: Function) {
+  execute(server: any, callback: Function) {
     const coll = this.collection;
     const query = this.query;
     const sort = formattedOrderClause(this.sort);
@@ -84,8 +88,6 @@ class FindAndModifyOperation extends OperationBase {
       queryObject.bypassDocumentValidation = options.bypassDocumentValidation;
     }
 
-    options.readPreference = ReadPreference.primary;
-
     // Have we specified collation
     try {
       decorateWithCollation(queryObject, coll, options);
@@ -97,7 +99,7 @@ class FindAndModifyOperation extends OperationBase {
       // TODO: once this method becomes a CommandOperation we will have the server
       // in place to check.
       const unacknowledgedWrite = options.writeConcern && options.writeConcern.w === 0;
-      if (unacknowledgedWrite || maxWireVersion(coll.s.topology) < 8) {
+      if (unacknowledgedWrite || maxWireVersion(server) < 8) {
         callback(
           new MongoError('The current topology does not support a hint on findAndModify commands')
         );
@@ -109,43 +111,12 @@ class FindAndModifyOperation extends OperationBase {
     }
 
     // Execute the command
-    executeCommand(coll.s.db, queryObject, options, (err?: any, result?: any) => {
+    super.executeCommand(server, queryObject, (err?: any, result?: any) => {
       if (err) return handleCallback(callback, err, null);
 
       return handleCallback(callback, null, result);
     });
   }
-}
-
-/**
- * Execute a command
- *
- * @function
- * @param {Db} db The Db instance on which to execute the command.
- * @param {object} command The command hash
- * @param {object} [options] Optional settings. See Db.prototype.command for a list of options.
- * @param {Db~resultCallback} [callback] The command result callback
- */
-function executeCommand(db: any, command: object, options?: any, callback?: Function) {
-  // Did the user destroy the topology
-  if (db.serverConfig && db.serverConfig.isDestroyed()) {
-    return callback!(new MongoError('topology was destroyed'));
-  }
-
-  // Convert the readPreference if its not a write
-  options.readPreference = ReadPreference.resolve(db, options);
-
-  // Execute command
-  db.s.topology.command(
-    db.s.namespace.withCollection('$cmd'),
-    command,
-    options,
-    (err?: any, result?: any) => {
-      if (err) return handleCallback(callback!, err);
-      if (options.full) return handleCallback(callback!, null, result);
-      handleCallback(callback!, null, result.result);
-    }
-  );
 }
 
 class FindOneAndDeleteOperation extends FindAndModifyOperation {
@@ -214,6 +185,12 @@ class FindOneAndUpdateOperation extends FindAndModifyOperation {
     super(collection, filter, finalOptions.sort, update, finalOptions);
   }
 }
+
+defineAspects(FindAndModifyOperation, [
+  Aspect.WRITE_OPERATION,
+  Aspect.RETRYABLE,
+  Aspect.EXECUTE_WITH_SELECTION
+]);
 
 export {
   FindAndModifyOperation,

@@ -87,7 +87,7 @@ class CommandOperation extends OperationBase {
     }
 
     if (serverWireVersion >= SUPPORTS_WRITE_CONCERN_AND_COLLATION) {
-      if (this.writeConcern && this.hasAspect(Aspect.WRITE_OPERATION)) {
+      if (this.writeConcern && this.hasAspect(Aspect.WRITE_OPERATION) && !inTransaction) {
         Object.assign(cmd, { writeConcern: this.writeConcern });
       }
 

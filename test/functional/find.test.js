@@ -995,16 +995,18 @@ describe('Find', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
+        expect(err).to.not.exist;
         var db = client.db(configuration.db);
         db.createCollection('FindAndModifyDuplicateKeyError', function (err, collection) {
+          expect(err).to.not.exist;
           collection.ensureIndex(['name', 1], { unique: true, w: 1 }, function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             // Test return new document on change
             collection.insert(
               [{ name: 'test1' }, { name: 'test2' }],
               configuration.writeConcernMax(),
               function (err) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 // Let's modify the document in place
                 collection.findAndModify(
                   { name: 'test1' },
@@ -1012,8 +1014,8 @@ describe('Find', function () {
                   { $set: { name: 'test2' } },
                   {},
                   function (err, updated_doc) {
-                    test.equal(null, updated_doc);
-                    test.ok(err != null);
+                    expect(err).to.exist;
+                    expect(updated_doc).to.not.exist;
                     client.close(done);
                   }
                 );
@@ -1239,21 +1241,23 @@ describe('Find', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
+        expect(err).to.not.exist;
         var db = client.db(configuration.db);
         db.createCollection('shouldCorrectlyFindAndModifyDocumentThatFailsInFirstStep', function (
           err,
           collection
         ) {
+          expect(err).to.not.exist;
           // Set up an index to force duplicate index erro
           collection.ensureIndex([['failIndex', 1]], { unique: true, w: 1 }, function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Setup a new document
             collection.insert(
               { a: 2, b: 2, failIndex: 2 },
               configuration.writeConcernMax(),
               function (err) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
 
                 // Let's attempt to upsert with a duplicate key error
                 collection.findAndModify(
@@ -1262,8 +1266,10 @@ describe('Find', function () {
                   { a: 10, b: 10, failIndex: 2 },
                   { w: 1, upsert: true },
                   function (err, result) {
-                    test.equal(null, result);
-                    test.ok(err.errmsg.match('duplicate key'));
+                    expect(result).to.not.exist;
+                    expect(err)
+                      .property('errmsg')
+                      .to.match(/duplicate key/);
                     client.close(done);
                   }
                 );

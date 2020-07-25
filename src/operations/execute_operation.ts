@@ -3,6 +3,7 @@ import ReadPreference = require('../read_preference');
 import { MongoError, isRetryableError } from '../error';
 import { Aspect, OperationBase } from './operation';
 import { maxWireVersion } from '../utils';
+import { ServerType } from '../sdam/common';
 
 /**
  * Executes the given operation with provided arguments.
@@ -114,13 +115,20 @@ function executeWithServerSelection(topology: any, operation: any, callback: Fun
       return callback(null, result);
     }
 
-    if (!isRetryableError(err)) {
+    if (
+      (operation.hasAspect(Aspect.READ_OPERATION) && !isRetryableError(err)) ||
+      (operation.hasAspect(Aspect.WRITE_OPERATION) && !shouldRetryWrite(err))
+    ) {
       return callback(err);
     }
 
     // select a new server, and attempt to retry the operation
     topology.selectServer(serverSelectionOptions, (err?: any, server?: any) => {
-      if (err || !supportsRetryableReads(server)) {
+      if (
+        err ||
+        (operation.hasAspect(Aspect.READ_OPERATION) && !supportsRetryableReads(server)) ||
+        (operation.hasAspect(Aspect.WRITE_OPERATION) && !supportsRetryableWrites(server))
+      ) {
         callback(err, null);
         return;
       }
@@ -136,20 +144,47 @@ function executeWithServerSelection(topology: any, operation: any, callback: Fun
       return;
     }
 
-    const shouldRetryReads =
+    const willRetryRead =
       topology.s.options.retryReads !== false &&
       operation.session &&
       !inTransaction &&
       supportsRetryableReads(server) &&
       operation.canRetryRead;
 
-    if (operation.hasAspect(Aspect.RETRYABLE) && shouldRetryReads) {
+    const willRetryWrite =
+      topology.s.options.retryWrites === true &&
+      operation.session &&
+      !inTransaction &&
+      supportsRetryableWrites(server);
+
+    if (
+      operation.hasAspect(Aspect.RETRYABLE) &&
+      ((operation.hasAspect(Aspect.READ_OPERATION) && willRetryRead) ||
+        (operation.hasAspect(Aspect.WRITE_OPERATION) && willRetryWrite))
+    ) {
+      if (operation.hasAspect(Aspect.WRITE_OPERATION) && willRetryWrite) {
+        operation.options.willRetryWrite = true;
+        operation.session.incrementTransactionNumber();
+      }
+
       operation.execute(server, callbackWithRetry);
       return;
     }
 
     operation.execute(server, callback);
   });
+}
+
+function shouldRetryWrite(err: any) {
+  return err instanceof MongoError && err.hasErrorLabel('RetryableWriteError');
+}
+
+function supportsRetryableWrites(server: any) {
+  return (
+    server.description.maxWireVersion >= 6 &&
+    server.description.logicalSessionTimeoutMinutes &&
+    server.description.type !== ServerType.Standalone
+  );
 }
 
 // TODO: This is only supported for unified topology, it should go away once
