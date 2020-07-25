@@ -4,7 +4,6 @@ const chai = require('chai');
 const expect = chai.expect;
 const sinonChai = require('sinon-chai');
 const mock = require('mongodb-mock-server');
-const { Long, ObjectId } = require('../../src');
 chai.use(sinonChai);
 
 describe('Collection', function () {
@@ -333,108 +332,6 @@ describe('Collection', function () {
       });
     });
 
-    it('should correctly execute save', function (done) {
-      db.createCollection('test_save', (err, collection) => {
-        const doc = { hello: 'world' };
-        collection.save(doc, configuration.writeConcernMax(), (err, r) => {
-          expect(r.ops[0]._id).to.exist;
-
-          collection.countDocuments((err, count) => {
-            expect(count).to.equal(1);
-
-            collection.save(r.ops[0], configuration.writeConcernMax(), err => {
-              expect(err).to.not.exist;
-              collection.countDocuments((err, count) => {
-                expect(count).to.equal(1);
-
-                collection.findOne((err, doc3) => {
-                  expect(doc3.hello).to.equal('world');
-
-                  doc3.hello = 'mike';
-
-                  collection.save(doc3, configuration.writeConcernMax(), err => {
-                    expect(err).to.not.exist;
-                    collection.countDocuments((err, count) => {
-                      expect(count).to.equal(1);
-
-                      collection.findOne((err, doc5) => {
-                        expect(doc5.hello).to.equal('mike');
-
-                        // Save another document
-                        collection.save(
-                          { hello: 'world' },
-                          configuration.writeConcernMax(),
-                          err => {
-                            expect(err).to.not.exist;
-                            collection.countDocuments((err, count) => {
-                              expect(count).to.equal(2);
-                              // Let's close the db
-                              done();
-                            });
-                          }
-                        );
-                      });
-                    });
-                  });
-                });
-              });
-            });
-          });
-        });
-      });
-    });
-
-    it('should correctly save document with Long value', function (done) {
-      db.createCollection('test_save_long', (err, collection) => {
-        collection.insertOne(
-          { x: Long.fromNumber(9223372036854775807) },
-          configuration.writeConcernMax(),
-          err => {
-            expect(err).to.not.exist;
-            collection.findOne((err, doc) => {
-              expect(err).to.not.exist;
-              expect(doc.x).to.deep.equal(Long.fromNumber(9223372036854775807));
-              // Let's close the db
-              done();
-            });
-          }
-        );
-      });
-    });
-
-    it('should save object that has id but does not exist in collection', function (done) {
-      db.createCollection(
-        'test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection',
-        (err, collection) => {
-          const a = { _id: '1', hello: 'world' };
-          collection.save(a, configuration.writeConcernMax(), err => {
-            expect(err).to.not.exist;
-            collection.countDocuments((err, count) => {
-              expect(count).to.equal(1);
-
-              collection.findOne((err, doc) => {
-                expect(doc.hello).to.equal('world');
-
-                doc.hello = 'mike';
-                collection.save(doc, configuration.writeConcernMax(), err => {
-                  expect(err).to.not.exist;
-                  collection.findOne((err, doc) => {
-                    collection.countDocuments((err, count) => {
-                      expect(count).to.equal(1);
-
-                      expect(doc.hello).to.equal('mike');
-                      // Let's close the db
-                      done();
-                    });
-                  });
-                });
-              });
-            });
-          });
-        }
-      );
-    });
-
     it('should correctly execute insert update delete safe mode', function (done) {
       db.createCollection(
         'test_should_execute_insert_update_delete_safe_mode',
@@ -467,92 +364,6 @@ describe('Collection', function () {
           });
         }
       );
-    });
-
-    it('should perform multiple saves', function (done) {
-      db.createCollection('multiple_save_test', (err, collection) => {
-        const doc = {
-          name: 'amit',
-          text: 'some text'
-        };
-
-        //insert new user
-        collection.save(doc, configuration.writeConcernMax(), err => {
-          expect(err).to.not.exist;
-
-          collection
-            .find({}, { name: 1 })
-            .limit(1)
-            .toArray((err, users) => {
-              const user = users[0];
-
-              if (err) {
-                throw new Error(err);
-              } else if (user) {
-                user.pants = 'worn';
-
-                collection.save(user, configuration.writeConcernMax(), (err, result) => {
-                  expect(err).to.not.exist;
-                  expect(result.result.n).to.equal(1);
-                  done();
-                });
-              }
-            });
-        });
-      });
-    });
-
-    it('should correctly save document with nested array', function (done) {
-      db.createCollection('save_error_on_save_test', (err, collection) => {
-        // Create unique index for username
-        collection.createIndex([['username', 1]], configuration.writeConcernMax(), err => {
-          expect(err).to.not.exist;
-          const doc = {
-            email: 'email@email.com',
-            encrypted_password: 'password',
-            friends: [
-              '4db96b973d01205364000006',
-              '4db94a1948a683a176000001',
-              '4dc77b24c5ba38be14000002'
-            ],
-            location: [72.4930088, 23.0431957],
-            name: 'Amit Kumar',
-            password_salt: 'salty',
-            profile_fields: [],
-            username: 'amit'
-          };
-          //insert new user
-          collection.save(doc, configuration.writeConcernMax(), err => {
-            expect(err).to.not.exist;
-
-            collection
-              .find({})
-              .limit(1)
-              .toArray((err, users) => {
-                expect(err).to.not.exist;
-                const user = users[0];
-                user.friends.splice(1, 1);
-
-                collection.save(user, err => {
-                  expect(err).to.not.exist;
-
-                  // Update again
-                  collection.updateOne(
-                    { _id: new ObjectId(user._id.toString()) },
-                    { $set: { friends: user.friends } },
-                    { upsert: true, w: 1 },
-                    (err, result) => {
-                      expect(err).to.not.exist;
-                      expect(result.result.n).to.equal(1);
-
-                      done();
-                    }
-                  );
-                });
-              });
-          });
-        });
-      });
     });
 
     it('should perform collection remove with no callback', function (done) {
@@ -604,17 +415,6 @@ describe('Collection', function () {
         });
 
         done();
-      });
-    });
-
-    it('should correctly handle 0 as id for save', function (done) {
-      db.collection('shouldCorrectlyHandle0asIdForSave').save({ _id: 0 }, err => {
-        expect(err).to.not.exist;
-
-        db.collection('shouldCorrectlyHandle0asIdForSave').save({ _id: 0 }, err => {
-          expect(err).to.not.exist;
-          done();
-        });
       });
     });
 
