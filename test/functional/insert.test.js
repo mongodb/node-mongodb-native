@@ -270,6 +270,7 @@ describe('Insert', function () {
         //convience curried handler for functions of type 'a -> (err, result)
         function getResult(callback) {
           return function (error, result) {
+            if (error) console.dir(error);
             test.ok(error == null);
             return callback(result);
           };
@@ -772,23 +773,25 @@ describe('Insert', function () {
           test.equal(null, err);
           test.ok(result);
 
-          collection.update({ a: 1 }, { a: 2 }, configuration.writeConcernMax(), function (
-            err,
-            result
-          ) {
-            test.equal(null, err);
-            test.ok(result);
-
-            collection.remove({ a: 2 }, configuration.writeConcernMax(), function (err, result) {
+          collection.update(
+            { a: 1 },
+            { $set: { a: 2 } },
+            configuration.writeConcernMax(),
+            function (err, result) {
               test.equal(null, err);
               test.ok(result);
 
-              collection.count(function (err, count) {
-                test.equal(0, count);
-                client.close(done);
+              collection.remove({ a: 2 }, configuration.writeConcernMax(), function (err, result) {
+                test.equal(null, err);
+                test.ok(result);
+
+                collection.count(function (err, count) {
+                  test.equal(0, count);
+                  client.close(done);
+                });
               });
-            });
-          });
+            }
+          );
         });
       });
     }
@@ -845,9 +848,10 @@ describe('Insert', function () {
 
         collection.update(
           { _id: new ObjectId() },
-          { email: 'update' },
+          { $set: { email: 'update' } },
           configuration.writeConcernMax(),
           function (err, result) {
+            expect(err).to.not.exist;
             test.equal(0, result.result.n);
             client.close(done);
           }
@@ -1238,13 +1242,20 @@ describe('Insert', function () {
         );
 
         // Upsert a new doc
-        collection.update({ a: 1 }, { a: 1 }, { upsert: true, w: 1 }, function (err, result) {
+        collection.update({ a: 1 }, { $set: { a: 1 } }, { upsert: true, w: 1 }, function (
+          err,
+          result
+        ) {
+          expect(err).to.not.exist;
           if (result.result.updatedExisting) test.equal(false, result.result.updatedExisting);
           test.equal(1, result.result.n);
           test.ok(result.result.upserted != null);
 
           // Upsert an existing doc
-          collection.update({ a: 1 }, { a: 1 }, { upsert: true, w: 1 }, function (err, result) {
+          collection.update({ a: 1 }, { $set: { a: 1 } }, { upsert: true, w: 1 }, function (
+            err,
+            result
+          ) {
             if (result.updatedExisting) test.equal(true, result.updatedExisting);
             test.equal(1, result.result.n);
             client.close(done);

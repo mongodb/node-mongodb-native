@@ -1,19 +1,21 @@
 import { MongoError } from '../error';
-import { OperationBase } from './operation';
-import { insertDocuments } from './common_functions';
+import { defineAspects, Aspect } from './operation';
+import CommandOperation = require('./command');
+import { applyRetryableWrites, applyWriteConcern, handleCallback, toError } from '../utils';
+import { prepareDocs } from './common_functions';
 
-class InsertOneOperation extends OperationBase {
+class InsertOneOperation extends CommandOperation {
   collection: any;
   doc: any;
 
   constructor(collection: any, doc: any, options: any) {
-    super(options);
+    super(collection, options);
 
     this.collection = collection;
     this.doc = doc;
   }
 
-  execute(callback: Function) {
+  execute(server: any, callback: Function) {
     const coll = this.collection;
     const doc = this.doc;
     const options = this.options;
@@ -24,7 +26,7 @@ class InsertOneOperation extends OperationBase {
       );
     }
 
-    insertDocuments(coll, [doc], options, (err?: any, r?: any) => {
+    insertDocuments(server, coll, [doc], options, (err?: any, r?: any) => {
       if (callback == null) return;
       if (err && callback) return callback(err);
       // Workaround for pre 2.6 servers
@@ -36,5 +38,43 @@ class InsertOneOperation extends OperationBase {
     });
   }
 }
+
+function insertDocuments(server: any, coll: any, docs: any, options: any, callback: Function) {
+  if (typeof options === 'function') (callback = options), (options = {});
+  options = options || {};
+  // Ensure we are operating on an array op docs
+  docs = Array.isArray(docs) ? docs : [docs];
+
+  // Final options for retryable writes and write concern
+  let finalOptions = Object.assign({}, options);
+  finalOptions = applyRetryableWrites(finalOptions, coll.s.db);
+  finalOptions = applyWriteConcern(finalOptions, { db: coll.s.db, collection: coll }, options);
+
+  // If keep going set unordered
+  if (finalOptions.keepGoing === true) finalOptions.ordered = false;
+  finalOptions.serializeFunctions = options.serializeFunctions || coll.s.serializeFunctions;
+
+  docs = prepareDocs(coll, docs, options);
+
+  // File inserts
+  server.insert(coll.s.namespace.toString(), docs, finalOptions, (err?: any, result?: any) => {
+    if (callback == null) return;
+    if (err) return handleCallback(callback, err);
+    if (result == null) return handleCallback(callback, null, null);
+    if (result.result.code) return handleCallback(callback, toError(result.result));
+    if (result.result.writeErrors)
+      return handleCallback(callback, toError(result.result.writeErrors[0]));
+    // Add docs to the list
+    result.ops = docs;
+    // Return the results
+    handleCallback(callback, null, result);
+  });
+}
+
+defineAspects(InsertOneOperation, [
+  Aspect.RETRYABLE,
+  Aspect.WRITE_OPERATION,
+  Aspect.EXECUTE_WITH_SELECTION
+]);
 
 export = InsertOneOperation;

@@ -10,7 +10,6 @@ import {
   formattedOrderClause,
   checkCollectionName,
   deprecateOptions,
-  executeLegacyOperation,
   MongoDBNamespace
 } from './utils';
 import { ObjectId } from './bson';
@@ -1723,13 +1722,7 @@ Collection.prototype.update = deprecate(function (
     options.ignoreUndefined = this.s.options.ignoreUndefined;
   }
 
-  return executeLegacyOperation(this.s.topology, updateDocuments, [
-    this,
-    selector,
-    update,
-    options,
-    callback
-  ]);
+  return this.updateMany(selector, update, options, callback);
 },
 'collection.update is deprecated. Use updateOne, updateMany, or bulkWrite instead.');
 
@@ -1767,12 +1760,7 @@ Collection.prototype.remove = deprecate(function (
     options.ignoreUndefined = this.s.options.ignoreUndefined;
   }
 
-  return executeLegacyOperation(this.s.topology, removeDocuments, [
-    this,
-    selector,
-    options,
-    callback
-  ]);
+  return this.deleteMany(selector, options, callback);
 },
 'collection.remove is deprecated. Use deleteOne, deleteMany, or bulkWrite instead.');
 

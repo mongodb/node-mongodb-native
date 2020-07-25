@@ -44,7 +44,9 @@ class CommandOperation extends OperationBase {
       : parent.s.namespace.withCollection('$cmd');
 
     const propertyProvider = this.hasAspect(Aspect.NO_INHERIT_OPTIONS) ? undefined : parent;
-    this.readPreference = ReadPreference.resolve(propertyProvider, this.options);
+    this.readPreference = this.hasAspect(Aspect.WRITE_OPERATION)
+      ? ReadPreference.primary
+      : ReadPreference.resolve(propertyProvider, this.options);
     this.readConcern = resolveReadConcern(propertyProvider, this.options);
     this.writeConcern = resolveWriteConcern(propertyProvider, this.options);
     this.explain = false;
