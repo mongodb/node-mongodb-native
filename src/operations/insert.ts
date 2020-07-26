@@ -1,8 +1,24 @@
 import { MongoError } from '../error';
-import { defineAspects, Aspect } from './operation';
+import { defineAspects, Aspect, OperationBase } from './operation';
 import CommandOperation = require('./command');
 import { applyRetryableWrites, applyWriteConcern, handleCallback, toError } from '../utils';
 import { prepareDocs } from './common_functions';
+
+class InsertOperation extends OperationBase {
+  namespace: any;
+  operations: any;
+  options: any;
+
+  constructor(ns: any, ops: any, options: any) {
+    super(options);
+    this.namespace = ns;
+    this.operations = ops;
+  }
+
+  execute(server: any, callback: Function) {
+    server.insert(this.namespace.toString(), this.operations, this.options, callback);
+  }
+}
 
 class InsertOneOperation extends CommandOperation {
   collection: any;
@@ -71,10 +87,16 @@ function insertDocuments(server: any, coll: any, docs: any, options: any, callba
   });
 }
 
+defineAspects(InsertOperation, [
+  Aspect.RETRYABLE,
+  Aspect.WRITE_OPERATION,
+  Aspect.EXECUTE_WITH_SELECTION
+]);
+
 defineAspects(InsertOneOperation, [
   Aspect.RETRYABLE,
   Aspect.WRITE_OPERATION,
   Aspect.EXECUTE_WITH_SELECTION
 ]);
 
-export = InsertOneOperation;
+export { InsertOperation, InsertOneOperation };

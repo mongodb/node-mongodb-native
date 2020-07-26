@@ -20,7 +20,6 @@ import ChangeStream = require('./change_stream');
 import WriteConcern = require('./write_concern');
 import ReadConcern = require('./read_concern');
 import { AggregationCursor, CommandCursor } from './cursor';
-import { removeDocuments, updateDocuments } from './operations/common_functions';
 import AggregateOperation = require('./operations/aggregate');
 import BulkWriteOperation = require('./operations/bulk_write');
 import CountDocumentsOperation = require('./operations/count_documents');
@@ -35,8 +34,6 @@ import {
   IndexInformationOperation,
   ListIndexesOperation
 } from './operations/indexes';
-import DeleteManyOperation = require('./operations/delete_many');
-import DeleteOneOperation = require('./operations/delete_one');
 import DistinctOperation = require('./operations/distinct');
 import { DropCollectionOperation } from './operations/drop';
 import EstimatedDocumentCountOperation = require('./operations/estimated_document_count');
@@ -49,15 +46,15 @@ import {
   FindOneAndUpdateOperation
 } from './operations/find_and_modify';
 import InsertManyOperation = require('./operations/insert_many');
-import InsertOneOperation = require('./operations/insert_one');
+import { InsertOneOperation } from './operations/insert';
+import { UpdateOneOperation, UpdateManyOperation } from './operations/update';
+import { DeleteOneOperation, DeleteManyOperation } from './operations/delete';
 import IsCappedOperation = require('./operations/is_capped');
 import MapReduceOperation = require('./operations/map_reduce');
 import OptionsOperation = require('./operations/options_operation');
 import RenameOperation = require('./operations/rename');
 import ReplaceOneOperation = require('./operations/replace_one');
 import { CollStatsOperation } from './operations/stats';
-import UpdateManyOperation = require('./operations/update_many');
-import UpdateOneOperation = require('./operations/update_one');
 import executeOperation = require('./operations/execute_operation');
 import { EvalGroupOperation, GroupOperation } from './operations/group';
 const mergeKeys = ['ignoreUndefined'];
