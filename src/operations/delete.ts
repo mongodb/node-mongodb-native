@@ -13,6 +13,12 @@ class DeleteOperation extends OperationBase {
     this.operations = ops;
   }
 
+  get canRetryWrite() {
+    return this.operations.every((op: any) =>
+      typeof op.limit !== 'undefined' ? op.limit > 0 : true
+    );
+  }
+
   execute(server: any, callback: Function) {
     server.remove(this.namespace.toString(), this.operations, this.options, callback);
   }
@@ -81,5 +87,4 @@ defineAspects(DeleteOneOperation, [
 ]);
 
 defineAspects(DeleteManyOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
-
 export { DeleteOperation, DeleteOneOperation, DeleteManyOperation };

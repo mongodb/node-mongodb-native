@@ -1,7 +1,6 @@
 'use strict';
 
 const { expect } = require('chai');
-const { format: f } = require('util');
 const { CoreCursor } = require('../../../src/cursor');
 
 describe('Extend cursor tests', function () {
@@ -43,49 +42,48 @@ describe('Extend cursor tests', function () {
       }
 
       // Attempt to connect, adding a custom cursor creator
-      var server = config.newTopology(this.configuration.host, this.configuration.port, {
+      const topology = config.newTopology(this.configuration.host, this.configuration.port, {
         cursorFactory: ExtendedCursor
       });
 
-      // Add event listeners
-      server.on('connect', function (_server) {
-        // Execute the write
-        _server.insert(
-          f('%s.inserts_extend_cursors', self.configuration.db),
-          [{ a: 1 }, { a: 2 }, { a: 3 }],
-          {
-            writeConcern: { w: 1 },
-            ordered: true
-          },
-          function (err, results) {
-            expect(err).to.be.null;
-            expect(results.result.n).to.equal(3);
+      topology.connect(err => {
+        expect(err).to.not.exist;
+        this.defer(() => topology.close());
 
-            // Execute find
-            var cursor = _server.cursor(f('%s.inserts_extend_cursors', self.configuration.db), {
-              find: f('%s.inserts_extend_cursors', self.configuration.db),
-              query: {}
-            });
+        topology.selectServer('primary', (err, server) => {
+          expect(err).to.not.exist;
 
-            // Force a single
-            // Logger.setLevel('debug');
-            // Set the batch size
-            cursor.batchSize = 2;
-            // Execute next
-            cursor.toArray(function (cursorErr, cursorItems) {
-              expect(cursorErr).to.be.null;
-              expect(cursorItems.length).to.equal(3);
-              // Destroy the connection
-              _server.destroy();
-              // Finish the test
-              done();
-            });
-          }
-        );
+          const ns = `${self.configuration.db}.inserts_extend_cursors`;
+          // Execute the write
+          server.insert(
+            ns,
+            [{ a: 1 }, { a: 2 }, { a: 3 }],
+            {
+              writeConcern: { w: 1 },
+              ordered: true
+            },
+            (err, results) => {
+              expect(err).to.not.exist;
+              expect(results.result.n).to.equal(3);
+
+              // Execute find
+              const cursor = topology.cursor(ns, { find: ns, query: {} });
+
+              // Force a single
+              // Logger.setLevel('debug');
+              // Set the batch size
+              cursor.batchSize = 2;
+              // Execute next
+              cursor.toArray((cursorErr, cursorItems) => {
+                expect(cursorErr).to.not.exist;
+                expect(cursorItems.length).to.equal(3);
+                // Destroy the connection
+                server.destroy(done);
+              });
+            }
+          );
+        });
       });
-
-      // Start connection
-      server.connect();
     }
   });
 });

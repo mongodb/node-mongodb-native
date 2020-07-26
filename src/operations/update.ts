@@ -14,6 +14,10 @@ class UpdateOperation extends OperationBase {
     this.operations = ops;
   }
 
+  get canRetryWrite() {
+    return this.operations.every((op: any) => op.multi == null || op.multi === false);
+  }
+
   execute(server: any, callback: Function) {
     server.update(this.namespace.toString(), this.operations, this.options, callback);
   }
@@ -92,5 +96,4 @@ defineAspects(UpdateOneOperation, [
 ]);
 
 defineAspects(UpdateManyOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
-
 export { UpdateOperation, UpdateOneOperation, UpdateManyOperation };

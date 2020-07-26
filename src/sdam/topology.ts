@@ -72,10 +72,6 @@ const DEPRECATED_OPTIONS = new Set([
   'bufferMaxEntries'
 ]);
 
-const MMAPv1_RETRY_WRITES_ERROR_CODE = 20;
-const MMAPv1_RETRY_WRITES_ERROR_MESSAGE =
-  'This MongoDB deployment does not support retryable writes. Please add retryWrites=false to your connection string.';
-
 const kCancelled = Symbol('cancelled');
 const kWaitQueue = Symbol('waitQueue');
 
@@ -576,63 +572,6 @@ class Topology extends EventEmitter {
     if (typeof callback === 'function') callback(null, true);
   }
 
-  // Basic operation support. Eventually this should be moved into command construction
-  // during the command refactor.
-
-  /**
-   * Insert one or more documents
-   *
-   * @param {string} ns The full qualified namespace for this operation
-   * @param {Array} ops An array of documents to insert
-   * @param {object} options insert options
-   * @param {boolean} [options.ordered=true] Execute in order or out of order
-   * @param {object} [options.writeConcern] Write concern for the operation
-   * @param {boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized
-   * @param {boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields
-   * @param {ClientSession} [options.session] Session to use for the operation
-   * @param {boolean} [options.retryWrites] Enable retryable writes for this operation
-   * @param {opResultCallback} callback A callback function
-   */
-  insert(ns: string, ops: any[], options: any, callback: any) {
-    executeWriteOperation({ topology: this, op: 'insert', ns, ops }, options, callback);
-  }
-
-  /**
-   * Perform one or more update operations
-   *
-   * @param {string} ns The fully qualified namespace for this operation
-   * @param {Array} ops An array of updates
-   * @param {object} options
-   * @param {boolean} [options.ordered=true] Execute in order or out of order
-   * @param {object} [options.writeConcern] Write concern for the operation
-   * @param {boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized
-   * @param {boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields
-   * @param {ClientSession} [options.session] Session to use for the operation
-   * @param {boolean} [options.retryWrites] Enable retryable writes for this operation
-   * @param {opResultCallback} callback A callback function
-   */
-  update(ns: string, ops: any[], options: any, callback: any) {
-    executeWriteOperation({ topology: this, op: 'update', ns, ops }, options, callback);
-  }
-
-  /**
-   * Perform one or more remove operations
-   *
-   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
-   * @param {Array} ops An array of removes
-   * @param {object} options options for removal
-   * @param {boolean} [options.ordered=true] Execute in order or out of order
-   * @param {object} [options.writeConcern={}] Write concern for the operation
-   * @param {boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
-   * @param {boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
-   * @param {ClientSession} [options.session=null] Session to use for the operation
-   * @param {boolean} [options.retryWrites] Enable retryable writes for this operation
-   * @param {opResultCallback} callback A callback function
-   */
-  remove(ns: string, ops: any[], options: any, callback: any) {
-    executeWriteOperation({ topology: this, op: 'remove', ns, ops }, options, callback);
-  }
-
   /**
    * Execute a command
    *
@@ -914,78 +853,6 @@ function updateServers(topology: Topology, incomingServerDescription?: any) {
     // prepare server for garbage collection
     destroyServer(server, topology);
   }
-}
-
-/**
- * @param {any} args
- * @param {any} options
- * @param {any} callback
- */
-function executeWriteOperation(args: any, options: any, callback: any) {
-  if (typeof options === 'function') (callback = options), (options = {});
-  options = options || {};
-
-  // TODO: once we drop Node 4, use destructuring either here or in arguments.
-  const topology = args.topology;
-  const op = args.op;
-  const ns = args.ns;
-  const ops = args.ops;
-
-  const willRetryWrite =
-    !args.retrying &&
-    !!options.retryWrites &&
-    options.session &&
-    isRetryableWritesSupported(topology) &&
-    !options.session.inTransaction();
-
-  topology.selectServer(writableServerSelector(), options, (err?: any, server?: any) => {
-    if (err) {
-      callback(err, null);
-      return;
-    }
-
-    const handler = (err?: any, result?: any) => {
-      if (!err) return callback(null, result);
-      if (!shouldRetryOperation(err)) {
-        if (
-          err.code === MMAPv1_RETRY_WRITES_ERROR_CODE &&
-          err.errmsg.includes('Transaction numbers')
-        ) {
-          callback(
-            new MongoError({
-              message: MMAPv1_RETRY_WRITES_ERROR_MESSAGE,
-              errmsg: MMAPv1_RETRY_WRITES_ERROR_MESSAGE,
-              originalError: err
-            })
-          );
-
-          return;
-        }
-
-        return callback(err);
-      }
-
-      if (willRetryWrite) {
-        const newArgs = Object.assign({}, args, { retrying: true });
-        return executeWriteOperation(newArgs, options, callback);
-      }
-
-      return callback(err);
-    };
-
-    if (callback.operationId) {
-      handler.operationId = callback.operationId;
-    }
-
-    // increment and assign txnNumber
-    if (willRetryWrite) {
-      options.session.incrementTransactionNumber();
-      options.willRetryWrite = willRetryWrite;
-    }
-
-    // execute the write operation
-    server[op](ns, ops, options, handler);
-  });
 }
 
 function shouldRetryOperation(err: any) {

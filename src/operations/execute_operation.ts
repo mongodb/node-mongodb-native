@@ -5,6 +5,10 @@ import { Aspect, OperationBase } from './operation';
 import { maxWireVersion } from '../utils';
 import { ServerType } from '../sdam/common';
 
+const MMAPv1_RETRY_WRITES_ERROR_CODE = 20;
+const MMAPv1_RETRY_WRITES_ERROR_MESSAGE =
+  'This MongoDB deployment does not support retryable writes. Please add retryWrites=false to your connection string.';
+
 /**
  * Executes the given operation with provided arguments.
  *
@@ -122,6 +126,23 @@ function executeWithServerSelection(topology: any, operation: any, callback: Fun
       return callback(err);
     }
 
+    if (
+      operation.hasAspect(Aspect.WRITE_OPERATION) &&
+      shouldRetryWrite(err) &&
+      err.code === MMAPv1_RETRY_WRITES_ERROR_CODE &&
+      err.errmsg.match(/Transaction numbers/)
+    ) {
+      callback(
+        new MongoError({
+          message: MMAPv1_RETRY_WRITES_ERROR_MESSAGE,
+          errmsg: MMAPv1_RETRY_WRITES_ERROR_MESSAGE,
+          originalError: err
+        })
+      );
+
+      return;
+    }
+
     // select a new server, and attempt to retry the operation
     topology.selectServer(serverSelectionOptions, (err?: any, server?: any) => {
       if (
@@ -155,7 +176,8 @@ function executeWithServerSelection(topology: any, operation: any, callback: Fun
       topology.s.options.retryWrites === true &&
       operation.session &&
       !inTransaction &&
-      supportsRetryableWrites(server);
+      supportsRetryableWrites(server) &&
+      operation.canRetryWrite;
 
     if (
       operation.hasAspect(Aspect.RETRYABLE) &&
