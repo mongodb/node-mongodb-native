@@ -9,6 +9,7 @@
     "localhost:27019"
   ],
   "options": {
-    "ssl": true
+    "ssl": true,
+    "directConnection": false
   }
 }
