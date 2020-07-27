@@ -227,10 +227,7 @@ class ConnectionPool extends EventEmitter {
     this.emit('connectionCheckOutStarted', new ConnectionCheckOutStartedEvent(this));
 
     if (this.closed) {
-      this.emit(
-        'connectionCheckOutFailed',
-        new ConnectionCheckOutFailedEvent(this, new MongoError('poolClosed'))
-      );
+      this.emit('connectionCheckOutFailed', new ConnectionCheckOutFailedEvent(this, 'poolClosed'));
       callback(new PoolClosedError(this));
       return;
     }
@@ -245,10 +242,7 @@ class ConnectionPool extends EventEmitter {
         waitQueueMember[kCancelled] = true;
         waitQueueMember.timer = undefined;
 
-        pool.emit(
-          'connectionCheckOutFailed',
-          new ConnectionCheckOutFailedEvent(pool, new MongoError('timeout'))
-        );
+        pool.emit('connectionCheckOutFailed', new ConnectionCheckOutFailedEvent(pool, 'timeout'));
         waitQueueMember.callback(new WaitQueueTimeoutError(pool));
       }, waitQueueTimeoutMS);
     }

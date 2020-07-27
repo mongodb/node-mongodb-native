@@ -81,9 +81,9 @@ export class ConnectionCheckOutStartedEvent extends ConnectionPoolMonitoringEven
 /** An event published when a request to check a connection out fails */
 export class ConnectionCheckOutFailedEvent extends ConnectionPoolMonitoringEvent {
   /** The reason the attempt to check out failed */
-  reason: UniversalError;
+  reason: UniversalError | string;
 
-  constructor(pool: ConnectionPool, reason: UniversalError) {
+  constructor(pool: ConnectionPool, reason: UniversalError | string) {
     super(pool);
     this.reason = reason;
   }
