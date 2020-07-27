@@ -2,7 +2,7 @@ import fs = require('fs');
 import Logger = require('../logger');
 import ReadPreference = require('../read_preference');
 import { MongoError } from '../error';
-import NativeTopology = require('../topologies/native_topology');
+import { Topology } from '../sdam/topology';
 import { parseConnectionString } from '../connection_string';
 import ReadConcern = require('../read_concern');
 import { ServerSessionPool } from '../sessions';
@@ -164,14 +164,6 @@ function addListeners(mongoClient: any, topology: any) {
   topology.once('fullsetup', createListener(mongoClient, 'fullsetup'));
   topology.once('all', createListener(mongoClient, 'all'));
   topology.on('reconnect', createListener(mongoClient, 'reconnect'));
-}
-
-function assignTopology(client: any, topology: any) {
-  client.topology = topology;
-
-  if (!(topology instanceof NativeTopology)) {
-    topology.s.sessionPool = new ServerSessionPool(topology.s.coreTopology);
-  }
 }
 
 function resolveTLSOptions(options: any) {
@@ -344,7 +336,7 @@ function createTopology(mongoClient: any, options: any, callback: Function) {
   }
 
   // Create the topology
-  const topology = new NativeTopology(options.servers, options);
+  const topology = new Topology(options.servers, options);
   registerDeprecatedEventNotifiers(mongoClient);
 
   // Add listeners
@@ -353,8 +345,8 @@ function createTopology(mongoClient: any, options: any, callback: Function) {
   // Propagate the events to the client
   relayEvents(mongoClient, topology);
 
-  // Open the connection
-  assignTopology(mongoClient, topology);
+  // Assign the topology
+  mongoClient.topology = topology;
 
   // initialize CSFLE if requested
   if (options.autoEncrypter) {

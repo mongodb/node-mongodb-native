@@ -1,4 +1,7 @@
 'use strict';
+
+const { filterForCommands } = require('./shared');
+
 var expect = require('chai').expect;
 
 describe('Aggregation', function () {
@@ -1287,13 +1290,9 @@ describe('Aggregation', function () {
       let err;
       let coll1;
       let coll2;
-      const events = [];
 
-      client.on('commandStarted', e => {
-        if (e.commandName === 'aggregate') {
-          events.push(e);
-        }
-      });
+      const events = [];
+      client.on('commandStarted', filterForCommands(['aggregate'], events));
 
       client
         .connect()
@@ -1301,11 +1300,10 @@ describe('Aggregation', function () {
           coll1 = client.db(databaseName).collection('coll1');
           coll2 = client.db(databaseName).collection('coll2');
 
-          return Promise.all([coll1.remove({}), coll2.remove({})]);
+          return Promise.all([coll1.deleteMany({}), coll2.deleteMany({})]);
         })
         .then(() => {
           const docs = Array.from({ length: 10 }).map(() => ({ a: 1 }));
-
           return coll1.insertMany(docs);
         })
         .then(() => {

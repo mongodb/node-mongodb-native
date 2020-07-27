@@ -2637,6 +2637,8 @@ describe('Operation Examples', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
+        expect(err).to.not.exist;
+
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -2647,22 +2649,26 @@ describe('Operation Examples', function () {
         // REMOVE-LINE done();
         // REMOVE-LINE var db = client.db(configuration.db);
         // BEGIN
-        var db = client.db(configuration.db);
-        // Fetch a collection to insert document into
-        var collection = db.collection('remove_all_documents_no_safe');
+        const db = client.db(configuration.db);
+        const collection = db.collection('remove_all_documents_no_safe');
+
         // Insert a bunch of documents
-        collection.insertMany([{ a: 1 }, { b: 2 }], { w: 1 }, function (err, result) {
-          test.ok(result);
-          test.equal(null, err);
+        collection.insertMany([{ a: 1 }, { b: 2 }], { w: 1 }, (err, result) => {
+          expect(err).to.not.exist;
+          expect(result).to.exist;
 
           // Remove all the document
-          collection.removeMany();
+          collection.deleteMany({}, (err, result) => {
+            expect(err).to.not.exist;
+            expect(result).to.exist;
 
-          // Fetch all results
-          collection.find().toArray(function (err, items) {
-            test.equal(null, err);
-            test.equal(0, items.length);
-            client.close(done);
+            // Fetch all results
+            collection.find().toArray((err, docs) => {
+              expect(err).to.not.exist;
+              expect(docs).to.have.lengthOf(0);
+
+              client.close(done);
+            });
           });
         });
       });

@@ -6,12 +6,12 @@ import { TopologyType, ServerType } from './common';
 import { ServerDescription } from './server_description';
 import { TopologyDescription } from './topology_description';
 import { Server } from './server';
-import { CoreCursor } from '../cursor';
+import { Cursor } from '../cursor';
 import { ClientSession, ServerSessionPool } from '../sessions';
 import { SrvPoller } from './srv_polling';
 import { CMAP_EVENT_NAMES } from '../cmap/events';
 import { MongoError, MongoServerSelectionError } from '../error';
-import { readPreferenceServerSelector, writableServerSelector } from './server_selection';
+import { readPreferenceServerSelector } from './server_selection';
 import { deprecate } from 'util';
 import {
   relayEvents,
@@ -176,7 +176,7 @@ class Topology extends EventEmitter {
       heartbeatFrequencyMS: options.heartbeatFrequencyMS,
       minHeartbeatFrequencyMS: options.minHeartbeatFrequencyMS,
       // allow users to override the cursor factory
-      Cursor: options.cursorFactory || CoreCursor,
+      Cursor: options.cursorFactory || Cursor,
       // a map of server instances to normalized addresses
       servers: new Map(),
       // Server Session Pool
@@ -222,6 +222,10 @@ class Topology extends EventEmitter {
    */
   get description() {
     return this.s.description;
+  }
+
+  capabilities() {
+    return new ServerCapabilities(this.lastIsMaster());
   }
 
   /**
@@ -977,6 +981,75 @@ function isRetryableWritesSupported(topology: any) {
   }
 
   return true;
+}
+
+class ServerCapabilities {
+  constructor(ismaster: any) {
+    // Capabilities
+    let aggregationCursor = false;
+    let writeCommands = false;
+    let textSearch = false;
+    let authCommands = false;
+    let listCollections = false;
+    let listIndexes = false;
+    let maxNumberOfDocsInBatch = ismaster.maxWriteBatchSize || 1000;
+    let commandsTakeWriteConcern = false;
+    let commandsTakeCollation = false;
+
+    if (ismaster.minWireVersion >= 0) {
+      textSearch = true;
+    }
+
+    if (ismaster.maxWireVersion >= 1) {
+      aggregationCursor = true;
+      authCommands = true;
+    }
+
+    if (ismaster.maxWireVersion >= 2) {
+      writeCommands = true;
+    }
+
+    if (ismaster.maxWireVersion >= 3) {
+      listCollections = true;
+      listIndexes = true;
+    }
+
+    if (ismaster.maxWireVersion >= 5) {
+      commandsTakeWriteConcern = true;
+      commandsTakeCollation = true;
+    }
+
+    // If no min or max wire version set to 0
+    if (ismaster.minWireVersion == null) {
+      ismaster.minWireVersion = 0;
+    }
+
+    if (ismaster.maxWireVersion == null) {
+      ismaster.maxWireVersion = 0;
+    }
+
+    function setup_get_property(object: any, name: any, value: any) {
+      Object.defineProperty(object, name, {
+        enumerable: true,
+        get() {
+          return value;
+        }
+      });
+    }
+
+    // Map up read only parameters
+    setup_get_property(this, 'hasAggregationCursor', aggregationCursor);
+    setup_get_property(this, 'hasWriteCommands', writeCommands);
+    setup_get_property(this, 'hasTextSearch', textSearch);
+    setup_get_property(this, 'hasAuthCommands', authCommands);
+    setup_get_property(this, 'hasListCollectionsCommand', listCollections);
+    setup_get_property(this, 'hasListIndexesCommand', listIndexes);
+    setup_get_property(this, 'minWireVersion', ismaster.minWireVersion);
+    setup_get_property(this, 'maxWireVersion', ismaster.maxWireVersion);
+    setup_get_property(this, 'maxNumberOfDocsInBatch', maxNumberOfDocsInBatch);
+    setup_get_property(this, 'commandsTakeWriteConcern', commandsTakeWriteConcern);
+    setup_get_property(this, 'commandsTakeCollation', commandsTakeCollation);
+  }
 }
 
 export { Topology };

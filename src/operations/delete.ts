@@ -1,6 +1,7 @@
 import { defineAspects, Aspect, OperationBase } from './operation';
 import { deleteCallback, removeDocuments } from './common_functions';
 import CommandOperation = require('./command');
+import { isObject } from 'util';
 
 class DeleteOperation extends OperationBase {
   namespace: any;
@@ -53,6 +54,10 @@ class DeleteManyOperation extends CommandOperation {
 
   constructor(collection: any, filter: any, options: any) {
     super(collection, options);
+
+    if (!isObject(filter)) {
+      throw new TypeError('filter is a required parameter');
+    }
 
     this.collection = collection;
     this.filter = filter;
