@@ -1,10 +1,11 @@
-import ReadPreference = require('../read_preference');
+import { ReadPreference } from '../read_preference';
 import * as BSON from '../bson';
 import { databaseNamespace } from '../utils';
 import { OP_QUERY, OP_GETMORE, OP_KILL_CURSORS, OP_MSG } from './wire_protocol/constants';
 import type { Long } from 'bson';
 import type { Connection } from './connection';
-import type { Document } from '../types';
+import type { Document, BSONSerializeOptions } from '../types';
+import type { ClientSession } from '../sessions';
 
 // Incrementing request id
 let _requestId = 0;
@@ -24,20 +25,40 @@ const QUERY_FAILURE = 2;
 const SHARD_CONFIG_STALE = 4;
 const AWAIT_CAPABLE = 8;
 
-export type CommandTypes = Query | Msg | GetMore | KillCursor;
+export type CommandType = Query | Msg | GetMore | KillCursor;
+
+export interface QueryOptions {
+  socketTimeout?: number;
+  session?: ClientSession;
+  documentsReturnedIn?: string;
+  numberToSkip?: number;
+  numberToReturn?: number;
+  returnFieldSelector?: null;
+  pre32Limit?: number;
+  serializeFunctions?: boolean;
+  ignoreUndefined?: boolean;
+  maxBsonSize?: number;
+  checkKeys?: boolean;
+  slaveOk?: boolean;
+
+  requestId?: number;
+  moreToCome?: boolean;
+  exhaustAllowed?: boolean;
+  readPreference?: ReadPreference;
+}
 
 /**************************************************************
  * QUERY
  **************************************************************/
 export class Query {
   ns: string;
-  query: any;
+  query: Document;
   numberToSkip: number;
   numberToReturn: number;
-  returnFieldSelector?: any;
+  returnFieldSelector?: Document;
   requestId: number;
-  pre32Limit: any;
-  serializeFunctions: any;
+  pre32Limit?: number;
+  serializeFunctions: boolean;
   ignoreUndefined: boolean;
   maxBsonSize: number;
   checkKeys: boolean;
@@ -49,8 +70,9 @@ export class Query {
   awaitData: boolean;
   exhaust: boolean;
   partial: boolean;
+  documentsReturnedIn?: string;
 
-  constructor(ns: string, query: Document, options: any) {
+  constructor(ns: string, query: Document, options: QueryOptions) {
     // Basic options needed to be passed in
     if (ns == null) throw new Error('ns must be specified for query');
     if (query == null) throw new Error('query must be specified for query');
@@ -67,7 +89,7 @@ export class Query {
     // Additional options
     this.numberToSkip = options.numberToSkip || 0;
     this.numberToReturn = options.numberToReturn || 0;
-    this.returnFieldSelector = options.returnFieldSelector || null;
+    this.returnFieldSelector = options.returnFieldSelector || undefined;
     this.requestId = Query.getRequestId();
 
     // special case for pre-3.2 find commands, delete ASAP
@@ -90,31 +112,28 @@ export class Query {
     this.partial = false;
   }
 
-  //
-  // Assign a new request Id
-  incRequestId() {
+  /** Assign next request Id. */
+  incRequestId(): void {
     this.requestId = _requestId++;
   }
 
-  //
-  // Assign a new request Id
-  nextRequestId() {
+  /** Peek next request Id. */
+  nextRequestId(): number {
     return _requestId + 1;
   }
 
-  static getRequestId() {
+  /** Increment then return next request Id. */
+  static getRequestId(): number {
     return ++_requestId;
   }
 
-  //
   // Uses a single allocated buffer for the process, avoiding multiple memory allocations
-  toBin() {
-    var self = this;
-    var buffers = [];
-    var projection = null;
+  toBin(): Buffer[] {
+    const buffers = [];
+    let projection = null;
 
     // Set up the flags
-    var flags = 0;
+    let flags = 0;
     if (this.tailable) {
       flags |= OPTS_TAILABLE_CURSOR;
     }
@@ -143,14 +162,14 @@ export class Query {
       flags |= OPTS_PARTIAL;
     }
 
-    // If batchSize is different to self.numberToReturn
-    if (self.batchSize !== self.numberToReturn) self.numberToReturn = self.batchSize;
+    // If batchSize is different to this.numberToReturn
+    if (this.batchSize !== this.numberToReturn) this.numberToReturn = this.batchSize;
 
     // Allocate write protocol header buffer
-    var header = Buffer.alloc(
+    const header = Buffer.alloc(
       4 * 4 + // Header
       4 + // Flags
-      Buffer.byteLength(self.ns) +
+      Buffer.byteLength(this.ns) +
       1 + // namespace
       4 + // numberToSkip
         4 // numberToReturn
@@ -160,7 +179,7 @@ export class Query {
     buffers.push(header);
 
     // Serialize the query
-    var query = BSON.serialize(this.query, {
+    const query = BSON.serialize(this.query, {
       checkKeys: this.checkKeys,
       serializeFunctions: this.serializeFunctions,
       ignoreUndefined: this.ignoreUndefined
@@ -169,7 +188,7 @@ export class Query {
     // Add query document
     buffers.push(query);
 
-    if (self.returnFieldSelector && Object.keys(self.returnFieldSelector).length > 0) {
+    if (this.returnFieldSelector && Object.keys(this.returnFieldSelector).length > 0) {
       // Serialize the projection document
       projection = BSON.serialize(this.returnFieldSelector, {
         checkKeys: this.checkKeys,
@@ -181,10 +200,10 @@ export class Query {
     }
 
     // Total message size
-    var totalLength = header.length + query.length + (projection ? projection.length : 0);
+    const totalLength = header.length + query.length + (projection ? projection.length : 0);
 
     // Set up the index
-    var index = 4;
+    let index = 4;
 
     // Write total document length
     header[3] = (totalLength >> 24) & 0xff;
@@ -243,6 +262,10 @@ export class Query {
   }
 }
 
+export interface GetMoreOptions {
+  numberToReturn?: number;
+}
+
 /**************************************************************
  * GETMORE
  **************************************************************/
@@ -252,22 +275,20 @@ export class GetMore {
   ns: string;
   cursorId: Long;
 
-  constructor(ns: string, cursorId: Long, opts: any) {
-    opts = opts || {};
+  constructor(ns: string, cursorId: Long, opts: GetMoreOptions = {}) {
     this.numberToReturn = opts.numberToReturn || 0;
     this.requestId = _requestId++;
     this.ns = ns;
     this.cursorId = cursorId;
   }
 
-  //
   // Uses a single allocated buffer for the process, avoiding multiple memory allocations
-  toBin() {
-    var length = 4 + Buffer.byteLength(this.ns) + 1 + 4 + 8 + 4 * 4;
+  toBin(): Buffer[] {
+    const length = 4 + Buffer.byteLength(this.ns) + 1 + 4 + 8 + 4 * 4;
     // Create command buffer
-    var index = 0;
+    let index = 0;
     // Allocate buffer
-    var _buffer = Buffer.alloc(length);
+    const _buffer = Buffer.alloc(length);
 
     // Write header information
     // index = write32bit(index, _buffer, length);
@@ -333,7 +354,7 @@ export class GetMore {
     index = index + 4;
 
     // Return buffer
-    return _buffer;
+    return [_buffer];
   }
 }
 
@@ -351,14 +372,13 @@ export class KillCursor {
     this.cursorIds = cursorIds;
   }
 
-  //
   // Uses a single allocated buffer for the process, avoiding multiple memory allocations
-  toBin() {
-    var length = 4 + 4 + 4 * 4 + this.cursorIds.length * 8;
+  toBin(): Buffer[] {
+    const length = 4 + 4 + 4 * 4 + this.cursorIds.length * 8;
 
     // Create command buffer
-    var index = 0;
-    var _buffer = Buffer.alloc(length);
+    let index = 0;
+    const _buffer = Buffer.alloc(length);
 
     // Write header information
     // index = write32bit(index, _buffer, length);
@@ -405,7 +425,7 @@ export class KillCursor {
     index = index + 4;
 
     // Write all the cursor ids into the array
-    for (var i = 0; i < this.cursorIds.length; i++) {
+    for (let i = 0; i < this.cursorIds.length; i++) {
       // Write cursor id
       // index = write32bit(index, _buffer, cursorIds[i].getLowBits());
       _buffer[index + 3] = (this.cursorIds[i].getLowBits() >> 24) & 0xff;
@@ -423,7 +443,7 @@ export class KillCursor {
     }
 
     // Return buffer
-    return _buffer;
+    return [_buffer];
   }
 }
 
@@ -435,11 +455,16 @@ export interface MessageHeader {
   fromCompressed?: boolean;
 }
 
+export interface ResponseOptions extends BSONSerializeOptions {
+  raw?: boolean;
+  documentsReturnedIn?: string | null;
+}
+
 export class Response {
   parsed: boolean;
   raw: Buffer;
   data: Buffer;
-  opts: any;
+  opts: ResponseOptions;
   length: number;
   requestId: number;
   responseTo: number;
@@ -459,12 +484,11 @@ export class Response {
   promoteBuffers: boolean;
   index?: number;
 
-  constructor(message: Buffer, msgHeader: MessageHeader, msgBody: Buffer, opts: any) {
-    opts = opts || { promoteLongs: true, promoteValues: true, promoteBuffers: false };
+  constructor(message: Buffer, msgHeader: MessageHeader, msgBody: Buffer, opts?: ResponseOptions) {
     this.parsed = false;
     this.raw = message;
     this.data = msgBody;
-    this.opts = opts;
+    this.opts = opts ?? { promoteLongs: true, promoteValues: true, promoteBuffers: false };
 
     // Read the message header
     this.length = msgHeader.length;
@@ -487,30 +511,30 @@ export class Response {
     this.queryFailure = (this.responseFlags & QUERY_FAILURE) !== 0;
     this.shardConfigStale = (this.responseFlags & SHARD_CONFIG_STALE) !== 0;
     this.awaitCapable = (this.responseFlags & AWAIT_CAPABLE) !== 0;
-    this.promoteLongs = opts.promoteLongs ?? true;
-    this.promoteValues = opts.promoteValues ?? true;
-    this.promoteBuffers = opts.promoteBuffers ?? false;
+    this.promoteLongs = this.opts.promoteLongs ?? true;
+    this.promoteValues = this.opts.promoteValues ?? true;
+    this.promoteBuffers = this.opts.promoteBuffers ?? false;
   }
 
-  isParsed() {
+  isParsed(): boolean {
     return this.parsed;
   }
 
-  parse(options: any) {
+  parse(options: ResponseOptions): void {
     // Don't parse again if not needed
     if (this.parsed) return;
     options = options || {};
 
     // Allow the return of raw documents instead of parsing
-    let raw = options.raw || false;
-    let documentsReturnedIn = options.documentsReturnedIn || null;
-    let promoteLongs = options.promoteLongs ?? this.opts.promoteLongs;
-    let promoteValues = options.promoteValues ?? this.opts.promoteValues;
-    let promoteBuffers = options.promoteBuffers ?? this.opts.promoteBuffers;
+    const raw = options.raw || false;
+    const documentsReturnedIn = options.documentsReturnedIn || null;
+    const promoteLongs = options.promoteLongs ?? this.opts.promoteLongs;
+    const promoteValues = options.promoteValues ?? this.opts.promoteValues;
+    const promoteBuffers = options.promoteBuffers ?? this.opts.promoteBuffers;
     let bsonSize;
 
     // Set up the options
-    const _options: any = {
+    const _options: BSONSerializeOptions = {
       promoteLongs: promoteLongs,
       promoteValues: promoteValues,
       promoteBuffers: promoteBuffers
@@ -520,10 +544,8 @@ export class Response {
     // (See https://docs.mongodb.com/manual/reference/mongodb-wire-protocol/#wire-op-reply)
     this.index = 20;
 
-    //
     // Parse Body
-    //
-    for (var i = 0; i < this.numberReturned; i++) {
+    for (let i = 0; i < this.numberReturned; i++) {
       bsonSize =
         this.data[this.index] |
         (this.data[this.index + 1] << 8) |
@@ -545,11 +567,11 @@ export class Response {
     }
 
     if (this.documents.length === 1 && documentsReturnedIn != null && raw) {
-      const fieldsAsRaw: any = {};
+      const fieldsAsRaw: Document = {};
       fieldsAsRaw[documentsReturnedIn] = true;
       _options.fieldsAsRaw = fieldsAsRaw;
 
-      const doc = BSON.deserialize(this.documents[0] as any, _options);
+      const doc = BSON.deserialize(this.documents[0] as Buffer, _options);
       this.documents = [doc];
     }
 
@@ -590,10 +612,21 @@ const OPTS_CHECKSUM_PRESENT = 1;
 const OPTS_MORE_TO_COME = 2;
 const OPTS_EXHAUST_ALLOWED = 1 << 16;
 
+export interface MsgOptions {
+  requestId: number;
+  serializeFunctions: boolean;
+  ignoreUndefined: boolean;
+  checkKeys: boolean;
+  maxBsonSize: number;
+  moreToCome: boolean;
+  exhaustAllowed: boolean;
+  readPreference: ReadPreference;
+}
+
 export class Msg {
   ns: string;
   command: Document;
-  options: any;
+  options: QueryOptions;
   requestId: number;
   serializeFunctions: boolean;
   ignoreUndefined: boolean;
@@ -603,7 +636,7 @@ export class Msg {
   moreToCome: boolean;
   exhaustAllowed: boolean;
 
-  constructor(ns: string, command: Document, options: any) {
+  constructor(ns: string, command: Document, options: QueryOptions) {
     // Basic options needed to be passed in
     if (command == null) throw new Error('query must be specified for query');
 
@@ -634,8 +667,8 @@ export class Msg {
     this.exhaustAllowed = options.exhaustAllowed ?? false;
   }
 
-  toBin() {
-    const buffers = [];
+  toBin(): Buffer[] {
+    const buffers: Buffer[] = [];
     let flags = 0;
 
     if (this.checksumPresent) {
@@ -669,7 +702,7 @@ export class Msg {
     return buffers;
   }
 
-  makeDocumentSegment(buffers: any, document: any) {
+  makeDocumentSegment(buffers: Buffer[], document: Document): number {
     const payloadTypeBuffer = Buffer.alloc(1);
     payloadTypeBuffer[0] = 0;
 
@@ -680,7 +713,7 @@ export class Msg {
     return payloadTypeBuffer.length + documentBuffer.length;
   }
 
-  serializeBson(document: any) {
+  serializeBson(document: Document): Buffer {
     return BSON.serialize(document, {
       checkKeys: this.checkKeys,
       serializeFunctions: this.serializeFunctions,
@@ -688,7 +721,7 @@ export class Msg {
     });
   }
 
-  static getRequestId() {
+  static getRequestId(): number {
     _requestId = (_requestId + 1) & 0x7fffffff;
     return _requestId;
   }
@@ -698,7 +731,7 @@ export class BinMsg {
   parsed: boolean;
   raw: Buffer;
   data: Buffer;
-  opts: any;
+  opts: ResponseOptions;
   length: number;
   requestId: number;
   responseTo: number;
@@ -714,12 +747,11 @@ export class BinMsg {
   documents: Document[];
   index?: number;
 
-  constructor(message: any, msgHeader: MessageHeader, msgBody: any, opts: any) {
-    opts = opts || { promoteLongs: true, promoteValues: true, promoteBuffers: false };
+  constructor(message: Buffer, msgHeader: MessageHeader, msgBody: Buffer, opts?: ResponseOptions) {
     this.parsed = false;
     this.raw = message;
     this.data = msgBody;
-    this.opts = opts;
+    this.opts = opts ?? { promoteLongs: true, promoteValues: true, promoteBuffers: false };
 
     // Read the message header
     this.length = msgHeader.length;
@@ -733,18 +765,18 @@ export class BinMsg {
     this.checksumPresent = (this.responseFlags & OPTS_CHECKSUM_PRESENT) !== 0;
     this.moreToCome = (this.responseFlags & OPTS_MORE_TO_COME) !== 0;
     this.exhaustAllowed = (this.responseFlags & OPTS_EXHAUST_ALLOWED) !== 0;
-    this.promoteLongs = opts.promoteLongs ?? true;
-    this.promoteValues = opts.promoteValues ?? true;
-    this.promoteBuffers = opts.promoteBuffers ?? false;
+    this.promoteLongs = this.opts.promoteLongs ?? true;
+    this.promoteValues = this.opts.promoteValues ?? true;
+    this.promoteBuffers = this.opts.promoteBuffers ?? false;
 
     this.documents = [];
   }
 
-  isParsed() {
+  isParsed(): boolean {
     return this.parsed;
   }
 
-  parse(options: any) {
+  parse(options: ResponseOptions): void {
     // Don't parse again if not needed
     if (this.parsed) return;
     options = options || {};
@@ -762,7 +794,7 @@ export class BinMsg {
       promoteLongs: promoteLongs,
       promoteValues: promoteValues,
       promoteBuffers: promoteBuffers
-    } as any;
+    } as BSONSerializeOptions;
 
     while (this.index < this.data.length) {
       const payloadType = this.data.readUInt8(this.index++);
@@ -778,7 +810,7 @@ export class BinMsg {
     }
 
     if (this.documents.length === 1 && documentsReturnedIn != null && raw) {
-      const fieldsAsRaw: any = {};
+      const fieldsAsRaw: Document = {};
       fieldsAsRaw[documentsReturnedIn] = true;
       _options.fieldsAsRaw = fieldsAsRaw;
 
@@ -801,9 +833,9 @@ export class CommandResult {
   ok?: number;
   result: Document;
   connection: Connection;
-  message: any;
+  message: Document;
 
-  constructor(result: Document, connection: Connection, message: any) {
+  constructor(result: Document, connection: Connection, message: Document) {
     this.result = result;
     this.connection = connection;
     this.message = message;
@@ -816,7 +848,7 @@ export class CommandResult {
    * @returns {object}
    */
   toJSON(): Document {
-    let result = Object.assign({}, this, this.result);
+    const result = Object.assign({}, this, this.result);
     delete result.message;
     return result;
   }

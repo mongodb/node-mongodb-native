@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
-import { MessageStream } from './message_stream';
-import { CommandResult, BinMsg, CommandTypes } from './commands';
+import { MessageStream, OperationDescription } from './message_stream';
+import { CommandResult, BinMsg, CommandType } from './commands';
 import { StreamDescription, StreamDescriptionOptions } from './stream_description';
 import * as wp from './wire_protocol';
 import { CommandStartedEvent, CommandFailedEvent, CommandSucceededEvent } from './events';
@@ -13,18 +13,14 @@ import {
   MongoWriteConcernError
 } from '../error';
 import { now, calculateDurationInMs } from '../utils';
-import type {
-  OperationDescription,
-  MongoDBInitialResponse,
-  ClusterTimeResponse,
-  CommandOptions
-} from './types';
 
-import type { Callback, Document } from '../types';
-import type { TLSSocketOptions } from 'tls';
-import type { TcpNetConnectOpts, Socket } from 'net';
+import type { Callback, Document, AutoEncryptionOptions } from '../types';
+import type { ConnectionOptions as TLSConnectionOptions } from 'tls';
+import type { Socket, TcpNetConnectOpts, IpcNetConnectOpts } from 'net';
 import type { Server } from '../sdam/server';
 import type { CursorState } from '../cursor/types';
+import type { MongoCredentials } from './auth/mongo_credentials';
+import type { CommandOptions } from './wire_protocol/command';
 
 const kStream = Symbol('stream');
 const kQueue = Symbol('queue');
@@ -36,20 +32,38 @@ const kDescription = Symbol('description');
 const kIsMaster = Symbol('ismaster');
 const kAutoEncrypter = Symbol('autoEncrypter');
 
-export interface ConnectionOptions
+export interface MongoDBConnectionOptions
   extends Partial<TcpNetConnectOpts>,
-    Partial<TLSSocketOptions>,
+    Partial<IpcNetConnectOpts>,
+    Partial<TLSConnectionOptions>,
     StreamDescriptionOptions {
-  [x: string]: any;
+  id: number;
+  monitorCommands: boolean;
+  generation: number;
+  autoEncrypter: AutoEncryptionOptions;
+  connectionType: typeof Connection;
+  credentials: MongoCredentials;
+  connectTimeoutMS?: number;
+  connectionTimeout?: number;
+  ssl: boolean;
+  keepAlive?: boolean;
+  keepAliveInitialDelay?: number;
+  noDelay?: boolean;
+  socketTimeout?: number;
 
   metadata: ClientMetadata;
-
   /** Required EventEmitter option */
   captureRejections?: boolean;
+
+  [key: string]: any;
+}
+
+export interface DestroyOptions {
+  force?: boolean;
 }
 
 export class Connection extends EventEmitter {
-  id: string | number;
+  id: number;
   address: string;
   socketTimeout: number;
   monitorCommands: boolean;
@@ -63,16 +77,15 @@ export class Connection extends EventEmitter {
   [kQueue]: Map<number | string, OperationDescription>;
   [kMessageStream]: MessageStream;
   [kStream]: Socket;
-  [kIsMaster]: MongoDBInitialResponse;
-  [kClusterTime]: ClusterTimeResponse;
+  [kIsMaster]: Document;
+  [kClusterTime]: Document;
 
-  constructor(stream: Socket, options: ConnectionOptions) {
+  constructor(stream: Socket, options: MongoDBConnectionOptions) {
     super(options);
     this.id = options.id;
     this.address = streamIdentifier(stream);
-    this.socketTimeout = typeof options.socketTimeout === 'number' ? options.socketTimeout : 360000;
-    this.monitorCommands =
-      typeof options.monitorCommands === 'boolean' ? options.monitorCommands : false;
+    this.socketTimeout = options.socketTimeout ?? 360000;
+    this.monitorCommands = options.monitorCommands ?? options.monitorCommands;
     this.closed = false;
     this.destroyed = false;
 
@@ -132,43 +145,47 @@ export class Connection extends EventEmitter {
     this[kMessageStream].pipe(stream);
   }
 
-  get description() {
+  get description(): StreamDescription {
     return this[kDescription];
   }
 
-  get ismaster() {
+  get ismaster(): Document {
     return this[kIsMaster];
   }
 
   // the `connect` method stores the result of the handshake ismaster on the connection
-  set ismaster(response: MongoDBInitialResponse) {
+  set ismaster(response: Document) {
     this[kDescription].receiveResponse(response);
 
     // TODO: remove this, and only use the `StreamDescription` in the future
     this[kIsMaster] = response;
   }
 
-  get generation() {
+  get generation(): number {
     return this[kGeneration] || 0;
   }
 
-  get idleTime() {
+  get idleTime(): number {
     return calculateDurationInMs(this[kLastUseTime]);
   }
 
-  get clusterTime() {
+  get clusterTime(): Document {
     return this[kClusterTime];
   }
 
-  get stream() {
+  get stream(): Socket {
     return this[kStream];
   }
 
-  markAvailable() {
+  markAvailable(): void {
     this[kLastUseTime] = now();
   }
 
-  destroy(options?: { force?: boolean }, callback?: Callback) {
+  destroy(): void;
+  destroy(callback?: Callback): void;
+  destroy(options?: DestroyOptions): void;
+  destroy(options?: DestroyOptions, callback?: Callback): void;
+  destroy(options?: DestroyOptions | Callback, callback?: Callback): void {
     if (typeof options === 'function') {
       callback = options;
       options = { force: false };
@@ -203,8 +220,15 @@ export class Connection extends EventEmitter {
   }
 
   // Wire protocol methods
-  command(ns: string, cmd: Document, options: CommandOptions, callback: Callback) {
-    wp.command(makeServerTrampoline(this), ns, cmd, options, callback);
+  command(ns: string, cmd: Document, callback: Callback): void;
+  command(ns: string, cmd: Document, options: CommandOptions, callback: Callback): void;
+  command(
+    ns: string,
+    cmd: Document,
+    options: CommandOptions | Callback,
+    callback?: Callback
+  ): void {
+    wp.command(makeServerTrampoline(this), ns, cmd, options as CommandOptions, callback);
   }
 
   query(
@@ -213,7 +237,7 @@ export class Connection extends EventEmitter {
     cursorState: CursorState,
     options: CommandOptions,
     callback: Callback
-  ) {
+  ): void {
     wp.query(makeServerTrampoline(this), ns, cmd, cursorState, options, callback);
   }
 
@@ -223,23 +247,23 @@ export class Connection extends EventEmitter {
     batchSize: number,
     options: CommandOptions,
     callback: Callback
-  ) {
+  ): void {
     wp.getMore(makeServerTrampoline(this), ns, cursorState, batchSize, options, callback);
   }
 
-  killCursors(ns: string, cursorState: Record<string, unknown>, callback: Callback) {
+  killCursors(ns: string, cursorState: CursorState, callback: Callback): void {
     wp.killCursors(makeServerTrampoline(this), ns, cursorState, callback);
   }
 
-  insert(ns: string, ops: Document[], options: CommandOptions, callback: Callback) {
+  insert(ns: string, ops: Document[], options: CommandOptions, callback: Callback): void {
     wp.insert(makeServerTrampoline(this), ns, ops, options, callback);
   }
 
-  update(ns: string, ops: Document[], options: CommandOptions, callback: Callback) {
+  update(ns: string, ops: Document[], options: CommandOptions, callback: Callback): void {
     wp.update(makeServerTrampoline(this), ns, ops, options, callback);
   }
 
-  remove(ns: string, ops: Document[], options: CommandOptions, callback: Callback) {
+  remove(ns: string, ops: Document[], options: CommandOptions, callback: Callback): void {
     wp.remove(makeServerTrampoline(this), ns, ops, options, callback);
   }
 }
@@ -262,11 +286,11 @@ function messageHandler(conn: Connection) {
   return function messageHandler(message: BinMsg) {
     // always emit the message, in case we are streaming
     conn.emit('message', message);
-    if (!conn[kQueue].has(message.responseTo)) {
+    const operationDescription = conn[kQueue].get(message.responseTo);
+    if (!operationDescription) {
       return;
     }
 
-    const operationDescription: OperationDescription = conn[kQueue].get(message.responseTo)!;
     const callback = operationDescription.cb;
 
     // SERVER-45775: For exhaust responses we should be able to use the same requestId to
@@ -296,7 +320,7 @@ function messageHandler(conn: Connection) {
       }
 
       if (document.$clusterTime) {
-        conn[kClusterTime] = document.$clusterTime as ClusterTimeResponse;
+        conn[kClusterTime] = document.$clusterTime as Document;
         conn.emit('clusterTimeReceived', document.$clusterTime);
       }
 
@@ -319,7 +343,7 @@ function messageHandler(conn: Connection) {
     callback(
       undefined,
       new CommandResult(
-        operationDescription.fullResult ? ((message as unknown) as Document) : message.documents[0],
+        operationDescription.fullResult ? message : message.documents[0],
         conn,
         message
       )
@@ -338,7 +362,7 @@ function streamIdentifier(stream: Socket) {
 // Not meant to be called directly, the wire protocol methods call this assuming it is a `Pool` instance
 function write(
   this: Connection,
-  command: CommandTypes,
+  command: CommandType,
   options: CommandOptions,
   callback: Callback
 ) {
@@ -348,7 +372,7 @@ function write(
   }
 
   options = options || {};
-  const operationDescription = {
+  const operationDescription: OperationDescription = {
     requestId: command.requestId,
     cb: callback,
     session: options.session,
@@ -361,8 +385,9 @@ function write(
     promoteLongs: typeof options.promoteLongs === 'boolean' ? options.promoteLongs : true,
     promoteValues: typeof options.promoteValues === 'boolean' ? options.promoteValues : true,
     promoteBuffers: typeof options.promoteBuffers === 'boolean' ? options.promoteBuffers : false,
-    raw: typeof options.raw === 'boolean' ? options.raw : false
-  } as OperationDescription;
+    raw: typeof options.raw === 'boolean' ? options.raw : false,
+    started: 0
+  };
 
   if (connection[kDescription] && connection[kDescription].compressor) {
     operationDescription.agreedCompressor = connection[kDescription].compressor;
@@ -395,10 +420,12 @@ function write(
             new CommandFailedEvent(connection, command, reply.result, operationDescription.started)
           );
         } else {
-          connection.emit(
-            'commandSucceeded',
-            new CommandSucceededEvent(connection, command, reply!, operationDescription.started)
-          );
+          if (reply) {
+            connection.emit(
+              'commandSucceeded',
+              new CommandSucceededEvent(connection, command, reply, operationDescription.started)
+            );
+          }
         }
       }
 

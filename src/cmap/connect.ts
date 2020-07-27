@@ -1,8 +1,8 @@
 import * as net from 'net';
 import * as tls from 'tls';
-import { Connection, ConnectionOptions } from './connection';
+import { Connection, MongoDBConnectionOptions } from './connection';
 import { MongoError, MongoNetworkError, MongoNetworkTimeoutError } from '../error';
-import { defaultAuthProviders } from './auth/defaultAuthProviders';
+import { AUTH_PROVIDERS } from './auth/defaultAuthProviders';
 import { AuthContext } from './auth/auth_provider';
 import { makeClientMetadata, ClientMetadataOptions, ClientMetadata } from '../utils';
 import {
@@ -11,19 +11,31 @@ import {
   MIN_SUPPORTED_WIRE_VERSION,
   MIN_SUPPORTED_SERVER_VERSION
 } from './wire_protocol/constants';
-import type { Callback, CallbackTypedError, Document } from '../types';
+import type { Callback, CallbackWithType, Document, UniversalError } from '../types';
 import type { EventEmitter } from 'events';
-import type { MongoDBInitialResponse } from './types';
 
-const AUTH_PROVIDERS = defaultAuthProviders();
+import type { Socket, SocketConnectOpts } from 'net';
+import type { TLSSocket, ConnectionOptions as TLSConnectionOpts } from 'tls';
+
+type UniversalSocket = Socket | TLSSocket;
 
 export function connect(
-  options: ConnectionOptions,
-  cancellationToken: EventEmitter | undefined,
-  callback: Callback<Connection>
-) {
-  if (typeof cancellationToken === 'function') {
-    callback = cancellationToken;
+  options: MongoDBConnectionOptions,
+  callback: Callback<Connection | UniversalSocket>
+): void;
+export function connect(
+  options: MongoDBConnectionOptions,
+  cancellationToken: EventEmitter,
+  callback: Callback<Connection | UniversalSocket>
+): void;
+export function connect(
+  options: MongoDBConnectionOptions,
+  _cancellationToken: EventEmitter | Callback<Connection | UniversalSocket>,
+  _callback?: Callback<Connection | UniversalSocket>
+): void {
+  let cancellationToken = _cancellationToken as EventEmitter | undefined;
+  const callback = (_callback ?? _cancellationToken) as Callback<Connection | UniversalSocket>;
+  if ('function' === typeof cancellationToken) {
     cancellationToken = undefined;
   }
 
@@ -31,17 +43,17 @@ export function connect(
     options && options.connectionType ? options.connectionType : Connection;
   const family = options.family !== undefined ? options.family : 0;
 
-  makeConnection(family, options, cancellationToken!, (err, socket) => {
-    if (err) {
-      callback(err, (socket as unknown) as Connection); // in the error case, `socket` is the originating error event name
+  makeConnection(family, options, cancellationToken, (err, socket) => {
+    if (err || !socket) {
+      callback(err, socket); // in the error case, `socket` is the originating error event name
       return;
     }
 
-    performInitialHandshake(new ConnectionType(socket!, options), options, callback);
+    performInitialHandshake(new ConnectionType(socket, options), options, callback);
   });
 }
 
-function checkSupportedServer(ismaster: MongoDBInitialResponse, options: ConnectionOptions) {
+function checkSupportedServer(ismaster: Document, options: MongoDBConnectionOptions) {
   const serverVersionHighEnough =
     ismaster &&
     typeof ismaster.maxWireVersion === 'number' &&
@@ -68,19 +80,19 @@ function checkSupportedServer(ismaster: MongoDBInitialResponse, options: Connect
 
 function performInitialHandshake(
   conn: Connection,
-  options: ConnectionOptions,
+  options: MongoDBConnectionOptions,
   _callback: Callback
 ) {
-  const callback = function (err, ret) {
+  const callback: Callback<Document> = function (err, ret) {
     if (err && conn) {
       conn.destroy();
     }
     _callback(err, ret);
-  } as Callback;
+  };
 
   const credentials = options.credentials;
   if (credentials) {
-    if (!credentials.mechanism.match(/DEFAULT/i) && !AUTH_PROVIDERS[credentials.mechanism]) {
+    if (!credentials.mechanism.match(/DEFAULT/i) && !AUTH_PROVIDERS.has(credentials.mechanism)) {
       callback(new MongoError(`authMechanism '${credentials.mechanism}' not supported`));
       return;
     }
@@ -88,18 +100,18 @@ function performInitialHandshake(
 
   const authContext = new AuthContext(conn, credentials, options);
   prepareHandshakeDocument(authContext, (err, handshakeDoc) => {
-    if (err) {
+    if (err || !handshakeDoc) {
       return callback(err);
     }
 
-    const handshakeOptions = Object.assign({}, options);
+    const handshakeOptions: Document = Object.assign({}, options);
     if (options.connectTimeoutMS || options.connectionTimeout) {
       // The handshake technically is a monitoring check, so its socket timeout should be connectTimeoutMS
       handshakeOptions.socketTimeout = options.connectTimeoutMS || options.connectionTimeout;
     }
 
     const start = new Date().getTime();
-    conn.command('admin.$cmd', handshakeDoc!, handshakeOptions, (err, result) => {
+    conn.command('admin.$cmd', handshakeDoc, handshakeOptions, (err, result) => {
       if (err) {
         callback(err);
         return;
@@ -128,8 +140,16 @@ function performInitialHandshake(
         Object.assign(authContext, { response });
 
         const resolvedCredentials = credentials.resolveAuthMechanism(response);
-        const authProvider = AUTH_PROVIDERS[resolvedCredentials.mechanism];
-        authProvider.auth(authContext, err => {
+        const AuthProvider = AUTH_PROVIDERS.get(resolvedCredentials.mechanism);
+        if (!AuthProvider) {
+          return callback(
+            new MongoError(
+              `Authentication Mechanism ${resolvedCredentials.mechanism} is not supported.`
+            )
+          );
+        }
+        const provider = new AuthProvider();
+        provider.auth(authContext, err => {
           if (err) return callback(err);
           callback(undefined, conn);
         });
@@ -142,7 +162,7 @@ function performInitialHandshake(
   });
 }
 
-interface HandshakeDocument extends Document {
+export interface HandshakeDocument extends Document {
   ismaster: boolean;
   client: ClientMetadata;
   compression: string[];
@@ -167,12 +187,23 @@ function prepareHandshakeDocument(authContext: AuthContext, callback: Callback<H
         saslSupportedMechs: `${credentials.source}.${credentials.username}`
       });
 
-      AUTH_PROVIDERS['scram-sha-256'].prepare(handshakeDoc, authContext, callback);
-      return;
+      let AuthProvider;
+      if ((AuthProvider = AUTH_PROVIDERS.get('scram-sha-256'))) {
+        // This auth mechanism is always present.
+        const provider = new AuthProvider();
+        provider.prepare(handshakeDoc, authContext, callback);
+        return;
+      }
     }
 
-    const authProvider = AUTH_PROVIDERS[credentials.mechanism];
-    authProvider.prepare(handshakeDoc, authContext, callback);
+    const AuthProvider = AUTH_PROVIDERS.get(credentials.mechanism);
+    if (!AuthProvider) {
+      return callback(
+        new MongoError(`Authentication Mechanism ${credentials.mechanism} is not supported.`)
+      );
+    }
+    const provider = new AuthProvider();
+    provider.prepare(handshakeDoc, authContext, callback);
     return;
   }
 
@@ -186,7 +217,6 @@ const LEGAL_SSL_SOCKET_OPTIONS = [
   'cert',
   'ca',
   'ciphers',
-  'NPNProtocols',
   'ALPNProtocols',
   'servername',
   'ecdhCurve',
@@ -198,12 +228,11 @@ const LEGAL_SSL_SOCKET_OPTIONS = [
   'rejectUnauthorized'
 ];
 
-function parseConnectOptions(
-  family: number,
-  options: ConnectionOptions
-): Partial<ConnectionOptions> {
+function parseConnectOptions(family: number, options: MongoDBConnectionOptions): SocketConnectOpts {
   const host = typeof options.host === 'string' ? options.host : 'localhost';
+
   if (host.indexOf('/') !== -1) {
+    // socket is a unix path
     return { path: host };
   }
 
@@ -217,17 +246,17 @@ function parseConnectOptions(
   return result;
 }
 
-function parseSslOptions(family: number, options: ConnectionOptions) {
-  const result = parseConnectOptions(family, options);
+function parseSslOptions(family: number, options: MongoDBConnectionOptions): TLSConnectionOpts {
+  const result: TLSConnectionOpts & { [key: string]: any } = parseConnectOptions(family, options);
   // Merge in valid SSL options
-  for (const name in options) {
-    if (options[name] != null && LEGAL_SSL_SOCKET_OPTIONS.indexOf(name) !== -1) {
+  for (const name of LEGAL_SSL_SOCKET_OPTIONS) {
+    if (options[name]) {
       result[name] = options[name];
     }
   }
 
   // Override checkServerIdentity behavior
-  if (options.checkServerIdentity === false) {
+  if (!options.checkServerIdentity) {
     // Skip the identity check by retuning undefined as per node documents
     // https://nodejs.org/api/tls.html#tls_tls_connect_options_callback
     result.checkServerIdentity = () => undefined;
@@ -248,9 +277,9 @@ const SOCKET_ERROR_EVENTS = new Set(socketErrorEventList);
 
 function makeConnection(
   family: number,
-  options: ConnectionOptions,
-  cancellationToken: EventEmitter,
-  _callback: CallbackTypedError<Error | MongoError, net.Socket | tls.TLSSocket>
+  options: MongoDBConnectionOptions,
+  cancellationToken: EventEmitter | undefined,
+  _callback: CallbackWithType<UniversalError, UniversalSocket>
 ) {
   const useSsl = typeof options.ssl === 'boolean' ? options.ssl : false;
   const keepAlive = typeof options.keepAlive === 'boolean' ? options.keepAlive : true;
@@ -271,23 +300,24 @@ function makeConnection(
     keepAliveInitialDelay = Math.round(socketTimeout / 2);
   }
 
-  let socket: net.Socket | tls.TLSSocket;
-  const callback = function (err, ret) {
+  let socket: UniversalSocket;
+  const callback: CallbackWithType<UniversalError, UniversalSocket> = function (err, ret) {
     if (err && socket) {
       socket.destroy();
     }
 
     _callback(err, ret);
-  } as CallbackTypedError<Error | MongoError, net.Socket | tls.TLSSocket>;
+  };
 
   try {
     if (useSsl) {
-      socket = tls.connect(parseSslOptions(family, options));
-      if (typeof (socket as tls.TLSSocket).disableRenegotiation === 'function') {
-        (socket as tls.TLSSocket).disableRenegotiation();
+      const tlsSocket = tls.connect(parseSslOptions(family, options));
+      if (typeof tlsSocket.disableRenegotiation === 'function') {
+        tlsSocket.disableRenegotiation();
       }
+      socket = tlsSocket;
     } else {
-      socket = net.createConnection(parseConnectOptions(family, options) as net.NetConnectOpts);
+      socket = net.createConnection(parseConnectOptions(family, options));
     }
   } catch (err) {
     return callback(err);
@@ -302,7 +332,7 @@ function makeConnection(
   function errorHandler(eventName: typeof socketErrorEventList[number] | 'cancel') {
     return (err: Error) => {
       SOCKET_ERROR_EVENTS.forEach(event => socket.removeAllListeners(event));
-      if (cancellationHandler) {
+      if (cancellationHandler && cancellationToken) {
         cancellationToken.removeListener('cancel', cancellationHandler);
       }
 
@@ -313,12 +343,14 @@ function makeConnection(
 
   function connectHandler() {
     SOCKET_ERROR_EVENTS.forEach(event => socket.removeAllListeners(event));
-    if (cancellationHandler) {
+    if (cancellationHandler && cancellationToken) {
       cancellationToken.removeListener('cancel', cancellationHandler);
     }
 
-    if ((socket as tls.TLSSocket).authorizationError && rejectUnauthorized) {
-      return callback((socket as tls.TLSSocket).authorizationError);
+    if (isTLSSocket(socket)) {
+      if (socket.authorizationError && rejectUnauthorized) {
+        return callback(socket.authorizationError);
+      }
     }
 
     socket.setTimeout(socketTimeout);
@@ -347,4 +379,8 @@ function connectionFailureError(type: string, err?: Error) {
     default:
       return new MongoNetworkError('unknown network error');
   }
+}
+
+function isTLSSocket(socket: UniversalSocket): socket is TLSSocket {
+  return 'boolean' === typeof (socket as TLSSocket).authorized;
 }

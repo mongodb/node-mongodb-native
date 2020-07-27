@@ -1,4 +1,4 @@
-import { Query, Msg } from '../commands';
+import { Query, Msg, CommandResult } from '../commands';
 import { getReadPreference, isSharded } from './shared';
 import { isTransactionCommand } from '../../transactions';
 import { applySession, ClientSession } from '../../sessions';
@@ -7,7 +7,23 @@ import { MongoError, MongoNetworkError } from '../../error';
 import type { Callback, Document } from '../../types';
 import type { Server } from '../../sdam/server';
 import type { Topology } from '../../sdam/topology';
-import type { CommandOptions } from '../types';
+import type { WriteConcern } from '../../write_concern';
+import type { ReadPreference } from '../..';
+
+export interface CommandOptions {
+  [key: string]: unknown;
+  writeConcern?: WriteConcern;
+  readPreference?: ReadPreference;
+  raw?: boolean;
+  promoteLongs?: boolean;
+  promoteValues?: boolean;
+  promoteBuffers?: boolean;
+  monitoring?: boolean;
+  fullResult?: boolean;
+  socketTimeout?: number;
+  session?: ClientSession;
+  documentsReturnedIn?: string;
+}
 
 function isClientEncryptionEnabled(server: Server) {
   const wireVersion = maxWireVersion(server);
@@ -18,11 +34,27 @@ export function command(
   server: Server,
   ns: string,
   cmd: Document,
-  options: Callback | CommandOptions,
-  callback: Callback
-) {
-  if (typeof options === 'function') (callback = options), (options = {});
-  options = options || {};
+  callback: Callback<CommandResult>
+): void;
+export function command(
+  server: Server,
+  ns: string,
+  cmd: Document,
+  options: CommandOptions,
+  callback?: Callback<CommandResult>
+): void;
+export function command(
+  server: Server,
+  ns: string,
+  cmd: Document,
+  _options: Callback | CommandOptions,
+  _callback?: Callback<CommandResult>
+): void {
+  let options = _options as CommandOptions;
+  const callback = (_callback ?? _options) as Callback<CommandResult>;
+  if ('function' === typeof options) {
+    options = {};
+  }
 
   if (cmd == null) {
     return callback(new MongoError(`command ${JSON.stringify(cmd)} does not return a cursor`));
@@ -47,12 +79,12 @@ function _command(
   ns: string,
   cmd: Document,
   options: CommandOptions,
-  callback: Callback
+  callback: Callback<CommandResult>
 ) {
   const pool = server.s.pool;
   const readPreference = getReadPreference(cmd, options);
   const shouldUseOpMsg = supportsOpMsg(server);
-  const session = options.session as ClientSession | undefined;
+  const session = options.session;
 
   let clusterTime = server.clusterTime;
   let finalCmd = Object.assign({}, cmd);
@@ -102,7 +134,7 @@ function _command(
 
   const inTransaction = session && (session.inTransaction() || isTransactionCommand(finalCmd));
   const commandResponseHandler = inTransaction
-    ? function (err: MongoNetworkError | MongoError) {
+    ? function (err: MongoNetworkError | MongoError, res?: CommandResult) {
         // We need to add a TransientTransactionError errorLabel, as stated in the transaction spec.
         if (
           err &&
@@ -113,14 +145,15 @@ function _command(
         }
 
         if (
+          session &&
           !cmd.commitTransaction &&
           err &&
           err instanceof MongoError &&
           err.hasErrorLabel('TransientTransactionError')
         ) {
-          session!.transaction.unpinServer();
+          session.transaction.unpinServer();
         }
-        return callback.apply(null, arguments as any);
+        return callback(undefined, res);
       }
     : callback;
 
@@ -160,13 +193,13 @@ function _cryptCommand(
   callback: Callback
 ) {
   const autoEncrypter = server.autoEncrypter;
-  const commandResponseHandler = function (err, response) {
+  const commandResponseHandler: Callback<Document> = function (err, response) {
     if (err || response == null) {
       callback(err, response);
       return;
     }
 
-    autoEncrypter.decrypt(response.result, options, (err?: any, decrypted?: any) => {
+    autoEncrypter.decrypt(response.result, options, (err: Error, decrypted: Document) => {
       if (err) {
         callback(err, null);
         return;
@@ -176,9 +209,9 @@ function _cryptCommand(
       response.message.documents = [decrypted];
       callback(undefined, response);
     });
-  } as Callback;
+  };
 
-  autoEncrypter.encrypt(ns, cmd, options, (err?: any, encrypted?: any) => {
+  autoEncrypter.encrypt(ns, cmd, options, (err: Error, encrypted: Document) => {
     if (err) {
       callback(err, null);
       return;

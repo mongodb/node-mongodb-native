@@ -6,10 +6,20 @@ import { AuthProvider, AuthContext } from './auth_provider';
 import { MongoCredentials } from './mongo_credentials';
 import { MongoError } from '../../error';
 import { maxWireVersion } from '../../utils';
-import type { Callback } from '../../types';
-import type { SerializeOptions } from 'bson';
+import type { Callback, BSONSerializeOptions } from '../../types';
 
-let aws4: any;
+interface AWSSignReturn {
+  headers: {
+    'X-Amz-Date': string;
+    Authorization: string;
+  };
+}
+
+interface AWSModule {
+  sign(requestOptions: unknown, credentials?: unknown): AWSSignReturn;
+}
+
+let aws4: AWSModule | null;
 try {
   aws4 = require('aws4');
 } catch {
@@ -20,32 +30,32 @@ const ASCII_N = 110;
 const AWS_RELATIVE_URI = 'http://169.254.170.2';
 const AWS_EC2_URI = 'http://169.254.169.254';
 const AWS_EC2_PATH = '/latest/meta-data/iam/security-credentials';
-const bsonOptions: SerializeOptions & {
-  promoteLongs: boolean;
-  promoteValues: boolean;
-  promoteBuffers: boolean;
-} = {
+const bsonOptions: BSONSerializeOptions = {
   promoteLongs: true,
   promoteValues: true,
   promoteBuffers: false
 };
 
+interface AWSSaslContinuePayload {
+  a: string;
+  d: string;
+  t?: string;
+}
+
 export class MongoDBAWS extends AuthProvider {
-  auth(authContext: AuthContext, callback: Callback) {
+  auth(authContext: AuthContext, callback: Callback): void {
     const { connection, credentials } = authContext;
     if (maxWireVersion(connection) < 9) {
       callback(new MongoError('MONGODB-AWS authentication requires MongoDB version 4.4 or later'));
       return;
     }
 
-    if (aws4 == null) {
-      callback(
+    if (!aws4) {
+      return callback(
         new MongoError(
           'MONGODB-AWS authentication requires the `aws4` module, please install it as a dependency of your project'
         )
       );
-
-      return;
     }
 
     if (credentials.username == null) {
@@ -75,7 +85,7 @@ export class MongoDBAWS extends AuthProvider {
         payload: BSON.serialize({ r: nonce, p: ASCII_N }, bsonOptions)
       };
 
-      connection.command(`${db}.$cmd`, saslStart, {}, (err, result) => {
+      connection.command(`${db}.$cmd`, saslStart, (err, result) => {
         if (err) return callback(err);
 
         const res = result.result;
@@ -101,6 +111,13 @@ export class MongoDBAWS extends AuthProvider {
         }
 
         const body = 'Action=GetCallerIdentity&Version=2011-06-15';
+        if (!aws4) {
+          return callback(
+            new MongoError(
+              'MONGODB-AWS authentication requires the `aws4` module, please install it as a dependency of your project'
+            )
+          );
+        }
         const options = aws4.sign(
           {
             method: 'POST',
@@ -125,7 +142,7 @@ export class MongoDBAWS extends AuthProvider {
 
         const authorization = options.headers.Authorization;
         const date = options.headers['X-Amz-Date'];
-        const payload = { a: authorization, d: date } as { a: any; d: any; t?: any };
+        const payload: AWSSaslContinuePayload = { a: authorization, d: date };
         if (token) {
           payload.t = token;
         }
@@ -136,14 +153,20 @@ export class MongoDBAWS extends AuthProvider {
           payload: BSON.serialize(payload, bsonOptions)
         };
 
-        connection.command(`${db}.$cmd`, saslContinue, {}, callback);
+        connection.command(`${db}.$cmd`, saslContinue, callback);
       });
     });
   }
 }
 
+interface TemporaryCredentials {
+  AccessKeyId?: string;
+  SecretAccessKey?: string;
+  Token?: string;
+}
+
 function makeTempCredentials(credentials: MongoCredentials, callback: Callback) {
-  function done(creds: any) {
+  function done(creds: TemporaryCredentials) {
     if (creds.AccessKeyId == null || creds.SecretAccessKey == null || creds.Token == null) {
       callback(new MongoError('Could not obtain temporary MONGODB-AWS credentials'));
       return;
@@ -168,7 +191,6 @@ function makeTempCredentials(credentials: MongoCredentials, callback: Callback) 
   if (process.env.AWS_CONTAINER_CREDENTIALS_RELATIVE_URI) {
     request(
       `${AWS_RELATIVE_URI}${process.env.AWS_CONTAINER_CREDENTIALS_RELATIVE_URI}`,
-      undefined,
       (err, res) => {
         if (err) return callback(err);
         done(res);
@@ -218,10 +240,27 @@ function deriveRegion(host: string) {
   return parts[1];
 }
 
-function request(uri: string, options?: any, callback?: Callback) {
-  if (typeof options === 'function') {
-    callback = options;
+interface RequestOptions {
+  json?: boolean;
+  method?: string;
+  timeout?: number;
+  headers?: {
+    'X-aws-ec2-metadata-token-ttl-seconds'?: number;
+    'X-aws-ec2-metadata-token'?: string;
+  };
+}
+
+function request(uri: string, callback: Callback): void;
+function request(uri: string, options: RequestOptions, callback: Callback): void;
+function request(uri: string, _options: RequestOptions | Callback, _callback?: Callback) {
+  let options = _options as RequestOptions;
+  if ('function' === typeof _options) {
     options = {};
+  }
+
+  let callback: Callback = _options as Callback;
+  if (_callback) {
+    callback = _callback;
   }
 
   options = Object.assign(
@@ -241,19 +280,19 @@ function request(uri: string, options?: any, callback?: Callback) {
     res.on('data', d => (data += d));
     res.on('end', () => {
       if (options.json === false) {
-        callback!(undefined, data);
+        callback(undefined, data);
         return;
       }
 
       try {
         const parsed = JSON.parse(data);
-        callback!(undefined, parsed);
+        callback(undefined, parsed);
       } catch (err) {
-        callback!(new MongoError(`Invalid JSON response: "${data}"`));
+        callback(new MongoError(`Invalid JSON response: "${data}"`));
       }
     });
   });
 
-  req.on('error', err => callback!(err));
+  req.on('error', err => callback(err));
   req.end();
 }

@@ -1,6 +1,7 @@
 import type { Callback, Document } from '../../types';
-import type { Connection, ConnectionOptions } from '../connection';
+import type { Connection, MongoDBConnectionOptions } from '../connection';
 import type { MongoCredentials } from './mongo_credentials';
+import type { HandshakeDocument } from '../connect';
 
 /**
  * Context used during authentication
@@ -12,16 +13,20 @@ import type { MongoCredentials } from './mongo_credentials';
  * @property {Buffer?} nonce A random nonce generated for use in an authentication conversation
  */
 export class AuthContext {
-  connection: Connection & { host: string; port: number };
+  connection: Connection;
   credentials: MongoCredentials;
-  options: ConnectionOptions;
+  options: MongoDBConnectionOptions;
 
   /** A response from a speculative auth attempt, only some mechanisms use this (e.g, SCRAM) */
   response?: Document;
   nonce?: Buffer;
 
-  constructor(connection: Connection, credentials: MongoCredentials, options: ConnectionOptions) {
-    this.connection = connection as Connection & { host: string; port: number };
+  constructor(
+    connection: Connection,
+    credentials: MongoCredentials,
+    options: MongoDBConnectionOptions
+  ) {
+    this.connection = connection;
     this.credentials = credentials;
     this.options = options;
   }
@@ -35,7 +40,11 @@ export class AuthProvider {
    * @param {AuthContext} authContext Context for authentication flow
    * @param {Function} callback
    */
-  prepare<T>(handshakeDoc: T, authContext: AuthContext, callback: Callback<T>) {
+  prepare(
+    handshakeDoc: HandshakeDocument,
+    authContext: AuthContext,
+    callback: Callback<HandshakeDocument>
+  ): void {
     callback(undefined, handshakeDoc);
   }
 
@@ -45,7 +54,7 @@ export class AuthProvider {
    * @param {AuthContext} context A shared context for authentication flow
    * @param {authResultCallback} callback The callback to return the result from the authentication
    */
-  auth(context: AuthContext, callback: Callback) {
+  auth(context: AuthContext, callback: Callback): void {
     callback(new TypeError('`auth` method must be overridden by subclass'));
   }
 }

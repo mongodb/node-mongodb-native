@@ -1,6 +1,6 @@
 import { emitDeprecatedOptionWarning, toError } from './utils';
 import PromiseProvider = require('./promise_provider');
-import ReadPreference = require('./read_preference');
+import { ReadPreference } from './read_preference';
 import { deprecate } from 'util';
 import {
   normalizeHintField,

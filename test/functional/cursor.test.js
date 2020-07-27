@@ -6,7 +6,7 @@ const { expect } = require('chai');
 const BSON = require('bson');
 const sinon = require('sinon');
 const { Writable } = require('stream');
-const ReadPreference = require('../../src/read_preference');
+const { ReadPreference } = require('../../src/read_preference');
 const { ServerType } = require('../../src/sdam/common');
 
 describe('Cursor', function () {

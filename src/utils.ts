@@ -3,7 +3,7 @@ import os = require('os');
 import crypto = require('crypto');
 import { MongoError } from './error';
 import { WriteConcern } from './write_concern';
-import type { CallbackTypedError, Callback } from './types';
+import type { CallbackWithType, Callback } from './types';
 
 const MAX_JS_INT = Number.MAX_SAFE_INTEGER + 1;
 
@@ -731,8 +731,8 @@ function collationNotSupported(server: any, cmd: any) {
  */
 function eachAsync<T, E = any>(
   arr: T[],
-  eachFn: (item: T, callback: Callback<CallbackTypedError<E>>) => void,
-  callback: CallbackTypedError<E>
+  eachFn: (item: T, callback: Callback<CallbackWithType<E>>) => void,
+  callback: CallbackWithType<E>
 ) {
   arr = arr || [];
 

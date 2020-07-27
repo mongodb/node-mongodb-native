@@ -1,6 +1,6 @@
 import { emitDeprecatedOptionWarning } from '../utils';
 import PromiseProvider = require('../promise_provider');
-import ReadPreference = require('../read_preference');
+import { ReadPreference } from '../read_preference';
 import { Transform, PassThrough } from 'stream';
 import { deprecate } from 'util';
 import { MongoError } from '../error';

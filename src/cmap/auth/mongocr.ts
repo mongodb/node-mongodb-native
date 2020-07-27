@@ -3,12 +3,12 @@ import { AuthProvider, AuthContext } from './auth_provider';
 import type { Callback } from '../../types';
 
 export class MongoCR extends AuthProvider {
-  auth(authContext: AuthContext, callback: Callback) {
+  auth(authContext: AuthContext, callback: Callback): void {
     const { connection, credentials } = authContext;
     const username = credentials.username;
     const password = credentials.password;
     const source = credentials.source;
-    connection.command(`${source}.$cmd`, { getnonce: 1 }, {}, (err, result) => {
+    connection.command(`${source}.$cmd`, { getnonce: 1 }, (err, result) => {
       let nonce = null;
       let key = null;
 
@@ -37,7 +37,7 @@ export class MongoCR extends AuthProvider {
         key
       };
 
-      connection.command(`${source}.$cmd`, authenticateCommand, {}, callback);
+      connection.command(`${source}.$cmd`, authenticateCommand, callback);
     });
   }
 }

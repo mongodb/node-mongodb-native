@@ -1,20 +1,26 @@
-import { command } from './command';
+import { command, CommandOptions } from './command';
 import { Query } from '../commands';
 import { MongoError } from '../../error';
 import { maxWireVersion, collectionNamespace } from '../../utils';
 import { getReadPreference, isSharded, applyCommonQueryOptions } from './shared';
 import type { Callback, Document } from '../../types';
 import type { Server } from '../../sdam/server';
-import type { CommandOptions } from '../types';
+import type { CursorState } from '../../cursor/types';
+import type { ReadPreference } from '../..';
+
+interface QueryOptions extends CommandOptions {
+  [key: string]: unknown;
+  readPreference?: ReadPreference;
+}
 
 export function query(
   server: Server,
   ns: string,
   cmd: Document,
-  cursorState: any,
-  options: CommandOptions,
+  cursorState: CursorState,
+  options: QueryOptions,
   callback: Callback
-) {
+): void {
   options = options || {};
   if (cursorState.cursorId != null) {
     return callback();
@@ -62,7 +68,7 @@ export function query(
   command(server, ns, findCmd, commandOptions, callback);
 }
 
-function prepareFindCommand(server: Server, ns: string, cmd: any, cursorState: any) {
+function prepareFindCommand(server: Server, ns: string, cmd: Document, cursorState: CursorState) {
   cursorState.batchSize = cmd.batchSize || cursorState.batchSize;
   let findCmd: Document = {
     find: collectionNamespace(ns)
@@ -162,10 +168,10 @@ function prepareFindCommand(server: Server, ns: string, cmd: any, cursorState: a
 function prepareLegacyFindQuery(
   server: Server,
   ns: string,
-  cmd: any,
-  cursorState: any,
+  cmd: Document,
+  cursorState: CursorState,
   options: CommandOptions
-): Query | any {
+): Query {
   options = options || {};
   const readPreference = getReadPreference(cmd, options);
   cursorState.batchSize = cmd.batchSize || cursorState.batchSize;

@@ -1,9 +1,10 @@
 import { AuthProvider, AuthContext } from './auth_provider';
-import type { Callback } from '../../types';
+import type { Callback, Document } from '../../types';
 import type { MongoCredentials } from './mongo_credentials';
+import type { HandshakeDocument } from '../connect';
 
 export class X509 extends AuthProvider {
-  prepare(handshakeDoc: any, authContext: AuthContext, callback: Callback) {
+  prepare(handshakeDoc: HandshakeDocument, authContext: AuthContext, callback: Callback): void {
     const { credentials } = authContext;
     Object.assign(handshakeDoc, {
       speculativeAuthenticate: x509AuthenticateCommand(credentials)
@@ -12,27 +13,21 @@ export class X509 extends AuthProvider {
     callback(undefined, handshakeDoc);
   }
 
-  auth(authContext: AuthContext, callback: Callback) {
+  auth(authContext: AuthContext, callback: Callback): void {
     const connection = authContext.connection;
     const credentials = authContext.credentials;
     const response = authContext.response;
-    if (response!.speculativeAuthenticate) {
+
+    if (response && response.speculativeAuthenticate) {
       return callback();
     }
 
-    connection.command('$external.$cmd', x509AuthenticateCommand(credentials), {}, callback);
+    connection.command('$external.$cmd', x509AuthenticateCommand(credentials), callback);
   }
 }
 
-interface X509Command {
-  authenticate: 1;
-  mechanism: 'MONGODB-X509';
-  user?: string;
-  [key: string]: unknown;
-}
-
 function x509AuthenticateCommand(credentials: MongoCredentials) {
-  const command: X509Command = { authenticate: 1, mechanism: 'MONGODB-X509' };
+  const command: Document = { authenticate: 1, mechanism: 'MONGODB-X509' };
   if (credentials.username) {
     command.user = credentials.username;
   }

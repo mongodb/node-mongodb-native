@@ -3,7 +3,7 @@ import { AuthProvider, AuthContext } from './auth_provider';
 import type { Callback } from '../../types';
 
 export class Plain extends AuthProvider {
-  auth(authContext: AuthContext, callback: Callback) {
+  auth(authContext: AuthContext, callback: Callback): void {
     const { connection, credentials } = authContext;
     const username = credentials.username;
     const password = credentials.password;
@@ -16,6 +16,6 @@ export class Plain extends AuthProvider {
       autoAuthorize: 1
     };
 
-    connection.command('$external.$cmd', command, {}, callback);
+    connection.command('$external.$cmd', command, callback);
   }
 }

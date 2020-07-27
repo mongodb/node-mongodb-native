@@ -1,12 +1,18 @@
 import { KillCursor } from '../commands';
 import { maxWireVersion, collectionNamespace } from '../../utils';
-import { command } from './command';
+import { command, CommandOptions } from './command';
 import { MongoError, MongoNetworkError } from '../../error';
 import type { Server } from '../../sdam/server';
 import type { Callback } from '../../types';
+import type { CursorState } from '../../cursor/types';
 
-export function killCursors(server: Server, ns: string, cursorState: any, callback: Callback) {
-  callback = typeof callback === 'function' ? callback : () => {};
+export function killCursors(
+  server: Server,
+  ns: string,
+  cursorState: CursorState,
+  callback: Callback
+): void {
+  callback = typeof callback === 'function' ? callback : () => undefined;
   const cursorId = cursorState.cursorId;
 
   if (maxWireVersion(server) < 4) {
@@ -42,13 +48,13 @@ export function killCursors(server: Server, ns: string, cursorState: any, callba
     cursors: [cursorId]
   };
 
-  const options = {} as any;
+  const options: CommandOptions = {};
   if (typeof cursorState.session === 'object') {
     options.session = cursorState.session;
   }
 
   command(server, ns, killCursorCmd, options, (err, result) => {
-    if (err) {
+    if (err || !result) {
       return callback(err);
     }
 

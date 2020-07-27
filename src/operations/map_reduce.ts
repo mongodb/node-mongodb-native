@@ -8,7 +8,7 @@ import {
   isObject,
   toError
 } from '../utils';
-import ReadPreference = require('../read_preference');
+import { ReadPreference } from '../read_preference';
 import CommandOperation = require('./command');
 import { defineAspects, Aspect } from './operation';
 

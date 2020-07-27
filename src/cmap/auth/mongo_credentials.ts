@@ -1,9 +1,9 @@
 // Resolves the default auth mechanism according to
 
-import type { MongoDBInitialResponse } from '../types';
+import type { Document } from '../../types';
 
 // https://github.com/mongodb/specifications/blob/master/source/auth/auth.rst
-function getDefaultAuthMechanism(ismaster?: MongoDBInitialResponse) {
+function getDefaultAuthMechanism(ismaster?: Document) {
   if (ismaster) {
     // If ismaster contains saslSupportedMechs, use scram-sha-256
     // if it is available, else scram-sha-1
@@ -23,6 +23,15 @@ function getDefaultAuthMechanism(ismaster?: MongoDBInitialResponse) {
   return 'mongocr';
 }
 
+export interface MongoCredentialsOptions {
+  username: string;
+  password: string;
+  source: string;
+  db?: string;
+  mechanism?: string;
+  mechanismProperties: Document;
+}
+
 /**
  * A representation of the credentials used by MongoDB
  *
@@ -38,7 +47,7 @@ class MongoCredentials {
   readonly password: string;
   readonly source: string;
   readonly mechanism: string;
-  readonly mechanismProperties: any;
+  readonly mechanismProperties: Document;
 
   /**
    * Creates a new MongoCredentials object
@@ -50,11 +59,13 @@ class MongoCredentials {
    * @param {string} [options.mechanism] The method used to authenticate
    * @param {object} [options.mechanismProperties] Special properties used by some types of auth mechanisms
    */
-  constructor(options?: any) {
-    options = options || {};
+  constructor(options: MongoCredentialsOptions) {
     this.username = options.username;
     this.password = options.password;
-    this.source = options.source || options.db;
+    this.source = options.source;
+    if (!this.source && options.db) {
+      this.source = options.db;
+    }
     this.mechanism = options.mechanism || 'default';
     this.mechanismProperties = options.mechanismProperties || {};
 
@@ -98,7 +109,7 @@ class MongoCredentials {
    * @param {object} [ismaster] An ismaster response from the server
    * @returns {MongoCredentials}
    */
-  resolveAuthMechanism(ismaster?: MongoDBInitialResponse): MongoCredentials {
+  resolveAuthMechanism(ismaster?: Document): MongoCredentials {
     // If the mechanism is not "default", then it does not need to be resolved
     if (this.mechanism.match(/DEFAULT/i)) {
       return new MongoCredentials({

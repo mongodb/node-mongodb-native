@@ -1,9 +1,8 @@
-import { GetMore, KillCursor, Msg, Query, CommandResult, CommandTypes } from './commands';
+import { GetMore, KillCursor, Msg, Query, CommandResult, CommandType } from './commands';
 import { calculateDurationInMs } from '../utils';
 import type { ConnectionPool, ConnectionPoolOptions } from './connection_pool';
 import type { Connection } from './connection';
-import type { MongoError } from '../error';
-import type { Document } from '../types';
+import type { Document, UniversalError } from '../types';
 
 /** The base export class for all monitoring events published from the connection pool */
 export class ConnectionPoolMonitoringEvent {
@@ -39,7 +38,7 @@ export class ConnectionPoolClosedEvent extends ConnectionPoolMonitoringEvent {
 /** An event published when a connection pool creates a new connection */
 export class ConnectionCreatedEvent extends ConnectionPoolMonitoringEvent {
   /** A monotonically increasing, per-pool id for the newly created connection */
-  connectionId: string | number;
+  connectionId: number;
 
   constructor(pool: ConnectionPool, connection: Connection) {
     super(pool);
@@ -50,7 +49,7 @@ export class ConnectionCreatedEvent extends ConnectionPoolMonitoringEvent {
 /** An event published when a connection is ready for use */
 export class ConnectionReadyEvent extends ConnectionPoolMonitoringEvent {
   /** The id of the connection */
-  connectionId: string | number;
+  connectionId: number;
 
   constructor(pool: ConnectionPool, connection: Connection) {
     super(pool);
@@ -61,7 +60,7 @@ export class ConnectionReadyEvent extends ConnectionPoolMonitoringEvent {
 /** An event published when a connection is closed */
 export class ConnectionClosedEvent extends ConnectionPoolMonitoringEvent {
   /** The id of the connection */
-  connectionId: string | number;
+  connectionId: number;
   /** The reason the connection was closed */
   reason: string;
 
@@ -82,9 +81,9 @@ export class ConnectionCheckOutStartedEvent extends ConnectionPoolMonitoringEven
 /** An event published when a request to check a connection out fails */
 export class ConnectionCheckOutFailedEvent extends ConnectionPoolMonitoringEvent {
   /** The reason the attempt to check out failed */
-  reason: string | MongoError;
+  reason: UniversalError;
 
-  constructor(pool: ConnectionPool, reason: string | MongoError) {
+  constructor(pool: ConnectionPool, reason: UniversalError) {
     super(pool);
     this.reason = reason;
   }
@@ -93,7 +92,7 @@ export class ConnectionCheckOutFailedEvent extends ConnectionPoolMonitoringEvent
 /** An event published when a connection is checked out of the connection pool */
 export class ConnectionCheckedOutEvent extends ConnectionPoolMonitoringEvent {
   /** The id of the connection */
-  connectionId: string | number;
+  connectionId: number;
 
   constructor(pool: ConnectionPool, connection: Connection) {
     super(pool);
@@ -104,7 +103,7 @@ export class ConnectionCheckedOutEvent extends ConnectionPoolMonitoringEvent {
 /** An event published when a connection is checked into the connection pool */
 export class ConnectionCheckedInEvent extends ConnectionPoolMonitoringEvent {
   /** The id of the connection */
-  connectionId: string | number;
+  connectionId: number;
 
   constructor(pool: ConnectionPool, connection: Connection) {
     super(pool);
@@ -148,7 +147,7 @@ export class CommandStartedEvent {
    * @param {Pool} pool the pool that originated the command
    * @param {object} command the command
    */
-  constructor(pool: Connection | ConnectionPool, command: CommandTypes) {
+  constructor(pool: Connection | ConnectionPool, command: CommandType) {
     const cmd = extractCommand(command);
     const commandName = extractCommandName(cmd);
     const { address, connectionId } = extractConnectionDetails(pool);
@@ -187,7 +186,7 @@ export class CommandSucceededEvent {
    */
   constructor(
     pool: Connection | ConnectionPool,
-    command: CommandTypes,
+    command: CommandType,
     reply: CommandResult,
     started: number
   ) {
@@ -222,7 +221,7 @@ export class CommandFailedEvent {
    */
   constructor(
     pool: Connection | ConnectionPool,
-    command: CommandTypes,
+    command: CommandType,
     error: Error | Document,
     started: number
   ) {
@@ -255,13 +254,13 @@ const SENSITIVE_COMMANDS = new Set([
 
 // helper methods
 const extractCommandName = (commandDoc: Document) => Object.keys(commandDoc)[0];
-const namespace = (command: CommandTypes) => command.ns;
-const databaseName = (command: CommandTypes) => command.ns.split('.')[0];
-const collectionName = (command: CommandTypes) => command.ns.split('.')[1];
+const namespace = (command: CommandType) => command.ns;
+const databaseName = (command: CommandType) => command.ns.split('.')[0];
+const collectionName = (command: CommandType) => command.ns.split('.')[1];
 const maybeRedact = (commandName: string, result: CommandResult | Error | Document) =>
   SENSITIVE_COMMANDS.has(commandName) ? {} : result;
 
-const LEGACY_FIND_QUERY_MAP = {
+const LEGACY_FIND_QUERY_MAP: { [key: string]: string } = {
   $query: 'filter',
   $orderby: 'sort',
   $hint: 'hint',
@@ -273,13 +272,13 @@ const LEGACY_FIND_QUERY_MAP = {
   $showDiskLoc: 'showRecordId',
   $maxTimeMS: 'maxTimeMS',
   $snapshot: 'snapshot'
-} as Record<string, string>;
+};
 
-const LEGACY_FIND_OPTIONS_MAP = {
+const LEGACY_FIND_OPTIONS_MAP: { [key: string]: string } = {
   numberToSkip: 'skip',
   numberToReturn: 'batchSize',
   returnFieldsSelector: 'projection'
-} as Record<string, string>;
+};
 
 const OP_QUERY_KEYS = [
   'tailable',
@@ -291,7 +290,7 @@ const OP_QUERY_KEYS = [
 ];
 
 /** Extract the actual command from the query, possibly up-converting if it's a legacy format */
-function extractCommand(command: CommandTypes): Document {
+function extractCommand(command: CommandType): Document {
   if (command instanceof GetMore) {
     return {
       getMore: command.cursorId,
@@ -313,7 +312,7 @@ function extractCommand(command: CommandTypes): Document {
 
   if (command.query && command.query.$query) {
     let result: Document;
-    let commandObject: any = command;
+    const commandObject: any = command;
     if (commandObject.ns === 'admin.$cmd') {
       // up-convert legacy command
       result = Object.assign({}, command.query.$query);

@@ -6,27 +6,31 @@ import { maxWireVersion, collectionNamespace } from '../../utils';
 import { command } from './command';
 import type { Server } from '../../sdam/server';
 import type { Connection } from '../connection';
-import type { Callback } from '../../types';
-import type { CommandOptions } from '../types';
+import type { Callback, Callback2, Document } from '../../types';
+import type { CursorState } from '../../cursor/types';
+
+interface GetMoreOptions {
+  [key: string]: unknown;
+}
 
 export function getMore(
   server: Server,
   ns: string,
-  cursorState: any,
+  cursorState: CursorState,
   batchSize: number,
-  options: CommandOptions,
-  callback: (error?: Error, doc?: any, connection?: Connection) => void
-) {
+  options: GetMoreOptions,
+  callback: Callback2<Document, Connection>
+): void {
   options = options || {};
 
   const wireVersion = maxWireVersion(server);
   const queryCallback = function (err, result) {
-    if (err) return callback(err);
+    if (err || !result) return callback(err);
     const response = result.message;
 
     // If we have a timed out query or a cursor that was killed
     if (response.cursorNotFound) {
-      return callback(new MongoNetworkError('cursor killed or timed out'), null);
+      return callback(new MongoNetworkError('cursor killed or timed out'));
     }
 
     if (wireVersion < 4) {
@@ -57,7 +61,7 @@ export function getMore(
     cursorState.cursorId = cursorId;
 
     callback(undefined, response.documents[0], response.connection);
-  } as Callback;
+  } as Callback<Document>;
 
   if (wireVersion < 4) {
     const getMoreOp = new GetMore(ns, cursorState.cursorId, { numberToReturn: batchSize });
@@ -71,11 +75,11 @@ export function getMore(
       ? cursorState.cursorId
       : Long.fromNumber(cursorState.cursorId);
 
-  const getMoreCmd = {
+  const getMoreCmd: Document = {
     getMore: cursorId,
     collection: collectionNamespace(ns),
     batchSize: Math.abs(batchSize)
-  } as any;
+  };
 
   if (cursorState.cmd.tailable && typeof cursorState.cmd.maxAwaitTimeMS === 'number') {
     getMoreCmd.maxTimeMS = cursorState.cmd.maxAwaitTimeMS;

@@ -1,4 +1,4 @@
-import ReadPreference = require('../read_preference');
+import { ReadPreference } from '../read_preference';
 import {
   maxWireVersion,
   applyRetryableWrites,

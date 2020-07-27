@@ -7,7 +7,7 @@ export { command } from './command';
 
 import { writeCommand } from './write_command';
 import type { Callback, Document } from '../../types';
-import type { CommandOptions } from '../types';
+import type { CommandOptions } from './command';
 export { writeCommand };
 
 export function insert(
@@ -16,7 +16,7 @@ export function insert(
   ops: Document[],
   options: CommandOptions,
   callback: Callback
-) {
+): void {
   writeCommand(server, 'insert', 'documents', ns, ops, options, callback);
 }
 
@@ -26,7 +26,7 @@ export function update(
   ops: Document[],
   options: CommandOptions,
   callback: Callback
-) {
+): void {
   writeCommand(server, 'update', 'updates', ns, ops, options, callback);
 }
 
@@ -36,6 +36,6 @@ export function remove(
   ops: Document[],
   options: CommandOptions,
   callback: Callback
-) {
+): void {
   writeCommand(server, 'delete', 'deletes', ns, ops, options, callback);
 }

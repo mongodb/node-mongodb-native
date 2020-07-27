@@ -3,7 +3,7 @@ import { emitDeprecatedOptionWarning } from './utils';
 import { loadAdmin } from './dynamic_loaders';
 import { AggregationCursor, CommandCursor } from './cursor';
 import { ObjectId } from './bson';
-import ReadPreference = require('./read_preference');
+import { ReadPreference } from './read_preference';
 import { MongoError } from './error';
 import Collection = require('./collection');
 import ChangeStream = require('./change_stream');

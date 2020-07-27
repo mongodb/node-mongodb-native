@@ -2,7 +2,7 @@ import { Aspect, OperationBase } from './operation';
 import ReadConcern = require('../read_concern');
 import { WriteConcern } from '../write_concern';
 import { maxWireVersion, MongoDBNamespace } from '../utils';
-import ReadPreference = require('../read_preference');
+import { ReadPreference } from '../read_preference';
 import { commandSupportsReadConcern } from '../sessions';
 import { MongoError } from '../error';
 import Logger = require('../logger');

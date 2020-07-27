@@ -1,5 +1,5 @@
 import { parseServerType } from '../sdam/server_description';
-import type { MongoDBInitialResponse } from './types';
+import type { Document } from '../types';
 
 const RESPONSE_FIELDS = [
   'minWireVersion',
@@ -42,7 +42,7 @@ export class StreamDescription {
         : [];
   }
 
-  receiveResponse(response: MongoDBInitialResponse) {
+  receiveResponse(response: Document): void {
     this.type = parseServerType(response);
     RESPONSE_FIELDS.forEach(field => {
       if (typeof response[field] !== 'undefined') {

@@ -2,12 +2,17 @@ import crypto = require('crypto');
 import { Binary } from '../../bson';
 import { MongoError } from '../../error';
 import { AuthProvider, AuthContext } from './auth_provider';
-import type { Callback } from '../../types';
+import type { Callback, UniversalError, Document } from '../../types';
 import type { MongoCredentials } from './mongo_credentials';
+import type { HandshakeDocument } from '../connect';
 
-type CryptoMethods = 'sha1' | 'sha256';
+type CryptoMethod = 'sha1' | 'sha256';
 
-let saslprep: any;
+interface SaslPrepModule {
+  (password: string): string;
+}
+
+let saslprep: SaslPrepModule | null;
 try {
   saslprep = require('saslprep');
 } catch (e) {
@@ -15,13 +20,13 @@ try {
 }
 
 class ScramSHA extends AuthProvider {
-  cryptoMethod: CryptoMethods;
-  constructor(cryptoMethod: CryptoMethods) {
+  cryptoMethod: CryptoMethod;
+  constructor(cryptoMethod: CryptoMethod) {
     super();
     this.cryptoMethod = cryptoMethod || 'sha1';
   }
 
-  prepare(handshakeDoc: any, authContext: AuthContext, callback: Callback) {
+  prepare(handshakeDoc: HandshakeDocument, authContext: AuthContext, callback: Callback) {
     const cryptoMethod = this.cryptoMethod;
     if (cryptoMethod === 'sha256' && saslprep == null) {
       console.warn('Warning: no saslprep library specified. Passwords will not be sanitized');
@@ -79,7 +84,7 @@ function clientFirstMessageBare(username: string, nonce: Buffer) {
 }
 
 function makeFirstMessage(
-  cryptoMethod: CryptoMethods,
+  cryptoMethod: CryptoMethod,
   credentials: MongoCredentials,
   nonce: Buffer
 ) {
@@ -99,14 +104,17 @@ function makeFirstMessage(
   };
 }
 
-function executeScram(cryptoMethod: CryptoMethods, authContext: AuthContext, callback: Callback) {
+function executeScram(cryptoMethod: CryptoMethod, authContext: AuthContext, callback: Callback) {
   const connection = authContext.connection;
   const credentials = authContext.credentials;
-  const nonce = authContext.nonce!;
+  if (!authContext.nonce) {
+    return callback(new MongoError('AuthContext must contain a valid nonce property'));
+  }
+  const nonce = authContext.nonce;
   const db = credentials.source;
 
   const saslStartCmd = makeFirstMessage(cryptoMethod, credentials, nonce);
-  connection.command(`${db}.$cmd`, saslStartCmd, {}, (_err, result) => {
+  connection.command(`${db}.$cmd`, saslStartCmd, (_err, result) => {
     const err = resolveError(_err, result);
     if (err) {
       return callback(err);
@@ -117,14 +125,17 @@ function executeScram(cryptoMethod: CryptoMethods, authContext: AuthContext, cal
 }
 
 function continueScramConversation(
-  cryptoMethod: CryptoMethods,
-  response: any,
+  cryptoMethod: CryptoMethod,
+  response: Document,
   authContext: AuthContext,
   callback: Callback
 ) {
   const connection = authContext.connection;
   const credentials = authContext.credentials;
-  const nonce = authContext.nonce!;
+  if (!authContext.nonce) {
+    return callback(new MongoError('Unable to continue SCRAM without valid nonce'));
+  }
+  const nonce = authContext.nonce;
 
   const db = credentials.source;
   const username = cleanUsername(credentials.username);
@@ -188,7 +199,7 @@ function continueScramConversation(
     payload: new Binary(Buffer.from(clientFinal))
   };
 
-  connection.command(`${db}.$cmd`, saslContinueCmd, {}, (_err, result) => {
+  connection.command(`${db}.$cmd`, saslContinueCmd, (_err, result) => {
     const err = resolveError(_err, result);
     if (err) {
       return callback(err);
@@ -211,12 +222,12 @@ function continueScramConversation(
       payload: Buffer.alloc(0)
     };
 
-    connection.command(`${db}.$cmd`, retrySaslContinueCmd, {}, callback);
+    connection.command(`${db}.$cmd`, retrySaslContinueCmd, callback);
   });
 }
 
-function parsePayload(payload: any) {
-  const dict: any = {};
+function parsePayload(payload: string) {
+  const dict: Document = {};
   const parts = payload.split(',');
   for (let i = 0; i < parts.length; i++) {
     const valueParts = parts[i].split('=');
@@ -264,27 +275,31 @@ function xor(a: Buffer, b: Buffer) {
   return Buffer.from(res).toString('base64');
 }
 
-function H(method: CryptoMethods, text: Buffer) {
+function H(method: CryptoMethod, text: Buffer) {
   return crypto.createHash(method).update(text).digest();
 }
 
-function HMAC(method: CryptoMethods, key: Buffer, text: Buffer | string) {
+function HMAC(method: CryptoMethod, key: Buffer, text: Buffer | string) {
   return crypto.createHmac(method, key).update(text).digest();
 }
 
-let _hiCache: any = {};
+interface HICache {
+  [key: string]: Buffer;
+}
+
+let _hiCache: HICache = {};
 let _hiCacheCount = 0;
 function _hiCachePurge() {
   _hiCache = {};
   _hiCacheCount = 0;
 }
 
-const hiLengthMap: any = {
+const hiLengthMap = {
   sha256: 32,
   sha1: 20
 };
 
-function HI(data: string, salt: Buffer, iterations: number, cryptoMethod: CryptoMethods) {
+function HI(data: string, salt: Buffer, iterations: number, cryptoMethod: CryptoMethod) {
   // omit the work if already generated
   const key = [data, salt.toString('base64'), iterations].join('_');
   if (_hiCache[key] !== undefined) {
@@ -327,7 +342,7 @@ function compareDigest(lhs: Buffer, rhs: Uint8Array) {
   return result === 0;
 }
 
-function resolveError(err?: MongoError | Error | null, result?: any) {
+function resolveError(err: UniversalError | undefined, result: Document) {
   if (err) return err;
 
   const r = result.result;
