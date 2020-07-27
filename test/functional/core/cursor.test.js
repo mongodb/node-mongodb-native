@@ -1,7 +1,5 @@
 'use strict';
 
-const ReadPreference = require('../../../src/read_preference');
-const { Cursor } = require('../../../src/cursor');
 const expect = require('chai').expect;
 const f = require('util').format;
 const setupDatabase = require('./shared').setupDatabase;

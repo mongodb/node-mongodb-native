@@ -5,7 +5,6 @@ import { MongoError } from '../error';
 import { Topology } from '../sdam/topology';
 import { parseConnectionString } from '../connection_string';
 import ReadConcern = require('../read_concern');
-import { ServerSessionPool } from '../sessions';
 import { emitDeprecationWarning } from '../utils';
 import { CMAP_EVENT_NAMES } from '../cmap/events';
 import { MongoCredentials } from '../cmap/auth/mongo_credentials';

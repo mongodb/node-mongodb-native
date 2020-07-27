@@ -219,6 +219,8 @@ describe('Cursor Streams', function () {
       });
 
       client.connect(function (err, client) {
+        expect(err).to.not.exist;
+
         var db = client.db(self.configuration.db);
         var docs = [];
 
@@ -226,52 +228,44 @@ describe('Cursor Streams', function () {
           docs.push({ a: i, b: new Binary(Buffer.alloc(1024)) });
         }
 
-        var allDocs = [];
-        while (docs.length > 0) {
-          allDocs.push(docs.splice(0, 1000));
-        }
-
         var collection = db.collection('test_streaming_function_with_limit_for_fetching');
         var updateCollection = db.collection(
           'test_streaming_function_with_limit_for_fetching_update'
         );
 
-        var left = allDocs.length;
-        for (i = 0; i < allDocs.length; i++) {
-          collection.insert(allDocs[i], { w: 1 }, function (err) {
-            expect(err).to.not.exist;
-            left = left - 1;
+        collection.insert(docs, { w: 1 }, function (err) {
+          expect(err).to.not.exist;
 
-            if (left === 0) {
-              var cursor = collection.find({});
-              // Execute find on all the documents
-              var stream = cursor.stream();
+          const stream = collection.find({}).stream();
 
-              stream.on('end', function () {
-                updateCollection.findOne({ id: 1 }, function (err, doc) {
-                  expect(err).to.not.exist;
-                  expect(doc.count).to.equal(2000);
+          stream.on('end', () => {
+            updateCollection.findOne({ id: 1 }, function (err, doc) {
+              expect(err).to.not.exist;
+              expect(doc.count).to.equal(1999);
 
-                  client.close(done);
-                });
-              });
-
-              stream.on('data', function () {
-                stream.pause();
-
-                updateCollection.update(
-                  { id: 1 },
-                  { $inc: { count: 1 } },
-                  { w: 1, upsert: true },
-                  function (err) {
-                    expect(err).to.not.exist;
-                    stream.resume();
-                  }
-                );
-              });
-            }
+              client.close(done);
+            });
           });
-        }
+
+          let docCount = 0;
+          stream.on('data', () => {
+            stream.pause();
+
+            if (docCount++ === docs.length - 1) {
+              return;
+            }
+
+            updateCollection.updateMany(
+              { id: 1 },
+              { $inc: { count: 1 } },
+              { w: 1, upsert: true },
+              function (err) {
+                expect(err).to.not.exist;
+                stream.resume();
+              }
+            );
+          });
+        });
       });
     }
   });

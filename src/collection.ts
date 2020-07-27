@@ -639,7 +639,19 @@ class Collection {
    * @returns {Promise<void>} returns Promise if no callback passed
    */
   deleteMany(filter: object, options?: any, callback?: Function): Promise<void> {
-    if (typeof options === 'function') (callback = options), (options = {});
+    if (filter == null) {
+      filter = {};
+      options = {};
+      callback = undefined;
+    } else if (typeof filter === 'function') {
+      callback = filter;
+      filter = {};
+      options = {};
+    } else if (typeof options === 'function') {
+      callback = options;
+      options = {};
+    }
+
     options = Object.assign({}, options);
 
     // Add ignoreUndefined

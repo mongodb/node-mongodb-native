@@ -1304,7 +1304,13 @@ describe('Aggregation', function () {
         })
         .then(() => {
           const docs = Array.from({ length: 10 }).map(() => ({ a: 1 }));
-          return coll1.insertMany(docs);
+          return Promise.all([
+            coll1.insertMany(docs),
+            client
+              .db(databaseName)
+              .createCollection('coll2')
+              .catch(() => {})
+          ]);
         })
         .then(() => {
           return Promise.all(

@@ -2658,7 +2658,7 @@ describe('Operation Examples', function () {
           expect(result).to.exist;
 
           // Remove all the document
-          collection.deleteMany({}, (err, result) => {
+          collection.deleteMany((err, result) => {
             expect(err).to.not.exist;
             expect(result).to.exist;
 
