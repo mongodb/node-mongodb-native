@@ -552,6 +552,32 @@ function translateOptions(options: any) {
   // Set the socket and connection timeouts
   if (options.socketTimeoutMS == null) options.socketTimeoutMS = 360000;
   if (options.connectTimeoutMS == null) options.connectTimeoutMS = 10000;
+
+  const translations: any = {
+    // SSL translation options
+    sslCA: 'ca',
+    sslCRL: 'crl',
+    sslValidate: 'rejectUnauthorized',
+    sslKey: 'key',
+    sslCert: 'cert',
+    sslPass: 'passphrase',
+    // SocketTimeout translation options
+    socketTimeoutMS: 'socketTimeout',
+    connectTimeoutMS: 'connectionTimeout',
+    // Replicaset options
+    replicaSet: 'setName',
+    rs_name: 'setName',
+    secondaryAcceptableLatencyMS: 'acceptableLatency',
+    connectWithNoPrimary: 'secondaryOnlyConnectionAllowed',
+    // Mongos options
+    acceptableLatencyMS: 'localThresholdMS'
+  };
+
+  for (const name in options) {
+    if (translations[name]) {
+      options[translations[name]] = options[name];
+    }
+  }
 }
 
 export { validOptions, connect };
