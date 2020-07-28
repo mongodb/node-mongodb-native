@@ -233,8 +233,7 @@ class ConnectionPool extends EventEmitter {
     }
 
     // add this request to the wait queue
-    const waitQueueMember = {} as WaitQueueMember;
-    waitQueueMember.callback = callback;
+    const waitQueueMember: WaitQueueMember = { callback } as WaitQueueMember;
     const pool = this;
     const waitQueueTimeoutMS = this.options.waitQueueTimeoutMS;
     if (waitQueueTimeoutMS) {
@@ -475,7 +474,11 @@ function processWaitQueue(pool: ConnectionPool) {
 
   while (pool.waitQueueSize) {
     const waitQueueMember = pool[kWaitQueue].peekFront();
-    if (waitQueueMember && waitQueueMember[kCancelled]) {
+    if (!waitQueueMember) {
+      continue;
+    }
+
+    if (waitQueueMember[kCancelled]) {
       pool[kWaitQueue].shift();
       continue;
     }
@@ -485,21 +488,24 @@ function processWaitQueue(pool: ConnectionPool) {
     }
 
     const connection = pool[kConnections].shift();
-    if (connection) {
-      const isStale = connectionIsStale(pool, connection);
-      const isIdle = connectionIsIdle(pool, connection);
-      if (!isStale && !isIdle && !connection.closed) {
-        pool.emit('connectionCheckedOut', new ConnectionCheckedOutEvent(pool, connection));
-        if (waitQueueMember && waitQueueMember.timer) {
-          clearTimeout(waitQueueMember.timer);
-          pool[kWaitQueue].shift();
-          waitQueueMember.callback(undefined, connection);
-        }
-        return;
-      }
-      const reason = connection.closed ? 'error' : isStale ? 'stale' : 'idle';
-      destroyConnection(pool, connection, reason);
+    if (!connection) {
+      continue;
     }
+
+    const isStale = connectionIsStale(pool, connection);
+    const isIdle = connectionIsIdle(pool, connection);
+    if (!isStale && !isIdle && !connection.closed) {
+      pool.emit('connectionCheckedOut', new ConnectionCheckedOutEvent(pool, connection));
+      if (waitQueueMember.timer) {
+        clearTimeout(waitQueueMember.timer);
+      }
+
+      pool[kWaitQueue].shift();
+      return waitQueueMember.callback(undefined, connection);
+    }
+
+    const reason = connection.closed ? 'error' : isStale ? 'stale' : 'idle';
+    destroyConnection(pool, connection, reason);
   }
 
   const maxPoolSize = pool.options.maxPoolSize;
