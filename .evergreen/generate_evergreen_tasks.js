@@ -114,7 +114,7 @@ OCSP_VERSIONS.forEach(VERSION => {
   // manually added tasks
   Array.prototype.push.apply(TASKS, [
     {
-      name: 'test-ocsp-valid-cert-server-staples',
+      name: `test-${VERSION}-ocsp-valid-cert-server-staples`,
       tags: ['ocsp'],
       commands: [
         { func: `run-${VERSION}-valid-ocsp-server` },
