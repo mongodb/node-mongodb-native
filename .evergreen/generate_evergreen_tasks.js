@@ -117,7 +117,7 @@ OCSP_VERSIONS.forEach(VERSION => {
       name: `test-${VERSION}-ocsp-valid-cert-server-staples`,
       tags: ['ocsp'],
       commands: [
-        { func: `run-${VERSION}-valid-ocsp-server` },
+        { func: `run-valid-ocsp-server` },
         { func: 'install dependencies' },
         {
           func: 'bootstrap mongo-orchestration',
