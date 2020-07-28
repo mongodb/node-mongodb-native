@@ -1049,11 +1049,11 @@ tasks:
     commands:
       - func: install dependencies
       - func: run atlas tests
-  - name: test-ocsp-valid-cert-server-staples
+  - name: test-latest-ocsp-valid-cert-server-staples
     tags:
       - ocsp
     commands:
-      - func: run-latest-valid-ocsp-server
+      - func: run-valid-ocsp-server
       - func: install dependencies
       - func: bootstrap mongo-orchestration
         vars:
@@ -1063,7 +1063,7 @@ tasks:
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 1
-  - name: test-latest-csp-invalid-cert-server-staples
+  - name: test-latest-ocsp-invalid-cert-server-staples
     tags:
       - ocsp
     commands:
@@ -1145,11 +1145,11 @@ tasks:
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 0
-  - name: test-ocsp-valid-cert-server-staples
+  - name: test-4.4-ocsp-valid-cert-server-staples
     tags:
       - ocsp
     commands:
-      - func: run-4.4-valid-ocsp-server
+      - func: run-valid-ocsp-server
       - func: install dependencies
       - func: bootstrap mongo-orchestration
         vars:
@@ -1159,7 +1159,7 @@ tasks:
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 1
-  - name: test-4.4-csp-invalid-cert-server-staples
+  - name: test-4.4-ocsp-invalid-cert-server-staples
     tags:
       - ocsp
     commands:
@@ -1343,15 +1343,15 @@ buildvariants:
       - test-2.6-replica_set-unified
       - test-2.6-sharded_cluster-unified
       - test-atlas-connectivity
-      - test-ocsp-valid-cert-server-staples
-      - test-latest-csp-invalid-cert-server-staples
+      - test-latest-ocsp-valid-cert-server-staples
+      - test-latest-ocsp-invalid-cert-server-staples
       - test-latest-ocsp-valid-cert-server-does-not-staple
       - test-latest-ocsp-invalid-cert-server-does-not-staple
       - test-latest-ocsp-soft-fail
       - test-latest-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
       - test-latest-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
-      - test-ocsp-valid-cert-server-staples
-      - test-4.4-csp-invalid-cert-server-staples
+      - test-4.4-ocsp-valid-cert-server-staples
+      - test-4.4-ocsp-invalid-cert-server-staples
       - test-4.4-ocsp-valid-cert-server-does-not-staple
       - test-4.4-ocsp-invalid-cert-server-does-not-staple
       - test-4.4-ocsp-soft-fail
@@ -1530,15 +1530,15 @@ buildvariants:
       - test-3.2-replica_set-unified
       - test-3.2-sharded_cluster-unified
       - test-atlas-connectivity
-      - test-ocsp-valid-cert-server-staples
-      - test-latest-csp-invalid-cert-server-staples
+      - test-latest-ocsp-valid-cert-server-staples
+      - test-latest-ocsp-invalid-cert-server-staples
       - test-latest-ocsp-valid-cert-server-does-not-staple
       - test-latest-ocsp-invalid-cert-server-does-not-staple
       - test-latest-ocsp-soft-fail
       - test-latest-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
       - test-latest-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
-      - test-ocsp-valid-cert-server-staples
-      - test-4.4-csp-invalid-cert-server-staples
+      - test-4.4-ocsp-valid-cert-server-staples
+      - test-4.4-ocsp-invalid-cert-server-staples
       - test-4.4-ocsp-valid-cert-server-does-not-staple
       - test-4.4-ocsp-invalid-cert-server-does-not-staple
       - test-4.4-ocsp-soft-fail
