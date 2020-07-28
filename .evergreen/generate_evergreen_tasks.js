@@ -64,12 +64,9 @@ const OPERATING_SYSTEMS = [
 const TASKS = [];
 const SINGLETON_TASKS = [];
 
-function makeTask({ mongoVersion, topology }) {
-  let topologyForTest = topology;
-  let runTestsCommand = { func: 'run tests' };
-
+function makeTask({ mongoVersion, topology, ssl, auth }) {
   return {
-    name: `test-${mongoVersion}-${topology}`,
+    name: `test-${mongoVersion}-${topology}-${ssl}-${auth}`,
     tags: [mongoVersion, topology],
     commands: [
       { func: 'install dependencies' },
@@ -77,17 +74,20 @@ function makeTask({ mongoVersion, topology }) {
         func: 'bootstrap mongo-orchestration',
         vars: {
           VERSION: mongoVersion,
-          TOPOLOGY: topologyForTest
+          TOPOLOGY: topology,
+          SSL: ssl,
+          AUTH: auth
         }
       },
-      runTestsCommand
+      { func: 'run tests' }
     ]
   };
 }
 
 MONGODB_VERSIONS.forEach(mongoVersion => {
   TOPOLOGIES.forEach(topology => {
-    TASKS.push(makeTask({ mongoVersion, topology }));
+    TASKS.push(makeTask({ mongoVersion, topology, ssl: 'ssl', auth: 'auth' }));
+    TASKS.push(makeTask({ mongoVersion, topology, ssl: 'nossl', auth: 'noauth' }));
   });
 });
 
