@@ -131,7 +131,7 @@ OCSP_VERSIONS.forEach(VERSION => {
       ]
     },
     {
-      name: `test-${VERSION}-csp-invalid-cert-server-staples`,
+      name: `test-${VERSION}-ocsp-invalid-cert-server-staples`,
       tags: ['ocsp'],
       commands: [
         { func: 'run-revoked-ocsp-server' },
