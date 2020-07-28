@@ -281,11 +281,11 @@ function makeConnection(
   cancellationToken: EventEmitter | undefined,
   _callback: CallbackWithType<UniversalError, UniversalSocket>
 ) {
-  const useSsl = typeof options.ssl === 'boolean' ? options.ssl : false;
-  const keepAlive = typeof options.keepAlive === 'boolean' ? options.keepAlive : true;
+  const useSsl = options.ssl ?? false;
+  const keepAlive = options.keepAlive ?? true;
   let keepAliveInitialDelay =
     typeof options.keepAliveInitialDelay === 'number' ? options.keepAliveInitialDelay : 120000;
-  const noDelay = typeof options.noDelay === 'boolean' ? options.noDelay : true;
+  const noDelay = options.noDelay ?? true;
   const connectionTimeout =
     typeof options.connectionTimeout === 'number'
       ? options.connectionTimeout
@@ -293,8 +293,7 @@ function makeConnection(
       ? options.connectTimeoutMS
       : 30000;
   const socketTimeout = typeof options.socketTimeout === 'number' ? options.socketTimeout : 360000;
-  const rejectUnauthorized =
-    typeof options.rejectUnauthorized === 'boolean' ? options.rejectUnauthorized : true;
+  const rejectUnauthorized = options.rejectUnauthorized ?? true;
 
   if (keepAliveInitialDelay > socketTimeout) {
     keepAliveInitialDelay = Math.round(socketTimeout / 2);

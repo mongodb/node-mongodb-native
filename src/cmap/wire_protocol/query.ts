@@ -224,9 +224,9 @@ function prepareLegacyFindQuery(
   }
 
   const serializeFunctions =
-    typeof options.serializeFunctions === 'boolean' ? options.serializeFunctions : false;
+    options.serializeFunctions ?? false;
   const ignoreUndefined =
-    typeof options.ignoreUndefined === 'boolean' ? options.ignoreUndefined : false;
+    options.ignoreUndefined ?? false;
 
   const query = new Query(ns, findCmd, {
     numberToSkip: numberToSkip,

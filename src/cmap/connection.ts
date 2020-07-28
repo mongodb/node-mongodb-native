@@ -376,16 +376,16 @@ function write(
     requestId: command.requestId,
     cb: callback,
     session: options.session,
-    fullResult: typeof options.fullResult === 'boolean' ? options.fullResult : false,
-    noResponse: typeof options.noResponse === 'boolean' ? options.noResponse : false,
+    fullResult: options.fullResult ?? false,
+    noResponse: options.noResponse ?? false,
     documentsReturnedIn: options.documentsReturnedIn,
     command: !!options.command,
 
     // for BSON parsing
-    promoteLongs: typeof options.promoteLongs === 'boolean' ? options.promoteLongs : true,
-    promoteValues: typeof options.promoteValues === 'boolean' ? options.promoteValues : true,
-    promoteBuffers: typeof options.promoteBuffers === 'boolean' ? options.promoteBuffers : false,
-    raw: typeof options.raw === 'boolean' ? options.raw : false,
+    promoteLongs: options.promoteLongs ?? true,
+    promoteValues: options.promoteValues ?? true,
+    promoteBuffers: options.promoteBuffers ?? false,
+    raw: options.raw ?? false,
     started: 0
   };
 
@@ -420,12 +420,10 @@ function write(
             new CommandFailedEvent(connection, command, reply.result, operationDescription.started)
           );
         } else {
-          if (reply) {
-            connection.emit(
-              'commandSucceeded',
-              new CommandSucceededEvent(connection, command, reply, operationDescription.started)
-            );
-          }
+          connection.emit(
+            'commandSucceeded',
+            new CommandSucceededEvent(connection, command, reply, operationDescription.started)
+          );
         }
       }
 

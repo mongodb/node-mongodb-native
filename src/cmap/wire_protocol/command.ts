@@ -23,6 +23,7 @@ export interface CommandOptions {
   socketTimeout?: number;
   session?: ClientSession;
   documentsReturnedIn?: string;
+  noResponse: boolean;
 }
 
 function isClientEncryptionEnabled(server: Server) {

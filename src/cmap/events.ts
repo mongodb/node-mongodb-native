@@ -187,7 +187,7 @@ export class CommandSucceededEvent {
   constructor(
     pool: Connection | ConnectionPool,
     command: CommandType,
-    reply: CommandResult,
+    reply: CommandResult | undefined,
     started: number
   ) {
     const cmd = extractCommand(command);
@@ -257,7 +257,7 @@ const extractCommandName = (commandDoc: Document) => Object.keys(commandDoc)[0];
 const namespace = (command: CommandType) => command.ns;
 const databaseName = (command: CommandType) => command.ns.split('.')[0];
 const collectionName = (command: CommandType) => command.ns.split('.')[1];
-const maybeRedact = (commandName: string, result: CommandResult | Error | Document) =>
+const maybeRedact = (commandName: string, result?: CommandResult | Error | Document) =>
   SENSITIVE_COMMANDS.has(commandName) ? {} : result;
 
 const LEGACY_FIND_QUERY_MAP: { [key: string]: string } = {
@@ -352,7 +352,18 @@ function extractCommand(command: CommandType): Document {
   return command.query ? command.query : command;
 }
 
-function extractReply(command: GetMore | KillCursor | Query, reply: CommandResult) {
+function extractReply(command: GetMore | KillCursor | Query, reply?: CommandResult) {
+  if (command instanceof KillCursor) {
+    return {
+      ok: 1,
+      cursorsUnknown: command.cursorIds
+    };
+  }
+
+  if (!reply) {
+    return reply;
+  }
+
   if (command instanceof GetMore) {
     return {
       ok: 1,
@@ -361,13 +372,6 @@ function extractReply(command: GetMore | KillCursor | Query, reply: CommandResul
         ns: namespace(command),
         nextBatch: reply.message.documents
       }
-    };
-  }
-
-  if (command instanceof KillCursor) {
-    return {
-      ok: 1,
-      cursorsUnknown: command.cursorIds
     };
   }
 
@@ -383,7 +387,7 @@ function extractReply(command: GetMore | KillCursor | Query, reply: CommandResul
     };
   }
 
-  return reply && reply.result ? reply.result : reply;
+  return reply.result ? reply.result : reply;
 }
 
 function extractConnectionDetails(connection: Connection | ConnectionPool) {

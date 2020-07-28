@@ -31,7 +31,7 @@ interface MessageStreamOptions extends DuplexOptions {
 
 export interface OperationDescription {
   started: number;
-  cb: Callback<CommandResult | null>;
+  cb: Callback<CommandResult | undefined>;
   command: boolean;
   documentsReturnedIn?: string;
   fullResult: boolean;
@@ -96,7 +96,7 @@ export class MessageStream extends Duplex {
     // Compress the message body
     compress({ options: operationDescription }, messageToBeCompressed, (err, compressedMessage) => {
       if (err || !compressedMessage) {
-        operationDescription.cb(err, null);
+        operationDescription.cb(err);
         return;
       }
 
