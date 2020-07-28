@@ -363,7 +363,7 @@ functions:
         background: true
         script: |
           cd ${DRIVERS_TOOLS}/.evergreen/ocsp
-          nohup ./venv/bin/python3 ocsp_mock.py \
+          nohup /opt/mongodbtoolchain/v3/bin/python3 ocsp_mock.py \
             --ca_file rsa/ca.pem \
             --ocsp_responder_cert rsa/ca.crt \
             --ocsp_responder_key rsa/ca.key \
@@ -380,7 +380,7 @@ functions:
         background: true
         script: |
           cd ${DRIVERS_TOOLS}/.evergreen/ocsp
-          nohup ./venv/bin/python3 ocsp_mock.py \
+          nohup /opt/mongodbtoolchain/v3/bin/python3 ocsp_mock.py \
             --ca_file rsa/ca.pem \
             --ocsp_responder_cert rsa/ca.crt \
             --ocsp_responder_key rsa/ca.key \
