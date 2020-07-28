@@ -1169,6 +1169,16 @@ tasks:
           NODE_LTS_NAME: erbium
       - func: run checks
 
+axes:
+  - id: os-aws-auth
+    display_name: OS
+    values:
+      - id: "ubuntu1804-test"
+        display_name: "Ubuntu 18.04"
+        run_on: ubuntu1804-test
+        expansions:
+          NODE_LTS_NAME: carbon
+
 buildvariants:
   - name: macos-1014-erbium
     display_name: macOS 10.14 Node Erbium
@@ -1451,12 +1461,7 @@ buildvariants:
       - run-checks
   - matrix_name: "aws-auth-test"
     matrix_spec: { os-aws-auth: "*" }
-    display_name: "MONGODB-AWS Auth"
-    matrix_spec: { version: ["4.4", "latest"] }
-    display_name: "MONGODB-AWS Auth ${version}"
-    run_on: ubuntu1804-test
-    expansions:
-      NODE_LTS_NAME: carbon
+    matrix_spec: { version: ["4.4", "latest"], os-aws-auth: "*" }
+    display_name: "MONGODB-AWS Auth ${version} ${os-aws-auth}"
     tasks:
       - name: "aws-auth-test"
-
