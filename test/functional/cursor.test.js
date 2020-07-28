@@ -722,21 +722,21 @@ describe('Cursor', function () {
 
           collection.insert({ a: 1 }, configuration.writeConcernMax(), err => {
             test.equal(null, err);
-          });
 
-          const cursor = collection.find();
-          this.defer(() => cursor.close());
+            const cursor = collection.find();
+            this.defer(() => cursor.close());
 
-          cursor.next(err => {
-            test.equal(null, err);
+            cursor.next(err => {
+              test.equal(null, err);
 
-            try {
-              cursor.limit(1);
-            } catch (err) {
-              test.equal('Cursor is closed', err.message);
-            }
+              try {
+                cursor.limit(1);
+              } catch (err) {
+                test.equal('Cursor is closed', err.message);
+              }
 
-            client.close(done);
+              client.close(done);
+            });
           });
         });
       });
