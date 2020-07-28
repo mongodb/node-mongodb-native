@@ -624,21 +624,21 @@ describe('Find', function () {
     test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function (err, client) {
+      client.connect((err, client) => {
         var db = client.db(configuration.db);
-        db.createCollection('test_find_by_oid', function (err, collection) {
-          collection.save({ hello: 'mike' }, configuration.writeConcernMax(), function (err, r) {
+        db.createCollection('test_find_by_oid', (err, collection) => {
+          collection.insertOne({ hello: 'mike' }, configuration.writeConcernMax(), (err, r) => {
             var docs = r.ops[0];
             test.ok(
               docs._id instanceof ObjectId ||
                 Object.prototype.toString.call(docs._id) === '[object ObjectId]'
             );
 
-            collection.findOne({ _id: docs._id }, function (err, doc) {
+            collection.findOne({ _id: docs._id }, (err, doc) => {
               test.equal('mike', doc.hello);
 
               var id = doc._id.toString();
-              collection.findOne({ _id: new ObjectId(id) }, function (err, doc) {
+              collection.findOne({ _id: new ObjectId(id) }, (err, doc) => {
                 test.equal('mike', doc.hello);
                 // Let's close the db
                 client.close(done);

@@ -135,39 +135,6 @@ describe('Insert', function () {
     }
   });
 
-  it('shouldCorrectlyExecuteSaveInsertUpdate', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function (err, client) {
-        var db = client.db(configuration.db);
-        var collection = db.collection('shouldCorrectlyExecuteSaveInsertUpdate');
-
-        collection.save({ email: 'save' }, configuration.writeConcernMax(), function () {
-          collection.insert({ email: 'insert' }, configuration.writeConcernMax(), function () {
-            collection.update(
-              { email: 'update' },
-              { email: 'update' },
-              { upsert: true, w: 1 },
-              function () {
-                collection.find().toArray(function (e, a) {
-                  test.equal(3, a.length);
-                  client.close(done);
-                });
-              }
-            );
-          });
-        });
-      });
-    }
-  });
-
   it('shouldCorrectlyInsertAndRetrieveLargeIntegratedArrayDocument', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run

@@ -1625,7 +1625,7 @@ describe('Cursor', function () {
         db.createCollection('test_count_with_fields', function (err, collection) {
           test.equal(null, err);
 
-          collection.save({ x: 1, a: 2 }, configuration.writeConcernMax(), function (err) {
+          collection.insertOne({ x: 1, a: 2 }, configuration.writeConcernMax(), function (err) {
             test.equal(null, err);
 
             collection
@@ -1661,7 +1661,7 @@ describe('Cursor', function () {
         db.createCollection('test_count_with_fields_using_exclude', function (err, collection) {
           test.equal(null, err);
 
-          collection.save({ x: 1, a: 2 }, configuration.writeConcernMax(), function (err) {
+          collection.insertOne({ x: 1, a: 2 }, configuration.writeConcernMax(), function (err) {
             test.equal(null, err);
 
             collection.find({}, { fields: { x: 0 } }).toArray(function (err, items) {

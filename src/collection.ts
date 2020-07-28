@@ -11,9 +11,7 @@ import {
   checkCollectionName,
   deprecateOptions,
   executeLegacyOperation,
-  MongoDBNamespace,
-  handleCallback,
-  applyWriteConcern
+  MongoDBNamespace
 } from './utils';
 import { ObjectId } from './bson';
 import { MongoError } from './error';
@@ -23,7 +21,7 @@ import ChangeStream = require('./change_stream');
 import WriteConcern = require('./write_concern');
 import ReadConcern = require('./read_concern');
 import { AggregationCursor, CommandCursor } from './cursor';
-import { removeDocuments, updateDocuments, insertDocuments } from './operations/common_functions';
+import { removeDocuments, updateDocuments } from './operations/common_functions';
 import AggregateOperation = require('./operations/aggregate');
 import BulkWriteOperation = require('./operations/bulk_write');
 import CountDocumentsOperation = require('./operations/count_documents');
@@ -70,7 +68,6 @@ interface Collection {
   insert(docs: any, options: any, callback: any): void;
   update(selector: any, update: any, options: any, callback: any): void;
   remove(selector: any, options: any, callback: any): void;
-  save(doc: any, options: any, callback: any): void;
   findOne(query: any, options: any, callback: any): void;
   dropAllIndexes(): void;
   ensureIndex(fieldOrSpec: any, options: any, callback: any): void;
@@ -1455,7 +1452,7 @@ Collection.prototype.find = deprecateOptions(
     deprecatedOptions: DEPRECATED_FIND_OPTIONS,
     optionsIndex: 1
   },
-  function(this: any, query: any, options: any) {
+  function (this: any, query: any, options: any) {
     if (arguments.length > 2) {
       throw new TypeError('Third parameter to `collection.find()` must be undefined');
     }
@@ -1670,7 +1667,7 @@ Collection.prototype.find = deprecateOptions(
  * @returns {Promise<void>} returns Promise if no callback passed
  * @deprecated Use insertOne, insertMany or bulkWrite
  */
-Collection.prototype.insert = deprecate(function(
+Collection.prototype.insert = deprecate(function (
   this: any,
   docs: any,
   options: any,
@@ -1710,7 +1707,7 @@ Collection.prototype.insert = deprecate(function(
  * @returns {Promise<void>} returns Promise if no callback passed
  * @deprecated use updateOne, updateMany or bulkWrite
  */
-Collection.prototype.update = deprecate(function(
+Collection.prototype.update = deprecate(function (
   this: any,
   selector: any,
   update: any,
@@ -1755,7 +1752,7 @@ Collection.prototype.removeMany = Collection.prototype.deleteMany;
  * @returns {Promise<void>} returns Promise if no callback passed
  * @deprecated use deleteOne, deleteMany or bulkWrite
  */
-Collection.prototype.remove = deprecate(function(
+Collection.prototype.remove = deprecate(function (
   this: any,
   selector: any,
   options: any,
@@ -1778,40 +1775,6 @@ Collection.prototype.remove = deprecate(function(
   ]);
 },
 'collection.remove is deprecated. Use deleteOne, deleteMany, or bulkWrite instead.');
-
-/**
- * Save a document. Simple full document replacement function. Not recommended for efficiency, use atomic
- * operators and update instead for more efficient operations.
- *
- * @function
- * @param {object} doc Document to save
- * @param {object} [options] Optional settings.
- * @param {(number|string)} [options.w] The write concern.
- * @param {number} [options.wtimeout] The write concern timeout.
- * @param {boolean} [options.j=false] Specify a journal write concern.
- * @param {ClientSession} [options.session] optional session to use for this operation
- * @param {Collection~writeOpCallback} [callback] The command result callback
- * @returns {Promise<void>} returns Promise if no callback passed
- * @deprecated use insertOne, insertMany, updateOne or updateMany
- */
-Collection.prototype.save = deprecate(function(
-  this: any,
-  doc: any,
-  options: any,
-  callback: Function
-) {
-  if (typeof options === 'function') (callback = options), (options = {});
-  options = options || {};
-
-  // Add ignoreUndefined
-  if (this.s.options.ignoreUndefined) {
-    options = Object.assign({}, options);
-    options.ignoreUndefined = this.s.options.ignoreUndefined;
-  }
-
-  return executeLegacyOperation(this.s.topology, save, [this, doc, options, callback]);
-},
-'collection.save is deprecated. Use insertOne, insertMany, updateOne, or updateMany instead.');
 
 /**
  * The callback format for results
@@ -1870,7 +1833,7 @@ Collection.prototype.findOne = deprecateOptions(
     deprecatedOptions: DEPRECATED_FIND_OPTIONS,
     optionsIndex: 1
   },
-  function(this: any, query: any, options: any, callback: Function) {
+  function (this: any, query: any, options: any, callback: Function) {
     if (callback !== undefined && typeof callback !== 'function') {
       throw new TypeError('Third parameter to `findOne()` must be a callback or undefined');
     }
@@ -1921,7 +1884,7 @@ Collection.prototype.dropAllIndexes = deprecate(
  * @param {Collection~resultCallback} [callback] The command result callback
  * @returns {Promise<void>} returns Promise if no callback passed
  */
-Collection.prototype.ensureIndex = deprecate(function(
+Collection.prototype.ensureIndex = deprecate(function (
   this: any,
   fieldOrSpec: any,
   options: any,
@@ -1967,7 +1930,7 @@ Collection.prototype.ensureIndex = deprecate(function(
  * @returns {Promise<void>} returns Promise if no callback passed
  * @deprecated use {@link Collection#countDocuments countDocuments} or {@link Collection#estimatedDocumentCount estimatedDocumentCount} instead
  */
-Collection.prototype.count = deprecate(function(
+Collection.prototype.count = deprecate(function (
   this: any,
   query: any,
   options: any,
@@ -2059,7 +2022,7 @@ function _findAndModify(
  * @returns {Promise<void>} returns Promise if no callback passed
  * @deprecated use findOneAndDelete instead
  */
-Collection.prototype.findAndRemove = deprecate(function(
+Collection.prototype.findAndRemove = deprecate(function (
   this: any,
   query: any,
   sort: any,
@@ -2099,7 +2062,7 @@ Collection.prototype.findAndRemove = deprecate(function(
  * @returns {Promise<void>} returns Promise if no callback passed
  * @deprecated MongoDB 3.6 or higher no longer supports the group command. We recommend rewriting using the aggregation framework.
  */
-Collection.prototype.group = deprecate(function(
+Collection.prototype.group = deprecate(function (
   this: any,
   keys: any,
   condition: any,
@@ -2158,37 +2121,5 @@ Collection.prototype.group = deprecate(function(
   );
 },
 'MongoDB 3.6 or higher no longer supports the group command. We recommend rewriting using the aggregation framework.');
-
-/**
- * Save a document.
- *
- * @function
- * @param {Collection} coll Collection instance.
- * @param {any} doc Document to save
- * @param {any} [options] Optional settings. See Collection.prototype.save for a list of options.
- * @param {Collection~writeOpCallback} [callback] The command result callback
- * @deprecated use insertOne, insertMany, updateOne or updateMany
- */
-function save(coll: any, doc: any, options?: any, callback?: Function) {
-  // Get the write concern options
-  const finalOptions = applyWriteConcern(
-    Object.assign({}, options),
-    { db: coll.s.db, collection: coll },
-    options
-  );
-  // Establish if we need to perform an insert or update
-  if (doc._id != null) {
-    finalOptions.upsert = true;
-    return updateDocuments(coll, { _id: doc._id }, doc, finalOptions, callback);
-  }
-
-  // Insert the document
-  insertDocuments(coll, [doc], finalOptions, (err?: any, result?: any) => {
-    if (callback == null) return;
-    if (doc == null) return handleCallback(callback, null, null);
-    if (err) return handleCallback(callback, err, null);
-    handleCallback(callback, null, result);
-  });
-}
 
 export = Collection;

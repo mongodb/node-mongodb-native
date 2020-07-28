@@ -6,7 +6,7 @@ describe('Unicode', function () {
     return setupDatabase(this.configuration);
   });
 
-  it('shouldCorrectlySaveUnicodeContainingDocument', {
+  it('shouldCorrectlyInsertUnicodeContainingDocument', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
@@ -60,13 +60,13 @@ describe('Unicode', function () {
             'http://a3.twimg.com/profile_images/107142257/passbild-square_normal.jpg'
         };
 
-        db.createCollection('test_should_correctly_save_unicode_containing_document', function (
+        db.createCollection('test_should_correctly_insert_unicode_containing_document', function (
           err,
           collection
         ) {
           doc['_id'] = 'felixge';
 
-          collection.save(doc, { w: 1 }, function (err) {
+          collection.insertOne(doc, { w: 1 }, function (err) {
             test.equal(null, err);
             collection.findOne(function (err, doc) {
               test.equal('felixge', doc._id);
