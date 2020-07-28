@@ -18,6 +18,7 @@ import {
   uncompressibleCommands
 } from './wire_protocol/compression';
 import type { Callback, Document } from '../types';
+import type { ClientSession } from '../sessions';
 
 const MESSAGE_HEADER_SIZE = 16;
 const COMPRESSION_DETAILS_SIZE = 9; // originalOpcode + uncompressedSize, compressorID
@@ -41,7 +42,7 @@ export interface OperationDescription {
   promoteValues: boolean;
   raw: boolean;
   requestId: number;
-  session?: unknown;
+  session?: ClientSession;
   socketTimeoutOverride?: boolean;
   agreedCompressor?: 'zlib' | 'snappy' | string;
   zlibCompressionLevel?: number;

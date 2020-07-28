@@ -223,10 +223,8 @@ function prepareLegacyFindQuery(
     delete cmd['readConcern'];
   }
 
-  const serializeFunctions =
-    options.serializeFunctions ?? false;
-  const ignoreUndefined =
-    options.ignoreUndefined ?? false;
+  const serializeFunctions = options.serializeFunctions ?? false;
+  const ignoreUndefined = options.ignoreUndefined ?? false;
 
   const query = new Query(ns, findCmd, {
     numberToSkip: numberToSkip,

@@ -4,13 +4,13 @@ import { isTransactionCommand } from '../../transactions';
 import { applySession, ClientSession } from '../../sessions';
 import { maxWireVersion, databaseNamespace } from '../../utils';
 import { MongoError, MongoNetworkError } from '../../error';
-import type { Callback, Document } from '../../types';
+import type { Callback, Document, BSONSerializeOptions } from '../../types';
 import type { Server } from '../../sdam/server';
 import type { Topology } from '../../sdam/topology';
 import type { WriteConcern } from '../../write_concern';
 import type { ReadPreference } from '../..';
 
-export interface CommandOptions {
+export interface CommandOptions extends BSONSerializeOptions {
   [key: string]: unknown;
   writeConcern?: WriteConcern;
   readPreference?: ReadPreference;
@@ -23,7 +23,7 @@ export interface CommandOptions {
   socketTimeout?: number;
   session?: ClientSession;
   documentsReturnedIn?: string;
-  noResponse: boolean;
+  noResponse?: boolean;
 }
 
 function isClientEncryptionEnabled(server: Server) {

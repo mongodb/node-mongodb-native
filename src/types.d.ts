@@ -22,6 +22,8 @@ export interface BSONSerializeOptions extends SerializeOptions {
   promoteLongs?: boolean;
   promoteValues?: boolean;
   promoteBuffers?: boolean;
+  serializeFunctions?: boolean;
+  ignoreUndefined?: boolean;
 }
 
 export const enum AutoEncryptionLoggerLevels {

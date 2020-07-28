@@ -1,4 +1,4 @@
-import { emitDeprecatedOptionWarning, toError } from './utils';
+import { emitDeprecatedOptionWarning } from './utils';
 import PromiseProvider = require('./promise_provider');
 import { ReadPreference } from './read_preference';
 import { deprecate } from 'util';
