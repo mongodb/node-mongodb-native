@@ -74,11 +74,12 @@ functions:
   bootstrap mongo-orchestration:
     - command: shell.exec
       params:
-        script: >
+        script: |
           ${PREPARE_SHELL}
-
-          MONGODB_VERSION=${VERSION} TOPOLOGY=${TOPOLOGY} ORCHESTRATION_FILE=${ORCHESTRATION_FILE} bash
-          ${DRIVERS_TOOLS}/.evergreen/run-orchestration.sh
+          MONGODB_VERSION=${VERSION} TOPOLOGY=${TOPOLOGY} \
+          SSL=${SSL} AUTH=${AUTH} \
+          ORCHESTRATION_FILE=${ORCHESTRATION_FILE} \
+          bash ${DRIVERS_TOOLS}/.evergreen/run-orchestration.sh
     - command: expansions.update
       params:
         file: mo-expansion.yml
