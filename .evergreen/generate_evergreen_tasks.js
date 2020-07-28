@@ -233,29 +233,26 @@ OCSP_VERSIONS.forEach(VERSION => {
   ]);
 })
 
-OCSP_VERSIONS.forEach(VERSION => {
-  TASKS.push({
-    name: `aws-${VERSION}-auth-test`,
-    commands: [
-      { func: 'install dependencies' },
-      {
-        func: 'bootstrap mongo-orchestration',
-        vars: {
-          AUTH: 'auth',
-          ORCHESTRATION_FILE: 'auth-aws.json',
-          VERSION: VERSION,
-          TOPOLOGY: 'server'
-        }
-      },
-      { func: 'add aws auth variables to file' },
-      { func: 'run aws auth test with regular aws credentials' },
-      { func: 'run aws auth test with assume role credentials' },
-      { func: 'run aws auth test with aws EC2 credentials' },
-      { func: 'run aws auth test with aws credentials as environment variables' },
-      { func: 'run aws auth test with aws credentials and session token as environment variables' },
-      { func: 'run aws ECS auth test' }
-    ]
-  });
+TASKS.push({
+  name: `aws-auth-test`,
+  commands: [
+    { func: 'install dependencies' },
+    {
+      func: 'bootstrap mongo-orchestration',
+      vars: {
+        AUTH: 'auth',
+        ORCHESTRATION_FILE: 'auth-aws.json',
+        TOPOLOGY: 'server'
+      }
+    },
+    { func: 'add aws auth variables to file' },
+    { func: 'run aws auth test with regular aws credentials' },
+    { func: 'run aws auth test with assume role credentials' },
+    { func: 'run aws auth test with aws EC2 credentials' },
+    { func: 'run aws auth test with aws credentials as environment variables' },
+    { func: 'run aws auth test with aws credentials and session token as environment variables' },
+    { func: 'run aws ECS auth test' }
+  ]
 });
 
 const BUILD_VARIANTS = [];
@@ -347,8 +344,7 @@ BUILD_VARIANTS.push({
     NODE_LTS_NAME: 'carbon'
   },
   tasks: [
-    'aws-latest-auth-test',
-    'aws-4.4-auth-test'
+    'aws-auth-test'
   ]
 });
 

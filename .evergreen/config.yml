@@ -357,13 +357,13 @@ functions:
         script: |
           cd ${DRIVERS_TOOLS}/.evergreen/ocsp
           /opt/mongodbtoolchain/v3/bin/python3 -m venv ./venv
-          ./venv/bin/pip3 install -r ${DRIVERS_TOOLS}/.evergreen/ocsp/mock-ocsp-responder-requirements.txt
+          ./venv/bin/pip3 install asn1crypto oscrypto bottle
     - command: shell.exec
       params:
         background: true
         script: |
           cd ${DRIVERS_TOOLS}/.evergreen/ocsp
-          nohup /opt/mongodbtoolchain/v3/bin/python3 ocsp_mock.py \
+          nohup ./venv/bin/python3 ocsp_mock.py \
             --ca_file rsa/ca.pem \
             --ocsp_responder_cert rsa/ca.crt \
             --ocsp_responder_key rsa/ca.key \
@@ -374,13 +374,13 @@ functions:
         script: |
           cd ${DRIVERS_TOOLS}/.evergreen/ocsp
           /opt/mongodbtoolchain/v3/bin/python3 -m venv ./venv
-          ./venv/bin/pip3 install -r ${DRIVERS_TOOLS}/.evergreen/ocsp/mock-ocsp-responder-requirements.txt
+          ./venv/bin/pip3 install asn1crypto oscrypto bottle
     - command: shell.exec
       params:
         background: true
         script: |
           cd ${DRIVERS_TOOLS}/.evergreen/ocsp
-          nohup /opt/mongodbtoolchain/v3/bin/python3 ocsp_mock.py \
+          nohup ./venv/bin/python3 ocsp_mock.py \
             --ca_file rsa/ca.pem \
             --ocsp_responder_cert rsa/ca.crt \
             --ocsp_responder_key rsa/ca.key \
@@ -1340,8 +1340,6 @@ buildvariants:
       - test-4.4-ocsp-soft-fail
       - test-4.4-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
       - test-4.4-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
-      - aws-latest-auth-test
-      - aws-4.4-auth-test
   - name: macos-1014-dubnium
     display_name: macOS 10.14 Node Dubnium
     run_on: macos-1014
@@ -1527,8 +1525,6 @@ buildvariants:
       - test-4.4-ocsp-soft-fail
       - test-4.4-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
       - test-4.4-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
-      - aws-latest-auth-test
-      - aws-4.4-auth-test
   - name: ubuntu-18.04-dubnium
     display_name: Ubuntu 18.04 Node Dubnium
     run_on: ubuntu1804-test
