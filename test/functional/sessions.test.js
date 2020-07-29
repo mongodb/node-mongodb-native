@@ -212,7 +212,7 @@ describe('Sessions', function() {
   context('unacknowledged writes', () => {
     it('should not include session for unacknowledged writes', {
       metadata: { requires: { topology: 'single' } },
-      test: withMonitoredClient('insert', { clientOptions: { w: 0 } }, function (
+      test: withMonitoredClient('insert', { clientOptions: { w: 0 } }, function(
         client,
         events,
         done
@@ -220,14 +220,14 @@ describe('Sessions', function() {
         client
           .db('test')
           .collection('foo')
-          .insertOne({ foo: 'bar' }, (err) => {
+          .insertOne({ foo: 'bar' }, err => {
             expect(err).to.not.exist;
             const event = events[0];
             expect(event.command.writeConcern.w).to.equal(0);
             expect(event.command.lsid).to.equal(undefined);
             done();
           });
-      }),
+      })
     });
   });
 });
