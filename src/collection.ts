@@ -10,7 +10,6 @@ import {
   formattedOrderClause,
   checkCollectionName,
   deprecateOptions,
-  executeLegacyOperation,
   MongoDBNamespace
 } from './utils';
 import { ObjectId } from './bson';
@@ -21,7 +20,6 @@ import ChangeStream = require('./change_stream');
 import WriteConcern = require('./write_concern');
 import ReadConcern = require('./read_concern');
 import { AggregationCursor, CommandCursor } from './cursor';
-import { removeDocuments, updateDocuments } from './operations/common_functions';
 import AggregateOperation = require('./operations/aggregate');
 import BulkWriteOperation = require('./operations/bulk_write');
 import CountDocumentsOperation = require('./operations/count_documents');
@@ -36,8 +34,6 @@ import {
   IndexInformationOperation,
   ListIndexesOperation
 } from './operations/indexes';
-import DeleteManyOperation = require('./operations/delete_many');
-import DeleteOneOperation = require('./operations/delete_one');
 import DistinctOperation = require('./operations/distinct');
 import { DropCollectionOperation } from './operations/drop';
 import EstimatedDocumentCountOperation = require('./operations/estimated_document_count');
@@ -50,15 +46,15 @@ import {
   FindOneAndUpdateOperation
 } from './operations/find_and_modify';
 import InsertManyOperation = require('./operations/insert_many');
-import InsertOneOperation = require('./operations/insert_one');
+import { InsertOneOperation } from './operations/insert';
+import { UpdateOneOperation, UpdateManyOperation } from './operations/update';
+import { DeleteOneOperation, DeleteManyOperation } from './operations/delete';
 import IsCappedOperation = require('./operations/is_capped');
 import MapReduceOperation = require('./operations/map_reduce');
 import OptionsOperation = require('./operations/options_operation');
 import RenameOperation = require('./operations/rename');
 import ReplaceOneOperation = require('./operations/replace_one');
 import { CollStatsOperation } from './operations/stats';
-import UpdateManyOperation = require('./operations/update_many');
-import UpdateOneOperation = require('./operations/update_one');
 import executeOperation = require('./operations/execute_operation');
 import { EvalGroupOperation, GroupOperation } from './operations/group';
 const mergeKeys = ['ignoreUndefined'];
@@ -643,7 +639,19 @@ class Collection {
    * @returns {Promise<void>} returns Promise if no callback passed
    */
   deleteMany(filter: object, options?: any, callback?: Function): Promise<void> {
-    if (typeof options === 'function') (callback = options), (options = {});
+    if (filter == null) {
+      filter = {};
+      options = {};
+      callback = undefined;
+    } else if (typeof filter === 'function') {
+      callback = filter;
+      filter = {};
+      options = {};
+    } else if (typeof options === 'function') {
+      callback = options;
+      options = {};
+    }
+
     options = Object.assign({}, options);
 
     // Add ignoreUndefined
@@ -1723,13 +1731,7 @@ Collection.prototype.update = deprecate(function (
     options.ignoreUndefined = this.s.options.ignoreUndefined;
   }
 
-  return executeLegacyOperation(this.s.topology, updateDocuments, [
-    this,
-    selector,
-    update,
-    options,
-    callback
-  ]);
+  return this.updateMany(selector, update, options, callback);
 },
 'collection.update is deprecated. Use updateOne, updateMany, or bulkWrite instead.');
 
@@ -1767,12 +1769,7 @@ Collection.prototype.remove = deprecate(function (
     options.ignoreUndefined = this.s.options.ignoreUndefined;
   }
 
-  return executeLegacyOperation(this.s.topology, removeDocuments, [
-    this,
-    selector,
-    options,
-    callback
-  ]);
+  return this.deleteMany(selector, options, callback);
 },
 'collection.remove is deprecated. Use deleteOne, deleteMany, or bulkWrite instead.');
 

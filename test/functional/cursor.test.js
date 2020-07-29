@@ -713,28 +713,30 @@ describe('Cursor', function () {
     test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function (err, client) {
+      client.connect((err, client) => {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
-        db.createCollection('test_limit_exceptions', function (err, collection) {
+        db.createCollection('test_limit_exceptions', (err, collection) => {
           test.equal(null, err);
 
-          collection.insert({ a: 1 }, configuration.writeConcernMax(), function (err) {
+          collection.insert({ a: 1 }, configuration.writeConcernMax(), err => {
             test.equal(null, err);
-          });
 
-          const cursor = collection.find();
+            const cursor = collection.find();
+            this.defer(() => cursor.close());
 
-          cursor.next(function (err) {
-            test.equal(null, err);
-            try {
-              cursor.limit(1);
-            } catch (err) {
-              test.equal('Cursor is closed', err.message);
-            }
-            cursor.close();
-            client.close(done);
+            cursor.next(err => {
+              test.equal(null, err);
+
+              try {
+                cursor.limit(1);
+              } catch (err) {
+                test.equal('Cursor is closed', err.message);
+              }
+
+              client.close(done);
+            });
           });
         });
       });
@@ -3481,8 +3483,6 @@ describe('Cursor', function () {
               .maxAwaitTimeMS(500);
 
             cursor.each(function (err, result) {
-              test.equal(null, err);
-
               if (result) {
                 setTimeout(function () {
                   cursor.kill();

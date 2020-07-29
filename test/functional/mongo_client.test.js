@@ -217,14 +217,8 @@ describe('MongoClient', function () {
       client.connect(function (err, client) {
         test.equal(null, err);
         var db = client.db(configuration.db);
-
-        if (db.s.topology.s.clonedOptions) {
-          test.equal(0, db.s.topology.s.clonedOptions.connectionTimeout);
-          test.equal(0, db.s.topology.s.clonedOptions.socketTimeout);
-        } else {
-          test.equal(0, db.s.topology.s.options.connectionTimeout);
-          test.equal(0, db.s.topology.s.options.socketTimeout);
-        }
+        expect(db).nested.property('s.topology.s.options.connectTimeoutMS').to.equal(0);
+        expect(db).nested.property('s.topology.s.options.socketTimeoutMS').to.equal(0);
 
         client.close(done);
       });

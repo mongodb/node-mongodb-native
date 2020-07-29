@@ -421,7 +421,7 @@ function createChangeStreamCursor(self: any, options: any) {
    * @type {object}
    */
   if (self.listenerCount('change') > 0) {
-    changeStreamCursor.on('data', function(change: any) {
+    changeStreamCursor.on('data', function (change: any) {
       processNewChange(self, change);
     });
   }
@@ -453,7 +453,7 @@ function createChangeStreamCursor(self: any, options: any) {
    * @event ChangeStream#error
    * @type {Error}
    */
-  changeStreamCursor.on('error', function(error: any) {
+  changeStreamCursor.on('error', function (error: any) {
     processError(self, error);
   });
 

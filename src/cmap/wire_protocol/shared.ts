@@ -3,7 +3,7 @@ import { TopologyDescription } from '../../sdam/topology_description';
 import ReadPreference = require('../../read_preference');
 import { MongoError } from '../../error';
 
-var getReadPreference = function(cmd: any, options: any) {
+var getReadPreference = function (cmd: any, options: any) {
   // Default to command version of the readPreference
   var readPreference = cmd.readPreference || new ReadPreference('primary');
   // If we have an option readPreference override the command one

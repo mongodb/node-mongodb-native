@@ -4986,8 +4986,6 @@ describe('Operation (Promises)', function () {
           .then(function (result) {
             test.ok(result);
 
-            // Start date
-            var s = new Date();
             var total = 0;
 
             // Get the cursor
@@ -5006,8 +5004,6 @@ describe('Operation (Promises)', function () {
             });
 
             cursor.on('end', function () {
-              test.ok(new Date().getTime() - s.getTime() > 1000);
-
               // TODO: forced because the cursor is still open/active
               client.close(true, done);
             });

@@ -86,7 +86,7 @@ function _command(server: any, ns: any, cmd: any, options: any, callback: Functi
 
   const inTransaction = session && (session.inTransaction() || isTransactionCommand(finalCmd));
   const commandResponseHandler = inTransaction
-    ? function(err: any) {
+    ? function (err: any) {
         // We need to add a TransientTransactionError errorLabel, as stated in the transaction spec.
         if (
           err &&

@@ -248,39 +248,6 @@ function mergeOptions(target: any, source: any) {
   return target;
 }
 
-// Merge options with translation
-function translateOptions(target: any, source: any) {
-  var translations: any = {
-    // SSL translation options
-    sslCA: 'ca',
-    sslCRL: 'crl',
-    sslValidate: 'rejectUnauthorized',
-    sslKey: 'key',
-    sslCert: 'cert',
-    sslPass: 'passphrase',
-    // SocketTimeout translation options
-    socketTimeoutMS: 'socketTimeout',
-    connectTimeoutMS: 'connectionTimeout',
-    // Replicaset options
-    replicaSet: 'setName',
-    rs_name: 'setName',
-    secondaryAcceptableLatencyMS: 'acceptableLatency',
-    connectWithNoPrimary: 'secondaryOnlyConnectionAllowed',
-    // Mongos options
-    acceptableLatencyMS: 'localThresholdMS'
-  };
-
-  for (var name in source) {
-    if (translations[name]) {
-      target[translations[name]] = source[name];
-    } else {
-      target[name] = source[name];
-    }
-  }
-
-  return target;
-}
-
 function filterOptions(options: any, names: any) {
   var filterOptions: any = {};
 

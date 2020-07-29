@@ -103,6 +103,8 @@ class Cursor extends CoreCursor {
    */
   constructor(topology: any, ns: any, cmd?: any, options?: any) {
     super(topology, ns, cmd, options);
+
+    options = options || {};
     if (this.operation) {
       options = this.operation.options;
     }

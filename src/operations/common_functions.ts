@@ -106,39 +106,7 @@ function nextObject(cursor: any, callback: Function) {
   });
 }
 
-function insertDocuments(coll: any, docs: any, options: any, callback: Function) {
-  if (typeof options === 'function') (callback = options), (options = {});
-  options = options || {};
-  // Ensure we are operating on an array op docs
-  docs = Array.isArray(docs) ? docs : [docs];
-
-  // Final options for retryable writes and write concern
-  let finalOptions = Object.assign({}, options);
-  finalOptions = applyRetryableWrites(finalOptions, coll.s.db);
-  finalOptions = applyWriteConcern(finalOptions, { db: coll.s.db, collection: coll }, options);
-
-  // If keep going set unordered
-  if (finalOptions.keepGoing === true) finalOptions.ordered = false;
-  finalOptions.serializeFunctions = options.serializeFunctions || coll.s.serializeFunctions;
-
-  docs = prepareDocs(coll, docs, options);
-
-  // File inserts
-  coll.s.topology.insert(coll.s.namespace, docs, finalOptions, (err?: any, result?: any) => {
-    if (callback == null) return;
-    if (err) return handleCallback(callback, err);
-    if (result == null) return handleCallback(callback, null, null);
-    if (result.result.code) return handleCallback(callback, toError(result.result));
-    if (result.result.writeErrors)
-      return handleCallback(callback, toError(result.result.writeErrors[0]));
-    // Add docs to the list
-    result.ops = docs;
-    // Return the results
-    handleCallback(callback, null, result);
-  });
-}
-
-function removeDocuments(coll: any, selector: any, options: any, callback: Function) {
+function removeDocuments(server: any, coll: any, selector: any, options: any, callback: Function) {
   if (typeof options === 'function') {
     (callback = options), (options = {});
   } else if (typeof selector === 'function') {
@@ -177,7 +145,7 @@ function removeDocuments(coll: any, selector: any, options: any, callback: Funct
   }
 
   // Execute the remove
-  coll.s.topology.remove(coll.s.namespace, [op], finalOptions, (err?: any, result?: any) => {
+  server.remove(coll.s.namespace.toString(), [op], finalOptions, (err?: any, result?: any) => {
     if (callback == null) return;
     if (err) return handleCallback(callback, err, null);
     if (result == null) return handleCallback(callback, null, null);
@@ -192,6 +160,7 @@ function removeDocuments(coll: any, selector: any, options: any, callback: Funct
 }
 
 function updateDocuments(
+  server: any,
   coll: any,
   selector: any,
   document: any,
@@ -244,7 +213,7 @@ function updateDocuments(
   }
 
   // Update options
-  coll.s.topology.update(coll.s.namespace, [op], finalOptions, (err?: any, result?: any) => {
+  server.update(coll.s.namespace.toString(), [op], finalOptions, (err?: any, result?: any) => {
     if (callback == null) return;
     if (err) return handleCallback(callback, err, null);
     if (result == null) return handleCallback(callback, null, null);
@@ -277,7 +246,6 @@ export {
   indexInformation,
   nextObject,
   prepareDocs,
-  insertDocuments,
   removeDocuments,
   updateDocuments,
   updateCallback

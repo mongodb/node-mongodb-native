@@ -6,12 +6,12 @@ import { TopologyType, ServerType } from './common';
 import { ServerDescription } from './server_description';
 import { TopologyDescription } from './topology_description';
 import { Server } from './server';
-import { CoreCursor } from '../cursor';
+import { Cursor } from '../cursor';
 import { ClientSession, ServerSessionPool } from '../sessions';
 import { SrvPoller } from './srv_polling';
 import { CMAP_EVENT_NAMES } from '../cmap/events';
 import { MongoError, MongoServerSelectionError } from '../error';
-import { readPreferenceServerSelector, writableServerSelector } from './server_selection';
+import { readPreferenceServerSelector } from './server_selection';
 import { deprecate } from 'util';
 import {
   relayEvents,
@@ -71,10 +71,6 @@ const DEPRECATED_OPTIONS = new Set([
   'reconnectInterval',
   'bufferMaxEntries'
 ]);
-
-const MMAPv1_RETRY_WRITES_ERROR_CODE = 20;
-const MMAPv1_RETRY_WRITES_ERROR_MESSAGE =
-  'This MongoDB deployment does not support retryable writes. Please add retryWrites=false to your connection string.';
 
 const kCancelled = Symbol('cancelled');
 const kWaitQueue = Symbol('waitQueue');
@@ -180,7 +176,7 @@ class Topology extends EventEmitter {
       heartbeatFrequencyMS: options.heartbeatFrequencyMS,
       minHeartbeatFrequencyMS: options.minHeartbeatFrequencyMS,
       // allow users to override the cursor factory
-      Cursor: options.cursorFactory || CoreCursor,
+      Cursor: options.cursorFactory || Cursor,
       // a map of server instances to normalized addresses
       servers: new Map(),
       // Server Session Pool
@@ -226,6 +222,10 @@ class Topology extends EventEmitter {
    */
   get description() {
     return this.s.description;
+  }
+
+  capabilities() {
+    return new ServerCapabilities(this.lastIsMaster());
   }
 
   /**
@@ -576,63 +576,6 @@ class Topology extends EventEmitter {
     if (typeof callback === 'function') callback(null, true);
   }
 
-  // Basic operation support. Eventually this should be moved into command construction
-  // during the command refactor.
-
-  /**
-   * Insert one or more documents
-   *
-   * @param {string} ns The full qualified namespace for this operation
-   * @param {Array} ops An array of documents to insert
-   * @param {object} options insert options
-   * @param {boolean} [options.ordered=true] Execute in order or out of order
-   * @param {object} [options.writeConcern] Write concern for the operation
-   * @param {boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized
-   * @param {boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields
-   * @param {ClientSession} [options.session] Session to use for the operation
-   * @param {boolean} [options.retryWrites] Enable retryable writes for this operation
-   * @param {opResultCallback} callback A callback function
-   */
-  insert(ns: string, ops: any[], options: any, callback: any) {
-    executeWriteOperation({ topology: this, op: 'insert', ns, ops }, options, callback);
-  }
-
-  /**
-   * Perform one or more update operations
-   *
-   * @param {string} ns The fully qualified namespace for this operation
-   * @param {Array} ops An array of updates
-   * @param {object} options
-   * @param {boolean} [options.ordered=true] Execute in order or out of order
-   * @param {object} [options.writeConcern] Write concern for the operation
-   * @param {boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized
-   * @param {boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields
-   * @param {ClientSession} [options.session] Session to use for the operation
-   * @param {boolean} [options.retryWrites] Enable retryable writes for this operation
-   * @param {opResultCallback} callback A callback function
-   */
-  update(ns: string, ops: any[], options: any, callback: any) {
-    executeWriteOperation({ topology: this, op: 'update', ns, ops }, options, callback);
-  }
-
-  /**
-   * Perform one or more remove operations
-   *
-   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
-   * @param {Array} ops An array of removes
-   * @param {object} options options for removal
-   * @param {boolean} [options.ordered=true] Execute in order or out of order
-   * @param {object} [options.writeConcern={}] Write concern for the operation
-   * @param {boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
-   * @param {boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
-   * @param {ClientSession} [options.session=null] Session to use for the operation
-   * @param {boolean} [options.retryWrites] Enable retryable writes for this operation
-   * @param {opResultCallback} callback A callback function
-   */
-  remove(ns: string, ops: any[], options: any, callback: any) {
-    executeWriteOperation({ topology: this, op: 'remove', ns, ops }, options, callback);
-  }
-
   /**
    * Execute a command
    *
@@ -916,78 +859,6 @@ function updateServers(topology: Topology, incomingServerDescription?: any) {
   }
 }
 
-/**
- * @param {any} args
- * @param {any} options
- * @param {any} callback
- */
-function executeWriteOperation(args: any, options: any, callback: any) {
-  if (typeof options === 'function') (callback = options), (options = {});
-  options = options || {};
-
-  // TODO: once we drop Node 4, use destructuring either here or in arguments.
-  const topology = args.topology;
-  const op = args.op;
-  const ns = args.ns;
-  const ops = args.ops;
-
-  const willRetryWrite =
-    !args.retrying &&
-    !!options.retryWrites &&
-    options.session &&
-    isRetryableWritesSupported(topology) &&
-    !options.session.inTransaction();
-
-  topology.selectServer(writableServerSelector(), options, (err?: any, server?: any) => {
-    if (err) {
-      callback(err, null);
-      return;
-    }
-
-    const handler = (err?: any, result?: any) => {
-      if (!err) return callback(null, result);
-      if (!shouldRetryOperation(err)) {
-        if (
-          err.code === MMAPv1_RETRY_WRITES_ERROR_CODE &&
-          err.errmsg.includes('Transaction numbers')
-        ) {
-          callback(
-            new MongoError({
-              message: MMAPv1_RETRY_WRITES_ERROR_MESSAGE,
-              errmsg: MMAPv1_RETRY_WRITES_ERROR_MESSAGE,
-              originalError: err
-            })
-          );
-
-          return;
-        }
-
-        return callback(err);
-      }
-
-      if (willRetryWrite) {
-        const newArgs = Object.assign({}, args, { retrying: true });
-        return executeWriteOperation(newArgs, options, callback);
-      }
-
-      return callback(err);
-    };
-
-    if (callback.operationId) {
-      handler.operationId = callback.operationId;
-    }
-
-    // increment and assign txnNumber
-    if (willRetryWrite) {
-      options.session.incrementTransactionNumber();
-      options.willRetryWrite = willRetryWrite;
-    }
-
-    // execute the write operation
-    server[op](ns, ops, options, handler);
-  });
-}
-
 function shouldRetryOperation(err: any) {
   return err instanceof MongoError && err.hasErrorLabel('RetryableWriteError');
 }
@@ -1110,6 +981,75 @@ function isRetryableWritesSupported(topology: any) {
   }
 
   return true;
+}
+
+class ServerCapabilities {
+  constructor(ismaster: any) {
+    // Capabilities
+    let aggregationCursor = false;
+    let writeCommands = false;
+    let textSearch = false;
+    let authCommands = false;
+    let listCollections = false;
+    let listIndexes = false;
+    let maxNumberOfDocsInBatch = ismaster.maxWriteBatchSize || 1000;
+    let commandsTakeWriteConcern = false;
+    let commandsTakeCollation = false;
+
+    if (ismaster.minWireVersion >= 0) {
+      textSearch = true;
+    }
+
+    if (ismaster.maxWireVersion >= 1) {
+      aggregationCursor = true;
+      authCommands = true;
+    }
+
+    if (ismaster.maxWireVersion >= 2) {
+      writeCommands = true;
+    }
+
+    if (ismaster.maxWireVersion >= 3) {
+      listCollections = true;
+      listIndexes = true;
+    }
+
+    if (ismaster.maxWireVersion >= 5) {
+      commandsTakeWriteConcern = true;
+      commandsTakeCollation = true;
+    }
+
+    // If no min or max wire version set to 0
+    if (ismaster.minWireVersion == null) {
+      ismaster.minWireVersion = 0;
+    }
+
+    if (ismaster.maxWireVersion == null) {
+      ismaster.maxWireVersion = 0;
+    }
+
+    function setup_get_property(object: any, name: any, value: any) {
+      Object.defineProperty(object, name, {
+        enumerable: true,
+        get() {
+          return value;
+        }
+      });
+    }
+
+    // Map up read only parameters
+    setup_get_property(this, 'hasAggregationCursor', aggregationCursor);
+    setup_get_property(this, 'hasWriteCommands', writeCommands);
+    setup_get_property(this, 'hasTextSearch', textSearch);
+    setup_get_property(this, 'hasAuthCommands', authCommands);
+    setup_get_property(this, 'hasListCollectionsCommand', listCollections);
+    setup_get_property(this, 'hasListIndexesCommand', listIndexes);
+    setup_get_property(this, 'minWireVersion', ismaster.minWireVersion);
+    setup_get_property(this, 'maxWireVersion', ismaster.maxWireVersion);
+    setup_get_property(this, 'maxNumberOfDocsInBatch', maxNumberOfDocsInBatch);
+    setup_get_property(this, 'commandsTakeWriteConcern', commandsTakeWriteConcern);
+    setup_get_property(this, 'commandsTakeCollation', commandsTakeCollation);
+  }
 }
 
 export { Topology };
