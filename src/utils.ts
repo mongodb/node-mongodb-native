@@ -1005,7 +1005,6 @@ function hasAtomicOperators(doc: any): boolean {
 export {
   filterOptions,
   mergeOptions,
-  translateOptions,
   getSingleProperty,
   checkCollectionName,
   toError,
