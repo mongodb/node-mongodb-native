@@ -119,16 +119,17 @@ function executeWithServerSelection(topology: any, operation: any, callback: Fun
       return callback(null, result);
     }
 
-    if (
-      (operation.hasAspect(Aspect.READ_OPERATION) && !isRetryableError(err)) ||
-      (operation.hasAspect(Aspect.WRITE_OPERATION) && !shouldRetryWrite(err))
-    ) {
+    const hasReadAspect = operation.hasAspect(Aspect.READ_OPERATION);
+    const hasWriteAspect = operation.hasAspect(Aspect.WRITE_OPERATION);
+    const itShouldRetryWrite = shouldRetryWrite(err);
+
+    if ((hasReadAspect && !isRetryableError(err)) || (hasWriteAspect && !itShouldRetryWrite)) {
       return callback(err);
     }
 
     if (
-      operation.hasAspect(Aspect.WRITE_OPERATION) &&
-      shouldRetryWrite(err) &&
+      hasWriteAspect &&
+      itShouldRetryWrite &&
       err.code === MMAPv1_RETRY_WRITES_ERROR_CODE &&
       err.errmsg.match(/Transaction numbers/)
     ) {
@@ -165,32 +166,33 @@ function executeWithServerSelection(topology: any, operation: any, callback: Fun
       return;
     }
 
-    const willRetryRead =
-      topology.s.options.retryReads !== false &&
-      operation.session &&
-      !inTransaction &&
-      supportsRetryableReads(server) &&
-      operation.canRetryRead;
+    if (operation.hasAspect(Aspect.RETRYABLE)) {
+      const willRetryRead =
+        topology.s.options.retryReads !== false &&
+        operation.session &&
+        !inTransaction &&
+        supportsRetryableReads(server) &&
+        operation.canRetryRead;
 
-    const willRetryWrite =
-      topology.s.options.retryWrites === true &&
-      operation.session &&
-      !inTransaction &&
-      supportsRetryableWrites(server) &&
-      operation.canRetryWrite;
+      const willRetryWrite =
+        topology.s.options.retryWrites === true &&
+        operation.session &&
+        !inTransaction &&
+        supportsRetryableWrites(server) &&
+        operation.canRetryWrite;
 
-    if (
-      operation.hasAspect(Aspect.RETRYABLE) &&
-      ((operation.hasAspect(Aspect.READ_OPERATION) && willRetryRead) ||
-        (operation.hasAspect(Aspect.WRITE_OPERATION) && willRetryWrite))
-    ) {
-      if (operation.hasAspect(Aspect.WRITE_OPERATION) && willRetryWrite) {
-        operation.options.willRetryWrite = true;
-        operation.session.incrementTransactionNumber();
+      const hasReadAspect = operation.hasAspect(Aspect.READ_OPERATION);
+      const hasWriteAspect = operation.hasAspect(Aspect.WRITE_OPERATION);
+
+      if ((hasReadAspect && willRetryRead) || (hasWriteAspect && willRetryWrite)) {
+        if (hasWriteAspect && willRetryWrite) {
+          operation.options.willRetryWrite = true;
+          operation.session.incrementTransactionNumber();
+        }
+
+        operation.execute(server, callbackWithRetry);
+        return;
       }
-
-      operation.execute(server, callbackWithRetry);
-      return;
     }
 
     operation.execute(server, callback);
