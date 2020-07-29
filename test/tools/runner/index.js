@@ -61,7 +61,15 @@ before(function (_done) {
   //   )} topology`
   // );
 
-  const client = new MongoClient(MONGODB_URI);
+  const options = {};
+  if (process.env.SSL && process.env.SSL === 'ssl') {
+    console.log('Detected ssl/tls test run');
+    options.tls = true;
+    options.tlsCertificateKeyFile = process.env.SSL_KEY_FILE;
+    options.tlsCAFile = process.env.SSL_CA_FILE;
+  }
+  const client = new MongoClient(MONGODB_URI, options);
+
   const done = err => client.close(err2 => _done(err || err2));
 
   client.connect(err => {
@@ -85,7 +93,7 @@ before(function (_done) {
           return;
         }
 
-        this.configuration = new TestConfiguration(parsedURI, context);
+        this.configuration = new TestConfiguration(parsedURI, context, options);
         done();
       });
     });
