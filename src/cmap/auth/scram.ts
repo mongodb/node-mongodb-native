@@ -257,17 +257,11 @@ function xor(a: any, b: any) {
 }
 
 function H(method: any, text: any) {
-  return crypto
-    .createHash(method)
-    .update(text)
-    .digest();
+  return crypto.createHash(method).update(text).digest();
 }
 
 function HMAC(method: any, key: any, text: any) {
-  return crypto
-    .createHmac(method, key)
-    .update(text)
-    .digest();
+  return crypto.createHmac(method, key).update(text).digest();
 }
 
 let _hiCache: any = {};

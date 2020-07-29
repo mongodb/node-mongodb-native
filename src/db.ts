@@ -822,7 +822,7 @@ Db.prototype.createCollection = deprecateOptions(
     deprecatedOptions: ['autoIndexId'],
     optionsIndex: 1
   },
-  function(this: any, name: any, options: any, callback: Function) {
+  function (this: any, name: any, options: any, callback: Function) {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
     options.readConcern = options.readConcern
@@ -847,7 +847,7 @@ Db.prototype.createCollection = deprecateOptions(
  * @deprecated Eval is deprecated on MongoDB 3.2 and forward
  * @returns {Promise<void>} returns Promise if no callback passed
  */
-Db.prototype.eval = deprecate(function(
+Db.prototype.eval = deprecate(function (
   this: any,
   code: any,
   parameters: any,
@@ -891,7 +891,7 @@ Db.prototype.eval = deprecate(function(
  * @param {Db~resultCallback} [callback] The command result callback
  * @returns {Promise<void>} returns Promise if no callback passed
  */
-Db.prototype.ensureIndex = deprecate(function(
+Db.prototype.ensureIndex = deprecate(function (
   this: any,
   name: any,
   fieldOrSpec: any,
@@ -918,13 +918,11 @@ Db.prototype.ensureIndex = deprecate(function(
  * @returns {Promise<void>} returns Promise if no callback passed
  * @deprecated Query the system.profile collection directly.
  */
-Db.prototype.profilingInfo = deprecate(function(this: any, options: any, callback: Function) {
+Db.prototype.profilingInfo = deprecate(function (this: any, options: any, callback: Function) {
   if (typeof options === 'function') (callback = options), (options = {});
   options = options || {};
 
-  return this.collection('system.profile')
-    .find({}, options)
-    .toArray(callback);
+  return this.collection('system.profile').find({}, options).toArray(callback);
 }, 'Db.profilingInfo is deprecated. Query the system.profile collection directly.');
 
 // Validate the database name
