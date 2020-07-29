@@ -41,6 +41,16 @@ function writeCommand(
     writeCommand.bypassDocumentValidation = options.bypassDocumentValidation;
   }
 
+  if (writeConcern && writeConcern.w === 0) {
+    // don't include session for unacknowledged writes
+    if (options && options.session && options.session.explicit) {
+      throw new MongoError('Cannot have explicit session with unacknowledged writes')
+    }
+    if (options) {
+      delete options.session;
+    }
+  }
+
   const commandOptions = Object.assign(
     {
       checkKeys: type === 'insert',
