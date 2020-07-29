@@ -264,7 +264,7 @@ export class Query {
   }
 }
 
-export interface GetMoreOptions {
+export interface OpGetMoreOptions {
   numberToReturn?: number;
 }
 
@@ -277,7 +277,7 @@ export class GetMore {
   ns: string;
   cursorId: Long;
 
-  constructor(ns: string, cursorId: Long, opts: GetMoreOptions = {}) {
+  constructor(ns: string, cursorId: Long, opts: OpGetMoreOptions = {}) {
     this.numberToReturn = opts.numberToReturn || 0;
     this.requestId = _requestId++;
     this.ns = ns;

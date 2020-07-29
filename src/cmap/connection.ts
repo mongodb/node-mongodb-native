@@ -20,7 +20,10 @@ import type { Socket, TcpNetConnectOpts, IpcNetConnectOpts } from 'net';
 import type { Server } from '../sdam/server';
 import type { MongoCredentials } from './auth/mongo_credentials';
 import type { CommandOptions } from './wire_protocol/command';
+import type { QueryOptions } from './wire_protocol/query';
 import type { InternalCursorState } from '../cursor/core_cursor';
+import type { GetMoreOptions } from './wire_protocol/get_more';
+import type { InsertOptions, UpdateOptions, RemoveOptions } from './wire_protocol/index';
 
 const kStream = Symbol('stream');
 const kQueue = Symbol('queue');
@@ -236,7 +239,7 @@ export class Connection extends EventEmitter {
     ns: string,
     cmd: Document,
     cursorState: InternalCursorState,
-    options: CommandOptions,
+    options: QueryOptions,
     callback: Callback
   ): void {
     wp.query(makeServerTrampoline(this), ns, cmd, cursorState, options, callback);
@@ -246,7 +249,7 @@ export class Connection extends EventEmitter {
     ns: string,
     cursorState: InternalCursorState,
     batchSize: number,
-    options: CommandOptions,
+    options: GetMoreOptions,
     callback: Callback
   ): void {
     wp.getMore(makeServerTrampoline(this), ns, cursorState, batchSize, options, callback);
@@ -256,15 +259,15 @@ export class Connection extends EventEmitter {
     wp.killCursors(makeServerTrampoline(this), ns, cursorState, callback);
   }
 
-  insert(ns: string, ops: Document[], options: CommandOptions, callback: Callback): void {
+  insert(ns: string, ops: Document[], options: InsertOptions, callback: Callback): void {
     wp.insert(makeServerTrampoline(this), ns, ops, options, callback);
   }
 
-  update(ns: string, ops: Document[], options: CommandOptions, callback: Callback): void {
+  update(ns: string, ops: Document[], options: UpdateOptions, callback: Callback): void {
     wp.update(makeServerTrampoline(this), ns, ops, options, callback);
   }
 
-  remove(ns: string, ops: Document[], options: CommandOptions, callback: Callback): void {
+  remove(ns: string, ops: Document[], options: RemoveOptions, callback: Callback): void {
     wp.remove(makeServerTrampoline(this), ns, ops, options, callback);
   }
 }

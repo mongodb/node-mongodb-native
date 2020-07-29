@@ -9,7 +9,7 @@ import type { Connection } from '../connection';
 import type { Callback, Callback2, Document } from '../../types';
 import type { InternalCursorState } from '../../cursor/core_cursor';
 
-interface GetMoreOptions {
+export interface GetMoreOptions {
   [key: string]: unknown;
 }
 

@@ -10,7 +10,7 @@ import type { Callback, Document } from '../../types';
 
 export { writeCommand };
 
-interface InsertOptions {
+export interface InsertOptions {
   [key: string]: any;
 }
 
@@ -24,7 +24,7 @@ export function insert(
   writeCommand(server, 'insert', 'documents', ns, ops, options, callback);
 }
 
-interface UpdateOptions {
+export interface UpdateOptions {
   [key: string]: any;
 }
 
@@ -38,7 +38,7 @@ export function update(
   writeCommand(server, 'update', 'updates', ns, ops, options, callback);
 }
 
-interface RemoveOptions {
+export interface RemoveOptions {
   [key: string]: any;
 }
 

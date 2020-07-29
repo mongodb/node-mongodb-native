@@ -11,7 +11,11 @@ import type { WriteConcern } from '../../write_concern';
 import type { ReadPreference } from '../..';
 
 export interface CommandOptions extends BSONSerializeOptions {
-  [key: string]: unknown;
+  command?: Document;
+  slaveOk?: boolean;
+  ordered?: any;
+  collation?: any;
+  bypassDocumentValidation?: boolean;
   writeConcern?: WriteConcern;
   readPreference?: ReadPreference;
   raw?: boolean;
@@ -132,7 +136,7 @@ function _command(
 
   const inTransaction = session && (session.inTransaction() || isTransactionCommand(finalCmd));
   const commandResponseHandler = inTransaction
-    ? function (err: MongoNetworkError, res?: CommandResult) {
+    ? function (err: MongoError, ...args: any[]) {
         // We need to add a TransientTransactionError errorLabel, as stated in the transaction spec.
         if (
           err &&
@@ -151,7 +155,8 @@ function _command(
         ) {
           session.transaction.unpinServer();
         }
-        return callback(undefined, res);
+
+        return callback(undefined, ...args);
       }
     : callback;
 
