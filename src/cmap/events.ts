@@ -1,4 +1,11 @@
-import { GetMore, KillCursor, Msg, Query, CommandResult, CommandType } from './commands';
+import {
+  GetMore,
+  KillCursor,
+  Msg,
+  Query,
+  CommandResult,
+  WriteProtocolMessageType
+} from './commands';
 import { calculateDurationInMs } from '../utils';
 import type { ConnectionPool, ConnectionPoolOptions } from './connection_pool';
 import type { Connection } from './connection';
@@ -147,7 +154,7 @@ export class CommandStartedEvent {
    * @param {Pool} pool the pool that originated the command
    * @param {object} command the command
    */
-  constructor(pool: Connection | ConnectionPool, command: CommandType) {
+  constructor(pool: Connection | ConnectionPool, command: WriteProtocolMessageType) {
     const cmd = extractCommand(command);
     const commandName = extractCommandName(cmd);
     const { address, connectionId } = extractConnectionDetails(pool);
@@ -186,7 +193,7 @@ export class CommandSucceededEvent {
    */
   constructor(
     pool: Connection | ConnectionPool,
-    command: CommandType,
+    command: WriteProtocolMessageType,
     reply: CommandResult | undefined,
     started: number
   ) {
@@ -221,7 +228,7 @@ export class CommandFailedEvent {
    */
   constructor(
     pool: Connection | ConnectionPool,
-    command: CommandType,
+    command: WriteProtocolMessageType,
     error: Error | Document,
     started: number
   ) {
@@ -254,9 +261,9 @@ const SENSITIVE_COMMANDS = new Set([
 
 // helper methods
 const extractCommandName = (commandDoc: Document) => Object.keys(commandDoc)[0];
-const namespace = (command: CommandType) => command.ns;
-const databaseName = (command: CommandType) => command.ns.split('.')[0];
-const collectionName = (command: CommandType) => command.ns.split('.')[1];
+const namespace = (command: WriteProtocolMessageType) => command.ns;
+const databaseName = (command: WriteProtocolMessageType) => command.ns.split('.')[0];
+const collectionName = (command: WriteProtocolMessageType) => command.ns.split('.')[1];
 const maybeRedact = (commandName: string, result?: CommandResult | Error | Document) =>
   SENSITIVE_COMMANDS.has(commandName) ? {} : result;
 
@@ -290,7 +297,7 @@ const OP_QUERY_KEYS = [
 ];
 
 /** Extract the actual command from the query, possibly up-converting if it's a legacy format */
-function extractCommand(command: CommandType): Document {
+function extractCommand(command: WriteProtocolMessageType): Document {
   if (command instanceof GetMore) {
     return {
       getMore: command.cursorId,

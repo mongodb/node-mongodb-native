@@ -15,9 +15,6 @@ export interface CommandOptions extends BSONSerializeOptions {
   writeConcern?: WriteConcern;
   readPreference?: ReadPreference;
   raw?: boolean;
-  promoteLongs?: boolean;
-  promoteValues?: boolean;
-  promoteBuffers?: boolean;
   monitoring?: boolean;
   fullResult?: boolean;
   socketTimeout?: number;
@@ -135,7 +132,7 @@ function _command(
 
   const inTransaction = session && (session.inTransaction() || isTransactionCommand(finalCmd));
   const commandResponseHandler = inTransaction
-    ? function (err: MongoNetworkError | MongoError, res?: CommandResult) {
+    ? function (err: MongoNetworkError, res?: CommandResult) {
         // We need to add a TransientTransactionError errorLabel, as stated in the transaction spec.
         if (
           err &&

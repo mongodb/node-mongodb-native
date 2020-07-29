@@ -2,6 +2,9 @@ import type { Callback, Document } from '../../types';
 import type { Connection, MongoDBConnectionOptions } from '../connection';
 import type { MongoCredentials } from './mongo_credentials';
 import type { HandshakeDocument } from '../connect';
+import type { ClientMetadataOptions } from '../../utils';
+
+export type AuthContextOptions = MongoDBConnectionOptions & ClientMetadataOptions;
 
 /**
  * Context used during authentication
@@ -14,8 +17,8 @@ import type { HandshakeDocument } from '../connect';
  */
 export class AuthContext {
   connection: Connection;
-  credentials: MongoCredentials;
-  options: MongoDBConnectionOptions;
+  credentials!: MongoCredentials;
+  options: AuthContextOptions;
 
   /** A response from a speculative auth attempt, only some mechanisms use this (e.g, SCRAM) */
   response?: Document;
@@ -23,11 +26,11 @@ export class AuthContext {
 
   constructor(
     connection: Connection,
-    credentials: MongoCredentials,
-    options: MongoDBConnectionOptions
+    credentials: MongoCredentials | undefined,
+    options: AuthContextOptions
   ) {
     this.connection = connection;
-    this.credentials = credentials;
+    this.credentials = credentials!;
     this.options = options;
   }
 }

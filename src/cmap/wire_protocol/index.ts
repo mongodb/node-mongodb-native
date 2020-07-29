@@ -7,34 +7,46 @@ export { command } from './command';
 
 import { writeCommand } from './write_command';
 import type { Callback, Document } from '../../types';
-import type { CommandOptions } from './command';
+
 export { writeCommand };
+
+interface InsertOptions {
+  [key: string]: any;
+}
 
 export function insert(
   server: Server,
   ns: string,
   ops: Document[],
-  options: CommandOptions,
+  options: InsertOptions,
   callback: Callback
 ): void {
   writeCommand(server, 'insert', 'documents', ns, ops, options, callback);
+}
+
+interface UpdateOptions {
+  [key: string]: any;
 }
 
 export function update(
   server: Server,
   ns: string,
   ops: Document[],
-  options: CommandOptions,
+  options: UpdateOptions,
   callback: Callback
 ): void {
   writeCommand(server, 'update', 'updates', ns, ops, options, callback);
+}
+
+interface RemoveOptions {
+  [key: string]: any;
 }
 
 export function remove(
   server: Server,
   ns: string,
   ops: Document[],
-  options: CommandOptions,
+  options: RemoveOptions,
   callback: Callback
 ): void {
   writeCommand(server, 'delete', 'deletes', ns, ops, options, callback);

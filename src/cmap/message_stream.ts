@@ -5,7 +5,7 @@ import {
   Msg,
   BinMsg,
   Query,
-  CommandType,
+  WriteProtocolMessageType,
   MessageHeader,
   CommandResult
 } from './commands';
@@ -78,7 +78,10 @@ export class MessageStream extends Duplex {
     return;
   }
 
-  writeCommand(command: CommandType, operationDescription: OperationDescription): void {
+  writeCommand(
+    command: WriteProtocolMessageType,
+    operationDescription: OperationDescription
+  ): void {
     // TODO: agreed compressor should live in `StreamDescription`
     const shouldCompress = operationDescription && !!operationDescription.agreedCompressor;
     if (!shouldCompress || !canCompress(command)) {
@@ -126,7 +129,7 @@ export class MessageStream extends Duplex {
 
 // Return whether a command contains an uncompressible command term
 // Will return true if command contains no uncompressible command terms
-function canCompress(command: CommandType) {
+function canCompress(command: WriteProtocolMessageType) {
   const commandDoc = command instanceof Msg ? command.command : (command as Query).query;
   const commandName = Object.keys(commandDoc)[0];
   return !uncompressibleCommands.has(commandName);

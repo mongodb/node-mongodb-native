@@ -115,7 +115,7 @@ export interface ConnectionPoolOptions extends MongoDBConnectionOptions {
 }
 
 interface WaitQueueMember {
-  callback: CheckoutCallback;
+  callback: Callback<Connection>;
   timer?: NodeJS.Timeout;
   [kCancelled]: boolean;
 }
@@ -143,7 +143,7 @@ export interface CloseOptions {
  * @fires ConnectionPool#connectionCheckedIn
  * @fires ConnectionPool#connectionPoolCleared
  */
-class ConnectionPool extends EventEmitter {
+export class ConnectionPool extends EventEmitter {
   closed: boolean;
   options: Readonly<ConnectionPoolOptions>;
   [kLogger]: Logger;
@@ -223,7 +223,7 @@ class ConnectionPool extends EventEmitter {
    *
    * @param {ConnectionPool~checkOutCallback} callback
    */
-  checkOut(callback: CheckoutCallback): void {
+  checkOut(callback: Callback<Connection>): void {
     this.emit('connectionCheckOutStarted', new ConnectionCheckOutStartedEvent(this));
 
     if (this.closed) {
@@ -316,8 +316,10 @@ class ConnectionPool extends EventEmitter {
     // drain the wait queue
     while (this.waitQueueSize) {
       const waitQueueMember = this[kWaitQueue].pop();
-      if (waitQueueMember && waitQueueMember.timer) {
-        clearTimeout(waitQueueMember.timer);
+      if (waitQueueMember) {
+        if (waitQueueMember.timer) {
+          clearTimeout(waitQueueMember.timer);
+        }
         if (!waitQueueMember[kCancelled]) {
           waitQueueMember.callback(new MongoError('connection pool closed'));
         }
@@ -362,10 +364,10 @@ class ConnectionPool extends EventEmitter {
    * @param {Function} callback The original callback
    * @returns {void}
    */
-  withConnection(fn: WithConnectionCallback, callback: Callback): void {
+  withConnection(fn: WithConnectionCallback, callback: Callback<Connection>): void {
     this.checkOut((err, conn) => {
       // don't callback with `err` here, we might want to act upon it inside `fn`
-      fn(err, conn, (fnErr, result) => {
+      fn(err as any, conn, (fnErr, result) => {
         if (typeof callback === 'function') {
           if (fnErr) {
             callback(fnErr);
@@ -413,8 +415,8 @@ function createConnection(pool: ConnectionPool, callback?: Callback<Connection>)
   );
 
   pool[kPermits]--;
-  connect(connectOptions, pool[kCancellationToken], (err, conn) => {
-    if (err || !conn) {
+  connect(connectOptions, pool[kCancellationToken], (err, connection) => {
+    if (err || !connection) {
       pool[kPermits]++;
       pool[kLogger].debug(`connection attempt failed with error [${JSON.stringify(err)}]`);
       if (typeof callback === 'function') {
@@ -423,8 +425,6 @@ function createConnection(pool: ConnectionPool, callback?: Callback<Connection>)
 
       return;
     }
-    // conn is only left as a plain socket if there was an error
-    const connection = conn as Connection;
 
     // The pool might have closed since we started trying to create a connection
     if (pool.closed) {
@@ -549,9 +549,9 @@ function processWaitQueue(pool: ConnectionPool) {
  * @param {Function} callback A function to call back after connection management is complete
  */
 type WithConnectionCallback = (
-  error?: MongoError | WaitQueueTimeoutError | null,
+  error?: MongoError | WaitQueueTimeoutError,
   connection?: Connection,
-  callback?: CheckoutCallback
+  callback?: Callback<Connection>
 ) => void;
 
 /**
@@ -561,7 +561,6 @@ type WithConnectionCallback = (
  * @param {MongoError} error An error instance representing the error during checkout
  * @param {Connection} connection A connection from the pool
  */
-type CheckoutCallback = CallbackWithType<WaitQueueTimeoutError | MongoError, Connection>;
 
 /**
  * Emitted once when the connection pool is created
@@ -632,5 +631,3 @@ type CheckoutCallback = CallbackWithType<WaitQueueTimeoutError | MongoError, Con
  * @event ConnectionPool#connectionPoolCleared
  * @type {PoolClearedEvent}
  */
-
-export { ConnectionPool };

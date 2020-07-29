@@ -25,9 +25,9 @@ const QUERY_FAILURE = 2;
 const SHARD_CONFIG_STALE = 4;
 const AWAIT_CAPABLE = 8;
 
-export type CommandType = Query | Msg | GetMore | KillCursor;
+export type WriteProtocolMessageType = Query | Msg | GetMore | KillCursor;
 
-export interface QueryOptions {
+export interface OpQueryOptions {
   socketTimeout?: number;
   session?: ClientSession;
   documentsReturnedIn?: string;
@@ -72,7 +72,7 @@ export class Query {
   partial: boolean;
   documentsReturnedIn?: string;
 
-  constructor(ns: string, query: Document, options: QueryOptions) {
+  constructor(ns: string, query: Document, options: OpQueryOptions) {
     // Basic options needed to be passed in
     if (ns == null) throw new Error('ns must be specified for query');
     if (query == null) throw new Error('query must be specified for query');
@@ -96,15 +96,17 @@ export class Query {
     this.pre32Limit = options.pre32Limit;
 
     // Serialization option
-    this.serializeFunctions = options.serializeFunctions ?? false;
-    this.ignoreUndefined = options.ignoreUndefined ?? false;
+    this.serializeFunctions =
+      'boolean' === typeof options.serializeFunctions ? options.serializeFunctions : false;
+    this.ignoreUndefined =
+      'boolean' === typeof options.ignoreUndefined ? options.ignoreUndefined : false;
     this.maxBsonSize = options.maxBsonSize || 1024 * 1024 * 16;
-    this.checkKeys = options.checkKeys ?? true;
+    this.checkKeys = 'boolean' === typeof options.checkKeys ? options.checkKeys : true;
     this.batchSize = this.numberToReturn;
 
     // Flags
     this.tailable = false;
-    this.slaveOk = options.slaveOk ?? false;
+    this.slaveOk = 'boolean' === typeof options.slaveOk ? options.slaveOk : false;
     this.oplogReplay = false;
     this.noCursorTimeout = false;
     this.awaitData = false;
@@ -511,9 +513,11 @@ export class Response {
     this.queryFailure = (this.responseFlags & QUERY_FAILURE) !== 0;
     this.shardConfigStale = (this.responseFlags & SHARD_CONFIG_STALE) !== 0;
     this.awaitCapable = (this.responseFlags & AWAIT_CAPABLE) !== 0;
-    this.promoteLongs = this.opts.promoteLongs ?? true;
-    this.promoteValues = this.opts.promoteValues ?? true;
-    this.promoteBuffers = this.opts.promoteBuffers ?? false;
+    this.promoteLongs = 'boolean' === typeof this.opts.promoteLongs ? this.opts.promoteLongs : true;
+    this.promoteValues =
+      'boolean' === typeof this.opts.promoteValues ? this.opts.promoteValues : true;
+    this.promoteBuffers =
+      'boolean' === typeof this.opts.promoteBuffers ? this.opts.promoteBuffers : false;
   }
 
   isParsed(): boolean {
@@ -626,7 +630,7 @@ export interface MsgOptions {
 export class Msg {
   ns: string;
   command: Document;
-  options: QueryOptions;
+  options: OpQueryOptions;
   requestId: number;
   serializeFunctions: boolean;
   ignoreUndefined: boolean;
@@ -636,7 +640,7 @@ export class Msg {
   moreToCome: boolean;
   exhaustAllowed: boolean;
 
-  constructor(ns: string, command: Document, options: QueryOptions) {
+  constructor(ns: string, command: Document, options: OpQueryOptions) {
     // Basic options needed to be passed in
     if (command == null) throw new Error('query must be specified for query');
 
@@ -656,15 +660,18 @@ export class Msg {
     this.requestId = options.requestId ? options.requestId : Msg.getRequestId();
 
     // Serialization option
-    this.serializeFunctions = options.serializeFunctions ?? false;
-    this.ignoreUndefined = options.ignoreUndefined ?? false;
-    this.checkKeys = options.checkKeys ?? false;
+    this.serializeFunctions =
+      'boolean' === typeof options.serializeFunctions ? options.serializeFunctions : false;
+    this.ignoreUndefined =
+      'boolean' === typeof options.ignoreUndefined ? options.ignoreUndefined : false;
+    this.checkKeys = 'boolean' === typeof options.checkKeys ? options.checkKeys : false;
     this.maxBsonSize = options.maxBsonSize || 1024 * 1024 * 16;
 
     // flags
     this.checksumPresent = false;
     this.moreToCome = options.moreToCome || false;
-    this.exhaustAllowed = options.exhaustAllowed ?? false;
+    this.exhaustAllowed =
+      'boolean' === typeof options.exhaustAllowed ? options.exhaustAllowed : false;
   }
 
   toBin(): Buffer[] {
@@ -765,9 +772,11 @@ export class BinMsg {
     this.checksumPresent = (this.responseFlags & OPTS_CHECKSUM_PRESENT) !== 0;
     this.moreToCome = (this.responseFlags & OPTS_MORE_TO_COME) !== 0;
     this.exhaustAllowed = (this.responseFlags & OPTS_EXHAUST_ALLOWED) !== 0;
-    this.promoteLongs = this.opts.promoteLongs ?? true;
-    this.promoteValues = this.opts.promoteValues ?? true;
-    this.promoteBuffers = this.opts.promoteBuffers ?? false;
+    this.promoteLongs = 'boolean' === typeof this.opts.promoteLongs ? this.opts.promoteLongs : true;
+    this.promoteValues =
+      'boolean' === typeof this.opts.promoteValues ? this.opts.promoteValues : true;
+    this.promoteBuffers =
+      'boolean' === typeof this.opts.promoteBuffers ? this.opts.promoteBuffers : false;
 
     this.documents = [];
   }
@@ -790,11 +799,11 @@ export class BinMsg {
     const promoteBuffers = options.promoteBuffers ?? this.opts.promoteBuffers;
 
     // Set up the options
-    const _options = {
+    const _options: BSONSerializeOptions = {
       promoteLongs: promoteLongs,
       promoteValues: promoteValues,
       promoteBuffers: promoteBuffers
-    } as BSONSerializeOptions;
+    };
 
     while (this.index < this.data.length) {
       const payloadType = this.data.readUInt8(this.index++);

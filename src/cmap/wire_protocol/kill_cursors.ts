@@ -4,12 +4,18 @@ import { command, CommandOptions } from './command';
 import { MongoError, MongoNetworkError } from '../../error';
 import type { Server } from '../../sdam/server';
 import type { Callback } from '../../types';
-import type { CursorState } from '../../cursor/types';
+import type { InternalCursorState } from '../../cursor/core_cursor';
+
+interface KillCursorOptions {
+  session?: any;
+  immediateRelease: boolean;
+  noResponse: boolean;
+}
 
 export function killCursors(
   server: Server,
   ns: string,
-  cursorState: CursorState,
+  cursorState: InternalCursorState,
   callback: Callback
 ): void {
   callback = typeof callback === 'function' ? callback : () => undefined;
@@ -18,10 +24,9 @@ export function killCursors(
   if (maxWireVersion(server) < 4) {
     const pool = server.s.pool;
     const killCursor = new KillCursor(ns, [cursorId]);
-    const options = {
+    const options: KillCursorOptions = {
       immediateRelease: true,
-      noResponse: true,
-      session: undefined
+      noResponse: true
     };
 
     if (typeof cursorState.session === 'object') {

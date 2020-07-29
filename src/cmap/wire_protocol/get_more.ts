@@ -7,7 +7,7 @@ import { command } from './command';
 import type { Server } from '../../sdam/server';
 import type { Connection } from '../connection';
 import type { Callback, Callback2, Document } from '../../types';
-import type { CursorState } from '../../cursor/types';
+import type { InternalCursorState } from '../../cursor/core_cursor';
 
 interface GetMoreOptions {
   [key: string]: unknown;
@@ -16,7 +16,7 @@ interface GetMoreOptions {
 export function getMore(
   server: Server,
   ns: string,
-  cursorState: CursorState,
+  cursorState: InternalCursorState,
   batchSize: number,
   options: GetMoreOptions,
   callback: Callback2<Document, Connection>
@@ -24,7 +24,7 @@ export function getMore(
   options = options || {};
 
   const wireVersion = maxWireVersion(server);
-  const queryCallback = function (err, result) {
+  const queryCallback: Callback<Document> = function (err, result) {
     if (err || !result) return callback(err);
     const response = result.message;
 
@@ -61,7 +61,7 @@ export function getMore(
     cursorState.cursorId = cursorId;
 
     callback(undefined, response.documents[0], response.connection);
-  } as Callback<Document>;
+  };
 
   if (wireVersion < 4) {
     const getMoreOp = new GetMore(ns, cursorState.cursorId, { numberToReturn: batchSize });

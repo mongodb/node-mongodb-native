@@ -2,9 +2,9 @@ import * as net from 'net';
 import * as tls from 'tls';
 import { Connection, MongoDBConnectionOptions } from './connection';
 import { MongoError, MongoNetworkError, MongoNetworkTimeoutError } from '../error';
-import { AUTH_PROVIDERS } from './auth/defaultAuthProviders';
+import { defaultAuthProviders, AuthMechanisms } from './auth/defaultAuthProviders';
 import { AuthContext } from './auth/auth_provider';
-import { makeClientMetadata, ClientMetadataOptions, ClientMetadata } from '../utils';
+import { makeClientMetadata, ClientMetadata } from '../utils';
 import {
   MAX_SUPPORTED_WIRE_VERSION,
   MAX_SUPPORTED_SERVER_VERSION,
@@ -17,24 +17,23 @@ import type { EventEmitter } from 'events';
 import type { Socket, SocketConnectOpts } from 'net';
 import type { TLSSocket, ConnectionOptions as TLSConnectionOpts } from 'tls';
 
-type UniversalSocket = Socket | TLSSocket;
+type Stream = Socket | TLSSocket;
 
-export function connect(
-  options: MongoDBConnectionOptions,
-  callback: Callback<Connection | UniversalSocket>
-): void;
+const AUTH_PROVIDERS = defaultAuthProviders();
+
+export function connect(options: MongoDBConnectionOptions, callback: Callback<Connection>): void;
 export function connect(
   options: MongoDBConnectionOptions,
   cancellationToken: EventEmitter,
-  callback: Callback<Connection | UniversalSocket>
+  callback: Callback<Connection>
 ): void;
 export function connect(
   options: MongoDBConnectionOptions,
-  _cancellationToken: EventEmitter | Callback<Connection | UniversalSocket>,
-  _callback?: Callback<Connection | UniversalSocket>
+  _cancellationToken: EventEmitter | Callback<Connection>,
+  _callback?: Callback<Connection>
 ): void {
   let cancellationToken = _cancellationToken as EventEmitter | undefined;
-  const callback = (_callback ?? _cancellationToken) as Callback<Connection | UniversalSocket>;
+  const callback = (_callback ?? _cancellationToken) as Callback<Connection>;
   if ('function' === typeof cancellationToken) {
     cancellationToken = undefined;
   }
@@ -45,7 +44,7 @@ export function connect(
 
   makeConnection(family, options, cancellationToken, (err, socket) => {
     if (err || !socket) {
-      callback(err, socket); // in the error case, `socket` is the originating error event name
+      callback(err);
       return;
     }
 
@@ -92,7 +91,7 @@ function performInitialHandshake(
 
   const credentials = options.credentials;
   if (credentials) {
-    if (!credentials.mechanism.match(/DEFAULT/i) && !AUTH_PROVIDERS.has(credentials.mechanism)) {
+    if (!credentials.mechanism.match(/DEFAULT/i) && !AUTH_PROVIDERS[credentials.mechanism]) {
       callback(new MongoError(`authMechanism '${credentials.mechanism}' not supported`));
       return;
     }
@@ -140,15 +139,7 @@ function performInitialHandshake(
         Object.assign(authContext, { response });
 
         const resolvedCredentials = credentials.resolveAuthMechanism(response);
-        const AuthProvider = AUTH_PROVIDERS.get(resolvedCredentials.mechanism);
-        if (!AuthProvider) {
-          return callback(
-            new MongoError(
-              `Authentication Mechanism ${resolvedCredentials.mechanism} is not supported.`
-            )
-          );
-        }
-        const provider = new AuthProvider();
+        const provider = AUTH_PROVIDERS[resolvedCredentials.mechanism];
         provider.auth(authContext, err => {
           if (err) return callback(err);
           callback(undefined, conn);
@@ -176,7 +167,7 @@ function prepareHandshakeDocument(authContext: AuthContext, callback: Callback<H
 
   const handshakeDoc = {
     ismaster: true,
-    client: options.metadata || makeClientMetadata(options as ClientMetadataOptions),
+    client: options.metadata || makeClientMetadata(options),
     compression: compressors
   };
 
@@ -187,22 +178,15 @@ function prepareHandshakeDocument(authContext: AuthContext, callback: Callback<H
         saslSupportedMechs: `${credentials.source}.${credentials.username}`
       });
 
-      let AuthProvider;
-      if ((AuthProvider = AUTH_PROVIDERS.get('scram-sha-256'))) {
+      let provider;
+      if ((provider = AUTH_PROVIDERS[AuthMechanisms.MONGODB_SCRAM_SHA256])) {
         // This auth mechanism is always present.
-        const provider = new AuthProvider();
         provider.prepare(handshakeDoc, authContext, callback);
         return;
       }
     }
 
-    const AuthProvider = AUTH_PROVIDERS.get(credentials.mechanism);
-    if (!AuthProvider) {
-      return callback(
-        new MongoError(`Authentication Mechanism ${credentials.mechanism} is not supported.`)
-      );
-    }
-    const provider = new AuthProvider();
+    const provider = AUTH_PROVIDERS[credentials.mechanism];
     provider.prepare(handshakeDoc, authContext, callback);
     return;
   }
@@ -239,7 +223,7 @@ function parseConnectOptions(family: number, options: MongoDBConnectionOptions):
   const result = {
     family,
     host,
-    port: options.port ?? 27017,
+    port: 'number' === typeof options.port ? options.port : 27017,
     rejectUnauthorized: false
   };
 
@@ -272,20 +256,21 @@ function parseSslOptions(family: number, options: MongoDBConnectionOptions): TLS
   return result;
 }
 
-const socketErrorEventList = ['error', 'close', 'timeout', 'parseError'] as const;
-const SOCKET_ERROR_EVENTS = new Set(socketErrorEventList);
+const SOCKET_ERROR_EVENT_LIST = ['error', 'close', 'timeout', 'parseError'] as const;
+type ErrorHandlerEventName = typeof SOCKET_ERROR_EVENT_LIST[number] | 'cancel';
+const SOCKET_ERROR_EVENTS = new Set(SOCKET_ERROR_EVENT_LIST);
 
 function makeConnection(
   family: number,
   options: MongoDBConnectionOptions,
   cancellationToken: EventEmitter | undefined,
-  _callback: CallbackWithType<UniversalError, UniversalSocket>
+  _callback: CallbackWithType<UniversalError, Stream>
 ) {
-  const useSsl = options.ssl ?? false;
-  const keepAlive = options.keepAlive ?? true;
+  const useSsl = 'boolean' === typeof options.ssl ? options.ssl : false;
+  const keepAlive = 'boolean' === typeof options.keepAlive ? options.keepAlive : true;
   let keepAliveInitialDelay =
     typeof options.keepAliveInitialDelay === 'number' ? options.keepAliveInitialDelay : 120000;
-  const noDelay = options.noDelay ?? true;
+  const noDelay = 'boolean' === typeof options.noDelay ? options.noDelay : true;
   const connectionTimeout =
     typeof options.connectionTimeout === 'number'
       ? options.connectionTimeout
@@ -293,14 +278,15 @@ function makeConnection(
       ? options.connectTimeoutMS
       : 30000;
   const socketTimeout = typeof options.socketTimeout === 'number' ? options.socketTimeout : 360000;
-  const rejectUnauthorized = options.rejectUnauthorized ?? true;
+  const rejectUnauthorized =
+    'boolean' === typeof options.rejectUnauthorized ? options.rejectUnauthorized : true;
 
   if (keepAliveInitialDelay > socketTimeout) {
     keepAliveInitialDelay = Math.round(socketTimeout / 2);
   }
 
-  let socket: UniversalSocket;
-  const callback: CallbackWithType<UniversalError, UniversalSocket> = function (err, ret) {
+  let socket: Stream;
+  const callback: Callback<Stream> = function (err, ret) {
     if (err && socket) {
       socket.destroy();
     }
@@ -328,7 +314,7 @@ function makeConnection(
 
   const connectEvent = useSsl ? 'secureConnect' : 'connect';
   let cancellationHandler: (err: Error) => void;
-  function errorHandler(eventName: typeof socketErrorEventList[number] | 'cancel') {
+  function errorHandler(eventName: ErrorHandlerEventName) {
     return (err: Error) => {
       SOCKET_ERROR_EVENTS.forEach(event => socket.removeAllListeners(event));
       if (cancellationHandler && cancellationToken) {
@@ -380,6 +366,6 @@ function connectionFailureError(type: string, err?: Error) {
   }
 }
 
-function isTLSSocket(socket: UniversalSocket): socket is TLSSocket {
+function isTLSSocket(socket: Stream): socket is TLSSocket {
   return 'boolean' === typeof (socket as TLSSocket).authorized;
 }

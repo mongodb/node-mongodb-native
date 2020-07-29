@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import { MessageStream, OperationDescription } from './message_stream';
-import { CommandResult, BinMsg, CommandType } from './commands';
+import { CommandResult, BinMsg, WriteProtocolMessageType } from './commands';
 import { StreamDescription, StreamDescriptionOptions } from './stream_description';
 import * as wp from './wire_protocol';
 import { CommandStartedEvent, CommandFailedEvent, CommandSucceededEvent } from './events';
@@ -18,9 +18,9 @@ import type { Callback, Document, AutoEncryptionOptions } from '../types';
 import type { ConnectionOptions as TLSConnectionOptions } from 'tls';
 import type { Socket, TcpNetConnectOpts, IpcNetConnectOpts } from 'net';
 import type { Server } from '../sdam/server';
-import type { CursorState } from '../cursor/types';
 import type { MongoCredentials } from './auth/mongo_credentials';
 import type { CommandOptions } from './wire_protocol/command';
+import type { InternalCursorState } from '../cursor/core_cursor';
 
 const kStream = Symbol('stream');
 const kQueue = Symbol('queue');
@@ -42,7 +42,7 @@ export interface MongoDBConnectionOptions
   generation: number;
   autoEncrypter: AutoEncryptionOptions;
   connectionType: typeof Connection;
-  credentials: MongoCredentials;
+  credentials?: MongoCredentials;
   connectTimeoutMS?: number;
   connectionTimeout?: number;
   ssl: boolean;
@@ -55,6 +55,7 @@ export interface MongoDBConnectionOptions
   /** Required EventEmitter option */
   captureRejections?: boolean;
 
+  // this is cheating
   [key: string]: any;
 }
 
@@ -234,7 +235,7 @@ export class Connection extends EventEmitter {
   query(
     ns: string,
     cmd: Document,
-    cursorState: CursorState,
+    cursorState: InternalCursorState,
     options: CommandOptions,
     callback: Callback
   ): void {
@@ -243,7 +244,7 @@ export class Connection extends EventEmitter {
 
   getMore(
     ns: string,
-    cursorState: Record<string, unknown>,
+    cursorState: InternalCursorState,
     batchSize: number,
     options: CommandOptions,
     callback: Callback
@@ -251,7 +252,7 @@ export class Connection extends EventEmitter {
     wp.getMore(makeServerTrampoline(this), ns, cursorState, batchSize, options, callback);
   }
 
-  killCursors(ns: string, cursorState: CursorState, callback: Callback): void {
+  killCursors(ns: string, cursorState: InternalCursorState, callback: Callback): void {
     wp.killCursors(makeServerTrampoline(this), ns, cursorState, callback);
   }
 
@@ -362,7 +363,7 @@ function streamIdentifier(stream: Socket) {
 // Not meant to be called directly, the wire protocol methods call this assuming it is a `Pool` instance
 function write(
   this: Connection,
-  command: CommandType,
+  command: WriteProtocolMessageType,
   options: CommandOptions,
   callback: Callback
 ) {
@@ -376,16 +377,16 @@ function write(
     requestId: command.requestId,
     cb: callback,
     session: options.session,
-    fullResult: options.fullResult ?? false,
-    noResponse: options.noResponse ?? false,
+    fullResult: 'boolean' === typeof options.fullResult ? options.fullResult : false,
+    noResponse: 'boolean' === typeof options.noResponse ? options.noResponse : false,
     documentsReturnedIn: options.documentsReturnedIn,
     command: !!options.command,
 
     // for BSON parsing
-    promoteLongs: options.promoteLongs ?? true,
-    promoteValues: options.promoteValues ?? true,
-    promoteBuffers: options.promoteBuffers ?? false,
-    raw: options.raw ?? false,
+    promoteLongs: 'boolean' === typeof options.promoteLongs ? options.promoteLongs : true,
+    promoteValues: 'boolean' === typeof options.promoteValues ? options.promoteValues : true,
+    promoteBuffers: 'boolean' === typeof options.promoteBuffers ? options.promoteBuffers : false,
+    raw: 'boolean' === typeof options.raw ? options.raw : false,
     started: 0
   };
 

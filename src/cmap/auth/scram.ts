@@ -342,11 +342,13 @@ function compareDigest(lhs: Buffer, rhs: Uint8Array) {
   return result === 0;
 }
 
-function resolveError(err: UniversalError | undefined, result: Document) {
+function resolveError(err?: UniversalError, result?: Document) {
   if (err) return err;
 
-  const r = result.result;
-  if (r.$err || r.errmsg) return new MongoError(r);
+  if (result) {
+    const r = result.result;
+    if (r.$err || r.errmsg) return new MongoError(r);
+  }
 }
 
 export class ScramSHA1 extends ScramSHA {

@@ -21,7 +21,7 @@ export function writeCommand(
   }
 
   options = options || {};
-  const ordered = options.ordered ?? true;
+  const ordered = 'boolean' === typeof options.ordered ? options.ordered : true;
   const writeConcern = options.writeConcern;
   const writeCommand: Document = {};
   writeCommand[type] = collectionNamespace(ns);

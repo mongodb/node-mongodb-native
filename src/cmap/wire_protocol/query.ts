@@ -5,8 +5,8 @@ import { maxWireVersion, collectionNamespace } from '../../utils';
 import { getReadPreference, isSharded, applyCommonQueryOptions } from './shared';
 import type { Callback, Document } from '../../types';
 import type { Server } from '../../sdam/server';
-import type { CursorState } from '../../cursor/types';
 import type { ReadPreference } from '../..';
+import type { InternalCursorState } from '../../cursor/core_cursor';
 
 interface QueryOptions extends CommandOptions {
   [key: string]: unknown;
@@ -17,7 +17,7 @@ export function query(
   server: Server,
   ns: string,
   cmd: Document,
-  cursorState: CursorState,
+  cursorState: InternalCursorState,
   options: QueryOptions,
   callback: Callback
 ): void {
@@ -68,7 +68,12 @@ export function query(
   command(server, ns, findCmd, commandOptions, callback);
 }
 
-function prepareFindCommand(server: Server, ns: string, cmd: Document, cursorState: CursorState) {
+function prepareFindCommand(
+  server: Server,
+  ns: string,
+  cmd: Document,
+  cursorState: InternalCursorState
+) {
   cursorState.batchSize = cmd.batchSize || cursorState.batchSize;
   let findCmd: Document = {
     find: collectionNamespace(ns)
@@ -169,7 +174,7 @@ function prepareLegacyFindQuery(
   server: Server,
   ns: string,
   cmd: Document,
-  cursorState: CursorState,
+  cursorState: InternalCursorState,
   options: CommandOptions
 ): Query {
   options = options || {};
@@ -223,8 +228,10 @@ function prepareLegacyFindQuery(
     delete cmd['readConcern'];
   }
 
-  const serializeFunctions = options.serializeFunctions ?? false;
-  const ignoreUndefined = options.ignoreUndefined ?? false;
+  const serializeFunctions =
+    'boolean' === typeof options.serializeFunctions ? options.serializeFunctions : false;
+  const ignoreUndefined =
+    'boolean' === typeof options.ignoreUndefined ? options.ignoreUndefined : false;
 
   const query = new Query(ns, findCmd, {
     numberToSkip: numberToSkip,
