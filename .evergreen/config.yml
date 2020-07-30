@@ -52,7 +52,6 @@ functions:
           # See what we've done
           cat expansion.yml
           # https://github.com/mongodb-labs/drivers-evergreen-tools/blob/3bd0e075fede049b07861d023e4ae803afc83bb3/.evergreen/auth_aws/lib/aws_e2e_lib.js#L38
-          alias python3=python
     - command: expansions.update
       params:
         file: src/expansion.yml
@@ -236,6 +235,7 @@ functions:
         script: |
           ${PREPARE_SHELL}
           cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
+          alias python3=python
           ${MONGODB_BINARIES}/mongo aws_e2e_assume_role.js
     - command: shell.exec
       type: test
