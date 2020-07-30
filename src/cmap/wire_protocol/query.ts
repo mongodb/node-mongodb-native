@@ -9,7 +9,6 @@ import type { ReadPreference } from '../..';
 import type { InternalCursorState } from '../../cursor/core_cursor';
 
 export interface QueryOptions extends CommandOptions {
-  [key: string]: unknown;
   readPreference?: ReadPreference;
 }
 
@@ -229,9 +228,9 @@ function prepareLegacyFindQuery(
   }
 
   const serializeFunctions =
-    'boolean' === typeof options.serializeFunctions ? options.serializeFunctions : false;
+    typeof options.serializeFunctions === 'boolean' ? options.serializeFunctions : false;
   const ignoreUndefined =
-    'boolean' === typeof options.ignoreUndefined ? options.ignoreUndefined : false;
+    typeof options.ignoreUndefined === 'boolean' ? options.ignoreUndefined : false;
 
   const query = new Query(ns, findCmd, {
     numberToSkip: numberToSkip,

@@ -206,7 +206,7 @@ export class CommandSucceededEvent {
     this.requestId = command.requestId;
     this.commandName = commandName;
     this.duration = calculateDurationInMs(started);
-    this.reply = maybeRedact(commandName, extractReply(command as Query, reply));
+    this.reply = maybeRedact(commandName, extractReply(command, reply));
   }
 }
 
@@ -217,7 +217,7 @@ export class CommandFailedEvent {
   requestId: number;
   duration: number;
   commandName: string;
-  failure: unknown;
+  failure: Error;
   /**
    * Create a failure event
    *
@@ -242,7 +242,7 @@ export class CommandFailedEvent {
     this.requestId = command.requestId;
     this.commandName = commandName;
     this.duration = calculateDurationInMs(started);
-    this.failure = maybeRedact(commandName, error);
+    this.failure = maybeRedact(commandName, error) as Error;
   }
 }
 
@@ -281,11 +281,11 @@ const LEGACY_FIND_QUERY_MAP: { [key: string]: string } = {
   $snapshot: 'snapshot'
 };
 
-const LEGACY_FIND_OPTIONS_MAP: { [key: string]: string } = {
+const LEGACY_FIND_OPTIONS_MAP = {
   numberToSkip: 'skip',
   numberToReturn: 'batchSize',
-  returnFieldsSelector: 'projection'
-};
+  returnFieldSelector: 'projection'
+} as const;
 
 const OP_QUERY_KEYS = [
   'tailable',
@@ -294,7 +294,7 @@ const OP_QUERY_KEYS = [
   'awaitData',
   'partial',
   'exhaust'
-];
+] as const;
 
 /** Extract the actual command from the query, possibly up-converting if it's a legacy format */
 function extractCommand(command: WriteProtocolMessageType): Document {
@@ -319,37 +319,38 @@ function extractCommand(command: WriteProtocolMessageType): Document {
 
   if (command.query && command.query.$query) {
     let result: Document;
-    const commandObject: any = command;
-    if (commandObject.ns === 'admin.$cmd') {
+    if (command.ns === 'admin.$cmd') {
       // up-convert legacy command
       result = Object.assign({}, command.query.$query);
     } else {
       // up-convert legacy find command
-      result = { find: collectionName(commandObject) };
+      result = { find: collectionName(command) };
       Object.keys(LEGACY_FIND_QUERY_MAP).forEach(key => {
-        if (typeof commandObject.query[key] !== 'undefined') {
+        if (typeof command.query[key] !== 'undefined') {
           result[LEGACY_FIND_QUERY_MAP[key]] = command.query[key];
         }
       });
     }
 
     Object.keys(LEGACY_FIND_OPTIONS_MAP).forEach(key => {
-      if (typeof commandObject[key] !== 'undefined') {
-        result[LEGACY_FIND_OPTIONS_MAP[key]] = commandObject[key];
+      let legacyKey = key as keyof typeof LEGACY_FIND_OPTIONS_MAP;
+      if (typeof command[legacyKey] !== 'undefined') {
+        result[LEGACY_FIND_OPTIONS_MAP[legacyKey]] = command[legacyKey];
       }
     });
 
     OP_QUERY_KEYS.forEach(key => {
-      if (commandObject[key]) {
-        result[key] = commandObject[key];
+      let opKey = key as typeof OP_QUERY_KEYS[number];
+      if (command[opKey]) {
+        result[opKey] = command[opKey];
       }
     });
 
-    if (typeof commandObject.pre32Limit !== 'undefined') {
-      result.limit = commandObject.pre32Limit;
+    if (typeof command.pre32Limit !== 'undefined') {
+      result.limit = command.pre32Limit;
     }
 
-    if (commandObject.query.$explain) {
+    if (command.query.$explain) {
       return { explain: result };
     }
 
@@ -359,7 +360,7 @@ function extractCommand(command: WriteProtocolMessageType): Document {
   return command.query ? command.query : command;
 }
 
-function extractReply(command: GetMore | KillCursor | Query, reply?: CommandResult) {
+function extractReply(command: WriteProtocolMessageType, reply?: CommandResult) {
   if (command instanceof KillCursor) {
     return {
       ok: 1,
@@ -380,6 +381,10 @@ function extractReply(command: GetMore | KillCursor | Query, reply?: CommandResu
         nextBatch: reply.message.documents
       }
     };
+  }
+
+  if (command instanceof Msg) {
+    return reply.result ? reply.result : reply;
   }
 
   // is this a legacy find command?

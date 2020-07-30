@@ -37,12 +37,12 @@ export function applyCommonQueryOptions(
   options: CommandOptions
 ): OpQueryOptions {
   Object.assign(queryOptions, {
-    raw: 'boolean' === typeof options.raw ? options.raw : false,
-    promoteLongs: 'boolean' === typeof options.promoteLongs ? options.promoteLongs : true,
-    promoteValues: 'boolean' === typeof options.promoteValues ? options.promoteValues : true,
-    promoteBuffers: 'boolean' === typeof options.promoteBuffers ? options.promoteBuffers : false,
-    monitoring: 'boolean' === typeof options.monitoring ? options.monitoring : false,
-    fullResult: 'boolean' === typeof options.fullResult ? options.fullResult : false
+    raw: typeof options.raw === 'boolean' ? options.raw : false,
+    promoteLongs: typeof options.promoteLongs === 'boolean' ? options.promoteLongs : true,
+    promoteValues: typeof options.promoteValues === 'boolean' ? options.promoteValues : true,
+    promoteBuffers: typeof options.promoteBuffers === 'boolean' ? options.promoteBuffers : false,
+    monitoring: typeof options.monitoring === 'boolean' ? options.monitoring : false,
+    fullResult: typeof options.fullResult === 'boolean' ? options.fullResult : false
   });
 
   if (typeof options.socketTimeout === 'number') {
@@ -61,10 +61,6 @@ export function applyCommonQueryOptions(
 }
 
 export function isSharded(topologyOrServer: Topology | Server): boolean {
-  if (((topologyOrServer as unknown) as ServerDescription).type === 'mongos') {
-    return true;
-  }
-
   if (topologyOrServer.description && topologyOrServer.description.type === ServerType.Mongos) {
     return true;
   }

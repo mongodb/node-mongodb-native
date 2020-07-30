@@ -2,7 +2,7 @@ import * as net from 'net';
 import * as tls from 'tls';
 import { Connection, MongoDBConnectionOptions } from './connection';
 import { MongoError, MongoNetworkError, MongoNetworkTimeoutError } from '../error';
-import { defaultAuthProviders, AuthMechanisms } from './auth/defaultAuthProviders';
+import { defaultAuthProviders, AuthMechanism } from './auth/defaultAuthProviders';
 import { AuthContext } from './auth/auth_provider';
 import { makeClientMetadata, ClientMetadata } from '../utils';
 import {
@@ -17,7 +17,7 @@ import type { EventEmitter } from 'events';
 import type { Socket, SocketConnectOpts } from 'net';
 import type { TLSSocket, ConnectionOptions as TLSConnectionOpts } from 'tls';
 
-type Stream = Socket | TLSSocket;
+export type ConnectionStream = Socket | TLSSocket;
 
 const AUTH_PROVIDERS = defaultAuthProviders();
 
@@ -179,7 +179,7 @@ function prepareHandshakeDocument(authContext: AuthContext, callback: Callback<H
       });
 
       let provider;
-      if ((provider = AUTH_PROVIDERS[AuthMechanisms.MONGODB_SCRAM_SHA256])) {
+      if ((provider = AUTH_PROVIDERS[AuthMechanism.MONGODB_SCRAM_SHA256])) {
         // This auth mechanism is always present.
         provider.prepare(handshakeDoc, authContext, callback);
         return;
@@ -223,7 +223,7 @@ function parseConnectOptions(family: number, options: MongoDBConnectionOptions):
   const result = {
     family,
     host,
-    port: 'number' === typeof options.port ? options.port : 27017,
+    port: typeof options.port === 'number' ? options.port : 27017,
     rejectUnauthorized: false
   };
 
@@ -264,13 +264,13 @@ function makeConnection(
   family: number,
   options: MongoDBConnectionOptions,
   cancellationToken: EventEmitter | undefined,
-  _callback: CallbackWithType<UniversalError, Stream>
+  _callback: CallbackWithType<UniversalError, ConnectionStream>
 ) {
-  const useSsl = 'boolean' === typeof options.ssl ? options.ssl : false;
-  const keepAlive = 'boolean' === typeof options.keepAlive ? options.keepAlive : true;
+  const useSsl = typeof options.ssl === 'boolean' ? options.ssl : false;
+  const keepAlive = typeof options.keepAlive === 'boolean' ? options.keepAlive : true;
   let keepAliveInitialDelay =
     typeof options.keepAliveInitialDelay === 'number' ? options.keepAliveInitialDelay : 120000;
-  const noDelay = 'boolean' === typeof options.noDelay ? options.noDelay : true;
+  const noDelay = typeof options.noDelay === 'boolean' ? options.noDelay : true;
   const connectionTimeout =
     typeof options.connectionTimeout === 'number'
       ? options.connectionTimeout
@@ -279,14 +279,14 @@ function makeConnection(
       : 30000;
   const socketTimeout = typeof options.socketTimeout === 'number' ? options.socketTimeout : 360000;
   const rejectUnauthorized =
-    'boolean' === typeof options.rejectUnauthorized ? options.rejectUnauthorized : true;
+    typeof options.rejectUnauthorized === 'boolean' ? options.rejectUnauthorized : true;
 
   if (keepAliveInitialDelay > socketTimeout) {
     keepAliveInitialDelay = Math.round(socketTimeout / 2);
   }
 
-  let socket: Stream;
-  const callback: Callback<Stream> = function (err, ret) {
+  let socket: ConnectionStream;
+  const callback: Callback<ConnectionStream> = function (err, ret) {
     if (err && socket) {
       socket.destroy();
     }
@@ -366,6 +366,6 @@ function connectionFailureError(type: string, err?: Error) {
   }
 }
 
-function isTLSSocket(socket: Stream): socket is TLSSocket {
+function isTLSSocket(socket: ConnectionStream): socket is TLSSocket {
   return 'boolean' === typeof (socket as TLSSocket).authorized;
 }

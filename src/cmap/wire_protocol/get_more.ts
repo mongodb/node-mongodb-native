@@ -3,15 +3,13 @@ import { Long } from '../../bson';
 import { MongoError, MongoNetworkError } from '../../error';
 import { applyCommonQueryOptions } from './shared';
 import { maxWireVersion, collectionNamespace } from '../../utils';
-import { command } from './command';
+import { command, CommandOptions } from './command';
 import type { Server } from '../../sdam/server';
 import type { Connection } from '../connection';
 import type { Callback, Callback2, Document } from '../../types';
 import type { InternalCursorState } from '../../cursor/core_cursor';
 
-export interface GetMoreOptions {
-  [key: string]: unknown;
-}
+export type GetMoreOptions = CommandOptions;
 
 export function getMore(
   server: Server,

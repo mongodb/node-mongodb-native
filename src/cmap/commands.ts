@@ -33,7 +33,7 @@ export interface OpQueryOptions {
   documentsReturnedIn?: string;
   numberToSkip?: number;
   numberToReturn?: number;
-  returnFieldSelector?: null;
+  returnFieldSelector?: Document;
   pre32Limit?: number;
   serializeFunctions?: boolean;
   ignoreUndefined?: boolean;
@@ -97,16 +97,17 @@ export class Query {
 
     // Serialization option
     this.serializeFunctions =
-      'boolean' === typeof options.serializeFunctions ? options.serializeFunctions : false;
+      typeof options.serializeFunctions === 'boolean' ? options.serializeFunctions : false;
+    'boolean' === typeof options.serializeFunctions ? options.serializeFunctions : false;
     this.ignoreUndefined =
-      'boolean' === typeof options.ignoreUndefined ? options.ignoreUndefined : false;
+      typeof options.ignoreUndefined === 'boolean' ? options.ignoreUndefined : false;
     this.maxBsonSize = options.maxBsonSize || 1024 * 1024 * 16;
-    this.checkKeys = 'boolean' === typeof options.checkKeys ? options.checkKeys : true;
+    this.checkKeys = typeof options.checkKeys === 'boolean' ? options.checkKeys : true;
     this.batchSize = this.numberToReturn;
 
     // Flags
     this.tailable = false;
-    this.slaveOk = 'boolean' === typeof options.slaveOk ? options.slaveOk : false;
+    this.slaveOk = typeof options.slaveOk === 'boolean' ? options.slaveOk : false;
     this.oplogReplay = false;
     this.noCursorTimeout = false;
     this.awaitData = false;
@@ -513,11 +514,11 @@ export class Response {
     this.queryFailure = (this.responseFlags & QUERY_FAILURE) !== 0;
     this.shardConfigStale = (this.responseFlags & SHARD_CONFIG_STALE) !== 0;
     this.awaitCapable = (this.responseFlags & AWAIT_CAPABLE) !== 0;
-    this.promoteLongs = 'boolean' === typeof this.opts.promoteLongs ? this.opts.promoteLongs : true;
+    this.promoteLongs = typeof this.opts.promoteLongs === 'boolean' ? this.opts.promoteLongs : true;
     this.promoteValues =
-      'boolean' === typeof this.opts.promoteValues ? this.opts.promoteValues : true;
+      typeof this.opts.promoteValues === 'boolean' ? this.opts.promoteValues : true;
     this.promoteBuffers =
-      'boolean' === typeof this.opts.promoteBuffers ? this.opts.promoteBuffers : false;
+      typeof this.opts.promoteBuffers === 'boolean' ? this.opts.promoteBuffers : false;
   }
 
   isParsed(): boolean {
@@ -661,17 +662,17 @@ export class Msg {
 
     // Serialization option
     this.serializeFunctions =
-      'boolean' === typeof options.serializeFunctions ? options.serializeFunctions : false;
+      typeof options.serializeFunctions === 'boolean' ? options.serializeFunctions : false;
     this.ignoreUndefined =
-      'boolean' === typeof options.ignoreUndefined ? options.ignoreUndefined : false;
-    this.checkKeys = 'boolean' === typeof options.checkKeys ? options.checkKeys : false;
+      typeof options.ignoreUndefined === 'boolean' ? options.ignoreUndefined : false;
+    this.checkKeys = typeof options.checkKeys === 'boolean' ? options.checkKeys : true;
     this.maxBsonSize = options.maxBsonSize || 1024 * 1024 * 16;
 
     // flags
     this.checksumPresent = false;
     this.moreToCome = options.moreToCome || false;
     this.exhaustAllowed =
-      'boolean' === typeof options.exhaustAllowed ? options.exhaustAllowed : false;
+      typeof options.exhaustAllowed === 'boolean' ? options.exhaustAllowed : false;
   }
 
   toBin(): Buffer[] {

@@ -30,7 +30,7 @@ const kCancellationToken = Symbol('cancellationToken');
 const kWaitQueue = Symbol('waitQueue');
 const kCancelled = Symbol('cancelled');
 
-const validPoolOptionsList = [
+const VALID_POOL_OPTION_NAMES = [
   // `connect` options
   'ssl',
   'connectionType',
@@ -86,7 +86,7 @@ const validPoolOptionsList = [
   'waitQueueTimeoutMS'
 ] as const;
 
-const VALID_POOL_OPTIONS = new Set(validPoolOptionsList);
+const VALID_POOL_OPTIONS = new Set(VALID_POOL_OPTION_NAMES);
 
 function resolveOptions(
   options: ConnectionPoolOptions,
@@ -117,7 +117,7 @@ export interface ConnectionPoolOptions extends MongoDBConnectionOptions {
 interface WaitQueueMember {
   callback: Callback<Connection>;
   timer?: NodeJS.Timeout;
-  [kCancelled]: boolean;
+  [kCancelled]?: boolean;
 }
 
 export interface CloseOptions {
@@ -233,7 +233,7 @@ export class ConnectionPool extends EventEmitter {
     }
 
     // add this request to the wait queue
-    const waitQueueMember: WaitQueueMember = { callback } as WaitQueueMember;
+    const waitQueueMember: WaitQueueMember = { callback };
     const pool = this;
     const waitQueueTimeoutMS = this.options.waitQueueTimeoutMS;
     if (waitQueueTimeoutMS) {
@@ -533,7 +533,7 @@ function processWaitQueue(pool: ConnectionPool) {
       if (waitQueueMember.timer) {
         clearTimeout(waitQueueMember.timer);
       }
-      waitQueueMember.callback(err as MongoError, connection);
+      waitQueueMember.callback(err, connection);
     });
 
     return;

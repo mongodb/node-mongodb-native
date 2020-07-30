@@ -1,5 +1,6 @@
 import { parseServerType } from '../sdam/server_description';
 import type { Document } from '../types';
+import type { Compressor, CompressorName } from './wire_protocol/compression';
 
 const RESPONSE_FIELDS = [
   'minWireVersion',
@@ -11,7 +12,7 @@ const RESPONSE_FIELDS = [
 
 export interface StreamDescriptionOptions {
   compression: {
-    compressors: string[];
+    compressors: CompressorName[];
   };
 }
 
@@ -23,8 +24,10 @@ export class StreamDescription {
   maxBsonObjectSize: number;
   maxMessageSizeBytes: number;
   maxWriteBatchSize: number;
-  compressors: string[];
-  compressor?: string;
+  compressors: CompressorName[];
+  compressor?: CompressorName;
+
+  __nodejs_mock_server__ = false;
 
   zlibCompressionLevel?: number;
 
@@ -51,8 +54,7 @@ export class StreamDescription {
 
       // testing case
       if ('__nodejs_mock_server__' in response) {
-        const that = (this as unknown) as { __nodejs_mock_server__: unknown };
-        that.__nodejs_mock_server__ = response['__nodejs_mock_server__'];
+        this.__nodejs_mock_server__ = response['__nodejs_mock_server__'];
       }
     });
 

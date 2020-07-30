@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import { MessageStream, OperationDescription } from './message_stream';
-import { CommandResult, BinMsg, WriteProtocolMessageType } from './commands';
+import { CommandResult, BinMsg, WriteProtocolMessageType, Response } from './commands';
 import { StreamDescription, StreamDescriptionOptions } from './stream_description';
 import * as wp from './wire_protocol';
 import { CommandStartedEvent, CommandFailedEvent, CommandSucceededEvent } from './events';
@@ -24,6 +24,7 @@ import type { QueryOptions } from './wire_protocol/query';
 import type { InternalCursorState } from '../cursor/core_cursor';
 import type { GetMoreOptions } from './wire_protocol/get_more';
 import type { InsertOptions, UpdateOptions, RemoveOptions } from './wire_protocol/index';
+import type { ConnectionStream } from './connect';
 
 const kStream = Symbol('stream');
 const kQueue = Symbol('queue');
@@ -77,11 +78,11 @@ export class Connection extends EventEmitter {
   [kAutoEncrypter]?: unknown;
   [kQueue]: Map<number, OperationDescription>;
   [kMessageStream]: MessageStream;
-  [kStream]: Socket;
+  [kStream]: ConnectionStream;
   [kIsMaster]: Document;
   [kClusterTime]: Document;
 
-  constructor(stream: Socket, options: MongoDBConnectionOptions) {
+  constructor(stream: ConnectionStream, options: MongoDBConnectionOptions) {
     super(options);
     this.id = options.id;
     this.address = streamIdentifier(stream);
@@ -174,7 +175,7 @@ export class Connection extends EventEmitter {
     return this[kClusterTime];
   }
 
-  get stream(): Socket {
+  get stream(): ConnectionStream {
     return this[kStream];
   }
 
@@ -284,7 +285,7 @@ function makeServerTrampoline(connection: Connection): Server {
 }
 
 function messageHandler(conn: Connection) {
-  return function messageHandler(message: BinMsg) {
+  return function messageHandler(message: BinMsg | Response) {
     // always emit the message, in case we are streaming
     conn.emit('message', message);
     const operationDescription = conn[kQueue].get(message.responseTo);
@@ -298,7 +299,7 @@ function messageHandler(conn: Connection) {
     // track response, however the server currently synthetically produces remote requests
     // making the `responseTo` change on each response
     conn[kQueue].delete(message.responseTo);
-    if (message.moreToCome) {
+    if ('moreToCome' in message && message.moreToCome) {
       // requeue the callback for next synthetic request
       conn[kQueue].set(message.requestId, operationDescription);
     } else if (operationDescription.socketTimeoutOverride) {
@@ -321,7 +322,7 @@ function messageHandler(conn: Connection) {
       }
 
       if (document.$clusterTime) {
-        conn[kClusterTime] = document.$clusterTime as Document;
+        conn[kClusterTime] = document.$clusterTime;
         conn.emit('clusterTimeReceived', document.$clusterTime);
       }
 
@@ -352,7 +353,7 @@ function messageHandler(conn: Connection) {
   };
 }
 
-function streamIdentifier(stream: Socket) {
+function streamIdentifier(stream: ConnectionStream) {
   if (typeof stream.address === 'function') {
     return `${stream.remoteAddress}:${stream.remotePort}`;
   }
@@ -377,16 +378,16 @@ function write(
     requestId: command.requestId,
     cb: callback,
     session: options.session,
-    fullResult: 'boolean' === typeof options.fullResult ? options.fullResult : false,
-    noResponse: 'boolean' === typeof options.noResponse ? options.noResponse : false,
+    fullResult: typeof options.fullResult === 'boolean' ? options.fullResult : false,
+    noResponse: typeof options.noResponse === 'boolean' ? options.noResponse : false,
     documentsReturnedIn: options.documentsReturnedIn,
     command: !!options.command,
 
     // for BSON parsing
-    promoteLongs: 'boolean' === typeof options.promoteLongs ? options.promoteLongs : true,
-    promoteValues: 'boolean' === typeof options.promoteValues ? options.promoteValues : true,
-    promoteBuffers: 'boolean' === typeof options.promoteBuffers ? options.promoteBuffers : false,
-    raw: 'boolean' === typeof options.raw ? options.raw : false,
+    promoteLongs: typeof options.promoteLongs === 'boolean' ? options.promoteLongs : true,
+    promoteValues: typeof options.promoteValues === 'boolean' ? options.promoteValues : true,
+    promoteBuffers: typeof options.promoteBuffers === 'boolean' ? options.promoteBuffers : false,
+    raw: typeof options.raw === 'boolean' ? options.raw : false,
     started: 0
   };
 

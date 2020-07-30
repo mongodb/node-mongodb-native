@@ -6,7 +6,7 @@ import { ScramSHA1, ScramSHA256 } from './scram';
 import { MongoDBAWS } from './mongodb_aws';
 import type { AuthProvider } from './auth_provider';
 
-export enum AuthMechanisms {
+export enum AuthMechanism {
   MONGODB_AWS = 'mongodb-aws',
   MONGODB_CR = 'mongocr',
   MONGODB_X509 = 'x509',
@@ -17,13 +17,13 @@ export enum AuthMechanisms {
 }
 
 export const AUTH_PROVIDERS = {
-  [AuthMechanisms.MONGODB_AWS]: new MongoDBAWS(),
-  [AuthMechanisms.MONGODB_CR]: new MongoCR(),
-  [AuthMechanisms.MONGODB_GSSAPI]: new GSSAPI(),
-  [AuthMechanisms.MONGODB_PLAIN]: new Plain(),
-  [AuthMechanisms.MONGODB_SCRAM_SHA1]: new ScramSHA1(),
-  [AuthMechanisms.MONGODB_SCRAM_SHA256]: new ScramSHA256(),
-  [AuthMechanisms.MONGODB_X509]: new X509()
+  [AuthMechanism.MONGODB_AWS]: new MongoDBAWS(),
+  [AuthMechanism.MONGODB_CR]: new MongoCR(),
+  [AuthMechanism.MONGODB_GSSAPI]: new GSSAPI(),
+  [AuthMechanism.MONGODB_PLAIN]: new Plain(),
+  [AuthMechanism.MONGODB_SCRAM_SHA1]: new ScramSHA1(),
+  [AuthMechanism.MONGODB_SCRAM_SHA256]: new ScramSHA256(),
+  [AuthMechanism.MONGODB_X509]: new X509()
 };
 
 // TODO: We can make auth mechanism more functional since we pass around a context object

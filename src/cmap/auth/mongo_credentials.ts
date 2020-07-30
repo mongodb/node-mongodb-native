@@ -1,27 +1,27 @@
 // Resolves the default auth mechanism according to
 
 import type { Document } from '../../types';
-import { AuthMechanisms } from './defaultAuthProviders';
+import { AuthMechanism } from './defaultAuthProviders';
 
 // https://github.com/mongodb/specifications/blob/master/source/auth/auth.rst
-function getDefaultAuthMechanism(ismaster?: Document): AuthMechanisms {
+function getDefaultAuthMechanism(ismaster?: Document): AuthMechanism {
   if (ismaster) {
     // If ismaster contains saslSupportedMechs, use scram-sha-256
     // if it is available, else scram-sha-1
     if (Array.isArray(ismaster.saslSupportedMechs)) {
       return ismaster.saslSupportedMechs.indexOf('SCRAM-SHA-256') >= 0
-        ? AuthMechanisms.MONGODB_SCRAM_SHA256
-        : AuthMechanisms.MONGODB_SCRAM_SHA1;
+        ? AuthMechanism.MONGODB_SCRAM_SHA256
+        : AuthMechanism.MONGODB_SCRAM_SHA1;
     }
 
     // Fallback to legacy selection method. If wire version >= 3, use scram-sha-1
     if (ismaster.maxWireVersion >= 3) {
-      return AuthMechanisms.MONGODB_SCRAM_SHA1;
+      return AuthMechanism.MONGODB_SCRAM_SHA1;
     }
   }
 
   // Default for wireprotocol < 3
-  return AuthMechanisms.MONGODB_CR;
+  return AuthMechanism.MONGODB_CR;
 }
 
 export interface MongoCredentialsOptions {

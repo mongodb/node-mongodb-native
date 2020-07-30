@@ -14,8 +14,9 @@ import { OP_COMPRESSED, OP_MSG } from './wire_protocol/constants';
 import {
   compress,
   decompress,
-  compressorIDs,
-  uncompressibleCommands
+  uncompressibleCommands,
+  Compressor,
+  CompressorName
 } from './wire_protocol/compression';
 import type { Callback, Document } from '../types';
 import type { ClientSession } from '../sessions';
@@ -44,7 +45,7 @@ export interface OperationDescription {
   requestId: number;
   session?: ClientSession;
   socketTimeoutOverride?: boolean;
-  agreedCompressor?: 'zlib' | 'snappy' | string;
+  agreedCompressor?: CompressorName;
   zlibCompressionLevel?: number;
   $clusterTime?: Document;
 }
@@ -83,8 +84,8 @@ export class MessageStream extends Duplex {
     operationDescription: OperationDescription
   ): void {
     // TODO: agreed compressor should live in `StreamDescription`
-    const shouldCompress = operationDescription && !!operationDescription.agreedCompressor;
-    if (!shouldCompress || !canCompress(command)) {
+    const compressorName = operationDescription.agreedCompressor;
+    if (!(operationDescription && compressorName) || !canCompress(command)) {
       const data = command.toBin();
       this.push(Array.isArray(data) ? Buffer.concat(data) : data);
       return;
@@ -118,11 +119,8 @@ export class MessageStream extends Duplex {
       const compressionDetails = Buffer.alloc(COMPRESSION_DETAILS_SIZE);
       compressionDetails.writeInt32LE(originalCommandOpCode, 0); // originalOpcode
       compressionDetails.writeInt32LE(messageToBeCompressed.length, 4); // Size of the uncompressed compressedMessage, excluding the MsgHeader
-      compressionDetails.writeUInt8(
-        compressorIDs[operationDescription.agreedCompressor as 'zlib' | 'snappy'],
-        8
-      ); // compressorID
-      this.push(Buffer.concat([msgHeader, compressionDetails, compressedMessage as Buffer]));
+      compressionDetails.writeUInt8(Compressor[compressorName], 8); // compressorID
+      this.push(Buffer.concat([msgHeader, compressionDetails, compressedMessage]));
     });
   }
 }
