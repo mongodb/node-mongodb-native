@@ -214,7 +214,7 @@ functions:
         silent: true
         script: |
           cat <<'EOF' > "${PROJECT_DIRECTORY}/prepare_mongodb_aws.sh"
-            alias urlencode='/opt/mongodbtoolchain/v3/bin/python3 -c "import sys, urllib as ul; print ul.quote_plus(sys.argv[1])"'
+            alias urlencode='python -c "import sys, urllib as ul; print ul.quote_plus(sys.argv[1])"'
             USER=$(urlencode ${iam_auth_ecs_account})
             PASS=$(urlencode ${iam_auth_ecs_secret_access_key})
             export MONGODB_URI="mongodb://$USER:$PASS@localhost:27017/aws?authMechanism=MONGODB-AWS"
@@ -242,7 +242,7 @@ functions:
         silent: true
         script: |
           cat <<'EOF' > "${PROJECT_DIRECTORY}/prepare_mongodb_aws.sh"
-            alias urlencode='/opt/mongodbtoolchain/v3/bin/python3 -c "import sys, urllib as ul; print ul.quote_plus(sys.argv[1])"'
+            alias urlencode='python -c "import sys, urllib as ul; print ul.quote_plus(sys.argv[1])"'
             USER=$(jq -r '.AccessKeyId' ${DRIVERS_TOOLS}/.evergreen/auth_aws/creds.json)
             USER=$(urlencode $USER)
             PASS=$(jq -r '.SecretAccessKey' ${DRIVERS_TOOLS}/.evergreen/auth_aws/creds.json)
@@ -363,7 +363,7 @@ functions:
         background: true
         script: |
           cd ${DRIVERS_TOOLS}/.evergreen/ocsp
-          nohup /opt/mongodbtoolchain/v3/bin/python3 ocsp_mock.py \
+          nohup ./venv/bin/python3 ocsp_mock.py \
             --ca_file rsa/ca.pem \
             --ocsp_responder_cert rsa/ca.crt \
             --ocsp_responder_key rsa/ca.key \
@@ -380,7 +380,7 @@ functions:
         background: true
         script: |
           cd ${DRIVERS_TOOLS}/.evergreen/ocsp
-          nohup /opt/mongodbtoolchain/v3/bin/python3 ocsp_mock.py \
+          nohup ./venv/bin/python3 ocsp_mock.py \
             --ca_file rsa/ca.pem \
             --ocsp_responder_cert rsa/ca.crt \
             --ocsp_responder_key rsa/ca.key \
@@ -1145,11 +1145,28 @@ tasks:
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 0
-  - name: aws-auth-test
+  - name: aws-latest-auth-test
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
         vars:
+          VERSION: latest
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: run aws auth test with regular aws credentials
+      - func: run aws auth test with assume role credentials
+      - func: run aws auth test with aws EC2 credentials
+      - func: run aws auth test with aws credentials as environment variables
+      - func: run aws auth test with aws credentials and session token as environment variables
+      - func: run aws ECS auth test
+  - name: aws-4.4-auth-test
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.4'
           AUTH: auth
           ORCHESTRATION_FILE: auth-aws.json
           TOPOLOGY: server
@@ -1237,6 +1254,8 @@ buildvariants:
       - test-ocsp-soft-fail
       - test-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
       - test-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
+      - aws-latest-auth-test
+      - aws-4.4-auth-test
   - name: macos-1014-dubnium
     display_name: macOS 10.14 Node Dubnium
     run_on: macos-1014
@@ -1415,6 +1434,8 @@ buildvariants:
       - test-ocsp-soft-fail
       - test-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
       - test-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
+      - aws-latest-auth-test
+      - aws-4.4-auth-test
   - name: ubuntu-18.04-dubnium
     display_name: Ubuntu 18.04 Node Dubnium
     run_on: ubuntu1804-test
@@ -1454,4 +1475,5 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: carbon
     tasks:
-      - aws-auth-test
+      - aws-latest-auth-test
+      - aws-4.4-auth-test
