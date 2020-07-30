@@ -2340,7 +2340,6 @@ const deprecateOptions = require('./utils').deprecateOptions;
 const checkCollectionName = require('./utils').checkCollectionName;
 const ObjectID = require('./core').BSON.ObjectID;
 const MongoError = require('./core').MongoError;
-const toError = require('./utils').toError;
 const normalizeHintField = require('./utils').normalizeHintField;
 const decorateCommand = require('./utils').decorateCommand;
 const decorateWithCollation = require('./utils').decorateWithCollation;
@@ -2358,7 +2357,6 @@ const AggregationCursor = require('./aggregation_cursor');
 const CommandCursor = require('./command_cursor');
 
 // Operations
-const checkForAtomicOperators = require('./operations/collection_ops').checkForAtomicOperators;
 const ensureIndex = require('./operations/collection_ops').ensureIndex;
 const group = require('./operations/collection_ops').group;
 const parallelCollectionScan = require('./operations/collection_ops').parallelCollectionScan;
@@ -3082,14 +3080,6 @@ Collection.prototype.insert = deprecate(function(docs, options, callback) {
  */
 Collection.prototype.updateOne = function(filter, update, options, callback) {
   if (typeof options === 'function') (callback = options), (options = {});
-  options = options || {};
-
-  const err = checkForAtomicOperators(update);
-  if (err) {
-    if (typeof callback === 'function') return callback(err);
-    return this.s.promiseLibrary.reject(err);
-  }
-
   options = Object.assign({}, options);
 
   // Add ignoreUndefined
@@ -3098,9 +3088,11 @@ Collection.prototype.updateOne = function(filter, update, options, callback) {
     options.ignoreUndefined = this.s.options.ignoreUndefined;
   }
 
-  const updateOneOperation = new UpdateOneOperation(this, filter, update, options);
-
-  return executeOperation(this.s.topology, updateOneOperation, callback);
+  return executeOperation(
+    this.s.topology,
+    new UpdateOneOperation(this, filter, update, options),
+    callback
+  );
 };
 
 /**
@@ -3133,9 +3125,11 @@ Collection.prototype.replaceOne = function(filter, doc, options, callback) {
     options.ignoreUndefined = this.s.options.ignoreUndefined;
   }
 
-  const replaceOneOperation = new ReplaceOneOperation(this, filter, doc, options);
-
-  return executeOperation(this.s.topology, replaceOneOperation, callback);
+  return executeOperation(
+    this.s.topology,
+    new ReplaceOneOperation(this, filter, doc, options),
+    callback
+  );
 };
 
 /**
@@ -3161,14 +3155,6 @@ Collection.prototype.replaceOne = function(filter, doc, options, callback) {
  */
 Collection.prototype.updateMany = function(filter, update, options, callback) {
   if (typeof options === 'function') (callback = options), (options = {});
-  options = options || {};
-
-  const err = checkForAtomicOperators(update);
-  if (err) {
-    if (typeof callback === 'function') return callback(err);
-    return this.s.promiseLibrary.reject(err);
-  }
-
   options = Object.assign({}, options);
 
   // Add ignoreUndefined
@@ -3177,9 +3163,11 @@ Collection.prototype.updateMany = function(filter, update, options, callback) {
     options.ignoreUndefined = this.s.options.ignoreUndefined;
   }
 
-  const updateManyOperation = new UpdateManyOperation(this, filter, update, options);
-
-  return executeOperation(this.s.topology, updateManyOperation, callback);
+  return executeOperation(
+    this.s.topology,
+    new UpdateManyOperation(this, filter, update, options),
+    callback
+  );
 };
 
 /**
@@ -4014,13 +4002,11 @@ Collection.prototype.findOneAndDelete = function(filter, options, callback) {
   if (typeof options === 'function') (callback = options), (options = {});
   options = options || {};
 
-  // Basic validation
-  if (filter == null || typeof filter !== 'object')
-    throw toError('filter parameter must be an object');
-
-  const findOneAndDeleteOperation = new FindOneAndDeleteOperation(this, filter, options);
-
-  return executeOperation(this.s.topology, findOneAndDeleteOperation, callback);
+  return executeOperation(
+    this.s.topology,
+    new FindOneAndDeleteOperation(this, filter, options),
+    callback
+  );
 };
 
 /**
@@ -4049,27 +4035,11 @@ Collection.prototype.findOneAndReplace = function(filter, replacement, options, 
   if (typeof options === 'function') (callback = options), (options = {});
   options = options || {};
 
-  // Basic validation
-  if (filter == null || typeof filter !== 'object')
-    throw toError('filter parameter must be an object');
-  if (replacement == null || typeof replacement !== 'object')
-    throw toError('replacement parameter must be an object');
-
-  // Check that there are no atomic operators
-  const keys = Object.keys(replacement);
-
-  if (keys[0] &amp;&amp; keys[0][0] === '$') {
-    throw toError('The replacement document must not contain atomic operators.');
-  }
-
-  const findOneAndReplaceOperation = new FindOneAndReplaceOperation(
-    this,
-    filter,
-    replacement,
-    options
+  return executeOperation(
+    this.s.topology,
+    new FindOneAndReplaceOperation(this, filter, replacement, options),
+    callback
   );
-
-  return executeOperation(this.s.topology, findOneAndReplaceOperation, callback);
 };
 
 /**
@@ -4099,21 +4069,11 @@ Collection.prototype.findOneAndUpdate = function(filter, update, options, callba
   if (typeof options === 'function') (callback = options), (options = {});
   options = options || {};
 
-  // Basic validation
-  if (filter == null || typeof filter !== 'object')
-    throw toError('filter parameter must be an object');
-  if (update == null || typeof update !== 'object')
-    throw toError('update parameter must be an object');
-
-  const err = checkForAtomicOperators(update);
-  if (err) {
-    if (typeof callback === 'function') return callback(err);
-    return this.s.promiseLibrary.reject(err);
-  }
-
-  const findOneAndUpdateOperation = new FindOneAndUpdateOperation(this, filter, update, options);
-
-  return executeOperation(this.s.topology, findOneAndUpdateOperation, callback);
+  return executeOperation(
+    this.s.topology,
+    new FindOneAndUpdateOperation(this, filter, update, options),
+    callback
+  );
 };
 
 /**
@@ -4561,7 +4521,7 @@ module.exports = Collection;
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.4</a> on Thu Jul 16 2020 17:49:41 GMT-0400 (EDT)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Thu Jul 30 2020 15:53:30 GMT-0400 (EDT)
                     </footer>
                 </div>
             </td>
