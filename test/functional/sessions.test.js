@@ -1,6 +1,7 @@
 'use strict';
 const expect = require('chai').expect;
 const setupDatabase = require('./shared').setupDatabase;
+const withMonitoredClient = require('./shared').withMonitoredClient;
 const TestRunnerContext = require('./spec-runner').TestRunnerContext;
 const generateTopologyTests = require('./spec-runner').generateTopologyTests;
 const loadSpecTests = require('../spec').loadSpecTests;
