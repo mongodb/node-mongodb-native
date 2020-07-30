@@ -199,7 +199,7 @@ describe('Sessions', function () {
   context('unacknowledged writes', () => {
     it('should not include session for unacknowledged writes', {
       metadata: { requires: { topology: 'single' } },
-      test: withMonitoredClient('insert', { clientOptions: { w: 0 } }, function(
+      test: withMonitoredClient('insert', { clientOptions: { w: 0 } }, function (
         client,
         events,
         done
