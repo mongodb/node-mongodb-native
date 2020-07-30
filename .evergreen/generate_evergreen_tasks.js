@@ -233,33 +233,27 @@ OCSP_VERSIONS.forEach(VERSION => {
   ]);
 })
 
-const AWS_AUTH_TASKS = [];
-
-OCSP_VERSIONS.forEach(VERSION => {
-  AWS_AUTH_TASKS.push(`aws-${VERSION}-auth-test`);
-  TASKS.push({
-    name: `aws-${VERSION}-auth-test`,
-    commands: [
-      { func: 'install dependencies' },
-      {
-        func: 'bootstrap mongo-orchestration',
-        vars: {
-          AUTH: 'auth',
-          ORCHESTRATION_FILE: 'auth-aws.json',
-          VERSION: VERSION,
-          TOPOLOGY: 'server'
-        }
-      },
-      { func: 'add aws auth variables to file' },
-      { func: 'run aws auth test with regular aws credentials' },
-      { func: 'run aws auth test with assume role credentials' },
-      { func: 'run aws auth test with aws EC2 credentials' },
-      { func: 'run aws auth test with aws credentials as environment variables' },
-      { func: 'run aws auth test with aws credentials and session token as environment variables' },
-      { func: 'run aws ECS auth test' }
-    ]
-  });
-})
+TASKS.push({
+  name: 'aws-auth-test',
+  commands: [
+    { func: 'install dependencies' },
+    {
+      func: 'bootstrap mongo-orchestration',
+      vars: {
+        AUTH: 'auth',
+        ORCHESTRATION_FILE: 'auth-aws.json',
+        TOPOLOGY: 'server'
+      }
+    },
+    { func: 'add aws auth variables to file' },
+    { func: 'run aws auth test with regular aws credentials' },
+    { func: 'run aws auth test with assume role credentials' },
+    { func: 'run aws auth test with aws EC2 credentials' },
+    { func: 'run aws auth test with aws credentials as environment variables' },
+    { func: 'run aws auth test with aws credentials and session token as environment variables' },
+    { func: 'run aws ECS auth test' }
+  ]
+});
 
 const BUILD_VARIANTS = [];
 
@@ -349,7 +343,9 @@ BUILD_VARIANTS.push({
   expansions: {
     NODE_LTS_NAME: 'carbon'
   },
-  tasks: AWS_AUTH_TASKS
+  tasks: [
+    'aws-auth-test'
+  ]
 });
 
 const fileData = yaml.safeLoad(fs.readFileSync(`${__dirname}/config.yml.in`, 'utf8'));
