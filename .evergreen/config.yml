@@ -1241,13 +1241,30 @@ tasks:
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 0
-  - name: aws-auth-test
+  - name: aws-latest-auth-test
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
         vars:
           AUTH: auth
           ORCHESTRATION_FILE: auth-aws.json
+          VERSION: latest
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: run aws auth test with regular aws credentials
+      - func: run aws auth test with assume role credentials
+      - func: run aws auth test with aws EC2 credentials
+      - func: run aws auth test with aws credentials as environment variables
+      - func: run aws auth test with aws credentials and session token as environment variables
+      - func: run aws ECS auth test
+  - name: aws-4.4-auth-test
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          VERSION: '4.4'
           TOPOLOGY: server
       - func: add aws auth variables to file
       - func: run aws auth test with regular aws credentials
@@ -1340,6 +1357,8 @@ buildvariants:
       - test-4.4-ocsp-soft-fail
       - test-4.4-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
       - test-4.4-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
+      - aws-latest-auth-test
+      - aws-4.4-auth-test
   - name: macos-1014-dubnium
     display_name: macOS 10.14 Node Dubnium
     run_on: macos-1014
@@ -1525,6 +1544,8 @@ buildvariants:
       - test-4.4-ocsp-soft-fail
       - test-4.4-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
       - test-4.4-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
+      - aws-latest-auth-test
+      - aws-4.4-auth-test
   - name: ubuntu-18.04-dubnium
     display_name: Ubuntu 18.04 Node Dubnium
     run_on: ubuntu1804-test
@@ -1564,4 +1585,5 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: carbon
     tasks:
-      - aws-auth-test
+      - aws-latest-auth-test
+      - aws-4.4-auth-test
