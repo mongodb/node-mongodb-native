@@ -136,7 +136,7 @@ function _command(
 
   const inTransaction = session && (session.inTransaction() || isTransactionCommand(finalCmd));
   const commandResponseHandler = inTransaction
-    ? function (err: MongoError, ...args: any[]) {
+    ? function (err: MongoError, ...args: CommandResult[]) {
         // We need to add a TransientTransactionError errorLabel, as stated in the transaction spec.
         if (
           err &&
@@ -147,16 +147,15 @@ function _command(
         }
 
         if (
-          session &&
           !cmd.commitTransaction &&
           err &&
           err instanceof MongoError &&
           err.hasErrorLabel('TransientTransactionError')
         ) {
-          session.transaction.unpinServer();
+          session!.transaction.unpinServer();
         }
 
-        return callback(undefined, ...args);
+        return callback(err, ...args);
       }
     : callback;
 
