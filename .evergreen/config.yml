@@ -214,7 +214,7 @@ functions:
         silent: true
         script: |
           cat <<'EOF' > "${PROJECT_DIRECTORY}/prepare_mongodb_aws.sh"
-            alias urlencode='python -c "import sys, urllib as ul; print ul.quote_plus(sys.argv[1])"'
+            alias urlencode='/opt/mongodbtoolchain/v3/bin/python3 -c "import sys, urllib as ul; print ul.quote_plus(sys.argv[1])"'
             USER=$(urlencode ${iam_auth_ecs_account})
             PASS=$(urlencode ${iam_auth_ecs_secret_access_key})
             export MONGODB_URI="mongodb://$USER:$PASS@localhost:27017/aws?authMechanism=MONGODB-AWS"
@@ -242,7 +242,7 @@ functions:
         silent: true
         script: |
           cat <<'EOF' > "${PROJECT_DIRECTORY}/prepare_mongodb_aws.sh"
-            alias urlencode='python -c "import sys, urllib as ul; print ul.quote_plus(sys.argv[1])"'
+            alias urlencode='/opt/mongodbtoolchain/v3/bin/python3 -c "import sys, urllib as ul; print ul.quote_plus(sys.argv[1])"'
             USER=$(jq -r '.AccessKeyId' ${DRIVERS_TOOLS}/.evergreen/auth_aws/creds.json)
             USER=$(urlencode $USER)
             PASS=$(jq -r '.SecretAccessKey' ${DRIVERS_TOOLS}/.evergreen/auth_aws/creds.json)
@@ -363,7 +363,7 @@ functions:
         background: true
         script: |
           cd ${DRIVERS_TOOLS}/.evergreen/ocsp
-          nohup ./venv/bin/python3 ocsp_mock.py \
+          nohup /opt/mongodbtoolchain/v3/bin/python3 ocsp_mock.py \
             --ca_file rsa/ca.pem \
             --ocsp_responder_cert rsa/ca.crt \
             --ocsp_responder_key rsa/ca.key \
@@ -380,7 +380,7 @@ functions:
         background: true
         script: |
           cd ${DRIVERS_TOOLS}/.evergreen/ocsp
-          nohup ./venv/bin/python3 ocsp_mock.py \
+          nohup /opt/mongodbtoolchain/v3/bin/python3 ocsp_mock.py \
             --ca_file rsa/ca.pem \
             --ocsp_responder_cert rsa/ca.crt \
             --ocsp_responder_key rsa/ca.key \

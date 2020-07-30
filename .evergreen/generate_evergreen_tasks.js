@@ -6,6 +6,7 @@ const yaml = require('js-yaml');
 
 const LATEST_EFFECTIVE_VERSION = '5.0';
 const MONGODB_VERSIONS = ['latest', '4.4', '4.2', '4.0', '3.6', '3.4', '3.2', '3.0', '2.6'];
+const AWS_AUTH_VERSIONS = ['latest', '4.4'];
 const NODE_VERSIONS = ['erbium', 'dubnium', 'carbon', 'boron', 'argon'];
 const TOPOLOGIES = ['server', 'replica_set', 'sharded_cluster'].concat([
   'server-unified',
@@ -229,27 +230,35 @@ Array.prototype.push.apply(TASKS, [
   }
 ]);
 
-TASKS.push({
-  name: 'aws-auth-test',
-  commands: [
-    { func: 'install dependencies' },
-    {
-      func: 'bootstrap mongo-orchestration',
-      vars: {
-        AUTH: 'auth',
-        ORCHESTRATION_FILE: 'auth-aws.json',
-        TOPOLOGY: 'server'
-      }
-    },
-    { func: 'add aws auth variables to file' },
-    { func: 'run aws auth test with regular aws credentials' },
-    { func: 'run aws auth test with assume role credentials' },
-    { func: 'run aws auth test with aws EC2 credentials' },
-    { func: 'run aws auth test with aws credentials as environment variables' },
-    { func: 'run aws auth test with aws credentials and session token as environment variables' },
-    { func: 'run aws ECS auth test' }
-  ]
-});
+const AWS_AUTH_TASKS = [];
+
+AWS_AUTH_VERSIONS.forEach(VERSION => {
+  const name = `aws-${VERSION}-auth-test`;
+  AWS_AUTH_TASKS.push(name);
+  TASKS.push({
+    name: name,
+    commands: [
+      { func: 'install dependencies' },
+      {
+        func: 'bootstrap mongo-orchestration',
+        vars: {
+          VERSION: VERSION,
+          AUTH: 'auth',
+          ORCHESTRATION_FILE: 'auth-aws.json',
+          TOPOLOGY: 'server'
+        }
+      },
+      { func: 'add aws auth variables to file' },
+      { func: 'run aws auth test with regular aws credentials' },
+      { func: 'run aws auth test with assume role credentials' },
+      { func: 'run aws auth test with aws EC2 credentials' },
+      { func: 'run aws auth test with aws credentials as environment variables' },
+      { func: 'run aws auth test with aws credentials and session token as environment variables' },
+      { func: 'run aws ECS auth test' }
+    ]
+  });
+})
+
 
 const BUILD_VARIANTS = [];
 
@@ -338,7 +347,7 @@ BUILD_VARIANTS.push({
   expansions: {
     NODE_LTS_NAME: 'carbon'
   },
-  tasks: ['aws-auth-test']
+  tasks: AWS_AUTH_TASKS
 });
 
 const fileData = yaml.safeLoad(fs.readFileSync(`${__dirname}/config.yml.in`, 'utf8'));
