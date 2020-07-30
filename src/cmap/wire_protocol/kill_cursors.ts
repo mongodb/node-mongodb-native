@@ -5,9 +5,10 @@ import { MongoError, MongoNetworkError } from '../../error';
 import type { Server } from '../../sdam/server';
 import type { Callback } from '../../types';
 import type { InternalCursorState } from '../../cursor/core_cursor';
+import type { ClientSession } from '../../sessions';
 
 interface KillCursorOptions {
-  session?: any;
+  session?: ClientSession;
   immediateRelease: boolean;
   noResponse: boolean;
 }
