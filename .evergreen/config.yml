@@ -48,6 +48,7 @@ functions:
              export TMPDIR="$MONGO_ORCHESTRATION_HOME/db"
              export PATH="$MONGODB_BINARIES:$PATH"
              export PROJECT="${project}"
+             export python3_binary="/opt/python/3.8/bin/python3"
           EOT
           # See what we've done
           cat expansion.yml
@@ -226,7 +227,6 @@ functions:
         working_dir: src
         script: |
           ${PREPARE_SHELL}
-          alias python3=python
           ${PROJECT_DIRECTORY}/.evergreen/run-mongodb-aws-test.sh
   run aws auth test with assume role credentials:
     - command: shell.exec
@@ -235,6 +235,14 @@ functions:
         working_dir: src
         script: |
           ${PREPARE_SHELL}
+          # The aws_e2e_assume_role script requires python3 with boto3.
+          virtualenv -p ${python3_binary} mongovenv
+          if [ "Windows_NT" = "$OS" ]; then
+            . mongovenv/Scripts/activate
+          else
+            . mongovenv/bin/activate
+          fi
+          pip install boto3
           cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
           ${MONGODB_BINARIES}/mongo aws_e2e_assume_role.js
     - command: shell.exec
@@ -259,7 +267,6 @@ functions:
         working_dir: src
         script: |
           ${PREPARE_SHELL}
-          alias python3=python
           ${PROJECT_DIRECTORY}/.evergreen/run-mongodb-aws-test.sh
   run aws auth test with aws EC2 credentials:
     - command: shell.exec
@@ -268,6 +275,16 @@ functions:
         working_dir: src
         script: |
           ${PREPARE_SHELL}
+          if [ "${skip_EC2_auth_test}" = "true" ]; then
+             echo "This platform does not support the EC2 auth test, skipping..."
+             exit 0
+          fi
+          # The mongovenv was created earlier in "run aws auth test with assume role credentials".
+          if [ "Windows_NT" = "$OS" ]; then
+            . mongovenv/Scripts/activate
+          else
+            . mongovenv/bin/activate
+          fi
           cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
           ${MONGODB_BINARIES}/mongo aws_e2e_ec2.js
     - command: shell.exec
@@ -276,7 +293,6 @@ functions:
         working_dir: src
         script: |
           ${PREPARE_SHELL}
-          alias python3=python
           ${PROJECT_DIRECTORY}/.evergreen/run-mongodb-aws-test.sh
   run aws auth test with aws credentials as environment variables:
     - command: shell.exec
@@ -296,7 +312,6 @@ functions:
         working_dir: src
         script: |
           ${PREPARE_SHELL}
-          alias python3=python
           ${PROJECT_DIRECTORY}/.evergreen/run-mongodb-aws-test.sh
   run aws auth test with aws credentials and session token as environment variables:
     - command: shell.exec
@@ -317,7 +332,6 @@ functions:
         working_dir: src
         script: |
           ${PREPARE_SHELL}
-          alias python3=python
           ${PROJECT_DIRECTORY}/.evergreen/run-mongodb-aws-test.sh
   run aws ECS auth test:
     - command: shell.exec
