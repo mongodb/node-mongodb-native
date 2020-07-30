@@ -75,7 +75,7 @@ export class Connection extends EventEmitter {
   [kGeneration]: number;
   [kLastUseTime]: number;
   [kAutoEncrypter]?: unknown;
-  [kQueue]: Map<number | string, OperationDescription>;
+  [kQueue]: Map<number, OperationDescription>;
   [kMessageStream]: MessageStream;
   [kStream]: Socket;
   [kIsMaster]: Document;
