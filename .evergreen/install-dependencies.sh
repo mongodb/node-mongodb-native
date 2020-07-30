@@ -34,4 +34,4 @@ EOT
 #       BUILD-6774 is resolved.
 
 # install node dependencies
-npm install
+npm install --unsafe-perm
