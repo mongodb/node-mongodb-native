@@ -43,7 +43,7 @@ export interface MongoCredentialsOptions {
  * @property {string} [source] The database that the user should authenticate against
  * @property {object} [mechanismProperties] Special properties used by some types of auth mechanisms
  */
-class MongoCredentials {
+export class MongoCredentials {
   readonly username: string;
   readonly password: string;
   readonly source: string;
@@ -125,5 +125,3 @@ class MongoCredentials {
     return this;
   }
 }
-
-export { MongoCredentials };

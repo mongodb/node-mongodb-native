@@ -27,6 +27,9 @@ interface AWSSaslContinuePayload {
 export class MongoDBAWS extends AuthProvider {
   auth(authContext: AuthContext, callback: Callback): void {
     const { connection, credentials } = authContext;
+    if (!credentials) {
+      return callback(new MongoError('AuthContext must provide credentials.'));
+    }
     if (maxWireVersion(connection) < 9) {
       callback(new MongoError('MONGODB-AWS authentication requires MongoDB version 4.4 or later'));
       return;

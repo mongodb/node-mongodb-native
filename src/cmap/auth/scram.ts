@@ -28,6 +28,10 @@ class ScramSHA extends AuthProvider {
 
   prepare(handshakeDoc: HandshakeDocument, authContext: AuthContext, callback: Callback) {
     const cryptoMethod = this.cryptoMethod;
+    const credentials = authContext.credentials;
+    if (!credentials) {
+      return callback(new MongoError('AuthContext must provide credentials.'));
+    }
     if (cryptoMethod === 'sha256' && saslprep == null) {
       console.warn('Warning: no saslprep library specified. Passwords will not be sanitized');
     }
@@ -40,7 +44,6 @@ class ScramSHA extends AuthProvider {
       // store the nonce for later use
       Object.assign(authContext, { nonce });
 
-      const credentials = authContext.credentials;
       const request = Object.assign({}, handshakeDoc, {
         speculativeAuthenticate: Object.assign(makeFirstMessage(cryptoMethod, credentials, nonce), {
           db: credentials.source
@@ -105,8 +108,10 @@ function makeFirstMessage(
 }
 
 function executeScram(cryptoMethod: CryptoMethod, authContext: AuthContext, callback: Callback) {
-  const connection = authContext.connection;
-  const credentials = authContext.credentials;
+  const { connection, credentials } = authContext;
+  if (!credentials) {
+    return callback(new MongoError('AuthContext must provide credentials.'));
+  }
   if (!authContext.nonce) {
     return callback(new MongoError('AuthContext must contain a valid nonce property'));
   }
@@ -132,6 +137,9 @@ function continueScramConversation(
 ) {
   const connection = authContext.connection;
   const credentials = authContext.credentials;
+  if (!credentials) {
+    return callback(new MongoError('AuthContext must provide credentials.'));
+  }
   if (!authContext.nonce) {
     return callback(new MongoError('Unable to continue SCRAM without valid nonce'));
   }

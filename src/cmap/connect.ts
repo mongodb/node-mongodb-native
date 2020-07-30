@@ -136,7 +136,7 @@ function performInitialHandshake(
 
       if (!response.arbiterOnly && credentials) {
         // store the response on auth context
-        Object.assign(authContext, { response });
+        authContext.response = response;
 
         const resolvedCredentials = credentials.resolveAuthMechanism(response);
         const provider = AUTH_PROVIDERS[resolvedCredentials.mechanism];
@@ -210,7 +210,7 @@ const LEGAL_SSL_SOCKET_OPTIONS = [
   'minDHSize',
   'crl',
   'rejectUnauthorized'
-];
+] as const;
 
 function parseConnectOptions(family: number, options: MongoDBConnectionOptions): SocketConnectOpts {
   const host = typeof options.host === 'string' ? options.host : 'localhost';
@@ -231,11 +231,11 @@ function parseConnectOptions(family: number, options: MongoDBConnectionOptions):
 }
 
 function parseSslOptions(family: number, options: MongoDBConnectionOptions): TLSConnectionOpts {
-  const result: TLSConnectionOpts & { [key: string]: any } = parseConnectOptions(family, options);
+  const result: TLSConnectionOpts = parseConnectOptions(family, options);
   // Merge in valid SSL options
   for (const name of LEGAL_SSL_SOCKET_OPTIONS) {
     if (options[name]) {
-      result[name] = options[name];
+      (result as { [k: string]: any })[name] = options[name];
     }
   }
 

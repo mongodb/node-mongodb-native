@@ -1,9 +1,28 @@
 import { MongoError } from '../../error';
 import { collectionNamespace } from '../../utils';
-import { command, CommandOptions } from './command';
+import { command } from './command';
 
 import type { Server } from '../../sdam/server';
-import type { Callback, Document } from '../../types';
+import type { Callback, Document, BSONSerializeOptions } from '../../types';
+import type { WriteConcern } from '../../write_concern';
+
+export interface CollationOptions {
+  locale: string;
+  caseLevel: boolean;
+  caseFirst: string;
+  strength: number;
+  numericOrdering: boolean;
+  alternate: string;
+  maxVariable: string;
+  backwards: boolean;
+}
+
+export interface WriteCommandOptions extends BSONSerializeOptions {
+  ordered?: boolean;
+  writeConcern?: WriteConcern;
+  collation?: CollationOptions;
+  bypassDocumentValidation?: boolean;
+}
 
 export function writeCommand(
   server: Server,
@@ -11,7 +30,7 @@ export function writeCommand(
   opsField: string,
   ns: string,
   ops: Document[],
-  options: CommandOptions,
+  options: WriteCommandOptions,
   callback: Callback
 ): void {
   if (ops.length === 0) throw new MongoError(`${type} must contain at least one document`);

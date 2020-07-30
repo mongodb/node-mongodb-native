@@ -57,9 +57,6 @@ export interface MongoDBConnectionOptions
   metadata: ClientMetadata;
   /** Required EventEmitter option */
   captureRejections?: boolean;
-
-  // this is cheating
-  [key: string]: any;
 }
 
 export interface DestroyOptions {

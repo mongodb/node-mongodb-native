@@ -2,31 +2,22 @@ import { AuthProvider, AuthContext } from './auth_provider';
 import type { Callback } from '../../types';
 import { MongoError } from '../../error';
 
-interface MongoAuthProcessConstructor {
-  new (host: string, port: number, serviceName: string, options: unknown): MongoAuthProcessLike;
-}
-
-interface MongoAuthProcessLike {
-  host: string;
-  port: number;
-  serviceName: string;
-  canonicalizeHostName: boolean;
-  retries: number;
-
-  init: (username: string, password: string, callback: Callback) => void;
-  transition: (payload: unknown, callback: Callback) => void;
-}
-
 export class GSSAPI extends AuthProvider {
   auth(authContext: AuthContext, callback: Callback): void {
     const { host, port } = authContext.options;
-    if (!host || !port) {
-      return callback(new MongoError('Connection must specify host and port.'));
+    const { connection, credentials } = authContext;
+    if (!host || !port || !credentials) {
+      return callback(
+        new MongoError(
+          `Connection must specify: ${host ? 'host' : ''}, ${port ? 'port' : ''}, ${
+            credentials ? 'host' : 'credentials'
+          }.`
+        )
+      );
     }
 
     import('kerberos')
       .then(Kerberos => {
-        const { connection, credentials } = authContext;
         const username = credentials.username;
         const password = credentials.password;
         const mechanismProperties = credentials.mechanismProperties;
@@ -35,8 +26,7 @@ export class GSSAPI extends AuthProvider {
           mechanismProperties['gssapiServiceName'] ||
           'mongodb';
 
-        const MongoAuthProcess: MongoAuthProcessConstructor = (Kerberos as any).processes
-          .MongoAuthProcess;
+        const MongoAuthProcess = Kerberos.processes.MongoAuthProcess;
 
         const authProcess = new MongoAuthProcess(
           host,

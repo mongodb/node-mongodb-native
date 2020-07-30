@@ -18,7 +18,7 @@ import {
   ConnectionCheckedInEvent,
   ConnectionPoolClearedEvent
 } from './events';
-import type { Callback, CallbackWithType } from '../types';
+import type { Callback } from '../types';
 
 const kLogger = Symbol('logger');
 const kConnections = Symbol('connections');
@@ -96,7 +96,7 @@ function resolveOptions(
 
   for (const key of VALID_POOL_OPTIONS) {
     if (key in options) {
-      newOptions[key] = options[key];
+      (newOptions as { [key: string]: any })[key] = options[key];
     }
   }
 

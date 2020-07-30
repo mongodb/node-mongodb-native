@@ -5,14 +5,12 @@ export { getMore } from './get_more';
 export { query } from './query';
 export { command } from './command';
 
-import { writeCommand } from './write_command';
+import { writeCommand, WriteCommandOptions } from './write_command';
 import type { Callback, Document } from '../../types';
 
 export { writeCommand };
 
-export interface InsertOptions {
-  [key: string]: any;
-}
+export type InsertOptions = WriteCommandOptions;
 
 export function insert(
   server: Server,
@@ -24,9 +22,7 @@ export function insert(
   writeCommand(server, 'insert', 'documents', ns, ops, options, callback);
 }
 
-export interface UpdateOptions {
-  [key: string]: any;
-}
+export type UpdateOptions = WriteCommandOptions;
 
 export function update(
   server: Server,
@@ -38,9 +34,7 @@ export function update(
   writeCommand(server, 'update', 'updates', ns, ops, options, callback);
 }
 
-export interface RemoveOptions {
-  [key: string]: any;
-}
+export type RemoveOptions = WriteCommandOptions;
 
 export function remove(
   server: Server,

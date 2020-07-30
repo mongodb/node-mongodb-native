@@ -7,16 +7,11 @@ import { MongoError, MongoNetworkError } from '../../error';
 import type { Callback, Document, BSONSerializeOptions } from '../../types';
 import type { Server } from '../../sdam/server';
 import type { Topology } from '../../sdam/topology';
-import type { WriteConcern } from '../../write_concern';
 import type { ReadPreference } from '../..';
 
 export interface CommandOptions extends BSONSerializeOptions {
   command?: Document;
   slaveOk?: boolean;
-  ordered?: any;
-  collation?: any;
-  bypassDocumentValidation?: boolean;
-  writeConcern?: WriteConcern;
   readPreference?: ReadPreference;
   raw?: boolean;
   monitoring?: boolean;
@@ -147,12 +142,13 @@ function _command(
         }
 
         if (
+          session &&
           !cmd.commitTransaction &&
           err &&
           err instanceof MongoError &&
           err.hasErrorLabel('TransientTransactionError')
         ) {
-          session!.transaction.unpinServer();
+          session.transaction.unpinServer();
         }
 
         return callback(err, ...args);

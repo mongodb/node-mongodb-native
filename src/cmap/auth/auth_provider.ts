@@ -6,22 +6,18 @@ import type { ClientMetadataOptions } from '../../utils';
 
 export type AuthContextOptions = MongoDBConnectionOptions & ClientMetadataOptions;
 
-/**
- * Context used during authentication
- *
- * @property {Connection} connection The connection to authenticate
- * @property {MongoCredentials} credentials The credentials to use for authentication
- * @property {ConnectionOptions} options The options passed to the `connect` method
- * @property {object?} response The response of the initial handshake
- * @property {Buffer?} nonce A random nonce generated for use in an authentication conversation
- */
+/** Context used during authentication */
 export class AuthContext {
+  /** The connection to authenticate */
   connection: Connection;
-  credentials!: MongoCredentials;
+  /** The credentials to use for authentication */
+  credentials?: MongoCredentials;
+  /** The options passed to the `connect` method */
   options: AuthContextOptions;
 
-  /** A response from a speculative auth attempt, only some mechanisms use this (e.g, SCRAM) */
+  /** A response from an initial auth attempt, only some mechanisms use this (e.g, SCRAM) */
   response?: Document;
+  /** A random nonce generated for use in an authentication conversation */
   nonce?: Buffer;
 
   constructor(
@@ -30,7 +26,7 @@ export class AuthContext {
     options: AuthContextOptions
   ) {
     this.connection = connection;
-    this.credentials = credentials!;
+    this.credentials = credentials;
     this.options = options;
   }
 }
@@ -55,17 +51,9 @@ export class AuthProvider {
    * Authenticate
    *
    * @param {AuthContext} context A shared context for authentication flow
-   * @param {authResultCallback} callback The callback to return the result from the authentication
+   * @param {Callback<Document>} callback The callback to return the result from the authentication
    */
   auth(context: AuthContext, callback: Callback): void {
     callback(new TypeError('`auth` method must be overridden by subclass'));
   }
 }
-
-/**
- * This is a result from an authentication provider
- *
- * @callback authResultCallback
- * @param {error} error An error object. Set to null if no error present
- * @param {boolean} result The result of the authentication process
- */
