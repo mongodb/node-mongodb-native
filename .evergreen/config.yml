@@ -51,6 +51,8 @@ functions:
           EOT
           # See what we've done
           cat expansion.yml
+          # https://github.com/mongodb-labs/drivers-evergreen-tools/blob/3bd0e075fede049b07861d023e4ae803afc83bb3/.evergreen/auth_aws/lib/aws_e2e_lib.js#L38
+          alias python3=python
     - command: expansions.update
       params:
         file: src/expansion.yml
