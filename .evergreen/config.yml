@@ -48,7 +48,6 @@ functions:
              export TMPDIR="$MONGO_ORCHESTRATION_HOME/db"
              export PATH="$MONGODB_BINARIES:$PATH"
              export PROJECT="${project}"
-             alias python3=python
           EOT
           # See what we've done
           cat expansion.yml
@@ -227,6 +226,7 @@ functions:
         working_dir: src
         script: |
           ${PREPARE_SHELL}
+          alias python3=python
           ${PROJECT_DIRECTORY}/.evergreen/run-mongodb-aws-test.sh
   run aws auth test with assume role credentials:
     - command: shell.exec
@@ -259,6 +259,7 @@ functions:
         working_dir: src
         script: |
           ${PREPARE_SHELL}
+          alias python3=python
           ${PROJECT_DIRECTORY}/.evergreen/run-mongodb-aws-test.sh
   run aws auth test with aws EC2 credentials:
     - command: shell.exec
@@ -275,6 +276,7 @@ functions:
         working_dir: src
         script: |
           ${PREPARE_SHELL}
+          alias python3=python
           ${PROJECT_DIRECTORY}/.evergreen/run-mongodb-aws-test.sh
   run aws auth test with aws credentials as environment variables:
     - command: shell.exec
@@ -294,6 +296,7 @@ functions:
         working_dir: src
         script: |
           ${PREPARE_SHELL}
+          alias python3=python
           ${PROJECT_DIRECTORY}/.evergreen/run-mongodb-aws-test.sh
   run aws auth test with aws credentials and session token as environment variables:
     - command: shell.exec
@@ -314,6 +317,7 @@ functions:
         working_dir: src
         script: |
           ${PREPARE_SHELL}
+          alias python3=python
           ${PROJECT_DIRECTORY}/.evergreen/run-mongodb-aws-test.sh
   run aws ECS auth test:
     - command: shell.exec
