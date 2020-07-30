@@ -1,6 +1,17 @@
-# Change Log
+# Changelog
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+### [3.5.10](https://github.com/mongodb/node-mongodb-native/compare/v3.5.9...v3.5.10) (2020-07-30)
+
+
+### Bug Fixes
+
+* db.command to not inherit options from parent ([f7a50e2](https://github.com/mongodb/node-mongodb-native/commit/f7a50e2f43375cc411d6f521e3b103c96ceca51a))
+* ipv6 is not supported when using dns service discovery ([a1be593](https://github.com/mongodb/node-mongodb-native/commit/a1be59315c3dc65a04d3f83bb75fff2f1b9c16ef))
+* ReadPreference maxStalenessSeconds from options ([72a743d](https://github.com/mongodb/node-mongodb-native/commit/72a743d536181867f770a88ea9cd68d30b3f97fd))
+* silently ignore session with unacknowledged write ([8f1ea7b](https://github.com/mongodb/node-mongodb-native/commit/8f1ea7b69678c243a729267109ac3e50387914f8))
+* **ChangeStream:** handle null changes ([306b5b3](https://github.com/mongodb/node-mongodb-native/commit/306b5b3f7103f91c6c07c08f95375876093ad897))
 
 <a name="3.5.9"></a>
 ## [3.5.9](https://github.com/mongodb/node-mongodb-native/compare/v3.5.8...v3.5.9) (2020-06-12)
