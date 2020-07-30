@@ -41,7 +41,7 @@ describe('Optional Dependency', function () {
         return this.skip();
       }
       const gssapi = new GSSAPI();
-      gssapi.auth(new AuthContext(null, null, { host: 'a', port: 1 }), error => {
+      gssapi.auth(new AuthContext(null, true, { host: true, port: true }), error => {
         expect(error).to.exist;
         expect(error.message).includes('not found');
       });
