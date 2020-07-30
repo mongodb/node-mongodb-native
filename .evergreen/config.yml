@@ -48,6 +48,7 @@ functions:
              export TMPDIR="$MONGO_ORCHESTRATION_HOME/db"
              export PATH="$MONGODB_BINARIES:$PATH"
              export PROJECT="${project}"
+             alias python3=python
           EOT
           # See what we've done
           cat expansion.yml
@@ -235,7 +236,6 @@ functions:
         script: |
           ${PREPARE_SHELL}
           cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
-          alias python3=python
           ${MONGODB_BINARIES}/mongo aws_e2e_assume_role.js
     - command: shell.exec
       type: test
