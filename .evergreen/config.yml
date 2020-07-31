@@ -366,7 +366,7 @@ functions:
         background: true
         script: |
           cd ${DRIVERS_TOOLS}/.evergreen/ocsp
-          nohup .python3 ocsp_mock.py \
+          nohup python3 ocsp_mock.py \
             --ca_file rsa/ca.pem \
             --ocsp_responder_cert rsa/ca.crt \
             --ocsp_responder_key rsa/ca.key \
