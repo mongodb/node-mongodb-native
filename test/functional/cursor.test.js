@@ -875,34 +875,34 @@ describe('Cursor', function () {
           test.equal(null, err);
           collection.insert({ a: 1 }, configuration.writeConcernMax(), function (err) {
             test.equal(null, err);
-          });
-
-          try {
-            collection.find().skip('not-an-integer');
-          } catch (err) {
-            test.equal('skip requires an integer', err.message);
-          }
-
-          var cursor = collection.find();
-          cursor.next(function (err) {
-            test.equal(null, err);
 
             try {
-              cursor.skip(1);
+              collection.find().skip('not-an-integer');
             } catch (err) {
-              test.equal('Cursor is closed', err.message);
+              test.equal('skip requires an integer', err.message);
             }
 
-            var cursor2 = collection.find();
-            cursor2.close(function (err) {
+            var cursor = collection.find();
+            cursor.next(function (err) {
               test.equal(null, err);
+
               try {
-                cursor2.skip(1);
+                cursor.skip(1);
               } catch (err) {
                 test.equal('Cursor is closed', err.message);
               }
 
-              client.close(done);
+              var cursor2 = collection.find();
+              cursor2.close(function (err) {
+                test.equal(null, err);
+                try {
+                  cursor2.skip(1);
+                } catch (err) {
+                  test.equal('Cursor is closed', err.message);
+                }
+
+                client.close(done);
+              });
             });
           });
         });
