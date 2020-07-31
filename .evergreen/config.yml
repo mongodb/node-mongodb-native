@@ -1152,6 +1152,7 @@ tasks:
         vars:
           AUTH: auth
           ORCHESTRATION_FILE: auth-aws.json
+          VERSION: '4.4'
           TOPOLOGY: server
       - func: add aws auth variables to file
       - func: run aws auth test with regular aws credentials
