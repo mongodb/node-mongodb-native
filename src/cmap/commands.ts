@@ -98,7 +98,6 @@ export class Query {
     // Serialization option
     this.serializeFunctions =
       typeof options.serializeFunctions === 'boolean' ? options.serializeFunctions : false;
-    'boolean' === typeof options.serializeFunctions ? options.serializeFunctions : false;
     this.ignoreUndefined =
       typeof options.ignoreUndefined === 'boolean' ? options.ignoreUndefined : false;
     this.maxBsonSize = options.maxBsonSize || 1024 * 1024 * 16;
@@ -458,7 +457,7 @@ export interface MessageHeader {
   fromCompressed?: boolean;
 }
 
-export interface ResponseOptions extends BSONSerializeOptions {
+export interface OpResponseOptions extends BSONSerializeOptions {
   raw?: boolean;
   documentsReturnedIn?: string | null;
 }
@@ -467,7 +466,7 @@ export class Response {
   parsed: boolean;
   raw: Buffer;
   data: Buffer;
-  opts: ResponseOptions;
+  opts: OpResponseOptions;
   length: number;
   requestId: number;
   responseTo: number;
@@ -487,7 +486,12 @@ export class Response {
   promoteBuffers: boolean;
   index?: number;
 
-  constructor(message: Buffer, msgHeader: MessageHeader, msgBody: Buffer, opts?: ResponseOptions) {
+  constructor(
+    message: Buffer,
+    msgHeader: MessageHeader,
+    msgBody: Buffer,
+    opts?: OpResponseOptions
+  ) {
     this.parsed = false;
     this.raw = message;
     this.data = msgBody;
@@ -525,7 +529,7 @@ export class Response {
     return this.parsed;
   }
 
-  parse(options: ResponseOptions): void {
+  parse(options: OpResponseOptions): void {
     // Don't parse again if not needed
     if (this.parsed) return;
     options = options || {};
@@ -617,7 +621,7 @@ const OPTS_CHECKSUM_PRESENT = 1;
 const OPTS_MORE_TO_COME = 2;
 const OPTS_EXHAUST_ALLOWED = 1 << 16;
 
-export interface MsgOptions {
+export interface OpMsgOptions {
   requestId: number;
   serializeFunctions: boolean;
   ignoreUndefined: boolean;
@@ -739,7 +743,7 @@ export class BinMsg {
   parsed: boolean;
   raw: Buffer;
   data: Buffer;
-  opts: ResponseOptions;
+  opts: OpResponseOptions;
   length: number;
   requestId: number;
   responseTo: number;
@@ -752,10 +756,15 @@ export class BinMsg {
   promoteLongs: boolean;
   promoteValues: boolean;
   promoteBuffers: boolean;
-  documents: Document[];
+  documents: (Document | Buffer)[];
   index?: number;
 
-  constructor(message: Buffer, msgHeader: MessageHeader, msgBody: Buffer, opts?: ResponseOptions) {
+  constructor(
+    message: Buffer,
+    msgHeader: MessageHeader,
+    msgBody: Buffer,
+    opts?: OpResponseOptions
+  ) {
     this.parsed = false;
     this.raw = message;
     this.data = msgBody;
@@ -773,11 +782,11 @@ export class BinMsg {
     this.checksumPresent = (this.responseFlags & OPTS_CHECKSUM_PRESENT) !== 0;
     this.moreToCome = (this.responseFlags & OPTS_MORE_TO_COME) !== 0;
     this.exhaustAllowed = (this.responseFlags & OPTS_EXHAUST_ALLOWED) !== 0;
-    this.promoteLongs = 'boolean' === typeof this.opts.promoteLongs ? this.opts.promoteLongs : true;
+    this.promoteLongs = typeof this.opts.promoteLongs === 'boolean' ? this.opts.promoteLongs : true;
     this.promoteValues =
-      'boolean' === typeof this.opts.promoteValues ? this.opts.promoteValues : true;
+      typeof this.opts.promoteValues === 'boolean' ? this.opts.promoteValues : true;
     this.promoteBuffers =
-      'boolean' === typeof this.opts.promoteBuffers ? this.opts.promoteBuffers : false;
+      typeof this.opts.promoteBuffers === 'boolean' ? this.opts.promoteBuffers : false;
 
     this.documents = [];
   }
@@ -786,7 +795,7 @@ export class BinMsg {
     return this.parsed;
   }
 
-  parse(options: ResponseOptions): void {
+  parse(options: OpResponseOptions): void {
     // Don't parse again if not needed
     if (this.parsed) return;
     options = options || {};
@@ -824,7 +833,7 @@ export class BinMsg {
       fieldsAsRaw[documentsReturnedIn] = true;
       _options.fieldsAsRaw = fieldsAsRaw;
 
-      const doc = BSON.deserialize((this.documents[0] as unknown) as Buffer, _options);
+      const doc = BSON.deserialize(this.documents[0] as Buffer, _options);
       this.documents = [doc];
     }
 

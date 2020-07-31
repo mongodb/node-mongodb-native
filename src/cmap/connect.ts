@@ -1,6 +1,6 @@
 import * as net from 'net';
 import * as tls from 'tls';
-import { Connection, MongoDBConnectionOptions } from './connection';
+import { Connection, StreamConnectionOptions } from './connection';
 import { MongoError, MongoNetworkError, MongoNetworkTimeoutError } from '../error';
 import { defaultAuthProviders, AuthMechanism } from './auth/defaultAuthProviders';
 import { AuthContext } from './auth/auth_provider';
@@ -11,7 +11,7 @@ import {
   MIN_SUPPORTED_WIRE_VERSION,
   MIN_SUPPORTED_SERVER_VERSION
 } from './wire_protocol/constants';
-import type { Callback, CallbackWithType, Document, UniversalError } from '../types';
+import type { Callback, CallbackWithType, Document, AnyError } from '../types';
 import type { EventEmitter } from 'events';
 
 import type { Socket, SocketConnectOpts } from 'net';
@@ -21,14 +21,14 @@ export type ConnectionStream = Socket | TLSSocket;
 
 const AUTH_PROVIDERS = defaultAuthProviders();
 
-export function connect(options: MongoDBConnectionOptions, callback: Callback<Connection>): void;
+export function connect(options: StreamConnectionOptions, callback: Callback<Connection>): void;
 export function connect(
-  options: MongoDBConnectionOptions,
+  options: StreamConnectionOptions,
   cancellationToken: EventEmitter,
   callback: Callback<Connection>
 ): void;
 export function connect(
-  options: MongoDBConnectionOptions,
+  options: StreamConnectionOptions,
   _cancellationToken: EventEmitter | Callback<Connection>,
   _callback?: Callback<Connection>
 ): void {
@@ -52,7 +52,7 @@ export function connect(
   });
 }
 
-function checkSupportedServer(ismaster: Document, options: MongoDBConnectionOptions) {
+function checkSupportedServer(ismaster: Document, options: StreamConnectionOptions) {
   const serverVersionHighEnough =
     ismaster &&
     typeof ismaster.maxWireVersion === 'number' &&
@@ -79,7 +79,7 @@ function checkSupportedServer(ismaster: Document, options: MongoDBConnectionOpti
 
 function performInitialHandshake(
   conn: Connection,
-  options: MongoDBConnectionOptions,
+  options: StreamConnectionOptions,
   _callback: Callback
 ) {
   const callback: Callback<Document> = function (err, ret) {
@@ -212,7 +212,7 @@ const LEGAL_SSL_SOCKET_OPTIONS = [
   'rejectUnauthorized'
 ] as const;
 
-function parseConnectOptions(family: number, options: MongoDBConnectionOptions): SocketConnectOpts {
+function parseConnectOptions(family: number, options: StreamConnectionOptions): SocketConnectOpts {
   const host = typeof options.host === 'string' ? options.host : 'localhost';
 
   if (host.indexOf('/') !== -1) {
@@ -230,7 +230,7 @@ function parseConnectOptions(family: number, options: MongoDBConnectionOptions):
   return result;
 }
 
-function parseSslOptions(family: number, options: MongoDBConnectionOptions): TLSConnectionOpts {
+function parseSslOptions(family: number, options: StreamConnectionOptions): TLSConnectionOpts {
   const result: TLSConnectionOpts = parseConnectOptions(family, options);
   // Merge in valid SSL options
   for (const name of LEGAL_SSL_SOCKET_OPTIONS) {
@@ -262,9 +262,9 @@ const SOCKET_ERROR_EVENTS = new Set(SOCKET_ERROR_EVENT_LIST);
 
 function makeConnection(
   family: number,
-  options: MongoDBConnectionOptions,
+  options: StreamConnectionOptions,
   cancellationToken: EventEmitter | undefined,
-  _callback: CallbackWithType<UniversalError, ConnectionStream>
+  _callback: CallbackWithType<AnyError, ConnectionStream>
 ) {
   const useSsl = typeof options.ssl === 'boolean' ? options.ssl : false;
   const keepAlive = typeof options.keepAlive === 'boolean' ? options.keepAlive : true;
@@ -332,7 +332,7 @@ function makeConnection(
       cancellationToken.removeListener('cancel', cancellationHandler);
     }
 
-    if (isTLSSocket(socket)) {
+    if ('authorizationError' in socket) {
       if (socket.authorizationError && rejectUnauthorized) {
         return callback(socket.authorizationError);
       }
@@ -364,8 +364,4 @@ function connectionFailureError(type: string, err?: Error) {
     default:
       return new MongoNetworkError('unknown network error');
   }
-}
-
-function isTLSSocket(socket: ConnectionStream): socket is TLSSocket {
-  return 'boolean' === typeof (socket as TLSSocket).authorized;
 }

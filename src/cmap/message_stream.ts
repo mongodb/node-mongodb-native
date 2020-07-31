@@ -18,7 +18,7 @@ import {
   Compressor,
   CompressorName
 } from './wire_protocol/compression';
-import type { Callback, Document } from '../types';
+import type { Callback, Document, BSONSerializeOptions } from '../types';
 import type { ClientSession } from '../sessions';
 
 const MESSAGE_HEADER_SIZE = 16;
@@ -31,16 +31,13 @@ interface MessageStreamOptions extends DuplexOptions {
   maxBsonMessageSize?: number;
 }
 
-export interface OperationDescription {
+export interface OperationDescription extends BSONSerializeOptions {
   started: number;
-  cb: Callback<CommandResult | undefined>;
+  cb: Callback<CommandResult>;
   command: boolean;
   documentsReturnedIn?: string;
   fullResult: boolean;
   noResponse: boolean;
-  promoteBuffers: boolean;
-  promoteLongs: boolean;
-  promoteValues: boolean;
   raw: boolean;
   requestId: number;
   session?: ClientSession;

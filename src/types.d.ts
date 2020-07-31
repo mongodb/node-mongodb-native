@@ -2,15 +2,11 @@ import type { MongoError } from './error';
 import type { SerializeOptions } from 'bson';
 import type { MongoClient } from '.';
 
-export type UniversalError = MongoError | Error;
+export type AnyError = MongoError | Error;
 
-export type Callback<T = any> = (error?: UniversalError, result?: T) => void;
-export type Callback2<T0 = any, T1 = any> = (
-  error?: UniversalError,
-  result0?: T0,
-  result1?: T1
-) => void;
-export type CallbackWithType<E = UniversalError, T0 = any> = (error?: E, result?: T0) => void;
+export type Callback<T = any> = (error?: AnyError, result?: T) => void;
+export type Callback2<T0 = any, T1 = any> = (error?: AnyError, result0?: T0, result1?: T1) => void;
+export type CallbackWithType<E = AnyError, T0 = any> = (error?: E, result?: T0) => void;
 
 export interface Document {
   [key: string]: any;

@@ -1,15 +1,8 @@
-import {
-  GetMore,
-  KillCursor,
-  Msg,
-  Query,
-  CommandResult,
-  WriteProtocolMessageType
-} from './commands';
+import { GetMore, KillCursor, Msg, CommandResult, WriteProtocolMessageType } from './commands';
 import { calculateDurationInMs } from '../utils';
 import type { ConnectionPool, ConnectionPoolOptions } from './connection_pool';
 import type { Connection } from './connection';
-import type { Document, UniversalError } from '../types';
+import type { Document, AnyError } from '../types';
 
 /** The base export class for all monitoring events published from the connection pool */
 export class ConnectionPoolMonitoringEvent {
@@ -88,9 +81,9 @@ export class ConnectionCheckOutStartedEvent extends ConnectionPoolMonitoringEven
 /** An event published when a request to check a connection out fails */
 export class ConnectionCheckOutFailedEvent extends ConnectionPoolMonitoringEvent {
   /** The reason the attempt to check out failed */
-  reason: UniversalError | string;
+  reason: AnyError | string;
 
-  constructor(pool: ConnectionPool, reason: UniversalError | string) {
+  constructor(pool: ConnectionPool, reason: AnyError | string) {
     super(pool);
     this.reason = reason;
   }

@@ -1,7 +1,7 @@
 import Denque = require('denque');
 import { EventEmitter } from 'events';
 import Logger = require('../logger');
-import { Connection, MongoDBConnectionOptions } from './connection';
+import { Connection, StreamConnectionOptions } from './connection';
 import { connect } from './connect';
 import { eachAsync, relayEvents, makeCounter } from '../utils';
 import { MongoError } from '../error';
@@ -92,7 +92,7 @@ function resolveOptions(
   options: ConnectionPoolOptions,
   defaults: Partial<ConnectionPoolOptions>
 ): Readonly<ConnectionPoolOptions> {
-  const newOptions = {} as MongoDBConnectionOptions;
+  const newOptions = {} as StreamConnectionOptions;
 
   for (const key of VALID_POOL_OPTIONS) {
     if (key in options) {
@@ -103,7 +103,7 @@ function resolveOptions(
   return Object.freeze(Object.assign({}, defaults, newOptions)) as ConnectionPoolOptions;
 }
 
-export interface ConnectionPoolOptions extends MongoDBConnectionOptions {
+export interface ConnectionPoolOptions extends StreamConnectionOptions {
   /** The maximum number of connections that may be associated with a pool at a given time. This includes in use and available connections. */
   maxPoolSize: number;
   /** The minimum number of connections that MUST exist at any moment in a single connection pool. */
@@ -475,6 +475,7 @@ function processWaitQueue(pool: ConnectionPool) {
   while (pool.waitQueueSize) {
     const waitQueueMember = pool[kWaitQueue].peekFront();
     if (!waitQueueMember) {
+      pool[kWaitQueue].shift();
       continue;
     }
 
@@ -489,7 +490,7 @@ function processWaitQueue(pool: ConnectionPool) {
 
     const connection = pool[kConnections].shift();
     if (!connection) {
-      continue;
+      break;
     }
 
     const isStale = connectionIsStale(pool, connection);

@@ -2,7 +2,7 @@ import crypto = require('crypto');
 import { Binary } from '../../bson';
 import { MongoError } from '../../error';
 import { AuthProvider, AuthContext } from './auth_provider';
-import type { Callback, UniversalError, Document } from '../../types';
+import type { Callback, AnyError, Document } from '../../types';
 import type { MongoCredentials } from './mongo_credentials';
 import type { HandshakeDocument } from '../connect';
 
@@ -342,7 +342,7 @@ function compareDigest(lhs: Buffer, rhs: Uint8Array) {
   return result === 0;
 }
 
-function resolveError(err?: UniversalError, result?: Document) {
+function resolveError(err?: AnyError, result?: Document) {
   if (err) return err;
 
   if (result) {

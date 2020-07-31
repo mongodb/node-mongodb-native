@@ -1,6 +1,6 @@
 import { MongoError } from '../../error';
 import { collectionNamespace } from '../../utils';
-import { command } from './command';
+import { command, CommandOptions } from './command';
 
 import type { Server } from '../../sdam/server';
 import type { Callback, Document, BSONSerializeOptions } from '../../types';
@@ -17,7 +17,7 @@ export interface CollationOptions {
   backwards: boolean;
 }
 
-export interface WriteCommandOptions extends BSONSerializeOptions {
+export interface WriteCommandOptions extends BSONSerializeOptions, CommandOptions {
   ordered?: boolean;
   writeConcern?: WriteConcern;
   collation?: CollationOptions;

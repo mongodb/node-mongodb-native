@@ -136,14 +136,14 @@ export class MongoDBAWS extends AuthProvider {
   }
 }
 
-interface TemporaryCredentials {
+interface AWSCredentials {
   AccessKeyId?: string;
   SecretAccessKey?: string;
   Token?: string;
 }
 
-function makeTempCredentials(credentials: MongoCredentials, callback: Callback) {
-  function done(creds: TemporaryCredentials) {
+function makeTempCredentials(credentials: MongoCredentials, callback: Callback<MongoCredentials>) {
+  function done(creds: AWSCredentials) {
     if (creds.AccessKeyId == null || creds.SecretAccessKey == null || creds.Token == null) {
       callback(new MongoError('Could not obtain temporary MONGODB-AWS credentials'));
       return;
@@ -224,6 +224,7 @@ interface RequestOptions {
   headers?: {
     'X-aws-ec2-metadata-token-ttl-seconds'?: number;
     'X-aws-ec2-metadata-token'?: string;
+    [key: string]: any;
   };
 }
 

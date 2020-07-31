@@ -36,7 +36,7 @@ const kDescription = Symbol('description');
 const kIsMaster = Symbol('ismaster');
 const kAutoEncrypter = Symbol('autoEncrypter');
 
-export interface MongoDBConnectionOptions
+export interface StreamConnectionOptions
   extends Partial<TcpNetConnectOpts>,
     Partial<IpcNetConnectOpts>,
     Partial<TLSConnectionOptions>,
@@ -82,7 +82,7 @@ export class Connection extends EventEmitter {
   [kIsMaster]: Document;
   [kClusterTime]: Document;
 
-  constructor(stream: ConnectionStream, options: MongoDBConnectionOptions) {
+  constructor(stream: ConnectionStream, options: StreamConnectionOptions) {
     super(options);
     this.id = options.id;
     this.address = streamIdentifier(stream);
@@ -315,7 +315,7 @@ function messageHandler(conn: Connection) {
     }
 
     if (message.documents[0]) {
-      const document = message.documents[0];
+      const document: Document = message.documents[0];
       const session = operationDescription.session;
       if (session) {
         updateSessionFromResponse(session, document);
