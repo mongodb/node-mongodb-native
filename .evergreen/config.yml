@@ -234,8 +234,8 @@ functions:
         script: |
           ${PREPARE_SHELL}
           cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
-          python3 -m venv ./venv
-          ./venv/bin/pip3 install boto3
+          python3 -m venv ${DRIVERS_TOOLS}/.evergreen/ocsp/venv
+          ${DRIVERS_TOOLS}/.evergreen/ocsp/venv/bin/pip3 install boto3
           ${MONGODB_BINARIES}/mongo aws_e2e_assume_role.js
     - command: shell.exec
       type: test
