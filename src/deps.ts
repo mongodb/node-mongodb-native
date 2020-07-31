@@ -1,10 +1,10 @@
 import { MongoError } from './error';
 
-interface OptionalModule {
+interface ModuleNotFoundObject {
   kModuleError: MongoError;
 }
 
-export function optionalRequire<T>(moduleName: string): T | OptionalModule {
+export function optionalRequire<T>(moduleName: string): T | ModuleNotFoundObject {
   try {
     return require(moduleName);
   } catch {

@@ -7,6 +7,7 @@ import { optionalRequire } from '../../deps';
 const Snappy = optionalRequire<typeof import('snappy')>('snappy');
 
 export enum Compressor {
+  none = 0,
   snappy = 1,
   zlib = 2
 }

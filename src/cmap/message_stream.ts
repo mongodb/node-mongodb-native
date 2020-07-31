@@ -81,13 +81,15 @@ export class MessageStream extends Duplex {
     operationDescription: OperationDescription
   ): void {
     // TODO: agreed compressor should live in `StreamDescription`
-    const compressorName = operationDescription.agreedCompressor;
-    if (!(operationDescription && compressorName) || !canCompress(command)) {
+    const compressorName: CompressorName =
+      operationDescription && operationDescription.agreedCompressor
+        ? operationDescription.agreedCompressor
+        : 'none';
+    if (!(operationDescription && compressorName === 'none') || !canCompress(command)) {
       const data = command.toBin();
       this.push(Array.isArray(data) ? Buffer.concat(data) : data);
       return;
     }
-
     // otherwise, compress the message
     const concatenatedOriginalCommandBuffer = Buffer.concat(command.toBin());
     const messageToBeCompressed = concatenatedOriginalCommandBuffer.slice(MESSAGE_HEADER_SIZE);
