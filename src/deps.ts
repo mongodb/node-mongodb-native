@@ -51,5 +51,5 @@ export let aws4: typeof import('aws4') = makeErrorModule(
 );
 
 try {
-  saslprep = require('aws4');
+  aws4 = require('aws4');
 } catch {} // eslint-disable-line
