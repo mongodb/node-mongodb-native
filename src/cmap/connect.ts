@@ -17,7 +17,7 @@ import type { EventEmitter } from 'events';
 import type { Socket, SocketConnectOpts } from 'net';
 import type { TLSSocket, ConnectionOptions as TLSConnectionOpts } from 'tls';
 
-export type ConnectionStream = Socket | TLSSocket;
+export type Stream = Socket | TLSSocket;
 
 const AUTH_PROVIDERS = defaultAuthProviders();
 
@@ -264,7 +264,7 @@ function makeConnection(
   family: number,
   options: StreamConnectionOptions,
   cancellationToken: EventEmitter | undefined,
-  _callback: CallbackWithType<AnyError, ConnectionStream>
+  _callback: CallbackWithType<AnyError, Stream>
 ) {
   const useSsl = typeof options.ssl === 'boolean' ? options.ssl : false;
   const keepAlive = typeof options.keepAlive === 'boolean' ? options.keepAlive : true;
@@ -285,8 +285,8 @@ function makeConnection(
     keepAliveInitialDelay = Math.round(socketTimeout / 2);
   }
 
-  let socket: ConnectionStream;
-  const callback: Callback<ConnectionStream> = function (err, ret) {
+  let socket: Stream;
+  const callback: Callback<Stream> = function (err, ret) {
     if (err && socket) {
       socket.destroy();
     }

@@ -24,7 +24,7 @@ import type { QueryOptions } from './wire_protocol/query';
 import type { InternalCursorState } from '../cursor/core_cursor';
 import type { GetMoreOptions } from './wire_protocol/get_more';
 import type { InsertOptions, UpdateOptions, RemoveOptions } from './wire_protocol/index';
-import type { ConnectionStream } from './connect';
+import type { Stream } from './connect';
 
 const kStream = Symbol('stream');
 const kQueue = Symbol('queue');
@@ -78,11 +78,11 @@ export class Connection extends EventEmitter {
   [kAutoEncrypter]?: unknown;
   [kQueue]: Map<number, OperationDescription>;
   [kMessageStream]: MessageStream;
-  [kStream]: ConnectionStream;
+  [kStream]: Stream;
   [kIsMaster]: Document;
   [kClusterTime]: Document;
 
-  constructor(stream: ConnectionStream, options: StreamConnectionOptions) {
+  constructor(stream: Stream, options: StreamConnectionOptions) {
     super(options);
     this.id = options.id;
     this.address = streamIdentifier(stream);
@@ -175,7 +175,7 @@ export class Connection extends EventEmitter {
     return this[kClusterTime];
   }
 
-  get stream(): ConnectionStream {
+  get stream(): Stream {
     return this[kStream];
   }
 
@@ -353,7 +353,7 @@ function messageHandler(conn: Connection) {
   };
 }
 
-function streamIdentifier(stream: ConnectionStream) {
+function streamIdentifier(stream: Stream) {
   if (typeof stream.address === 'function') {
     return `${stream.remoteAddress}:${stream.remotePort}`;
   }
