@@ -46,7 +46,7 @@ functions:
              export PROJECT_DIRECTORY="$PROJECT_DIRECTORY"
 
              export TMPDIR="$MONGO_ORCHESTRATION_HOME/db"
-             export PATH="$MONGODB_BINARIES:$PATH:/opt/mongodbtoolchain/v2/bin"
+             export PATH="$MONGODB_BINARIES:$PATH"
              export PROJECT="${project}"
           EOT
           # See what we've done
@@ -233,7 +233,9 @@ functions:
         working_dir: src
         script: |
           ${PREPARE_SHELL}
-          pip3 install boto3
+          virtualenv -p python3 mongovenv
+          . mongovenv/bin/activate
+          pip install boto3
           cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
           ${MONGODB_BINARIES}/mongo aws_e2e_assume_role.js
     - command: shell.exec
@@ -266,6 +268,7 @@ functions:
         working_dir: src
         script: |
           ${PREPARE_SHELL}
+          . mongovenv/bin/activate
           cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
           ${MONGODB_BINARIES}/mongo aws_e2e_ec2.js
     - command: shell.exec
