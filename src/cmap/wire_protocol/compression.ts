@@ -1,8 +1,10 @@
 import zlib = require('zlib');
 import type { Callback } from '../../types';
 import type { OperationDescription } from '../message_stream';
-import { MongoError } from '../../error';
 import type { bufferCallback } from 'snappy';
+
+import { optionalRequire } from '../../deps';
+const Snappy = optionalRequire<typeof import('snappy')>('snappy');
 
 export enum Compressor {
   snappy = 1,
@@ -32,17 +34,10 @@ export function compress(
   const zlibOptions = {} as zlib.ZlibOptions;
   switch (self.options.agreedCompressor) {
     case 'snappy':
-      import('snappy')
-        .then(Snappy => {
-          Snappy.compress(dataToBeCompressed, callback as bufferCallback);
-        })
-        .catch(() => {
-          callback(
-            new MongoError(
-              'Optional module `snappy` not found. Please install it to enable snappy compression'
-            )
-          );
-        });
+      if ('kModuleError' in Snappy) {
+        return callback(Snappy['kModuleError']);
+      }
+      Snappy.compress(dataToBeCompressed, callback as bufferCallback);
       break;
     case 'zlib':
       // Determine zlibCompressionLevel
@@ -75,17 +70,10 @@ export function decompress(
 
   switch (compressorID) {
     case Compressor.snappy:
-      import('snappy')
-        .then(Snappy => {
-          Snappy.uncompress(compressedData, callback as bufferCallback);
-        })
-        .catch(() => {
-          callback(
-            new MongoError(
-              'Optional module `snappy` not found. Please install it to enable snappy compression'
-            )
-          );
-        });
+      if ('kModuleError' in Snappy) {
+        return callback(Snappy['kModuleError']);
+      }
+      Snappy.uncompress(compressedData, callback as bufferCallback);
       break;
     case Compressor.zlib:
       zlib.inflate(compressedData, callback as zlib.CompressCallback);

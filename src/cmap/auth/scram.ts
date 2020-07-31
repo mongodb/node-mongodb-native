@@ -6,18 +6,10 @@ import type { Callback, UniversalError, Document } from '../../types';
 import type { MongoCredentials } from './mongo_credentials';
 import type { HandshakeDocument } from '../connect';
 
+import { optionalRequire } from '../../deps';
+const saslprep = optionalRequire<typeof import('saslprep')>('saslprep');
+
 type CryptoMethod = 'sha1' | 'sha256';
-
-interface SaslPrepModule {
-  (password: string): string;
-}
-
-let saslprep: SaslPrepModule | null;
-try {
-  saslprep = require('saslprep');
-} catch (e) {
-  // don't do anything;
-}
 
 class ScramSHA extends AuthProvider {
   cryptoMethod: CryptoMethod;
@@ -151,7 +143,7 @@ function continueScramConversation(
 
   let processedPassword;
   if (cryptoMethod === 'sha256') {
-    processedPassword = saslprep ? saslprep(password) : password;
+    processedPassword = 'kModuleError' in saslprep ? password : saslprep(password);
   } else {
     try {
       processedPassword = passwordDigest(username, password);

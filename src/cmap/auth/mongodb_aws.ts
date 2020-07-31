@@ -8,6 +8,9 @@ import { MongoError } from '../../error';
 import { maxWireVersion } from '../../utils';
 import type { Callback, BSONSerializeOptions } from '../../types';
 
+import { optionalRequire } from '../../deps';
+const aws4 = optionalRequire<typeof import('aws4')>('aws4');
+
 const ASCII_N = 110;
 const AWS_RELATIVE_URI = 'http://169.254.170.2';
 const AWS_EC2_URI = 'http://169.254.169.254';
@@ -35,107 +38,101 @@ export class MongoDBAWS extends AuthProvider {
       return;
     }
 
-    import('aws4')
-      .then(aws4 => {
-        if (credentials.username == null) {
-          makeTempCredentials(credentials, (err, tempCredentials) => {
-            if (err) return callback(err);
+    if (credentials.username == null) {
+      makeTempCredentials(credentials, (err, tempCredentials) => {
+        if (err) return callback(err);
 
-            authContext.credentials = tempCredentials;
-            this.auth(authContext, callback);
-          });
+        authContext.credentials = tempCredentials;
+        this.auth(authContext, callback);
+      });
+
+      return;
+    }
+
+    if ('kModuleError' in aws4) {
+      return callback(aws4['kModuleError']);
+    }
+
+    const username = credentials.username;
+    const password = credentials.password;
+    const db = credentials.source;
+    const token = credentials.mechanismProperties.AWS_SESSION_TOKEN;
+    crypto.randomBytes(32, (err, nonce) => {
+      if (err) {
+        callback(err);
+        return;
+      }
+
+      const saslStart = {
+        saslStart: 1,
+        mechanism: 'MONGODB-AWS',
+        payload: BSON.serialize({ r: nonce, p: ASCII_N }, bsonOptions)
+      };
+
+      connection.command(`${db}.$cmd`, saslStart, (err, result) => {
+        if (err) return callback(err);
+
+        const res = result.result;
+        const serverResponse = BSON.deserialize(res.payload.buffer, bsonOptions);
+        const host = serverResponse.h;
+        const serverNonce = serverResponse.s.buffer;
+        if (serverNonce.length !== 64) {
+          callback(
+            new MongoError(`Invalid server nonce length ${serverNonce.length}, expected 64`)
+          );
 
           return;
         }
 
-        const username = credentials.username;
-        const password = credentials.password;
-        const db = credentials.source;
-        const token = credentials.mechanismProperties.AWS_SESSION_TOKEN;
-        crypto.randomBytes(32, (err, nonce) => {
-          if (err) {
-            callback(err);
-            return;
+        if (serverNonce.compare(nonce, 0, nonce.length, 0, nonce.length) !== 0) {
+          callback(new MongoError('Server nonce does not begin with client nonce'));
+          return;
+        }
+
+        if (host.length < 1 || host.length > 255 || host.indexOf('..') !== -1) {
+          callback(new MongoError(`Server returned an invalid host: "${host}"`));
+          return;
+        }
+
+        const body = 'Action=GetCallerIdentity&Version=2011-06-15';
+        const options = aws4.sign(
+          {
+            method: 'POST',
+            host,
+            region: deriveRegion(serverResponse.h),
+            service: 'sts',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'Content-Length': body.length,
+              'X-MongoDB-Server-Nonce': serverNonce.toString('base64'),
+              'X-MongoDB-GS2-CB-Flag': 'n'
+            },
+            path: '/',
+            body
+          },
+          {
+            accessKeyId: username,
+            secretAccessKey: password,
+            token
           }
-
-          const saslStart = {
-            saslStart: 1,
-            mechanism: 'MONGODB-AWS',
-            payload: BSON.serialize({ r: nonce, p: ASCII_N }, bsonOptions)
-          };
-
-          connection.command(`${db}.$cmd`, saslStart, (err, result) => {
-            if (err) return callback(err);
-
-            const res = result.result;
-            const serverResponse = BSON.deserialize(res.payload.buffer, bsonOptions);
-            const host = serverResponse.h;
-            const serverNonce = serverResponse.s.buffer;
-            if (serverNonce.length !== 64) {
-              callback(
-                new MongoError(`Invalid server nonce length ${serverNonce.length}, expected 64`)
-              );
-
-              return;
-            }
-
-            if (serverNonce.compare(nonce, 0, nonce.length, 0, nonce.length) !== 0) {
-              callback(new MongoError('Server nonce does not begin with client nonce'));
-              return;
-            }
-
-            if (host.length < 1 || host.length > 255 || host.indexOf('..') !== -1) {
-              callback(new MongoError(`Server returned an invalid host: "${host}"`));
-              return;
-            }
-
-            const body = 'Action=GetCallerIdentity&Version=2011-06-15';
-            const options = aws4.sign(
-              {
-                method: 'POST',
-                host,
-                region: deriveRegion(serverResponse.h),
-                service: 'sts',
-                headers: {
-                  'Content-Type': 'application/x-www-form-urlencoded',
-                  'Content-Length': body.length,
-                  'X-MongoDB-Server-Nonce': serverNonce.toString('base64'),
-                  'X-MongoDB-GS2-CB-Flag': 'n'
-                },
-                path: '/',
-                body
-              },
-              {
-                accessKeyId: username,
-                secretAccessKey: password,
-                token
-              }
-            );
-
-            const authorization = options.headers.Authorization;
-            const date = options.headers['X-Amz-Date'];
-            const payload: AWSSaslContinuePayload = { a: authorization, d: date };
-            if (token) {
-              payload.t = token;
-            }
-
-            const saslContinue = {
-              saslContinue: 1,
-              conversationId: 1,
-              payload: BSON.serialize(payload, bsonOptions)
-            };
-
-            connection.command(`${db}.$cmd`, saslContinue, callback);
-          });
-        });
-      })
-      .catch(() => {
-        callback(
-          new MongoError(
-            'MONGODB-AWS authentication requires the `aws4` module, please install it as a dependency of your project'
-          )
         );
+
+        const authorization = options.headers.Authorization;
+        const date = options.headers['X-Amz-Date'];
+        const payload: AWSSaslContinuePayload = { a: authorization, d: date };
+        if (token) {
+          payload.t = token;
+        }
+
+        const saslContinue = {
+          saslContinue: 1,
+          conversationId: 1,
+          payload: BSON.serialize(payload, bsonOptions)
+        };
+
+        connection.command(`${db}.$cmd`, saslContinue, callback);
       });
+    });
   }
 }
 

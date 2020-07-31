@@ -12,7 +12,7 @@ function moduleExistsSync(moduleName) {
   return existsSync(resolve(__dirname, `../../node_modules/${moduleName}`));
 }
 
-describe('Optional Dependency', function () {
+describe('optionalRequire', function () {
   context('Snappy', function () {
     it('should error if not installed', function () {
       const moduleName = 'snappy';
@@ -61,7 +61,7 @@ describe('Optional Dependency', function () {
           return this.skip();
         }
         const mdbAWS = new MongoDBAWS();
-        mdbAWS.auth(new AuthContext(null, null, null), error => {
+        mdbAWS.auth(new AuthContext({ ismaster: { maxWireVersion: 9 } }, true, null), error => {
           expect(error).to.exist;
           expect(error.message).includes('not found');
         });
