@@ -46,12 +46,11 @@ functions:
              export PROJECT_DIRECTORY="$PROJECT_DIRECTORY"
 
              export TMPDIR="$MONGO_ORCHESTRATION_HOME/db"
-             export PATH="$MONGODB_BINARIES:$PATH:/opt/mongodbtoolchain/v3/bin/:${DRIVERS_TOOLS}/.evergreen/ocsp/venv/bin/"
+             export PATH="$MONGODB_BINARIES:$PATH:${DRIVERS_TOOLS}/.evergreen/ocsp/venv/bin/"
              export PROJECT="${project}"
           EOT
           # See what we've done
           cat expansion.yml
-          # https://github.com/mongodb-labs/drivers-evergreen-tools/blob/3bd0e075fede049b07861d023e4ae803afc83bb3/.evergreen/auth_aws/lib/aws_e2e_lib.js#L38
     - command: expansions.update
       params:
         file: src/expansion.yml
@@ -366,7 +365,7 @@ functions:
         background: true
         script: |
           cd ${DRIVERS_TOOLS}/.evergreen/ocsp
-          nohup python3 ocsp_mock.py \
+          nohup .python3 ocsp_mock.py \
             --ca_file rsa/ca.pem \
             --ocsp_responder_cert rsa/ca.crt \
             --ocsp_responder_key rsa/ca.key \
