@@ -356,6 +356,7 @@ functions:
     - command: shell.exec
       params:
         script: |
+          ${PREPARE_SHELL}
           cd ${DRIVERS_TOOLS}/.evergreen/ocsp
           python3 -m venv ./venv
           pip3 install asn1crypto oscrypto bottle
@@ -373,6 +374,7 @@ functions:
     - command: shell.exec
       params:
         script: |
+          ${PREPARE_SHELL}
           cd ${DRIVERS_TOOLS}/.evergreen/ocsp
           python3 -m venv ./venv
           pip3 install asn1crypto oscrypto bottle
@@ -380,6 +382,7 @@ functions:
       params:
         background: true
         script: |
+          ${PREPARE_SHELL}
           cd ${DRIVERS_TOOLS}/.evergreen/ocsp
           nohup python3 ocsp_mock.py \
             --ca_file rsa/ca.pem \
