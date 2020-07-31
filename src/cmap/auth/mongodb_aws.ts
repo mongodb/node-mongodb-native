@@ -8,8 +8,7 @@ import { MongoError } from '../../error';
 import { maxWireVersion } from '../../utils';
 import type { Callback, BSONSerializeOptions } from '../../types';
 
-import { optionalRequire } from '../../deps';
-const aws4 = optionalRequire<typeof import('aws4')>('aws4');
+import { aws4 } from '../../deps';
 
 const ASCII_N = 110;
 const AWS_RELATIVE_URI = 'http://169.254.170.2';
@@ -33,6 +32,11 @@ export class MongoDBAWS extends AuthProvider {
     if (!credentials) {
       return callback(new MongoError('AuthContext must provide credentials.'));
     }
+
+    if ('kModuleError' in aws4) {
+      return callback(aws4['kModuleError']);
+    }
+
     if (maxWireVersion(connection) < 9) {
       callback(new MongoError('MONGODB-AWS authentication requires MongoDB version 4.4 or later'));
       return;
@@ -47,10 +51,6 @@ export class MongoDBAWS extends AuthProvider {
       });
 
       return;
-    }
-
-    if ('kModuleError' in aws4) {
-      return callback(aws4['kModuleError']);
     }
 
     const username = credentials.username;

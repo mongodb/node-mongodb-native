@@ -6,8 +6,7 @@ import type { Callback, AnyError, Document } from '../../types';
 import type { MongoCredentials } from './mongo_credentials';
 import type { HandshakeDocument } from '../connect';
 
-import { optionalRequire } from '../../deps';
-const saslprep = optionalRequire<typeof import('saslprep')>('saslprep');
+import { saslprep } from '../../deps';
 
 type CryptoMethod = 'sha1' | 'sha256';
 

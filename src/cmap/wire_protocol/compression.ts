@@ -3,8 +3,7 @@ import type { Callback } from '../../types';
 import type { OperationDescription } from '../message_stream';
 import type { bufferCallback } from 'snappy';
 
-import { optionalRequire } from '../../deps';
-const Snappy = optionalRequire<typeof import('snappy')>('snappy');
+import { Snappy } from '../../deps';
 
 export enum Compressor {
   none = 0,

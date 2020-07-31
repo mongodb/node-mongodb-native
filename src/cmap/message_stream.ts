@@ -85,7 +85,7 @@ export class MessageStream extends Duplex {
       operationDescription && operationDescription.agreedCompressor
         ? operationDescription.agreedCompressor
         : 'none';
-    if (!(operationDescription && compressorName === 'none') || !canCompress(command)) {
+    if (compressorName === 'none' || !canCompress(command)) {
       const data = command.toBin();
       this.push(Array.isArray(data) ? Buffer.concat(data) : data);
       return;
