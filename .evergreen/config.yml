@@ -24,7 +24,6 @@ functions:
           fi
 
           export DRIVERS_TOOLS="$(pwd)/../drivers-tools"
-          export _DRIVERS_TOOLS=$DRIVERS_TOOLS
           export PROJECT_DIRECTORY="$(pwd)"
           export MONGO_ORCHESTRATION_HOME="$DRIVERS_TOOLS/.evergreen/orchestration"
           export MONGODB_BINARIES="$DRIVERS_TOOLS/mongodb/bin"
