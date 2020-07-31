@@ -46,7 +46,7 @@ functions:
              export PROJECT_DIRECTORY="$PROJECT_DIRECTORY"
 
              export TMPDIR="$MONGO_ORCHESTRATION_HOME/db"
-             export PATH="$MONGODB_BINARIES:$PATH:${DRIVERS_TOOLS}/.evergreen/ocsp/venv/bin/"
+             export PATH="$MONGODB_BINARIES:$PATH:${DRIVERS_TOOLS}/.evergreen/orchestration/venv/bin/"
              export PROJECT="${project}"
           EOT
           # See what we've done
