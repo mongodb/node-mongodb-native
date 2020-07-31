@@ -46,7 +46,7 @@ functions:
              export PROJECT_DIRECTORY="$PROJECT_DIRECTORY"
 
              export TMPDIR="$MONGO_ORCHESTRATION_HOME/db"
-             export PATH="$MONGODB_BINARIES:$PATH:/opt/mongodbtoolchain/v3/bin/"
+             export PATH="$MONGODB_BINARIES:$PATH:/opt/mongodbtoolchain/v3/bin/:${DRIVERS_TOOLS}/.evergreen/ocsp/venv/bin/"
              export PROJECT="${project}"
           EOT
           # See what we've done
@@ -235,7 +235,7 @@ functions:
         script: |
           ${PREPARE_SHELL}
           cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
-          pip3 install boto3 pyOpenSSL
+          pip3 install boto3
           ${MONGODB_BINARIES}/mongo aws_e2e_assume_role.js
     - command: shell.exec
       type: test
