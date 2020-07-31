@@ -358,7 +358,7 @@ functions:
         script: |
           ${PREPARE_SHELL}
           cd ${DRIVERS_TOOLS}/.evergreen/ocsp
-          pip install asn1crypto oscrypto bottle
+          pip3 install asn1crypto oscrypto bottle
     - command: shell.exec
       params:
         background: true
@@ -375,7 +375,7 @@ functions:
         script: |
           ${PREPARE_SHELL}
           cd ${DRIVERS_TOOLS}/.evergreen/ocsp
-          pip install asn1crypto oscrypto bottle
+          pip3 install asn1crypto oscrypto bottle
     - command: shell.exec
       params:
         background: true
