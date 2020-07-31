@@ -233,8 +233,6 @@ functions:
         working_dir: src
         script: |
           ${PREPARE_SHELL}
-          virtualenv -p python3 mongovenv
-          . mongovenv/bin/activate
           pip3 install boto3
           cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
           ${MONGODB_BINARIES}/mongo aws_e2e_assume_role.js
@@ -268,7 +266,6 @@ functions:
         working_dir: src
         script: |
           ${PREPARE_SHELL}
-          . mongovenv/bin/activate
           cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
           ${MONGODB_BINARIES}/mongo aws_e2e_ec2.js
     - command: shell.exec
