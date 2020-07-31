@@ -46,9 +46,8 @@ functions:
              export PROJECT_DIRECTORY="$PROJECT_DIRECTORY"
 
              export TMPDIR="$MONGO_ORCHESTRATION_HOME/db"
-             export PATH="$MONGODB_BINARIES:$PATH"
+             export PATH="$MONGODB_BINARIES:$PATH:/opt/mongodbtoolchain/v3/bin/"
              export PROJECT="${project}"
-             export python3_binary="/opt/python/3.8/bin/python3"
           EOT
           # See what we've done
           cat expansion.yml
@@ -235,14 +234,6 @@ functions:
         working_dir: src
         script: |
           ${PREPARE_SHELL}
-          # The aws_e2e_assume_role script requires python3 with boto3.
-          virtualenv -p ${python3_binary} mongovenv
-          if [ "Windows_NT" = "$OS" ]; then
-            . mongovenv/Scripts/activate
-          else
-            . mongovenv/bin/activate
-          fi
-          pip install boto3
           cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
           ${MONGODB_BINARIES}/mongo aws_e2e_assume_role.js
     - command: shell.exec
@@ -275,16 +266,6 @@ functions:
         working_dir: src
         script: |
           ${PREPARE_SHELL}
-          if [ "${skip_EC2_auth_test}" = "true" ]; then
-             echo "This platform does not support the EC2 auth test, skipping..."
-             exit 0
-          fi
-          # The mongovenv was created earlier in "run aws auth test with assume role credentials".
-          if [ "Windows_NT" = "$OS" ]; then
-            . mongovenv/Scripts/activate
-          else
-            . mongovenv/bin/activate
-          fi
           cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
           ${MONGODB_BINARIES}/mongo aws_e2e_ec2.js
     - command: shell.exec
@@ -376,14 +357,14 @@ functions:
       params:
         script: |
           cd ${DRIVERS_TOOLS}/.evergreen/ocsp
-          /opt/mongodbtoolchain/v3/bin/python3 -m venv ./venv
-          ./venv/bin/pip3 install asn1crypto oscrypto bottle
+          python3 -m venv ./venv
+          pip3 install asn1crypto oscrypto bottle
     - command: shell.exec
       params:
         background: true
         script: |
           cd ${DRIVERS_TOOLS}/.evergreen/ocsp
-          nohup ./venv/bin/python3 ocsp_mock.py \
+          nohup .python3 ocsp_mock.py \
             --ca_file rsa/ca.pem \
             --ocsp_responder_cert rsa/ca.crt \
             --ocsp_responder_key rsa/ca.key \
@@ -393,14 +374,14 @@ functions:
       params:
         script: |
           cd ${DRIVERS_TOOLS}/.evergreen/ocsp
-          /opt/mongodbtoolchain/v3/bin/python3 -m venv ./venv
-          ./venv/bin/pip3 install asn1crypto oscrypto bottle
+          python3 -m venv ./venv
+          pip3 install asn1crypto oscrypto bottle
     - command: shell.exec
       params:
         background: true
         script: |
           cd ${DRIVERS_TOOLS}/.evergreen/ocsp
-          nohup ./venv/bin/python3 ocsp_mock.py \
+          nohup python3 ocsp_mock.py \
             --ca_file rsa/ca.pem \
             --ocsp_responder_cert rsa/ca.crt \
             --ocsp_responder_key rsa/ca.key \
