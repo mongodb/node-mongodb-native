@@ -235,7 +235,7 @@ functions:
         script: |
           ${PREPARE_SHELL}
           cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
-          pip3 install boto3
+          pip3 install boto3 pyOpenSSL
           ${MONGODB_BINARIES}/mongo aws_e2e_assume_role.js
     - command: shell.exec
       type: test
