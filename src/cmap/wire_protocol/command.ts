@@ -180,7 +180,7 @@ function supportsOpMsg(topologyOrServer: Server | Topology) {
     return false;
   }
 
-  return description.maxWireVersion >= 6 && description.__nodejs_mock_server__ == null;
+  return description.maxWireVersion >= 6 && !description.__nodejs_mock_server__;
 }
 
 function _cryptCommand(
