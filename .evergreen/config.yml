@@ -396,7 +396,7 @@ pre:
 post:
   - func: cleanup
 tasks:
-  - name: test-latest-server-ssl-auth
+  - name: test-latest-server-ssl-noauth
     tags:
       - latest
       - server
@@ -407,7 +407,7 @@ tasks:
           VERSION: latest
           TOPOLOGY: server
           SSL: ssl
-          AUTH: auth
+          AUTH: noauth
       - func: run tests
   - name: test-latest-server-nossl-noauth
     tags:
@@ -422,7 +422,7 @@ tasks:
           SSL: nossl
           AUTH: noauth
       - func: run tests
-  - name: test-latest-replica_set-ssl-auth
+  - name: test-latest-replica_set-ssl-noauth
     tags:
       - latest
       - replica_set
@@ -433,7 +433,7 @@ tasks:
           VERSION: latest
           TOPOLOGY: replica_set
           SSL: ssl
-          AUTH: auth
+          AUTH: noauth
       - func: run tests
   - name: test-latest-replica_set-nossl-noauth
     tags:
@@ -448,7 +448,7 @@ tasks:
           SSL: nossl
           AUTH: noauth
       - func: run tests
-  - name: test-latest-sharded_cluster-ssl-auth
+  - name: test-latest-sharded_cluster-ssl-noauth
     tags:
       - latest
       - sharded_cluster
@@ -459,7 +459,7 @@ tasks:
           VERSION: latest
           TOPOLOGY: sharded_cluster
           SSL: ssl
-          AUTH: auth
+          AUTH: noauth
       - func: run tests
   - name: test-latest-sharded_cluster-nossl-noauth
     tags:
@@ -474,7 +474,7 @@ tasks:
           SSL: nossl
           AUTH: noauth
       - func: run tests
-  - name: test-4.4-server-ssl-auth
+  - name: test-4.4-server-ssl-noauth
     tags:
       - '4.4'
       - server
@@ -485,7 +485,7 @@ tasks:
           VERSION: '4.4'
           TOPOLOGY: server
           SSL: ssl
-          AUTH: auth
+          AUTH: noauth
       - func: run tests
   - name: test-4.4-server-nossl-noauth
     tags:
@@ -500,7 +500,7 @@ tasks:
           SSL: nossl
           AUTH: noauth
       - func: run tests
-  - name: test-4.4-replica_set-ssl-auth
+  - name: test-4.4-replica_set-ssl-noauth
     tags:
       - '4.4'
       - replica_set
@@ -511,7 +511,7 @@ tasks:
           VERSION: '4.4'
           TOPOLOGY: replica_set
           SSL: ssl
-          AUTH: auth
+          AUTH: noauth
       - func: run tests
   - name: test-4.4-replica_set-nossl-noauth
     tags:
@@ -526,7 +526,7 @@ tasks:
           SSL: nossl
           AUTH: noauth
       - func: run tests
-  - name: test-4.4-sharded_cluster-ssl-auth
+  - name: test-4.4-sharded_cluster-ssl-noauth
     tags:
       - '4.4'
       - sharded_cluster
@@ -537,7 +537,7 @@ tasks:
           VERSION: '4.4'
           TOPOLOGY: sharded_cluster
           SSL: ssl
-          AUTH: auth
+          AUTH: noauth
       - func: run tests
   - name: test-4.4-sharded_cluster-nossl-noauth
     tags:
@@ -552,7 +552,7 @@ tasks:
           SSL: nossl
           AUTH: noauth
       - func: run tests
-  - name: test-4.2-server-ssl-auth
+  - name: test-4.2-server-ssl-noauth
     tags:
       - '4.2'
       - server
@@ -563,7 +563,7 @@ tasks:
           VERSION: '4.2'
           TOPOLOGY: server
           SSL: ssl
-          AUTH: auth
+          AUTH: noauth
       - func: run tests
   - name: test-4.2-server-nossl-noauth
     tags:
@@ -578,7 +578,7 @@ tasks:
           SSL: nossl
           AUTH: noauth
       - func: run tests
-  - name: test-4.2-replica_set-ssl-auth
+  - name: test-4.2-replica_set-ssl-noauth
     tags:
       - '4.2'
       - replica_set
@@ -589,7 +589,7 @@ tasks:
           VERSION: '4.2'
           TOPOLOGY: replica_set
           SSL: ssl
-          AUTH: auth
+          AUTH: noauth
       - func: run tests
   - name: test-4.2-replica_set-nossl-noauth
     tags:
@@ -604,7 +604,7 @@ tasks:
           SSL: nossl
           AUTH: noauth
       - func: run tests
-  - name: test-4.2-sharded_cluster-ssl-auth
+  - name: test-4.2-sharded_cluster-ssl-noauth
     tags:
       - '4.2'
       - sharded_cluster
@@ -615,7 +615,7 @@ tasks:
           VERSION: '4.2'
           TOPOLOGY: sharded_cluster
           SSL: ssl
-          AUTH: auth
+          AUTH: noauth
       - func: run tests
   - name: test-4.2-sharded_cluster-nossl-noauth
     tags:
@@ -630,7 +630,7 @@ tasks:
           SSL: nossl
           AUTH: noauth
       - func: run tests
-  - name: test-4.0-server-ssl-auth
+  - name: test-4.0-server-ssl-noauth
     tags:
       - '4.0'
       - server
@@ -641,7 +641,7 @@ tasks:
           VERSION: '4.0'
           TOPOLOGY: server
           SSL: ssl
-          AUTH: auth
+          AUTH: noauth
       - func: run tests
   - name: test-4.0-server-nossl-noauth
     tags:
@@ -656,7 +656,7 @@ tasks:
           SSL: nossl
           AUTH: noauth
       - func: run tests
-  - name: test-4.0-replica_set-ssl-auth
+  - name: test-4.0-replica_set-ssl-noauth
     tags:
       - '4.0'
       - replica_set
@@ -667,7 +667,7 @@ tasks:
           VERSION: '4.0'
           TOPOLOGY: replica_set
           SSL: ssl
-          AUTH: auth
+          AUTH: noauth
       - func: run tests
   - name: test-4.0-replica_set-nossl-noauth
     tags:
@@ -682,7 +682,7 @@ tasks:
           SSL: nossl
           AUTH: noauth
       - func: run tests
-  - name: test-4.0-sharded_cluster-ssl-auth
+  - name: test-4.0-sharded_cluster-ssl-noauth
     tags:
       - '4.0'
       - sharded_cluster
@@ -693,7 +693,7 @@ tasks:
           VERSION: '4.0'
           TOPOLOGY: sharded_cluster
           SSL: ssl
-          AUTH: auth
+          AUTH: noauth
       - func: run tests
   - name: test-4.0-sharded_cluster-nossl-noauth
     tags:
@@ -708,7 +708,7 @@ tasks:
           SSL: nossl
           AUTH: noauth
       - func: run tests
-  - name: test-3.6-server-ssl-auth
+  - name: test-3.6-server-ssl-noauth
     tags:
       - '3.6'
       - server
@@ -719,7 +719,7 @@ tasks:
           VERSION: '3.6'
           TOPOLOGY: server
           SSL: ssl
-          AUTH: auth
+          AUTH: noauth
       - func: run tests
   - name: test-3.6-server-nossl-noauth
     tags:
@@ -734,7 +734,7 @@ tasks:
           SSL: nossl
           AUTH: noauth
       - func: run tests
-  - name: test-3.6-replica_set-ssl-auth
+  - name: test-3.6-replica_set-ssl-noauth
     tags:
       - '3.6'
       - replica_set
@@ -745,7 +745,7 @@ tasks:
           VERSION: '3.6'
           TOPOLOGY: replica_set
           SSL: ssl
-          AUTH: auth
+          AUTH: noauth
       - func: run tests
   - name: test-3.6-replica_set-nossl-noauth
     tags:
@@ -760,7 +760,7 @@ tasks:
           SSL: nossl
           AUTH: noauth
       - func: run tests
-  - name: test-3.6-sharded_cluster-ssl-auth
+  - name: test-3.6-sharded_cluster-ssl-noauth
     tags:
       - '3.6'
       - sharded_cluster
@@ -771,7 +771,7 @@ tasks:
           VERSION: '3.6'
           TOPOLOGY: sharded_cluster
           SSL: ssl
-          AUTH: auth
+          AUTH: noauth
       - func: run tests
   - name: test-3.6-sharded_cluster-nossl-noauth
     tags:
@@ -786,7 +786,7 @@ tasks:
           SSL: nossl
           AUTH: noauth
       - func: run tests
-  - name: test-3.4-server-ssl-auth
+  - name: test-3.4-server-ssl-noauth
     tags:
       - '3.4'
       - server
@@ -797,7 +797,7 @@ tasks:
           VERSION: '3.4'
           TOPOLOGY: server
           SSL: ssl
-          AUTH: auth
+          AUTH: noauth
       - func: run tests
   - name: test-3.4-server-nossl-noauth
     tags:
@@ -812,7 +812,7 @@ tasks:
           SSL: nossl
           AUTH: noauth
       - func: run tests
-  - name: test-3.4-replica_set-ssl-auth
+  - name: test-3.4-replica_set-ssl-noauth
     tags:
       - '3.4'
       - replica_set
@@ -823,7 +823,7 @@ tasks:
           VERSION: '3.4'
           TOPOLOGY: replica_set
           SSL: ssl
-          AUTH: auth
+          AUTH: noauth
       - func: run tests
   - name: test-3.4-replica_set-nossl-noauth
     tags:
@@ -838,7 +838,7 @@ tasks:
           SSL: nossl
           AUTH: noauth
       - func: run tests
-  - name: test-3.4-sharded_cluster-ssl-auth
+  - name: test-3.4-sharded_cluster-ssl-noauth
     tags:
       - '3.4'
       - sharded_cluster
@@ -849,7 +849,7 @@ tasks:
           VERSION: '3.4'
           TOPOLOGY: sharded_cluster
           SSL: ssl
-          AUTH: auth
+          AUTH: noauth
       - func: run tests
   - name: test-3.4-sharded_cluster-nossl-noauth
     tags:
@@ -864,7 +864,7 @@ tasks:
           SSL: nossl
           AUTH: noauth
       - func: run tests
-  - name: test-3.2-server-ssl-auth
+  - name: test-3.2-server-ssl-noauth
     tags:
       - '3.2'
       - server
@@ -875,7 +875,7 @@ tasks:
           VERSION: '3.2'
           TOPOLOGY: server
           SSL: ssl
-          AUTH: auth
+          AUTH: noauth
       - func: run tests
   - name: test-3.2-server-nossl-noauth
     tags:
@@ -890,7 +890,7 @@ tasks:
           SSL: nossl
           AUTH: noauth
       - func: run tests
-  - name: test-3.2-replica_set-ssl-auth
+  - name: test-3.2-replica_set-ssl-noauth
     tags:
       - '3.2'
       - replica_set
@@ -901,7 +901,7 @@ tasks:
           VERSION: '3.2'
           TOPOLOGY: replica_set
           SSL: ssl
-          AUTH: auth
+          AUTH: noauth
       - func: run tests
   - name: test-3.2-replica_set-nossl-noauth
     tags:
@@ -916,7 +916,7 @@ tasks:
           SSL: nossl
           AUTH: noauth
       - func: run tests
-  - name: test-3.2-sharded_cluster-ssl-auth
+  - name: test-3.2-sharded_cluster-ssl-noauth
     tags:
       - '3.2'
       - sharded_cluster
@@ -927,7 +927,7 @@ tasks:
           VERSION: '3.2'
           TOPOLOGY: sharded_cluster
           SSL: ssl
-          AUTH: auth
+          AUTH: noauth
       - func: run tests
   - name: test-3.2-sharded_cluster-nossl-noauth
     tags:
@@ -942,7 +942,7 @@ tasks:
           SSL: nossl
           AUTH: noauth
       - func: run tests
-  - name: test-3.0-server-ssl-auth
+  - name: test-3.0-server-ssl-noauth
     tags:
       - '3.0'
       - server
@@ -953,7 +953,7 @@ tasks:
           VERSION: '3.0'
           TOPOLOGY: server
           SSL: ssl
-          AUTH: auth
+          AUTH: noauth
       - func: run tests
   - name: test-3.0-server-nossl-noauth
     tags:
@@ -968,7 +968,7 @@ tasks:
           SSL: nossl
           AUTH: noauth
       - func: run tests
-  - name: test-3.0-replica_set-ssl-auth
+  - name: test-3.0-replica_set-ssl-noauth
     tags:
       - '3.0'
       - replica_set
@@ -979,7 +979,7 @@ tasks:
           VERSION: '3.0'
           TOPOLOGY: replica_set
           SSL: ssl
-          AUTH: auth
+          AUTH: noauth
       - func: run tests
   - name: test-3.0-replica_set-nossl-noauth
     tags:
@@ -994,7 +994,7 @@ tasks:
           SSL: nossl
           AUTH: noauth
       - func: run tests
-  - name: test-3.0-sharded_cluster-ssl-auth
+  - name: test-3.0-sharded_cluster-ssl-noauth
     tags:
       - '3.0'
       - sharded_cluster
@@ -1005,7 +1005,7 @@ tasks:
           VERSION: '3.0'
           TOPOLOGY: sharded_cluster
           SSL: ssl
-          AUTH: auth
+          AUTH: noauth
       - func: run tests
   - name: test-3.0-sharded_cluster-nossl-noauth
     tags:
@@ -1020,7 +1020,7 @@ tasks:
           SSL: nossl
           AUTH: noauth
       - func: run tests
-  - name: test-2.6-server-ssl-auth
+  - name: test-2.6-server-ssl-noauth
     tags:
       - '2.6'
       - server
@@ -1031,7 +1031,7 @@ tasks:
           VERSION: '2.6'
           TOPOLOGY: server
           SSL: ssl
-          AUTH: auth
+          AUTH: noauth
       - func: run tests
   - name: test-2.6-server-nossl-noauth
     tags:
@@ -1046,7 +1046,7 @@ tasks:
           SSL: nossl
           AUTH: noauth
       - func: run tests
-  - name: test-2.6-replica_set-ssl-auth
+  - name: test-2.6-replica_set-ssl-noauth
     tags:
       - '2.6'
       - replica_set
@@ -1057,7 +1057,7 @@ tasks:
           VERSION: '2.6'
           TOPOLOGY: replica_set
           SSL: ssl
-          AUTH: auth
+          AUTH: noauth
       - func: run tests
   - name: test-2.6-replica_set-nossl-noauth
     tags:
@@ -1072,7 +1072,7 @@ tasks:
           SSL: nossl
           AUTH: noauth
       - func: run tests
-  - name: test-2.6-sharded_cluster-ssl-auth
+  - name: test-2.6-sharded_cluster-ssl-noauth
     tags:
       - '2.6'
       - sharded_cluster
@@ -1083,7 +1083,7 @@ tasks:
           VERSION: '2.6'
           TOPOLOGY: sharded_cluster
           SSL: ssl
-          AUTH: auth
+          AUTH: noauth
       - func: run tests
   - name: test-2.6-sharded_cluster-nossl-noauth
     tags:
@@ -1230,59 +1230,59 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: dubnium
     tasks: &ref_0
-      - test-latest-server-ssl-auth
+      - test-latest-server-ssl-noauth
       - test-latest-server-nossl-noauth
-      - test-latest-replica_set-ssl-auth
+      - test-latest-replica_set-ssl-noauth
       - test-latest-replica_set-nossl-noauth
-      - test-latest-sharded_cluster-ssl-auth
+      - test-latest-sharded_cluster-ssl-noauth
       - test-latest-sharded_cluster-nossl-noauth
-      - test-4.4-server-ssl-auth
+      - test-4.4-server-ssl-noauth
       - test-4.4-server-nossl-noauth
-      - test-4.4-replica_set-ssl-auth
+      - test-4.4-replica_set-ssl-noauth
       - test-4.4-replica_set-nossl-noauth
-      - test-4.4-sharded_cluster-ssl-auth
+      - test-4.4-sharded_cluster-ssl-noauth
       - test-4.4-sharded_cluster-nossl-noauth
-      - test-4.2-server-ssl-auth
+      - test-4.2-server-ssl-noauth
       - test-4.2-server-nossl-noauth
-      - test-4.2-replica_set-ssl-auth
+      - test-4.2-replica_set-ssl-noauth
       - test-4.2-replica_set-nossl-noauth
-      - test-4.2-sharded_cluster-ssl-auth
+      - test-4.2-sharded_cluster-ssl-noauth
       - test-4.2-sharded_cluster-nossl-noauth
-      - test-4.0-server-ssl-auth
+      - test-4.0-server-ssl-noauth
       - test-4.0-server-nossl-noauth
-      - test-4.0-replica_set-ssl-auth
+      - test-4.0-replica_set-ssl-noauth
       - test-4.0-replica_set-nossl-noauth
-      - test-4.0-sharded_cluster-ssl-auth
+      - test-4.0-sharded_cluster-ssl-noauth
       - test-4.0-sharded_cluster-nossl-noauth
-      - test-3.6-server-ssl-auth
+      - test-3.6-server-ssl-noauth
       - test-3.6-server-nossl-noauth
-      - test-3.6-replica_set-ssl-auth
+      - test-3.6-replica_set-ssl-noauth
       - test-3.6-replica_set-nossl-noauth
-      - test-3.6-sharded_cluster-ssl-auth
+      - test-3.6-sharded_cluster-ssl-noauth
       - test-3.6-sharded_cluster-nossl-noauth
-      - test-3.4-server-ssl-auth
+      - test-3.4-server-ssl-noauth
       - test-3.4-server-nossl-noauth
-      - test-3.4-replica_set-ssl-auth
+      - test-3.4-replica_set-ssl-noauth
       - test-3.4-replica_set-nossl-noauth
-      - test-3.4-sharded_cluster-ssl-auth
+      - test-3.4-sharded_cluster-ssl-noauth
       - test-3.4-sharded_cluster-nossl-noauth
-      - test-3.2-server-ssl-auth
+      - test-3.2-server-ssl-noauth
       - test-3.2-server-nossl-noauth
-      - test-3.2-replica_set-ssl-auth
+      - test-3.2-replica_set-ssl-noauth
       - test-3.2-replica_set-nossl-noauth
-      - test-3.2-sharded_cluster-ssl-auth
+      - test-3.2-sharded_cluster-ssl-noauth
       - test-3.2-sharded_cluster-nossl-noauth
-      - test-3.0-server-ssl-auth
+      - test-3.0-server-ssl-noauth
       - test-3.0-server-nossl-noauth
-      - test-3.0-replica_set-ssl-auth
+      - test-3.0-replica_set-ssl-noauth
       - test-3.0-replica_set-nossl-noauth
-      - test-3.0-sharded_cluster-ssl-auth
+      - test-3.0-sharded_cluster-ssl-noauth
       - test-3.0-sharded_cluster-nossl-noauth
-      - test-2.6-server-ssl-auth
+      - test-2.6-server-ssl-noauth
       - test-2.6-server-nossl-noauth
-      - test-2.6-replica_set-ssl-auth
+      - test-2.6-replica_set-ssl-noauth
       - test-2.6-replica_set-nossl-noauth
-      - test-2.6-sharded_cluster-ssl-auth
+      - test-2.6-sharded_cluster-ssl-noauth
       - test-2.6-sharded_cluster-nossl-noauth
       - test-atlas-connectivity
       - test-ocsp-valid-cert-server-staples
@@ -1316,41 +1316,41 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: dubnium
     tasks: &ref_1
-      - test-4.0-server-ssl-auth
+      - test-4.0-server-ssl-noauth
       - test-4.0-server-nossl-noauth
-      - test-4.0-replica_set-ssl-auth
+      - test-4.0-replica_set-ssl-noauth
       - test-4.0-replica_set-nossl-noauth
-      - test-4.0-sharded_cluster-ssl-auth
+      - test-4.0-sharded_cluster-ssl-noauth
       - test-4.0-sharded_cluster-nossl-noauth
-      - test-3.6-server-ssl-auth
+      - test-3.6-server-ssl-noauth
       - test-3.6-server-nossl-noauth
-      - test-3.6-replica_set-ssl-auth
+      - test-3.6-replica_set-ssl-noauth
       - test-3.6-replica_set-nossl-noauth
-      - test-3.6-sharded_cluster-ssl-auth
+      - test-3.6-sharded_cluster-ssl-noauth
       - test-3.6-sharded_cluster-nossl-noauth
-      - test-3.4-server-ssl-auth
+      - test-3.4-server-ssl-noauth
       - test-3.4-server-nossl-noauth
-      - test-3.4-replica_set-ssl-auth
+      - test-3.4-replica_set-ssl-noauth
       - test-3.4-replica_set-nossl-noauth
-      - test-3.4-sharded_cluster-ssl-auth
+      - test-3.4-sharded_cluster-ssl-noauth
       - test-3.4-sharded_cluster-nossl-noauth
-      - test-3.2-server-ssl-auth
+      - test-3.2-server-ssl-noauth
       - test-3.2-server-nossl-noauth
-      - test-3.2-replica_set-ssl-auth
+      - test-3.2-replica_set-ssl-noauth
       - test-3.2-replica_set-nossl-noauth
-      - test-3.2-sharded_cluster-ssl-auth
+      - test-3.2-sharded_cluster-ssl-noauth
       - test-3.2-sharded_cluster-nossl-noauth
-      - test-3.0-server-ssl-auth
+      - test-3.0-server-ssl-noauth
       - test-3.0-server-nossl-noauth
-      - test-3.0-replica_set-ssl-auth
+      - test-3.0-replica_set-ssl-noauth
       - test-3.0-replica_set-nossl-noauth
-      - test-3.0-sharded_cluster-ssl-auth
+      - test-3.0-sharded_cluster-ssl-noauth
       - test-3.0-sharded_cluster-nossl-noauth
-      - test-2.6-server-ssl-auth
+      - test-2.6-server-ssl-noauth
       - test-2.6-server-nossl-noauth
-      - test-2.6-replica_set-ssl-auth
+      - test-2.6-replica_set-ssl-noauth
       - test-2.6-replica_set-nossl-noauth
-      - test-2.6-sharded_cluster-ssl-auth
+      - test-2.6-sharded_cluster-ssl-noauth
       - test-2.6-sharded_cluster-nossl-noauth
       - test-atlas-connectivity
   - name: ubuntu-14.04-erbium
@@ -1366,47 +1366,47 @@ buildvariants:
       NODE_LTS_NAME: dubnium
       CLIENT_ENCRYPTION: true
     tasks: &ref_2
-      - test-latest-server-ssl-auth
+      - test-latest-server-ssl-noauth
       - test-latest-server-nossl-noauth
-      - test-latest-replica_set-ssl-auth
+      - test-latest-replica_set-ssl-noauth
       - test-latest-replica_set-nossl-noauth
-      - test-latest-sharded_cluster-ssl-auth
+      - test-latest-sharded_cluster-ssl-noauth
       - test-latest-sharded_cluster-nossl-noauth
-      - test-4.4-server-ssl-auth
+      - test-4.4-server-ssl-noauth
       - test-4.4-server-nossl-noauth
-      - test-4.4-replica_set-ssl-auth
+      - test-4.4-replica_set-ssl-noauth
       - test-4.4-replica_set-nossl-noauth
-      - test-4.4-sharded_cluster-ssl-auth
+      - test-4.4-sharded_cluster-ssl-noauth
       - test-4.4-sharded_cluster-nossl-noauth
-      - test-4.2-server-ssl-auth
+      - test-4.2-server-ssl-noauth
       - test-4.2-server-nossl-noauth
-      - test-4.2-replica_set-ssl-auth
+      - test-4.2-replica_set-ssl-noauth
       - test-4.2-replica_set-nossl-noauth
-      - test-4.2-sharded_cluster-ssl-auth
+      - test-4.2-sharded_cluster-ssl-noauth
       - test-4.2-sharded_cluster-nossl-noauth
-      - test-4.0-server-ssl-auth
+      - test-4.0-server-ssl-noauth
       - test-4.0-server-nossl-noauth
-      - test-4.0-replica_set-ssl-auth
+      - test-4.0-replica_set-ssl-noauth
       - test-4.0-replica_set-nossl-noauth
-      - test-4.0-sharded_cluster-ssl-auth
+      - test-4.0-sharded_cluster-ssl-noauth
       - test-4.0-sharded_cluster-nossl-noauth
-      - test-3.6-server-ssl-auth
+      - test-3.6-server-ssl-noauth
       - test-3.6-server-nossl-noauth
-      - test-3.6-replica_set-ssl-auth
+      - test-3.6-replica_set-ssl-noauth
       - test-3.6-replica_set-nossl-noauth
-      - test-3.6-sharded_cluster-ssl-auth
+      - test-3.6-sharded_cluster-ssl-noauth
       - test-3.6-sharded_cluster-nossl-noauth
-      - test-3.4-server-ssl-auth
+      - test-3.4-server-ssl-noauth
       - test-3.4-server-nossl-noauth
-      - test-3.4-replica_set-ssl-auth
+      - test-3.4-replica_set-ssl-noauth
       - test-3.4-replica_set-nossl-noauth
-      - test-3.4-sharded_cluster-ssl-auth
+      - test-3.4-sharded_cluster-ssl-noauth
       - test-3.4-sharded_cluster-nossl-noauth
-      - test-3.2-server-ssl-auth
+      - test-3.2-server-ssl-noauth
       - test-3.2-server-nossl-noauth
-      - test-3.2-replica_set-ssl-auth
+      - test-3.2-replica_set-ssl-noauth
       - test-3.2-replica_set-nossl-noauth
-      - test-3.2-sharded_cluster-ssl-auth
+      - test-3.2-sharded_cluster-ssl-noauth
       - test-3.2-sharded_cluster-nossl-noauth
       - test-atlas-connectivity
       - test-ocsp-valid-cert-server-staples

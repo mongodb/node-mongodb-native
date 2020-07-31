@@ -86,7 +86,7 @@ function makeTask({ mongoVersion, topology, ssl, auth }) {
 
 MONGODB_VERSIONS.forEach(mongoVersion => {
   TOPOLOGIES.forEach(topology => {
-    TASKS.push(makeTask({ mongoVersion, topology, ssl: 'ssl', auth: 'auth' }));
+    TASKS.push(makeTask({ mongoVersion, topology, ssl: 'ssl', auth: 'noauth' }));
     TASKS.push(makeTask({ mongoVersion, topology, ssl: 'nossl', auth: 'noauth' }));
   });
 });
