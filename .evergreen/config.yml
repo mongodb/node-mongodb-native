@@ -48,7 +48,7 @@ functions:
 
              export TMPDIR="$MONGO_ORCHESTRATION_HOME/db"
              export PATH="$MONGODB_BINARIES:$PATH"
-             export PATH="$_DRIVERS_TOOLS/.evergreen/orchestration/venv/bin/:$PATH"
+             export PATH="$_DRIVERS_TOOLS/.evergreen/ocsp/venv/bin/:$PATH"
              export PROJECT="${project}"
           EOT
           # See what we've done
