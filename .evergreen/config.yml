@@ -235,7 +235,7 @@ functions:
           ${PREPARE_SHELL}
           virtualenv -p python3 mongovenv
           . mongovenv/bin/activate
-          pip install boto3
+          pip3 install boto3
           cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
           ${MONGODB_BINARIES}/mongo aws_e2e_assume_role.js
     - command: shell.exec
