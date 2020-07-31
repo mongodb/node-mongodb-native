@@ -233,7 +233,7 @@ functions:
         working_dir: src
         script: |
           ${PREPARE_SHELL}
-          virtualenv -p python3 mongovenv
+          /opt/mongodbtoolchain/v3/bin/python3 -m venv ./mongovenv
           . mongovenv/bin/activate
           pip install boto3
           cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
