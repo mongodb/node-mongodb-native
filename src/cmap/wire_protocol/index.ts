@@ -1,19 +1,47 @@
-const insert = function insert(server: any, ns: any, ops: any, options: any, callback: Function) {
+import type { Server } from '../../sdam/server';
+
+export { killCursors } from './kill_cursors';
+export { getMore } from './get_more';
+export { query } from './query';
+export { command } from './command';
+
+import { writeCommand, WriteCommandOptions } from './write_command';
+import type { Callback, Document } from '../../types';
+
+export { writeCommand };
+
+export type InsertOptions = WriteCommandOptions;
+
+export function insert(
+  server: Server,
+  ns: string,
+  ops: Document[],
+  options: InsertOptions,
+  callback: Callback
+): void {
   writeCommand(server, 'insert', 'documents', ns, ops, options, callback);
-};
+}
 
-const update = function update(server: any, ns: any, ops: any, options: any, callback: Function) {
+export type UpdateOptions = WriteCommandOptions;
+
+export function update(
+  server: Server,
+  ns: string,
+  ops: Document[],
+  options: UpdateOptions,
+  callback: Callback
+): void {
   writeCommand(server, 'update', 'updates', ns, ops, options, callback);
-};
+}
 
-const remove = function remove(server: any, ns: any, ops: any, options: any, callback: Function) {
+export type RemoveOptions = WriteCommandOptions;
+
+export function remove(
+  server: Server,
+  ns: string,
+  ops: Document[],
+  options: RemoveOptions,
+  callback: Callback
+): void {
   writeCommand(server, 'delete', 'deletes', ns, ops, options, callback);
-};
-
-import killCursors = require('./kill_cursors');
-import getMore = require('./get_more');
-import query = require('./query');
-import command = require('./command');
-import writeCommand = require('./write_command');
-
-export { insert, update, remove, killCursors, getMore, query, command };
+}

@@ -3,7 +3,7 @@ const EventEmitter = require('events');
 const { ConnectionPool } = require('../../../src/cmap/connection_pool');
 const { format: f } = require('util');
 const { Query } = require('../../../src/cmap/commands');
-const ReadPreference = require('../../../src/read_preference');
+const { ReadPreference } = require('../../../src/read_preference');
 
 function executeCommand(configuration, db, cmd, options, cb) {
   // Optional options

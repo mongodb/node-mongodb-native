@@ -1,5 +1,5 @@
 import PromiseProvider = require('../promise_provider');
-import ReadPreference = require('../read_preference');
+import { ReadPreference } from '../read_preference';
 import { MongoError, isRetryableError } from '../error';
 import { Aspect, OperationBase } from './operation';
 import { maxWireVersion } from '../utils';

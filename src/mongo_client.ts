@@ -1,9 +1,9 @@
 import Db = require('./db');
 import { EventEmitter } from 'events';
 import ChangeStream = require('./change_stream');
-import ReadPreference = require('./read_preference');
+import { ReadPreference } from './read_preference';
 import { MongoError } from './error';
-import WriteConcern = require('./write_concern');
+import { WriteConcern } from './write_concern';
 import { maybePromise, MongoDBNamespace } from './utils';
 import { deprecate } from 'util';
 import { connect, validOptions } from './operations/connect';

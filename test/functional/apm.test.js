@@ -9,7 +9,7 @@ const {
 } = require('./shared');
 const { loadSpecTests } = require('../spec');
 const { expect } = require('chai');
-const ReadPreference = require('../../src/read_preference');
+const { ReadPreference } = require('../../src/read_preference');
 
 describe('APM', function () {
   before(function () {

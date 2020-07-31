@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import Logger = require('../logger');
-import ReadPreference = require('../read_preference');
+import { ReadPreference } from '../read_preference';
 import { ConnectionPool } from '../cmap/connection_pool';
 import { CMAP_EVENT_NAMES } from '../cmap/events';
 import { ServerDescription, compareTopologyVersion } from './server_description';
@@ -29,6 +29,7 @@ import {
   isNodeShuttingDownError,
   isNetworkErrorBeforeHandshake
 } from '../error';
+import type { Document } from '../types';
 
 // Used for filtering out fields for logging
 const DEBUG_FIELDS = [
@@ -75,6 +76,7 @@ const kMonitor = Symbol('monitor');
 class Server extends EventEmitter {
   s: any;
   clusterTime: any;
+  ismaster?: Document;
   [kMonitor]: any;
 
   /**

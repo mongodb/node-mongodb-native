@@ -1,19 +1,34 @@
 import { KillCursor } from '../commands';
 import { maxWireVersion, collectionNamespace } from '../../utils';
-import command = require('./command');
+import { command, CommandOptions } from './command';
 import { MongoError, MongoNetworkError } from '../../error';
+import type { Server } from '../../sdam/server';
+import type { Callback } from '../../types';
+import type { InternalCursorState } from '../../cursor/core_cursor';
+import type { ClientSession } from '../../sessions';
 
-function killCursors(server: any, ns: any, cursorState: any, callback: Function) {
-  callback = typeof callback === 'function' ? callback : () => {};
+interface KillCursorOptions {
+  session?: ClientSession;
+  immediateRelease: boolean;
+  noResponse: boolean;
+}
+
+export function killCursors(
+  server: Server,
+  ns: string,
+  cursorState: InternalCursorState,
+  callback: Callback
+): void {
+  callback = typeof callback === 'function' ? callback : () => undefined;
   const cursorId = cursorState.cursorId;
 
   if (maxWireVersion(server) < 4) {
     const pool = server.s.pool;
     const killCursor = new KillCursor(ns, [cursorId]);
-    const options = {
+    const options: KillCursorOptions = {
       immediateRelease: true,
       noResponse: true
-    } as any;
+    };
 
     if (typeof cursorState.session === 'object') {
       options.session = cursorState.session;
@@ -39,11 +54,13 @@ function killCursors(server: any, ns: any, cursorState: any, callback: Function)
     cursors: [cursorId]
   };
 
-  const options = {} as any;
-  if (typeof cursorState.session === 'object') options.session = cursorState.session;
+  const options: CommandOptions = {};
+  if (typeof cursorState.session === 'object') {
+    options.session = cursorState.session;
+  }
 
-  command(server, ns, killCursorCmd, options, (err?: any, result?: any) => {
-    if (err) {
+  command(server, ns, killCursorCmd, options, (err, result) => {
+    if (err || !result) {
       return callback(err);
     }
 
@@ -58,8 +75,6 @@ function killCursors(server: any, ns: any, cursorState: any, callback: Function)
       );
     }
 
-    callback(null, response.documents[0]);
+    callback(undefined, response.documents[0]);
   });
 }
-
-export = killCursors;

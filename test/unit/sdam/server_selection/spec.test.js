@@ -5,7 +5,7 @@ const { Topology } = require('../../../../src/sdam/topology');
 const { Server } = require('../../../../src/sdam/server');
 const { ServerType } = require('../../../../src/sdam/common');
 const { ServerDescription } = require('../../../../src/sdam/server_description');
-const ReadPreference = require('../../../../src/read_preference');
+const { ReadPreference } = require('../../../../src/read_preference');
 const { MongoServerSelectionError } = require('../../../../src/error');
 const ServerSelectors = require('../../../../src/sdam/server_selection');
 

@@ -3,12 +3,12 @@ import { emitDeprecatedOptionWarning } from './utils';
 import { loadAdmin } from './dynamic_loaders';
 import { AggregationCursor, CommandCursor } from './cursor';
 import { ObjectId } from './bson';
-import ReadPreference = require('./read_preference');
+import { ReadPreference } from './read_preference';
 import { MongoError } from './error';
 import Collection = require('./collection');
 import ChangeStream = require('./change_stream');
 import CONSTANTS = require('./constants');
-import WriteConcern = require('./write_concern');
+import { WriteConcern } from './write_concern';
 import ReadConcern = require('./read_concern');
 import Logger = require('./logger');
 import {

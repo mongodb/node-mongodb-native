@@ -1,14 +1,27 @@
-import { AuthProvider } from './auth_provider';
-import { Kerberos, kModuleError } from '../../deps';
+import { AuthProvider, AuthContext } from './auth_provider';
+import type { Callback } from '../../types';
+import { MongoError } from '../../error';
 
-class GSSAPI extends AuthProvider {
-  auth(authContext: any, callback: Function) {
-    if (Kerberos[kModuleError]) {
-      callback(Kerberos[kModuleError]);
-      return;
+import { Kerberos } from '../../deps';
+
+export class GSSAPI extends AuthProvider {
+  auth(authContext: AuthContext, callback: Callback): void {
+    const { host, port } = authContext.options;
+    const { connection, credentials } = authContext;
+    if (!host || !port || !credentials) {
+      return callback(
+        new MongoError(
+          `Connection must specify: ${host ? 'host' : ''}, ${port ? 'port' : ''}, ${
+            credentials ? 'host' : 'credentials'
+          }.`
+        )
+      );
     }
 
-    const { connection, credentials } = authContext;
+    if ('kModuleError' in Kerberos) {
+      return callback(Kerberos['kModuleError']);
+    }
+
     const username = credentials.username;
     const password = credentials.password;
     const mechanismProperties = credentials.mechanismProperties;
@@ -18,16 +31,12 @@ class GSSAPI extends AuthProvider {
       'mongodb';
 
     const MongoAuthProcess = Kerberos.processes.MongoAuthProcess;
-    const authProcess = new MongoAuthProcess(
-      connection.host,
-      connection.port,
-      gssapiServiceName,
-      mechanismProperties
-    );
 
-    authProcess.init(username, password, (err: any) => {
+    const authProcess = new MongoAuthProcess(host, port, gssapiServiceName, mechanismProperties);
+
+    authProcess.init(username, password, err => {
       if (err) return callback(err, false);
-      authProcess.transition('', (err?: any, payload?: any) => {
+      authProcess.transition('', (err, payload) => {
         if (err) return callback(err, false);
 
         const command = {
@@ -37,11 +46,11 @@ class GSSAPI extends AuthProvider {
           autoAuthorize: 1
         };
 
-        connection.command('$external.$cmd', command, (err?: any, result?: any) => {
+        connection.command('$external.$cmd', command, (err, result) => {
           if (err) return callback(err, false);
 
           const doc = result.result;
-          authProcess.transition(doc.payload, (err?: any, payload?: any) => {
+          authProcess.transition(doc.payload, (err, payload) => {
             if (err) return callback(err, false);
             const command = {
               saslContinue: 1,
@@ -49,11 +58,11 @@ class GSSAPI extends AuthProvider {
               payload
             };
 
-            connection.command('$external.$cmd', command, (err?: any, result?: any) => {
+            connection.command('$external.$cmd', command, (err, result) => {
               if (err) return callback(err, false);
 
               const doc = result.result;
-              authProcess.transition(doc.payload, (err?: any, payload?: any) => {
+              authProcess.transition(doc.payload, (err, payload) => {
                 if (err) return callback(err, false);
                 const command = {
                   saslContinue: 1,
@@ -61,13 +70,13 @@ class GSSAPI extends AuthProvider {
                   payload
                 };
 
-                connection.command('$external.$cmd', command, (err?: any, result?: any) => {
+                connection.command('$external.$cmd', command, (err, result) => {
                   if (err) return callback(err, false);
 
                   const response = result.result;
-                  authProcess.transition(null, (err: any) => {
-                    if (err) return callback(err, null);
-                    callback(null, response);
+                  authProcess.transition(null, err => {
+                    if (err) return callback(err);
+                    callback(undefined, response);
                   });
                 });
               });
@@ -78,5 +87,3 @@ class GSSAPI extends AuthProvider {
     });
   }
 }
-
-export = GSSAPI;

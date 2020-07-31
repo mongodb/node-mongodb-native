@@ -1,7 +1,7 @@
 import { emitDeprecatedOptionWarning } from '../utils';
 import Denque = require('denque');
 import { EventEmitter } from 'events';
-import ReadPreference = require('../read_preference');
+import { ReadPreference } from '../read_preference';
 import { TopologyType, ServerType } from './common';
 import { ServerDescription } from './server_description';
 import { TopologyDescription } from './topology_description';
@@ -38,6 +38,7 @@ import {
   TopologyClosedEvent,
   TopologyDescriptionChangedEvent
 } from './events';
+import type { Document } from '../types';
 
 // Global state
 let globalTopologyCounter = 0;
@@ -95,6 +96,7 @@ interface Topology {
 class Topology extends EventEmitter {
   s: any;
   [kWaitQueue]: any;
+  ismaster?: Document;
 
   /**
    * Create a topology

@@ -1,12 +1,18 @@
-import { Snappy, kModuleError } from '../../deps';
 import zlib = require('zlib');
+import type { Callback } from '../../types';
+import type { OperationDescription } from '../message_stream';
+import type { bufferCallback } from 'snappy';
 
-const compressorIDs = {
-  snappy: 1,
-  zlib: 2
-} as any;
+import { Snappy } from '../../deps';
 
-const uncompressibleCommands = new Set([
+export enum Compressor {
+  none = 0,
+  snappy = 1,
+  zlib = 2
+}
+export type CompressorName = keyof typeof Compressor;
+
+export const uncompressibleCommands = new Set([
   'ismaster',
   'saslStart',
   'saslContinue',
@@ -20,22 +26,25 @@ const uncompressibleCommands = new Set([
 ]);
 
 // Facilitate compressing a message using an agreed compressor
-function compress(self: any, dataToBeCompressed: any, callback: Function) {
+export function compress(
+  self: { options: OperationDescription & zlib.ZlibOptions },
+  dataToBeCompressed: Buffer,
+  callback: Callback<Buffer>
+): void {
+  const zlibOptions = {} as zlib.ZlibOptions;
   switch (self.options.agreedCompressor) {
     case 'snappy':
-      if (Snappy[kModuleError]) {
-        callback(Snappy[kModuleError]);
-        return;
+      if ('kModuleError' in Snappy) {
+        return callback(Snappy['kModuleError']);
       }
-      Snappy.compress(dataToBeCompressed, callback);
+      Snappy.compress(dataToBeCompressed, callback as bufferCallback);
       break;
     case 'zlib':
       // Determine zlibCompressionLevel
-      var zlibOptions = {} as any;
       if (self.options.zlibCompressionLevel) {
         zlibOptions.level = self.options.zlibCompressionLevel;
       }
-      zlib.deflate(dataToBeCompressed, zlibOptions, callback as any);
+      zlib.deflate(dataToBeCompressed, zlibOptions, callback as zlib.CompressCallback);
       break;
     default:
       throw new Error(
@@ -47,29 +56,29 @@ function compress(self: any, dataToBeCompressed: any, callback: Function) {
 }
 
 // Decompress a message using the given compressor
-function decompress(compressorID: any, compressedData: any, callback: Function) {
-  if (compressorID < 0 || compressorID > compressorIDs.length) {
+export function decompress(
+  compressorID: Compressor,
+  compressedData: Buffer,
+  callback: Callback<Buffer>
+): void {
+  if (compressorID < 0 || compressorID > Math.max(2)) {
     throw new Error(
-      'Server sent message compressed using an unsupported compressor. (Received compressor ID ' +
-        compressorID +
-        ')'
+      `Server sent message compressed using an unsupported compressor.` +
+        ` (Received compressor ID ${compressorID})`
     );
   }
 
   switch (compressorID) {
-    case compressorIDs.snappy:
-      if (Snappy[kModuleError]) {
-        callback(Snappy[kModuleError]);
-        return;
+    case Compressor.snappy:
+      if ('kModuleError' in Snappy) {
+        return callback(Snappy['kModuleError']);
       }
-      Snappy.uncompress(compressedData, callback);
+      Snappy.uncompress(compressedData, callback as bufferCallback);
       break;
-    case compressorIDs.zlib:
-      zlib.inflate(compressedData, callback as any);
+    case Compressor.zlib:
+      zlib.inflate(compressedData, callback as zlib.CompressCallback);
       break;
     default:
-      callback(null, compressedData);
+      callback(undefined, compressedData);
   }
 }
-
-export { compressorIDs, uncompressibleCommands, compress, decompress };

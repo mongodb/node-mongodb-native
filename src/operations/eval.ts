@@ -1,6 +1,6 @@
 import CommandOperation = require('./command');
 import { Code } from '../bson';
-import ReadPreference = require('../read_preference');
+import { ReadPreference } from '../read_preference';
 import { handleCallback } from '../utils';
 import { MongoError } from '../error';
 

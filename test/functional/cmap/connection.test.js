@@ -1,7 +1,7 @@
 'use strict';
 
 const Connection = require('../../../src/cmap/connection').Connection;
-const connect = require('../../../src/cmap/connect');
+const { connect } = require('../../../src/cmap/connect');
 const expect = require('chai').expect;
 const setupDatabase = require('../../functional/shared').setupDatabase;
 

@@ -1,18 +1,57 @@
-import { Query, Msg } from '../commands';
+import { Query, Msg, CommandResult } from '../commands';
 import { getReadPreference, isSharded } from './shared';
 import { isTransactionCommand } from '../../transactions';
-import { applySession } from '../../sessions';
+import { applySession, ClientSession } from '../../sessions';
 import { maxWireVersion, databaseNamespace } from '../../utils';
 import { MongoError, MongoNetworkError } from '../../error';
+import type { Callback, Document, BSONSerializeOptions } from '../../types';
+import type { Server } from '../../sdam/server';
+import type { Topology } from '../../sdam/topology';
+import type { ReadPreference } from '../..';
 
-function isClientEncryptionEnabled(server: any) {
+export interface CommandOptions extends BSONSerializeOptions {
+  command?: Document;
+  slaveOk?: boolean;
+  readPreference?: ReadPreference;
+  raw?: boolean;
+  monitoring?: boolean;
+  fullResult?: boolean;
+  socketTimeout?: number;
+  session?: ClientSession;
+  documentsReturnedIn?: string;
+  noResponse?: boolean;
+}
+
+function isClientEncryptionEnabled(server: Server) {
   const wireVersion = maxWireVersion(server);
   return wireVersion && server.autoEncrypter;
 }
 
-function command(server: any, ns: any, cmd: any, options: any, callback: Function) {
-  if (typeof options === 'function') (callback = options), (options = {});
-  options = options || {};
+export function command(
+  server: Server,
+  ns: string,
+  cmd: Document,
+  callback: Callback<CommandResult>
+): void;
+export function command(
+  server: Server,
+  ns: string,
+  cmd: Document,
+  options: CommandOptions,
+  callback?: Callback<CommandResult>
+): void;
+export function command(
+  server: Server,
+  ns: string,
+  cmd: Document,
+  _options: Callback | CommandOptions,
+  _callback?: Callback<CommandResult>
+): void {
+  let options = _options as CommandOptions;
+  const callback = (_callback ?? _options) as Callback<CommandResult>;
+  if ('function' === typeof options) {
+    options = {};
+  }
 
   if (cmd == null) {
     return callback(new MongoError(`command ${JSON.stringify(cmd)} does not return a cursor`));
@@ -32,7 +71,13 @@ function command(server: any, ns: any, cmd: any, options: any, callback: Functio
   _cryptCommand(server, ns, cmd, options, callback);
 }
 
-function _command(server: any, ns: any, cmd: any, options: any, callback: Function) {
+function _command(
+  server: Server,
+  ns: string,
+  cmd: Document,
+  options: CommandOptions,
+  callback: Callback<CommandResult>
+) {
   const pool = server.s.pool;
   const readPreference = getReadPreference(cmd, options);
   const shouldUseOpMsg = supportsOpMsg(server);
@@ -86,7 +131,7 @@ function _command(server: any, ns: any, cmd: any, options: any, callback: Functi
 
   const inTransaction = session && (session.inTransaction() || isTransactionCommand(finalCmd));
   const commandResponseHandler = inTransaction
-    ? function (err: any) {
+    ? function (err: MongoError, ...args: CommandResult[]) {
         // We need to add a TransientTransactionError errorLabel, as stated in the transaction spec.
         if (
           err &&
@@ -97,6 +142,7 @@ function _command(server: any, ns: any, cmd: any, options: any, callback: Functi
         }
 
         if (
+          session &&
           !cmd.commitTransaction &&
           err &&
           err instanceof MongoError &&
@@ -105,7 +151,7 @@ function _command(server: any, ns: any, cmd: any, options: any, callback: Functi
           session.transaction.unpinServer();
         }
 
-        return callback.apply(null, arguments);
+        return callback(err, ...args);
       }
     : callback;
 
@@ -116,7 +162,7 @@ function _command(server: any, ns: any, cmd: any, options: any, callback: Functi
   }
 }
 
-function hasSessionSupport(topology: any) {
+function hasSessionSupport(topology: Topology | Server) {
   if (topology == null) return false;
   if (topology.description) {
     return topology.description.maxWireVersion >= 6;
@@ -125,7 +171,7 @@ function hasSessionSupport(topology: any) {
   return topology.ismaster == null ? false : topology.ismaster.maxWireVersion >= 6;
 }
 
-function supportsOpMsg(topologyOrServer: any) {
+function supportsOpMsg(topologyOrServer: Server | Topology) {
   const description = topologyOrServer.ismaster
     ? topologyOrServer.ismaster
     : topologyOrServer.description;
@@ -134,18 +180,24 @@ function supportsOpMsg(topologyOrServer: any) {
     return false;
   }
 
-  return description.maxWireVersion >= 6 && description.__nodejs_mock_server__ == null;
+  return description.maxWireVersion >= 6 && !description.__nodejs_mock_server__;
 }
 
-function _cryptCommand(server: any, ns: any, cmd: any, options: any, callback: Function) {
+function _cryptCommand(
+  server: Server,
+  ns: string,
+  cmd: Document,
+  options: CommandOptions,
+  callback: Callback
+) {
   const autoEncrypter = server.autoEncrypter;
-  function commandResponseHandler(err?: any, response?: any) {
+  const commandResponseHandler: Callback<Document> = function (err, response) {
     if (err || response == null) {
       callback(err, response);
       return;
     }
 
-    autoEncrypter.decrypt(response.result, options, (err?: any, decrypted?: any) => {
+    autoEncrypter.decrypt(response.result, options, (err: Error, decrypted: Document) => {
       if (err) {
         callback(err, null);
         return;
@@ -153,11 +205,11 @@ function _cryptCommand(server: any, ns: any, cmd: any, options: any, callback: F
 
       response.result = decrypted;
       response.message.documents = [decrypted];
-      callback(null, response);
+      callback(undefined, response);
     });
-  }
+  };
 
-  autoEncrypter.encrypt(ns, cmd, options, (err?: any, encrypted?: any) => {
+  autoEncrypter.encrypt(ns, cmd, options, (err: Error, encrypted: Document) => {
     if (err) {
       callback(err, null);
       return;
@@ -166,5 +218,3 @@ function _cryptCommand(server: any, ns: any, cmd: any, options: any, callback: F
     _command(server, ns, encrypted, options, commandResponseHandler);
   });
 }
-
-export = command;

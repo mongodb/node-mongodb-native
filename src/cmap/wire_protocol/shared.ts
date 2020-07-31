@@ -1,11 +1,21 @@
 import { ServerType } from '../../sdam/common';
 import { TopologyDescription } from '../../sdam/topology_description';
-import ReadPreference = require('../../read_preference');
+import { ReadPreference } from '../../read_preference';
 import { MongoError } from '../../error';
+import type { Document } from '../../types';
+import type { CommandOptions } from './command';
+import type { OpQueryOptions } from '../commands';
+import type { Topology } from '../../sdam/topology';
+import type { Server } from '../../sdam/server';
+import type { ServerDescription } from '../../sdam/server_description';
 
-var getReadPreference = function (cmd: any, options: any) {
+export interface FindOptions {
+  readPreference?: ReadPreference;
+}
+
+export function getReadPreference(cmd: Document, options: FindOptions): ReadPreference {
   // Default to command version of the readPreference
-  var readPreference = cmd.readPreference || new ReadPreference('primary');
+  let readPreference = cmd.readPreference || new ReadPreference('primary');
   // If we have an option readPreference override the command one
   if (options.readPreference) {
     readPreference = options.readPreference;
@@ -20,9 +30,12 @@ var getReadPreference = function (cmd: any, options: any) {
   }
 
   return readPreference;
-};
+}
 
-function applyCommonQueryOptions(queryOptions: any, options: any) {
+export function applyCommonQueryOptions(
+  queryOptions: OpQueryOptions,
+  options: CommandOptions
+): OpQueryOptions {
   Object.assign(queryOptions, {
     raw: typeof options.raw === 'boolean' ? options.raw : false,
     promoteLongs: typeof options.promoteLongs === 'boolean' ? options.promoteLongs : true,
@@ -47,8 +60,7 @@ function applyCommonQueryOptions(queryOptions: any, options: any) {
   return queryOptions;
 }
 
-function isSharded(topologyOrServer: any) {
-  if (topologyOrServer.type === 'mongos') return true;
+export function isSharded(topologyOrServer: Topology | Server): boolean {
   if (topologyOrServer.description && topologyOrServer.description.type === ServerType.Mongos) {
     return true;
   }
@@ -56,11 +68,9 @@ function isSharded(topologyOrServer: any) {
   // NOTE: This is incredibly inefficient, and should be removed once command construction
   //       happens based on `Server` not `Topology`.
   if (topologyOrServer.description && topologyOrServer.description instanceof TopologyDescription) {
-    const servers = Array.from(topologyOrServer.description.servers.values());
-    return servers.some((server: any) => server.type === ServerType.Mongos);
+    const servers: ServerDescription[] = Array.from(topologyOrServer.description.servers.values());
+    return servers.some((server: ServerDescription) => server.type === ServerType.Mongos);
   }
 
   return false;
 }
-
-export { getReadPreference, applyCommonQueryOptions, isSharded };

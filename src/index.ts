@@ -5,7 +5,7 @@ import Admin = require('./admin');
 import MongoClient = require('./mongo_client');
 import Db = require('./db');
 import Collection = require('./collection');
-import ReadPreference = require('./read_preference');
+import { ReadPreference } from './read_preference';
 import Logger = require('./logger');
 import GridFSBucket = require('./gridfs-stream');
 

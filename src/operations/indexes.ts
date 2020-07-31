@@ -3,7 +3,7 @@ import { OperationBase, Aspect, defineAspects } from './operation';
 import { MongoError } from '../error';
 import { maxWireVersion, parseIndexOptions, handleCallback } from '../utils';
 import CommandOperation = require('./command');
-import ReadPreference = require('../read_preference');
+import { ReadPreference } from '../read_preference';
 
 /* eslint-disable */
 import type { Server } from '../sdam/server';

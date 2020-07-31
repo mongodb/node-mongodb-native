@@ -1,11 +1,35 @@
 import Logger = require('../logger');
-import ReadPreference = require('../read_preference');
+import { ReadPreference } from '../read_preference';
 import { handleCallback, collationNotSupported, MongoDBNamespace } from '../utils';
 import executeOperation = require('../operations/execute_operation');
 import { Readable } from 'stream';
 import { OperationBase } from '../operations/operation';
 import { MongoError, MongoNetworkError } from '../error';
 import { Long } from '../bson';
+import type { BSONSerializeOptions } from '../types';
+
+export interface InternalCursorState extends BSONSerializeOptions {
+  [key: string]: any;
+  batchSize: any;
+  cmd: any;
+  currentLimit: any;
+  cursorId: any;
+  cursorIndex: any;
+  dead: any;
+  documents: any;
+  init: any;
+  killed: any;
+  lastCursorId: any;
+  limit: any;
+  notified: any;
+  operationTime: any;
+  reconnect: any;
+  session: any;
+  skip: any;
+  streamOptions: any;
+  transforms: any;
+  raw: any;
+}
 
 // Possible states for a cursor
 const CursorState = {
@@ -47,7 +71,7 @@ class CoreCursor extends Readable {
   cmd: any;
   options: any;
   topology: any;
-  cursorState: any;
+  cursorState: InternalCursorState;
   logger: any;
   s: any;
   query: any;
@@ -109,7 +133,7 @@ class CoreCursor extends Readable {
       // Result field name if not a cursor (contains the array of results)
       transforms: options.transforms,
       raw: options.raw || (cmd && cmd.raw)
-    };
+    } as InternalCursorState;
 
     if (typeof options.session === 'object') {
       this.cursorState.session = options.session;
