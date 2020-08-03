@@ -13,7 +13,7 @@ export interface Document {
 }
 
 /** BSON Serialization options. TODO: Remove me when types from BSON are updated */
-export interface BSONSerializeOptions extends SerializeOptions {
+export interface SerializeOptions extends SerializeOptions {
   /** Return document results as raw BSON buffers */
   fieldsAsRaw?: { [key: string]: boolean };
   /** Promotes BSON values to native types where possible, set to false to only receive wrapper types */
@@ -28,17 +28,17 @@ export interface BSONSerializeOptions extends SerializeOptions {
   ignoreUndefined?: boolean;
 }
 
-export interface MongoClientBSONSerializeOptions {
+export interface BSONSerializeOptions {
   /** Promotes BSON values to native types where possible, set to false to only receive wrapper types */
-  promoteValues?: BSONSerializeOptions['promoteValues'];
+  promoteValues?: SerializeOptions['promoteValues'];
   /** Promotes Binary BSON values to native Node Buffers */
-  promoteBuffers?: BSONSerializeOptions['promoteBuffers'];
+  promoteBuffers?: SerializeOptions['promoteBuffers'];
   /** Promotes long values to number if they fit inside the 53 bits resolution */
-  promoteLongs?: BSONSerializeOptions['promoteLongs'];
+  promoteLongs?: SerializeOptions['promoteLongs'];
   /** Serialize functions on any object */
-  serializeFunctions?: BSONSerializeOptions['serializeFunctions'];
+  serializeFunctions?: SerializeOptions['serializeFunctions'];
   /** Specify if the BSON serializer should ignore undefined fields */
-  ignoreUndefined?: BSONSerializeOptions['ignoreUndefined'];
+  ignoreUndefined?: SerializeOptions['ignoreUndefined'];
 }
 
 export const enum AutoEncryptionLoggerLevels {
@@ -280,7 +280,7 @@ export interface MongoURIOptions {
   directConnection?: boolean;
 }
 
-export interface MongoClientOptions extends MongoURIOptions, MongoClientBSONSerializeOptions {
+export interface MongoClientOptions extends MongoURIOptions, BSONSerializeOptions {
   /** The maximum number of connections in the connection pool. */
   poolSize?: MongoURIOptions['maxPoolSize'];
   /** Validate mongod server certificate against Certificate Authority */
