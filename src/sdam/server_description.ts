@@ -1,6 +1,9 @@
-import { arrayStrictEqual, tagsStrictEqual, errorStrictEqual } from '../utils';
+import { arrayStrictEqual, errorStrictEqual } from '../utils';
 import { ServerType } from './common';
 import { now } from '../utils';
+import type { ObjectId, Long } from '../bson';
+import type { ClusterTime } from './common';
+import type { Document } from '../types';
 
 const WRITABLE_SERVER_TYPES = new Set([
   ServerType.RSPrimary,
@@ -15,123 +18,139 @@ const DATA_BEARING_SERVER_TYPES = new Set([
   ServerType.Standalone
 ]);
 
-const ISMASTER_FIELDS = [
-  'minWireVersion',
-  'maxWireVersion',
-  'maxBsonObjectSize',
-  'maxMessageSizeBytes',
-  'maxWriteBatchSize',
-  'compression',
-  'me',
-  'hosts',
-  'passives',
-  'arbiters',
-  'tags',
-  'setName',
-  'setVersion',
-  'electionId',
-  'primary',
-  'logicalSessionTimeoutMinutes',
-  'saslSupportedMechs',
-  '__nodejs_mock_server__',
-  '$clusterTime'
-];
+export interface TopologyVersion {
+  processId: ObjectId;
+  counter: Long;
+}
+
+export type TagSet = { [key: string]: string };
+
+interface ServerDescriptionOptions {
+  /** An Error used for better reporting debugging */
+  error?: Error;
+
+  /** The round trip time to ping this server (in ms) */
+  roundTripTime?: number;
+
+  /** The topologyVersion */
+  topologyVersion?: TopologyVersion;
+}
 
 /**
  * The client's view of a single server, based on the most recent ismaster outcome.
  *
  * Internal type, not meant to be directly instantiated
  */
-class ServerDescription {
+export class ServerDescription {
   address: string;
-  error: any;
-  roundTripTime: any;
-  lastUpdateTime: any;
-  lastWriteDate: any;
-  opTime: any;
-  type: any;
-  topologyVersion: any;
-  me: any;
-  hosts: any;
-  passives: any;
-  arbiters: any;
-  minWireVersion: any;
-  maxWireVersion: any;
-  tags: any;
-  setName: any;
-  setVersion: any;
-  electionId: any;
-  primary: any;
-  logicalSessionTimeoutMinutes: any;
-  $clusterTime: any;
+  type: ServerType;
+  hosts: string[];
+  passives: string[];
+  arbiters: string[];
+  tags: TagSet;
+
+  error?: Error;
+  topologyVersion?: TopologyVersion;
+  minWireVersion: number;
+  maxWireVersion: number;
+  roundTripTime: number;
+  lastUpdateTime: number;
+  lastWriteDate?: any;
+
+  me?: string;
+  primary?: string;
+  setName?: string;
+  setVersion?: number;
+  electionId?: ObjectId;
+  logicalSessionTimeoutMinutes?: number;
+
+  // NOTE: does this belong here? It seems we should gossip the cluster time at the CMAP level
+  $clusterTime?: ClusterTime;
 
   /**
    * Create a ServerDescription
    *
-   * @param {string} address The address of the server
-   * @param {any} [ismaster] An optional ismaster response for this server
-   * @param {object} [options] Optional settings
-   * @param {number} [options.roundTripTime] The round trip time to ping this server (in ms)
-   * @param {Error} [options.error] An Error used for better reporting debugging
-   * @param {any} [options.topologyVersion] The topologyVersion
+   * @param address The address of the server
+   * @param ismaster An optional ismaster response for this server
+   * @param options Optioanl settings
    */
-  constructor(address: string, ismaster?: any, options?: any) {
-    options = options || {};
-    ismaster = Object.assign(
-      {
-        minWireVersion: 0,
-        maxWireVersion: 0,
-        hosts: [],
-        passives: [],
-        arbiters: [],
-        tags: []
-      },
-      ismaster
-    );
-
+  constructor(address: string, ismaster?: Document, options?: ServerDescriptionOptions) {
     this.address = address;
-    this.error = options.error;
-    this.roundTripTime = options.roundTripTime || -1;
-    this.lastUpdateTime = now();
-    this.lastWriteDate = ismaster.lastWrite ? ismaster.lastWrite.lastWriteDate : null;
-    this.opTime = ismaster.lastWrite ? ismaster.lastWrite.opTime : null;
     this.type = parseServerType(ismaster);
-    this.topologyVersion = options.topologyVersion || ismaster.topologyVersion;
+    this.hosts = ismaster?.hosts?.map((host: string) => host.toLowerCase()) ?? [];
+    this.passives = ismaster?.passives?.map((host: string) => host.toLowerCase()) ?? [];
+    this.arbiters = ismaster?.arbiters?.map((host: string) => host.toLowerCase()) ?? [];
+    this.tags = ismaster?.tags ?? {};
+    this.minWireVersion = ismaster?.minWireVersion ?? 0;
+    this.maxWireVersion = ismaster?.maxWireVersion ?? 0;
+    this.roundTripTime = options?.roundTripTime ?? -1;
+    this.lastUpdateTime = now();
 
-    // direct mappings
-    ISMASTER_FIELDS.forEach((field: any) => {
-      if (typeof ismaster[field] !== 'undefined') (this as any)[field] = ismaster[field];
-    });
+    if (options?.topologyVersion) {
+      this.topologyVersion = options.topologyVersion;
+    } else if (ismaster?.topologyVersion) {
+      this.topologyVersion = ismaster.topologyVersion;
+    }
 
-    // normalize case for hosts
-    if (this.me) this.me = this.me.toLowerCase();
-    this.hosts = this.hosts.map((host: any) => host.toLowerCase());
-    this.passives = this.passives.map((host: any) => host.toLowerCase());
-    this.arbiters = this.arbiters.map((host: any) => host.toLowerCase());
+    if (options?.error) {
+      this.error = options.error;
+    }
+
+    if (ismaster?.primary) {
+      this.primary = ismaster.primary;
+    }
+
+    if (ismaster?.lastWrite) {
+      this.lastWriteDate = ismaster.lastWrite.lastWriteDate;
+    }
+
+    if (ismaster?.me) {
+      this.me = ismaster.me.toLowerCase();
+    }
+
+    if (ismaster?.setName) {
+      this.setName = ismaster.setName;
+    }
+
+    if (ismaster?.setVersion) {
+      this.setVersion = ismaster.setVersion;
+    }
+
+    if (ismaster?.electionId) {
+      this.electionId = ismaster.electionId;
+    }
+
+    if (ismaster?.logicalSessionTimeoutMinutes) {
+      this.logicalSessionTimeoutMinutes = ismaster.logicalSessionTimeoutMinutes;
+    }
+
+    if (ismaster?.$clusterTime) {
+      this.$clusterTime = ismaster.$clusterTime;
+    }
   }
 
-  get allHosts() {
+  get allHosts(): string[] {
     return this.hosts.concat(this.arbiters).concat(this.passives);
   }
 
   /**
    * @returns {boolean} Is this server available for reads
    */
-  get isReadable() {
+  get isReadable(): boolean {
     return this.type === ServerType.RSSecondary || this.isWritable;
   }
 
   /**
    * @returns {boolean} Is this server data bearing
    */
-  get isDataBearing() {
+  get isDataBearing(): boolean {
     return DATA_BEARING_SERVER_TYPES.has(this.type);
   }
 
   /**
    * @returns {boolean} Is this server available for writes
    */
-  get isWritable() {
+  get isWritable(): boolean {
     return WRITABLE_SERVER_TYPES.has(this.type);
   }
 
@@ -157,19 +176,21 @@ class ServerDescription {
       this.topologyVersion === other.topologyVersion ||
       compareTopologyVersion(this.topologyVersion, other.topologyVersion) === 0;
 
+    const electionIdsEqual: boolean =
+      this.electionId && other.electionId
+        ? other.electionId && this.electionId.equals(other.electionId)
+        : this.electionId === other.electionId;
+
     return (
       other != null &&
       errorStrictEqual(this.error, other.error) &&
       this.type === other.type &&
       this.minWireVersion === other.minWireVersion &&
-      this.me === other.me &&
       arrayStrictEqual(this.hosts, other.hosts) &&
       tagsStrictEqual(this.tags, other.tags) &&
       this.setName === other.setName &&
       this.setVersion === other.setVersion &&
-      (this.electionId
-        ? other.electionId && this.electionId.equals(other.electionId)
-        : this.electionId === other.electionId) &&
+      electionIdsEqual &&
       this.primary === other.primary &&
       this.logicalSessionTimeoutMinutes === other.logicalSessionTimeoutMinutes &&
       topologyVersionsEqual
@@ -177,13 +198,8 @@ class ServerDescription {
   }
 }
 
-/**
- * Parses an `ismaster` message and determines the server type
- *
- * @param {any} ismaster The `ismaster` message to parse
- * @returns {string}
- */
-function parseServerType(ismaster: any): string {
+// Parses an `ismaster` message and determines the server type
+export function parseServerType(ismaster?: Document): ServerType {
   if (!ismaster || !ismaster.ok) {
     return ServerType.Unknown;
   }
@@ -213,14 +229,22 @@ function parseServerType(ismaster: any): string {
   return ServerType.Standalone;
 }
 
+function tagsStrictEqual(tags: TagSet, tags2: TagSet): boolean {
+  const tagsKeys = Object.keys(tags);
+  const tags2Keys = Object.keys(tags2);
+
+  return (
+    tagsKeys.length === tags2Keys.length &&
+    tagsKeys.every((key: string) => tags2[key] === tags[key])
+  );
+}
+
 /**
  * Compares two topology versions.
  *
- * @param {any} lhs
- * @param {any} rhs
  * @returns A negative number if `lhs` is older than `rhs`; positive if `lhs` is newer than `rhs`; 0 if they are equivalent.
  */
-function compareTopologyVersion(lhs: any, rhs: any) {
+export function compareTopologyVersion(lhs?: TopologyVersion, rhs?: TopologyVersion): number {
   if (lhs == null || rhs == null) {
     return -1;
   }
@@ -238,5 +262,3 @@ function compareTopologyVersion(lhs: any, rhs: any) {
 
   return -1;
 }
-
-export { ServerDescription, parseServerType, compareTopologyVersion };

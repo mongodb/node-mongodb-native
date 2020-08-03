@@ -1,7 +1,7 @@
 import Denque = require('denque');
 import { EventEmitter } from 'events';
 import Logger = require('../logger');
-import { Connection, StreamConnectionOptions } from './connection';
+import { Connection, ConnectionOptions } from './connection';
 import { connect } from './connect';
 import { eachAsync, relayEvents, makeCounter } from '../utils';
 import { MongoError } from '../error';
@@ -19,6 +19,7 @@ import {
   ConnectionPoolClearedEvent
 } from './events';
 import type { Callback } from '../types';
+import type { CommandResult } from './commands';
 
 const kLogger = Symbol('logger');
 const kConnections = Symbol('connections');
@@ -92,7 +93,7 @@ function resolveOptions(
   options: ConnectionPoolOptions,
   defaults: Partial<ConnectionPoolOptions>
 ): Readonly<ConnectionPoolOptions> {
-  const newOptions = {} as StreamConnectionOptions;
+  const newOptions = {} as ConnectionOptions;
 
   for (const key of VALID_POOL_OPTIONS) {
     if (key in options) {
@@ -103,7 +104,7 @@ function resolveOptions(
   return Object.freeze(Object.assign({}, defaults, newOptions)) as ConnectionPoolOptions;
 }
 
-export interface ConnectionPoolOptions extends StreamConnectionOptions {
+export interface ConnectionPoolOptions extends ConnectionOptions {
   /** The maximum number of connections that may be associated with a pool at a given time. This includes in use and available connections. */
   maxPoolSize: number;
   /** The minimum number of connections that MUST exist at any moment in a single connection pool. */
@@ -122,6 +123,16 @@ interface WaitQueueMember {
 
 export interface CloseOptions {
   force?: boolean;
+}
+
+// NOTE: to be removed as part of NODE-2745
+export interface ConnectionPool {
+  isConnected(): boolean;
+  write(
+    message: any,
+    commandOptions: any,
+    callback: (err: MongoError, ...args: CommandResult[]) => void
+  ): void;
 }
 
 /**
@@ -297,11 +308,12 @@ export class ConnectionPool extends EventEmitter {
    * @param {boolean} [options.force] Force close connections
    * @param {Function} callback
    */
-  close(callback: Callback): void;
-  close(_options: CloseOptions | Callback, _cb?: Callback): void {
+  close(callback: Callback<void>): void;
+  close(options: CloseOptions, callback: Callback<void>): void;
+  close(_options?: CloseOptions | Callback<void>, _cb?: Callback<void>): void {
     let options = _options as CloseOptions;
-    const callback = (_cb ?? _options) as Callback;
-    if ('function' === typeof options) {
+    const callback = (_cb ?? _options) as Callback<void>;
+    if (typeof options === 'function') {
       options = {};
     }
 
@@ -550,9 +562,9 @@ function processWaitQueue(pool: ConnectionPool) {
  * @param {Function} callback A function to call back after connection management is complete
  */
 type WithConnectionCallback = (
-  error?: MongoError | WaitQueueTimeoutError,
-  connection?: Connection,
-  callback?: Callback<Connection>
+  error: MongoError,
+  connection: Connection | undefined,
+  callback: Callback<Connection>
 ) => void;
 
 /**

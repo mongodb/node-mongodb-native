@@ -20,6 +20,11 @@ export interface CommandOptions extends BSONSerializeOptions {
   session?: ClientSession;
   documentsReturnedIn?: string;
   noResponse?: boolean;
+
+  // NOTE: these are for retryable writes and will be removed soon
+  willRetryWrite?: boolean;
+  retryWrites?: boolean;
+  retrying?: boolean;
 }
 
 function isClientEncryptionEnabled(server: Server) {
@@ -88,6 +93,7 @@ function _command(
   if (hasSessionSupport(server) && session) {
     if (
       session.clusterTime &&
+      clusterTime &&
       session.clusterTime.clusterTime.greaterThan(clusterTime.clusterTime)
     ) {
       clusterTime = session.clusterTime;
@@ -131,7 +137,7 @@ function _command(
 
   const inTransaction = session && (session.inTransaction() || isTransactionCommand(finalCmd));
   const commandResponseHandler = inTransaction
-    ? function (err: MongoError, ...args: CommandResult[]) {
+    ? (err: MongoError, ...args: CommandResult[]) => {
         // We need to add a TransientTransactionError errorLabel, as stated in the transaction spec.
         if (
           err &&
@@ -162,9 +168,9 @@ function _command(
   }
 }
 
-function hasSessionSupport(topology: Topology | Server) {
+function hasSessionSupport(topology: Server) {
   if (topology == null) return false;
-  if (topology.description) {
+  if (topology.description && topology.description) {
     return topology.description.maxWireVersion >= 6;
   }
 
@@ -191,13 +197,17 @@ function _cryptCommand(
   callback: Callback
 ) {
   const autoEncrypter = server.autoEncrypter;
+  if (!autoEncrypter) {
+    return callback(new MongoError('no AutoEncrypter available for encryption'));
+  }
+
   const commandResponseHandler: Callback<Document> = function (err, response) {
     if (err || response == null) {
       callback(err, response);
       return;
     }
 
-    autoEncrypter.decrypt(response.result, options, (err: Error, decrypted: Document) => {
+    autoEncrypter.decrypt(response.result, options, (err, decrypted) => {
       if (err) {
         callback(err, null);
         return;
@@ -209,8 +219,8 @@ function _cryptCommand(
     });
   };
 
-  autoEncrypter.encrypt(ns, cmd, options, (err: Error, encrypted: Document) => {
-    if (err) {
+  autoEncrypter.encrypt(ns, cmd, options, (err, encrypted) => {
+    if (err || encrypted == null) {
       callback(err, null);
       return;
     }

@@ -1,6 +1,6 @@
 import * as net from 'net';
 import * as tls from 'tls';
-import { Connection, StreamConnectionOptions } from './connection';
+import { Connection, ConnectionOptions } from './connection';
 import { MongoError, MongoNetworkError, MongoNetworkTimeoutError } from '../error';
 import { defaultAuthProviders, AuthMechanism } from './auth/defaultAuthProviders';
 import { AuthContext } from './auth/auth_provider';
@@ -21,14 +21,14 @@ export type Stream = Socket | TLSSocket;
 
 const AUTH_PROVIDERS = defaultAuthProviders();
 
-export function connect(options: StreamConnectionOptions, callback: Callback<Connection>): void;
+export function connect(options: ConnectionOptions, callback: Callback<Connection>): void;
 export function connect(
-  options: StreamConnectionOptions,
+  options: ConnectionOptions,
   cancellationToken: EventEmitter,
   callback: Callback<Connection>
 ): void;
 export function connect(
-  options: StreamConnectionOptions,
+  options: ConnectionOptions,
   _cancellationToken: EventEmitter | Callback<Connection>,
   _callback?: Callback<Connection>
 ): void {
@@ -52,7 +52,7 @@ export function connect(
   });
 }
 
-function checkSupportedServer(ismaster: Document, options: StreamConnectionOptions) {
+function checkSupportedServer(ismaster: Document, options: ConnectionOptions) {
   const serverVersionHighEnough =
     ismaster &&
     typeof ismaster.maxWireVersion === 'number' &&
@@ -79,7 +79,7 @@ function checkSupportedServer(ismaster: Document, options: StreamConnectionOptio
 
 function performInitialHandshake(
   conn: Connection,
-  options: StreamConnectionOptions,
+  options: ConnectionOptions,
   _callback: Callback
 ) {
   const callback: Callback<Document> = function (err, ret) {
@@ -212,7 +212,7 @@ const LEGAL_SSL_SOCKET_OPTIONS = [
   'rejectUnauthorized'
 ] as const;
 
-function parseConnectOptions(family: number, options: StreamConnectionOptions): SocketConnectOpts {
+function parseConnectOptions(family: number, options: ConnectionOptions): SocketConnectOpts {
   const host = typeof options.host === 'string' ? options.host : 'localhost';
 
   if (host.indexOf('/') !== -1) {
@@ -230,7 +230,7 @@ function parseConnectOptions(family: number, options: StreamConnectionOptions): 
   return result;
 }
 
-function parseSslOptions(family: number, options: StreamConnectionOptions): TLSConnectionOpts {
+function parseSslOptions(family: number, options: ConnectionOptions): TLSConnectionOpts {
   const result: TLSConnectionOpts = parseConnectOptions(family, options);
   // Merge in valid SSL options
   for (const name of LEGAL_SSL_SOCKET_OPTIONS) {
@@ -262,7 +262,7 @@ const SOCKET_ERROR_EVENTS = new Set(SOCKET_ERROR_EVENT_LIST);
 
 function makeConnection(
   family: number,
-  options: StreamConnectionOptions,
+  options: ConnectionOptions,
   cancellationToken: EventEmitter | undefined,
   _callback: CallbackWithType<AnyError, Stream>
 ) {

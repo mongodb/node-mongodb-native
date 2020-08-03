@@ -1,10 +1,10 @@
 import type { Callback, Document } from '../../types';
-import type { Connection, StreamConnectionOptions } from '../connection';
+import type { Connection, ConnectionOptions } from '../connection';
 import type { MongoCredentials } from './mongo_credentials';
 import type { HandshakeDocument } from '../connect';
 import type { ClientMetadataOptions } from '../../utils';
 
-export type AuthContextOptions = StreamConnectionOptions & ClientMetadataOptions;
+export type AuthContextOptions = ConnectionOptions & ClientMetadataOptions;
 
 /** Context used during authentication */
 export class AuthContext {

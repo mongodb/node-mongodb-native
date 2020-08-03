@@ -1,3 +1,5 @@
+import type { Timestamp } from '../bson';
+
 // shared state names
 const STATE_CLOSING = 'closing';
 const STATE_CLOSED = 'closed';
@@ -5,26 +7,26 @@ const STATE_CONNECTING = 'connecting';
 const STATE_CONNECTED = 'connected';
 
 // An enumeration of topology types we know about
-const TopologyType = {
-  Single: 'Single',
-  ReplicaSetNoPrimary: 'ReplicaSetNoPrimary',
-  ReplicaSetWithPrimary: 'ReplicaSetWithPrimary',
-  Sharded: 'Sharded',
-  Unknown: 'Unknown'
-};
+enum TopologyType {
+  Single = 'Single',
+  ReplicaSetNoPrimary = 'ReplicaSetNoPrimary',
+  ReplicaSetWithPrimary = 'ReplicaSetWithPrimary',
+  Sharded = 'Sharded',
+  Unknown = 'Unknown'
+}
 
 // An enumeration of server types we know about
-const ServerType = {
-  Standalone: 'Standalone',
-  Mongos: 'Mongos',
-  PossiblePrimary: 'PossiblePrimary',
-  RSPrimary: 'RSPrimary',
-  RSSecondary: 'RSSecondary',
-  RSArbiter: 'RSArbiter',
-  RSOther: 'RSOther',
-  RSGhost: 'RSGhost',
-  Unknown: 'Unknown'
-};
+enum ServerType {
+  Standalone = 'Standalone',
+  Mongos = 'Mongos',
+  PossiblePrimary = 'PossiblePrimary',
+  RSPrimary = 'RSPrimary',
+  RSSecondary = 'RSSecondary',
+  RSArbiter = 'RSArbiter',
+  RSOther = 'RSOther',
+  RSGhost = 'RSGhost',
+  Unknown = 'Unknown'
+}
 
 const TOPOLOGY_DEFAULTS = {
   localThresholdMS: 15,
@@ -33,14 +35,20 @@ const TOPOLOGY_DEFAULTS = {
   minHeartbeatFrequencyMS: 500
 };
 
-function drainTimerQueue(queue: any) {
+export type TimerQueue = Set<NodeJS.Timeout>;
+function drainTimerQueue(queue: TimerQueue) {
   queue.forEach(clearTimeout);
   queue.clear();
 }
 
-function clearAndRemoveTimerFrom(timer: any, timers: any) {
+function clearAndRemoveTimerFrom(timer: NodeJS.Timeout, timers: TimerQueue) {
   clearTimeout(timer);
   return timers.delete(timer);
+}
+
+export interface ClusterTime {
+  clusterTime: Timestamp;
+  signature: any;
 }
 
 /**
@@ -49,7 +57,7 @@ function clearAndRemoveTimerFrom(timer: any, timers: any) {
  * @param {any} topology
  * @param {any} $clusterTime
  */
-function resolveClusterTime(topology: any, $clusterTime: any) {
+function resolveClusterTime(topology: any, $clusterTime: ClusterTime) {
   if (topology.clusterTime == null) {
     topology.clusterTime = $clusterTime;
   } else {

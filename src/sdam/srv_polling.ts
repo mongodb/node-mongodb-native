@@ -23,7 +23,7 @@ class SrvPollingEvent {
     this.srvRecords = srvRecords;
   }
 
-  addresses() {
+  addresses(): Set<string> {
     return new Set(this.srvRecords.map((record: any) => `${record.name}:${record.port}`));
   }
 }
