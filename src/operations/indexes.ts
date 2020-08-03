@@ -2,12 +2,10 @@ import { indexInformation } from './common_functions';
 import { OperationBase, Aspect, defineAspects } from './operation';
 import { MongoError } from '../error';
 import { maxWireVersion, parseIndexOptions, handleCallback } from '../utils';
-import CommandOperation = require('./command');
+import { CommandOperation } from './command';
 import { ReadPreference } from '../read_preference';
 
-/* eslint-disable */
 import type { Server } from '../sdam/server';
-/* eslint-enable */
 
 const LIST_INDEXES_WIRE_VERSION = 3;
 const VALID_INDEX_OPTIONS = new Set([

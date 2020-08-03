@@ -1,9 +1,9 @@
-import { Aspect, defineAspects } from './operation';
-import CommandOperation = require('./command');
 import crypto = require('crypto');
+import { Aspect, defineAspects } from './operation';
+import { CommandOperation } from './command';
 import { handleCallback, toError } from '../utils';
 
-class AddUserOperation extends CommandOperation {
+export class AddUserOperation extends CommandOperation {
   db: any;
   username: any;
   password: any;
@@ -86,4 +86,3 @@ class AddUserOperation extends CommandOperation {
 }
 
 defineAspects(AddUserOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
-export = AddUserOperation;

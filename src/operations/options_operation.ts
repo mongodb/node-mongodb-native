@@ -2,7 +2,7 @@ import { OperationBase } from './operation';
 import { handleCallback } from '../utils';
 import { MongoError } from '../error';
 
-class OptionsOperation extends OperationBase {
+export class OptionsOperation extends OperationBase {
   collection: any;
 
   constructor(collection: any, options: any) {
@@ -30,5 +30,3 @@ class OptionsOperation extends OperationBase {
       });
   }
 }
-
-export = OptionsOperation;

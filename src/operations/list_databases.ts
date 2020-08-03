@@ -1,8 +1,8 @@
-import CommandOperation = require('./command');
+import { CommandOperation } from './command';
 import { Aspect, defineAspects } from './operation';
 import { MongoDBNamespace } from '../utils';
 
-class ListDatabasesOperation extends CommandOperation {
+export class ListDatabasesOperation extends CommandOperation {
   constructor(db: any, options: any) {
     super(db, options);
     this.ns = new MongoDBNamespace('admin', '$cmd');
@@ -31,5 +31,3 @@ defineAspects(ListDatabasesOperation, [
   Aspect.RETRYABLE,
   Aspect.EXECUTE_WITH_SELECTION
 ]);
-
-export = ListDatabasesOperation;

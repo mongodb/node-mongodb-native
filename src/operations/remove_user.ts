@@ -1,7 +1,7 @@
 import { Aspect, defineAspects } from './operation';
-import CommandOperation = require('./command');
+import { CommandOperation } from './command';
 
-class RemoveUserOperation extends CommandOperation {
+export class RemoveUserOperation extends CommandOperation {
   username: any;
 
   constructor(db: any, username: any, options: any) {
@@ -17,4 +17,3 @@ class RemoveUserOperation extends CommandOperation {
 }
 
 defineAspects(RemoveUserOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
-export = RemoveUserOperation;

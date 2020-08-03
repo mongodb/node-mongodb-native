@@ -1,7 +1,7 @@
 import { defineAspects, Aspect } from './operation';
-import CommandOperation = require('./command');
+import { CommandOperation } from './command';
 
-class ProfilingLevelOperation extends CommandOperation {
+export class ProfilingLevelOperation extends CommandOperation {
   constructor(db: any, options: any) {
     super(db, options);
   }
@@ -22,4 +22,3 @@ class ProfilingLevelOperation extends CommandOperation {
 }
 
 defineAspects(ProfilingLevelOperation, [Aspect.EXECUTE_WITH_SELECTION]);
-export = ProfilingLevelOperation;

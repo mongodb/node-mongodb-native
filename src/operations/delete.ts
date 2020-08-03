@@ -1,6 +1,6 @@
 import { defineAspects, Aspect, OperationBase } from './operation';
 import { deleteCallback, removeDocuments } from './common_functions';
-import CommandOperation = require('./command');
+import { CommandOperation } from './command';
 import { isObject } from 'util';
 
 class DeleteOperation extends OperationBase {

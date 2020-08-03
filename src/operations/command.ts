@@ -17,7 +17,7 @@ interface CommandOperationOptions {
   fullResponse?: boolean;
 }
 
-class CommandOperation extends OperationBase {
+export class CommandOperation extends OperationBase {
   ns: MongoDBNamespace;
   readPreference: ReadPreference;
   readConcern?: ReadConcern;
@@ -133,5 +133,3 @@ function resolveWriteConcern(parent: any, options: any) {
 function resolveReadConcern(parent: any, options: any) {
   return ReadConcern.fromOptions(options) || (parent && parent.readConcern);
 }
-
-export = CommandOperation;

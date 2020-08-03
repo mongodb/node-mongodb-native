@@ -1,5 +1,5 @@
-import CommandOperation = require('./command');
-import EvalOperation = require('./eval');
+import { CommandOperation } from './command';
+import { EvalOperation } from './eval';
 import { Code } from '../bson';
 import { handleCallback } from '../utils';
 import { defineAspects, Aspect } from './operation';

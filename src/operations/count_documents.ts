@@ -1,6 +1,6 @@
-import AggregateOperation = require('./aggregate');
+import { AggregateOperation } from './aggregate';
 
-class CountDocumentsOperation extends AggregateOperation {
+export class CountDocumentsOperation extends AggregateOperation {
   constructor(collection: any, query: any, options: any) {
     const pipeline = [];
     pipeline.push({ $match: query });
@@ -37,5 +37,3 @@ class CountDocumentsOperation extends AggregateOperation {
     });
   }
 }
-
-export = CountDocumentsOperation;

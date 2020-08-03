@@ -1,7 +1,7 @@
 import { Aspect, defineAspects } from './operation';
-import CommandOperation = require('./command');
+import { CommandOperation } from './command';
 
-class EstimatedDocumentCountOperation extends CommandOperation {
+export class EstimatedDocumentCountOperation extends CommandOperation {
   collectionName: string;
   query?: any;
 
@@ -59,5 +59,3 @@ defineAspects(EstimatedDocumentCountOperation, [
   Aspect.RETRYABLE,
   Aspect.EXECUTE_WITH_SELECTION
 ]);
-
-export = EstimatedDocumentCountOperation;

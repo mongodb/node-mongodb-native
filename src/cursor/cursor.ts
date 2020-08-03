@@ -6,9 +6,9 @@ import { deprecate } from 'util';
 import { MongoError } from '../error';
 import { CoreCursor, CursorState } from './core_cursor';
 import { handleCallback, maybePromise, formattedOrderClause } from '../utils';
-import executeOperation = require('../operations/execute_operation');
+import { executeOperation } from '../operations/execute_operation';
 import { each } from '../operations/cursor_ops';
-import CountOperation = require('../operations/count');
+import { CountOperation } from '../operations/count';
 
 /**
  * @file The **Cursor** class is an internal class that embodies a cursor on MongoDB

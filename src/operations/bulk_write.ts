@@ -1,7 +1,8 @@
 import { applyRetryableWrites, applyWriteConcern } from '../utils';
 import { MongoError } from '../error';
 import { OperationBase } from './operation';
-class BulkWriteOperation extends OperationBase {
+
+export class BulkWriteOperation extends OperationBase {
   collection: any;
   operations: any;
 
@@ -99,5 +100,3 @@ class BulkWriteOperation extends OperationBase {
     });
   }
 }
-
-export = BulkWriteOperation;

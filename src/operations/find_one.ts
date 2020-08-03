@@ -1,7 +1,7 @@
 import { handleCallback, toError } from '../utils';
 import { OperationBase } from './operation';
 
-class FindOneOperation extends OperationBase {
+export class FindOneOperation extends OperationBase {
   collection: any;
   query: any;
 
@@ -30,5 +30,3 @@ class FindOneOperation extends OperationBase {
     }
   }
 }
-
-export = FindOneOperation;

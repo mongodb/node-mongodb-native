@@ -1,7 +1,7 @@
 import { defineAspects, Aspect, OperationBase } from './operation';
 import { updateDocuments, updateCallback } from './common_functions';
 import { hasAtomicOperators } from '../utils';
-import CommandOperation = require('./command');
+import { CommandOperation } from './command';
 
 class UpdateOperation extends OperationBase {
   namespace: any;

@@ -1,8 +1,8 @@
 import { Aspect, defineAspects } from './operation';
-import CommandOperation = require('./command');
+import { CommandOperation } from './command';
 import { decorateWithCollation, decorateWithReadConcern } from '../utils';
 
-class CountOperation extends CommandOperation {
+export class CountOperation extends CommandOperation {
   cursor: any;
   applySkipLimit: any;
 
@@ -103,5 +103,3 @@ defineAspects(CountOperation, [
   Aspect.RETRYABLE,
   Aspect.EXECUTE_WITH_SELECTION
 ]);
-
-export = CountOperation;

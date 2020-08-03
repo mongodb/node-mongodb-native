@@ -9,7 +9,7 @@ import {
   hasAtomicOperators
 } from '../utils';
 import { MongoError } from '../error';
-import CommandOperation = require('./command');
+import { CommandOperation } from './command';
 import { defineAspects, Aspect } from './operation';
 
 class FindAndModifyOperation extends CommandOperation {

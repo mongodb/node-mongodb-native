@@ -3,7 +3,7 @@ import { loadCollection } from '../dynamic_loaders';
 import { RunAdminCommandOperation } from './run_command';
 import { defineAspects, Aspect } from './operation';
 
-class RenameOperation extends RunAdminCommandOperation {
+export class RenameOperation extends RunAdminCommandOperation {
   collection: any;
   newName: any;
 
@@ -51,4 +51,3 @@ class RenameOperation extends RunAdminCommandOperation {
 }
 
 defineAspects(RenameOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
-export = RenameOperation;

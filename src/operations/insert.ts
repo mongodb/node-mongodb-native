@@ -1,6 +1,6 @@
 import { MongoError } from '../error';
 import { defineAspects, Aspect, OperationBase } from './operation';
-import CommandOperation = require('./command');
+import { CommandOperation } from './command';
 import { applyRetryableWrites, applyWriteConcern, handleCallback, toError } from '../utils';
 import { prepareDocs } from './common_functions';
 

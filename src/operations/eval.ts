@@ -1,10 +1,10 @@
-import CommandOperation = require('./command');
+import { CommandOperation } from './command';
 import { Code } from '../bson';
 import { ReadPreference } from '../read_preference';
 import { handleCallback } from '../utils';
 import { MongoError } from '../error';
 
-class EvalOperation extends CommandOperation {
+export class EvalOperation extends CommandOperation {
   code: any;
   parameters: any;
 
@@ -56,5 +56,3 @@ class EvalOperation extends CommandOperation {
     });
   }
 }
-
-export = EvalOperation;

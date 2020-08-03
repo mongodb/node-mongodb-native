@@ -1,8 +1,8 @@
 import { defineAspects, Aspect } from './operation';
-import CommandOperation = require('./command');
+import { CommandOperation } from './command';
 const levelValues = new Set(['off', 'slow_only', 'all']);
 
-class SetProfilingLevelOperation extends CommandOperation {
+export class SetProfilingLevelOperation extends CommandOperation {
   level: any;
   profile: any;
 
@@ -38,4 +38,3 @@ class SetProfilingLevelOperation extends CommandOperation {
 }
 
 defineAspects(SetProfilingLevelOperation, [Aspect.EXECUTE_WITH_SELECTION]);
-export = SetProfilingLevelOperation;

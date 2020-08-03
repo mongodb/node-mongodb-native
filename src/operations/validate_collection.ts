@@ -1,7 +1,7 @@
 import { defineAspects, Aspect } from './operation';
-import CommandOperation = require('./command');
+import { CommandOperation } from './command';
 
-class ValidateCollectionOperation extends CommandOperation {
+export class ValidateCollectionOperation extends CommandOperation {
   collectionName: string;
   command: any;
 
@@ -40,4 +40,3 @@ class ValidateCollectionOperation extends CommandOperation {
 }
 
 defineAspects(ValidateCollectionOperation, [Aspect.EXECUTE_WITH_SELECTION]);
-export = ValidateCollectionOperation;

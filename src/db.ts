@@ -20,25 +20,25 @@ import {
   deprecateOptions,
   MongoDBNamespace
 } from './utils';
-import AggregateOperation = require('./operations/aggregate');
-import AddUserOperation = require('./operations/add_user');
-import CollectionsOperation = require('./operations/collections');
+import { AggregateOperation } from './operations/aggregate';
+import { AddUserOperation } from './operations/add_user';
+import { CollectionsOperation } from './operations/collections';
 import { DbStatsOperation } from './operations/stats';
 import { RunCommandOperation, RunAdminCommandOperation } from './operations/run_command';
-import CreateCollectionOperation = require('./operations/create_collection');
+import { CreateCollectionOperation } from './operations/create_collection';
 import {
   CreateIndexOperation,
   EnsureIndexOperation,
   IndexInformationOperation
 } from './operations/indexes';
 import { DropCollectionOperation, DropDatabaseOperation } from './operations/drop';
-import ListCollectionsOperation = require('./operations/list_collections');
-import ProfilingLevelOperation = require('./operations/profiling_level');
-import RemoveUserOperation = require('./operations/remove_user');
-import RenameOperation = require('./operations/rename');
-import SetProfilingLevelOperation = require('./operations/set_profiling_level');
-import executeOperation = require('./operations/execute_operation');
-import EvalOperation = require('./operations/eval');
+import { ListCollectionsOperation } from './operations/list_collections';
+import { ProfilingLevelOperation } from './operations/profiling_level';
+import { RemoveUserOperation } from './operations/remove_user';
+import { RenameOperation } from './operations/rename';
+import { SetProfilingLevelOperation } from './operations/set_profiling_level';
+import { executeOperation } from './operations/execute_operation';
+import { EvalOperation } from './operations/eval';
 
 // Allowed parameters
 const legalOptionNames = [
