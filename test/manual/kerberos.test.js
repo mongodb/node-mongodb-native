@@ -1,8 +1,8 @@
 'use strict';
 
-var format = require('util').format;
-var test = require('./shared').assert;
-var setupDatabase = require('./shared').setupDatabase;
+const format = require('util').format;
+const test = require('../functional/shared').assert;
+const { MongoClient } = require('../../src');
 
 // You need to set up the kinit tab first
 // https://wiki.mongodb.com/pages/viewpage.action?title=Testing+Kerberos&spaceKey=DH
@@ -10,27 +10,15 @@ var setupDatabase = require('./shared').setupDatabase;
 // password: (not shown)
 
 describe('Kerberos', function () {
-  before(function () {
-    return setupDatabase(this.configuration);
-  });
+  if (process.env.MONGODB_URL == null) {
+    console.log('skipping Kerberos tests, MONGODB_URL environment variable is not defined');
 
+    return;
+  }
   it('Should Correctly Authenticate using kerberos with MongoClient', {
-    metadata: { requires: { topology: 'kerberos', os: '!win32' } },
-
+    metadata: { requires: { os: '!win32' } },
     test: function (done) {
-      var configuration = this.configuration;
-
-      // KDC Server
-      var server = 'ldaptest.10gen.cc';
-      var principal = 'drivers@LDAPTEST.10GEN.CC';
-      var urlEncodedPrincipal = encodeURIComponent(principal);
-      const url = format(
-        'mongodb://%s@%s/kerberos?authMechanism=GSSAPI&gssapiServiceName=mongodb&maxPoolSize=1',
-        urlEncodedPrincipal,
-        server
-      );
-
-      const client = configuration.newClient(url);
+      const client = new MongoClient(process.env.MONGODB_URL);
       client.connect(function (err, client) {
         test.equal(null, err);
         var db = client.db('kerberos');
@@ -47,8 +35,8 @@ describe('Kerberos', function () {
     }
   });
 
-  it('Validate that SERVICE_REALM and CANONICALIZE_HOST_NAME is passed in', {
-    metadata: { requires: { topology: 'kerberos', os: '!win32' } },
+  it.skip('Validate that SERVICE_REALM and CANONICALIZE_HOST_NAME is passed in', {
+    metadata: { requires: { os: '!win32' } },
 
     test: function (done) {
       var configuration = this.configuration;
@@ -80,10 +68,10 @@ describe('Kerberos', function () {
     }
   });
 
-  it(
+  it.skip(
     'Should Correctly Authenticate using kerberos with MongoClient and authentication properties',
     {
-      metadata: { requires: { topology: 'kerberos', os: '!win32' } },
+      metadata: { requires: { os: '!win32' } },
 
       test: function (done) {
         var configuration = this.configuration;
@@ -116,8 +104,8 @@ describe('Kerberos', function () {
     }
   );
 
-  it('Should Correctly Authenticate using kerberos with MongoClient and then reconnect', {
-    metadata: { requires: { topology: 'kerberos', os: '!win32' } },
+  it.skip('Should Correctly Authenticate using kerberos with MongoClient and then reconnect', {
+    metadata: { requires: { os: '!win32' } },
 
     test: function (done) {
       var configuration = this.configuration;
@@ -175,8 +163,8 @@ describe('Kerberos', function () {
     }
   });
 
-  it('Should Correctly Authenticate authenticate method manually', {
-    metadata: { requires: { topology: 'kerberos', os: '!win32' } },
+  it.skip('Should Correctly Authenticate authenticate method manually', {
+    metadata: { requires: { os: '!win32' } },
 
     test: function (done) {
       var configuration = this.configuration;
@@ -210,22 +198,15 @@ describe('Kerberos', function () {
   });
 
   it('Should Fail to Authenticate due to illegal service name', {
-    metadata: { requires: { topology: 'kerberos', os: '!win32' } },
+    metadata: { requires: { os: '!win32' } },
 
     test: function (done) {
-      var configuration = this.configuration;
-
-      // KDC Server
-      var server = 'ldaptest.10gen.cc';
-      var principal = 'drivers@LDAPTEST.10GEN.CC';
-      var urlEncodedPrincipal = encodeURIComponent(principal);
       const url = format(
-        'mongodb://%s@%s/test?authMechanism=GSSAPI&gssapiServiceName=mongodb2&maxPoolSize=1',
-        urlEncodedPrincipal,
-        server
+        '%s/test?authMechanism=GSSAPI&gssapiServiceName=mongodb2&maxPoolSize=1',
+        process.env.MONGODB_URL
       );
 
-      const client = configuration.newClient(url);
+      const client = new MongoClient(url);
       client.connect(function (err) {
         test.ok(err != null);
         done();
@@ -234,7 +215,7 @@ describe('Kerberos', function () {
   });
 
   it('Should Correctly Authenticate on Win32 using kerberos with MongoClient', {
-    metadata: { requires: { topology: 'kerberos', os: 'win32' } },
+    metadata: { requires: { os: 'win32' } },
 
     test: function (done) {
       var configuration = this.configuration;
@@ -271,7 +252,7 @@ describe('Kerberos', function () {
   });
 
   it('Should Correctly Authenticate using kerberos on Win32 with MongoClient and then reconnect', {
-    metadata: { requires: { topology: 'kerberos', os: 'win32' } },
+    metadata: { requires: { os: 'win32' } },
 
     test: function (done) {
       var configuration = this.configuration;
@@ -333,7 +314,7 @@ describe('Kerberos', function () {
   });
 
   it('Should Correctly Authenticate on Win32 authenticate method manually', {
-    metadata: { requires: { topology: 'kerberos', os: 'win32' } },
+    metadata: { requires: { os: 'win32' } },
 
     test: function (done) {
       var configuration = this.configuration;
@@ -369,7 +350,7 @@ describe('Kerberos', function () {
   });
 
   it('Should Fail to Authenticate due to illegal service name on win32', {
-    metadata: { requires: { topology: 'kerberos', os: 'win32' } },
+    metadata: { requires: { os: 'win32' } },
 
     test: function (done) {
       var configuration = this.configuration;

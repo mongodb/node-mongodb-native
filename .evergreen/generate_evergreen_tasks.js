@@ -102,6 +102,14 @@ Array.prototype.push.apply(TASKS, [
     ]
   },
   {
+    name: 'test-kerberos-auth',
+    tags: ['kerberos-auth'],
+    commands: [
+      { func: 'install dependencies' },
+      { func: 'run kerberos tests' }
+    ]
+  },
+  {
     name: 'test-ocsp-valid-cert-server-staples',
     tags: ['ocsp'],
     commands: [
