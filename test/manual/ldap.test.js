@@ -7,8 +7,6 @@ describe('LDAP', function () {
     throw new Error(`skipping SSL tests, MONGODB_URI environment variable is not defined`);
   }
 
-  console.log({ MONGODB_URI: process.env.MONGODB_URI });
-
   it('Should correctly authenticate against ldap', function (done) {
     const client = new MongoClient(process.env.MONGODB_URI);
     client.connect(function (err, client) {
@@ -26,7 +24,7 @@ describe('LDAP', function () {
     });
   });
 
-  it('Should correctly reauthenticate against ldap', function (done) {
+  it.skip('Should correctly reauthenticate against ldap', function (done) {
     const client = new MongoClient(process.env.MONGODB_URI);
     client.connect(function (err, client) {
       test.equal(null, err);
