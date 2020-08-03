@@ -60,8 +60,8 @@ before(function (_done) {
   //     usingUnifiedTopology ? 'unified' : 'legacy'
   //   )} topology`
   // );
-  const client = new MongoClient(MONGODB_URI);
 
+  const client = new MongoClient(MONGODB_URI);
   const done = err => client.close(err2 => _done(err || err2));
 
   client.connect(err => {
