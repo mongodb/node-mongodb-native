@@ -7,7 +7,6 @@ NODE_ARTIFACTS_PATH="${PROJECT_DIRECTORY}/node-artifacts"
 export NVM_DIR="${NODE_ARTIFACTS_PATH}/nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-
 # set up keytab
 mkdir -p "$(pwd)/.evergreen"
 touch "$(pwd)/.evergreen/krb5.conf.empty"
@@ -22,7 +21,6 @@ if [[ $OS == "Darwin" ]]; then
   DECODE='-D'
 fi
 echo $KEYTAB | base64 $DECODE > "$(pwd)/.evergreen/drivers.keytab"
-ls -la "$(pwd)/.evergreen/drivers.keytab"
 echo "Running kinit"
 kinit -k -t "$(pwd)/.evergreen/drivers.keytab" -p drivers@LDAPTEST.10GEN.CC
 

@@ -12,9 +12,13 @@ const { MongoClient } = require('../../src');
 describe('Kerberos', function () {
   if (process.env.MONGODB_URI == null) {
     console.log('skipping Kerberos tests, MONGODB_URI environment variable is not defined');
-
     return;
   }
+  if (process.platform === 'win32') {
+    console.log('Only running Win32 tests');
+    return;
+  }
+
   it.only('Should Correctly Authenticate using kerberos with MongoClient', function (done) {
     const client = new MongoClient(process.env.MONGODB_URI);
     client.connect(function (err, client) {
@@ -187,6 +191,17 @@ describe('Kerberos', function () {
       done();
     });
   });
+});
+
+describe('Kerberos - Win32', function () {
+  if (process.env.MONGODB_URI == null) {
+    console.log('skipping Kerberos tests, MONGODB_URI environment variable is not defined');
+    return;
+  }
+  if (process.platform !== 'win32') {
+    console.log(`Platform is ${process.platform}, skipping Win32 tests`);
+    return;
+  }
 
   it('Should Correctly Authenticate on Win32 using kerberos with MongoClient', function (done) {
     var configuration = this.configuration;
