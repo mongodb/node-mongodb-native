@@ -64,9 +64,9 @@ const OPERATING_SYSTEMS = [
 const TASKS = [];
 const SINGLETON_TASKS = [];
 
-function makeTask({ mongoVersion, topology, ssl, auth }) {
+function makeTask({ mongoVersion, topology }) {
   return {
-    name: `test-${mongoVersion}-${topology}-${ssl}-${auth}`,
+    name: `test-${mongoVersion}-${topology}`,
     tags: [mongoVersion, topology],
     commands: [
       { func: 'install dependencies' },
@@ -75,8 +75,7 @@ function makeTask({ mongoVersion, topology, ssl, auth }) {
         vars: {
           VERSION: mongoVersion,
           TOPOLOGY: topology,
-          SSL: ssl,
-          AUTH: auth
+          SSL: 'nossl'
         }
       },
       { func: 'run tests' }
@@ -85,10 +84,9 @@ function makeTask({ mongoVersion, topology, ssl, auth }) {
 }
 
 MONGODB_VERSIONS.forEach(mongoVersion => {
-  TOPOLOGIES.forEach(topology => {
-    TASKS.push(makeTask({ mongoVersion, topology, ssl: 'ssl', auth: 'noauth' }));
-    TASKS.push(makeTask({ mongoVersion, topology, ssl: 'nossl', auth: 'noauth' }));
-  });
+  TOPOLOGIES.forEach(topology =>
+    TASKS.push(makeTask({ mongoVersion, topology }))
+  );
 });
 
 // manually added tasks
@@ -99,6 +97,22 @@ Array.prototype.push.apply(TASKS, [
     commands: [
       { func: 'install dependencies' },
       { func: 'run atlas tests' }
+    ]
+  },
+  {
+    name: 'test-ssl-support',
+    tags: ['ssl-support'],
+    commands: [
+      { func: 'install dependencies' },
+      {
+        func: 'bootstrap mongo-orchestration',
+        vars: {
+          SSL: 'ssl',
+          VERSION: 'latest',
+          TOPOLOGY: 'server'
+        }
+      },
+      { func: 'run ssl tests' }
     ]
   },
   {

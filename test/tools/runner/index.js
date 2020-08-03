@@ -60,15 +60,7 @@ before(function (_done) {
   //     usingUnifiedTopology ? 'unified' : 'legacy'
   //   )} topology`
   // );
-
-  const options = {};
-  if (process.env.SSL && process.env.SSL === 'ssl') {
-    console.log('Detected ssl/tls test run');
-    options.tls = true;
-    options.tlsCertificateKeyFile = process.env.SSL_KEY_FILE;
-    options.tlsCAFile = process.env.SSL_CA_FILE;
-  }
-  const client = new MongoClient(MONGODB_URI, options);
+  const client = new MongoClient(MONGODB_URI);
 
   const done = err => client.close(err2 => _done(err || err2));
 
@@ -93,7 +85,7 @@ before(function (_done) {
           return;
         }
 
-        this.configuration = new TestConfiguration(parsedURI, context, options);
+        this.configuration = new TestConfiguration(parsedURI, context);
         done();
       });
     });

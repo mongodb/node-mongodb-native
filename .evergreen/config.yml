@@ -77,7 +77,7 @@ functions:
         script: |
           ${PREPARE_SHELL}
           MONGODB_VERSION=${VERSION} TOPOLOGY=${TOPOLOGY} \
-          SSL=${SSL} AUTH=${AUTH} \
+          SSL=${SSL} \
           ORCHESTRATION_FILE=${ORCHESTRATION_FILE} \
           bash ${DRIVERS_TOOLS}/.evergreen/run-orchestration.sh
     - command: expansions.update
@@ -101,9 +101,8 @@ functions:
       type: test
       params:
         working_dir: src
-        script: >
+        script: |
           ${PREPARE_SHELL}
-
 
           if [ -n "${CLIENT_ENCRYPTION}" ]; then
             # Disable xtrace (just in case it was accidentally set).
@@ -112,9 +111,7 @@ functions:
             rm -f ./prepare_client_encryption.sh
           fi
 
-
-          AUTH=${AUTH} SSL=${SSL} UNIFIED=${UNIFIED} MONGODB_URI="${MONGODB_URI}" bash
-          ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
+          UNIFIED=${UNIFIED} MONGODB_URI="${MONGODB_URI}" bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
   run checks:
     - command: shell.exec
       type: test
@@ -174,6 +171,15 @@ functions:
           rm -f ./prepare_atlas_connectivity.sh
 
           NODE_LTS_NAME='${NODE_LTS_NAME}' bash ${PROJECT_DIRECTORY}/.evergreen/run-atlas-tests.sh
+  run ssl tests:
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: src
+        script: |
+          DRIVERS_TOOLS="${DRIVERS_TOOLS}" \
+          SSL_CA_FILE="${SSL_CA_FILE}" SSL_KEY_FILE="${SSL_KEY_FILE}" \
+          MONGODB_URI="${MONGODB_URI}" bash ${PROJECT_DIRECTORY}/.evergreen/run-ssl-tests.sh
   add aws auth variables to file:
     - command: shell.exec
       type: test
@@ -396,20 +402,7 @@ pre:
 post:
   - func: cleanup
 tasks:
-  - name: test-latest-server-ssl-noauth
-    tags:
-      - latest
-      - server
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: latest
-          TOPOLOGY: server
-          SSL: ssl
-          AUTH: noauth
-      - func: run tests
-  - name: test-latest-server-nossl-noauth
+  - name: test-latest-server
     tags:
       - latest
       - server
@@ -420,22 +413,8 @@ tasks:
           VERSION: latest
           TOPOLOGY: server
           SSL: nossl
-          AUTH: noauth
       - func: run tests
-  - name: test-latest-replica_set-ssl-noauth
-    tags:
-      - latest
-      - replica_set
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: latest
-          TOPOLOGY: replica_set
-          SSL: ssl
-          AUTH: noauth
-      - func: run tests
-  - name: test-latest-replica_set-nossl-noauth
+  - name: test-latest-replica_set
     tags:
       - latest
       - replica_set
@@ -446,22 +425,8 @@ tasks:
           VERSION: latest
           TOPOLOGY: replica_set
           SSL: nossl
-          AUTH: noauth
       - func: run tests
-  - name: test-latest-sharded_cluster-ssl-noauth
-    tags:
-      - latest
-      - sharded_cluster
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: latest
-          TOPOLOGY: sharded_cluster
-          SSL: ssl
-          AUTH: noauth
-      - func: run tests
-  - name: test-latest-sharded_cluster-nossl-noauth
+  - name: test-latest-sharded_cluster
     tags:
       - latest
       - sharded_cluster
@@ -472,22 +437,8 @@ tasks:
           VERSION: latest
           TOPOLOGY: sharded_cluster
           SSL: nossl
-          AUTH: noauth
       - func: run tests
-  - name: test-4.4-server-ssl-noauth
-    tags:
-      - '4.4'
-      - server
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '4.4'
-          TOPOLOGY: server
-          SSL: ssl
-          AUTH: noauth
-      - func: run tests
-  - name: test-4.4-server-nossl-noauth
+  - name: test-4.4-server
     tags:
       - '4.4'
       - server
@@ -498,22 +449,8 @@ tasks:
           VERSION: '4.4'
           TOPOLOGY: server
           SSL: nossl
-          AUTH: noauth
       - func: run tests
-  - name: test-4.4-replica_set-ssl-noauth
-    tags:
-      - '4.4'
-      - replica_set
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '4.4'
-          TOPOLOGY: replica_set
-          SSL: ssl
-          AUTH: noauth
-      - func: run tests
-  - name: test-4.4-replica_set-nossl-noauth
+  - name: test-4.4-replica_set
     tags:
       - '4.4'
       - replica_set
@@ -524,22 +461,8 @@ tasks:
           VERSION: '4.4'
           TOPOLOGY: replica_set
           SSL: nossl
-          AUTH: noauth
       - func: run tests
-  - name: test-4.4-sharded_cluster-ssl-noauth
-    tags:
-      - '4.4'
-      - sharded_cluster
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '4.4'
-          TOPOLOGY: sharded_cluster
-          SSL: ssl
-          AUTH: noauth
-      - func: run tests
-  - name: test-4.4-sharded_cluster-nossl-noauth
+  - name: test-4.4-sharded_cluster
     tags:
       - '4.4'
       - sharded_cluster
@@ -550,22 +473,8 @@ tasks:
           VERSION: '4.4'
           TOPOLOGY: sharded_cluster
           SSL: nossl
-          AUTH: noauth
       - func: run tests
-  - name: test-4.2-server-ssl-noauth
-    tags:
-      - '4.2'
-      - server
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '4.2'
-          TOPOLOGY: server
-          SSL: ssl
-          AUTH: noauth
-      - func: run tests
-  - name: test-4.2-server-nossl-noauth
+  - name: test-4.2-server
     tags:
       - '4.2'
       - server
@@ -576,22 +485,8 @@ tasks:
           VERSION: '4.2'
           TOPOLOGY: server
           SSL: nossl
-          AUTH: noauth
       - func: run tests
-  - name: test-4.2-replica_set-ssl-noauth
-    tags:
-      - '4.2'
-      - replica_set
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '4.2'
-          TOPOLOGY: replica_set
-          SSL: ssl
-          AUTH: noauth
-      - func: run tests
-  - name: test-4.2-replica_set-nossl-noauth
+  - name: test-4.2-replica_set
     tags:
       - '4.2'
       - replica_set
@@ -602,22 +497,8 @@ tasks:
           VERSION: '4.2'
           TOPOLOGY: replica_set
           SSL: nossl
-          AUTH: noauth
       - func: run tests
-  - name: test-4.2-sharded_cluster-ssl-noauth
-    tags:
-      - '4.2'
-      - sharded_cluster
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '4.2'
-          TOPOLOGY: sharded_cluster
-          SSL: ssl
-          AUTH: noauth
-      - func: run tests
-  - name: test-4.2-sharded_cluster-nossl-noauth
+  - name: test-4.2-sharded_cluster
     tags:
       - '4.2'
       - sharded_cluster
@@ -628,22 +509,8 @@ tasks:
           VERSION: '4.2'
           TOPOLOGY: sharded_cluster
           SSL: nossl
-          AUTH: noauth
       - func: run tests
-  - name: test-4.0-server-ssl-noauth
-    tags:
-      - '4.0'
-      - server
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '4.0'
-          TOPOLOGY: server
-          SSL: ssl
-          AUTH: noauth
-      - func: run tests
-  - name: test-4.0-server-nossl-noauth
+  - name: test-4.0-server
     tags:
       - '4.0'
       - server
@@ -654,22 +521,8 @@ tasks:
           VERSION: '4.0'
           TOPOLOGY: server
           SSL: nossl
-          AUTH: noauth
       - func: run tests
-  - name: test-4.0-replica_set-ssl-noauth
-    tags:
-      - '4.0'
-      - replica_set
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '4.0'
-          TOPOLOGY: replica_set
-          SSL: ssl
-          AUTH: noauth
-      - func: run tests
-  - name: test-4.0-replica_set-nossl-noauth
+  - name: test-4.0-replica_set
     tags:
       - '4.0'
       - replica_set
@@ -680,22 +533,8 @@ tasks:
           VERSION: '4.0'
           TOPOLOGY: replica_set
           SSL: nossl
-          AUTH: noauth
       - func: run tests
-  - name: test-4.0-sharded_cluster-ssl-noauth
-    tags:
-      - '4.0'
-      - sharded_cluster
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '4.0'
-          TOPOLOGY: sharded_cluster
-          SSL: ssl
-          AUTH: noauth
-      - func: run tests
-  - name: test-4.0-sharded_cluster-nossl-noauth
+  - name: test-4.0-sharded_cluster
     tags:
       - '4.0'
       - sharded_cluster
@@ -706,22 +545,8 @@ tasks:
           VERSION: '4.0'
           TOPOLOGY: sharded_cluster
           SSL: nossl
-          AUTH: noauth
       - func: run tests
-  - name: test-3.6-server-ssl-noauth
-    tags:
-      - '3.6'
-      - server
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '3.6'
-          TOPOLOGY: server
-          SSL: ssl
-          AUTH: noauth
-      - func: run tests
-  - name: test-3.6-server-nossl-noauth
+  - name: test-3.6-server
     tags:
       - '3.6'
       - server
@@ -732,22 +557,8 @@ tasks:
           VERSION: '3.6'
           TOPOLOGY: server
           SSL: nossl
-          AUTH: noauth
       - func: run tests
-  - name: test-3.6-replica_set-ssl-noauth
-    tags:
-      - '3.6'
-      - replica_set
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '3.6'
-          TOPOLOGY: replica_set
-          SSL: ssl
-          AUTH: noauth
-      - func: run tests
-  - name: test-3.6-replica_set-nossl-noauth
+  - name: test-3.6-replica_set
     tags:
       - '3.6'
       - replica_set
@@ -758,22 +569,8 @@ tasks:
           VERSION: '3.6'
           TOPOLOGY: replica_set
           SSL: nossl
-          AUTH: noauth
       - func: run tests
-  - name: test-3.6-sharded_cluster-ssl-noauth
-    tags:
-      - '3.6'
-      - sharded_cluster
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '3.6'
-          TOPOLOGY: sharded_cluster
-          SSL: ssl
-          AUTH: noauth
-      - func: run tests
-  - name: test-3.6-sharded_cluster-nossl-noauth
+  - name: test-3.6-sharded_cluster
     tags:
       - '3.6'
       - sharded_cluster
@@ -784,22 +581,8 @@ tasks:
           VERSION: '3.6'
           TOPOLOGY: sharded_cluster
           SSL: nossl
-          AUTH: noauth
       - func: run tests
-  - name: test-3.4-server-ssl-noauth
-    tags:
-      - '3.4'
-      - server
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '3.4'
-          TOPOLOGY: server
-          SSL: ssl
-          AUTH: noauth
-      - func: run tests
-  - name: test-3.4-server-nossl-noauth
+  - name: test-3.4-server
     tags:
       - '3.4'
       - server
@@ -810,22 +593,8 @@ tasks:
           VERSION: '3.4'
           TOPOLOGY: server
           SSL: nossl
-          AUTH: noauth
       - func: run tests
-  - name: test-3.4-replica_set-ssl-noauth
-    tags:
-      - '3.4'
-      - replica_set
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '3.4'
-          TOPOLOGY: replica_set
-          SSL: ssl
-          AUTH: noauth
-      - func: run tests
-  - name: test-3.4-replica_set-nossl-noauth
+  - name: test-3.4-replica_set
     tags:
       - '3.4'
       - replica_set
@@ -836,22 +605,8 @@ tasks:
           VERSION: '3.4'
           TOPOLOGY: replica_set
           SSL: nossl
-          AUTH: noauth
       - func: run tests
-  - name: test-3.4-sharded_cluster-ssl-noauth
-    tags:
-      - '3.4'
-      - sharded_cluster
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '3.4'
-          TOPOLOGY: sharded_cluster
-          SSL: ssl
-          AUTH: noauth
-      - func: run tests
-  - name: test-3.4-sharded_cluster-nossl-noauth
+  - name: test-3.4-sharded_cluster
     tags:
       - '3.4'
       - sharded_cluster
@@ -862,22 +617,8 @@ tasks:
           VERSION: '3.4'
           TOPOLOGY: sharded_cluster
           SSL: nossl
-          AUTH: noauth
       - func: run tests
-  - name: test-3.2-server-ssl-noauth
-    tags:
-      - '3.2'
-      - server
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '3.2'
-          TOPOLOGY: server
-          SSL: ssl
-          AUTH: noauth
-      - func: run tests
-  - name: test-3.2-server-nossl-noauth
+  - name: test-3.2-server
     tags:
       - '3.2'
       - server
@@ -888,22 +629,8 @@ tasks:
           VERSION: '3.2'
           TOPOLOGY: server
           SSL: nossl
-          AUTH: noauth
       - func: run tests
-  - name: test-3.2-replica_set-ssl-noauth
-    tags:
-      - '3.2'
-      - replica_set
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '3.2'
-          TOPOLOGY: replica_set
-          SSL: ssl
-          AUTH: noauth
-      - func: run tests
-  - name: test-3.2-replica_set-nossl-noauth
+  - name: test-3.2-replica_set
     tags:
       - '3.2'
       - replica_set
@@ -914,22 +641,8 @@ tasks:
           VERSION: '3.2'
           TOPOLOGY: replica_set
           SSL: nossl
-          AUTH: noauth
       - func: run tests
-  - name: test-3.2-sharded_cluster-ssl-noauth
-    tags:
-      - '3.2'
-      - sharded_cluster
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '3.2'
-          TOPOLOGY: sharded_cluster
-          SSL: ssl
-          AUTH: noauth
-      - func: run tests
-  - name: test-3.2-sharded_cluster-nossl-noauth
+  - name: test-3.2-sharded_cluster
     tags:
       - '3.2'
       - sharded_cluster
@@ -940,22 +653,8 @@ tasks:
           VERSION: '3.2'
           TOPOLOGY: sharded_cluster
           SSL: nossl
-          AUTH: noauth
       - func: run tests
-  - name: test-3.0-server-ssl-noauth
-    tags:
-      - '3.0'
-      - server
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '3.0'
-          TOPOLOGY: server
-          SSL: ssl
-          AUTH: noauth
-      - func: run tests
-  - name: test-3.0-server-nossl-noauth
+  - name: test-3.0-server
     tags:
       - '3.0'
       - server
@@ -966,22 +665,8 @@ tasks:
           VERSION: '3.0'
           TOPOLOGY: server
           SSL: nossl
-          AUTH: noauth
       - func: run tests
-  - name: test-3.0-replica_set-ssl-noauth
-    tags:
-      - '3.0'
-      - replica_set
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '3.0'
-          TOPOLOGY: replica_set
-          SSL: ssl
-          AUTH: noauth
-      - func: run tests
-  - name: test-3.0-replica_set-nossl-noauth
+  - name: test-3.0-replica_set
     tags:
       - '3.0'
       - replica_set
@@ -992,22 +677,8 @@ tasks:
           VERSION: '3.0'
           TOPOLOGY: replica_set
           SSL: nossl
-          AUTH: noauth
       - func: run tests
-  - name: test-3.0-sharded_cluster-ssl-noauth
-    tags:
-      - '3.0'
-      - sharded_cluster
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '3.0'
-          TOPOLOGY: sharded_cluster
-          SSL: ssl
-          AUTH: noauth
-      - func: run tests
-  - name: test-3.0-sharded_cluster-nossl-noauth
+  - name: test-3.0-sharded_cluster
     tags:
       - '3.0'
       - sharded_cluster
@@ -1018,22 +689,8 @@ tasks:
           VERSION: '3.0'
           TOPOLOGY: sharded_cluster
           SSL: nossl
-          AUTH: noauth
       - func: run tests
-  - name: test-2.6-server-ssl-noauth
-    tags:
-      - '2.6'
-      - server
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '2.6'
-          TOPOLOGY: server
-          SSL: ssl
-          AUTH: noauth
-      - func: run tests
-  - name: test-2.6-server-nossl-noauth
+  - name: test-2.6-server
     tags:
       - '2.6'
       - server
@@ -1044,22 +701,8 @@ tasks:
           VERSION: '2.6'
           TOPOLOGY: server
           SSL: nossl
-          AUTH: noauth
       - func: run tests
-  - name: test-2.6-replica_set-ssl-noauth
-    tags:
-      - '2.6'
-      - replica_set
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '2.6'
-          TOPOLOGY: replica_set
-          SSL: ssl
-          AUTH: noauth
-      - func: run tests
-  - name: test-2.6-replica_set-nossl-noauth
+  - name: test-2.6-replica_set
     tags:
       - '2.6'
       - replica_set
@@ -1070,22 +713,8 @@ tasks:
           VERSION: '2.6'
           TOPOLOGY: replica_set
           SSL: nossl
-          AUTH: noauth
       - func: run tests
-  - name: test-2.6-sharded_cluster-ssl-noauth
-    tags:
-      - '2.6'
-      - sharded_cluster
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '2.6'
-          TOPOLOGY: sharded_cluster
-          SSL: ssl
-          AUTH: noauth
-      - func: run tests
-  - name: test-2.6-sharded_cluster-nossl-noauth
+  - name: test-2.6-sharded_cluster
     tags:
       - '2.6'
       - sharded_cluster
@@ -1096,7 +725,6 @@ tasks:
           VERSION: '2.6'
           TOPOLOGY: sharded_cluster
           SSL: nossl
-          AUTH: noauth
       - func: run tests
   - name: test-atlas-connectivity
     tags:
@@ -1104,6 +732,17 @@ tasks:
     commands:
       - func: install dependencies
       - func: run atlas tests
+  - name: test-ssl-support
+    tags:
+      - ssl-support
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          SSL: ssl
+          VERSION: latest
+          TOPOLOGY: server
+      - func: run ssl tests
   - name: test-ocsp-valid-cert-server-staples
     tags:
       - ocsp
@@ -1230,61 +869,35 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: dubnium
     tasks: &ref_0
-      - test-latest-server-ssl-noauth
-      - test-latest-server-nossl-noauth
-      - test-latest-replica_set-ssl-noauth
-      - test-latest-replica_set-nossl-noauth
-      - test-latest-sharded_cluster-ssl-noauth
-      - test-latest-sharded_cluster-nossl-noauth
-      - test-4.4-server-ssl-noauth
-      - test-4.4-server-nossl-noauth
-      - test-4.4-replica_set-ssl-noauth
-      - test-4.4-replica_set-nossl-noauth
-      - test-4.4-sharded_cluster-ssl-noauth
-      - test-4.4-sharded_cluster-nossl-noauth
-      - test-4.2-server-ssl-noauth
-      - test-4.2-server-nossl-noauth
-      - test-4.2-replica_set-ssl-noauth
-      - test-4.2-replica_set-nossl-noauth
-      - test-4.2-sharded_cluster-ssl-noauth
-      - test-4.2-sharded_cluster-nossl-noauth
-      - test-4.0-server-ssl-noauth
-      - test-4.0-server-nossl-noauth
-      - test-4.0-replica_set-ssl-noauth
-      - test-4.0-replica_set-nossl-noauth
-      - test-4.0-sharded_cluster-ssl-noauth
-      - test-4.0-sharded_cluster-nossl-noauth
-      - test-3.6-server-ssl-noauth
-      - test-3.6-server-nossl-noauth
-      - test-3.6-replica_set-ssl-noauth
-      - test-3.6-replica_set-nossl-noauth
-      - test-3.6-sharded_cluster-ssl-noauth
-      - test-3.6-sharded_cluster-nossl-noauth
-      - test-3.4-server-ssl-noauth
-      - test-3.4-server-nossl-noauth
-      - test-3.4-replica_set-ssl-noauth
-      - test-3.4-replica_set-nossl-noauth
-      - test-3.4-sharded_cluster-ssl-noauth
-      - test-3.4-sharded_cluster-nossl-noauth
-      - test-3.2-server-ssl-noauth
-      - test-3.2-server-nossl-noauth
-      - test-3.2-replica_set-ssl-noauth
-      - test-3.2-replica_set-nossl-noauth
-      - test-3.2-sharded_cluster-ssl-noauth
-      - test-3.2-sharded_cluster-nossl-noauth
-      - test-3.0-server-ssl-noauth
-      - test-3.0-server-nossl-noauth
-      - test-3.0-replica_set-ssl-noauth
-      - test-3.0-replica_set-nossl-noauth
-      - test-3.0-sharded_cluster-ssl-noauth
-      - test-3.0-sharded_cluster-nossl-noauth
-      - test-2.6-server-ssl-noauth
-      - test-2.6-server-nossl-noauth
-      - test-2.6-replica_set-ssl-noauth
-      - test-2.6-replica_set-nossl-noauth
-      - test-2.6-sharded_cluster-ssl-noauth
-      - test-2.6-sharded_cluster-nossl-noauth
+      - test-latest-server
+      - test-latest-replica_set
+      - test-latest-sharded_cluster
+      - test-4.4-server
+      - test-4.4-replica_set
+      - test-4.4-sharded_cluster
+      - test-4.2-server
+      - test-4.2-replica_set
+      - test-4.2-sharded_cluster
+      - test-4.0-server
+      - test-4.0-replica_set
+      - test-4.0-sharded_cluster
+      - test-3.6-server
+      - test-3.6-replica_set
+      - test-3.6-sharded_cluster
+      - test-3.4-server
+      - test-3.4-replica_set
+      - test-3.4-sharded_cluster
+      - test-3.2-server
+      - test-3.2-replica_set
+      - test-3.2-sharded_cluster
+      - test-3.0-server
+      - test-3.0-replica_set
+      - test-3.0-sharded_cluster
+      - test-2.6-server
+      - test-2.6-replica_set
+      - test-2.6-sharded_cluster
       - test-atlas-connectivity
+      - test-ssl-support
       - test-ocsp-valid-cert-server-staples
       - test-ocsp-invalid-cert-server-staples
       - test-ocsp-valid-cert-server-does-not-staple
@@ -1316,42 +929,24 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: dubnium
     tasks: &ref_1
-      - test-4.0-server-ssl-noauth
-      - test-4.0-server-nossl-noauth
-      - test-4.0-replica_set-ssl-noauth
-      - test-4.0-replica_set-nossl-noauth
-      - test-4.0-sharded_cluster-ssl-noauth
-      - test-4.0-sharded_cluster-nossl-noauth
-      - test-3.6-server-ssl-noauth
-      - test-3.6-server-nossl-noauth
-      - test-3.6-replica_set-ssl-noauth
-      - test-3.6-replica_set-nossl-noauth
-      - test-3.6-sharded_cluster-ssl-noauth
-      - test-3.6-sharded_cluster-nossl-noauth
-      - test-3.4-server-ssl-noauth
-      - test-3.4-server-nossl-noauth
-      - test-3.4-replica_set-ssl-noauth
-      - test-3.4-replica_set-nossl-noauth
-      - test-3.4-sharded_cluster-ssl-noauth
-      - test-3.4-sharded_cluster-nossl-noauth
-      - test-3.2-server-ssl-noauth
-      - test-3.2-server-nossl-noauth
-      - test-3.2-replica_set-ssl-noauth
-      - test-3.2-replica_set-nossl-noauth
-      - test-3.2-sharded_cluster-ssl-noauth
-      - test-3.2-sharded_cluster-nossl-noauth
-      - test-3.0-server-ssl-noauth
-      - test-3.0-server-nossl-noauth
-      - test-3.0-replica_set-ssl-noauth
-      - test-3.0-replica_set-nossl-noauth
-      - test-3.0-sharded_cluster-ssl-noauth
-      - test-3.0-sharded_cluster-nossl-noauth
-      - test-2.6-server-ssl-noauth
-      - test-2.6-server-nossl-noauth
-      - test-2.6-replica_set-ssl-noauth
-      - test-2.6-replica_set-nossl-noauth
-      - test-2.6-sharded_cluster-ssl-noauth
-      - test-2.6-sharded_cluster-nossl-noauth
+      - test-4.0-server
+      - test-4.0-replica_set
+      - test-4.0-sharded_cluster
+      - test-3.6-server
+      - test-3.6-replica_set
+      - test-3.6-sharded_cluster
+      - test-3.4-server
+      - test-3.4-replica_set
+      - test-3.4-sharded_cluster
+      - test-3.2-server
+      - test-3.2-replica_set
+      - test-3.2-sharded_cluster
+      - test-3.0-server
+      - test-3.0-replica_set
+      - test-3.0-sharded_cluster
+      - test-2.6-server
+      - test-2.6-replica_set
+      - test-2.6-sharded_cluster
       - test-atlas-connectivity
   - name: ubuntu-14.04-erbium
     display_name: Ubuntu 14.04 Node Erbium
@@ -1366,49 +961,29 @@ buildvariants:
       NODE_LTS_NAME: dubnium
       CLIENT_ENCRYPTION: true
     tasks: &ref_2
-      - test-latest-server-ssl-noauth
-      - test-latest-server-nossl-noauth
-      - test-latest-replica_set-ssl-noauth
-      - test-latest-replica_set-nossl-noauth
-      - test-latest-sharded_cluster-ssl-noauth
-      - test-latest-sharded_cluster-nossl-noauth
-      - test-4.4-server-ssl-noauth
-      - test-4.4-server-nossl-noauth
-      - test-4.4-replica_set-ssl-noauth
-      - test-4.4-replica_set-nossl-noauth
-      - test-4.4-sharded_cluster-ssl-noauth
-      - test-4.4-sharded_cluster-nossl-noauth
-      - test-4.2-server-ssl-noauth
-      - test-4.2-server-nossl-noauth
-      - test-4.2-replica_set-ssl-noauth
-      - test-4.2-replica_set-nossl-noauth
-      - test-4.2-sharded_cluster-ssl-noauth
-      - test-4.2-sharded_cluster-nossl-noauth
-      - test-4.0-server-ssl-noauth
-      - test-4.0-server-nossl-noauth
-      - test-4.0-replica_set-ssl-noauth
-      - test-4.0-replica_set-nossl-noauth
-      - test-4.0-sharded_cluster-ssl-noauth
-      - test-4.0-sharded_cluster-nossl-noauth
-      - test-3.6-server-ssl-noauth
-      - test-3.6-server-nossl-noauth
-      - test-3.6-replica_set-ssl-noauth
-      - test-3.6-replica_set-nossl-noauth
-      - test-3.6-sharded_cluster-ssl-noauth
-      - test-3.6-sharded_cluster-nossl-noauth
-      - test-3.4-server-ssl-noauth
-      - test-3.4-server-nossl-noauth
-      - test-3.4-replica_set-ssl-noauth
-      - test-3.4-replica_set-nossl-noauth
-      - test-3.4-sharded_cluster-ssl-noauth
-      - test-3.4-sharded_cluster-nossl-noauth
-      - test-3.2-server-ssl-noauth
-      - test-3.2-server-nossl-noauth
-      - test-3.2-replica_set-ssl-noauth
-      - test-3.2-replica_set-nossl-noauth
-      - test-3.2-sharded_cluster-ssl-noauth
-      - test-3.2-sharded_cluster-nossl-noauth
+      - test-latest-server
+      - test-latest-replica_set
+      - test-latest-sharded_cluster
+      - test-4.4-server
+      - test-4.4-replica_set
+      - test-4.4-sharded_cluster
+      - test-4.2-server
+      - test-4.2-replica_set
+      - test-4.2-sharded_cluster
+      - test-4.0-server
+      - test-4.0-replica_set
+      - test-4.0-sharded_cluster
+      - test-3.6-server
+      - test-3.6-replica_set
+      - test-3.6-sharded_cluster
+      - test-3.4-server
+      - test-3.4-replica_set
+      - test-3.4-sharded_cluster
+      - test-3.2-server
+      - test-3.2-replica_set
+      - test-3.2-sharded_cluster
       - test-atlas-connectivity
+      - test-ssl-support
       - test-ocsp-valid-cert-server-staples
       - test-ocsp-invalid-cert-server-staples
       - test-ocsp-valid-cert-server-does-not-staple

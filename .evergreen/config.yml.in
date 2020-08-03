@@ -95,7 +95,7 @@ functions:
         script: |
           ${PREPARE_SHELL}
           MONGODB_VERSION=${VERSION} TOPOLOGY=${TOPOLOGY} \
-          SSL=${SSL} AUTH=${AUTH} \
+          SSL=${SSL} \
           ORCHESTRATION_FILE=${ORCHESTRATION_FILE} \
           bash ${DRIVERS_TOOLS}/.evergreen/run-orchestration.sh
     # run-orchestration generates expansion file with the MONGODB_URI for the cluster
@@ -131,7 +131,7 @@ functions:
             rm -f ./prepare_client_encryption.sh
           fi
 
-          AUTH=${AUTH} SSL=${SSL} UNIFIED=${UNIFIED} MONGODB_URI="${MONGODB_URI}" bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
+          UNIFIED=${UNIFIED} MONGODB_URI="${MONGODB_URI}" bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
 
   "run checks":
     - command: shell.exec
@@ -209,6 +209,16 @@ functions:
           rm -f ./prepare_atlas_connectivity.sh
 
           NODE_LTS_NAME='${NODE_LTS_NAME}' bash ${PROJECT_DIRECTORY}/.evergreen/run-atlas-tests.sh
+
+  "run ssl tests":
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: "src"
+        script: |
+          DRIVERS_TOOLS="${DRIVERS_TOOLS}" \
+          SSL_CA_FILE="${SSL_CA_FILE}" SSL_KEY_FILE="${SSL_KEY_FILE}" \
+          MONGODB_URI="${MONGODB_URI}" bash ${PROJECT_DIRECTORY}/.evergreen/run-ssl-tests.sh
 
   "add aws auth variables to file":
     - command: shell.exec

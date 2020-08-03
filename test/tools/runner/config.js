@@ -17,7 +17,7 @@ function convertToConnStringMap(obj) {
 }
 
 class NativeConfiguration {
-  constructor(parsedURI, context, serverOptions = {}) {
+  constructor(parsedURI, context) {
     this.topologyType = context.topologyType;
     this.version = context.version;
     this.clientSideEncryption = context.clientSideEncryption;
@@ -31,7 +31,6 @@ class NativeConfiguration {
       },
       parsedURI.options
     );
-    this.serverOptions = serverOptions;
 
     this.writeConcern = function () {
       return { w: 1 };
@@ -84,8 +83,7 @@ class NativeConfiguration {
     serverOptions = Object.assign(
       {},
       { haInterval: 100, minHeartbeatFrequencyMS: 100 },
-      serverOptions,
-      this.serverOptions
+      serverOptions
     );
 
     // Fall back
