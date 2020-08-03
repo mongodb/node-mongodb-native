@@ -173,6 +173,14 @@ functions:
           rm -f ./prepare_atlas_connectivity.sh
 
           NODE_LTS_NAME='${NODE_LTS_NAME}' bash ${PROJECT_DIRECTORY}/.evergreen/run-atlas-tests.sh
+  run ldap tests:
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: src
+        script: |
+          MONGODB_URI='${plain_auth_mongodb_uri}' NODE_LTS_NAME='${NODE_LTS_NAME}' \
+          bash ${PROJECT_DIRECTORY}/.evergreen/run-ldap-tests.sh
   add aws auth variables to file:
     - command: shell.exec
       type: test
@@ -357,7 +365,7 @@ functions:
         script: |
           cd ${DRIVERS_TOOLS}/.evergreen/ocsp
           /opt/mongodbtoolchain/v3/bin/python3 -m venv ./venv
-          ./venv/bin/pip3 install -r ${DRIVERS_TOOLS}/.evergreen/ocsp/mock-ocsp-responder-requirements.txt
+          ./venv/bin/pip3 install asn1crypto oscrypto bottle
     - command: shell.exec
       params:
         background: true
@@ -374,7 +382,7 @@ functions:
         script: |
           cd ${DRIVERS_TOOLS}/.evergreen/ocsp
           /opt/mongodbtoolchain/v3/bin/python3 -m venv ./venv
-          ./venv/bin/pip3 install -r ${DRIVERS_TOOLS}/.evergreen/ocsp/mock-ocsp-responder-requirements.txt
+          ./venv/bin/pip3 install asn1crypto oscrypto bottle
     - command: shell.exec
       params:
         background: true
@@ -698,6 +706,12 @@ tasks:
     commands:
       - func: install dependencies
       - func: run atlas tests
+  - name: test-ldap-auth
+    tags:
+      - ldap-auth
+    commands:
+      - func: install dependencies
+      - func: run ldap tests
   - name: test-ocsp-valid-cert-server-staples
     tags:
       - ocsp
@@ -852,6 +866,7 @@ buildvariants:
       - test-2.6-replica_set
       - test-2.6-sharded_cluster
       - test-atlas-connectivity
+      - test-ldap-auth
       - test-ocsp-valid-cert-server-staples
       - test-ocsp-invalid-cert-server-staples
       - test-ocsp-valid-cert-server-does-not-staple
@@ -902,6 +917,7 @@ buildvariants:
       - test-2.6-replica_set
       - test-2.6-sharded_cluster
       - test-atlas-connectivity
+      - test-ldap-auth
   - name: ubuntu-14.04-erbium
     display_name: Ubuntu 14.04 Node Erbium
     run_on: ubuntu1404-test
@@ -937,6 +953,7 @@ buildvariants:
       - test-3.2-replica_set
       - test-3.2-sharded_cluster
       - test-atlas-connectivity
+      - test-ldap-auth
       - test-ocsp-valid-cert-server-staples
       - test-ocsp-invalid-cert-server-staples
       - test-ocsp-valid-cert-server-does-not-staple
