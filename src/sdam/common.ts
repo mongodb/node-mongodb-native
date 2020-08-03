@@ -1,13 +1,13 @@
-import type { Timestamp } from '../bson';
+import type { Timestamp, Binary, Long } from '../bson';
 
 // shared state names
-const STATE_CLOSING = 'closing';
-const STATE_CLOSED = 'closed';
-const STATE_CONNECTING = 'connecting';
-const STATE_CONNECTED = 'connected';
+export const STATE_CLOSING = 'closing';
+export const STATE_CLOSED = 'closed';
+export const STATE_CONNECTING = 'connecting';
+export const STATE_CONNECTED = 'connected';
 
 // An enumeration of topology types we know about
-enum TopologyType {
+export enum TopologyType {
   Single = 'Single',
   ReplicaSetNoPrimary = 'ReplicaSetNoPrimary',
   ReplicaSetWithPrimary = 'ReplicaSetWithPrimary',
@@ -16,7 +16,7 @@ enum TopologyType {
 }
 
 // An enumeration of server types we know about
-enum ServerType {
+export enum ServerType {
   Standalone = 'Standalone',
   Mongos = 'Mongos',
   PossiblePrimary = 'PossiblePrimary',
@@ -28,7 +28,7 @@ enum ServerType {
   Unknown = 'Unknown'
 }
 
-const TOPOLOGY_DEFAULTS = {
+export const TOPOLOGY_DEFAULTS = {
   localThresholdMS: 15,
   serverSelectionTimeoutMS: 30000,
   heartbeatFrequencyMS: 10000,
@@ -36,19 +36,22 @@ const TOPOLOGY_DEFAULTS = {
 };
 
 export type TimerQueue = Set<NodeJS.Timeout>;
-function drainTimerQueue(queue: TimerQueue) {
+export function drainTimerQueue(queue: TimerQueue) {
   queue.forEach(clearTimeout);
   queue.clear();
 }
 
-function clearAndRemoveTimerFrom(timer: NodeJS.Timeout, timers: TimerQueue) {
+export function clearAndRemoveTimerFrom(timer: NodeJS.Timeout, timers: TimerQueue) {
   clearTimeout(timer);
   return timers.delete(timer);
 }
 
 export interface ClusterTime {
   clusterTime: Timestamp;
-  signature: any;
+  signature: {
+    hash: Binary;
+    keyId: Long;
+  };
 }
 
 /**
@@ -57,7 +60,7 @@ export interface ClusterTime {
  * @param {any} topology
  * @param {any} $clusterTime
  */
-function resolveClusterTime(topology: any, $clusterTime: ClusterTime) {
+export function resolveClusterTime(topology: any, $clusterTime: ClusterTime) {
   if (topology.clusterTime == null) {
     topology.clusterTime = $clusterTime;
   } else {
@@ -66,16 +69,3 @@ function resolveClusterTime(topology: any, $clusterTime: ClusterTime) {
     }
   }
 }
-
-export {
-  STATE_CLOSING,
-  STATE_CLOSED,
-  STATE_CONNECTING,
-  STATE_CONNECTED,
-  TOPOLOGY_DEFAULTS,
-  TopologyType,
-  ServerType,
-  drainTimerQueue,
-  clearAndRemoveTimerFrom,
-  resolveClusterTime
-};

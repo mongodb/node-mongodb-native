@@ -108,7 +108,7 @@ export interface DestroyOptions {
  * @fires Server#serverHeartbeatSucceeded
  * @fires Server#serverHeartbeatFailed
  */
-class Server extends EventEmitter {
+export class Server extends EventEmitter {
   s: ServerPrivate;
   clusterTime?: ClusterTime;
   ismaster?: Document;
@@ -469,12 +469,8 @@ function basicReadValidations(server: Server, options: CommandOptions) {
 function executeWriteOperation(args: any, options: WriteCommandOptions, callback: Callback) {
   options = options || {};
 
-  // TODO: once we drop Node 4, use destructuring either here or in arguments.
-  const server = args.server;
-  const op = args.op;
-  const ns = args.ns;
+  const { server, op, ns } = args;
   const ops = Array.isArray(args.ops) ? args.ops : [args.ops];
-
   if (server.s.state === STATE_CLOSING || server.s.state === STATE_CLOSED) {
     callback(new MongoError('server is closed'));
     return;
@@ -581,5 +577,3 @@ function makeOperationHandler(
     callback(err, result);
   };
 }
-
-export { Server };

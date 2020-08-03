@@ -78,7 +78,7 @@ interface ServerSelectionRequest {
   [kCancelled]?: boolean;
 }
 
-interface Topology {
+export interface Topology {
   destroy(): void;
 }
 
@@ -130,7 +130,7 @@ interface TopologyOptions extends ServerOptions {
   minHeartbeatFrequencyMS: number;
   replicaSet?: string;
   cursorFactory: typeof Cursor;
-  srvHost?: boolean;
+  srvHost?: string;
   srvPoller?: SrvPoller;
   logger?: Logger;
   loggerLevel?: string;
@@ -168,7 +168,7 @@ interface SelectServerOptions {
  * @fires Topology#serverHeartbeatSucceeded
  * @fires Topology#serverHeartbeatFailed
  */
-class Topology extends EventEmitter {
+export class Topology extends EventEmitter {
   s: TopologyPrivate;
   [kWaitQueue]: Denque<ServerSelectionRequest>;
   ismaster?: Document;
@@ -258,9 +258,7 @@ class Topology extends EventEmitter {
         options.srvPoller ||
         new SrvPoller({
           heartbeatFrequencyMS: this.s.heartbeatFrequencyMS,
-          srvHost: options.srvHost,
-          logger: options.logger,
-          loggerLevel: options.loggerLevel
+          srvHost: options.srvHost
         });
 
       this.s.detectTopologyDescriptionChange = (ev: TopologyDescriptionChangedEvent) => {
@@ -1140,5 +1138,3 @@ class ServerCapabilities {
     setup_get_property(this, 'commandsTakeCollation', commandsTakeCollation);
   }
 }
-
-export { Topology };

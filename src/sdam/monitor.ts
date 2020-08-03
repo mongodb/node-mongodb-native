@@ -53,7 +53,7 @@ interface MonitorOptions {
   minHeartbeatFrequencyMS: number;
 }
 
-class Monitor extends EventEmitter {
+export class Monitor extends EventEmitter {
   s: MonitorPrivate;
   address: string;
   options: MonitorOptions;
@@ -424,5 +424,3 @@ function measureRoundTripTime(rttPinger: RTTPinger, options: RTTPingerOptions) {
     measureAndReschedule();
   });
 }
-
-export { Monitor };

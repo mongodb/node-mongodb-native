@@ -932,6 +932,15 @@ function calculateDurationInMs(started: number) {
   return elapsed < 0 ? 0 : elapsed;
 }
 
+export interface InterruptableAsyncIntervalOptions {
+  /** The interval to execute a method on */
+  interval: number;
+  /** A minumum interval that must elapse before the method is called */
+  minInterval: number;
+  /** Whether the method should be called immediately when the interval is started  */
+  immediate: boolean;
+}
+
 export interface InterruptableAsyncInterval {
   wake(): void;
   stop(): void;
@@ -949,10 +958,13 @@ export interface InterruptableAsyncInterval {
  * @param {number} [options.minInterval] The minimum time which must pass between invocations of the provided function
  * @param {boolean} [options.immediate] Execute the function immediately when the interval is started
  */
-function makeInterruptableAsyncInterval(fn: Function, options?: any): InterruptableAsyncInterval {
-  let timerId: any;
-  let lastCallTime: any;
-  let lastWakeTime: any;
+function makeInterruptableAsyncInterval(
+  fn: Function,
+  options?: Partial<InterruptableAsyncIntervalOptions>
+): InterruptableAsyncInterval {
+  let timerId: NodeJS.Timeout | undefined;
+  let lastCallTime: number;
+  let lastWakeTime: number;
   let stopped = false;
 
   options = options || {};
@@ -989,7 +1001,7 @@ function makeInterruptableAsyncInterval(fn: Function, options?: any): Interrupta
     stopped = true;
     if (timerId) {
       clearTimeout(timerId);
-      timerId = null;
+      timerId = undefined;
     }
 
     lastCallTime = 0;
@@ -998,7 +1010,10 @@ function makeInterruptableAsyncInterval(fn: Function, options?: any): Interrupta
 
   function reschedule(ms: any) {
     if (stopped) return;
-    clearTimeout(timerId);
+    if (timerId) {
+      clearTimeout(timerId);
+    }
+
     timerId = setTimeout(executeAndReschedule, ms || interval);
   }
 

@@ -16,7 +16,7 @@ interface TopologyDescriptionOptions {
 }
 
 // Representation of a deployment of servers
-class TopologyDescription {
+export class TopologyDescription {
   type: TopologyType;
   setName?: string;
   maxSetVersion?: number;
@@ -461,5 +461,3 @@ function checkHasPrimary(serverDescriptions: Map<string, ServerDescription>): To
 
   return TopologyType.ReplicaSetNoPrimary;
 }
-
-export { TopologyDescription };

@@ -11,7 +11,7 @@ const SMALLEST_MAX_STALENESS_SECONDS = 90;
 /**
  * Returns a server selector that selects for writable servers
  */
-function writableServerSelector() {
+export function writableServerSelector() {
   return (topologyDescription: TopologyDescription, servers: ServerDescription[]) =>
     latencyWindowReducer(
       topologyDescription,
@@ -193,7 +193,7 @@ function knownFilter(server: ServerDescription): boolean {
  *
  * @param {ReadPreference} readPreference The read preference to select with
  */
-function readPreferenceServerSelector(readPreference: ReadPreference) {
+export function readPreferenceServerSelector(readPreference: ReadPreference) {
   if (!readPreference.isValid()) {
     throw new TypeError('Invalid read preference specified');
   }
@@ -249,5 +249,3 @@ function readPreferenceServerSelector(readPreference: ReadPreference) {
     return selectedServers;
   };
 }
-
-export { writableServerSelector, readPreferenceServerSelector };
