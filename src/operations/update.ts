@@ -3,7 +3,7 @@ import { updateDocuments, updateCallback } from './common_functions';
 import { hasAtomicOperators } from '../utils';
 import { CommandOperation } from './command';
 
-class UpdateOperation extends OperationBase {
+export class UpdateOperation extends OperationBase {
   namespace: any;
   operations: any;
   options: any;
@@ -23,7 +23,7 @@ class UpdateOperation extends OperationBase {
   }
 }
 
-class UpdateOneOperation extends CommandOperation {
+export class UpdateOneOperation extends CommandOperation {
   collection: any;
   filter: any;
   update: any;
@@ -55,7 +55,7 @@ class UpdateOneOperation extends CommandOperation {
   }
 }
 
-class UpdateManyOperation extends CommandOperation {
+export class UpdateManyOperation extends CommandOperation {
   collection: any;
   filter: any;
   update: any;
@@ -96,4 +96,3 @@ defineAspects(UpdateOneOperation, [
 ]);
 
 defineAspects(UpdateManyOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
-export { UpdateOperation, UpdateOneOperation, UpdateManyOperation };

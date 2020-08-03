@@ -1,6 +1,6 @@
 import type { Document } from '../types';
 
-const Aspect = {
+export const Aspect = {
   READ_OPERATION: Symbol('READ_OPERATION'),
   WRITE_OPERATION: Symbol('WRITE_OPERATION'),
   RETRYABLE: Symbol('RETRYABLE'),
@@ -14,7 +14,7 @@ const Aspect = {
  * Additionally, this class implements `hasAspect`, which determines whether an operation has
  * a specific aspect.
  */
-class OperationBase {
+export class OperationBase {
   options: any;
   cmd?: Document;
 
@@ -61,7 +61,7 @@ class OperationBase {
   }
 }
 
-function defineAspects(operation: any, aspects: any) {
+export function defineAspects(operation: any, aspects: any) {
   if (!Array.isArray(aspects) && !(aspects instanceof Set)) {
     aspects = [aspects];
   }
@@ -74,5 +74,3 @@ function defineAspects(operation: any, aspects: any) {
 
   return aspects;
 }
-
-export { Aspect, defineAspects, OperationBase };

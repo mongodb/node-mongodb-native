@@ -8,7 +8,7 @@ import { CommandOperation } from './command';
  * @property {Collection} collection Collection instance.
  * @property {object} [options] Optional settings. See Collection.prototype.stats for a list of options.
  */
-class CollStatsOperation extends CommandOperation {
+export class CollStatsOperation extends CommandOperation {
   collectionName: string;
 
   /**
@@ -32,7 +32,7 @@ class CollStatsOperation extends CommandOperation {
   }
 }
 
-class DbStatsOperation extends CommandOperation {
+export class DbStatsOperation extends CommandOperation {
   execute(server: any, callback: Function) {
     const command: any = { dbStats: true };
     if (this.options.scale != null) {
@@ -45,4 +45,3 @@ class DbStatsOperation extends CommandOperation {
 
 defineAspects(CollStatsOperation, [Aspect.READ_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
 defineAspects(DbStatsOperation, [Aspect.READ_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
-export { DbStatsOperation, CollStatsOperation };

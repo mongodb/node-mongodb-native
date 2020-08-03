@@ -3,7 +3,7 @@ import { deleteCallback, removeDocuments } from './common_functions';
 import { CommandOperation } from './command';
 import { isObject } from 'util';
 
-class DeleteOperation extends OperationBase {
+export class DeleteOperation extends OperationBase {
   namespace: any;
   operations: any;
   options: any;
@@ -25,7 +25,7 @@ class DeleteOperation extends OperationBase {
   }
 }
 
-class DeleteOneOperation extends CommandOperation {
+export class DeleteOneOperation extends CommandOperation {
   collection: any;
   filter: any;
 
@@ -48,7 +48,7 @@ class DeleteOneOperation extends CommandOperation {
   }
 }
 
-class DeleteManyOperation extends CommandOperation {
+export class DeleteManyOperation extends CommandOperation {
   collection: any;
   filter: any;
 
@@ -92,4 +92,3 @@ defineAspects(DeleteOneOperation, [
 ]);
 
 defineAspects(DeleteManyOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
-export { DeleteOperation, DeleteOneOperation, DeleteManyOperation };

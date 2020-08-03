@@ -12,7 +12,7 @@ import { MongoError } from '../error';
 import { CommandOperation } from './command';
 import { defineAspects, Aspect } from './operation';
 
-class FindAndModifyOperation extends CommandOperation {
+export class FindAndModifyOperation extends CommandOperation {
   collection: any;
   query: any;
   sort: any;
@@ -119,7 +119,7 @@ class FindAndModifyOperation extends CommandOperation {
   }
 }
 
-class FindOneAndDeleteOperation extends FindAndModifyOperation {
+export class FindOneAndDeleteOperation extends FindAndModifyOperation {
   constructor(collection: any, filter: any, options: any) {
     // Final options
     const finalOptions = Object.assign({}, options);
@@ -135,7 +135,7 @@ class FindOneAndDeleteOperation extends FindAndModifyOperation {
   }
 }
 
-class FindOneAndReplaceOperation extends FindAndModifyOperation {
+export class FindOneAndReplaceOperation extends FindAndModifyOperation {
   constructor(collection: any, filter: any, replacement: any, options: any) {
     // Final options
     const finalOptions = Object.assign({}, options);
@@ -160,7 +160,7 @@ class FindOneAndReplaceOperation extends FindAndModifyOperation {
   }
 }
 
-class FindOneAndUpdateOperation extends FindAndModifyOperation {
+export class FindOneAndUpdateOperation extends FindAndModifyOperation {
   constructor(collection: any, filter: any, update: any, options: any) {
     // Final options
     const finalOptions = Object.assign({}, options);
@@ -191,10 +191,3 @@ defineAspects(FindAndModifyOperation, [
   Aspect.RETRYABLE,
   Aspect.EXECUTE_WITH_SELECTION
 ]);
-
-export {
-  FindAndModifyOperation,
-  FindOneAndDeleteOperation,
-  FindOneAndReplaceOperation,
-  FindOneAndUpdateOperation
-};

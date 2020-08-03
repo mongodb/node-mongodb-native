@@ -123,7 +123,7 @@ const ignoreOptionNames = ['native_parser'];
 const legacyOptionNames = ['server', 'replset', 'replSet', 'mongos', 'db'];
 
 // Validate options object
-function validOptions(options: any) {
+export function validOptions(options: any) {
   const _validOptions = validOptionNames.concat(legacyOptionNames);
 
   for (const name in options) {
@@ -177,7 +177,7 @@ function resolveTLSOptions(options: any) {
   });
 }
 
-function connect(mongoClient: any, url: any, options: any, callback: Function) {
+export function connect(mongoClient: any, url: any, options: any, callback: Function) {
   options = Object.assign({}, options);
 
   // If callback is null throw an exception
@@ -579,5 +579,3 @@ function translateOptions(options: any) {
     }
   }
 }
-
-export { validOptions, connect };

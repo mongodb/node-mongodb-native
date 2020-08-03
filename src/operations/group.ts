@@ -4,7 +4,7 @@ import { Code } from '../bson';
 import { handleCallback } from '../utils';
 import { defineAspects, Aspect } from './operation';
 
-class GroupOperation extends CommandOperation {
+export class GroupOperation extends CommandOperation {
   collectionName: string;
   keys: any;
   condition: any;
@@ -70,7 +70,7 @@ class GroupOperation extends CommandOperation {
 const groupFunction =
   'function () {\nvar c = db[ns].find(condition);\nvar map = new Map();\nvar reduce_function = reduce;\n\nwhile (c.hasNext()) {\nvar obj = c.next();\nvar key = {};\n\nfor (var i = 0, len = keys.length; i < len; ++i) {\nvar k = keys[i];\nkey[k] = obj[k];\n}\n\nvar aggObj = map.get(key);\n\nif (aggObj == null) {\nvar newObj = Object.extend({}, key);\naggObj = Object.extend(newObj, initial);\nmap.put(key, aggObj);\n}\n\nreduce_function(obj, aggObj);\n}\n\nreturn { "result": map.values() };\n}';
 
-class EvalGroupOperation extends EvalOperation {
+export class EvalGroupOperation extends EvalOperation {
   constructor(
     collection: any,
     keys: any,
@@ -103,4 +103,3 @@ class EvalGroupOperation extends EvalOperation {
 }
 
 defineAspects(GroupOperation, [Aspect.EXECUTE_WITH_SELECTION]);
-export { GroupOperation, EvalGroupOperation };

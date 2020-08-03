@@ -9,7 +9,7 @@ import {
   toError
 } from '../utils';
 
-function deleteCallback(err: any, r: any, callback: Function) {
+export function deleteCallback(err: any, r: any, callback: Function) {
   if (callback == null) return;
   if (err && callback) return callback(err);
   if (r == null) return callback(null, { result: { ok: 1 } });
@@ -26,7 +26,7 @@ function deleteCallback(err: any, r: any, callback: Function) {
  * @param {object} [options] Optional settings. See Db.prototype.indexInformation for a list of options.
  * @param {Db~resultCallback} [callback] The command result callback
  */
-function indexInformation(db: any, name: string, options?: any, callback?: Function) {
+export function indexInformation(db: any, name: string, options?: any, callback?: Function) {
   // If we specified full information
   const full = options['full'] == null ? false : options['full'];
 
@@ -61,7 +61,7 @@ function indexInformation(db: any, name: string, options?: any, callback?: Funct
     });
 }
 
-function prepareDocs(coll: any, docs: any, options: any) {
+export function prepareDocs(coll: any, docs: any, options: any) {
   const forceServerObjectId =
     typeof options.forceServerObjectId === 'boolean'
       ? options.forceServerObjectId
@@ -82,7 +82,7 @@ function prepareDocs(coll: any, docs: any, options: any) {
 }
 
 // Get the next available document from the cursor, returns null if no more documents are available.
-function nextObject(cursor: any, callback: Function) {
+export function nextObject(cursor: any, callback: Function) {
   if (cursor.s.state === CursorState.CLOSED || (cursor.isDead && cursor.isDead())) {
     return handleCallback(
       callback,
@@ -106,7 +106,13 @@ function nextObject(cursor: any, callback: Function) {
   });
 }
 
-function removeDocuments(server: any, coll: any, selector: any, options: any, callback: Function) {
+export function removeDocuments(
+  server: any,
+  coll: any,
+  selector: any,
+  options: any,
+  callback: Function
+) {
   if (typeof options === 'function') {
     (callback = options), (options = {});
   } else if (typeof selector === 'function') {
@@ -159,7 +165,7 @@ function removeDocuments(server: any, coll: any, selector: any, options: any, ca
   });
 }
 
-function updateDocuments(
+export function updateDocuments(
   server: any,
   coll: any,
   selector: any,
@@ -225,7 +231,7 @@ function updateDocuments(
   });
 }
 
-function updateCallback(err: any, r: any, callback: Function) {
+export function updateCallback(err: any, r: any, callback: Function) {
   if (callback == null) return;
   if (err) return callback(err);
   if (r == null) return callback(null, { result: { ok: 1 } });
@@ -240,13 +246,3 @@ function updateCallback(err: any, r: any, callback: Function) {
     Array.isArray(r.result.upserted) && r.result.upserted.length > 0 ? 0 : r.result.n;
   callback(null, r);
 }
-
-export {
-  deleteCallback,
-  indexInformation,
-  nextObject,
-  prepareDocs,
-  removeDocuments,
-  updateDocuments,
-  updateCallback
-};
