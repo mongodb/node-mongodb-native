@@ -76,8 +76,7 @@ functions:
       params:
         script: |
           ${PREPARE_SHELL}
-          MONGODB_VERSION=${VERSION} TOPOLOGY=${TOPOLOGY} \
-          SSL=${SSL} \
+          MONGODB_VERSION=${VERSION} TOPOLOGY=${TOPOLOGY} SSL=${SSL} \
           ORCHESTRATION_FILE=${ORCHESTRATION_FILE} \
           bash ${DRIVERS_TOOLS}/.evergreen/run-orchestration.sh
     - command: expansions.update
@@ -412,7 +411,6 @@ tasks:
         vars:
           VERSION: latest
           TOPOLOGY: server
-          SSL: nossl
       - func: run tests
   - name: test-latest-replica_set
     tags:
@@ -424,7 +422,6 @@ tasks:
         vars:
           VERSION: latest
           TOPOLOGY: replica_set
-          SSL: nossl
       - func: run tests
   - name: test-latest-sharded_cluster
     tags:
@@ -436,7 +433,6 @@ tasks:
         vars:
           VERSION: latest
           TOPOLOGY: sharded_cluster
-          SSL: nossl
       - func: run tests
   - name: test-4.4-server
     tags:
@@ -448,7 +444,6 @@ tasks:
         vars:
           VERSION: '4.4'
           TOPOLOGY: server
-          SSL: nossl
       - func: run tests
   - name: test-4.4-replica_set
     tags:
@@ -460,7 +455,6 @@ tasks:
         vars:
           VERSION: '4.4'
           TOPOLOGY: replica_set
-          SSL: nossl
       - func: run tests
   - name: test-4.4-sharded_cluster
     tags:
@@ -472,7 +466,6 @@ tasks:
         vars:
           VERSION: '4.4'
           TOPOLOGY: sharded_cluster
-          SSL: nossl
       - func: run tests
   - name: test-4.2-server
     tags:
@@ -484,7 +477,6 @@ tasks:
         vars:
           VERSION: '4.2'
           TOPOLOGY: server
-          SSL: nossl
       - func: run tests
   - name: test-4.2-replica_set
     tags:
@@ -496,7 +488,6 @@ tasks:
         vars:
           VERSION: '4.2'
           TOPOLOGY: replica_set
-          SSL: nossl
       - func: run tests
   - name: test-4.2-sharded_cluster
     tags:
@@ -508,7 +499,6 @@ tasks:
         vars:
           VERSION: '4.2'
           TOPOLOGY: sharded_cluster
-          SSL: nossl
       - func: run tests
   - name: test-4.0-server
     tags:
@@ -520,7 +510,6 @@ tasks:
         vars:
           VERSION: '4.0'
           TOPOLOGY: server
-          SSL: nossl
       - func: run tests
   - name: test-4.0-replica_set
     tags:
@@ -532,7 +521,6 @@ tasks:
         vars:
           VERSION: '4.0'
           TOPOLOGY: replica_set
-          SSL: nossl
       - func: run tests
   - name: test-4.0-sharded_cluster
     tags:
@@ -544,7 +532,6 @@ tasks:
         vars:
           VERSION: '4.0'
           TOPOLOGY: sharded_cluster
-          SSL: nossl
       - func: run tests
   - name: test-3.6-server
     tags:
@@ -556,7 +543,6 @@ tasks:
         vars:
           VERSION: '3.6'
           TOPOLOGY: server
-          SSL: nossl
       - func: run tests
   - name: test-3.6-replica_set
     tags:
@@ -568,7 +554,6 @@ tasks:
         vars:
           VERSION: '3.6'
           TOPOLOGY: replica_set
-          SSL: nossl
       - func: run tests
   - name: test-3.6-sharded_cluster
     tags:
@@ -580,7 +565,6 @@ tasks:
         vars:
           VERSION: '3.6'
           TOPOLOGY: sharded_cluster
-          SSL: nossl
       - func: run tests
   - name: test-3.4-server
     tags:
@@ -592,7 +576,6 @@ tasks:
         vars:
           VERSION: '3.4'
           TOPOLOGY: server
-          SSL: nossl
       - func: run tests
   - name: test-3.4-replica_set
     tags:
@@ -604,7 +587,6 @@ tasks:
         vars:
           VERSION: '3.4'
           TOPOLOGY: replica_set
-          SSL: nossl
       - func: run tests
   - name: test-3.4-sharded_cluster
     tags:
@@ -616,7 +598,6 @@ tasks:
         vars:
           VERSION: '3.4'
           TOPOLOGY: sharded_cluster
-          SSL: nossl
       - func: run tests
   - name: test-3.2-server
     tags:
@@ -628,7 +609,6 @@ tasks:
         vars:
           VERSION: '3.2'
           TOPOLOGY: server
-          SSL: nossl
       - func: run tests
   - name: test-3.2-replica_set
     tags:
@@ -640,7 +620,6 @@ tasks:
         vars:
           VERSION: '3.2'
           TOPOLOGY: replica_set
-          SSL: nossl
       - func: run tests
   - name: test-3.2-sharded_cluster
     tags:
@@ -652,7 +631,6 @@ tasks:
         vars:
           VERSION: '3.2'
           TOPOLOGY: sharded_cluster
-          SSL: nossl
       - func: run tests
   - name: test-3.0-server
     tags:
@@ -664,7 +642,6 @@ tasks:
         vars:
           VERSION: '3.0'
           TOPOLOGY: server
-          SSL: nossl
       - func: run tests
   - name: test-3.0-replica_set
     tags:
@@ -676,7 +653,6 @@ tasks:
         vars:
           VERSION: '3.0'
           TOPOLOGY: replica_set
-          SSL: nossl
       - func: run tests
   - name: test-3.0-sharded_cluster
     tags:
@@ -688,7 +664,6 @@ tasks:
         vars:
           VERSION: '3.0'
           TOPOLOGY: sharded_cluster
-          SSL: nossl
       - func: run tests
   - name: test-2.6-server
     tags:
@@ -700,7 +675,6 @@ tasks:
         vars:
           VERSION: '2.6'
           TOPOLOGY: server
-          SSL: nossl
       - func: run tests
   - name: test-2.6-replica_set
     tags:
@@ -712,7 +686,6 @@ tasks:
         vars:
           VERSION: '2.6'
           TOPOLOGY: replica_set
-          SSL: nossl
       - func: run tests
   - name: test-2.6-sharded_cluster
     tags:
@@ -724,7 +697,6 @@ tasks:
         vars:
           VERSION: '2.6'
           TOPOLOGY: sharded_cluster
-          SSL: nossl
       - func: run tests
   - name: test-atlas-connectivity
     tags:

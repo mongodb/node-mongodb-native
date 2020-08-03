@@ -16,11 +16,7 @@ describe('SSL/TLS Support', function () {
 
   it(
     'should connect with tls',
-    makeConnectionTest(connectionString, {
-      tls: true,
-      tlsCertificateKeyFile,
-      tlsCAFile
-    })
+    makeConnectionTest(connectionString, { tls: true, tlsCertificateKeyFile, tlsCAFile })
   );
 });
 

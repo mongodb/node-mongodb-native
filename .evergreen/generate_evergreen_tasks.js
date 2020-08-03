@@ -74,8 +74,7 @@ function makeTask({ mongoVersion, topology }) {
         func: 'bootstrap mongo-orchestration',
         vars: {
           VERSION: mongoVersion,
-          TOPOLOGY: topology,
-          SSL: 'nossl'
+          TOPOLOGY: topology
         }
       },
       { func: 'run tests' }
