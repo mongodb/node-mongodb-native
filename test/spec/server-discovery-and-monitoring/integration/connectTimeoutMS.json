@@ -1,32 +1,63 @@
 {
   "runOn": [
     {
-      "minServerVersion": "4.4",
-      "topology": [
-        "replicaset"
-      ]
+      "minServerVersion": "4.4"
     }
   ],
   "database_name": "sdam-tests",
-  "collection_name": "test-replSetStepDown",
-  "data": [
-    {
-      "_id": 1
-    },
-    {
-      "_id": 2
-    }
-  ],
+  "collection_name": "connectTimeoutMS",
+  "data": [],
   "tests": [
     {
-      "description": "Rediscover quickly after replSetStepDown",
+      "description": "connectTimeoutMS=0",
       "clientOptions": {
-        "appname": "replSetStepDownTest",
-        "heartbeatFrequencyMS": 60000,
-        "serverSelectionTimeoutMS": 5000,
-        "w": "majority"
+        "retryWrites": false,
+        "connectTimeoutMS": 0,
+        "heartbeatFrequencyMS": 500,
+        "appname": "connectTimeoutMS=0"
       },
       "operations": [
+        {
+          "name": "insertMany",
+          "object": "collection",
+          "arguments": {
+            "documents": [
+              {
+                "_id": 1
+              },
+              {
+                "_id": 2
+              }
+            ]
+          }
+        },
+        {
+          "name": "configureFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 2
+              },
+              "data": {
+                "failCommands": [
+                  "isMaster"
+                ],
+                "appName": "connectTimeoutMS=0",
+                "blockConnection": true,
+                "blockTimeMS": 550
+              }
+            }
+          }
+        },
+        {
+          "name": "wait",
+          "object": "testRunner",
+          "arguments": {
+            "ms": 750
+          }
+        },
         {
           "name": "insertMany",
           "object": "collection",
@@ -42,53 +73,11 @@
           }
         },
         {
-          "name": "recordPrimary",
-          "object": "testRunner"
-        },
-        {
-          "name": "runAdminCommand",
-          "object": "testRunner",
-          "command_name": "replSetFreeze",
-          "arguments": {
-            "command": {
-              "replSetFreeze": 0
-            },
-            "readPreference": {
-              "mode": "Secondary"
-            }
-          }
-        },
-        {
-          "name": "runAdminCommand",
-          "object": "testRunner",
-          "command_name": "replSetStepDown",
-          "arguments": {
-            "command": {
-              "replSetStepDown": 30,
-              "secondaryCatchUpPeriodSecs": 30,
-              "force": false
-            }
-          }
-        },
-        {
-          "name": "waitForPrimaryChange",
+          "name": "assertEventCount",
           "object": "testRunner",
           "arguments": {
-            "timeoutMS": 15000
-          }
-        },
-        {
-          "name": "insertMany",
-          "object": "collection",
-          "arguments": {
-            "documents": [
-              {
-                "_id": 5
-              },
-              {
-                "_id": 6
-              }
-            ]
+            "event": "ServerMarkedUnknownEvent",
+            "count": 0
           }
         },
         {
@@ -104,13 +93,13 @@
         {
           "command_started_event": {
             "command": {
-              "insert": "test-replSetStepDown",
+              "insert": "connectTimeoutMS",
               "documents": [
                 {
-                  "_id": 3
+                  "_id": 1
                 },
                 {
-                  "_id": 4
+                  "_id": 2
                 }
               ]
             },
@@ -121,13 +110,13 @@
         {
           "command_started_event": {
             "command": {
-              "insert": "test-replSetStepDown",
+              "insert": "connectTimeoutMS",
               "documents": [
                 {
-                  "_id": 5
+                  "_id": 3
                 },
                 {
-                  "_id": 6
+                  "_id": 4
                 }
               ]
             },
@@ -150,12 +139,6 @@
             },
             {
               "_id": 4
-            },
-            {
-              "_id": 5
-            },
-            {
-              "_id": 6
             }
           ]
         }

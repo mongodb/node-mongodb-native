@@ -4,6 +4,7 @@ const BSON = require('bson');
 const Topology = require('../../../lib/core/sdam/topology').Topology;
 const Monitor = require('../../../lib/core/sdam/monitor').Monitor;
 const ServerType = require('../../../lib/core/sdam/common').ServerType;
+const ServerDescription = require('../../../lib/core/sdam/server_description').ServerDescription;
 const expect = require('chai').expect;
 
 class MockServer {
@@ -12,10 +13,8 @@ class MockServer {
       bson: new BSON()
     };
 
-    this.description = {
-      type: ServerType.Unknown,
-      address: `${options.host}:${options.port}`
-    };
+    this.description = new ServerDescription(`${options.host}:${options.port}`);
+    this.description.type = ServerType.Unknown;
   }
 }
 
