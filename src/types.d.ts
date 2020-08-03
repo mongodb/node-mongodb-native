@@ -1,5 +1,5 @@
 import type { MongoError } from './error';
-import type { SerializeOptions } from 'bson';
+import type { SerializeOptions as ImportedSerializeOptions } from 'bson';
 import type { MongoClient } from '.';
 
 export type AnyError = MongoError | Error;
@@ -13,7 +13,7 @@ export interface Document {
 }
 
 /** BSON Serialization options. TODO: Remove me when types from BSON are updated */
-export interface SerializeOptions extends SerializeOptions {
+export interface SerializeOptions extends ImportedSerializeOptions {
   /** Return document results as raw BSON buffers */
   fieldsAsRaw?: { [key: string]: boolean };
   /** Promotes BSON values to native types where possible, set to false to only receive wrapper types */
@@ -28,6 +28,7 @@ export interface SerializeOptions extends SerializeOptions {
   ignoreUndefined?: boolean;
 }
 
+/** set of BSON serialize options that are used in the driver */
 export interface BSONSerializeOptions {
   /** Promotes BSON values to native types where possible, set to false to only receive wrapper types */
   promoteValues?: SerializeOptions['promoteValues'];
