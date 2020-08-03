@@ -178,7 +178,7 @@ functions:
       params:
         working_dir: src
         script: |
-          DRIVERS_TOOLS="${DRIVERS_TOOLS}" \
+          NODE_LTS_NAME=${NODE_LTS_NAME} DRIVERS_TOOLS="${DRIVERS_TOOLS}" \
           SSL_CA_FILE="${SSL_CA_FILE}" SSL_KEY_FILE="${SSL_KEY_FILE}" \
           MONGODB_URI="${MONGODB_URI}" bash ${PROJECT_DIRECTORY}/.evergreen/run-ssl-tests.sh
   add aws auth variables to file:
