@@ -84,6 +84,7 @@ import type { OperationOptions } from './operations/operation';
 import type { IndexInformationOptions } from './operations/common_functions';
 import type { CountOptions } from './operations/count';
 import type { BulkWriteResult } from './bulk/common';
+
 const mergeKeys = ['ignoreUndefined'];
 
 export interface Collection {
