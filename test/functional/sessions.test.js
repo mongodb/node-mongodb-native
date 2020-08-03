@@ -1,4 +1,5 @@
 'use strict';
+
 const expect = require('chai').expect;
 const setupDatabase = require('./shared').setupDatabase;
 const withMonitoredClient = require('./shared').withMonitoredClient;
@@ -196,7 +197,7 @@ describe('Sessions', function () {
     generateTopologyTests(testSuites, testContext, testFilter);
   });
 
-  context('unacknowledged writes', () => {
+  context.only('unacknowledged writes', () => {
     it('should not include session for unacknowledged writes', {
       metadata: { requires: { topology: 'single' } },
       test: withMonitoredClient('insert', { clientOptions: { w: 0 } }, function (
@@ -213,6 +214,23 @@ describe('Sessions', function () {
             expect(event.command.writeConcern.w).to.equal(0);
             expect(event.command.lsid).to.equal(undefined);
             done();
+          });
+      })
+    });
+    it('should throw error with explicit session', {
+      metadata: { requires: { topology: 'single' } },
+      test: withMonitoredClient('insert', { clientOptions: { w: 0 } }, function (
+        client,
+        events,
+        done
+      ) {
+        const session = client.startSession({ causalConsistency: true });
+        client
+          .db('test')
+          .collection('foo')
+          .insertOne({ foo: 'bar' }, { session }, err => {
+            expect(err).to.exist;
+            client.close(done);
           });
       })
     });
