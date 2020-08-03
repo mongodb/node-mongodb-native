@@ -273,6 +273,8 @@ const getTaskList = (() => {
 
     const ret = TASKS.filter(task => {
       const tasksWithVars = task.commands.filter(task => !!task.vars);
+      if (task.name.match(/^aws/)) return false;
+
       if (!tasksWithVars.length) {
         return true;
       }

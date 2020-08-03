@@ -1254,8 +1254,6 @@ buildvariants:
       - test-ocsp-soft-fail
       - test-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
       - test-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
-      - aws-latest-auth-test
-      - aws-4.4-auth-test
   - name: macos-1014-dubnium
     display_name: macOS 10.14 Node Dubnium
     run_on: macos-1014
@@ -1434,8 +1432,6 @@ buildvariants:
       - test-ocsp-soft-fail
       - test-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
       - test-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
-      - aws-latest-auth-test
-      - aws-4.4-auth-test
   - name: ubuntu-18.04-dubnium
     display_name: Ubuntu 18.04 Node Dubnium
     run_on: ubuntu1804-test
