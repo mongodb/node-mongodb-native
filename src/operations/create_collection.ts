@@ -5,7 +5,6 @@ import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
 import type { PkFactory } from '../mongo_client';
-import type { ListCollectionsOptions } from './list_collections';
 
 // eslint-disable-next-line
 import type { Collection } from '../collection';
