@@ -58,7 +58,7 @@ function makeIndexSpec(indexOrSpec: any, options: any) {
   return indexSpec;
 }
 
-class IndexesOperation extends OperationBase {
+export class IndexesOperation extends OperationBase {
   collection: any;
 
   constructor(collection: any, options: any) {
@@ -76,7 +76,7 @@ class IndexesOperation extends OperationBase {
   }
 }
 
-class CreateIndexesOperation extends CommandOperation {
+export class CreateIndexesOperation extends CommandOperation {
   collectionName: string;
   onlyReturnNameOfCreatedIndex?: boolean;
   indexes: any;
@@ -147,7 +147,7 @@ class CreateIndexesOperation extends CommandOperation {
   }
 }
 
-class CreateIndexOperation extends CreateIndexesOperation {
+export class CreateIndexOperation extends CreateIndexesOperation {
   constructor(parent: any, collectionName: string, indexOrSpec: any, options: any) {
     // createIndex can be called with a variety of styles:
     //   coll.createIndex('a');
@@ -159,7 +159,7 @@ class CreateIndexOperation extends CreateIndexesOperation {
   }
 }
 
-class EnsureIndexOperation extends CreateIndexOperation {
+export class EnsureIndexOperation extends CreateIndexOperation {
   db: any;
   collectionName: string;
 
@@ -193,7 +193,7 @@ class EnsureIndexOperation extends CreateIndexOperation {
   }
 }
 
-class DropIndexOperation extends CommandOperation {
+export class DropIndexOperation extends CommandOperation {
   collection: any;
   indexName: any;
 
@@ -213,7 +213,7 @@ class DropIndexOperation extends CommandOperation {
   }
 }
 
-class DropIndexesOperation extends DropIndexOperation {
+export class DropIndexesOperation extends DropIndexOperation {
   constructor(collection: any, options: any) {
     super(collection, '*', options);
   }
@@ -226,7 +226,7 @@ class DropIndexesOperation extends DropIndexOperation {
   }
 }
 
-class ListIndexesOperation extends CommandOperation {
+export class ListIndexesOperation extends CommandOperation {
   collectionNamespace: any;
 
   constructor(collection: any, options: any) {
@@ -254,7 +254,7 @@ class ListIndexesOperation extends CommandOperation {
   }
 }
 
-class IndexExistsOperation extends OperationBase {
+export class IndexExistsOperation extends OperationBase {
   collection: any;
   indexes: any;
 
@@ -294,7 +294,7 @@ class IndexExistsOperation extends OperationBase {
   }
 }
 
-class IndexInformationOperation extends OperationBase {
+export class IndexInformationOperation extends OperationBase {
   db: any;
   name: any;
 
@@ -325,14 +325,3 @@ defineAspects(CreateIndexOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH
 defineAspects(EnsureIndexOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
 defineAspects(DropIndexOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
 defineAspects(DropIndexesOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
-export {
-  IndexesOperation,
-  CreateIndexesOperation,
-  CreateIndexOperation,
-  DropIndexOperation,
-  DropIndexesOperation,
-  EnsureIndexOperation,
-  IndexExistsOperation,
-  IndexInformationOperation,
-  ListIndexesOperation
-};

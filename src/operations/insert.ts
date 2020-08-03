@@ -4,7 +4,7 @@ import { CommandOperation } from './command';
 import { applyRetryableWrites, applyWriteConcern, handleCallback, toError } from '../utils';
 import { prepareDocs } from './common_functions';
 
-class InsertOperation extends OperationBase {
+export class InsertOperation extends OperationBase {
   namespace: any;
   operations: any;
   options: any;
@@ -20,7 +20,7 @@ class InsertOperation extends OperationBase {
   }
 }
 
-class InsertOneOperation extends CommandOperation {
+export class InsertOneOperation extends CommandOperation {
   collection: any;
   doc: any;
 
@@ -98,5 +98,3 @@ defineAspects(InsertOneOperation, [
   Aspect.WRITE_OPERATION,
   Aspect.EXECUTE_WITH_SELECTION
 ]);
-
-export { InsertOperation, InsertOneOperation };

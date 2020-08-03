@@ -11,7 +11,7 @@ const push = Array.prototype.push;
  * @param {Cursor} cursor The Cursor instance on which to run.
  * @param {Cursor~resultCallback} callback The result callback.
  */
-function each(cursor: any, callback: Function) {
+export function each(cursor: any, callback: Function) {
   if (!callback) throw MongoError.create({ message: 'callback is mandatory', driver: true });
   if (cursor.isNotified()) return;
   if (cursor.s.state === CursorState.CLOSED || cursor.isDead()) {
@@ -62,7 +62,7 @@ function loop(cursor: any, callback: Function) {
  * @param {Cursor} cursor The Cursor instance from which to get the next document.
  * @param {Cursor~toArrayResultCallback} [callback] The result callback.
  */
-function toArray(cursor: any, callback: Function) {
+export function toArray(cursor: any, callback: Function) {
   const items: any = [];
 
   // Reset cursor
@@ -102,5 +102,3 @@ function toArray(cursor: any, callback: Function) {
 
   fetchDocs();
 }
-
-export { each, toArray };

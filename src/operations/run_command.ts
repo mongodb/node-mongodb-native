@@ -6,7 +6,7 @@ import MongoClient = require('../mongo_client');
 import { MongoDBNamespace } from '../utils';
 import type { Server } from '../sdam/server';
 
-class RunCommandOperation extends CommandOperation {
+export class RunCommandOperation extends CommandOperation {
   command: any;
 
   constructor(parent: MongoClient | Db | Collection, command: any, options: any) {
@@ -20,7 +20,7 @@ class RunCommandOperation extends CommandOperation {
   }
 }
 
-class RunAdminCommandOperation extends RunCommandOperation {
+export class RunAdminCommandOperation extends RunCommandOperation {
   constructor(parent: MongoClient | Db | Collection, command: any, options: any) {
     super(parent, command, options);
     this.ns = new MongoDBNamespace('admin');
@@ -29,4 +29,3 @@ class RunAdminCommandOperation extends RunCommandOperation {
 
 defineAspects(RunCommandOperation, [Aspect.EXECUTE_WITH_SELECTION, Aspect.NO_INHERIT_OPTIONS]);
 defineAspects(RunAdminCommandOperation, [Aspect.EXECUTE_WITH_SELECTION, Aspect.NO_INHERIT_OPTIONS]);
-export { RunCommandOperation, RunAdminCommandOperation };

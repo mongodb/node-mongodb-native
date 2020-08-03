@@ -2,7 +2,7 @@ import { Aspect, defineAspects } from './operation';
 import { handleCallback } from '../utils';
 import { CommandOperation } from './command';
 
-class DropCollectionOperation extends CommandOperation {
+export class DropCollectionOperation extends CommandOperation {
   name: any;
 
   constructor(db: any, name: any, options: any) {
@@ -19,7 +19,7 @@ class DropCollectionOperation extends CommandOperation {
   }
 }
 
-class DropDatabaseOperation extends CommandOperation {
+export class DropDatabaseOperation extends CommandOperation {
   execute(server: any, callback: Function) {
     super.executeCommand(server, { dropDatabase: 1 }, (err?: any, result?: any) => {
       if (err) return handleCallback(callback, err);
@@ -31,4 +31,3 @@ class DropDatabaseOperation extends CommandOperation {
 
 defineAspects(DropCollectionOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
 defineAspects(DropDatabaseOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
-export { DropCollectionOperation, DropDatabaseOperation };
