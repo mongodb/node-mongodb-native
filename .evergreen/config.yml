@@ -233,9 +233,6 @@ functions:
         working_dir: src
         script: |
           ${PREPARE_SHELL}
-          /opt/mongodbtoolchain/v3/bin/python3 -m venv ./venv
-          . venv/bin/activate
-          ./venv/bin/pip3 install boto3
           cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
           ${MONGODB_BINARIES}/mongo aws_e2e_assume_role.js
     - command: shell.exec
@@ -268,7 +265,6 @@ functions:
         working_dir: src
         script: |
           ${PREPARE_SHELL}
-          . venv/bin/activate
           cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
           ${MONGODB_BINARIES}/mongo aws_e2e_ec2.js
     - command: shell.exec
@@ -361,7 +357,7 @@ functions:
         script: |
           cd ${DRIVERS_TOOLS}/.evergreen/ocsp
           /opt/mongodbtoolchain/v3/bin/python3 -m venv ./venv
-          ./venv/bin/pip3 install -r ${DRIVERS_TOOLS}/.evergreen/ocsp/mock-ocsp-responder-requirements.txt
+          ./venv/bin/pip3 install asn1crypto oscrypto bottle
     - command: shell.exec
       params:
         background: true
@@ -378,7 +374,7 @@ functions:
         script: |
           cd ${DRIVERS_TOOLS}/.evergreen/ocsp
           /opt/mongodbtoolchain/v3/bin/python3 -m venv ./venv
-          ./venv/bin/pip3 install -r ${DRIVERS_TOOLS}/.evergreen/ocsp/mock-ocsp-responder-requirements.txt
+          ./venv/bin/pip3 install asn1crypto oscrypto bottle
     - command: shell.exec
       params:
         background: true
