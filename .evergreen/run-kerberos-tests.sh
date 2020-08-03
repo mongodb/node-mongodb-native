@@ -26,6 +26,7 @@ ls -la "$(pwd)/.evergreen/drivers.keytab"
 echo "Running kinit"
 kinit -k -t "$(pwd)/.evergreen/drivers.keytab" -p drivers@LDAPTEST.10GEN.CC
 
+npm install kerberos
 npm run check:kerberos
 
 # destroy ticket
