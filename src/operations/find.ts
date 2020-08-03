@@ -4,7 +4,7 @@ import { ReadPreference } from '../read_preference';
 import { maxWireVersion } from '../utils';
 import { MongoError } from '../error';
 
-class FindOperation extends OperationBase {
+export class FindOperation extends OperationBase {
   ns: any;
   cmd: any;
   readPreference: any;
@@ -39,5 +39,3 @@ defineAspects(FindOperation, [
   Aspect.RETRYABLE,
   Aspect.EXECUTE_WITH_SELECTION
 ]);
-
-export = FindOperation;

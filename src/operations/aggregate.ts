@@ -1,4 +1,4 @@
-import CommandOperation = require('./command');
+import { CommandOperation } from './command';
 import { ReadPreference } from '../read_preference';
 import { MongoError } from '../error';
 import { maxWireVersion } from '../utils';
@@ -7,7 +7,7 @@ import { Aspect, defineAspects } from './operation';
 const DB_AGGREGATE_COLLECTION = 1;
 const MIN_WIRE_VERSION_$OUT_READ_CONCERN_SUPPORT = 8;
 
-class AggregateOperation extends CommandOperation {
+export class AggregateOperation extends CommandOperation {
   target: any;
   pipeline: any;
   hasWriteStage: boolean;
@@ -103,5 +103,3 @@ defineAspects(AggregateOperation, [
   Aspect.RETRYABLE,
   Aspect.EXECUTE_WITH_SELECTION
 ]);
-
-export = AggregateOperation;

@@ -1,7 +1,7 @@
 import Logger = require('../logger');
 import { ReadPreference } from '../read_preference';
 import { handleCallback, MongoDBNamespace } from '../utils';
-import executeOperation = require('../operations/execute_operation');
+import { executeOperation } from '../operations/execute_operation';
 import { Readable } from 'stream';
 import { MongoError, MongoNetworkError } from '../error';
 import { Long } from '../bson';

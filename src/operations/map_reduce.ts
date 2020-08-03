@@ -9,7 +9,7 @@ import {
   toError
 } from '../utils';
 import { ReadPreference } from '../read_preference';
-import CommandOperation = require('./command');
+import { CommandOperation } from './command';
 import { defineAspects, Aspect } from './operation';
 
 const exclusionList = [
@@ -32,7 +32,7 @@ const exclusionList = [
  * @property {(Function|string)} reduce The reduce function.
  * @property {object} [options] Optional settings. See Collection.prototype.mapReduce for a list of options.
  */
-class MapReduceOperation extends CommandOperation {
+export class MapReduceOperation extends CommandOperation {
   collection: any;
   map: any;
   reduce: any;
@@ -188,4 +188,3 @@ function processScope(scope: any) {
 }
 
 defineAspects(MapReduceOperation, [Aspect.EXECUTE_WITH_SELECTION]);
-export = MapReduceOperation;

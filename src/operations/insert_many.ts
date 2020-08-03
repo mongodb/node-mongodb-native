@@ -1,9 +1,9 @@
 import { OperationBase } from './operation';
-import BulkWriteOperation = require('./bulk_write');
+import { BulkWriteOperation } from './bulk_write';
 import { MongoError } from '../error';
 import { prepareDocs } from './common_functions';
 
-class InsertManyOperation extends OperationBase {
+export class InsertManyOperation extends OperationBase {
   collection: any;
   docs: any;
 
@@ -60,5 +60,3 @@ function mapInsertManyResults(docs: any, r: any) {
 
   return finalResult;
 }
-
-export = InsertManyOperation;

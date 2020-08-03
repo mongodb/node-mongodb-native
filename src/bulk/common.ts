@@ -11,7 +11,7 @@ import {
   hasAtomicOperators,
   maxWireVersion
 } from '../utils';
-import executeOperation = require('../operations/execute_operation');
+import { executeOperation } from '../operations/execute_operation';
 import { InsertOperation } from '../operations/insert';
 import { UpdateOperation } from '../operations/update';
 import { DeleteOperation } from '../operations/delete';

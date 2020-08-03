@@ -1,7 +1,7 @@
-import OptionsOperation = require('./options_operation');
+import { OptionsOperation } from './options_operation';
 import { handleCallback } from '../utils';
 
-class IsCappedOperation extends OptionsOperation {
+export class IsCappedOperation extends OptionsOperation {
   constructor(collection: any, options: any) {
     super(collection, options);
   }
@@ -13,5 +13,3 @@ class IsCappedOperation extends OptionsOperation {
     });
   }
 }
-
-export = IsCappedOperation;

@@ -22,7 +22,7 @@ const MMAPv1_RETRY_WRITES_ERROR_MESSAGE =
  * @param {Operation} operation The operation to execute
  * @param {Function} callback The command result callback
  */
-function executeOperation(topology: any, operation: any, callback?: Function) {
+export function executeOperation(topology: any, operation: any, callback?: Function) {
   const Promise = PromiseProvider.get();
 
   if (topology == null) {
@@ -235,5 +235,3 @@ function selectServerForSessionSupport(topology: any, operation: any, callback: 
 
   return result;
 }
-
-export = executeOperation;

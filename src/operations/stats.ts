@@ -1,5 +1,5 @@
 import { Aspect, defineAspects } from './operation';
-import CommandOperation = require('./command');
+import { CommandOperation } from './command';
 
 /**
  * Get all the collection statistics.

@@ -1,4 +1,4 @@
-import CommandOperation = require('./command');
+import { CommandOperation } from './command';
 import { defineAspects, Aspect } from './operation';
 import Db = require('../db');
 import Collection = require('../collection');

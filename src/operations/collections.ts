@@ -2,7 +2,7 @@ import { OperationBase } from './operation';
 import { handleCallback } from '../utils';
 import { loadCollection } from '../dynamic_loaders';
 
-class CollectionsOperation extends OperationBase {
+export class CollectionsOperation extends OperationBase {
   db: any;
 
   constructor(db: any, options: any) {
@@ -44,5 +44,3 @@ class CollectionsOperation extends OperationBase {
     });
   }
 }
-
-export = CollectionsOperation;

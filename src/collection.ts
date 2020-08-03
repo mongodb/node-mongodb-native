@@ -20,9 +20,9 @@ import ChangeStream = require('./change_stream');
 import { WriteConcern } from './write_concern';
 import ReadConcern = require('./read_concern');
 import { AggregationCursor, CommandCursor, Cursor } from './cursor';
-import AggregateOperation = require('./operations/aggregate');
-import BulkWriteOperation = require('./operations/bulk_write');
-import CountDocumentsOperation = require('./operations/count_documents');
+import { AggregateOperation } from './operations/aggregate';
+import { BulkWriteOperation } from './operations/bulk_write';
+import { CountDocumentsOperation } from './operations/count_documents';
 import {
   CreateIndexesOperation,
   CreateIndexOperation,
@@ -34,28 +34,28 @@ import {
   IndexInformationOperation,
   ListIndexesOperation
 } from './operations/indexes';
-import DistinctOperation = require('./operations/distinct');
+import { DistinctOperation } from './operations/distinct';
 import { DropCollectionOperation } from './operations/drop';
-import EstimatedDocumentCountOperation = require('./operations/estimated_document_count');
-import FindOperation = require('./operations/find');
-import FindOneOperation = require('./operations/find_one');
+import { EstimatedDocumentCountOperation } from './operations/estimated_document_count';
+import { FindOperation } from './operations/find';
+import { FindOneOperation } from './operations/find_one';
 import {
   FindAndModifyOperation,
   FindOneAndDeleteOperation,
   FindOneAndReplaceOperation,
   FindOneAndUpdateOperation
 } from './operations/find_and_modify';
-import InsertManyOperation = require('./operations/insert_many');
+import { InsertManyOperation } from './operations/insert_many';
 import { InsertOneOperation } from './operations/insert';
 import { UpdateOneOperation, UpdateManyOperation } from './operations/update';
 import { DeleteOneOperation, DeleteManyOperation } from './operations/delete';
-import IsCappedOperation = require('./operations/is_capped');
-import MapReduceOperation = require('./operations/map_reduce');
-import OptionsOperation = require('./operations/options_operation');
-import RenameOperation = require('./operations/rename');
-import ReplaceOneOperation = require('./operations/replace_one');
+import { IsCappedOperation } from './operations/is_capped';
+import { MapReduceOperation } from './operations/map_reduce';
+import { OptionsOperation } from './operations/options_operation';
+import { RenameOperation } from './operations/rename';
+import { ReplaceOneOperation } from './operations/replace_one';
 import { CollStatsOperation } from './operations/stats';
-import executeOperation = require('./operations/execute_operation');
+import { executeOperation } from './operations/execute_operation';
 import { EvalGroupOperation, GroupOperation } from './operations/group';
 const mergeKeys = ['ignoreUndefined'];
 

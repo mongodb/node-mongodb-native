@@ -1,4 +1,4 @@
-import CommandOperation = require('./command');
+import { CommandOperation } from './command';
 import { Aspect, defineAspects } from './operation';
 import { loadCollection } from '../dynamic_loaders';
 
@@ -17,7 +17,7 @@ const ILLEGAL_COMMAND_FIELDS = new Set([
   'writeConcern'
 ]);
 
-class CreateCollectionOperation extends CommandOperation {
+export class CreateCollectionOperation extends CommandOperation {
   db: any;
   name: any;
 
@@ -65,4 +65,3 @@ class CreateCollectionOperation extends CommandOperation {
 }
 
 defineAspects(CreateCollectionOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
-export = CreateCollectionOperation;

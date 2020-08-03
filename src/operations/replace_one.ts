@@ -1,9 +1,9 @@
 import { defineAspects, Aspect } from './operation';
 import { updateDocuments } from './common_functions';
 import { hasAtomicOperators } from '../utils';
-import CommandOperation = require('./command');
+import { CommandOperation } from './command';
 
-class ReplaceOneOperation extends CommandOperation {
+export class ReplaceOneOperation extends CommandOperation {
   collection: any;
   filter: any;
   replacement: any;
@@ -59,5 +59,3 @@ defineAspects(ReplaceOneOperation, [
   Aspect.WRITE_OPERATION,
   Aspect.EXECUTE_WITH_SELECTION
 ]);
-
-export = ReplaceOneOperation;

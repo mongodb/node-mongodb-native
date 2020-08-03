@@ -1,9 +1,9 @@
 import { applyWriteConcern } from './utils';
-import AddUserOperation = require('./operations/add_user');
-import RemoveUserOperation = require('./operations/remove_user');
-import ValidateCollectionOperation = require('./operations/validate_collection');
-import ListDatabasesOperation = require('./operations/list_databases');
-import executeOperation = require('./operations/execute_operation');
+import { AddUserOperation } from './operations/add_user';
+import { RemoveUserOperation } from './operations/remove_user';
+import { ValidateCollectionOperation } from './operations/validate_collection';
+import { ListDatabasesOperation } from './operations/list_databases';
+import { executeOperation } from './operations/execute_operation';
 import { RunCommandOperation } from './operations/run_command';
 
 /**

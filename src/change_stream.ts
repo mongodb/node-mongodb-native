@@ -2,7 +2,7 @@ import Denque = require('denque');
 import { EventEmitter } from 'events';
 import { MongoError, isResumableError } from './error';
 import { Cursor } from './cursor';
-import AggregateOperation = require('./operations/aggregate');
+import { AggregateOperation } from './operations/aggregate';
 import { loadCollection, loadDb, loadMongoClient } from './dynamic_loaders';
 import { relayEvents, maxWireVersion, calculateDurationInMs, now, maybePromise } from './utils';
 const kResumeQueue = Symbol('resumeQueue');
