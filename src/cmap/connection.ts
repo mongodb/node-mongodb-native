@@ -340,7 +340,7 @@ function messageHandler(conn: Connection) {
     }
 
     // NODE-2382: re-enable in our glorious non-leaky abstraction future
-    // callback(null, operationDescription.fullResult ? message : message.documents[0]);
+    // callback(undefined, operationDescription.fullResult ? message : message.documents[0]);
 
     callback(
       undefined,
