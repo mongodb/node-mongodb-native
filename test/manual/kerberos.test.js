@@ -10,15 +10,15 @@ const { MongoClient } = require('../../src');
 // password: (not shown)
 
 describe('Kerberos', function () {
-  if (process.env.MONGODB_URL == null) {
-    console.log('skipping Kerberos tests, MONGODB_URL environment variable is not defined');
+  if (process.env.MONGODB_URI == null) {
+    console.log('skipping Kerberos tests, MONGODB_URI environment variable is not defined');
 
     return;
   }
   it('Should Correctly Authenticate using kerberos with MongoClient', {
     metadata: { requires: { os: '!win32' } },
     test: function (done) {
-      const client = new MongoClient(process.env.MONGODB_URL);
+      const client = new MongoClient(process.env.MONGODB_URI);
       client.connect(function (err, client) {
         test.equal(null, err);
         var db = client.db('kerberos');
