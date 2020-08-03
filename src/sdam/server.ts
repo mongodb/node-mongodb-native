@@ -306,11 +306,11 @@ export class Server extends EventEmitter {
   /**
    * Execute a query against the server
    *
-   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
-   * @param {object} cmd The command document for the query
-   * @param {any} cursorState
-   * @param {object} options Optional settings
-   * @param {Function} callback
+   * @param ns The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param cmd The command document for the query
+   * @param cursorState
+   * @param options Optional settings
+   * @param callback
    */
   query(
     ns: string,
@@ -337,11 +337,11 @@ export class Server extends EventEmitter {
   /**
    * Execute a `getMore` against the server
    *
-   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
-   * @param {object} cursorState State data associated with the cursor calling this method
-   * @param {any} batchSize
-   * @param {object} options Optional settings
-   * @param {Function} callback
+   * @param ns The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param cursorState State data associated with the cursor calling this method
+   * @param batchSize
+   * @param options Optional settings
+   * @param callback
    */
   getMore(
     ns: string,
@@ -374,9 +374,9 @@ export class Server extends EventEmitter {
   /**
    * Execute a `killCursors` command against the server
    *
-   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
-   * @param {object} cursorState State data associated with the cursor calling this method
-   * @param {Function} callback
+   * @param ns The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param cursorState State data associated with the cursor calling this method
+   * @param callback
    */
   killCursors(ns: string, cursorState: InternalCursorState, callback: Callback) {
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {

@@ -42,12 +42,6 @@ class SrvPoller extends EventEmitter {
   generation: number;
   _timeout?: NodeJS.Timeout;
 
-  /**
-   * @param {object} options
-   * @param {string} options.srvHost
-   * @param {number} [options.heartbeatFrequencyMS]
-   * @param {Function} [options.logger]
-   */
   constructor(options: SrvPollerOptions) {
     super();
 

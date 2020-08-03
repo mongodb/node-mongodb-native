@@ -293,13 +293,7 @@ export class Topology extends EventEmitter {
     return new ServerCapabilities(this.lastIsMaster());
   }
 
-  /**
-   * Initiate server connect
-   *
-   * @param {object} [options] Optional settings
-   * @param {Array} [options.auth=null] Array of auth options to apply on connect
-   * @param {Function} [callback] An optional callback called once on the first connected server
-   */
+  /** Initiate server connect */
   connect(options?: ConnectOptions, callback?: Callback) {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
@@ -541,13 +535,8 @@ export class Topology extends EventEmitter {
     return session;
   }
 
-  /**
-   * Send endSessions command(s) with the given session ids
-   *
-   * @param {Array} sessions The sessions to end
-   * @param {Function} [callback]
-   */
-  endSessions(sessions: ClientSession[], callback?: Function) {
+  /** Send endSessions command(s) with the given session ids */
+  endSessions(sessions: ClientSession[], callback?: Callback) {
     if (!Array.isArray(sessions)) {
       sessions = [sessions];
     }
@@ -640,13 +629,13 @@ export class Topology extends EventEmitter {
     }
   }
 
-  auth(credentials: any, callback: Function) {
+  auth(credentials: any, callback: Callback) {
     if (typeof credentials === 'function') (callback = credentials), (credentials = null);
-    if (typeof callback === 'function') callback(null, true);
+    if (typeof callback === 'function') callback(undefined, true);
   }
 
-  logout(callback: Function) {
-    if (typeof callback === 'function') callback(null, true);
+  logout(callback: Callback) {
+    if (typeof callback === 'function') callback(undefined, true);
   }
 
   /**
