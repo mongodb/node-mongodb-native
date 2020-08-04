@@ -3,7 +3,7 @@ const { MongoClient } = require('../../src');
 
 const REQUIRED_ENV = ['MONGODB_URI', 'SSL_KEY_FILE', 'SSL_CA_FILE'];
 
-describe('SSL/TLS Support', function () {
+describe('TLS Support', function () {
   for (let key of REQUIRED_ENV) {
     if (process.env[key] == null) {
       throw new Error(`skipping SSL tests, ${key} environment variable is not defined`);
