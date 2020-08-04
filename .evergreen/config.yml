@@ -179,7 +179,8 @@ functions:
       params:
         working_dir: src
         script: |
-          MONGODB_URI='${gssapi_auth_mongodb_uri}' KEYTAB='${gssapi_auth_keytab_base64}' \
+          KRB5_KEYTAB='${gssapi_auth_keytab_base64}' KRB5_PRINCIPAL='${gssapi_auth_principal}' \
+          MONGODB_URI='${gssapi_auth_mongodb_uri}' \
           NODE_LTS_NAME='${NODE_LTS_NAME}' bash ${PROJECT_DIRECTORY}/.evergreen/run-kerberos-tests.sh
   add aws auth variables to file:
     - command: shell.exec

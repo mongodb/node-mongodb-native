@@ -1,351 +1,82 @@
 'use strict';
-
-const format = require('util').format;
-const test = require('../functional/shared').assert;
 const { MongoClient } = require('../../src');
-
-// You need to set up the kinit tab first
-// https://wiki.mongodb.com/pages/viewpage.action?title=Testing+Kerberos&spaceKey=DH
-// kinit -p drivers@LDAPTEST.10GEN.CC
-// password: (not shown)
+const chai = require('chai');
+const expect = chai.expect;
 
 describe('Kerberos', function () {
   if (process.env.MONGODB_URI == null) {
     console.log('skipping Kerberos tests, MONGODB_URI environment variable is not defined');
     return;
   }
+  let krb5Uri = process.env.MONGODB_URI;
   if (process.platform === 'win32') {
-    console.log('Only running Win32 tests');
-    return;
+    console.log('Win32 run detected');
+    if (process.env.LDAPTEST_PASSWORD == null) {
+      throw new Error('The env parameter LDAPTEST_PASSWORD must be set');
+    }
+    const parts = krb5Uri.split('@', 2);
+    krb5Uri = `${parts[0]}:${process.env.LDAPTEST_PASSWORD}@${parts[1]}`;
   }
 
-  it.only('Should Correctly Authenticate using kerberos with MongoClient', function (done) {
-    const client = new MongoClient(process.env.MONGODB_URI);
+  it('should authenticate with original uri', function (done) {
+    const client = new MongoClient(krb5Uri);
     client.connect(function (err, client) {
-      test.equal(null, err);
-      var db = client.db('kerberos');
-
-      db.collection('test')
-        .find()
-        .toArray(function (err, docs) {
-          test.equal(null, err);
-          test.ok(true, docs[0].kerberos);
-
-          client.close(done);
-        });
-    });
-  });
-
-  it('Validate that SERVICE_REALM and CANONICALIZE_HOST_NAME is passed in', function (done) {
-    var configuration = this.configuration;
-
-    // KDC Server
-    var server = 'ldaptest.10gen.cc';
-    var principal = 'drivers@LDAPTEST.10GEN.CC';
-    var urlEncodedPrincipal = encodeURIComponent(principal);
-    const url = format(
-      'mongodb://%s@%s/kerberos?authMechanism=GSSAPI&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:false,SERVICE_REALM:windows&maxPoolSize=1',
-      urlEncodedPrincipal,
-      server
-    );
-
-    const client = configuration.newClient(url);
-    client.connect(function (err, client) {
-      test.equal(null, err);
-      var db = client.db('kerberos');
-
-      db.collection('test')
-        .find()
-        .toArray(function (err, docs) {
-          test.equal(null, err);
-          test.ok(true, docs[0].kerberos);
-
-          client.close(done);
-        });
-    });
-  });
-
-  it('Should Correctly Authenticate using kerberos with MongoClient and authentication properties', function (done) {
-    var configuration = this.configuration;
-
-    // KDC Server
-    var server = 'ldaptest.10gen.cc';
-    var principal = 'drivers@LDAPTEST.10GEN.CC';
-    var urlEncodedPrincipal = encodeURIComponent(principal);
-    const url = format(
-      'mongodb://%s@%s/kerberos?authMechanism=GSSAPI&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:false&maxPoolSize=1',
-      urlEncodedPrincipal,
-      server
-    );
-
-    const client = configuration.newClient(url);
-    client.connect(function (err, client) {
-      test.equal(null, err);
-      var db = client.db('kerberos');
-
-      db.collection('test')
-        .find()
-        .toArray(function (err, docs) {
-          test.equal(null, err);
-          test.ok(true, docs[0].kerberos);
-
-          client.close(done);
-        });
-    });
-  });
-
-  it('Should Correctly Authenticate using kerberos with MongoClient and then reconnect', function (done) {
-    var configuration = this.configuration;
-
-    // KDC Server
-    var server = 'ldaptest.10gen.cc';
-    var principal = 'drivers@LDAPTEST.10GEN.CC';
-    var urlEncodedPrincipal = encodeURIComponent(principal);
-    const url = format(
-      'mongodb://%s@%s/kerberos?authMechanism=GSSAPI&gssapiServiceName=mongodb&maxPoolSize=5',
-      urlEncodedPrincipal,
-      server
-    );
-
-    const client = configuration.newClient(url);
-    client.connect(function (err, client) {
-      test.equal(null, err);
-
+      expect(err).to.not.exist;
       client
         .db('kerberos')
         .collection('test')
-        .findOne(function (err, doc) {
-          test.equal(null, err);
-          test.equal(true, doc.kerberos);
-
-          client.topology.once('reconnect', function () {
-            // Await reconnect and re-authentication
-            client
-              .db('kerberos')
-              .collection('test')
-              .findOne(function (err, doc) {
-                test.equal(null, err);
-                test.equal(true, doc.kerberos);
-
-                // Attempt disconnect again
-                client.topology.connections()[0].destroy();
-
-                // Await reconnect and re-authentication
-                client
-                  .db('kerberos')
-                  .collection('test')
-                  .findOne(function (err, doc) {
-                    test.equal(null, err);
-                    test.equal(true, doc.kerberos);
-
-                    client.close(done);
-                  });
-              });
-          });
-
-          // Force close
-          client.topology.connections()[0].destroy();
-        });
-    });
-  });
-
-  it('Should Correctly Authenticate authenticate method manually', function (done) {
-    var configuration = this.configuration;
-    var MongoClient = configuration.require.MongoClient,
-      Server = configuration.require.Server;
-
-    // KDC Server
-    var server = 'ldaptest.10gen.cc';
-    var principal = 'drivers@LDAPTEST.10GEN.CC';
-
-    var client = new MongoClient(new Server(server, 27017), {
-      w: 1,
-      user: principal,
-      authMechanism: 'GSSAPI'
-    });
-    client.connect(function (err, client) {
-      test.equal(null, err);
-
-      // Await reconnect and re-authentication
-      client
-        .db('kerberos')
-        .collection('test')
-        .findOne(function (err, doc) {
-          test.equal(null, err);
-          test.equal(true, doc.kerberos);
+        .find()
+        .toArray(function (err, docs) {
+          expect(err).to.not.exist;
+          expect(docs[0].kerberos).to.be.true;
 
           client.close(done);
         });
     });
   });
 
-  it.only('Should Fail to Authenticate due to illegal service name', function (done) {
-    const url = format(
-      '%s/test?authMechanism=GSSAPI&gssapiServiceName=mongodb2&maxPoolSize=1',
-      process.env.MONGODB_URL
+  it('validate that SERVICE_REALM and CANONICALIZE_HOST_NAME can be passed in', function (done) {
+    const client = new MongoClient(
+      `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:false,SERVICE_REALM:windows&maxPoolSize=1`
     );
+    client.connect(function (err, client) {
+      expect(err).to.not.exist;
+      client
+        .db('kerberos')
+        .collection('test')
+        .find()
+        .toArray(function (err, docs) {
+          expect(err).to.not.exist;
+          expect(docs[0].kerberos).to.be.true;
 
-    const client = new MongoClient(url);
+          client.close(done);
+        });
+    });
+  });
+
+  it('should authenticate with additional authentication properties', function (done) {
+    const client = new MongoClient(
+      `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:false&maxPoolSize=1`
+    );
+    client.connect(function (err, client) {
+      expect(err).to.not.exist;
+      client
+        .db('kerberos')
+        .collection('test')
+        .find()
+        .toArray(function (err, docs) {
+          expect(err).to.not.exist;
+          expect(docs[0].kerberos).to.be.true;
+
+          client.close(done);
+        });
+    });
+  });
+
+  it.skip('should fail to authenticate due to illegal service name', function (done) {
+    const client = new MongoClient(`${krb5Uri}&gssapiServiceName=mongodb2&maxPoolSize=1`);
     client.connect(function (err) {
-      test.ok(err != null);
-      done();
-    });
-  });
-});
-
-describe('Kerberos - Win32', function () {
-  if (process.env.MONGODB_URI == null) {
-    console.log('skipping Kerberos tests, MONGODB_URI environment variable is not defined');
-    return;
-  }
-  if (process.platform !== 'win32') {
-    console.log(`Platform is ${process.platform}, skipping Win32 tests`);
-    return;
-  }
-
-  it('Should Correctly Authenticate on Win32 using kerberos with MongoClient', function (done) {
-    var configuration = this.configuration;
-
-    // KDC Server
-    var server = 'ldaptest.10gen.cc';
-    var principal = 'drivers@LDAPTEST.10GEN.CC';
-    var pass = process.env['LDAPTEST_PASSWORD'];
-
-    if (pass == null) throw new Error('The env parameter LDAPTEST_PASSWORD must be set');
-    var urlEncodedPrincipal = encodeURIComponent(principal);
-    const url = format(
-      'mongodb://%s:%s@%s/kerberos?authMechanism=GSSAPI&maxPoolSize=1',
-      urlEncodedPrincipal,
-      pass,
-      server
-    );
-
-    const client = configuration.newClient(url);
-    client.connect(function (err, client) {
-      test.equal(null, err);
-      var db = client.db('kerberos');
-
-      db.collection('test')
-        .find()
-        .toArray(function (err, docs) {
-          test.equal(null, err);
-          test.ok(true, docs[0].kerberos);
-
-          client.close(done);
-        });
-    });
-  });
-
-  it('Should Correctly Authenticate using kerberos on Win32 with MongoClient and then reconnect', function (done) {
-    var configuration = this.configuration;
-
-    // KDC Server
-    var server = 'ldaptest.10gen.cc';
-    var principal = 'drivers@LDAPTEST.10GEN.CC';
-    var pass = process.env['LDAPTEST_PASSWORD'];
-    if (pass == null) throw new Error('The env parameter LDAPTEST_PASSWORD must be set');
-    var urlEncodedPrincipal = encodeURIComponent(principal);
-    const url = format(
-      'mongodb://%s:%s@%s/kerberos?authMechanism=GSSAPI&maxPoolSize=5',
-      urlEncodedPrincipal,
-      pass,
-      server
-    );
-
-    const client = configuration.newClient(url);
-    client.connect(function (err, client) {
-      test.equal(null, err);
-
-      client
-        .db('kerberos')
-        .collection('test')
-        .findOne(function (err, doc) {
-          test.equal(null, err);
-          test.equal(true, doc.kerberos);
-
-          client.topology.once('reconnect', function () {
-            // Await reconnect and re-authentication
-            client
-              .db('kerberos')
-              .collection('test')
-              .findOne(function (err, doc) {
-                test.equal(null, err);
-                test.equal(true, doc.kerberos);
-
-                // Attempt disconnect again
-                client.topology.connections()[0].destroy();
-
-                // Await reconnect and re-authentication
-                client
-                  .db('kerberos')
-                  .collection('test')
-                  .findOne(function (err, doc) {
-                    test.equal(null, err);
-                    test.equal(true, doc.kerberos);
-
-                    client.close(done);
-                  });
-              });
-          });
-
-          // Force close
-          client.topology.connections()[0].destroy();
-        });
-    });
-  });
-
-  it('Should Correctly Authenticate on Win32 authenticate method manually', function (done) {
-    var configuration = this.configuration;
-    var MongoClient = configuration.require.MongoClient,
-      Server = configuration.require.Server;
-
-    // KDC Server
-    var server = 'ldaptest.10gen.cc';
-    var principal = 'drivers@LDAPTEST.10GEN.CC';
-    var pass = process.env['LDAPTEST_PASSWORD'];
-    if (pass == null) throw new Error('The env parameter LDAPTEST_PASSWORD must be set');
-    var client = new MongoClient(new Server(server, 27017), {
-      w: 1,
-      user: principal,
-      password: pass,
-      authMechanism: 'GSSAPI'
-    });
-
-    client.connect(function (err, client) {
-      test.equal(null, err);
-      var db = client.db('kerberos');
-
-      db.collection('test')
-        .find()
-        .toArray(function (err, docs) {
-          test.equal(null, err);
-          test.ok(true, docs[0].kerberos);
-
-          client.close(done);
-        });
-    });
-  });
-
-  it('Should Fail to Authenticate due to illegal service name on win32', function (done) {
-    var configuration = this.configuration;
-
-    // KDC Server
-    var server = 'ldaptest.10gen.cc';
-    var principal = 'drivers@LDAPTEST.10GEN.CC';
-    var pass = process.env['LDAPTEST_PASSWORD'];
-
-    if (pass == null) throw new Error('The env parameter LDAPTEST_PASSWORD must be set');
-    var urlEncodedPrincipal = encodeURIComponent(principal);
-    const url = format(
-      'mongodb://%s:%s@%s/kerberos?authMechanism=GSSAPI&gssapiServiceName=mongodb2&maxPoolSize=1',
-      urlEncodedPrincipal,
-      pass,
-      server
-    );
-
-    const client = configuration.newClient(url);
-    client.connect(function (err) {
-      test.ok(err != null);
+      expect(err).to.exist;
       done();
     });
   });
