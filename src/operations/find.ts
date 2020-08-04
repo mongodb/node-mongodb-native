@@ -3,13 +3,15 @@ import { Aspect, defineAspects } from './operation';
 import { ReadPreference } from '../read_preference';
 import { maxWireVersion } from '../utils';
 import { MongoError } from '../error';
+import type { Callback } from '../types';
+import type { Server } from '../sdam/server';
 
 export class FindOperation extends OperationBase {
   ns: any;
   cmd: any;
   readPreference: any;
   cursorState: any;
-  server: any;
+  server?: Server;
 
   constructor(collection: any, ns: any, command: any, options: any) {
     super(options);
@@ -19,7 +21,7 @@ export class FindOperation extends OperationBase {
     this.readPreference = ReadPreference.resolve(collection, this.options);
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback) {
     // copied from `CommandOperationV2`, to be subclassed in the future
     this.server = server;
 
@@ -28,7 +30,7 @@ export class FindOperation extends OperationBase {
       return;
     }
 
-    // TOOD: use `MongoDBNamespace` through and through
+    // TODO: use `MongoDBNamespace` through and through
     const cursorState = this.cursorState || {};
     server.query(this.ns.toString(), this.cmd, cursorState, this.options, callback);
   }

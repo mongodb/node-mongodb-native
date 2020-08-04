@@ -1,6 +1,7 @@
 import { handleCallback } from '../utils';
 import { MongoError } from '../error';
 import { CursorState } from '../cursor/core_cursor';
+import type { Callback } from '../types';
 const push = Array.prototype.push;
 
 /**
@@ -11,7 +12,7 @@ const push = Array.prototype.push;
  * @param {Cursor} cursor The Cursor instance on which to run.
  * @param {Cursor~resultCallback} callback The result callback.
  */
-export function each(cursor: any, callback: Function) {
+export function each(cursor: any, callback: Callback) {
   if (!callback) throw MongoError.create({ message: 'callback is mandatory', driver: true });
   if (cursor.isNotified()) return;
   if (cursor.s.state === CursorState.CLOSED || cursor.isDead()) {
@@ -46,7 +47,7 @@ export function each(cursor: any, callback: Function) {
 
 // Trampoline emptying the number of retrieved items
 // without incurring a nextTick operation
-function loop(cursor: any, callback: Function) {
+function loop(cursor: any, callback: Callback) {
   // No more items we are done
   if (cursor.bufferedCount() === 0) return;
   // Get the next document
@@ -62,7 +63,7 @@ function loop(cursor: any, callback: Function) {
  * @param {Cursor} cursor The Cursor instance from which to get the next document.
  * @param {Cursor~toArrayResultCallback} [callback] The result callback.
  */
-export function toArray(cursor: any, callback: Function) {
+export function toArray(cursor: any, callback: Callback) {
   const items: any = [];
 
   // Reset cursor

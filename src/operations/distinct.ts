@@ -1,6 +1,8 @@
 import { Aspect, defineAspects } from './operation';
 import { CommandOperation } from './command';
 import { decorateWithCollation, decorateWithReadConcern } from '../utils';
+import type { Callback } from '../types';
+import type { Server } from '../sdam/server';
 
 /**
  * Return a list of distinct values for the given key across a collection.
@@ -38,7 +40,7 @@ export class DistinctOperation extends CommandOperation {
    * @param {any} server
    * @param {Collection~resultCallback} [callback] The command result callback
    */
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback) {
     const coll = this.collection;
     const key = this.key;
     const query = this.query;
@@ -66,13 +68,13 @@ export class DistinctOperation extends CommandOperation {
       return callback(err, null);
     }
 
-    super.executeCommand(server, cmd, (err?: any, result?: any) => {
+    super.executeCommand(server, cmd, (err, result) => {
       if (err) {
         callback(err);
         return;
       }
 
-      callback(null, this.options.full ? result : result.values);
+      callback(undefined, this.options.full ? result : result.values);
     });
   }
 }

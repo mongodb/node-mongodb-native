@@ -37,7 +37,7 @@ describe('MapReduce', function () {
                 [{ a: 2 }, { b: 5, a: 0 }, { a: 1 }, { c: 2, a: 0 }],
                 configuration.writeConcernMax(),
                 function (err) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   collection.group(
                     [],
                     {},
@@ -83,7 +83,7 @@ describe('MapReduce', function () {
             [{ user_id: 1 }, { user_id: 2 }],
             configuration.writeConcernMax(),
             function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               // String functions
               var map = 'function() { emit(this.user_id, 1); }';
@@ -133,7 +133,7 @@ describe('MapReduce', function () {
             [{ user_id: 1 }, { user_id: 2 }],
             configuration.writeConcernMax(),
             function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               // String functions
               var map = 'function() { emiddft(this.user_id, 1); }';
               var reduce = 'function(k,vals) { return 1; }';
@@ -163,12 +163,12 @@ describe('MapReduce', function () {
           err,
           collection
         ) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           collection.insert(
             [{ user_id: 1 }, { user_id: 2 }],
             configuration.writeConcernMax(),
             function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               // String functions
               var map = function () {
@@ -213,7 +213,7 @@ describe('MapReduce', function () {
             [{ user_id: 1 }, { user_id: 2 }],
             configuration.writeConcernMax(),
             function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               // String functions
               var map = new Code('function() { emit(this.user_id, 1); }');
               var reduce = new Code('function(k,vals) { return 1; }');
@@ -253,7 +253,7 @@ describe('MapReduce', function () {
             [{ user_id: 1 }, { user_id: 2 }, { user_id: 3 }],
             configuration.writeConcernMax(),
             function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               // String functions
               var map = new Code('function() { emit(this.user_id, 1); }');
               var reduce = new Code('function(k,vals) { return 1; }');
@@ -299,7 +299,7 @@ describe('MapReduce', function () {
             [{ user_id: 1 }, { user_id: 2 }, { user_id: 3 }],
             configuration.writeConcernMax(),
             function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               // String functions
               var map = new Code("function() { throw 'error'; }");
               var reduce = new Code("function(k,vals) { throw 'error'; }");
@@ -339,14 +339,14 @@ describe('MapReduce', function () {
         db.createCollection('test_map_reduce_functions', function (err, collection) {
           // create the output collection
           outDb.createCollection('tempCollection', err => {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Insert some documents to perform map reduce over
             collection.insert(
               [{ user_id: 1 }, { user_id: 2 }],
               configuration.writeConcernMax(),
               function (err) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 // Map function
                 var map = function () {
                   emit(this.user_id, 1); // eslint-disable-line
@@ -362,15 +362,15 @@ describe('MapReduce', function () {
                   reduce,
                   { out: { replace: 'test_map_reduce_functions_temp', db: 'outputCollectionDb' } },
                   function (err, collection) {
-                    test.equal(null, err);
+                    expect(err).to.not.exist;
 
                     // Mapreduce returns the temporary collection with the results
                     collection.findOne({ _id: 1 }, function (err, result) {
-                      test.equal(null, err);
+                      expect(err).to.not.exist;
                       test.equal(1, result.value);
 
                       collection.findOne({ _id: 2 }, function (err, result) {
-                        test.equal(null, err);
+                        expect(err).to.not.exist;
                         test.equal(1, result.value);
 
                         client.close(done);
@@ -434,7 +434,7 @@ describe('MapReduce', function () {
             },
             configuration.writeConcernMax(),
             function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               // Execute the group
               collection.group(keys, condition, initial, reduce, true, function (err, r) {
                 test.equal(1, r[0].count);
@@ -472,7 +472,7 @@ describe('MapReduce', function () {
             [{ user_id: 1 }, { user_id: 2 }],
             configuration.writeConcernMax(),
             function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               // String functions
               var map = 'function() { emit(this.user_id, util.times_one_hundred(this.user_id)); }';
               var reduce = 'function(k,vals) { return vals[0]; }';

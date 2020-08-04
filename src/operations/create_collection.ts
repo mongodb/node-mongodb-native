@@ -4,6 +4,8 @@ import { Aspect, defineAspects } from './operation';
 import { applyWriteConcern } from '../utils';
 import { loadCollection } from '../dynamic_loaders';
 import { MongoError } from '../error';
+import type { Callback } from '../types';
+import type { Server } from '../sdam/server';
 
 const ILLEGAL_COMMAND_FIELDS = new Set([
   'w',
@@ -31,7 +33,7 @@ export class CreateCollectionOperation extends CommandOperation {
     this.name = name;
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback) {
     const db = this.db;
     const name = this.name;
     const options = this.options;
@@ -47,7 +49,7 @@ export class CreateCollectionOperation extends CommandOperation {
 
       try {
         callback(
-          null,
+          undefined,
           new Collection(db, db.s.topology, db.databaseName, name, db.s.pkFactory, options)
         );
       } catch (err) {
@@ -56,7 +58,7 @@ export class CreateCollectionOperation extends CommandOperation {
     }
 
     const cmd: any = { create: name };
-    for (let n in options) {
+    for (const n in options) {
       if (
         options[n] != null &&
         typeof options[n] !== 'function' &&

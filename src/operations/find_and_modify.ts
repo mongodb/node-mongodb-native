@@ -11,6 +11,8 @@ import {
 import { MongoError } from '../error';
 import { CommandOperation } from './command';
 import { defineAspects, Aspect } from './operation';
+import type { Callback } from '../types';
+import type { Server } from '../sdam/server';
 
 export class FindAndModifyOperation extends CommandOperation {
   collection: any;
@@ -30,7 +32,7 @@ export class FindAndModifyOperation extends CommandOperation {
     this.doc = doc;
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback) {
     const coll = this.collection;
     const query = this.query;
     const sort = formattedOrderClause(this.sort);
@@ -111,7 +113,7 @@ export class FindAndModifyOperation extends CommandOperation {
     }
 
     // Execute the command
-    super.executeCommand(server, queryObject, (err?: any, result?: any) => {
+    super.executeCommand(server, queryObject, (err, result) => {
       if (err) return handleCallback(callback, err, null);
 
       return handleCallback(callback, null, result);

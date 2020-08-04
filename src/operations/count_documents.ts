@@ -1,4 +1,6 @@
 import { AggregateOperation } from './aggregate';
+import type { Callback } from '../types';
+import type { Server } from '../sdam/server';
 
 export class CountDocumentsOperation extends AggregateOperation {
   constructor(collection: any, query: any, options: any) {
@@ -18,8 +20,8 @@ export class CountDocumentsOperation extends AggregateOperation {
     super(collection, pipeline, options);
   }
 
-  execute(server: any, callback: Function) {
-    super.execute(server, (err?: any, result?: any) => {
+  execute(server: Server, callback: Callback) {
+    super.execute(server, (err, result) => {
       if (err) {
         callback(err, null);
         return;
@@ -28,12 +30,12 @@ export class CountDocumentsOperation extends AggregateOperation {
       // NOTE: We're avoiding creating a cursor here to reduce the callstack.
       const response = result.result;
       if (response.cursor == null || response.cursor.firstBatch == null) {
-        callback(null, 0);
+        callback(undefined, 0);
         return;
       }
 
       const docs = response.cursor.firstBatch;
-      callback(null, docs.length ? docs[0].n : 0);
+      callback(undefined, docs.length ? docs[0].n : 0);
     });
   }
 }

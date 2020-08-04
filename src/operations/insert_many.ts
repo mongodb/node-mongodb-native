@@ -2,6 +2,7 @@ import { OperationBase } from './operation';
 import { BulkWriteOperation } from './bulk_write';
 import { MongoError } from '../error';
 import { prepareDocs } from './common_functions';
+import type { Callback } from '../types';
 
 export class InsertManyOperation extends OperationBase {
   collection: any;
@@ -14,7 +15,7 @@ export class InsertManyOperation extends OperationBase {
     this.docs = docs;
   }
 
-  execute(callback: Function) {
+  execute(callback: Callback) {
     const coll = this.collection;
     let docs = this.docs;
     const options = this.options;
@@ -39,9 +40,9 @@ export class InsertManyOperation extends OperationBase {
 
     const bulkWriteOperation = new BulkWriteOperation(coll, operations, options);
 
-    bulkWriteOperation.execute((err?: any, result?: any) => {
+    bulkWriteOperation.execute((err, result) => {
       if (err) return callback(err, null);
-      callback(null, mapInsertManyResults(docs, result));
+      callback(undefined, mapInsertManyResults(docs, result));
     });
   }
 }

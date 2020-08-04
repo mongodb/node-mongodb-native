@@ -3,6 +3,8 @@ import { ReadPreference } from '../read_preference';
 import { MongoError } from '../error';
 import { maxWireVersion } from '../utils';
 import { Aspect, defineAspects } from './operation';
+import type { Callback } from '../types';
+import type { Server } from '../sdam/server';
 
 const DB_AGGREGATE_COLLECTION = 1;
 const MIN_WIRE_VERSION_$OUT_READ_CONCERN_SUPPORT = 8;
@@ -57,7 +59,7 @@ export class AggregateOperation extends CommandOperation {
     this.pipeline.push(stage);
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback) {
     const options = this.options;
     const serverWireVersion = maxWireVersion(server);
     const command = { aggregate: this.target, pipeline: this.pipeline } as any;

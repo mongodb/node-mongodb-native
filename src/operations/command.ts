@@ -8,6 +8,7 @@ import { MongoError } from '../error';
 import Logger = require('../logger');
 
 import type { Server } from '../sdam/server';
+import type { Callback } from '../types';
 
 const SUPPORTS_WRITE_CONCERN_AND_COLLATION = 5;
 
@@ -67,7 +68,7 @@ export class CommandOperation extends OperationBase {
     }
   }
 
-  executeCommand(server: any, cmd: any, callback: Function) {
+  executeCommand(server: Server, cmd: any, callback: Callback) {
     // TODO: consider making this a non-enumerable property
     this.server = server;
 
@@ -110,18 +111,18 @@ export class CommandOperation extends OperationBase {
       this.logger.debug(`executing command ${JSON.stringify(cmd)} against ${this.ns}`);
     }
 
-    server.command(this.ns.toString(), cmd, this.options, (err?: any, result?: any) => {
+    server.command(this.ns.toString(), cmd, this.options, (err, result) => {
       if (err) {
         callback(err, null);
         return;
       }
 
       if (this.fullResponse) {
-        callback(null, result);
+        callback(undefined, result);
         return;
       }
 
-      callback(null, result.result);
+      callback(undefined, result.result);
     });
   }
 }

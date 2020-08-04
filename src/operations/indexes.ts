@@ -6,6 +6,7 @@ import { CommandOperation } from './command';
 import { ReadPreference } from '../read_preference';
 
 import type { Server } from '../sdam/server';
+import type { Callback } from '../types';
 
 const LIST_INDEXES_WIRE_VERSION = 3;
 const VALID_INDEX_OPTIONS = new Set([
@@ -49,7 +50,7 @@ function makeIndexSpec(indexOrSpec: any, options: any) {
   const indexSpec: any = { name, key: indexParameters.fieldHash };
 
   // merge valid index options into the index spec
-  for (let optionName in options) {
+  for (const optionName in options) {
     if (VALID_INDEX_OPTIONS.has(optionName)) {
       indexSpec[optionName] = options[optionName];
     }
@@ -67,7 +68,7 @@ export class IndexesOperation extends OperationBase {
     this.collection = collection;
   }
 
-  execute(callback: Function) {
+  execute(callback: Callback) {
     const coll = this.collection;
     let options = this.options;
 
@@ -91,7 +92,7 @@ export class CreateIndexesOperation extends CommandOperation {
     }
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback) {
     const options = this.options;
     const indexes = this.indexes;
 
@@ -112,7 +113,7 @@ export class CreateIndexesOperation extends CommandOperation {
       if (indexes[i].name == null) {
         const keys = [];
 
-        for (let name in indexes[i].key) {
+        for (const name in indexes[i].key) {
           keys.push(`${name}_${indexes[i].key[name]}`);
         }
 
@@ -136,13 +137,13 @@ export class CreateIndexesOperation extends CommandOperation {
     // collation is set on each index, it should not be defined at the root
     this.options.collation = undefined;
 
-    super.executeCommand(server, cmd, (err?: any, result?: any) => {
+    super.executeCommand(server, cmd, (err, result) => {
       if (err) {
         callback(err);
         return;
       }
 
-      callback(null, this.onlyReturnNameOfCreatedIndex ? indexes[0].name : result);
+      callback(undefined, this.onlyReturnNameOfCreatedIndex ? indexes[0].name : result);
     });
   }
 }
@@ -171,7 +172,7 @@ export class EnsureIndexOperation extends CreateIndexOperation {
     this.collectionName = collectionName;
   }
 
-  execute(server: Server, callback: Function) {
+  execute(server: Server, callback: Callback) {
     const indexName = this.indexes[0].name;
     const cursor = this.db.collection(this.collectionName).listIndexes();
     cursor.toArray((err: MongoError, indexes: any) => {
@@ -183,7 +184,7 @@ export class EnsureIndexOperation extends CreateIndexOperation {
       if (indexes) {
         indexes = Array.isArray(indexes) ? indexes : [indexes];
         if (indexes.some((index: any) => index.name === indexName)) {
-          callback(null, indexName);
+          callback(undefined, indexName);
           return;
         }
       }
@@ -203,9 +204,9 @@ export class DropIndexOperation extends CommandOperation {
     this.indexName = indexName;
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback) {
     const cmd = { dropIndexes: this.collection.collectionName, index: this.indexName };
-    super.executeCommand(server, cmd, (err?: any, result?: any) => {
+    super.executeCommand(server, cmd, (err, result) => {
       if (typeof callback !== 'function') return;
       if (err) return handleCallback(callback, err, null);
       handleCallback(callback, null, result);
@@ -218,7 +219,7 @@ export class DropIndexesOperation extends DropIndexOperation {
     super(collection, '*', options);
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback) {
     super.execute(server, (err: any) => {
       if (err) return handleCallback(callback, err, false);
       handleCallback(callback, null, true);
@@ -235,7 +236,7 @@ export class ListIndexesOperation extends CommandOperation {
     this.collectionNamespace = collection.s.namespace;
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback) {
     const serverWireVersion = maxWireVersion(server);
     if (serverWireVersion < LIST_INDEXES_WIRE_VERSION) {
       const systemIndexesNS = this.collectionNamespace.withCollection('system.indexes').toString();
@@ -265,7 +266,7 @@ export class IndexExistsOperation extends OperationBase {
     this.indexes = indexes;
   }
 
-  execute(callback: Function) {
+  execute(callback: Callback) {
     const coll = this.collection;
     const indexes = this.indexes;
     const options = this.options;
@@ -305,7 +306,7 @@ export class IndexInformationOperation extends OperationBase {
     this.name = name;
   }
 
-  execute(callback: Function) {
+  execute(callback: Callback) {
     const db = this.db;
     const name = this.name;
     const options = this.options;

@@ -1,4 +1,4 @@
-import fs = require('fs');
+import * as fs from 'fs';
 import Logger = require('../logger');
 import { ReadPreference } from '../read_preference';
 import { MongoError } from '../error';
@@ -9,6 +9,7 @@ import { emitDeprecationWarning } from '../utils';
 import { CMAP_EVENT_NAMES } from '../cmap/events';
 import { MongoCredentials } from '../cmap/auth/mongo_credentials';
 import * as BSON from '../bson';
+import type { Callback } from '../types';
 
 const AUTH_MECHANISM_INTERNAL_MAP: any = {
   DEFAULT: 'default',
@@ -177,7 +178,7 @@ function resolveTLSOptions(options: any) {
   });
 }
 
-export function connect(mongoClient: any, url: any, options: any, callback: Function) {
+export function connect(mongoClient: any, url: any, options: any, callback: Callback) {
   options = Object.assign({}, options);
 
   // If callback is null throw an exception
@@ -297,7 +298,7 @@ function registerDeprecatedEventNotifiers(client: any) {
   });
 }
 
-function createTopology(mongoClient: any, options: any, callback: Function) {
+function createTopology(mongoClient: any, options: any, callback: Callback) {
   // Set default options
   translateOptions(options);
 
@@ -420,7 +421,7 @@ function generateCredentials(client: any, username: any, password: any, options:
   options = Object.assign({}, options);
 
   // the default db to authenticate against is 'self'
-  // if authententicate is called from a retry context, it may be another one, like admin
+  // if authenticate is called from a retry context, it may be another one, like admin
   const source = options.authSource || options.authdb || options.dbName;
 
   // authMechanism
@@ -489,8 +490,8 @@ function relayEvents(mongoClient: any, topology: any) {
 }
 
 function transformUrlOptions(_object: any) {
-  let object = Object.assign({ servers: _object.hosts }, _object.options);
-  for (let name in object) {
+  const object = Object.assign({ servers: _object.hosts }, _object.options);
+  for (const name in object) {
     const camelCaseName = LEGACY_OPTIONS_MAP[name];
     if (camelCaseName) {
       object[camelCaseName] = object[name];

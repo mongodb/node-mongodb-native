@@ -1,6 +1,8 @@
 import { Aspect, defineAspects } from './operation';
 import { CommandOperation } from './command';
 import { decorateWithCollation, decorateWithReadConcern } from '../utils';
+import type { Callback } from '../types';
+import type { Server } from '../sdam/server';
 
 export class CountOperation extends CommandOperation {
   cursor: any;
@@ -13,7 +15,7 @@ export class CountOperation extends CommandOperation {
     this.applySkipLimit = applySkipLimit;
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback) {
     const cursor = this.cursor;
     const applySkipLimit = this.applySkipLimit;
     const options = this.options;
@@ -31,7 +33,7 @@ export class CountOperation extends CommandOperation {
       options.maxTimeMS = cursor.cmd.maxTimeMS;
     }
 
-    let finalOptions = {} as any;
+    const finalOptions = {} as any;
     finalOptions.skip = options.skip;
     finalOptions.limit = options.limit;
     finalOptions.hint = options.hint;
@@ -47,7 +49,7 @@ export class CountOperation extends CommandOperation {
       return callback(err);
     }
 
-    super.executeCommand(server, command, (err?: any, result?: any) => {
+    super.executeCommand(server, command, (err, result) => {
       callback(err, result ? result.n : null);
     });
   }

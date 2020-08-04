@@ -29,26 +29,26 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         db.createCollection('test_to_a', function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           collection.insert({ a: 1 }, configuration.writeConcernMax(), function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             var cursor = collection.find({});
             cursor.toArray(function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               // Should fail if called again (cursor should be closed)
               cursor.toArray(function (err) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
 
                 // Should fail if called again (cursor should be closed)
                 cursor.each(function (err, item) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
 
                   // Let's close the db
                   if (!item) {
@@ -74,22 +74,22 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         db.createCollection('close_on_next', function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           collection.insert(
             [{ a: 1 }, { a: 1 }, { a: 1 }],
             configuration.writeConcernMax(),
             function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               var cursor = collection.find({});
               cursor.batchSize(2);
               cursor.next(function (err) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
 
                 cursor.close();
                 client.close(done);
@@ -112,21 +112,21 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         db.createCollection('trigger_get_more', function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           collection.insert(
             [{ a: 1 }, { a: 1 }, { a: 1 }],
             configuration.writeConcernMax(),
             function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               var cursor = collection.find({});
               cursor.batchSize(2);
               cursor.toArray(function (err) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
 
                 client.close(done);
               });
@@ -148,17 +148,17 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         db.createCollection('test_explain', function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           collection.insert({ a: 1 }, configuration.writeConcernMax(), function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             collection.find({ a: 1 }).explain(function (err, explaination) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.ok(explaination != null);
 
               // Let's close the db
@@ -181,21 +181,21 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         db.createCollection('test_count', function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           collection.find().count(function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             function insert(callback) {
               var total = 10;
 
               for (var i = 0; i < 10; i++) {
                 collection.insert({ x: i }, configuration.writeConcernMax(), function (e) {
-                  test.equal(null, e);
+                  expect(e).to.not.exist;
                   total = total - 1;
                   if (total === 0) callback();
                 });
@@ -204,32 +204,32 @@ describe('Cursor', function () {
 
             function finished() {
               collection.find().count(function (err, count) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.equal(10, count);
                 test.ok(count.constructor === Number);
 
                 collection.find({}, { limit: 5 }).count(function (err, count) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   test.equal(5, count);
 
                   collection.find({}, { skip: 5 }).count(function (err, count) {
-                    test.equal(null, err);
+                    expect(err).to.not.exist;
                     test.equal(5, count);
 
                     db.collection('acollectionthatdoesn').count(function (err, count) {
-                      test.equal(null, err);
+                      expect(err).to.not.exist;
                       test.equal(0, count);
 
                       var cursor = collection.find();
                       cursor.count(function (err, count) {
-                        test.equal(null, err);
+                        expect(err).to.not.exist;
                         test.equal(10, count);
 
                         cursor.each(function (err, item) {
-                          test.equal(null, err);
+                          expect(err).to.not.exist;
                           if (item == null) {
                             cursor.count(function (err, count2) {
-                              test.equal(null, err);
+                              expect(err).to.not.exist;
                               test.equal(10, count2);
                               test.equal(count, count2);
                               // Let's close the db
@@ -276,7 +276,7 @@ describe('Cursor', function () {
 
         const cursor = db.collection('countTEST').find({ qty: { $gt: 4 } });
         cursor.count(true, { readPreference: ReadPreference.SECONDARY }, err => {
-          expect(err).to.be.null;
+          expect(err).to.not.exist;
 
           const selectedServerAddress = bag[0].address.replace('127.0.0.1', 'localhost');
           const selectedServer = client.topology.description.servers.get(selectedServerAddress);
@@ -299,21 +299,21 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         db.createCollection('test_count.ext', function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           collection.find().count(function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             function insert(callback) {
               var total = 10;
 
               for (var i = 0; i < 10; i++) {
                 collection.insert({ x: i }, configuration.writeConcernMax(), function (e) {
-                  test.equal(null, e);
+                  expect(e).to.not.exist;
                   total = total - 1;
                   if (total === 0) callback();
                 });
@@ -322,32 +322,32 @@ describe('Cursor', function () {
 
             function finished() {
               collection.find().count(function (err, count) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.equal(10, count);
                 test.ok(count.constructor === Number);
 
                 collection.find({}, { limit: 5 }).count(function (err, count) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   test.equal(5, count);
 
                   collection.find({}, { skip: 5 }).count(function (err, count) {
-                    test.equal(null, err);
+                    expect(err).to.not.exist;
                     test.equal(5, count);
 
                     db.collection('acollectionthatdoesn').count(function (err, count) {
-                      test.equal(null, err);
+                      expect(err).to.not.exist;
                       test.equal(0, count);
 
                       var cursor = collection.find();
                       cursor.count(function (err, count) {
-                        test.equal(null, err);
+                        expect(err).to.not.exist;
                         test.equal(10, count);
 
                         cursor.each(function (err, item) {
-                          test.equal(null, err);
+                          expect(err).to.not.exist;
                           if (item == null) {
                             cursor.count(function (err, count2) {
-                              test.equal(null, err);
+                              expect(err).to.not.exist;
                               test.equal(10, count2);
                               test.equal(count, count2);
                               // Let's close the db
@@ -382,17 +382,17 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         db.createCollection('test_sort', function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           function insert(callback) {
             var total = 10;
 
             for (var i = 0; i < 10; i++) {
               collection.insert({ x: i }, configuration.writeConcernMax(), function (e) {
-                test.equal(null, e);
+                expect(e).to.not.exist;
                 total = total - 1;
                 if (total === 0) callback();
               });
@@ -438,7 +438,7 @@ describe('Cursor', function () {
             finished();
 
             cursor.next(function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               try {
                 cursor.sort(['a']);
               } catch (err) {
@@ -489,17 +489,17 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         db.createCollection('test_each', function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           function insert(callback) {
             var total = 10;
 
             for (var i = 0; i < 10; i++) {
               collection.insert({ x: i }, configuration.writeConcernMax(), function (e) {
-                test.equal(null, e);
+                expect(e).to.not.exist;
                 total = total - 1;
                 if (total === 0) callback();
               });
@@ -542,7 +542,7 @@ describe('Cursor', function () {
 
             for (var i = 0; i < 10; i++) {
               collection.insert({ x: i }, configuration.writeConcernMax(), function (e) {
-                test.equal(null, e);
+                expect(e).to.not.exist;
                 total = total - 1;
                 if (total === 0) callback();
               });
@@ -557,7 +557,7 @@ describe('Cursor', function () {
                 test.equal(5, items.length);
 
                 // Let's close the db
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 client.close(done);
               });
           }
@@ -581,17 +581,17 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         db.createCollection('test_cursor_negative_one_limit', function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           function insert(callback) {
             var total = 10;
 
             for (var i = 0; i < 10; i++) {
               collection.insert({ x: i }, configuration.writeConcernMax(), function (e) {
-                test.equal(null, e);
+                expect(e).to.not.exist;
                 total = total - 1;
                 if (total === 0) callback();
               });
@@ -603,7 +603,7 @@ describe('Cursor', function () {
               .find()
               .limit(-1)
               .toArray(function (err, items) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.equal(1, items.length);
 
                 // Let's close the db
@@ -630,17 +630,17 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         db.createCollection('test_cursor_any_negative_limit', function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           function insert(callback) {
             var total = 10;
 
             for (var i = 0; i < 10; i++) {
               collection.insert({ x: i }, configuration.writeConcernMax(), function (e) {
-                test.equal(null, e);
+                expect(e).to.not.exist;
                 total = total - 1;
                 if (total === 0) callback();
               });
@@ -652,7 +652,7 @@ describe('Cursor', function () {
               .find()
               .limit(-5)
               .toArray(function (err, items) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.equal(5, items.length);
 
                 // Let's close the db
@@ -679,14 +679,14 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         db.createCollection('test_limit_exceptions_2', function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           collection.insert({ a: 1 }, configuration.writeConcernMax(), function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             const cursor = collection.find();
 
             try {
@@ -714,20 +714,20 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect((err, client) => {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         db.createCollection('test_limit_exceptions', (err, collection) => {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           collection.insert({ a: 1 }, configuration.writeConcernMax(), err => {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             const cursor = collection.find();
             this.defer(() => cursor.close());
 
             cursor.next(err => {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               try {
                 cursor.limit(1);
@@ -754,19 +754,19 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         db.createCollection('test_limit_exceptions_1', function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           collection.insert({ a: 1 }, configuration.writeConcernMax(), function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             const cursor = collection.find();
 
             cursor.close(function (err, cursor) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               try {
                 cursor.limit(1);
                 test.ok(false);
@@ -793,18 +793,18 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         db.createCollection('test_skip', function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           function insert(callback) {
             var total = 10;
 
             for (var i = 0; i < 10; i++) {
               collection.insert({ x: i }, configuration.writeConcernMax(), function (e) {
-                test.equal(null, e);
+                expect(e).to.not.exist;
 
                 total = total - 1;
                 if (total === 0) callback();
@@ -815,21 +815,21 @@ describe('Cursor', function () {
           function finished() {
             const cursor = collection.find();
             cursor.count(function (err, count) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.equal(10, count);
             });
 
             (function () {
               const cursor = collection.find();
               cursor.toArray(function (err, items) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.equal(10, items.length);
 
                 collection
                   .find()
                   .skip(2)
                   .toArray(function (err, items2) {
-                    test.equal(null, err);
+                    expect(err).to.not.exist;
                     test.equal(8, items2.length);
 
                     // Check that we have the same elements
@@ -868,13 +868,13 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         db.createCollection('test_skip_exceptions', function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           collection.insert({ a: 1 }, configuration.writeConcernMax(), function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             try {
               collection.find().skip('not-an-integer');
@@ -884,7 +884,7 @@ describe('Cursor', function () {
 
             var cursor = collection.find();
             cursor.next(function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               try {
                 cursor.skip(1);
@@ -894,7 +894,7 @@ describe('Cursor', function () {
 
               var cursor2 = collection.find();
               cursor2.close(function (err) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 try {
                   cursor2.skip(1);
                 } catch (err) {
@@ -921,48 +921,49 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         db.createCollection('test_batchSize_exceptions', function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           collection.insert({ a: 1 }, configuration.writeConcernMax(), function (err) {
-            test.equal(null, err);
-          });
-          var cursor = collection.find();
+            expect(err).to.not.exist;
 
-          try {
-            cursor.batchSize('not-an-integer');
-            test.ok(false);
-          } catch (err) {
-            test.equal('batchSize requires an integer', err.message);
-          }
+            var cursor = collection.find();
 
-          cursor = collection.find();
-          cursor.next(function (err) {
-            test.equal(null, err);
+            try {
+              cursor.batchSize('not-an-integer');
+              test.ok(false);
+            } catch (err) {
+              test.equal('batchSize requires an integer', err.message);
+            }
 
+            cursor = collection.find();
             cursor.next(function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
-              try {
-                cursor.batchSize(1);
-                test.ok(false);
-              } catch (err) {
-                test.equal('Cursor is closed', err.message);
-              }
+              cursor.next(function (err) {
+                expect(err).to.not.exist;
 
-              var cursor2 = collection.find();
-              cursor2.close(function (err) {
-                test.equal(null, err);
                 try {
-                  cursor2.batchSize(1);
+                  cursor.batchSize(1);
                   test.ok(false);
                 } catch (err) {
                   test.equal('Cursor is closed', err.message);
                 }
 
-                client.close(done);
+                var cursor2 = collection.find();
+                cursor2.close(function (err) {
+                  expect(err).to.not.exist;
+                  try {
+                    cursor2.batchSize(1);
+                    test.ok(false);
+                  } catch (err) {
+                    test.equal('Cursor is closed', err.message);
+                  }
+
+                  client.close(done);
+                });
               });
             });
           });
@@ -982,11 +983,11 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         db.createCollection('test_not_multiple_batch_size', function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           var records = 6;
           var batchSize = 2;
@@ -996,20 +997,20 @@ describe('Cursor', function () {
           }
 
           collection.insert(docs, configuration.writeConcernMax(), function () {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             const cursor = collection.find({}, { batchSize: batchSize });
 
             //1st
             cursor.next(function (err, items) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               //cursor.items should contain 1 since nextObject already popped one
               test.equal(1, cursor.bufferedCount());
               test.ok(items != null);
 
               //2nd
               cursor.next(function (err, items) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.equal(0, cursor.bufferedCount());
                 test.ok(items != null);
 
@@ -1019,31 +1020,31 @@ describe('Cursor', function () {
 
                 //3rd
                 cursor.next(function (err, items) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   test.equal(2, cursor.bufferedCount());
                   test.ok(items != null);
 
                   //4th
                   cursor.next(function (err, items) {
-                    test.equal(null, err);
+                    expect(err).to.not.exist;
                     test.equal(1, cursor.bufferedCount());
                     test.ok(items != null);
 
                     //5th
                     cursor.next(function (err, items) {
-                      test.equal(null, err);
+                      expect(err).to.not.exist;
                       test.equal(0, cursor.bufferedCount());
                       test.ok(items != null);
 
                       //6th
                       cursor.next(function (err, items) {
-                        test.equal(null, err);
+                        expect(err).to.not.exist;
                         test.equal(0, cursor.bufferedCount());
                         test.ok(items != null);
 
                         //No more
                         cursor.next(function (err, items) {
-                          test.equal(null, err);
+                          expect(err).to.not.exist;
                           test.ok(items == null);
                           test.ok(cursor.isClosed());
 
@@ -1072,11 +1073,11 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         db.createCollection('test_multiple_batch_size', function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           //test with the last batch that is a multiple of batchSize
           var records = 4;
@@ -1087,37 +1088,37 @@ describe('Cursor', function () {
           }
 
           collection.insert(docs, configuration.writeConcernMax(), function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             const cursor = collection.find({}, { batchSize: batchSize });
 
             //1st
             cursor.next(function (err, items) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.equal(1, cursor.bufferedCount());
               test.ok(items != null);
 
               //2nd
               cursor.next(function (err, items) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.equal(0, cursor.bufferedCount());
                 test.ok(items != null);
 
                 //3rd
                 cursor.next(function (err, items) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   test.equal(1, cursor.bufferedCount());
                   test.ok(items != null);
 
                   //4th
                   cursor.next(function (err, items) {
-                    test.equal(null, err);
+                    expect(err).to.not.exist;
                     test.equal(0, cursor.bufferedCount());
                     test.ok(items != null);
 
                     //No more
                     cursor.next(function (err, items) {
-                      test.equal(null, err);
+                      expect(err).to.not.exist;
                       test.ok(items == null);
                       test.ok(cursor.isClosed());
 
@@ -1144,11 +1145,11 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         db.createCollection('test_limit_greater_than_batch_size', function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           var limit = 4;
           var records = 10;
@@ -1159,31 +1160,31 @@ describe('Cursor', function () {
           }
 
           collection.insert(docs, configuration.writeConcernMax(), function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             var cursor = collection.find({}, { batchSize: batchSize, limit: limit });
             //1st
             cursor.next(function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.equal(2, cursor.bufferedCount());
 
               //2nd
               cursor.next(function (err) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.equal(1, cursor.bufferedCount());
 
                 //3rd
                 cursor.next(function (err) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   test.equal(0, cursor.bufferedCount());
 
                   //4th
                   cursor.next(function (err) {
-                    test.equal(null, err);
+                    expect(err).to.not.exist;
 
                     //No more
                     cursor.next(function (err, items) {
-                      test.equal(null, err);
+                      expect(err).to.not.exist;
                       test.ok(items == null);
                       test.ok(cursor.isClosed());
 
@@ -1210,11 +1211,11 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         db.createCollection('test_limit_less_than_batch_size', function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           var limit = 2;
           var records = 10;
@@ -1225,22 +1226,22 @@ describe('Cursor', function () {
           }
 
           collection.insert(docs, configuration.writeConcernMax(), function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             var cursor = collection.find({}, { batchSize: batchSize, limit: limit });
             //1st
             cursor.next(function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.equal(1, cursor.bufferedCount());
 
               //2nd
               cursor.next(function (err) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.equal(0, cursor.bufferedCount());
 
                 //No more
                 cursor.next(function (err, items) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   test.ok(items == null);
                   test.ok(cursor.isClosed());
 
@@ -1265,7 +1266,7 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         var collection = db.collection('shouldHandleSkipLimitChaining');
@@ -1275,7 +1276,7 @@ describe('Cursor', function () {
 
           for (var i = 0; i < 10; i++) {
             collection.insert({ x: i }, configuration.writeConcernMax(), function (e) {
-              test.equal(null, e);
+              expect(e).to.not.exist;
               total = total - 1;
               if (total === 0) callback();
             });
@@ -1284,7 +1285,7 @@ describe('Cursor', function () {
 
         function finished() {
           collection.find().toArray(function (err, items) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.equal(10, items.length);
 
             collection
@@ -1292,7 +1293,7 @@ describe('Cursor', function () {
               .limit(5)
               .skip(3)
               .toArray(function (err, items2) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.equal(5, items2.length);
 
                 // Check that we have the same elements
@@ -1328,18 +1329,18 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         db.createCollection('test_limit_skip_chaining_inline', function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           function insert(callback) {
             var total = 10;
 
             for (var i = 0; i < 10; i++) {
               collection.insert({ x: i }, configuration.writeConcernMax(), function (e) {
-                test.equal(null, e);
+                expect(e).to.not.exist;
                 total = total - 1;
                 if (total === 0) callback();
               });
@@ -1348,7 +1349,7 @@ describe('Cursor', function () {
 
           function finished() {
             collection.find().toArray(function (err, items) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.equal(10, items.length);
 
               collection
@@ -1356,7 +1357,7 @@ describe('Cursor', function () {
                 .limit(5)
                 .skip(3)
                 .toArray(function (err, items2) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   test.equal(5, items2.length);
 
                   // Check that we have the same elements
@@ -1393,14 +1394,14 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         db.createCollection('test_close_no_query_sent', function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           collection.find().close(function (err, cursor) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.equal(true, cursor.isClosed());
             // Let's close the db
             client.close(done);
@@ -1423,11 +1424,11 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         db.createCollection('test_refill_via_get_more', function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           function insert(callback) {
             var docs = [];
@@ -1441,36 +1442,36 @@ describe('Cursor', function () {
 
           function finished() {
             collection.count(function (err, count) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.equal(COUNT, count);
             });
 
             var total = 0;
             collection.find({}, {}).each(function (err, item) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               if (item != null) {
                 total = total + item.a;
               } else {
                 test.equal(499500, total);
 
                 collection.count(function (err, count) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   test.equal(COUNT, count);
                 });
 
                 collection.count(function (err, count) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   test.equal(COUNT, count);
 
                   var total2 = 0;
                   collection.find().each(function (err, item) {
-                    test.equal(null, err);
+                    expect(err).to.not.exist;
                     if (item != null) {
                       total2 = total2 + item.a;
                     } else {
                       test.equal(499500, total2);
                       collection.count(function (err, count) {
-                        test.equal(null, err);
+                        expect(err).to.not.exist;
                         test.equal(COUNT, count);
                         test.equal(total, total2);
 
@@ -1503,11 +1504,11 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         db.createCollection('test_refill_via_get_more_alt_coll', function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           var COUNT = 1000;
 
           function insert(callback) {
@@ -1522,36 +1523,36 @@ describe('Cursor', function () {
 
           function finished() {
             collection.count(function (err, count) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.equal(1000, count);
             });
 
             var total = 0;
             collection.find().each(function (err, item) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               if (item != null) {
                 total = total + item.a;
               } else {
                 test.equal(499500, total);
 
                 collection.count(function (err, count) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   test.equal(1000, count);
                 });
 
                 collection.count(function (err, count) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   test.equal(1000, count);
 
                   var total2 = 0;
                   collection.find().each(function (err, item) {
-                    test.equal(null, err);
+                    expect(err).to.not.exist;
                     if (item != null) {
                       total2 = total2 + item.a;
                     } else {
                       test.equal(499500, total2);
                       collection.count(function (err, count) {
-                        test.equal(null, err);
+                        expect(err).to.not.exist;
                         test.equal(1000, count);
                         test.equal(total, total2);
 
@@ -1584,21 +1585,21 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         db.createCollection('test_close_after_query_sent', function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           collection.insert({ a: 1 }, configuration.writeConcernMax(), function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             var cursor = collection.find({ a: 1 });
             cursor.next(function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               cursor.close(function (err, cursor) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.equal(true, cursor.isClosed());
                 // Let's close the db
                 client.close(done);
@@ -1621,20 +1622,20 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         db.createCollection('test_count_with_fields', function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           collection.insertOne({ x: 1, a: 2 }, configuration.writeConcernMax(), function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             collection
               .find({})
               .project({ a: 1 })
               .toArray(function (err, items) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.equal(1, items.length);
                 test.equal(2, items[0].a);
                 test.equal(undefined, items[0].x);
@@ -1657,17 +1658,17 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         db.createCollection('test_count_with_fields_using_exclude', function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           collection.insertOne({ x: 1, a: 2 }, configuration.writeConcernMax(), function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             collection.find({}, { fields: { x: 0 } }).toArray(function (err, items) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.equal(1, items.length);
               test.equal(2, items[0].a);
               test.equal(undefined, items[0].x);
@@ -1697,32 +1698,32 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         db.createCollection('Should_correctly_execute_count_on_cursor_1', function (
           err,
           collection
         ) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // insert all docs
           collection.insert(docs, configuration.writeConcernMax(), function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             var total = 0;
             // Create a cursor for the content
             var cursor = collection.find({});
             cursor.count(function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               // Ensure each returns all documents
               cursor.each(function (err, item) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 if (item != null) {
                   total++;
                 } else {
                   cursor.count(function (err, c) {
-                    test.equal(null, err);
+                    expect(err).to.not.exist;
                     test.equal(1000, c);
                     test.equal(1000, total);
                     client.close(done);
@@ -1755,15 +1756,15 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         db.createCollection('Should_be_able_to_stream_documents', function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // insert all docs
           collection.insert(docs, configuration.writeConcernMax(), function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             var paused = 0,
               closed = 0,
@@ -1804,7 +1805,7 @@ describe('Cursor', function () {
             });
 
             function testDone() {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.equal(i, docs.length);
               test.equal(1, closed);
               test.equal(1, paused);
@@ -1833,17 +1834,17 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         db.createCollection(
           'immediately_destroying_a_stream_prevents_the_query_from_executing',
           function (err, collection) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // insert all docs
             collection.insert(docs, configuration.writeConcernMax(), function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               var stream = collection.find().stream();
 
@@ -1887,17 +1888,17 @@ describe('Cursor', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         db.createCollection('destroying_a_stream_stops_it', function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           var docs = [];
           for (var ii = 0; ii < 10; ++ii) docs.push({ b: ii + 1 });
 
           // insert all docs
           collection.insert(docs, configuration.writeConcernMax(), function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             var finished = 0,
               i = 0;
@@ -1942,17 +1943,17 @@ describe('Cursor', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         db.createCollection('cursor_stream_errors', function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           var docs = [];
           for (var ii = 0; ii < 10; ++ii) docs.push({ b: ii + 1 });
 
           // insert all docs
           collection.insert(docs, configuration.writeConcernMax(), function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             var finished = 0,
               i = 0;
@@ -2003,11 +2004,11 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         db.createCollection('cursor_stream_pipe', function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           var docs = [];
           'Aaden Aaron Adrian Aditya Bob Joe'.split(' ').forEach(function (name) {
@@ -2016,7 +2017,7 @@ describe('Cursor', function () {
 
           // insert all docs
           collection.insert(docs, configuration.writeConcernMax(), function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             var filename = '/tmp/_nodemongodbnative_stream_out.txt',
               out = fs.createWriteStream(filename);
@@ -2072,7 +2073,7 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         var options = { capped: true, size: 10000000 };
@@ -2080,7 +2081,7 @@ describe('Cursor', function () {
           err,
           collection
         ) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           var closeCount = 0;
           var errorOccurred = false;
@@ -2089,7 +2090,7 @@ describe('Cursor', function () {
           // Just hammer the server
           for (var i = 0; i < 100; i++) {
             collection.insert({ id: i }, { w: 'majority', wtimeout: 5000 }, function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               count = count - 1;
 
               if (count === 0) {
@@ -2118,7 +2119,7 @@ describe('Cursor', function () {
                   const id = i;
                   process.nextTick(function () {
                     collection.insert({ id }, function (err) {
-                      test.equal(null, err);
+                      expect(err).to.not.exist;
 
                       if (id === 99) {
                         setTimeout(() => client.close());
@@ -2147,7 +2148,7 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         var options = { capped: true, size: 8 };
@@ -2155,10 +2156,10 @@ describe('Cursor', function () {
           err,
           collection
         ) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           collection.insert({ a: 1 }, configuration.writeConcernMax(), function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Create cursor with awaitdata, and timeout after the period specified
             var cursor = collection.find({}, { tailable: true, awaitdata: true });
@@ -2194,12 +2195,12 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         var options = { capped: true, size: 8 };
         db.createCollection('should_await_data_no_docs', options, function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Create cursor with awaitdata, and timeout after the period specified
           var cursor = collection.find({}, { tailable: true, awaitdata: true });
@@ -2234,15 +2235,15 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         var options = { capped: true, size: 8 };
         db.createCollection('should_await_data_cursor_flag', options, function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           collection.insert({ a: 1 }, configuration.writeConcernMax(), function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             // Create cursor with awaitdata, and timeout after the period specified
             var cursor = collection.find({}, {});
             cursor.addCursorFlag('tailable', true);
@@ -2303,15 +2304,15 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         var options = { capped: true, size: 8 };
         db.createCollection('should_await_data', options, function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           collection.insert({ a: 1 }, configuration.writeConcernMax(), function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Create cursor with awaitdata, and timeout after the period specified
             var cursor = collection.find({}, { tailable: true, awaitdata: true });
@@ -2518,29 +2519,29 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         // Insert all the docs
         var collection = db.collection('shouldCorrectExecuteExplainHonoringLimit');
         collection.insert(docs, configuration.writeConcernMax(), function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           collection.ensureIndex({ _keywords: 1 }, configuration.writeConcernMax(), function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             collection
               .find({ _keywords: 'red' })
               .limit(10)
               .toArray(function (err, result) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.ok(result != null);
 
                 collection
                   .find({ _keywords: 'red' }, {})
                   .limit(10)
                   .explain(function (err, result) {
-                    test.equal(null, err);
+                    expect(err).to.not.exist;
                     test.ok(result != null);
 
                     client.close(done);
@@ -2565,18 +2566,18 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         var collection = db.collection('shouldNotExplainWhenFalse');
         collection.insert(doc, configuration.writeConcernMax(), function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           collection
             .find({ _keywords: 'red' })
             .limit(10)
             .toArray(function (err, result) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               test.equal('camera', result[0].name);
               client.close(done);
@@ -2625,11 +2626,11 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         db.createCollection('shouldNotFailDueToStackOverflowEach', function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           var docs = [];
           var total = 0;
@@ -2647,14 +2648,14 @@ describe('Cursor', function () {
           // Execute inserts
           for (i = 0; i < left; i++) {
             collection.insert(allDocs.shift(), configuration.writeConcernMax(), function (err, d) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               left = left - 1;
               totalI = totalI + d.length;
 
               if (left === 0) {
                 collection.find({}).each(function (err, item) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   if (item == null) {
                     test.equal(30000, total);
                     client.close(done);
@@ -2681,11 +2682,11 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         db.createCollection('shouldNotFailDueToStackOverflowToArray', function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           var docs = [];
           for (var i = 0; i < 30000; i++) docs.push({ a: i });
@@ -2707,14 +2708,14 @@ describe('Cursor', function () {
                 err,
                 d
               ) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
 
                 left = left - 1;
                 totalI = totalI + d.length;
 
                 if (left === 0) {
                   collection.find({}).toArray(function (err, items) {
-                    test.equal(null, err);
+                    expect(err).to.not.exist;
 
                     test.equal(30000, items.length);
                     client.close(done);
@@ -2740,7 +2741,7 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         var collection = db.collection('shouldCorrectlySkipAndLimit');
@@ -2748,14 +2749,14 @@ describe('Cursor', function () {
         for (var i = 0; i < 100; i++) docs.push({ a: i, OrderNumber: i });
 
         collection.insert(docs, configuration.writeConcernMax(), function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           collection
             .find({}, { OrderNumber: 1 })
             .skip(10)
             .limit(10)
             .toArray(function (err, items) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.equal(10, items[0].OrderNumber);
 
               collection
@@ -2763,7 +2764,7 @@ describe('Cursor', function () {
                 .skip(10)
                 .limit(10)
                 .count(true, function (err, count) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   test.equal(10, count);
                   client.close(done);
                 });
@@ -2784,7 +2785,7 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         var collection = db.collection('shouldFailToTailANormalCollection');
@@ -2792,7 +2793,7 @@ describe('Cursor', function () {
         for (var i = 0; i < 100; i++) docs.push({ a: i, OrderNumber: i });
 
         collection.insert(docs, configuration.writeConcernMax(), function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           const cursor = collection.find({}, { tailable: true });
           cursor.each(function (err) {
@@ -2823,7 +2824,7 @@ describe('Cursor', function () {
       // DOC_START
       // Establish connection to db
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
 
@@ -2835,16 +2836,16 @@ describe('Cursor', function () {
 
         // Create a collection
         db.createCollection('test_close_function_on_cursor_2', function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Insert documents into collection
           collection.insert(docs, configuration.writeConcernMax(), function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             const cursor = collection.find({});
 
             cursor.count(function (err, count) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.equal(100, count);
 
               client.close(done);
@@ -2874,37 +2875,37 @@ describe('Cursor', function () {
       // DOC_START
       // Establish connection to db
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         var col = db.collection('count_hint');
 
         col.insert([{ i: 1 }, { i: 2 }], { w: 1 }, function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           col.ensureIndex({ i: 1 }, function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             col.find({ i: 1 }, { hint: '_id_' }).count(function (err, count) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.equal(1, count);
 
               col.find({}, { hint: '_id_' }).count(function (err, count) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.equal(2, count);
 
                 col.find({ i: 1 }, { hint: 'BAD HINT' }).count(function (err) {
                   test.ok(err != null);
 
                   col.ensureIndex({ x: 1 }, { sparse: true }, function (err) {
-                    test.equal(null, err);
+                    expect(err).to.not.exist;
 
                     col.find({ i: 1 }, { hint: 'x_1' }).count(function (err, count) {
-                      test.equal(null, err);
+                      expect(err).to.not.exist;
                       test.equal(0, count);
 
                       col.find({}, { hint: 'i_1' }).count(function (err, count) {
-                        test.equal(null, err);
+                        expect(err).to.not.exist;
                         test.equal(2, count);
 
                         client.close(done);
@@ -2932,7 +2933,7 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
 
@@ -2944,15 +2945,15 @@ describe('Cursor', function () {
 
         // Create a collection
         db.createCollection('terminate_each_returning_false', function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Insert documents into collection
           collection.insert(docs, configuration.writeConcernMax(), function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             var finished = false;
 
             collection.find({}).each(function (err, doc) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               if (doc) {
                 test.equal(finished, false);
@@ -2980,20 +2981,20 @@ describe('Cursor', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var donkey = {
           color: 'brown'
         };
 
         db.collection('donkies').insertOne(donkey, function (err, result) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           var query = { _id: result.insertedId };
           var options = { maxTimeMS: 1000 };
 
           db.collection('donkies').findOne(query, options, function (err, doc) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.equal('brown', doc.color);
 
             client.close(done);
@@ -3015,22 +3016,22 @@ describe('Cursor', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
         const collectionName = 'should_correctly_handle_batchSize_2';
 
         db.collection(collectionName).insert([{ x: 1 }, { x: 2 }, { x: 3 }], function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           const cursor = db.collection(collectionName).find({}, { batchSize: 2 });
 
           cursor.next(function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             cursor.next(function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               cursor.next(function (err) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 client.close(done);
               });
             });
@@ -3048,7 +3049,7 @@ describe('Cursor', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         const cursor = db.collection('myCollection').find({});
         test.equal('myCollection', cursor.namespace.collection);
@@ -3077,25 +3078,25 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         db.createCollection('Should_correctly_execute_count_on_cursor_2', function (
           err,
           collection
         ) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // insert all docs
           collection.insert(docs, configuration.writeConcernMax(), function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Create a cursor for the content
             var cursor = collection.find({});
             cursor.limit(100);
             cursor.skip(10);
             cursor.count(true, { maxTimeMS: 1000 }, function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               // Create a cursor for the content
               var cursor = collection.find({});
@@ -3103,7 +3104,7 @@ describe('Cursor', function () {
               cursor.skip(10);
               cursor.maxTimeMS(100);
               cursor.count(function (err) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
 
                 client.close(done);
               });
@@ -3132,23 +3133,23 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         db.createCollection('Should_correctly_execute_count_on_cursor_3', function (
           err,
           collection
         ) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // insert all docs
           collection.insert(docs, configuration.writeConcernMax(), function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Create a cursor for the content
             var cursor = collection.find({}, { maxTimeMS: 100 });
             cursor.toArray(function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               client.close(done);
             });
@@ -3177,13 +3178,13 @@ describe('Cursor', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var collection = db.collection('map_toArray');
 
         // insert all docs
         collection.insert(docs, configuration.writeConcernMax(), function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Create a cursor for the content
           var cursor = collection
@@ -3195,7 +3196,7 @@ describe('Cursor', function () {
             .limit(10);
 
           cursor.toArray(function (err, docs) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.equal(10, docs.length);
 
             // Ensure all docs where mapped
@@ -3229,13 +3230,13 @@ describe('Cursor', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var collection = db.collection('map_next');
 
         // insert all docs
         collection.insert(docs, configuration.writeConcernMax(), function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Create a cursor for the content
           var cursor = collection
@@ -3247,7 +3248,7 @@ describe('Cursor', function () {
             .limit(10);
 
           cursor.next(function (err, doc) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.equal(1, doc.a);
 
             // Close cursor b/c we did not exhaust cursor
@@ -3278,13 +3279,13 @@ describe('Cursor', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var collection = db.collection('map_each');
 
         // insert all docs
         collection.insert(docs, configuration.writeConcernMax(), function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Create a cursor for the content
           var cursor = collection
@@ -3296,7 +3297,7 @@ describe('Cursor', function () {
             .limit(10);
 
           cursor.each(function (err, doc) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             if (doc) {
               test.equal(1, doc.a);
@@ -3328,13 +3329,13 @@ describe('Cursor', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var collection = db.collection('map_forEach');
 
         // insert all docs
         collection.insert(docs, configuration.writeConcernMax(), function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Create a cursor for the content
           var cursor = collection
@@ -3353,7 +3354,7 @@ describe('Cursor', function () {
               test.equal(4, doc.a);
             },
             function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               client.close(done);
             }
           );
@@ -3381,13 +3382,13 @@ describe('Cursor', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var collection = db.collection('map_mapmapforEach');
 
         // insert all docs
         collection.insert(docs, configuration.writeConcernMax(), function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Create a cursor for the content
           var cursor = collection
@@ -3403,7 +3404,7 @@ describe('Cursor', function () {
               test.equal(1, doc.a);
             },
             function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               client.close(done);
             }
           );
@@ -3422,7 +3423,7 @@ describe('Cursor', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var collection = db.collection('cursor_limit_skip_correctly');
 
@@ -3434,7 +3435,7 @@ describe('Cursor', function () {
         }
 
         ordered.execute({ w: 1 }, function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Let's attempt to skip and limit
           collection
@@ -3442,7 +3443,7 @@ describe('Cursor', function () {
             .limit(2016)
             .skip(2016)
             .toArray(function (err, docs) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.equal(2016, docs.length);
 
               client.close(done);
@@ -3461,7 +3462,7 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         var options = { capped: true, size: 8 };
@@ -3469,10 +3470,10 @@ describe('Cursor', function () {
           err,
           collection
         ) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           collection.insert({ a: 1 }, configuration.writeConcernMax(), function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             var s = new Date();
             // Create cursor with awaitdata, and timeout after the period specified
@@ -3510,7 +3511,7 @@ describe('Cursor', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var collection = db.collection('cursor_limit_skip_correctly');
 
@@ -3522,7 +3523,7 @@ describe('Cursor', function () {
         }
 
         ordered.execute({ w: 1 }, function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Let's attempt to skip and limit
           var cursor = collection.find({}).batchSize(10);
@@ -3556,29 +3557,29 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         db.createCollection('shouldCorrectlyExecuteEnsureIndexWithNoCallback', function (
           err,
           collection
         ) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // ensure index of createdAt index
           collection.ensureIndex({ createdAt: 1 }, function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // insert all docs
             collection.insert(docs, configuration.writeConcernMax(), function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               // Find with sort
               collection
                 .find()
                 .sort(['createdAt', 'asc'])
                 .toArray(function (err, items) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
 
                   test.equal(1, items.length);
                   client.close(done);
@@ -3608,15 +3609,15 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         db.createCollection('negative_batch_size_and_limit_set', function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // insert all docs
           collection.insert(docs, configuration.writeConcernMax(), function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Create a cursor for the content
             var cursor = collection.find({});
@@ -3624,7 +3625,7 @@ describe('Cursor', function () {
               .limit(100)
               .skip(0)
               .count(function (err, c) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.equal(50, c);
 
                 var cursor = collection.find({});
@@ -3632,7 +3633,7 @@ describe('Cursor', function () {
                   .limit(100)
                   .skip(0)
                   .toArray(function (err) {
-                    test.equal(null, err);
+                    expect(err).to.not.exist;
                     test.equal(50, c);
 
                     client.close(done);
@@ -3662,23 +3663,23 @@ describe('Cursor', function () {
 
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         db.createCollection('Should_correctly_execute_count_on_cursor_1_', function (
           err,
           collection
         ) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // insert all docs
           collection.insert(docs, configuration.writeConcernMax(), function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Create a cursor for the content
             var cursor = collection.find({});
             cursor.batchSize(-10).next(function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.ok(cursor.cursorState.cursorId.equals(BSON.Long.ZERO));
 
               client.close(done);
@@ -3699,7 +3700,7 @@ describe('Cursor', function () {
     test: function (done) {
       var started = [];
       var listener = require('../../src').instrument(function (err) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
       });
 
       listener.on('started', function (event) {
@@ -3710,7 +3711,7 @@ describe('Cursor', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         db.collection('cursor_count_test', { readConcern: { level: 'local' } })
           .find({ project: '123' })
@@ -3718,7 +3719,7 @@ describe('Cursor', function () {
           .skip(5)
           .hint({ project: 1 })
           .count(true, function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.equal(1, started.length);
             if (started[0].command.readConcern)
               test.deepEqual({ level: 'local' }, started[0].command.readConcern);
@@ -3745,7 +3746,7 @@ describe('Cursor', function () {
       var started = [];
 
       var listener = require('../../src').instrument(function (err) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
       });
 
       listener.on('started', function (event) {
@@ -3756,7 +3757,7 @@ describe('Cursor', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         db.collection('cursor_count_test1', { readConcern: { level: 'local' } }).count(
           {
@@ -3769,7 +3770,7 @@ describe('Cursor', function () {
             hint: { project: 1 }
           },
           function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.equal(1, started.length);
             if (started[0].command.readConcern)
               test.deepEqual({ level: 'local' }, started[0].command.readConcern);
@@ -3883,7 +3884,7 @@ describe('Cursor', function () {
       var configuration = this.configuration;
       var client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         var findCommand = {
@@ -3918,13 +3919,13 @@ describe('Cursor', function () {
         const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
 
         client.connect(function (err, client) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           const db = client.db(configuration.db);
           const collection = db.collection('cursor_session_tests');
 
           collection.insertMany([{ a: 1, b: 2 }], function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             const cursor = collection.find({});
 
             cursor.next(function () {
@@ -3951,7 +3952,7 @@ describe('Cursor', function () {
         const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
 
         client.connect(function (err, client) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           const db = client.db(configuration.db);
           const collection = db.collection('cursor_session_tests2');
@@ -3965,7 +3966,7 @@ describe('Cursor', function () {
           ];
 
           collection.insertMany(docs, function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             const cursor = collection.find({}, { batchSize: 3 });
             cursor.next(function () {
               test.equal(client.topology.s.sessions.size, 1);

@@ -3,6 +3,8 @@ import { EvalOperation } from './eval';
 import { Code } from '../bson';
 import { handleCallback } from '../utils';
 import { defineAspects, Aspect } from './operation';
+import type { Callback } from '../types';
+import type { Server } from '../sdam/server';
 
 export class GroupOperation extends CommandOperation {
   collectionName: string;
@@ -30,7 +32,7 @@ export class GroupOperation extends CommandOperation {
     this.reduceFunction = reduce && reduce._bsontype === 'Code' ? reduce : new Code(reduce);
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback) {
     const selector = {
       group: {
         ns: this.collectionName,
@@ -60,9 +62,9 @@ export class GroupOperation extends CommandOperation {
     }
 
     // Execute command
-    super.executeCommand(server, selector, (err?: any, result?: any) => {
-      if (err) return handleCallback(callback!, err, null);
-      handleCallback(callback!, null, result.retval);
+    super.executeCommand(server, selector, (err, result) => {
+      if (err) return handleCallback(callback, err, null);
+      handleCallback(callback, null, result.retval);
     });
   }
 }
@@ -94,10 +96,10 @@ export class EvalGroupOperation extends EvalOperation {
     super(collection, new Code(groupfn, scope), null, options);
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback) {
     super.execute(server, (err?: any, results?: any) => {
-      if (err) return handleCallback(callback!, err, null);
-      handleCallback(callback!, null, results.result || results);
+      if (err) return handleCallback(callback, err, null);
+      handleCallback(callback, null, results.result || results);
     });
   }
 }

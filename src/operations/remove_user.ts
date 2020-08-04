@@ -1,5 +1,7 @@
 import { Aspect, defineAspects } from './operation';
 import { CommandOperation } from './command';
+import type { Callback } from '../types';
+import type { Server } from '../sdam/server';
 
 export class RemoveUserOperation extends CommandOperation {
   username: any;
@@ -9,7 +11,7 @@ export class RemoveUserOperation extends CommandOperation {
     this.username = username;
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback) {
     super.executeCommand(server, { dropUser: this.username }, (err?: any) => {
       callback(err, err ? false : true);
     });

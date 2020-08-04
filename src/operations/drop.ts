@@ -1,6 +1,8 @@
 import { Aspect, defineAspects } from './operation';
 import { handleCallback } from '../utils';
 import { CommandOperation } from './command';
+import type { Callback } from '../types';
+import type { Server } from '../sdam/server';
 
 export class DropCollectionOperation extends CommandOperation {
   name: any;
@@ -10,8 +12,8 @@ export class DropCollectionOperation extends CommandOperation {
     this.name = name;
   }
 
-  execute(server: any, callback: Function) {
-    super.executeCommand(server, { drop: this.name }, (err?: any, result?: any) => {
+  execute(server: Server, callback: Callback) {
+    super.executeCommand(server, { drop: this.name }, (err, result) => {
       if (err) return handleCallback(callback, err);
       if (result.ok) return handleCallback(callback, null, true);
       handleCallback(callback, null, false);
@@ -20,8 +22,8 @@ export class DropCollectionOperation extends CommandOperation {
 }
 
 export class DropDatabaseOperation extends CommandOperation {
-  execute(server: any, callback: Function) {
-    super.executeCommand(server, { dropDatabase: 1 }, (err?: any, result?: any) => {
+  execute(server: Server, callback: Callback) {
+    super.executeCommand(server, { dropDatabase: 1 }, (err, result) => {
       if (err) return handleCallback(callback, err);
       if (result.ok) return handleCallback(callback, null, true);
       handleCallback(callback, null, false);

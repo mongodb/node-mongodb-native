@@ -1,5 +1,6 @@
 'use strict';
 var test = require('./shared').assert;
+const { expect } = require('chai');
 var setupDatabase = require('./shared').setupDatabase;
 
 describe('Unicode', function () {
@@ -30,7 +31,7 @@ describe('Unicode', function () {
 
         // Simple insert
         col.insert(docs_1, { w: 1 }, function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Execute a find command
           col
@@ -68,7 +69,7 @@ describe('Unicode', function () {
 
         // Simple insert
         col.insert(docs_1, { w: 1 }, function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Execute a find command
           col
@@ -105,12 +106,12 @@ describe('Unicode', function () {
 
         // Simple insert
         col.insert(docs_1, { w: 1 }, function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           db.admin().command(
             { configureFailPoint: 'maxTimeAlwaysTimeOut', mode: 'alwaysOn' },
             function (err, result) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.equal(1, result.ok);
 
               col
@@ -122,7 +123,7 @@ describe('Unicode', function () {
                   db.admin().command(
                     { configureFailPoint: 'maxTimeAlwaysTimeOut', mode: 'off' },
                     function (err, result) {
-                      test.equal(null, err);
+                      expect(err).to.not.exist;
                       test.equal(1, result.ok);
                       client.close(done);
                     }

@@ -1,6 +1,8 @@
 import { CommandOperation } from './command';
 import { Aspect, defineAspects } from './operation';
 import { MongoDBNamespace } from '../utils';
+import type { Callback } from '../types';
+import type { Server } from '../sdam/server';
 
 export class ListDatabasesOperation extends CommandOperation {
   constructor(db: any, options: any) {
@@ -8,7 +10,7 @@ export class ListDatabasesOperation extends CommandOperation {
     this.ns = new MongoDBNamespace('admin', '$cmd');
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback) {
     const cmd = { listDatabases: 1 } as any;
     if (this.options.nameOnly) {
       cmd.nameOnly = Number(cmd.nameOnly);

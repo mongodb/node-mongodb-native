@@ -1,6 +1,7 @@
 import { applyRetryableWrites, applyWriteConcern } from '../utils';
 import { MongoError } from '../error';
 import { OperationBase } from './operation';
+import type { Callback } from '../types';
 
 export class BulkWriteOperation extends OperationBase {
   collection: any;
@@ -13,7 +14,7 @@ export class BulkWriteOperation extends OperationBase {
     this.operations = operations;
   }
 
-  execute(callback: Function) {
+  execute(callback: Callback) {
     const coll = this.collection;
     const operations = this.operations;
     let options = this.options;
@@ -96,7 +97,7 @@ export class BulkWriteOperation extends OperationBase {
       }
 
       // Return the results
-      callback(null, r);
+      callback(undefined, r);
     });
   }
 }

@@ -1,6 +1,7 @@
 import { OperationBase } from './operation';
 import { handleCallback } from '../utils';
 import { loadCollection } from '../dynamic_loaders';
+import type { Callback } from '../types';
 
 export class CollectionsOperation extends OperationBase {
   db: any;
@@ -11,11 +12,11 @@ export class CollectionsOperation extends OperationBase {
     this.db = db;
   }
 
-  execute(callback: Function) {
+  execute(callback: Callback) {
     const db = this.db;
     let options = this.options;
 
-    let Collection = loadCollection();
+    const Collection = loadCollection();
 
     options = Object.assign({}, options, { nameOnly: true });
     // Let's get the collection names

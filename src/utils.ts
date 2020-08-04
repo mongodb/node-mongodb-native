@@ -102,7 +102,7 @@ function checkCollectionName(collectionName: any) {
  * @param {any} [value1]
  * @param {any} [value2]
  */
-function handleCallback(callback: Function, err: any, value1?: any, value2?: any) {
+function handleCallback(callback?: Function, err?: any, value1?: any, value2?: any) {
   try {
     if (callback == null) return;
 
