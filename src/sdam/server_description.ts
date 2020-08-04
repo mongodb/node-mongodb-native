@@ -85,7 +85,7 @@ export class ServerDescription {
     this.maxWireVersion = ismaster?.maxWireVersion ?? 0;
     this.roundTripTime = options?.roundTripTime ?? -1;
     this.lastUpdateTime = now();
-    this.lastWriteDate = ismaster?.lastWrite.lastWriteDate ?? 0;
+    this.lastWriteDate = ismaster?.lastWrite?.lastWriteDate ?? 0;
 
     if (options?.topologyVersion) {
       this.topologyVersion = options.topologyVersion;
