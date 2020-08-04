@@ -1,6 +1,6 @@
 import type { MongoError } from './error';
 import type * as BSON from 'bson';
-import type MongoClient from './mongo_client';
+import type { MongoClient } from './mongo_client';
 
 export type AnyError = MongoError | Error;
 
