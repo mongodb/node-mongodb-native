@@ -218,7 +218,7 @@ describe('Sessions', function () {
       })
     });
     it('should throw error with explicit session', {
-      metadata: { requires: { topology: 'single' } },
+      metadata: { requires: { topology: 'replicaset', mongodb: '>3.6.0' } },
       test: withMonitoredClient('insert', { clientOptions: { w: 0 } }, function (
         client,
         events,
