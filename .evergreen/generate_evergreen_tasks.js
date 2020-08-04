@@ -102,6 +102,14 @@ Array.prototype.push.apply(TASKS, [
     ]
   },
   {
+    name: 'test-ldap-auth',
+    tags: ['ldap-auth'],
+    commands: [
+      { func: 'install dependencies' },
+      { func: 'run ldap tests' }
+    ]
+  },
+  {
     name: 'test-ocsp-valid-cert-server-staples',
     tags: ['ocsp'],
     commands: [
