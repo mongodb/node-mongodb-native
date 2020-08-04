@@ -2,6 +2,8 @@ import { defineAspects, Aspect, OperationBase } from './operation';
 import { deleteCallback, removeDocuments } from './common_functions';
 import { CommandOperation } from './command';
 import { isObject } from 'util';
+import type { Callback } from '../types';
+import type { Server } from '../sdam/server';
 
 export class DeleteOperation extends OperationBase {
   namespace: any;
@@ -20,7 +22,7 @@ export class DeleteOperation extends OperationBase {
     );
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback) {
     server.remove(this.namespace.toString(), this.operations, this.options, callback);
   }
 }
@@ -36,7 +38,7 @@ export class DeleteOneOperation extends CommandOperation {
     this.filter = filter;
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback) {
     const coll = this.collection;
     const filter = this.filter;
     const options = this.options;
@@ -63,7 +65,7 @@ export class DeleteManyOperation extends CommandOperation {
     this.filter = filter;
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback) {
     const coll = this.collection;
     const filter = this.filter;
     const options = this.options;

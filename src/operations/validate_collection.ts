@@ -1,5 +1,7 @@
 import { defineAspects, Aspect } from './operation';
 import { CommandOperation } from './command';
+import type { Document, Callback } from '../types';
+import type { Server } from '../sdam/server';
 
 export class ValidateCollectionOperation extends CommandOperation {
   collectionName: string;
@@ -7,7 +9,7 @@ export class ValidateCollectionOperation extends CommandOperation {
 
   constructor(admin: any, collectionName: any, options: any) {
     // Decorate command with extra options
-    let command: any = { validate: collectionName };
+    const command: Document = { validate: collectionName };
     const keys = Object.keys(options);
     for (let i = 0; i < keys.length; i++) {
       if (Object.prototype.hasOwnProperty.call(options, keys[i]) && keys[i] !== 'session') {
@@ -20,7 +22,7 @@ export class ValidateCollectionOperation extends CommandOperation {
     this.collectionName = collectionName;
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback) {
     const collectionName = this.collectionName;
 
     super.executeCommand(server, this.command, (err?: any, doc?: any) => {
@@ -34,7 +36,7 @@ export class ValidateCollectionOperation extends CommandOperation {
       if (doc.valid != null && !doc.valid)
         return callback(new Error('Error: invalid collection ' + collectionName), null);
 
-      return callback(null, doc);
+      return callback(undefined, doc);
     });
   }
 }

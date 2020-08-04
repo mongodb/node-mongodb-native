@@ -2,6 +2,8 @@ import crypto = require('crypto');
 import { Aspect, defineAspects } from './operation';
 import { CommandOperation } from './command';
 import { handleCallback, toError } from '../utils';
+import type { Callback } from '../types';
+import type { Server } from '../sdam/server';
 
 export class AddUserOperation extends CommandOperation {
   db: any;
@@ -16,7 +18,7 @@ export class AddUserOperation extends CommandOperation {
     this.password = password;
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback) {
     const db = this.db;
     const username = this.username;
     const password = this.password;

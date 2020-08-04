@@ -953,13 +953,13 @@ describe('Collection', function () {
       };
 
       client.connect((err, client) => {
-        expect(err).to.be.null;
+        expect(err).to.not.exist;
 
         const db = client.db(configuration.db);
         const collection = db.collection('find_one_and_replace');
 
         collection.insertOne({ a: 1 }, err => {
-          expect(err).to.be.null;
+          expect(err).to.not.exist;
 
           try {
             collection.findOneAndReplace({ a: 1 }, {}, finish);

@@ -8,41 +8,67 @@ import {
   handleCallback,
   toError
 } from '../utils';
+import type { Callback, BSONSerializeOptions, Document } from '../types';
+import type { ReadPreference, Collection } from '..';
+import type { ClientSession } from '../sessions';
+import type { Server } from '../sdam/server';
 
-export function deleteCallback(err: any, r: any, callback: Function) {
+export function deleteCallback(err: any, r: any, callback: Callback) {
   if (callback == null) return;
   if (err && callback) return callback(err);
-  if (r == null) return callback(null, { result: { ok: 1 } });
+  if (r == null) return callback(undefined, { result: { ok: 1 } });
   r.deletedCount = r.result.n;
-  if (callback) callback(null, r);
+  if (callback) callback(undefined, r);
 }
 
+export interface IndexInformationOptions {
+  full?: boolean;
+  readPreference?: ReadPreference;
+  session?: ClientSession;
+}
 /**
  * Retrieves this collections index info.
  *
- * @function
- * @param {Db} db The Db instance on which to retrieve the index info.
- * @param {string} name The name of the collection.
- * @param {object} [options] Optional settings. See Db.prototype.indexInformation for a list of options.
- * @param {Db~resultCallback} [callback] The command result callback
+ * @param db The Db instance on which to retrieve the index info.
+ * @param name The name of the collection.
+ * @param [options] Optional settings. See Db.prototype.indexInformation for a list of options.
+ * @param [callback] The command result callback
  */
-export function indexInformation(db: any, name: string, options?: any, callback?: Function) {
+export function indexInformation(db: any, name: string, callback: Callback): void;
+export function indexInformation(
+  db: any,
+  name: string,
+  options: IndexInformationOptions,
+  callback?: Callback
+): void;
+export function indexInformation(
+  db: any,
+  name: string,
+  _optionsOrCallback: IndexInformationOptions | Callback,
+  _callback?: Callback
+) {
+  let options = _optionsOrCallback as IndexInformationOptions;
+  let callback = _callback as Callback;
+  if ('function' === typeof _optionsOrCallback) {
+    callback = _optionsOrCallback as Callback;
+    options = {};
+  }
   // If we specified full information
-  const full = options['full'] == null ? false : options['full'];
+  const full = options.full == null ? false : options.full;
 
   // Did the user destroy the topology
   if (db.serverConfig && db.serverConfig.isDestroyed())
-    return callback!(new MongoError('topology was destroyed'));
+    return callback(new MongoError('topology was destroyed'));
   // Process all the results from the index command and collection
   function processResults(indexes: any) {
     // Contains all the information
-    let info: any = {};
+    const info: any = {};
     // Process all the indexes
     for (let i = 0; i < indexes.length; i++) {
       const index = indexes[i];
       // Let's unpack the object
       info[index.name] = [];
-      for (let name in index.key) {
+      for (const name in index.key) {
         info[index.name].push([name, index.key[name]]);
       }
     }
@@ -54,10 +80,10 @@ export function indexInformation(db: any, name: string, options?: any, callback?
   db.collection(name)
     .listIndexes(options)
     .toArray((err?: any, indexes?: any) => {
-      if (err) return callback!(toError(err));
-      if (!Array.isArray(indexes)) return handleCallback(callback!, null, []);
-      if (full) return handleCallback(callback!, null, indexes);
-      handleCallback(callback!, null, processResults(indexes));
+      if (err) return callback(toError(err));
+      if (!Array.isArray(indexes)) return handleCallback(callback, null, []);
+      if (full) return handleCallback(callback, null, indexes);
+      handleCallback(callback, null, processResults(indexes));
     });
 }
 
@@ -82,7 +108,7 @@ export function prepareDocs(coll: any, docs: any, options: any) {
 }
 
 // Get the next available document from the cursor, returns null if no more documents are available.
-export function nextObject(cursor: any, callback: Function) {
+export function nextObject(cursor: any, callback: Callback) {
   if (cursor.s.state === CursorState.CLOSED || (cursor.isDead && cursor.isDead())) {
     return handleCallback(
       callback,
@@ -107,11 +133,11 @@ export function nextObject(cursor: any, callback: Function) {
 }
 
 export function removeDocuments(
-  server: any,
+  server: Server,
   coll: any,
   selector: any,
   options: any,
-  callback: Function
+  callback: Callback
 ) {
   if (typeof options === 'function') {
     (callback = options), (options = {});
@@ -151,7 +177,7 @@ export function removeDocuments(
   }
 
   // Execute the remove
-  server.remove(coll.s.namespace.toString(), [op], finalOptions, (err?: any, result?: any) => {
+  server.remove(coll.s.namespace.toString(), [op], finalOptions, (err, result) => {
     if (callback == null) return;
     if (err) return handleCallback(callback, err, null);
     if (result == null) return handleCallback(callback, null, null);
@@ -165,23 +191,49 @@ export function removeDocuments(
   });
 }
 
+export interface UpdateDocumentsOptions extends BSONSerializeOptions {
+  multi?: undefined;
+  hint?: any;
+  arrayFilters?: any;
+  retryWrites?: any;
+  upsert?: undefined;
+}
+
 export function updateDocuments(
-  server: any,
-  coll: any,
-  selector: any,
-  document: any,
-  options: any,
-  callback?: Function
+  server: Server,
+  coll: Collection,
+  selector: Document,
+  document: Document,
+  callback: Callback
+): void;
+export function updateDocuments(
+  server: Server,
+  coll: Collection,
+  selector: Document,
+  document: Document,
+  options: UpdateDocumentsOptions,
+  callback: Callback
+): void;
+export function updateDocuments(
+  server: Server,
+  coll: Collection,
+  selector: Document,
+  document: Document,
+  _options: UpdateDocumentsOptions | Callback,
+  _callback?: Callback
 ) {
-  if ('function' === typeof options) (callback = options), (options = null);
-  if (options == null) options = {};
-  if (!('function' === typeof callback)) callback = undefined;
+  let options = _options as UpdateDocumentsOptions;
+  let callback = _callback as Callback;
+  if ('function' === typeof options) {
+    callback = options;
+    options = {};
+  }
 
   // If we are not providing a selector or document throw
   if (selector == null || typeof selector !== 'object')
-    return callback!(toError('selector must be a valid JavaScript object'));
+    return callback(toError('selector must be a valid JavaScript object'));
   if (document == null || typeof document !== 'object')
-    return callback!(toError('document must be a valid JavaScript object'));
+    return callback(toError('document must be a valid JavaScript object'));
 
   // Final options for retryable writes and write concern
   let finalOptions = Object.assign({}, options);
@@ -215,11 +267,11 @@ export function updateDocuments(
   try {
     decorateWithCollation(finalOptions, coll, options);
   } catch (err) {
-    return callback!(err, null);
+    return callback(err, null);
   }
 
   // Update options
-  server.update(coll.s.namespace.toString(), [op], finalOptions, (err?: any, result?: any) => {
+  server.update(coll.s.namespace.toString(), [op], finalOptions, (err, result) => {
     if (callback == null) return;
     if (err) return handleCallback(callback, err, null);
     if (result == null) return handleCallback(callback, null, null);
@@ -231,10 +283,10 @@ export function updateDocuments(
   });
 }
 
-export function updateCallback(err: any, r: any, callback: Function) {
+export function updateCallback(err: any, r: any, callback: Callback) {
   if (callback == null) return;
   if (err) return callback(err);
-  if (r == null) return callback(null, { result: { ok: 1 } });
+  if (r == null) return callback(undefined, { result: { ok: 1 } });
   r.modifiedCount = r.result.nModified != null ? r.result.nModified : r.result.n;
   r.upsertedId =
     Array.isArray(r.result.upserted) && r.result.upserted.length > 0
@@ -244,5 +296,5 @@ export function updateCallback(err: any, r: any, callback: Function) {
     Array.isArray(r.result.upserted) && r.result.upserted.length ? r.result.upserted.length : 0;
   r.matchedCount =
     Array.isArray(r.result.upserted) && r.result.upserted.length > 0 ? 0 : r.result.n;
-  callback(null, r);
+  callback(undefined, r);
 }

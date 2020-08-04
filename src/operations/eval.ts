@@ -3,6 +3,8 @@ import { Code } from '../bson';
 import { ReadPreference } from '../read_preference';
 import { handleCallback } from '../utils';
 import { MongoError } from '../error';
+import type { Callback } from '../types';
+import type { Server } from '../sdam/server';
 
 export class EvalOperation extends CommandOperation {
   code: any;
@@ -20,7 +22,7 @@ export class EvalOperation extends CommandOperation {
     this.parameters = parameters;
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback) {
     let finalCode = this.code;
     let finalParameters = [];
 
@@ -35,7 +37,7 @@ export class EvalOperation extends CommandOperation {
     }
 
     // Create execution selector
-    let cmd: any = { $eval: finalCode, args: finalParameters };
+    const cmd: any = { $eval: finalCode, args: finalParameters };
 
     // Check if the nolock parameter is passed in
     if (this.options.nolock) {
@@ -43,16 +45,16 @@ export class EvalOperation extends CommandOperation {
     }
 
     // Execute the command
-    super.executeCommand(server, cmd, (err?: any, result?: any) => {
-      if (err) return handleCallback(callback!, err, null);
-      if (result && result.ok === 1) return handleCallback(callback!, null, result.retval);
+    super.executeCommand(server, cmd, (err, result) => {
+      if (err) return handleCallback(callback, err, null);
+      if (result && result.ok === 1) return handleCallback(callback, null, result.retval);
       if (result)
         return handleCallback(
-          callback!,
+          callback,
           MongoError.create({ message: `eval failed: ${result.errmsg}`, driver: true }),
           null
         );
-      handleCallback(callback!, err, result);
+      handleCallback(callback, err, result);
     });
   }
 }

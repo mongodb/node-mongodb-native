@@ -1,5 +1,7 @@
 import { defineAspects, Aspect } from './operation';
 import { CommandOperation } from './command';
+import type { Callback } from '../types';
+import type { Server } from '../sdam/server';
 const levelValues = new Set(['off', 'slow_only', 'all']);
 
 export class SetProfilingLevelOperation extends CommandOperation {
@@ -21,7 +23,7 @@ export class SetProfilingLevelOperation extends CommandOperation {
     this.profile = profile;
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback) {
     const level = this.level;
 
     if (!levelValues.has(level)) {
@@ -29,7 +31,7 @@ export class SetProfilingLevelOperation extends CommandOperation {
     }
 
     super.executeCommand(server, { profile: this.profile }, (err?: any, doc?: any) => {
-      if (err == null && doc.ok === 1) return callback(null, level);
+      if (err == null && doc.ok === 1) return callback(undefined, level);
       return err != null
         ? callback(err, null)
         : callback(new Error('Error with profile command'), null);

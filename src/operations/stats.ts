@@ -1,5 +1,7 @@
 import { Aspect, defineAspects } from './operation';
 import { CommandOperation } from './command';
+import type { Callback } from '../types';
+import type { Server } from '../sdam/server';
 
 /**
  * Get all the collection statistics.
@@ -22,7 +24,7 @@ export class CollStatsOperation extends CommandOperation {
     this.collectionName = collection.collectionName;
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback) {
     const command: any = { collStats: this.collectionName };
     if (this.options.scale != null) {
       command.scale = this.options.scale;
@@ -33,7 +35,7 @@ export class CollStatsOperation extends CommandOperation {
 }
 
 export class DbStatsOperation extends CommandOperation {
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback) {
     const command: any = { dbStats: true };
     if (this.options.scale != null) {
       command.scale = this.options.scale;

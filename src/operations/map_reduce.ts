@@ -11,6 +11,8 @@ import {
 import { ReadPreference } from '../read_preference';
 import { CommandOperation } from './command';
 import { defineAspects, Aspect } from './operation';
+import type { Callback } from '../types';
+import type { Server } from '../sdam/server';
 
 const exclusionList = [
   'readPreference',
@@ -53,7 +55,7 @@ export class MapReduceOperation extends CommandOperation {
     this.reduce = reduce;
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback) {
     const coll = this.collection;
     const map = this.map;
     const reduce = this.reduce;
@@ -70,7 +72,7 @@ export class MapReduceOperation extends CommandOperation {
     }
 
     // Add any other options passed in
-    for (let n in options) {
+    for (const n in options) {
       // Only include if not in exclusion list
       if (exclusionList.indexOf(n) === -1) {
         mapCommandHash[n] = options[n];
@@ -111,7 +113,7 @@ export class MapReduceOperation extends CommandOperation {
     }
 
     // Execute command
-    super.executeCommand(server, mapCommandHash, (err?: any, result?: any) => {
+    super.executeCommand(server, mapCommandHash, (err, result) => {
       if (err) return handleCallback(callback, err);
       // Check if we have an error
       if (1 !== result.ok || result.err || result.errmsg) {
@@ -141,7 +143,7 @@ export class MapReduceOperation extends CommandOperation {
       if (result.result != null && typeof result.result === 'object') {
         const doc = result.result;
         // Return a collection from another db
-        let Db = loadDb();
+        const Db = loadDb();
         collection = new Db(doc.db, coll.s.db.s.topology, coll.s.db.s.options).collection(
           doc.collection
         );

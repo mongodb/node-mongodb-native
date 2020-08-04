@@ -2,6 +2,8 @@ import { defineAspects, Aspect } from './operation';
 import { updateDocuments } from './common_functions';
 import { hasAtomicOperators } from '../utils';
 import { CommandOperation } from './command';
+import type { Callback } from '../types';
+import type { Server } from '../sdam/server';
 
 export class ReplaceOneOperation extends CommandOperation {
   collection: any;
@@ -20,7 +22,7 @@ export class ReplaceOneOperation extends CommandOperation {
     this.replacement = replacement;
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback) {
     const coll = this.collection;
     const filter = this.filter;
     const replacement = this.replacement;
@@ -30,16 +32,16 @@ export class ReplaceOneOperation extends CommandOperation {
     options.multi = false;
 
     // Execute update
-    updateDocuments(server, coll, filter, replacement, options, (err: Error, r: any) =>
+    updateDocuments(server, coll, filter, replacement, options, (err, r) =>
       replaceCallback(err, r, replacement, callback)
     );
   }
 }
 
-function replaceCallback(err: any, r: any, doc: any, callback: Function) {
+function replaceCallback(err: any, r: any, doc: any, callback: Callback) {
   if (callback == null) return;
   if (err && callback) return callback(err);
-  if (r == null) return callback(null, { result: { ok: 1 } });
+  if (r == null) return callback(undefined, { result: { ok: 1 } });
 
   r.modifiedCount = r.result.nModified != null ? r.result.nModified : r.result.n;
   r.upsertedId =
@@ -51,7 +53,7 @@ function replaceCallback(err: any, r: any, doc: any, callback: Function) {
   r.matchedCount =
     Array.isArray(r.result.upserted) && r.result.upserted.length > 0 ? 0 : r.result.n;
   r.ops = [doc]; // TODO: Should we still have this?
-  if (callback) callback(null, r);
+  if (callback) callback(undefined, r);
 }
 
 defineAspects(ReplaceOneOperation, [

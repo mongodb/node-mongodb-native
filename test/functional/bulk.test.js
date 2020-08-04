@@ -28,7 +28,7 @@ describe('Bulk', function () {
 
         // Add unique index on b field causing all updates to fail
         col.ensureIndex({ a: 1 }, { unique: true, sparse: false }, function (err) {
-          test.equal(err, null);
+          expect(err).to.not.exist;
 
           var batch = col.initializeOrderedBulkOp();
           batch.insert({ b: 1, a: 1 });
@@ -175,7 +175,7 @@ describe('Bulk', function () {
 
         // Add unique index on field `a` causing all updates to fail
         col.ensureIndex({ a: 1 }, { unique: true, sparse: false }, function (err) {
-          test.equal(err, null);
+          expect(err).to.not.exist;
 
           var batch = col.initializeOrderedBulkOp();
           batch.insert({ b: 1, a: 1 });
@@ -322,7 +322,7 @@ describe('Bulk', function () {
 
           // Add unique index on b field causing all updates to fail
           col.ensureIndex({ b: 1 }, { unique: true, sparse: false }, function (err) {
-            test.equal(err, null);
+            expect(err).to.not.exist;
 
             var batch = col.initializeOrderedBulkOp();
 
@@ -378,7 +378,7 @@ describe('Bulk', function () {
 
           // Add unique index on b field causing all updates to fail
           col.ensureIndex({ b: 1 }, { unique: true, sparse: false }, function (err) {
-            test.equal(err, null);
+            expect(err).to.not.exist;
 
             var batch = col.initializeOrderedBulkOp();
             batch.insert({ a: 1 });
@@ -549,7 +549,7 @@ describe('Bulk', function () {
 
         // Add unique index on b field causing all updates to fail
         col.ensureIndex({ a: 1 }, { unique: true, sparse: false }, function (err) {
-          test.equal(err, null);
+          expect(err).to.not.exist;
 
           // Initialize the unordered Batch
           var batch = col.initializeUnorderedBulkOp();
@@ -743,7 +743,7 @@ describe('Bulk', function () {
 
         // Add unique index on b field causing all updates to fail
         col.ensureIndex({ b: 1 }, writeConcern, function (err) {
-          test.equal(err, null);
+          expect(err).to.not.exist;
 
           // Initialize the unordered Batch
           var batch = col.initializeUnorderedBulkOp();
@@ -849,7 +849,7 @@ describe('Bulk', function () {
 
           // Add unique index on b field causing all updates to fail
           col.ensureIndex({ b: 1 }, { unique: true, sparse: false }, function (err) {
-            test.equal(err, null);
+            expect(err).to.not.exist;
 
             // Initialize the unordered Batch
             var batch = col.initializeUnorderedBulkOp();

@@ -2,6 +2,8 @@ import { checkCollectionName, handleCallback, toError } from '../utils';
 import { loadCollection } from '../dynamic_loaders';
 import { RunAdminCommandOperation } from './run_command';
 import { defineAspects, Aspect } from './operation';
+import type { Callback } from '../types';
+import type { Server } from '../sdam/server';
 
 export class RenameOperation extends RunAdminCommandOperation {
   collection: any;
@@ -22,7 +24,7 @@ export class RenameOperation extends RunAdminCommandOperation {
     this.newName = newName;
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback) {
     const Collection = loadCollection();
     const coll = this.collection;
 

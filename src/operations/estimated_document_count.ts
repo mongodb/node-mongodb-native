@@ -1,5 +1,7 @@
 import { Aspect, defineAspects } from './operation';
 import { CommandOperation } from './command';
+import type { Callback } from '../types';
+import type { Server } from '../sdam/server';
 
 export class EstimatedDocumentCountOperation extends CommandOperation {
   collectionName: string;
@@ -23,7 +25,7 @@ export class EstimatedDocumentCountOperation extends CommandOperation {
     }
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback) {
     const options = this.options;
     const cmd = { count: this.collectionName } as any;
 
@@ -49,7 +51,7 @@ export class EstimatedDocumentCountOperation extends CommandOperation {
         return;
       }
 
-      callback(null, response.n);
+      callback(undefined, response.n);
     });
   }
 }

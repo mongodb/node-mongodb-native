@@ -3,6 +3,8 @@ import { defineAspects, Aspect, OperationBase } from './operation';
 import { CommandOperation } from './command';
 import { applyRetryableWrites, applyWriteConcern, handleCallback, toError } from '../utils';
 import { prepareDocs } from './common_functions';
+import type { Callback } from '../types';
+import type { Server } from '../sdam/server';
 
 export class InsertOperation extends OperationBase {
   namespace: any;
@@ -15,7 +17,7 @@ export class InsertOperation extends OperationBase {
     this.operations = ops;
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback) {
     server.insert(this.namespace.toString(), this.operations, this.options, callback);
   }
 }
@@ -31,7 +33,7 @@ export class InsertOneOperation extends CommandOperation {
     this.doc = doc;
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback) {
     const coll = this.collection;
     const doc = this.doc;
     const options = this.options;
@@ -46,16 +48,16 @@ export class InsertOneOperation extends CommandOperation {
       if (callback == null) return;
       if (err && callback) return callback(err);
       // Workaround for pre 2.6 servers
-      if (r == null) return callback(null, { result: { ok: 1 } });
+      if (r == null) return callback(undefined, { result: { ok: 1 } });
       // Add values to top level to ensure crud spec compatibility
       r.insertedCount = r.result.n;
       r.insertedId = doc._id;
-      if (callback) callback(null, r);
+      if (callback) callback(undefined, r);
     });
   }
 }
 
-function insertDocuments(server: any, coll: any, docs: any, options: any, callback: Function) {
+function insertDocuments(server: Server, coll: any, docs: any, options: any, callback: Callback) {
   if (typeof options === 'function') (callback = options), (options = {});
   options = options || {};
   // Ensure we are operating on an array op docs
@@ -73,7 +75,7 @@ function insertDocuments(server: any, coll: any, docs: any, options: any, callba
   docs = prepareDocs(coll, docs, options);
 
   // File inserts
-  server.insert(coll.s.namespace.toString(), docs, finalOptions, (err?: any, result?: any) => {
+  server.insert(coll.s.namespace.toString(), docs, finalOptions, (err, result) => {
     if (callback == null) return;
     if (err) return handleCallback(callback, err);
     if (result == null) return handleCallback(callback, null, null);

@@ -1,5 +1,6 @@
 import { handleCallback, toError } from '../utils';
 import { OperationBase } from './operation';
+import type { Callback } from '../types';
 
 export class FindOneOperation extends OperationBase {
   collection: any;
@@ -12,7 +13,7 @@ export class FindOneOperation extends OperationBase {
     this.query = query;
   }
 
-  execute(callback: Function) {
+  execute(callback: Callback) {
     const coll = this.collection;
     const query = this.query;
     const options = this.options;

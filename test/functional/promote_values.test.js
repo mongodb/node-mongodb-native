@@ -1,5 +1,6 @@
 'use strict';
 var test = require('./shared').assert;
+const { expect } = require('chai');
 var setupDatabase = require('./shared').setupDatabase;
 const { Long, Int32, Double } = require('../../src');
 
@@ -33,10 +34,10 @@ describe('Promote Values', function () {
             array: [[Long.fromNumber(10)]]
           },
           function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             db.collection('shouldCorrectlyHonorPromoteValues').findOne(function (err, doc) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               test.deepEqual(Long.fromNumber(10), doc.doc);
               test.deepEqual(new Int32(10), doc.int);
@@ -70,10 +71,10 @@ describe('Promote Values', function () {
             array: [[Long.fromNumber(10)]]
           },
           function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             db.collection('shouldCorrectlyHonorPromoteValues').findOne(function (err, doc) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               test.deepEqual(Long.fromNumber(10), doc.doc);
               test.deepEqual(new Int32(10), doc.int);
@@ -107,12 +108,12 @@ describe('Promote Values', function () {
             array: [[Long.fromNumber(10)]]
           },
           function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             db.collection('shouldCorrectlyHonorPromoteValues')
               .find()
               .next(function (err, doc) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
 
                 test.deepEqual(Long.fromNumber(10), doc.doc);
                 test.deepEqual(new Int32(10), doc.int);
@@ -146,12 +147,12 @@ describe('Promote Values', function () {
             array: [[Long.fromNumber(10)]]
           },
           function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             db.collection('shouldCorrectlyHonorPromoteValues')
               .find({}, { promoteValues: false })
               .next(function (err, doc) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
 
                 test.deepEqual(Long.fromNumber(10), doc.doc);
                 test.deepEqual(new Int32(10), doc.int);
@@ -185,12 +186,12 @@ describe('Promote Values', function () {
             array: [[Long.fromNumber(10)]]
           },
           function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             db.collection('shouldCorrectlyHonorPromoteValues2')
               .aggregate([{ $match: {} }], { promoteValues: false })
               .next(function (err, doc) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
 
                 test.deepEqual(Long.fromNumber(10), doc.doc);
                 test.deepEqual(new Int32(10), doc.int);

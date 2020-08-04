@@ -4,6 +4,8 @@ import { MongoError, isRetryableError } from '../error';
 import { Aspect, OperationBase } from './operation';
 import { maxWireVersion } from '../utils';
 import { ServerType } from '../sdam/common';
+import type { Callback } from '../types';
+import type { Server } from '../sdam/server';
 
 const MMAPv1_RETRY_WRITES_ERROR_CODE = 20;
 const MMAPv1_RETRY_WRITES_ERROR_MESSAGE =
@@ -22,7 +24,7 @@ const MMAPv1_RETRY_WRITES_ERROR_MESSAGE =
  * @param {Operation} operation The operation to execute
  * @param {Function} callback The command result callback
  */
-export function executeOperation(topology: any, operation: any, callback?: Function) {
+export function executeOperation(topology: any, operation: any, callback: Callback) {
   const Promise = PromiseProvider.get();
 
   if (topology == null) {
@@ -34,7 +36,7 @@ export function executeOperation(topology: any, operation: any, callback?: Funct
   }
 
   if (topology.shouldCheckForSessionSupport()) {
-    return selectServerForSessionSupport(topology, operation, callback!);
+    return selectServerForSessionSupport(topology, operation, callback);
   }
 
   // The driver sessions spec mandates that we implicitly create sessions for operations
@@ -68,7 +70,7 @@ export function executeOperation(topology: any, operation: any, callback?: Funct
       }
     }
 
-    callback!(err, result);
+    callback(err, result);
   }
 
   try {
@@ -91,11 +93,11 @@ export function executeOperation(topology: any, operation: any, callback?: Funct
   return result;
 }
 
-function supportsRetryableReads(server: any) {
+function supportsRetryableReads(server: Server) {
   return maxWireVersion(server) >= 6;
 }
 
-function executeWithServerSelection(topology: any, operation: any, callback: Function) {
+function executeWithServerSelection(topology: any, operation: any, callback: Callback) {
   const readPreference = operation.readPreference || ReadPreference.primary;
   const inTransaction = operation.session && operation.session.inTransaction();
 
@@ -116,7 +118,7 @@ function executeWithServerSelection(topology: any, operation: any, callback: Fun
 
   function callbackWithRetry(err?: any, result?: any) {
     if (err == null) {
-      return callback(null, result);
+      return callback(undefined, result);
     }
 
     if (
@@ -201,7 +203,7 @@ function shouldRetryWrite(err: any) {
   return err instanceof MongoError && err.hasErrorLabel('RetryableWriteError');
 }
 
-function supportsRetryableWrites(server: any) {
+function supportsRetryableWrites(server: Server) {
   return (
     server.description.maxWireVersion >= 6 &&
     server.description.logicalSessionTimeoutMinutes &&
@@ -211,13 +213,13 @@ function supportsRetryableWrites(server: any) {
 
 // TODO: This is only supported for unified topology, it should go away once
 //       we remove support for legacy topology types.
-function selectServerForSessionSupport(topology: any, operation: any, callback: Function) {
+function selectServerForSessionSupport(topology: any, operation: any, callback: Callback) {
   const Promise = PromiseProvider.get();
 
   let result;
   if (typeof callback !== 'function') {
     result = new Promise((resolve: any, reject: any) => {
-      callback = (err?: any, result?: any) => {
+      callback = (err, result) => {
         if (err) return reject(err);
         resolve(result);
       };

@@ -31,7 +31,7 @@ describe('Aggregation', function () {
       // REMOVE-LINE test.
       // BEGIN
       client.connect(function (err, client) {
-        expect(err).to.be.null;
+        expect(err).to.not.exist;
 
         var db = client.db(databaseName);
         // Some docs for insertion
@@ -56,7 +56,7 @@ describe('Aggregation', function () {
         collection.insert(docs, { w: 1 }, function (err, result) {
           if (err) console.dir({ err });
           expect(result).to.exist;
-          expect(err).to.be.null;
+          expect(err).to.not.exist;
 
           // Execute aggregate, notice the pipeline is expressed as an Array
           const cursor = collection.aggregate([
@@ -77,7 +77,7 @@ describe('Aggregation', function () {
           ]);
 
           cursor.toArray(function (err, result) {
-            expect(err).to.be.null;
+            expect(err).to.not.exist;
             expect(result[0]._id.tags).to.equal('good');
             expect(result[0].authors).to.eql(['bob']);
             expect(result[1]._id.tags).to.equal('fun');
@@ -149,7 +149,7 @@ describe('Aggregation', function () {
       // REMOVE-LINE test.
       // BEGIN
       client.connect(function (err, client) {
-        expect(err).to.be.null;
+        expect(err).to.not.exist;
 
         var db = client.db(databaseName);
         // Some docs for insertion
@@ -175,7 +175,7 @@ describe('Aggregation', function () {
         // Insert the docs
         collection.insert(docs, { w: 1 }, function (err, result) {
           expect(result).to.exist;
-          expect(err).to.be.null;
+          expect(err).to.not.exist;
 
           // Execute aggregate, notice the pipeline is expressed as function call parameters
           // instead of an Array.
@@ -197,7 +197,7 @@ describe('Aggregation', function () {
           ]);
 
           cursor.toArray(function (err, result) {
-            expect(err).to.be.null;
+            expect(err).to.not.exist;
             expect(result[0]._id.tags).to.equal('good');
             expect(result[0].authors).to.eql(['bob']);
             expect(result[1]._id.tags).to.equal('fun');
@@ -237,7 +237,7 @@ describe('Aggregation', function () {
       // REMOVE-LINE test.
       // BEGIN
       client.connect(function (err, client) {
-        expect(err).to.be.null;
+        expect(err).to.not.exist;
 
         var db = client.db(databaseName);
         // Some docs for insertion
@@ -263,7 +263,7 @@ describe('Aggregation', function () {
         // Insert the docs
         collection.insert(docs, { w: 1 }, function (err, result) {
           expect(result).to.exist;
-          expect(err).to.be.null;
+          expect(err).to.not.exist;
 
           // Execute aggregate, notice the pipeline is expressed as function call parameters
           // instead of an Array.
@@ -285,7 +285,7 @@ describe('Aggregation', function () {
           ]);
 
           cursor.toArray(function (err, result) {
-            expect(err).to.be.null;
+            expect(err).to.not.exist;
             expect(result[0]._id.tags).to.equal('good');
             expect(result[0].authors).to.eql(['bob']);
             expect(result[1]._id.tags).to.equal('fun');
@@ -325,7 +325,7 @@ describe('Aggregation', function () {
       // REMOVE-LINE test.
       // BEGIN
       client.connect(function (err, client) {
-        expect(err).to.be.null;
+        expect(err).to.not.exist;
 
         var db = client.db(databaseName);
         // Some docs for insertion
@@ -348,7 +348,7 @@ describe('Aggregation', function () {
         var collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
         // Insert the docs
         collection.insert(docs, { w: 1 }, function (err, result) {
-          expect(err).to.be.null;
+          expect(err).to.not.exist;
           expect(result).to.exist;
 
           // Execute aggregate, notice the pipeline is expressed as an Array
@@ -370,7 +370,7 @@ describe('Aggregation', function () {
 
           // Iterate over all the items in the cursor
           cursor.toArray(function (err, result) {
-            expect(err).to.be.null;
+            expect(err).to.not.exist;
             expect(result).to.exist;
 
             client.close(done);
@@ -407,7 +407,7 @@ describe('Aggregation', function () {
       // REMOVE-LINE test.
       // BEGIN
       client.connect(function (err, client) {
-        expect(err).to.be.null;
+        expect(err).to.not.exist;
 
         var db = client.db(databaseName);
         // Some docs for insertion
@@ -431,7 +431,7 @@ describe('Aggregation', function () {
         // Insert the docs
         collection.insert(docs, { w: 1 }, function (err, result) {
           expect(result).to.exist;
-          expect(err).to.be.null;
+          expect(err).to.not.exist;
 
           // Execute aggregate, notice the pipeline is expressed as an Array
           var cursor = collection.aggregate(
@@ -457,7 +457,7 @@ describe('Aggregation', function () {
 
           // Iterate over all the items in the cursor
           cursor.explain(function (err, result) {
-            expect(err).to.be.null;
+            expect(err).to.not.exist;
             expect(result.stages).to.have.lengthOf.at.least(1);
             expect(result.stages[0]).to.have.key('$cursor');
 
@@ -495,7 +495,7 @@ describe('Aggregation', function () {
       // REMOVE-LINE test.
       // BEGIN
       client.connect(function (err, client) {
-        expect(err).to.be.null;
+        expect(err).to.not.exist;
 
         var db = client.db(databaseName);
         // Some docs for insertion
@@ -519,7 +519,7 @@ describe('Aggregation', function () {
         // Insert the docs
         collection.insert(docs, { w: 1 }, function (err, result) {
           expect(result).to.exist;
-          expect(err).to.be.null;
+          expect(err).to.not.exist;
 
           // Execute aggregate, notice the pipeline is expressed as an Array
           var cursor = collection.aggregate(
@@ -546,7 +546,7 @@ describe('Aggregation', function () {
 
           // Iterate over all the items in the cursor
           cursor.next(function (err, result) {
-            expect(err).to.be.null;
+            expect(err).to.not.exist;
             expect(result._id.tags).to.equal('good');
             expect(result.authors).to.eql(['bob']);
 
@@ -587,7 +587,7 @@ describe('Aggregation', function () {
       // REMOVE-LINE test.
       // BEGIN
       client.connect(function (err, client) {
-        expect(err).to.be.null;
+        expect(err).to.not.exist;
 
         var db = client.db(databaseName);
         // Some docs for insertion
@@ -611,7 +611,7 @@ describe('Aggregation', function () {
         // Insert the docs
         collection.insert(docs, { w: 1 }, function (err, result) {
           expect(result).to.exist;
-          expect(err).to.be.null;
+          expect(err).to.not.exist;
 
           // Execute aggregate, notice the pipeline is expressed as an Array
           const cursor = collection.aggregate(
@@ -635,7 +635,7 @@ describe('Aggregation', function () {
             }
           );
           cursor.toArray(function (err, results) {
-            expect(err).to.be.null;
+            expect(err).to.not.exist;
             expect(results).to.be.empty;
 
             client.close(done);
@@ -672,7 +672,7 @@ describe('Aggregation', function () {
       // REMOVE-LINE test.
       // BEGIN
       client.connect(function (err, client) {
-        expect(err).to.be.null;
+        expect(err).to.not.exist;
 
         var db = client.db(databaseName);
         // Some docs for insertion
@@ -696,7 +696,7 @@ describe('Aggregation', function () {
         // Insert the docs
         collection.insert(docs, { w: 1 }, function (err, result) {
           expect(result).to.exist;
-          expect(err).to.be.null;
+          expect(err).to.not.exist;
 
           // Execute aggregate, notice the pipeline is expressed as an Array
           const cursor = collection.aggregate(
@@ -721,7 +721,7 @@ describe('Aggregation', function () {
             }
           );
           cursor.toArray(function (err, results) {
-            expect(err).to.be.null;
+            expect(err).to.not.exist;
             expect(results[0]._id.tags).to.equal('good');
             expect(results[0].authors).to.eql(['bob']);
             expect(results[1]._id.tags).to.equal('fun');
@@ -755,17 +755,17 @@ describe('Aggregation', function () {
       });
 
       client.connect(function (err, client) {
-        expect(err).to.be.null;
+        expect(err).to.not.exist;
 
         var db = client.db(databaseName);
         // Create a collection
         var col = db.collection('shouldPerformSimpleGroupAggregation');
         col.remove({}, function (err) {
-          expect(err).to.be.null;
+          expect(err).to.not.exist;
 
           // Insert a single document
           col.insert([{ a: 1 }, { a: 1 }, { a: 1 }], function (err, r) {
-            expect(err).to.be.null;
+            expect(err).to.not.exist;
             expect(r.result.n).to.equal(3);
 
             // Get first two documents that match the query
@@ -777,7 +777,7 @@ describe('Aggregation', function () {
                 }
               ])
               .toArray(function (err, docs) {
-                expect(err).to.be.null;
+                expect(err).to.not.exist;
                 expect(docs[0].total).to.equal(3);
 
                 client.close(done);
@@ -808,21 +808,21 @@ describe('Aggregation', function () {
       });
 
       client.connect(function (err, client) {
-        expect(err).to.be.null;
+        expect(err).to.not.exist;
 
         var db = client.db(databaseName);
         db.collection('te.st', function (err, col) {
-          expect(err).to.be.null;
+          expect(err).to.not.exist;
           var count = 0;
 
           col.insert([{ a: 1 }, { a: 1 }, { a: 1 }], function (err, r) {
-            expect(err).to.be.null;
+            expect(err).to.not.exist;
             expect(r.result.n).to.equal(3);
 
             const cursor = col.aggregate([{ $project: { a: 1 } }]);
 
             cursor.toArray(function (err, docs) {
-              expect(err).to.be.null;
+              expect(err).to.not.exist;
               expect(docs.length).to.be.greaterThan(0);
 
               //Using cursor - KO
@@ -835,7 +835,7 @@ describe('Aggregation', function () {
                     count = count + 1;
                   },
                   function (err) {
-                    expect(err).to.be.null;
+                    expect(err).to.not.exist;
                     expect(count).to.be.greaterThan(0);
 
                     client.close(done);
@@ -868,7 +868,7 @@ describe('Aggregation', function () {
       });
 
       client.connect(function (err, client) {
-        expect(err).to.be.null;
+        expect(err).to.not.exist;
 
         var db = client.db(databaseName);
         // Some docs for insertion
@@ -892,7 +892,7 @@ describe('Aggregation', function () {
         // Insert the docs
         collection.insert(docs, { w: 1 }, function (err, result) {
           expect(result).to.exist;
-          expect(err).to.be.null;
+          expect(err).to.not.exist;
 
           try {
             // Execute aggregate, notice the pipeline is expressed as an Array
@@ -1065,7 +1065,7 @@ describe('Aggregation', function () {
             var cmd = db.command;
             // Validate the command
             db.command = function (c) {
-              expect(err).to.be.null;
+              expect(err).to.not.exist;
               expect(c.maxTimeMS).to.equal(1000);
 
               // Apply to existing command
@@ -1074,13 +1074,13 @@ describe('Aggregation', function () {
 
             // Iterate over all the items in the cursor
             cursor.next(function (err, result) {
-              expect(err).to.be.null;
+              expect(err).to.not.exist;
               expect(result._id.tags).to.equal('good');
               expect(result.authors).to.eql(['bob']);
 
               // Validate the command
               db.command = function (c) {
-                expect(err).to.be.null;
+                expect(err).to.not.exist;
                 expect(c.maxTimeMS).to.equal(1000);
 
                 // Apply to existing command
@@ -1138,7 +1138,7 @@ describe('Aggregation', function () {
       const comment = 'Darmok and Jalad at Tanagra';
 
       client.connect(function (err, client) {
-        expect(err).to.be.null;
+        expect(err).to.not.exist;
 
         const db = client.db(databaseName);
         const collection = db.collection('testingPassingDownTheAggregationCommand');
@@ -1181,7 +1181,7 @@ describe('Aggregation', function () {
       // DOC_LINE var client = new MongoClient(new Server('localhost', 27017));
       // DOC_START
       client.connect(function (err, client) {
-        expect(err).to.be.null;
+        expect(err).to.not.exist;
 
         var db = client.db(databaseName);
         var date1 = new Date();
@@ -1204,7 +1204,7 @@ describe('Aggregation', function () {
         // Insert the docs
         collection.insertMany(docs, { w: 1 }, function (err, result) {
           expect(result).to.exist;
-          expect(err).to.be.null;
+          expect(err).to.not.exist;
 
           // Execute aggregate, notice the pipeline is expressed as an Array
           var cursor = collection.aggregate([
@@ -1217,7 +1217,7 @@ describe('Aggregation', function () {
 
           // Iterate over all the items in the cursor
           cursor.next(function (err, result) {
-            expect(err).to.be.null;
+            expect(err).to.not.exist;
             expect(result.b).to.equal(1);
 
             client.close(done);
@@ -1248,7 +1248,7 @@ describe('Aggregation', function () {
       // DOC_LINE var client = new MongoClient(new Server('localhost', 27017));
       // DOC_START
       client.connect(function (err, client) {
-        expect(err).to.be.null;
+        expect(err).to.not.exist;
 
         var db = client.db(databaseName);
         // Create a collection
@@ -1256,7 +1256,7 @@ describe('Aggregation', function () {
         // Insert the docs
         collection.insertMany([{ a: 1 }, { b: 1 }], { w: 1 }, function (err, result) {
           expect(result).to.exist;
-          expect(err).to.be.null;
+          expect(err).to.not.exist;
 
           // Execute aggregate, notice the pipeline is expressed as an Array
           var cursor = collection.aggregate([
@@ -1267,7 +1267,7 @@ describe('Aggregation', function () {
 
           // Iterate over all the items in the cursor
           cursor.hasNext(function (err, result) {
-            expect(err).to.be.null;
+            expect(err).to.not.exist;
             expect(result).to.equal(true);
 
             client.close(done);

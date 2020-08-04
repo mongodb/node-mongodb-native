@@ -2,6 +2,8 @@ import { CommandOperation } from './command';
 import { Aspect, defineAspects } from './operation';
 import { maxWireVersion } from '../utils';
 import CONSTANTS = require('../constants');
+import type { Callback } from '../types';
+import type { Server } from '../sdam/server';
 
 const LIST_COLLECTIONS_WIRE_VERSION = 3;
 
@@ -39,7 +41,7 @@ export class ListCollectionsOperation extends CommandOperation {
     }
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback) {
     if (maxWireVersion(server) < LIST_COLLECTIONS_WIRE_VERSION) {
       let filter = this.filter;
       const databaseName = this.db.s.namespace.db;
@@ -71,7 +73,7 @@ export class ListCollectionsOperation extends CommandOperation {
         { query: filter },
         { batchSize: this.batchSize || 1000 },
         {},
-        (err?: any, result?: any) => {
+        (err, result) => {
           if (
             result &&
             result.message &&

@@ -2,6 +2,8 @@ import { defineAspects, Aspect, OperationBase } from './operation';
 import { updateDocuments, updateCallback } from './common_functions';
 import { hasAtomicOperators } from '../utils';
 import { CommandOperation } from './command';
+import type { Callback } from '../types';
+import type { Server } from '../sdam/server';
 
 export class UpdateOperation extends OperationBase {
   namespace: any;
@@ -18,7 +20,7 @@ export class UpdateOperation extends OperationBase {
     return this.operations.every((op: any) => op.multi == null || op.multi === false);
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback) {
     server.update(this.namespace.toString(), this.operations, this.options, callback);
   }
 }
@@ -40,7 +42,7 @@ export class UpdateOneOperation extends CommandOperation {
     this.update = update;
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback) {
     const coll = this.collection;
     const filter = this.filter;
     const update = this.update;
@@ -49,7 +51,7 @@ export class UpdateOneOperation extends CommandOperation {
     // Set single document update
     options.multi = false;
     // Execute update
-    updateDocuments(server, coll, filter, update, options, (err?: any, r?: any) =>
+    updateDocuments(server, coll, filter, update, options, (err, r) =>
       updateCallback(err, r, callback)
     );
   }
@@ -68,7 +70,7 @@ export class UpdateManyOperation extends CommandOperation {
     this.update = update;
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback) {
     const coll = this.collection;
     const filter = this.filter;
     const update = this.update;
