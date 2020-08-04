@@ -8,11 +8,19 @@ import type { ServerDescription, TagSet } from './server_description';
 const IDLE_WRITE_PERIOD = 10000;
 const SMALLEST_MAX_STALENESS_SECONDS = 90;
 
+export type ServerSelector = (
+  topologyDescription: TopologyDescription,
+  servers: ServerDescription[]
+) => ServerDescription[];
+
 /**
  * Returns a server selector that selects for writable servers
  */
-export function writableServerSelector() {
-  return (topologyDescription: TopologyDescription, servers: ServerDescription[]) =>
+export function writableServerSelector(): ServerSelector {
+  return (
+    topologyDescription: TopologyDescription,
+    servers: ServerDescription[]
+  ): ServerDescription[] =>
     latencyWindowReducer(
       topologyDescription,
       servers.filter((s: ServerDescription) => s.isWritable)
@@ -193,12 +201,15 @@ function knownFilter(server: ServerDescription): boolean {
  *
  * @param {ReadPreference} readPreference The read preference to select with
  */
-export function readPreferenceServerSelector(readPreference: ReadPreference) {
+export function readPreferenceServerSelector(readPreference: ReadPreference): ServerSelector {
   if (!readPreference.isValid()) {
     throw new TypeError('Invalid read preference specified');
   }
 
-  return (topologyDescription: TopologyDescription, servers: ServerDescription[]) => {
+  return (
+    topologyDescription: TopologyDescription,
+    servers: ServerDescription[]
+  ): ServerDescription[] => {
     const commonWireVersion = topologyDescription.commonWireVersion;
     if (
       commonWireVersion &&

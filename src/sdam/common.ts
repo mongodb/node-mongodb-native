@@ -1,4 +1,6 @@
 import type { Timestamp, Binary, Long } from '../bson';
+import type { Topology } from './topology';
+import type { ClientSession } from '../sessions';
 
 // shared state names
 export const STATE_CLOSING = 'closing';
@@ -36,12 +38,12 @@ export const TOPOLOGY_DEFAULTS = {
 };
 
 export type TimerQueue = Set<NodeJS.Timeout>;
-export function drainTimerQueue(queue: TimerQueue) {
+export function drainTimerQueue(queue: TimerQueue): void {
   queue.forEach(clearTimeout);
   queue.clear();
 }
 
-export function clearAndRemoveTimerFrom(timer: NodeJS.Timeout, timers: TimerQueue) {
+export function clearAndRemoveTimerFrom(timer: NodeJS.Timeout, timers: TimerQueue): boolean {
   clearTimeout(timer);
   return timers.delete(timer);
 }
@@ -54,13 +56,11 @@ export interface ClusterTime {
   };
 }
 
-/**
- * Shared function to determine clusterTime for a given topology
- *
- * @param {any} topology
- * @param {any} $clusterTime
- */
-export function resolveClusterTime(topology: any, $clusterTime: ClusterTime) {
+/** Shared function to determine clusterTime for a given topology */
+export function resolveClusterTime(
+  topology: Topology | ClientSession,
+  $clusterTime: ClusterTime
+): void {
   if (topology.clusterTime == null) {
     topology.clusterTime = $clusterTime;
   } else {

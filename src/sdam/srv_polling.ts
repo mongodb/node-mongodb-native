@@ -60,21 +60,21 @@ class SrvPoller extends EventEmitter {
     this._timeout = undefined;
   }
 
-  get srvAddress() {
+  get srvAddress(): string {
     return `_mongodb._tcp.${this.srvHost}`;
   }
 
-  get intervalMS() {
+  get intervalMS(): number {
     return this.haMode ? this.heartbeatFrequencyMS : this.rescanSrvIntervalMS;
   }
 
-  start() {
+  start(): void {
     if (!this._timeout) {
       this.schedule();
     }
   }
 
-  stop() {
+  stop(): void {
     if (this._timeout) {
       clearTimeout(this._timeout);
       this.generation += 1;
@@ -82,7 +82,7 @@ class SrvPoller extends EventEmitter {
     }
   }
 
-  schedule() {
+  schedule(): void {
     if (this._timeout) {
       clearTimeout(this._timeout);
     }
@@ -90,26 +90,26 @@ class SrvPoller extends EventEmitter {
     this._timeout = setTimeout(() => this._poll(), this.intervalMS);
   }
 
-  success(srvRecords: dns.SrvRecord[]) {
+  success(srvRecords: dns.SrvRecord[]): void {
     this.haMode = false;
     this.schedule();
     this.emit('srvRecordDiscovery', new SrvPollingEvent(srvRecords));
   }
 
-  failure(message: string, obj?: NodeJS.ErrnoException) {
+  failure(message: string, obj?: NodeJS.ErrnoException): void {
     this.logger.warn(message, obj);
     this.haMode = true;
     this.schedule();
   }
 
-  parentDomainMismatch(srvRecord: dns.SrvRecord) {
+  parentDomainMismatch(srvRecord: dns.SrvRecord): void {
     this.logger.warn(
       `parent domain mismatch on SRV record (${srvRecord.name}:${srvRecord.port})`,
       srvRecord
     );
   }
 
-  _poll() {
+  _poll(): void {
     const generation = this.generation;
     dns.resolveSrv(this.srvAddress, (err, srvRecords) => {
       if (generation !== this.generation) {

@@ -31,7 +31,7 @@ import {
   isNodeShuttingDownError,
   isNetworkErrorBeforeHandshake
 } from '../error';
-import type { Document, Callback, CallbackWithType } from '../types';
+import type { Document, Callback, CallbackWithType, AutoEncrypter } from '../types';
 import type { Topology } from './topology';
 import type { Connection } from '../cmap/connection';
 import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
@@ -180,18 +180,16 @@ export class Server extends EventEmitter {
     return this.s.description.address;
   }
 
-  get autoEncrypter() {
+  get autoEncrypter(): AutoEncrypter | undefined {
     if (this.s.options && this.s.options.autoEncrypter) {
       return this.s.options.autoEncrypter;
     }
-
-    return null;
   }
 
   /**
    * Initiate server connect
    */
-  connect() {
+  connect(): void {
     if (this.s.state !== STATE_CLOSED) {
       return;
     }
@@ -207,7 +205,7 @@ export class Server extends EventEmitter {
    * @param {boolean} [options.force=false] Force destroy the pool
    * @param {any} callback
    */
-  destroy(options?: DestroyOptions, callback?: Callback) {
+  destroy(options?: DestroyOptions, callback?: Callback): void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, { force: false }, options);
 
@@ -235,7 +233,7 @@ export class Server extends EventEmitter {
    * Immediately schedule monitoring of this server. If there already an attempt being made
    * this will be a no-op.
    */
-  requestCheck() {
+  requestCheck(): void {
     this[kMonitor].requestCheck();
   }
 
@@ -318,19 +316,25 @@ export class Server extends EventEmitter {
     cursorState: InternalCursorState,
     options: QueryOptions,
     callback: Callback
-  ) {
+  ): void {
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
       callback(new MongoError('server is closed'));
       return;
     }
 
-    this.s.pool.withConnection((err: any, conn: any, cb: any) => {
-      if (err) {
+    this.s.pool.withConnection((err, conn, cb) => {
+      if (err || !conn) {
         markServerUnknown(this, err);
         return cb(err);
       }
 
-      conn.query(ns, cmd, cursorState, options, makeOperationHandler(this, conn, cmd, options, cb));
+      conn.query(
+        ns,
+        cmd,
+        cursorState,
+        options,
+        makeOperationHandler(this, conn, cmd, options, cb) as Callback
+      );
     }, callback);
   }
 
@@ -349,14 +353,14 @@ export class Server extends EventEmitter {
     batchSize: number,
     options: GetMoreOptions,
     callback: Callback
-  ) {
+  ): void {
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
       callback(new MongoError('server is closed'));
       return;
     }
 
-    this.s.pool.withConnection((err: any, conn: any, cb: any) => {
-      if (err) {
+    this.s.pool.withConnection((err, conn, cb) => {
+      if (err || !conn) {
         markServerUnknown(this, err);
         return cb(err);
       }
@@ -366,7 +370,7 @@ export class Server extends EventEmitter {
         cursorState,
         batchSize,
         options,
-        makeOperationHandler(this, conn, {}, options, cb)
+        makeOperationHandler(this, conn, {}, options, cb) as Callback
       );
     }, callback);
   }
@@ -378,7 +382,7 @@ export class Server extends EventEmitter {
    * @param cursorState State data associated with the cursor calling this method
    * @param callback
    */
-  killCursors(ns: string, cursorState: InternalCursorState, callback: Callback) {
+  killCursors(ns: string, cursorState: InternalCursorState, callback: Callback): void {
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
       if (typeof callback === 'function') {
         callback(new MongoError('server is closed'));
@@ -387,13 +391,17 @@ export class Server extends EventEmitter {
       return;
     }
 
-    this.s.pool.withConnection((err: any, conn: any, cb: any) => {
-      if (err) {
+    this.s.pool.withConnection((err, conn, cb) => {
+      if (err || !conn) {
         markServerUnknown(this, err);
         return cb(err);
       }
 
-      conn.killCursors(ns, cursorState, makeOperationHandler(this, conn, {}, undefined, cb));
+      conn.killCursors(
+        ns,
+        cursorState,
+        makeOperationHandler(this, conn, {}, undefined, cb) as Callback
+      );
     }, callback);
   }
 
@@ -405,7 +413,7 @@ export class Server extends EventEmitter {
    * @param {object} options
    * @param {opResultCallback} callback A callback function
    */
-  insert(ns: string, ops: Document[], options: WriteCommandOptions, callback: Callback) {
+  insert(ns: string, ops: Document[], options: WriteCommandOptions, callback: Callback): void {
     executeWriteOperation({ server: this, op: 'insert', ns, ops }, options, callback);
   }
 
@@ -417,7 +425,7 @@ export class Server extends EventEmitter {
    * @param {object} options
    * @param {opResultCallback} callback A callback function
    */
-  update(ns: string, ops: Document[], options: WriteCommandOptions, callback: Callback) {
+  update(ns: string, ops: Document[], options: WriteCommandOptions, callback: Callback): void {
     executeWriteOperation({ server: this, op: 'update', ns, ops }, options, callback);
   }
 
@@ -429,7 +437,7 @@ export class Server extends EventEmitter {
    * @param {object} options options for removal
    * @param {opResultCallback} callback A callback function
    */
-  remove(ns: string, ops: Document[], options: WriteCommandOptions, callback: Callback) {
+  remove(ns: string, ops: Document[], options: WriteCommandOptions, callback: Callback): void {
     executeWriteOperation({ server: this, op: 'remove', ns, ops }, options, callback);
   }
 }
@@ -466,7 +474,11 @@ function basicReadValidations(server: Server, options: CommandOptions) {
   }
 }
 
-function executeWriteOperation(args: any, options: WriteCommandOptions, callback: Callback) {
+function executeWriteOperation(
+  args: { server: Server; op: string; ns: string; ops: Document[] | Document },
+  options: WriteCommandOptions,
+  callback: Callback
+) {
   options = options || {};
 
   const { server, op, ns } = args;
@@ -489,13 +501,34 @@ function executeWriteOperation(args: any, options: WriteCommandOptions, callback
     }
   }
 
-  server.s.pool.withConnection((err: any, conn: any, cb: any) => {
-    if (err) {
+  server.s.pool.withConnection((err, conn, cb) => {
+    if (err || !conn) {
       markServerUnknown(server, err);
       return cb(err);
     }
 
-    conn[op](ns, ops, options, makeOperationHandler(server, conn, ops, options, cb));
+    if (op === 'insert') {
+      conn.insert(
+        ns,
+        ops,
+        options,
+        makeOperationHandler(server, conn, ops, options, cb) as Callback
+      );
+    } else if (op === 'update') {
+      conn.update(
+        ns,
+        ops,
+        options,
+        makeOperationHandler(server, conn, ops, options, cb) as Callback
+      );
+    } else {
+      conn.remove(
+        ns,
+        ops,
+        options,
+        makeOperationHandler(server, conn, ops, options, cb) as Callback
+      );
+    }
   }, callback);
 }
 

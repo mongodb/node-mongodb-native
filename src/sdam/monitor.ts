@@ -111,7 +111,7 @@ export class Monitor extends EventEmitter {
     this.connectOptions = Object.freeze(connectOptions);
   }
 
-  connect() {
+  connect(): void {
     if (this.s.state !== STATE_CLOSED) {
       return;
     }
@@ -126,7 +126,7 @@ export class Monitor extends EventEmitter {
     });
   }
 
-  requestCheck() {
+  requestCheck(): void {
     if (INVALID_REQUEST_CHECK_STATES.has(this.s.state)) {
       return;
     }
@@ -134,7 +134,7 @@ export class Monitor extends EventEmitter {
     this[kMonitorId]?.wake();
   }
 
-  reset() {
+  reset(): void {
     if (isInCloseState(this)) {
       return;
     }
@@ -154,7 +154,7 @@ export class Monitor extends EventEmitter {
     });
   }
 
-  close() {
+  close(): void {
     if (isInCloseState(this)) {
       return;
     }
@@ -401,7 +401,7 @@ function measureRoundTripTime(rttPinger: RTTPinger, options: RTTPingerOptions) {
 
   const connection = rttPinger[kConnection];
   if (connection == null) {
-    connect(options, cancellationToken, (err?: any, conn?: any) => {
+    connect(options, cancellationToken, (err, conn) => {
       if (err) {
         rttPinger[kConnection] = undefined;
         rttPinger[kRoundTripTime] = 0;
@@ -414,7 +414,7 @@ function measureRoundTripTime(rttPinger: RTTPinger, options: RTTPingerOptions) {
     return;
   }
 
-  connection.command('admin.$cmd', { ismaster: 1 }, (err: any) => {
+  connection.command('admin.$cmd', { ismaster: 1 }, err => {
     if (err) {
       rttPinger[kConnection] = undefined;
       rttPinger[kRoundTripTime] = 0;

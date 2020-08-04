@@ -11,7 +11,7 @@ import { ClientSession, ServerSessionPool } from '../sessions';
 import { SrvPoller, SrvPollingEvent } from './srv_polling';
 import { CMAP_EVENT_NAMES } from '../cmap/events';
 import { MongoError, MongoServerSelectionError } from '../error';
-import { readPreferenceServerSelector } from './server_selection';
+import { readPreferenceServerSelector, ServerSelector } from './server_selection';
 import { deprecate } from 'util';
 import { relayEvents, makeStateMachine, eachAsync, makeClientMetadata } from '../utils';
 import {
@@ -149,7 +149,6 @@ interface ConnectOptions {
   readPreference?: ReadPreference;
 }
 
-type ServerSelector = Function;
 interface SelectServerOptions {
   readPreference?: ReadPreference;
   serverSelectionTimeoutMS?: number;
@@ -172,6 +171,7 @@ export class Topology extends EventEmitter {
   s: TopologyPrivate;
   [kWaitQueue]: Denque<ServerSelectionRequest>;
   ismaster?: Document;
+  clusterTime?: ClusterTime;
 
   /**
    * Create a topology
@@ -285,16 +285,16 @@ export class Topology extends EventEmitter {
   /**
    * @returns A `TopologyDescription` for this topology
    */
-  get description() {
+  get description(): TopologyDescription {
     return this.s.description;
   }
 
-  capabilities() {
+  capabilities(): ServerCapabilities {
     return new ServerCapabilities(this.lastIsMaster());
   }
 
   /** Initiate server connect */
-  connect(options?: ConnectOptions, callback?: Callback) {
+  connect(options?: ConnectOptions, callback?: Callback): void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
     if (this.s.state === STATE_CONNECTED) {
@@ -355,7 +355,7 @@ export class Topology extends EventEmitter {
   }
 
   /** Close this topology */
-  close(options?: CloseOptions, callback?: Callback) {
+  close(options?: CloseOptions, callback?: Callback): void {
     if (typeof options === 'function') {
       callback = options;
       options = {};
@@ -476,7 +476,7 @@ export class Topology extends EventEmitter {
     const transaction = session && session.transaction;
 
     if (isSharded && transaction && transaction.server) {
-      callback!(undefined, transaction.server);
+      callback(undefined, transaction.server);
       return;
     }
 
@@ -509,7 +509,7 @@ export class Topology extends EventEmitter {
   /**
    * @returns Whether the topology should initiate selection to determine session support
    */
-  shouldCheckForSessionSupport() {
+  shouldCheckForSessionSupport(): boolean {
     if (this.description.type === TopologyType.Single) {
       return !this.description.hasKnownServers;
     }
@@ -520,12 +520,12 @@ export class Topology extends EventEmitter {
   /**
    * @returns Whether sessions are supported on the current topology
    */
-  hasSessionSupport() {
+  hasSessionSupport(): boolean {
     return this.description.logicalSessionTimeoutMinutes != null;
   }
 
   /** Start a logical session */
-  startSession(options: any, clientOptions?: any) {
+  startSession(options: unknown, clientOptions?: Record<string, unknown>): ClientSession {
     const session = new ClientSession(this, this.s.sessionPool, options, clientOptions);
     session.once('ended', () => {
       this.s.sessions.delete(session);
@@ -536,7 +536,7 @@ export class Topology extends EventEmitter {
   }
 
   /** Send endSessions command(s) with the given session ids */
-  endSessions(sessions: ClientSession[], callback?: Callback) {
+  endSessions(sessions: ClientSession[], callback?: Callback): void {
     if (!Array.isArray(sessions)) {
       sessions = [sessions];
     }
@@ -557,7 +557,7 @@ export class Topology extends EventEmitter {
    *
    * @param {ServerDescription} serverDescription The server to update in the internal list of server descriptions
    */
-  serverUpdateHandler(serverDescription: ServerDescription) {
+  serverUpdateHandler(serverDescription: ServerDescription): void {
     if (!this.s.description.hasServer(serverDescription.address)) {
       return;
     }
@@ -629,12 +629,12 @@ export class Topology extends EventEmitter {
     }
   }
 
-  auth(credentials: any, callback: Callback) {
-    if (typeof credentials === 'function') (callback = credentials), (credentials = null);
+  auth(credentials?: MongoCredentials, callback?: Callback): void {
+    if (typeof credentials === 'function') (callback = credentials), (credentials = undefined);
     if (typeof callback === 'function') callback(undefined, true);
   }
 
-  logout(callback: Callback) {
+  logout(callback: Callback): void {
     if (typeof callback === 'function') callback(undefined, true);
   }
 
@@ -652,7 +652,7 @@ export class Topology extends EventEmitter {
    * @param {ClientSession} [options.session=null] Session to use for the operation
    * @param {opResultCallback} callback A callback function
    */
-  command(ns: string, cmd: Document, options: CommandOptions, callback: Callback) {
+  command(ns: string, cmd: Document, options: CommandOptions, callback: Callback): void {
     if (typeof options === 'function') {
       (callback = options), (options = {}), (options = options || {});
     }
@@ -721,19 +721,19 @@ export class Topology extends EventEmitter {
     return new CursorClass(topology, ns, cmd, options);
   }
 
-  get clientMetadata() {
+  get clientMetadata(): ClientMetadata {
     return this.s.options.metadata;
   }
 
-  isConnected() {
+  isConnected(): boolean {
     return this.s.state === STATE_CONNECTED;
   }
 
-  isDestroyed() {
+  isDestroyed(): boolean {
     return this.s.state === STATE_CLOSED;
   }
 
-  unref() {
+  unref(): void {
     console.log('not implemented: `unref`');
   }
 
@@ -751,7 +751,7 @@ export class Topology extends EventEmitter {
     return result;
   }
 
-  get logicalSessionTimeoutMinutes() {
+  get logicalSessionTimeoutMinutes(): number | undefined {
     return this.description.logicalSessionTimeoutMinutes;
   }
 }
@@ -891,8 +891,10 @@ function connectServers(topology: Topology, serverDescriptions: ServerDescriptio
 function updateServers(topology: Topology, incomingServerDescription?: ServerDescription) {
   // update the internal server's description
   if (incomingServerDescription && topology.s.servers.has(incomingServerDescription.address)) {
-    const server = topology.s.servers.get(incomingServerDescription.address)!;
-    server.s.description = incomingServerDescription;
+    const server = topology.s.servers.get(incomingServerDescription.address);
+    if (server) {
+      server.s.description = incomingServerDescription;
+    }
   }
 
   // add new servers for all descriptions we currently don't know about locally
@@ -914,11 +916,13 @@ function updateServers(topology: Topology, incomingServerDescription?: ServerDes
       continue;
     }
 
-    const server = topology.s.servers.get(serverAddress)!;
+    const server = topology.s.servers.get(serverAddress);
     topology.s.servers.delete(serverAddress);
 
     // prepare server for garbage collection
-    destroyServer(server, topology);
+    if (server) {
+      destroyServer(server, topology);
+    }
   }
 }
 
@@ -1068,7 +1072,7 @@ class ServerCapabilities {
     let authCommands = false;
     let listCollections = false;
     let listIndexes = false;
-    let maxNumberOfDocsInBatch = ismaster.maxWriteBatchSize || 1000;
+    const maxNumberOfDocsInBatch = ismaster.maxWriteBatchSize || 1000;
     let commandsTakeWriteConcern = false;
     let commandsTakeCollation = false;
 
@@ -1104,7 +1108,11 @@ class ServerCapabilities {
       ismaster.maxWireVersion = 0;
     }
 
-    function setup_get_property(object: any, name: any, value: any) {
+    function setup_get_property(
+      object: ServerCapabilities,
+      name: string,
+      value: string | boolean | number
+    ) {
       Object.defineProperty(object, name, {
         enumerable: true,
         get() {

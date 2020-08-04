@@ -3,6 +3,7 @@ import WIRE_CONSTANTS = require('../cmap/wire_protocol/constants');
 import { TopologyType, ServerType } from './common';
 import type { ObjectId } from '../bson';
 import type { SrvPollingEvent } from './srv_polling';
+import type { Document } from '../types';
 
 // contstants related to compatability checks
 const MIN_SUPPORTED_SERVER_VERSION = WIRE_CONSTANTS.MIN_SUPPORTED_SERVER_VERSION;
@@ -158,7 +159,7 @@ export class TopologyDescription {
     }
 
     const serverType = serverDescription.type;
-    let serverDescriptions = new Map(this.servers);
+    const serverDescriptions = new Map(this.servers);
 
     // update common wire version
     if (serverDescription.maxWireVersion !== 0) {
@@ -317,7 +318,7 @@ function topologyTypeForServerType(serverType: ServerType): TopologyType {
 }
 
 // TODO: improve these docs when ObjectId is properly typed
-function compareObjectId(oid1: any, oid2: any): number {
+function compareObjectId(oid1: Document, oid2: Document): number {
   if (oid1 == null) {
     return -1;
   }
@@ -431,8 +432,7 @@ function updateRsNoPrimaryFromMember(
   serverDescription: ServerDescription,
   setName?: string
 ): [TopologyType, string?] {
-  let topologyType = TopologyType.ReplicaSetNoPrimary;
-
+  const topologyType = TopologyType.ReplicaSetNoPrimary;
   setName = setName || serverDescription.setName;
   if (setName !== serverDescription.setName) {
     serverDescriptions.delete(serverDescription.address);

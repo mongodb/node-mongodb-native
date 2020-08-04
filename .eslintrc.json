@@ -59,6 +59,17 @@
     "prefer-const": "off",
     "prefer-spread": "off",
     "prefer-rest-params": "off"
+
+    // possible future options
+    // "@typescript-eslint/ban-types": 2,
+    // "@typescript-eslint/explicit-module-boundary-types": 2,
+    // "@typescript-eslint/no-empty-function": 2,
+    // "@typescript-eslint/no-explicit-any": 2,
+    // "@typescript-eslint/no-this-alias": 2,
+    // "@typescript-eslint/no-non-null-assertion": 2,
+    // "@typescript-eslint/no-var-requires": 2,
+    // "no-var": 2,
+    // "prefer-const": 2
   },
   "settings": {
     "jsdoc": {

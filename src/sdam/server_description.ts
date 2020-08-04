@@ -55,7 +55,7 @@ export class ServerDescription {
   maxWireVersion: number;
   roundTripTime: number;
   lastUpdateTime: number;
-  lastWriteDate?: any;
+  lastWriteDate: number;
 
   me?: string;
   primary?: string;
@@ -85,6 +85,7 @@ export class ServerDescription {
     this.maxWireVersion = ismaster?.maxWireVersion ?? 0;
     this.roundTripTime = options?.roundTripTime ?? -1;
     this.lastUpdateTime = now();
+    this.lastWriteDate = ismaster?.lastWrite.lastWriteDate ?? 0;
 
     if (options?.topologyVersion) {
       this.topologyVersion = options.topologyVersion;
@@ -98,10 +99,6 @@ export class ServerDescription {
 
     if (ismaster?.primary) {
       this.primary = ismaster.primary;
-    }
-
-    if (ismaster?.lastWrite) {
-      this.lastWriteDate = ismaster.lastWrite.lastWriteDate;
     }
 
     if (ismaster?.me) {
@@ -154,14 +151,14 @@ export class ServerDescription {
     return WRITABLE_SERVER_TYPES.has(this.type);
   }
 
-  get host() {
+  get host(): string {
     const chopLength = `:${this.port}`.length;
     return this.address.slice(0, -chopLength);
   }
 
-  get port() {
+  get port(): number {
     const port = this.address.split(':').pop();
-    return port ? Number.parseInt(port, 10) : port;
+    return port ? Number.parseInt(port, 10) : 27017;
   }
 
   /**
