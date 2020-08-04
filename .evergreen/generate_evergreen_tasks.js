@@ -99,8 +99,8 @@ Array.prototype.push.apply(TASKS, [
     ]
   },
   {
-    name: 'test-ssl-support',
-    tags: ['ssl-support'],
+    name: 'test-tls-support',
+    tags: ['tls-support'],
     commands: [
       { func: 'install dependencies' },
       {
@@ -111,7 +111,7 @@ Array.prototype.push.apply(TASKS, [
           TOPOLOGY: 'server'
         }
       },
-      { func: 'run ssl tests' }
+      { func: 'run tls tests' }
     ]
   },
   {

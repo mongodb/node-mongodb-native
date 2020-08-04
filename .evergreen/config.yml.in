@@ -211,7 +211,7 @@ functions:
 
           NODE_LTS_NAME='${NODE_LTS_NAME}' bash ${PROJECT_DIRECTORY}/.evergreen/run-atlas-tests.sh
 
-  "run ssl tests":
+  "run tls tests":
     - command: shell.exec
       type: test
       params:
@@ -219,7 +219,7 @@ functions:
         script: |
           NODE_LTS_NAME=${NODE_LTS_NAME} DRIVERS_TOOLS="${DRIVERS_TOOLS}" \
           SSL_CA_FILE="${SSL_CA_FILE}" SSL_KEY_FILE="${SSL_KEY_FILE}" \
-          MONGODB_URI="${MONGODB_URI}" bash ${PROJECT_DIRECTORY}/.evergreen/run-ssl-tests.sh
+          MONGODB_URI="${MONGODB_URI}" bash ${PROJECT_DIRECTORY}/.evergreen/run-tls-tests.sh
 
   "add aws auth variables to file":
     - command: shell.exec
