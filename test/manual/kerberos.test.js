@@ -73,10 +73,13 @@ describe('Kerberos', function () {
     });
   });
 
-  it.skip('should fail to authenticate due to illegal service name', function (done) {
-    const client = new MongoClient(`${krb5Uri}&gssapiServiceName=mongodb2&maxPoolSize=1`);
+  it('should fail to authenticate with bad credentials', function (done) {
+    const client = new MongoClient(
+      krb5Uri.replace(encodeURIComponent(process.env.KRB5_PRINCIPAL), 'bad%40creds.cc')
+    );
     client.connect(function (err) {
       expect(err).to.exist;
+      expect(err.codeName).to.equal('AuthenticationFailed');
       done();
     });
   });
