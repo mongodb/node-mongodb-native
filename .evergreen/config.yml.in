@@ -207,6 +207,14 @@ functions:
 
           NODE_LTS_NAME='${NODE_LTS_NAME}' bash ${PROJECT_DIRECTORY}/.evergreen/run-atlas-tests.sh
 
+  "run ldap tests":
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: "src"
+        script: |
+          MONGODB_URI='${plain_auth_mongodb_uri}' NODE_LTS_NAME='${NODE_LTS_NAME}' \
+          bash ${PROJECT_DIRECTORY}/.evergreen/run-ldap-tests.sh
 pre:
   - func: "fetch source"
   - func: "prepare resources"
