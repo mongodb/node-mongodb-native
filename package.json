@@ -91,6 +91,7 @@
     "check:atlas": "mocha --config \"test/manual/mocharc.json\" test/manual/atlas_connectivity.test.js",
     "check:ocsp": "mocha --config \"test/manual/mocharc.json\" test/manual/ocsp_support.test.js",
     "check:kerberos": "mocha --config \"test/manual/mocharc.json\" test/manual/kerberos.test.js",
+    "check:ldap": "mocha --config \"test/manual/mocharc.json\" test/manual/ldap.test.js",
     "prepare": "npm run build:ts",
     "release": "standard-version -i HISTORY.md",
     "test": "npm run check:lint && npm run check:test"
