@@ -1,7 +1,7 @@
-import ReadPreference = require('./read_preference');
+import { ReadPreference } from './read_preference';
 import { MongoError } from './error';
 import ReadConcern = require('./read_concern');
-import WriteConcern = require('./write_concern');
+import { WriteConcern } from './write_concern';
 
 let TxnState: any;
 let stateMachine: any;

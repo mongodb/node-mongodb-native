@@ -15,49 +15,53 @@ describe('Cursor tests', function () {
     },
 
     test: function (done) {
-      const server = this.configuration.newTopology();
-      server.on('connect', function (_server) {
-        var ns = f('integration_tests.cursor1');
-        // Execute the write
-        _server.insert(
-          ns,
-          [{ a: 1 }, { a: 2 }, { a: 3 }],
-          {
-            writeConcern: { w: 1 },
-            ordered: true
-          },
-          function (err, results) {
-            expect(err).to.be.null;
-            expect(results.result.n).to.equal(3);
+      const topology = this.configuration.newTopology();
+      topology.connect(err => {
+        expect(err).to.not.exist;
+        this.defer(() => topology.close());
 
-            // Execute find
-            var cursor = _server.cursor(ns, {
-              find: ns,
-              query: {},
-              batchSize: 2
-            });
+        topology.selectServer('primary', (err, server) => {
+          expect(err).to.not.exist;
 
-            // Execute next
-            cursor._next(function (nextCursorErr, nextCursorD) {
-              expect(nextCursorErr).to.be.null;
-              expect(nextCursorD.a).to.equal(1);
-              expect(cursor.bufferedCount()).to.equal(1);
+          var ns = f('integration_tests.cursor1');
+          // Execute the write
+          server.insert(
+            ns,
+            [{ a: 1 }, { a: 2 }, { a: 3 }],
+            {
+              writeConcern: { w: 1 },
+              ordered: true
+            },
+            (err, results) => {
+              expect(err).to.not.exist;
+              expect(results.result.n).to.equal(3);
 
-              // Kill the cursor
-              cursor._next(function (killCursorErr, killCursorD) {
-                expect(killCursorErr).to.be.null;
-                expect(killCursorD.a).to.equal(2);
-                expect(cursor.bufferedCount()).to.equal(0);
-                // Destroy the server connection
-                _server.destroy(done);
+              // Execute find
+              var cursor = topology.cursor(ns, {
+                find: ns,
+                query: {},
+                batchSize: 2
               });
-            });
-          }
-        );
-      });
 
-      // Start connection
-      server.connect();
+              // Execute next
+              cursor._next((nextCursorErr, nextCursorD) => {
+                expect(nextCursorErr).to.not.exist;
+                expect(nextCursorD.a).to.equal(1);
+                expect(cursor.bufferedCount()).to.equal(1);
+
+                // Kill the cursor
+                cursor._next((killCursorErr, killCursorD) => {
+                  expect(killCursorErr).to.not.exist;
+                  expect(killCursorD.a).to.equal(2);
+                  expect(cursor.bufferedCount()).to.equal(0);
+                  // Destroy the server connection
+                  server.destroy(done);
+                });
+              });
+            }
+          );
+        });
+      });
     }
   });
 
@@ -67,53 +71,57 @@ describe('Cursor tests', function () {
     },
 
     test: function (done) {
-      const server = this.configuration.newTopology();
-      var ns = f('%s.cursor2', this.configuration.db);
-      // Add event listeners
-      server.on('connect', function (_server) {
-        // Execute the write
-        _server.insert(
-          ns,
-          [{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4 }, { a: 5 }],
-          {
-            writeConcern: { w: 1 },
-            ordered: true
-          },
-          function (err, results) {
-            expect(err).to.be.null;
-            expect(results.result.n).to.equal(5);
+      const topology = this.configuration.newTopology();
+      const ns = f('%s.cursor2', this.configuration.db);
 
-            // Execute find
-            var cursor = _server.cursor(ns, {
-              find: ns,
-              query: {},
-              batchSize: 5
-            });
+      topology.connect(err => {
+        expect(err).to.not.exist;
+        this.defer(() => topology.close());
 
-            // Execute next
-            cursor._next(function (nextCursorErr, nextCursorD) {
-              expect(nextCursorErr).to.be.null;
-              expect(nextCursorD.a).to.equal(1);
-              expect(cursor.bufferedCount()).to.equal(4);
+        topology.selectServer('primary', (err, server) => {
+          expect(err).to.not.exist;
 
-              // Read the buffered Count
-              cursor.readBufferedDocuments(cursor.bufferedCount());
+          // Execute the write
+          server.insert(
+            ns,
+            [{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4 }, { a: 5 }],
+            {
+              writeConcern: { w: 1 },
+              ordered: true
+            },
+            (err, results) => {
+              expect(err).to.not.exist;
+              expect(results.result.n).to.equal(5);
 
-              // Get the next item
-              cursor._next(function (secondCursorErr, secondCursorD) {
-                expect(secondCursorErr).to.be.null;
-                expect(secondCursorD).to.be.null;
-
-                // Destroy the server connection
-                _server.destroy(done);
+              // Execute find
+              const cursor = topology.cursor(ns, {
+                find: ns,
+                query: {},
+                batchSize: 5
               });
-            });
-          }
-        );
-      });
 
-      // Start connection
-      server.connect();
+              // Execute next
+              cursor._next((nextCursorErr, nextCursorD) => {
+                expect(nextCursorErr).to.not.exist;
+                expect(nextCursorD.a).to.equal(1);
+                expect(cursor.bufferedCount()).to.equal(4);
+
+                // Read the buffered Count
+                cursor.readBufferedDocuments(cursor.bufferedCount());
+
+                // Get the next item
+                cursor._next((secondCursorErr, secondCursorD) => {
+                  expect(secondCursorErr).to.not.exist;
+                  expect(secondCursorD).to.not.exist;
+
+                  // Destroy the server connection
+                  server.destroy(done);
+                });
+              });
+            }
+          );
+        });
+      });
     }
   });
 
@@ -123,49 +131,53 @@ describe('Cursor tests', function () {
     },
 
     test: function (done) {
-      const server = this.configuration.newTopology();
-      var ns = f('%s.cursor3', this.configuration.db);
-      // Add event listeners
-      server.on('connect', function (_server) {
-        // Execute the write
-        _server.insert(
-          ns,
-          [{ a: 1 }],
-          {
-            writeConcern: { w: 1 },
-            ordered: true
-          },
-          function (err, results) {
-            expect(err).to.be.null;
-            expect(results.result.n).to.equal(1);
+      const topology = this.configuration.newTopology();
+      const ns = f('%s.cursor3', this.configuration.db);
 
-            // Execute find
-            var cursor = _server.cursor(ns, { find: ns, query: {}, batchSize: 5 });
+      topology.connect(err => {
+        expect(err).to.not.exist;
+        this.defer(() => topology.close());
 
-            // Execute next
-            cursor._next(function (nextCursorErr, nextCursorD) {
-              expect(nextCursorErr).to.be.null;
-              expect(nextCursorD.a).to.equal(1);
+        topology.selectServer('primary', (err, server) => {
+          expect(err).to.not.exist;
 
-              // Get the next item
-              cursor._next(function (secondCursorErr, secondCursorD) {
-                expect(secondCursorErr).to.be.null;
-                expect(secondCursorD).to.be.null;
+          // Execute the write
+          server.insert(
+            ns,
+            [{ a: 1 }],
+            {
+              writeConcern: { w: 1 },
+              ordered: true
+            },
+            (err, results) => {
+              expect(err).to.not.exist;
+              expect(results.result.n).to.equal(1);
 
-                cursor._next(function (thirdCursorErr, thirdCursorD) {
-                  expect(thirdCursorErr).to.be.ok;
-                  expect(thirdCursorD).to.be.undefined;
-                  // Destroy the server connection
-                  _server.destroy(done);
+              // Execute find
+              const cursor = topology.cursor(ns, { find: ns, query: {}, batchSize: 5 });
+
+              // Execute next
+              cursor._next((nextCursorErr, nextCursorD) => {
+                expect(nextCursorErr).to.not.exist;
+                expect(nextCursorD.a).to.equal(1);
+
+                // Get the next item
+                cursor._next((secondCursorErr, secondCursorD) => {
+                  expect(secondCursorErr).to.not.exist;
+                  expect(secondCursorD).to.not.exist;
+
+                  cursor._next((thirdCursorErr, thirdCursorD) => {
+                    expect(thirdCursorErr).to.be.ok;
+                    expect(thirdCursorD).to.be.undefined;
+                    // Destroy the server connection
+                    server.destroy(done);
+                  });
                 });
               });
-            });
-          }
-        );
+            }
+          );
+        });
       });
-
-      // Start connection
-      server.connect();
     }
   });
 
@@ -175,49 +187,53 @@ describe('Cursor tests', function () {
     },
 
     test: function (done) {
-      const server = this.configuration.newTopology();
-      var ns = f('%s.cursor4', this.configuration.db);
-      // Add event listeners
-      server.on('connect', function (_server) {
-        // Execute the write
-        _server.insert(
-          ns,
-          [{ a: 1 }, { a: 2 }, { a: 3 }],
-          {
-            writeConcern: { w: 1 },
-            ordered: true
-          },
-          function (err, results) {
-            expect(err).to.be.null;
-            expect(results.result.n).to.equal(3);
+      const topology = this.configuration.newTopology();
+      const ns = f('%s.cursor4', this.configuration.db);
 
-            // Execute find
-            var cursor = _server.cursor(ns, { find: ns, query: {}, batchSize: 2 });
+      topology.connect(err => {
+        expect(err).to.not.exist;
+        this.defer(() => topology.close());
 
-            // Execute next
-            cursor._next(function (nextCursorErr, nextCursorD) {
-              expect(nextCursorErr).to.be.null;
-              expect(nextCursorD.a).to.equal(1);
+        topology.selectServer('primary', (err, server) => {
+          expect(err).to.not.exist;
 
-              // Get the next item
-              cursor._next(function (secondCursorErr, secondCursorD) {
-                expect(secondCursorErr).to.be.null;
-                expect(secondCursorD.a).to.equal(2);
+          // Execute the write
+          server.insert(
+            ns,
+            [{ a: 1 }, { a: 2 }, { a: 3 }],
+            {
+              writeConcern: { w: 1 },
+              ordered: true
+            },
+            (err, results) => {
+              expect(err).to.not.exist;
+              expect(results.result.n).to.equal(3);
 
-                cursor._next(function (thirdCursorErr, thirdCursorD) {
-                  expect(thirdCursorErr).to.be.null;
-                  expect(thirdCursorD.a).to.equal(3);
-                  // Destroy the server connection
-                  _server.destroy(done);
+              // Execute find
+              const cursor = topology.cursor(ns, { find: ns, query: {}, batchSize: 2 });
+
+              // Execute next
+              cursor._next((nextCursorErr, nextCursorD) => {
+                expect(nextCursorErr).to.not.exist;
+                expect(nextCursorD.a).to.equal(1);
+
+                // Get the next item
+                cursor._next((secondCursorErr, secondCursorD) => {
+                  expect(secondCursorErr).to.not.exist;
+                  expect(secondCursorD.a).to.equal(2);
+
+                  cursor._next((thirdCursorErr, thirdCursorD) => {
+                    expect(thirdCursorErr).to.not.exist;
+                    expect(thirdCursorD.a).to.equal(3);
+                    // Destroy the server connection
+                    server.destroy(done);
+                  });
                 });
               });
-            });
-          }
-        );
+            }
+          );
+        });
       });
-
-      // Start connection
-      server.connect();
     }
   });
 
@@ -227,54 +243,58 @@ describe('Cursor tests', function () {
     },
 
     test: function (done) {
-      const server = this.configuration.newTopology();
-      var ns = f('%s.cursor4', this.configuration.db);
-      // Add event listeners
-      server.on('connect', function (_server) {
-        // Execute the write
-        _server.insert(
-          ns,
-          [{ a: 1 }, { a: 2 }, { a: 3 }],
-          {
-            writeConcern: { w: 1 },
-            ordered: true
-          },
-          function (err, results) {
-            expect(err).to.be.null;
-            expect(results.result.n).to.equal(3);
+      const topology = this.configuration.newTopology();
+      const ns = f('%s.cursor4', this.configuration.db);
 
-            // Execute find
-            var cursor = _server.cursor(ns, { find: ns, query: {}, batchSize: 2 });
+      topology.connect(err => {
+        expect(err).to.not.exist;
+        this.defer(() => topology.close());
 
-            // Execute next
-            cursor._next(function (nextCursorErr, nextCursorD) {
-              expect(nextCursorErr).to.be.null;
-              expect(nextCursorD.a).to.equal(1);
+        topology.selectServer('primary', (err, server) => {
+          expect(err).to.not.exist;
 
-              // Get the next item
-              cursor._next(function (secondCursorErr, secondCursorD) {
-                expect(secondCursorErr).to.be.null;
-                expect(secondCursorD.a).to.equal(2);
+          // Execute the write
+          server.insert(
+            ns,
+            [{ a: 1 }, { a: 2 }, { a: 3 }],
+            {
+              writeConcern: { w: 1 },
+              ordered: true
+            },
+            (err, results) => {
+              expect(err).to.not.exist;
+              expect(results.result.n).to.equal(3);
 
-                // Kill cursor
-                cursor.kill(function () {
-                  // Should error out
-                  cursor._next(function (thirdCursorErr, thirdCursorD) {
-                    expect(thirdCursorErr).to.not.exist;
-                    expect(thirdCursorD).to.not.exist;
+              // Execute find
+              const cursor = topology.cursor(ns, { find: ns, query: {}, batchSize: 2 });
 
-                    // Destroy the server connection
-                    _server.destroy(done);
+              // Execute next
+              cursor._next((nextCursorErr, nextCursorD) => {
+                expect(nextCursorErr).to.not.exist;
+                expect(nextCursorD.a).to.equal(1);
+
+                // Get the next item
+                cursor._next((secondCursorErr, secondCursorD) => {
+                  expect(secondCursorErr).to.not.exist;
+                  expect(secondCursorD.a).to.equal(2);
+
+                  // Kill cursor
+                  cursor.kill(() => {
+                    // Should error out
+                    cursor._next((thirdCursorErr, thirdCursorD) => {
+                      expect(thirdCursorErr).to.not.exist;
+                      expect(thirdCursorD).to.not.exist;
+
+                      // Destroy the server connection
+                      server.destroy(done);
+                    });
                   });
                 });
               });
-            });
-          }
-        );
+            }
+          );
+        });
       });
-
-      // Start connection
-      server.connect();
     }
   });
 
@@ -299,7 +319,7 @@ describe('Cursor tests', function () {
             ordered: true
           },
           function (err, results) {
-            expect(err).to.be.null;
+            expect(err).to.not.exist;
             expect(results.result.n).to.equal(3);
 
             // Execute find
@@ -307,12 +327,12 @@ describe('Cursor tests', function () {
 
             // Execute next
             cursor._next(function (nextCursorErr, nextCursorD) {
-              expect(nextCursorErr).to.be.null;
+              expect(nextCursorErr).to.not.exist;
               expect(nextCursorD.a).to.equal(1);
 
               // Get the next item
               cursor._next(function (secondCursorErr, secondCursorD) {
-                expect(secondCursorErr).to.be.null;
+                expect(secondCursorErr).to.not.exist;
                 expect(secondCursorD.a).to.equal(2);
 
                 self.configuration.manager.restart(false).then(function () {

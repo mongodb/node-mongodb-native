@@ -1,10 +1,25 @@
-import command = require('./command');
+import { command, CommandOptions } from './command';
 import { Query } from '../commands';
 import { MongoError } from '../../error';
 import { maxWireVersion, collectionNamespace } from '../../utils';
 import { getReadPreference, isSharded, applyCommonQueryOptions } from './shared';
+import type { Callback, Document } from '../../types';
+import type { Server } from '../../sdam/server';
+import type { ReadPreference } from '../..';
+import type { InternalCursorState } from '../../cursor/core_cursor';
 
-function query(server: any, ns: any, cmd: any, cursorState: any, options: any, callback: Function) {
+export interface QueryOptions extends CommandOptions {
+  readPreference?: ReadPreference;
+}
+
+export function query(
+  server: Server,
+  ns: string,
+  cmd: Document,
+  cursorState: InternalCursorState,
+  options: QueryOptions,
+  callback: Callback
+): void {
   options = options || {};
   if (cursorState.cursorId != null) {
     return callback();
@@ -52,11 +67,16 @@ function query(server: any, ns: any, cmd: any, cursorState: any, options: any, c
   command(server, ns, findCmd, commandOptions, callback);
 }
 
-function prepareFindCommand(server: any, ns: any, cmd: any, cursorState: any) {
+function prepareFindCommand(
+  server: Server,
+  ns: string,
+  cmd: Document,
+  cursorState: InternalCursorState
+) {
   cursorState.batchSize = cmd.batchSize || cursorState.batchSize;
-  let findCmd = {
+  let findCmd: Document = {
     find: collectionNamespace(ns)
-  } as any;
+  };
 
   if (cmd.query) {
     if (cmd.query['$query']) {
@@ -68,7 +88,7 @@ function prepareFindCommand(server: any, ns: any, cmd: any, cursorState: any) {
 
   let sortValue = cmd.sort;
   if (Array.isArray(sortValue)) {
-    const sortObject: any = {};
+    const sortObject: Document = {};
 
     if (sortValue.length > 0 && !Array.isArray(sortValue[0])) {
       let sortDirection = sortValue[1];
@@ -150,12 +170,12 @@ function prepareFindCommand(server: any, ns: any, cmd: any, cursorState: any) {
 }
 
 function prepareLegacyFindQuery(
-  server: any,
-  ns: any,
-  cmd: any,
-  cursorState: any,
-  options: any
-): any {
+  server: Server,
+  ns: string,
+  cmd: Document,
+  cursorState: InternalCursorState,
+  options: CommandOptions
+): Query {
   options = options || {};
   const readPreference = getReadPreference(cmd, options);
   cursorState.batchSize = cmd.batchSize || cursorState.batchSize;
@@ -173,7 +193,7 @@ function prepareLegacyFindQuery(
 
   const numberToSkip = cursorState.skip || 0;
 
-  const findCmd: any = {};
+  const findCmd: Document = {};
   if (isSharded(server) && readPreference) {
     findCmd['$readPreference'] = readPreference.toJSON();
   }
@@ -231,5 +251,3 @@ function prepareLegacyFindQuery(
   query.slaveOk = readPreference.slaveOk();
   return query;
 }
-
-export = query;

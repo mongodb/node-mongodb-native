@@ -172,6 +172,14 @@ functions:
           rm -f ./prepare_atlas_connectivity.sh
 
           NODE_LTS_NAME='${NODE_LTS_NAME}' bash ${PROJECT_DIRECTORY}/.evergreen/run-atlas-tests.sh
+  run ldap tests:
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: src
+        script: |
+          MONGODB_URI='${plain_auth_mongodb_uri}' NODE_LTS_NAME='${NODE_LTS_NAME}' \
+          bash ${PROJECT_DIRECTORY}/.evergreen/run-ldap-tests.sh
   run tls tests:
     - command: shell.exec
       type: test
@@ -717,6 +725,12 @@ tasks:
           VERSION: latest
           TOPOLOGY: server
       - func: run tls tests
+  - name: test-ldap-auth
+    tags:
+      - ldap-auth
+    commands:
+      - func: install dependencies
+      - func: run ldap tests
   - name: test-ocsp-valid-cert-server-staples
     tags:
       - ocsp
@@ -872,6 +886,7 @@ buildvariants:
       - test-2.6-sharded_cluster
       - test-atlas-connectivity
       - test-tls-support
+      - test-ldap-auth
       - test-ocsp-valid-cert-server-staples
       - test-ocsp-invalid-cert-server-staples
       - test-ocsp-valid-cert-server-does-not-staple
@@ -922,6 +937,7 @@ buildvariants:
       - test-2.6-replica_set
       - test-2.6-sharded_cluster
       - test-atlas-connectivity
+      - test-ldap-auth
   - name: ubuntu-14.04-erbium
     display_name: Ubuntu 14.04 Node Erbium
     run_on: ubuntu1404-test
@@ -958,6 +974,7 @@ buildvariants:
       - test-3.2-sharded_cluster
       - test-atlas-connectivity
       - test-tls-support
+      - test-ldap-auth
       - test-ocsp-valid-cert-server-staples
       - test-ocsp-invalid-cert-server-staples
       - test-ocsp-valid-cert-server-does-not-staple

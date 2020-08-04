@@ -273,7 +273,7 @@ describe('Authentication', function () {
                 client.logout(function (err) {
                   test.equal(null, err);
 
-                  // Attempt to save a document
+                  // Attempt to insert a document
                   db.collection('test').insert({ a: 1 }, function (err) {
                     test.ok(err != null);
 
@@ -295,7 +295,7 @@ describe('Authentication', function () {
                         client.logout(function (err) {
                           test.equal(null, err);
 
-                          // Attempt to save a document
+                          // Attempt to insert a document
                           db.collection('test').insert({ a: 1 }, function (err) {
                             test.ok(err != null);
                             client.close();
@@ -338,7 +338,7 @@ describe('Authentication', function () {
           db.admin().addUser('admin', 'admin', function (err) {
             test.equal(null, err);
 
-            // Attempt to save a document
+            // Attempt to insert a document
             db.collection('test').insert({ a: 1 }, function (err) {
               test.ok(err != null);
               client.close();
@@ -414,7 +414,7 @@ describe('Authentication', function () {
           db.admin().addUser('admin', 'admin', function (err) {
             test.equal(null, err);
 
-            // Attempt to save a document
+            // Attempt to insert a document
             var col = db.collection('test');
 
             // Initialize the Ordered Batch
@@ -466,7 +466,7 @@ describe('Authentication', function () {
           db.admin().addUser('admin', 'admin', function (err) {
             test.equal(null, err);
 
-            // Attempt to save a document
+            // Attempt to insert a document
             var col = db.collection('test');
 
             // Initialize the Ordered Batch

@@ -44,6 +44,10 @@ class OperationBase {
     return true;
   }
 
+  get canRetryWrite() {
+    return true;
+  }
+
   /**
    * @param {any} [server]
    * @param {any} [callback]

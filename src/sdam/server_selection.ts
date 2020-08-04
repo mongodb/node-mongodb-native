@@ -1,5 +1,5 @@
 import { ServerType, TopologyType } from './common';
-import ReadPreference = require('../read_preference');
+import { ReadPreference } from '../read_preference';
 import { MongoError } from '../error';
 
 // max staleness constants

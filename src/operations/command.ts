@@ -1,8 +1,8 @@
 import { Aspect, OperationBase } from './operation';
 import ReadConcern = require('../read_concern');
-import WriteConcern = require('../write_concern');
+import { WriteConcern } from '../write_concern';
 import { maxWireVersion, MongoDBNamespace } from '../utils';
-import ReadPreference = require('../read_preference');
+import { ReadPreference } from '../read_preference';
 import { commandSupportsReadConcern } from '../sessions';
 import { MongoError } from '../error';
 import Logger = require('../logger');
@@ -44,7 +44,9 @@ class CommandOperation extends OperationBase {
       : parent.s.namespace.withCollection('$cmd');
 
     const propertyProvider = this.hasAspect(Aspect.NO_INHERIT_OPTIONS) ? undefined : parent;
-    this.readPreference = ReadPreference.resolve(propertyProvider, this.options);
+    this.readPreference = this.hasAspect(Aspect.WRITE_OPERATION)
+      ? ReadPreference.primary
+      : ReadPreference.resolve(propertyProvider, this.options);
     this.readConcern = resolveReadConcern(propertyProvider, this.options);
     this.writeConcern = resolveWriteConcern(propertyProvider, this.options);
     this.explain = false;
@@ -87,7 +89,7 @@ class CommandOperation extends OperationBase {
     }
 
     if (serverWireVersion >= SUPPORTS_WRITE_CONCERN_AND_COLLATION) {
-      if (this.writeConcern && this.hasAspect(Aspect.WRITE_OPERATION)) {
+      if (this.writeConcern && this.hasAspect(Aspect.WRITE_OPERATION) && !inTransaction) {
         Object.assign(cmd, { writeConcern: this.writeConcern });
       }
 

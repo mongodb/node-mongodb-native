@@ -10,7 +10,7 @@ const kWriteConcernKeys = new Set(['w', 'wtimeout', 'j', 'fsync']);
  * @property {boolean} fsync The file sync write concern
  * @see https://docs.mongodb.com/manual/reference/write-concern/index.html
  */
-class WriteConcern {
+export class WriteConcern {
   w?: any;
   wtimeout?: any;
   j?: any;
@@ -72,4 +72,3 @@ class WriteConcern {
     return new WriteConcern(options.w, options.wtimeout, options.j, options.fsync);
   }
 }
-export = WriteConcern;

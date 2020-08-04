@@ -1,5 +1,5 @@
 import CommandOperation = require('./command');
-import ReadPreference = require('../read_preference');
+import { ReadPreference } from '../read_preference';
 import { MongoError } from '../error';
 import { maxWireVersion } from '../utils';
 import { Aspect, defineAspects } from './operation';

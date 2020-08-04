@@ -2637,6 +2637,8 @@ describe('Operation Examples', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
+        expect(err).to.not.exist;
+
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -2647,22 +2649,26 @@ describe('Operation Examples', function () {
         // REMOVE-LINE done();
         // REMOVE-LINE var db = client.db(configuration.db);
         // BEGIN
-        var db = client.db(configuration.db);
-        // Fetch a collection to insert document into
-        var collection = db.collection('remove_all_documents_no_safe');
+        const db = client.db(configuration.db);
+        const collection = db.collection('remove_all_documents_no_safe');
+
         // Insert a bunch of documents
-        collection.insertMany([{ a: 1 }, { b: 2 }], { w: 1 }, function (err, result) {
-          test.ok(result);
-          test.equal(null, err);
+        collection.insertMany([{ a: 1 }, { b: 2 }], { w: 1 }, (err, result) => {
+          expect(err).to.not.exist;
+          expect(result).to.exist;
 
           // Remove all the document
-          collection.removeMany();
+          collection.deleteMany((err, result) => {
+            expect(err).to.not.exist;
+            expect(result).to.exist;
 
-          // Fetch all results
-          collection.find().toArray(function (err, items) {
-            test.equal(null, err);
-            test.equal(0, items.length);
-            client.close(done);
+            // Fetch all results
+            collection.find().toArray((err, docs) => {
+              expect(err).to.not.exist;
+              expect(docs).to.have.lengthOf(0);
+
+              client.close(done);
+            });
           });
         });
       });
@@ -2821,117 +2827,6 @@ describe('Operation Examples', function () {
                     client.close(done);
                   });
                 });
-              });
-            });
-          });
-        });
-      });
-      // END
-    }
-  });
-
-  /**
-   * Example of a simple document save with safe set to false
-   *
-   * @example-class Collection
-   * @example-method save
-   */
-  it('shouldCorrectlySaveASimpleDocument', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function (err, client) {
-        // LINE var MongoClient = require('mongodb').MongoClient,
-        // LINE   test = require('assert');
-        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
-        // LINE client.connect(function(err, client) {
-        // LINE   var db = client.db('test);
-        // REPLACE configuration.writeConcernMax() WITH {w:1}
-        // REMOVE-LINE restartAndDone
-        // REMOVE-LINE done();
-        // REMOVE-LINE var db = client.db(configuration.db);
-        // BEGIN
-        var db = client.db(configuration.db);
-        // Fetch the collection
-        var collection = db.collection('save_a_simple_document');
-        // Save a document with no safe option
-        collection.save({ hello: 'world' });
-
-        // Wait for a second
-        setTimeout(function () {
-          // Find the saved document
-          collection.findOne({ hello: 'world' }, function (err, item) {
-            test.equal(null, err);
-            test.equal('world', item.hello);
-            client.close(done);
-          });
-        }, 2000);
-      });
-      // END
-    }
-  });
-
-  /**
-   * Example of a simple document save and then resave with safe set to true
-   *
-   * @example-class Collection
-   * @example-method save
-   */
-  it('shouldCorrectlySaveASimpleDocumentModifyItAndResaveIt', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function (err, client) {
-        // LINE var MongoClient = require('mongodb').MongoClient,
-        // LINE   test = require('assert');
-        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
-        // LINE client.connect(function(err, client) {
-        // LINE   var db = client.db('test);
-        // REPLACE configuration.writeConcernMax() WITH {w:1}
-        // REMOVE-LINE restartAndDone
-        // REMOVE-LINE done();
-        // REMOVE-LINE var db = client.db(configuration.db);
-        // BEGIN
-        var db = client.db(configuration.db);
-        // Fetch the collection
-        var collection = db.collection('save_a_simple_document_modify_it_and_resave_it');
-
-        // Save a document with no safe option
-        collection.save({ hello: 'world' }, configuration.writeConcernMax(), function (
-          err,
-          result
-        ) {
-          test.ok(result);
-          test.equal(null, err);
-
-          // Find the saved document
-          collection.findOne({ hello: 'world' }, function (err, item) {
-            test.equal(null, err);
-            test.equal('world', item.hello);
-
-            // Update the document
-            item['hello2'] = 'world2';
-
-            // Save the item with the additional field
-            collection.save(item, configuration.writeConcernMax(), function (err, result) {
-              test.ok(result);
-              test.equal(null, err);
-
-              // Find the changed document
-              collection.findOne({ hello: 'world' }, function (err, item) {
-                test.equal(null, err);
-                test.equal('world', item.hello);
-                test.equal('world2', item.hello2);
-
-                client.close(done);
               });
             });
           });

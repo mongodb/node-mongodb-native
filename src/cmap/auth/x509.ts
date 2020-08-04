@@ -1,8 +1,15 @@
-import { AuthProvider } from './auth_provider';
+import { AuthProvider, AuthContext } from './auth_provider';
+import type { Callback, Document } from '../../types';
+import type { MongoCredentials } from './mongo_credentials';
+import type { HandshakeDocument } from '../connect';
+import { MongoError } from '../../error';
 
-class X509 extends AuthProvider {
-  prepare(handshakeDoc: any, authContext: any, callback: Function) {
+export class X509 extends AuthProvider {
+  prepare(handshakeDoc: HandshakeDocument, authContext: AuthContext, callback: Callback): void {
     const { credentials } = authContext;
+    if (!credentials) {
+      return callback(new MongoError('AuthContext must provide credentials.'));
+    }
     Object.assign(handshakeDoc, {
       speculativeAuthenticate: x509AuthenticateCommand(credentials)
     });
@@ -10,11 +17,15 @@ class X509 extends AuthProvider {
     callback(undefined, handshakeDoc);
   }
 
-  auth(authContext: any, callback: Function) {
+  auth(authContext: AuthContext, callback: Callback): void {
     const connection = authContext.connection;
     const credentials = authContext.credentials;
+    if (!credentials) {
+      return callback(new MongoError('AuthContext must provide credentials.'));
+    }
     const response = authContext.response;
-    if (response.speculativeAuthenticate) {
+
+    if (response && response.speculativeAuthenticate) {
       return callback();
     }
 
@@ -22,13 +33,11 @@ class X509 extends AuthProvider {
   }
 }
 
-function x509AuthenticateCommand(credentials: any) {
-  const command: any = { authenticate: 1, mechanism: 'MONGODB-X509' };
+function x509AuthenticateCommand(credentials: MongoCredentials) {
+  const command: Document = { authenticate: 1, mechanism: 'MONGODB-X509' };
   if (credentials.username) {
     command.user = credentials.username;
   }
 
   return command;
 }
-
-export = X509;

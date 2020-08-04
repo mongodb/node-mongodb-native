@@ -2,7 +2,7 @@
 
 const expect = require('chai').expect;
 const sinon = require('sinon');
-const NativeTopology = require('../../src/topologies/native_topology');
+const { Topology } = require('../../src/sdam/topology');
 
 describe('URI', function () {
   it('should correctly allow for w:0 overriding on the connect url', {
@@ -142,7 +142,7 @@ describe('URI', function () {
         done();
       }
 
-      const topologyPrototype = NativeTopology.prototype;
+      const topologyPrototype = Topology.prototype;
       const connectStub = sinon.stub(topologyPrototype, 'connect').callsFake(validateConnect);
       const uri = 'mongodb://some-hostname/test?ssl=true&authMechanism=MONGODB-X509&replicaSet=rs0';
       const client = this.configuration.newClient(uri, { useNewUrlParser: true });

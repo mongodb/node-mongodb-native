@@ -4,7 +4,7 @@ const mock = require('mongodb-mock-server');
 const { expect } = require('chai');
 const EventEmitter = require('events');
 
-const connect = require('../../../src/cmap/connect');
+const { connect } = require('../../../src/cmap/connect');
 const { MongoCredentials } = require('../../../src/cmap/auth/mongo_credentials');
 const { genClusterTime } = require('./common');
 const { MongoNetworkError } = require('../../../src/error');

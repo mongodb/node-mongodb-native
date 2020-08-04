@@ -3,26 +3,32 @@ import { Long } from '../../bson';
 import { MongoError, MongoNetworkError } from '../../error';
 import { applyCommonQueryOptions } from './shared';
 import { maxWireVersion, collectionNamespace } from '../../utils';
-import command = require('./command');
+import { command, CommandOptions } from './command';
+import type { Server } from '../../sdam/server';
+import type { Connection } from '../connection';
+import type { Callback, Callback2, Document } from '../../types';
+import type { InternalCursorState } from '../../cursor/core_cursor';
 
-function getMore(
-  server: any,
-  ns: any,
-  cursorState: any,
-  batchSize: any,
-  options: any,
-  callback: Function
-) {
+export type GetMoreOptions = CommandOptions;
+
+export function getMore(
+  server: Server,
+  ns: string,
+  cursorState: InternalCursorState,
+  batchSize: number,
+  options: GetMoreOptions,
+  callback: Callback2<Document, Connection>
+): void {
   options = options || {};
 
   const wireVersion = maxWireVersion(server);
-  function queryCallback(err?: any, result?: any) {
-    if (err) return callback(err);
+  const queryCallback: Callback<Document> = function (err, result) {
+    if (err || !result) return callback(err);
     const response = result.message;
 
     // If we have a timed out query or a cursor that was killed
     if (response.cursorNotFound) {
-      return callback(new MongoNetworkError('cursor killed or timed out'), null);
+      return callback(new MongoNetworkError('cursor killed or timed out'));
     }
 
     if (wireVersion < 4) {
@@ -34,7 +40,7 @@ function getMore(
       cursorState.documents = response.documents;
       cursorState.cursorId = cursorId;
 
-      callback(null, null, response.connection);
+      callback(undefined, undefined, response.connection);
       return;
     }
 
@@ -52,8 +58,8 @@ function getMore(
     cursorState.documents = response.documents[0].cursor.nextBatch;
     cursorState.cursorId = cursorId;
 
-    callback(null, response.documents[0], response.connection);
-  }
+    callback(undefined, response.documents[0], response.connection);
+  };
 
   if (wireVersion < 4) {
     const getMoreOp = new GetMore(ns, cursorState.cursorId, { numberToReturn: batchSize });
@@ -67,11 +73,11 @@ function getMore(
       ? cursorState.cursorId
       : Long.fromNumber(cursorState.cursorId);
 
-  const getMoreCmd = {
+  const getMoreCmd: Document = {
     getMore: cursorId,
     collection: collectionNamespace(ns),
     batchSize: Math.abs(batchSize)
-  } as any;
+  };
 
   if (cursorState.cmd.tailable && typeof cursorState.cmd.maxAwaitTimeMS === 'number') {
     getMoreCmd.maxTimeMS = cursorState.cmd.maxAwaitTimeMS;
@@ -91,5 +97,3 @@ function getMore(
 
   command(server, ns, getMoreCmd, commandOptions, queryCallback);
 }
-
-export = getMore;

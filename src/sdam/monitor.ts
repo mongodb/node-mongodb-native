@@ -6,7 +6,7 @@ import {
   makeInterruptableAsyncInterval
 } from '../utils';
 import { EventEmitter } from 'events';
-import connect = require('../cmap/connect');
+import { connect } from '../cmap/connect';
 import { Connection } from '../cmap/connection';
 import { MongoNetworkError } from '../error';
 import { Long } from '../bson';

@@ -11,6 +11,10 @@ import {
   hasAtomicOperators,
   maxWireVersion
 } from '../utils';
+import executeOperation = require('../operations/execute_operation');
+import { InsertOperation } from '../operations/insert';
+import { UpdateOperation } from '../operations/update';
+import { DeleteOperation } from '../operations/delete';
 
 // Error codes
 const WRITE_CONCERN_ERROR = 64;
@@ -1229,24 +1233,21 @@ class BulkOperationBase {
 
     try {
       if (config.batch.batchType === INSERT) {
-        this.s.topology.insert(
-          this.s.namespace,
-          config.batch.operations,
-          finalOptions,
+        executeOperation(
+          this.s.topology,
+          new InsertOperation(this.s.namespace, config.batch.operations, finalOptions),
           config.resultHandler
         );
       } else if (config.batch.batchType === UPDATE) {
-        this.s.topology.update(
-          this.s.namespace,
-          config.batch.operations,
-          finalOptions,
+        executeOperation(
+          this.s.topology,
+          new UpdateOperation(this.s.namespace, config.batch.operations, finalOptions),
           config.resultHandler
         );
       } else if (config.batch.batchType === REMOVE) {
-        this.s.topology.remove(
-          this.s.namespace,
-          config.batch.operations,
-          finalOptions,
+        executeOperation(
+          this.s.topology,
+          new DeleteOperation(this.s.namespace, config.batch.operations, finalOptions),
           config.resultHandler
         );
       }

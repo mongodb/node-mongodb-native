@@ -6,7 +6,7 @@ const { expect } = require('chai');
 const BSON = require('bson');
 const sinon = require('sinon');
 const { Writable } = require('stream');
-const ReadPreference = require('../../src/read_preference');
+const { ReadPreference } = require('../../src/read_preference');
 const { ServerType } = require('../../src/sdam/common');
 
 describe('Cursor', function () {
@@ -713,28 +713,30 @@ describe('Cursor', function () {
     test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function (err, client) {
+      client.connect((err, client) => {
         test.equal(null, err);
 
         var db = client.db(configuration.db);
-        db.createCollection('test_limit_exceptions', function (err, collection) {
+        db.createCollection('test_limit_exceptions', (err, collection) => {
           test.equal(null, err);
 
-          collection.insert({ a: 1 }, configuration.writeConcernMax(), function (err) {
+          collection.insert({ a: 1 }, configuration.writeConcernMax(), err => {
             test.equal(null, err);
-          });
 
-          const cursor = collection.find();
+            const cursor = collection.find();
+            this.defer(() => cursor.close());
 
-          cursor.next(function (err) {
-            test.equal(null, err);
-            try {
-              cursor.limit(1);
-            } catch (err) {
-              test.equal('Cursor is closed', err.message);
-            }
-            cursor.close();
-            client.close(done);
+            cursor.next(err => {
+              test.equal(null, err);
+
+              try {
+                cursor.limit(1);
+              } catch (err) {
+                test.equal('Cursor is closed', err.message);
+              }
+
+              client.close(done);
+            });
           });
         });
       });
@@ -873,34 +875,34 @@ describe('Cursor', function () {
           test.equal(null, err);
           collection.insert({ a: 1 }, configuration.writeConcernMax(), function (err) {
             test.equal(null, err);
-          });
-
-          try {
-            collection.find().skip('not-an-integer');
-          } catch (err) {
-            test.equal('skip requires an integer', err.message);
-          }
-
-          var cursor = collection.find();
-          cursor.next(function (err) {
-            test.equal(null, err);
 
             try {
-              cursor.skip(1);
+              collection.find().skip('not-an-integer');
             } catch (err) {
-              test.equal('Cursor is closed', err.message);
+              test.equal('skip requires an integer', err.message);
             }
 
-            var cursor2 = collection.find();
-            cursor2.close(function (err) {
+            var cursor = collection.find();
+            cursor.next(function (err) {
               test.equal(null, err);
+
               try {
-                cursor2.skip(1);
+                cursor.skip(1);
               } catch (err) {
                 test.equal('Cursor is closed', err.message);
               }
 
-              client.close(done);
+              var cursor2 = collection.find();
+              cursor2.close(function (err) {
+                test.equal(null, err);
+                try {
+                  cursor2.skip(1);
+                } catch (err) {
+                  test.equal('Cursor is closed', err.message);
+                }
+
+                client.close(done);
+              });
             });
           });
         });
@@ -1625,7 +1627,7 @@ describe('Cursor', function () {
         db.createCollection('test_count_with_fields', function (err, collection) {
           test.equal(null, err);
 
-          collection.save({ x: 1, a: 2 }, configuration.writeConcernMax(), function (err) {
+          collection.insertOne({ x: 1, a: 2 }, configuration.writeConcernMax(), function (err) {
             test.equal(null, err);
 
             collection
@@ -1661,7 +1663,7 @@ describe('Cursor', function () {
         db.createCollection('test_count_with_fields_using_exclude', function (err, collection) {
           test.equal(null, err);
 
-          collection.save({ x: 1, a: 2 }, configuration.writeConcernMax(), function (err) {
+          collection.insertOne({ x: 1, a: 2 }, configuration.writeConcernMax(), function (err) {
             test.equal(null, err);
 
             collection.find({}, { fields: { x: 0 } }).toArray(function (err, items) {
@@ -3481,8 +3483,6 @@ describe('Cursor', function () {
               .maxAwaitTimeMS(500);
 
             cursor.each(function (err, result) {
-              test.equal(null, err);
-
               if (result) {
                 setTimeout(function () {
                   cursor.kill();

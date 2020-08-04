@@ -13,7 +13,7 @@ class Instrumentation extends EventEmitter {
     const $prototypeConnect = (this.$prototypeConnect = MongoClient.prototype.connect);
 
     const instrumentation = this;
-    MongoClient.prototype.connect = function(callback: Function) {
+    MongoClient.prototype.connect = function (callback: Function) {
       this.s.options.monitorCommands = true;
       this.on('commandStarted', (event: any) => instrumentation.emit('started', event));
       this.on('commandSucceeded', (event: any) => instrumentation.emit('succeeded', event));

@@ -2,7 +2,7 @@
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 const expect = require('chai').expect;
-const { Db, DBRef } = require('../../src');
+const { Db } = require('../../src');
 
 describe('Db', function () {
   before(function () {
@@ -147,57 +147,6 @@ describe('Db', function () {
       fs_client.connect(function (err) {
         test.ok(err != null);
         done();
-      });
-    }
-  });
-
-  it('shouldCorrectlyResaveDBRef', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function (err, client) {
-        var db = client.db(configuration.db);
-        test.equal(null, err);
-
-        db.dropCollection('test_resave_dbref', function () {
-          test.equal(null, err);
-
-          db.createCollection('test_resave_dbref', function (err, collection) {
-            test.equal(null, err);
-
-            collection.insert({ name: 'parent' }, { safe: true }, function (err, r) {
-              test.equal(null, err);
-              test.ok(r.ops.length === 1 && r.ops[0]._id != null);
-              var parent = r.ops[0];
-              var child = { name: 'child', parent: new DBRef('test_resave_dbref', parent._id) };
-
-              collection.insert(child, { safe: true }, function (err) {
-                test.equal(null, err);
-
-                collection.findOne({ name: 'child' }, function (err, child) {
-                  //Child deserialized
-                  test.ok(child != null);
-
-                  collection.save(child, { save: true }, function (err) {
-                    test.equal(null, err);
-
-                    collection.findOne(
-                      { parent: new DBRef('test_resave_dbref', parent._id) },
-                      function (err, child) {
-                        test.ok(child != null); //!!!! Main test point!
-                        client.close(done);
-                      }
-                    );
-                  });
-                });
-              });
-            });
-          });
-        });
       });
     }
   });

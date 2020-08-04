@@ -1,4 +1,4 @@
-import ReadPreference = require('../read_preference');
+import { ReadPreference } from '../read_preference';
 import { MongoError } from '../error';
 import Cursor = require('./cursor');
 import { CursorState } from './core_cursor';

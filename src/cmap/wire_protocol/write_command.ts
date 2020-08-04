@@ -1,16 +1,38 @@
 import { MongoError } from '../../error';
 import { collectionNamespace } from '../../utils';
-import command = require('./command');
+import { command, CommandOptions } from './command';
 
-function writeCommand(
-  server: any,
-  type: any,
-  opsField: any,
-  ns: any,
-  ops: any,
-  options: any,
-  callback: Function
-) {
+import type { Server } from '../../sdam/server';
+import type { Callback, Document, BSONSerializeOptions } from '../../types';
+import type { WriteConcern } from '../../write_concern';
+
+export interface CollationOptions {
+  locale: string;
+  caseLevel: boolean;
+  caseFirst: string;
+  strength: number;
+  numericOrdering: boolean;
+  alternate: string;
+  maxVariable: string;
+  backwards: boolean;
+}
+
+export interface WriteCommandOptions extends BSONSerializeOptions, CommandOptions {
+  ordered?: boolean;
+  writeConcern?: WriteConcern;
+  collation?: CollationOptions;
+  bypassDocumentValidation?: boolean;
+}
+
+export function writeCommand(
+  server: Server,
+  type: string,
+  opsField: string,
+  ns: string,
+  ops: Document[],
+  options: WriteCommandOptions,
+  callback: Callback
+): void {
   if (ops.length === 0) throw new MongoError(`${type} must contain at least one document`);
   if (typeof options === 'function') {
     callback = options;
@@ -20,7 +42,7 @@ function writeCommand(
   options = options || {};
   const ordered = typeof options.ordered === 'boolean' ? options.ordered : true;
   const writeConcern = options.writeConcern;
-  const writeCommand: any = {} as any;
+  const writeCommand: Document = {};
   writeCommand[type] = collectionNamespace(ns);
   writeCommand[opsField] = ops;
   writeCommand.ordered = ordered;
@@ -51,5 +73,3 @@ function writeCommand(
 
   command(server, ns, writeCommand, commandOptions, callback);
 }
-
-export = writeCommand;

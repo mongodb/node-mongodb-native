@@ -1,7 +1,7 @@
 import URL = require('url');
 import qs = require('querystring');
 import dns = require('dns');
-import ReadPreference = require('./read_preference');
+import { ReadPreference } from './read_preference';
 import { MongoParseError } from './error';
 
 /**
