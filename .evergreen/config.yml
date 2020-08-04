@@ -1241,11 +1241,28 @@ tasks:
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 0
-  - name: aws-auth-test
+  - name: aws-latest-auth-test
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
         vars:
+          VERSION: latest
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: run aws auth test with regular aws credentials
+      - func: run aws auth test with assume role credentials
+      - func: run aws auth test with aws EC2 credentials
+      - func: run aws auth test with aws credentials as environment variables
+      - func: run aws auth test with aws credentials and session token as environment variables
+      - func: run aws ECS auth test
+  - name: aws-4.4-auth-test
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.4'
           AUTH: auth
           ORCHESTRATION_FILE: auth-aws.json
           TOPOLOGY: server
@@ -1564,4 +1581,5 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: carbon
     tasks:
-      - aws-auth-test
+      - aws-latest-auth-test
+      - aws-4.4-auth-test
