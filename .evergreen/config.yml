@@ -808,11 +808,220 @@ tasks:
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 0
-  - name: aws-auth-test
+  - name: test-latest-ocsp-valid-cert-server-staples
+    tags:
+      - ocsp
+    commands:
+      - func: run-valid-ocsp-server
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple.json
+          VERSION: latest
+          TOPOLOGY: server
+      - func: run-ocsp-test
+        vars:
+          OCSP_TLS_SHOULD_SUCCEED: 1
+  - name: test-latest-ocsp-invalid-cert-server-staples
+    tags:
+      - ocsp
+    commands:
+      - func: run-revoked-ocsp-server
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple.json
+          VERSION: latest
+          TOPOLOGY: server
+      - func: run-ocsp-test
+        vars:
+          OCSP_TLS_SHOULD_SUCCEED: 0
+  - name: test-latest-ocsp-valid-cert-server-does-not-staple
+    tags:
+      - ocsp
+    commands:
+      - func: run-valid-ocsp-server
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          ORCHESTRATION_FILE: rsa-basic-tls-ocsp-disableStapling.json
+          VERSION: latest
+          TOPOLOGY: server
+      - func: run-ocsp-test
+        vars:
+          OCSP_TLS_SHOULD_SUCCEED: 1
+  - name: test-latest-ocsp-invalid-cert-server-does-not-staple
+    tags:
+      - ocsp
+    commands:
+      - func: run-revoked-ocsp-server
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          ORCHESTRATION_FILE: rsa-basic-tls-ocsp-disableStapling.json
+          VERSION: latest
+          TOPOLOGY: server
+      - func: run-ocsp-test
+        vars:
+          OCSP_TLS_SHOULD_SUCCEED: 0
+  - name: test-latest-ocsp-soft-fail
+    tags:
+      - ocsp
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
         vars:
+          ORCHESTRATION_FILE: rsa-basic-tls-ocsp-disableStapling.json
+          VERSION: latest
+          TOPOLOGY: server
+      - func: run-ocsp-test
+        vars:
+          OCSP_TLS_SHOULD_SUCCEED: 1
+  - name: test-latest-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
+    tags:
+      - ocsp
+    commands:
+      - func: run-revoked-ocsp-server
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple-disableStapling.json
+          VERSION: latest
+          TOPOLOGY: server
+      - func: run-ocsp-test
+        vars:
+          OCSP_TLS_SHOULD_SUCCEED: 0
+  - name: test-latest-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
+    tags:
+      - ocsp
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple-disableStapling.json
+          VERSION: latest
+          TOPOLOGY: server
+      - func: run-ocsp-test
+        vars:
+          OCSP_TLS_SHOULD_SUCCEED: 0
+  - name: test-4.4-ocsp-valid-cert-server-staples
+    tags:
+      - ocsp
+    commands:
+      - func: run-valid-ocsp-server
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple.json
+          VERSION: '4.4'
+          TOPOLOGY: server
+      - func: run-ocsp-test
+        vars:
+          OCSP_TLS_SHOULD_SUCCEED: 1
+  - name: test-4.4-ocsp-invalid-cert-server-staples
+    tags:
+      - ocsp
+    commands:
+      - func: run-revoked-ocsp-server
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple.json
+          VERSION: '4.4'
+          TOPOLOGY: server
+      - func: run-ocsp-test
+        vars:
+          OCSP_TLS_SHOULD_SUCCEED: 0
+  - name: test-4.4-ocsp-valid-cert-server-does-not-staple
+    tags:
+      - ocsp
+    commands:
+      - func: run-valid-ocsp-server
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          ORCHESTRATION_FILE: rsa-basic-tls-ocsp-disableStapling.json
+          VERSION: '4.4'
+          TOPOLOGY: server
+      - func: run-ocsp-test
+        vars:
+          OCSP_TLS_SHOULD_SUCCEED: 1
+  - name: test-4.4-ocsp-invalid-cert-server-does-not-staple
+    tags:
+      - ocsp
+    commands:
+      - func: run-revoked-ocsp-server
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          ORCHESTRATION_FILE: rsa-basic-tls-ocsp-disableStapling.json
+          VERSION: '4.4'
+          TOPOLOGY: server
+      - func: run-ocsp-test
+        vars:
+          OCSP_TLS_SHOULD_SUCCEED: 0
+  - name: test-4.4-ocsp-soft-fail
+    tags:
+      - ocsp
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          ORCHESTRATION_FILE: rsa-basic-tls-ocsp-disableStapling.json
+          VERSION: '4.4'
+          TOPOLOGY: server
+      - func: run-ocsp-test
+        vars:
+          OCSP_TLS_SHOULD_SUCCEED: 1
+  - name: test-4.4-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
+    tags:
+      - ocsp
+    commands:
+      - func: run-revoked-ocsp-server
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple-disableStapling.json
+          VERSION: '4.4'
+          TOPOLOGY: server
+      - func: run-ocsp-test
+        vars:
+          OCSP_TLS_SHOULD_SUCCEED: 0
+  - name: test-4.4-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
+    tags:
+      - ocsp
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple-disableStapling.json
+          VERSION: '4.4'
+          TOPOLOGY: server
+      - func: run-ocsp-test
+        vars:
+          OCSP_TLS_SHOULD_SUCCEED: 0
+  - name: aws-latest-auth-test
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: latest
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: run aws auth test with regular aws credentials
+      - func: run aws auth test with assume role credentials
+      - func: run aws auth test with aws EC2 credentials
+      - func: run aws auth test with aws credentials as environment variables
+      - func: run aws auth test with aws credentials and session token as environment variables
+      - func: run aws ECS auth test
+  - name: aws-4.4-auth-test
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.4'
           AUTH: auth
           ORCHESTRATION_FILE: auth-aws.json
           TOPOLOGY: server
@@ -874,6 +1083,20 @@ buildvariants:
       - test-ocsp-soft-fail
       - test-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
       - test-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
+      - test-latest-ocsp-valid-cert-server-staples
+      - test-latest-ocsp-invalid-cert-server-staples
+      - test-latest-ocsp-valid-cert-server-does-not-staple
+      - test-latest-ocsp-invalid-cert-server-does-not-staple
+      - test-latest-ocsp-soft-fail
+      - test-latest-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
+      - test-latest-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
+      - test-4.4-ocsp-valid-cert-server-staples
+      - test-4.4-ocsp-invalid-cert-server-staples
+      - test-4.4-ocsp-valid-cert-server-does-not-staple
+      - test-4.4-ocsp-invalid-cert-server-does-not-staple
+      - test-4.4-ocsp-soft-fail
+      - test-4.4-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
+      - test-4.4-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
   - name: macos-1014-erbium
     display_name: macOS 10.14 Node Erbium
     run_on: macos-1014
@@ -961,6 +1184,20 @@ buildvariants:
       - test-ocsp-soft-fail
       - test-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
       - test-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
+      - test-latest-ocsp-valid-cert-server-staples
+      - test-latest-ocsp-invalid-cert-server-staples
+      - test-latest-ocsp-valid-cert-server-does-not-staple
+      - test-latest-ocsp-invalid-cert-server-does-not-staple
+      - test-latest-ocsp-soft-fail
+      - test-latest-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
+      - test-latest-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
+      - test-4.4-ocsp-valid-cert-server-staples
+      - test-4.4-ocsp-invalid-cert-server-staples
+      - test-4.4-ocsp-valid-cert-server-does-not-staple
+      - test-4.4-ocsp-invalid-cert-server-does-not-staple
+      - test-4.4-ocsp-soft-fail
+      - test-4.4-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
+      - test-4.4-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
   - name: ubuntu-18.04-erbium
     display_name: Ubuntu 18.04 Node Erbium
     run_on: ubuntu1804-test
@@ -979,4 +1216,5 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: dubnium
     tasks:
-      - aws-auth-test
+      - aws-latest-auth-test
+      - aws-4.4-auth-test
