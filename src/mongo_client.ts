@@ -9,6 +9,7 @@ import { deprecate } from 'util';
 import { connect, validOptions } from './operations/connect';
 import { PromiseProvider } from './promise_provider';
 import type { Callback, BSONSerializeOptions, AutoEncryptionOptions } from './types';
+import type { CompressorName } from './cmap/wire_protocol/compression';
 
 export enum ReadPreferenceMode {
   primary = 'primary',
@@ -19,19 +20,13 @@ export enum ReadPreferenceMode {
 }
 export type ReadPreferenceModes = keyof typeof ReadPreferenceMode;
 
-export enum Compressor {
-  snappy = 'snappy',
-  zlib = 'zlib'
-}
-export type Compressors = keyof typeof Compressor;
-
 export enum ReadConcernLevel {
   local = 'local',
   majority = 'majority',
   linearizable = 'linearizable',
   available = 'available'
 }
-export type ReadConcernLevels = keyof typeof Compressor;
+export type ReadConcernLevels = keyof typeof ReadConcernLevel;
 
 export enum AuthMechanism {
   'GSSAPI' = 'GSSAPI',
@@ -129,7 +124,7 @@ export interface MongoURIOptions {
   /** The time in milliseconds to attempt a send or receive on a socket before the attempt times out. */
   socketTimeoutMS?: number;
   /** Comma-delimited string of compressors to enable network compression for communication between this client and a mongod/mongos instance. */
-  compressors?: Compressors[];
+  compressors?: CompressorName[];
   /** An integer that specifies the compression level if using zlib for network compression. */
   zlibCompressionLevel?: number;
   /** The maximum number of connections in the connection pool. */
@@ -254,7 +249,7 @@ export interface MongoClientOptions extends MongoURIOptions, BSONSerializeOption
   /** The auth settings for when connection to server. */
   auth?: Auth;
   /** Type of compression to use?: snappy or zlib */
-  compression?: Compressors;
+  compression?: CompressorName;
   /** Specify a file sync write concern */
   fsync?: boolean;
   /** The number of retries for a tailable cursor */
