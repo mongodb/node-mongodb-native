@@ -14,13 +14,11 @@ export KRB5_CONFIG="$(pwd)/.evergreen/krb5.conf.empty"
 echo "Writing keytab"
 # DON'T PRINT KEYTAB TO STDOUT
 set +o verbose
-DECODE='-d'
-OS=`uname`
-if [[ $OS == "Darwin" ]]; then
-  echo "OSX detected, using -D flag for base64 decode"
-  DECODE='-D'
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    echo $KEYTAB | base64 -D > "$(pwd)/.evergreen/drivers.keytab"
+else
+    echo $KEYTAB | base64 -d > "$(pwd)/.evergreen/drivers.keytab"
 fi
-echo $KEYTAB | base64 $DECODE > "$(pwd)/.evergreen/drivers.keytab"
 echo "Running kinit"
 kinit -k -t "$(pwd)/.evergreen/drivers.keytab" -p drivers@LDAPTEST.10GEN.CC
 
