@@ -99,6 +99,22 @@ Array.prototype.push.apply(TASKS, [
     ]
   },
   {
+    name: 'test-auth-kerberos',
+    tags: ['auth', 'kerberos'],
+    commands: [
+      { func: 'install dependencies' },
+      { func: 'run kerberos tests' }
+    ]
+  },
+  {
+    name: 'test-auth-ldap',
+    tags: ['auth', 'ldap'],
+    commands: [
+      { func: 'install dependencies' },
+      { func: 'run ldap tests' }
+    ]
+  },
+  {
     name: 'test-tls-support',
     tags: ['tls-support'],
     commands: [
@@ -112,14 +128,6 @@ Array.prototype.push.apply(TASKS, [
         }
       },
       { func: 'run tls tests' }
-    ]
-  },
-  {
-    name: 'test-ldap-auth',
-    tags: ['ldap-auth'],
-    commands: [
-      { func: 'install dependencies' },
-      { func: 'run ldap tests' }
     ]
   },
   {
