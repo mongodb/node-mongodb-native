@@ -3,7 +3,7 @@ import * as crypto from 'crypto';
 import { PromiseProvider } from './promise_provider';
 import { MongoError } from './error';
 import { WriteConcern } from './write_concern';
-import type { CallbackWithType, Callback } from './types';
+import type { CallbackWithType, Callback, Callback2 } from './types';
 
 const MAX_JS_INT = Number.MAX_SAFE_INTEGER + 1;
 

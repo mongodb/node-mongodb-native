@@ -1,6 +1,9 @@
 import { CommandOperation, CommandOperationOptions, Parent } from './command';
 import { defineAspects, Aspect } from './operation';
 import { MongoDBNamespace } from '../utils';
+import type { MongoClient } from '../mongo_client';
+import type { Collection } from '../collection';
+import type { Db } from '../db';
 import type { Server } from '../sdam/server';
 import type { Document, Callback } from '../types';
 
