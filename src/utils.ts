@@ -798,14 +798,6 @@ function arrayStrictEqual(arr: any, arr2: any) {
   return arr.length === arr2.length && arr.every((elt: any, idx: any) => elt === arr2[idx]);
 }
 
-function tagsStrictEqual(tags: any, tags2: any) {
-  const tagsKeys = Object.keys(tags);
-  const tags2Keys = Object.keys(tags2);
-  return (
-    tagsKeys.length === tags2Keys.length && tagsKeys.every((key: any) => tags2[key] === tags[key])
-  );
-}
-
 function errorStrictEqual(lhs: any, rhs: any) {
   if (lhs === rhs) {
     return true;
@@ -940,6 +932,20 @@ function calculateDurationInMs(started: number) {
   return elapsed < 0 ? 0 : elapsed;
 }
 
+export interface InterruptableAsyncIntervalOptions {
+  /** The interval to execute a method on */
+  interval: number;
+  /** A minumum interval that must elapse before the method is called */
+  minInterval: number;
+  /** Whether the method should be called immediately when the interval is started  */
+  immediate: boolean;
+}
+
+export interface InterruptableAsyncInterval {
+  wake(): void;
+  stop(): void;
+}
+
 /**
  * Creates an interval timer which is able to be woken up sooner than
  * the interval. The timer will also debounce multiple calls to wake
@@ -952,10 +958,13 @@ function calculateDurationInMs(started: number) {
  * @param {number} [options.minInterval] The minimum time which must pass between invocations of the provided function
  * @param {boolean} [options.immediate] Execute the function immediately when the interval is started
  */
-function makeInterruptableAsyncInterval(fn: Function, options?: any) {
-  let timerId: any;
-  let lastCallTime: any;
-  let lastWakeTime: any;
+function makeInterruptableAsyncInterval(
+  fn: Function,
+  options?: Partial<InterruptableAsyncIntervalOptions>
+): InterruptableAsyncInterval {
+  let timerId: NodeJS.Timeout | undefined;
+  let lastCallTime: number;
+  let lastWakeTime: number;
   let stopped = false;
 
   options = options || {};
@@ -992,7 +1001,7 @@ function makeInterruptableAsyncInterval(fn: Function, options?: any) {
     stopped = true;
     if (timerId) {
       clearTimeout(timerId);
-      timerId = null;
+      timerId = undefined;
     }
 
     lastCallTime = 0;
@@ -1001,7 +1010,10 @@ function makeInterruptableAsyncInterval(fn: Function, options?: any) {
 
   function reschedule(ms: any) {
     if (stopped) return;
-    clearTimeout(timerId);
+    if (timerId) {
+      clearTimeout(timerId);
+    }
+
     timerId = setTimeout(executeAndReschedule, ms || interval);
   }
 
@@ -1071,7 +1083,6 @@ export {
   eachAsync,
   eachAsyncSeries,
   arrayStrictEqual,
-  tagsStrictEqual,
   errorStrictEqual,
   makeStateMachine,
   makeClientMetadata,

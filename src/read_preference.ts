@@ -194,7 +194,7 @@ export class ReadPreference {
    * @param {string} mode The string representing the read preference mode.
    * @returns {boolean} True if a mode is valid
    */
-  isValid(mode: string): boolean {
+  isValid(mode?: string): boolean {
     return ReadPreference.isValid(typeof mode === 'string' ? mode : this.mode);
   }
 

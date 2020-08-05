@@ -14,9 +14,9 @@ import {
 } from '../error';
 import { now, calculateDurationInMs } from '../utils';
 
-import type { Callback, Document, AutoEncryptionOptions } from '../types';
+import type { Callback, Document, AutoEncrypter } from '../types';
 import type { ConnectionOptions as TLSConnectionOptions } from 'tls';
-import type { Socket, TcpNetConnectOpts, IpcNetConnectOpts } from 'net';
+import type { TcpNetConnectOpts, IpcNetConnectOpts } from 'net';
 import type { Server } from '../sdam/server';
 import type { MongoCredentials } from './auth/mongo_credentials';
 import type { CommandOptions } from './wire_protocol/command';
@@ -36,7 +36,7 @@ const kDescription = Symbol('description');
 const kIsMaster = Symbol('ismaster');
 const kAutoEncrypter = Symbol('autoEncrypter');
 
-export interface StreamConnectionOptions
+export interface ConnectionOptions
   extends Partial<TcpNetConnectOpts>,
     Partial<IpcNetConnectOpts>,
     Partial<TLSConnectionOptions>,
@@ -44,7 +44,7 @@ export interface StreamConnectionOptions
   id: number;
   monitorCommands: boolean;
   generation: number;
-  autoEncrypter: AutoEncryptionOptions;
+  autoEncrypter: AutoEncrypter;
   connectionType: typeof Connection;
   credentials?: MongoCredentials;
   connectTimeoutMS?: number;
@@ -82,7 +82,7 @@ export class Connection extends EventEmitter {
   [kIsMaster]: Document;
   [kClusterTime]: Document;
 
-  constructor(stream: Stream, options: StreamConnectionOptions) {
+  constructor(stream: Stream, options: ConnectionOptions) {
     super(options);
     this.id = options.id;
     this.address = streamIdentifier(stream);

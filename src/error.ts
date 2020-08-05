@@ -1,3 +1,5 @@
+import type { TopologyVersion } from './sdam/server_description';
+
 const kErrorLabels = Symbol('errorLabels');
 
 // From spec@https://github.com/mongodb/specifications/blob/f93d78191f3db2898a59013a7ed5650352ef6da8/source/change-streams/change-streams.rst#resumable-error
@@ -25,7 +27,6 @@ const GET_MORE_RESUMABLE_CODES = new Set([
 /**
  * Creates a new MongoError
  *
- * @extends Error
  * @param {Error|string|object} message The error message
  * @property {string} message The error message
  * @property {string} stack The error call stack
@@ -33,6 +34,7 @@ const GET_MORE_RESUMABLE_CODES = new Set([
 class MongoError extends Error {
   [kErrorLabels]: any;
   code?: number;
+  topologyVersion?: TopologyVersion;
 
   constructor(message: any) {
     if (message instanceof Error) {

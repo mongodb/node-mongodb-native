@@ -79,3 +79,8 @@ export interface AutoEncryptionOptions {
     mongocryptdSpawnArgs: string[];
   };
 }
+
+interface AutoEncrypter {
+  encrypt(ns: string, cmd: Document, options: any, callback: Callback<Document>): void;
+  decrypt(cmd: Document, options: any, callback: Callback<Document>): void;
+}

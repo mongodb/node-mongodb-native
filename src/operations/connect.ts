@@ -357,7 +357,7 @@ function createTopology(mongoClient: any, options: any, callback: Function) {
 
       topology.connect(options, (err: any) => {
         if (err) {
-          topology.close(true);
+          topology.close({ force: true });
           callback(err);
           return;
         }
@@ -372,7 +372,7 @@ function createTopology(mongoClient: any, options: any, callback: Function) {
   // otherwise connect normally
   topology.connect(options, (err: any) => {
     if (err) {
-      topology.close(true);
+      topology.close({ force: true });
       return callback(err);
     }
 

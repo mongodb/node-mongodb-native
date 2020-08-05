@@ -1,19 +1,29 @@
 import { ServerType, TopologyType } from './common';
 import { ReadPreference } from '../read_preference';
 import { MongoError } from '../error';
+import type { TopologyDescription } from './topology_description';
+import type { ServerDescription, TagSet } from './server_description';
 
 // max staleness constants
 const IDLE_WRITE_PERIOD = 10000;
 const SMALLEST_MAX_STALENESS_SECONDS = 90;
 
+export type ServerSelector = (
+  topologyDescription: TopologyDescription,
+  servers: ServerDescription[]
+) => ServerDescription[];
+
 /**
  * Returns a server selector that selects for writable servers
  */
-function writableServerSelector() {
-  return (topologyDescription: any, servers: any) =>
+export function writableServerSelector(): ServerSelector {
+  return (
+    topologyDescription: TopologyDescription,
+    servers: ServerDescription[]
+  ): ServerDescription[] =>
     latencyWindowReducer(
       topologyDescription,
-      servers.filter((s: any) => s.isWritable)
+      servers.filter((s: ServerDescription) => s.isWritable)
     );
 }
 
@@ -26,7 +36,11 @@ function writableServerSelector() {
  * @param {ServerDescription[]} servers The list of server descriptions to be reduced
  * @returns {ServerDescription[]} The list of servers that satisfy the requirements of max staleness
  */
-function maxStalenessReducer(readPreference: any, topologyDescription: any, servers: any): any {
+function maxStalenessReducer(
+  readPreference: ReadPreference,
+  topologyDescription: TopologyDescription,
+  servers: ServerDescription[]
+): ServerDescription[] {
   if (readPreference.maxStalenessSeconds == null || readPreference.maxStalenessSeconds < 0) {
     return servers;
   }
@@ -45,8 +59,11 @@ function maxStalenessReducer(readPreference: any, topologyDescription: any, serv
   }
 
   if (topologyDescription.type === TopologyType.ReplicaSetWithPrimary) {
-    const primary: any = Array.from(topologyDescription.servers.values()).filter(primaryFilter)[0];
-    return servers.reduce((result: any, server: any) => {
+    const primary: ServerDescription = Array.from(topologyDescription.servers.values()).filter(
+      primaryFilter
+    )[0];
+
+    return servers.reduce((result: ServerDescription[], server: ServerDescription) => {
       const stalenessMS =
         server.lastUpdateTime -
         server.lastWriteDate -
@@ -64,11 +81,11 @@ function maxStalenessReducer(readPreference: any, topologyDescription: any, serv
       return servers;
     }
 
-    const sMax = servers.reduce((max: any, s: any) =>
+    const sMax = servers.reduce((max: ServerDescription, s: ServerDescription) =>
       s.lastWriteDate > max.lastWriteDate ? s : max
     );
 
-    return servers.reduce((result: any, server: any) => {
+    return servers.reduce((result: ServerDescription[], server: ServerDescription) => {
       const stalenessMS =
         sMax.lastWriteDate - server.lastWriteDate + topologyDescription.heartbeatFrequencyMS;
 
@@ -84,10 +101,10 @@ function maxStalenessReducer(readPreference: any, topologyDescription: any, serv
 /**
  * Determines whether a server's tags match a given set of tags
  *
- * @param {string[]} tagSet The requested tag set to match
- * @param {string[]} serverTags The server's tags
+ * @param tagSet The requested tag set to match
+ * @param serverTags The server's tags
  */
-function tagSetMatch(tagSet: any, serverTags: any) {
+function tagSetMatch(tagSet: TagSet, serverTags: TagSet) {
   const keys = Object.keys(tagSet);
   const serverTagKeys = Object.keys(serverTags);
   for (let i = 0; i < keys.length; ++i) {
@@ -107,7 +124,10 @@ function tagSetMatch(tagSet: any, serverTags: any) {
  * @param {ServerDescription[]} servers The list of server descriptions to reduce
  * @returns {ServerDescription[]} The list of servers matching the requested tags
  */
-function tagSetReducer(readPreference: any, servers: any): any {
+function tagSetReducer(
+  readPreference: ReadPreference,
+  servers: ServerDescription[]
+): ServerDescription[] {
   if (
     readPreference.tags == null ||
     (Array.isArray(readPreference.tags) && readPreference.tags.length === 0)
@@ -117,10 +137,13 @@ function tagSetReducer(readPreference: any, servers: any): any {
 
   for (let i = 0; i < readPreference.tags.length; ++i) {
     const tagSet = readPreference.tags[i];
-    const serversMatchingTagset = servers.reduce((matched: any, server: any) => {
-      if (tagSetMatch(tagSet, server.tags)) matched.push(server);
-      return matched;
-    }, []);
+    const serversMatchingTagset = servers.reduce(
+      (matched: ServerDescription[], server: ServerDescription) => {
+        if (tagSetMatch(tagSet, server.tags)) matched.push(server);
+        return matched;
+      },
+      []
+    );
 
     if (serversMatchingTagset.length) {
       return serversMatchingTagset;
@@ -139,34 +162,37 @@ function tagSetReducer(readPreference: any, servers: any): any {
  * @param {ServerDescription[]} servers The list of servers to reduce
  * @returns {ServerDescription[]} The servers which fall within an acceptable latency window
  */
-function latencyWindowReducer(topologyDescription: any, servers: any): any {
+function latencyWindowReducer(
+  topologyDescription: TopologyDescription,
+  servers: ServerDescription[]
+): ServerDescription[] {
   const low = servers.reduce(
-    (min: any, server: any) =>
+    (min: number, server: ServerDescription) =>
       min === -1 ? server.roundTripTime : Math.min(server.roundTripTime, min),
     -1
   );
 
   const high = low + topologyDescription.localThresholdMS;
-  return servers.reduce((result: any, server: any) => {
+  return servers.reduce((result: ServerDescription[], server: ServerDescription) => {
     if (server.roundTripTime <= high && server.roundTripTime >= low) result.push(server);
     return result;
   }, []);
 }
 
 // filters
-function primaryFilter(server: any) {
+function primaryFilter(server: ServerDescription): boolean {
   return server.type === ServerType.RSPrimary;
 }
 
-function secondaryFilter(server: any) {
+function secondaryFilter(server: ServerDescription): boolean {
   return server.type === ServerType.RSSecondary;
 }
 
-function nearestFilter(server: any) {
+function nearestFilter(server: ServerDescription): boolean {
   return server.type === ServerType.RSSecondary || server.type === ServerType.RSPrimary;
 }
 
-function knownFilter(server: any) {
+function knownFilter(server: ServerDescription): boolean {
   return server.type !== ServerType.Unknown;
 }
 
@@ -175,12 +201,15 @@ function knownFilter(server: any) {
  *
  * @param {ReadPreference} readPreference The read preference to select with
  */
-function readPreferenceServerSelector(readPreference: any) {
+export function readPreferenceServerSelector(readPreference: ReadPreference): ServerSelector {
   if (!readPreference.isValid()) {
     throw new TypeError('Invalid read preference specified');
   }
 
-  return function (topologyDescription: any, servers: any) {
+  return (
+    topologyDescription: TopologyDescription,
+    servers: ServerDescription[]
+  ): ServerDescription[] => {
     const commonWireVersion = topologyDescription.commonWireVersion;
     if (
       commonWireVersion &&
@@ -231,5 +260,3 @@ function readPreferenceServerSelector(readPreference: any) {
     return selectedServers;
   };
 }
-
-export { writableServerSelector, readPreferenceServerSelector };

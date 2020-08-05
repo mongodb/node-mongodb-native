@@ -1,13 +1,15 @@
 import { parseServerType } from '../sdam/server_description';
 import type { Document } from '../types';
-import type { Compressor, CompressorName } from './wire_protocol/compression';
+import type { CompressorName } from './wire_protocol/compression';
+import { ServerType } from '../sdam/common';
 
 const RESPONSE_FIELDS = [
   'minWireVersion',
   'maxWireVersion',
   'maxBsonObjectSize',
   'maxMessageSizeBytes',
-  'maxWriteBatchSize'
+  'maxWriteBatchSize',
+  'logicalSessionTimeoutMinutes'
 ] as const;
 
 export interface StreamDescriptionOptions {
@@ -26,6 +28,7 @@ export class StreamDescription {
   maxWriteBatchSize: number;
   compressors: CompressorName[];
   compressor?: CompressorName;
+  logicalSessionTimeoutMinutes?: number;
 
   __nodejs_mock_server__ = false;
 
@@ -33,7 +36,7 @@ export class StreamDescription {
 
   constructor(address: string, options?: StreamDescriptionOptions) {
     this.address = address;
-    this.type = parseServerType(null);
+    this.type = ServerType.Unknown;
     this.minWireVersion = undefined;
     this.maxWireVersion = undefined;
     this.maxBsonObjectSize = 16777216;
