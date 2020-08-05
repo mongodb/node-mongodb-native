@@ -142,7 +142,7 @@ export class ChangeStream extends EventEmitter {
    * @throws {MongoError}
    * @returns {Promise<void>|void} returns Promise if no callback passed
    */
-  hasNext(callback: Callback): Promise<void> | void {
+  hasNext(callback?: Callback): Promise<void> | void {
     return maybePromise(callback, (cb: any) => {
       getCursor(this, (err?: any, cursor?: any) => {
         if (err) return cb(err); // failed to resume, raise an error
@@ -159,7 +159,7 @@ export class ChangeStream extends EventEmitter {
    * @throws {MongoError}
    * @returns {Promise<void>|void} returns Promise if no callback passed
    */
-  next(callback: Callback): Promise<void> | void {
+  next(callback?: Callback): Promise<void> | void {
     return maybePromise(callback, (cb: any) => {
       getCursor(this, (err?: any, cursor?: any) => {
         if (err) return cb(err); // failed to resume, raise an error
@@ -192,7 +192,7 @@ export class ChangeStream extends EventEmitter {
    * @param {ChangeStream~resultCallback} [callback] The result callback.
    * @returns {Promise<void>|void} returns Promise if no callback passed
    */
-  close(callback: Callback): Promise<void> | void {
+  close(callback?: Callback): Promise<void> | void {
     return maybePromise(callback, (cb: any) => {
       if (this.closed) return cb();
 

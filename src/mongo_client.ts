@@ -197,7 +197,7 @@ export class MongoClient extends EventEmitter {
    * @param {MongoClient~connectCallback} [callback] The command result callback
    * @returns {Promise<MongoClient>} returns Promise if no callback passed
    */
-  connect(callback: Callback): Promise<MongoClient> {
+  connect(callback?: Callback): Promise<MongoClient> | void {
     if (typeof callback === 'string') {
       throw new TypeError('`connect` only accepts a callback');
     }
@@ -395,7 +395,7 @@ export class MongoClient extends EventEmitter {
    * @param {MongoClient~connectCallback} [callback] The command result callback
    * @returns {Promise<MongoClient>} returns Promise if no callback passed
    */
-  static connect(url: string, options?: any, callback?: Callback): Promise<MongoClient> {
+  static connect(url: string, options?: any, callback?: Callback): Promise<MongoClient> | void {
     const args = Array.prototype.slice.call(arguments, 1);
     callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
     options = args.length ? args.shift() : null;
@@ -512,7 +512,7 @@ export class MongoClient extends EventEmitter {
   }
 }
 
-MongoClient.prototype.logout = deprecate((options: any, callback: Callback) => {
+MongoClient.prototype.logout = deprecate((options: any, callback: Callback): void => {
   if (typeof options === 'function') (callback = options), (options = {});
   if (typeof callback === 'function') callback(undefined, true);
 }, 'Multiple authentication is prohibited on a connected client, please only authenticate once per MongoClient');

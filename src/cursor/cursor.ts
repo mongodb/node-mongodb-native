@@ -194,7 +194,7 @@ export class Cursor extends CoreCursor {
    * @throws {MongoError}
    * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  hasNext(callback: Callback): Promise<void> | void {
+  hasNext(callback?: Callback): Promise<void> | void {
     if (this.s.state === CursorState.CLOSED || (this.isDead && this.isDead())) {
       throw MongoError.create({ message: 'Cursor is closed', driver: true });
     }
@@ -226,7 +226,7 @@ export class Cursor extends CoreCursor {
    * @throws {MongoError}
    * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  next(callback: Callback): Promise<void> | void {
+  next(callback?: Callback): Promise<void> | void {
     return maybePromise(callback, (cb: any) => {
       const cursor = this;
       if (cursor.s.state === CursorState.CLOSED || (cursor.isDead && cursor.isDead())) {
@@ -842,7 +842,7 @@ export class Cursor extends CoreCursor {
    * @throws {MongoError}
    * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  toArray(callback: Callback): Promise<void> | void {
+  toArray(callback?: Callback): Promise<void> | void {
     if (this.options.tailable) {
       throw MongoError.create({
         message: 'Tailable cursor cannot be converted to array',
@@ -1039,7 +1039,7 @@ export class Cursor extends CoreCursor {
    * @param {Cursor~resultCallback} [callback] The result callback.
    * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  explain(callback: Callback): Promise<void> | void {
+  explain(callback?: Callback): Promise<void> | void {
     // NOTE: the next line includes a special case for operations which do not
     //       subclass `CommandOperationV2`. To be removed asap.
     if (this.operation && this.operation.cmd == null) {
