@@ -1,6 +1,7 @@
 import * as BSON from '../bson';
 import { BulkOperationBase, Batch, INSERT, UPDATE, REMOVE } from './common';
 import { toError } from '../utils';
+import type { Callback } from '../types';
 
 /**
  * Add to internal list of Operations
@@ -100,7 +101,7 @@ function addToOperationsList(
  * @property {number} length Get the number of operations in the bulk.
  * @returns {UnorderedBulkOperation} a UnorderedBulkOperation instance.
  */
-class UnorderedBulkOperation extends BulkOperationBase {
+export class UnorderedBulkOperation extends BulkOperationBase {
   s: any;
 
   constructor(topology: any, collection: any, options: any) {
@@ -115,7 +116,7 @@ class UnorderedBulkOperation extends BulkOperationBase {
    * @param {any} writeResult
    * @returns {boolean|undefined}
    */
-  handleWriteError(callback: Function, writeResult: any): boolean | undefined {
+  handleWriteError(callback: Callback, writeResult: any): boolean | undefined {
     if (this.s.batches.length) {
       return false;
     }
@@ -131,8 +132,6 @@ class UnorderedBulkOperation extends BulkOperationBase {
  * @param {any} collection
  * @param {any} options
  */
-function initializeUnorderedBulkOp(topology: any, collection: any, options: any) {
+export function initializeUnorderedBulkOp(topology: any, collection: any, options: any) {
   return new UnorderedBulkOperation(topology, collection, options);
 }
-
-export = initializeUnorderedBulkOp;

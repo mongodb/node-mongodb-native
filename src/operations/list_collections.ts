@@ -1,7 +1,7 @@
 import { CommandOperation } from './command';
 import { Aspect, defineAspects } from './operation';
 import { maxWireVersion } from '../utils';
-import CONSTANTS = require('../constants');
+import * as CONSTANTS from '../constants';
 import type { Callback } from '../types';
 import type { Server } from '../sdam/server';
 

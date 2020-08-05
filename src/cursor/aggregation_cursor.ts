@@ -1,5 +1,5 @@
 import { MongoError } from '../error';
-import Cursor = require('./cursor');
+import { Cursor } from './cursor';
 import { CursorState } from './core_cursor';
 import { deprecate } from 'util';
 
@@ -53,7 +53,7 @@ import { deprecate } from 'util';
  * @fires AggregationCursor#readable
  * @returns {AggregationCursor} an AggregationCursor instance.
  */
-class AggregationCursor extends Cursor {
+export class AggregationCursor extends Cursor {
   constructor(topology: any, operation: any, options: any) {
     super(topology, operation, options);
   }
@@ -380,5 +380,3 @@ deprecate(
  * @throws {MongoError}
  * @returns {null}
  */
-
-export = AggregationCursor;

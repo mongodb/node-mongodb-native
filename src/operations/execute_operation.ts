@@ -1,4 +1,4 @@
-import PromiseProvider = require('../promise_provider');
+import { PromiseProvider } from '../promise_provider';
 import { ReadPreference } from '../read_preference';
 import { MongoError, isRetryableError } from '../error';
 import { Aspect, OperationBase } from './operation';
@@ -24,7 +24,7 @@ const MMAPv1_RETRY_WRITES_ERROR_MESSAGE =
  * @param {Operation} operation The operation to execute
  * @param {Function} callback The command result callback
  */
-export function executeOperation(topology: any, operation: any, callback: Callback) {
+export function executeOperation(topology: any, operation: any, callback?: Callback) {
   const Promise = PromiseProvider.get();
 
   if (topology == null) {
@@ -70,7 +70,7 @@ export function executeOperation(topology: any, operation: any, callback: Callba
       }
     }
 
-    callback(err, result);
+    callback!(err, result);
   }
 
   try {
@@ -213,7 +213,7 @@ function supportsRetryableWrites(server: Server) {
 
 // TODO: This is only supported for unified topology, it should go away once
 //       we remove support for legacy topology types.
-function selectServerForSessionSupport(topology: any, operation: any, callback: Callback) {
+function selectServerForSessionSupport(topology: any, operation: any, callback?: Callback) {
   const Promise = PromiseProvider.get();
 
   let result;
@@ -228,7 +228,7 @@ function selectServerForSessionSupport(topology: any, operation: any, callback: 
 
   topology.selectServer(ReadPreference.primaryPreferred, (err: any) => {
     if (err) {
-      callback(err);
+      callback!(err);
       return;
     }
 

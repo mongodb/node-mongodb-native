@@ -3,7 +3,7 @@
 const expect = require('chai').expect;
 const sinon = require('sinon');
 const { Topology } = require('../../../../src/sdam/topology');
-const MongoClient = require('../../../../src/mongo_client');
+const { MongoClient } = require('../../../../src/mongo_client');
 const { ServerSessionPool } = require('../../../../src/sessions');
 
 const sandbox = sinon.createSandbox();

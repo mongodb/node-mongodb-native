@@ -1,4 +1,5 @@
 import { Readable } from 'stream';
+import type { Callback } from '../types';
 
 /**
  * A readable stream that enables you to read buffers from GridFS.
@@ -19,7 +20,7 @@ import { Readable } from 'stream';
  * @fires GridFSBucketReadStream#error
  * @fires GridFSBucketReadStream#file
  */
-class GridFSBucketReadStream extends Readable {
+export class GridFSBucketReadStream extends Readable {
   s: any;
 
   constructor(chunks: any, files: any, readPreference: any, filter: any, options: any) {
@@ -137,7 +138,7 @@ class GridFSBucketReadStream extends Readable {
    * @fires GridFSBucketWriteStream#end
    */
 
-  abort(callback: Function) {
+  abort(callback: Callback) {
     var _this = this;
     this.push(null);
     this.destroyed = true;
@@ -325,7 +326,7 @@ function init(self: any) {
   });
 }
 
-function waitForFile(_this: any, callback: Function) {
+function waitForFile(_this: any, callback: Callback) {
   if (_this.s.file) {
     return callback();
   }
@@ -402,5 +403,3 @@ function handleEndOption(stream: any, doc: any, cursor: any, options: any) {
 function __handleError(_this: any, error?: any) {
   _this.emit('error', error);
 }
-
-export = GridFSBucketReadStream;

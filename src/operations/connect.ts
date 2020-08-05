@@ -1,10 +1,10 @@
 import * as fs from 'fs';
-import Logger = require('../logger');
+import { Logger } from '../logger';
 import { ReadPreference } from '../read_preference';
 import { MongoError } from '../error';
 import { Topology } from '../sdam/topology';
 import { parseConnectionString } from '../connection_string';
-import ReadConcern = require('../read_concern');
+import { ReadConcern } from '../read_concern';
 import { emitDeprecationWarning } from '../utils';
 import { CMAP_EVENT_NAMES } from '../cmap/events';
 import { MongoCredentials } from '../cmap/auth/mongo_credentials';

@@ -5,12 +5,12 @@ import { AggregationCursor, CommandCursor } from './cursor';
 import { ObjectId } from './bson';
 import { ReadPreference } from './read_preference';
 import { MongoError } from './error';
-import Collection = require('./collection');
-import ChangeStream = require('./change_stream');
-import CONSTANTS = require('./constants');
+import { Collection } from './collection';
+import { ChangeStream } from './change_stream';
+import * as CONSTANTS from './constants';
 import { WriteConcern } from './write_concern';
-import ReadConcern = require('./read_concern');
-import Logger = require('./logger');
+import { ReadConcern } from './read_concern';
+import { Logger } from './logger';
 import {
   getSingleProperty,
   handleCallback,
@@ -39,6 +39,7 @@ import { RenameOperation } from './operations/rename';
 import { SetProfilingLevelOperation } from './operations/set_profiling_level';
 import { executeOperation } from './operations/execute_operation';
 import { EvalOperation } from './operations/eval';
+import type { Callback } from './types';
 
 // Allowed parameters
 const legalOptionNames = [
@@ -70,7 +71,7 @@ const legalOptionNames = [
   'retryWrites'
 ];
 
-interface Db {
+export interface Db {
   createCollection(name: any, options: any, callback: any): void;
   eval(code: any, parameters: any, options: any, callback: any): void;
   ensureIndex(name: any, fieldOrSpec: any, options: any, callback: any): void;
@@ -94,7 +95,7 @@ interface Db {
  *   client.close();
  * });
  */
-class Db {
+export class Db {
   s: any;
   databaseName: any;
   serverConfig: any;
@@ -239,7 +240,7 @@ class Db {
    * @param {Db~resultCallback} [callback] The command result callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  command(command: object, options?: any, callback?: Function): Promise<void> {
+  command(command: object, options?: any, callback?: Callback): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, options);
 
@@ -326,7 +327,7 @@ class Db {
    * @param {Db~collectionResultCallback} [callback] The collection result callback
    * @returns {Collection} return the new Collection instance if not in strict mode
    */
-  collection(name: string, options?: any, callback?: Function): any {
+  collection(name: string, options?: any, callback?: Callback): any {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
     options = Object.assign({}, options);
@@ -355,7 +356,7 @@ class Db {
           this.s.pkFactory,
           options
         );
-        if (callback) callback(null, collection);
+        if (callback) callback(undefined, collection);
         return collection;
       } catch (err) {
         if (err instanceof MongoError && callback) return callback(err);
@@ -416,7 +417,7 @@ class Db {
    * @param {Db~resultCallback} [callback] The collection result callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  stats(options?: any, callback?: Function): Promise<void> {
+  stats(options?: any, callback?: Callback): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -463,7 +464,7 @@ class Db {
     fromCollection: string,
     toCollection: string,
     options?: any,
-    callback?: Function
+    callback?: Callback
   ): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, options, { readPreference: ReadPreference.PRIMARY });
@@ -494,7 +495,7 @@ class Db {
    * @param {Db~resultCallback} [callback] The results callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  dropCollection(name: string, options?: any, callback?: Function): Promise<void> {
+  dropCollection(name: string, options?: any, callback?: Callback): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -512,7 +513,7 @@ class Db {
    * @param {Db~resultCallback} [callback] The results callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  dropDatabase(options?: any, callback?: Function): Promise<void> {
+  dropDatabase(options?: any, callback?: Callback): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -530,7 +531,7 @@ class Db {
    * @param {Db~collectionsResultCallback} [callback] The results callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  collections(options?: any, callback?: Function): Promise<void> {
+  collections(options?: any, callback?: Callback): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -550,7 +551,7 @@ class Db {
    * @param {Db~resultCallback} [callback] The command result callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  executeDbAdminCommand(selector: object, options?: any, callback?: Function): Promise<void> {
+  executeDbAdminCommand(selector: object, options?: any, callback?: Callback): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -586,7 +587,7 @@ class Db {
    * @param {Db~resultCallback} [callback] The command result callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  createIndex(name: string, fieldOrSpec: any, options?: any, callback?: Function): Promise<void> {
+  createIndex(name: string, fieldOrSpec: any, options?: any, callback?: Callback): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options ? Object.assign({}, options) : {};
 
@@ -613,7 +614,7 @@ class Db {
    * @param {Db~resultCallback} [callback] The command result callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  addUser(username: string, password: any, options?: any, callback?: Function): Promise<void> {
+  addUser(username: string, password: any, options?: any, callback?: Callback): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -641,7 +642,7 @@ class Db {
    * @param {Db~resultCallback} [callback] The command result callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  removeUser(username: string, options?: any, callback?: Function): Promise<void> {
+  removeUser(username: string, options?: any, callback?: Callback): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -659,7 +660,7 @@ class Db {
    * @param {Db~resultCallback} [callback] The command result callback.
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  setProfilingLevel(level: string, options?: any, callback?: Function): Promise<void> {
+  setProfilingLevel(level: string, options?: any, callback?: Callback): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -676,7 +677,7 @@ class Db {
    * @param {Db~resultCallback} [callback] The command result callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  profilingLevel(options?: any, callback?: Function): Promise<void> {
+  profilingLevel(options?: any, callback?: Callback): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -697,7 +698,7 @@ class Db {
    * @param {Db~resultCallback} [callback] The command result callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  indexInformation(name: string, options?: any, callback?: Function): Promise<void> {
+  indexInformation(name: string, options?: any, callback?: Callback): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -821,7 +822,7 @@ Db.prototype.createCollection = deprecateOptions(
     deprecatedOptions: ['autoIndexId'],
     optionsIndex: 1
   },
-  function (this: any, name: any, options: any, callback: Function) {
+  function (this: any, name: any, options: any, callback: Callback) {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
     options.readConcern = options.readConcern
@@ -851,7 +852,7 @@ Db.prototype.eval = deprecate(function (
   code: any,
   parameters: any,
   options: any,
-  callback: Function
+  callback: Callback
 ) {
   const args = Array.prototype.slice.call(arguments, 1);
   callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
@@ -895,7 +896,7 @@ Db.prototype.ensureIndex = deprecate(function (
   name: any,
   fieldOrSpec: any,
   options: any,
-  callback: Function
+  callback: Callback
 ) {
   if (typeof options === 'function') (callback = options), (options = {});
   options = options || {};
@@ -917,7 +918,7 @@ Db.prototype.ensureIndex = deprecate(function (
  * @returns {Promise<void>} returns Promise if no callback passed
  * @deprecated Query the system.profile collection directly.
  */
-Db.prototype.profilingInfo = deprecate(function (this: any, options: any, callback: Function) {
+Db.prototype.profilingInfo = deprecate(function (this: any, options: any, callback: Callback) {
   if (typeof options === 'function') (callback = options), (options = {});
   options = options || {};
 
@@ -941,5 +942,3 @@ function validateDatabaseName(databaseName: any) {
       });
   }
 }
-
-export = Db;

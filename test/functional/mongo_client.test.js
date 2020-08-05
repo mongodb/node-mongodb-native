@@ -3,7 +3,7 @@
 var f = require('util').format;
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
-const Db = require('../../src/db');
+const { Db } = require('../../src/db');
 const expect = require('chai').expect;
 
 describe('MongoClient', function () {

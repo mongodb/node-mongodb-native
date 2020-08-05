@@ -17,7 +17,7 @@ let currentLogger: any = null;
  * @param {string} msg message being logged
  * @param {object} state an object containing more metadata about the logging message
  */
-class Logger {
+export class Logger {
   className: any;
 
   /**
@@ -272,5 +272,3 @@ class Logger {
     level = _level;
   }
 }
-
-export = Logger;

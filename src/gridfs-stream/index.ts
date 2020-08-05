@@ -1,7 +1,9 @@
 import { EventEmitter } from 'events';
-import GridFSBucketReadStream = require('./download');
-import GridFSBucketWriteStream = require('./upload');
+import { GridFSBucketReadStream } from './download';
+import { GridFSBucketWriteStream } from './upload';
 import { toError, executeLegacyOperation } from '../utils';
+import type { Callback } from '../types';
+
 const DEFAULT_GRIDFS_BUCKET_OPTIONS: any = {
   bucketName: 'fs',
   chunkSizeBytes: 255 * 1024
@@ -21,7 +23,7 @@ const DEFAULT_GRIDFS_BUCKET_OPTIONS: any = {
  * @fires GridFSBucketWriteStream#index
  */
 
-class GridFSBucket extends EventEmitter {
+export class GridFSBucket extends EventEmitter {
   s: any;
 
   constructor(db: any, options: any) {
@@ -158,7 +160,7 @@ class GridFSBucket extends EventEmitter {
    * @param {GridFSBucket~errorCallback} [callback]
    */
 
-  delete(id: any, callback: Function) {
+  delete(id: any, callback: Callback) {
     return executeLegacyOperation(this.s.db.s.topology, _delete, [this, id, callback], {
       skipSessions: true
     });
@@ -260,7 +262,7 @@ class GridFSBucket extends EventEmitter {
    * @param {GridFSBucket~errorCallback} [callback]
    */
 
-  rename(id: any, filename: any, callback: Function) {
+  rename(id: any, filename: any, callback: Callback) {
     return executeLegacyOperation(this.s.db.s.topology, _rename, [this, id, filename, callback], {
       skipSessions: true
     });
@@ -273,7 +275,7 @@ class GridFSBucket extends EventEmitter {
    * @param {GridFSBucket~errorCallback} [callback]
    */
 
-  drop(callback: Function) {
+  drop(callback: Callback) {
     return executeLegacyOperation(this.s.db.s.topology, _drop, [this, callback], {
       skipSessions: true
     });
@@ -290,7 +292,7 @@ class GridFSBucket extends EventEmitter {
   }
 }
 
-function _delete(_this: any, id: any, callback: Function) {
+function _delete(_this: any, id: any, callback: Callback) {
   _this.s._filesCollection.deleteOne({ _id: id }, (error?: any, res?: any) => {
     if (error) {
       return callback(error);
@@ -312,7 +314,7 @@ function _delete(_this: any, id: any, callback: Function) {
   });
 }
 
-function _rename(_this: any, id: any, filename: any, callback: Function) {
+function _rename(_this: any, id: any, filename: any, callback: Callback) {
   var filter = { _id: id };
   var update = { $set: { filename } };
   _this.s._filesCollection.updateOne(filter, update, (error?: any, res?: any) => {
@@ -326,7 +328,7 @@ function _rename(_this: any, id: any, filename: any, callback: Function) {
   });
 }
 
-function _drop(_this: any, callback: Function) {
+function _drop(_this: any, callback: Callback) {
   _this.s._filesCollection.drop((error: any) => {
     if (error) {
       return callback(error);
@@ -340,5 +342,3 @@ function _drop(_this: any, callback: Function) {
     });
   });
 }
-
-export = GridFSBucket;

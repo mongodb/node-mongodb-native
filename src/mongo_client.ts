@@ -1,13 +1,14 @@
-import Db = require('./db');
+import { Db } from './db';
 import { EventEmitter } from 'events';
-import ChangeStream = require('./change_stream');
+import { ChangeStream } from './change_stream';
 import { ReadPreference } from './read_preference';
 import { MongoError } from './error';
 import { WriteConcern } from './write_concern';
 import { maybePromise, MongoDBNamespace } from './utils';
 import { deprecate } from 'util';
 import { connect, validOptions } from './operations/connect';
-import PromiseProvider = require('./promise_provider');
+import { PromiseProvider } from './promise_provider';
+import type { Callback } from './types';
 
 /**
  * A string specifying the level of a ReadConcern
@@ -25,8 +26,8 @@ import PromiseProvider = require('./promise_provider');
  * @property {string} [platform] Optional platform information
  */
 
-interface MongoClient {
-  logout(options: any, callback: Function): void;
+export interface MongoClient {
+  logout(options: any, callback: Callback): void;
 }
 
 /**
@@ -61,7 +62,7 @@ interface MongoClient {
  *   client.close();
  * });
  */
-class MongoClient extends EventEmitter {
+export class MongoClient extends EventEmitter {
   s: any;
   topology: any;
 
@@ -196,7 +197,7 @@ class MongoClient extends EventEmitter {
    * @param {MongoClient~connectCallback} [callback] The command result callback
    * @returns {Promise<MongoClient>} returns Promise if no callback passed
    */
-  connect(callback: Function): Promise<MongoClient> {
+  connect(callback: Callback): Promise<MongoClient> {
     if (typeof callback === 'string') {
       throw new TypeError('`connect` only accepts a callback');
     }
@@ -221,7 +222,7 @@ class MongoClient extends EventEmitter {
    * @param {Db~noResultCallback} [callback] The result callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  close(force?: boolean, callback?: Function): Promise<void> {
+  close(force?: boolean, callback?: Callback): Promise<void> {
     if (typeof force === 'function') {
       callback = force;
       force = false;
@@ -394,7 +395,7 @@ class MongoClient extends EventEmitter {
    * @param {MongoClient~connectCallback} [callback] The command result callback
    * @returns {Promise<MongoClient>} returns Promise if no callback passed
    */
-  static connect(url: string, options?: any, callback?: Function): Promise<MongoClient> {
+  static connect(url: string, options?: any, callback?: Callback): Promise<MongoClient> {
     const args = Array.prototype.slice.call(arguments, 1);
     callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
     options = args.length ? args.shift() : null;
@@ -511,9 +512,7 @@ class MongoClient extends EventEmitter {
   }
 }
 
-MongoClient.prototype.logout = deprecate((options: any, callback: Function) => {
+MongoClient.prototype.logout = deprecate((options: any, callback: Callback) => {
   if (typeof options === 'function') (callback = options), (options = {});
-  if (typeof callback === 'function') callback(null, true);
+  if (typeof callback === 'function') callback(undefined, true);
 }, 'Multiple authentication is prohibited on a connected client, please only authenticate once per MongoClient');
-
-export = MongoClient;

@@ -3,7 +3,7 @@ const url = require('url');
 const qs = require('querystring');
 const util = require('util');
 
-const MongoClient = require('../../../src/mongo_client');
+const { MongoClient } = require('../../../src/mongo_client');
 const { Topology } = require('../../../src/sdam/topology');
 const { TopologyType } = require('../../../src/sdam/common');
 

@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import Logger = require('../logger');
+import { Logger } from '../logger';
 import { ReadPreference } from '../read_preference';
 import { ConnectionPool, ConnectionPoolOptions } from '../cmap/connection_pool';
 import { CMAP_EVENT_NAMES } from '../cmap/events';
@@ -255,13 +255,13 @@ export class Server extends EventEmitter {
     }
 
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
-      callback(new MongoError('server is closed'));
+      callback!(new MongoError('server is closed'));
       return;
     }
 
     const error = basicReadValidations(this, options);
     if (error) {
-      return callback(error);
+      return callback!(error);
     }
 
     // Clone the options
@@ -280,7 +280,7 @@ export class Server extends EventEmitter {
 
     // error if collation not supported
     if (collationNotSupported(this, cmd)) {
-      callback(new MongoError(`server ${this.name} does not support collation`));
+      callback!(new MongoError(`server ${this.name} does not support collation`));
       return;
     }
 

@@ -5,6 +5,7 @@ import { Cursor } from './cursor';
 import { AggregateOperation } from './operations/aggregate';
 import { loadCollection, loadDb, loadMongoClient } from './dynamic_loaders';
 import { relayEvents, maxWireVersion, calculateDurationInMs, now, maybePromise } from './utils';
+import type { Callback } from './types';
 const kResumeQueue = Symbol('resumeQueue');
 
 const CHANGE_STREAM_OPTIONS = ['resumeAfter', 'startAfter', 'startAtOperationTime', 'fullDocument'];
@@ -58,7 +59,7 @@ const CHANGE_DOMAIN_TYPES = {
  * @fires ChangeStream#resumeTokenChanged
  * @returns {ChangeStream} a ChangeStream instance.
  */
-class ChangeStream extends EventEmitter {
+export class ChangeStream extends EventEmitter {
   pipeline: any;
   options: any;
   parent: any;
@@ -141,7 +142,7 @@ class ChangeStream extends EventEmitter {
    * @throws {MongoError}
    * @returns {Promise<void>|void} returns Promise if no callback passed
    */
-  hasNext(callback: Function): Promise<void> | void {
+  hasNext(callback: Callback): Promise<void> | void {
     return maybePromise(callback, (cb: any) => {
       getCursor(this, (err?: any, cursor?: any) => {
         if (err) return cb(err); // failed to resume, raise an error
@@ -158,7 +159,7 @@ class ChangeStream extends EventEmitter {
    * @throws {MongoError}
    * @returns {Promise<void>|void} returns Promise if no callback passed
    */
-  next(callback: Function): Promise<void> | void {
+  next(callback: Callback): Promise<void> | void {
     return maybePromise(callback, (cb: any) => {
       getCursor(this, (err?: any, cursor?: any) => {
         if (err) return cb(err); // failed to resume, raise an error
@@ -191,7 +192,7 @@ class ChangeStream extends EventEmitter {
    * @param {ChangeStream~resultCallback} [callback] The result callback.
    * @returns {Promise<void>|void} returns Promise if no callback passed
    */
-  close(callback: Function): Promise<void> | void {
+  close(callback: Callback): Promise<void> | void {
     return maybePromise(callback, (cb: any) => {
       if (this.closed) return cb();
 
@@ -346,7 +347,7 @@ class ChangeStreamCursor extends Cursor {
     }
   }
 
-  _initializeCursor(callback: Function) {
+  _initializeCursor(callback: Callback) {
     super._initializeCursor((err?: any, result?: any) => {
       if (err || result == null) {
         callback(err, result);
@@ -372,7 +373,7 @@ class ChangeStreamCursor extends Cursor {
     });
   }
 
-  _getMore(callback: Function) {
+  _getMore(callback: Callback) {
     super._getMore((err?: any, response?: any) => {
       if (err) {
         callback(err);
@@ -480,7 +481,7 @@ function applyKnownOptions(target: any, source: any, optionNames: any) {
 // This method performs a basic server selection loop, satisfying the requirements of
 // ChangeStream resumability until the new SDAM layer can be used.
 const SELECTION_TIMEOUT = 30000;
-function waitForTopologyConnected(topology: any, options: any, callback: Function) {
+function waitForTopologyConnected(topology: any, options: any, callback: Callback) {
   setTimeout(() => {
     if (options && options.start == null) {
       options.start = now();
@@ -501,7 +502,7 @@ function waitForTopologyConnected(topology: any, options: any, callback: Functio
   }, 500); // this is an arbitrary wait time to allow SDAM to transition
 }
 
-function processNewChange(changeStream: any, change: any, callback?: Function) {
+function processNewChange(changeStream: any, change: any, callback?: Callback) {
   const cursor = changeStream.cursor;
 
   // a null change means the cursor has been notified, implicitly closing the change stream
@@ -535,7 +536,7 @@ function processNewChange(changeStream: any, change: any, callback?: Function) {
   return callback(undefined, change);
 }
 
-function processError(changeStream: any, error: any, callback?: Function) {
+function processError(changeStream: any, error: any, callback?: Callback) {
   const topology = changeStream.topology;
   const cursor = changeStream.cursor;
 
@@ -604,7 +605,7 @@ function processError(changeStream: any, error: any, callback?: Function) {
  * @param {ChangeStream} changeStream the parent ChangeStream
  * @param {Function} callback gets the cursor or error
  */
-function getCursor(changeStream: ChangeStream, callback: Function) {
+function getCursor(changeStream: ChangeStream, callback: Callback) {
   if (changeStream.isClosed()) {
     callback(new MongoError('ChangeStream is closed.'));
     return;
@@ -637,5 +638,3 @@ function processResumeQueue(changeStream: ChangeStream, err?: Error) {
     request(err, changeStream.cursor);
   }
 }
-
-export = ChangeStream;

@@ -1,6 +1,6 @@
 import { ReadPreference } from './read_preference';
 import { MongoError } from './error';
-import ReadConcern = require('./read_concern');
+import { ReadConcern } from './read_concern';
 import { WriteConcern } from './write_concern';
 
 let TxnState: any;

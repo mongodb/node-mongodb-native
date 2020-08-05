@@ -12,7 +12,7 @@ describe('Causal Consistency', function () {
 
   beforeEach(function () {
     test.commands = { started: [], succeeded: [] };
-    test.listener = mongo.instrument(err => expect(err).to.be.null);
+    test.listener = mongo.instrument(err => expect(err).to.not.exist);
     test.listener.on('started', event => {
       if (ignoredCommands.indexOf(event.commandName) === -1) test.commands.started.push(event);
     });

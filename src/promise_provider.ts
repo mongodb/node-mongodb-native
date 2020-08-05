@@ -5,7 +5,7 @@ const store = {
 };
 
 /** global promise store allowing user-provided promises */
-class PromiseProvider {
+export class PromiseProvider {
   /**
    * validates the passed in promise library
    *
@@ -36,5 +36,3 @@ class PromiseProvider {
 }
 
 PromiseProvider.set(global.Promise);
-
-export = PromiseProvider;

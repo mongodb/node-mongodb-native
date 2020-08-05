@@ -5,7 +5,7 @@
  * @property {string} level The read concern level
  * @see https://docs.mongodb.com/manual/reference/read-concern/index.html
  */
-class ReadConcern {
+export class ReadConcern {
   level?: string;
 
   /**
@@ -59,5 +59,3 @@ class ReadConcern {
     return 'snapshot';
   }
 }
-
-export = ReadConcern;
