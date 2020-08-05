@@ -1,5 +1,5 @@
 import { defineAspects, Aspect } from './operation';
-import CommandOperation = require('./command');
+import { CommandOperation } from './command';
 
 class ProfilingLevelOperation extends CommandOperation {
   constructor(db: any, options: any) {

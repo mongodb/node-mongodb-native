@@ -1,3 +1,5 @@
+import type { WriteConcernOptions } from './../collection';
+import type { CommandOptions } from './../cmap/wire_protocol/command';
 import { ReadPreference } from '../read_preference';
 import {
   maxWireVersion,
@@ -9,10 +11,23 @@ import {
   hasAtomicOperators
 } from '../utils';
 import { MongoError } from '../error';
-import CommandOperation = require('./command');
+import { CommandOperation } from './command';
 import { defineAspects, Aspect } from './operation';
 
-class FindAndModifyOperation extends CommandOperation {
+interface FindAndModifyOperationOptions extends CommandOptions, WriteConcernOptions {
+  fields?: any;
+  new?: any;
+  upsert?: any;
+  projection?: any;
+  hint?: any;
+  arrayFilters?: any;
+  remove?: any;
+  maxTimeMS?: number;
+  writeConcern?: any;
+  bypassDocumentValidation?: any;
+}
+
+class FindAndModifyOperation extends CommandOperation<FindAndModifyOperationOptions> {
   collection: any;
   query: any;
   sort: any;

@@ -1,4 +1,4 @@
-import { KillCursor } from '../commands';
+import { KillCursor, Response } from '../commands';
 import { maxWireVersion, collectionNamespace } from '../../utils';
 import { command, CommandOptions } from './command';
 import { MongoError, MongoNetworkError } from '../../error';
@@ -65,7 +65,7 @@ export function killCursors(
     }
 
     const response = result.message;
-    if (response.cursorNotFound) {
+    if (response instanceof Response && response.cursorNotFound) {
       return callback(new MongoNetworkError('cursor killed or timed out'), null);
     }
 

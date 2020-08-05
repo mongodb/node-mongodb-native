@@ -1,10 +1,14 @@
-import CommandOperation = require('./command');
+import { CommandOperation, CommandOperationOptions } from './command';
 import { Code } from '../bson';
 import { ReadPreference } from '../read_preference';
 import { handleCallback } from '../utils';
 import { MongoError } from '../error';
 
-class EvalOperation extends CommandOperation {
+interface EvalOperationOptions extends CommandOperationOptions {
+  nolock?: any;
+}
+
+class EvalOperation extends CommandOperation<EvalOperationOptions> {
   code: any;
   parameters: any;
 

@@ -17,7 +17,7 @@ export interface CollationOptions {
   backwards: boolean;
 }
 
-export interface WriteCommandOptions extends BSONSerializeOptions, CommandOptions {
+export interface WriteCommandOptions extends CommandOptions {
   ordered?: boolean;
   writeConcern?: WriteConcern;
   collation?: CollationOptions;

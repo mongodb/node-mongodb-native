@@ -1,15 +1,49 @@
+import type { InsertOptions } from './../cmap/wire_protocol/index';
+import type { BinMsg, CommandResult } from './../cmap/commands';
+import type { Server } from '../sdam/server';
+import type { Connection } from './../cmap/connection';
+import type { ObjectId } from 'bson';
+import type { Document, Callback } from './../types.d';
 import { MongoError } from '../error';
 import { defineAspects, Aspect, OperationBase } from './operation';
-import CommandOperation = require('./command');
+import { CommandOperation } from './command';
 import { applyRetryableWrites, applyWriteConcern, handleCallback, toError } from '../utils';
 import { prepareDocs } from './common_functions';
+import type { Collection, WriteConcernOptions } from '../collection';
 
-class InsertOperation extends OperationBase {
+export interface InsertDocumentsResult {
+  connection: Connection;
+  message: BinMsg;
+  ops: Document;
+  result: {
+    n: number;
+    ok: number;
+  };
+}
+
+export interface InsertOneResultPreTwoSix {
+  result: {
+    ok: number;
+  };
+}
+
+/** The result object if the command was executed successfully. */
+export interface InsertOneResult extends InsertDocumentsResult {
+  /** The total amount of documents inserted. */
+  insertedCount?: number;
+  /** The driver generated ObjectId for the insert operation. */
+  insertedId?: ObjectId;
+}
+
+export interface InsertOperationOptions extends InsertOptions, WriteConcernOptions {
+  keepGoing?: boolean;
+}
+
+export class InsertOperation extends OperationBase<InsertOperationOptions> {
   namespace: any;
   operations: any;
-  options: any;
 
-  constructor(ns: any, ops: any, options: any) {
+  constructor(ns: any, ops: any, options: InsertOperationOptions) {
     super(options);
     this.namespace = ns;
     this.operations = ops;
@@ -20,18 +54,18 @@ class InsertOperation extends OperationBase {
   }
 }
 
-class InsertOneOperation extends CommandOperation {
-  collection: any;
-  doc: any;
+export class InsertOneOperation extends CommandOperation<InsertOperationOptions> {
+  collection: Collection;
+  doc: Document;
 
-  constructor(collection: any, doc: any, options: any) {
+  constructor(collection: any, doc: any, options: InsertOperationOptions) {
     super(collection, options);
 
     this.collection = collection;
     this.doc = doc;
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback<Partial<InsertOneResult> | InsertOneResultPreTwoSix>) {
     const coll = this.collection;
     const doc = this.doc;
     const options = this.options;
@@ -42,20 +76,25 @@ class InsertOneOperation extends CommandOperation {
       );
     }
 
-    insertDocuments(server, coll, [doc], options, (err?: any, r?: any) => {
+    insertDocuments(server, coll, [doc], options, (err?: any, r?) => {
       if (callback == null) return;
       if (err && callback) return callback(err);
       // Workaround for pre 2.6 servers
-      if (r == null) return callback(null, { result: { ok: 1 } });
+      if (r == null) return callback(undefined, { result: { ok: 1 } });
       // Add values to top level to ensure crud spec compatibility
-      r.insertedCount = r.result.n;
-      r.insertedId = doc._id;
-      if (callback) callback(null, r);
+      if (callback)
+        return callback(undefined, { ...r, insertedCount: r.result.n, insertedId: doc._id });
     });
   }
 }
 
-function insertDocuments(server: any, coll: any, docs: any, options: any, callback: Function) {
+function insertDocuments(
+  server: Server,
+  coll: Collection,
+  docs: Document[],
+  options?: InsertOperationOptions,
+  callback?: Callback<InsertDocumentsResult>
+) {
   if (typeof options === 'function') (callback = options), (options = {});
   options = options || {};
   // Ensure we are operating on an array op docs
@@ -71,19 +110,17 @@ function insertDocuments(server: any, coll: any, docs: any, options: any, callba
   finalOptions.serializeFunctions = options.serializeFunctions || coll.s.serializeFunctions;
 
   docs = prepareDocs(coll, docs, options);
+  const ns = coll.s.namespace.toString();
 
   // File inserts
-  server.insert(coll.s.namespace.toString(), docs, finalOptions, (err?: any, result?: any) => {
+  server.insert(ns, docs, finalOptions, (err?: any, result?: CommandResult) => {
     if (callback == null) return;
     if (err) return handleCallback(callback, err);
-    if (result == null) return handleCallback(callback, null, null);
+    if (result === undefined) return handleCallback(callback, undefined);
     if (result.result.code) return handleCallback(callback, toError(result.result));
     if (result.result.writeErrors)
       return handleCallback(callback, toError(result.result.writeErrors[0]));
-    // Add docs to the list
-    result.ops = docs;
-    // Return the results
-    handleCallback(callback, null, result);
+    handleCallback(callback, null, ({ ...result, ops: docs } as unknown) as InsertDocumentsResult);
   });
 }
 
@@ -98,5 +135,3 @@ defineAspects(InsertOneOperation, [
   Aspect.WRITE_OPERATION,
   Aspect.EXECUTE_WITH_SELECTION
 ]);
-
-export { InsertOperation, InsertOneOperation };

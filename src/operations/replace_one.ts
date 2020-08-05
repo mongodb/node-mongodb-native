@@ -1,9 +1,13 @@
 import { defineAspects, Aspect } from './operation';
 import { updateDocuments } from './common_functions';
 import { hasAtomicOperators } from '../utils';
-import CommandOperation = require('./command');
+import { CommandOperation, CommandOperationOptions } from './command';
 
-class ReplaceOneOperation extends CommandOperation {
+interface ReplaceOneOperationOptions extends CommandOperationOptions {
+  multi?: boolean;
+}
+
+class ReplaceOneOperation extends CommandOperation<ReplaceOneOperationOptions> {
   collection: any;
   filter: any;
   replacement: any;

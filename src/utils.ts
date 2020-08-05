@@ -1,3 +1,4 @@
+import type { Callback2 } from './types.d';
 import PromiseProvider = require('./promise_provider');
 import os = require('os');
 import crypto = require('crypto');
@@ -102,11 +103,16 @@ function checkCollectionName(collectionName: any) {
  * @param {any} [value1]
  * @param {any} [value2]
  */
-function handleCallback(callback: Function, err: any, value1?: any, value2?: any) {
+function handleCallback<
+  T extends Callback | Callback2 | Function,
+  V1 extends T extends Callback | Callback2 ? Parameters<T>[1] : any,
+  V2 extends T extends Callback | Callback2 ? Parameters<T>[2] : any
+>(callback: T, err: null | undefined | Error, value1?: V1, value2?: V2) {
   try {
     if (callback == null) return;
 
     if (callback) {
+      if (err === null) err = undefined;
       return value2 ? callback(err, value1, value2) : callback(err, value1);
     }
   } catch (err) {

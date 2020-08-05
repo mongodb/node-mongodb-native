@@ -1,5 +1,5 @@
 import { Aspect, defineAspects } from './operation';
-import CommandOperation = require('./command');
+import { CommandOperation } from './command';
 
 class RemoveUserOperation extends CommandOperation {
   username: any;

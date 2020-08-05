@@ -1,8 +1,14 @@
-import CommandOperation = require('./command');
+import { CommandOperation, CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 import { MongoDBNamespace } from '../utils';
 
-class ListDatabasesOperation extends CommandOperation {
+interface ListDatabasesOperationOptions extends CommandOperationOptions {
+  nameOnly?: any;
+  filter?: any;
+  authorizedDatabases?: any;
+}
+
+class ListDatabasesOperation extends CommandOperation<ListDatabasesOperationOptions> {
   constructor(db: any, options: any) {
     super(db, options);
     this.ns = new MongoDBNamespace('admin', '$cmd');

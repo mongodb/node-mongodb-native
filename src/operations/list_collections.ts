@@ -1,4 +1,4 @@
-import CommandOperation = require('./command');
+import { CommandOperation, CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 import { maxWireVersion } from '../utils';
 import CONSTANTS = require('../constants');
@@ -21,14 +21,19 @@ function listCollectionsTransforms(databaseName: any) {
   };
 }
 
-class ListCollectionsOperation extends CommandOperation {
+interface ListCollectionsOperationOptions extends CommandOperationOptions {
+  nameOnly?: any;
+  batchSize?: any;
+}
+
+class ListCollectionsOperation extends CommandOperation<ListCollectionsOperationOptions> {
   db: any;
   filter: any;
   nameOnly: boolean;
   batchSize?: number;
 
-  constructor(db: any, filter: any, options: any) {
-    super(db, options, { fullResponse: true });
+  constructor(db: any, filter: any, options: ListCollectionsOperationOptions) {
+    super(db, { ...options, fullResponse: true });
 
     this.db = db;
     this.filter = filter;

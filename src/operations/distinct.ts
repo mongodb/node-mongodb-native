@@ -1,6 +1,10 @@
 import { Aspect, defineAspects } from './operation';
-import CommandOperation = require('./command');
+import { CommandOperation, CommandOperationOptions } from './command';
 import { decorateWithCollation, decorateWithReadConcern } from '../utils';
+
+interface DistinctOperationOptions extends CommandOperationOptions {
+  full?: any;
+}
 
 /**
  * Return a list of distinct values for the given key across a collection.
@@ -11,7 +15,7 @@ import { decorateWithCollation, decorateWithReadConcern } from '../utils';
  * @property {object} query The query for filtering the set of documents to which we apply the distinct filter.
  * @property {object} [options] Optional settings. See Collection.prototype.distinct for a list of options.
  */
-class DistinctOperation extends CommandOperation {
+class DistinctOperation extends CommandOperation<DistinctOperationOptions> {
   collection: any;
   key: any;
   query: any;
@@ -24,7 +28,7 @@ class DistinctOperation extends CommandOperation {
    * @param {object} query The query for filtering the set of documents to which we apply the distinct filter.
    * @param {object} [options] Optional settings. See Collection.prototype.distinct for a list of options.
    */
-  constructor(collection: any, key: string, query: object, options?: object) {
+  constructor(collection: any, key: string, query: object, options?: DistinctOperationOptions) {
     super(collection, options);
 
     this.collection = collection;

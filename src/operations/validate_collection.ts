@@ -1,5 +1,5 @@
 import { defineAspects, Aspect } from './operation';
-import CommandOperation = require('./command');
+import { CommandOperation } from './command';
 
 class ValidateCollectionOperation extends CommandOperation {
   collectionName: string;

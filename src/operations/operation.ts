@@ -1,4 +1,6 @@
-const Aspect = {
+import type { ClientSession } from '../sessions';
+
+export const Aspect = {
   READ_OPERATION: Symbol('READ_OPERATION'),
   WRITE_OPERATION: Symbol('WRITE_OPERATION'),
   RETRYABLE: Symbol('RETRYABLE'),
@@ -6,17 +8,21 @@ const Aspect = {
   NO_INHERIT_OPTIONS: Symbol('NO_INHERIT_OPTIONS')
 };
 
+export interface OperationBaseOptions {
+  session?: ClientSession;
+}
+
 /**
  * This class acts as a parent class for any operation and is responsible for setting this.options,
  * as well as setting and getting a session.
  * Additionally, this class implements `hasAspect`, which determines whether an operation has
  * a specific aspect.
  */
-class OperationBase {
-  options: any;
+export class OperationBase<T extends OperationBaseOptions = OperationBaseOptions> {
+  options: T;
 
-  constructor(options: any) {
-    this.options = Object.assign({}, options);
+  constructor(options: T = {} as T) {
+    this.options = options;
   }
 
   hasAspect(aspect: any) {
@@ -58,7 +64,7 @@ class OperationBase {
   }
 }
 
-function defineAspects(operation: any, aspects: any) {
+export function defineAspects(operation: any, aspects: any) {
   if (!Array.isArray(aspects) && !(aspects instanceof Set)) {
     aspects = [aspects];
   }
@@ -71,5 +77,3 @@ function defineAspects(operation: any, aspects: any) {
 
   return aspects;
 }
-
-export { Aspect, defineAspects, OperationBase };

@@ -1,4 +1,4 @@
-import CommandOperation = require('./command');
+import { CommandOperation } from './command';
 import { ReadPreference } from '../read_preference';
 import { MongoError } from '../error';
 import { maxWireVersion } from '../utils';
@@ -7,13 +7,22 @@ import { Aspect, defineAspects } from './operation';
 const DB_AGGREGATE_COLLECTION = 1;
 const MIN_WIRE_VERSION_$OUT_READ_CONCERN_SUPPORT = 8;
 
-class AggregateOperation extends CommandOperation {
+interface AggregateOperationOptions extends CommandOperation {
+  batchSize?: any;
+  bypassDocumentValidation?: any;
+  allowDiskUse?: any;
+  cursor?: any;
+  full?: any;
+  hint?: any;
+}
+
+class AggregateOperation extends CommandOperation<AggregateOperationOptions> {
   target: any;
   pipeline: any;
   hasWriteStage: boolean;
 
   constructor(parent: any, pipeline: any, options: any) {
-    super(parent, options, { fullResponse: true });
+    super(parent, { ...options, fullResponse: true });
 
     this.target =
       parent.s.namespace && parent.s.namespace.collection

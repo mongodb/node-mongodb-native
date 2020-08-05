@@ -5,7 +5,7 @@ import { AggregationCursor, CommandCursor } from './cursor';
 import { ObjectId } from './bson';
 import { ReadPreference } from './read_preference';
 import { MongoError } from './error';
-import Collection = require('./collection');
+import { Collection } from './collection';
 import ChangeStream = require('./change_stream');
 import CONSTANTS = require('./constants');
 import { WriteConcern } from './write_concern';
@@ -39,6 +39,7 @@ import RenameOperation = require('./operations/rename');
 import SetProfilingLevelOperation = require('./operations/set_profiling_level');
 import executeOperation = require('./operations/execute_operation');
 import EvalOperation = require('./operations/eval');
+import type { Callback } from './types';
 
 // Allowed parameters
 const legalOptionNames = [
@@ -70,7 +71,7 @@ const legalOptionNames = [
   'retryWrites'
 ];
 
-interface Db {
+export interface Db {
   createCollection(name: any, options: any, callback: any): void;
   eval(code: any, parameters: any, options: any, callback: any): void;
   ensureIndex(name: any, fieldOrSpec: any, options: any, callback: any): void;
@@ -94,7 +95,7 @@ interface Db {
  *   client.close();
  * });
  */
-class Db {
+export class Db {
   s: any;
   databaseName: any;
   serverConfig: any;
@@ -326,7 +327,11 @@ class Db {
    * @param {Db~collectionResultCallback} [callback] The collection result callback
    * @returns {Collection} return the new Collection instance if not in strict mode
    */
-  collection(name: string, options?: any, callback?: Function): any {
+  collection(
+    name: string,
+    options?: any,
+    callback?: Callback<Collection>
+  ): Collection | Callback<Collection> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
     options = Object.assign({}, options);
@@ -355,7 +360,7 @@ class Db {
           this.s.pkFactory,
           options
         );
-        if (callback) callback(null, collection);
+        if (callback) callback(undefined, collection);
         return collection;
       } catch (err) {
         if (err instanceof MongoError && callback) return callback(err);
@@ -378,13 +383,11 @@ class Db {
     // Strict mode
     this.listCollections({ name }, listCollectionOptions).toArray(
       (err?: any, collections?: any) => {
-        if (err != null) return handleCallback(callback!, err, null);
+        if (err != null) return handleCallback(callback!, err);
         if (collections.length === 0)
           return handleCallback(
             callback!,
-            toError(`Collection ${name} does not exist. Currently in strict mode.`),
-            null
-          );
+            toError(`Collection ${name} does not exist. Currently in strict mode.`));
 
         try {
           return handleCallback(
@@ -400,7 +403,7 @@ class Db {
             )
           );
         } catch (err) {
-          return handleCallback(callback!, err, null);
+          return handleCallback(callback!, err);
         }
       }
     );
@@ -942,5 +945,3 @@ function validateDatabaseName(databaseName: any) {
       });
   }
 }
-
-export = Db;

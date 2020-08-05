@@ -1,6 +1,6 @@
 import { Aspect, defineAspects } from './operation';
 import { handleCallback } from '../utils';
-import CommandOperation = require('./command');
+import { CommandOperation } from './command';
 
 class DropCollectionOperation extends CommandOperation {
   name: any;

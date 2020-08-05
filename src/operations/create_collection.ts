@@ -1,27 +1,22 @@
-import CommandOperation = require('./command');
+import type { WriteConcernOptions } from './../collection';
+import type { CommandOptions } from './../cmap/wire_protocol/command';
+import { CommandOperation } from './command';
 import { ReadPreference } from '../read_preference';
 import { Aspect, defineAspects } from './operation';
 import { applyWriteConcern } from '../utils';
 import { loadCollection } from '../dynamic_loaders';
 import { MongoError } from '../error';
 
-const ILLEGAL_COMMAND_FIELDS = new Set([
-  'w',
-  'wtimeout',
-  'j',
-  'fsync',
-  'autoIndexId',
-  'strict',
-  'serializeFunctions',
-  'pkFactory',
-  'raw',
-  'readPreference',
-  'session',
-  'readConcern',
-  'writeConcern'
-]);
+interface CreateCollectionOperationOptions extends WriteConcernOptions, CommandOptions {
+  fsync?: any;
+  autoIndexId?: any;
+  strict?: any;
+  pkFactory?: any;
+  readConcern?: any;
+  writeConcern?: any;
+}
 
-class CreateCollectionOperation extends CommandOperation {
+class CreateCollectionOperation extends CommandOperation<CreateCollectionOperationOptions> {
   db: any;
   name: any;
 
@@ -55,16 +50,23 @@ class CreateCollectionOperation extends CommandOperation {
       }
     }
 
-    const cmd: any = { create: name };
-    for (let n in options) {
-      if (
-        options[n] != null &&
-        typeof options[n] !== 'function' &&
-        !ILLEGAL_COMMAND_FIELDS.has(n)
-      ) {
-        cmd[n] = options[n];
-      }
-    }
+    const cmd = {
+      create: name,
+      ...options
+    };
+    delete cmd.w;
+    delete cmd.wtimeout;
+    delete cmd.j;
+    delete cmd.fsync;
+    delete cmd.autoIndexId;
+    delete cmd.strict;
+    delete cmd.serializeFunctions;
+    delete cmd.pkFactory;
+    delete cmd.raw;
+    delete cmd.readPreference;
+    delete cmd.session;
+    delete cmd.readConcern;
+    delete cmd.writeConcern;
 
     const strictMode = listCollectionOptions.strict;
     if (strictMode) {

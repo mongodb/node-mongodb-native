@@ -1,3 +1,4 @@
+import type { BSONSerializeOptions, Document, Callback } from './types.d';
 import { emitDeprecatedOptionWarning } from './utils';
 import PromiseProvider = require('./promise_provider');
 import { ReadPreference } from './read_preference';
@@ -46,7 +47,7 @@ import {
   FindOneAndUpdateOperation
 } from './operations/find_and_modify';
 import InsertManyOperation = require('./operations/insert_many');
-import { InsertOneOperation } from './operations/insert';
+import { InsertOneOperation, InsertOneResult, InsertOperationOptions } from './operations/insert';
 import { UpdateOneOperation, UpdateManyOperation } from './operations/update';
 import { DeleteOneOperation, DeleteManyOperation } from './operations/delete';
 import IsCappedOperation = require('./operations/is_capped');
@@ -57,9 +58,11 @@ import ReplaceOneOperation = require('./operations/replace_one');
 import { CollStatsOperation } from './operations/stats';
 import executeOperation = require('./operations/execute_operation');
 import { EvalGroupOperation, GroupOperation } from './operations/group';
+import type { Db } from './db';
+import type { Topology } from './sdam/topology';
 const mergeKeys = ['ignoreUndefined'];
 
-interface Collection {
+export interface Collection {
   find(query: any, options: any): void;
   insert(docs: any, options: any, callback: any): void;
   update(selector: any, update: any, options: any, callback: any): void;
@@ -83,6 +86,48 @@ interface Collection {
   removeOne(filter: object, options?: any, callback?: Function): Promise<void>;
   findAndModify(this: any, query: any, sort: any, doc: any, options: any, callback: Function): any;
   _findAndModify(this: any, query: any, sort: any, doc: any, options: any, callback: Function): any;
+}
+
+export interface WriteConcernOptions {
+  w?: number | string;
+  wtimeout?: number;
+  j?: boolean;
+}
+
+export interface CollectionOptions extends WriteConcernOptions, BSONSerializeOptions {
+  raw?: boolean;
+  pkFactory?: Object;
+  readPreference?: ReadPreference | string;
+  strict?: boolean;
+  capped?: boolean;
+  autoIndexId?: boolean;
+  size?: number;
+  max?: number;
+  flags?: number;
+  storageEngine?: object;
+  validator?: object;
+  validationLevel?: 'off' | 'strict' | 'moderate';
+  validationAction?: 'error' | 'warn';
+  indexOptionDefaults?: object;
+  viewOn?: string;
+  pipeline?: any[];
+  collation?: object;
+  slaveOk: boolean;
+}
+
+export interface CollectionPrivate extends BSONSerializeOptions {
+  pkFactory: any;
+  db: Db;
+  topology: Topology;
+  options: CollectionOptions;
+  namespace: MongoDBNamespace;
+  readPreference: ReadPreference | null;
+  slaveOk: boolean;
+  raw: boolean;
+  internalHint: null;
+  collectionHint: null;
+  readConcern: ReadConcern | undefined;
+  writeConcern: WriteConcern | undefined;
 }
 
 /**
@@ -110,25 +155,23 @@ interface Collection {
  *   });
  * });
  */
-class Collection {
-  s: any;
+export class Collection {
+  s: CollectionPrivate;
 
-  /**
-   * Create a new Collection instance (INTERNAL TYPE, do not instantiate directly)
-   *
-   * @class
-   * @param {any} db
-   * @param {any} topology
-   * @param {any} dbName
-   * @param {any} name
-   * @param {any} pkFactory
-   * @param {any} options
-   */
-  constructor(db: any, topology: any, dbName: any, name: any, pkFactory: any, options: any) {
+  /** Create a new Collection instance (internal use only) */
+  constructor(
+    db: Db,
+    topology: Topology,
+    dbName: string,
+    name: string,
+    pkFactory: any,
+    options: CollectionOptions
+  ) {
     checkCollectionName(name);
     emitDeprecatedOptionWarning(options, ['promiseLibrary']);
 
     // Unpack variables
+    const collectionHint = null;
     const internalHint = null;
     const slaveOk = options == null || options.slaveOk == null ? db.slaveOk : options.slaveOk;
     const serializeFunctions =
@@ -148,7 +191,6 @@ class Collection {
       options == null || options.promoteBuffers == null
         ? db.s.options.promoteBuffers
         : options.promoteBuffers;
-    const collectionHint = null;
 
     const namespace = new MongoDBNamespace(dbName, name);
 
@@ -285,6 +327,7 @@ class Collection {
     this.s.collectionHint = normalizeHintField(v);
   }
 
+
   /**
    * Inserts a single document into MongoDB. If documents passed in do not contain the **_id** field,
    * one will be added to each of the documents missing it by the driver, mutating the document. This behavior
@@ -305,7 +348,11 @@ class Collection {
    * @param {Collection~insertOneWriteOpCallback} [callback] The command result callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  insertOne(doc: object, options?: any, callback?: Function): Promise<void> {
+  insertOne(
+    doc: Document,
+    options?: InsertOperationOptions,
+    callback?: Callback<InsertOneResult>
+  ): Promise<InsertOneResult> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -2118,5 +2165,3 @@ Collection.prototype.group = deprecate(function (
   );
 },
 'MongoDB 3.6 or higher no longer supports the group command. We recommend rewriting using the aggregation framework.');
-
-export = Collection;

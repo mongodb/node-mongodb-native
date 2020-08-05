@@ -1,4 +1,4 @@
-import { Aspect, OperationBase } from './operation';
+import { Aspect, OperationBase, OperationBaseOptions } from './operation';
 import ReadConcern = require('../read_concern');
 import { WriteConcern } from '../write_concern';
 import { maxWireVersion, MongoDBNamespace } from '../utils';
@@ -8,16 +8,26 @@ import { MongoError } from '../error';
 import Logger = require('../logger');
 
 import type { Server } from '../sdam/server';
+import type { Collection } from '../collection';
+import type { MongoClient, Db } from '..';
 
 const SUPPORTS_WRITE_CONCERN_AND_COLLATION = 5;
 
-interface CommandOperationOptions {
+export interface CommandOperationOptions extends OperationBaseOptions {
   dbName?: string;
   authdb?: string;
   fullResponse?: boolean;
+  readPreference?: ReadPreference | string | boolean;
+  collation?: any;
+  maxTimeMS?: number;
+  comment?: string;
 }
 
-class CommandOperation extends OperationBase {
+type Parent = MongoClient | Db | Collection | { s: any };
+
+export class CommandOperation<
+  T extends CommandOperationOptions = CommandOperationOptions
+> extends OperationBase<T> {
   ns: MongoDBNamespace;
   readPreference: ReadPreference;
   readConcern?: ReadConcern;
@@ -30,9 +40,8 @@ class CommandOperation extends OperationBase {
   /**
    * @param {any} parent
    * @param {any} [options]
-   * @param {any} [operationOptions]
    */
-  constructor(parent: any, options?: any, operationOptions?: CommandOperationOptions) {
+  constructor(parent: Parent, options?: T) {
     super(options);
 
     // NOTE: this was explicitly added for the add/remove user operations, it's likely
@@ -51,7 +60,7 @@ class CommandOperation extends OperationBase {
     this.writeConcern = resolveWriteConcern(propertyProvider, this.options);
     this.explain = false;
 
-    if (operationOptions && typeof operationOptions.fullResponse === 'boolean') {
+    if (options && typeof options.fullResponse === 'boolean') {
       this.fullResponse = true;
     }
 
@@ -133,5 +142,3 @@ function resolveWriteConcern(parent: any, options: any) {
 function resolveReadConcern(parent: any, options: any) {
   return ReadConcern.fromOptions(options) || (parent && parent.readConcern);
 }
-
-export = CommandOperation;

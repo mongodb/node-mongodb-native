@@ -1,6 +1,6 @@
 import { defineAspects, Aspect, OperationBase } from './operation';
 import { deleteCallback, removeDocuments } from './common_functions';
-import CommandOperation = require('./command');
+import { CommandOperation, CommandOperationOptions } from './command';
 import { isObject } from 'util';
 
 class DeleteOperation extends OperationBase {
@@ -25,7 +25,11 @@ class DeleteOperation extends OperationBase {
   }
 }
 
-class DeleteOneOperation extends CommandOperation {
+interface DeleteOneOperationOptions extends CommandOperationOptions {
+  single?: boolean;
+}
+
+class DeleteOneOperation extends CommandOperation<DeleteOneOperationOptions> {
   collection: any;
   filter: any;
 
@@ -48,11 +52,15 @@ class DeleteOneOperation extends CommandOperation {
   }
 }
 
-class DeleteManyOperation extends CommandOperation {
+interface DeleteManyOperationOptions extends CommandOperationOptions {
+  single?: any;
+}
+
+class DeleteManyOperation extends CommandOperation<DeleteManyOperationOptions> {
   collection: any;
   filter: any;
 
-  constructor(collection: any, filter: any, options: any) {
+  constructor(collection: any, filter: any, options?: DeleteManyOperationOptions) {
     super(collection, options);
 
     if (!isObject(filter)) {

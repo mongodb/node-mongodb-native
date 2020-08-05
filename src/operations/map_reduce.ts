@@ -1,3 +1,4 @@
+import type { WriteConcernOptions } from './../collection';
 import { Code } from '../bson';
 import { loadDb } from '../dynamic_loaders';
 import {
@@ -9,19 +10,15 @@ import {
   toError
 } from '../utils';
 import { ReadPreference } from '../read_preference';
-import CommandOperation = require('./command');
+import { CommandOperation, CommandOperationOptions } from './command';
 import { defineAspects, Aspect } from './operation';
 
-const exclusionList = [
-  'readPreference',
-  'session',
-  'bypassDocumentValidation',
-  'w',
-  'wtimeout',
-  'j',
-  'writeConcern',
-  'scope' // this option is reformatted thus exclude the original
-];
+interface MapReduceOperationOptions extends CommandOperationOptions, WriteConcernOptions {
+  bypassDocumentValidation?: boolean;
+  verbose?: boolean;
+  scope?: any;
+  out?: boolean | 'inline' | { inline: number };
+}
 
 /**
  * Run Map Reduce across a collection. Be aware that the inline option for out will return an array of results not a collection.
@@ -32,7 +29,7 @@ const exclusionList = [
  * @property {(Function|string)} reduce The reduce function.
  * @property {object} [options] Optional settings. See Collection.prototype.mapReduce for a list of options.
  */
-class MapReduceOperation extends CommandOperation {
+class MapReduceOperation extends CommandOperation<MapReduceOperationOptions> {
   collection: any;
   map: any;
   reduce: any;
@@ -53,45 +50,39 @@ class MapReduceOperation extends CommandOperation {
     this.reduce = reduce;
   }
 
+  get inline() {
+    const { options } = this;
+    return Boolean(
+      (typeof options['out'] === 'boolean' && options['out']) ||
+        (typeof options['out'] === 'string' && options['out'] === 'inline') ||
+        (options['out'] && options['out'].inline && options['out'].inline === 1)
+    );
+  }
+
   execute(server: any, callback: Function) {
     const coll = this.collection;
     const map = this.map;
     const reduce = this.reduce;
     let options = this.options;
 
-    const mapCommandHash: any = {
+    const mapCommandHash = {
       mapReduce: coll.collectionName,
       map: map,
-      reduce: reduce
-    } as any;
-
-    if (options.scope) {
-      mapCommandHash.scope = processScope(options.scope);
-    }
-
-    // Add any other options passed in
-    for (let n in options) {
-      // Only include if not in exclusion list
-      if (exclusionList.indexOf(n) === -1) {
-        mapCommandHash[n] = options[n];
-      }
-    }
-
-    options = Object.assign({}, options);
-
-    // Ensure we have the right read preference inheritance
-    options.readPreference = ReadPreference.resolve(coll, options);
+      reduce: reduce,
+      scope: options.scope ? processScope(options.scope) : undefined,
+      ...options
+    };
+    delete mapCommandHash.readPreference;
+    delete mapCommandHash.session;
+    delete mapCommandHash.bypassDocumentValidation;
+    delete mapCommandHash.w;
+    delete mapCommandHash.wtimeout;
+    delete mapCommandHash.j;
 
     // If we have a read preference and inline is not set as output fail hard
-    if (
-      options.readPreference !== false &&
-      options.readPreference !== 'primary' &&
-      options['out'] &&
-      options['out'].inline !== 1 &&
-      options['out'] !== 'inline'
-    ) {
+    if (this.readPreference.mode !== 'primary' && !this.inline) {
       // Force readPreference to primary
-      options.readPreference = 'primary';
+      this.readPreference = ReadPreference.primary;
       // Decorate command with writeConcern if supported
       applyWriteConcern(mapCommandHash, { db: coll.s.db, collection: coll }, options);
     } else {

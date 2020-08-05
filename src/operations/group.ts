@@ -1,4 +1,4 @@
-import CommandOperation = require('./command');
+import { CommandOperation } from './command';
 import EvalOperation = require('./eval');
 import { Code } from '../bson';
 import { handleCallback } from '../utils';

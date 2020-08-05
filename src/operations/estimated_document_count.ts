@@ -1,7 +1,15 @@
 import { Aspect, defineAspects } from './operation';
-import CommandOperation = require('./command');
+import { CommandOperation, CommandOperationOptions } from './command';
 
-class EstimatedDocumentCountOperation extends CommandOperation {
+interface EstimatedDocumentCountOperationOptions extends CommandOperationOptions {
+  hint?: any;
+  limit?: any;
+  skip?: any;
+}
+
+class EstimatedDocumentCountOperation extends CommandOperation<
+  EstimatedDocumentCountOperationOptions
+> {
   collectionName: string;
   query?: any;
 

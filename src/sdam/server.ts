@@ -1,3 +1,4 @@
+import type { CommandResult } from './../cmap/commands';
 import { EventEmitter } from 'events';
 import Logger = require('../logger');
 import { ReadPreference } from '../read_preference';
@@ -29,7 +30,7 @@ import {
   isNodeShuttingDownError,
   isNetworkErrorBeforeHandshake
 } from '../error';
-import type { Document } from '../types';
+import type { Document, Callback } from '../types';
 
 // Used for filtering out fields for logging
 const DEBUG_FIELDS = [
@@ -369,7 +370,7 @@ class Server extends EventEmitter {
    * @param {ClientSession} [options.session] Session to use for the operation
    * @param {opResultCallback} callback A callback function
    */
-  insert(ns: string, ops: any[], options: any, callback: any) {
+  insert(ns: string, ops: any[], options: any, callback: Callback<CommandResult>) {
     executeWriteOperation({ server: this, op: 'insert', ns, ops }, options, callback);
   }
 

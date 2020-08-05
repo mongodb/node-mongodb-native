@@ -1,7 +1,14 @@
+import type { BSONSerializeOptions } from './../types.d';
 import { applyRetryableWrites, applyWriteConcern } from '../utils';
 import { MongoError } from '../error';
-import { OperationBase } from './operation';
-class BulkWriteOperation extends OperationBase {
+import { OperationBase, OperationBaseOptions } from './operation';
+
+interface BulkWriteOperationOptions extends BSONSerializeOptions, OperationBaseOptions {
+  ordered?: any;
+  writeConcern?: any;
+}
+
+class BulkWriteOperation extends OperationBase<BulkWriteOperationOptions> {
   collection: any;
   operations: any;
 

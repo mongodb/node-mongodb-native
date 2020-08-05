@@ -1,12 +1,14 @@
+import { CommandOptions } from './../cmap/wire_protocol/command';
 import { indexInformation } from './common_functions';
 import { OperationBase, Aspect, defineAspects } from './operation';
 import { MongoError } from '../error';
 import { maxWireVersion, parseIndexOptions, handleCallback } from '../utils';
-import CommandOperation = require('./command');
+import { CommandOperation, CommandOperationOptions } from './command';
 import { ReadPreference } from '../read_preference';
 
 /* eslint-disable */
 import type { Server } from '../sdam/server';
+import { FindAndModifyOperation } from './find_and_modify';
 /* eslint-enable */
 
 const LIST_INDEXES_WIRE_VERSION = 3;
@@ -78,12 +80,21 @@ class IndexesOperation extends OperationBase {
   }
 }
 
-class CreateIndexesOperation extends CommandOperation {
+interface CreateIndexesOperationOptions extends CommandOperationOptions {
+  commitQuorum?: any;
+}
+
+class CreateIndexesOperation extends CommandOperation<CreateIndexesOperationOptions> {
   collectionName: string;
   onlyReturnNameOfCreatedIndex?: boolean;
   indexes: any;
 
-  constructor(parent: any, collectionName: string, indexes: any[], options: any) {
+  constructor(
+    parent: any,
+    collectionName: string,
+    indexes: any[],
+    options: CreateIndexesOperationOptions
+  ) {
     super(parent, options);
     this.collectionName = collectionName;
 
@@ -228,11 +239,15 @@ class DropIndexesOperation extends DropIndexOperation {
   }
 }
 
-class ListIndexesOperation extends CommandOperation {
+interface ListIndexesOperationOptions extends CommandOperationOptions {
+  batchSize?: any;
+}
+
+class ListIndexesOperation extends CommandOperation<ListIndexesOperationOptions> {
   collectionNamespace: any;
 
-  constructor(collection: any, options: any) {
-    super(collection, options, { fullResponse: true });
+  constructor(collection: any, options: ListIndexesOperationOptions) {
+    super(collection, { ...options, fullResponse: true });
 
     this.collectionNamespace = collection.s.namespace;
   }

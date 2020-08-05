@@ -1,13 +1,16 @@
-import { OperationBase } from './operation';
+import type { BSONSerializeOptions } from './../types.d';
+import { OperationBase, OperationBaseOptions } from './operation';
 import BulkWriteOperation = require('./bulk_write');
 import { MongoError } from '../error';
 import { prepareDocs } from './common_functions';
 
-class InsertManyOperation extends OperationBase {
+interface InsertManyOperationOptions extends BSONSerializeOptions, OperationBaseOptions {}
+
+class InsertManyOperation extends OperationBase<InsertManyOperationOptions> {
   collection: any;
   docs: any;
 
-  constructor(collection: any, docs: any, options: any) {
+  constructor(collection: any, docs: any, options: InsertManyOperationOptions) {
     super(options);
 
     this.collection = collection;

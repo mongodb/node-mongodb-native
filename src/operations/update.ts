@@ -1,7 +1,10 @@
+import type { Connection } from '../cmap/connection';
+import type { ObjectID } from 'bson';
+import type { Document } from './../types.d';
 import { defineAspects, Aspect, OperationBase } from './operation';
 import { updateDocuments, updateCallback } from './common_functions';
 import { hasAtomicOperators } from '../utils';
-import CommandOperation = require('./command');
+import { CommandOperation, CommandOperationOptions } from './command';
 
 class UpdateOperation extends OperationBase {
   namespace: any;
@@ -23,7 +26,34 @@ class UpdateOperation extends OperationBase {
   }
 }
 
-class UpdateOneOperation extends CommandOperation {
+export interface UpdateOneResult {
+  /** The number of documents that matched the filter. */
+  matchedCount: number;
+  /** The number of documents that were modified. */
+  modifiedCount: number;
+  /** The number of documents upserted. */
+  upsertedCount: number;
+  /** The upserted id. */
+  upsertId: { _id: ObjectID };
+  /** The raw msg response wrapped in an internal class */
+  message: Document;
+  /** Contains the new value of the document on the server. This is the same
+   * document that was originally passed in, and is only here for legacy
+   * purposes. */
+  ops?: Document[];
+  connection: Connection;
+  result: {
+    ok: number;
+    n: number;
+    nModified: number;
+  };
+}
+
+export interface UpdateOneOperationOptions extends CommandOperationOptions {
+  multi?: boolean;
+}
+
+class UpdateOneOperation extends CommandOperation<UpdateOneOperationOptions> {
   collection: any;
   filter: any;
   update: any;
@@ -55,7 +85,11 @@ class UpdateOneOperation extends CommandOperation {
   }
 }
 
-class UpdateManyOperation extends CommandOperation {
+export interface UpdateManyOperationOptions extends CommandOperationOptions {
+  multi?: boolean;
+}
+
+class UpdateManyOperation extends CommandOperation<UpdateManyOperationOptions> {
   collection: any;
   filter: any;
   update: any;

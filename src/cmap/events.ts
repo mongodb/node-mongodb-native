@@ -1,4 +1,11 @@
-import { GetMore, KillCursor, Msg, CommandResult, WriteProtocolMessageType } from './commands';
+import {
+  GetMore,
+  KillCursor,
+  Msg,
+  CommandResult,
+  WriteProtocolMessageType,
+  Response
+} from './commands';
 import { calculateDurationInMs } from '../utils';
 import type { ConnectionPool, ConnectionPoolOptions } from './connection_pool';
 import type { Connection } from './connection';
@@ -369,7 +376,7 @@ function extractReply(command: WriteProtocolMessageType, reply?: CommandResult) 
     return {
       ok: 1,
       cursor: {
-        id: reply.message.cursorId,
+        id: reply.message instanceof Response && reply.message.cursorId,
         ns: namespace(command),
         nextBatch: reply.message.documents
       }
@@ -385,7 +392,7 @@ function extractReply(command: WriteProtocolMessageType, reply?: CommandResult) 
     return {
       ok: 1,
       cursor: {
-        id: reply.message.cursorId,
+        id: reply.message instanceof Response && reply.message.cursorId,
         ns: namespace(command),
         firstBatch: reply.message.documents
       }

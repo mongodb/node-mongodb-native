@@ -1,8 +1,14 @@
 import { Aspect, defineAspects } from './operation';
-import CommandOperation = require('./command');
+import { CommandOperation, CommandOperationOptions } from './command';
 import { decorateWithCollation, decorateWithReadConcern } from '../utils';
 
-class CountOperation extends CommandOperation {
+interface CountOperationOptions extends CommandOperationOptions {
+  skip?: any;
+  limit?: any;
+  hint?: any;
+}
+
+class CountOperation extends CommandOperation<CountOperationOptions> {
   cursor: any;
   applySkipLimit: any;
 

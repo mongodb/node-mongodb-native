@@ -1,5 +1,9 @@
 import { Aspect, defineAspects } from './operation';
-import CommandOperation = require('./command');
+import { CommandOperation, CommandOperationOptions } from './command';
+
+export interface CollStatsOperationOptions extends CommandOperationOptions {
+  scale?: any;
+}
 
 /**
  * Get all the collection statistics.
@@ -8,7 +12,7 @@ import CommandOperation = require('./command');
  * @property {Collection} collection Collection instance.
  * @property {object} [options] Optional settings. See Collection.prototype.stats for a list of options.
  */
-class CollStatsOperation extends CommandOperation {
+class CollStatsOperation extends CommandOperation<CollStatsOperationOptions> {
   collectionName: string;
 
   /**
@@ -17,7 +21,7 @@ class CollStatsOperation extends CommandOperation {
    * @param {Collection} collection Collection instance
    * @param {object} [options] Optional settings. See Collection.prototype.stats for a list of options.
    */
-  constructor(collection: any, options?: object) {
+  constructor(collection: any, options?: CollStatsOperationOptions) {
     super(collection, options);
     this.collectionName = collection.collectionName;
   }
@@ -32,10 +36,14 @@ class CollStatsOperation extends CommandOperation {
   }
 }
 
-class DbStatsOperation extends CommandOperation {
+export interface DbStatsOperationOptions extends CommandOperationOptions {
+  scale?: any;
+}
+
+class DbStatsOperation extends CommandOperation<DbStatsOperationOptions> {
   execute(server: any, callback: Function) {
     const command: any = { dbStats: true };
-    if (this.options.scale != null) {
+    if (this.options?.scale != null) {
       command.scale = this.options.scale;
     }
 
