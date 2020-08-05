@@ -238,9 +238,9 @@ export class Db {
    * @param {(ReadPreference|string)} [options.readPreference] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @param {Db~resultCallback} [callback] The command result callback
-   * @returns {Promise<void>} returns Promise if no callback passed
+   * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  command(command: object, options?: any, callback?: Callback): Promise<void> {
+  command(command: object, options?: any, callback?: Callback): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, options);
 
@@ -415,9 +415,9 @@ export class Db {
    * @param {number} [options.scale] Divide the returned sizes by scale value.
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @param {Db~resultCallback} [callback] The collection result callback
-   * @returns {Promise<void>} returns Promise if no callback passed
+   * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  stats(options?: any, callback?: Callback): Promise<void> {
+  stats(options?: any, callback?: Callback): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -458,14 +458,14 @@ export class Db {
    * @param {boolean} [options.dropTarget=false] Drop the target name collection if it previously exists.
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @param {Db~collectionResultCallback} [callback] The results callback
-   * @returns {Promise<void>} returns Promise if no callback passed
+   * @returns {Promise<void> | void} returns Promise if no callback passed
    */
   renameCollection(
     fromCollection: string,
     toCollection: string,
     options?: any,
     callback?: Callback
-  ): Promise<void> {
+  ): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, options, { readPreference: ReadPreference.PRIMARY });
 
@@ -493,9 +493,9 @@ export class Db {
    * @param {boolean} [options.j] The journal write concern
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @param {Db~resultCallback} [callback] The results callback
-   * @returns {Promise<void>} returns Promise if no callback passed
+   * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  dropCollection(name: string, options?: any, callback?: Callback): Promise<void> {
+  dropCollection(name: string, options?: any, callback?: Callback): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -511,9 +511,9 @@ export class Db {
    * @param {object} [options] Optional settings
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @param {Db~resultCallback} [callback] The results callback
-   * @returns {Promise<void>} returns Promise if no callback passed
+   * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  dropDatabase(options?: any, callback?: Callback): Promise<void> {
+  dropDatabase(options?: any, callback?: Callback): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -529,9 +529,9 @@ export class Db {
    * @param {object} [options] Optional settings
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @param {Db~collectionsResultCallback} [callback] The results callback
-   * @returns {Promise<void>} returns Promise if no callback passed
+   * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  collections(options?: any, callback?: Callback): Promise<void> {
+  collections(options?: any, callback?: Callback): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -549,9 +549,13 @@ export class Db {
    * @param {(ReadPreference|string)} [options.readPreference] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @param {Db~resultCallback} [callback] The command result callback
-   * @returns {Promise<void>} returns Promise if no callback passed
+   * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  executeDbAdminCommand(selector: object, options?: any, callback?: Callback): Promise<void> {
+  executeDbAdminCommand(
+    selector: object,
+    options?: any,
+    callback?: Callback
+  ): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -585,9 +589,14 @@ export class Db {
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @param {(number|string)} [options.commitQuorum] (MongoDB 4.4. or higher) Specifies how many data-bearing members of a replica set, including the primary, must complete the index builds successfully before the primary marks the indexes as ready. This option accepts the same values for the "w" field in a write concern plus "votingMembers", which indicates all voting data-bearing nodes.
    * @param {Db~resultCallback} [callback] The command result callback
-   * @returns {Promise<void>} returns Promise if no callback passed
+   * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  createIndex(name: string, fieldOrSpec: any, options?: any, callback?: Callback): Promise<void> {
+  createIndex(
+    name: string,
+    fieldOrSpec: any,
+    options?: any,
+    callback?: Callback
+  ): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options ? Object.assign({}, options) : {};
 
@@ -612,9 +621,14 @@ export class Db {
    * @param {object[]} [options.roles] Roles associated with the created user (only Mongodb 2.6 or higher)
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @param {Db~resultCallback} [callback] The command result callback
-   * @returns {Promise<void>} returns Promise if no callback passed
+   * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  addUser(username: string, password: any, options?: any, callback?: Callback): Promise<void> {
+  addUser(
+    username: string,
+    password: any,
+    options?: any,
+    callback?: Callback
+  ): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -640,9 +654,9 @@ export class Db {
    * @param {boolean} [options.j=false] Specify a journal write concern.
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @param {Db~resultCallback} [callback] The command result callback
-   * @returns {Promise<void>} returns Promise if no callback passed
+   * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  removeUser(username: string, options?: any, callback?: Callback): Promise<void> {
+  removeUser(username: string, options?: any, callback?: Callback): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -658,9 +672,9 @@ export class Db {
    * @param {object} [options] Optional settings
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @param {Db~resultCallback} [callback] The command result callback.
-   * @returns {Promise<void>} returns Promise if no callback passed
+   * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  setProfilingLevel(level: string, options?: any, callback?: Callback): Promise<void> {
+  setProfilingLevel(level: string, options?: any, callback?: Callback): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -675,9 +689,9 @@ export class Db {
    * @param {object} [options] Optional settings
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @param {Db~resultCallback} [callback] The command result callback
-   * @returns {Promise<void>} returns Promise if no callback passed
+   * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  profilingLevel(options?: any, callback?: Callback): Promise<void> {
+  profilingLevel(options?: any, callback?: Callback): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -696,9 +710,9 @@ export class Db {
    * @param {(ReadPreference|string)} [options.readPreference] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @param {Db~resultCallback} [callback] The command result callback
-   * @returns {Promise<void>} returns Promise if no callback passed
+   * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  indexInformation(name: string, options?: any, callback?: Callback): Promise<void> {
+  indexInformation(name: string, options?: any, callback?: Callback): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -814,7 +828,7 @@ const collectionKeys = [
  * @param {object} [options.collation] Specify collation (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields).
  * @param {ClientSession} [options.session] optional session to use for this operation
  * @param {Db~collectionResultCallback} [callback] The results callback
- * @returns {Promise<void>} returns Promise if no callback passed
+ * @returns {Promise<void> | void} returns Promise if no callback passed
  */
 Db.prototype.createCollection = deprecateOptions(
   {
@@ -845,7 +859,7 @@ Db.prototype.createCollection = deprecateOptions(
  * @param {ClientSession} [options.session] optional session to use for this operation
  * @param {Db~resultCallback} [callback] The results callback
  * @deprecated Eval is deprecated on MongoDB 3.2 and forward
- * @returns {Promise<void>} returns Promise if no callback passed
+ * @returns {Promise<void> | void} returns Promise if no callback passed
  */
 Db.prototype.eval = deprecate(function (
   this: any,
@@ -889,7 +903,7 @@ Db.prototype.eval = deprecate(function (
  * @param {number} [options.name] Override the autogenerated index name (useful if the resulting name is larger than 128 bytes)
  * @param {ClientSession} [options.session] optional session to use for this operation
  * @param {Db~resultCallback} [callback] The command result callback
- * @returns {Promise<void>} returns Promise if no callback passed
+ * @returns {Promise<void> | void} returns Promise if no callback passed
  */
 Db.prototype.ensureIndex = deprecate(function (
   this: any,
@@ -915,7 +929,7 @@ Db.prototype.ensureIndex = deprecate(function (
  * @param {object} [options] Optional settings
  * @param {ClientSession} [options.session] optional session to use for this operation
  * @param {Db~resultCallback} [callback] The command result callback.
- * @returns {Promise<void>} returns Promise if no callback passed
+ * @returns {Promise<void> | void} returns Promise if no callback passed
  * @deprecated Query the system.profile collection directly.
  */
 Db.prototype.profilingInfo = deprecate(function (this: any, options: any, callback: Callback) {
