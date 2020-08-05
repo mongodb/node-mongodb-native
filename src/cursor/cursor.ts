@@ -192,9 +192,9 @@ export class Cursor extends CoreCursor {
    * @function
    * @param {Cursor~resultCallback} [callback] The result callback.
    * @throws {MongoError}
-   * @returns {Promise<void>} returns Promise if no callback passed
+   * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  hasNext(callback: Callback): Promise<void> {
+  hasNext(callback: Callback): Promise<void> | void {
     if (this.s.state === CursorState.CLOSED || (this.isDead && this.isDead())) {
       throw MongoError.create({ message: 'Cursor is closed', driver: true });
     }
@@ -224,9 +224,9 @@ export class Cursor extends CoreCursor {
    * @function
    * @param {Cursor~resultCallback} [callback] The result callback.
    * @throws {MongoError}
-   * @returns {Promise<void>} returns Promise if no callback passed
+   * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  next(callback: Callback): Promise<void> {
+  next(callback: Callback): Promise<void> | void {
     return maybePromise(callback, (cb: any) => {
       const cursor = this;
       if (cursor.s.state === CursorState.CLOSED || (cursor.isDead && cursor.isDead())) {
@@ -749,9 +749,9 @@ export class Cursor extends CoreCursor {
    * @param {Cursor~iteratorCallback} iterator The iteration callback.
    * @param {Cursor~endCallback} callback The end callback.
    * @throws {MongoError}
-   * @returns {Promise<void>|undefined} if no callback supplied
+   * @returns {Promise<void> | void|undefined} if no callback supplied
    */
-  forEach(iterator: any, callback?: Callback): Promise<void> | undefined {
+  forEach(iterator: any, callback?: Callback): Promise<void> | void | undefined {
     const Promise = PromiseProvider.get();
     // Rewind cursor state
     this.rewind();
@@ -840,9 +840,9 @@ export class Cursor extends CoreCursor {
    * @function
    * @param {Cursor~toArrayResultCallback} [callback] The result callback.
    * @throws {MongoError}
-   * @returns {Promise<void>} returns Promise if no callback passed
+   * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  toArray(callback: Callback): Promise<void> {
+  toArray(callback: Callback): Promise<void> | void {
     if (this.options.tailable) {
       throw MongoError.create({
         message: 'Tailable cursor cannot be converted to array',
@@ -906,9 +906,9 @@ export class Cursor extends CoreCursor {
    * @param {string} [options.hint] An index name hint for the query.
    * @param {(ReadPreference|string)} [options.readPreference] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
    * @param {Cursor~countResultCallback} [callback] The result callback.
-   * @returns {Promise<void>} returns Promise if no callback passed
+   * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  count(applySkipLimit?: boolean, options?: any, callback?: Callback): Promise<void> {
+  count(applySkipLimit?: boolean, options?: any, callback?: Callback): void | Promise<void> | void {
     if (this.cmd.query == null)
       throw MongoError.create({
         message: 'count can only be used with find command',
@@ -938,9 +938,9 @@ export class Cursor extends CoreCursor {
    * @param {object} [options] Optional settings.
    * @param {boolean} [options.skipKillCursors] Bypass calling killCursors when closing the cursor.
    * @param {Cursor~resultCallback} [callback] The result callback.
-   * @returns {Promise<void>} returns Promise if no callback passed
+   * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  close(options?: any, callback?: Callback): Promise<void> {
+  close(options?: any, callback?: Callback): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, { skipKillCursors: false }, options);
     return maybePromise(callback!, (cb: any) => {
@@ -1037,9 +1037,9 @@ export class Cursor extends CoreCursor {
    *
    * @function
    * @param {Cursor~resultCallback} [callback] The result callback.
-   * @returns {Promise<void>} returns Promise if no callback passed
+   * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  explain(callback: Callback): Promise<void> {
+  explain(callback: Callback): Promise<void> | void {
     // NOTE: the next line includes a special case for operations which do not
     //       subclass `CommandOperationV2`. To be removed asap.
     if (this.operation && this.operation.cmd == null) {

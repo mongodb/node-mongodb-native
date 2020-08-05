@@ -6,6 +6,7 @@ import { maxWireVersion } from '../utils';
 import { ServerType } from '../sdam/common';
 import type { Callback } from '../types';
 import type { Server } from '../sdam/server';
+import type { Topology } from '../sdam/topology';
 
 const MMAPv1_RETRY_WRITES_ERROR_CODE = 20;
 const MMAPv1_RETRY_WRITES_ERROR_MESSAGE =
@@ -24,7 +25,25 @@ const MMAPv1_RETRY_WRITES_ERROR_MESSAGE =
  * @param {Operation} operation The operation to execute
  * @param {Function} callback The command result callback
  */
-export function executeOperation(topology: any, operation: any, callback?: Callback) {
+export function executeOperation<T extends OperationBase>(
+  topology: Topology,
+  operation: T
+): Promise<any>;
+export function executeOperation<T extends OperationBase>(
+  topology: Topology,
+  operation: T,
+  callback: Callback
+): void;
+export function executeOperation<T extends OperationBase>(
+  topology: Topology,
+  operation: T,
+  callback?: Callback
+): Promise<any> | void;
+export function executeOperation<T extends OperationBase>(
+  topology: Topology,
+  operation: T,
+  callback?: Callback
+): Promise<any> | void {
   const Promise = PromiseProvider.get();
 
   if (topology == null) {
@@ -232,7 +251,7 @@ function selectServerForSessionSupport(topology: any, operation: any, callback?:
       return;
     }
 
-    executeOperation(topology, operation, callback);
+    executeOperation(topology, operation, callback!);
   });
 
   return result;

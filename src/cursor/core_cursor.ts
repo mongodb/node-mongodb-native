@@ -40,7 +40,7 @@ const CursorState = {
 };
 
 interface CoreCursor {
-  close(options?: any, callback?: Callback): Promise<void>;
+  close(options?: any, callback?: Callback): Promise<void> | void;
 }
 
 /**

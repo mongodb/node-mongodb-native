@@ -80,8 +80,8 @@ export interface Collection {
     options: any,
     callback: any
   ): void;
-  removeMany(filter: object, options?: any, callback?: Callback): Promise<void>;
-  removeOne(filter: object, options?: any, callback?: Callback): Promise<void>;
+  removeMany(filter: object, options?: any, callback?: Callback): Promise<void> | void;
+  removeOne(filter: object, options?: any, callback?: Callback): Promise<void> | void;
   findAndModify(this: any, query: any, sort: any, doc: any, options: any, callback: Callback): any;
   _findAndModify(this: any, query: any, sort: any, doc: any, options: any, callback: Callback): any;
 }
@@ -304,9 +304,9 @@ export class Collection {
    * @param {boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @param {Collection~insertOneWriteOpCallback} [callback] The command result callback
-   * @returns {Promise<void>} returns Promise if no callback passed
+   * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  insertOne(doc: object, options?: any, callback?: Callback): Promise<void> {
+  insertOne(doc: object, options?: any, callback?: Callback): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -338,9 +338,9 @@ export class Collection {
    * @param {boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @param {Collection~insertWriteOpCallback} [callback] The command result callback
-   * @returns {Promise<void>} returns Promise if no callback passed
+   * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  insertMany(docs: any, options?: any, callback?: Callback): Promise<void> {
+  insertMany(docs: any, options?: any, callback?: Callback): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options ? Object.assign({}, options) : { ordered: true };
 
@@ -408,9 +408,9 @@ export class Collection {
    * @param {boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @param {Collection~bulkWriteOpCallback} [callback] The command result callback
-   * @returns {Promise<void>} returns Promise if no callback passed
+   * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  bulkWrite(operations: any, options?: any, callback?: Callback): Promise<void> {
+  bulkWrite(operations: any, options?: any, callback?: Callback): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || { ordered: true };
 
@@ -472,9 +472,14 @@ export class Collection {
    * @param {boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @param {Collection~updateWriteOpCallback} [callback] The command result callback
-   * @returns {Promise<void>} returns Promise if no callback passed
+   * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  updateOne(filter: object, update: object, options?: any, callback?: Callback): Promise<void> {
+  updateOne(
+    filter: object,
+    update: object,
+    options?: any,
+    callback?: Callback
+  ): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, options);
 
@@ -510,9 +515,14 @@ export class Collection {
    * @param {boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @param {Collection~updateWriteOpCallback} [callback] The command result callback
-   * @returns {Promise<void><Collection~updateWriteOpResult>} returns Promise if no callback passed
+   * @returns {Promise<void> | void<Collection~updateWriteOpResult>} returns Promise if no callback passed
    */
-  replaceOne(filter: object, doc: object, options?: any, callback?: Callback): Promise<void> {
+  replaceOne(
+    filter: object,
+    doc: object,
+    options?: any,
+    callback?: Callback
+  ): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, options);
 
@@ -549,9 +559,14 @@ export class Collection {
    * @param {boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @param {Collection~updateWriteOpCallback} [callback] The command result callback
-   * @returns {Promise<void><Collection~updateWriteOpResult>} returns Promise if no callback passed
+   * @returns {Promise<void> | void<Collection~updateWriteOpResult>} returns Promise if no callback passed
    */
-  updateMany(filter: object, update: object, options?: any, callback?: Callback): Promise<void> {
+  updateMany(
+    filter: object,
+    update: object,
+    options?: any,
+    callback?: Callback
+  ): Promise<void> | void {
     const Promise = PromiseProvider.get();
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, options);
@@ -602,9 +617,9 @@ export class Collection {
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @param {string|object} [options.hint] optional index hint for optimizing the filter query
    * @param {Collection~deleteWriteOpCallback} [callback] The command result callback
-   * @returns {Promise<void>} returns Promise if no callback passed
+   * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  deleteOne(filter: object, options?: any, callback?: Callback): Promise<void> {
+  deleteOne(filter: object, options?: any, callback?: Callback): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, options);
 
@@ -637,9 +652,9 @@ export class Collection {
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @param {string|object} [options.hint] optional index hint for optimizing the filter query
    * @param {Collection~deleteWriteOpCallback} [callback] The command result callback
-   * @returns {Promise<void>} returns Promise if no callback passed
+   * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  deleteMany(filter: object, options?: any, callback?: Callback): Promise<void> {
+  deleteMany(filter: object, options?: any, callback?: Callback): Promise<void> | void {
     if (filter == null) {
       filter = {};
       options = {};
@@ -685,9 +700,9 @@ export class Collection {
    * @param {boolean} [options.dropTarget=false] Drop the target name collection if it previously exists.
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @param {Collection~collectionResultCallback} [callback] The results callback
-   * @returns {Promise<void>} returns Promise if no callback passed
+   * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  rename(newName: string, options?: any, callback?: Callback): Promise<void> {
+  rename(newName: string, options?: any, callback?: Callback): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, options, { readPreference: ReadPreference.PRIMARY });
 
@@ -705,9 +720,9 @@ export class Collection {
    * @param {boolean} [options.j] The journal write concern
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @param {Collection~resultCallback} [callback] The results callback
-   * @returns {Promise<void>} returns Promise if no callback passed
+   * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  drop(options?: any, callback?: Callback): Promise<void> {
+  drop(options?: any, callback?: Callback): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -725,9 +740,9 @@ export class Collection {
    * @param {object} [options] Optional settings
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @param {Collection~resultCallback} [callback] The results callback
-   * @returns {Promise<void>} returns Promise if no callback passed
+   * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  options(options?: any, callback?: Callback): Promise<void> {
+  options(options?: any, callback?: Callback): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -741,9 +756,9 @@ export class Collection {
    * @param {object} [options] Optional settings
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @param {Collection~resultCallback} [callback] The results callback
-   * @returns {Promise<void>} returns Promise if no callback passed
+   * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  isCapped(options?: any, callback?: Callback): Promise<void> {
+  isCapped(options?: any, callback?: Callback): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -773,7 +788,7 @@ export class Collection {
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @param {(number|string)} [options.commitQuorum] (MongoDB 4.4. or higher) Specifies how many data-bearing members of a replica set, including the primary, must complete the index builds successfully before the primary marks the indexes as ready. This option accepts the same values for the "w" field in a write concern plus "votingMembers", which indicates all voting data-bearing nodes.
    * @param {Collection~resultCallback} [callback] The command result callback
-   * @returns {Promise<void>} returns Promise if no callback passed
+   * @returns {Promise<void> | void} returns Promise if no callback passed
    * @example
    * const collection = client.db('foo').collection('bar');
    *
@@ -794,7 +809,7 @@ export class Collection {
    * // Equivalent to { j: 1, k: -1, l: 2d }
    * await collection.createIndex(['j', ['k', -1], { l: '2d' }])
    */
-  createIndex(fieldOrSpec: any, options?: any, callback?: Callback): Promise<void> {
+  createIndex(fieldOrSpec: any, options?: any, callback?: Callback): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -819,7 +834,7 @@ export class Collection {
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @param {(number|string)} [options.commitQuorum] (MongoDB 4.4. or higher) Specifies how many data-bearing members of a replica set, including the primary, must complete the index builds successfully before the primary marks the indexes as ready. This option accepts the same values for the "w" field in a write concern plus "votingMembers", which indicates all voting data-bearing nodes.
    * @param {Collection~resultCallback} [callback] The command result callback
-   * @returns {Promise<void>} returns Promise if no callback passed
+   * @returns {Promise<void> | void} returns Promise if no callback passed
    * @example
    * const collection = client.db('foo').collection('bar');
    * await collection.createIndexes([
@@ -838,7 +853,7 @@ export class Collection {
    *   }
    * ]);
    */
-  createIndexes(indexSpecs: any, options?: any, callback?: Callback): Promise<void> {
+  createIndexes(indexSpecs: any, options?: any, callback?: Callback): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options ? Object.assign({}, options) : {};
     if (typeof options.maxTimeMS !== 'number') delete options.maxTimeMS;
@@ -862,9 +877,9 @@ export class Collection {
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @param {number} [options.maxTimeMS] Number of milliseconds to wait before aborting the query.
    * @param {Collection~resultCallback} [callback] The command result callback
-   * @returns {Promise<void>} returns Promise if no callback passed
+   * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  dropIndex(indexName: string, options?: any, callback?: Callback): Promise<void> {
+  dropIndex(indexName: string, options?: any, callback?: Callback): Promise<void> | void {
     const args = Array.prototype.slice.call(arguments, 1);
     callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
     options = args.length ? args.shift() || {} : {};
@@ -887,9 +902,9 @@ export class Collection {
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @param {number} [options.maxTimeMS] Number of milliseconds to wait before aborting the query.
    * @param {Collection~resultCallback} [callback] The command result callback
-   * @returns {Promise<void>} returns Promise if no callback passed
+   * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  dropIndexes(options?: any, callback?: Callback): Promise<void> {
+  dropIndexes(options?: any, callback?: Callback): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options ? Object.assign({}, options) : {};
     if (typeof options.maxTimeMS !== 'number') delete options.maxTimeMS;
@@ -925,9 +940,9 @@ export class Collection {
    * @param {object} [options] Optional settings
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @param {Collection~resultCallback} [callback] The command result callback
-   * @returns {Promise<void>} returns Promise if no callback passed
+   * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  indexExists(indexes: any, options?: any, callback?: Callback): Promise<void> {
+  indexExists(indexes: any, options?: any, callback?: Callback): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -946,9 +961,9 @@ export class Collection {
    * @param {boolean} [options.full=false] Returns the full raw index information.
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @param {Collection~resultCallback} [callback] The command result callback
-   * @returns {Promise<void>} returns Promise if no callback passed
+   * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  indexInformation(options?: any, callback?: Callback): Promise<void> {
+  indexInformation(options?: any, callback?: Callback): Promise<void> | void {
     const args = Array.prototype.slice.call(arguments, 0);
     callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
     options = args.length ? args.shift() || {} : {};
@@ -967,9 +982,9 @@ export class Collection {
    * @param {object} [options] Optional settings.
    * @param {number} [options.maxTimeMS] The maximum amount of time to allow the operation to run.
    * @param {Collection~countCallback} [callback] The command result callback.
-   * @returns {Promise<void>} returns Promise if no callback passed.
+   * @returns {Promise<void> | void} returns Promise if no callback passed.
    */
-  estimatedDocumentCount(options?: any, callback?: Callback): Promise<void> {
+  estimatedDocumentCount(options?: any, callback?: Callback): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -1005,7 +1020,7 @@ export class Collection {
    * @param {number} [options.maxTimeMS] The maximum amount of time to allow the operation to run.
    * @param {number} [options.skip] The number of documents to skip before counting.
    * @param {Collection~countCallback} [callback] The command result callback.
-   * @returns {Promise<void>} returns Promise if no callback passed.
+   * @returns {Promise<void> | void} returns Promise if no callback passed.
    * @see https://docs.mongodb.com/manual/reference/operator/query/expr/
    * @see https://docs.mongodb.com/manual/reference/operator/query/geoWithin/
    * @see https://docs.mongodb.com/manual/reference/operator/query/center/#op._S_center
@@ -1037,9 +1052,9 @@ export class Collection {
    * @param {object} [options.collation] Specify collation settings for operation. See {@link https://docs.mongodb.com/manual/reference/command/aggregate|aggregation documentation}.
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @param {Collection~resultCallback} [callback] The command result callback
-   * @returns {Promise<void>} returns Promise if no callback passed
+   * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  distinct(key: string, query?: object, options?: any, callback?: Callback): Promise<void> {
+  distinct(key: string, query?: object, options?: any, callback?: Callback): Promise<void> | void {
     const args = Array.prototype.slice.call(arguments, 1);
     callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
     const queryOption = args.length ? args.shift() || {} : {};
@@ -1059,9 +1074,9 @@ export class Collection {
    * @param {object} [options] Optional settings
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @param {Collection~resultCallback} [callback] The command result callback
-   * @returns {Promise<void>} returns Promise if no callback passed
+   * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  indexes(options?: any, callback?: Callback): Promise<void> {
+  indexes(options?: any, callback?: Callback): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -1076,9 +1091,9 @@ export class Collection {
    * @param {number} [options.scale] Divide the returned sizes by scale value.
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @param {Collection~resultCallback} [callback] The collection result callback
-   * @returns {Promise<void>} returns Promise if no callback passed
+   * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  stats(options?: any, callback?: Callback): Promise<void> {
+  stats(options?: any, callback?: Callback): Promise<void> | void {
     const args = Array.prototype.slice.call(arguments, 0);
     callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
     options = args.length ? args.shift() || {} : {};
@@ -1116,9 +1131,9 @@ export class Collection {
    * @param {boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @param {Collection~findAndModifyCallback} [callback] The collection result callback
-   * @returns {Promise<void><Collection~findAndModifyWriteOpResultObject>} returns Promise if no callback passed
+   * @returns {Promise<void> | void<Collection~findAndModifyWriteOpResultObject>} returns Promise if no callback passed
    */
-  findOneAndDelete(filter: object, options?: any, callback?: Callback): Promise<void> {
+  findOneAndDelete(filter: object, options?: any, callback?: Callback): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -1149,14 +1164,14 @@ export class Collection {
    * @param {boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @param {Collection~findAndModifyCallback} [callback] The collection result callback
-   * @returns {Promise<void><Collection~findAndModifyWriteOpResultObject>} returns Promise if no callback passed
+   * @returns {Promise<void> | void<Collection~findAndModifyWriteOpResultObject>} returns Promise if no callback passed
    */
   findOneAndReplace(
     filter: object,
     replacement: object,
     options?: any,
     callback?: Callback
-  ): Promise<void> {
+  ): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -1188,14 +1203,14 @@ export class Collection {
    * @param {boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
    * @param {ClientSession} [options.session] An ptional session to use for this operation
    * @param {Collection~findAndModifyCallback} [callback] The collection result callback
-   * @returns {Promise<void><Collection~findAndModifyWriteOpResultObject>} returns Promise if no callback passed
+   * @returns {Promise<void> | void<Collection~findAndModifyWriteOpResultObject>} returns Promise if no callback passed
    */
   findOneAndUpdate(
     filter: object,
     update: object,
     options?: any,
     callback?: Callback
-  ): Promise<void> {
+  ): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -1329,9 +1344,9 @@ export class Collection {
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @param {Collection~resultCallback} [callback] The command result callback
    * @throws {MongoError}
-   * @returns {Promise<void>} returns Promise if no callback passed
+   * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  mapReduce(map: any, reduce: any, options?: any, callback?: Callback): Promise<void> {
+  mapReduce(map: any, reduce: any, options?: any, callback?: Callback): Promise<void> | void {
     if ('function' === typeof options) (callback = options), (options = {});
     // Out must allways be defined (make sure we don't break weirdly on pre 1.8+ servers)
     if (null == options.out) {
@@ -1673,7 +1688,7 @@ Collection.prototype.find = deprecateOptions(
  * @param {boolean} [options.bypassDocumentValidation=false] Allow driver to bypass schema validation in MongoDB 3.2 or higher.
  * @param {ClientSession} [options.session] optional session to use for this operation
  * @param {Collection~insertWriteOpCallback} [callback] The command result callback
- * @returns {Promise<void>} returns Promise if no callback passed
+ * @returns {Promise<void> | void} returns Promise if no callback passed
  * @deprecated Use insertOne, insertMany or bulkWrite
  */
 Collection.prototype.insert = deprecate(function (
@@ -1713,7 +1728,7 @@ Collection.prototype.insert = deprecate(function (
  * @param {object} [options.hint] An optional hint for query optimization. See the {@link https://docs.mongodb.com/manual/reference/command/update/#update-command-hint|update command} reference for more information.
  * @param {Collection~writeOpCallback} [callback] The command result callback
  * @throws {MongoError}
- * @returns {Promise<void>} returns Promise if no callback passed
+ * @returns {Promise<void> | void} returns Promise if no callback passed
  * @deprecated use updateOne, updateMany or bulkWrite
  */
 Collection.prototype.update = deprecate(function (
@@ -1752,7 +1767,7 @@ Collection.prototype.removeMany = Collection.prototype.deleteMany;
  * @param {boolean} [options.single=false] Removes the first document found.
  * @param {ClientSession} [options.session] optional session to use for this operation
  * @param {Collection~writeOpCallback} [callback] The command result callback
- * @returns {Promise<void>} returns Promise if no callback passed
+ * @returns {Promise<void> | void} returns Promise if no callback passed
  * @deprecated use deleteOne, deleteMany or bulkWrite
  */
 Collection.prototype.remove = deprecate(function (
@@ -1823,7 +1838,7 @@ Collection.prototype.remove = deprecate(function (
  * @param {object} [options.collation] Specify collation (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields).
  * @param {ClientSession} [options.session] optional session to use for this operation
  * @param {Collection~resultCallback} [callback] The command result callback
- * @returns {Promise<void>} returns Promise if no callback passed
+ * @returns {Promise<void> | void} returns Promise if no callback passed
  */
 Collection.prototype.findOne = deprecateOptions(
   {
@@ -1851,7 +1866,7 @@ Collection.prototype.findOne = deprecateOptions(
  * @function
  * @deprecated use dropIndexes
  * @param {Collection~resultCallback} callback The command result callback
- * @returns {Promise<void>} returns Promise if no [callback] passed
+ * @returns {Promise<void> | void} returns Promise if no [callback] passed
  */
 Collection.prototype.dropAllIndexes = deprecate(
   Collection.prototype.dropIndexes,
@@ -1880,7 +1895,7 @@ Collection.prototype.dropAllIndexes = deprecate(
  * @param {object} [options.collation] Specify collation (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields).
  * @param {ClientSession} [options.session] optional session to use for this operation
  * @param {Collection~resultCallback} [callback] The command result callback
- * @returns {Promise<void>} returns Promise if no callback passed
+ * @returns {Promise<void> | void} returns Promise if no callback passed
  */
 Collection.prototype.ensureIndex = deprecate(function (
   this: any,
@@ -1925,7 +1940,7 @@ Collection.prototype.ensureIndex = deprecate(function (
  * @param {number} [options.maxTimeMS] Number of milliseconds to wait before aborting the query.
  * @param {ClientSession} [options.session] optional session to use for this operation
  * @param {Collection~countCallback} [callback] The command result callback
- * @returns {Promise<void>} returns Promise if no callback passed
+ * @returns {Promise<void> | void} returns Promise if no callback passed
  * @deprecated use {@link Collection#countDocuments countDocuments} or {@link Collection#estimatedDocumentCount estimatedDocumentCount} instead
  */
 Collection.prototype.count = deprecate(function (
@@ -1969,7 +1984,7 @@ Collection.prototype.count = deprecate(function (
  * @param {ClientSession} [options.session] optional session to use for this operation
  * @param {Array} [options.arrayFilters] optional list of array filters referenced in filtered positional operators
  * @param {Collection~findAndModifyCallback} [callback] The command result callback
- * @returns {Promise<void>} returns Promise if no callback passed
+ * @returns {Promise<void> | void} returns Promise if no callback passed
  * @deprecated use findOneAndUpdate, findOneAndReplace or findOneAndDelete instead
  */
 Collection.prototype.findAndModify = deprecate(
@@ -2017,7 +2032,7 @@ function _findAndModify(
  * @param {boolean} [options.j=false] Specify a journal write concern.
  * @param {ClientSession} [options.session] optional session to use for this operation
  * @param {Collection~resultCallback} [callback] The command result callback
- * @returns {Promise<void>} returns Promise if no callback passed
+ * @returns {Promise<void> | void} returns Promise if no callback passed
  * @deprecated use findOneAndDelete instead
  */
 Collection.prototype.findAndRemove = deprecate(function (
@@ -2057,7 +2072,7 @@ Collection.prototype.findAndRemove = deprecate(function (
  * @param {(ReadPreference|string)} [options.readPreference] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
  * @param {ClientSession} [options.session] optional session to use for this operation
  * @param {Collection~resultCallback} [callback] The command result callback
- * @returns {Promise<void>} returns Promise if no callback passed
+ * @returns {Promise<void> | void} returns Promise if no callback passed
  * @deprecated MongoDB 3.6 or higher no longer supports the group command. We recommend rewriting using the aggregation framework.
  */
 Collection.prototype.group = deprecate(function (
