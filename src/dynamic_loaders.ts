@@ -4,7 +4,6 @@ import type { Db } from './db';
 import type { MongoClient } from './mongo_client';
 
 let collection: typeof Collection;
-let cursor: any;
 let db: typeof Db;
 let client: typeof MongoClient;
 let admin: typeof Admin;
@@ -14,13 +13,6 @@ export function loadCollection(): typeof Collection {
     collection = require('./collection').Collection;
   }
   return collection;
-}
-
-export function loadCursor() {
-  if (!cursor) {
-    cursor = require('./cursor');
-  }
-  return cursor;
 }
 
 export function loadDb(): typeof Db {
