@@ -742,9 +742,9 @@ export class Cursor extends CoreCursor {
    * @param {Cursor~iteratorCallback} iterator The iteration callback.
    * @param {Cursor~endCallback} callback The end callback.
    * @throws {MongoError}
-   * @returns {Promise<void> | void|undefined} if no callback supplied
+   * @returns {Promise<void> | void} if no callback supplied
    */
-  forEach(iterator: any, callback?: Callback): Promise<void> | void | undefined {
+  forEach(iterator: any, callback?: Callback): Promise<void> | void {
     const Promise = PromiseProvider.get();
     // Rewind cursor state
     this.rewind();
@@ -901,7 +901,7 @@ export class Cursor extends CoreCursor {
    * @param {Cursor~countResultCallback} [callback] The result callback.
    * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  count(applySkipLimit?: boolean, options?: any, callback?: Callback): void | Promise<void> | void {
+  count(applySkipLimit?: boolean, options?: any, callback?: Callback): Promise<void> | void {
     if (this.cmd.query == null)
       throw MongoError.create({
         message: 'count can only be used with find command',
