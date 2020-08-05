@@ -65,9 +65,6 @@ const TASKS = [];
 const SINGLETON_TASKS = [];
 
 function makeTask({ mongoVersion, topology }) {
-  let topologyForTest = topology;
-  let runTestsCommand = { func: 'run tests' };
-
   return {
     name: `test-${mongoVersion}-${topology}`,
     tags: [mongoVersion, topology],
@@ -77,18 +74,18 @@ function makeTask({ mongoVersion, topology }) {
         func: 'bootstrap mongo-orchestration',
         vars: {
           VERSION: mongoVersion,
-          TOPOLOGY: topologyForTest
+          TOPOLOGY: topology
         }
       },
-      runTestsCommand
+      { func: 'run tests' }
     ]
   };
 }
 
 MONGODB_VERSIONS.forEach(mongoVersion => {
-  TOPOLOGIES.forEach(topology => {
-    TASKS.push(makeTask({ mongoVersion, topology }));
-  });
+  TOPOLOGIES.forEach(topology =>
+    TASKS.push(makeTask({ mongoVersion, topology }))
+  );
 });
 
 // manually added tasks
@@ -102,19 +99,35 @@ Array.prototype.push.apply(TASKS, [
     ]
   },
   {
-    name: 'test-kerberos-auth',
-    tags: ['kerberos-auth'],
+    name: 'test-auth-kerberos',
+    tags: ['auth', 'kerberos'],
     commands: [
       { func: 'install dependencies' },
       { func: 'run kerberos tests' }
     ]
   },
   {
-    name: 'test-ldap-auth',
-    tags: ['ldap-auth'],
+    name: 'test-auth-ldap',
+    tags: ['auth', 'ldap'],
     commands: [
       { func: 'install dependencies' },
       { func: 'run ldap tests' }
+    ]
+  },
+  {
+    name: 'test-tls-support',
+    tags: ['tls-support'],
+    commands: [
+      { func: 'install dependencies' },
+      {
+        func: 'bootstrap mongo-orchestration',
+        vars: {
+          SSL: 'ssl',
+          VERSION: 'latest',
+          TOPOLOGY: 'server'
+        }
+      },
+      { func: 'run tls tests' }
     ]
   },
   {
