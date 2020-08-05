@@ -1,6 +1,6 @@
-import Logger = require('../logger');
+import * as dns from 'dns';
+import { Logger } from '../logger';
 import { EventEmitter } from 'events';
-import dns = require('dns');
 
 /**
  * Determines whether a provided address matches the provided parent domain in order

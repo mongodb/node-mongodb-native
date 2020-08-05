@@ -1,8 +1,9 @@
-import URL = require('url');
-import qs = require('querystring');
-import dns = require('dns');
+import * as url from 'url';
+import * as qs from 'querystring';
+import * as dns from 'dns';
 import { ReadPreference } from './read_preference';
 import { MongoParseError } from './error';
+import type { Callback } from './types';
 
 /**
  * The following regular expression validates a connection string and breaks the
@@ -33,8 +34,8 @@ function matchesParentDomain(srvAddress: string, parentDomain: string): boolean 
  * @param {object} options Optional user provided connection string options
  * @param {Function} callback
  */
-function parseSrvConnectionString(uri: string, options: any, callback: Function) {
-  const result: any = URL.parse(uri, true);
+function parseSrvConnectionString(uri: string, options: any, callback: Callback) {
+  const result: any = url.parse(uri, true);
 
   if (options.directConnection) {
     return callback(new MongoParseError('directConnection not supported with SRV URI'));
@@ -109,14 +110,14 @@ function parseSrvConnectionString(uri: string, options: any, callback: Function)
       // Set completed options back into the URL object.
       result.search = qs.stringify(result.query);
 
-      const finalString = URL.format(result);
+      const finalString = url.format(result);
       parseConnectionString(finalString, options, (err?: any, ret?: any) => {
         if (err) {
           callback(err);
           return;
         }
 
-        callback(null, Object.assign({}, ret, { srvHost: lookupAddress }));
+        callback(undefined, Object.assign({}, ret, { srvHost: lookupAddress }));
       });
     });
   });
@@ -583,7 +584,7 @@ function parseConnectionString(uri: string, options?: any, callback?: any) {
 
   // Check for bad uris before we parse
   try {
-    URL.parse(uri);
+    url.parse(uri);
   } catch (e) {
     return callback(new MongoParseError('URI malformed, cannot be parsed'));
   }
@@ -667,7 +668,7 @@ function parseConnectionString(uri: string, options?: any, callback?: any) {
     .shift()
     .split(',')
     .map((host: any) => {
-      let parsedHost: any = URL.parse(`mongodb://${host}`);
+      let parsedHost: any = url.parse(`mongodb://${host}`);
       if (parsedHost.path === '/:') {
         hostParsingError = new MongoParseError('Double colon in host identifier');
         return null;

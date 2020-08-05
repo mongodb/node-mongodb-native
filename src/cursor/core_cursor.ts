@@ -1,4 +1,4 @@
-import Logger = require('../logger');
+import { Logger } from '../logger';
 import { ReadPreference } from '../read_preference';
 import { handleCallback, collationNotSupported, MongoDBNamespace } from '../utils';
 import { executeOperation } from '../operations/execute_operation';
@@ -6,29 +6,29 @@ import { Readable } from 'stream';
 import { OperationBase } from '../operations/operation';
 import { MongoError, MongoNetworkError } from '../error';
 import { Long } from '../bson';
-import type { BSONSerializeOptions } from '../types';
+import type { BSONSerializeOptions, Callback, Callback2 } from '../types';
 
 export interface InternalCursorState extends BSONSerializeOptions {
   [key: string]: any;
-  batchSize: any;
-  cmd: any;
-  currentLimit: any;
-  cursorId: any;
-  cursorIndex: any;
-  dead: any;
-  documents: any;
-  init: any;
-  killed: any;
-  lastCursorId: any;
-  limit: any;
-  notified: any;
-  operationTime: any;
-  reconnect: any;
-  session: any;
-  skip: any;
-  streamOptions: any;
-  transforms: any;
-  raw: any;
+  batchSize?: any;
+  cmd?: any;
+  currentLimit?: any;
+  cursorId?: any;
+  cursorIndex?: any;
+  dead?: any;
+  documents?: any;
+  init?: any;
+  killed?: any;
+  lastCursorId?: any;
+  limit?: any;
+  notified?: any;
+  operationTime?: any;
+  reconnect?: any;
+  session?: any;
+  skip?: any;
+  streamOptions?: any;
+  transforms?: any;
+  raw?: any;
 }
 
 // Possible states for a cursor
@@ -40,7 +40,7 @@ const CursorState = {
 };
 
 interface CoreCursor {
-  close(options?: any, callback?: Function): Promise<void>;
+  close(options?: any, callback?: Callback): Promise<void>;
 }
 
 /**
@@ -398,7 +398,7 @@ class CoreCursor extends Readable {
    * @param {any} [options]
    * @param {Function} [callback]
    */
-  _endSession(options?: any, callback?: Function) {
+  _endSession(options?: any, callback?: Callback) {
     if (typeof options === 'function') {
       callback = options;
       options = {};
@@ -425,7 +425,7 @@ class CoreCursor extends Readable {
     return false;
   }
 
-  _getMore(callback: Function) {
+  _getMore(callback: Callback2) {
     if (this.logger.isDebug()) {
       this.logger.debug(`schedule getMore call for query [${JSON.stringify(this.query)}]`);
     }
@@ -455,7 +455,7 @@ class CoreCursor extends Readable {
     );
   }
 
-  _initializeCursor(callback: Function) {
+  _initializeCursor(callback: Callback) {
     const cursor = this;
 
     // NOTE: this goes away once cursors use `executeOperation`
@@ -727,7 +727,7 @@ function setCursorNotified(self: any, callback: any) {
   _setCursorNotifiedImpl(self, () => handleCallback(callback, null, null));
 }
 
-function _setCursorNotifiedImpl(self: any, callback: Function) {
+function _setCursorNotifiedImpl(self: any, callback: Callback) {
   self.cursorState.notified = true;
   self.cursorState.documents = [];
   self.cursorState.cursorIndex = 0;
@@ -740,7 +740,7 @@ function _setCursorNotifiedImpl(self: any, callback: Function) {
   return callback();
 }
 
-function nextFunction(self: any, callback: Function) {
+function nextFunction(self: any, callback: Callback) {
   // We have notified about it
   if (self.cursorState.notified) {
     return callback(new Error('cursor is exhausted'));

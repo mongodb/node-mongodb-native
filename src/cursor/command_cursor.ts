@@ -1,6 +1,6 @@
 import { ReadPreference } from '../read_preference';
 import { MongoError } from '../error';
-import Cursor = require('./cursor');
+import { Cursor } from './cursor';
 import { CursorState } from './core_cursor';
 
 /**
@@ -52,7 +52,7 @@ import { CursorState } from './core_cursor';
  * @fires CommandCursor#readable
  * @returns {CommandCursor} an CommandCursor instance.
  */
-class CommandCursor extends Cursor {
+export class CommandCursor extends Cursor {
   /**
    * @param {any} topology
    * @param {any} ns
@@ -273,5 +273,3 @@ class CommandCursor extends Cursor {
  * @throws {MongoError}
  * @return {null}
  */
-
-export = CommandCursor;

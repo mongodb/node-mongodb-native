@@ -1,11 +1,11 @@
 import { Aspect, OperationBase } from './operation';
-import ReadConcern = require('../read_concern');
+import { ReadConcern } from '../read_concern';
 import { WriteConcern } from '../write_concern';
 import { maxWireVersion, MongoDBNamespace } from '../utils';
 import { ReadPreference } from '../read_preference';
 import { commandSupportsReadConcern } from '../sessions';
 import { MongoError } from '../error';
-import Logger = require('../logger');
+import type { Logger } from '../logger';
 
 import type { Server } from '../sdam/server';
 import type { Callback } from '../types';

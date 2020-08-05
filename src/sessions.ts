@@ -1,4 +1,4 @@
-import PromiseProvider = require('./promise_provider');
+import { PromiseProvider } from './promise_provider';
 import { EventEmitter } from 'events';
 import { Binary, Long } from './bson';
 import { ReadPreference } from './read_preference';
@@ -8,13 +8,14 @@ import { isSharded } from './cmap/wire_protocol/shared';
 import { isPromiseLike, uuidV4, maxWireVersion } from './utils';
 import { MongoError, isRetryableError, MongoNetworkError, MongoWriteConcernError } from './error';
 import { now, calculateDurationInMs } from './utils';
+import type { Callback } from './types';
 const minWireVersionForShardedTransactions = 8;
 
 /**
  * @param {ClientSession} session
  * @param {Function} [callback]
  */
-function assertAlive(session: any, callback?: Function) {
+function assertAlive(session: any, callback?: Callback) {
   if (session.serverSession == null) {
     const error = new MongoError('Cannot use a session that has ended');
     if (typeof callback === 'function') {
@@ -116,12 +117,12 @@ class ClientSession extends EventEmitter {
    * @param {object} [options] Optional settings. Currently reserved for future use
    * @param {Function} [callback] Optional callback for completion of this operation
    */
-  endSession(options?: object, callback?: Function) {
-    if (typeof options === 'function') (callback = options), (options = {});
+  endSession(options?: object, callback?: Callback) {
+    if (typeof options === 'function') (callback = options as Callback), (options = {});
     options = options || {};
 
     if (this.hasEnded) {
-      if (typeof callback === 'function') callback(null, null);
+      if (typeof callback === 'function') callback(undefined, null);
       return;
     }
 
@@ -138,7 +139,7 @@ class ClientSession extends EventEmitter {
     this.serverSession = null;
 
     // spec indicates that we should ignore all errors for `endSessions`
-    if (typeof callback === 'function') callback(null, null);
+    if (typeof callback === 'function') callback(undefined, null);
   }
 
   /**
@@ -222,7 +223,7 @@ class ClientSession extends EventEmitter {
    * @param {Function} [callback] optional callback for completion of this operation
    * @returns {Promise<void>|undefined} A promise is returned if no callback is provided
    */
-  commitTransaction(callback?: Function): Promise<void> | undefined {
+  commitTransaction(callback?: Callback): Promise<void> | undefined {
     const Promise = PromiseProvider.get();
 
     if (typeof callback === 'function') {
@@ -243,7 +244,7 @@ class ClientSession extends EventEmitter {
    * @param {Function} [callback] optional callback for completion of this operation
    * @returns {Promise<void>|undefined} A promise is returned if no callback is provided
    */
-  abortTransaction(callback?: Function): Promise<void> | undefined {
+  abortTransaction(callback?: Callback): Promise<void> | undefined {
     const Promise = PromiseProvider.get();
 
     if (typeof callback === 'function') {
@@ -403,7 +404,7 @@ function attemptTransaction(session: any, startTime: any, fn: any, options: any)
     });
 }
 
-function endTransaction(session: any, commandName: any, callback: Function) {
+function endTransaction(session: any, commandName: any, callback: Callback) {
   if (!assertAlive(session, callback)) {
     // checking result in case callback was called
     return;
@@ -424,7 +425,7 @@ function endTransaction(session: any, commandName: any, callback: Function) {
     ) {
       // the transaction was never started, we can safely exit here
       session.transaction.transition(TxnState.TRANSACTION_COMMITTED_EMPTY);
-      callback(null, null);
+      callback(undefined, null);
       return;
     }
 
@@ -436,7 +437,7 @@ function endTransaction(session: any, commandName: any, callback: Function) {
     if (txnState === TxnState.STARTING_TRANSACTION) {
       // the transaction was never started, we can safely exit here
       session.transaction.transition(TxnState.TRANSACTION_ABORTED);
-      callback(null, null);
+      callback(undefined, null);
       return;
     }
 

@@ -1,4 +1,4 @@
-import crypto = require('crypto');
+import * as crypto from 'crypto';
 import { Aspect, defineAspects } from './operation';
 import { CommandOperation } from './command';
 import { handleCallback, toError } from '../utils';

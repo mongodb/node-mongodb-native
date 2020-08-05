@@ -1,7 +1,9 @@
-import PromiseProvider = require('../promise_provider');
-import crypto = require('crypto');
+import * as crypto from 'crypto';
+import { PromiseProvider } from '../promise_provider';
 import { Writable } from 'stream';
 import { ObjectId } from '../bson';
+import type { Callback } from '../types';
+
 const ERROR_NAMESPACE_NOT_FOUND = 26;
 
 /**
@@ -24,7 +26,7 @@ const ERROR_NAMESPACE_NOT_FOUND = 26;
  * @fires GridFSBucketWriteStream#finish
  */
 
-class GridFSBucketWriteStream extends Writable {
+export class GridFSBucketWriteStream extends Writable {
   bucket: any;
   chunks: any;
   filename: any;
@@ -102,7 +104,7 @@ class GridFSBucketWriteStream extends Writable {
    * @returns {boolean} False if this write required flushing a chunk to MongoDB. True otherwise.
    */
 
-  write(chunk: any, encoding: any, callback?: Function) {
+  write(chunk: any, encoding: any, callback?: Callback): boolean {
     var _this = this;
     return waitForIndexes(this, () => doWrite(_this, chunk, encoding, callback));
   }
@@ -116,7 +118,7 @@ class GridFSBucketWriteStream extends Writable {
    * @returns {Promise<void>} if no callback specified
    */
 
-  abort(callback: Function) {
+  abort(callback: Callback) {
     const Promise = PromiseProvider.get();
     if (this.state.streamEnd) {
       var error = new Error('Cannot abort a stream that has already completed');
@@ -149,7 +151,7 @@ class GridFSBucketWriteStream extends Writable {
    * @param {GridFSBucket~errorCallback} callback Function to call when all files and chunks have been persisted to MongoDB
    */
 
-  end(chunk: any, encoding?: any, callback?: Function) {
+  end(chunk: any, encoding?: any, callback?: Callback) {
     var _this = this;
     if (typeof chunk === 'function') {
       (callback = chunk), (chunk = null), (encoding = null);
@@ -164,14 +166,12 @@ class GridFSBucketWriteStream extends Writable {
 
     if (callback) {
       this.once('finish', (result: any) => {
-        callback!(null, result);
+        callback!(undefined, result);
       });
     }
 
     if (!chunk) {
-      waitForIndexes(this, () => {
-        writeRemnant(_this);
-      });
+      waitForIndexes(this, () => !!writeRemnant(_this));
       return;
     }
 
@@ -181,7 +181,7 @@ class GridFSBucketWriteStream extends Writable {
   }
 }
 
-function __handleError(_this: any, error: any, callback?: Function) {
+function __handleError(_this: any, error: any, callback?: Callback) {
   if (_this.state.errored) {
     return;
   }
@@ -201,7 +201,7 @@ function createChunkDoc(filesId: any, n: any, data: any) {
   };
 }
 
-function checkChunksIndex(_this: any, callback: Function) {
+function checkChunksIndex(_this: any, callback: Callback) {
   _this.chunks.listIndexes().toArray((error?: any, indexes?: any) => {
     if (error) {
       // Collection doesn't exist so create index
@@ -249,7 +249,7 @@ function checkChunksIndex(_this: any, callback: Function) {
   });
 }
 
-function checkDone(_this: any, callback?: Function) {
+function checkDone(_this: any, callback?: Callback) {
   if (_this.done) return true;
   if (_this.state.streamEnd && _this.state.outstandingRequests === 0 && !_this.state.errored) {
     // Set done so we dont' trigger duplicate createFilesDoc
@@ -283,7 +283,7 @@ function checkDone(_this: any, callback?: Function) {
   return false;
 }
 
-function checkIndexes(_this: any, callback: Function) {
+function checkIndexes(_this: any, callback: Callback) {
   _this.files.findOne({}, { _id: 1 }, (error?: any, doc?: any) => {
     if (error) {
       return callback(error);
@@ -375,7 +375,7 @@ function createFilesDoc(
   return ret;
 }
 
-function doWrite(_this: any, chunk: any, encoding: any, callback?: Function) {
+function doWrite(_this: any, chunk: any, encoding: any, callback?: Callback) {
   if (checkAborted(_this, callback)) {
     return false;
   }
@@ -458,7 +458,7 @@ function getWriteOptions(_this: any) {
   return obj;
 }
 
-function waitForIndexes(_this: any, callback: Function) {
+function waitForIndexes(_this: any, callback: (res: boolean) => boolean): boolean {
   if (_this.bucket.s.checkedIndexes) {
     return callback(false);
   }
@@ -470,7 +470,7 @@ function waitForIndexes(_this: any, callback: Function) {
   return true;
 }
 
-function writeRemnant(_this: any, callback?: Function) {
+function writeRemnant(_this: any, callback?: Callback) {
   // Buffer is empty, so don't bother to insert
   if (_this.pos === 0) {
     return checkDone(_this, callback);
@@ -501,7 +501,7 @@ function writeRemnant(_this: any, callback?: Function) {
   });
 }
 
-function checkAborted(_this: any, callback?: Function) {
+function checkAborted(_this: any, callback?: Callback) {
   if (_this.state.aborted) {
     if (typeof callback === 'function') {
       callback(new Error('this stream has been aborted'));
@@ -510,5 +510,3 @@ function checkAborted(_this: any, callback?: Function) {
   }
   return false;
 }
-
-export = GridFSBucketWriteStream;

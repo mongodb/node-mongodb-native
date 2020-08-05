@@ -1,5 +1,5 @@
 import { ServerDescription } from './server_description';
-import WIRE_CONSTANTS = require('../cmap/wire_protocol/constants');
+import * as WIRE_CONSTANTS from '../cmap/wire_protocol/constants';
 import { TopologyType, ServerType } from './common';
 import type { ObjectId } from '../bson';
 import type { SrvPollingEvent } from './srv_polling';

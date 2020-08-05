@@ -86,7 +86,7 @@ function addToOperationsList(
  * @property {number} length Get the number of operations in the bulk.
  * @returns {OrderedBulkOperation} a OrderedBulkOperation instance.
  */
-class OrderedBulkOperation extends BulkOperationBase {
+export class OrderedBulkOperation extends BulkOperationBase {
   constructor(topology: any, collection: any, options: any) {
     options = options || {};
     options = Object.assign(options, { addToOperationsList });
@@ -102,8 +102,6 @@ class OrderedBulkOperation extends BulkOperationBase {
  * @param {any} collection
  * @param {any} options
  */
-function initializeOrderedBulkOp(topology: any, collection: any, options: any) {
+export function initializeOrderedBulkOp(topology: any, collection: any, options: any) {
   return new OrderedBulkOperation(topology, collection, options);
 }
-
-export = initializeOrderedBulkOp;

@@ -1,9 +1,9 @@
-import PromiseProvider = require('./promise_provider');
-import os = require('os');
-import crypto = require('crypto');
+import * as os from 'os';
+import * as crypto from 'crypto';
+import { PromiseProvider } from './promise_provider';
 import { MongoError } from './error';
 import { WriteConcern } from './write_concern';
-import type { CallbackWithType, Callback } from './types';
+import type { CallbackWithType, Callback, Callback2 } from './types';
 
 const MAX_JS_INT = Number.MAX_SAFE_INTEGER + 1;
 
@@ -102,7 +102,7 @@ function checkCollectionName(collectionName: any) {
  * @param {any} [value1]
  * @param {any} [value2]
  */
-function handleCallback(callback?: Function, err?: any, value1?: any, value2?: any) {
+function handleCallback(callback?: Callback | Callback2, err?: any, value1?: any, value2?: any) {
   try {
     if (callback == null) return;
 
@@ -620,7 +620,7 @@ function* makeCounter(seed = 0) {
  * @param {Function} wrapper A function that wraps the callback
  * @returns {any|void} Returns nothing if a callback is supplied, else returns a Promise.
  */
-function maybePromise(callback: Function | undefined, wrapper: Function): any | void {
+function maybePromise(callback: Callback | undefined, wrapper: Function): any | void {
   const Promise = PromiseProvider.get();
 
   let result;
@@ -761,7 +761,7 @@ function eachAsync<T, E = any>(
   }
 }
 
-function eachAsyncSeries(arr: any, eachFn: any, callback: Function) {
+function eachAsyncSeries(arr: any, eachFn: any, callback: Callback) {
   arr = arr || [];
 
   let idx = 0;

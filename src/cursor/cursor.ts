@@ -1,5 +1,5 @@
 import { emitDeprecatedOptionWarning } from '../utils';
-import PromiseProvider = require('../promise_provider');
+import { PromiseProvider } from '../promise_provider';
 import { ReadPreference } from '../read_preference';
 import { Transform, PassThrough } from 'stream';
 import { deprecate } from 'util';
@@ -9,6 +9,7 @@ import { handleCallback, maybePromise, formattedOrderClause } from '../utils';
 import { executeOperation } from '../operations/execute_operation';
 import { each } from '../operations/cursor_ops';
 import { CountOperation } from '../operations/count';
+import type { Callback } from '../types';
 
 /**
  * @file The **Cursor** class is an internal class that embodies a cursor on MongoDB
@@ -94,7 +95,7 @@ const fields = ['numberOfRetries', 'tailableRetryInterval'];
  *
  * collection.find({}).maxTimeMS(1000).maxScan(100).skip(1).toArray(..)
  */
-class Cursor extends CoreCursor {
+export class Cursor extends CoreCursor {
   /**
    * @param {any} topology
    * @param {any} ns
@@ -164,7 +165,7 @@ class Cursor extends CoreCursor {
     return this.cmd.sort;
   }
 
-  _initializeCursor(callback: Function) {
+  _initializeCursor(callback: Callback) {
     if (this.operation && this.operation.session != null) {
       this.cursorState.session = this.operation.session;
     } else {
@@ -193,7 +194,7 @@ class Cursor extends CoreCursor {
    * @throws {MongoError}
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  hasNext(callback: Function): Promise<void> {
+  hasNext(callback: Callback): Promise<void> {
     if (this.s.state === CursorState.CLOSED || (this.isDead && this.isDead())) {
       throw MongoError.create({ message: 'Cursor is closed', driver: true });
     }
@@ -225,7 +226,7 @@ class Cursor extends CoreCursor {
    * @throws {MongoError}
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  next(callback: Function): Promise<void> {
+  next(callback: Callback): Promise<void> {
     return maybePromise(callback, (cb: any) => {
       const cursor = this;
       if (cursor.s.state === CursorState.CLOSED || (cursor.isDead && cursor.isDead())) {
@@ -718,7 +719,7 @@ class Cursor extends CoreCursor {
    * @throws {MongoError}
    * @returns {void}
    */
-  each(callback: Function): void {
+  each(callback: Callback): void {
     // Rewind cursor state
     this.rewind();
     // Set current cursor to INIT
@@ -750,7 +751,7 @@ class Cursor extends CoreCursor {
    * @throws {MongoError}
    * @returns {Promise<void>|undefined} if no callback supplied
    */
-  forEach(iterator: any, callback?: Function): Promise<void> | undefined {
+  forEach(iterator: any, callback?: Callback): Promise<void> | undefined {
     const Promise = PromiseProvider.get();
     // Rewind cursor state
     this.rewind();
@@ -773,7 +774,7 @@ class Cursor extends CoreCursor {
         if (doc == null && callback) {
           const internalCallback = callback;
           callback = undefined;
-          internalCallback(null);
+          internalCallback(undefined);
           return false;
         }
       });
@@ -841,7 +842,7 @@ class Cursor extends CoreCursor {
    * @throws {MongoError}
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  toArray(callback: Function): Promise<void> {
+  toArray(callback: Callback): Promise<void> {
     if (this.options.tailable) {
       throw MongoError.create({
         message: 'Tailable cursor cannot be converted to array',
@@ -907,7 +908,7 @@ class Cursor extends CoreCursor {
    * @param {Cursor~countResultCallback} [callback] The result callback.
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  count(applySkipLimit?: boolean, options?: any, callback?: Function): Promise<void> {
+  count(applySkipLimit?: boolean, options?: any, callback?: Callback): Promise<void> {
     if (this.cmd.query == null)
       throw MongoError.create({
         message: 'count can only be used with find command',
@@ -939,7 +940,7 @@ class Cursor extends CoreCursor {
    * @param {Cursor~resultCallback} [callback] The result callback.
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  close(options?: any, callback?: Function): Promise<void> {
+  close(options?: any, callback?: Callback): Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, { skipKillCursors: false }, options);
     return maybePromise(callback!, (cb: any) => {
@@ -1019,7 +1020,7 @@ class Cursor extends CoreCursor {
     if (typeof streamOptions.transform === 'function') {
       const stream = new Transform({
         objectMode: true,
-        transform(chunk: any, encoding: any, callback: Function) {
+        transform(chunk: any, encoding: any, callback: Callback) {
           this.push(streamOptions.transform(chunk));
           callback();
         }
@@ -1038,7 +1039,7 @@ class Cursor extends CoreCursor {
    * @param {Cursor~resultCallback} [callback] The result callback.
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  explain(callback: Function): Promise<void> {
+  explain(callback: Callback): Promise<void> {
     // NOTE: the next line includes a special case for operations which do not
     //       subclass `CommandOperationV2`. To be removed asap.
     if (this.operation && this.operation.cmd == null) {
@@ -1109,5 +1110,3 @@ deprecate(
   Cursor.prototype.snapshot,
   'Cursor Snapshot is deprecated, and will be removed in a later version'
 );
-
-export = Cursor;

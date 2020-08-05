@@ -1,6 +1,6 @@
 import Denque = require('denque');
 import { EventEmitter } from 'events';
-import Logger = require('../logger');
+import { Logger } from '../logger';
 import { Connection, ConnectionOptions } from './connection';
 import { connect } from './connect';
 import { eachAsync, relayEvents, makeCounter } from '../utils';

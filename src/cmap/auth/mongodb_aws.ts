@@ -1,6 +1,6 @@
-import http = require('http');
-import crypto = require('crypto');
-import url = require('url');
+import * as http from 'http';
+import * as crypto from 'crypto';
+import * as url from 'url';
 import * as BSON from '../../bson';
 import { AuthProvider, AuthContext } from './auth_provider';
 import { MongoCredentials } from './mongo_credentials';

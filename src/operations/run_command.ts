@@ -1,9 +1,9 @@
 import { CommandOperation } from './command';
 import { defineAspects, Aspect } from './operation';
-import Db = require('../db');
-import Collection = require('../collection');
-import MongoClient = require('../mongo_client');
 import { MongoDBNamespace } from '../utils';
+import type { MongoClient } from '../mongo_client';
+import type { Collection } from '../collection';
+import type { Db } from '../db';
 import type { Server } from '../sdam/server';
 
 export class RunCommandOperation extends CommandOperation {

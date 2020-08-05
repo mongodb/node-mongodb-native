@@ -1,4 +1,4 @@
-import PromiseProvider = require('../promise_provider');
+import { PromiseProvider } from '../promise_provider';
 import { Long, ObjectId } from '../bson';
 import { MongoError, MongoWriteConcernError } from '../error';
 import {
@@ -15,6 +15,7 @@ import { executeOperation } from '../operations/execute_operation';
 import { InsertOperation } from '../operations/insert';
 import { UpdateOperation } from '../operations/update';
 import { DeleteOperation } from '../operations/delete';
+import type { Callback } from '../types';
 
 // Error codes
 const WRITE_CONCERN_ERROR = 64;
@@ -511,7 +512,7 @@ function mergeBatchResults(batch: any, bulkResult: any, err: any, result: any) {
   }
 }
 
-function executeCommands(bulkOperation: any, options: any, callback: Function) {
+function executeCommands(bulkOperation: any, options: any, callback: Callback) {
   if (bulkOperation.s.batches.length === 0) {
     return handleCallback(callback, null, new BulkWriteResult(bulkOperation.s.bulkResult));
   }
@@ -558,7 +559,7 @@ function handleMongoWriteConcernError(
   batch: object,
   bulkResult: object,
   err: any,
-  callback: Function
+  callback: Callback
 ) {
   mergeBatchResults(batch, bulkResult, null, err.result);
 
@@ -1107,12 +1108,12 @@ class BulkOperationBase {
    * @param {object} options
    * @param {Function} callback
    */
-  bulkExecute(_writeConcern: object, options: object, callback: Function) {
-    if (typeof options === 'function') (callback = options), (options = {});
+  bulkExecute(_writeConcern: object, options: object, callback: Callback) {
+    if (typeof options === 'function') (callback = options as Callback), (options = {});
     options = options || {};
 
     if (typeof _writeConcern === 'function') {
-      callback = _writeConcern;
+      callback = _writeConcern as Callback;
     } else if (_writeConcern && typeof _writeConcern === 'object') {
       this.s.writeConcern = _writeConcern;
     }
@@ -1161,7 +1162,7 @@ class BulkOperationBase {
    * @throws {MongoError} Throws error if the bulk object does not have any operations
    * @returns {Promise<void>|void} returns Promise if no callback passed
    */
-  execute(_writeConcern?: any, options?: any, callback?: Function): Promise<void> | void {
+  execute(_writeConcern?: any, options?: any, callback?: Callback): Promise<void> | void {
     const ret = this.bulkExecute(_writeConcern, options, callback!);
     if (!ret || isPromiseLike(ret)) {
       return ret;
@@ -1184,7 +1185,7 @@ class BulkOperationBase {
    * @param {Function} config.resultHandler
    * @param {Function} callback
    */
-  finalOptionsHandler(config: any, callback: Function) {
+  finalOptionsHandler(config: any, callback: Callback) {
     const finalOptions = Object.assign({ ordered: this.isOrdered }, config.options);
     if (this.s.writeConcern != null) {
       finalOptions.writeConcern = this.s.writeConcern;
@@ -1268,7 +1269,7 @@ class BulkOperationBase {
    * @param {any} writeResult
    * @returns {boolean|undefined}
    */
-  handleWriteError(callback: Function, writeResult: any): boolean | undefined {
+  handleWriteError(callback: Callback, writeResult: any): boolean | undefined {
     if (this.s.bulkResult.writeErrors.length > 0) {
       const msg = this.s.bulkResult.writeErrors[0].errmsg
         ? this.s.bulkResult.writeErrors[0].errmsg

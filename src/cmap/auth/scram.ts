@@ -1,4 +1,4 @@
-import crypto = require('crypto');
+import * as crypto from 'crypto';
 import { Binary } from '../../bson';
 import { MongoError } from '../../error';
 import { AuthProvider, AuthContext } from './auth_provider';

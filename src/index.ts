@@ -1,16 +1,17 @@
-import Instrumentation = require('./apm');
+import { Instrumentation } from './apm';
 import { Cursor, AggregationCursor, CommandCursor } from './cursor';
-import PromiseProvider = require('./promise_provider');
-import Admin = require('./admin');
-import MongoClient = require('./mongo_client');
-import Db = require('./db');
-import Collection = require('./collection');
+import { PromiseProvider } from './promise_provider';
+import { Admin } from './admin';
+import { MongoClient } from './mongo_client';
+import { Db } from './db';
+import { Collection } from './collection';
 import { ReadPreference } from './read_preference';
-import Logger = require('./logger');
-import GridFSBucket = require('./gridfs-stream');
+import { Logger } from './logger';
+import { GridFSBucket } from './gridfs-stream';
+import type { Callback } from './types';
 
 // Set up the instrumentation method
-function instrument(options: any, callback: Function) {
+function instrument(options: any, callback: Callback) {
   if (typeof options === 'function') {
     callback = options;
     options = {};

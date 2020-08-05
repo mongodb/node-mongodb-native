@@ -1,42 +1,45 @@
-let collection: any;
-let cursor: any;
-let db: any;
-let client: any;
-let admin: any;
+import type { Admin } from './admin';
+import type { Collection } from './collection';
+import type { Db } from './db';
+import type { MongoClient } from './mongo_client';
 
-function loadCollection() {
+let collection: typeof Collection;
+let cursor: any;
+let db: typeof Db;
+let client: typeof MongoClient;
+let admin: typeof Admin;
+
+export function loadCollection(): typeof Collection {
   if (!collection) {
-    collection = require('./collection');
+    collection = require('./collection').Collection;
   }
   return collection;
 }
 
-function loadCursor() {
+export function loadCursor() {
   if (!cursor) {
     cursor = require('./cursor');
   }
   return cursor;
 }
 
-function loadDb() {
+export function loadDb(): typeof Db {
   if (!db) {
-    db = require('./db');
+    db = require('./db').Db;
   }
   return db;
 }
 
-function loadMongoClient() {
+export function loadMongoClient(): typeof MongoClient {
   if (!client) {
-    client = require('./mongo_client');
+    client = require('./mongo_client').MongoClient;
   }
   return client;
 }
 
-function loadAdmin() {
+export function loadAdmin(): typeof Admin {
   if (!admin) {
-    admin = require('./admin');
+    admin = require('./admin').Admin;
   }
   return admin;
 }
-
-export { loadCollection, loadCursor, loadDb, loadMongoClient, loadAdmin };
