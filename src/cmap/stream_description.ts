@@ -8,7 +8,8 @@ const RESPONSE_FIELDS = [
   'maxWireVersion',
   'maxBsonObjectSize',
   'maxMessageSizeBytes',
-  'maxWriteBatchSize'
+  'maxWriteBatchSize',
+  'logicalSessionTimeoutMinutes'
 ] as const;
 
 export interface StreamDescriptionOptions {
@@ -27,6 +28,7 @@ export class StreamDescription {
   maxWriteBatchSize: number;
   compressors: CompressorName[];
   compressor?: CompressorName;
+  logicalSessionTimeoutMinutes?: number;
 
   __nodejs_mock_server__ = false;
 
