@@ -74,11 +74,12 @@ functions:
   bootstrap mongo-orchestration:
     - command: shell.exec
       params:
-        script: >
+        script: |
           ${PREPARE_SHELL}
-
-          MONGODB_VERSION=${VERSION} TOPOLOGY=${TOPOLOGY} ORCHESTRATION_FILE=${ORCHESTRATION_FILE} bash
-          ${DRIVERS_TOOLS}/.evergreen/run-orchestration.sh
+          MONGODB_VERSION=${VERSION} TOPOLOGY=${TOPOLOGY} \
+          AUTH=${AUTH} SSL=${SSL} \
+          ORCHESTRATION_FILE=${ORCHESTRATION_FILE} \
+          bash ${DRIVERS_TOOLS}/.evergreen/run-orchestration.sh
     - command: expansions.update
       params:
         file: mo-expansion.yml
@@ -100,9 +101,8 @@ functions:
       type: test
       params:
         working_dir: src
-        script: >
+        script: |
           ${PREPARE_SHELL}
-
 
           if [ -n "${CLIENT_ENCRYPTION}" ]; then
             # Disable xtrace (just in case it was accidentally set).
@@ -111,9 +111,8 @@ functions:
             rm -f ./prepare_client_encryption.sh
           fi
 
-
-          AUTH=${AUTH} SSL=${SSL} UNIFIED=${UNIFIED} MONGODB_URI="${MONGODB_URI}" bash
-          ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
+          AUTH=${AUTH} SSL=${SSL} UNIFIED=${UNIFIED} MONGODB_URI="${MONGODB_URI}" \
+          bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
   run checks:
     - command: shell.exec
       type: test
@@ -173,6 +172,23 @@ functions:
           rm -f ./prepare_atlas_connectivity.sh
 
           NODE_LTS_NAME='${NODE_LTS_NAME}' bash ${PROJECT_DIRECTORY}/.evergreen/run-atlas-tests.sh
+  run ldap tests:
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: src
+        script: |
+          MONGODB_URI='${plain_auth_mongodb_uri}' NODE_LTS_NAME='${NODE_LTS_NAME}' \
+          bash ${PROJECT_DIRECTORY}/.evergreen/run-ldap-tests.sh
+  run tls tests:
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: src
+        script: |
+          NODE_LTS_NAME=${NODE_LTS_NAME} DRIVERS_TOOLS="${DRIVERS_TOOLS}" \
+          SSL_CA_FILE="${SSL_CA_FILE}" SSL_KEY_FILE="${SSL_KEY_FILE}" \
+          MONGODB_URI="${MONGODB_URI}" bash ${PROJECT_DIRECTORY}/.evergreen/run-tls-tests.sh
   add aws auth variables to file:
     - command: shell.exec
       type: test
@@ -437,10 +453,8 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
-          TOPOLOGY: server
+          TOPOLOGY: server-unified
       - func: run tests
-        vars:
-          UNIFIED: 1
   - name: test-latest-replica_set-unified
     tags:
       - latest
@@ -450,10 +464,8 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
-          TOPOLOGY: replica_set
+          TOPOLOGY: replica_set-unified
       - func: run tests
-        vars:
-          UNIFIED: 1
   - name: test-latest-sharded_cluster-unified
     tags:
       - latest
@@ -463,10 +475,8 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
-          TOPOLOGY: sharded_cluster
+          TOPOLOGY: sharded_cluster-unified
       - func: run tests
-        vars:
-          UNIFIED: 1
   - name: test-4.4-server
     tags:
       - '4.4'
@@ -509,10 +519,8 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.4'
-          TOPOLOGY: server
+          TOPOLOGY: server-unified
       - func: run tests
-        vars:
-          UNIFIED: 1
   - name: test-4.4-replica_set-unified
     tags:
       - '4.4'
@@ -522,10 +530,8 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.4'
-          TOPOLOGY: replica_set
+          TOPOLOGY: replica_set-unified
       - func: run tests
-        vars:
-          UNIFIED: 1
   - name: test-4.4-sharded_cluster-unified
     tags:
       - '4.4'
@@ -535,10 +541,8 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.4'
-          TOPOLOGY: sharded_cluster
+          TOPOLOGY: sharded_cluster-unified
       - func: run tests
-        vars:
-          UNIFIED: 1
   - name: test-4.2-server
     tags:
       - '4.2'
@@ -581,10 +585,8 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.2'
-          TOPOLOGY: server
+          TOPOLOGY: server-unified
       - func: run tests
-        vars:
-          UNIFIED: 1
   - name: test-4.2-replica_set-unified
     tags:
       - '4.2'
@@ -594,10 +596,8 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.2'
-          TOPOLOGY: replica_set
+          TOPOLOGY: replica_set-unified
       - func: run tests
-        vars:
-          UNIFIED: 1
   - name: test-4.2-sharded_cluster-unified
     tags:
       - '4.2'
@@ -607,10 +607,8 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.2'
-          TOPOLOGY: sharded_cluster
+          TOPOLOGY: sharded_cluster-unified
       - func: run tests
-        vars:
-          UNIFIED: 1
   - name: test-4.0-server
     tags:
       - '4.0'
@@ -653,10 +651,8 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.0'
-          TOPOLOGY: server
+          TOPOLOGY: server-unified
       - func: run tests
-        vars:
-          UNIFIED: 1
   - name: test-4.0-replica_set-unified
     tags:
       - '4.0'
@@ -666,10 +662,8 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.0'
-          TOPOLOGY: replica_set
+          TOPOLOGY: replica_set-unified
       - func: run tests
-        vars:
-          UNIFIED: 1
   - name: test-4.0-sharded_cluster-unified
     tags:
       - '4.0'
@@ -679,10 +673,8 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.0'
-          TOPOLOGY: sharded_cluster
+          TOPOLOGY: sharded_cluster-unified
       - func: run tests
-        vars:
-          UNIFIED: 1
   - name: test-3.6-server
     tags:
       - '3.6'
@@ -725,10 +717,8 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '3.6'
-          TOPOLOGY: server
+          TOPOLOGY: server-unified
       - func: run tests
-        vars:
-          UNIFIED: 1
   - name: test-3.6-replica_set-unified
     tags:
       - '3.6'
@@ -738,10 +728,8 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '3.6'
-          TOPOLOGY: replica_set
+          TOPOLOGY: replica_set-unified
       - func: run tests
-        vars:
-          UNIFIED: 1
   - name: test-3.6-sharded_cluster-unified
     tags:
       - '3.6'
@@ -751,10 +739,8 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '3.6'
-          TOPOLOGY: sharded_cluster
+          TOPOLOGY: sharded_cluster-unified
       - func: run tests
-        vars:
-          UNIFIED: 1
   - name: test-3.4-server
     tags:
       - '3.4'
@@ -797,10 +783,8 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '3.4'
-          TOPOLOGY: server
+          TOPOLOGY: server-unified
       - func: run tests
-        vars:
-          UNIFIED: 1
   - name: test-3.4-replica_set-unified
     tags:
       - '3.4'
@@ -810,10 +794,8 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '3.4'
-          TOPOLOGY: replica_set
+          TOPOLOGY: replica_set-unified
       - func: run tests
-        vars:
-          UNIFIED: 1
   - name: test-3.4-sharded_cluster-unified
     tags:
       - '3.4'
@@ -823,10 +805,8 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '3.4'
-          TOPOLOGY: sharded_cluster
+          TOPOLOGY: sharded_cluster-unified
       - func: run tests
-        vars:
-          UNIFIED: 1
   - name: test-3.2-server
     tags:
       - '3.2'
@@ -869,10 +849,8 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '3.2'
-          TOPOLOGY: server
+          TOPOLOGY: server-unified
       - func: run tests
-        vars:
-          UNIFIED: 1
   - name: test-3.2-replica_set-unified
     tags:
       - '3.2'
@@ -882,10 +860,8 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '3.2'
-          TOPOLOGY: replica_set
+          TOPOLOGY: replica_set-unified
       - func: run tests
-        vars:
-          UNIFIED: 1
   - name: test-3.2-sharded_cluster-unified
     tags:
       - '3.2'
@@ -895,10 +871,8 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '3.2'
-          TOPOLOGY: sharded_cluster
+          TOPOLOGY: sharded_cluster-unified
       - func: run tests
-        vars:
-          UNIFIED: 1
   - name: test-3.0-server
     tags:
       - '3.0'
@@ -941,10 +915,8 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '3.0'
-          TOPOLOGY: server
+          TOPOLOGY: server-unified
       - func: run tests
-        vars:
-          UNIFIED: 1
   - name: test-3.0-replica_set-unified
     tags:
       - '3.0'
@@ -954,10 +926,8 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '3.0'
-          TOPOLOGY: replica_set
+          TOPOLOGY: replica_set-unified
       - func: run tests
-        vars:
-          UNIFIED: 1
   - name: test-3.0-sharded_cluster-unified
     tags:
       - '3.0'
@@ -967,10 +937,8 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '3.0'
-          TOPOLOGY: sharded_cluster
+          TOPOLOGY: sharded_cluster-unified
       - func: run tests
-        vars:
-          UNIFIED: 1
   - name: test-2.6-server
     tags:
       - '2.6'
@@ -1013,10 +981,8 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '2.6'
-          TOPOLOGY: server
+          TOPOLOGY: server-unified
       - func: run tests
-        vars:
-          UNIFIED: 1
   - name: test-2.6-replica_set-unified
     tags:
       - '2.6'
@@ -1026,10 +992,8 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '2.6'
-          TOPOLOGY: replica_set
+          TOPOLOGY: replica_set-unified
       - func: run tests
-        vars:
-          UNIFIED: 1
   - name: test-2.6-sharded_cluster-unified
     tags:
       - '2.6'
@@ -1039,16 +1003,25 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '2.6'
-          TOPOLOGY: sharded_cluster
+          TOPOLOGY: sharded_cluster-unified
       - func: run tests
-        vars:
-          UNIFIED: 1
   - name: test-atlas-connectivity
     tags:
       - atlas-connect
     commands:
       - func: install dependencies
       - func: run atlas tests
+  - name: test-tls-support
+    tags:
+      - tls-support
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          SSL: ssl
+          VERSION: latest
+          TOPOLOGY: server
+      - func: run tls tests
   - name: test-latest-ocsp-valid-cert-server-staples
     tags:
       - ocsp
@@ -1343,6 +1316,7 @@ buildvariants:
       - test-2.6-replica_set-unified
       - test-2.6-sharded_cluster-unified
       - test-atlas-connectivity
+      - test-tls-support
       - test-latest-ocsp-valid-cert-server-staples
       - test-latest-ocsp-invalid-cert-server-staples
       - test-latest-ocsp-valid-cert-server-does-not-staple
@@ -1528,6 +1502,7 @@ buildvariants:
       - test-3.2-replica_set-unified
       - test-3.2-sharded_cluster-unified
       - test-atlas-connectivity
+      - test-tls-support
       - test-latest-ocsp-valid-cert-server-staples
       - test-latest-ocsp-invalid-cert-server-staples
       - test-latest-ocsp-valid-cert-server-does-not-staple

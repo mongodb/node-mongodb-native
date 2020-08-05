@@ -88,28 +88,46 @@ function makeTask({ mongoVersion, topology }) {
         func: 'bootstrap mongo-orchestration',
         vars: {
           VERSION: mongoVersion,
-          TOPOLOGY: topologyForTest
+          TOPOLOGY: topology
         }
       },
-      runTestsCommand
+      { func: 'run tests' }
     ]
   };
 }
 
 MONGODB_VERSIONS.forEach(mongoVersion => {
-  TOPOLOGIES.forEach(topology => {
-    TASKS.push(makeTask({ mongoVersion, topology }));
-  });
+  TOPOLOGIES.forEach(topology =>
+    TASKS.push(makeTask({ mongoVersion, topology }))
+  );
 });
 
-TASKS.push({
-  name: 'test-atlas-connectivity',
-  tags: ['atlas-connect'],
-  commands: [
-    { func: 'install dependencies' },
-    { func: 'run atlas tests' }
-  ]
-});
+TASKS.push(
+  {
+    name: 'test-atlas-connectivity',
+    tags: ['atlas-connect'],
+    commands: [
+      { func: 'install dependencies' },
+      { func: 'run atlas tests' }
+    ]
+  },
+  {
+    name: 'test-tls-support',
+    tags: ['tls-support'],
+    commands: [
+      { func: 'install dependencies' },
+      {
+        func: 'bootstrap mongo-orchestration',
+        vars: {
+          SSL: 'ssl',
+          VERSION: 'latest',
+          TOPOLOGY: 'server'
+        }
+      },
+      { func: 'run tls tests' }
+    ]
+  }
+);
 
 OCSP_VERSIONS.forEach(VERSION => {
   // manually added tasks
