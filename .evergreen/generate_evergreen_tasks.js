@@ -88,10 +88,10 @@ function makeTask({ mongoVersion, topology }) {
         func: 'bootstrap mongo-orchestration',
         vars: {
           VERSION: mongoVersion,
-          TOPOLOGY: topology
+          TOPOLOGY: topologyForTest
         }
       },
-      { func: 'run tests' }
+      runTestsCommand
     ]
   };
 }
