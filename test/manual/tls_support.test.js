@@ -3,7 +3,7 @@ const MongoClient = require('../..').MongoClient;
 
 const REQUIRED_ENV = ['MONGODB_URI', 'SSL_KEY_FILE', 'SSL_CA_FILE'];
 
-describe('TLS Support', function () {
+describe('TLS Support', function() {
   for (let key of REQUIRED_ENV) {
     if (process.env[key] == null) {
       throw new Error(`skipping SSL tests, ${key} environment variable is not defined`);
@@ -21,13 +21,18 @@ describe('TLS Support', function () {
 });
 
 function makeConnectionTest(connectionString, clientOptions) {
-  return function () {
+  return function() {
     const client = new MongoClient(connectionString, clientOptions);
 
     return client
       .connect()
       .then(() => client.db('admin').command({ ismaster: 1 }))
-      .then(() => client.db('test').collection('test').findOne({}))
+      .then(() =>
+        client
+          .db('test')
+          .collection('test')
+          .findOne({})
+      )
       .then(() => client.close());
   };
 }
