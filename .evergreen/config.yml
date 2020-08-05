@@ -171,6 +171,14 @@ functions:
           rm -f ./prepare_atlas_connectivity.sh
 
           NODE_LTS_NAME='${NODE_LTS_NAME}' bash ${PROJECT_DIRECTORY}/.evergreen/run-atlas-tests.sh
+  run ldap tests:
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: src
+        script: |
+          MONGODB_URI='${plain_auth_mongodb_uri}' NODE_LTS_NAME='${NODE_LTS_NAME}' \
+          bash ${PROJECT_DIRECTORY}/.evergreen/run-ldap-tests.sh
 pre:
   - func: fetch source
   - func: prepare resources
@@ -761,6 +769,13 @@ tasks:
     commands:
       - func: install dependencies
       - func: run atlas tests
+  - name: test-auth-ldap
+    tags:
+      - auth
+      - ldap
+    commands:
+      - func: install dependencies
+      - func: run ldap tests
   - name: run-checks
     tags:
       - run-checks
@@ -825,6 +840,7 @@ buildvariants:
       - test-2.6-replica_set-unified
       - test-2.6-sharded_cluster-unified
       - test-atlas-connectivity
+      - test-auth-ldap
   - name: macos-1014-dubnium
     display_name: macOS 10.14 Node Dubnium
     run_on: macos-1014
@@ -922,6 +938,7 @@ buildvariants:
       - test-2.6-replica_set-unified
       - test-2.6-sharded_cluster-unified
       - test-atlas-connectivity
+      - test-auth-ldap
   - name: ubuntu-14.04-dubnium
     display_name: Ubuntu 14.04 Node Dubnium
     run_on: ubuntu1404-test
@@ -990,6 +1007,7 @@ buildvariants:
       - test-3.2-replica_set-unified
       - test-3.2-sharded_cluster-unified
       - test-atlas-connectivity
+      - test-auth-ldap
   - name: ubuntu-18.04-dubnium
     display_name: Ubuntu 18.04 Node Dubnium
     run_on: ubuntu1804-test

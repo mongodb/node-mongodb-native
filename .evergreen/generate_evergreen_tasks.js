@@ -101,11 +101,18 @@ MONGODB_VERSIONS.forEach(mongoVersion => {
 });
 
 // singleton task for connectivity tests
-TASKS.push({
-  name: 'test-atlas-connectivity',
-  tags: ['atlas-connect'],
-  commands: [{ func: 'install dependencies' }, { func: 'run atlas tests' }]
-});
+TASKS.push(
+  {
+    name: 'test-atlas-connectivity',
+    tags: ['atlas-connect'],
+    commands: [{ func: 'install dependencies' }, { func: 'run atlas tests' }]
+  },
+  {
+    name: 'test-auth-ldap',
+    tags: ['auth', 'ldap'],
+    commands: [{ func: 'install dependencies' }, { func: 'run ldap tests' }]
+  }
+);
 
 const BUILD_VARIANTS = [];
 
