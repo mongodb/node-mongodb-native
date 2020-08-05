@@ -110,11 +110,8 @@ TASKS.push(
   {
     name: 'test-auth-ldap',
     tags: ['auth', 'ldap'],
-    commands: [
-      { func: 'install dependencies' },
-      { func: 'run ldap tests' }
-    ]
-},
+    commands: [{ func: 'install dependencies' }, { func: 'run ldap tests' }]
+  }
 );
 
 const BUILD_VARIANTS = [];
