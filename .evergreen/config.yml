@@ -769,9 +769,10 @@ tasks:
     commands:
       - func: install dependencies
       - func: run atlas tests
-  - name: test-ldap-auth
+  - name: test-auth-ldap
     tags:
-      - ldap-auth
+      - auth
+      - ldap
     commands:
       - func: install dependencies
       - func: run ldap tests
@@ -839,7 +840,7 @@ buildvariants:
       - test-2.6-replica_set-unified
       - test-2.6-sharded_cluster-unified
       - test-atlas-connectivity
-      - test-ldap-auth
+      - test-auth-ldap
   - name: macos-1014-dubnium
     display_name: macOS 10.14 Node Dubnium
     run_on: macos-1014
@@ -937,7 +938,7 @@ buildvariants:
       - test-2.6-replica_set-unified
       - test-2.6-sharded_cluster-unified
       - test-atlas-connectivity
-      - test-ldap-auth
+      - test-auth-ldap
   - name: ubuntu-14.04-dubnium
     display_name: Ubuntu 14.04 Node Dubnium
     run_on: ubuntu1404-test
@@ -1006,7 +1007,7 @@ buildvariants:
       - test-3.2-replica_set-unified
       - test-3.2-sharded_cluster-unified
       - test-atlas-connectivity
-      - test-ldap-auth
+      - test-auth-ldap
   - name: ubuntu-18.04-dubnium
     display_name: Ubuntu 18.04 Node Dubnium
     run_on: ubuntu1804-test
