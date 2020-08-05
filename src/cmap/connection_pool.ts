@@ -90,11 +90,10 @@ const VALID_POOL_OPTION_NAMES = [
 const VALID_POOL_OPTIONS = new Set(VALID_POOL_OPTION_NAMES);
 
 function resolveOptions(
-  options: ConnectionPoolOptions,
+  options: Partial<ConnectionPoolOptions>,
   defaults: Partial<ConnectionPoolOptions>
 ): Readonly<ConnectionPoolOptions> {
-  const newOptions = {} as ConnectionOptions;
-
+  const newOptions = {};
   for (const key of VALID_POOL_OPTIONS) {
     if (key in options) {
       (newOptions as { [key: string]: any })[key] = options[key];
@@ -171,7 +170,7 @@ export class ConnectionPool extends EventEmitter {
    *
    * @param {ConnectionPoolOptions} options
    */
-  constructor(options: ConnectionPoolOptions) {
+  constructor(options: Partial<ConnectionPoolOptions>) {
     super();
 
     this.closed = false;

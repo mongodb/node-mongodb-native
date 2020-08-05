@@ -168,13 +168,8 @@ function _command(
   }
 }
 
-function hasSessionSupport(topology: Server) {
-  if (topology == null) return false;
-  if (topology.description && topology.description) {
-    return topology.description.maxWireVersion >= 6;
-  }
-
-  return topology.ismaster == null ? false : topology.ismaster.maxWireVersion >= 6;
+function hasSessionSupport(server: Server) {
+  return server.description.logicalSessionTimeoutMinutes != null;
 }
 
 function supportsOpMsg(topologyOrServer: Server | Topology) {

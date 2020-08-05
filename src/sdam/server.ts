@@ -126,9 +126,7 @@ export class Server extends EventEmitter {
       logger: new Logger('Server', options),
       state: STATE_CLOSED,
       topology,
-      pool: new ConnectionPool(
-        Object.assign({ host: description.host, port: description.port }, options)
-      )
+      pool: new ConnectionPool({ host: description.host, port: description.port, ...options })
     };
 
     relayEvents(
