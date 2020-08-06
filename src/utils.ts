@@ -362,13 +362,13 @@ const executeLegacyOperation = (topology: any, operation: Function, args: any, o
   if (typeof callback === 'function') {
     callback = args.pop();
     const handler = makeExecuteCallback(
-      (result: any) => callback(null, result),
+      (result: any) => callback(undefined, result),
       (err: any) => callback(err, null)
     );
     args.push(handler);
 
     try {
-      return operation.apply(null, args);
+      return operation.apply(undefined, args);
     } catch (e) {
       handler(e);
       throw e;
@@ -385,7 +385,7 @@ const executeLegacyOperation = (topology: any, operation: Function, args: any, o
     args[args.length - 1] = handler;
 
     try {
-      return operation.apply(null, args);
+      return operation.apply(undefined, args);
     } catch (e) {
       handler(e);
     }
@@ -1031,7 +1031,7 @@ function makeInterruptableAsyncInterval(
     executeAndReschedule();
   } else {
     lastCallTime = now();
-    reschedule(null);
+    reschedule(undefined);
   }
 
   return { wake, stop };

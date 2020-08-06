@@ -319,7 +319,7 @@ describe('ReadPreference', function () {
         ]);
 
         cursor.toArray(function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           client.topology.command = command;
 
           client.close(done);
@@ -471,7 +471,7 @@ describe('ReadPreference', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
         var cursor = db
           .collection('test', { readPreference: ReadPreference.SECONDARY_PREFERRED })
           .listIndexes();

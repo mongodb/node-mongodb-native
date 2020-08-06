@@ -2613,7 +2613,7 @@ describe('Operation (Promises)', function () {
         // BEGIN
         // Grab a collection with a callback but no safe operation
         db.collection('test_correctly_access_collections_with_promise', function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Grab a collection with a callback in safe mode, ensuring it exists (should fail as it's not created)
           db.collection(
@@ -2630,7 +2630,7 @@ describe('Operation (Promises)', function () {
                     'test_correctly_access_collections_with_promise',
                     { strict: true },
                     function (err) {
-                      test.equal(null, err);
+                      expect(err).to.not.exist;
                       client.close(done);
                     }
                   );

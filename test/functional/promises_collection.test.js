@@ -213,7 +213,7 @@ describe('Promises (Collection)', function () {
           error = err;
         })
         .then(function () {
-          test.equal(null, error);
+          expect(error).to.not.exist;
           test.ok(result != null);
 
           client.close(done);

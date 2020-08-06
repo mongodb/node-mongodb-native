@@ -25,7 +25,7 @@ describe('Deprecation Warnings', function () {
       exec(
         'node --no-deprecation ./test/tools/deprecate_warning_test_program.js',
         (err, stdout, stderr) => {
-          expect(err).to.be.null;
+          expect(err).to.not.exist;
           expect(stdout).to.be.empty;
           expect(stderr).to.be.empty;
           done();
@@ -40,7 +40,7 @@ describe('Deprecation Warnings', function () {
       exec(
         'node --trace-deprecation ./test/tools/deprecate_warning_test_program.js',
         (err, stdout, stderr) => {
-          expect(err).to.be.null;
+          expect(err).to.not.exist;
           expect(stdout).to.be.empty;
           expect(stderr).to.not.be.empty;
 
@@ -72,7 +72,7 @@ describe('Deprecation Warnings', function () {
         'node --throw-deprecation ./test/tools/deprecate_warning_test_program.js this_arg_should_never_print',
         (err, stdout, stderr) => {
           expect(stderr).to.not.be.empty;
-          expect(err).to.not.be.null;
+          expect(err).to.not.exist;
           expect(err).to.have.own.property('code').that.equals(1);
 
           // ensure stdout is empty, i.e. that the program threw an error before reaching the console.log statement

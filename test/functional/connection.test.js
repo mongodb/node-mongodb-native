@@ -19,7 +19,7 @@ describe('Connection', function () {
       );
 
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         client.topology.once('monitoring', function () {
           client.close(done);
@@ -40,15 +40,15 @@ describe('Connection', function () {
 
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         db.collection('domainSocketCollection0').insert({ a: 1 }, { w: 1 }, function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           db.collection('domainSocketCollection0')
             .find({ a: 1 })
             .toArray(function (err, items) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.equal(1, items.length);
 
               client.close(done);
@@ -104,15 +104,15 @@ describe('Connection', function () {
 
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         db.collection('domainSocketCollection1').insert({ x: 1 }, { w: 1 }, function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           db.collection('domainSocketCollection1')
             .find({ x: 1 })
             .toArray(function (err, items) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.equal(1, items.length);
 
               client.close(done);

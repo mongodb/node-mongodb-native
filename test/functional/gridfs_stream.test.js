@@ -894,7 +894,7 @@ describe('GridFS Stream', function () {
 
         uploadStream.once('finish', function () {
           bucket.find({}, { batchSize: 1 }).toArray(function (err, files) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.equal(1, files.length);
             client.close(done);
           });
@@ -1000,7 +1000,7 @@ describe('GridFS Stream', function () {
 
         const uploadStream = bucket.openUploadStream('test');
         uploadStream.end(Buffer.alloc(40 * 1024 * 1024), err => {
-          expect(err).to.be.null;
+          expect(err).to.not.exist;
           const range = {
             start: 35191617,
             end: 35192831
@@ -1011,7 +1011,7 @@ describe('GridFS Stream', function () {
             expect(err).to.not.exist;
             client.close(() => {
               fs.stat('output', (err, stats) => {
-                expect(err).to.be.null;
+                expect(err).to.not.exist;
                 expect(range.end - range.start).to.equal(stats.size);
                 done();
               });
@@ -1044,7 +1044,7 @@ describe('GridFS Stream', function () {
               var buf = Buffer.from(testSpec.act.arguments.source.$hex, 'hex');
 
               res.on('error', function (err) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
               });
 
               res.on('finish', function () {

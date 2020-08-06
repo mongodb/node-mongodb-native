@@ -105,7 +105,7 @@ export interface Collection {
  *   const col = client.db(dbName).collection('createIndexExample1');
  *   // Show that duplicate records got dropped
  *   col.find({}).toArray(function(err, items) {
- *     test.equal(null, err);
+ *     expect(err).to.not.exist;
  *     test.equal(4, items.length);
  *     client.close();
  *   });

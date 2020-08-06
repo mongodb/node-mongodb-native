@@ -28,7 +28,7 @@ import type { Callback } from './types';
  *
  *   // List all the available databases
  *   adminDb.listDatabases(function(err, dbs) {
- *     test.equal(null, err);
+ *     expect(err).to.not.exist;
  *     test.ok(dbs.databases.length > 0);
  *     client.close();
  *   });

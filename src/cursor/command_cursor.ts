@@ -26,10 +26,10 @@ import type { OperationBase } from '../operations/operation';
  *   col.insert([{a:1, b:1}
  *     , {a:2, b:2}, {a:3, b:3}
  *     , {a:4, b:4}], {w:1}, function(err, result) {
- *     test.equal(null, err);
+ *     expect(err).to.not.exist;
  *     // List the database collections available
  *     db.listCollections().toArray(function(err, items) {
- *       test.equal(null, err);
+ *       expect(err).to.not.exist;
  *       client.close();
  *     });
  *   });

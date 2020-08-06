@@ -308,7 +308,7 @@ class CoreCursor extends Readable {
       this.cursorState.cursorId.isZero() ||
       this.cursorState.init === false
     ) {
-      if (callback) callback(null, null);
+      if (callback) callback(undefined, null);
       return;
     }
 
@@ -511,7 +511,7 @@ class CoreCursor extends Readable {
             }
 
             // Return after processing command cursor
-            return done(null, result);
+            return done(undefined, result);
           }
         }
       }
@@ -530,7 +530,7 @@ class CoreCursor extends Readable {
         cursor.cursorState.documents = cursor.cursorState.transforms.query(result);
       }
 
-      done(null, result);
+      done(undefined, result);
     };
 
     if (cursor.logger.isDebug()) {
