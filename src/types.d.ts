@@ -13,7 +13,7 @@ export interface Document {
 }
 
 /** BSON Serialization options. TODO: Remove me when types from BSON are updated */
-export interface SerializeOptions extends BSON.SerializeOptions {
+export interface BSONSerializeOptions extends BSON.SerializeOptions {
   /** Return document results as raw BSON buffers */
   fieldsAsRaw?: { [key: string]: boolean };
   /** Promotes BSON values to native types where possible, set to false to only receive wrapper types */
@@ -26,20 +26,6 @@ export interface SerializeOptions extends BSON.SerializeOptions {
   serializeFunctions?: boolean;
   /** Specify if the BSON serializer should ignore undefined fields */
   ignoreUndefined?: boolean;
-}
-
-/** set of BSON serialize options that are used in the driver */
-export interface BSONSerializeOptions {
-  /** Promotes BSON values to native types where possible, set to false to only receive wrapper types */
-  promoteValues?: SerializeOptions['promoteValues'];
-  /** Promotes Binary BSON values to native Node Buffers */
-  promoteBuffers?: SerializeOptions['promoteBuffers'];
-  /** Promotes long values to number if they fit inside the 53 bits resolution */
-  promoteLongs?: SerializeOptions['promoteLongs'];
-  /** Serialize functions on any object */
-  serializeFunctions?: SerializeOptions['serializeFunctions'];
-  /** Specify if the BSON serializer should ignore undefined fields */
-  ignoreUndefined?: SerializeOptions['ignoreUndefined'];
 }
 
 export interface AutoEncrypter {

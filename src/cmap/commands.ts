@@ -5,7 +5,7 @@ import { OP_QUERY, OP_GETMORE, OP_KILL_CURSORS, OP_MSG } from './wire_protocol/c
 import type { Long } from 'bson';
 import type { Connection } from './connection';
 // TODO: when bson owns type use BSON.SerializeOptions
-import type { Document, SerializeOptions as BSONSerializeOptions } from '../types';
+import type { Document, BSONSerializeOptions } from '../types';
 import type { ClientSession } from '../sessions';
 
 // Incrementing request id
