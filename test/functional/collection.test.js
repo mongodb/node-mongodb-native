@@ -181,23 +181,6 @@ describe('Collection', function () {
       });
     });
 
-    it('should perform strict create collection', function (done) {
-      db.createCollection('test_strict_create_collection', (err, collection) => {
-        expect(err).to.not.exist;
-        expect(collection.collectionName).to.equal('test_strict_create_collection');
-
-        // Creating an existing collection should fail
-        db.createCollection('test_strict_create_collection', { strict: true }, err => {
-          expect(err).to.be.an.instanceof(Error);
-          expect(err.message).to.equal(
-            'Collection test_strict_create_collection already exists. Currently in strict mode.'
-          );
-
-          done();
-        });
-      });
-    });
-
     it('should fail to insert due to illegal keys', function (done) {
       db.createCollection('test_invalid_key_names', (err, collection) => {
         // Legal inserts
@@ -476,21 +459,6 @@ describe('Collection', function () {
               done();
             }
           );
-        });
-      });
-    });
-
-    it('should fail due to existing collection', function (done) {
-      db.createCollection('shouldFailDueToExistingCollection', { strict: true }, (err, coll) => {
-        expect(err).to.not.exist;
-        expect(coll).to.exist;
-
-        db.createCollection('shouldFailDueToExistingCollection', { strict: true }, err => {
-          expect(err).to.exist;
-          expect(err.message).to.equal(
-            'Collection shouldFailDueToExistingCollection already exists. Currently in strict mode.'
-          );
-          done();
         });
       });
     });

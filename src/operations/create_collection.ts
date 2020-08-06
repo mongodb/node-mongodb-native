@@ -1,9 +1,6 @@
 import CommandOperation = require('./command');
-import { ReadPreference } from '../read_preference';
 import { Aspect, defineAspects } from './operation';
-import { applyWriteConcern } from '../utils';
 import { loadCollection } from '../dynamic_loaders';
-import { MongoError } from '../error';
 
 const ILLEGAL_COMMAND_FIELDS = new Set([
   'w',
@@ -11,7 +8,6 @@ const ILLEGAL_COMMAND_FIELDS = new Set([
   'j',
   'fsync',
   'autoIndexId',
-  'strict',
   'serializeFunctions',
   'pkFactory',
   'raw',
@@ -37,9 +33,6 @@ class CreateCollectionOperation extends CommandOperation {
     const options = this.options;
     const Collection = loadCollection();
 
-    let listCollectionOptions = Object.assign({ nameOnly: true, strict: false }, options);
-    listCollectionOptions = applyWriteConcern(listCollectionOptions, { db }, listCollectionOptions);
-
     function done(err: any) {
       if (err) {
         return callback(err);
@@ -64,27 +57,6 @@ class CreateCollectionOperation extends CommandOperation {
       ) {
         cmd[n] = options[n];
       }
-    }
-
-    const strictMode = listCollectionOptions.strict;
-    if (strictMode) {
-      db.listCollections({ name }, listCollectionOptions)
-        .setReadPreference(ReadPreference.PRIMARY)
-        .toArray((err?: any, collections?: any) => {
-          if (err) {
-            return callback(err);
-          }
-
-          if (collections.length > 0) {
-            return callback(
-              new MongoError(`Collection ${name} already exists. Currently in strict mode.`)
-            );
-          }
-
-          super.executeCommand(server, cmd, done);
-        });
-
-      return;
     }
 
     // otherwise just execute the command
