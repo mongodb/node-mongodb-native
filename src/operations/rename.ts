@@ -8,7 +8,7 @@ import type { Collection } from '../collection';
 import type { CommandOperationOptions } from './command';
 import { MongoError } from '../error';
 
-export interface RenameOptions extends CommandOperationOptions {
+export interface RenameOptions extends CommandOpOptions {
   /** Drop the target name collection if it previously exists. */
   dropTarget?: boolean;
   /** Unclear */

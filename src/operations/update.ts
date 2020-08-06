@@ -43,7 +43,7 @@ export class UpdateOperation extends OperationBase<UpdateOptions> {
   namespace: MongoDBNamespace;
   operations: Document[];
 
-  constructor(ns: MongoDBNamespace, ops: Document[], options: UpdateOptions) {
+  constructor(ns: MongoDBNamespace, ops: Document[], options: UpdateOpOptions) {
     super(options);
     this.namespace = ns;
     this.operations = ops;
