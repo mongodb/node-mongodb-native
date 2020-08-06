@@ -947,7 +947,7 @@ describe('Indexes', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (error, client) {
         var db = client.db(configuration.db);
-        test.equal(error, null);
+        expect(error).to.not.exist;
         // Can't use $exists: false in partial filter expression, see
         // https://jira.mongodb.org/browse/SERVER-17853
         var opts = { partialFilterExpression: { a: { $exists: false } } };
