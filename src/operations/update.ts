@@ -20,7 +20,7 @@ export class UpdateOperation extends OperationBase {
     return this.operations.every((op: any) => op.multi == null || op.multi === false);
   }
 
-  execute(server: Server, callback: Callback) {
+  execute(server: Server, callback: Callback): void {
     server.update(this.namespace.toString(), this.operations, this.options, callback);
   }
 }
@@ -42,7 +42,7 @@ export class UpdateOneOperation extends CommandOperation {
     this.update = update;
   }
 
-  execute(server: Server, callback: Callback) {
+  execute(server: Server, callback: Callback): void {
     const coll = this.collection;
     const filter = this.filter;
     const update = this.update;

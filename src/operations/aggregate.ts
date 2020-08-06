@@ -1,20 +1,36 @@
-import { CommandOperation } from './command';
+import { CommandOperation, CommandOperationOptions } from './command';
 import { ReadPreference } from '../read_preference';
 import { MongoError } from '../error';
 import { maxWireVersion } from '../utils';
-import { Aspect, defineAspects } from './operation';
-import type { Callback } from '../types';
+import { Aspect, defineAspects, Hint } from './operation';
+import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
+import type { Collection } from '../collection';
+import type { Db } from '../db';
+import type { Cursor } from '../cursor';
+import type { WriteConcern } from '../write_concern';
+import type { ReadConcern } from '../read_concern';
 
-const DB_AGGREGATE_COLLECTION = 1;
-const MIN_WIRE_VERSION_$OUT_READ_CONCERN_SUPPORT = 8;
+const DB_AGGREGATE_COLLECTION = 1 as const;
+const MIN_WIRE_VERSION_$OUT_READ_CONCERN_SUPPORT = 8 as const;
+
+export interface AggregateOperationOptions extends CommandOperationOptions {
+  bypassDocumentValidation: boolean;
+  allowDiskUse: boolean;
+  hint: Hint;
+  full: boolean;
+  batchSize: boolean;
+  out?: string;
+  explain?: ReadConcern | WriteConcern;
+  cursor: Cursor;
+}
 
 export class AggregateOperation extends CommandOperation {
-  target: any;
-  pipeline: any;
+  target: string | typeof DB_AGGREGATE_COLLECTION;
+  pipeline: Document[];
   hasWriteStage: boolean;
 
-  constructor(parent: any, pipeline: any, options: any) {
+  constructor(parent: Collection | Db, pipeline: Document[], options: AggregateOperationOptions) {
     super(parent, options, { fullResponse: true });
 
     this.target =
@@ -51,18 +67,18 @@ export class AggregateOperation extends CommandOperation {
     }
   }
 
-  get canRetryRead() {
+  get canRetryRead(): boolean {
     return !this.hasWriteStage;
   }
 
-  addToPipeline(stage: any) {
+  addToPipeline(stage: Document): void {
     this.pipeline.push(stage);
   }
 
-  execute(server: Server, callback: Callback) {
-    const options = this.options;
+  execute(server: Server, callback: Callback<Document>): void {
+    const options: AggregateOperationOptions = this.options;
     const serverWireVersion = maxWireVersion(server);
-    const command = { aggregate: this.target, pipeline: this.pipeline } as any;
+    const command: Document = { aggregate: this.target, pipeline: this.pipeline };
 
     if (this.hasWriteStage && serverWireVersion < MIN_WIRE_VERSION_$OUT_READ_CONCERN_SUPPORT) {
       this.readConcern = undefined;

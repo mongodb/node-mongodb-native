@@ -9,7 +9,7 @@ import { handleCallback, maybePromise, formattedOrderClause } from '../utils';
 import { executeOperation } from '../operations/execute_operation';
 import { each } from '../operations/cursor_ops';
 import { CountOperation } from '../operations/count';
-import type { Callback } from '../types';
+import type { Callback, Document } from '../types';
 
 /**
  * @file The **Cursor** class is an internal class that embodies a cursor on MongoDB
@@ -842,7 +842,7 @@ export class Cursor extends CoreCursor {
    * @throws {MongoError}
    * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  toArray(callback?: Callback): Promise<void> | void {
+  toArray(callback: Callback<Document[]>): Promise<void> | void {
     if (this.options.tailable) {
       throw MongoError.create({
         message: 'Tailable cursor cannot be converted to array',
@@ -873,7 +873,7 @@ export class Cursor extends CoreCursor {
 
           // Get all buffered objects
           if (cursor.bufferedCount() > 0) {
-            let docs = cursor.readBufferedDocuments(cursor.bufferedCount());
+            const docs = cursor.readBufferedDocuments(cursor.bufferedCount());
             Array.prototype.push.apply(items, docs);
           }
 
@@ -927,7 +927,7 @@ export class Cursor extends CoreCursor {
       options = Object.assign({}, options, { session: this.cursorState.session });
     }
 
-    const countOperation = new CountOperation(this, applySkipLimit, options);
+    const countOperation = new CountOperation(this, !!applySkipLimit, options);
     return executeOperation(this.topology, countOperation, callback);
   }
 

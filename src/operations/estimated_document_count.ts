@@ -1,20 +1,32 @@
-import { Aspect, defineAspects } from './operation';
-import { CommandOperation } from './command';
-import type { Callback } from '../types';
+import { Aspect, defineAspects, Hint } from './operation';
+import { CommandOperation, CommandOperationOptions } from './command';
+import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
+import type { Collection } from '../collection';
+
+export interface EstimatedDocumentCountOperationOptions extends CommandOperationOptions {
+  skip: number;
+  limit: number;
+  hint: Hint;
+}
 
 export class EstimatedDocumentCountOperation extends CommandOperation {
   collectionName: string;
-  query?: any;
+  query?: Document;
 
-  /**
-   * @param {Collection} collection
-   * @param {object} [query]
-   * @param {object} [options]
-   */
-  constructor(collection: any, query?: object, options?: object) {
+  constructor(collection: Collection, options: EstimatedDocumentCountOperationOptions);
+  constructor(
+    collection: Collection,
+    query: Document,
+    options: EstimatedDocumentCountOperationOptions
+  );
+  constructor(
+    collection: Collection,
+    query?: Document | EstimatedDocumentCountOperationOptions,
+    options?: EstimatedDocumentCountOperationOptions
+  ) {
     if (typeof options === 'undefined') {
-      options = query;
+      options = query as EstimatedDocumentCountOperationOptions;
       query = undefined;
     }
 
@@ -25,9 +37,9 @@ export class EstimatedDocumentCountOperation extends CommandOperation {
     }
   }
 
-  execute(server: Server, callback: Callback) {
-    const options = this.options;
-    const cmd = { count: this.collectionName } as any;
+  execute(server: Server, callback: Callback): void {
+    const options: EstimatedDocumentCountOperationOptions = this.options;
+    const cmd: Document = { count: this.collectionName };
 
     if (this.query) {
       cmd.query = this.query;
@@ -45,7 +57,7 @@ export class EstimatedDocumentCountOperation extends CommandOperation {
       cmd.hint = options.hint;
     }
 
-    super.executeCommand(server, cmd, (err?: any, response?: any) => {
+    super.executeCommand(server, cmd, (err, response) => {
       if (err) {
         callback(err);
         return;

@@ -1,9 +1,15 @@
-import { AggregateOperation } from './aggregate';
-import type { Callback } from '../types';
+import { AggregateOperation, AggregateOperationOptions } from './aggregate';
+import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
+import type { Collection } from '../collection';
+
+export interface CountDocumentsOperationOptions extends AggregateOperationOptions {
+  skip: number;
+  limit: number;
+}
 
 export class CountDocumentsOperation extends AggregateOperation {
-  constructor(collection: any, query: any, options: any) {
+  constructor(collection: Collection, query: Document, options: CountDocumentsOperationOptions) {
     const pipeline = [];
     pipeline.push({ $match: query });
 
@@ -20,10 +26,10 @@ export class CountDocumentsOperation extends AggregateOperation {
     super(collection, pipeline, options);
   }
 
-  execute(server: Server, callback: Callback) {
+  execute(server: Server, callback: Callback): void {
     super.execute(server, (err, result) => {
-      if (err) {
-        callback(err, null);
+      if (err || !result) {
+        callback(err);
         return;
       }
 

@@ -214,7 +214,7 @@ class CoreCursor extends Readable {
    * @function
    * @param {resultCallback} callback A callback function
    */
-  _next(callback: any) {
+  _next(callback: Callback) {
     nextFunction(this, callback);
   }
 

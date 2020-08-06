@@ -3,6 +3,7 @@ var test = require('./shared').assert;
 var co = require('co');
 var mock = require('mongodb-mock-server');
 const { ObjectId, Long, Code } = require('../../src');
+const { expect } = require('chai');
 
 // Extend the object
 var extend = function (template, fields) {

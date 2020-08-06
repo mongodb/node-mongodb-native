@@ -9,7 +9,7 @@ export class ProfilingLevelOperation extends CommandOperation {
   }
 
   execute(server: Server, callback: Callback) {
-    super.executeCommand(server, { profile: -1 }, (err?: any, doc?: any) => {
+    super.executeCommand(server, { profile: -1 }, (err, doc) => {
       if (err == null && doc.ok === 1) {
         const was = doc.was;
         if (was === 0) return callback(undefined, 'off');

@@ -2,20 +2,21 @@ import { OperationBase } from './operation';
 import { BulkWriteOperation } from './bulk_write';
 import { MongoError } from '../error';
 import { prepareDocs } from './common_functions';
-import type { Callback } from '../types';
+import type { Callback, Document } from '../types';
+import type { Collection } from '../collection';
 
 export class InsertManyOperation extends OperationBase {
-  collection: any;
-  docs: any;
+  collection: Collection;
+  docs: Document[];
 
-  constructor(collection: any, docs: any, options: any) {
+  constructor(collection: Collection, docs: Document[], options: any) {
     super(options);
 
     this.collection = collection;
     this.docs = docs;
   }
 
-  execute(callback: Callback) {
+  execute(callback: Callback): void {
     const coll = this.collection;
     let docs = this.docs;
     const options = this.options;
@@ -47,13 +48,13 @@ export class InsertManyOperation extends OperationBase {
   }
 }
 
-function mapInsertManyResults(docs: any, r: any) {
-  const finalResult = {
+function mapInsertManyResults(docs: Document[], r: Document) {
+  const finalResult: Document = {
     result: { ok: 1, n: r.insertedCount },
     ops: docs,
     insertedCount: r.insertedCount,
     insertedIds: r.insertedIds
-  } as any;
+  };
 
   if (r.getLastOp()) {
     finalResult.result.opTime = r.getLastOp();

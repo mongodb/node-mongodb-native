@@ -2,7 +2,7 @@ import type { Callback } from './types';
 
 /** Declaration Merging block for MongoDB specific functionality in Kerberos */
 declare module 'kerberos' {
-  export var processes: {
+  export const processes: {
     MongoAuthProcess: {
       new (host: string, port: number, serviceName: string, options: unknown): {
         host: string;

@@ -1,5 +1,6 @@
 'use strict';
 var test = require('./shared').assert;
+const { expect } = require('chai');
 var setupDatabase = require('./shared').setupDatabase;
 const { Decimal128 } = require('../../src');
 

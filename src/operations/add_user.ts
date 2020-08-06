@@ -1,16 +1,28 @@
 import * as crypto from 'crypto';
 import { Aspect, defineAspects } from './operation';
-import { CommandOperation } from './command';
+import { CommandOperation, CommandOperationOptions } from './command';
 import { handleCallback, toError } from '../utils';
-import type { Callback } from '../types';
+import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
+import type { Db } from '../db';
+
+export interface AddUserOperationOptions extends CommandOperationOptions {
+  digestPassword: null;
+  roles: string | string[];
+  customData: Document;
+}
 
 export class AddUserOperation extends CommandOperation {
-  db: any;
-  username: any;
-  password: any;
+  db: Db;
+  username: string;
+  password?: string;
 
-  constructor(db: any, username: any, password: any, options: any) {
+  constructor(
+    db: Db,
+    username: string,
+    password: string | undefined,
+    options: AddUserOperationOptions
+  ) {
     super(db, options);
 
     this.db = db;
@@ -18,7 +30,7 @@ export class AddUserOperation extends CommandOperation {
     this.password = password;
   }
 
-  execute(server: Server, callback: Callback) {
+  execute(server: Server, callback: Callback): void {
     const db = this.db;
     const username = this.username;
     const password = this.password;
@@ -39,7 +51,7 @@ export class AddUserOperation extends CommandOperation {
     // If not roles defined print deprecated message
     // TODO: handle deprecation properly
     if (roles.length === 0) {
-      console.log('Creating a user without roles is deprecated in MongoDB >= 2.6');
+      console.warn('Creating a user without roles is deprecated in MongoDB >= 2.6');
     }
 
     // Check the db name and add roles if needed
@@ -65,24 +77,26 @@ export class AddUserOperation extends CommandOperation {
     }
 
     // Build the command to execute
-    const command = {
+    const command: Document = {
       createUser: username,
       customData: options.customData || {},
       roles: roles,
       digestPassword
-    } as any;
+    };
 
     // No password
     if (typeof password === 'string') {
       command.pwd = userPassword;
     }
 
-    super.executeCommand(server, command, (err?: any, r?: any) => {
+    super.executeCommand(server, command, (err, r) => {
       if (!err) {
-        return handleCallback(callback, err, r);
+        handleCallback(callback, err, r);
+        return;
       }
 
-      return handleCallback(callback, err, null);
+      handleCallback(callback, err, null);
+      return;
     });
   }
 }

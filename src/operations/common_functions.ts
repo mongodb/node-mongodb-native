@@ -1,5 +1,5 @@
 import { MongoError } from '../error';
-import { CursorState } from '../cursor';
+import { CursorState, Cursor } from '../cursor';
 import {
   applyRetryableWrites,
   applyWriteConcern,
@@ -8,12 +8,14 @@ import {
   handleCallback,
   toError
 } from '../utils';
-import type { Callback, BSONSerializeOptions, Document } from '../types';
-import type { ReadPreference, Collection } from '..';
+import type { Callback, BSONSerializeOptions, Document, AnyError } from '../types';
+import type { Db } from '../db';
 import type { ClientSession } from '../sessions';
 import type { Server } from '../sdam/server';
+import type { ReadPreference } from '../read_preference';
+import type { Collection } from '../collection';
 
-export function deleteCallback(err: any, r: any, callback: Callback) {
+export function deleteCallback(err: any, r: any, callback: Callback): void {
   if (callback == null) return;
   if (err && callback) return callback(err);
   if (r == null) return callback(undefined, { result: { ok: 1 } });
@@ -34,19 +36,19 @@ export interface IndexInformationOptions {
  * @param [options] Optional settings. See Db.prototype.indexInformation for a list of options.
  * @param [callback] The command result callback
  */
-export function indexInformation(db: any, name: string, callback: Callback): void;
+export function indexInformation(db: Db, name: string, callback: Callback): void;
 export function indexInformation(
-  db: any,
+  db: Db,
   name: string,
   options: IndexInformationOptions,
   callback?: Callback
 ): void;
 export function indexInformation(
-  db: any,
+  db: Db,
   name: string,
   _optionsOrCallback: IndexInformationOptions | Callback,
   _callback?: Callback
-) {
+): void {
   let options = _optionsOrCallback as IndexInformationOptions;
   let callback = _callback as Callback;
   if ('function' === typeof _optionsOrCallback) {
@@ -108,7 +110,7 @@ export function prepareDocs(coll: any, docs: any, options: any) {
 }
 
 // Get the next available document from the cursor, returns null if no more documents are available.
-export function nextObject(cursor: any, callback: Callback) {
+export function nextObject(cursor: Cursor, callback: Callback) {
   if (cursor.s.state === CursorState.CLOSED || (cursor.isDead && cursor.isDead())) {
     return handleCallback(
       callback,
@@ -125,7 +127,7 @@ export function nextObject(cursor: any, callback: Callback) {
   }
 
   // Get the next object
-  cursor._next((err?: any, doc?: any) => {
+  cursor._next((err, doc) => {
     cursor.s.state = CursorState.OPEN;
     if (err) return handleCallback(callback, err);
     handleCallback(callback, null, doc);
@@ -134,11 +136,11 @@ export function nextObject(cursor: any, callback: Callback) {
 
 export function removeDocuments(
   server: Server,
-  coll: any,
+  coll: Collection,
   selector: any,
   options: any,
   callback: Callback
-) {
+): void {
   if (typeof options === 'function') {
     (callback = options), (options = {});
   } else if (typeof selector === 'function') {
@@ -221,7 +223,7 @@ export function updateDocuments(
   document: Document,
   _options: UpdateDocumentsOptions | Callback,
   _callback?: Callback
-) {
+): void {
   let options = _options as UpdateDocumentsOptions;
   let callback = _callback as Callback;
   if ('function' === typeof options) {
@@ -246,7 +248,7 @@ export function updateDocuments(
   finalOptions.serializeFunctions = options.serializeFunctions || coll.s.serializeFunctions;
 
   // Execute the operation
-  const op = { q: selector, u: document } as any;
+  const op: Document = { q: selector, u: document };
   op.upsert = options.upsert !== void 0 ? !!options.upsert : false;
   op.multi = options.multi !== void 0 ? !!options.multi : false;
 
@@ -283,10 +285,10 @@ export function updateDocuments(
   });
 }
 
-export function updateCallback(err: any, r: any, callback: Callback) {
-  if (callback == null) return;
+export function updateCallback(err?: AnyError, r?: Document, callback?: Callback): void {
+  if (!callback) return;
   if (err) return callback(err);
-  if (r == null) return callback(undefined, { result: { ok: 1 } });
+  if (!r) return callback(undefined, { result: { ok: 1 } });
   r.modifiedCount = r.result.nModified != null ? r.result.nModified : r.result.n;
   r.upsertedId =
     Array.isArray(r.result.upserted) && r.result.upserted.length > 0

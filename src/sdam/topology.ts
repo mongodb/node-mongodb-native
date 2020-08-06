@@ -115,13 +115,15 @@ interface TopologyPrivate {
   handleSrvPolling?: (event: SrvPollingEvent) => void;
 }
 
-interface ServerAddress {
+export interface ServerAddress {
   host: string;
   port: number;
   domain_socket?: string;
 }
 
-interface TopologyOptions extends ServerOptions {
+export interface TopologyOptions extends ServerOptions {
+  retryWrites?: boolean;
+  retryReads?: boolean;
   host: string;
   port?: number;
   credentials?: MongoCredentials;
@@ -423,6 +425,7 @@ export class Topology extends EventEmitter {
    * @param {(error: Error, server: Server) => void} callback The callback used to indicate success or failure
    * @returns {void} An instance of a `Server` meeting the criteria of the predicate provided
    */
+  selectServer(options: SelectServerOptions, callback: Callback<Server>): void;
   selectServer(
     selector: string | ReadPreference | ServerSelector,
     callback: Callback<Server>
@@ -433,7 +436,7 @@ export class Topology extends EventEmitter {
     callback: Callback<Server>
   ): void;
   selectServer(
-    selector: string | ReadPreference | ServerSelector,
+    selector: string | ReadPreference | ServerSelector | SelectServerOptions,
     _options?: SelectServerOptions | Callback<Server>,
     _callback?: Callback<Server>
   ): void {

@@ -2,14 +2,17 @@ import * as fs from 'fs';
 import { Logger } from '../logger';
 import { ReadPreference } from '../read_preference';
 import { MongoError } from '../error';
-import { Topology } from '../sdam/topology';
+import { Topology, TopologyOptions, ServerAddress } from '../sdam/topology';
 import { parseConnectionString } from '../connection_string';
 import { ReadConcern } from '../read_concern';
 import { emitDeprecationWarning } from '../utils';
 import { CMAP_EVENT_NAMES } from '../cmap/events';
 import { MongoCredentials } from '../cmap/auth/mongo_credentials';
 import * as BSON from '../bson';
-import type { Callback } from '../types';
+import type { Callback, Document, AnyError } from '../types';
+import type { MongoClient } from '../mongo_client';
+import type { ConnectionOptions } from '../cmap/connection';
+import type { AuthMechanism } from '../cmap/auth/defaultAuthProviders';
 
 const VALID_AUTH_MECHANISMS = new Set([
   'DEFAULT',
@@ -112,8 +115,20 @@ const validOptionNames = [
 const ignoreOptionNames = ['native_parser'];
 const legacyOptionNames = ['server', 'replset', 'replSet', 'mongos', 'db'];
 
+interface MongoClientOptions extends TopologyOptions, Omit<ConnectionOptions, 'host'> {
+  tls: boolean;
+  servers: string | ServerAddress[];
+  autoEncryption: null;
+  validateOptions: boolean;
+  readPreference?: ReadPreference;
+
+  sslCA: string | Buffer;
+  sslKey: string | Buffer;
+  sslCert: string | Buffer;
+}
+
 // Validate options object
-export function validOptions(options: any) {
+export function validOptions(options: MongoClientOptions): void | MongoError {
   const _validOptions = validOptionNames.concat(legacyOptionNames);
 
   for (const name in options) {
@@ -138,12 +153,12 @@ export function validOptions(options: any) {
   }
 }
 
-const LEGACY_OPTIONS_MAP: any = validOptionNames.reduce((obj: any, name: any) => {
+const LEGACY_OPTIONS_MAP = validOptionNames.reduce((obj, name: string) => {
   obj[name.toLowerCase()] = name;
   return obj;
-}, {});
+}, {} as { [key: string]: string });
 
-function addListeners(mongoClient: any, topology: any) {
+function addListeners(mongoClient: MongoClient, topology: Topology) {
   topology.on('authenticated', createListener(mongoClient, 'authenticated'));
   topology.on('error', createListener(mongoClient, 'error'));
   topology.on('timeout', createListener(mongoClient, 'timeout'));
@@ -155,87 +170,96 @@ function addListeners(mongoClient: any, topology: any) {
   topology.on('reconnect', createListener(mongoClient, 'reconnect'));
 }
 
-function resolveTLSOptions(options: any) {
-  if (options.tls == null) {
+function resolveTLSOptions(options: MongoClientOptions) {
+  if (!options.tls) {
     return;
   }
 
-  ['sslCA', 'sslKey', 'sslCert'].forEach((optionName: any) => {
+  const keyFileOptionNames = ['sslCA', 'sslKey', 'sslCert'] as const;
+  for (const optionName of keyFileOptionNames) {
     if (options[optionName]) {
       options[optionName] = fs.readFileSync(options[optionName]);
     }
-  });
+  }
 }
 
-export function connect(mongoClient: any, url: any, options: any, callback: Callback) {
+export function connect(
+  mongoClient: MongoClient,
+  url: string,
+  options: ConnectionOptions,
+  callback: Callback<MongoClient>
+): void {
   options = Object.assign({}, options);
 
   // If callback is null throw an exception
-  if (callback == null) {
+  if (!callback) {
     throw new Error('no callback function provided');
   }
 
   let didRequestAuthentication = false;
   const logger = new Logger('MongoClient', options);
 
-  parseConnectionString(url, options, (err?: any, _object?: any) => {
+  parseConnectionString(url, options, (err, connectionStringOptions) => {
     // Do not attempt to connect if parsing error
     if (err) return callback(err);
 
     // Flatten
-    const object = transformUrlOptions(_object);
+    const urlOptions = transformUrlOptions(connectionStringOptions);
 
     // Parse the string
-    const _finalOptions = createUnifiedOptions(object, options);
+    const finalOptions = createUnifiedOptions(urlOptions, options);
 
     // Check if we have connection and socket timeout set
-    if (_finalOptions.socketTimeoutMS == null) _finalOptions.socketTimeoutMS = 360000;
-    if (_finalOptions.connectTimeoutMS == null) _finalOptions.connectTimeoutMS = 10000;
-    if (_finalOptions.retryWrites == null) _finalOptions.retryWrites = true;
-    if (_finalOptions.useRecoveryToken == null) _finalOptions.useRecoveryToken = true;
-    if (_finalOptions.readPreference == null) _finalOptions.readPreference = 'primary';
+    if (finalOptions.socketTimeoutMS == null) finalOptions.socketTimeoutMS = 360000;
+    if (finalOptions.connectTimeoutMS == null) finalOptions.connectTimeoutMS = 10000;
+    if (finalOptions.retryWrites == null) finalOptions.retryWrites = true;
+    if (finalOptions.useRecoveryToken == null) finalOptions.useRecoveryToken = true;
+    if (finalOptions.readPreference == null) finalOptions.readPreference = 'primary';
 
-    if (_finalOptions.db_options && _finalOptions.db_options.auth) {
-      delete _finalOptions.db_options.auth;
+    if (finalOptions.db_options && finalOptions.db_options.auth) {
+      delete finalOptions.db_options.auth;
     }
 
     // `journal` should be translated to `j` for the driver
-    if (_finalOptions.journal != null) {
-      _finalOptions.j = _finalOptions.journal;
-      _finalOptions.journal = undefined;
+    if (finalOptions.journal != null) {
+      finalOptions.j = finalOptions.journal;
+      finalOptions.journal = undefined;
     }
 
     // resolve tls options if needed
-    resolveTLSOptions(_finalOptions);
+    resolveTLSOptions(finalOptions);
 
     // Store the merged options object
-    mongoClient.s.options = _finalOptions;
+    mongoClient.s.options = finalOptions;
 
     // Failure modes
-    if (object.servers.length === 0) {
+    if (urlOptions.servers.length === 0) {
       return callback(new Error('connection string must contain at least one seed host'));
     }
 
-    if (_finalOptions.auth && !_finalOptions.credentials) {
+    if (finalOptions.auth && !finalOptions.credentials) {
       try {
         didRequestAuthentication = true;
-        _finalOptions.credentials = generateCredentials(
+        finalOptions.credentials = generateCredentials(
           mongoClient,
-          _finalOptions.auth.user,
-          _finalOptions.auth.password,
-          _finalOptions
+          finalOptions.auth.user,
+          finalOptions.auth.password,
+          finalOptions
         );
       } catch (err) {
         return callback(err);
       }
     }
 
-    return createTopology(mongoClient, _finalOptions, connectCallback);
+    return createTopology(mongoClient, finalOptions, connectCallback);
   });
 
-  function connectCallback(err?: any, topology?: any) {
-    const warningMessage = `seed list contains no mongos proxies, replicaset connections requires the parameter replicaSet to be supplied in the URI or options object, mongodb://server:port/db?replicaSet=name`;
-    if (err && err.message === 'no mongos proxies found in seed list') {
+  function connectCallback(err?: AnyError, topology?: MongoClient) {
+    const warningMessage =
+      'seed list contains no mongos proxies, replicaset connections requires ' +
+      'the parameter replicaSet to be supplied in the URI or options object, ' +
+      'mongodb://server:port/db?replicaSet=name';
+    if ((err && err.message === 'no mongos proxies found in seed list') || !topology) {
       if (logger.isWarn()) {
         logger.warn(warningMessage);
       }
@@ -253,14 +277,15 @@ export function connect(mongoClient: any, url: any, options: any, callback: Call
   }
 }
 
-function createListener(mongoClient: any, event: any) {
+export type ListenerFunction = (v1: any, v2: any) => boolean;
+function createListener(mongoClient: MongoClient, event: string): ListenerFunction {
   const eventSet = new Set(['all', 'fullsetup', 'open', 'reconnect']);
-  return (v1: any, v2: any) => {
+  return (v1, v2) => {
     if (eventSet.has(event)) {
       return mongoClient.emit(event, mongoClient);
     }
 
-    mongoClient.emit(event, v1, v2);
+    return mongoClient.emit(event, v1, v2);
   };
 }
 
@@ -277,17 +302,18 @@ const DEPRECATED_UNIFIED_EVENTS = new Set([
   'open'
 ]);
 
-function registerDeprecatedEventNotifiers(client: any) {
-  client.on('newListener', (eventName: any) => {
+function registerDeprecatedEventNotifiers(client: MongoClient) {
+  client.on('newListener', (eventName: string) => {
     if (DEPRECATED_UNIFIED_EVENTS.has(eventName)) {
       emitDeprecationWarning(
-        `The \`${eventName}\` event is no longer supported by the unified topology, please read more by visiting http://bit.ly/2D8WfT6`
+        `The \`${eventName}\` event is no longer supported by the unified topology, ` +
+          'please read more by visiting http://bit.ly/2D8WfT6'
       );
     }
   });
 }
 
-function createTopology(mongoClient: any, options: any, callback: Callback) {
+function createTopology(mongoClient: MongoClient, options: MongoClientOptions, callback: Callback) {
   // Set default options
   translateOptions(options);
 
@@ -299,7 +325,8 @@ function createTopology(mongoClient: any, options: any, callback: Callback) {
     } catch (err) {
       callback(
         new MongoError(
-          'Auto-encryption requested, but the module is not installed. Please add `mongodb-client-encryption` as a dependency of your project'
+          'Auto-encryption requested, but the module is not installed. ' +
+            'Please add `mongodb-client-encryption` as a dependency of your project'
         )
       );
       return;
@@ -310,7 +337,8 @@ function createTopology(mongoClient: any, options: any, callback: Callback) {
       if (typeof mongodbClientEncryption.extension !== 'function') {
         callback(
           new MongoError(
-            'loaded version of `mongodb-client-encryption` does not have property `extension`. Please make sure you are loading the correct version of `mongodb-client-encryption`'
+            'loaded version of `mongodb-client-encryption` does not have property `extension`. ' +
+              'Please make sure you are loading the correct version of `mongodb-client-encryption`'
           )
         );
       }
@@ -339,13 +367,13 @@ function createTopology(mongoClient: any, options: any, callback: Callback) {
 
   // initialize CSFLE if requested
   if (options.autoEncrypter) {
-    options.autoEncrypter.init((err: any) => {
+    options.autoEncrypter.init(err => {
       if (err) {
         callback(err);
         return;
       }
 
-      topology.connect(options, (err: any) => {
+      topology.connect(options, err => {
         if (err) {
           topology.close({ force: true });
           callback(err);
@@ -360,7 +388,7 @@ function createTopology(mongoClient: any, options: any, callback: Callback) {
   }
 
   // otherwise connect normally
-  topology.connect(options, (err: any) => {
+  topology.connect(options, err => {
     if (err) {
       topology.close({ force: true });
       return callback(err);
@@ -406,7 +434,20 @@ function createUnifiedOptions(finalOptions: any, options: any) {
   return finalOptions;
 }
 
-function generateCredentials(client: any, username: any, password: any, options: any) {
+export interface GenerateCredentialsOptions {
+  authSource: string;
+  authdb: string;
+  dbName: string;
+  authMechanism: AuthMechanism;
+  authMechanismProperties: Document;
+}
+
+function generateCredentials(
+  client: MongoClient,
+  username: string,
+  password: string,
+  options: GenerateCredentialsOptions
+) {
   options = Object.assign({}, options);
 
   // the default db to authenticate against is 'self'
@@ -414,7 +455,8 @@ function generateCredentials(client: any, username: any, password: any, options:
   const source = options.authSource || options.authdb || options.dbName;
 
   // authMechanism
-  const authMechanism = options?.authMechanism?.toUpperCase() || 'DEFAULT';
+  const authMechanismRaw = options.authMechanism || 'DEFAULT';
+  const authMechanism = authMechanismRaw.toUpperCase();
   const mechanismProperties = options.authMechanismProperties;
 
   if (!VALID_AUTH_MECHANISMS.has(authMechanism)) {
@@ -425,7 +467,7 @@ function generateCredentials(client: any, username: any, password: any, options:
   }
 
   return new MongoCredentials({
-    mechanism: authMechanism,
+    mechanism: authMechanism as AuthMechanism,
     mechanismProperties,
     source,
     username,
@@ -445,7 +487,7 @@ function mergeOptions(target: any, source: any, flatten: any) {
   return target;
 }
 
-function relayEvents(mongoClient: any, topology: any) {
+function relayEvents(mongoClient: MongoClient, topology: Topology) {
   const serverOrCommandEvents = [
     // APM
     'commandStarted',
@@ -477,49 +519,49 @@ function relayEvents(mongoClient: any, topology: any) {
   });
 }
 
-function transformUrlOptions(_object: any) {
-  const object = Object.assign({ servers: _object.hosts }, _object.options);
-  for (const name in object) {
+function transformUrlOptions(connStrOptions: any) {
+  const connStrOpts = Object.assign({ servers: connStrOptions.hosts }, connStrOptions.options);
+  for (const name in connStrOpts) {
     const camelCaseName = LEGACY_OPTIONS_MAP[name];
     if (camelCaseName) {
-      object[camelCaseName] = object[name];
+      connStrOpts[camelCaseName] = connStrOpts[name];
     }
   }
 
-  const hasUsername = _object.auth && _object.auth.username;
-  const hasAuthMechanism = _object.options && _object.options.authMechanism;
+  const hasUsername = connStrOptions.auth && connStrOptions.auth.username;
+  const hasAuthMechanism = connStrOptions.options && connStrOptions.options.authMechanism;
   if (hasUsername || hasAuthMechanism) {
-    object.auth = Object.assign({}, _object.auth);
-    if (object.auth.db) {
-      object.authSource = object.authSource || object.auth.db;
+    connStrOpts.auth = Object.assign({}, connStrOptions.auth);
+    if (connStrOpts.auth.db) {
+      connStrOpts.authSource = connStrOpts.authSource || connStrOpts.auth.db;
     }
 
-    if (object.auth.username) {
-      object.auth.user = object.auth.username;
+    if (connStrOpts.auth.username) {
+      connStrOpts.auth.user = connStrOpts.auth.username;
     }
   }
 
-  if (_object.defaultDatabase) {
-    object.dbName = _object.defaultDatabase;
+  if (connStrOptions.defaultDatabase) {
+    connStrOpts.dbName = connStrOptions.defaultDatabase;
   }
 
-  if (object.maxPoolSize) {
-    object.poolSize = object.maxPoolSize;
+  if (connStrOpts.maxPoolSize) {
+    connStrOpts.poolSize = connStrOpts.maxPoolSize;
   }
 
-  if (object.readConcernLevel) {
-    object.readConcern = new ReadConcern(object.readConcernLevel);
+  if (connStrOpts.readConcernLevel) {
+    connStrOpts.readConcern = new ReadConcern(connStrOpts.readConcernLevel);
   }
 
-  if (object.wTimeoutMS) {
-    object.wtimeout = object.wTimeoutMS;
+  if (connStrOpts.wTimeoutMS) {
+    connStrOpts.wtimeout = connStrOpts.wTimeoutMS;
   }
 
-  if (_object.srvHost) {
-    object.srvHost = _object.srvHost;
+  if (connStrOptions.srvHost) {
+    connStrOpts.srvHost = connStrOptions.srvHost;
   }
 
-  return object;
+  return connStrOpts;
 }
 
 function translateOptions(options: any) {
@@ -542,7 +584,7 @@ function translateOptions(options: any) {
   if (options.socketTimeoutMS == null) options.socketTimeoutMS = 360000;
   if (options.connectTimeoutMS == null) options.connectTimeoutMS = 10000;
 
-  const translations: any = {
+  const translations = {
     // SSL translation options
     sslCA: 'ca',
     sslCRL: 'crl',
@@ -560,7 +602,7 @@ function translateOptions(options: any) {
     connectWithNoPrimary: 'secondaryOnlyConnectionAllowed',
     // Mongos options
     acceptableLatencyMS: 'localThresholdMS'
-  };
+  } as { [key: string]: string };
 
   for (const name in options) {
     if (translations[name]) {

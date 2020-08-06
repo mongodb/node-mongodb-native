@@ -2,36 +2,39 @@ import { OperationBase } from './operation';
 import { handleCallback } from '../utils';
 import { loadCollection } from '../dynamic_loaders';
 import type { Callback } from '../types';
+import type { Db } from '../db';
+
+export interface CollectionsOperationOptions {
+  nameOnly: boolean;
+}
 
 export class CollectionsOperation extends OperationBase {
-  db: any;
+  db: Db;
 
-  constructor(db: any, options: any) {
+  constructor(db: Db, options: CollectionsOperationOptions) {
     super(options);
 
     this.db = db;
   }
 
-  execute(callback: Callback) {
+  execute(callback: Callback): void {
     const db = this.db;
-    let options = this.options;
+    let options: CollectionsOperationOptions = this.options;
 
     const Collection = loadCollection();
 
     options = Object.assign({}, options, { nameOnly: true });
     // Let's get the collection names
-    db.listCollections({}, options).toArray((err?: any, documents?: any) => {
-      if (err != null) return handleCallback(callback, err, null);
+    db.listCollections({}, options).toArray((err, documents) => {
+      if (err || !documents) return handleCallback(callback, err, null);
       // Filter collections removing any illegal ones
-      documents = documents.filter((doc: any) => {
-        return doc.name.indexOf('$') === -1;
-      });
+      documents = documents.filter(doc => doc.name.indexOf('$') === -1);
 
       // Return the collection objects
       handleCallback(
         callback,
         null,
-        documents.map((d: any) => {
+        documents.map(d => {
           return new Collection(
             db,
             db.s.topology,

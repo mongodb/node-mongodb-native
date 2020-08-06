@@ -1,12 +1,15 @@
-import { indexInformation } from './common_functions';
-import { OperationBase, Aspect, defineAspects } from './operation';
+import { indexInformation, IndexInformationOptions } from './common_functions';
+import { OperationBase, Aspect, defineAspects, OperationOptions } from './operation';
 import { MongoError } from '../error';
-import { maxWireVersion, parseIndexOptions, handleCallback } from '../utils';
-import { CommandOperation } from './command';
+import { maxWireVersion, parseIndexOptions, handleCallback, MongoDBNamespace } from '../utils';
+import { CommandOperation, CommandOperationOptions } from './command';
 import { ReadPreference } from '../read_preference';
 
 import type { Server } from '../sdam/server';
-import type { Callback } from '../types';
+import type { Callback, Document } from '../types';
+import type { Collection } from '../collection';
+import type { Db } from '../db';
+import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 
 const LIST_INDEXES_WIRE_VERSION = 3;
 const VALID_INDEX_OPTIONS = new Set([
@@ -40,14 +43,40 @@ const VALID_INDEX_OPTIONS = new Set([
   'wildcardProjection'
 ]);
 
-function makeIndexSpec(indexOrSpec: any, options: any) {
+export interface IndexOptions {
+  background: boolean;
+  unique: boolean;
+  name: string;
+  partialFilterExpression: Document;
+  sparse: boolean;
+  expireAfterSeconds: number;
+  storageEngine: Document;
+  collation: CollationOptions;
+  // text indexes
+  weights: Document;
+  default_language: string;
+  language_override: string;
+  textIndexVersion: number;
+  // 2d-sphere indexes
+  '2dsphereIndexVersion': number;
+  // 2d indexes
+  bits: number;
+  min: number;
+  max: number;
+  // geoHaystack Indexes
+  bucketSize: number;
+  // wildcard indexes
+  wildcardProjection: Document;
+}
+
+function makeIndexSpec(indexOrSpec: any, options: any): IndexDescription {
   const indexParameters = parseIndexOptions(indexOrSpec);
 
   // Generate the index name
   const name = typeof options.name === 'string' ? options.name : indexParameters.name;
 
   // Set up the index
-  const indexSpec: any = { name, key: indexParameters.fieldHash };
+  const indexSpec: Document = { name, key: indexParameters.fieldHash };
 
   // merge valid index options into the index spec
   for (const optionName in options) {
@@ -56,19 +85,19 @@ function makeIndexSpec(indexOrSpec: any, options: any) {
     }
   }
 
-  return indexSpec;
+  return indexSpec as IndexDescription;
 }
 
 export class IndexesOperation extends OperationBase {
-  collection: any;
+  collection: Collection;
 
-  constructor(collection: any, options: any) {
+  constructor(collection: Collection, options: OperationOptions) {
     super(options);
 
     this.collection = collection;
   }
 
-  execute(callback: Callback) {
+  execute(callback: Callback): void {
     const coll = this.collection;
     let options = this.options;
 
@@ -77,12 +106,23 @@ export class IndexesOperation extends OperationBase {
   }
 }
 
+export interface IndexDescription {
+  collation: CollationOptions;
+  name: string;
+  key: Document;
+}
+
 export class CreateIndexesOperation extends CommandOperation {
   collectionName: string;
   onlyReturnNameOfCreatedIndex?: boolean;
-  indexes: any;
+  indexes: IndexDescription[];
 
-  constructor(parent: any, collectionName: string, indexes: any[], options: any) {
+  constructor(
+    parent: Collection | Db,
+    collectionName: string,
+    indexes: IndexDescription[],
+    options: CommandOperationOptions
+  ) {
     super(parent, options);
     this.collectionName = collectionName;
 
@@ -92,7 +132,7 @@ export class CreateIndexesOperation extends CommandOperation {
     }
   }
 
-  execute(server: Server, callback: Callback) {
+  execute(server: Server, callback: Callback): void {
     const options = this.options;
     const indexes = this.indexes;
 
@@ -104,7 +144,8 @@ export class CreateIndexesOperation extends CommandOperation {
       if (indexes[i].collation && serverWireVersion < 5) {
         callback(
           new MongoError(
-            `Server ${server.name}, which reports wire version ${serverWireVersion}, does not support collation`
+            `Server ${server.name}, which reports wire version ${serverWireVersion}, ` +
+              'does not support collation'
           )
         );
         return;
@@ -122,7 +163,7 @@ export class CreateIndexesOperation extends CommandOperation {
       }
     }
 
-    const cmd = { createIndexes: this.collectionName, indexes } as any;
+    const cmd: Document = { createIndexes: this.collectionName, indexes };
 
     if (options.commitQuorum != null) {
       if (serverWireVersion < 9) {
@@ -149,7 +190,7 @@ export class CreateIndexesOperation extends CommandOperation {
 }
 
 export class CreateIndexOperation extends CreateIndexesOperation {
-  constructor(parent: any, collectionName: string, indexOrSpec: any, options: any) {
+  constructor(parent: Collection | Db, collectionName: string, indexOrSpec: any, options: any) {
     // createIndex can be called with a variety of styles:
     //   coll.createIndex('a');
     //   coll.createIndex({ a: 1 });
@@ -161,10 +202,10 @@ export class CreateIndexOperation extends CreateIndexesOperation {
 }
 
 export class EnsureIndexOperation extends CreateIndexOperation {
-  db: any;
+  db: Db;
   collectionName: string;
 
-  constructor(db: any, collectionName: string, fieldOrSpec: any, options?: object) {
+  constructor(db: Db, collectionName: string, fieldOrSpec: any, options?: object) {
     super(db, collectionName, fieldOrSpec, options);
 
     this.readPreference = ReadPreference.primary;
@@ -172,18 +213,18 @@ export class EnsureIndexOperation extends CreateIndexOperation {
     this.collectionName = collectionName;
   }
 
-  execute(server: Server, callback: Callback) {
+  execute(server: Server, callback: Callback): void {
     const indexName = this.indexes[0].name;
     const cursor = this.db.collection(this.collectionName).listIndexes();
-    cursor.toArray((err: MongoError, indexes: any) => {
+    cursor.toArray((err, indexes) => {
       /// ignore "NamespaceNotFound" errors
-      if (err && err.code !== 26) {
+      if (err && (err as MongoError).code !== 26) {
         return callback(err);
       }
 
       if (indexes) {
         indexes = Array.isArray(indexes) ? indexes : [indexes];
-        if (indexes.some((index: any) => index.name === indexName)) {
+        if (indexes.some(index => index.name === indexName)) {
           callback(undefined, indexName);
           return;
         }
@@ -195,16 +236,16 @@ export class EnsureIndexOperation extends CreateIndexOperation {
 }
 
 export class DropIndexOperation extends CommandOperation {
-  collection: any;
-  indexName: any;
+  collection: Collection;
+  indexName: string;
 
-  constructor(collection: any, indexName: any, options: any) {
+  constructor(collection: Collection, indexName: string, options: any) {
     super(collection, options);
     this.collection = collection;
     this.indexName = indexName;
   }
 
-  execute(server: Server, callback: Callback) {
+  execute(server: Server, callback: Callback): void {
     const cmd = { dropIndexes: this.collection.collectionName, index: this.indexName };
     super.executeCommand(server, cmd, (err, result) => {
       if (typeof callback !== 'function') return;
@@ -215,12 +256,12 @@ export class DropIndexOperation extends CommandOperation {
 }
 
 export class DropIndexesOperation extends DropIndexOperation {
-  constructor(collection: any, options: any) {
+  constructor(collection: Collection, options: any) {
     super(collection, '*', options);
   }
 
-  execute(server: Server, callback: Callback) {
-    super.execute(server, (err: any) => {
+  execute(server: Server, callback: Callback): void {
+    super.execute(server, err => {
       if (err) return handleCallback(callback, err, false);
       handleCallback(callback, null, true);
     });
@@ -228,15 +269,15 @@ export class DropIndexesOperation extends DropIndexOperation {
 }
 
 export class ListIndexesOperation extends CommandOperation {
-  collectionNamespace: any;
+  collectionNamespace: MongoDBNamespace;
 
-  constructor(collection: any, options: any) {
+  constructor(collection: Collection, options: any) {
     super(collection, options, { fullResponse: true });
 
     this.collectionNamespace = collection.s.namespace;
   }
 
-  execute(server: Server, callback: Callback) {
+  execute(server: Server, callback: Callback): void {
     const serverWireVersion = maxWireVersion(server);
     if (serverWireVersion < LIST_INDEXES_WIRE_VERSION) {
       const systemIndexesNS = this.collectionNamespace.withCollection('system.indexes').toString();
@@ -256,57 +297,56 @@ export class ListIndexesOperation extends CommandOperation {
 }
 
 export class IndexExistsOperation extends OperationBase {
-  collection: any;
-  indexes: any;
+  collection: Collection;
+  indexes: string | string[];
 
-  constructor(collection: any, indexes: any, options: any) {
+  constructor(
+    collection: Collection,
+    indexes: string | string[],
+    options: IndexInformationOptions
+  ) {
     super(options);
 
     this.collection = collection;
     this.indexes = indexes;
   }
 
-  execute(callback: Callback) {
+  execute(callback: Callback): void {
     const coll = this.collection;
     const indexes = this.indexes;
     const options = this.options;
 
-    indexInformation(
-      coll.s.db,
-      coll.collectionName,
-      options,
-      (err?: any, indexInformation?: any) => {
-        // If we have an error return
-        if (err != null) return handleCallback(callback, err, null);
-        // Let's check for the index names
-        if (!Array.isArray(indexes))
-          return handleCallback(callback, null, indexInformation[indexes] != null);
-        // Check in list of indexes
-        for (let i = 0; i < indexes.length; i++) {
-          if (indexInformation[indexes[i]] == null) {
-            return handleCallback(callback, null, false);
-          }
+    indexInformation(coll.s.db, coll.collectionName, options, (err, indexInformation) => {
+      // If we have an error return
+      if (err != null) return handleCallback(callback, err, null);
+      // Let's check for the index names
+      if (!Array.isArray(indexes))
+        return handleCallback(callback, null, indexInformation[indexes] != null);
+      // Check in list of indexes
+      for (let i = 0; i < indexes.length; i++) {
+        if (indexInformation[indexes[i]] == null) {
+          return handleCallback(callback, null, false);
         }
-
-        // All keys found return true
-        return handleCallback(callback, null, true);
       }
-    );
+
+      // All keys found return true
+      return handleCallback(callback, null, true);
+    });
   }
 }
 
 export class IndexInformationOperation extends OperationBase {
-  db: any;
-  name: any;
+  db: Db;
+  name: string;
 
-  constructor(db: any, name: any, options: any) {
+  constructor(db: Db, name: string, options: IndexInformationOptions) {
     super(options);
 
     this.db = db;
     this.name = name;
   }
 
-  execute(callback: Callback) {
+  execute(callback: Callback): void {
     const db = this.db;
     const name = this.name;
     const options = this.options;

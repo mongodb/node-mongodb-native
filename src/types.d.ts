@@ -87,6 +87,7 @@ export interface AutoEncryptionOptions {
 }
 
 export interface AutoEncrypter {
+  init(cb: Callback): void;
   encrypt(ns: string, cmd: Document, options: any, callback: Callback<Document>): void;
   decrypt(cmd: Document, options: any, callback: Callback<Document>): void;
 }

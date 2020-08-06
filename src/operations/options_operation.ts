@@ -2,32 +2,31 @@ import { OperationBase } from './operation';
 import { handleCallback } from '../utils';
 import { MongoError } from '../error';
 import type { Callback } from '../types';
+import type { Collection } from '../collection';
 
 export class OptionsOperation extends OperationBase {
-  collection: any;
+  collection: Collection;
 
-  constructor(collection: any, options: any) {
+  constructor(collection: Collection, options: any) {
     super(options);
 
     this.collection = collection;
   }
 
-  execute(callback: Callback) {
+  execute(callback: Callback): void {
     const coll = this.collection;
     const opts = this.options;
 
-    coll.s.db
-      .listCollections({ name: coll.collectionName }, opts)
-      .toArray((err?: any, collections?: any) => {
-        if (err) return handleCallback(callback, err);
-        if (collections.length === 0) {
-          return handleCallback(
-            callback,
-            MongoError.create({ message: `collection ${coll.namespace} not found`, driver: true })
-          );
-        }
+    coll.s.db.listCollections({ name: coll.collectionName }, opts).toArray((err, collections) => {
+      if (err || !collections) return handleCallback(callback, err);
+      if (collections.length === 0) {
+        return handleCallback(
+          callback,
+          MongoError.create({ message: `collection ${coll.namespace} not found`, driver: true })
+        );
+      }
 
-        handleCallback(callback, err, collections[0].options || null);
-      });
+      handleCallback(callback, err, collections[0].options || null);
+    });
   }
 }

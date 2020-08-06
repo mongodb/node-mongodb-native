@@ -1,4 +1,4 @@
-import { Aspect, OperationBase } from './operation';
+import { Aspect, OperationBase, OperationOptions } from './operation';
 import { ReadConcern } from '../read_concern';
 import { WriteConcern } from '../write_concern';
 import { maxWireVersion, MongoDBNamespace } from '../utils';
@@ -8,13 +8,18 @@ import { MongoError } from '../error';
 import type { Logger } from '../logger';
 
 import type { Server } from '../sdam/server';
-import type { Callback } from '../types';
+import type { Callback, Document } from '../types';
+import type { Collection } from '../collection';
+import type { Db } from '../db';
 
 const SUPPORTS_WRITE_CONCERN_AND_COLLATION = 5;
 
-interface CommandOperationOptions {
+export interface CommandOptions extends OperationOptions {
   dbName?: string;
   authdb?: string;
+}
+
+export interface CommandOperationOptions extends OperationOptions {
   fullResponse?: boolean;
 }
 
@@ -33,7 +38,11 @@ export class CommandOperation extends OperationBase {
    * @param {any} [options]
    * @param {any} [operationOptions]
    */
-  constructor(parent: any, options?: any, operationOptions?: CommandOperationOptions) {
+  constructor(
+    parent: Collection | Db,
+    options?: CommandOptions,
+    operationOptions?: CommandOperationOptions
+  ) {
     super(options);
 
     // NOTE: this was explicitly added for the add/remove user operations, it's likely
@@ -68,7 +77,7 @@ export class CommandOperation extends OperationBase {
     }
   }
 
-  executeCommand(server: Server, cmd: any, callback: Callback) {
+  executeCommand(server: Server, cmd: Document, callback: Callback): void {
     // TODO: consider making this a non-enumerable property
     this.server = server;
 
@@ -127,10 +136,14 @@ export class CommandOperation extends OperationBase {
   }
 }
 
-function resolveWriteConcern(parent: any, options: any) {
-  return WriteConcern.fromOptions(options) || (parent && parent.writeConcern);
+function resolveWriteConcern(parent: Collection | Db | undefined, options: any) {
+  return (
+    WriteConcern.fromOptions(options) || (parent && 'writeConcern' in parent && parent.writeConcern)
+  );
 }
 
-function resolveReadConcern(parent: any, options: any) {
-  return ReadConcern.fromOptions(options) || (parent && parent.readConcern);
+function resolveReadConcern(parent: Collection | Db | undefined, options: any) {
+  return (
+    ReadConcern.fromOptions(options) || (parent && 'readConcern' in parent && parent.readConcern)
+  );
 }

@@ -93,7 +93,7 @@ export class EvalGroupOperation extends EvalOperation {
     // Pass in the function text to execute within mongodb.
     const groupfn = groupFunction.replace(/ reduce;/, reduce.toString() + ';');
 
-    super(collection, new Code(groupfn, scope), null, options);
+    super(collection, new Code(groupfn, scope), undefined, options);
   }
 
   execute(server: Server, callback: Callback) {
