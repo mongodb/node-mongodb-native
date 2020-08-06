@@ -1,9 +1,9 @@
-import { AggregateOperation, AggregateOperationOptions } from './aggregate';
+import { AggregateOperation, AggregateOptions } from './aggregate';
 import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 
-export interface CountDocumentsOperationOptions extends AggregateOperationOptions {
+export interface CountDocumentsOperationOptions extends AggregateOptions {
   skip: number;
   limit: number;
 }

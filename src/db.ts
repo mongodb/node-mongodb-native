@@ -21,7 +21,7 @@ import {
   MongoDBNamespace
 } from './utils';
 import { AggregateOperation } from './operations/aggregate';
-import { AddUserOperation } from './operations/add_user';
+import { AddUserOperation, AddUserOptions } from './operations/add_user';
 import { CollectionsOperation } from './operations/collections';
 import { DbStatsOperation } from './operations/stats';
 import { RunCommandOperation, RunAdminCommandOperation } from './operations/run_command';
@@ -616,19 +616,19 @@ export class Db {
    * @param {string} username The username.
    * @param {any} password The password.
    * @param {object} [options] Optional settings.
-   * @param {(number|string)} [options.w] The write concern.
-   * @param {number} [options.wtimeout] The write concern timeout.
-   * @param {boolean} [options.j=false] Specify a journal write concern.
-   * @param {object} [options.customData] Custom data associated with the user (only Mongodb 2.6 or higher)
-   * @param {object[]} [options.roles] Roles associated with the created user (only Mongodb 2.6 or higher)
-   * @param {ClientSession} [options.session] optional session to use for this operation
+   
+   
+   
+   
+   
+   
    * @param {Db~resultCallback} [callback] The command result callback
    * @returns {Promise<void> | void} returns Promise if no callback passed
    */
   addUser(
     username: string,
     password: any,
-    options?: any,
+    options?: AddUserOptions,
     callback?: Callback
   ): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
@@ -640,7 +640,7 @@ export class Db {
       password = null;
     }
 
-    const addUserOperation = new AddUserOperation(this, username, password, options);
+    const addUserOperation = new AddUserOperation(this, username, password, options!);
 
     return executeOperation(this.s.topology, addUserOperation, callback);
   }

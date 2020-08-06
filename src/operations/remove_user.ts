@@ -1,10 +1,10 @@
 import { Aspect, defineAspects } from './operation';
-import { CommandOperation, CommandOperationOptions } from './command';
+import { CommandOperation, CommandOpOptions } from './command';
 import type { Callback } from '../types';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
 
-export interface RemoveUserOptions extends CommandOperationOptions {
+export interface RemoveUserOptions extends CommandOpOptions {
   /** The write concern. */
   w: string | number;
   /** The write concern timeout. */

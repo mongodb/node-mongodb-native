@@ -3,11 +3,11 @@ import { MongoError } from '../error';
 import { OperationBase } from './operation';
 import type { Callback, Document } from '../types';
 import type { Collection } from '../collection';
-import type { CommandOperationOptions } from './command';
+import type { CommandOpOptions } from './command';
 import type { BulkOperationBase } from '../bulk/common';
 import type { WriteConcern } from '../write_concern';
 
-export interface BulkWriteOperationOptions extends CommandOperationOptions {
+export interface BulkWriteOperationOptions extends CommandOpOptions {
   s: 4;
   ignoreUndefined: boolean;
   ordered: boolean;

@@ -1,4 +1,4 @@
-import { CommandOperation, CommandOperationOptions } from './command';
+import { CommandOperation, CommandOpOptions } from './command';
 import { ReadPreference } from '../read_preference';
 import { Aspect, defineAspects } from './operation';
 import { applyWriteConcern } from '../utils';
@@ -24,7 +24,7 @@ const ILLEGAL_COMMAND_FIELDS = new Set([
   'writeConcern'
 ]);
 
-export interface CreateCollectionOperationOptions extends CommandOperationOptions {
+export interface CreateCollectionOperationOptions extends CommandOpOptions {
   [key: string]: any;
 }
 

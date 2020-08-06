@@ -9,7 +9,7 @@ import {
   hasAtomicOperators
 } from '../utils';
 import { MongoError } from '../error';
-import { CommandOperation, CommandOperationOptions } from './command';
+import { CommandOperation, CommandOpOptions } from './command';
 import { defineAspects, Aspect, Hint } from './operation';
 import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
@@ -18,7 +18,7 @@ import type { WriteConcern } from '../write_concern';
 
 export type Sort = { [key: string]: number | string };
 
-export interface FindOptions extends CommandOperationOptions {
+export interface FindOptions extends CommandOpOptions {
   update: boolean;
   new: boolean;
   returnOriginal: undefined;

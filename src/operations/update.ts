@@ -8,7 +8,9 @@ import type { Collection } from '../collection';
 import type { WriteConcern } from '../write_concern';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 
-export interface UpdateOptions extends OperationOptions {
+export interface UpdateOpOptions extends OperationOptions {
+  serializeFunctions?: boolean;
+  retryWrites?: boolean;
   arrayFilters?: Document[];
   upsert?: boolean;
   writeConcern?: WriteConcern;
@@ -32,7 +34,7 @@ export class UpdateOperation extends OperationBase {
   namespace: MongoDBNamespace;
   operations: OperationOptions[];
 
-  constructor(ns: MongoDBNamespace, ops: Document[], options: UpdateOptions) {
+  constructor(ns: MongoDBNamespace, ops: Document[], options: UpdateOpOptions) {
     super(options);
     this.namespace = ns;
     this.operations = ops;
@@ -56,7 +58,7 @@ export class UpdateOneOperation extends CommandOperation {
     collection: Collection,
     filter: Document,
     update: UpdateOperators,
-    options: UpdateOptions
+    options: UpdateOpOptions
   ) {
     super(collection, options);
 

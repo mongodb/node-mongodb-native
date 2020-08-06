@@ -1,4 +1,4 @@
-import { CommandOperation, CommandOperationOptions } from './command';
+import { CommandOperation, CommandOpOptions } from './command';
 import { ReadPreference } from '../read_preference';
 import { MongoError } from '../error';
 import { maxWireVersion } from '../utils';
@@ -14,15 +14,33 @@ import type { ReadConcern } from '../read_concern';
 const DB_AGGREGATE_COLLECTION = 1 as const;
 const MIN_WIRE_VERSION_$OUT_READ_CONCERN_SUPPORT = 8 as const;
 
-export interface AggregateOperationOptions extends CommandOperationOptions {
-  bypassDocumentValidation: boolean;
+export interface AggregateOptions extends CommandOpOptions {
   allowDiskUse: boolean;
-  hint: Hint;
-  full: boolean;
+  /** The number of documents to return per batch. */
   batchSize: boolean;
-  out?: string;
-  explain?: ReadConcern | WriteConcern;
+  bypassDocumentValidation: boolean;
   cursor: Cursor;
+  explain?: ReadConcern | WriteConcern;
+  full: boolean;
+  hint: Hint;
+  out?: string;
+
+  /** number} [options.batchSize=1000]  See {@link https://docs.mongodb.com/manual/reference/command/aggregate|aggregation documentation}. */
+  /** object} [options.cursor] Return the query as cursor, on 2.6 > it returns as a real cursor on pre 2.6 it returns as an emulated cursor. */
+  /** number} [options.cursor.batchSize=1000] Deprecated. Use `options.batchSize` */
+  /** boolean} [options.explain=false] Explain returns the aggregation execution plan (requires mongodb 2.6 >). */
+  /** boolean} [options.allowDiskUse=false] allowDiskUse lets the server know if it can use disk to store temporary results for the aggregation (requires mongodb 2.6 >). */
+  /** number} [options.maxTimeMS] maxTimeMS specifies a cumulative time limit in milliseconds for processing operations on the cursor. MongoDB interrupts the operation at the earliest following interrupt point. */
+  /** number} [options.maxAwaitTimeMS] The maximum amount of time for the server to wait on new documents to satisfy a tailable cursor query. */
+  /** boolean} [options.bypassDocumentValidation=false] Allow driver to bypass schema validation in MongoDB 3.2 or higher. */
+  /** boolean} [options.raw=false] Return document results as raw BSON buffers. */
+  /** boolean} [options.promoteLongs=true] Promotes Long values to number if they fit inside the 53 bits resolution. */
+  /** boolean} [options.promoteValues=true] Promotes BSON values to native types where possible, set to false to only receive wrapper types. */
+  /** boolean} [options.promoteBuffers=false] Promotes Binary BSON values to native Node Buffers. */
+  /** object} [options.collation] Specify collation (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields). */
+  /** string} [options.comment] Add a comment to an aggregation command */
+  /** string|object} [options.hint] Add an index selection hint to an aggregation command */
+  /** ClientSession} [options.session] optional session to use for this operation */
 }
 
 export class AggregateOperation extends CommandOperation {
@@ -30,7 +48,7 @@ export class AggregateOperation extends CommandOperation {
   pipeline: Document[];
   hasWriteStage: boolean;
 
-  constructor(parent: Collection | Db, pipeline: Document[], options: AggregateOperationOptions) {
+  constructor(parent: Collection | Db, pipeline: Document[], options: AggregateOptions) {
     super(parent, options, { fullResponse: true });
 
     this.target =
@@ -76,7 +94,7 @@ export class AggregateOperation extends CommandOperation {
   }
 
   execute(server: Server, callback: Callback<Document>): void {
-    const options: AggregateOperationOptions = this.options;
+    const options: AggregateOptions = this.options;
     const serverWireVersion = maxWireVersion(server);
     const command: Document = { aggregate: this.target, pipeline: this.pipeline };
 

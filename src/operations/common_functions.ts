@@ -8,12 +8,13 @@ import {
   handleCallback,
   toError
 } from '../utils';
-import type { Callback, BSONSerializeOptions, Document, AnyError } from '../types';
+import type { Callback, Document, AnyError } from '../types';
 import type { Db } from '../db';
 import type { ClientSession } from '../sessions';
 import type { Server } from '../sdam/server';
 import type { ReadPreference } from '../read_preference';
 import type { Collection } from '../collection';
+import type { UpdateOpOptions } from './update';
 
 export function deleteCallback(err: any, r: any, callback: Callback): void {
   if (callback == null) return;
@@ -193,14 +194,6 @@ export function removeDocuments(
   });
 }
 
-export interface UpdateDocumentsOptions extends BSONSerializeOptions {
-  multi?: undefined;
-  hint?: any;
-  arrayFilters?: any;
-  retryWrites?: any;
-  upsert?: undefined;
-}
-
 export function updateDocuments(
   server: Server,
   coll: Collection,
@@ -213,7 +206,7 @@ export function updateDocuments(
   coll: Collection,
   selector: Document,
   document: Document,
-  options: UpdateDocumentsOptions,
+  options: UpdateOpOptions,
   callback: Callback
 ): void;
 export function updateDocuments(
@@ -221,10 +214,10 @@ export function updateDocuments(
   coll: Collection,
   selector: Document,
   document: Document,
-  _options: UpdateDocumentsOptions | Callback,
+  _options: UpdateOpOptions | Callback,
   _callback?: Callback
 ): void {
-  let options = _options as UpdateDocumentsOptions;
+  let options = _options as UpdateOpOptions;
   let callback = _callback as Callback;
   if ('function' === typeof options) {
     callback = options;
