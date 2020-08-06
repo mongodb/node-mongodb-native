@@ -33,10 +33,10 @@ import type { Callback } from '../types';
  *   col.insert([{a:1, b:1}
  *     , {a:2, b:2}, {a:3, b:3}
  *     , {a:4, b:4}], {w:1}, function(err, result) {
- *     test.equal(null, err);
+ *     expect(err).to.not.exist;
  *     // Show that duplicate records got dropped
  *     col.find({}).toArray(function(err, items) {
- *       test.equal(null, err);
+ *       expect(err).to.not.exist;
  *       test.equal(4, items.length);
  *       client.close();
  *     });
@@ -202,18 +202,18 @@ export class Cursor extends CoreCursor {
     return maybePromise(callback, (cb: any) => {
       const cursor = this;
       if (cursor.isNotified()) {
-        return cb(null, false);
+        return cb(undefined, false);
       }
 
       cursor._next((err?: any, doc?: any) => {
         if (err) return cb(err);
         if (doc == null || cursor.s.state === CursorState.CLOSED || cursor.isDead()) {
-          return cb(null, false);
+          return cb(undefined, false);
         }
 
         cursor.s.state = CursorState.OPEN;
         cursor.cursorState.cursorIndex--;
-        cb(null, true);
+        cb(undefined, true);
       });
     });
   }
@@ -245,7 +245,7 @@ export class Cursor extends CoreCursor {
       cursor._next((err?: any, doc?: any) => {
         if (err) return cb(err);
         cursor.s.state = CursorState.OPEN;
-        cb(null, doc);
+        cb(undefined, doc);
       });
     });
   }
@@ -952,7 +952,7 @@ export class Cursor extends CoreCursor {
 
       this._endSession(() => {
         this.emit('close');
-        cb(null, this);
+        cb(undefined, this);
       });
     });
   }

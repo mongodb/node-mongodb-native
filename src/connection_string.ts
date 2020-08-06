@@ -745,7 +745,7 @@ function parseConnectionString(uri: string, options?: any, callback?: any) {
     return callback(authError);
   }
 
-  callback(null, result);
+  callback(undefined, result);
 }
 
 export { parseConnectionString };

@@ -61,12 +61,12 @@ describe('SSL (x509)', function () {
               }
             },
             function (err, client) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               var db = client.db(configuration.db);
 
               // Execute build info
               db.command({ buildInfo: 1 }, function (err, result) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 var version = parseInt(result.versionArray.slice(0, 3).join(''), 10);
                 if (version < 253) {
                   client.close();
@@ -84,7 +84,7 @@ describe('SSL (x509)', function () {
                     ]
                   },
                   function (err, result) {
-                    test.equal(null, err);
+                    expect(err).to.not.exist;
                     test.equal(userName, result[0].user);
                     test.equal('', result[0].pwd);
                     client.close();
@@ -104,7 +104,7 @@ describe('SSL (x509)', function () {
                         }
                       },
                       function (err, client) {
-                        test.equal(null, err);
+                        expect(err).to.not.exist;
 
                         client.close();
 
@@ -175,12 +175,12 @@ describe('SSL (x509)', function () {
               }
             },
             function (err, client) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               var db = client.db(configuration.db);
 
               // Execute build info
               db.command({ buildInfo: 1 }, function (err, result) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 var version = parseInt(result.versionArray.slice(0, 3).join(''), 10);
                 if (version < 253) {
                   client.close();
@@ -198,7 +198,7 @@ describe('SSL (x509)', function () {
                     ]
                   },
                   function (err, result) {
-                    test.equal(null, err);
+                    expect(err).to.not.exist;
                     test.equal(userName, result[0].user);
                     test.equal('', result[0].pwd);
                     client.close();
@@ -287,12 +287,12 @@ describe('SSL (x509)', function () {
               }
             },
             function (err, client) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               var db = client.db(configuration.db);
 
               // Execute build info
               db.command({ buildInfo: 1 }, function (err, result) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 var version = parseInt(result.versionArray.slice(0, 3).join(''), 10);
                 if (version < 253) {
                   client.close();
@@ -310,7 +310,7 @@ describe('SSL (x509)', function () {
                     ]
                   },
                   function (err, result) {
-                    test.equal(null, err);
+                    expect(err).to.not.exist;
                     test.equal(userName, result[0].user);
                     test.equal('', result[0].pwd);
                     client.close();
@@ -389,12 +389,12 @@ describe('SSL (x509)', function () {
               }
             },
             function (err, client) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               var db = client.db(configuration.db);
 
               // Execute build info
               db.command({ buildInfo: 1 }, function (err, result) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 var version = parseInt(result.versionArray.slice(0, 3).join(''), 10);
                 if (version < 253) {
                   client.close();
@@ -412,7 +412,7 @@ describe('SSL (x509)', function () {
                     ]
                   },
                   function (err, result) {
-                    test.equal(null, err);
+                    expect(err).to.not.exist;
                     test.equal(userName, result[0].user);
                     test.equal('', result[0].pwd);
                     client.close();
@@ -505,12 +505,12 @@ describe('SSL (x509)', function () {
               }
             },
             function (err, client) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               var db = client.db(configuration.db);
 
               // Execute build info
               db.command({ buildInfo: 1 }, function (err, result) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 var version = parseInt(result.versionArray.slice(0, 3).join(''), 10);
                 if (version < 253) {
                   client.close();
@@ -528,7 +528,7 @@ describe('SSL (x509)', function () {
                     ]
                   },
                   function (err, result) {
-                    test.equal(null, err);
+                    expect(err).to.not.exist;
                     test.equal(userName, result[0].user);
                     test.equal('', result[0].pwd);
                     client.close();
@@ -548,20 +548,20 @@ describe('SSL (x509)', function () {
                         }
                       },
                       function (err, client) {
-                        test.equal(null, err);
+                        expect(err).to.not.exist;
                         var db = client.db(configuration.db);
 
                         db.collection('x509collection').insert({ a: 1 }, function (err) {
-                          test.equal(null, err);
+                          expect(err).to.not.exist;
 
                           db.collection('x509collection').findOne(function (err, doc) {
-                            test.equal(null, err);
+                            expect(err).to.not.exist;
                             test.equal(1, doc.a);
 
                             client.topology.once('reconnect', function () {
                               // Await reconnect and re-authentication
                               db.collection('x509collection').findOne(function (err, doc) {
-                                test.equal(null, err);
+                                expect(err).to.not.exist;
                                 test.equal(1, doc.a);
 
                                 // Attempt disconnect again
@@ -569,7 +569,7 @@ describe('SSL (x509)', function () {
 
                                 // Await reconnect and re-authentication
                                 db.collection('x509collection').findOne(function (err, doc) {
-                                  test.equal(null, err);
+                                  expect(err).to.not.exist;
                                   test.equal(1, doc.a);
 
                                   client.close();

@@ -399,8 +399,8 @@ describe.skip('ReplSet (Connection)', function () {
       CoreConnection.enableConnectionAccounting();
 
       const client = configuration.newClient({}, { w: 0 });
-      client.once('open', function (_err) {
-        test.equal(null, _err);
+      client.once('open', function (err) {
+        test.equal(null, err);
         openCalled = true;
       });
 

@@ -39,7 +39,7 @@ describe('Optional PromiseLibrary / maybePromise', function () {
     );
     client.connect((err, client) => {
       const db = client.db(configuration.db);
-      expect(err).to.be.null;
+      expect(err).to.not.exist;
       const collection = db.collection('test');
       const cursor = collection.find({});
       const isPromise = cursor.toArray();

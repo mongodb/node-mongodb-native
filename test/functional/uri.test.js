@@ -31,7 +31,7 @@ describe('URI', function () {
           if (result) {
             expect(result.result.ok).to.equal(1);
           } else {
-            expect(result).to.be.null;
+            expect(result).to.not.exist;
           }
 
           client.close(done);

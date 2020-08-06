@@ -25,10 +25,10 @@ import { deprecate } from 'util';
  *   col.insert([{a:1, b:1}
  *     , {a:2, b:2}, {a:3, b:3}
  *     , {a:4, b:4}], {w:1}, function(err, result) {
- *     test.equal(null, err);
+ *     expect(err).to.not.exist;
  *     // Show that duplicate records got dropped
  *     col.aggregation({}, {cursor: {}}).toArray(function(err, items) {
- *       test.equal(null, err);
+ *       expect(err).to.not.exist;
  *       test.equal(4, items.length);
  *       client.close();
  *     });

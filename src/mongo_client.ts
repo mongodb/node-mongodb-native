@@ -336,7 +336,7 @@ export class MongoClient extends EventEmitter {
 
       connect(client, client.s.url, client.s.options, (err: any) => {
         if (err) return cb(err);
-        cb(null, client);
+        cb(undefined, client);
       });
     });
   }
@@ -511,7 +511,7 @@ export class MongoClient extends EventEmitter {
     try {
       const result = operation!(session);
       return Promise.resolve(result)
-        .then((result: any) => cleanupHandler(null, result, undefined))
+        .then((result: any) => cleanupHandler(undefined, result, undefined))
         .catch((err: any) => cleanupHandler(err, null, { throw: true }));
     } catch (err) {
       return cleanupHandler(err, null, { throw: false });
