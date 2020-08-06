@@ -28,11 +28,6 @@ export interface BSONSerializeOptions extends BSON.SerializeOptions {
   ignoreUndefined?: boolean;
 }
 
-export interface AutoEncrypter {
-  encrypt(ns: string, cmd: Document, options: any, callback: Callback<Document>): void;
-  decrypt(cmd: Document, options: any, callback: Callback<Document>): void;
-}
-
 export const enum AutoEncryptionLoggerLevels {
   FatalError = 0,
   Error = 1,
@@ -89,4 +84,9 @@ export interface AutoEncryptionOptions {
     /** Command line arguments to use when auto-spawning a mongocryptd */
     mongocryptdSpawnArgs?: string[];
   };
+}
+
+export interface AutoEncrypter {
+  encrypt(ns: string, cmd: Document, options: any, callback: Callback<Document>): void;
+  decrypt(cmd: Document, options: any, callback: Callback<Document>): void;
 }
