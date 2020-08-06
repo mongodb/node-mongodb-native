@@ -18,7 +18,6 @@ export enum ReadPreferenceMode {
   secondaryPreferred = 'secondaryPreferred',
   nearest = 'nearest'
 }
-export type ReadPreferenceModes = keyof typeof ReadPreferenceMode;
 
 export enum ReadConcernLevel {
   local = 'local',
@@ -26,7 +25,6 @@ export enum ReadConcernLevel {
   linearizable = 'linearizable',
   available = 'available'
 }
-export type ReadConcernLevels = keyof typeof ReadConcernLevel;
 
 export enum AuthMechanism {
   'GSSAPI' = 'GSSAPI',
@@ -38,10 +36,9 @@ export enum AuthMechanism {
   'SCRAM-SHA-256' = 'SCRAM-SHA-256',
   'PLAIN' = 'PLAIN'
 }
-export type AuthMechanisms = keyof typeof AuthMechanism;
 
 export interface ReadConcern {
-  level?: ReadConcernLevels;
+  level?: ReadConcernLevel;
 }
 
 export enum LogLevel {
@@ -50,7 +47,6 @@ export enum LogLevel {
   'info' = 'info',
   'debug' = 'debug'
 }
-export type LogLevels = keyof typeof LogLevel;
 
 export interface AuthMechanismProperties {
   SERVICE_NAME?: string;
@@ -124,7 +120,7 @@ export interface MongoURIOptions {
   /** The time in milliseconds to attempt a send or receive on a socket before the attempt times out. */
   socketTimeoutMS?: number;
   /** Comma-delimited string of compressors to enable network compression for communication between this client and a mongod/mongos instance. */
-  compressors?: CompressorName[];
+  compressors?: string;
   /** An integer that specifies the compression level if using zlib for network compression. */
   zlibCompressionLevel?: number;
   /** The maximum number of connections in the connection pool. */
@@ -144,17 +140,17 @@ export interface MongoURIOptions {
   /** Corresponds to the write concern j Option option. The journal option requests acknowledgement from MongoDB that the write operation has been written to the journal. */
   journal?: boolean;
   /** The level of isolation */
-  readConcernLevel?: ReadConcernLevels;
+  readConcernLevel?: ReadConcernLevel;
   /** Specifies the read preferences for this connection */
-  readPreference?: ReadPreferenceModes | ReadPreference;
+  readPreference?: ReadPreferenceMode | ReadPreference;
   /** Specifies, in seconds, how stale a secondary can be before the client stops using it for read operations. */
   maxStalenessSeconds?: number;
   /** Specifies the tags document as a comma-separated list of colon-separated key-value pairs.  */
-  readPreferenceTags?: string | string[] | { [key: string]: string };
+  readPreferenceTags?: string;
   /** Specify the database name associated with the user’s credentials. */
   authSource?: string;
   /** Specify the authentication mechanism that MongoDB will use to authenticate the connection. */
-  authMechanism?: AuthMechanisms;
+  authMechanism?: AuthMechanism;
   /** Specify properties for the specified authMechanism as a comma-separated list of colon-separated key-value pairs. */
   authMechanismProperties?: AuthMechanismProperties;
   /** Set the Kerberos service name when connecting to Kerberized MongoDB instances. This value must match the service name set on MongoDB instances to which you are connecting. */
@@ -218,8 +214,6 @@ export interface MongoClientOptions extends MongoURIOptions, BSONSerializeOption
   secondaryAcceptableLatencyMS?: number;
   /** Cutoff latency point in MS for Mongos proxies selection */
   acceptableLatencyMS?: number;
-  /** Sets if the driver should connect even if no primary is available */
-  connectWithNoPrimary?: boolean;
   /** The write concern timeout */
   wtimeout?: MongoURIOptions['wtimeoutMS'];
   /** Corresponds to the write concern j Option option. The journal option requests acknowledgement from MongoDB that the write operation has been written to the journal. */
@@ -228,8 +222,6 @@ export interface MongoClientOptions extends MongoURIOptions, BSONSerializeOption
   forceServerObjectId?: boolean;
   /** Return document results as raw BSON buffers */
   raw?: boolean;
-  /** Sets a cap on how many operations the driver will buffer up before giving up on getting a working connection, default is -1 which is unlimited */
-  bufferMaxEntries?: number;
   /** A primary key factory object for generation of custom `_id` keys */
   pkFactory?: PkFactory;
   /** A Promise library class the application wishes to use such as Bluebird, must be ES6 compatible */
@@ -237,7 +229,7 @@ export interface MongoClientOptions extends MongoURIOptions, BSONSerializeOption
   /** Specify a read concern for the collection (only MongoDB 3.2 or higher supported) */
   readConcern?: ReadConcern;
   /** The logging level */
-  loggerLevel?: LogLevels;
+  loggerLevel?: LogLevel;
   /** Custom logger object */
   logger?: object;
   /** Enable the wrapping of the callback in the current domain, disabled by default to avoid perf hit */
