@@ -71,7 +71,11 @@ function maxStalenessReducer(
         topologyDescription.heartbeatFrequencyMS;
 
       const staleness = stalenessMS / 1000;
-      if (staleness <= readPreference.maxStalenessSeconds) result.push(server);
+      const maxStalenessSeconds = readPreference.maxStalenessSeconds ?? 0;
+      if (staleness <= maxStalenessSeconds) {
+        result.push(server);
+      }
+
       return result;
     }, []);
   }
@@ -90,7 +94,11 @@ function maxStalenessReducer(
         sMax.lastWriteDate - server.lastWriteDate + topologyDescription.heartbeatFrequencyMS;
 
       const staleness = stalenessMS / 1000;
-      if (staleness <= readPreference.maxStalenessSeconds) result.push(server);
+      const maxStalenessSeconds = readPreference.maxStalenessSeconds ?? 0;
+      if (staleness <= maxStalenessSeconds) {
+        result.push(server);
+      }
+
       return result;
     }, []);
   }

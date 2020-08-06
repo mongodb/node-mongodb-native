@@ -15,14 +15,14 @@ export interface FindOptions {
 
 export function getReadPreference(cmd: Document, options: FindOptions): ReadPreference {
   // Default to command version of the readPreference
-  let readPreference = cmd.readPreference || new ReadPreference('primary');
+  let readPreference = cmd.readPreference || ReadPreference.primary;
   // If we have an option readPreference override the command one
   if (options.readPreference) {
     readPreference = options.readPreference;
   }
 
   if (typeof readPreference === 'string') {
-    readPreference = new ReadPreference(readPreference);
+    readPreference = ReadPreference.fromString(readPreference);
   }
 
   if (!(readPreference instanceof ReadPreference)) {

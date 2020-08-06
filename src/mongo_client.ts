@@ -1,7 +1,7 @@
 import { Db } from './db';
 import { EventEmitter } from 'events';
 import { ChangeStream } from './change_stream';
-import { ReadPreference } from './read_preference';
+import { ReadPreference, ReadPreferenceMode } from './read_preference';
 import { MongoError } from './error';
 import { WriteConcern } from './write_concern';
 import { maybePromise, MongoDBNamespace } from './utils';
@@ -10,48 +10,14 @@ import { connect, validOptions } from './operations/connect';
 import { PromiseProvider } from './promise_provider';
 import type { Callback, BSONSerializeOptions, AutoEncryptionOptions } from './types';
 import type { CompressorName } from './cmap/wire_protocol/compression';
-
-export enum ReadPreferenceMode {
-  primary = 'primary',
-  primaryPreferred = 'primaryPreferred',
-  secondary = 'secondary',
-  secondaryPreferred = 'secondaryPreferred',
-  nearest = 'nearest'
-}
-
-export enum ReadConcernLevel {
-  local = 'local',
-  majority = 'majority',
-  linearizable = 'linearizable',
-  available = 'available'
-}
-
-export enum AuthMechanism {
-  'GSSAPI' = 'GSSAPI',
-  'MONGODB-AWS' = 'MONGODB-AWS',
-  'MONGODB-X509' = 'MONGODB-X509',
-  'MONGODB-CR' = 'MONGODB-CR',
-  'DEFAULT' = 'DEFAULT',
-  'SCRAM-SHA-1' = 'SCRAM-SHA-1',
-  'SCRAM-SHA-256' = 'SCRAM-SHA-256',
-  'PLAIN' = 'PLAIN'
-}
-
-export interface ReadConcern {
-  level?: ReadConcernLevel;
-}
+import type { ReadConcernLevel, ReadConcern } from './read_concern';
+import type { AuthMechanism } from './cmap/auth/defaultAuthProviders';
 
 export enum LogLevel {
   'error' = 'error',
   'warn' = 'warn',
   'info' = 'info',
   'debug' = 'debug'
-}
-
-export interface AuthMechanismProperties {
-  SERVICE_NAME?: string;
-  CANONICALIZE_HOST_NAME?: boolean;
-  SERVICE_REALM?: string;
 }
 
 export interface DriverInfo {
@@ -152,7 +118,11 @@ export interface MongoURIOptions {
   /** Specify the authentication mechanism that MongoDB will use to authenticate the connection. */
   authMechanism?: AuthMechanism;
   /** Specify properties for the specified authMechanism as a comma-separated list of colon-separated key-value pairs. */
-  authMechanismProperties?: AuthMechanismProperties;
+  authMechanismProperties?: {
+    SERVICE_NAME?: string;
+    CANONICALIZE_HOST_NAME?: boolean;
+    SERVICE_REALM?: string;
+  };
   /** Set the Kerberos service name when connecting to Kerberized MongoDB instances. This value must match the service name set on MongoDB instances to which you are connecting. */
   gssapiServiceName?: string;
   /** The size (in milliseconds) of the latency window for selecting among multiple suitable MongoDB instances. */
@@ -190,10 +160,6 @@ export interface MongoClientOptions extends MongoURIOptions, BSONSerializeOption
   sslCRL?: Buffer;
   /** Ensure we check server identify during SSL, set to false to disable checking. */
   checkServerIdentity?: boolean | Function;
-  /** Enable autoReconnect for single server instances */
-  autoReconnect?: boolean;
-  /** Enable autoReconnect for single server instances */
-  auto_reconnect?: MongoClientOptions['autoReconnect'];
   /** TCP Connection no delay */
   noDelay?: boolean;
   /** TCP Connection keep alive enabled */
@@ -210,10 +176,6 @@ export interface MongoClientOptions extends MongoURIOptions, BSONSerializeOption
   ha?: boolean;
   /** The High availability period for replicaset inquiry */
   haInterval?: number;
-  /** Cutoff latency point in MS for Replicaset member selection */
-  secondaryAcceptableLatencyMS?: number;
-  /** Cutoff latency point in MS for Mongos proxies selection */
-  acceptableLatencyMS?: number;
   /** The write concern timeout */
   wtimeout?: MongoURIOptions['wtimeoutMS'];
   /** Corresponds to the write concern j Option option. The journal option requests acknowledgement from MongoDB that the write operation has been written to the journal. */
@@ -260,8 +222,6 @@ export interface MongoClientOptions extends MongoURIOptions, BSONSerializeOption
   driverInfo?: DriverInfo;
   /** String containing the server name requested via TLS SNI. */
   servername?: string;
-  read_preference?: MongoClientOptions['readPreference'];
-  read_preference_tags?: MongoClientOptions['readPreferenceTags'];
 }
 
 /**

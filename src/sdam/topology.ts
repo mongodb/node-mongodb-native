@@ -439,7 +439,6 @@ export class Topology extends EventEmitter {
   ): void {
     let options = _options as SelectServerOptions;
     const callback = (_callback ?? _options) as Callback<Server>;
-
     if (typeof options === 'function') {
       options = {};
     }
@@ -447,10 +446,8 @@ export class Topology extends EventEmitter {
     let serverSelector;
     if (typeof selector !== 'function') {
       if (typeof selector === 'string') {
-        serverSelector = readPreferenceServerSelector(new ReadPreference(selector));
+        serverSelector = readPreferenceServerSelector(ReadPreference.fromString(selector));
       } else {
-        options = selector as SelectServerOptions;
-
         let readPreference;
         if (selector instanceof ReadPreference) {
           readPreference = selector;

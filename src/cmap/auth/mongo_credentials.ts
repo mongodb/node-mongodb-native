@@ -29,7 +29,7 @@ export interface MongoCredentialsOptions {
   password: string;
   source: string;
   db?: string;
-  mechanism?: string;
+  mechanism?: AuthMechanism;
   mechanismProperties: Document;
 }
 
@@ -47,7 +47,7 @@ export class MongoCredentials {
   readonly username: string;
   readonly password: string;
   readonly source: string;
-  readonly mechanism: string;
+  readonly mechanism: AuthMechanism;
   readonly mechanismProperties: Document;
 
   /**
@@ -67,7 +67,7 @@ export class MongoCredentials {
     if (!this.source && options.db) {
       this.source = options.db;
     }
-    this.mechanism = options.mechanism || 'default';
+    this.mechanism = options.mechanism || AuthMechanism.MONGODB_DEFAULT;
     this.mechanismProperties = options.mechanismProperties || {};
 
     if (this.mechanism.match(/MONGODB-AWS/i)) {
