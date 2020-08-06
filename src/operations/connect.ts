@@ -11,17 +11,6 @@ import { MongoCredentials } from '../cmap/auth/mongo_credentials';
 import * as BSON from '../bson';
 import type { Callback } from '../types';
 
-const AUTH_MECHANISM_INTERNAL_MAP: any = {
-  DEFAULT: 'default',
-  PLAIN: 'plain',
-  GSSAPI: 'gssapi',
-  'MONGODB-CR': 'mongocr',
-  'MONGODB-X509': 'x509',
-  'MONGODB-AWS': 'mongodb-aws',
-  'SCRAM-SHA-1': 'scram-sha-1',
-  'SCRAM-SHA-256': 'scram-sha-256'
-};
-
 const VALID_AUTH_MECHANISMS = new Set([
   'DEFAULT',
   'PLAIN',
@@ -425,19 +414,18 @@ function generateCredentials(client: any, username: any, password: any, options:
   const source = options.authSource || options.authdb || options.dbName;
 
   // authMechanism
-  const authMechanismRaw = options.authMechanism || 'DEFAULT';
-  const authMechanism = authMechanismRaw.toUpperCase();
+  const authMechanism = options?.authMechanism?.toUpperCase() || 'DEFAULT';
   const mechanismProperties = options.authMechanismProperties;
 
   if (!VALID_AUTH_MECHANISMS.has(authMechanism)) {
     throw MongoError.create({
-      message: `authentication mechanism ${authMechanismRaw} not supported', options.authMechanism`,
+      message: `authentication mechanism ${authMechanism} not supported`,
       driver: true
     });
   }
 
   return new MongoCredentials({
-    mechanism: AUTH_MECHANISM_INTERNAL_MAP[authMechanism],
+    mechanism: authMechanism,
     mechanismProperties,
     source,
     username,

@@ -815,7 +815,7 @@ export class Cursor extends CoreCursor {
     if (readPreference instanceof ReadPreference) {
       this.options.readPreference = readPreference;
     } else if (typeof readPreference === 'string') {
-      this.options.readPreference = new ReadPreference(readPreference);
+      this.options.readPreference = ReadPreference.fromString(readPreference);
     } else {
       throw new TypeError('Invalid read preference: ' + readPreference);
     }
