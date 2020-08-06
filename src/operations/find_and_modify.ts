@@ -9,18 +9,55 @@ import {
   hasAtomicOperators
 } from '../utils';
 import { MongoError } from '../error';
-import { CommandOperation } from './command';
-import { defineAspects, Aspect } from './operation';
-import type { Callback } from '../types';
+import { CommandOperation, CommandOperationOptions } from './command';
+import { defineAspects, Aspect, Hint } from './operation';
+import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
+import type { Collection } from '../collection';
+import type { WriteConcern } from '../write_concern';
+
+export type Sort = { [key: string]: number | string };
+
+export interface FindOptions extends CommandOperationOptions {
+  update: boolean;
+  new: boolean;
+  returnOriginal: undefined;
+  upsert: boolean;
+  fields: Document;
+  projection: Document;
+  remove: boolean;
+  sort: Sort;
+}
+
+export interface FindAndModifyQuery {
+  sort?: Sort;
+  new?: boolean;
+  remove?: boolean;
+  upsert?: boolean;
+  fields?: Document;
+  arrayFilters?: any;
+  update?: Document;
+  maxTimeMS?: number;
+  writeConcern?: WriteConcern;
+  bypassDocumentValidation?: boolean;
+  hint?: Hint;
+  findAndModify?: string;
+  query?: Document;
+}
 
 export class FindAndModifyOperation extends CommandOperation {
-  collection: any;
-  query: any;
-  sort: any;
-  doc: any;
+  collection: Collection;
+  query: Document;
+  sort: Sort;
+  doc: Document | null;
 
-  constructor(collection: any, query: any, sort: any, doc: any, options: any) {
+  constructor(
+    collection: Collection,
+    query: Document,
+    sort: Sort,
+    doc: Document | null,
+    options: FindOptions
+  ) {
     super(collection, options);
 
     // force primary read preference
@@ -32,7 +69,7 @@ export class FindAndModifyOperation extends CommandOperation {
     this.doc = doc;
   }
 
-  execute(server: Server, callback: Callback) {
+  execute(server: Server, callback: Callback): void {
     const coll = this.collection;
     const query = this.query;
     const sort = formattedOrderClause(this.sort);
@@ -40,10 +77,10 @@ export class FindAndModifyOperation extends CommandOperation {
     let options = this.options;
 
     // Create findAndModify command object
-    const queryObject = {
+    const queryObject: FindAndModifyQuery = {
       findAndModify: coll.collectionName,
       query: query
-    } as any;
+    };
 
     if (sort) {
       queryObject.sort = sort;
@@ -122,7 +159,7 @@ export class FindAndModifyOperation extends CommandOperation {
 }
 
 export class FindOneAndDeleteOperation extends FindAndModifyOperation {
-  constructor(collection: any, filter: any, options: any) {
+  constructor(collection: Collection, filter: Document, options: FindOptions) {
     // Final options
     const finalOptions = Object.assign({}, options);
     finalOptions.fields = options.projection;
@@ -138,7 +175,12 @@ export class FindOneAndDeleteOperation extends FindAndModifyOperation {
 }
 
 export class FindOneAndReplaceOperation extends FindAndModifyOperation {
-  constructor(collection: any, filter: any, replacement: any, options: any) {
+  constructor(
+    collection: Collection,
+    filter: Document,
+    replacement: Document,
+    options: FindOptions
+  ) {
     // Final options
     const finalOptions = Object.assign({}, options);
     finalOptions.fields = options.projection;
@@ -163,7 +205,7 @@ export class FindOneAndReplaceOperation extends FindAndModifyOperation {
 }
 
 export class FindOneAndUpdateOperation extends FindAndModifyOperation {
-  constructor(collection: any, filter: any, update: any, options: any) {
+  constructor(collection: Collection, filter: Document, update: Document, options: FindOptions) {
     // Final options
     const finalOptions = Object.assign({}, options);
     finalOptions.fields = options.projection;

@@ -25,7 +25,7 @@ export class ValidateCollectionOperation extends CommandOperation {
   execute(server: Server, callback: Callback) {
     const collectionName = this.collectionName;
 
-    super.executeCommand(server, this.command, (err?: any, doc?: any) => {
+    super.executeCommand(server, this.command, (err, doc) => {
       if (err != null) return callback(err, null);
 
       if (doc.ok === 0) return callback(new Error('Error with validate command'), null);

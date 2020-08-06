@@ -55,7 +55,7 @@ export function executeOperation<T extends OperationBase>(
   }
 
   if (topology.shouldCheckForSessionSupport()) {
-    return selectServerForSessionSupport(topology, operation, callback);
+    return selectServerForSessionSupport(topology, operation, callback!);
   }
 
   // The driver sessions spec mandates that we implicitly create sessions for operations
@@ -74,7 +74,7 @@ export function executeOperation<T extends OperationBase>(
   let result;
   if (typeof callback !== 'function') {
     result = new Promise((resolve: any, reject: any) => {
-      callback = (err?: any, res?: any) => {
+      callback = (err, res) => {
         if (err) return reject(err);
         resolve(res);
       };
@@ -116,7 +116,7 @@ function supportsRetryableReads(server: Server) {
   return maxWireVersion(server) >= 6;
 }
 
-function executeWithServerSelection(topology: any, operation: any, callback: Callback) {
+function executeWithServerSelection(topology: Topology, operation: any, callback: Callback) {
   const readPreference = operation.readPreference || ReadPreference.primary;
   const inTransaction = operation.session && operation.session.inTransaction();
 

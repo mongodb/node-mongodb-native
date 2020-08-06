@@ -19,7 +19,7 @@ import { initializeOrderedBulkOp as ordered } from './bulk/ordered';
 import { ChangeStream } from './change_stream';
 import { WriteConcern } from './write_concern';
 import { ReadConcern } from './read_concern';
-import { AggregationCursor, CommandCursor } from './cursor';
+import { AggregationCursor, CommandCursor, Cursor } from './cursor';
 import { AggregateOperation } from './operations/aggregate';
 import { BulkWriteOperation } from './operations/bulk_write';
 import { CountDocumentsOperation } from './operations/count_documents';
@@ -57,11 +57,13 @@ import { ReplaceOneOperation } from './operations/replace_one';
 import { CollStatsOperation } from './operations/stats';
 import { executeOperation } from './operations/execute_operation';
 import { EvalGroupOperation, GroupOperation } from './operations/group';
-import type { Callback } from './types';
+import type { Callback, Document } from './types';
+import type { Db } from './db';
 const mergeKeys = ['ignoreUndefined'];
 
 export interface Collection {
-  find(query: any, options: any): void;
+  /** @deprecated */
+  find(query: any, options: any): Cursor;
   insert(docs: any, options: any, callback: any): void;
   update(selector: any, update: any, options: any, callback: any): void;
   remove(selector: any, options: any, callback: any): void;
@@ -112,7 +114,10 @@ export interface Collection {
  * });
  */
 export class Collection {
-  s: any;
+  s: {
+    db: Db;
+    [key: string]: any;
+  };
 
   /**
    * Create a new Collection instance (INTERNAL TYPE, do not instantiate directly)
@@ -1246,7 +1251,7 @@ export class Collection {
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @returns {AggregationCursor}
    */
-  aggregate(pipeline?: object, options?: any): AggregationCursor {
+  aggregate(pipeline: Document[] = [], options?: any): AggregationCursor {
     if (arguments.length > 2) {
       throw new TypeError('Third parameter to `collection.aggregate()` must be undefined');
     }
@@ -1434,7 +1439,7 @@ const DEPRECATED_FIND_OPTIONS = ['maxScan', 'fields', 'snapshot', 'oplogReplay']
 /**
  * Creates a cursor for a query that can be used to iterate over results from MongoDB
  *
- * @function
+ * @deprecated
  * @param {object} [query={}] The cursor query object.
  * @param {object} [options] Optional settings.
  * @param {number} [options.limit=0] Sets the limit of documents returned in the query.
@@ -1526,10 +1531,10 @@ Collection.prototype.find = deprecateOptions(
     }
 
     // Make a shallow copy of options
-    let newOptions = Object.assign({}, options);
+    const newOptions = Object.assign({}, options);
 
     // Make a shallow copy of the collection options
-    for (let key in this.s.options) {
+    for (const key in this.s.options) {
       if (mergeKeys.indexOf(key) !== -1) {
         newOptions[key] = this.s.options[key];
       }

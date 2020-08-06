@@ -30,7 +30,7 @@ export class SetProfilingLevelOperation extends CommandOperation {
       return callback(new Error('Error: illegal profiling level value ' + level));
     }
 
-    super.executeCommand(server, { profile: this.profile }, (err?: any, doc?: any) => {
+    super.executeCommand(server, { profile: this.profile }, (err, doc) => {
       if (err == null && doc.ok === 1) return callback(undefined, level);
       return err != null
         ? callback(err, null)

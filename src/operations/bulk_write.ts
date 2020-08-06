@@ -1,32 +1,43 @@
 import { applyRetryableWrites, applyWriteConcern } from '../utils';
 import { MongoError } from '../error';
 import { OperationBase } from './operation';
-import type { Callback } from '../types';
+import type { Callback, Document } from '../types';
+import type { Collection } from '../collection';
+import type { CommandOperationOptions } from './command';
+import type { BulkOperationBase } from '../bulk/common';
+import type { WriteConcern } from '../write_concern';
+
+export interface BulkWriteOperationOptions extends CommandOperationOptions {
+  s: 4;
+  ignoreUndefined: boolean;
+  ordered: boolean;
+  writeConcern: WriteConcern;
+}
 
 export class BulkWriteOperation extends OperationBase {
-  collection: any;
-  operations: any;
+  collection: Collection;
+  operations: Document[];
 
-  constructor(collection: any, operations: any, options: any) {
+  constructor(collection: Collection, operations: Document[], options: BulkWriteOperationOptions) {
     super(options);
 
     this.collection = collection;
     this.operations = operations;
   }
 
-  execute(callback: Callback) {
+  execute(callback: Callback): void {
     const coll = this.collection;
     const operations = this.operations;
-    let options = this.options;
+    let options: BulkWriteOperationOptions = this.options;
 
-    // Add ignoreUndfined
+    // Add ignoreUndefined
     if (coll.s.options.ignoreUndefined) {
       options = Object.assign({}, options);
       options.ignoreUndefined = coll.s.options.ignoreUndefined;
     }
 
     // Create the bulk operation
-    const bulk =
+    const bulk: BulkOperationBase =
       options.ordered === true || options.ordered == null
         ? coll.initializeOrderedBulkOp(options)
         : coll.initializeUnorderedBulkOp(options);
@@ -65,7 +76,7 @@ export class BulkWriteOperation extends OperationBase {
     }
 
     // Execute the bulk
-    bulk.execute(writeCon, finalOptions, (err?: any, r?: any) => {
+    bulk.execute(writeCon, finalOptions, (err, r) => {
       // We have connection level error
       if (!r && err) {
         return callback(err, null);

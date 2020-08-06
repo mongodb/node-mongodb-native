@@ -1,19 +1,21 @@
-import { OperationBase } from './operation';
+import { OperationBase, OperationOptions } from './operation';
 import { Aspect, defineAspects } from './operation';
 import { ReadPreference } from '../read_preference';
 import { maxWireVersion } from '../utils';
 import { MongoError } from '../error';
-import type { Callback } from '../types';
+import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
+import type { Collection } from '../collection';
+import type { InternalCursorState } from '../cursor/core_cursor';
 
 export class FindOperation extends OperationBase {
-  ns: any;
-  cmd: any;
-  readPreference: any;
-  cursorState: any;
+  ns: string;
+  cmd: Document;
+  readPreference: ReadPreference;
+  cursorState?: InternalCursorState;
   server?: Server;
 
-  constructor(collection: any, ns: any, command: any, options: any) {
+  constructor(collection: Collection, ns: string, command: Document, options: OperationOptions) {
     super(options);
 
     this.ns = ns;
@@ -21,7 +23,7 @@ export class FindOperation extends OperationBase {
     this.readPreference = ReadPreference.resolve(collection, this.options);
   }
 
-  execute(server: Server, callback: Callback) {
+  execute(server: Server, callback: Callback): void {
     // copied from `CommandOperationV2`, to be subclassed in the future
     this.server = server;
 

@@ -3,32 +3,39 @@ import { Code } from '../bson';
 import { ReadPreference } from '../read_preference';
 import { handleCallback } from '../utils';
 import { MongoError } from '../error';
-import type { Callback } from '../types';
+import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
+import type { Db } from '../db';
+import type { ClientSession } from '../sessions';
+
+export interface EvalOperationOptions {
+  nolock: boolean;
+  session: ClientSession;
+}
 
 export class EvalOperation extends CommandOperation {
-  code: any;
-  parameters: any;
+  code: Code;
+  parameters?: unknown[];
 
-  get readPreference() {
+  get readPreference(): ReadPreference {
     // force primary read preference
     return ReadPreference.primary;
   }
 
-  constructor(db: any, code: any, parameters: any, options?: any) {
+  constructor(db: Db, code: Code, parameters?: unknown[], options?: EvalOperationOptions) {
     super(db, options);
 
     this.code = code;
     this.parameters = parameters;
   }
 
-  execute(server: Server, callback: Callback) {
+  execute(server: Server, callback: Callback): void {
     let finalCode = this.code;
     let finalParameters = [];
 
     // If not a code object translate to one
-    if (!(finalCode && finalCode._bsontype === 'Code')) {
-      finalCode = new Code(finalCode);
+    if (!(finalCode && ((finalCode as unknown) as { _bsontype: string })._bsontype === 'Code')) {
+      finalCode = new Code(finalCode as never);
     }
 
     // Ensure the parameters are correct
@@ -37,7 +44,7 @@ export class EvalOperation extends CommandOperation {
     }
 
     // Create execution selector
-    const cmd: any = { $eval: finalCode, args: finalParameters };
+    const cmd: Document = { $eval: finalCode, args: finalParameters };
 
     // Check if the nolock parameter is passed in
     if (this.options.nolock) {

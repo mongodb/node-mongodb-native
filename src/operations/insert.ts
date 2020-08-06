@@ -3,21 +3,22 @@ import { defineAspects, Aspect, OperationBase } from './operation';
 import { CommandOperation } from './command';
 import { applyRetryableWrites, applyWriteConcern, handleCallback, toError } from '../utils';
 import { prepareDocs } from './common_functions';
-import type { Callback } from '../types';
+import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
+import type { Collection } from '../collection';
 
 export class InsertOperation extends OperationBase {
-  namespace: any;
-  operations: any;
+  namespace: string;
+  operations: Document[];
   options: any;
 
-  constructor(ns: any, ops: any, options: any) {
+  constructor(ns: string, ops: Document[], options: any) {
     super(options);
     this.namespace = ns;
     this.operations = ops;
   }
 
-  execute(server: Server, callback: Callback) {
+  execute(server: Server, callback: Callback): void {
     server.insert(this.namespace.toString(), this.operations, this.options, callback);
   }
 }
@@ -33,7 +34,7 @@ export class InsertOneOperation extends CommandOperation {
     this.doc = doc;
   }
 
-  execute(server: Server, callback: Callback) {
+  execute(server: Server, callback: Callback): void {
     const coll = this.collection;
     const doc = this.doc;
     const options = this.options;
@@ -44,7 +45,7 @@ export class InsertOneOperation extends CommandOperation {
       );
     }
 
-    insertDocuments(server, coll, [doc], options, (err?: any, r?: any) => {
+    insertDocuments(server, coll, [doc], options, (err, r) => {
       if (callback == null) return;
       if (err && callback) return callback(err);
       // Workaround for pre 2.6 servers
@@ -57,7 +58,13 @@ export class InsertOneOperation extends CommandOperation {
   }
 }
 
-function insertDocuments(server: Server, coll: any, docs: any, options: any, callback: Callback) {
+function insertDocuments(
+  server: Server,
+  coll: Collection,
+  docs: Document[],
+  options: any,
+  callback: Callback<Document>
+) {
   if (typeof options === 'function') (callback = options), (options = {});
   options = options || {};
   // Ensure we are operating on an array op docs

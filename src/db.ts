@@ -39,7 +39,7 @@ import { RenameOperation } from './operations/rename';
 import { SetProfilingLevelOperation } from './operations/set_profiling_level';
 import { executeOperation } from './operations/execute_operation';
 import { EvalOperation } from './operations/eval';
-import type { Callback } from './types';
+import type { Callback, Document } from './types';
 
 // Allowed parameters
 const legalOptionNames = [
@@ -274,7 +274,7 @@ export class Db {
    * @param {ClientSession} [options.session] optional session to use for this operation
    * @returns {AggregationCursor}
    */
-  aggregate(pipeline?: object, options?: any): AggregationCursor {
+  aggregate(pipeline: Document[] = [], options?: any): AggregationCursor {
     if (arguments.length > 2) {
       throw new TypeError('Third parameter to `db.aggregate()` must be undefined');
     }
@@ -327,7 +327,9 @@ export class Db {
    * @param {Db~collectionResultCallback} [callback] The collection result callback
    * @returns {Collection} return the new Collection instance if not in strict mode
    */
-  collection(name: string, options?: any, callback?: Callback): any {
+  collection(name: string, options?: any): Collection;
+  collection(name: string, options: any, callback: Callback): void;
+  collection(name: string, options?: any, callback?: Callback): Collection | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
     options = Object.assign({}, options);

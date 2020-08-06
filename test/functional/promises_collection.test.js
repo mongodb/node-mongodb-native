@@ -2,6 +2,7 @@
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 var f = require('util').format;
+const { expect } = require('chai');
 
 describe('Promises (Collection)', function () {
   before(function () {

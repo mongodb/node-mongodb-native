@@ -1,8 +1,19 @@
 import { Aspect, defineAspects } from './operation';
 import { CommandOperation } from './command';
 import { decorateWithCollation, decorateWithReadConcern } from '../utils';
-import type { Callback } from '../types';
+import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
+import type { Collection } from '../collection';
+import type { CollationOptions } from '../cmap/wire_protocol/write_command';
+import type { ClientSession } from '../sessions';
+import type { ReadPreference } from '../read_preference';
+
+export interface DistinctOperationOptions {
+  readPreference: ReadPreference;
+  maxTimeMS: number;
+  collation: CollationOptions;
+  session: ClientSession;
+}
 
 /**
  * Return a list of distinct values for the given key across a collection.
@@ -14,19 +25,24 @@ import type { Server } from '../sdam/server';
  * @property {object} [options] Optional settings. See Collection.prototype.distinct for a list of options.
  */
 export class DistinctOperation extends CommandOperation {
-  collection: any;
-  key: any;
-  query: any;
+  collection: Collection;
+  key: string;
+  query: Document;
 
   /**
    * Construct a Distinct operation.
    *
-   * @param {Collection} collection Collection instance.
-   * @param {string} key Field of the document to find distinct values for.
-   * @param {object} query The query for filtering the set of documents to which we apply the distinct filter.
-   * @param {object} [options] Optional settings. See Collection.prototype.distinct for a list of options.
+   * @param collection Collection instance.
+   * @param key Field of the document to find distinct values for.
+   * @param query The query for filtering the set of documents to which we apply the distinct filter.
+   * @param options Optional settings. See Collection.prototype.distinct for a list of options.
    */
-  constructor(collection: any, key: string, query: object, options?: object) {
+  constructor(
+    collection: Collection,
+    key: string,
+    query: Document,
+    options?: DistinctOperationOptions
+  ) {
     super(collection, options);
 
     this.collection = collection;
@@ -40,18 +56,18 @@ export class DistinctOperation extends CommandOperation {
    * @param {any} server
    * @param {Collection~resultCallback} [callback] The command result callback
    */
-  execute(server: Server, callback: Callback) {
+  execute(server: Server, callback: Callback): void {
     const coll = this.collection;
     const key = this.key;
     const query = this.query;
-    const options = this.options;
+    const options: DistinctOperationOptions = this.options;
 
     // Distinct command
-    const cmd = {
+    const cmd: Document = {
       distinct: coll.collectionName,
       key: key,
       query: query
-    } as any;
+    };
 
     // Add maxTimeMS if defined
     if (typeof options.maxTimeMS === 'number') {

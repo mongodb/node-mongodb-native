@@ -1,31 +1,27 @@
 import { CommandOperation } from './command';
 import { defineAspects, Aspect } from './operation';
 import { MongoDBNamespace } from '../utils';
-import type { MongoClient } from '../mongo_client';
 import type { Collection } from '../collection';
 import type { Db } from '../db';
 import type { Server } from '../sdam/server';
+import type { Document, Callback } from '../types';
 
 export class RunCommandOperation extends CommandOperation {
-  command: any;
+  command: Document;
 
-  constructor(
-    parent: MongoClient | Db | Collection | { s: { namespace: MongoDBNamespace } },
-    command: any,
-    options: any
-  ) {
+  constructor(parent: Parent, command: any, options: any) {
     super(parent, options);
     this.command = command;
   }
 
-  execute(server: Server, callback: any) {
+  execute(server: Server, callback: Callback): void {
     const command = this.command;
     this.executeCommand(server, command, callback);
   }
 }
 
 export class RunAdminCommandOperation extends RunCommandOperation {
-  constructor(parent: MongoClient | Db | Collection, command: any, options: any) {
+  constructor(parent: Db | Collection, command: Document, options: any) {
     super(parent, command, options);
     this.ns = new MongoDBNamespace('admin');
   }

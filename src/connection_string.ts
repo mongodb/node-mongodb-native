@@ -415,7 +415,7 @@ function applyAuthExpectations(parsed: any) {
  */
 function parseQueryString(query: string, options?: object): object | Error {
   const result = {} as any;
-  let parsedQueryString = qs.parse(query);
+  const parsedQueryString = qs.parse(query);
 
   checkTLSQueryString(parsedQueryString);
 
@@ -578,7 +578,7 @@ const SUPPORTED_PROTOCOLS = [PROTOCOL_MONGODB, PROTOCOL_MONGODB_SRV];
  * @param {boolean} [options.caseTranslate] Whether the parser should translate options back into camelCase after normalization
  * @param {parseCallback} callback
  */
-function parseConnectionString(uri: string, options?: any, callback?: any) {
+function parseConnectionString(uri: string, options?: any, callback?: Callback) {
   if (typeof options === 'function') (callback = options), (options = {});
   options = Object.assign({}, { caseTranslate: true }, options);
 
@@ -586,17 +586,17 @@ function parseConnectionString(uri: string, options?: any, callback?: any) {
   try {
     url.parse(uri);
   } catch (e) {
-    return callback(new MongoParseError('URI malformed, cannot be parsed'));
+    return callback!(new MongoParseError('URI malformed, cannot be parsed'));
   }
 
   const cap = uri.match(HOSTS_RX);
   if (!cap) {
-    return callback(new MongoParseError('Invalid connection string'));
+    return callback!(new MongoParseError('Invalid connection string'));
   }
 
   const protocol = cap[1];
   if (SUPPORTED_PROTOCOLS.indexOf(protocol) === -1) {
-    return callback(new MongoParseError('Invalid protocol provided'));
+    return callback!(new MongoParseError('Invalid protocol provided'));
   }
 
   const dbAndQuery = cap[4].split('?');
@@ -611,13 +611,13 @@ function parseConnectionString(uri: string, options?: any, callback?: any) {
     parsedOptions = Object.assign({}, parsedOptions, options);
     checkTLSOptions(parsedOptions);
   } catch (parseError) {
-    return callback(parseError);
+    return callback!(parseError);
   }
 
   parsedOptions = Object.assign({}, parsedOptions, options);
 
   if (protocol === PROTOCOL_MONGODB_SRV) {
-    return parseSrvConnectionString(uri, parsedOptions, callback);
+    return parseSrvConnectionString(uri, parsedOptions, callback!);
   }
 
   const auth: any = {
@@ -637,26 +637,26 @@ function parseConnectionString(uri: string, options?: any, callback?: any) {
   }
 
   if (cap[4].split('?')[0].indexOf('@') !== -1) {
-    return callback(new MongoParseError('Unescaped slash in userinfo section'));
+    return callback!(new MongoParseError('Unescaped slash in userinfo section'));
   }
 
   const authorityParts: any = cap[3].split('@');
   if (authorityParts.length > 2) {
-    return callback(new MongoParseError('Unescaped at-sign in authority section'));
+    return callback!(new MongoParseError('Unescaped at-sign in authority section'));
   }
 
   if (authorityParts[0] == null || authorityParts[0] === '') {
-    return callback(new MongoParseError('No username provided in authority section'));
+    return callback!(new MongoParseError('No username provided in authority section'));
   }
 
   if (authorityParts.length > 1) {
     const authParts = authorityParts.shift().split(':');
     if (authParts.length > 2) {
-      return callback(new MongoParseError('Unescaped colon in authority section'));
+      return callback!(new MongoParseError('Unescaped colon in authority section'));
     }
 
     if (authParts[0] === '') {
-      return callback(new MongoParseError('Invalid empty username provided'));
+      return callback!(new MongoParseError('Invalid empty username provided'));
     }
 
     if (!auth.username) auth.username = qs.unescape(authParts[0]);
@@ -668,7 +668,7 @@ function parseConnectionString(uri: string, options?: any, callback?: any) {
     .shift()
     .split(',')
     .map((host: any) => {
-      let parsedHost: any = url.parse(`mongodb://${host}`);
+      const parsedHost: any = url.parse(`mongodb://${host}`);
       if (parsedHost.path === '/:') {
         hostParsingError = new MongoParseError('Double colon in host identifier');
         return null;
@@ -710,18 +710,18 @@ function parseConnectionString(uri: string, options?: any, callback?: any) {
     .filter((host: any) => !!host);
 
   if (hostParsingError) {
-    return callback(hostParsingError);
+    return callback!(hostParsingError);
   }
 
   if (hosts.length === 0 || hosts[0].host === '' || hosts[0].host === null) {
-    return callback(new MongoParseError('No hostname or hostnames provided in connection string'));
+    return callback!(new MongoParseError('No hostname or hostnames provided in connection string'));
   }
 
   const directConnection = !!parsedOptions.directConnection;
   if (directConnection && hosts.length !== 1) {
     // If the option is set to true, the driver MUST validate that there is exactly one host given
     // in the host list in the URI, and fail client creation otherwise.
-    return callback(new MongoParseError('directConnection option requires exactly one host'));
+    return callback!(new MongoParseError('directConnection option requires exactly one host'));
   }
 
   const result = {
@@ -742,10 +742,10 @@ function parseConnectionString(uri: string, options?: any, callback?: any) {
   try {
     applyAuthExpectations(result);
   } catch (authError) {
-    return callback(authError);
+    return callback!(authError);
   }
 
-  callback(undefined, result);
+  callback!(undefined, result);
 }
 
 export { parseConnectionString };

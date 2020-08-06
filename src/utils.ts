@@ -18,7 +18,7 @@ function getSingleProperty(obj: any, name: any, value: any) {
 }
 
 function formatSortValue(sortDirection: any) {
-  var value = ('' + sortDirection).toLowerCase();
+  const value = ('' + sortDirection).toLowerCase();
 
   switch (value) {
     case 'ascending':
@@ -39,14 +39,14 @@ function formatSortValue(sortDirection: any) {
 }
 
 function formattedOrderClause(sortValue: any) {
-  var orderBy: any = {};
+  let orderBy: any = {};
   if (sortValue == null) return null;
   if (Array.isArray(sortValue)) {
     if (sortValue.length === 0) {
       return null;
     }
 
-    for (var i = 0; i < sortValue.length; i++) {
+    for (let i = 0; i < sortValue.length; i++) {
       if (sortValue[i].constructor === String) {
         orderBy[sortValue[i]] = 1;
       } else {
@@ -127,13 +127,13 @@ function handleCallback(callback?: Callback | Callback2, err?: any, value1?: any
 function toError(error: any) {
   if (error instanceof Error) return error;
 
-  var msg = error.err || error.errmsg || error.errMessage || error;
-  var e: any = MongoError.create({ message: msg, driver: true });
+  const msg = error.err || error.errmsg || error.errMessage || error;
+  const e: any = MongoError.create({ message: msg, driver: true });
 
   // Get all object keys
-  var keys = typeof error === 'object' ? Object.keys(error) : [];
+  const keys = typeof error === 'object' ? Object.keys(error) : [];
 
-  for (var i = 0; i < keys.length; i++) {
+  for (let i = 0; i < keys.length; i++) {
     try {
       e[keys[i]] = error[keys[i]];
     } catch (err) {
@@ -148,7 +148,7 @@ function toError(error: any) {
  * @param {any} hint
  */
 function normalizeHintField(hint: any) {
-  var finalHint: any = null;
+  let finalHint: any = null;
 
   if (typeof hint === 'string') {
     finalHint = hint;
@@ -160,7 +160,7 @@ function normalizeHintField(hint: any) {
     });
   } else if (hint != null && typeof hint === 'object') {
     finalHint = {};
-    for (var name in hint) {
+    for (const name in hint) {
       finalHint[name] = hint[name];
     }
   }
@@ -174,9 +174,9 @@ function normalizeHintField(hint: any) {
  * @param {any} fieldOrSpec
  */
 function parseIndexOptions(fieldOrSpec: any) {
-  var fieldHash: any = {};
-  var indexes = [];
-  var keys;
+  const fieldHash: any = {};
+  const indexes = [];
+  let keys;
 
   // Get all the fields accordingly
   if ('string' === typeof fieldOrSpec) {
@@ -225,7 +225,7 @@ function isObject(arg: any) {
 }
 
 function debugOptions(debugFields: any, options: any) {
-  var finalOptions: any = {};
+  const finalOptions: any = {};
   debugFields.forEach(function (n: any) {
     finalOptions[n] = options[n];
   });
@@ -234,7 +234,7 @@ function debugOptions(debugFields: any, options: any) {
 }
 
 function decorateCommand(command: any, options: any, exclude: any) {
-  for (var name in options) {
+  for (const name in options) {
     if (exclude.indexOf(name) === -1) command[name] = options[name];
   }
 
@@ -242,7 +242,7 @@ function decorateCommand(command: any, options: any, exclude: any) {
 }
 
 function mergeOptions(target: any, source: any) {
-  for (var name in source) {
+  for (const name in source) {
     target[name] = source[name];
   }
 
@@ -250,9 +250,9 @@ function mergeOptions(target: any, source: any) {
 }
 
 function filterOptions(options: any, names: any) {
-  var filterOptions: any = {};
+  const filterOptions: any = {};
 
-  for (var name in options) {
+  for (const name in options) {
     if (names.indexOf(name) !== -1) filterOptions[name] = options[name];
   }
 
@@ -261,7 +261,7 @@ function filterOptions(options: any, names: any) {
 }
 
 // Write concern keys
-var writeConcernKeys = ['w', 'j', 'wtimeout', 'fsync'];
+const writeConcernKeys = ['w', 'j', 'wtimeout', 'fsync'];
 
 // Merge the write concern options
 function mergeOptionsAndWriteConcern(
@@ -281,7 +281,7 @@ function mergeOptionsAndWriteConcern(
   if (!mergeWriteConcern) return targetOptions;
 
   // Found no write Concern options
-  var found = false;
+  let found = false;
   for (i = 0; i < writeConcernKeys.length; i++) {
     if (targetOptions[writeConcernKeys[i]]) {
       found = true;
@@ -490,7 +490,7 @@ function decorateWithReadConcern(command: any, coll: any, options?: any) {
   if (options && options.session && options.session.inTransaction()) {
     return;
   }
-  let readConcern = Object.assign({}, command.readConcern || {});
+  const readConcern = Object.assign({}, command.readConcern || {});
   if (coll.s.readConcern) {
     Object.assign(readConcern, coll.s.readConcern);
   }

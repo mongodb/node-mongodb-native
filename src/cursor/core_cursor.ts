@@ -6,6 +6,7 @@ import { Readable } from 'stream';
 import { MongoError, MongoNetworkError } from '../error';
 import { Long } from '../bson';
 import type { BSONSerializeOptions, Callback, Callback2 } from '../types';
+import type { OperationBase } from '../operations/operation';
 
 export interface InternalCursorState extends BSONSerializeOptions {
   [key: string]: any;
@@ -200,7 +201,7 @@ class CoreCursor extends Readable {
    * @function
    * @param {resultCallback} callback A callback function
    */
-  _next(callback: any) {
+  _next(callback: Callback) {
     nextFunction(this, callback);
   }
 

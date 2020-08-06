@@ -1,7 +1,8 @@
 import { handleCallback } from '../utils';
 import { MongoError } from '../error';
 import { CursorState } from '../cursor/core_cursor';
-import type { Callback } from '../types';
+import type { Callback, Document } from '../types';
+import type { Cursor } from '../cursor';
 const push = Array.prototype.push;
 
 /**
@@ -63,8 +64,8 @@ function loop(cursor: any, callback: Callback) {
  * @param {Cursor} cursor The Cursor instance from which to get the next document.
  * @param {Cursor~toArrayResultCallback} [callback] The result callback.
  */
-export function toArray(cursor: any, callback: Callback) {
-  const items: any = [];
+export function toArray(cursor: Cursor, callback: Callback): void {
+  const items: Document[] = [];
 
   // Reset cursor
   cursor.rewind();
@@ -72,7 +73,7 @@ export function toArray(cursor: any, callback: Callback) {
 
   // Fetch all the documents
   const fetchDocs = () => {
-    cursor._next((err?: any, doc?: any) => {
+    cursor._next((err, doc) => {
       if (err) {
         return handleCallback(callback, err);
       }

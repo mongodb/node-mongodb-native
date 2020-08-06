@@ -1,24 +1,35 @@
 import { Aspect, defineAspects } from './operation';
-import { CommandOperation } from './command';
+import { CommandOperation, CommandOperationOptions } from './command';
 import { decorateWithCollation, decorateWithReadConcern } from '../utils';
-import type { Callback } from '../types';
+import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
+import type { Collection } from '../collection';
+import type { Cursor } from '../cursor/cursor';
+
+export interface CountOperationOptions extends CommandOperationOptions {
+  skip?: number;
+  limit?: number;
+  maxTimeMS?: number;
+  hint?: string | Document;
+}
+
+type FinalCountOperationOptions = CountOperationOptions & { collectionName: string };
 
 export class CountOperation extends CommandOperation {
-  cursor: any;
-  applySkipLimit: any;
+  cursor: Cursor;
+  applySkipLimit: boolean;
 
-  constructor(cursor: any, applySkipLimit: any, options: any) {
-    super({ s: cursor }, options);
+  constructor(cursor: Cursor, applySkipLimit: boolean, options: CountOperationOptions) {
+    super(({ s: cursor } as unknown) as Collection, options);
 
     this.cursor = cursor;
     this.applySkipLimit = applySkipLimit;
   }
 
-  execute(server: Server, callback: Callback) {
+  execute(server: Server, callback: Callback): void {
     const cursor = this.cursor;
     const applySkipLimit = this.applySkipLimit;
-    const options = this.options;
+    const options: CountOperationOptions = this.options;
 
     if (applySkipLimit) {
       if (typeof cursor.cursorSkip() === 'number') options.skip = cursor.cursorSkip();
@@ -33,14 +44,13 @@ export class CountOperation extends CommandOperation {
       options.maxTimeMS = cursor.cmd.maxTimeMS;
     }
 
-    const finalOptions = {} as any;
+    const finalOptions: FinalCountOperationOptions = {
+      collectionName: cursor.namespace.collection
+    };
     finalOptions.skip = options.skip;
     finalOptions.limit = options.limit;
     finalOptions.hint = options.hint;
     finalOptions.maxTimeMS = options.maxTimeMS;
-
-    // Command
-    finalOptions.collectionName = cursor.namespace.collection;
 
     let command;
     try {
@@ -63,7 +73,11 @@ export class CountOperation extends CommandOperation {
  * @param {any} query The query for the count.
  * @param {any} [options] Optional settings. See Collection.prototype.count and Cursor.prototype.count for a list of options.
  */
-function buildCountCommand(collectionOrCursor: any, query: any, options?: any) {
+function buildCountCommand(
+  collectionOrCursor: Collection | Cursor,
+  query: Document,
+  options: FinalCountOperationOptions
+) {
   const skip = options.skip;
   const limit = options.limit;
   let hint = options.hint;
@@ -71,12 +85,12 @@ function buildCountCommand(collectionOrCursor: any, query: any, options?: any) {
   query = query || {};
 
   // Final query
-  const cmd = {
+  const cmd: Document = {
     count: options.collectionName,
     query: query
-  } as any;
+  };
 
-  if (collectionOrCursor.s.numberOfRetries) {
+  if (isCursor(collectionOrCursor)) {
     // collectionOrCursor is a cursor
     if (collectionOrCursor.options.hint) {
       hint = collectionOrCursor.options.hint;
@@ -98,6 +112,10 @@ function buildCountCommand(collectionOrCursor: any, query: any, options?: any) {
   decorateWithReadConcern(cmd, collectionOrCursor);
 
   return cmd;
+}
+
+function isCursor(c: any): c is Cursor {
+  return 'numberOfRetries' in c.s && 'undefined' !== typeof c.s.numberOfRetries;
 }
 
 defineAspects(CountOperation, [

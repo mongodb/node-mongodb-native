@@ -1,3 +1,4 @@
+import type { ClientSession } from '../sessions';
 import type { Document } from '../types';
 
 export const Aspect = {
@@ -6,7 +7,17 @@ export const Aspect = {
   RETRYABLE: Symbol('RETRYABLE'),
   EXECUTE_WITH_SELECTION: Symbol('EXECUTE_WITH_SELECTION'),
   NO_INHERIT_OPTIONS: Symbol('NO_INHERIT_OPTIONS')
-};
+} as const;
+
+export type Hint = string | Document;
+
+export interface OperationConstructor extends Function {
+  aspects?: Set<symbol>;
+}
+export interface OperationOptions {
+  multi?: boolean;
+  session?: ClientSession;
+}
 
 /**
  * This class acts as a parent class for any operation and is responsible for setting this.options,
@@ -22,8 +33,8 @@ export class OperationBase {
     this.options = Object.assign({}, options);
   }
 
-  hasAspect(aspect: any) {
-    const ctor: any = this.constructor;
+  hasAspect(aspect: symbol): boolean {
+    const ctor = this.constructor as OperationConstructor;
     if (ctor.aspects == null) {
       return false;
     }
@@ -31,23 +42,23 @@ export class OperationBase {
     return ctor.aspects.has(aspect);
   }
 
-  set session(session: any) {
+  set session(session: ClientSession) {
     Object.assign(this.options, { session });
   }
 
-  get session() {
+  get session(): ClientSession {
     return this.options.session;
   }
 
-  clearSession() {
+  clearSession(): void {
     delete this.options.session;
   }
 
-  get canRetryRead() {
+  get canRetryRead(): boolean {
     return true;
   }
 
-  get canRetryWrite() {
+  get canRetryWrite(): boolean {
     return true;
   }
 
@@ -61,7 +72,10 @@ export class OperationBase {
   }
 }
 
-export function defineAspects(operation: any, aspects: any) {
+export function defineAspects(
+  operation: OperationConstructor,
+  aspects: symbol | symbol[] | Set<symbol>
+): Set<symbol> {
   if (!Array.isArray(aspects) && !(aspects instanceof Set)) {
     aspects = [aspects];
   }

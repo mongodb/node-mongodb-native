@@ -1,8 +1,9 @@
-import { CommandOperation } from './command';
+import { CommandOperation, CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 import { loadCollection } from '../dynamic_loaders';
-import type { Callback } from '../types';
+import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
+import type { Db } from '../db';
 
 const ILLEGAL_COMMAND_FIELDS = new Set([
   'w',
@@ -19,23 +20,27 @@ const ILLEGAL_COMMAND_FIELDS = new Set([
   'writeConcern'
 ]);
 
-export class CreateCollectionOperation extends CommandOperation {
-  db: any;
-  name: any;
+export interface CreateCollectionOperationOptions extends CommandOperationOptions {
+  [key: string]: any;
+}
 
-  constructor(db: any, name: any, options: any) {
+export class CreateCollectionOperation extends CommandOperation {
+  db: Db;
+  name: string;
+
+  constructor(db: Db, name: string, options: CreateCollectionOperationOptions) {
     super(db, options);
     this.db = db;
     this.name = name;
   }
 
-  execute(server: Server, callback: Callback) {
+  execute(server: Server, callback: Callback): void {
     const db = this.db;
     const name = this.name;
-    const options = this.options;
+    const options: CreateCollectionOperationOptions = this.options;
     const Collection = loadCollection();
 
-    function done(err: any) {
+    const done: Callback = err => {
       if (err) {
         return callback(err);
       }
@@ -48,9 +53,9 @@ export class CreateCollectionOperation extends CommandOperation {
       } catch (err) {
         callback(err);
       }
-    }
+    };
 
-    const cmd: any = { create: name };
+    const cmd: Document = { create: name };
     for (const n in options) {
       if (
         options[n] != null &&

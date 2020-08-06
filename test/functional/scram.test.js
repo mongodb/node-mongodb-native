@@ -2,6 +2,7 @@
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 const { MongoClient } = require('../../src');
+const { expect } = require('chai');
 
 describe('SCRAM', function () {
   before(function () {

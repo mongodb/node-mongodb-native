@@ -1,19 +1,21 @@
 import { handleCallback, toError } from '../utils';
 import { OperationBase } from './operation';
-import type { Callback } from '../types';
+import type { Callback, Document } from '../types';
+import type { Collection } from '../collection';
+import type { FindOptions } from './find_and_modify';
 
 export class FindOneOperation extends OperationBase {
-  collection: any;
-  query: any;
+  collection: Collection;
+  query: Document;
 
-  constructor(collection: any, query: any, options: any) {
+  constructor(collection: Collection, query: Document, options: FindOptions) {
     super(options);
 
     this.collection = collection;
     this.query = query;
   }
 
-  execute(callback: Callback) {
+  execute(callback: Callback): void {
     const coll = this.collection;
     const query = this.query;
     const options = this.options;
@@ -22,7 +24,7 @@ export class FindOneOperation extends OperationBase {
       const cursor = coll.find(query, options).limit(-1).batchSize(1);
 
       // Return the item
-      cursor.next((err?: any, item?: any) => {
+      cursor.next((err, item) => {
         if (err != null) return handleCallback(callback, toError(err), null);
         handleCallback(callback, null, item);
       });
