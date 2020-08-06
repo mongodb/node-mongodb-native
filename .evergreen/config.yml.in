@@ -94,7 +94,10 @@ functions:
       params:
         script: |
           ${PREPARE_SHELL}
-          MONGODB_VERSION=${VERSION} TOPOLOGY=${TOPOLOGY} bash ${DRIVERS_TOOLS}/.evergreen/run-orchestration.sh
+          MONGODB_VERSION=${VERSION} TOPOLOGY=${TOPOLOGY} \
+          AUTH=${AUTH} SSL=${SSL} \
+          ORCHESTRATION_FILE=${ORCHESTRATION_FILE} \
+          bash ${DRIVERS_TOOLS}/.evergreen/run-orchestration.sh
     # run-orchestration generates expansion file with the MONGODB_URI for the cluster
     - command: expansions.update
       params:
@@ -128,7 +131,8 @@ functions:
             rm -f ./prepare_client_encryption.sh
           fi
 
-          AUTH=${AUTH} SSL=${SSL} UNIFIED=${UNIFIED} MONGODB_URI="${MONGODB_URI}" bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
+          AUTH=${AUTH} SSL=${SSL} UNIFIED=${UNIFIED} MONGODB_URI="${MONGODB_URI}" \
+          bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
 
   "run checks":
     - command: shell.exec
@@ -208,6 +212,25 @@ functions:
           NODE_LTS_NAME='${NODE_LTS_NAME}' bash ${PROJECT_DIRECTORY}/.evergreen/run-atlas-tests.sh
 
   "run ldap tests":
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: "src"
+        script: |
+          MONGODB_URI='${plain_auth_mongodb_uri}' NODE_LTS_NAME='${NODE_LTS_NAME}' \
+          bash ${PROJECT_DIRECTORY}/.evergreen/run-ldap-tests.sh
+
+  "run tls tests":
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: "src"
+        script: |
+          NODE_LTS_NAME=${NODE_LTS_NAME} DRIVERS_TOOLS="${DRIVERS_TOOLS}" \
+          SSL_CA_FILE="${SSL_CA_FILE}" SSL_KEY_FILE="${SSL_KEY_FILE}" \
+          MONGODB_URI="${MONGODB_URI}" bash ${PROJECT_DIRECTORY}/.evergreen/run-tls-tests.sh
+
+  "add aws auth variables to file":
     - command: shell.exec
       type: test
       params:
