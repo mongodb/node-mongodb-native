@@ -23,7 +23,7 @@ echo "Running kinit"
 kinit -k -t "$(pwd)/.evergreen/drivers.keytab" -p ${KRB5_PRINCIPAL}
 
 npm install kerberos
-MONGODB_UNIFIED_TOPOLOGY=1 npm run check:kerberos
+npm run check:kerberos
 
 # destroy ticket
 kdestroy
