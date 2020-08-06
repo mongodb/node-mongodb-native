@@ -1,7 +1,13 @@
 import { Aspect, defineAspects } from './operation';
-import { CommandOperation } from './command';
-import type { Callback } from '../types';
+import { CommandOperation, CommandOperationOptions } from './command';
+import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
+import type { Collection } from '../collection';
+
+export interface CollStatsOptions extends CommandOperationOptions {
+  /** Divide the returned sizes by scale value. */
+  scale: number;
+}
 
 /**
  * Get all the collection statistics.
@@ -19,13 +25,13 @@ export class CollStatsOperation extends CommandOperation {
    * @param {Collection} collection Collection instance
    * @param {object} [options] Optional settings. See Collection.prototype.stats for a list of options.
    */
-  constructor(collection: any, options?: object) {
+  constructor(collection: Collection, options?: CollStatsOptions) {
     super(collection, options);
     this.collectionName = collection.collectionName;
   }
 
-  execute(server: Server, callback: Callback) {
-    const command: any = { collStats: this.collectionName };
+  execute(server: Server, callback: Callback): void {
+    const command: Document = { collStats: this.collectionName };
     if (this.options.scale != null) {
       command.scale = this.options.scale;
     }
@@ -35,8 +41,8 @@ export class CollStatsOperation extends CommandOperation {
 }
 
 export class DbStatsOperation extends CommandOperation {
-  execute(server: Server, callback: Callback) {
-    const command: any = { dbStats: true };
+  execute(server: Server, callback: Callback): void {
+    const command: Document = { dbStats: true };
     if (this.options.scale != null) {
       command.scale = this.options.scale;
     }

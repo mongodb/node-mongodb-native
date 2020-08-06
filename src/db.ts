@@ -36,7 +36,7 @@ import { ListCollectionsOperation } from './operations/list_collections';
 import { ProfilingLevelOperation } from './operations/profiling_level';
 import { RemoveUserOperation } from './operations/remove_user';
 import { RenameOperation } from './operations/rename';
-import { SetProfilingLevelOperation } from './operations/set_profiling_level';
+import { SetProfilingLevelOperation, ProfilingLevel } from './operations/set_profiling_level';
 import { executeOperation } from './operations/execute_operation';
 import { EvalOperation } from './operations/eval';
 import type { Callback, Document } from './types';
@@ -676,7 +676,11 @@ export class Db {
    * @param {Db~resultCallback} [callback] The command result callback.
    * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  setProfilingLevel(level: string, options?: any, callback?: Callback): Promise<void> | void {
+  setProfilingLevel(
+    level: ProfilingLevel,
+    options?: any,
+    callback?: Callback
+  ): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 

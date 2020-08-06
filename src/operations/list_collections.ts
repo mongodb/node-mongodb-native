@@ -2,16 +2,23 @@ import { CommandOperation } from './command';
 import { Aspect, defineAspects } from './operation';
 import { maxWireVersion } from '../utils';
 import * as CONSTANTS from '../constants';
-import type { Callback } from '../types';
+import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
+import type { Db } from '../db';
+import type { ReadPreference } from '..';
+import type { ClientSession } from '../sessions';
 
 const LIST_COLLECTIONS_WIRE_VERSION = 3;
 
-function listCollectionsTransforms(databaseName: any) {
+interface CollectionTransform {
+  doc(doc: Document): Document;
+}
+
+function listCollectionsTransforms(databaseName: string): CollectionTransform {
   const matching = `${databaseName}.`;
 
   return {
-    doc: (doc: any) => {
+    doc(doc) {
       const index = doc.name.indexOf(matching);
       // Remove database name if available
       if (doc.name && index === 0) {
@@ -23,13 +30,24 @@ function listCollectionsTransforms(databaseName: any) {
   };
 }
 
+export interface ListCollectionOptions {
+  /** Since 4.0: If true, will only return the collection name in the response, and will omit additional info */
+  nameOnly?: boolean;
+  /** The batchSize for the returned command cursor or if pre 2.8 the systems batch collection */
+  batchSize?: number;
+  /** The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST). */
+  readPreference?: ReadPreference;
+  /** optional session to use for this operation */
+  session?: ClientSession;
+}
+
 export class ListCollectionsOperation extends CommandOperation {
-  db: any;
-  filter: any;
+  db: Db;
+  filter: Document;
   nameOnly: boolean;
   batchSize?: number;
 
-  constructor(db: any, filter: any, options: any) {
+  constructor(db: Db, filter: Document, options: ListCollectionOptions) {
     super(db, options, { fullResponse: true });
 
     this.db = db;
@@ -41,7 +59,7 @@ export class ListCollectionsOperation extends CommandOperation {
     }
   }
 
-  execute(server: Server, callback: Callback) {
+  execute(server: Server, callback: Callback): void {
     if (maxWireVersion(server) < LIST_COLLECTIONS_WIRE_VERSION) {
       let filter = this.filter;
       const databaseName = this.db.s.namespace.db;
@@ -56,7 +74,7 @@ export class ListCollectionsOperation extends CommandOperation {
       }
 
       // No filter, filter by current database
-      if (filter == null) {
+      if (filter.name == null) {
         filter.name = `/${databaseName}/`;
       }
 

@@ -1,29 +1,41 @@
 import { defineAspects, Aspect } from './operation';
-import { CommandOperation } from './command';
+import { CommandOperation, CommandOperationOptions } from './command';
 import type { Callback } from '../types';
 import type { Server } from '../sdam/server';
+import type { Db } from '../db';
 const levelValues = new Set(['off', 'slow_only', 'all']);
 
-export class SetProfilingLevelOperation extends CommandOperation {
-  level: any;
-  profile: any;
+export enum ProfilingLevel {
+  off = 'off',
+  slowOnly = 'slow_only',
+  all = 'all'
+}
 
-  constructor(db: any, level: any, options: any) {
-    let profile = 0;
-    if (level === 'off') {
-      profile = 0;
-    } else if (level === 'slow_only') {
-      profile = 1;
-    } else if (level === 'all') {
-      profile = 2;
+export class SetProfilingLevelOperation extends CommandOperation {
+  level: ProfilingLevel;
+  profile: 0 | 1 | 2;
+
+  constructor(db: Db, level: ProfilingLevel, options: CommandOperationOptions) {
+    super(db, options);
+    switch (level) {
+      case ProfilingLevel.off:
+        this.profile = 0;
+        break;
+      case ProfilingLevel.slowOnly:
+        this.profile = 1;
+        break;
+      case ProfilingLevel.all:
+        this.profile = 2;
+        break;
+      default:
+        this.profile = 0;
+        break;
     }
 
-    super(db, options);
     this.level = level;
-    this.profile = profile;
   }
 
-  execute(server: Server, callback: Callback) {
+  execute(server: Server, callback: Callback): void {
     const level = this.level;
 
     if (!levelValues.has(level)) {

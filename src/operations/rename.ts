@@ -4,12 +4,19 @@ import { RunAdminCommandOperation } from './run_command';
 import { defineAspects, Aspect } from './operation';
 import type { Callback } from '../types';
 import type { Server } from '../sdam/server';
+import type { Collection } from '../collection';
+import type { CommandOperationOptions } from './command';
+
+export interface RenameOptions extends CommandOperationOptions {
+  /** Drop the target name collection if it previously exists. */
+  dropTarget: boolean;
+}
 
 export class RenameOperation extends RunAdminCommandOperation {
-  collection: any;
-  newName: any;
+  collection: Collection;
+  newName: string;
 
-  constructor(collection: any, newName: any, options: any) {
+  constructor(collection: Collection, newName: string, options: RenameOptions) {
     // Check the collection name
     checkCollectionName(newName);
 
@@ -24,7 +31,7 @@ export class RenameOperation extends RunAdminCommandOperation {
     this.newName = newName;
   }
 
-  execute(server: Server, callback: Callback) {
+  execute(server: Server, callback: Callback): void {
     const Collection = loadCollection();
     const coll = this.collection;
 

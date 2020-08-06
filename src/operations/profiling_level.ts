@@ -1,14 +1,15 @@
-import { defineAspects, Aspect } from './operation';
+import { defineAspects, Aspect, OperationOptions } from './operation';
 import { CommandOperation } from './command';
 import type { Callback } from '../types';
 import type { Server } from '../sdam/server';
+import type { Db } from '../db';
 
 export class ProfilingLevelOperation extends CommandOperation {
-  constructor(db: any, options: any) {
+  constructor(db: Db, options: OperationOptions) {
     super(db, options);
   }
 
-  execute(server: Server, callback: Callback) {
+  execute(server: Server, callback: Callback): void {
     super.executeCommand(server, { profile: -1 }, (err, doc) => {
       if (err == null && doc.ok === 1) {
         const was = doc.was;
