@@ -1076,6 +1076,13 @@ tasks:
           VERSION: latest
           TOPOLOGY: server
       - func: run tls tests
+  - name: test-auth-ldap
+    tags:
+      - auth
+      - ldap
+    commands:
+      - func: install dependencies
+      - func: run ldap tests
   - name: test-latest-ocsp-valid-cert-server-staples
     tags:
       - ocsp
@@ -1371,6 +1378,7 @@ buildvariants:
       - test-2.6-sharded_cluster-unified
       - test-atlas-connectivity
       - test-tls-support
+      - test-auth-ldap
       - test-latest-ocsp-valid-cert-server-staples
       - test-latest-ocsp-invalid-cert-server-staples
       - test-latest-ocsp-valid-cert-server-does-not-staple
@@ -1482,6 +1490,7 @@ buildvariants:
       - test-2.6-replica_set-unified
       - test-2.6-sharded_cluster-unified
       - test-atlas-connectivity
+      - test-auth-ldap
   - name: ubuntu-14.04-dubnium
     display_name: Ubuntu 14.04 Node Dubnium
     run_on: ubuntu1404-test
@@ -1557,6 +1566,7 @@ buildvariants:
       - test-3.2-sharded_cluster-unified
       - test-atlas-connectivity
       - test-tls-support
+      - test-auth-ldap
       - test-latest-ocsp-valid-cert-server-staples
       - test-latest-ocsp-invalid-cert-server-staples
       - test-latest-ocsp-valid-cert-server-does-not-staple
