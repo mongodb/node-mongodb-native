@@ -126,6 +126,11 @@ TASKS.push(
       },
       { func: 'run tls tests' }
     ]
+  },
+  {
+    name: 'test-auth-ldap',
+    tags: ['auth', 'ldap'],
+    commands: [{ func: 'install dependencies' }, { func: 'run ldap tests' }]
   }
 );
 
