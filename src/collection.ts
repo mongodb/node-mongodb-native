@@ -481,7 +481,7 @@ export class Collection {
    */
   updateOne(
     filter: object,
-    update: object,
+    update: Document,
     options?: any,
     callback?: Callback
   ): Promise<void> | void {

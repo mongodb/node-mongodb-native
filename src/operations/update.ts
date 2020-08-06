@@ -1,23 +1,45 @@
-import { defineAspects, Aspect, OperationBase } from './operation';
+import { defineAspects, Aspect, OperationBase, OperationOptions, Hint } from './operation';
 import { updateDocuments, updateCallback } from './common_functions';
-import { hasAtomicOperators } from '../utils';
+import { hasAtomicOperators, MongoDBNamespace } from '../utils';
 import { CommandOperation } from './command';
-import type { Callback } from '../types';
+import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
+import type { Collection } from '../collection';
+import type { WriteConcern } from '../write_concern';
+import type { CollationOptions } from '../cmap/wire_protocol/write_command';
+
+export interface UpdateOptions extends OperationOptions {
+  arrayFilters?: Document[];
+  upsert?: boolean;
+  writeConcern?: WriteConcern;
+  collation?: CollationOptions;
+  hint?: Hint;
+}
+
+export interface UpdateOperators {
+  $currentDate?: Document;
+  $inc?: Document;
+  $min?: Document;
+  $max?: Document;
+  $mul?: Document;
+  $rename?: Document;
+  $set?: Document;
+  $setOnInsert?: Document;
+  $unset?: Document;
+}
 
 export class UpdateOperation extends OperationBase {
-  namespace: any;
-  operations: any;
-  options: any;
+  namespace: MongoDBNamespace;
+  operations: OperationOptions[];
 
-  constructor(ns: any, ops: any, options: any) {
+  constructor(ns: MongoDBNamespace, ops: Document[], options: UpdateOptions) {
     super(options);
     this.namespace = ns;
     this.operations = ops;
   }
 
-  get canRetryWrite() {
-    return this.operations.every((op: any) => op.multi == null || op.multi === false);
+  get canRetryWrite(): boolean {
+    return this.operations.every(op => op.multi == null || op.multi === false);
   }
 
   execute(server: Server, callback: Callback): void {
@@ -26,11 +48,16 @@ export class UpdateOperation extends OperationBase {
 }
 
 export class UpdateOneOperation extends CommandOperation {
-  collection: any;
-  filter: any;
-  update: any;
+  collection: Collection;
+  filter: Document;
+  update: UpdateOperators;
 
-  constructor(collection: any, filter: any, update: any, options: any) {
+  constructor(
+    collection: Collection,
+    filter: Document,
+    update: UpdateOperators,
+    options: UpdateOptions
+  ) {
     super(collection, options);
 
     if (!hasAtomicOperators(update)) {
@@ -58,11 +85,16 @@ export class UpdateOneOperation extends CommandOperation {
 }
 
 export class UpdateManyOperation extends CommandOperation {
-  collection: any;
-  filter: any;
-  update: any;
+  collection: Collection;
+  filter: Document;
+  update: UpdateOperators;
 
-  constructor(collection: any, filter: any, update: any, options: any) {
+  constructor(
+    collection: Collection,
+    filter: Document,
+    update: UpdateOperators,
+    options: UpdateOperation
+  ) {
     super(collection, options);
 
     this.collection = collection;
@@ -70,7 +102,7 @@ export class UpdateManyOperation extends CommandOperation {
     this.update = update;
   }
 
-  execute(server: Server, callback: Callback) {
+  execute(server: Server, callback: Callback): void {
     const coll = this.collection;
     const filter = this.filter;
     const update = this.update;
@@ -79,7 +111,7 @@ export class UpdateManyOperation extends CommandOperation {
     // Set single document update
     options.multi = true;
     // Execute update
-    updateDocuments(server, coll, filter, update, options, (err?: any, r?: any) =>
+    updateDocuments(server, coll, filter, update, options, (err, r) =>
       updateCallback(err, r, callback)
     );
   }

@@ -1,16 +1,46 @@
-import { defineAspects, Aspect } from './operation';
+import { defineAspects, Aspect, Hint } from './operation';
 import { updateDocuments } from './common_functions';
 import { hasAtomicOperators } from '../utils';
-import { CommandOperation } from './command';
-import type { Callback } from '../types';
+import { CommandOperation, CommandOperationOptions } from './command';
+import type { Callback, Document, AnyError } from '../types';
 import type { Server } from '../sdam/server';
+import type { Collection } from '../collection';
+import type { CollationOptions } from '../cmap/wire_protocol/write_command';
+
+export interface ReplaceOneOptions extends CommandOperationOptions {
+  /** Allow driver to bypass schema validation in MongoDB 3.2 or higher. */
+  bypassDocumentValidation: boolean;
+  /** Specify collation (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields). */
+  collation: CollationOptions;
+  /** An optional hint for query optimization. See the {@link https://docs.mongodb.com/manual/reference/command/update/#update-command-hint|update command} reference for more information. */
+  hint: Hint;
+  /** When true, creates a new document if no document matches the query. */
+  upsert: boolean;
+  /** The write concern. */
+  w: number | string;
+  /** The write concern timeout. */
+  wtimeout: number;
+  /** Specify a journal write concern. */
+  j: boolean;
+  /** If true, will throw if bson documents start with `$` or include a `.` in any key value */
+  checkKeys: boolean;
+  /** Serialize functions on any object. */
+  serializeFunctions: boolean;
+  /** Specify if the BSON serializer should ignore undefined fields. */
+  ignoreUndefined: boolean;
+}
 
 export class ReplaceOneOperation extends CommandOperation {
-  collection: any;
-  filter: any;
-  replacement: any;
+  collection: Collection;
+  filter: Document;
+  replacement: Document;
 
-  constructor(collection: any, filter: any, replacement: any, options: any) {
+  constructor(
+    collection: Collection,
+    filter: Document,
+    replacement: Document,
+    options: ReplaceOneOptions
+  ) {
     super(collection, options);
 
     if (hasAtomicOperators(replacement)) {
@@ -22,7 +52,7 @@ export class ReplaceOneOperation extends CommandOperation {
     this.replacement = replacement;
   }
 
-  execute(server: Server, callback: Callback) {
+  execute(server: Server, callback: Callback): void {
     const coll = this.collection;
     const filter = this.filter;
     const replacement = this.replacement;
@@ -38,7 +68,12 @@ export class ReplaceOneOperation extends CommandOperation {
   }
 }
 
-function replaceCallback(err: any, r: any, doc: any, callback: Callback) {
+function replaceCallback(
+  err: AnyError | undefined,
+  r: Document,
+  doc: Document,
+  callback: Callback
+) {
   if (callback == null) return;
   if (err && callback) return callback(err);
   if (r == null) return callback(undefined, { result: { ok: 1 } });

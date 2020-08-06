@@ -9,10 +9,13 @@ import {
   toError
 } from '../utils';
 import { ReadPreference } from '../read_preference';
-import { CommandOperation } from './command';
+import { CommandOperation, CommandOptions } from './command';
 import { defineAspects, Aspect } from './operation';
-import type { Callback } from '../types';
+import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
+import type { Collection } from '../collection';
+import type { ClientSession } from '../sessions';
+import type { Sort } from './find_and_modify';
 
 const exclusionList = [
   'readPreference',
@@ -25,6 +28,43 @@ const exclusionList = [
   'scope' // this option is reformatted thus exclude the original
 ];
 
+export type MapFunction = () => void;
+export type ReduceFunction = (key: string, values: Document[]) => Document;
+export type FinalizeFunction = (key: string, reducedValue: Document) => Document;
+
+export interface MapReduceOptions extends CommandOptions {
+  /** The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST). */
+  readPreference?: ReadPreference;
+  /** Sets the output target for the map reduce job. *{inline:1} | {replace:'collectionName'} | {merge:'collectionName'} | {reduce:'collectionName'}* */
+  out?: 'inline' | { inline: 1 } | { replace: string } | { merge: string } | { reduce: string };
+  /** Query filter object. */
+  query?: Document;
+  /** Sorts the input objects using this key. Useful for optimization, like sorting by the emit key for fewer reduces. */
+  sort?: Sort;
+  /** Number of objects to return from collection. */
+  limit?: number;
+  /** Keep temporary data. */
+  keeptemp?: boolean;
+  /** Finalize function. */
+  finalize?: FinalizeFunction | string;
+  /** Can pass in variables that can be access from map/reduce/finalize. */
+  scope?: Document;
+  /** It is possible to make the execution stay in JS. Provided in MongoDB > 2.0.X. */
+  jsMode?: boolean;
+  /** Provide statistics on job execution time. */
+  verbose?: boolean;
+  /** Allow driver to bypass schema validation in MongoDB 3.2 or higher. */
+  bypassDocumentValidation?: boolean;
+  /** optional session to use for this operation */
+  session?: ClientSession;
+}
+
+interface MapReduceStats {
+  processtime?: number;
+  counts?: number;
+  timing?: number;
+}
+
 /**
  * Run Map Reduce across a collection. Be aware that the inline option for out will return an array of results not a collection.
  *
@@ -35,9 +75,9 @@ const exclusionList = [
  * @property {object} [options] Optional settings. See Collection.prototype.mapReduce for a list of options.
  */
 export class MapReduceOperation extends CommandOperation {
-  collection: any;
-  map: any;
-  reduce: any;
+  collection: Collection;
+  map: MapFunction | string;
+  reduce: ReduceFunction | string;
 
   /**
    * Constructs a MapReduce operation.
@@ -47,7 +87,12 @@ export class MapReduceOperation extends CommandOperation {
    * @param {(Function|string)} reduce The reduce function.
    * @param {object} [options] Optional settings. See Collection.prototype.mapReduce for a list of options.
    */
-  constructor(collection: any, map: any, reduce: any, options?: object) {
+  constructor(
+    collection: Collection,
+    map: MapFunction | string,
+    reduce: ReduceFunction | string,
+    options?: MapReduceOptions
+  ) {
     super(collection, options);
 
     this.collection = collection;
@@ -55,17 +100,17 @@ export class MapReduceOperation extends CommandOperation {
     this.reduce = reduce;
   }
 
-  execute(server: Server, callback: Callback) {
+  execute(server: Server, callback: Callback): void {
     const coll = this.collection;
     const map = this.map;
     const reduce = this.reduce;
     let options = this.options;
 
-    const mapCommandHash: any = {
+    const mapCommandHash: Document = {
       mapReduce: coll.collectionName,
       map: map,
       reduce: reduce
-    } as any;
+    };
 
     if (options.scope) {
       mapCommandHash.scope = processScope(options.scope);
@@ -88,9 +133,9 @@ export class MapReduceOperation extends CommandOperation {
     if (
       options.readPreference !== false &&
       options.readPreference !== 'primary' &&
-      options['out'] &&
-      options['out'].inline !== 1 &&
-      options['out'] !== 'inline'
+      options.out &&
+      options.out.inline !== 1 &&
+      options.out !== 'inline'
     ) {
       // Force readPreference to primary
       options.readPreference = 'primary';
@@ -121,7 +166,7 @@ export class MapReduceOperation extends CommandOperation {
       }
 
       // Create statistics value
-      const stats: any = {};
+      const stats: MapReduceStats = {};
       if (result.timeMillis) stats['processtime'] = result.timeMillis;
       if (result.counts) stats['counts'] = result.counts;
       if (result.timing) stats['timing'] = result.timing;
@@ -163,18 +208,13 @@ export class MapReduceOperation extends CommandOperation {
   }
 }
 
-/**
- * Functions that are passed as scope args must
- * be converted to Code instances.
- *
- * @param {any} scope
- */
-function processScope(scope: any) {
+/** Functions that are passed as scope args must be converted to Code instances. */
+function processScope(scope: Document) {
   if (!isObject(scope) || scope._bsontype === 'ObjectID') {
     return scope;
   }
 
-  const newScope: any = {};
+  const newScope: Document = {};
 
   for (const key of Object.keys(scope)) {
     if ('function' === typeof scope[key]) {

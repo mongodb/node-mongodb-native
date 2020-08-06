@@ -1,19 +1,25 @@
 import { defineAspects, Aspect } from './operation';
-import { CommandOperation } from './command';
+import { CommandOperation, CommandOptions } from './command';
 import type { Document, Callback } from '../types';
 import type { Server } from '../sdam/server';
+import type { Admin } from '../admin';
+
+export interface ValidateCollectionOptions extends CommandOptions {
+  /** Validates a collection in the background, without interrupting read or write traffic (only in MongoDB 4.4+) */
+  background: boolean;
+}
 
 export class ValidateCollectionOperation extends CommandOperation {
   collectionName: string;
-  command: any;
+  command: Document;
 
-  constructor(admin: any, collectionName: any, options: any) {
+  constructor(admin: Admin, collectionName: string, options: ValidateCollectionOptions) {
     // Decorate command with extra options
     const command: Document = { validate: collectionName };
     const keys = Object.keys(options);
     for (let i = 0; i < keys.length; i++) {
       if (Object.prototype.hasOwnProperty.call(options, keys[i]) && keys[i] !== 'session') {
-        command[keys[i]] = options[keys[i]];
+        command[keys[i]] = (options as Document)[keys[i]];
       }
     }
 
@@ -22,7 +28,7 @@ export class ValidateCollectionOperation extends CommandOperation {
     this.collectionName = collectionName;
   }
 
-  execute(server: Server, callback: Callback) {
+  execute(server: Server, callback: Callback): void {
     const collectionName = this.collectionName;
 
     super.executeCommand(server, this.command, (err, doc) => {

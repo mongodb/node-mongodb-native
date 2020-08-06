@@ -1,4 +1,4 @@
-import { OperationBase } from './operation';
+import { OperationBase, OperationOptions } from './operation';
 import { handleCallback } from '../utils';
 import { MongoError } from '../error';
 import type { Callback } from '../types';
@@ -7,7 +7,7 @@ import type { Collection } from '../collection';
 export class OptionsOperation extends OperationBase {
   collection: Collection;
 
-  constructor(collection: Collection, options: any) {
+  constructor(collection: Collection, options: OperationOptions) {
     super(options);
 
     this.collection = collection;

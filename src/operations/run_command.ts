@@ -1,4 +1,4 @@
-import { CommandOperation } from './command';
+import { CommandOperation, CommandOperationOptions } from './command';
 import { defineAspects, Aspect } from './operation';
 import { MongoDBNamespace } from '../utils';
 import type { Collection } from '../collection';
@@ -9,7 +9,7 @@ import type { Document, Callback } from '../types';
 export class RunCommandOperation extends CommandOperation {
   command: Document;
 
-  constructor(parent: Db | Collection, command: Document, options: any) {
+  constructor(parent: Db | Collection, command: Document, options: CommandOperationOptions) {
     super(parent, options);
     this.command = command;
   }
@@ -21,7 +21,7 @@ export class RunCommandOperation extends CommandOperation {
 }
 
 export class RunAdminCommandOperation extends RunCommandOperation {
-  constructor(parent: Db | Collection, command: Document, options: any) {
+  constructor(parent: Db | Collection, command: Document, options: CommandOperationOptions) {
     super(parent, command, options);
     this.ns = new MongoDBNamespace('admin');
   }
