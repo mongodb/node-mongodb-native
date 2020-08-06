@@ -9,7 +9,7 @@ import {
   toError
 } from '../utils';
 import { ReadPreference } from '../read_preference';
-import { CommandOperation, CommandOptions } from './command';
+import { CommandOperation, CommandOpOptions } from './command';
 import { defineAspects, Aspect } from './operation';
 import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
@@ -32,7 +32,7 @@ export type MapFunction = () => void;
 export type ReduceFunction = (key: string, values: Document[]) => Document;
 export type FinalizeFunction = (key: string, reducedValue: Document) => Document;
 
-export interface MapReduceOptions extends CommandOptions {
+export interface MapReduceOptions extends CommandOpOptions {
   /** The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST). */
   readPreference?: ReadPreference;
   /** Sets the output target for the map reduce job. *{inline:1} | {replace:'collectionName'} | {merge:'collectionName'} | {reduce:'collectionName'}* */

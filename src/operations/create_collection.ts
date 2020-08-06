@@ -1,4 +1,4 @@
-import { CommandOperation, CommandOperationOptions } from './command';
+import { CommandOperation, CommandOpOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 import { loadCollection } from '../dynamic_loaders';
 import type { Callback, Document } from '../types';
@@ -20,7 +20,7 @@ const ILLEGAL_COMMAND_FIELDS = new Set([
   'writeConcern'
 ]);
 
-export interface CreateCollectionOperationOptions extends CommandOperationOptions {
+export interface CreateCollectionOperationOptions extends CommandOpOptions {
   [key: string]: any;
 }
 

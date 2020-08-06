@@ -1,12 +1,12 @@
 import { Aspect, defineAspects } from './operation';
-import { CommandOperation, CommandOperationOptions } from './command';
+import { CommandOperation, CommandOpOptions } from './command';
 import { decorateWithCollation, decorateWithReadConcern } from '../utils';
 import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { Cursor } from '../cursor/cursor';
 
-export interface CountOperationOptions extends CommandOperationOptions {
+export interface CountOperationOptions extends CommandOpOptions {
   skip?: number;
   limit?: number;
   maxTimeMS?: number;

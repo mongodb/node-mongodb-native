@@ -1,10 +1,10 @@
 import { Aspect, defineAspects } from './operation';
-import { CommandOperation, CommandOperationOptions } from './command';
+import { CommandOperation, CommandOpOptions } from './command';
 import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 
-export interface CollStatsOptions extends CommandOperationOptions {
+export interface CollStatsOptions extends CommandOpOptions {
   /** Divide the returned sizes by scale value. */
   scale: number;
 }

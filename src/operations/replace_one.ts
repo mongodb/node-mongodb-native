@@ -1,13 +1,13 @@
 import { defineAspects, Aspect, Hint } from './operation';
 import { updateDocuments } from './common_functions';
 import { hasAtomicOperators } from '../utils';
-import { CommandOperation, CommandOperationOptions } from './command';
+import { CommandOperation, CommandOpOptions } from './command';
 import type { Callback, Document, AnyError } from '../types';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 
-export interface ReplaceOneOptions extends CommandOperationOptions {
+export interface ReplaceOneOptions extends CommandOpOptions {
   /** Allow driver to bypass schema validation in MongoDB 3.2 or higher. */
   bypassDocumentValidation: boolean;
   /** Specify collation (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields). */

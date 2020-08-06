@@ -1,15 +1,18 @@
 import * as crypto from 'crypto';
 import { Aspect, defineAspects } from './operation';
-import { CommandOperation, CommandOperationOptions } from './command';
+import { CommandOperation, CommandOpOptions } from './command';
 import { handleCallback, toError } from '../utils';
 import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
 
-export interface AddUserOperationOptions extends CommandOperationOptions {
-  digestPassword: null;
-  roles: string | string[];
-  customData: Document;
+export interface AddUserOptions extends CommandOpOptions {
+  /** @deprecated Please use db.command('createUser', ...) instead for this option */
+  digestPassword?: null;
+  /** Roles associated with the created user (only Mongodb 2.6 or higher) */
+  roles?: string | string[];
+  /** Custom data associated with the user (only Mongodb 2.6 or higher) */
+  customData?: Document;
 }
 
 export class AddUserOperation extends CommandOperation {
@@ -17,12 +20,7 @@ export class AddUserOperation extends CommandOperation {
   username: string;
   password?: string;
 
-  constructor(
-    db: Db,
-    username: string,
-    password: string | undefined,
-    options: AddUserOperationOptions
-  ) {
+  constructor(db: Db, username: string, password: string | undefined, options: AddUserOptions) {
     super(db, options);
 
     this.db = db;
@@ -40,7 +38,8 @@ export class AddUserOperation extends CommandOperation {
     if (options.digestPassword != null) {
       return callback(
         toError(
-          "The digestPassword option is not supported via add_user. Please use db.command('createUser', ...) instead for this option."
+          'The digestPassword option is not supported via add_user. ' +
+            "Please use db.command('createUser', ...) instead for this option."
         )
       );
     }

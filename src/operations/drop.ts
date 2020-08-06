@@ -1,6 +1,6 @@
 import { Aspect, defineAspects } from './operation';
 import { handleCallback } from '../utils';
-import { CommandOperation, CommandOperationOptions } from './command';
+import { CommandOperation, CommandOpOptions } from './command';
 import type { Callback } from '../types';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
@@ -8,7 +8,7 @@ import type { Db } from '../db';
 export class DropCollectionOperation extends CommandOperation {
   name: string;
 
-  constructor(db: Db, name: string, options: CommandOperationOptions) {
+  constructor(db: Db, name: string, options: CommandOpOptions) {
     super(db, options);
     this.name = name;
   }

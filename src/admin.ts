@@ -1,5 +1,5 @@
 import { applyWriteConcern } from './utils';
-import { AddUserOperation } from './operations/add_user';
+import { AddUserOperation, AddUserOptions } from './operations/add_user';
 import { RemoveUserOperation } from './operations/remove_user';
 import { ValidateCollectionOperation } from './operations/validate_collection';
 import { ListDatabasesOperation } from './operations/list_databases';
@@ -146,21 +146,13 @@ export class Admin {
    * @function
    * @param {string} username The username.
    * @param {string} [password] The password.
-   * @param {object} [options] Optional settings.
-   * @param {(number|string)} [options.w] The write concern.
-   * @param {number} [options.wtimeout] The write concern timeout.
-   * @param {boolean} [options.j=false] Specify a journal write concern.
-   * @param {boolean} [options.fsync=false] Specify a file sync write concern.
-   * @param {object} [options.customData] Custom data associated with the user (only Mongodb 2.6 or higher)
-   * @param {object[]} [options.roles] Roles associated with the created user (only Mongodb 2.6 or higher)
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {Admin~resultCallback} [callback] The command result callback
+   * @param {Callback} [callback] The command result callback
    * @returns {Promise<void> | void} returns Promise if no callback passed
    */
   addUser(
     username: string,
     password?: string,
-    options?: any,
+    options?: AddUserOptions,
     callback?: Callback
   ): Promise<void> | void {
     const args = Array.prototype.slice.call(arguments, 2);
@@ -177,9 +169,9 @@ export class Admin {
     // Get the options
     options = applyWriteConcern(options, { db: this.s.db });
     // Set the db name to admin
-    options.dbName = 'admin';
+    options!.dbName = 'admin';
 
-    const addUserOperation = new AddUserOperation(this.s.db, username, password, options);
+    const addUserOperation = new AddUserOperation(this.s.db, username, password, options!);
     return executeOperation(this.s.db.s.topology, addUserOperation, callback);
   }
 

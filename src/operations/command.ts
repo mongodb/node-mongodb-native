@@ -3,7 +3,7 @@ import { ReadConcern } from '../read_concern';
 import { WriteConcern } from '../write_concern';
 import { maxWireVersion, MongoDBNamespace } from '../utils';
 import { ReadPreference } from '../read_preference';
-import { commandSupportsReadConcern } from '../sessions';
+import { commandSupportsReadConcern, ClientSession } from '../sessions';
 import { MongoError } from '../error';
 import type { Logger } from '../logger';
 
@@ -14,14 +14,20 @@ import type { Db } from '../db';
 
 const SUPPORTS_WRITE_CONCERN_AND_COLLATION = 5;
 
-export interface CommandOptions extends OperationOptions {
+export interface CommandOpOptions extends OperationOptions {
   fullResponse?: boolean;
+  /** Specify a read concern and level for the collection. (only MongoDB 3.2 or higher supported) */
+  readConcern?: ReadConcern;
+  /** The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST). */
+  readPreference?: ReadPreference;
+  /** Specify ClientSession for this command */
+  session?: ClientSession;
+  /** WriteConcern for this command */
+  writeConcern?: WriteConcern;
+
+  // Admin command overrides.
   dbName?: string;
   authdb?: string;
-}
-
-export interface CommandOperationOptions extends OperationOptions {
-  fullResponse?: boolean;
 }
 
 export class CommandOperation extends OperationBase {
@@ -41,8 +47,8 @@ export class CommandOperation extends OperationBase {
    */
   constructor(
     parent: Collection | Db,
-    options?: CommandOptions,
-    operationOptions?: CommandOperationOptions
+    options?: CommandOpOptions,
+    operationOptions?: CommandOpOptions
   ) {
     super(options);
 

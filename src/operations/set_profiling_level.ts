@@ -1,5 +1,5 @@
 import { defineAspects, Aspect } from './operation';
-import { CommandOperation, CommandOperationOptions } from './command';
+import { CommandOperation, CommandOpOptions } from './command';
 import type { Callback } from '../types';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
@@ -15,7 +15,7 @@ export class SetProfilingLevelOperation extends CommandOperation {
   level: ProfilingLevel;
   profile: 0 | 1 | 2;
 
-  constructor(db: Db, level: ProfilingLevel, options: CommandOperationOptions) {
+  constructor(db: Db, level: ProfilingLevel, options: CommandOpOptions) {
     super(db, options);
     switch (level) {
       case ProfilingLevel.off:

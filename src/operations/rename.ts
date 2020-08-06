@@ -5,9 +5,9 @@ import { defineAspects, Aspect } from './operation';
 import type { Callback } from '../types';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
-import type { CommandOperationOptions } from './command';
+import type { CommandOpOptions } from './command';
 
-export interface RenameOptions extends CommandOperationOptions {
+export interface RenameOptions extends CommandOpOptions {
   /** Drop the target name collection if it previously exists. */
   dropTarget: boolean;
 }
