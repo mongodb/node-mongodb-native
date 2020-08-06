@@ -7,13 +7,14 @@ import { MongoDBAWS } from './mongodb_aws';
 import type { AuthProvider } from './auth_provider';
 
 export enum AuthMechanism {
-  MONGODB_AWS = 'mongodb-aws',
-  MONGODB_CR = 'mongocr',
-  MONGODB_X509 = 'x509',
-  MONGODB_PLAIN = 'plain',
-  MONGODB_GSSAPI = 'gssapi',
-  MONGODB_SCRAM_SHA1 = 'scram-sha-1',
-  MONGODB_SCRAM_SHA256 = 'scram-sha-256'
+  MONGODB_AWS = 'MONGODB-AWS',
+  MONGODB_CR = 'MONGODB-CR',
+  MONGODB_DEFAULT = 'DEFAULT',
+  MONGODB_GSSAPI = 'GSSAPI',
+  MONGODB_PLAIN = 'PLAIN',
+  MONGODB_SCRAM_SHA1 = 'SCRAM-SHA-1',
+  MONGODB_SCRAM_SHA256 = 'SCRAM-SHA-256',
+  MONGODB_X509 = 'MONGODB-X509'
 }
 
 export const AUTH_PROVIDERS = {

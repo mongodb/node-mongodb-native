@@ -1,4 +1,24 @@
-const needSlaveOk = ['primaryPreferred', 'secondary', 'secondaryPreferred', 'nearest'];
+import type { TagSet } from './sdam/server_description';
+
+export enum ReadPreferenceMode {
+  primary = 'primary',
+  primaryPreferred = 'primaryPreferred',
+  secondary = 'secondary',
+  secondaryPreferred = 'secondaryPreferred',
+  nearest = 'nearest'
+}
+
+export interface HedgeOptions {
+  /** Explicitly enable or disable hedged reads. */
+  enabled?: boolean;
+}
+
+export interface ReadPreferenceOptions {
+  /** Max secondary read staleness in seconds, Minimum value is 90 seconds.*/
+  maxStalenessSeconds?: number;
+  /** Server mode in which the same query is dispatched in parallel to multiple replica set members. */
+  hedge?: HedgeOptions;
+}
 
 /**
  * The **ReadPreference** class is a class that represents a MongoDB ReadPreference and is
@@ -8,23 +28,23 @@ const needSlaveOk = ['primaryPreferred', 'secondary', 'secondaryPreferred', 'nea
  * @returns {ReadPreference}
  */
 export class ReadPreference {
-  mode: any;
-  tags: any;
-  hedge: any;
-  maxStalenessSeconds: any;
-  minWireVersion: any;
+  mode: ReadPreferenceMode;
+  tags?: TagSet[];
+  hedge?: HedgeOptions;
+  maxStalenessSeconds?: number;
+  minWireVersion?: number;
 
-  public static PRIMARY = 'primary';
-  public static PRIMARY_PREFERRED = 'primaryPreferred';
-  public static SECONDARY = 'secondary';
-  public static SECONDARY_PREFERRED = 'secondaryPreferred';
-  public static NEAREST = 'nearest';
+  public static PRIMARY = ReadPreferenceMode.primary;
+  public static PRIMARY_PREFERRED = ReadPreferenceMode.primaryPreferred;
+  public static SECONDARY = ReadPreferenceMode.secondary;
+  public static SECONDARY_PREFERRED = ReadPreferenceMode.secondaryPreferred;
+  public static NEAREST = ReadPreferenceMode.nearest;
 
-  public static primary = new ReadPreference('primary');
-  public static primaryPreferred = new ReadPreference('primaryPreferred');
-  public static secondary = new ReadPreference('secondary');
-  public static secondaryPreferred = new ReadPreference('secondaryPreferred');
-  public static nearest = new ReadPreference('nearest');
+  public static primary = new ReadPreference(ReadPreferenceMode.primary);
+  public static primaryPreferred = new ReadPreference(ReadPreferenceMode.primaryPreferred);
+  public static secondary = new ReadPreference(ReadPreferenceMode.secondary);
+  public static secondaryPreferred = new ReadPreference(ReadPreferenceMode.secondaryPreferred);
+  public static nearest = new ReadPreference(ReadPreferenceMode.nearest);
 
   /**
    * Create a read preference
@@ -36,7 +56,7 @@ export class ReadPreference {
    * @param {object} [options.hedge] Server mode in which the same query is dispatched in parallel to multiple replica set members.
    * @param {boolean} [options.hedge.enabled] Explicitly enable or disable hedged reads.
    */
-  constructor(mode: string, tags?: any, options?: any) {
+  constructor(mode: ReadPreferenceMode, tags?: TagSet[], options?: ReadPreferenceOptions) {
     if (!ReadPreference.isValid(mode)) {
       throw new TypeError(`Invalid read preference mode ${mode}`);
     }
@@ -49,7 +69,7 @@ export class ReadPreference {
 
     this.mode = mode;
     this.tags = tags;
-    this.hedge = options && options.hedge;
+    this.hedge = options?.hedge;
 
     options = options || {};
     if (options.maxStalenessSeconds != null) {
@@ -84,26 +104,30 @@ export class ReadPreference {
     return this.mode;
   }
 
+  static fromString(mode: string): ReadPreference {
+    return new ReadPreference(mode as ReadPreferenceMode);
+  }
+
   /**
    * Construct a ReadPreference given an options object.
    *
    * @param {any} options The options object from which to extract the read preference.
    * @returns {ReadPreference|null}
    */
-  static fromOptions(options: any): ReadPreference | null {
+  static fromOptions(options: any): ReadPreference | undefined {
     const readPreference = options.readPreference;
     const readPreferenceTags = options.readPreferenceTags;
 
     if (readPreference == null) {
-      return null;
+      return;
     }
 
     if (typeof readPreference === 'string') {
-      return new ReadPreference(readPreference, readPreferenceTags);
+      return new ReadPreference(readPreference as ReadPreferenceMode, readPreferenceTags);
     } else if (!(readPreference instanceof ReadPreference) && typeof readPreference === 'object') {
       const mode = readPreference.mode || readPreference.preference;
       if (mode && typeof mode === 'string') {
-        return new ReadPreference(mode, readPreference.tags, {
+        return new ReadPreference(mode as ReadPreferenceMode, readPreference.tags, {
           maxStalenessSeconds: readPreference.maxStalenessSeconds,
           hedge: options.hedge
         });
@@ -141,7 +165,9 @@ export class ReadPreference {
       readPreference = ReadPreference.primary;
     }
 
-    return typeof readPreference === 'string' ? new ReadPreference(readPreference) : readPreference;
+    return typeof readPreference === 'string'
+      ? new ReadPreference(readPreference as ReadPreferenceMode)
+      : readPreference;
   }
 
   /**
@@ -152,11 +178,11 @@ export class ReadPreference {
     const r = options.readPreference;
 
     if (typeof r === 'string') {
-      options.readPreference = new ReadPreference(r);
+      options.readPreference = new ReadPreference(r as ReadPreferenceMode);
     } else if (r && !(r instanceof ReadPreference) && typeof r === 'object') {
       const mode = r.mode || r.preference;
       if (mode && typeof mode === 'string') {
-        options.readPreference = new ReadPreference(mode, r.tags, {
+        options.readPreference = new ReadPreference(mode as ReadPreferenceMode, r.tags, {
           maxStalenessSeconds: r.maxStalenessSeconds
         });
       }
@@ -175,16 +201,16 @@ export class ReadPreference {
    * @returns {boolean} True if a mode is valid
    */
   static isValid(mode: string): boolean {
-    const VALID_MODES = [
+    const VALID_MODES = new Set([
       ReadPreference.PRIMARY,
       ReadPreference.PRIMARY_PREFERRED,
       ReadPreference.SECONDARY,
       ReadPreference.SECONDARY_PREFERRED,
       ReadPreference.NEAREST,
       null
-    ];
+    ]);
 
-    return VALID_MODES.indexOf(mode) !== -1;
+    return VALID_MODES.has(mode as ReadPreferenceMode);
   }
 
   /**
@@ -206,7 +232,14 @@ export class ReadPreference {
    * @see https://docs.mongodb.com/manual/reference/mongodb-wire-protocol/#op-query
    */
   slaveOk(): boolean {
-    return needSlaveOk.indexOf(this.mode) !== -1;
+    const NEEDS_SLAVEOK = new Set([
+      ReadPreference.PRIMARY_PREFERRED,
+      ReadPreference.SECONDARY,
+      ReadPreference.SECONDARY_PREFERRED,
+      ReadPreference.NEAREST
+    ]);
+
+    return NEEDS_SLAVEOK.has(this.mode);
   }
 
   /**
@@ -216,7 +249,7 @@ export class ReadPreference {
    * @param {ReadPreference} readPreference The read preference with which to check equality
    * @returns {boolean} True if the two ReadPreferences are equivalent
    */
-  equals(readPreference: any): boolean {
+  equals(readPreference: ReadPreference): boolean {
     return readPreference.mode === this.mode;
   }
 

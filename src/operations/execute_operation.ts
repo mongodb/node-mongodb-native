@@ -131,7 +131,6 @@ function executeWithServerSelection(topology: any, operation: any, callback: Cal
   }
 
   const serverSelectionOptions = {
-    readPreference,
     session: operation.session
   };
 
@@ -165,7 +164,7 @@ function executeWithServerSelection(topology: any, operation: any, callback: Cal
     }
 
     // select a new server, and attempt to retry the operation
-    topology.selectServer(serverSelectionOptions, (err?: any, server?: any) => {
+    topology.selectServer(readPreference, serverSelectionOptions, (err?: any, server?: any) => {
       if (
         err ||
         (operation.hasAspect(Aspect.READ_OPERATION) && !supportsRetryableReads(server)) ||
@@ -180,7 +179,7 @@ function executeWithServerSelection(topology: any, operation: any, callback: Cal
   }
 
   // select a server, and execute the operation against it
-  topology.selectServer(serverSelectionOptions, (err?: any, server?: any) => {
+  topology.selectServer(readPreference, serverSelectionOptions, (err?: any, server?: any) => {
     if (err) {
       callback(err, null);
       return;

@@ -1,14 +1,228 @@
 import { Db } from './db';
 import { EventEmitter } from 'events';
 import { ChangeStream } from './change_stream';
-import { ReadPreference } from './read_preference';
+import { ReadPreference, ReadPreferenceMode } from './read_preference';
 import { MongoError } from './error';
 import { WriteConcern } from './write_concern';
 import { maybePromise, MongoDBNamespace } from './utils';
 import { deprecate } from 'util';
 import { connect, validOptions } from './operations/connect';
 import { PromiseProvider } from './promise_provider';
-import type { Callback } from './types';
+import type { Callback, BSONSerializeOptions, AutoEncryptionOptions } from './types';
+import type { CompressorName } from './cmap/wire_protocol/compression';
+import type { ReadConcernLevel, ReadConcern } from './read_concern';
+import type { AuthMechanism } from './cmap/auth/defaultAuthProviders';
+
+export enum LogLevel {
+  'error' = 'error',
+  'warn' = 'warn',
+  'info' = 'info',
+  'debug' = 'debug'
+}
+
+export interface DriverInfo {
+  name?: string;
+  version?: string;
+  platform?: string;
+}
+
+export interface Auth {
+  /** The username for auth */
+  user?: string;
+  /** The password for auth */
+  pass?: string;
+}
+
+export interface KMSProviders {
+  /** Configuration options for using 'aws' as your KMS provider */
+  aws?: {
+    /** The access key used for the AWS KMS provider */
+    accessKeyId?: string;
+    /** The secret access key used for the AWS KMS provider */
+    secretAccessKey?: string;
+  };
+  /** Configuration options for using 'local' as your KMS provider */
+  local?: {
+    /** The master key used to encrypt/decrypt data keys. A 96-byte long Buffer. */
+    key?: Buffer;
+  };
+}
+
+export abstract class PkFactoryAbstract {
+  abstract createPk(): any;
+}
+
+export interface PkFactoryLiteral {
+  createPk(): any;
+}
+
+export type PkFactory = typeof PkFactoryAbstract | PkFactoryLiteral;
+
+/**
+ * Describes all possible URI query options for the mongo client
+ * https://docs.mongodb.com/manual/reference/connection-string
+ */
+export interface MongoURIOptions {
+  /** Specifies the name of the replica set, if the mongod is a member of a replica set. */
+  replicaSet?: string;
+  /** Enables or disables TLS/SSL for the connection. */
+  tls?: boolean;
+  /** A boolean to enable or disables TLS/SSL for the connection. (The ssl option is equivalent to the tls option.) */
+  ssl?: MongoURIOptions['tls'];
+  /** Specifies the location of a local .pem file that contains either the client’s TLS/SSL certificate or the client’s TLS/SSL certificate and key. */
+  tlsCertificateKeyFile?: string;
+  /** Specifies the password to de-crypt the tlsCertificateKeyFile. */
+  tlsCertificateKeyFilePassword?: string;
+  /** Specifies the location of a local .pem file that contains the root certificate chain from the Certificate Authority. This file is used to validate the certificate presented by the mongod/mongos instance. */
+  tlsCAFile?: string;
+  /** Bypasses validation of the certificates presented by the mongod/mongos instance */
+  tlsAllowInvalidCertificates?: boolean;
+  /** Disables hostname validation of the certificate presented by the mongod/mongos instance. */
+  tlsAllowInvalidHostnames?: boolean;
+  /** Disables various certificate validations. */
+  tlsInsecure?: boolean;
+  /** The time in milliseconds to attempt a connection before timing out. */
+  connectTimeoutMS?: number;
+  /** The time in milliseconds to attempt a send or receive on a socket before the attempt times out. */
+  socketTimeoutMS?: number;
+  /** Comma-delimited string of compressors to enable network compression for communication between this client and a mongod/mongos instance. */
+  compressors?: string;
+  /** An integer that specifies the compression level if using zlib for network compression. */
+  zlibCompressionLevel?: number;
+  /** The maximum number of connections in the connection pool. */
+  maxPoolSize?: number;
+  /** The minimum number of connections in the connection pool. */
+  minPoolSize?: number;
+  /** The maximum number of milliseconds that a connection can remain idle in the pool before being removed and closed. */
+  maxIdleTimeMS?: number;
+  /** A number that the driver multiples the maxPoolSize value to, to provide the maximum number of threads allowed to wait for a connection to become available from the pool. */
+  waitQueueMultiple?: number;
+  /** The maximum time in milliseconds that a thread can wait for a connection to become available. */
+  waitQueueTimeoutMS?: number;
+  /** Corresponds to the write concern w Option. The w option requests acknowledgement that the write operation has propagated to a specified number of mongod instances or to mongod instances with specified tags. */
+  w?: number | 'majority';
+  /** Corresponds to the write concern wtimeout. wtimeoutMS specifies a time limit, in milliseconds, for the write concern. */
+  wtimeoutMS?: number;
+  /** Corresponds to the write concern j Option option. The journal option requests acknowledgement from MongoDB that the write operation has been written to the journal. */
+  journal?: boolean;
+  /** The level of isolation */
+  readConcernLevel?: ReadConcernLevel;
+  /** Specifies the read preferences for this connection */
+  readPreference?: ReadPreferenceMode | ReadPreference;
+  /** Specifies, in seconds, how stale a secondary can be before the client stops using it for read operations. */
+  maxStalenessSeconds?: number;
+  /** Specifies the tags document as a comma-separated list of colon-separated key-value pairs.  */
+  readPreferenceTags?: string;
+  /** Specify the database name associated with the user’s credentials. */
+  authSource?: string;
+  /** Specify the authentication mechanism that MongoDB will use to authenticate the connection. */
+  authMechanism?: AuthMechanism;
+  /** Specify properties for the specified authMechanism as a comma-separated list of colon-separated key-value pairs. */
+  authMechanismProperties?: {
+    SERVICE_NAME?: string;
+    CANONICALIZE_HOST_NAME?: boolean;
+    SERVICE_REALM?: string;
+  };
+  /** Set the Kerberos service name when connecting to Kerberized MongoDB instances. This value must match the service name set on MongoDB instances to which you are connecting. */
+  gssapiServiceName?: string;
+  /** The size (in milliseconds) of the latency window for selecting among multiple suitable MongoDB instances. */
+  localThresholdMS?: number;
+  /** Specifies how long (in milliseconds) to block for server selection before throwing an exception.  */
+  serverSelectionTimeoutMS?: number;
+  /** When true, instructs the driver to scan the MongoDB deployment exactly once after server selection fails and then either select a server or raise an error. When false, the driver blocks and searches for a server up to the serverSelectionTimeoutMS value. */
+  serverSelectionTryOnce?: boolean;
+  /** heartbeatFrequencyMS controls when the driver checks the state of the MongoDB deployment. Specify the interval (in milliseconds) between checks, counted from the end of the previous check until the beginning of the next one. */
+  heartbeatFrequencyMS?: number;
+  /** Specify a custom app name. */
+  appName?: string;
+  /** Enables retryable reads. */
+  retryReads?: boolean;
+  /** Enable retryable writes. */
+  retryWrites?: boolean;
+  /** Allow a driver to force a Single topology type with a connection string containing one host */
+  directConnection?: boolean;
+}
+
+export interface MongoClientOptions extends MongoURIOptions, BSONSerializeOptions {
+  /** The maximum number of connections in the connection pool. */
+  poolSize?: MongoURIOptions['maxPoolSize'];
+  /** Validate mongod server certificate against Certificate Authority */
+  sslValidate?: boolean;
+  /** SSL Certificate store binary buffer. */
+  sslCA?: Buffer;
+  /** SSL Certificate binary buffer. */
+  sslCert?: Buffer;
+  /** SSL Key file binary buffer. */
+  sslKey?: Buffer;
+  /** SSL Certificate pass phrase. */
+  sslPass?: string;
+  /** SSL Certificate revocation list binary buffer. */
+  sslCRL?: Buffer;
+  /** Ensure we check server identify during SSL, set to false to disable checking. */
+  checkServerIdentity?: boolean | Function;
+  /** TCP Connection no delay */
+  noDelay?: boolean;
+  /** TCP Connection keep alive enabled */
+  keepAlive?: boolean;
+  /** The number of milliseconds to wait before initiating keepAlive on the TCP socket */
+  keepAliveInitialDelay?: number;
+  /** Version of IP stack. Can be 4, 6 or null (default). If null, will attempt to connect with IPv6, and will fall back to IPv4 on failure */
+  family?: 4 | 6 | null;
+  /** Server attempt to reconnect #times */
+  reconnectTries?: number;
+  /** Server will wait number of milliseconds between retries */
+  reconnectInterval?: number;
+  /** Control if high availability monitoring runs for Replicaset or Mongos proxies */
+  ha?: boolean;
+  /** The High availability period for replicaset inquiry */
+  haInterval?: number;
+  /** The write concern timeout */
+  wtimeout?: MongoURIOptions['wtimeoutMS'];
+  /** Corresponds to the write concern j Option option. The journal option requests acknowledgement from MongoDB that the write operation has been written to the journal. */
+  j?: MongoURIOptions['journal'];
+  /** Force server to assign `_id` values instead of driver */
+  forceServerObjectId?: boolean;
+  /** Return document results as raw BSON buffers */
+  raw?: boolean;
+  /** A primary key factory object for generation of custom `_id` keys */
+  pkFactory?: PkFactory;
+  /** A Promise library class the application wishes to use such as Bluebird, must be ES6 compatible */
+  promiseLibrary?: any;
+  /** Specify a read concern for the collection (only MongoDB 3.2 or higher supported) */
+  readConcern?: ReadConcern;
+  /** The logging level */
+  loggerLevel?: LogLevel;
+  /** Custom logger object */
+  logger?: object;
+  /** Enable the wrapping of the callback in the current domain, disabled by default to avoid perf hit */
+  domainsEnabled?: boolean;
+  /** Validate MongoClient passed in options for correctness */
+  validateOptions?: boolean;
+  /** The name of the application that created this MongoClient instance. MongoDB 3.4 and newer will print this value in the server log upon establishing each connection. It is also recorded in the slow query log and profile collections */
+  appname?: MongoURIOptions['appName'];
+  /** The auth settings for when connection to server. */
+  auth?: Auth;
+  /** Type of compression to use?: snappy or zlib */
+  compression?: CompressorName;
+  /** Specify a file sync write concern */
+  fsync?: boolean;
+  /** The number of retries for a tailable cursor */
+  numberOfRetries?: number;
+  /** Enable command monitoring for this client */
+  monitorCommands?: boolean;
+  /** If present, the connection pool will be initialized with minSize connections, and will never dip below minSize connections */
+  minSize?: number;
+  /** Determines whether or not to use the new url parser. Enables the new, spec-compliant, url parser shipped in the core driver. This url parser fixes a number of problems with the original parser, and aims to outright replace that parser in the near future. Defaults to true, and must be explicitly set to false to use the legacy url parser. */
+  useNewUrlParser?: boolean;
+  /** Enables the new unified topology layer */
+  useUnifiedTopology?: boolean;
+  /** Optionally enable client side auto encryption */
+  autoEncryption?: AutoEncryptionOptions;
+  /** Allows a wrapping driver to amend the client metadata generated by the driver to include information about the wrapping driver */
+  driverInfo?: DriverInfo;
+  /** String containing the server name requested via TLS SNI. */
+  servername?: string;
+}
 
 /**
  * A string specifying the level of a ReadConcern
@@ -65,94 +279,7 @@ export interface MongoClient {
 export class MongoClient extends EventEmitter {
   s: any;
   topology: any;
-
-  /**
-   * Creates a new MongoClient instance
-   *
-   * @class
-   * @param {string} url The connection URI string
-   * @param {object} [options] Optional settings
-   * @param {number} [options.poolSize=5] The maximum size of the individual server pool
-   * @param {boolean} [options.ssl=false] Enable SSL connection. *deprecated* use `tls` variants
-   * @param {boolean} [options.sslValidate=false] Validate mongod server certificate against Certificate Authority
-   * @param {buffer} [options.sslCA=undefined] SSL Certificate store binary buffer *deprecated* use `tls` variants
-   * @param {buffer} [options.sslCert=undefined] SSL Certificate binary buffer *deprecated* use `tls` variants
-   * @param {buffer} [options.sslKey=undefined] SSL Key file binary buffer *deprecated* use `tls` variants
-   * @param {string} [options.sslPass=undefined] SSL Certificate pass phrase *deprecated* use `tls` variants
-   * @param {buffer} [options.sslCRL=undefined] SSL Certificate revocation list binary buffer *deprecated* use `tls` variants
-   * @param {boolean|Function} [options.checkServerIdentity=true] Ensure we check server identify during SSL, set to false to disable checking. Only works for Node 0.12.x or higher. You can pass in a boolean or your own checkServerIdentity override function. *deprecated* use `tls` variants
-   * @param {boolean} [options.tls=false] Enable TLS connections
-   * @param {boolean} [options.tlsInsecure=false] Relax TLS constraints, disabling validation
-   * @param {string} [options.tlsCAFile] A path to file with either a single or bundle of certificate authorities to be considered trusted when making a TLS connection
-   * @param {string} [options.tlsCertificateKeyFile] A path to the client certificate file or the client private key file; in the case that they both are needed, the files should be concatenated
-   * @param {string} [options.tlsCertificateKeyFilePassword] The password to decrypt the client private key to be used for TLS connections
-   * @param {boolean} [options.tlsAllowInvalidCertificates] Specifies whether or not the driver should error when the server’s TLS certificate is invalid
-   * @param {boolean} [options.tlsAllowInvalidHostnames] Specifies whether or not the driver should error when there is a mismatch between the server’s hostname and the hostname specified by the TLS certificate
-   * @param {boolean} [options.autoReconnect=true] Enable autoReconnect for single server instances
-   * @param {boolean} [options.noDelay=true] TCP Connection no delay
-   * @param {boolean} [options.keepAlive=true] TCP Connection keep alive enabled
-   * @param {number} [options.keepAliveInitialDelay=120000] The number of milliseconds to wait before initiating keepAlive on the TCP socket
-   * @param {number} [options.connectTimeoutMS=10000] How long to wait for a connection to be established before timing out
-   * @param {number} [options.socketTimeoutMS=360000] How long a send or receive on a socket can take before timing out
-   * @param {number} [options.family] Version of IP stack. Can be 4, 6 or null (default).
-   * If null, will attempt to connect with IPv6, and will fall back to IPv4 on failure
-   * @param {number} [options.reconnectTries=30] Server attempt to reconnect #times
-   * @param {number} [options.reconnectInterval=1000] Server will wait # milliseconds between retries
-   * @param {boolean} [options.ha=true] Control if high availability monitoring runs for Replicaset or Mongos proxies
-   * @param {number} [options.haInterval=10000] The High availability period for replicaset inquiry
-   * @param {string} [options.replicaSet] The name of the replica set to connect to
-   * @param {number} [options.secondaryAcceptableLatencyMS=15] Cutoff latency point in MS for Replicaset member selection
-   * @param {number} [options.acceptableLatencyMS=15] Cutoff latency point in MS for Mongos proxies selection
-   * @param {boolean} [options.connectWithNoPrimary=false] Sets if the driver should connect even if no primary is available
-   * @param {string} [options.authSource=undefined] Define the database to authenticate against
-   * @param {(number|string)} [options.w] The write concern
-   * @param {number} [options.wtimeout] The write concern timeout
-   * @param {boolean} [options.j=false] Specify a journal write concern
-   * @param {boolean} [options.forceServerObjectId=false] Force server to assign _id values instead of driver
-   * @param {boolean} [options.serializeFunctions=false] Serialize functions on any object
-   * @param {boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields
-   * @param {boolean} [options.raw=false] Return document results as raw BSON buffers
-   * @param {number} [options.bufferMaxEntries=-1] Sets a cap on how many operations the driver will buffer up before giving up on getting a working connection, default is -1 which is unlimited
-   * @param {(ReadPreference|string)} [options.readPreference] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST)
-   * @param {object} [options.pkFactory] A primary key factory object for generation of custom _id keys
-   * @param {object} [options.promiseLibrary] A Promise library class the application wishes to use such as Bluebird, must be ES6 compatible
-   * @param {object} [options.readConcern] Specify a read concern for the collection (only MongoDB 3.2 or higher supported)
-   * @param {ReadConcernLevel} [options.readConcern.level='local'] Specify a read concern level for the collection operations (only MongoDB 3.2 or higher supported)
-   * @param {number} [options.maxStalenessSeconds=undefined] The max staleness to secondary reads (values under 10 seconds cannot be guaranteed)
-   * @param {string} [options.loggerLevel=undefined] The logging level (error/warn/info/debug)
-   * @param {object} [options.logger=undefined] Custom logger object
-   * @param {boolean} [options.promoteValues=true] Promotes BSON values to native types where possible, set to false to only receive wrapper types
-   * @param {boolean} [options.promoteBuffers=false] Promotes Binary BSON values to native Node Buffers
-   * @param {boolean} [options.promoteLongs=true] Promotes long values to number if they fit inside the 53 bits resolution
-   * @param {boolean} [options.domainsEnabled=false] Enable the wrapping of the callback in the current domain, disabled by default to avoid perf hit
-   * @param {object} [options.validateOptions=false] Validate MongoClient passed in options for correctness
-   * @param {string} [options.appname=undefined] The name of the application that created this MongoClient instance. MongoDB 3.4 and newer will print this value in the server log upon establishing each connection. It is also recorded in the slow query log and profile collections
-   * @param {object} [options.auth] Authentication options
-   * @param {string} [options.auth.user=undefined] The username for auth
-   * @param {string} [options.auth.password=undefined] The password for auth
-   * @param {string} [options.authMechanism] An authentication mechanism to use for connection authentication, see the {@link https://docs.mongodb.com/manual/reference/connection-string/#urioption.authMechanism|authMechanism} reference for supported options.
-   * @param {object} [options.compression] Type of compression to use: snappy or zlib
-   * @param {boolean} [options.fsync=false] Specify a file sync write concern
-   * @param {Array} [options.readPreferenceTags] Read preference tags
-   * @param {number} [options.numberOfRetries=5] The number of retries for a tailable cursor
-   * @param {boolean} [options.auto_reconnect=true] Enable auto reconnecting for single server instances
-   * @param {boolean} [options.monitorCommands=false] Enable command monitoring for this client
-   * @param {number} [options.minSize] If present, the connection pool will be initialized with minSize connections, and will never dip below minSize connections
-   * @param {boolean} [options.directConnection=false] Whether to connect to the deployment in Single topology.
-   * @param {boolean} [options.useNewUrlParser=true] Determines whether or not to use the new url parser. Enables the new, spec-compliant, url parser shipped in the core driver. This url parser fixes a number of problems with the original parser, and aims to outright replace that parser in the near future. Defaults to true, and must be explicitly set to false to use the legacy url parser.
-   * @param {boolean} [options.useUnifiedTopology] Enables the new unified topology layer
-   * @param {number} [options.localThresholdMS=15] **Only applies to the unified topology** The size of the latency window for selecting among multiple suitable servers
-   * @param {number} [options.serverSelectionTimeoutMS=30000] **Only applies to the unified topology** How long to block for server selection before throwing an error
-   * @param {number} [options.heartbeatFrequencyMS=10000] **Only applies to the unified topology** The frequency with which topology updates are scheduled
-   * @param {number} [options.maxPoolSize=10] **Only applies to the unified topology** The maximum number of connections that may be associated with a pool at a given time. This includes in use and available connections.
-   * @param {number} [options.minPoolSize=0] **Only applies to the unified topology** The minimum number of connections that MUST exist at any moment in a single connection pool.
-   * @param {number} [options.maxIdleTimeMS] **Only applies to the unified topology** The maximum amount of time a connection should remain idle in the connection pool before being marked idle. The default is infinity.
-   * @param {number} [options.waitQueueTimeoutMS=0] **Only applies to the unified topology** The maximum amount of time operation execution should wait for a connection to become available. The default is 0 which means there is no limit.
-   * @param {DriverInfoOptions} [options.driverInfo] Allows a wrapping driver to amend the client metadata generated by the driver to include information about the wrapping driver
-   * @param {AutoEncrypter~AutoEncryptionOptions} [options.autoEncryption] Optionally enable client side auto encryption
-   * @returns {MongoClient} a MongoClient instance
-   */
-  constructor(url: string, options?: any) {
+  constructor(url: string, options?: MongoClientOptions) {
     super();
 
     if (options && options.promiseLibrary) {
@@ -191,7 +318,7 @@ export class MongoClient extends EventEmitter {
    *
    *  docs.mongodb.org/manual/reference/connection-string/
    *
-   * Note that for replicasets the replicaSet query parameter is required in the 2.0 driver
+   * Note that for replica sets the replicaSet query parameter is required in the 2.0 driver
    *
    * @function
    * @param {MongoClient~connectCallback} [callback] The command result callback
@@ -310,92 +437,13 @@ export class MongoClient extends EventEmitter {
    *
    *  docs.mongodb.org/manual/reference/connection-string/
    *
-   * Note that for replicasets the replicaSet query parameter is required in the 2.0 driver
-   *
-   * @function
-   * @static
-   * @param {string} url The connection URI string
-   * @param {object} [options] Optional settings
-   * @param {number} [options.poolSize=5] The maximum size of the individual server pool
-   * @param {boolean} [options.ssl=false] Enable SSL connection. *deprecated* use `tls` variants
-   * @param {boolean} [options.sslValidate=false] Validate mongod server certificate against Certificate Authority *deprecated* use `tls` variants
-   * @param {buffer} [options.sslCA=undefined] SSL Certificate store binary buffer *deprecated* use `tls` variants
-   * @param {buffer} [options.sslCert=undefined] SSL Certificate binary buffer *deprecated* use `tls` variants
-   * @param {buffer} [options.sslKey=undefined] SSL Key file binary buffer *deprecated* use `tls` variants
-   * @param {string} [options.sslPass=undefined] SSL Certificate pass phrase *deprecated* use `tls` variants
-   * @param {buffer} [options.sslCRL=undefined] SSL Certificate revocation list binary buffer *deprecated* use `tls` variants
-   * @param {boolean|Function} [options.checkServerIdentity=true] Ensure we check server identify during SSL, set to false to disable checking. Only works for Node 0.12.x or higher. You can pass in a boolean or your own checkServerIdentity override function. *deprecated* use `tls` variants
-   * @param {boolean} [options.tls=false] Enable TLS connections
-   * @param {boolean} [options.tlsInsecure=false] Relax TLS constraints, disabling validation
-   * @param {string} [options.tlsCAFile] A path to file with either a single or bundle of certificate authorities to be considered trusted when making a TLS connection
-   * @param {string} [options.tlsCertificateKeyFile] A path to the client certificate file or the client private key file; in the case that they both are needed, the files should be concatenated
-   * @param {string} [options.tlsCertificateKeyFilePassword] The password to decrypt the client private key to be used for TLS connections
-   * @param {boolean} [options.tlsAllowInvalidCertificates] Specifies whether or not the driver should error when the server’s TLS certificate is invalid
-   * @param {boolean} [options.tlsAllowInvalidHostnames] Specifies whether or not the driver should error when there is a mismatch between the server’s hostname and the hostname specified by the TLS certificate
-   * @param {boolean} [options.autoReconnect=true] Enable autoReconnect for single server instances
-   * @param {boolean} [options.noDelay=true] TCP Connection no delay
-   * @param {boolean} [options.keepAlive=true] TCP Connection keep alive enabled
-   * @param {number} [options.keepAliveInitialDelay=120000] The number of milliseconds to wait before initiating keepAlive on the TCP socket
-   * @param {number} [options.connectTimeoutMS=10000] How long to wait for a connection to be established before timing out
-   * @param {number} [options.socketTimeoutMS=360000] How long a send or receive on a socket can take before timing out
-   * @param {number} [options.family] Version of IP stack. Can be 4, 6 or null (default).
-   * If null, will attempt to connect with IPv6, and will fall back to IPv4 on failure
-   * @param {number} [options.reconnectTries=30] Server attempt to reconnect #times
-   * @param {number} [options.reconnectInterval=1000] Server will wait # milliseconds between retries
-   * @param {boolean} [options.ha=true] Control if high availability monitoring runs for Replicaset or Mongos proxies
-   * @param {number} [options.haInterval=10000] The High availability period for replicaset inquiry
-   * @param {string} [options.replicaSet] The name of the replica set to connect to
-   * @param {number} [options.secondaryAcceptableLatencyMS=15] Cutoff latency point in MS for Replicaset member selection
-   * @param {number} [options.acceptableLatencyMS=15] Cutoff latency point in MS for Mongos proxies selection
-   * @param {boolean} [options.connectWithNoPrimary=false] Sets if the driver should connect even if no primary is available
-   * @param {string} [options.authSource=undefined] Define the database to authenticate against
-   * @param {(number|string)} [options.w] The write concern
-   * @param {number} [options.wtimeout] The write concern timeout
-   * @param {boolean} [options.j=false] Specify a journal write concern
-   * @param {boolean} [options.forceServerObjectId=false] Force server to assign _id values instead of driver
-   * @param {boolean} [options.serializeFunctions=false] Serialize functions on any object
-   * @param {boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields
-   * @param {boolean} [options.raw=false] Return document results as raw BSON buffers
-   * @param {number} [options.bufferMaxEntries=-1] Sets a cap on how many operations the driver will buffer up before giving up on getting a working connection, default is -1 which is unlimited
-   * @param {(ReadPreference|string)} [options.readPreference] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST)
-   * @param {object} [options.pkFactory] A primary key factory object for generation of custom _id keys
-   * @param {object} [options.promiseLibrary] A Promise library class the application wishes to use such as Bluebird, must be ES6 compatible
-   * @param {object} [options.readConcern] Specify a read concern for the collection (only MongoDB 3.2 or higher supported)
-   * @param {ReadConcernLevel} [options.readConcern.level='local'] Specify a read concern level for the collection operations (only MongoDB 3.2 or higher supported)
-   * @param {number} [options.maxStalenessSeconds=undefined] The max staleness to secondary reads (values under 10 seconds cannot be guaranteed)
-   * @param {string} [options.loggerLevel=undefined] The logging level (error/warn/info/debug)
-   * @param {object} [options.logger=undefined] Custom logger object
-   * @param {boolean} [options.promoteValues=true] Promotes BSON values to native types where possible, set to false to only receive wrapper types
-   * @param {boolean} [options.promoteBuffers=false] Promotes Binary BSON values to native Node Buffers
-   * @param {boolean} [options.promoteLongs=true] Promotes long values to number if they fit inside the 53 bits resolution
-   * @param {boolean} [options.domainsEnabled=false] Enable the wrapping of the callback in the current domain, disabled by default to avoid perf hit
-   * @param {object} [options.validateOptions=false] Validate MongoClient passed in options for correctness
-   * @param {string} [options.appname=undefined] The name of the application that created this MongoClient instance. MongoDB 3.4 and newer will print this value in the server log upon establishing each connection. It is also recorded in the slow query log and profile collections
-   * @param {string} [options.auth.user=undefined] The username for auth
-   * @param {string} [options.auth.password=undefined] The password for auth
-   * @param {string} [options.authMechanism] An authentication mechanism to use for connection authentication, see the {@link https://docs.mongodb.com/manual/reference/connection-string/#urioption.authMechanism|authMechanism} reference for supported options.
-   * @param {object} [options.compression] Type of compression to use: snappy or zlib
-   * @param {boolean} [options.fsync=false] Specify a file sync write concern
-   * @param {Array} [options.readPreferenceTags] Read preference tags
-   * @param {number} [options.numberOfRetries=5] The number of retries for a tailable cursor
-   * @param {boolean} [options.auto_reconnect=true] Enable auto reconnecting for single server instances
-   * @param {number} [options.minSize] If present, the connection pool will be initialized with minSize connections, and will never dip below minSize connections
-   * @param {boolean} [options.directConnection=false] Whether to connect to the deployment in Single topology.
-   * @param {boolean} [options.useNewUrlParser=true] Determines whether or not to use the new url parser. Enables the new, spec-compliant, url parser shipped in the core driver. This url parser fixes a number of problems with the original parser, and aims to outright replace that parser in the near future. Defaults to true, and must be explicitly set to false to use the legacy url parser.
-   * @param {boolean} [options.useUnifiedTopology] Enables the new unified topology layer
-   * @param {number} [options.localThresholdMS=15] **Only applies to the unified topology** The size of the latency window for selecting among multiple suitable servers
-   * @param {number} [options.serverSelectionTimeoutMS=30000] **Only applies to the unified topology** How long to block for server selection before throwing an error
-   * @param {number} [options.heartbeatFrequencyMS=10000] **Only applies to the unified topology** The frequency with which topology updates are scheduled
-   * @param {number} [options.maxPoolSize=10] **Only applies to the unified topology** The maximum number of connections that may be associated with a pool at a given time. This includes in use and available connections.
-   * @param {number} [options.minPoolSize=0] **Only applies to the unified topology** The minimum number of connections that MUST exist at any moment in a single connection pool.
-   * @param {number} [options.maxIdleTimeMS] **Only applies to the unified topology** The maximum amount of time a connection should remain idle in the connection pool before being marked idle. The default is infinity.
-   * @param {number} [options.waitQueueTimeoutMS=0] **Only applies to the unified topology** The maximum amount of time operation execution should wait for a connection to become available. The default is 0 which means there is no limit.
-   * @param {AutoEncrypter~AutoEncryptionOptions} [options.autoEncryption] Optionally enable client side auto encryption
-   * @param {DriverInfoOptions} [options.driverInfo] Allows a wrapping driver to amend the client metadata generated by the driver to include information about the wrapping driver
-   * @param {MongoClient~connectCallback} [callback] The command result callback
-   * @returns {Promise<MongoClient>} returns Promise if no callback passed
+   * Note that for replica sets the replicaSet query parameter is required in the 2.0 driver
    */
-  static connect(url: string, options?: any, callback?: Callback): Promise<MongoClient> | void {
+  static connect(
+    url: string,
+    options?: MongoClientOptions,
+    callback?: Callback<MongoClient>
+  ): Promise<MongoClient> | void {
     const args = Array.prototype.slice.call(arguments, 1);
     callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
     options = args.length ? args.shift() : null;

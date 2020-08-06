@@ -1,3 +1,11 @@
+export enum ReadConcernLevel {
+  local = 'local',
+  majority = 'majority',
+  linearizable = 'linearizable',
+  available = 'available',
+  snapshot = 'snapshot'
+}
+
 /**
  * The **ReadConcern** class is a class that represents a MongoDB ReadConcern.
  *
@@ -6,17 +14,15 @@
  * @see https://docs.mongodb.com/manual/reference/read-concern/index.html
  */
 export class ReadConcern {
-  level?: string;
+  level?: ReadConcernLevel;
 
   /**
    * Constructs a ReadConcern from the read concern properties.
    *
    * @param {string} [level] The read concern level ({'local'|'available'|'majority'|'linearizable'|'snapshot'})
    */
-  constructor(level?: string) {
-    if (level != null) {
-      this.level = level;
-    }
+  constructor(level?: ReadConcernLevel) {
+    this.level = level;
   }
 
   /**
@@ -44,18 +50,18 @@ export class ReadConcern {
   }
 
   static get MAJORITY() {
-    return 'majority';
+    return ReadConcernLevel.majority;
   }
 
   static get AVAILABLE() {
-    return 'available';
+    return ReadConcernLevel.available;
   }
 
   static get LINEARIZABLE() {
-    return 'linearizable';
+    return ReadConcernLevel.linearizable;
   }
 
   static get SNAPSHOT() {
-    return 'snapshot';
+    return ReadConcernLevel.snapshot;
   }
 }

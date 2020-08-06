@@ -1,6 +1,6 @@
 import type { MongoError } from './error';
-import type { SerializeOptions } from 'bson';
-import type { MongoClient } from '.';
+import type * as BSON from 'bson';
+import type { MongoClient } from './mongo_client';
 
 export type AnyError = MongoError | Error;
 
@@ -13,12 +13,18 @@ export interface Document {
 }
 
 /** BSON Serialization options. TODO: Remove me when types from BSON are updated */
-export interface BSONSerializeOptions extends SerializeOptions {
-  fieldsAsRaw?: any;
-  promoteLongs?: boolean;
+export interface BSONSerializeOptions extends BSON.SerializeOptions {
+  /** Return document results as raw BSON buffers */
+  fieldsAsRaw?: { [key: string]: boolean };
+  /** Promotes BSON values to native types where possible, set to false to only receive wrapper types */
   promoteValues?: boolean;
+  /** Promotes Binary BSON values to native Node Buffers */
   promoteBuffers?: boolean;
+  /** Promotes long values to number if they fit inside the 53 bits resolution */
+  promoteLongs?: boolean;
+  /** Serialize functions on any object */
   serializeFunctions?: boolean;
+  /** Specify if the BSON serializer should ignore undefined fields */
   ignoreUndefined?: boolean;
 }
 
@@ -32,20 +38,20 @@ export const enum AutoEncryptionLoggerLevels {
 
 export interface AutoEncryptionOptions {
   /** A `MongoClient` used to fetch keys from a key vault */
-  keyVaultClient: MongoClient;
+  keyVaultClient?: MongoClient;
   /** The namespace where keys are stored in the key vault */
-  keyVaultNamespace: string;
+  keyVaultNamespace?: string;
   /** Configuration options that are used by specific KMS providers during key generation, encryption, and decryption. */
-  kmsProviders: {
+  kmsProviders?: {
     /** Configuration options for using 'aws' as your KMS provider */
-    aws: {
+    aws?: {
       /** The access key used for the AWS KMS provider */
       accessKeyId?: string;
       /** The secret access key used for the AWS KMS provider */
       secretAccessKey?: string;
     };
     /** Configuration options for using 'local' as your KMS provider */
-    local: {
+    local?: {
       /** The master key used to encrypt/decrypt data keys. A 96-byte long Buffer. */
       key?: Buffer;
     };
@@ -58,29 +64,29 @@ export interface AutoEncryptionOptions {
    * Schemas supplied in the schemaMap only apply to configuring automatic encryption for client side encryption.
    * Other validation rules in the JSON schema will not be enforced by the driver and will result in an error.
    */
-  schemaMap: Document;
+  schemaMap?: Document;
   /** Allows the user to bypass auto encryption, maintaining implicit decryption */
-  bypassAutoEncryption: boolean;
-  options: {
+  bypassAutoEncryption?: boolean;
+  options?: {
     /** An optional hook to catch logging messages from the underlying encryption engine */
-    logger: (level: AutoEncryptionLoggerLevels, message: string) => void;
+    logger?: (level: AutoEncryptionLoggerLevels, message: string) => void;
   };
-  extraOptions: {
+  extraOptions?: {
     /**
      * A local process the driver communicates with to determine how to encrypt values in a command.
      * Defaults to "mongodb://%2Fvar%2Fmongocryptd.sock" if domain sockets are available or "mongodb://localhost:27020" otherwise
      */
-    mongocryptdURI: string;
+    mongocryptdURI?: string;
     /** If true, autoEncryption will not attempt to spawn a mongocryptd before connecting  */
-    mongocryptdBypassSpawn: boolean;
+    mongocryptdBypassSpawn?: boolean;
     /** The path to the mongocryptd executable on the system */
-    mongocryptdSpawnPath: string;
+    mongocryptdSpawnPath?: string;
     /** Command line arguments to use when auto-spawning a mongocryptd */
-    mongocryptdSpawnArgs: string[];
+    mongocryptdSpawnArgs?: string[];
   };
 }
 
-interface AutoEncrypter {
+export interface AutoEncrypter {
   encrypt(ns: string, cmd: Document, options: any, callback: Callback<Document>): void;
   decrypt(cmd: Document, options: any, callback: Callback<Document>): void;
 }
