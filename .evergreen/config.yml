@@ -74,11 +74,12 @@ functions:
   bootstrap mongo-orchestration:
     - command: shell.exec
       params:
-        script: >
+        script: |
           ${PREPARE_SHELL}
-
-          MONGODB_VERSION=${VERSION} TOPOLOGY=${TOPOLOGY} ORCHESTRATION_FILE=${ORCHESTRATION_FILE} bash
-          ${DRIVERS_TOOLS}/.evergreen/run-orchestration.sh
+          MONGODB_VERSION=${VERSION} TOPOLOGY=${TOPOLOGY} \
+          AUTH=${AUTH} SSL=${SSL} \
+          ORCHESTRATION_FILE=${ORCHESTRATION_FILE} \
+          bash ${DRIVERS_TOOLS}/.evergreen/run-orchestration.sh
     - command: expansions.update
       params:
         file: mo-expansion.yml
@@ -100,9 +101,8 @@ functions:
       type: test
       params:
         working_dir: src
-        script: >
+        script: |
           ${PREPARE_SHELL}
-
 
           if [ -n "${CLIENT_ENCRYPTION}" ]; then
             # Disable xtrace (just in case it was accidentally set).
@@ -111,9 +111,8 @@ functions:
             rm -f ./prepare_client_encryption.sh
           fi
 
-
-          AUTH=${AUTH} SSL=${SSL} UNIFIED=${UNIFIED} MONGODB_URI="${MONGODB_URI}" bash
-          ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
+          AUTH=${AUTH} SSL=${SSL} UNIFIED=${UNIFIED} MONGODB_URI="${MONGODB_URI}" \
+          bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
   run checks:
     - command: shell.exec
       type: test
@@ -173,6 +172,23 @@ functions:
           rm -f ./prepare_atlas_connectivity.sh
 
           NODE_LTS_NAME='${NODE_LTS_NAME}' bash ${PROJECT_DIRECTORY}/.evergreen/run-atlas-tests.sh
+  run ldap tests:
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: src
+        script: |
+          MONGODB_URI='${plain_auth_mongodb_uri}' NODE_LTS_NAME='${NODE_LTS_NAME}' \
+          bash ${PROJECT_DIRECTORY}/.evergreen/run-ldap-tests.sh
+  run tls tests:
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: src
+        script: |
+          NODE_LTS_NAME=${NODE_LTS_NAME} DRIVERS_TOOLS="${DRIVERS_TOOLS}" \
+          SSL_CA_FILE="${SSL_CA_FILE}" SSL_KEY_FILE="${SSL_KEY_FILE}" \
+          MONGODB_URI="${MONGODB_URI}" bash ${PROJECT_DIRECTORY}/.evergreen/run-tls-tests.sh
   add aws auth variables to file:
     - command: shell.exec
       type: test
@@ -1049,6 +1065,17 @@ tasks:
     commands:
       - func: install dependencies
       - func: run atlas tests
+  - name: test-tls-support
+    tags:
+      - tls-support
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          SSL: ssl
+          VERSION: latest
+          TOPOLOGY: server
+      - func: run tls tests
   - name: test-latest-ocsp-valid-cert-server-staples
     tags:
       - ocsp
@@ -1343,6 +1370,7 @@ buildvariants:
       - test-2.6-replica_set-unified
       - test-2.6-sharded_cluster-unified
       - test-atlas-connectivity
+      - test-tls-support
       - test-latest-ocsp-valid-cert-server-staples
       - test-latest-ocsp-invalid-cert-server-staples
       - test-latest-ocsp-valid-cert-server-does-not-staple
@@ -1528,6 +1556,7 @@ buildvariants:
       - test-3.2-replica_set-unified
       - test-3.2-sharded_cluster-unified
       - test-atlas-connectivity
+      - test-tls-support
       - test-latest-ocsp-valid-cert-server-staples
       - test-latest-ocsp-invalid-cert-server-staples
       - test-latest-ocsp-valid-cert-server-does-not-staple

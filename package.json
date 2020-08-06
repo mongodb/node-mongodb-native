@@ -65,6 +65,7 @@
   },
   "scripts": {
     "atlas": "mocha --opts '{}' ./test/manual/atlas_connectivity.test.js",
+    "check:tls": "mocha --opts '{}' test/manual/tls_support.test.js",
     "test": "npm run lint && mocha --recursive test/functional test/unit test/core",
     "test-nolint": "mocha --recursive test/functional test/unit test/core",
     "coverage": "istanbul cover mongodb-test-runner -- -t 60000 test/core test/unit test/functional",
