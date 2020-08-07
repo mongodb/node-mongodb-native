@@ -4,7 +4,7 @@ import { MongoError } from '../error';
 import type { Callback } from '../types';
 import type { Collection } from '../collection';
 
-export class OptionsOperation extends OperationBase {
+export class OptionsOperation extends OperationBase<OperationOptions> {
   collection: Collection;
 
   constructor(collection: Collection, options: OperationOptions) {

@@ -1,4 +1,4 @@
-import { CommandOperation } from './command';
+import { CommandOperation, CommandOperationOptions } from './command';
 import { Code } from '../bson';
 import { ReadPreference } from '../read_preference';
 import { handleCallback } from '../utils';
@@ -6,14 +6,12 @@ import { MongoError } from '../error';
 import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
-import type { ClientSession } from '../sessions';
 
-export interface EvalOperationOptions {
+export interface EvalOptions extends CommandOperationOptions {
   nolock: boolean;
-  session: ClientSession;
 }
 
-export class EvalOperation extends CommandOperation {
+export class EvalOperation extends CommandOperation<EvalOptions> {
   code: Code;
   parameters?: unknown[];
 
@@ -22,7 +20,7 @@ export class EvalOperation extends CommandOperation {
     return ReadPreference.primary;
   }
 
-  constructor(db: Db, code: Code, parameters?: unknown[], options?: EvalOperationOptions) {
+  constructor(db: Db, code: Code, parameters?: unknown[], options?: EvalOptions) {
     super(db, options);
 
     this.code = code;

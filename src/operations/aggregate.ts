@@ -1,4 +1,4 @@
-import { CommandOperation, CommandOpOptions } from './command';
+import { CommandOperation, CommandOperationOptions } from './command';
 import { ReadPreference } from '../read_preference';
 import { MongoError } from '../error';
 import { maxWireVersion } from '../utils';
@@ -7,49 +7,39 @@ import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { Db } from '../db';
-import type { Cursor } from '../cursor';
 import type { WriteConcern } from '../write_concern';
 import type { ReadConcern } from '../read_concern';
 
 const DB_AGGREGATE_COLLECTION = 1 as const;
 const MIN_WIRE_VERSION_$OUT_READ_CONCERN_SUPPORT = 8 as const;
 
-export interface AggregateOptions extends CommandOpOptions {
+export interface AggregateOptions extends CommandOperationOptions {
+  /** Lets the server know if it can use disk to store temporary results for the aggregation (requires mongodb 2.6 >) */
   allowDiskUse: boolean;
-  /** The number of documents to return per batch. */
+  /** The number of documents to return per batch */
   batchSize: boolean;
+  /** Allow driver to bypass schema validation in MongoDB 3.2 or higher */
   bypassDocumentValidation: boolean;
-  cursor: Cursor;
+  /** Explain returns the aggregation execution plan (requires mongodb >2.6) */
   explain?: ReadConcern | WriteConcern;
   full: boolean;
+  /** string|object} [options.hint] Add an index selection hint to an aggregation command */
   hint: Hint;
   out?: string;
-
-  /** number} [options.batchSize=1000]  See {@link https://docs.mongodb.com/manual/reference/command/aggregate|aggregation documentation}. */
-  /** object} [options.cursor] Return the query as cursor, on 2.6 > it returns as a real cursor on pre 2.6 it returns as an emulated cursor. */
-  /** number} [options.cursor.batchSize=1000] Deprecated. Use `options.batchSize` */
-  /** boolean} [options.explain=false] Explain returns the aggregation execution plan (requires mongodb 2.6 >). */
-  /** boolean} [options.allowDiskUse=false] allowDiskUse lets the server know if it can use disk to store temporary results for the aggregation (requires mongodb 2.6 >). */
-  /** number} [options.maxTimeMS] maxTimeMS specifies a cumulative time limit in milliseconds for processing operations on the cursor. MongoDB interrupts the operation at the earliest following interrupt point. */
   /** number} [options.maxAwaitTimeMS] The maximum amount of time for the server to wait on new documents to satisfy a tailable cursor query. */
-  /** boolean} [options.bypassDocumentValidation=false] Allow driver to bypass schema validation in MongoDB 3.2 or higher. */
-  /** boolean} [options.raw=false] Return document results as raw BSON buffers. */
-  /** boolean} [options.promoteLongs=true] Promotes Long values to number if they fit inside the 53 bits resolution. */
-  /** boolean} [options.promoteValues=true] Promotes BSON values to native types where possible, set to false to only receive wrapper types. */
-  /** boolean} [options.promoteBuffers=false] Promotes Binary BSON values to native Node Buffers. */
-  /** object} [options.collation] Specify collation (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields). */
-  /** string} [options.comment] Add a comment to an aggregation command */
-  /** string|object} [options.hint] Add an index selection hint to an aggregation command */
-  /** ClientSession} [options.session] optional session to use for this operation */
+  maxAwaitTimeMS?: number;
+
+  // hmmm
+  cursor: Document;
 }
 
-export class AggregateOperation extends CommandOperation {
+export class AggregateOperation extends CommandOperation<AggregateOptions> {
   target: string | typeof DB_AGGREGATE_COLLECTION;
   pipeline: Document[];
   hasWriteStage: boolean;
 
   constructor(parent: Collection | Db, pipeline: Document[], options: AggregateOptions) {
-    super(parent, options, { fullResponse: true });
+    super(parent, { fullResponse: true, ...options });
 
     this.target =
       parent.s.namespace && parent.s.namespace.collection

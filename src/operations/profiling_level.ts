@@ -1,11 +1,12 @@
-import { defineAspects, Aspect, OperationOptions } from './operation';
-import { CommandOperation } from './command';
+import { defineAspects, Aspect } from './operation';
+import { CommandOperation, CommandOperationOptions } from './command';
 import type { Callback } from '../types';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
 
-export class ProfilingLevelOperation extends CommandOperation {
-  constructor(db: Db, options: OperationOptions) {
+export type ProfilingLevelOptions = CommandOperationOptions;
+export class ProfilingLevelOperation extends CommandOperation<ProfilingLevelOptions> {
+  constructor(db: Db, options: ProfilingLevelOptions) {
     super(db, options);
   }
 

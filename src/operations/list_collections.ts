@@ -1,4 +1,4 @@
-import { CommandOperation } from './command';
+import { CommandOperation, CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 import { maxWireVersion } from '../utils';
 import * as CONSTANTS from '../constants';
@@ -30,7 +30,7 @@ function listCollectionsTransforms(databaseName: string): CollectionTransform {
   };
 }
 
-export interface ListCollectionOptions {
+export interface ListCollectionOptions extends CommandOperationOptions {
   /** Since 4.0: If true, will only return the collection name in the response, and will omit additional info */
   nameOnly?: boolean;
   /** The batchSize for the returned command cursor or if pre 2.8 the systems batch collection */
@@ -41,14 +41,14 @@ export interface ListCollectionOptions {
   session?: ClientSession;
 }
 
-export class ListCollectionsOperation extends CommandOperation {
+export class ListCollectionsOperation extends CommandOperation<ListCollectionOptions> {
   db: Db;
   filter: Document;
   nameOnly: boolean;
   batchSize?: number;
 
   constructor(db: Db, filter: Document, options: ListCollectionOptions) {
-    super(db, options, { fullResponse: true });
+    super(db, { fullResponse: true, ...options });
 
     this.db = db;
     this.filter = filter;

@@ -1,19 +1,11 @@
 import { Aspect, defineAspects } from './operation';
-import { CommandOperation } from './command';
+import { CommandOperation, CommandOperationOptions } from './command';
 import { decorateWithCollation, decorateWithReadConcern } from '../utils';
 import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
-import type { CollationOptions } from '../cmap/wire_protocol/write_command';
-import type { ClientSession } from '../sessions';
-import type { ReadPreference } from '../read_preference';
 
-export interface DistinctOperationOptions {
-  readPreference: ReadPreference;
-  maxTimeMS: number;
-  collation: CollationOptions;
-  session: ClientSession;
-}
+export type DistinctOptions = CommandOperationOptions;
 
 /**
  * Return a list of distinct values for the given key across a collection.
@@ -24,7 +16,7 @@ export interface DistinctOperationOptions {
  * @property {object} query The query for filtering the set of documents to which we apply the distinct filter.
  * @property {object} [options] Optional settings. See Collection.prototype.distinct for a list of options.
  */
-export class DistinctOperation extends CommandOperation {
+export class DistinctOperation extends CommandOperation<DistinctOptions> {
   collection: Collection;
   key: string;
   query: Document;
@@ -37,12 +29,7 @@ export class DistinctOperation extends CommandOperation {
    * @param query The query for filtering the set of documents to which we apply the distinct filter.
    * @param options Optional settings. See Collection.prototype.distinct for a list of options.
    */
-  constructor(
-    collection: Collection,
-    key: string,
-    query: Document,
-    options?: DistinctOperationOptions
-  ) {
+  constructor(collection: Collection, key: string, query: Document, options?: DistinctOptions) {
     super(collection, options);
 
     this.collection = collection;
@@ -60,7 +47,7 @@ export class DistinctOperation extends CommandOperation {
     const coll = this.collection;
     const key = this.key;
     const query = this.query;
-    const options: DistinctOperationOptions = this.options;
+    const options = this.options;
 
     // Distinct command
     const cmd: Document = {
@@ -90,7 +77,7 @@ export class DistinctOperation extends CommandOperation {
         return;
       }
 
-      callback(undefined, this.options.full ? result : result.values);
+      callback(undefined, this.options.fullResponse ? result : result.values);
     });
   }
 }

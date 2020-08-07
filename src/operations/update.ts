@@ -1,40 +1,34 @@
-import { defineAspects, Aspect, OperationBase, OperationOptions, Hint } from './operation';
+import { defineAspects, Aspect, OperationBase } from './operation';
 import { updateDocuments, updateCallback } from './common_functions';
 import { hasAtomicOperators, MongoDBNamespace } from '../utils';
-import { CommandOperation } from './command';
+import { CommandOperation, CommandOperationOptions } from './command';
 import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
-import type { WriteConcern } from '../write_concern';
-import type { CollationOptions } from '../cmap/wire_protocol/write_command';
+import type { CollationOptions, WriteCommandOptions } from '../cmap/wire_protocol/write_command';
 
-export interface UpdateOpOptions extends OperationOptions {
-  serializeFunctions?: boolean;
-  retryWrites?: boolean;
+export interface UpdateOptions extends CommandOperationOptions {
+  /** A set of filters specifying to which array elements an update should apply */
   arrayFilters?: Document[];
-  upsert?: boolean;
-  writeConcern?: WriteConcern;
+  /** If true, allows the write to opt-out of document level validation */
+  bypassDocumentValidation?: boolean;
+  /** Specifies a collation */
   collation?: CollationOptions;
-  hint?: Hint;
+  /** Specify that the update query should only consider plans using the hinted index */
+  hint?: string | Document;
+  /** When true, creates a new document if no document matches the query */
+  upsert?: boolean;
+
+  // non-standard options
+  retryWrites?: boolean;
+  multi?: boolean;
 }
 
-export interface UpdateOperators {
-  $currentDate?: Document;
-  $inc?: Document;
-  $min?: Document;
-  $max?: Document;
-  $mul?: Document;
-  $rename?: Document;
-  $set?: Document;
-  $setOnInsert?: Document;
-  $unset?: Document;
-}
-
-export class UpdateOperation extends OperationBase {
+export class UpdateOperation extends OperationBase<UpdateOptions> {
   namespace: MongoDBNamespace;
-  operations: OperationOptions[];
+  operations: Document[];
 
-  constructor(ns: MongoDBNamespace, ops: Document[], options: UpdateOpOptions) {
+  constructor(ns: MongoDBNamespace, ops: Document[], options: UpdateOptions) {
     super(options);
     this.namespace = ns;
     this.operations = ops;
@@ -45,21 +39,21 @@ export class UpdateOperation extends OperationBase {
   }
 
   execute(server: Server, callback: Callback): void {
-    server.update(this.namespace.toString(), this.operations, this.options, callback);
+    server.update(
+      this.namespace.toString(),
+      this.operations,
+      this.options as WriteCommandOptions,
+      callback
+    );
   }
 }
 
-export class UpdateOneOperation extends CommandOperation {
+export class UpdateOneOperation extends CommandOperation<UpdateOptions> {
   collection: Collection;
   filter: Document;
-  update: UpdateOperators;
+  update: Document;
 
-  constructor(
-    collection: Collection,
-    filter: Document,
-    update: UpdateOperators,
-    options: UpdateOpOptions
-  ) {
+  constructor(collection: Collection, filter: Document, update: Document, options: UpdateOptions) {
     super(collection, options);
 
     if (!hasAtomicOperators(update)) {
@@ -86,17 +80,12 @@ export class UpdateOneOperation extends CommandOperation {
   }
 }
 
-export class UpdateManyOperation extends CommandOperation {
+export class UpdateManyOperation extends CommandOperation<UpdateOptions> {
   collection: Collection;
   filter: Document;
-  update: UpdateOperators;
+  update: Document;
 
-  constructor(
-    collection: Collection,
-    filter: Document,
-    update: UpdateOperators,
-    options: UpdateOperation
-  ) {
+  constructor(collection: Collection, filter: Document, update: Document, options: UpdateOptions) {
     super(collection, options);
 
     this.collection = collection;

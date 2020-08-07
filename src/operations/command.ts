@@ -2,7 +2,7 @@ import { Aspect, OperationBase, OperationOptions } from './operation';
 import { ReadConcern } from '../read_concern';
 import { WriteConcern } from '../write_concern';
 import { maxWireVersion, MongoDBNamespace } from '../utils';
-import { ReadPreference } from '../read_preference';
+import { ReadPreference, ReadPreferenceMode } from '../read_preference';
 import { commandSupportsReadConcern, ClientSession } from '../sessions';
 import { MongoError } from '../error';
 import type { Logger } from '../logger';
@@ -11,26 +11,35 @@ import type { Server } from '../sdam/server';
 import type { Callback, Document } from '../types';
 import type { Collection } from '../collection';
 import type { Db } from '../db';
+import type { MongoClient } from '../mongo_client';
+import type { CommandOptions } from '../cmap/wire_protocol/command';
 
 const SUPPORTS_WRITE_CONCERN_AND_COLLATION = 5;
 
-export interface CommandOpOptions extends OperationOptions {
+export interface CommandOperationOptions extends OperationOptions {
   fullResponse?: boolean;
   /** Specify a read concern and level for the collection. (only MongoDB 3.2 or higher supported) */
   readConcern?: ReadConcern;
   /** The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST). */
-  readPreference?: ReadPreference;
+  readPreference?: ReadPreference | ReadPreferenceMode | keyof typeof ReadPreferenceMode;
   /** Specify ClientSession for this command */
   session?: ClientSession;
   /** WriteConcern for this command */
   writeConcern?: WriteConcern;
+  /** Collation */
+  collation?: any;
+  maxTimeMS?: number;
+  /** A user-provided comment to attach to this command */
+  comment?: Document;
 
   // Admin command overrides.
   dbName?: string;
   authdb?: string;
 }
 
-export class CommandOperation extends OperationBase {
+type Parent = MongoClient | Db | Collection | { s: any };
+
+export class CommandOperation<T extends CommandOperationOptions> extends OperationBase<T> {
   ns: MongoDBNamespace;
   readPreference: ReadPreference;
   readConcern?: ReadConcern;
@@ -40,16 +49,7 @@ export class CommandOperation extends OperationBase {
   logger?: Logger;
   server?: Server;
 
-  /**
-   * @param {any} parent
-   * @param {any} [options]
-   * @param {any} [operationOptions]
-   */
-  constructor(
-    parent: Collection | Db,
-    options?: CommandOpOptions,
-    operationOptions?: CommandOpOptions
-  ) {
+  constructor(parent: Parent, options?: T) {
     super(options);
 
     // NOTE: this was explicitly added for the add/remove user operations, it's likely
@@ -68,8 +68,8 @@ export class CommandOperation extends OperationBase {
     this.writeConcern = resolveWriteConcern(propertyProvider, this.options);
     this.explain = false;
 
-    if (operationOptions && typeof operationOptions.fullResponse === 'boolean') {
-      this.fullResponse = true;
+    if (options && typeof options.fullResponse === 'boolean') {
+      this.fullResponse = options.fullResponse;
     }
 
     // TODO: A lot of our code depends on having the read preference in the options. This should
@@ -127,7 +127,7 @@ export class CommandOperation extends OperationBase {
       this.logger.debug(`executing command ${JSON.stringify(cmd)} against ${this.ns}`);
     }
 
-    server.command(this.ns.toString(), cmd, this.options, (err, result) => {
+    server.command(this.ns.toString(), cmd, this.options as CommandOptions, (err, result) => {
       if (err) {
         callback(err, null);
         return;
@@ -143,13 +143,13 @@ export class CommandOperation extends OperationBase {
   }
 }
 
-function resolveWriteConcern(parent: Collection | Db | undefined, options: any) {
+function resolveWriteConcern(parent: Parent | undefined, options: any) {
   return (
     WriteConcern.fromOptions(options) || (parent && 'writeConcern' in parent && parent.writeConcern)
   );
 }
 
-function resolveReadConcern(parent: Collection | Db | undefined, options: any) {
+function resolveReadConcern(parent: Parent | undefined, options: any) {
   return (
     ReadConcern.fromOptions(options) || (parent && 'readConcern' in parent && parent.readConcern)
   );

@@ -140,16 +140,7 @@ export class Admin {
     return this.command({ ping: 1 }, options, callback);
   }
 
-  /**
-   * Add a user to the database.
-   *
-   * @function
-   * @param {string} username The username.
-   * @param {string} [password] The password.
-   * @param {AddUserOptions} [options] Optional settings
-   * @param {Callback} [callback] The command result callback
-   * @returns {Promise<void> | void} returns Promise if no callback passed
-   */
+  /** Add a user to the database */
   addUser(
     username: string,
     password?: string,
@@ -158,22 +149,14 @@ export class Admin {
   ): Promise<void> | void {
     const args = Array.prototype.slice.call(arguments, 2);
     callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
-
-    // Special case where there is no password ($external users)
-    if (typeof username === 'string' && password != null && typeof password === 'object') {
-      options = password;
-      password = undefined;
-    }
-
     options = args.length ? args.shift() : {};
-    options = Object.assign({}, options);
-    // Get the options
-    options = applyWriteConcern(options, { db: this.s.db });
-    // Set the db name to admin
-    options!.dbName = 'admin';
+    options = Object.assign({ dbName: 'admin' }, options);
 
-    const addUserOperation = new AddUserOperation(this.s.db, username, password, options!);
-    return executeOperation(this.s.db.s.topology, addUserOperation, callback);
+    return executeOperation(
+      this.s.db.s.topology,
+      new AddUserOperation(this.s.db, username, password, options),
+      callback
+    );
   }
 
   /**

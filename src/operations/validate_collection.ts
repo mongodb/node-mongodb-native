@@ -1,15 +1,15 @@
 import { defineAspects, Aspect } from './operation';
-import { CommandOperation, CommandOpOptions } from './command';
+import { CommandOperation, CommandOperationOptions } from './command';
 import type { Document, Callback } from '../types';
 import type { Server } from '../sdam/server';
 import type { Admin } from '../admin';
 
-export interface ValidateCollectionOptions extends CommandOpOptions {
+export interface ValidateCollectionOptions extends CommandOperationOptions {
   /** Validates a collection in the background, without interrupting read or write traffic (only in MongoDB 4.4+) */
   background: boolean;
 }
 
-export class ValidateCollectionOperation extends CommandOperation {
+export class ValidateCollectionOperation extends CommandOperation<ValidateCollectionOptions> {
   collectionName: string;
   command: Document;
 

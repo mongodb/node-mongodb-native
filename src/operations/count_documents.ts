@@ -3,13 +3,13 @@ import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 
-export interface CountDocumentsOperationOptions extends AggregateOptions {
+export interface CountDocumentsOptions extends AggregateOptions {
   skip: number;
   limit: number;
 }
 
 export class CountDocumentsOperation extends AggregateOperation {
-  constructor(collection: Collection, query: Document, options: CountDocumentsOperationOptions) {
+  constructor(collection: Collection, query: Document, options: CountDocumentsOptions) {
     const pipeline = [];
     pipeline.push({ $match: query });
 

@@ -1,19 +1,20 @@
-import { CommandOperation } from './command';
+import { CommandOperation, CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 import { MongoDBNamespace } from '../utils';
 import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
-import type { ClientSession } from '../sessions';
 import type { Db } from '../db';
 
-export interface ListDatabasesOptions {
-  /** Whether the command should return only db names, or names and size info. */
+export interface ListDatabasesOptions extends CommandOperationOptions {
+  /** A query predicate that determines which databases are listed */
+  filter: Document;
+  /** A flag to indicate whether the command should return just the database names, or return both database names and size information */
   nameOnly?: boolean;
-  /** optional session to use for this operation */
-  session?: ClientSession;
+  /** A flag that determines which databases are returned based on the user privileges when access control is enabled */
+  authorizedDatabases?: boolean;
 }
 
-export class ListDatabasesOperation extends CommandOperation {
+export class ListDatabasesOperation extends CommandOperation<ListDatabasesOptions> {
   constructor(db: Db, options: ListDatabasesOptions) {
     super(db, options);
     this.ns = new MongoDBNamespace('admin', '$cmd');

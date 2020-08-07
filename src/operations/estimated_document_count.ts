@@ -1,32 +1,30 @@
 import { Aspect, defineAspects, Hint } from './operation';
-import { CommandOperation, CommandOpOptions } from './command';
+import { CommandOperation, CommandOperationOptions } from './command';
 import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 
-export interface EstimatedDocumentCountOperationOptions extends CommandOpOptions {
+export interface EstimatedDocumentCountOptions extends CommandOperationOptions {
   skip: number;
   limit: number;
   hint: Hint;
 }
 
-export class EstimatedDocumentCountOperation extends CommandOperation {
+export class EstimatedDocumentCountOperation extends CommandOperation<
+  EstimatedDocumentCountOptions
+> {
   collectionName: string;
   query?: Document;
 
-  constructor(collection: Collection, options: EstimatedDocumentCountOperationOptions);
+  constructor(collection: Collection, options: EstimatedDocumentCountOptions);
+  constructor(collection: Collection, query: Document, options: EstimatedDocumentCountOptions);
   constructor(
     collection: Collection,
-    query: Document,
-    options: EstimatedDocumentCountOperationOptions
-  );
-  constructor(
-    collection: Collection,
-    query?: Document | EstimatedDocumentCountOperationOptions,
-    options?: EstimatedDocumentCountOperationOptions
+    query?: Document | EstimatedDocumentCountOptions,
+    options?: EstimatedDocumentCountOptions
   ) {
     if (typeof options === 'undefined') {
-      options = query as EstimatedDocumentCountOperationOptions;
+      options = query as EstimatedDocumentCountOptions;
       query = undefined;
     }
 
@@ -38,7 +36,7 @@ export class EstimatedDocumentCountOperation extends CommandOperation {
   }
 
   execute(server: Server, callback: Callback): void {
-    const options: EstimatedDocumentCountOperationOptions = this.options;
+    const options = this.options;
     const cmd: Document = { count: this.collectionName };
 
     if (this.query) {

@@ -1,5 +1,5 @@
 import type { ClientSession } from '../sessions';
-import type { Document } from '../types';
+import type { Document, BSONSerializeOptions } from '../types';
 
 export const Aspect = {
   READ_OPERATION: Symbol('READ_OPERATION'),
@@ -14,8 +14,8 @@ export type Hint = string | Document;
 export interface OperationConstructor extends Function {
   aspects?: Set<symbol>;
 }
-export interface OperationOptions {
-  multi?: boolean;
+export interface OperationOptions extends BSONSerializeOptions {
+  // multi?: boolean;
   session?: ClientSession;
 }
 
@@ -25,10 +25,10 @@ export interface OperationOptions {
  * Additionally, this class implements `hasAspect`, which determines whether an operation has
  * a specific aspect.
  */
-export class OperationBase {
-  options: any;
+export class OperationBase<T extends OperationOptions = OperationOptions> {
+  options: T;
 
-  constructor(options: any) {
+  constructor(options: T = {} as T) {
     this.options = Object.assign({}, options);
   }
 
@@ -46,7 +46,10 @@ export class OperationBase {
   }
 
   get session(): ClientSession {
-    return this.options.session;
+    // NOTE: Using the bang operator here because we know there is always a
+    //       session, explicit or implicit. We should disambiguate the session
+    //       from the options and set it as an explicit field
+    return this.options.session!;
   }
 
   clearSession(): void {

@@ -14,7 +14,8 @@ import type { ClientSession } from '../sessions';
 import type { Server } from '../sdam/server';
 import type { ReadPreference } from '../read_preference';
 import type { Collection } from '../collection';
-import type { UpdateOpOptions } from './update';
+import type { UpdateOptions } from './update';
+import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
 
 export function deleteCallback(err: any, r: any, callback: Callback): void {
   if (callback == null) return;
@@ -206,7 +207,7 @@ export function updateDocuments(
   coll: Collection,
   selector: Document,
   document: Document,
-  options: UpdateOpOptions,
+  options: UpdateOptions,
   callback: Callback
 ): void;
 export function updateDocuments(
@@ -214,10 +215,10 @@ export function updateDocuments(
   coll: Collection,
   selector: Document,
   document: Document,
-  _options: UpdateOpOptions | Callback,
+  _options: UpdateOptions | Callback,
   _callback?: Callback
 ): void {
-  let options = _options as UpdateOpOptions;
+  let options = _options as UpdateOptions;
   let callback = _callback as Callback;
   if ('function' === typeof options) {
     callback = options;
@@ -266,7 +267,7 @@ export function updateDocuments(
   }
 
   // Update options
-  server.update(coll.s.namespace.toString(), [op], finalOptions, (err, result) => {
+  server.update(coll.s.namespace.toString(), [op], finalOptions as WriteCommandOptions, (err, result) => {
     if (callback == null) return;
     if (err) return handleCallback(callback, err, null);
     if (result == null) return handleCallback(callback, null, null);

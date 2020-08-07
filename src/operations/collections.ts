@@ -1,17 +1,17 @@
-import { OperationBase } from './operation';
+import { OperationBase, OperationOptions } from './operation';
 import { handleCallback } from '../utils';
 import { loadCollection } from '../dynamic_loaders';
 import type { Callback } from '../types';
 import type { Db } from '../db';
 
-export interface CollectionsOperationOptions {
+export interface CollectionsOptions extends OperationOptions {
   nameOnly: boolean;
 }
 
-export class CollectionsOperation extends OperationBase {
+export class CollectionsOperation extends OperationBase<CollectionsOptions> {
   db: Db;
 
-  constructor(db: Db, options: CollectionsOperationOptions) {
+  constructor(db: Db, options: CollectionsOptions) {
     super(options);
 
     this.db = db;
@@ -19,7 +19,7 @@ export class CollectionsOperation extends OperationBase {
 
   execute(callback: Callback): void {
     const db = this.db;
-    let options: CollectionsOperationOptions = this.options;
+    let options: CollectionsOptions = this.options;
 
     const Collection = loadCollection();
 

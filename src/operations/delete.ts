@@ -1,20 +1,21 @@
 import { defineAspects, Aspect, OperationBase } from './operation';
 import { deleteCallback, removeDocuments } from './common_functions';
-import { CommandOperation, CommandOpOptions } from './command';
+import { CommandOperation, CommandOperationOptions } from './command';
 import { isObject } from 'util';
 import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
+import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
 
-export interface DeleteOperationOptions extends CommandOpOptions {
+export interface DeleteOptions extends CommandOperationOptions {
   single: boolean;
 }
 
-export class DeleteOperation extends OperationBase {
+export class DeleteOperation extends OperationBase<DeleteOptions> {
   namespace: string;
   operations: Document[];
 
-  constructor(ns: string, ops: Document[], options: DeleteOperationOptions) {
+  constructor(ns: string, ops: Document[], options: DeleteOptions) {
     super(options);
     this.namespace = ns;
     this.operations = ops;
@@ -25,15 +26,20 @@ export class DeleteOperation extends OperationBase {
   }
 
   execute(server: Server, callback: Callback): void {
-    server.remove(this.namespace.toString(), this.operations, this.options, callback);
+    server.remove(
+      this.namespace.toString(),
+      this.operations,
+      this.options as WriteCommandOptions,
+      callback
+    );
   }
 }
 
-export class DeleteOneOperation extends CommandOperation {
+export class DeleteOneOperation extends CommandOperation<DeleteOptions> {
   collection: Collection;
   filter: Document;
 
-  constructor(collection: Collection, filter: Document, options: DeleteOperationOptions) {
+  constructor(collection: Collection, filter: Document, options: DeleteOptions) {
     super(collection, options);
 
     this.collection = collection;
@@ -43,18 +49,18 @@ export class DeleteOneOperation extends CommandOperation {
   execute(server: Server, callback: Callback): void {
     const coll = this.collection;
     const filter = this.filter;
-    const options: DeleteOperationOptions = this.options;
+    const options = this.options;
 
     options.single = true;
     removeDocuments(server, coll, filter, options, (err, r) => deleteCallback(err, r, callback));
   }
 }
 
-export class DeleteManyOperation extends CommandOperation {
+export class DeleteManyOperation extends CommandOperation<DeleteOptions> {
   collection: Collection;
   filter: Document;
 
-  constructor(collection: Collection, filter: Document, options: DeleteOperationOptions) {
+  constructor(collection: Collection, filter: Document, options: DeleteOptions) {
     super(collection, options);
 
     if (!isObject(filter)) {
@@ -68,7 +74,7 @@ export class DeleteManyOperation extends CommandOperation {
   execute(server: Server, callback: Callback): void {
     const coll = this.collection;
     const filter = this.filter;
-    const options: DeleteOperationOptions = this.options;
+    const options = this.options;
 
     // a user can pass `single: true` in to `deleteMany` to remove a single document, theoretically
     if (typeof options.single !== 'boolean') {

@@ -4,12 +4,13 @@ import { MongoError } from '../error';
 import { prepareDocs } from './common_functions';
 import type { Callback, Document } from '../types';
 import type { Collection } from '../collection';
+import type { InsertOptions } from './insert';
 
-export class InsertManyOperation extends OperationBase {
+export class InsertManyOperation extends OperationBase<InsertOptions> {
   collection: Collection;
   docs: Document[];
 
-  constructor(collection: Collection, docs: Document[], options: any) {
+  constructor(collection: Collection, docs: Document[], options: InsertOptions) {
     super(options);
 
     this.collection = collection;

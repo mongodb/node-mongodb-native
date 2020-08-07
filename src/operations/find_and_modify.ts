@@ -9,43 +9,39 @@ import {
   hasAtomicOperators
 } from '../utils';
 import { MongoError } from '../error';
-import { CommandOperation, CommandOpOptions } from './command';
-import { defineAspects, Aspect, Hint } from './operation';
+import { CommandOperation, CommandOperationOptions } from './command';
+import { defineAspects, Aspect } from './operation';
 import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
-import type { WriteConcern } from '../write_concern';
 
 export type Sort = { [key: string]: number | string };
 
-export interface FindOptions extends CommandOpOptions {
-  update: boolean;
-  new: boolean;
-  returnOriginal: undefined;
+export interface FindAndModifyOptions extends CommandOperationOptions {
+  /** When false, returns the updated document rather than the original. The default is true. */
+  returnOriginal: boolean;
+  /** Upsert the document if it does not exist. */
   upsert: boolean;
-  fields: Document;
+  /** Limits the fields to return for all matching documents. */
   projection: Document;
-  remove: boolean;
+  /** @deprecated use `projection` instead */
+  fields: Document;
+  /** Determines which document the operation modifies if the query selects multiple documents. */
   sort: Sort;
+  /** Optional list of array filters referenced in filtered positional operators */
+  arrayFilters: Document[];
+  /** Allow driver to bypass schema validation in MongoDB 3.2 or higher. */
+  bypassDocumentValidation: boolean;
+  /** An optional hint for query optimization. See the {@link https://docs.mongodb.com/manual/reference/command/update/#update-command-hint|update command} reference for more information.*/
+  hint: Document;
+
+  // NOTE: These types are a misuse of options, can we think of a way to remove them?
+  update: boolean;
+  remove: boolean;
+  new: boolean;
 }
 
-export interface FindAndModifyQuery {
-  sort?: Sort;
-  new?: boolean;
-  remove?: boolean;
-  upsert?: boolean;
-  fields?: Document;
-  arrayFilters?: any;
-  update?: Document;
-  maxTimeMS?: number;
-  writeConcern?: WriteConcern;
-  bypassDocumentValidation?: boolean;
-  hint?: Hint;
-  findAndModify?: string;
-  query?: Document;
-}
-
-export class FindAndModifyOperation extends CommandOperation {
+export class FindAndModifyOperation extends CommandOperation<FindAndModifyOptions> {
   collection: Collection;
   query: Document;
   sort: Sort;
@@ -56,7 +52,7 @@ export class FindAndModifyOperation extends CommandOperation {
     query: Document,
     sort: Sort,
     doc: Document | null,
-    options: FindOptions
+    options: FindAndModifyOptions
   ) {
     super(collection, options);
 
@@ -77,34 +73,36 @@ export class FindAndModifyOperation extends CommandOperation {
     let options = this.options;
 
     // Create findAndModify command object
-    const queryObject: FindAndModifyQuery = {
+    const cmd: Document = {
       findAndModify: coll.collectionName,
       query: query
     };
 
     if (sort) {
-      queryObject.sort = sort;
+      cmd.sort = sort;
     }
 
-    queryObject.new = options.new ? true : false;
-    queryObject.remove = options.remove ? true : false;
-    queryObject.upsert = options.upsert ? true : false;
+    cmd.new = options.new ? true : false;
+    cmd.remove = options.remove ? true : false;
+    cmd.upsert = options.upsert ? true : false;
 
     const projection = options.projection || options.fields;
 
     if (projection) {
-      queryObject.fields = projection;
+      cmd.fields = projection;
     }
 
     if (options.arrayFilters) {
-      queryObject.arrayFilters = options.arrayFilters;
+      cmd.arrayFilters = options.arrayFilters;
     }
 
     if (doc && !options.remove) {
-      queryObject.update = doc;
+      cmd.update = doc;
     }
 
-    if (options.maxTimeMS) queryObject.maxTimeMS = options.maxTimeMS;
+    if (options.maxTimeMS) {
+      cmd.maxTimeMS = options.maxTimeMS;
+    }
 
     // Either use override on the function, or go back to default on either the collection
     // level or db
@@ -119,17 +117,17 @@ export class FindAndModifyOperation extends CommandOperation {
 
     // Decorate the findAndModify command with the write Concern
     if (options.writeConcern) {
-      queryObject.writeConcern = options.writeConcern;
+      cmd.writeConcern = options.writeConcern;
     }
 
     // Have we specified bypassDocumentValidation
     if (options.bypassDocumentValidation === true) {
-      queryObject.bypassDocumentValidation = options.bypassDocumentValidation;
+      cmd.bypassDocumentValidation = options.bypassDocumentValidation;
     }
 
     // Have we specified collation
     try {
-      decorateWithCollation(queryObject, coll, options);
+      decorateWithCollation(cmd, coll, options);
     } catch (err) {
       return callback(err, null);
     }
@@ -146,11 +144,11 @@ export class FindAndModifyOperation extends CommandOperation {
         return;
       }
 
-      queryObject.hint = options.hint;
+      cmd.hint = options.hint;
     }
 
     // Execute the command
-    super.executeCommand(server, queryObject, (err, result) => {
+    super.executeCommand(server, cmd, (err, result) => {
       if (err) return handleCallback(callback, err, null);
 
       return handleCallback(callback, null, result);
@@ -159,7 +157,7 @@ export class FindAndModifyOperation extends CommandOperation {
 }
 
 export class FindOneAndDeleteOperation extends FindAndModifyOperation {
-  constructor(collection: Collection, filter: Document, options: FindOptions) {
+  constructor(collection: Collection, filter: Document, options: FindAndModifyOptions) {
     // Final options
     const finalOptions = Object.assign({}, options);
     finalOptions.fields = options.projection;
@@ -179,7 +177,7 @@ export class FindOneAndReplaceOperation extends FindAndModifyOperation {
     collection: Collection,
     filter: Document,
     replacement: Document,
-    options: FindOptions
+    options: FindAndModifyOptions
   ) {
     // Final options
     const finalOptions = Object.assign({}, options);
@@ -205,7 +203,12 @@ export class FindOneAndReplaceOperation extends FindAndModifyOperation {
 }
 
 export class FindOneAndUpdateOperation extends FindAndModifyOperation {
-  constructor(collection: Collection, filter: Document, update: Document, options: FindOptions) {
+  constructor(
+    collection: Collection,
+    filter: Document,
+    update: Document,
+    options: FindAndModifyOptions
+  ) {
     // Final options
     const finalOptions = Object.assign({}, options);
     finalOptions.fields = options.projection;

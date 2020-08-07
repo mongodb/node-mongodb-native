@@ -8,13 +8,12 @@ import {
   isObject,
   toError
 } from '../utils';
-import { ReadPreference } from '../read_preference';
-import { CommandOperation, CommandOpOptions } from './command';
+import { ReadPreference, ReadPreferenceMode } from '../read_preference';
+import { CommandOperation, CommandOperationOptions } from './command';
 import { defineAspects, Aspect } from './operation';
 import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
-import type { ClientSession } from '../sessions';
 import type { Sort } from './find_and_modify';
 
 const exclusionList = [
@@ -32,9 +31,7 @@ export type MapFunction = () => void;
 export type ReduceFunction = (key: string, values: Document[]) => Document;
 export type FinalizeFunction = (key: string, reducedValue: Document) => Document;
 
-export interface MapReduceOptions extends CommandOpOptions {
-  /** The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST). */
-  readPreference?: ReadPreference;
+export interface MapReduceOptions extends CommandOperationOptions {
   /** Sets the output target for the map reduce job. *{inline:1} | {replace:'collectionName'} | {merge:'collectionName'} | {reduce:'collectionName'}* */
   out?: 'inline' | { inline: 1 } | { replace: string } | { merge: string } | { reduce: string };
   /** Query filter object. */
@@ -55,8 +52,6 @@ export interface MapReduceOptions extends CommandOpOptions {
   verbose?: boolean;
   /** Allow driver to bypass schema validation in MongoDB 3.2 or higher. */
   bypassDocumentValidation?: boolean;
-  /** optional session to use for this operation */
-  session?: ClientSession;
 }
 
 interface MapReduceStats {
@@ -74,7 +69,7 @@ interface MapReduceStats {
  * @property {(Function|string)} reduce The reduce function.
  * @property {object} [options] Optional settings. See Collection.prototype.mapReduce for a list of options.
  */
-export class MapReduceOperation extends CommandOperation {
+export class MapReduceOperation extends CommandOperation<MapReduceOptions> {
   collection: Collection;
   map: MapFunction | string;
   reduce: ReduceFunction | string;
@@ -120,7 +115,7 @@ export class MapReduceOperation extends CommandOperation {
     for (const n in options) {
       // Only include if not in exclusion list
       if (exclusionList.indexOf(n) === -1) {
-        mapCommandHash[n] = options[n];
+        mapCommandHash[n] = (options as any)[n];
       }
     }
 
@@ -131,10 +126,10 @@ export class MapReduceOperation extends CommandOperation {
 
     // If we have a read preference and inline is not set as output fail hard
     if (
-      options.readPreference !== false &&
-      options.readPreference !== 'primary' &&
+      options.readPreference &&
+      options.readPreference.mode === ReadPreferenceMode.primary &&
       options.out &&
-      options.out.inline !== 1 &&
+      (options.out as any).inline !== 1 &&
       options.out !== 'inline'
     ) {
       // Force readPreference to primary

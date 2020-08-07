@@ -1,10 +1,11 @@
 import { Aspect, defineAspects } from './operation';
-import { CommandOperation, CommandOpOptions } from './command';
+import { CommandOperation, CommandOperationOptions } from './command';
 import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
+import type { Db } from '../db';
 
-export interface CollStatsOptions extends CommandOpOptions {
+export interface CollStatsOptions extends CommandOperationOptions {
   /** Divide the returned sizes by scale value. */
   scale: number;
 }
@@ -16,7 +17,7 @@ export interface CollStatsOptions extends CommandOpOptions {
  * @property {Collection} collection Collection instance.
  * @property {object} [options] Optional settings. See Collection.prototype.stats for a list of options.
  */
-export class CollStatsOperation extends CommandOperation {
+export class CollStatsOperation extends CommandOperation<CollStatsOptions> {
   collectionName: string;
 
   /**
@@ -40,7 +41,12 @@ export class CollStatsOperation extends CommandOperation {
   }
 }
 
-export class DbStatsOperation extends CommandOperation {
+export interface DbStatsOptions extends CommandOperationOptions {
+  /** Divide the returned sizes by scale value. */
+  scale: number;
+}
+
+export class DbStatsOperation extends CommandOperation<DbStatsOptions> {
   execute(server: Server, callback: Callback): void {
     const command: Document = { dbStats: true };
     if (this.options.scale != null) {
