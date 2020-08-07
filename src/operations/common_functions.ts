@@ -35,7 +35,7 @@ export interface IndexInformationOptions {
  *
  * @param db The Db instance on which to retrieve the index info.
  * @param name The name of the collection.
- * @param [options] Optional settings. See Db.prototype.indexInformation for a list of options.
+ * @param [options] Optional settings.
  * @param [callback] The command result callback
  */
 export function indexInformation(db: Db, name: string, callback: Callback): void;
@@ -267,16 +267,21 @@ export function updateDocuments(
   }
 
   // Update options
-  server.update(coll.s.namespace.toString(), [op], finalOptions as WriteCommandOptions, (err, result) => {
-    if (callback == null) return;
-    if (err) return handleCallback(callback, err, null);
-    if (result == null) return handleCallback(callback, null, null);
-    if (result.result.code) return handleCallback(callback, toError(result.result));
-    if (result.result.writeErrors)
-      return handleCallback(callback, toError(result.result.writeErrors[0]));
-    // Return the results
-    handleCallback(callback, null, result);
-  });
+  server.update(
+    coll.s.namespace.toString(),
+    [op],
+    finalOptions as WriteCommandOptions,
+    (err, result) => {
+      if (callback == null) return;
+      if (err) return handleCallback(callback, err, null);
+      if (result == null) return handleCallback(callback, null, null);
+      if (result.result.code) return handleCallback(callback, toError(result.result));
+      if (result.result.writeErrors)
+        return handleCallback(callback, toError(result.result.writeErrors[0]));
+      // Return the results
+      handleCallback(callback, null, result);
+    }
+  );
 }
 
 export function updateCallback(err?: AnyError, r?: Document, callback?: Callback): void {

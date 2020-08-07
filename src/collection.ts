@@ -37,7 +37,7 @@ import {
 import { DistinctOperation } from './operations/distinct';
 import { DropCollectionOperation } from './operations/drop';
 import { EstimatedDocumentCountOperation } from './operations/estimated_document_count';
-import { FindOperation } from './operations/find';
+import { FindOperation, FindOptions } from './operations/find';
 import { FindOneOperation } from './operations/find_one';
 import {
   FindAndModifyOperation,
@@ -59,6 +59,7 @@ import { executeOperation } from './operations/execute_operation';
 import { EvalGroupOperation, GroupOperation } from './operations/group';
 import type { Callback, Document } from './types';
 import type { Db } from './db';
+import type { InsertOptions } from './cmap/wire_protocol';
 const mergeKeys = ['ignoreUndefined'];
 
 export interface Collection {
@@ -401,21 +402,11 @@ export class Collection {
    *
    * @function
    * @param {object[]} operations Bulk operations to perform.
-   * @param {object} [options] Optional settings.
-   * @param {boolean} [options.ordered=true] Execute write operation in ordered or unordered fashion.
-   * @param {boolean} [options.bypassDocumentValidation=false] Allow driver to bypass schema validation in MongoDB 3.2 or higher.
-   * @param {object[]} [options.arrayFilters] Determines which array elements to modify for update operation in MongoDB 3.6 or higher.
-   * @param {(number|string)} [options.w] The write concern.
-   * @param {number} [options.wtimeout] The write concern timeout.
-   * @param {boolean} [options.j=false] Specify a journal write concern.
-   * @param {boolean} [options.checkKeys=false] If true, will throw if bson documents start with `$` or include a `.` in any key value
-   * @param {boolean} [options.serializeFunctions=false] Serialize functions on any object.
-   * @param {boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
-   * @param {ClientSession} [options.session] optional session to use for this operation
+   * @param {BulkWriteOptions} [options] Optional settings.
    * @param {Collection~bulkWriteOpCallback} [callback] The command result callback
    * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  bulkWrite(operations: any, options?: any, callback?: Callback): Promise<void> | void {
+  bulkWrite(operations: any, options?: InsertOptions, callback?: Callback): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || { ordered: true };
 
@@ -1442,35 +1433,6 @@ const DEPRECATED_FIND_OPTIONS = ['maxScan', 'fields', 'snapshot', 'oplogReplay']
  * @deprecated
  * @param {object} [query={}] The cursor query object.
  * @param {object} [options] Optional settings.
- * @param {number} [options.limit=0] Sets the limit of documents returned in the query.
- * @param {(Array|object)} [options.sort] Set to sort the documents coming back from the query. Array of indexes, [['a', 1]] etc.
- * @param {object} [options.projection] The fields to return in the query. Object of fields to either include or exclude (one of, not both), {'a':1, 'b': 1} **or** {'a': 0, 'b': 0}
- * @param {object} [options.fields] **Deprecated** Use `options.projection` instead
- * @param {number} [options.skip=0] Set to skip N documents ahead in your query (useful for pagination).
- * @param {object} [options.hint] Tell the query to use specific indexes in the query. Object of indexes to use, {'_id':1}
- * @param {boolean} [options.explain=false] Explain the query instead of returning the data.
- * @param {boolean} [options.snapshot=false] DEPRECATED: Snapshot query.
- * @param {boolean} [options.timeout=false] Specify if the cursor can timeout.
- * @param {boolean} [options.tailable=false] Specify if the cursor is tailable.
- * @param {boolean} [options.awaitData=false] Specify if the cursor is a a tailable-await cursor. Requires `tailable` to be true
- * @param {number} [options.batchSize=1000] Set the batchSize for the getMoreCommand when iterating over the query results.
- * @param {boolean} [options.returnKey=false] Only return the index key.
- * @param {number} [options.maxScan] DEPRECATED: Limit the number of items to scan.
- * @param {number} [options.min] Set index bounds.
- * @param {number} [options.max] Set index bounds.
- * @param {boolean} [options.showDiskLoc=false] Show disk location of results.
- * @param {string} [options.comment] You can put a $comment field on a query to make looking in the profiler logs simpler.
- * @param {boolean} [options.raw=false] Return document results as raw BSON buffers.
- * @param {boolean} [options.promoteLongs=true] Promotes Long values to number if they fit inside the 53 bits resolution.
- * @param {boolean} [options.promoteValues=true] Promotes BSON values to native types where possible, set to false to only receive wrapper types.
- * @param {boolean} [options.promoteBuffers=false] Promotes Binary BSON values to native Node Buffers.
- * @param {(ReadPreference|string)} [options.readPreference] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
- * @param {boolean} [options.partial=false] Specify if the cursor should return partial results when querying against a sharded system
- * @param {number} [options.maxTimeMS] Number of milliseconds to wait before aborting the query.
- * @param {number} [options.maxAwaitTimeMS] The maximum amount of time for the server to wait on new documents to satisfy a tailable cursor query. Requires `taiable` and `awaitData` to be true
- * @param {boolean} [options.noCursorTimeout] The server normally times out idle cursors after an inactivity period (10 minutes) to prevent excess memory use. Set this option to prevent that.
- * @param {object} [options.collation] Specify collation (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields).
- * @param {boolean} [options.allowDiskUse] Enables writing to temporary files on the server.
  * @param {ClientSession} [options.session] optional session to use for this operation
  * @throws {MongoError}
  * @returns {Cursor}
@@ -1481,7 +1443,7 @@ Collection.prototype.find = deprecateOptions(
     deprecatedOptions: DEPRECATED_FIND_OPTIONS,
     optionsIndex: 1
   },
-  function (this: any, query: any, options: any) {
+  function (this: any, query: any, options: FindOptions) {
     if (arguments.length > 2) {
       throw new TypeError('Third parameter to `collection.find()` must be undefined');
     }
@@ -1531,7 +1493,7 @@ Collection.prototype.find = deprecateOptions(
     }
 
     // Make a shallow copy of options
-    const newOptions = Object.assign({}, options);
+    const newOptions: Document = Object.assign({}, options);
 
     // Make a shallow copy of the collection options
     for (const key in this.s.options) {

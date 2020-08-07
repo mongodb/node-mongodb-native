@@ -7,30 +7,35 @@ import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { Db } from '../db';
-import type { WriteConcern } from '../write_concern';
-import type { ReadConcern } from '../read_concern';
+import type { Cursor } from '../cursor';
+import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 
 const DB_AGGREGATE_COLLECTION = 1 as const;
 const MIN_WIRE_VERSION_$OUT_READ_CONCERN_SUPPORT = 8 as const;
 
 export interface AggregateOptions extends CommandOperationOptions {
-  /** Lets the server know if it can use disk to store temporary results for the aggregation (requires mongodb 2.6 >) */
-  allowDiskUse: boolean;
-  /** The number of documents to return per batch */
-  batchSize: boolean;
-  /** Allow driver to bypass schema validation in MongoDB 3.2 or higher */
-  bypassDocumentValidation: boolean;
-  /** Explain returns the aggregation execution plan (requires mongodb >2.6) */
-  explain?: ReadConcern | WriteConcern;
-  full: boolean;
-  /** string|object} [options.hint] Add an index selection hint to an aggregation command */
-  hint: Hint;
-  out?: string;
-  /** number} [options.maxAwaitTimeMS] The maximum amount of time for the server to wait on new documents to satisfy a tailable cursor query. */
+  /** allowDiskUse lets the server know if it can use disk to store temporary results for the aggregation (requires mongodb 2.6 >). */
+  allowDiskUse?: boolean;
+  /** The number of documents to return per batch. See [aggregation documentation](https://docs.mongodb.com/manual/reference/command/aggregate). */
+  batchSize?: boolean;
+  /** Allow driver to bypass schema validation in MongoDB 3.2 or higher. */
+  bypassDocumentValidation?: boolean;
+  /** Return the query as cursor, on 2.6 > it returns as a real cursor on pre 2.6 it returns as an emulated cursor. */
+  cursor?: Cursor;
+  /** Explain returns the aggregation execution plan (requires mongodb 2.6 >) */
+  explain?: boolean;
+  /** specifies a cumulative time limit in milliseconds for processing operations on the cursor. MongoDB interrupts the operation at the earliest following interrupt point. */
+  maxTimeMS?: number;
+  /** The maximum amount of time for the server to wait on new documents to satisfy a tailable cursor query. */
   maxAwaitTimeMS?: number;
-
-  // hmmm
-  cursor: Document;
+  /** Specify collation. */
+  collation?: CollationOptions;
+  /** Add a comment to an aggregation command */
+  comment?: string | Document;
+  /** Add an index selection hint to an aggregation command */
+  hint?: Hint;
+  full?: boolean;
+  out?: string;
 }
 
 export class AggregateOperation extends CommandOperation<AggregateOptions> {

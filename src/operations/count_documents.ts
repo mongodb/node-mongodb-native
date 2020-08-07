@@ -4,8 +4,10 @@ import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 
 export interface CountDocumentsOptions extends AggregateOptions {
-  skip: number;
-  limit: number;
+  /** The number of documents to skip. */
+  skip?: number;
+  /** The maximum amounts to count before aborting. */
+  limit?: number;
 }
 
 export class CountDocumentsOperation extends AggregateOperation {

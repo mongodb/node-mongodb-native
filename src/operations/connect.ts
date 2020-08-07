@@ -475,16 +475,16 @@ function generateCredentials(
   });
 }
 
-function mergeOptions(target: any, source: any, flatten: any) {
+function mergeOptions<T, S>(target: T, source: S, flatten: boolean): S & T {
   for (const name in source) {
     if (source[name] && typeof source[name] === 'object' && flatten) {
       target = mergeOptions(target, source[name], flatten);
     } else {
-      target[name] = source[name];
+      target = Object.assign(target, { [name]: source[name] });
     }
   }
 
-  return target;
+  return target as S & T;
 }
 
 function relayEvents(mongoClient: MongoClient, topology: Topology) {

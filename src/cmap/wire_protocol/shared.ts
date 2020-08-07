@@ -9,11 +9,11 @@ import type { Topology } from '../../sdam/topology';
 import type { Server } from '../../sdam/server';
 import type { ServerDescription } from '../../sdam/server_description';
 
-export interface FindOptions {
+export interface ReadPreferenceOption {
   readPreference?: ReadPreference;
 }
 
-export function getReadPreference(cmd: Document, options: FindOptions): ReadPreference {
+export function getReadPreference(cmd: Document, options: ReadPreferenceOption): ReadPreference {
   // Default to command version of the readPreference
   let readPreference = cmd.readPreference || ReadPreference.primary;
   // If we have an option readPreference override the command one

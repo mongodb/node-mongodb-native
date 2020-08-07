@@ -5,12 +5,12 @@ import * as CONSTANTS from '../constants';
 import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
-import type { ReadPreference } from '..';
+import type { ReadPreference } from '../read_preference';
 import type { ClientSession } from '../sessions';
 
 const LIST_COLLECTIONS_WIRE_VERSION = 3;
 
-interface CollectionTransform {
+export interface CollectionTransform {
   doc(doc: Document): Document;
 }
 

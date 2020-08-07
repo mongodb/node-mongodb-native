@@ -4,6 +4,7 @@ import { loadCollection } from '../dynamic_loaders';
 import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
+import type { PkFactory } from '../mongo_client';
 
 const ILLEGAL_COMMAND_FIELDS = new Set([
   'w',
@@ -47,6 +48,12 @@ export interface CreateCollectionOptions extends CommandOperationOptions {
   viewOn: string;
   /** An array that consists of the aggregation pipeline stage. Creates the view by applying the specified pipeline to the viewOn collection or view on MongoDB 3.4 or higher */
   pipeline: Document[];
+  /** A primary key factory object for generation of custom _id keys. */
+  pkFactory: PkFactory;
+  /** The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST). */
+  readPreference: ReadPreference;
+  /** Specify collation (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields). */
+  collation: object;
 }
 
 export class CreateCollectionOperation extends CommandOperation<CreateCollectionOptions> {
