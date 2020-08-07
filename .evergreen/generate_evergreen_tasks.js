@@ -95,9 +95,9 @@ function makeTask({ mongoVersion, topology }) {
 }
 
 MONGODB_VERSIONS.forEach(mongoVersion => {
-  TOPOLOGIES.forEach(topology => {
-    TASKS.push(makeTask({ mongoVersion, topology }));
-  });
+  TOPOLOGIES.forEach(topology =>
+    TASKS.push(makeTask({ mongoVersion, topology }))
+  );
 });
 
 // singleton task for connectivity tests
@@ -119,6 +119,22 @@ TASKS.push(
     name: 'test-auth-ldap',
     tags: ['auth', 'ldap'],
     commands: [{ func: 'install dependencies' }, { func: 'run ldap tests' }]
+  },
+  {
+    name: 'test-tls-support',
+    tags: ['tls-support'],
+    commands: [
+      { func: 'install dependencies' },
+      {
+        func: 'bootstrap mongo-orchestration',
+        vars: {
+          SSL: 'ssl',
+          VERSION: 'latest',
+          TOPOLOGY: 'server'
+        }
+      },
+      { func: 'run tls tests' }
+    ]
   }
 );
 

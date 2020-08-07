@@ -10,9 +10,15 @@ set -o errexit  # Exit the script with error if any of the commands fail
 #       MARCH                   Machine Architecture. Defaults to lowercase uname -m
 
 AUTH=${AUTH:-noauth}
-SSL=${SSL:-nossl}
 UNIFIED=${UNIFIED:-}
 MONGODB_URI=${MONGODB_URI:-}
+
+# ssl setup
+SSL=${SSL:-nossl}
+if [ "$SSL" != "nossl" ]; then
+   export SSL_KEY_FILE="$DRIVERS_TOOLS/.evergreen/x509gen/client.pem"
+   export SSL_CA_FILE="$DRIVERS_TOOLS/.evergreen/x509gen/ca.pem"
+fi
 
 # run tests
 echo "Running $AUTH tests over $SSL, connecting to $MONGODB_URI"
