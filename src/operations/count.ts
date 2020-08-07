@@ -7,9 +7,13 @@ import type { Collection } from '../collection';
 import type { Cursor } from '../cursor/cursor';
 
 export interface CountOptions extends CommandOperationOptions {
+  /** The number of documents to skip. */
   skip?: number;
+  /** The maximum amounts to count before aborting. */
   limit?: number;
+  /** Number of milliseconds to wait before aborting the query. */
   maxTimeMS?: number;
+  /** An index name hint for the query. */
   hint?: string | Document;
 }
 

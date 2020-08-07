@@ -10,6 +10,7 @@ import { executeOperation } from '../operations/execute_operation';
 import { each } from '../operations/cursor_ops';
 import { CountOperation } from '../operations/count';
 import type { Callback, Document } from '../types';
+import type { CollectionTransform } from '../operations/list_collections';
 
 /**
  * @file The **Cursor** class is an internal class that embodies a cursor on MongoDB
@@ -54,6 +55,17 @@ import type { Callback, Document } from '../types';
 // Flags allowed for cursor
 const flags = ['tailable', 'oplogReplay', 'noCursorTimeout', 'awaitData', 'exhaust', 'partial'];
 const fields = ['numberOfRetries', 'tailableRetryInterval'];
+
+export interface CursorPrivate {
+  /** Transforms functions */
+  transforms: CollectionTransform;
+  numberOfRetries: number;
+  tailableRetryInterval: number;
+  currentNumberOfRetries: number;
+  explicitlyIgnoreSession: boolean;
+
+  state: number; // Should be enum
+}
 
 /**
  * Creates a new Cursor instance (INTERNAL TYPE, do not instantiate directly)
@@ -102,6 +114,7 @@ export class Cursor extends CoreCursor {
    * @param {any} [cmd]
    * @param {any} [options]
    */
+  s: any;
   constructor(topology: any, ns: any, cmd?: any, options?: any) {
     super(topology, ns, cmd, options);
 
@@ -900,10 +913,6 @@ export class Cursor extends CoreCursor {
    * @function
    * @param {boolean} [applySkipLimit=true] Should the count command apply limit and skip settings on the cursor or in the passed in options.
    * @param {object} [options] Optional settings.
-   * @param {number} [options.skip] The number of documents to skip.
-   * @param {number} [options.limit] The maximum amounts to count before aborting.
-   * @param {number} [options.maxTimeMS] Number of milliseconds to wait before aborting the query.
-   * @param {string} [options.hint] An index name hint for the query.
    * @param {(ReadPreference|string)} [options.readPreference] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
    * @param {Cursor~countResultCallback} [callback] The result callback.
    * @returns {Promise<void> | void} returns Promise if no callback passed

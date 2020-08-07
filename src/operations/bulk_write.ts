@@ -6,7 +6,7 @@ import type { Collection } from '../collection';
 import type { BulkOperationBase } from '../bulk/common';
 import type { InsertOptions } from './insert';
 
-export class BulkWriteOperation extends OperationBase<InsertOptions> {
+export class BulkWriteOperation extends OperationBase {
   collection: Collection;
   operations: Document[];
 
@@ -20,7 +20,7 @@ export class BulkWriteOperation extends OperationBase<InsertOptions> {
   execute(callback: Callback): void {
     const coll = this.collection;
     const operations = this.operations;
-    let options = this.options;
+    let options = this.options as InsertOptions;
 
     // Add ignoreUndefined
     if (coll.s.options.ignoreUndefined) {

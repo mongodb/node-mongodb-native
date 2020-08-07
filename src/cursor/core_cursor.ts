@@ -6,7 +6,7 @@ import { Readable } from 'stream';
 import { OperationBase } from '../operations/operation';
 import { MongoError, MongoNetworkError } from '../error';
 import { Long } from '../bson';
-import type { BSONSerializeOptions, Callback, Callback2 } from '../types';
+import type { BSONSerializeOptions, Callback, Callback2, Document } from '../types';
 
 export interface InternalCursorState extends BSONSerializeOptions {
   [key: string]: any;
@@ -73,8 +73,8 @@ class CoreCursor extends Readable {
   topology: any;
   cursorState: InternalCursorState;
   logger: any;
-  s: any;
   query: any;
+  s: any;
 
   /**
    * Create a new core `Cursor` instance.
@@ -214,7 +214,7 @@ class CoreCursor extends Readable {
    * @function
    * @param {resultCallback} callback A callback function
    */
-  _next(callback: Callback) {
+  _next(callback: Callback<Document>) {
     nextFunction(this, callback);
   }
 
@@ -275,7 +275,7 @@ class CoreCursor extends Readable {
    * @param {any} number
    * @returns {any[]} An array of buffered documents
    */
-  readBufferedDocuments(number: any): any[] {
+  readBufferedDocuments(number: number): Document[] {
     const unreadDocumentsLength = this.cursorState.documents.length - this.cursorState.cursorIndex;
     const length = number < unreadDocumentsLength ? number : unreadDocumentsLength;
     let elements = this.cursorState.documents.slice(
