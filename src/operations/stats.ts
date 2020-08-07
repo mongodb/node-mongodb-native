@@ -6,7 +6,7 @@ import type { Collection } from '../collection';
 
 export interface CollStatsOptions extends CommandOperationOptions {
   /** Divide the returned sizes by scale value. */
-  scale: number;
+  scale?: number;
 }
 
 /**
@@ -42,7 +42,7 @@ export class CollStatsOperation extends CommandOperation<CollStatsOptions> {
 
 export interface DbStatsOptions extends CommandOperationOptions {
   /** Divide the returned sizes by scale value. */
-  scale: number;
+  scale?: number;
 }
 
 export class DbStatsOperation extends CommandOperation<DbStatsOptions> {

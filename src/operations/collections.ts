@@ -5,7 +5,7 @@ import type { Callback } from '../types';
 import type { Db } from '../db';
 
 export interface CollectionsOptions extends OperationOptions {
-  nameOnly: boolean;
+  nameOnly?: boolean;
 }
 
 export class CollectionsOperation extends OperationBase<CollectionsOptions> {

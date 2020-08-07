@@ -140,7 +140,14 @@ export class Admin {
     return this.command({ ping: 1 }, options, callback);
   }
 
-  /** Add a user to the database */
+  /**
+   * Add a user to the database
+   *
+   * @param username The username for the new user
+   * @param password An optional password for the new user
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
+   */
   addUser(
     username: string,
     password?: string,

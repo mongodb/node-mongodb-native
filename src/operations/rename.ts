@@ -9,7 +9,9 @@ import type { CommandOperationOptions } from './command';
 
 export interface RenameOptions extends CommandOperationOptions {
   /** Drop the target name collection if it previously exists. */
-  dropTarget: boolean;
+  dropTarget?: boolean;
+  /** Unclear */
+  new_collection?: boolean;
 }
 
 export class RenameOperation extends RunAdminCommandOperation {

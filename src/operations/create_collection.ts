@@ -5,6 +5,7 @@ import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
 import type { PkFactory } from '../mongo_client';
+import type { ListCollectionsOptions } from './list_collections';
 
 const ILLEGAL_COMMAND_FIELDS = new Set([
   'w',
@@ -23,37 +24,33 @@ const ILLEGAL_COMMAND_FIELDS = new Set([
 
 export interface CreateCollectionOptions extends CommandOperationOptions {
   /** Returns an error if the collection does not exist */
-  strict: boolean;
+  strict?: boolean;
   /** Create a capped collection */
-  capped: boolean;
+  capped?: boolean;
   /** @deprecated Create an index on the _id field of the document, True by default on MongoDB 2.6 - 3.0 */
-  autoIndexId: boolean;
+  autoIndexId?: boolean;
   /** The size of the capped collection in bytes */
-  size: number;
+  size?: number;
   /** The maximum number of documents in the capped collection */
-  max: number;
+  max?: number;
   /** Available for the MMAPv1 storage engine only to set the usePowerOf2Sizes and the noPadding flag */
-  flags: number;
+  flags?: number;
   /** Allows users to specify configuration to the storage engine on a per-collection basis when creating a collection on MongoDB 3.0 or higher */
-  storageEngine: Document;
+  storageEngine?: Document;
   /** Allows users to specify validation rules or expressions for the collection. For more information, see Document Validation on MongoDB 3.2 or higher */
-  validator: Document;
+  validator?: Document;
   /** Determines how strictly MongoDB applies the validation rules to existing documents during an update on MongoDB 3.2 or higher */
-  validationLevel: string;
+  validationLevel?: string;
   /** Determines whether to error on invalid documents or just warn about the violations but allow invalid documents to be inserted on MongoDB 3.2 or higher */
-  validationAction: string;
+  validationAction?: string;
   /** Allows users to specify a default configuration for indexes when creating a collection on MongoDB 3.2 or higher */
-  indexOptionDefaults: Document;
+  indexOptionDefaults?: Document;
   /** The name of the source collection or view from which to create the view. The name is not the full namespace of the collection or view; i.e. does not include the database name and implies the same database as the view to create on MongoDB 3.4 or higher */
-  viewOn: string;
+  viewOn?: string;
   /** An array that consists of the aggregation pipeline stage. Creates the view by applying the specified pipeline to the viewOn collection or view on MongoDB 3.4 or higher */
   pipeline: Document[];
   /** A primary key factory object for generation of custom _id keys. */
   pkFactory: PkFactory;
-  /** The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST). */
-  readPreference: ReadPreference;
-  /** Specify collation (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields). */
-  collation: object;
 }
 
 export class CreateCollectionOperation extends CommandOperation<CreateCollectionOptions> {

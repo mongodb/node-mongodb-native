@@ -30,24 +30,20 @@ function listCollectionsTransforms(databaseName: string): CollectionTransform {
   };
 }
 
-export interface ListCollectionOptions extends CommandOperationOptions {
+export interface ListCollectionsOptions extends CommandOperationOptions {
   /** Since 4.0: If true, will only return the collection name in the response, and will omit additional info */
   nameOnly?: boolean;
   /** The batchSize for the returned command cursor or if pre 2.8 the systems batch collection */
   batchSize?: number;
-  /** The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST). */
-  readPreference?: ReadPreference;
-  /** optional session to use for this operation */
-  session?: ClientSession;
 }
 
-export class ListCollectionsOperation extends CommandOperation<ListCollectionOptions> {
+export class ListCollectionsOperation extends CommandOperation<ListCollectionsOptions> {
   db: Db;
   filter: Document;
   nameOnly: boolean;
   batchSize?: number;
 
-  constructor(db: Db, filter: Document, options: ListCollectionOptions) {
+  constructor(db: Db, filter: Document, options: ListCollectionsOptions) {
     super(db, { fullResponse: true, ...options });
 
     this.db = db;
