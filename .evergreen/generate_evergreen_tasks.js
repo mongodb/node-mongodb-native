@@ -106,10 +106,20 @@ TASKS.push(
   {
     name: 'test-atlas-connectivity',
     tags: ['atlas-connect'],
+    commands: [{ func: 'install dependencies' }, { func: 'run atlas tests' }]
+  },
+  {
+    name: 'test-auth-kerberos',
+    tags: ['auth', 'kerberos'],
     commands: [
       { func: 'install dependencies' },
-      { func: 'run atlas tests' }
+      { func: 'run kerberos tests' }
     ]
+  },
+  {
+    name: 'test-auth-ldap',
+    tags: ['auth', 'ldap'],
+    commands: [{ func: 'install dependencies' }, { func: 'run ldap tests' }]
   },
   {
     name: 'test-tls-support',
@@ -126,11 +136,6 @@ TASKS.push(
       },
       { func: 'run tls tests' }
     ]
-  },
-  {
-    name: 'test-auth-ldap',
-    tags: ['auth', 'ldap'],
-    commands: [{ func: 'install dependencies' }, { func: 'run ldap tests' }]
   }
 );
 

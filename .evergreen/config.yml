@@ -172,6 +172,15 @@ functions:
           rm -f ./prepare_atlas_connectivity.sh
 
           NODE_LTS_NAME='${NODE_LTS_NAME}' bash ${PROJECT_DIRECTORY}/.evergreen/run-atlas-tests.sh
+  run kerberos tests:
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: src
+        script: |
+          KRB5_KEYTAB='${gssapi_auth_keytab_base64}' KRB5_PRINCIPAL='${gssapi_auth_principal}' \
+          MONGODB_URI='${gssapi_auth_mongodb_uri}' \
+          NODE_LTS_NAME='${NODE_LTS_NAME}' bash ${PROJECT_DIRECTORY}/.evergreen/run-kerberos-tests.sh
   run ldap tests:
     - command: shell.exec
       type: test
@@ -1065,6 +1074,20 @@ tasks:
     commands:
       - func: install dependencies
       - func: run atlas tests
+  - name: test-auth-kerberos
+    tags:
+      - auth
+      - kerberos
+    commands:
+      - func: install dependencies
+      - func: run kerberos tests
+  - name: test-auth-ldap
+    tags:
+      - auth
+      - ldap
+    commands:
+      - func: install dependencies
+      - func: run ldap tests
   - name: test-tls-support
     tags:
       - tls-support
@@ -1076,13 +1099,6 @@ tasks:
           VERSION: latest
           TOPOLOGY: server
       - func: run tls tests
-  - name: test-auth-ldap
-    tags:
-      - auth
-      - ldap
-    commands:
-      - func: install dependencies
-      - func: run ldap tests
   - name: test-latest-ocsp-valid-cert-server-staples
     tags:
       - ocsp
@@ -1377,8 +1393,9 @@ buildvariants:
       - test-2.6-replica_set-unified
       - test-2.6-sharded_cluster-unified
       - test-atlas-connectivity
-      - test-tls-support
+      - test-auth-kerberos
       - test-auth-ldap
+      - test-tls-support
       - test-latest-ocsp-valid-cert-server-staples
       - test-latest-ocsp-invalid-cert-server-staples
       - test-latest-ocsp-valid-cert-server-does-not-staple
@@ -1490,6 +1507,7 @@ buildvariants:
       - test-2.6-replica_set-unified
       - test-2.6-sharded_cluster-unified
       - test-atlas-connectivity
+      - test-auth-kerberos
       - test-auth-ldap
   - name: ubuntu-14.04-dubnium
     display_name: Ubuntu 14.04 Node Dubnium
@@ -1565,8 +1583,9 @@ buildvariants:
       - test-3.2-replica_set-unified
       - test-3.2-sharded_cluster-unified
       - test-atlas-connectivity
-      - test-tls-support
+      - test-auth-kerberos
       - test-auth-ldap
+      - test-tls-support
       - test-latest-ocsp-valid-cert-server-staples
       - test-latest-ocsp-invalid-cert-server-staples
       - test-latest-ocsp-valid-cert-server-does-not-staple
