@@ -69,12 +69,6 @@ export interface CursorPrivate {
   state: number; // Should be enum
 }
 
-export interface CursorOptions extends CoreCursorOptions {
-  topology?: typeof Topology;
-  maxTimeMS?: number;
-  cursorFactory?: typeof Cursor;
-}
-
 /**
  * Creates a new Cursor instance (INTERNAL TYPE, do not instantiate directly)
  *
