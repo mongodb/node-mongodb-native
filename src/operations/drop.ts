@@ -1,14 +1,16 @@
 import { Aspect, defineAspects } from './operation';
 import { handleCallback } from '../utils';
-import { CommandOperation, CommandOpOptions } from './command';
+import { CommandOperation, CommandOperationOptions } from './command';
 import type { Callback } from '../types';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
 
-export class DropCollectionOperation extends CommandOperation {
+export type DropCollectionOptions = CommandOperationOptions;
+
+export class DropCollectionOperation extends CommandOperation<DropCollectionOptions> {
   name: string;
 
-  constructor(db: Db, name: string, options: CommandOpOptions) {
+  constructor(db: Db, name: string, options: DropCollectionOptions) {
     super(db, options);
     this.name = name;
   }
@@ -22,7 +24,8 @@ export class DropCollectionOperation extends CommandOperation {
   }
 }
 
-export class DropDatabaseOperation extends CommandOperation {
+export type DropDatabaseOptions = CommandOperationOptions;
+export class DropDatabaseOperation extends CommandOperation<DropDatabaseOptions> {
   execute(server: Server, callback: Callback): void {
     super.executeCommand(server, { dropDatabase: 1 }, (err, result) => {
       if (err) return handleCallback(callback, err);

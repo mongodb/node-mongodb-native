@@ -2,9 +2,9 @@ import { handleCallback, toError } from '../utils';
 import { OperationBase } from './operation';
 import type { Callback, Document } from '../types';
 import type { Collection } from '../collection';
-import type { FindOptions } from './find_and_modify';
+import type { FindOptions } from './find';
 
-export class FindOneOperation extends OperationBase {
+export class FindOneOperation extends OperationBase<FindOptions> {
   collection: Collection;
   query: Document;
 

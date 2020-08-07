@@ -1,12 +1,15 @@
-import { CommandOperation } from './command';
+import { CommandOperation, CommandOperationOptions } from './command';
 import { EvalOperation } from './eval';
 import { Code } from '../bson';
 import { handleCallback } from '../utils';
 import { defineAspects, Aspect } from './operation';
-import type { Callback } from '../types';
+import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
+import type { Collection } from '../collection';
 
-export class GroupOperation extends CommandOperation {
+export type GroupOptions = CommandOperationOptions;
+
+export class GroupOperation extends CommandOperation<GroupOptions> {
   collectionName: string;
   keys: any;
   condition: any;
@@ -15,13 +18,13 @@ export class GroupOperation extends CommandOperation {
   finalize: any;
 
   constructor(
-    collection: any,
+    collection: Collection,
     keys: any,
     condition: any,
     initial: any,
     reduce: any,
     finalize: any,
-    options: any
+    options: GroupOptions
   ) {
     super(collection, options);
     this.collectionName = collection.collectionName;
@@ -33,7 +36,7 @@ export class GroupOperation extends CommandOperation {
   }
 
   execute(server: Server, callback: Callback) {
-    const selector = {
+    const cmd: Document = {
       group: {
         ns: this.collectionName,
         $reduce: this.reduceFunction,
@@ -41,16 +44,16 @@ export class GroupOperation extends CommandOperation {
         initial: this.initial,
         out: 'inline'
       }
-    } as any;
+    };
 
     // if finalize is defined
     if (this.finalize != null) {
-      selector.group.finalize = this.finalize;
+      cmd.group.finalize = this.finalize;
     }
 
     // Set up group selector
     if ('function' === typeof this.keys || (this.keys && this.keys._bsontype === 'Code')) {
-      selector.group.$keyf =
+      cmd.group.$keyf =
         this.keys && this.keys._bsontype === 'Code' ? this.keys : new Code(this.keys);
     } else {
       const hash: any = {};
@@ -58,11 +61,11 @@ export class GroupOperation extends CommandOperation {
         hash[key] = 1;
       });
 
-      selector.group.key = hash;
+      cmd.group.key = hash;
     }
 
     // Execute command
-    super.executeCommand(server, selector, (err, result) => {
+    super.executeCommand(server, cmd, (err, result) => {
       if (err) return handleCallback(callback, err, null);
       handleCallback(callback, null, result.retval);
     });

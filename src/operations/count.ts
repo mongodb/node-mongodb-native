@@ -1,25 +1,25 @@
 import { Aspect, defineAspects } from './operation';
-import { CommandOperation, CommandOpOptions } from './command';
+import { CommandOperation, CommandOperationOptions } from './command';
 import { decorateWithCollation, decorateWithReadConcern } from '../utils';
 import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { Cursor } from '../cursor/cursor';
 
-export interface CountOperationOptions extends CommandOpOptions {
+export interface CountOptions extends CommandOperationOptions {
   skip?: number;
   limit?: number;
   maxTimeMS?: number;
   hint?: string | Document;
 }
 
-type FinalCountOperationOptions = CountOperationOptions & { collectionName: string };
+type BuildCountCommandOptions = CountOptions & { collectionName: string };
 
-export class CountOperation extends CommandOperation {
+export class CountOperation extends CommandOperation<CountOptions> {
   cursor: Cursor;
   applySkipLimit: boolean;
 
-  constructor(cursor: Cursor, applySkipLimit: boolean, options: CountOperationOptions) {
+  constructor(cursor: Cursor, applySkipLimit: boolean, options: CountOptions) {
     super(({ s: cursor } as unknown) as Collection, options);
 
     this.cursor = cursor;
@@ -29,7 +29,7 @@ export class CountOperation extends CommandOperation {
   execute(server: Server, callback: Callback): void {
     const cursor = this.cursor;
     const applySkipLimit = this.applySkipLimit;
-    const options: CountOperationOptions = this.options;
+    const options = this.options;
 
     if (applySkipLimit) {
       if (typeof cursor.cursorSkip() === 'number') options.skip = cursor.cursorSkip();
@@ -44,9 +44,10 @@ export class CountOperation extends CommandOperation {
       options.maxTimeMS = cursor.cmd.maxTimeMS;
     }
 
-    const finalOptions: FinalCountOperationOptions = {
+    const finalOptions: BuildCountCommandOptions = {
       collectionName: cursor.namespace.collection
     };
+
     finalOptions.skip = options.skip;
     finalOptions.limit = options.limit;
     finalOptions.hint = options.hint;
@@ -76,7 +77,7 @@ export class CountOperation extends CommandOperation {
 function buildCountCommand(
   collectionOrCursor: Collection | Cursor,
   query: Document,
-  options: FinalCountOperationOptions
+  options: BuildCountCommandOptions
 ) {
   const skip = options.skip;
   const limit = options.limit;

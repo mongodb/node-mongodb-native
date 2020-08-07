@@ -3,22 +3,14 @@ import { MongoError } from '../error';
 import { OperationBase } from './operation';
 import type { Callback, Document } from '../types';
 import type { Collection } from '../collection';
-import type { CommandOpOptions } from './command';
 import type { BulkOperationBase } from '../bulk/common';
-import type { WriteConcern } from '../write_concern';
+import type { InsertOptions } from './insert';
 
-export interface BulkWriteOperationOptions extends CommandOpOptions {
-  s: 4;
-  ignoreUndefined: boolean;
-  ordered: boolean;
-  writeConcern: WriteConcern;
-}
-
-export class BulkWriteOperation extends OperationBase {
+export class BulkWriteOperation extends OperationBase<InsertOptions> {
   collection: Collection;
   operations: Document[];
 
-  constructor(collection: Collection, operations: Document[], options: BulkWriteOperationOptions) {
+  constructor(collection: Collection, operations: Document[], options: InsertOptions) {
     super(options);
 
     this.collection = collection;
@@ -28,7 +20,7 @@ export class BulkWriteOperation extends OperationBase {
   execute(callback: Callback): void {
     const coll = this.collection;
     const operations = this.operations;
-    let options: BulkWriteOperationOptions = this.options;
+    let options = this.options;
 
     // Add ignoreUndefined
     if (coll.s.options.ignoreUndefined) {

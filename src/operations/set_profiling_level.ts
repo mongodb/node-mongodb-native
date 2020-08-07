@@ -1,5 +1,5 @@
 import { defineAspects, Aspect } from './operation';
-import { CommandOperation, CommandOpOptions } from './command';
+import { CommandOperation, CommandOperationOptions } from './command';
 import type { Callback } from '../types';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
@@ -11,11 +11,13 @@ export enum ProfilingLevel {
   all = 'all'
 }
 
-export class SetProfilingLevelOperation extends CommandOperation {
+export type SetProfilingLevelOptions = CommandOperationOptions;
+
+export class SetProfilingLevelOperation extends CommandOperation<SetProfilingLevelOptions> {
   level: ProfilingLevel;
   profile: 0 | 1 | 2;
 
-  constructor(db: Db, level: ProfilingLevel, options: CommandOpOptions) {
+  constructor(db: Db, level: ProfilingLevel, options: SetProfilingLevelOptions) {
     super(db, options);
     switch (level) {
       case ProfilingLevel.off:

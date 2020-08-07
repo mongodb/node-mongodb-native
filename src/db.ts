@@ -31,7 +31,11 @@ import {
   EnsureIndexOperation,
   IndexInformationOperation
 } from './operations/indexes';
-import { DropCollectionOperation, DropDatabaseOperation } from './operations/drop';
+import {
+  DropCollectionOperation,
+  DropDatabaseOperation,
+  DropDatabaseOptions
+} from './operations/drop';
 import { ListCollectionsOperation } from './operations/list_collections';
 import { ProfilingLevelOperation } from './operations/profiling_level';
 import { RemoveUserOperation } from './operations/remove_user';
@@ -515,7 +519,7 @@ export class Db {
    * @param {Db~resultCallback} [callback] The results callback
    * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  dropDatabase(options?: any, callback?: Callback): Promise<void> | void {
+  dropDatabase(options?: DropDatabaseOptions, callback?: Callback): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -609,22 +613,7 @@ export class Db {
     );
   }
 
-  /**
-   * Add a user to the database.
-   *
-   * @function
-   * @param {string} username The username.
-   * @param {any} password The password.
-   * @param {object} [options] Optional settings.
-   
-   
-   
-   
-   
-   
-   * @param {Db~resultCallback} [callback] The command result callback
-   * @returns {Promise<void> | void} returns Promise if no callback passed
-   */
+  /** Add a user to the database */
   addUser(
     username: string,
     password: any,
@@ -634,15 +623,11 @@ export class Db {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    // Special case where there is no password ($external users)
-    if (typeof username === 'string' && password != null && typeof password === 'object') {
-      options = password;
-      password = null;
-    }
-
-    const addUserOperation = new AddUserOperation(this, username, password, options!);
-
-    return executeOperation(this.s.topology, addUserOperation, callback);
+    return executeOperation(
+      this.s.topology,
+      new AddUserOperation(this, username, password, options),
+      callback
+    );
   }
 
   /**

@@ -1,12 +1,12 @@
 import * as crypto from 'crypto';
 import { Aspect, defineAspects } from './operation';
-import { CommandOperation, CommandOpOptions } from './command';
-import { handleCallback, toError } from '../utils';
+import { CommandOperation, CommandOperationOptions } from './command';
+import { MongoError } from '../error';
 import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
 
-export interface AddUserOptions extends CommandOpOptions {
+export interface AddUserOptions extends CommandOperationOptions {
   /** @deprecated Please use db.command('createUser', ...) instead for this option */
   digestPassword?: null;
   /** Roles associated with the created user (only Mongodb 2.6 or higher) */
@@ -15,13 +15,19 @@ export interface AddUserOptions extends CommandOpOptions {
   customData?: Document;
 }
 
-export class AddUserOperation extends CommandOperation {
+export class AddUserOperation extends CommandOperation<AddUserOptions> {
   db: Db;
   username: string;
   password?: string;
 
-  constructor(db: Db, username: string, password: string | undefined, options: AddUserOptions) {
+  constructor(db: Db, username: string, password: string | undefined, options?: AddUserOptions) {
     super(db, options);
+
+    // Special case where there is no password ($external users)
+    if (typeof username === 'string' && password != null && typeof password === 'object') {
+      options = password;
+      password = undefined;
+    }
 
     this.db = db;
     this.username = username;
@@ -37,7 +43,7 @@ export class AddUserOperation extends CommandOperation {
     // Error out if digestPassword set
     if (options.digestPassword != null) {
       return callback(
-        toError(
+        new MongoError(
           'The digestPassword option is not supported via add_user. ' +
             "Please use db.command('createUser', ...) instead for this option."
         )
@@ -88,15 +94,7 @@ export class AddUserOperation extends CommandOperation {
       command.pwd = userPassword;
     }
 
-    super.executeCommand(server, command, (err, r) => {
-      if (!err) {
-        handleCallback(callback, err, r);
-        return;
-      }
-
-      handleCallback(callback, err, null);
-      return;
-    });
+    super.executeCommand(server, command, callback);
   }
 }
 

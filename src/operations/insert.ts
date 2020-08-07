@@ -1,33 +1,49 @@
 import { MongoError } from '../error';
 import { defineAspects, Aspect, OperationBase } from './operation';
-import { CommandOperation } from './command';
+import { CommandOperation, CommandOperationOptions } from './command';
 import { applyRetryableWrites, applyWriteConcern, handleCallback, toError } from '../utils';
 import { prepareDocs } from './common_functions';
 import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
+import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
 
-export class InsertOperation extends OperationBase {
+export interface InsertOptions extends CommandOperationOptions {
+  /** Allow driver to bypass schema validation in MongoDB 3.2 or higher. */
+  bypassDocumentValidation?: boolean;
+  /** If true, when an insert fails, don't execute the remaining writes. If false, continue with remaining inserts when one fails. */
+  ordered?: boolean;
+  /** @deprecated use `ordered` instead */
+  keepGoing?: boolean;
+  /** Force server to assign _id values instead of driver. */
+  forceServerObjectId?: boolean;
+}
+
+export class InsertOperation extends OperationBase<InsertOptions> {
   namespace: string;
   operations: Document[];
-  options: any;
 
-  constructor(ns: string, ops: Document[], options: any) {
+  constructor(ns: string, ops: Document[], options: InsertOptions) {
     super(options);
     this.namespace = ns;
     this.operations = ops;
   }
 
   execute(server: Server, callback: Callback): void {
-    server.insert(this.namespace.toString(), this.operations, this.options, callback);
+    server.insert(
+      this.namespace.toString(),
+      this.operations,
+      this.options as WriteCommandOptions,
+      callback
+    );
   }
 }
 
-export class InsertOneOperation extends CommandOperation {
-  collection: any;
-  doc: any;
+export class InsertOneOperation extends CommandOperation<InsertOptions> {
+  collection: Collection;
+  doc: Document;
 
-  constructor(collection: any, doc: any, options: any) {
+  constructor(collection: Collection, doc: Document, options: InsertOptions) {
     super(collection, options);
 
     this.collection = collection;
@@ -62,7 +78,7 @@ function insertDocuments(
   server: Server,
   coll: Collection,
   docs: Document[],
-  options: any,
+  options: InsertOptions,
   callback: Callback<Document>
 ) {
   if (typeof options === 'function') (callback = options), (options = {});
@@ -82,18 +98,23 @@ function insertDocuments(
   docs = prepareDocs(coll, docs, options);
 
   // File inserts
-  server.insert(coll.s.namespace.toString(), docs, finalOptions, (err, result) => {
-    if (callback == null) return;
-    if (err) return handleCallback(callback, err);
-    if (result == null) return handleCallback(callback, null, null);
-    if (result.result.code) return handleCallback(callback, toError(result.result));
-    if (result.result.writeErrors)
-      return handleCallback(callback, toError(result.result.writeErrors[0]));
-    // Add docs to the list
-    result.ops = docs;
-    // Return the results
-    handleCallback(callback, null, result);
-  });
+  server.insert(
+    coll.s.namespace.toString(),
+    docs,
+    finalOptions as WriteCommandOptions,
+    (err, result) => {
+      if (callback == null) return;
+      if (err) return handleCallback(callback, err);
+      if (result == null) return handleCallback(callback, null, null);
+      if (result.result.code) return handleCallback(callback, toError(result.result));
+      if (result.result.writeErrors)
+        return handleCallback(callback, toError(result.result.writeErrors[0]));
+      // Add docs to the list
+      result.ops = docs;
+      // Return the results
+      handleCallback(callback, null, result);
+    }
+  );
 }
 
 defineAspects(InsertOperation, [

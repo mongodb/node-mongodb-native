@@ -1,36 +1,27 @@
-import { defineAspects, Aspect, Hint } from './operation';
+import { defineAspects, Aspect } from './operation';
 import { updateDocuments } from './common_functions';
 import { hasAtomicOperators } from '../utils';
-import { CommandOperation, CommandOpOptions } from './command';
+import { CommandOperation, CommandOperationOptions } from './command';
 import type { Callback, Document, AnyError } from '../types';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 
-export interface ReplaceOneOptions extends CommandOpOptions {
-  /** Allow driver to bypass schema validation in MongoDB 3.2 or higher. */
-  bypassDocumentValidation: boolean;
-  /** Specify collation (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields). */
-  collation: CollationOptions;
-  /** An optional hint for query optimization. See the {@link https://docs.mongodb.com/manual/reference/command/update/#update-command-hint|update command} reference for more information. */
-  hint: Hint;
-  /** When true, creates a new document if no document matches the query. */
-  upsert: boolean;
-  /** The write concern. */
-  w: number | string;
-  /** The write concern timeout. */
-  wtimeout: number;
-  /** Specify a journal write concern. */
-  j: boolean;
-  /** If true, will throw if bson documents start with `$` or include a `.` in any key value */
-  checkKeys: boolean;
-  /** Serialize functions on any object. */
-  serializeFunctions: boolean;
-  /** Specify if the BSON serializer should ignore undefined fields. */
-  ignoreUndefined: boolean;
+export interface ReplaceOptions extends CommandOperationOptions {
+  /** If true, allows the write to opt-out of document level validation */
+  bypassDocumentValidation?: boolean;
+  /** Specifies a collation */
+  collation?: CollationOptions;
+  /** Specify that the update query should only consider plans using the hinted index */
+  hint?: string | Document;
+  /** When true, creates a new document if no document matches the query */
+  upsert?: boolean;
+
+  // FIXME:
+  multi?: boolean;
 }
 
-export class ReplaceOneOperation extends CommandOperation {
+export class ReplaceOneOperation extends CommandOperation<ReplaceOptions> {
   collection: Collection;
   filter: Document;
   replacement: Document;
@@ -39,7 +30,7 @@ export class ReplaceOneOperation extends CommandOperation {
     collection: Collection,
     filter: Document,
     replacement: Document,
-    options: ReplaceOneOptions
+    options: ReplaceOptions
   ) {
     super(collection, options);
 
