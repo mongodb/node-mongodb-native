@@ -620,20 +620,23 @@ function* makeCounter(seed = 0) {
  * @param {Function} wrapper A function that wraps the callback
  * @returns {any|void} Returns nothing if a callback is supplied, else returns a Promise.
  */
-function maybePromise(callback: Callback | undefined, wrapper: Function): any | void {
+function maybePromise<T extends Callback>(
+  callback: T | undefined,
+  wrapper: (fn: T) => void
+): Promise<NonNullable<Parameters<T>[1]>> | void {
   const Promise = PromiseProvider.get();
 
   let result;
   if (typeof callback !== 'function') {
     result = new Promise((resolve: any, reject: any) => {
-      callback = (err?: any, res?: any) => {
+      callback = ((err?: any, res?: any) => {
         if (err) return reject(err);
         resolve(res);
-      };
+      }) as T;
     });
   }
 
-  wrapper(function (err?: any, res?: any) {
+  wrapper(function (err?: any, res?: Parameters<T>[1]) {
     if (err != null) {
       try {
         callback!(err);
@@ -646,7 +649,7 @@ function maybePromise(callback: Callback | undefined, wrapper: Function): any | 
     }
 
     callback!(err, res);
-  });
+  } as T);
 
   return result;
 }

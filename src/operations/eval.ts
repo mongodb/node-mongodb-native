@@ -29,7 +29,7 @@ export class EvalOperation extends CommandOperation<EvalOptions> {
 
   execute(server: Server, callback: Callback): void {
     let finalCode = this.code;
-    let finalParameters = [];
+    let finalParameters: any[] = [];
 
     // If not a code object translate to one
     if (!(finalCode && ((finalCode as unknown) as { _bsontype: string })._bsontype === 'Code')) {

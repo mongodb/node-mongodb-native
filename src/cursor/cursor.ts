@@ -855,7 +855,7 @@ export class Cursor extends CoreCursor {
    * @throws {MongoError}
    * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  toArray(callback: Callback<Document[]>): Promise<void> | void {
+  toArray(callback?: Callback<Document[]>): Promise<Document[]> | void {
     if (this.options.tailable) {
       throw MongoError.create({
         message: 'Tailable cursor cannot be converted to array',

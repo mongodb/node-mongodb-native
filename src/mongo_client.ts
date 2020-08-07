@@ -349,7 +349,7 @@ export class MongoClient extends EventEmitter {
    * @param {Db~noResultCallback} [callback] The result callback
    * @returns {Promise<void>} returns Promise if no callback passed
    */
-  close(force?: boolean, callback?: Callback): Promise<void> {
+  close(force?: boolean, callback?: Callback): Promise<void> | void {
     if (typeof force === 'function') {
       callback = force;
       force = false;
