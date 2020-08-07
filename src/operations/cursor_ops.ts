@@ -12,14 +12,12 @@ import type { Cursor } from '../cursor';
  * @param {Cursor} cursor The Cursor instance on which to run.
  * @param {Cursor~resultCallback} callback The result callback.
  */
-export function each(cursor: any, callback: Callback) {
+export function each(cursor: Cursor, callback: Callback<Document>): void {
   if (!callback) throw MongoError.create({ message: 'callback is mandatory', driver: true });
   if (cursor.isNotified()) return;
   if (cursor.s.state === CursorState.CLOSED || cursor.isDead()) {
-    return handleCallback(
-      callback,
-      MongoError.create({ message: 'Cursor is closed', driver: true })
-    );
+    handleCallback(callback, MongoError.create({ message: 'Cursor is closed', driver: true }));
+    return;
   }
 
   if (cursor.s.state === CursorState.INIT) {
@@ -33,7 +31,7 @@ export function each(cursor: any, callback: Callback) {
     while ((fn = loop(cursor, callback))) fn(cursor, callback);
     each(cursor, callback);
   } else {
-    cursor.next((err?: any, item?: any) => {
+    cursor.next((err, item) => {
       if (err) return handleCallback(callback, err);
       if (item == null) {
         return cursor.close({ skipKillCursors: true }, () => handleCallback(callback, null, null));

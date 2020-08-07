@@ -14,8 +14,7 @@ import { defineAspects, Aspect } from './operation';
 import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
-
-export type Sort = { [key: string]: number | string };
+import type { Sort } from './find';
 
 export interface FindAndModifyOptions extends CommandOperationOptions {
   /** When false, returns the updated document rather than the original. The default is true. */

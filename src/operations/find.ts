@@ -1,7 +1,7 @@
 import { OperationBase, Hint } from './operation';
 import { Aspect, defineAspects } from './operation';
 import { ReadPreference } from '../read_preference';
-import { maxWireVersion } from '../utils';
+import { maxWireVersion, MongoDBNamespace } from '../utils';
 import { MongoError } from '../error';
 import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
@@ -64,13 +64,17 @@ export interface FindOptions extends QueryOptions {
 }
 
 export class FindOperation extends OperationBase<FindOptions> {
-  ns: string;
   cmd: Document;
   readPreference: ReadPreference;
   cursorState?: InternalCursorState;
   server?: Server;
 
-  constructor(collection: Collection, ns: string, command: Document, options: FindOptions) {
+  constructor(
+    collection: Collection,
+    ns: MongoDBNamespace,
+    command: Document,
+    options: FindOptions
+  ) {
     super(options);
 
     this.ns = ns;

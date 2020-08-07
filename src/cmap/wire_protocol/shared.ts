@@ -1,16 +1,17 @@
 import { ServerType } from '../../sdam/common';
 import { TopologyDescription } from '../../sdam/topology_description';
-import { ReadPreference } from '../../read_preference';
 import { MongoError } from '../../error';
+import { ReadPreference } from '../../read_preference';
 import type { Document } from '../../types';
 import type { CommandOptions } from './command';
 import type { OpQueryOptions } from '../commands';
 import type { Topology } from '../../sdam/topology';
 import type { Server } from '../../sdam/server';
 import type { ServerDescription } from '../../sdam/server_description';
+import type { ReadPreferenceLike } from '../../read_preference';
 
 export interface ReadPreferenceOption {
-  readPreference?: ReadPreference;
+  readPreference?: ReadPreferenceLike;
 }
 
 export function getReadPreference(cmd: Document, options: ReadPreferenceOption): ReadPreference {

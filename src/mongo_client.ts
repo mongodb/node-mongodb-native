@@ -8,7 +8,7 @@ import { maybePromise, MongoDBNamespace } from './utils';
 import { deprecate } from 'util';
 import { connect, validOptions } from './operations/connect';
 import { PromiseProvider } from './promise_provider';
-import type { Callback, BSONSerializeOptions, AutoEncryptionOptions } from './types';
+import type { Callback, BSONSerializeOptions, AutoEncryptionOptions, AnyError } from './types';
 import type { CompressorName } from './cmap/wire_protocol/compression';
 import type { ReadConcernLevel, ReadConcern } from './read_concern';
 import type { AuthMechanism } from './cmap/auth/defaultAuthProviders';
@@ -57,6 +57,8 @@ export interface PkFactoryLiteral {
 }
 
 export type PkFactory = typeof PkFactoryAbstract | PkFactoryLiteral;
+
+type CleanUpHandlerFunction = (err?: AnyError, result?: any, opts?: any) => Promise<void>;
 
 /**
  * Describes all possible URI query options for the mongo client
@@ -493,7 +495,7 @@ export class MongoClient extends EventEmitter {
     const session = this.startSession(options);
     const Promise = PromiseProvider.get();
 
-    let cleanupHandler = (err: any, result: any, opts: any) => {
+    let cleanupHandler: CleanUpHandlerFunction = ((err, result, opts) => {
       // prevent multiple calls to cleanupHandler
       cleanupHandler = () => {
         throw new ReferenceError('cleanupHandler was called too many times');
@@ -506,13 +508,13 @@ export class MongoClient extends EventEmitter {
         if (opts.throw) throw err;
         return Promise.reject(err);
       }
-    };
+    }) as CleanUpHandlerFunction;
 
     try {
       const result = operation!(session);
       return Promise.resolve(result)
-        .then((result: any) => cleanupHandler(undefined, result, undefined))
-        .catch((err: any) => cleanupHandler(err, null, { throw: true }));
+        .then(result => cleanupHandler(undefined, result, undefined))
+        .catch(err => cleanupHandler(err, null, { throw: true }));
     } catch (err) {
       return cleanupHandler(err, null, { throw: false });
     }

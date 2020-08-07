@@ -2,7 +2,7 @@ import { Aspect, OperationBase, OperationOptions } from './operation';
 import { ReadConcern } from '../read_concern';
 import { WriteConcern } from '../write_concern';
 import { maxWireVersion, MongoDBNamespace } from '../utils';
-import { ReadPreference, ReadPreferenceMode } from '../read_preference';
+import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import { commandSupportsReadConcern, ClientSession } from '../sessions';
 import { MongoError } from '../error';
 import type { Logger } from '../logger';
@@ -21,7 +21,7 @@ export interface CommandOperationOptions extends OperationOptions, BSONSerialize
   /** Specify a read concern and level for the collection. (only MongoDB 3.2 or higher supported) */
   readConcern?: ReadConcern;
   /** The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST). */
-  readPreference?: ReadPreference | ReadPreferenceMode | keyof typeof ReadPreferenceMode;
+  readPreference?: ReadPreferenceLike;
   /** Specify ClientSession for this command */
   session?: ClientSession;
   /** WriteConcern for this command */
@@ -39,7 +39,9 @@ export interface CommandOperationOptions extends OperationOptions, BSONSerialize
 
 type Parent = MongoClient | Db | Collection | { s: any };
 
-export class CommandOperation<T extends CommandOperationOptions> extends OperationBase<T> {
+export class CommandOperation<
+  T extends CommandOperationOptions = CommandOperationOptions
+> extends OperationBase<T> {
   ns: MongoDBNamespace;
   readPreference: ReadPreference;
   readConcern?: ReadConcern;

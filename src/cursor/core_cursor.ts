@@ -30,6 +30,8 @@ export interface InternalCursorState extends BSONSerializeOptions {
   raw?: any;
 }
 
+export type CoreCursorOptions = BSONSerializeOptions;
+
 // Possible states for a cursor
 const CursorState = {
   INIT: 0,

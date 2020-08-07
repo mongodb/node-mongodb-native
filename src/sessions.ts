@@ -355,7 +355,7 @@ function userExplicitlyEndedTransaction(session: any) {
   return USER_EXPLICIT_TXN_END_STATES.has(session.transaction.state);
 }
 
-function attemptTransaction(session: any, startTime: any, fn: any, options: any) {
+function attemptTransaction(session: any, startTime: any, fn: any, options: any): Promise<any> {
   const Promise = PromiseProvider.get();
   session.startTransaction(options);
 
@@ -379,8 +379,8 @@ function attemptTransaction(session: any, startTime: any, fn: any, options: any)
 
       return attemptTransactionCommit(session, startTime, fn, options);
     })
-    .catch((err: any) => {
-      function maybeRetryOrThrow(err: any) {
+    .catch(err => {
+      function maybeRetryOrThrow(err: any): Promise<any> {
         if (
           err instanceof MongoError &&
           err.hasErrorLabel('TransientTransactionError') &&

@@ -1,5 +1,10 @@
 import type { TagSet } from './sdam/server_description';
 
+export type ReadPreferenceLike =
+  | ReadPreference
+  | ReadPreferenceMode
+  | keyof typeof ReadPreferenceMode;
+
 export enum ReadPreferenceMode {
   primary = 'primary',
   primaryPreferred = 'primaryPreferred',

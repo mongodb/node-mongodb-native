@@ -244,15 +244,14 @@ export class ConnectionPool extends EventEmitter {
 
     // add this request to the wait queue
     const waitQueueMember: WaitQueueMember = { callback };
-    const pool = this;
     const waitQueueTimeoutMS = this.options.waitQueueTimeoutMS;
     if (waitQueueTimeoutMS) {
       waitQueueMember.timer = setTimeout(() => {
         waitQueueMember[kCancelled] = true;
         waitQueueMember.timer = undefined;
 
-        pool.emit('connectionCheckOutFailed', new ConnectionCheckOutFailedEvent(pool, 'timeout'));
-        waitQueueMember.callback(new WaitQueueTimeoutError(pool));
+        this.emit('connectionCheckOutFailed', new ConnectionCheckOutFailedEvent(this, 'timeout'));
+        waitQueueMember.callback(new WaitQueueTimeoutError(this));
       }, waitQueueTimeoutMS);
     }
 

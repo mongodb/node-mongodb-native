@@ -31,7 +31,7 @@ import {
   isNodeShuttingDownError,
   isNetworkErrorBeforeHandshake
 } from '../error';
-import type { Document, Callback, CallbackWithType, AutoEncrypter } from '../types';
+import type { Document, Callback, CallbackWithType, AutoEncrypter, Callback2 } from '../types';
 import type { Topology } from './topology';
 import type { Connection } from '../cmap/connection';
 import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
@@ -311,7 +311,7 @@ export class Server extends EventEmitter {
   query(
     ns: string,
     cmd: Document,
-    cursorState: InternalCursorState,
+    cursorState: Partial<InternalCursorState>,
     options: QueryOptions,
     callback: Callback
   ): void {
@@ -329,7 +329,7 @@ export class Server extends EventEmitter {
       conn.query(
         ns,
         cmd,
-        cursorState,
+        cursorState as InternalCursorState,
         options,
         makeOperationHandler(this, conn, cmd, options, cb) as Callback
       );
@@ -350,7 +350,7 @@ export class Server extends EventEmitter {
     cursorState: InternalCursorState,
     batchSize: number,
     options: GetMoreOptions,
-    callback: Callback
+    callback: Callback2
   ): void {
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
       callback(new MongoError('server is closed'));
@@ -380,7 +380,7 @@ export class Server extends EventEmitter {
    * @param cursorState State data associated with the cursor calling this method
    * @param callback
    */
-  killCursors(ns: string, cursorState: InternalCursorState, callback: Callback): void {
+  killCursors(ns: string, cursorState: InternalCursorState, callback?: Callback): void {
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
       if (typeof callback === 'function') {
         callback(new MongoError('server is closed'));
@@ -400,7 +400,7 @@ export class Server extends EventEmitter {
         cursorState,
         makeOperationHandler(this, conn, {}, undefined, cb) as Callback
       );
-    }, callback);
+    }, callback!);
   }
 
   /**

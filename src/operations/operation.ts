@@ -1,5 +1,8 @@
 import type { ClientSession } from '../sessions';
 import type { Document, BSONSerializeOptions } from '../types';
+import type { MongoDBNamespace } from '../utils';
+import type { InternalCursorState } from '../cursor/core_cursor';
+import type { ReadPreference } from '../read_preference';
 
 export const Aspect = {
   READ_OPERATION: Symbol('READ_OPERATION'),
@@ -15,7 +18,7 @@ export interface OperationConstructor extends Function {
   aspects?: Set<symbol>;
 }
 export interface OperationOptions extends BSONSerializeOptions {
-  // multi?: boolean;
+  explain?: boolean;
   session?: ClientSession;
 }
 
@@ -27,6 +30,14 @@ export interface OperationOptions extends BSONSerializeOptions {
  */
 export class OperationBase<T extends OperationOptions = OperationOptions> {
   options: T;
+  ns!: MongoDBNamespace;
+  cmd!: Document;
+
+  readPreference?: ReadPreference;
+
+  // TODO: remove as part of NODE-2104, except this is closed?
+  cursorState?: InternalCursorState;
+  fullResponse?: boolean;
 
   constructor(options: T = {} as T) {
     this.options = Object.assign({}, options);

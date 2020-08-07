@@ -451,7 +451,7 @@ function applyWriteConcern(target: any, sources: any, options?: any): any {
  * @param {any} maybePromise
  * @returns true if the provided value is a Promise
  */
-function isPromiseLike(maybePromise: any) {
+function isPromiseLike(maybePromise: any): maybePromise is Promise<any> {
   return maybePromise && typeof maybePromise.then === 'function';
 }
 
@@ -573,8 +573,8 @@ function deprecateOptions(config: any, fn: Function): any {
 }
 
 class MongoDBNamespace {
-  db: any;
-  collection: any;
+  db: string;
+  collection?: string;
   /**
    * Create a namespace object
    *
@@ -586,15 +586,15 @@ class MongoDBNamespace {
     this.collection = collection;
   }
 
-  toString() {
+  toString(): string {
     return this.collection ? `${this.db}.${this.collection}` : this.db;
   }
 
-  withCollection(collection: any) {
+  withCollection(collection: string): MongoDBNamespace {
     return new MongoDBNamespace(this.db, collection);
   }
 
-  static fromString(namespace: any) {
+  static fromString(namespace?: string): MongoDBNamespace {
     if (!namespace) {
       throw new Error(`Cannot parse namespace from "${namespace}"`);
     }

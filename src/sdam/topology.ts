@@ -32,14 +32,15 @@ import {
   TopologyClosedEvent,
   TopologyDescriptionChangedEvent
 } from './events';
-import type { Document, Callback, AnyError } from '../types';
+import type { Document, Callback, AnyError, BSONSerializeOptions } from '../types';
 import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
 import type { Transaction } from '../transactions';
 import type { CloseOptions } from '../cmap/connection_pool';
-import type { Logger } from '..';
+import type { Logger } from '../logger';
 import type { DestroyOptions } from '../cmap/connection';
 import type { CommandOptions } from '../cmap/wire_protocol/command';
 import { RunCommandOperation } from '../operations/run_command';
+import type { CursorOptions } from '../cursor/cursor';
 
 // Global state
 let globalTopologyCounter = 0;
@@ -77,10 +78,6 @@ interface ServerSelectionRequest {
   callback: ServerSelectionCallback;
   timer?: NodeJS.Timeout;
   [kCancelled]?: boolean;
-}
-
-export interface Topology {
-  destroy(): void;
 }
 
 interface TopologyPrivate {
@@ -122,7 +119,8 @@ export interface ServerAddress {
   domain_socket?: string;
 }
 
-export interface TopologyOptions extends ServerOptions {
+export interface TopologyOptions extends ServerOptions, BSONSerializeOptions {
+  reconnect: boolean;
   retryWrites?: boolean;
   retryReads?: boolean;
   host: string;
@@ -142,17 +140,11 @@ export interface TopologyOptions extends ServerOptions {
   metadata: ClientMetadata;
 }
 
-interface CursorOptions {
-  topology?: typeof Topology;
-  maxTimeMS?: number;
-  cursorFactory?: typeof Cursor;
-}
-
 interface ConnectOptions {
   readPreference?: ReadPreference;
 }
 
-interface SelectServerOptions {
+export interface SelectServerOptions {
   readPreference?: ReadPreference;
   serverSelectionTimeoutMS?: number;
   session?: ClientSession;
@@ -174,7 +166,7 @@ export class Topology extends EventEmitter {
   s: TopologyPrivate;
   [kWaitQueue]: Denque<ServerSelectionRequest>;
   ismaster?: Document;
-  clusterTime?: ClusterTime;
+  _type?: string;
 
   /**
    * Create a topology
@@ -460,7 +452,7 @@ export class Topology extends EventEmitter {
           readPreference = options.readPreference || ReadPreference.primary;
         }
 
-        serverSelector = readPreferenceServerSelector(readPreference);
+        serverSelector = readPreferenceServerSelector(readPreference as ReadPreference);
       }
     } else {
       serverSelector = selector;
@@ -704,13 +696,6 @@ export class Topology extends EventEmitter {
    * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
    * @param {object|Long} cmd Can be either a command returning a cursor or a cursorId
    * @param {object} [options] Options for the cursor
-   * @param {object} [options.batchSize=0] Batchsize for the operation
-   * @param {Array} [options.documents=[]] Initial documents list for cursor
-   * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
-   * @param {boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
-   * @param {boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
-   * @param {ClientSession} [options.session=null] Session to use for the operation
-   * @param {object} [options.topology] The internal topology of the created cursor
    * @returns {Cursor}
    */
   cursor(ns: string, cmd: Document, options?: CursorOptions): Cursor {
@@ -762,23 +747,21 @@ export class Topology extends EventEmitter {
   get logicalSessionTimeoutMinutes(): number | undefined {
     return this.description.logicalSessionTimeoutMinutes;
   }
-}
 
-Object.defineProperty(Topology.prototype, 'clusterTime', {
-  enumerable: true,
-  get() {
+  get clusterTime(): ClusterTime | undefined {
     return this.s.clusterTime;
-  },
-  set(clusterTime: ClusterTime) {
+  }
+
+  set clusterTime(clusterTime: ClusterTime | undefined) {
     this.s.clusterTime = clusterTime;
   }
-});
 
-// legacy aliases
-Topology.prototype.destroy = deprecate(
-  Topology.prototype.close,
-  'destroy() is deprecated, please use close() instead'
-);
+  // legacy aliases
+  destroy = deprecate(
+    Topology.prototype.close,
+    'destroy() is deprecated, please use close() instead'
+  );
+}
 
 const RETRYABLE_WRITE_OPERATIONS = ['findAndModify', 'insert', 'update', 'delete'];
 function isWriteCommand(command: Document) {

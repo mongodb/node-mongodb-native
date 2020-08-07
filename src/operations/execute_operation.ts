@@ -55,7 +55,7 @@ export function executeOperation<T extends OperationBase, U>(
   }
 
   if (topology.shouldCheckForSessionSupport()) {
-    return selectServerForSessionSupport(topology, operation, callback!);
+    return selectServerForSessionSupport<U>(topology, operation, callback!);
   }
 
   // The driver sessions spec mandates that we implicitly create sessions for operations
@@ -109,7 +109,7 @@ export function executeOperation<T extends OperationBase, U>(
     throw e;
   }
 
-  return result;
+  return result as any;
 }
 
 function supportsRetryableReads(server: Server) {
@@ -231,12 +231,16 @@ function supportsRetryableWrites(server: Server) {
 
 // TODO: This is only supported for unified topology, it should go away once
 //       we remove support for legacy topology types.
-function selectServerForSessionSupport(topology: any, operation: any, callback?: Callback) {
+function selectServerForSessionSupport<U>(
+  topology: Topology,
+  operation: any,
+  callback?: Callback
+): Promise<U> | void {
   const Promise = PromiseProvider.get();
 
   let result;
   if (typeof callback !== 'function') {
-    result = new Promise((resolve: any, reject: any) => {
+    result = new Promise<U>((resolve, reject) => {
       callback = (err, result) => {
         if (err) return reject(err);
         resolve(result);
@@ -244,7 +248,7 @@ function selectServerForSessionSupport(topology: any, operation: any, callback?:
     });
   }
 
-  topology.selectServer(ReadPreference.primaryPreferred, (err: any) => {
+  topology.selectServer(ReadPreference.primaryPreferred, err => {
     if (err) {
       callback!(err);
       return;

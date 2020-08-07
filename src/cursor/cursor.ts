@@ -4,14 +4,15 @@ import { ReadPreference } from '../read_preference';
 import { Transform, PassThrough } from 'stream';
 import { deprecate } from 'util';
 import { MongoError } from '../error';
-import { CoreCursor, CursorState } from './core_cursor';
+import { CoreCursor, CursorState, CoreCursorOptions } from './core_cursor';
 import { handleCallback, maybePromise, formattedOrderClause } from '../utils';
 import { executeOperation } from '../operations/execute_operation';
 import { each } from '../operations/cursor_ops';
 import { CountOperation } from '../operations/count';
 import type { Callback, Document } from '../types';
 import type { OperationBase } from '../operations/operation';
-import type { CollectionTransform } from '../operations/list_collections';
+import type { TransformFunctions } from '../operations/list_collections';
+import type { Topology } from '../sdam/topology';
 
 /**
  * @file The **Cursor** class is an internal class that embodies a cursor on MongoDB
@@ -59,13 +60,19 @@ const fields = ['numberOfRetries', 'tailableRetryInterval'];
 
 export interface CursorPrivate {
   /** Transforms functions */
-  transforms: CollectionTransform;
+  transforms: TransformFunctions;
   numberOfRetries: number;
   tailableRetryInterval: number;
   currentNumberOfRetries: number;
   explicitlyIgnoreSession: boolean;
 
   state: number; // Should be enum
+}
+
+export interface CursorOptions extends CoreCursorOptions {
+  topology?: typeof Topology;
+  maxTimeMS?: number;
+  cursorFactory?: typeof Cursor;
 }
 
 /**

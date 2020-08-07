@@ -14,7 +14,7 @@ import { defineAspects, Aspect } from './operation';
 import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
-import type { Sort } from './find_and_modify';
+import type { Sort } from './find';
 
 const exclusionList = [
   'readPreference',

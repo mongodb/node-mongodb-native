@@ -49,7 +49,7 @@ export class CountOperation extends CommandOperation<CountOptions> {
     }
 
     const finalOptions: BuildCountCommandOptions = {
-      collectionName: cursor.namespace.collection
+      collectionName: cursor.namespace.collection ?? ''
     };
 
     finalOptions.skip = options.skip;

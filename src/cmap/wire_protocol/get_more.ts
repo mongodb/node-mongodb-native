@@ -62,7 +62,7 @@ export function getMore(
   };
 
   if (wireVersion < 4) {
-    const getMoreOp = new GetMore(ns, cursorState.cursorId, { numberToReturn: batchSize });
+    const getMoreOp = new GetMore(ns, cursorState.cursorId!, { numberToReturn: batchSize });
     const queryOptions = applyCommonQueryOptions({}, cursorState);
     server.s.pool.write(getMoreOp, queryOptions, queryCallback);
     return;
@@ -71,7 +71,7 @@ export function getMore(
   const cursorId =
     cursorState.cursorId instanceof Long
       ? cursorState.cursorId
-      : Long.fromNumber(cursorState.cursorId);
+      : Long.fromNumber((cursorState.cursorId as unknown) as number);
 
   const getMoreCmd: Document = {
     getMore: cursorId,

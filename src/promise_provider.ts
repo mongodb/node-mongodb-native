@@ -1,37 +1,33 @@
 const kPromise = Symbol('promise');
 
-const store = {
+interface PromiseStore {
+  [kPromise]?: PromiseConstructor;
+}
+
+const store: PromiseStore = {
   [kPromise]: undefined
 };
 
-/** global promise store allowing user-provided promises */
+/** Global promise store allowing user-provided promises */
 export class PromiseProvider {
-  /**
-   * validates the passed in promise library
-   *
-   * @param {Function} lib promise implementation
-   */
-  static validate(lib: Function) {
+  /** Validates the passed in promise library */
+  static validate(lib: any): lib is PromiseConstructor {
     if (typeof lib !== 'function') throw new Error(`Promise must be a function, got ${lib}`);
     return lib;
   }
 
-  /**
-   * sets the promise library
-   *
-   * @param {Function} lib promise implementation
-   */
-  static set(lib: Function) {
-    (store as any)[kPromise] = PromiseProvider.validate(lib);
+  /** Sets the promise library */
+  static set(lib: PromiseConstructor) {
+    if (!PromiseProvider.validate(lib)) {
+      // validate
+      return;
+    }
+    store[kPromise] = lib;
   }
 
-  /**
-   * get the stored promise library, or resolves passed in
-   *
-   * @returns {any}
-   */
-  static get(): any {
-    return store[kPromise];
+  /** Get the stored promise library, or resolves passed in */
+  static get(): PromiseConstructor {
+    return store[kPromise] as PromiseConstructor;
   }
 }
 

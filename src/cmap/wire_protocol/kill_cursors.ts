@@ -20,11 +20,11 @@ export function killCursors(
   callback: Callback
 ): void {
   callback = typeof callback === 'function' ? callback : () => undefined;
-  const cursorId = cursorState.cursorId;
+  const cursorIds = [cursorState.cursorId!];
 
   if (maxWireVersion(server) < 4) {
     const pool = server.s.pool;
-    const killCursor = new KillCursor(ns, [cursorId]);
+    const killCursor = new KillCursor(ns, cursorIds);
     const options: KillCursorOptions = {
       immediateRelease: true,
       noResponse: true
@@ -51,7 +51,7 @@ export function killCursors(
 
   const killCursorCmd = {
     killCursors: collectionNamespace(ns),
-    cursors: [cursorId]
+    cursors: cursorIds
   };
 
   const options: CommandOptions = {};
@@ -71,7 +71,7 @@ export function killCursors(
 
     if (!Array.isArray(response.documents) || response.documents.length === 0) {
       return callback(
-        new MongoError(`invalid killCursors result returned for cursor id ${cursorId}`)
+        new MongoError(`invalid killCursors result returned for cursor id ${cursorIds[0]}`)
       );
     }
 

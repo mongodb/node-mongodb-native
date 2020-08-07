@@ -57,7 +57,7 @@ export class CreateCollectionOperation extends CommandOperation<CreateCollection
   db: Db;
   name: string;
 
-  constructor(db: Db, name: string, options: CreateCollectionOptions) {
+  constructor(db: Db, name: string, options: CreateCollectionOptions = {}) {
     super(db, options);
     this.db = db;
     this.name = name;
