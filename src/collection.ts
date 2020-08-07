@@ -20,7 +20,7 @@ import { WriteConcern } from './write_concern';
 import { ReadConcern } from './read_concern';
 import { AggregationCursor, CommandCursor, Cursor } from './cursor';
 import { AggregateOperation, AggregateOptions } from './operations/aggregate';
-import { BulkWriteOperation } from './operations/bulk_write';
+import { BulkWriteOperation, BulkWriteResult } from './operations/bulk_write';
 import { CountDocumentsOperation, CountDocumentsOptions } from './operations/count_documents';
 import {
   CreateIndexesOperation,
@@ -53,7 +53,7 @@ import {
 } from './operations/find_and_modify';
 import { InsertManyOperation } from './operations/insert_many';
 import { InsertOneOperation } from './operations/insert';
-import { UpdateOneOperation, UpdateManyOperation } from './operations/update';
+import { UpdateOneOperation, UpdateManyOperation, UpdateResult } from './operations/update';
 import { DeleteOneOperation, DeleteManyOperation, DeleteOptions } from './operations/delete';
 import { IsCappedOperation } from './operations/is_capped';
 import {
@@ -337,7 +337,11 @@ export class Collection {
    * @param options Optional settings for the command
    * @param callback An optional callback, a Promise will be returned if none is provided
    */
-  insertMany(docs: Document[], options?: InsertOptions, callback?: Callback): Promise<void> | void {
+  insertMany(
+    docs: Document[],
+    options?: InsertOptions,
+    callback?: Callback<BulkWriteResult>
+  ): Promise<BulkWriteResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options ? Object.assign({}, options) : { ordered: true };
 
@@ -347,18 +351,6 @@ export class Collection {
       callback
     );
   }
-
-  /**
-   * @typedef {object} Collection~BulkWriteOpResult
-   * @property {number} insertedCount Number of documents inserted.
-   * @property {number} matchedCount Number of documents matched for update.
-   * @property {number} modifiedCount Number of documents modified.
-   * @property {number} deletedCount Number of documents deleted.
-   * @property {number} upsertedCount Number of documents upserted.
-   * @property {object} insertedIds Inserted document generated Id's, hash key is the index of the originating operation
-   * @property {object} upsertedIds Upserted document generated Id's, hash key is the index of the originating operation
-   * @property {object} result The command result object.
-   */
 
   /**
    * The callback format for inserts
@@ -398,8 +390,8 @@ export class Collection {
   bulkWrite(
     operations: Document[],
     options?: InsertOptions,
-    callback?: Callback
-  ): Promise<void> | void {
+    callback?: Callback<BulkWriteResult>
+  ): Promise<BulkWriteResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || { ordered: true };
 
@@ -418,30 +410,6 @@ export class Collection {
   }
 
   /**
-   * @typedef {object} Collection~updateWriteOpResult
-   * @property {object} result The raw result returned from MongoDB. Will vary depending on server version.
-   * @property {number} result.ok Is 1 if the command executed correctly.
-   * @property {number} result.n The total count of documents scanned.
-   * @property {number} result.nModified The total count of documents modified.
-   * @property {object} connection The connection object used for the operation.
-   * @property {number} matchedCount The number of documents that matched the filter.
-   * @property {number} modifiedCount The number of documents that were modified.
-   * @property {number} upsertedCount The number of documents upserted.
-   * @property {object} upsertedId The upserted id.
-   * @property {ObjectId} upsertedId._id The upserted _id returned from the server.
-   * @property {object} message The raw msg response wrapped in an internal class
-   * @property {object[]} [ops] In a response to {@link Collection#replaceOne replaceOne}, contains the new value of the document on the server. This is the same document that was originally passed in, and is only here for legacy purposes.
-   */
-
-  /**
-   * The callback format for inserts
-   *
-   * @callback Collection~updateWriteOpCallback
-   * @param {MongoError} error An error instance representing the error during the execution.
-   * @param {Collection~updateWriteOpResult} result The result object if the command was executed successfully.
-   */
-
-  /**
    * Update a single document in a collection
    *
    * @param filter The Filter used to select the document to update
@@ -453,8 +421,8 @@ export class Collection {
     filter: Document,
     update: Document,
     options?: UpdateOptions,
-    callback?: Callback
-  ): Promise<void> | void {
+    callback?: Callback<UpdateResult>
+  ): Promise<UpdateResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, options);
 
@@ -483,8 +451,8 @@ export class Collection {
     filter: Document,
     doc: Document,
     options?: ReplaceOptions,
-    callback?: Callback
-  ): Promise<void> | void {
+    callback?: Callback<UpdateResult>
+  ): Promise<UpdateResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, options);
 
@@ -514,8 +482,8 @@ export class Collection {
     filter: Document,
     update: Document,
     options?: UpdateOptions,
-    callback?: Callback
-  ): Promise<void> | void {
+    callback?: Callback<UpdateResult>
+  ): Promise<UpdateResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, options);
 

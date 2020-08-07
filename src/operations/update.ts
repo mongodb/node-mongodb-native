@@ -6,6 +6,9 @@ import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { CollationOptions, WriteCommandOptions } from '../cmap/wire_protocol/write_command';
+import type { Connection } from '../cmap/connection';
+import type { ObjectId } from '../bson';
+import type { BinMsg, Response } from '../cmap/commands';
 
 export interface UpdateOptions extends CommandOperationOptions {
   /** A set of filters specifying to which array elements an update should apply */
@@ -22,6 +25,27 @@ export interface UpdateOptions extends CommandOperationOptions {
   // non-standard options
   retryWrites?: boolean;
   multi?: boolean;
+}
+
+export interface UpdateResult {
+  /** The number of documents that matched the filter */
+  matchedCount: number;
+  /** The number of documents that were modified */
+  modifiedCount: number;
+  /** The number of documents upserted */
+  upsertedCount: number;
+  /** The upserted id */
+  upsertedId: ObjectId;
+
+  // FIXME: remove these internal details
+  /** @property {object} message The raw msg response wrapped in an internal class */
+  message: BinMsg | Response;
+  /** @property {object[]} [ops] In a response to {@link Collection#replaceOne replaceOne}, contains the new value of the document on the server. This is the same document that was originally passed in, and is only here for legacy purposes. */
+  ops: Document[];
+  /** @property {object} result The raw result returned from MongoDB. Will vary depending on server version. */
+  result: Document;
+  /** The connection object used for the operation */
+  connection: Connection;
 }
 
 export class UpdateOperation extends OperationBase<UpdateOptions> {

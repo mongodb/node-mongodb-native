@@ -5,6 +5,26 @@ import type { Callback, Document } from '../types';
 import type { Collection } from '../collection';
 import type { BulkOperationBase } from '../bulk/common';
 import type { InsertOptions } from './insert';
+import type { ObjectId } from '../bson';
+
+export interface BulkWriteResult {
+  /** @property {number} insertedCount Number of documents inserted. */
+  insertedCount: number;
+  /** @property {number} matchedCount Number of documents matched for update. */
+  matchedCount: number;
+  /** @property {number} modifiedCount Number of documents modified. */
+  modifiedCount: number;
+  /** @property {number} deletedCount Number of documents deleted. */
+  deletedCount: number;
+  /** @property {number} upsertedCount Number of documents upserted. */
+  upsertedCount: number;
+  /** @property {object} insertedIds Inserted document generated Id's, hash key is the index of the originating operation */
+  insertedIds: ObjectId[];
+  /** @property {object} upsertedIds Upserted document generated Id's, hash key is the index of the originating operation */
+  upsertedIds: ObjectId[];
+  /** @property {object} result The command result object. */
+  result: Document;
+}
 
 export class BulkWriteOperation extends OperationBase {
   collection: Collection;

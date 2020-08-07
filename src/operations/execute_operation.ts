@@ -25,25 +25,25 @@ const MMAPv1_RETRY_WRITES_ERROR_MESSAGE =
  * @param {Operation} operation The operation to execute
  * @param {Function} callback The command result callback
  */
-export function executeOperation<T extends OperationBase>(
+export function executeOperation<T extends OperationBase, U>(
   topology: Topology,
   operation: T
-): Promise<any>;
-export function executeOperation<T extends OperationBase>(
+): Promise<U>;
+export function executeOperation<T extends OperationBase, U>(
   topology: Topology,
   operation: T,
-  callback: Callback
+  callback: Callback<U>
 ): void;
-export function executeOperation<T extends OperationBase>(
+export function executeOperation<T extends OperationBase, U>(
   topology: Topology,
   operation: T,
-  callback?: Callback
-): Promise<any> | void;
-export function executeOperation<T extends OperationBase>(
+  callback?: Callback<U>
+): Promise<U> | void;
+export function executeOperation<T extends OperationBase, U>(
   topology: Topology,
   operation: T,
-  callback?: Callback
-): Promise<any> | void {
+  callback?: Callback<U>
+): Promise<U> | void {
   const Promise = PromiseProvider.get();
 
   if (topology == null) {
