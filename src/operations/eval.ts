@@ -13,14 +13,14 @@ export interface EvalOptions extends CommandOperationOptions {
 
 export class EvalOperation extends CommandOperation<EvalOptions> {
   code: Code;
-  parameters?: unknown[];
+  parameters?: Document | Document[];
 
   get readPreference(): ReadPreference {
     // force primary read preference
     return ReadPreference.primary;
   }
 
-  constructor(db: Db, code: Code, parameters?: unknown[], options?: EvalOptions) {
+  constructor(db: Db, code: Code, parameters?: Document | Document[], options?: EvalOptions) {
     super(db, options);
 
     this.code = code;

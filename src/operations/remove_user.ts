@@ -4,16 +4,7 @@ import type { Callback } from '../types';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
 
-export interface RemoveUserOptions extends CommandOperationOptions {
-  /** The write concern. */
-  w: string | number;
-  /** The write concern timeout. */
-  wtimeout: number;
-  /** Specify a journal write concern. */
-  j: boolean;
-  /** Specify a file sync write concern. */
-  fsync: boolean;
-}
+export type RemoveUserOptions = CommandOperationOptions;
 
 export class RemoveUserOperation extends CommandOperation<RemoveUserOptions> {
   username: string;

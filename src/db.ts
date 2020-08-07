@@ -2,7 +2,7 @@ import { deprecate } from 'util';
 import { emitDeprecatedOptionWarning } from './utils';
 import { loadAdmin } from './dynamic_loaders';
 import { AggregationCursor, CommandCursor } from './cursor';
-import { ObjectId } from './bson';
+import { ObjectId, Code } from './bson';
 import { ReadPreference } from './read_preference';
 import { MongoError } from './error';
 import { Collection } from './collection';
@@ -23,27 +23,38 @@ import {
 import { AggregateOperation } from './operations/aggregate';
 import { AddUserOperation, AddUserOptions } from './operations/add_user';
 import { CollectionsOperation } from './operations/collections';
-import { DbStatsOperation } from './operations/stats';
-import { RunCommandOperation, RunAdminCommandOperation } from './operations/run_command';
-import { CreateCollectionOperation } from './operations/create_collection';
+import { DbStatsOperation, DbStatsOptions } from './operations/stats';
+import {
+  RunCommandOperation,
+  RunAdminCommandOperation,
+  RunCommandOptions
+} from './operations/run_command';
+import { CreateCollectionOperation, CreateCollectionOptions } from './operations/create_collection';
 import {
   CreateIndexOperation,
   EnsureIndexOperation,
-  IndexInformationOperation
+  IndexInformationOperation,
+  CreateIndexesOptions
 } from './operations/indexes';
 import {
   DropCollectionOperation,
   DropDatabaseOperation,
-  DropDatabaseOptions
+  DropDatabaseOptions,
+  DropCollectionOptions
 } from './operations/drop';
-import { ListCollectionsOperation } from './operations/list_collections';
-import { ProfilingLevelOperation } from './operations/profiling_level';
-import { RemoveUserOperation } from './operations/remove_user';
-import { RenameOperation } from './operations/rename';
-import { SetProfilingLevelOperation, ProfilingLevel } from './operations/set_profiling_level';
+import { ListCollectionsOperation, ListCollectionsOptions } from './operations/list_collections';
+import { ProfilingLevelOperation, ProfilingLevelOptions } from './operations/profiling_level';
+import { RemoveUserOperation, RemoveUserOptions } from './operations/remove_user';
+import { RenameOperation, RenameOptions } from './operations/rename';
+import {
+  SetProfilingLevelOperation,
+  ProfilingLevel,
+  SetProfilingLevelOptions
+} from './operations/set_profiling_level';
 import { executeOperation } from './operations/execute_operation';
-import { EvalOperation } from './operations/eval';
+import { EvalOperation, EvalOptions } from './operations/eval';
 import type { Callback, Document } from './types';
+import type { IndexInformationOptions } from './operations/common_functions';
 
 // Allowed parameters
 const legalOptionNames = [
@@ -236,47 +247,30 @@ export class Db {
   /**
    * Execute a command
    *
-   * @function
-   * @param {object} command The command hash
-   * @param {object} [options] Optional settings.
-   * @param {(ReadPreference|string)} [options.readPreference] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {Db~resultCallback} [callback] The command result callback
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param command The command to run
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
    */
-  command(command: object, options?: any, callback?: Callback): Promise<void> | void {
+  command(
+    command: Document,
+    options?: RunCommandOptions,
+    callback?: Callback
+  ): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, options);
 
-    const commandOperation = new RunCommandOperation(this, command, options);
-
-    return executeOperation(this.s.topology, commandOperation, callback);
+    return executeOperation(
+      this.s.topology,
+      new RunCommandOperation(this, command, options),
+      callback
+    );
   }
 
   /**
    * Execute an aggregation framework pipeline against the database, needs MongoDB >= 3.6
    *
-   * @function
-   * @param {object} [pipeline=[]] Array containing all the aggregation framework commands for the execution.
-   * @param {object} [options] Optional settings.
-   * @param {(ReadPreference|string)} [options.readPreference] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
-   * @param {number} [options.batchSize=1000] The number of documents to return per batch. See {@link https://docs.mongodb.com/manual/reference/command/aggregate|aggregation documentation}.
-   * @param {object} [options.cursor] Return the query as cursor, on 2.6 > it returns as a real cursor on pre 2.6 it returns as an emulated cursor.
-   * @param {number} [options.cursor.batchSize=1000] Deprecated. Use `options.batchSize`
-   * @param {boolean} [options.explain=false] Explain returns the aggregation execution plan (requires mongodb 2.6 >).
-   * @param {boolean} [options.allowDiskUse=false] allowDiskUse lets the server know if it can use disk to store temporary results for the aggregation (requires mongodb 2.6 >).
-   * @param {number} [options.maxTimeMS] maxTimeMS specifies a cumulative time limit in milliseconds for processing operations on the cursor. MongoDB interrupts the operation at the earliest following interrupt point.
-   * @param {number} [options.maxAwaitTimeMS] The maximum amount of time for the server to wait on new documents to satisfy a tailable cursor query.
-   * @param {boolean} [options.bypassDocumentValidation=false] Allow driver to bypass schema validation in MongoDB 3.2 or higher.
-   * @param {boolean} [options.raw=false] Return document results as raw BSON buffers.
-   * @param {boolean} [options.promoteLongs=true] Promotes Long values to number if they fit inside the 53 bits resolution.
-   * @param {boolean} [options.promoteValues=true] Promotes BSON values to native types where possible, set to false to only receive wrapper types.
-   * @param {boolean} [options.promoteBuffers=false] Promotes Binary BSON values to native Node Buffers.
-   * @param {object} [options.collation] Specify collation (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields).
-   * @param {string} [options.comment] Add a comment to an aggregation command
-   * @param {string|object} [options.hint] Add an index selection hint to an aggregation command
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @returns {AggregationCursor}
+   * @param pipeline An array of aggregation stages to be executed
+   * @param options Optional settings for the command
    */
   aggregate(pipeline: Document[] = [], options?: any): AggregationCursor {
     if (arguments.length > 2) {
@@ -289,8 +283,7 @@ export class Db {
       throw new TypeError('`options` parameter must not be function');
     }
 
-    if (!options) options = {};
-
+    options = options || {};
     const cursor = new AggregationCursor(
       this.s.topology,
       new AggregateOperation(this, pipeline, options),
@@ -303,7 +296,6 @@ export class Db {
   /**
    * Return the Admin db instance
    *
-   * @function
    * @returns {Admin} return the new Admin db instance
    */
   admin(): any {
@@ -315,7 +307,6 @@ export class Db {
    * Fetch a specific collection (containing the actual collection information). If the application does not use strict mode you
    * can use it without a callback in the following way: `const collection = db.collection('mycollection');`
    *
-   * @function
    * @param {string} name the collection name we wish to access.
    * @param {object} [options] Optional settings.
    * @param {(number|string)} [options.w] The write concern.
@@ -416,34 +407,23 @@ export class Db {
   /**
    * Get all the db statistics.
    *
-   * @function
-   * @param {object} [options] Optional settings.
-   * @param {number} [options.scale] Divide the returned sizes by scale value.
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {Db~resultCallback} [callback] The collection result callback
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
    */
-  stats(options?: any, callback?: Callback): Promise<void> | void {
+  stats(options?: DbStatsOptions, callback?: Callback): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    const statsOperation = new DbStatsOperation(this, options);
-    return executeOperation(this.s.topology, statsOperation, callback);
+    return executeOperation(this.s.topology, new DbStatsOperation(this, options), callback);
   }
 
   /**
-   * Get the list of all collection information for the specified db.
+   * List all collections of this database with optional filter
    *
-   * @function
-   * @param {object} [filter={}] Query to filter collections by
-   * @param {object} [options] Optional settings.
-   * @param {boolean} [options.nameOnly=false] Since 4.0: If true, will only return the collection name in the response, and will omit additional info
-   * @param {number} [options.batchSize=1000] The batchSize for the returned command cursor or if pre 2.8 the systems batch collection
-   * @param {(ReadPreference|string)} [options.readPreference] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @returns {CommandCursor}
+   * @param filter Query to filter collections by
+   * @param options Optional settings for the command
    */
-  listCollections(filter?: object, options?: any): CommandCursor {
+  listCollections(filter?: Document, options?: ListCollectionsOptions): CommandCursor {
     filter = filter || {};
     options = options || {};
 
@@ -457,19 +437,15 @@ export class Db {
   /**
    * Rename a collection.
    *
-   * @function
-   * @param {string} fromCollection Name of current collection to rename.
-   * @param {string} toCollection New name of of the collection.
-   * @param {object} [options] Optional settings.
-   * @param {boolean} [options.dropTarget=false] Drop the target name collection if it previously exists.
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {Db~collectionResultCallback} [callback] The results callback
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param fromCollection Name of current collection to rename
+   * @param toCollection New name of of the collection
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
    */
   renameCollection(
     fromCollection: string,
     toCollection: string,
-    options?: any,
+    options?: RenameOptions,
     callback?: Callback
   ): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
@@ -478,88 +454,23 @@ export class Db {
     // Add return new collection
     options.new_collection = true;
 
-    const renameOperation = new RenameOperation(
-      this.collection(fromCollection),
-      toCollection,
-      options
+    return executeOperation(
+      this.s.topology,
+      new RenameOperation(this.collection(fromCollection), toCollection, options),
+      callback
     );
-
-    return executeOperation(this.s.topology, renameOperation, callback);
   }
 
   /**
    * Drop a collection from the database, removing it permanently. New accesses will create a new collection.
    *
-   * @function
-   * @param {string} name Name of collection to drop
-   * @param {object} [options] Optional settings
-   * @param {WriteConcern} [options.writeConcern] A full WriteConcern object
-   * @param {(number|string)} [options.w] The write concern
-   * @param {number} [options.wtimeout] The write concern timeout
-   * @param {boolean} [options.j] The journal write concern
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {Db~resultCallback} [callback] The results callback
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param name Name of collection to drop
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
    */
-  dropCollection(name: string, options?: any, callback?: Callback): Promise<void> | void {
-    if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
-
-    const dropCollectionOperation = new DropCollectionOperation(this, name, options);
-
-    return executeOperation(this.s.topology, dropCollectionOperation, callback);
-  }
-
-  /**
-   * Drop a database, removing it permanently from the server.
-   *
-   * @function
-   * @param {object} [options] Optional settings
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {Db~resultCallback} [callback] The results callback
-   * @returns {Promise<void> | void} returns Promise if no callback passed
-   */
-  dropDatabase(options?: DropDatabaseOptions, callback?: Callback): Promise<void> | void {
-    if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
-
-    const dropDatabaseOperation = new DropDatabaseOperation(this, options);
-
-    return executeOperation(this.s.topology, dropDatabaseOperation, callback);
-  }
-
-  /**
-   * Fetch all collections for the current db.
-   *
-   * @function
-   * @param {object} [options] Optional settings
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {Db~collectionsResultCallback} [callback] The results callback
-   * @returns {Promise<void> | void} returns Promise if no callback passed
-   */
-  collections(options?: any, callback?: Callback): Promise<void> | void {
-    if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
-
-    const collectionsOperation = new CollectionsOperation(this, options);
-
-    return executeOperation(this.s.topology, collectionsOperation, callback);
-  }
-
-  /**
-   * Runs a command on the database as admin.
-   *
-   * @function
-   * @param {object} selector The command hash
-   * @param {object} [options] Optional settings.
-   * @param {(ReadPreference|string)} [options.readPreference] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {Db~resultCallback} [callback] The command result callback
-   * @returns {Promise<void> | void} returns Promise if no callback passed
-   */
-  executeDbAdminCommand(
-    selector: object,
-    options?: any,
+  dropCollection(
+    name: string,
+    options?: DropCollectionOptions,
     callback?: Callback
   ): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
@@ -567,7 +478,55 @@ export class Db {
 
     return executeOperation(
       this.s.topology,
-      new RunAdminCommandOperation(this, selector, options),
+      new DropCollectionOperation(this, name, options),
+      callback
+    );
+  }
+
+  /**
+   * Drop a database, removing it permanently from the server.
+   *
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
+   */
+  dropDatabase(options?: DropDatabaseOptions, callback?: Callback): Promise<void> | void {
+    if (typeof options === 'function') (callback = options), (options = {});
+    options = options || {};
+
+    return executeOperation(this.s.topology, new DropDatabaseOperation(this, options), callback);
+  }
+
+  /**
+   * Fetch all collections for the current db.
+   *
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
+   */
+  collections(options?: ListCollectionsOptions, callback?: Callback): Promise<void> | void {
+    if (typeof options === 'function') (callback = options), (options = {});
+    options = options || {};
+
+    return executeOperation(this.s.topology, new CollectionsOperation(this, options), callback);
+  }
+
+  /**
+   * Runs a command on the database as admin.
+   *
+   * @param command The command to run
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
+   */
+  executeDbAdminCommand(
+    command: Document,
+    options?: RunCommandOptions,
+    callback?: Callback
+  ): Promise<void> | void {
+    if (typeof options === 'function') (callback = options), (options = {});
+    options = options || {};
+
+    return executeOperation(
+      this.s.topology,
+      new RunAdminCommandOperation(this, command, options),
       callback
     );
   }
@@ -575,32 +534,15 @@ export class Db {
   /**
    * Creates an index on the db and collection.
    *
-   * @function
-   * @param {string} name Name of the collection to create the index on.
-   * @param {(string|object)} fieldOrSpec Defines the index.
-   * @param {object} [options] Optional settings.
-   * @param {(number|string)} [options.w] The write concern.
-   * @param {number} [options.wtimeout] The write concern timeout.
-   * @param {boolean} [options.j=false] Specify a journal write concern.
-   * @param {boolean} [options.unique=false] Creates an unique index.
-   * @param {boolean} [options.sparse=false] Creates a sparse index.
-   * @param {boolean} [options.background=false] Creates the index in the background, yielding whenever possible.
-   * @param {boolean} [options.dropDups=false] A unique index cannot be created on a key that has pre-existing duplicate values. If you would like to create the index anyway, keeping the first document the database indexes and deleting all subsequent documents that have duplicate value
-   * @param {number} [options.min] For geospatial indexes set the lower bound for the co-ordinates.
-   * @param {number} [options.max] For geospatial indexes set the high bound for the co-ordinates.
-   * @param {number} [options.v] Specify the format version of the indexes.
-   * @param {number} [options.expireAfterSeconds] Allows you to expire data on indexes applied to a data (MongoDB 2.2 or higher)
-   * @param {string} [options.name] Override the autogenerated index name (useful if the resulting name is larger than 128 bytes)
-   * @param {object} [options.partialFilterExpression] Creates a partial index based on the given filter object (MongoDB 3.2 or higher)
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {(number|string)} [options.commitQuorum] (MongoDB 4.4. or higher) Specifies how many data-bearing members of a replica set, including the primary, must complete the index builds successfully before the primary marks the indexes as ready. This option accepts the same values for the "w" field in a write concern plus "votingMembers", which indicates all voting data-bearing nodes.
-   * @param {Db~resultCallback} [callback] The command result callback
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param name Name of the collection to create the index on.
+   * @param fieldOrSpec Specify the field to index, or an index specification
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
    */
   createIndex(
     name: string,
-    fieldOrSpec: any,
-    options?: any,
+    fieldOrSpec: string | object,
+    options?: CreateIndexesOptions,
     callback?: Callback
   ): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
@@ -613,10 +555,17 @@ export class Db {
     );
   }
 
-  /** Add a user to the database */
+  /**
+   * Add a user to the database
+   *
+   * @param username The username for the new user
+   * @param password An optional password for the new user
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
+   */
   addUser(
     username: string,
-    password: any,
+    password: string | undefined,
     options?: AddUserOptions,
     callback?: Callback
   ): Promise<void> | void {
@@ -633,90 +582,83 @@ export class Db {
   /**
    * Remove a user from a database
    *
-   * @function
-   * @param {string} username The username.
-   * @param {object} [options] Optional settings.
-   * @param {(number|string)} [options.w] The write concern.
-   * @param {number} [options.wtimeout] The write concern timeout.
-   * @param {boolean} [options.j=false] Specify a journal write concern.
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {Db~resultCallback} [callback] The command result callback
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param username The username to remove
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
    */
-  removeUser(username: string, options?: any, callback?: Callback): Promise<void> | void {
-    if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
-
-    const removeUserOperation = new RemoveUserOperation(this, username, options);
-
-    return executeOperation(this.s.topology, removeUserOperation, callback);
-  }
-
-  /**
-   * Set the current profiling level of MongoDB
-   *
-   * @param {string} level The new profiling level (off, slow_only, all).
-   * @param {object} [options] Optional settings
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {Db~resultCallback} [callback] The command result callback.
-   * @returns {Promise<void> | void} returns Promise if no callback passed
-   */
-  setProfilingLevel(
-    level: ProfilingLevel,
-    options?: any,
+  removeUser(
+    username: string,
+    options?: RemoveUserOptions,
     callback?: Callback
   ): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    const setProfilingLevelOperation = new SetProfilingLevelOperation(this, level, options);
+    return executeOperation(
+      this.s.topology,
+      new RemoveUserOperation(this, username, options),
+      callback
+    );
+  }
 
-    return executeOperation(this.s.topology, setProfilingLevelOperation, callback);
+  /**
+   * Set the current profiling level of MongoDB
+   *
+   * @param level The new profiling level (off, slow_only, all).
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
+   */
+  setProfilingLevel(
+    level: ProfilingLevel,
+    options?: SetProfilingLevelOptions,
+    callback?: Callback
+  ): Promise<void> | void {
+    if (typeof options === 'function') (callback = options), (options = {});
+    options = options || {};
+
+    return executeOperation(
+      this.s.topology,
+      new SetProfilingLevelOperation(this, level, options),
+      callback
+    );
   }
 
   /**
    * Retrieve the current profiling Level for MongoDB
    *
-   * @param {object} [options] Optional settings
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {Db~resultCallback} [callback] The command result callback
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
    */
-  profilingLevel(options?: any, callback?: Callback): Promise<void> | void {
+  profilingLevel(options?: ProfilingLevelOptions, callback?: Callback): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    const profilingLevelOperation = new ProfilingLevelOperation(this, options);
-
-    return executeOperation(this.s.topology, profilingLevelOperation, callback);
+    return executeOperation(this.s.topology, new ProfilingLevelOperation(this, options), callback);
   }
 
   /**
    * Retrieves this collections index info.
    *
-   * @function
-   * @param {string} name The name of the collection.
-   * @param {object} [options] Optional settings.
-   * @param {boolean} [options.full=false] Returns the full raw index information.
-   * @param {(ReadPreference|string)} [options.readPreference] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {Db~resultCallback} [callback] The command result callback
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param name The name of the collection.
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
    */
-  indexInformation(name: string, options?: any, callback?: Callback): Promise<void> | void {
+  indexInformation(
+    name: string,
+    options?: IndexInformationOptions,
+    callback?: Callback
+  ): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    const indexInformationOperation = new IndexInformationOperation(this, name, options);
-
-    return executeOperation(this.s.topology, indexInformationOperation, callback);
+    return executeOperation(
+      this.s.topology,
+      new IndexInformationOperation(this, name, options),
+      callback
+    );
   }
 
-  /**
-   * Unref all sockets
-   *
-   * @function
-   */
+  /** Unref all sockets */
   unref() {
     this.s.topology.unref();
   }
@@ -724,7 +666,6 @@ export class Db {
   /**
    * Create a new Change Stream, watching for new changes (insertions, updates, replacements, deletions, and invalidations) in this database. Will ignore all changes to system collections.
    *
-   * @function
    * @since 3.1.0
    * @param {Array} [pipeline] An array of {@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents. This allows for filtering (using $match) and manipulating the change stream documents.
    * @param {object} [options] Optional settings
@@ -751,12 +692,7 @@ export class Db {
     return new ChangeStream(this, pipeline, options);
   }
 
-  /**
-   * Return the db logger
-   *
-   * @function
-   * @returns {Logger} return the db logger
-   */
+  /** Return the db logger */
   getLogger(): Logger {
     return this.s.logger;
   }
@@ -794,10 +730,9 @@ const collectionKeys = [
  * Create a new collection on a server with the specified options. Use this to create capped collections.
  * More information about command options available at https://docs.mongodb.com/manual/reference/command/create/
  *
- * @function
- * @param {string} name the collection name we wish to access.
- * @param {Db~collectionResultCallback} [callback] The results callback
- * @returns {Promise<void> | void} returns Promise if no callback passed
+ * @param name The name of the collection to create
+ * @param options Optional settings for the command
+ * @param callback An optional callback, a Promise will be returned if none is provided
  */
 Db.prototype.createCollection = deprecateOptions(
   {
@@ -805,36 +740,35 @@ Db.prototype.createCollection = deprecateOptions(
     deprecatedOptions: ['autoIndexId'],
     optionsIndex: 1
   },
-  function (this: any, name: any, options: any, callback: Callback) {
+  function (this: Db, name: string, options?: CreateCollectionOptions, callback?: Callback) {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
     options.readConcern = options.readConcern
       ? new ReadConcern(options.readConcern.level)
       : this.readConcern;
-    const createCollectionOperation = new CreateCollectionOperation(this, name, options);
 
-    return executeOperation(this.s.topology, createCollectionOperation, callback);
+    return executeOperation(
+      this.s.topology,
+      new CreateCollectionOperation(this, name, options),
+      callback
+    );
   }
 );
 
 /**
  * Evaluate JavaScript on the server
  *
- * @function
- * @param {Code} code JavaScript to execute on server.
- * @param {(object|Array)} parameters The parameters for the call.
- * @param {object} [options] Optional settings.
- * @param {boolean} [options.nolock=false] Tell MongoDB not to block on the evaluation of the javascript.
- * @param {ClientSession} [options.session] optional session to use for this operation
- * @param {Db~resultCallback} [callback] The results callback
  * @deprecated Eval is deprecated on MongoDB 3.2 and forward
- * @returns {Promise<void> | void} returns Promise if no callback passed
+ * @param code JavaScript to execute on server.
+ * @param parameters The parameters for the call.
+ * @param options Optional settings for the command
+ * @param callback An optional callback, a Promise will be returned if none is provided
  */
 Db.prototype.eval = deprecate(function (
-  this: any,
-  code: any,
-  parameters: any,
-  options: any,
+  this: Db,
+  code: Code,
+  parameters: Document | Document[],
+  options: EvalOptions,
   callback: Callback
 ) {
   const args = Array.prototype.slice.call(arguments, 1);
@@ -853,32 +787,17 @@ Db.prototype.eval = deprecate(function (
 /**
  * Ensures that an index exists, if it does not it creates it
  *
- * @function
  * @deprecated since version 2.0
- * @param {string} name The index name
- * @param {(string|object)} fieldOrSpec Defines the index.
- * @param {object} [options] Optional settings.
- * @param {(number|string)} [options.w] The write concern.
- * @param {number} [options.wtimeout] The write concern timeout.
- * @param {boolean} [options.j=false] Specify a journal write concern.
- * @param {boolean} [options.unique=false] Creates an unique index.
- * @param {boolean} [options.sparse=false] Creates a sparse index.
- * @param {boolean} [options.background=false] Creates the index in the background, yielding whenever possible.
- * @param {boolean} [options.dropDups=false] A unique index cannot be created on a key that has pre-existing duplicate values. If you would like to create the index anyway, keeping the first document the database indexes and deleting all subsequent documents that have duplicate value
- * @param {number} [options.min] For geospatial indexes set the lower bound for the co-ordinates.
- * @param {number} [options.max] For geospatial indexes set the high bound for the co-ordinates.
- * @param {number} [options.v] Specify the format version of the indexes.
- * @param {number} [options.expireAfterSeconds] Allows you to expire data on indexes applied to a data (MongoDB 2.2 or higher)
- * @param {number} [options.name] Override the autogenerated index name (useful if the resulting name is larger than 128 bytes)
- * @param {ClientSession} [options.session] optional session to use for this operation
- * @param {Db~resultCallback} [callback] The command result callback
- * @returns {Promise<void> | void} returns Promise if no callback passed
+ * @param name The index name
+ * @param fieldOrSpec Defines the index.
+ * @param options Optional settings for the command
+ * @param callback An optional callback, a Promise will be returned if none is provided
  */
 Db.prototype.ensureIndex = deprecate(function (
-  this: any,
-  name: any,
-  fieldOrSpec: any,
-  options: any,
+  this: Db,
+  name: string,
+  fieldOrSpec: string | Document,
+  options: CreateIndexesOptions,
   callback: Callback
 ) {
   if (typeof options === 'function') (callback = options), (options = {});
@@ -895,18 +814,21 @@ Db.prototype.ensureIndex = deprecate(function (
 /**
  * Retrieve the current profiling information for MongoDB
  *
- * @param {object} [options] Optional settings
- * @param {ClientSession} [options.session] optional session to use for this operation
- * @param {Db~resultCallback} [callback] The command result callback.
- * @returns {Promise<void> | void} returns Promise if no callback passed
- * @deprecated Query the system.profile collection directly.
+ * @deprecated Query the `system.profile` collection directly.
+ * @param options Optional settings for the command
+ * @param callback An optional callback, a Promise will be returned if none is provided
  */
-Db.prototype.profilingInfo = deprecate(function (this: any, options: any, callback: Callback) {
+Db.prototype.profilingInfo = deprecate(function (
+  this: Db,
+  options: ProfilingLevelOptions,
+  callback: Callback
+) {
   if (typeof options === 'function') (callback = options), (options = {});
   options = options || {};
 
   return this.collection('system.profile').find({}, options).toArray(callback);
-}, 'Db.profilingInfo is deprecated. Query the system.profile collection directly.');
+},
+'Db.profilingInfo is deprecated. Query the system.profile collection directly.');
 
 // Validate the database name
 function validateDatabaseName(databaseName: any) {
