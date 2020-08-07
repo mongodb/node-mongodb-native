@@ -1,5 +1,5 @@
 import { Aspect, defineAspects } from './operation';
-import { CommandOperation, CommandOpOptions } from './command';
+import { CommandOperation, CommandOperationOptions } from './command';
 import { decorateWithCollation, decorateWithReadConcern } from '../utils';
 import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';

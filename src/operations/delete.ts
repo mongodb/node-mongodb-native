@@ -1,6 +1,6 @@
 import { defineAspects, Aspect, OperationBase } from './operation';
 import { deleteCallback, removeDocuments } from './common_functions';
-import { CommandOperation, CommandOpOptions } from './command';
+import { CommandOperation, CommandOperationOptions } from './command';
 import { isObject } from 'util';
 import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
