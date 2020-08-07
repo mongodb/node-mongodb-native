@@ -146,6 +146,7 @@ export class Admin {
    * @function
    * @param {string} username The username.
    * @param {string} [password] The password.
+   * @param {AddUserOptions} [options] Optional settings
    * @param {Callback} [callback] The command result callback
    * @returns {Promise<void> | void} returns Promise if no callback passed
    */

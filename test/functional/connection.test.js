@@ -130,16 +130,16 @@ describe('Connection', function () {
   function connectionTester(configuration, testName, callback) {
     return function (err, client) {
       var db = client.db(configuration.db);
-      test.equal(err, null);
+      expect(err).to.not.exist;
 
       db.collection(testName, function (err, collection) {
-        test.equal(err, null);
+        expect(err).to.not.exist;
 
         collection.insert({ foo: 123 }, { w: 1 }, function (err) {
-          test.equal(err, null);
+          expect(err).to.not.exist;
 
           db.dropDatabase(function (err, dropped) {
-            test.equal(err, null);
+            expect(err).to.not.exist;
             test.ok(dropped);
             if (callback) return callback(client);
           });
@@ -175,11 +175,11 @@ describe('Connection', function () {
 
       // First add a user.
       setupClient.connect(function (err, client) {
-        test.equal(err, null);
+        expect(err).to.not.exist;
         var db = client.db(configuration.db);
 
         db.addUser(user, password, function (err) {
-          test.equal(err, null);
+          expect(err).to.not.exist;
           client.close(restOfTest);
         });
       });
@@ -206,11 +206,11 @@ describe('Connection', function () {
       // First add a user.
       const setupClient = configuration.newClient();
       setupClient.connect(function (err, client) {
-        test.equal(err, null);
+        expect(err).to.not.exist;
         var db = client.db(configuration.db);
 
         db.addUser(user, password, function (err) {
-          test.equal(err, null);
+          expect(err).to.not.exist;
           client.close(restOfTest);
         });
       });

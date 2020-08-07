@@ -1168,7 +1168,7 @@ describe('Operation Examples', function () {
                   // Verify that the index is gone
                   collection.indexInformation(function (err, indexInformation) {
                     test.deepEqual([['_id', 1]], indexInformation._id_);
-                    test.equal(undefined, indexInformation.a_1_b_1);
+                    expect(indexInformation.a_1_b_1).to.not.exist;
 
                     client.close(done);
                   });
@@ -1473,7 +1473,7 @@ describe('Operation Examples', function () {
               .toArray(function (err, docs) {
                 expect(err).to.not.exist;
                 test.equal(1, docs.length);
-                test.equal(undefined, docs[0].a);
+                expect(docs[0].a).to.not.exist;
                 test.equal(2, docs[0].b);
 
                 client.close(done);
@@ -1551,7 +1551,7 @@ describe('Operation Examples', function () {
                     // Verify that the document is gone
                     collection.findOne({ b: 1 }, function (err, item) {
                       expect(err).to.not.exist;
-                      test.equal(null, item);
+                      expect(item).to.not.exist;
 
                       // Simple findAndModify command performing an upsert and returning the new document
                       // executing the command safely
@@ -1626,7 +1626,7 @@ describe('Operation Examples', function () {
               // Verify that the document is gone
               collection.findOne({ b: 1 }, function (err, item) {
                 expect(err).to.not.exist;
-                test.equal(null, item);
+                expect(item).to.not.exist;
 
                 client.close(done);
               });
@@ -1681,7 +1681,7 @@ describe('Operation Examples', function () {
             // Perform a simple find and return all the documents
             collection.findOne({ a: 2 }, { fields: { b: 1 } }, function (err, doc) {
               expect(err).to.not.exist;
-              test.equal(undefined, doc.a);
+              expect(doc.a).to.not.exist;
               test.equal(2, doc.b);
 
               client.close(done);
@@ -2513,7 +2513,7 @@ describe('Operation Examples', function () {
                 ],
                 { w: 1, keepGoing: true },
                 function (err, result) {
-                  test.equal(result, null);
+                  expect(result).to.not.exist;
                   test.ok(err);
                   test.ok(err.result);
 
@@ -2813,7 +2813,7 @@ describe('Operation Examples', function () {
 
               // Attemp to rename the first collection to the second one, this will fail
               collection1.rename('test_rename_collection2', function (err, collection) {
-                test.equal(null, collection);
+                expect(collection).to.not.exist;
                 test.ok(err instanceof Error);
                 test.ok(err.message.length > 0);
 
@@ -3114,8 +3114,8 @@ describe('Operation Examples', function () {
                       // Verify that the index is gone
                       collection.indexInformation(function (err, indexInformation) {
                         test.deepEqual([['_id', 1]], indexInformation._id_);
-                        test.equal(undefined, indexInformation.a_1_b_1);
-                        test.equal(undefined, indexInformation.c_1);
+                        expect(indexInformation.a_1_b_1).to.not.exist;
+                        expect(indexInformation.c_1).to.not.exist;
 
                         client.close(done);
                       });
@@ -3385,7 +3385,7 @@ describe('Operation Examples', function () {
             err,
             col3
           ) {
-            test.equal(null, col3);
+            expect(col3).to.not.exist;
             test.ok(err != null);
 
             // Create the collection
@@ -5635,7 +5635,7 @@ describe('Operation Examples', function () {
 
           // When the stream is done
           stream.on('end', function () {
-            test.equal(null, fetchedDocs[1]);
+            expect(fetchedDocs[1]).to.not.exist;
             client.close(done);
           });
         });
