@@ -19,40 +19,40 @@ export type Sort = { [key: string]: number | string };
 
 export interface FindAndModifyOptions extends CommandOperationOptions {
   /** When false, returns the updated document rather than the original. The default is true. */
-  returnOriginal: boolean;
+  returnOriginal?: boolean;
   /** Upsert the document if it does not exist. */
-  upsert: boolean;
+  upsert?: boolean;
   /** Limits the fields to return for all matching documents. */
-  projection: Document;
+  projection?: Document;
   /** @deprecated use `projection` instead */
-  fields: Document;
+  fields?: Document;
   /** Determines which document the operation modifies if the query selects multiple documents. */
-  sort: Sort;
+  sort?: Sort;
   /** Optional list of array filters referenced in filtered positional operators */
-  arrayFilters: Document[];
+  arrayFilters?: Document[];
   /** Allow driver to bypass schema validation in MongoDB 3.2 or higher. */
-  bypassDocumentValidation: boolean;
+  bypassDocumentValidation?: boolean;
   /** An optional hint for query optimization. See the {@link https://docs.mongodb.com/manual/reference/command/update/#update-command-hint|update command} reference for more information.*/
-  hint: Document;
+  hint?: Document;
 
   // NOTE: These types are a misuse of options, can we think of a way to remove them?
-  update: boolean;
-  remove: boolean;
-  new: boolean;
+  update?: boolean;
+  remove?: boolean;
+  new?: boolean;
 }
 
 export class FindAndModifyOperation extends CommandOperation<FindAndModifyOptions> {
   collection: Collection;
   query: Document;
-  sort: Sort;
-  doc: Document | null;
+  sort?: Sort;
+  doc?: Document;
 
   constructor(
     collection: Collection,
     query: Document,
-    sort: Sort,
-    doc: Document | null,
-    options: FindAndModifyOptions
+    sort: Sort | undefined,
+    doc: Document | undefined,
+    options?: FindAndModifyOptions
   ) {
     super(collection, options);
 
@@ -168,7 +168,7 @@ export class FindOneAndDeleteOperation extends FindAndModifyOperation {
       throw new TypeError('Filter parameter must be an object');
     }
 
-    super(collection, filter, finalOptions.sort, null, finalOptions);
+    super(collection, filter, finalOptions.sort, undefined, finalOptions);
   }
 }
 

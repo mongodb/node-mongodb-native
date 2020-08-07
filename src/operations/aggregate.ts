@@ -30,8 +30,6 @@ export interface AggregateOptions extends CommandOperationOptions {
   maxAwaitTimeMS?: number;
   /** Specify collation. */
   collation?: CollationOptions;
-  /** Add a comment to an aggregation command */
-  comment?: string | Document;
   /** Add an index selection hint to an aggregation command */
   hint?: Hint;
   full?: boolean;
@@ -43,7 +41,7 @@ export class AggregateOperation extends CommandOperation<AggregateOptions> {
   pipeline: Document[];
   hasWriteStage: boolean;
 
-  constructor(parent: Collection | Db, pipeline: Document[], options: AggregateOptions) {
+  constructor(parent: Collection | Db, pipeline: Document[], options?: AggregateOptions) {
     super(parent, { fullResponse: true, ...options });
 
     this.target =
@@ -55,7 +53,7 @@ export class AggregateOperation extends CommandOperation<AggregateOptions> {
 
     // determine if we have a write stage, override read preference if so
     this.hasWriteStage = false;
-    if (typeof options.out === 'string') {
+    if (typeof options?.out === 'string') {
       this.pipeline = this.pipeline.concat({ $out: options.out });
       this.hasWriteStage = true;
     } else if (pipeline.length > 0) {
@@ -69,13 +67,13 @@ export class AggregateOperation extends CommandOperation<AggregateOptions> {
       this.readPreference = ReadPreference.primary;
     }
 
-    if (options.explain && (this.readConcern || this.writeConcern)) {
+    if (options?.explain && (this.readConcern || this.writeConcern)) {
       throw new MongoError(
         '"explain" cannot be used on an aggregate call with readConcern/writeConcern'
       );
     }
 
-    if (options.cursor != null && typeof options.cursor !== 'object') {
+    if (options?.cursor != null && typeof options.cursor !== 'object') {
       throw new MongoError('cursor options must be an object');
     }
   }

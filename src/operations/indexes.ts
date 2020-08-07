@@ -286,13 +286,13 @@ export class DropIndexesOperation extends DropIndexOperation {
 
 export interface ListIndexesOptions extends CommandOperationOptions {
   /** The batchSize for the returned command cursor or if pre 2.8 the systems batch collection */
-  batchSize: number;
+  batchSize?: number;
 }
 
 export class ListIndexesOperation extends CommandOperation<ListIndexesOptions> {
   collectionNamespace: MongoDBNamespace;
 
-  constructor(collection: Collection, options: ListIndexesOptions) {
+  constructor(collection: Collection, options?: ListIndexesOptions) {
     super(collection, { fullResponse: true, ...options });
 
     this.collectionNamespace = collection.s.namespace;
@@ -366,7 +366,7 @@ export class IndexInformationOperation extends OperationBase<IndexInformationOpt
   db: Db;
   name: string;
 
-  constructor(db: Db, name: string, options: IndexInformationOptions) {
+  constructor(db: Db, name: string, options?: IndexInformationOptions) {
     super(options);
 
     this.db = db;

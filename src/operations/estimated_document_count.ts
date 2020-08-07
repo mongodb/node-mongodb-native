@@ -5,9 +5,9 @@ import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 
 export interface EstimatedDocumentCountOptions extends CommandOperationOptions {
-  skip: number;
-  limit: number;
-  hint: Hint;
+  skip?: number;
+  limit?: number;
+  hint?: Hint;
 }
 
 export class EstimatedDocumentCountOperation extends CommandOperation<

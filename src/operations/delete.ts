@@ -8,7 +8,7 @@ import type { Collection } from '../collection';
 import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
 
 export interface DeleteOptions extends CommandOperationOptions {
-  single: boolean;
+  single?: boolean;
 }
 
 export class DeleteOperation extends OperationBase<DeleteOptions> {

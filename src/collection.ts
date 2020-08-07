@@ -1,5 +1,4 @@
 import { emitDeprecatedOptionWarning } from './utils';
-import { PromiseProvider } from './promise_provider';
 import { ReadPreference } from './read_preference';
 import { deprecate } from 'util';
 import {
@@ -20,9 +19,9 @@ import { ChangeStream } from './change_stream';
 import { WriteConcern } from './write_concern';
 import { ReadConcern } from './read_concern';
 import { AggregationCursor, CommandCursor, Cursor } from './cursor';
-import { AggregateOperation } from './operations/aggregate';
+import { AggregateOperation, AggregateOptions } from './operations/aggregate';
 import { BulkWriteOperation } from './operations/bulk_write';
-import { CountDocumentsOperation } from './operations/count_documents';
+import { CountDocumentsOperation, CountDocumentsOptions } from './operations/count_documents';
 import {
   CreateIndexesOperation,
   CreateIndexOperation,
@@ -32,34 +31,49 @@ import {
   IndexesOperation,
   IndexExistsOperation,
   IndexInformationOperation,
-  ListIndexesOperation
+  ListIndexesOperation,
+  CreateIndexesOptions,
+  DropIndexesOptions,
+  ListIndexesOptions
 } from './operations/indexes';
-import { DistinctOperation } from './operations/distinct';
-import { DropCollectionOperation } from './operations/drop';
-import { EstimatedDocumentCountOperation } from './operations/estimated_document_count';
+import { DistinctOperation, DistinctOptions } from './operations/distinct';
+import { DropCollectionOperation, DropCollectionOptions } from './operations/drop';
+import {
+  EstimatedDocumentCountOperation,
+  EstimatedDocumentCountOptions
+} from './operations/estimated_document_count';
 import { FindOperation, FindOptions } from './operations/find';
 import { FindOneOperation } from './operations/find_one';
 import {
   FindAndModifyOperation,
   FindOneAndDeleteOperation,
   FindOneAndReplaceOperation,
-  FindOneAndUpdateOperation
+  FindOneAndUpdateOperation,
+  FindAndModifyOptions
 } from './operations/find_and_modify';
 import { InsertManyOperation } from './operations/insert_many';
 import { InsertOneOperation } from './operations/insert';
 import { UpdateOneOperation, UpdateManyOperation } from './operations/update';
-import { DeleteOneOperation, DeleteManyOperation } from './operations/delete';
+import { DeleteOneOperation, DeleteManyOperation, DeleteOptions } from './operations/delete';
 import { IsCappedOperation } from './operations/is_capped';
-import { MapReduceOperation } from './operations/map_reduce';
+import {
+  MapReduceOperation,
+  MapFunction,
+  ReduceFunction,
+  MapReduceOptions
+} from './operations/map_reduce';
 import { OptionsOperation } from './operations/options_operation';
-import { RenameOperation } from './operations/rename';
-import { ReplaceOneOperation } from './operations/replace_one';
-import { CollStatsOperation } from './operations/stats';
+import { RenameOperation, RenameOptions } from './operations/rename';
+import { ReplaceOneOperation, ReplaceOptions } from './operations/replace_one';
+import { CollStatsOperation, CollStatsOptions } from './operations/stats';
 import { executeOperation } from './operations/execute_operation';
 import { EvalGroupOperation, GroupOperation } from './operations/group';
 import type { Callback, Document } from './types';
 import type { Db } from './db';
-import type { InsertOptions } from './cmap/wire_protocol';
+import type { InsertOptions, UpdateOptions } from './cmap/wire_protocol';
+import type { OperationOptions } from './operations/operation';
+import type { IndexInformationOptions } from './operations/common_functions';
+import type { CountOptions } from './operations/count';
 const mergeKeys = ['ignoreUndefined'];
 
 export interface Collection {
@@ -297,22 +311,11 @@ export class Collection {
    * one will be added to each of the documents missing it by the driver, mutating the document. This behavior
    * can be overridden by setting the **forceServerObjectId** flag.
    *
-   * @function
-   * @param {object} doc Document to insert.
-   * @param {object} [options] Optional settings.
-   * @param {boolean} [options.bypassDocumentValidation=false] Allow driver to bypass schema validation in MongoDB 3.2 or higher.
-   * @param {boolean} [options.forceServerObjectId=false] Force server to assign _id values instead of driver.
-   * @param {(number|string)} [options.w] The write concern.
-   * @param {number} [options.wtimeout] The write concern timeout.
-   * @param {boolean} [options.j=false] Specify a journal write concern.
-   * @param {boolean} [options.checkKeys=true] If true, will throw if bson documents start with `$` or include a `.` in any key value
-   * @param {boolean} [options.serializeFunctions=false] Serialize functions on any object.
-   * @param {boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {Collection~insertOneWriteOpCallback} [callback] The command result callback
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param doc The document to insert
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
    */
-  insertOne(doc: object, options?: any, callback?: Callback): Promise<void> | void {
+  insertOne(doc: Document, options?: InsertOptions, callback?: Callback): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -330,23 +333,11 @@ export class Collection {
    * one will be added to each of the documents missing it by the driver, mutating the document. This behavior
    * can be overridden by setting the **forceServerObjectId** flag.
    *
-   * @function
-   * @param {object[]} docs Documents to insert.
-   * @param {object} [options] Optional settings.
-   * @param {boolean} [options.bypassDocumentValidation=false] Allow driver to bypass schema validation in MongoDB 3.2 or higher.
-   * @param {boolean} [options.ordered=true] If true, when an insert fails, don't execute the remaining writes. If false, continue with remaining inserts when one fails.
-   * @param {boolean} [options.forceServerObjectId=false] Force server to assign _id values instead of driver.
-   * @param {(number|string)} [options.w] The write concern.
-   * @param {number} [options.wtimeout] The write concern timeout.
-   * @param {boolean} [options.j=false] Specify a journal write concern.
-   * @param {boolean} [options.checkKeys=true] If true, will throw if bson documents start with `$` or include a `.` in any key value
-   * @param {boolean} [options.serializeFunctions=false] Serialize functions on any object.
-   * @param {boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {Collection~insertWriteOpCallback} [callback] The command result callback
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param docs The documents to insert
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
    */
-  insertMany(docs: any, options?: any, callback?: Callback): Promise<void> | void {
+  insertMany(docs: Document[], options?: InsertOptions, callback?: Callback): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options ? Object.assign({}, options) : { ordered: true };
 
@@ -400,13 +391,15 @@ export class Collection {
    * one will be added to each of the documents missing it by the driver, mutating the document. This behavior
    * can be overridden by setting the **forceServerObjectId** flag.
    *
-   * @function
-   * @param {object[]} operations Bulk operations to perform.
-   * @param {BulkWriteOptions} [options] Optional settings.
-   * @param {Collection~bulkWriteOpCallback} [callback] The command result callback
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param operations Bulk operations to perform
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
    */
-  bulkWrite(operations: any, options?: InsertOptions, callback?: Callback): Promise<void> | void {
+  bulkWrite(
+    operations: Document[],
+    options?: InsertOptions,
+    callback?: Callback
+  ): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || { ordered: true };
 
@@ -451,29 +444,15 @@ export class Collection {
   /**
    * Update a single document in a collection
    *
-   * @function
-   * @param {object} filter The Filter used to select the document to update
-   * @param {object} update The update operations to be applied to the document
-   * @param {object} [options] Optional settings.
-   * @param {Array} [options.arrayFilters] optional list of array filters referenced in filtered positional operators
-   * @param {boolean} [options.bypassDocumentValidation=false] Allow driver to bypass schema validation in MongoDB 3.2 or higher.
-   * @param {object} [options.collation] Specify collation (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields).
-   * @param {object} [options.hint] An optional hint for query optimization. See the {@link https://docs.mongodb.com/manual/reference/command/update/#update-command-hint|update command} reference for more information.
-   * @param {boolean} [options.upsert=false] When true, creates a new document if no document matches the query..
-   * @param {(number|string)} [options.w] The write concern.
-   * @param {number} [options.wtimeout] The write concern timeout.
-   * @param {boolean} [options.j=false] Specify a journal write concern.
-   * @param {boolean} [options.checkKeys=false] If true, will throw if bson documents start with `$` or include a `.` in any key value
-   * @param {boolean} [options.serializeFunctions=false] Serialize functions on any object.
-   * @param {boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {Collection~updateWriteOpCallback} [callback] The command result callback
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param filter The Filter used to select the document to update
+   * @param update The update operations to be applied to the document
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
    */
   updateOne(
-    filter: object,
+    filter: Document,
     update: Document,
-    options?: any,
+    options?: UpdateOptions,
     callback?: Callback
   ): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
@@ -495,28 +474,15 @@ export class Collection {
   /**
    * Replace a document in a collection with another document
    *
-   * @function
-   * @param {object} filter The Filter used to select the document to replace
-   * @param {object} doc The Document that replaces the matching document
-   * @param {object} [options] Optional settings.
-   * @param {boolean} [options.bypassDocumentValidation=false] Allow driver to bypass schema validation in MongoDB 3.2 or higher.
-   * @param {object} [options.collation] Specify collation (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields).
-   * @param {object} [options.hint] An optional hint for query optimization. See the {@link https://docs.mongodb.com/manual/reference/command/update/#update-command-hint|update command} reference for more information.
-   * @param {boolean} [options.upsert=false] When true, creates a new document if no document matches the query.
-   * @param {(number|string)} [options.w] The write concern.
-   * @param {number} [options.wtimeout] The write concern timeout.
-   * @param {boolean} [options.j=false] Specify a journal write concern.
-   * @param {boolean} [options.checkKeys=false] If true, will throw if bson documents start with `$` or include a `.` in any key value
-   * @param {boolean} [options.serializeFunctions=false] Serialize functions on any object.
-   * @param {boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {Collection~updateWriteOpCallback} [callback] The command result callback
-   * @returns {Promise<void> | void<Collection~updateWriteOpResult>} returns Promise if no callback passed
+   * @param filter The Filter used to select the document to replace
+   * @param doc The Document that replaces the matching document
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
    */
   replaceOne(
-    filter: object,
-    doc: object,
-    options?: any,
+    filter: Document,
+    doc: Document,
+    options?: ReplaceOptions,
     callback?: Callback
   ): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
@@ -539,31 +505,17 @@ export class Collection {
    * Update multiple documents in a collection
    *
    * @function
-   * @param {object} filter The Filter used to select the documents to update
-   * @param {object} update The update operations to be applied to the documents
-   * @param {object} [options] Optional settings.
-   * @param {Array} [options.arrayFilters] optional list of array filters referenced in filtered positional operators
-   * @param {boolean} [options.bypassDocumentValidation=false] Allow driver to bypass schema validation in MongoDB 3.2 or higher.
-   * @param {object} [options.collation] Specify collation (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields).
-   * @param {object} [options.hint] An optional hint for query optimization. See the {@link https://docs.mongodb.com/manual/reference/command/update/#update-command-hint|update command} reference for more information.
-   * @param {boolean} [options.upsert=false] When true, creates a new document if no document matches the query..
-   * @param {(number|string)} [options.w] The write concern.
-   * @param {number} [options.wtimeout] The write concern timeout.
-   * @param {boolean} [options.j=false] Specify a journal write concern.
-   * @param {boolean} [options.checkKeys=false] If true, will throw if bson documents start with `$` or include a `.` in any key value
-   * @param {boolean} [options.serializeFunctions=false] Serialize functions on any object.
-   * @param {boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {Collection~updateWriteOpCallback} [callback] The command result callback
-   * @returns {Promise<void> | void<Collection~updateWriteOpResult>} returns Promise if no callback passed
+   * @param filter The Filter used to select the documents to update
+   * @param update The update operations to be applied to the documents
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
    */
   updateMany(
-    filter: object,
-    update: object,
-    options?: any,
+    filter: Document,
+    update: Document,
+    options?: UpdateOptions,
     callback?: Callback
   ): Promise<void> | void {
-    const Promise = PromiseProvider.get();
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, options);
 
@@ -600,22 +552,11 @@ export class Collection {
   /**
    * Delete a document from a collection
    *
-   * @function
-   * @param {object} filter The Filter used to select the document to remove
-   * @param {object} [options] Optional settings.
-   * @param {object} [options.collation] Specify collation (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields).
-   * @param {(number|string)} [options.w] The write concern.
-   * @param {number} [options.wtimeout] The write concern timeout.
-   * @param {boolean} [options.j=false] Specify a journal write concern.
-   * @param {boolean} [options.checkKeys=false] If true, will throw if bson documents start with `$` or include a `.` in any key value
-   * @param {boolean} [options.serializeFunctions=false] Serialize functions on any object.
-   * @param {boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {string|object} [options.hint] optional index hint for optimizing the filter query
-   * @param {Collection~deleteWriteOpCallback} [callback] The command result callback
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param filter The Filter used to select the document to remove
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
    */
-  deleteOne(filter: object, options?: any, callback?: Callback): Promise<void> | void {
+  deleteOne(filter: Document, options?: DeleteOptions, callback?: Callback): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, options);
 
@@ -635,22 +576,11 @@ export class Collection {
   /**
    * Delete multiple documents from a collection
    *
-   * @function
-   * @param {object} filter The Filter used to select the documents to remove
-   * @param {object} [options] Optional settings.
-   * @param {object} [options.collation] Specify collation (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields).
-   * @param {(number|string)} [options.w] The write concern.
-   * @param {number} [options.wtimeout] The write concern timeout.
-   * @param {boolean} [options.j=false] Specify a journal write concern.
-   * @param {boolean} [options.checkKeys=false] If true, will throw if bson documents start with `$` or include a `.` in any key value
-   * @param {boolean} [options.serializeFunctions=false] Serialize functions on any object.
-   * @param {boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {string|object} [options.hint] optional index hint for optimizing the filter query
-   * @param {Collection~deleteWriteOpCallback} [callback] The command result callback
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param filter The Filter used to select the documents to remove
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
    */
-  deleteMany(filter: object, options?: any, callback?: Callback): Promise<void> | void {
+  deleteMany(filter: Document, options?: DeleteOptions, callback?: Callback): Promise<void> | void {
     if (filter == null) {
       filter = {};
       options = {};
@@ -690,15 +620,11 @@ export class Collection {
   /**
    * Rename the collection.
    *
-   * @function
-   * @param {string} newName New name of of the collection.
-   * @param {object} [options] Optional settings.
-   * @param {boolean} [options.dropTarget=false] Drop the target name collection if it previously exists.
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {Collection~collectionResultCallback} [callback] The results callback
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param newName New name of of the collection.
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
    */
-  rename(newName: string, options?: any, callback?: Callback): Promise<void> | void {
+  rename(newName: string, options?: RenameOptions, callback?: Callback): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, options, { readPreference: ReadPreference.PRIMARY });
 
@@ -708,17 +634,10 @@ export class Collection {
   /**
    * Drop the collection from the database, removing it permanently. New accesses will create a new collection.
    *
-   * @function
-   * @param {object} [options] Optional settings.
-   * @param {WriteConcern} [options.writeConcern] A full WriteConcern object
-   * @param {(number|string)} [options.w] The write concern
-   * @param {number} [options.wtimeout] The write concern timeout
-   * @param {boolean} [options.j] The journal write concern
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {Collection~resultCallback} [callback] The results callback
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
    */
-  drop(options?: any, callback?: Callback): Promise<void> | void {
+  drop(options?: DropCollectionOptions, callback?: Callback): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -732,13 +651,10 @@ export class Collection {
   /**
    * Returns the options of the collection.
    *
-   * @function
-   * @param {object} [options] Optional settings
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {Collection~resultCallback} [callback] The results callback
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
    */
-  options(options?: any, callback?: Callback): Promise<void> | void {
+  options(options?: OperationOptions, callback?: Callback): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -748,13 +664,10 @@ export class Collection {
   /**
    * Returns if the collection is a capped collection
    *
-   * @function
-   * @param {object} [options] Optional settings
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {Collection~resultCallback} [callback] The results callback
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
    */
-  isCapped(options?: any, callback?: Callback): Promise<void> | void {
+  isCapped(options?: OperationOptions, callback?: Callback): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -764,27 +677,10 @@ export class Collection {
   /**
    * Creates an index on the db and collection collection.
    *
-   * @function
-   * @param {(string|Array|object)} fieldOrSpec Defines the index.
-   * @param {object} [options] Optional settings.
-   * @param {(number|string)} [options.w] The write concern.
-   * @param {number} [options.wtimeout] The write concern timeout.
-   * @param {boolean} [options.j=false] Specify a journal write concern.
-   * @param {boolean} [options.unique=false] Creates an unique index.
-   * @param {boolean} [options.sparse=false] Creates a sparse index.
-   * @param {boolean} [options.background=false] Creates the index in the background, yielding whenever possible.
-   * @param {boolean} [options.dropDups=false] A unique index cannot be created on a key that has pre-existing duplicate values. If you would like to create the index anyway, keeping the first document the database indexes and deleting all subsequent documents that have duplicate value
-   * @param {number} [options.min] For geospatial indexes set the lower bound for the co-ordinates.
-   * @param {number} [options.max] For geospatial indexes set the high bound for the co-ordinates.
-   * @param {number} [options.v] Specify the format version of the indexes.
-   * @param {number} [options.expireAfterSeconds] Allows you to expire data on indexes applied to a data (MongoDB 2.2 or higher)
-   * @param {string} [options.name] Override the autogenerated index name (useful if the resulting name is larger than 128 bytes)
-   * @param {object} [options.partialFilterExpression] Creates a partial index based on the given filter object (MongoDB 3.2 or higher)
-   * @param {object} [options.collation] Specify collation (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields).
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {(number|string)} [options.commitQuorum] (MongoDB 4.4. or higher) Specifies how many data-bearing members of a replica set, including the primary, must complete the index builds successfully before the primary marks the indexes as ready. This option accepts the same values for the "w" field in a write concern plus "votingMembers", which indicates all voting data-bearing nodes.
-   * @param {Collection~resultCallback} [callback] The command result callback
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param fieldOrSpec The field name or index specification to create an index for
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
+   *
    * @example
    * const collection = client.db('foo').collection('bar');
    *
@@ -805,7 +701,11 @@ export class Collection {
    * // Equivalent to { j: 1, k: -1, l: 2d }
    * await collection.createIndex(['j', ['k', -1], { l: '2d' }])
    */
-  createIndex(fieldOrSpec: any, options?: any, callback?: Callback): Promise<void> | void {
+  createIndex(
+    fieldOrSpec: string | Document,
+    options?: CreateIndexesOptions,
+    callback?: Callback
+  ): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -824,13 +724,10 @@ export class Collection {
    * **Note**: Unlike {@link Collection#createIndex createIndex}, this function takes in raw index specifications.
    * Index specifications are defined {@link http://docs.mongodb.org/manual/reference/command/createIndexes/ here}.
    *
-   * @function
-   * @param {Collection~IndexDefinition[]} indexSpecs An array of index specifications to be created
-   * @param {object} [options] Optional settings
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {(number|string)} [options.commitQuorum] (MongoDB 4.4. or higher) Specifies how many data-bearing members of a replica set, including the primary, must complete the index builds successfully before the primary marks the indexes as ready. This option accepts the same values for the "w" field in a write concern plus "votingMembers", which indicates all voting data-bearing nodes.
-   * @param {Collection~resultCallback} [callback] The command result callback
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param indexSpecs An array of index specifications to be created
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
+   *
    * @example
    * const collection = client.db('foo').collection('bar');
    * await collection.createIndexes([
@@ -849,7 +746,11 @@ export class Collection {
    *   }
    * ]);
    */
-  createIndexes(indexSpecs: any, options?: any, callback?: Callback): Promise<void> | void {
+  createIndexes(
+    indexSpecs: any,
+    options?: CreateIndexesOptions,
+    callback?: Callback
+  ): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options ? Object.assign({}, options) : {};
     if (typeof options.maxTimeMS !== 'number') delete options.maxTimeMS;
@@ -864,21 +765,19 @@ export class Collection {
   /**
    * Drops an index from this collection.
    *
-   * @function
-   * @param {string} indexName Name of the index to drop.
-   * @param {object} [options] Optional settings.
-   * @param {(number|string)} [options.w] The write concern.
-   * @param {number} [options.wtimeout] The write concern timeout.
-   * @param {boolean} [options.j=false] Specify a journal write concern.
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {number} [options.maxTimeMS] Number of milliseconds to wait before aborting the query.
-   * @param {Collection~resultCallback} [callback] The command result callback
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param indexName Name of the index to drop.
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
    */
-  dropIndex(indexName: string, options?: any, callback?: Callback): Promise<void> | void {
+  dropIndex(
+    indexName: string,
+    options?: DropIndexesOptions,
+    callback?: Callback
+  ): Promise<void> | void {
     const args = Array.prototype.slice.call(arguments, 1);
     callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
-    options = args.length ? args.shift() || {} : {};
+    options = args.length ? args.shift() : {};
+    options = options || {};
 
     // Run only against primary
     options.readPreference = ReadPreference.PRIMARY;
@@ -893,17 +792,12 @@ export class Collection {
   /**
    * Drops all indexes from this collection.
    *
-   * @function
-   * @param {object} [options] Optional settings
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {number} [options.maxTimeMS] Number of milliseconds to wait before aborting the query.
-   * @param {Collection~resultCallback} [callback] The command result callback
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
    */
-  dropIndexes(options?: any, callback?: Callback): Promise<void> | void {
+  dropIndexes(options?: DropIndexesOptions, callback?: Callback): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options ? Object.assign({}, options) : {};
-    if (typeof options.maxTimeMS !== 'number') delete options.maxTimeMS;
 
     return executeOperation(this.s.topology, new DropIndexesOperation(this, options), callback);
   }
@@ -911,14 +805,9 @@ export class Collection {
   /**
    * Get the list of all indexes information for the collection.
    *
-   * @function
-   * @param {object} [options] Optional settings.
-   * @param {number} [options.batchSize=1000] The batchSize for the returned command cursor or if pre 2.8 the systems batch collection
-   * @param {(ReadPreference|string)} [options.readPreference] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @returns {CommandCursor}
+   * @param options Optional settings for the command
    */
-  listIndexes(options?: any): CommandCursor {
+  listIndexes(options?: ListIndexesOptions): CommandCursor {
     const cursor = new CommandCursor(
       this.s.topology,
       new ListIndexesOperation(this, options),
@@ -931,14 +820,15 @@ export class Collection {
   /**
    * Checks if one or more indexes exist on the collection, fails on first non-existing index
    *
-   * @function
-   * @param {(string|Array)} indexes One or more index names to check.
-   * @param {object} [options] Optional settings
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {Collection~resultCallback} [callback] The command result callback
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param indexes One or more index names to check.
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
    */
-  indexExists(indexes: any, options?: any, callback?: Callback): Promise<void> | void {
+  indexExists(
+    indexes: string | string[],
+    options?: IndexInformationOptions,
+    callback?: Callback
+  ): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -952,14 +842,10 @@ export class Collection {
   /**
    * Retrieves this collections index info.
    *
-   * @function
-   * @param {object} [options] Optional settings.
-   * @param {boolean} [options.full=false] Returns the full raw index information.
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {Collection~resultCallback} [callback] The command result callback
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
    */
-  indexInformation(options?: any, callback?: Callback): Promise<void> | void {
+  indexInformation(options?: IndexInformationOptions, callback?: Callback): Promise<void> | void {
     const args = Array.prototype.slice.call(arguments, 0);
     callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
     options = args.length ? args.shift() || {} : {};
@@ -974,13 +860,13 @@ export class Collection {
   /**
    * Gets an estimate of the count of documents in a collection using collection metadata.
    *
-   * @function
-   * @param {object} [options] Optional settings.
-   * @param {number} [options.maxTimeMS] The maximum amount of time to allow the operation to run.
-   * @param {Collection~countCallback} [callback] The command result callback.
-   * @returns {Promise<void> | void} returns Promise if no callback passed.
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
    */
-  estimatedDocumentCount(options?: any, callback?: Callback): Promise<void> | void {
+  estimatedDocumentCount(
+    options?: EstimatedDocumentCountOptions,
+    callback?: Callback
+  ): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -1008,22 +894,16 @@ export class Collection {
    * [3]: https://docs.mongodb.com/manual/reference/operator/query/center/#op._S_center
    * [4]: https://docs.mongodb.com/manual/reference/operator/query/centerSphere/#op._S_centerSphere
    *
-   * @param {object} [query] the query for the count
-   * @param {object} [options] Optional settings.
-   * @param {object} [options.collation] Specifies a collation.
-   * @param {string|object} [options.hint] The index to use.
-   * @param {number} [options.limit] The maximum number of document to count.
-   * @param {number} [options.maxTimeMS] The maximum amount of time to allow the operation to run.
-   * @param {number} [options.skip] The number of documents to skip before counting.
-   * @param {Collection~countCallback} [callback] The command result callback.
-   * @returns {Promise<void> | void} returns Promise if no callback passed.
+   * @param query The query for the count
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
+   *
    * @see https://docs.mongodb.com/manual/reference/operator/query/expr/
    * @see https://docs.mongodb.com/manual/reference/operator/query/geoWithin/
    * @see https://docs.mongodb.com/manual/reference/operator/query/center/#op._S_center
    * @see https://docs.mongodb.com/manual/reference/operator/query/centerSphere/#op._S_centerSphere
    */
-
-  countDocuments(query: any, options: any, callback: Callback) {
+  countDocuments(query: Document, options: CountDocumentsOptions, callback: Callback) {
     const args = Array.prototype.slice.call(arguments, 0);
     callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
     query = args.length ? args.shift() || {} : {};
@@ -1039,18 +919,17 @@ export class Collection {
   /**
    * The distinct command returns a list of distinct values for the given key across a collection.
    *
-   * @function
-   * @param {string} key Field of the document to find distinct values for.
-   * @param {object} [query] The query for filtering the set of documents to which we apply the distinct filter.
-   * @param {object} [options] Optional settings.
-   * @param {(ReadPreference|string)} [options.readPreference] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
-   * @param {number} [options.maxTimeMS] Number of milliseconds to wait before aborting the query.
-   * @param {object} [options.collation] Specify collation settings for operation. See {@link https://docs.mongodb.com/manual/reference/command/aggregate|aggregation documentation}.
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {Collection~resultCallback} [callback] The command result callback
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param key Field of the document to find distinct values for
+   * @param query The query for filtering the set of documents to which we apply the distinct filter.
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
    */
-  distinct(key: string, query?: object, options?: any, callback?: Callback): Promise<void> | void {
+  distinct(
+    key: string,
+    query?: Document,
+    options?: DistinctOptions,
+    callback?: Callback
+  ): Promise<void> | void {
     const args = Array.prototype.slice.call(arguments, 1);
     callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
     const queryOption = args.length ? args.shift() || {} : {};
@@ -1066,13 +945,10 @@ export class Collection {
   /**
    * Retrieve all the indexes on the collection.
    *
-   * @function
-   * @param {object} [options] Optional settings
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {Collection~resultCallback} [callback] The command result callback
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
    */
-  indexes(options?: any, callback?: Callback): Promise<void> | void {
+  indexes(options?: IndexInformationOptions, callback?: Callback): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -1082,14 +958,10 @@ export class Collection {
   /**
    * Get all the collection statistics.
    *
-   * @function
-   * @param {object} [options] Optional settings.
-   * @param {number} [options.scale] Divide the returned sizes by scale value.
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {Collection~resultCallback} [callback] The collection result callback
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
    */
-  stats(options?: any, callback?: Callback): Promise<void> | void {
+  stats(options?: CollStatsOptions, callback?: Callback): Promise<void> | void {
     const args = Array.prototype.slice.call(arguments, 0);
     callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
     options = args.length ? args.shift() || {} : {};
@@ -1115,21 +987,15 @@ export class Collection {
   /**
    * Find a document and delete it in one atomic operation. Requires a write lock for the duration of the operation.
    *
-   * @function
-   * @param {object} filter The Filter used to select the document to remove
-   * @param {object} [options] Optional settings.
-   * @param {object} [options.collation] Specify collation (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields).
-   * @param {object} [options.projection] Limits the fields to return for all matching documents.
-   * @param {object} [options.sort] Determines which document the operation modifies if the query selects multiple documents.
-   * @param {number} [options.maxTimeMS] The maximum amount of time to allow the query to run.
-   * @param {boolean} [options.checkKeys=false] If true, will throw if bson documents start with `$` or include a `.` in any key value
-   * @param {boolean} [options.serializeFunctions=false] Serialize functions on any object.
-   * @param {boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {Collection~findAndModifyCallback} [callback] The collection result callback
-   * @returns {Promise<void> | void<Collection~findAndModifyWriteOpResultObject>} returns Promise if no callback passed
+   * @param filter The Filter used to select the document to remove
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
    */
-  findOneAndDelete(filter: object, options?: any, callback?: Callback): Promise<void> | void {
+  findOneAndDelete(
+    filter: Document,
+    options?: FindAndModifyOptions,
+    callback?: Callback
+  ): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -1143,29 +1009,15 @@ export class Collection {
   /**
    * Find a document and replace it in one atomic operation. Requires a write lock for the duration of the operation.
    *
-   * @function
-   * @param {object} filter The Filter used to select the document to replace
-   * @param {object} replacement The Document that replaces the matching document
-   * @param {object} [options] Optional settings.
-   * @param {boolean} [options.bypassDocumentValidation=false] Allow driver to bypass schema validation in MongoDB 3.2 or higher.
-   * @param {object} [options.collation] Specify collation (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields).
-   * @param {string|object} [options.hint] An optional index to use for this operation
-   * @param {number} [options.maxTimeMS] The maximum amount of time to allow the query to run.
-   * @param {object} [options.projection] Limits the fields to return for all matching documents.
-   * @param {object} [options.sort] Determines which document the operation modifies if the query selects multiple documents.
-   * @param {boolean} [options.upsert=false] Upsert the document if it does not exist.
-   * @param {boolean} [options.returnOriginal=true] When false, returns the updated document rather than the original. The default is true.
-   * @param {boolean} [options.checkKeys=false] If true, will throw if bson documents start with `$` or include a `.` in any key value
-   * @param {boolean} [options.serializeFunctions=false] Serialize functions on any object.
-   * @param {boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {Collection~findAndModifyCallback} [callback] The collection result callback
-   * @returns {Promise<void> | void<Collection~findAndModifyWriteOpResultObject>} returns Promise if no callback passed
+   * @param filter The Filter used to select the document to replace
+   * @param replacement The Document that replaces the matching document
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
    */
   findOneAndReplace(
-    filter: object,
-    replacement: object,
-    options?: any,
+    filter: Document,
+    replacement: Document,
+    options?: FindAndModifyOptions,
     callback?: Callback
   ): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
@@ -1181,30 +1033,15 @@ export class Collection {
   /**
    * Find a document and update it in one atomic operation. Requires a write lock for the duration of the operation.
    *
-   * @function
-   * @param {object} filter The Filter used to select the document to update
-   * @param {object} update Update operations to be performed on the document
-   * @param {object} [options] Optional settings.
-   * @param {Array} [options.arrayFilters] optional list of array filters referenced in filtered positional operators
-   * @param {boolean} [options.bypassDocumentValidation=false] Allow driver to bypass schema validation in MongoDB 3.2 or higher.
-   * @param {object} [options.collation] Specify collation (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields).
-   * @param {string|object} [options.hint] An optional index to use for this operation
-   * @param {number} [options.maxTimeMS] The maximum amount of time to allow the query to run.
-   * @param {object} [options.projection] Limits the fields to return for all matching documents.
-   * @param {object} [options.sort] Determines which document the operation modifies if the query selects multiple documents.
-   * @param {boolean} [options.upsert=false] Upsert the document if it does not exist.
-   * @param {boolean} [options.returnOriginal=true] When false, returns the updated document rather than the original. The default is true.
-   * @param {boolean} [options.checkKeys=false] If true, will throw if bson documents start with `$` or include a `.` in any key value
-   * @param {boolean} [options.serializeFunctions=false] Serialize functions on any object.
-   * @param {boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
-   * @param {ClientSession} [options.session] An ptional session to use for this operation
-   * @param {Collection~findAndModifyCallback} [callback] The collection result callback
-   * @returns {Promise<void> | void<Collection~findAndModifyWriteOpResultObject>} returns Promise if no callback passed
+   * @param filter The Filter used to select the document to update
+   * @param update Update operations to be performed on the document
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
    */
   findOneAndUpdate(
-    filter: object,
-    update: object,
-    options?: any,
+    filter: Document,
+    update: Document,
+    options?: FindAndModifyOptions,
     callback?: Callback
   ): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
@@ -1220,29 +1057,10 @@ export class Collection {
   /**
    * Execute an aggregation framework pipeline against the collection, needs MongoDB >= 2.2
    *
-   * @function
-   * @param {object} [pipeline=[]] Array containing all the aggregation framework commands for the execution.
-   * @param {object} [options] Optional settings.
-   * @param {(ReadPreference|string)} [options.readPreference] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
-   * @param {number} [options.batchSize=1000] The number of documents to return per batch. See {@link https://docs.mongodb.com/manual/reference/command/aggregate|aggregation documentation}.
-   * @param {object} [options.cursor] Return the query as cursor, on 2.6 > it returns as a real cursor on pre 2.6 it returns as an emulated cursor.
-   * @param {number} [options.cursor.batchSize=1000] Deprecated. Use `options.batchSize`
-   * @param {boolean} [options.explain=false] Explain returns the aggregation execution plan (requires mongodb 2.6 >).
-   * @param {boolean} [options.allowDiskUse=false] allowDiskUse lets the server know if it can use disk to store temporary results for the aggregation (requires mongodb 2.6 >).
-   * @param {number} [options.maxTimeMS] maxTimeMS specifies a cumulative time limit in milliseconds for processing operations on the cursor. MongoDB interrupts the operation at the earliest following interrupt point.
-   * @param {number} [options.maxAwaitTimeMS] The maximum amount of time for the server to wait on new documents to satisfy a tailable cursor query.
-   * @param {boolean} [options.bypassDocumentValidation=false] Allow driver to bypass schema validation in MongoDB 3.2 or higher.
-   * @param {boolean} [options.raw=false] Return document results as raw BSON buffers.
-   * @param {boolean} [options.promoteLongs=true] Promotes Long values to number if they fit inside the 53 bits resolution.
-   * @param {boolean} [options.promoteValues=true] Promotes BSON values to native types where possible, set to false to only receive wrapper types.
-   * @param {boolean} [options.promoteBuffers=false] Promotes Binary BSON values to native Node Buffers.
-   * @param {object} [options.collation] Specify collation (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields).
-   * @param {string} [options.comment] Add a comment to an aggregation command
-   * @param {string|object} [options.hint] Add an index selection hint to an aggregation command
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @returns {AggregationCursor}
+   * @param pipeline An array of aggregation pipelines to execute
+   * @param options Optional settings for the command
    */
-  aggregate(pipeline: Document[] = [], options?: any): AggregationCursor {
+  aggregate(pipeline: Document[], options?: AggregateOptions): AggregationCursor {
     if (arguments.length > 2) {
       throw new TypeError('Third parameter to `collection.aggregate()` must be undefined');
     }
@@ -1292,7 +1110,6 @@ export class Collection {
   /**
    * Create a new Change Stream, watching for new changes (insertions, updates, replacements, deletions, and invalidations) in this collection.
    *
-   * @function
    * @since 3.0.0
    * @param {Array} [pipeline] An array of {@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents. This allows for filtering (using $match) and manipulating the change stream documents.
    * @param {object} [options] Optional settings
@@ -1322,30 +1139,20 @@ export class Collection {
   /**
    * Run Map Reduce across a collection. Be aware that the inline option for out will return an array of results not a collection.
    *
-   * @function
-   * @param {(Function|string)} map The mapping function.
-   * @param {(Function|string)} reduce The reduce function.
-   * @param {object} [options] Optional settings.
-   * @param {(ReadPreference|string)} [options.readPreference] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
-   * @param {object} [options.out] Sets the output target for the map reduce job. *{inline:1} | {replace:'collectionName'} | {merge:'collectionName'} | {reduce:'collectionName'}*
-   * @param {object} [options.query] Query filter object.
-   * @param {object} [options.sort] Sorts the input objects using this key. Useful for optimization, like sorting by the emit key for fewer reduces.
-   * @param {number} [options.limit] Number of objects to return from collection.
-   * @param {boolean} [options.keeptemp=false] Keep temporary data.
-   * @param {(Function|string)} [options.finalize] Finalize function.
-   * @param {object} [options.scope] Can pass in variables that can be access from map/reduce/finalize.
-   * @param {boolean} [options.jsMode=false] It is possible to make the execution stay in JS. Provided in MongoDB > 2.0.X.
-   * @param {boolean} [options.verbose=false] Provide statistics on job execution time.
-   * @param {boolean} [options.bypassDocumentValidation=false] Allow driver to bypass schema validation in MongoDB 3.2 or higher.
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {Collection~resultCallback} [callback] The command result callback
-   * @throws {MongoError}
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param map The mapping function.
+   * @param reduce The reduce function.
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
    */
-  mapReduce(map: any, reduce: any, options?: any, callback?: Callback): Promise<void> | void {
+  mapReduce(
+    map: string | MapFunction,
+    reduce: string | ReduceFunction,
+    options?: MapReduceOptions,
+    callback?: Callback
+  ): Promise<void> | void {
     if ('function' === typeof options) (callback = options), (options = {});
     // Out must allways be defined (make sure we don't break weirdly on pre 1.8+ servers)
-    if (null == options.out) {
+    if (options?.out == null) {
       throw new Error(
         'the out option parameter must be defined, see mongodb docs for possible values'
       );
@@ -1430,12 +1237,9 @@ const DEPRECATED_FIND_OPTIONS = ['maxScan', 'fields', 'snapshot', 'oplogReplay']
 /**
  * Creates a cursor for a query that can be used to iterate over results from MongoDB
  *
- * @deprecated
- * @param {object} [query={}] The cursor query object.
- * @param {object} [options] Optional settings.
- * @param {ClientSession} [options.session] optional session to use for this operation
- * @throws {MongoError}
- * @returns {Cursor}
+ * @param query The cursor query object.
+ * @param options Optional settings for the command
+ * @param callback An optional callback, a Promise will be returned if none is provided
  */
 Collection.prototype.find = deprecateOptions(
   {
@@ -1443,7 +1247,7 @@ Collection.prototype.find = deprecateOptions(
     deprecatedOptions: DEPRECATED_FIND_OPTIONS,
     optionsIndex: 1
   },
-  function (this: any, query: any, options: FindOptions) {
+  function (this: Collection, query: Document, options?: FindOptions) {
     if (arguments.length > 2) {
       throw new TypeError('Third parameter to `collection.find()` must be undefined');
     }
@@ -1479,7 +1283,9 @@ Collection.prototype.find = deprecateOptions(
       selector = { _id: selector };
     }
 
-    if (!options) options = {};
+    if (!options) {
+      options = {};
+    }
 
     let projection = options.projection || options.fields;
 
@@ -1776,37 +1582,9 @@ Collection.prototype.remove = deprecate(function (
 /**
  * Fetches the first document that matches the query
  *
- * @function
- * @param {object} query Query for find Operation
- * @param {object} [options] Optional settings.
- * @param {number} [options.limit=0] Sets the limit of documents returned in the query.
- * @param {(Array|object)} [options.sort] Set to sort the documents coming back from the query. Array of indexes, [['a', 1]] etc.
- * @param {object} [options.projection] The fields to return in the query. Object of fields to include or exclude (not both), {'a':1}
- * @param {object} [options.fields] **Deprecated** Use `options.projection` instead
- * @param {number} [options.skip=0] Set to skip N documents ahead in your query (useful for pagination).
- * @param {object} [options.hint] Tell the query to use specific indexes in the query. Object of indexes to use, {'_id':1}
- * @param {boolean} [options.explain=false] Explain the query instead of returning the data.
- * @param {boolean} [options.snapshot=false] DEPRECATED: Snapshot query.
- * @param {boolean} [options.timeout=false] Specify if the cursor can timeout.
- * @param {boolean} [options.tailable=false] Specify if the cursor is tailable.
- * @param {number} [options.batchSize=1] Set the batchSize for the getMoreCommand when iterating over the query results.
- * @param {boolean} [options.returnKey=false] Only return the index key.
- * @param {number} [options.maxScan] DEPRECATED: Limit the number of items to scan.
- * @param {number} [options.min] Set index bounds.
- * @param {number} [options.max] Set index bounds.
- * @param {boolean} [options.showDiskLoc=false] Show disk location of results.
- * @param {string} [options.comment] You can put a $comment field on a query to make looking in the profiler logs simpler.
- * @param {boolean} [options.raw=false] Return document results as raw BSON buffers.
- * @param {boolean} [options.promoteLongs=true] Promotes Long values to number if they fit inside the 53 bits resolution.
- * @param {boolean} [options.promoteValues=true] Promotes BSON values to native types where possible, set to false to only receive wrapper types.
- * @param {boolean} [options.promoteBuffers=false] Promotes Binary BSON values to native Node Buffers.
- * @param {(ReadPreference|string)} [options.readPreference] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
- * @param {boolean} [options.partial=false] Specify if the cursor should return partial results when querying against a sharded system
- * @param {number} [options.maxTimeMS] Number of milliseconds to wait before aborting the query.
- * @param {object} [options.collation] Specify collation (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields).
- * @param {ClientSession} [options.session] optional session to use for this operation
- * @param {Collection~resultCallback} [callback] The command result callback
- * @returns {Promise<void> | void} returns Promise if no callback passed
+ * @param query Query for find Operation
+ * @param options Optional settings for the command
+ * @param callback An optional callback, a Promise will be returned if none is provided
  */
 Collection.prototype.findOne = deprecateOptions(
   {
@@ -1814,7 +1592,7 @@ Collection.prototype.findOne = deprecateOptions(
     deprecatedOptions: DEPRECATED_FIND_OPTIONS,
     optionsIndex: 1
   },
-  function (this: any, query: any, options: any, callback: Callback) {
+  function (this: Collection, query: any, options?: any, callback?: Callback) {
     if (callback !== undefined && typeof callback !== 'function') {
       throw new TypeError('Third parameter to `findOne()` must be a callback or undefined');
     }
@@ -1844,31 +1622,15 @@ Collection.prototype.dropAllIndexes = deprecate(
 /**
  * Ensures that an index exists, if it does not it creates it
  *
- * @function
  * @deprecated use createIndexes instead
- * @param {(string|object)} fieldOrSpec Defines the index.
- * @param {object} [options] Optional settings.
- * @param {(number|string)} [options.w] The write concern.
- * @param {number} [options.wtimeout] The write concern timeout.
- * @param {boolean} [options.j=false] Specify a journal write concern.
- * @param {boolean} [options.unique=false] Creates an unique index.
- * @param {boolean} [options.sparse=false] Creates a sparse index.
- * @param {boolean} [options.background=false] Creates the index in the background, yielding whenever possible.
- * @param {boolean} [options.dropDups=false] A unique index cannot be created on a key that has pre-existing duplicate values. If you would like to create the index anyway, keeping the first document the database indexes and deleting all subsequent documents that have duplicate value
- * @param {number} [options.min] For geospatial indexes set the lower bound for the co-ordinates.
- * @param {number} [options.max] For geospatial indexes set the high bound for the co-ordinates.
- * @param {number} [options.v] Specify the format version of the indexes.
- * @param {number} [options.expireAfterSeconds] Allows you to expire data on indexes applied to a data (MongoDB 2.2 or higher)
- * @param {number} [options.name] Override the autogenerated index name (useful if the resulting name is larger than 128 bytes)
- * @param {object} [options.collation] Specify collation (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields).
- * @param {ClientSession} [options.session] optional session to use for this operation
- * @param {Collection~resultCallback} [callback] The command result callback
- * @returns {Promise<void> | void} returns Promise if no callback passed
+ * @param fieldOrSpec Defines the index.
+ * @param options Optional settings for the command
+ * @param callback An optional callback, a Promise will be returned if none is provided
  */
 Collection.prototype.ensureIndex = deprecate(function (
   this: any,
-  fieldOrSpec: any,
-  options: any,
+  fieldOrSpec: string | Document,
+  options: CreateIndexesOptions,
   callback: Callback
 ) {
   if (typeof options === 'function') (callback = options), (options = {});
@@ -1897,24 +1659,16 @@ Collection.prototype.ensureIndex = deprecate(function (
  * in a collection. To obtain an accurate count of documents in the collection, use {@link Collection#countDocuments countDocuments}.
  * To obtain an estimated count of all documents in the collection, use {@link Collection#estimatedDocumentCount estimatedDocumentCount}.
  *
- * @function
- * @param {object} [query={}] The query for the count.
- * @param {object} [options] Optional settings.
- * @param {object} [options.collation] Specify collation settings for operation. See {@link https://docs.mongodb.com/manual/reference/command/aggregate|aggregation documentation}.
- * @param {boolean} [options.limit] The limit of documents to count.
- * @param {boolean} [options.skip] The number of documents to skip for the count.
- * @param {string} [options.hint] An index name hint for the query.
- * @param {(ReadPreference|string)} [options.readPreference] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
- * @param {number} [options.maxTimeMS] Number of milliseconds to wait before aborting the query.
- * @param {ClientSession} [options.session] optional session to use for this operation
- * @param {Collection~countCallback} [callback] The command result callback
- * @returns {Promise<void> | void} returns Promise if no callback passed
  * @deprecated use {@link Collection#countDocuments countDocuments} or {@link Collection#estimatedDocumentCount estimatedDocumentCount} instead
+ *
+ * @param query The query for the count.
+ * @param options Optional settings for the command
+ * @param callback An optional callback, a Promise will be returned if none is provided
  */
 Collection.prototype.count = deprecate(function (
-  this: any,
-  query: any,
-  options: any,
+  this: Collection,
+  query: Document,
+  options: CountOptions,
   callback: Callback
 ) {
   const args = Array.prototype.slice.call(arguments, 0);
@@ -1936,24 +1690,13 @@ Collection.prototype.count = deprecate(function (
 /**
  * Find and update a document.
  *
- * @function
- * @param {object} query Query object to locate the object to modify.
- * @param {Array} sort If multiple docs match, choose the first one in the specified sort order as the object to manipulate.
- * @param {object} doc The fields/vals to be updated.
- * @param {object} [options] Optional settings.
- * @param {(number|string)} [options.w] The write concern.
- * @param {number} [options.wtimeout] The write concern timeout.
- * @param {boolean} [options.j=false] Specify a journal write concern.
- * @param {boolean} [options.remove=false] Set to true to remove the object before returning.
- * @param {boolean} [options.upsert=false] Perform an upsert operation.
- * @param {boolean} [options.new=false] Set to true if you want to return the modified object rather than the original. Ignored for remove.
- * @param {object} [options.projection] Object containing the field projection for the result returned from the operation.
- * @param {object} [options.fields] **Deprecated** Use `options.projection` instead
- * @param {ClientSession} [options.session] optional session to use for this operation
- * @param {Array} [options.arrayFilters] optional list of array filters referenced in filtered positional operators
- * @param {Collection~findAndModifyCallback} [callback] The command result callback
- * @returns {Promise<void> | void} returns Promise if no callback passed
  * @deprecated use findOneAndUpdate, findOneAndReplace or findOneAndDelete instead
+ *
+ * @param query Query object to locate the object to modify.
+ * @param sort If multiple docs match, choose the first one in the specified sort order as the object to manipulate.
+ * @param doc The fields/vals to be updated.
+ * @param options Optional settings for the command
+ * @param callback An optional callback, a Promise will be returned if none is provided
  */
 Collection.prototype.findAndModify = deprecate(
   _findAndModify,
@@ -1963,11 +1706,11 @@ Collection.prototype.findAndModify = deprecate(
 Collection.prototype._findAndModify = _findAndModify;
 
 function _findAndModify(
-  this: any,
-  query: any,
-  sort: any,
-  doc: any,
-  options: any,
+  this: Collection,
+  query: Document,
+  sort: Document,
+  doc: Document,
+  options: FindAndModifyOptions,
   callback: Callback
 ) {
   const args = Array.prototype.slice.call(arguments, 1);
@@ -1991,23 +1734,18 @@ function _findAndModify(
 /**
  * Find and remove a document.
  *
- * @function
- * @param {object} query Query object to locate the object to modify.
- * @param {Array} sort If multiple docs match, choose the first one in the specified sort order as the object to manipulate.
- * @param {object} [options] Optional settings.
- * @param {(number|string)} [options.w] The write concern.
- * @param {number} [options.wtimeout] The write concern timeout.
- * @param {boolean} [options.j=false] Specify a journal write concern.
- * @param {ClientSession} [options.session] optional session to use for this operation
- * @param {Collection~resultCallback} [callback] The command result callback
- * @returns {Promise<void> | void} returns Promise if no callback passed
  * @deprecated use findOneAndDelete instead
+ *
+ * @param query Query object to locate the object to modify.
+ * @param sort If multiple docs match, choose the first one in the specified sort order as the object to manipulate.
+ * @param options Optional settings for the command
+ * @param callback An optional callback, a Promise will be returned if none is provided
  */
 Collection.prototype.findAndRemove = deprecate(function (
-  this: any,
-  query: any,
-  sort: any,
-  options: any,
+  this: Collection,
+  query: Document,
+  sort: Document,
+  options: FindAndModifyOptions,
   callback: Callback
 ) {
   const args = Array.prototype.slice.call(arguments, 1);
@@ -2020,7 +1758,7 @@ Collection.prototype.findAndRemove = deprecate(function (
 
   return executeOperation(
     this.s.topology,
-    new FindAndModifyOperation(this, query, sort, null, options),
+    new FindAndModifyOperation(this, query, sort, undefined, options),
     callback
   );
 },
