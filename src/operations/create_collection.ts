@@ -52,9 +52,9 @@ export interface CreateCollectionOptions extends CommandOperationOptions {
   /** The name of the source collection or view from which to create the view. The name is not the full namespace of the collection or view; i.e. does not include the database name and implies the same database as the view to create on MongoDB 3.4 or higher */
   viewOn?: string;
   /** An array that consists of the aggregation pipeline stage. Creates the view by applying the specified pipeline to the viewOn collection or view on MongoDB 3.4 or higher */
-  pipeline: Document[];
+  pipeline?: Document[];
   /** A primary key factory object for generation of custom _id keys. */
-  pkFactory: PkFactory;
+  pkFactory?: PkFactory;
 }
 
 export class CreateCollectionOperation extends CommandOperation<CreateCollectionOptions> {
