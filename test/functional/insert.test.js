@@ -490,7 +490,7 @@ describe('Insert', function () {
 
           // Locate document
           collection.findOne({}, function (err, item) {
-            test.equal(null, item.i);
+            expect(item.i).to.not.exist;
 
             client.close(done);
           });
@@ -928,7 +928,7 @@ describe('Insert', function () {
         var collection = db.collection('Should_fail_on_insert_due_to_key_starting_with');
         collection.insert(doc, configuration.writeConcernMax(), function (err, result) {
           test.ok(err != null);
-          test.equal(null, result);
+          expect(result).to.not.exist;
 
           client.close(done);
         });
@@ -969,7 +969,7 @@ describe('Insert', function () {
               test.equal(1, result.result.n);
 
               collection.findOne({ str: 'String' }, function (err, item) {
-                test.equal(undefined, item.d);
+                expect(item.d).to.not.exist;
 
                 // Execute a safe insert with replication to two servers
                 collection.findAndModify(
@@ -1152,7 +1152,7 @@ describe('Insert', function () {
 
           // Update two fields
           collection.insert({ _id: 1 }, configuration.writeConcernMax(), function (err, r) {
-            test.equal(r, null);
+            expect(r).to.not.exist;
             test.ok(err != null);
             test.ok(err.result);
 
@@ -2284,7 +2284,7 @@ describe('Insert', function () {
               [{ a: 1 }, { a: 2 }, { a: 1 }, { a: 3 }, { a: 1 }],
               { ordered: true },
               function (err, r) {
-                test.equal(r, null);
+                expect(r).to.not.exist;
                 test.ok(err != null);
                 test.ok(err.result);
 
@@ -2324,7 +2324,7 @@ describe('Insert', function () {
               [{ a: 1 }, { a: 2 }, { a: 1 }, { a: 3 }, { a: 1 }],
               { ordered: true },
               function (err, r) {
-                test.equal(r, null);
+                expect(r).to.not.exist;
                 test.ok(err != null);
                 test.ok(err.result);
 
@@ -2365,7 +2365,7 @@ describe('Insert', function () {
         db.collection('apm_test')
           .insertOne({ a: 1 }, { forceServerObjectId: true })
           .then(function () {
-            test.equal(undefined, started[0].command.documents[0]._id);
+            expect(started[0].command.documents[0]._id).to.not.exist;
             listener.uninstrument();
 
             client.close(done);
@@ -2402,7 +2402,7 @@ describe('Insert', function () {
         db.collection('apm_test')
           .insertMany([{ a: 1 }], { forceServerObjectId: true })
           .then(function () {
-            test.equal(undefined, started[0].command.documents[0]._id);
+            expect(started[0].command.documents[0]._id).to.not.exist;
 
             listener.uninstrument();
             client.close(done);
@@ -2439,7 +2439,7 @@ describe('Insert', function () {
         db.collection('apm_test')
           .insertMany([{ a: 1 }], { forceServerObjectId: true })
           .then(function () {
-            test.equal(undefined, started[0].command.documents[0]._id);
+            expect(started[0].command.documents[0]._id).to.not.exist;
 
             listener.uninstrument();
             client.close(done);

@@ -100,7 +100,7 @@ describe('CRUD API', function () {
 
                 clonedCursor.next(function (err, doc) {
                   expect(err).to.not.exist;
-                  test.equal(null, doc);
+                  expect(doc).to.not.exist;
                   streamMethod();
                 });
               });

@@ -778,7 +778,7 @@ describe('Find', function () {
                   test.equal(3, documents.length);
 
                   documents.forEach(function (doc, idx) {
-                    test.equal(undefined, doc.b); // making sure field select works
+                    expect(doc.b).to.not.exist; // making sure field select works
                     test.equal(24 - idx, doc.a); // checking limit sort object with field select
                   });
 
@@ -1048,7 +1048,7 @@ describe('Find', function () {
             { $set: { name: 'test2' } },
             {},
             function (err, updated_doc) {
-              test.equal(null, updated_doc.value);
+              expect(updated_doc.value).to.not.exist;
               test.ok(err == null || err.errmsg.match('No matching object found'));
               client.close(done);
             }
@@ -1425,13 +1425,13 @@ describe('Find', function () {
 
               // Get one document, excluding the _id field
               collection.findOne({ a: 1 }, { fields: { _id: 0 } }, function (err, item) {
-                test.equal(undefined, item._id);
+                expect(item._id).to.not.exist;
                 test.equal(1, item.a);
                 test.equal(2, item.c);
 
                 collection.find({ a: 1 }, { fields: { _id: 0 } }).toArray(function (err, items) {
                   var item = items[0];
-                  test.equal(undefined, item._id);
+                  expect(item._id).to.not.exist;
                   test.equal(1, item.a);
                   test.equal(2, item.c);
                   p_client.close(done);
@@ -1493,7 +1493,7 @@ describe('Find', function () {
               updated_doc
             ) {
               expect(err).to.not.exist;
-              test.equal(null, updated_doc.value);
+              expect(updated_doc.value).to.not.exist;
               client.close(done);
             });
           }
@@ -1915,7 +1915,7 @@ describe('Find', function () {
                 .toArray(function (err, docs) {
                   expect(err).to.not.exist;
                   test.equal(1, docs.length);
-                  test.equal(undefined, docs[0].a);
+                  expect(docs[0].a).to.not.exist;
                   test.equal(2, docs[0].b);
 
                   // Perform a simple find and return all the documents
@@ -1925,7 +1925,7 @@ describe('Find', function () {
                     .toArray(function (err, docs) {
                       expect(err).to.not.exist;
                       test.equal(1, docs.length);
-                      test.equal(undefined, docs[0].a);
+                      expect(docs[0].a).to.not.exist;
                       test.equal(2, docs[0].b);
 
                       client.close(done);
@@ -1974,7 +1974,7 @@ describe('Find', function () {
                 .toArray(function (err, docs) {
                   expect(err).to.not.exist;
                   test.equal(1, docs.length);
-                  test.equal(undefined, docs[0].a);
+                  expect(docs[0].a).to.not.exist;
                   test.equal(2, docs[0].b);
 
                   client.close(done);
@@ -2186,7 +2186,7 @@ describe('Find', function () {
         db.collection('noresultAvailableForEachToIterate', function (err, collection) {
           // Perform a simple find and return all the documents
           collection.find({}).each(function (err, item) {
-            test.equal(null, item);
+            expect(item).to.not.exist;
 
             client.close(done);
           });
@@ -2335,8 +2335,8 @@ describe('Find', function () {
         var collection = db.collection('shouldNotMutateUserOptions');
         var options = { raw: 'TEST' };
         collection.find({}, options);
-        test.equal(undefined, options.skip);
-        test.equal(undefined, options.limit);
+        expect(options.skip).to.not.exist;
+        expect(options.limit).to.not.exist;
         test.equal('TEST', options.raw);
         client.close(done);
       });

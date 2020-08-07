@@ -635,7 +635,7 @@ describe('GridFS Stream', function () {
           });
 
           downloadStream.on('end', function () {
-            test.equal(downloadStream.s.cursor, null);
+            expect(downloadStream.s.cursor).to.not.exist;
             if (finished.close) {
               client.close(done);
               return;
@@ -652,7 +652,7 @@ describe('GridFS Stream', function () {
           });
 
           downloadStream.abort(function (error) {
-            test.equal(error, undefined);
+            expect(error).to.not.exist;
           });
         });
 
@@ -976,7 +976,7 @@ describe('GridFS Stream', function () {
           stream.on('end', function () {
             // As per spec, make sure we didn't actually fire a query
             // because the document length is 0
-            test.equal(stream.s.cursor, null);
+            expect(stream.s.cursor).to.not.exist;
             client.close(done);
           });
         });
@@ -1089,7 +1089,7 @@ describe('GridFS Stream', function () {
           client.connect(function (err, client) {
             var db = client.db(configuration.db);
             db.dropDatabase(function (err) {
-              test.equal(err, null);
+              expect(err).to.not.exist;
               var BUCKET_NAME = 'fs';
 
               var _runTest = function () {
@@ -1284,7 +1284,7 @@ describe('GridFS Stream', function () {
         var id = uploadStream.id;
         var query = { files_id: id };
         uploadStream.write('a', 'utf8', function (error) {
-          test.equal(undefined, error);
+          expect(error).to.not.exist;
 
           db.collection(CHUNKS_COLL).count(query, function (error, c) {
             expect(error).to.not.exist;

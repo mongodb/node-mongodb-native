@@ -1638,7 +1638,7 @@ describe('Cursor', function () {
                 expect(err).to.not.exist;
                 test.equal(1, items.length);
                 test.equal(2, items[0].a);
-                test.equal(undefined, items[0].x);
+                expect(items[0].x).to.not.exist;
                 client.close(done);
               });
           });
@@ -1671,7 +1671,7 @@ describe('Cursor', function () {
               expect(err).to.not.exist;
               test.equal(1, items.length);
               test.equal(2, items[0].a);
-              test.equal(undefined, items[0].x);
+              expect(items[0].x).to.not.exist;
               client.close(done);
             });
           });
@@ -1862,7 +1862,7 @@ describe('Cursor', function () {
                   ++doneCalled;
 
                   if (doneCalled === 1) {
-                    test.equal(undefined, err);
+                    expect(err).to.not.exist;
                     test.strictEqual(0, i);
                     test.strictEqual(true, stream.isClosed());
                     client.close(done);
