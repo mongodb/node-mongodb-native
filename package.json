@@ -65,6 +65,7 @@
   },
   "scripts": {
     "atlas": "mocha --opts '{}' ./test/manual/atlas_connectivity.test.js",
+    "check:kerberos": "mocha --opts '{}' test/manual/kerberos.test.js",
     "check:ldap": "mocha --opts '{}' test/manual/ldap.test.js",
     "check:tls": "mocha --opts '{}' test/manual/tls_support.test.js",
     "test": "npm run lint && mocha --recursive test/functional test/unit test/core",

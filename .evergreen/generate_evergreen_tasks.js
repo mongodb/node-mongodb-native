@@ -108,6 +108,14 @@ TASKS.push(
     commands: [{ func: 'install dependencies' }, { func: 'run atlas tests' }]
   },
   {
+    name: 'test-auth-kerberos',
+    tags: ['auth', 'kerberos'],
+    commands: [
+      { func: 'install dependencies' },
+      { func: 'run kerberos tests' }
+    ]
+  },
+  {
     name: 'test-auth-ldap',
     tags: ['auth', 'ldap'],
     commands: [{ func: 'install dependencies' }, { func: 'run ldap tests' }]
