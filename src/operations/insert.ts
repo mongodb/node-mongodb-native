@@ -7,6 +7,8 @@ import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
+import type { ObjectId } from 'bson';
+import type { Connection } from '../cmap/connection';
 
 export interface InsertOptions extends CommandOperationOptions {
   /** Allow driver to bypass schema validation in MongoDB 3.2 or higher. */
@@ -37,6 +39,19 @@ export class InsertOperation extends OperationBase<InsertOptions> {
       callback
     );
   }
+}
+
+export interface InsertOneResult {
+  /** The total amount of documents inserted */
+  insertedCount: number;
+  /** The driver generated ObjectId for the insert operation */
+  insertedId: ObjectId;
+  /** All the documents inserted using insertOne/insertMany/replaceOne. Documents contain the _id field if forceServerObjectId == false for insertOne/insertMany */
+  ops: Document[];
+  /** The connection object used for the operation */
+  connection: Connection;
+  /** The raw command result object returned from MongoDB (content might vary by server version) */
+  result: Document;
 }
 
 export class InsertOneOperation extends CommandOperation<InsertOptions> {

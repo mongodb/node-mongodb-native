@@ -6,9 +6,21 @@ import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
+import type { Connection } from '../cmap/connection';
 
 export interface DeleteOptions extends CommandOperationOptions {
   single?: boolean;
+}
+
+export interface DeleteResult {
+  /** Indicates whether this write result was acknowledged */
+  acknowledged: boolean;
+  /** The number of documents that were deleted */
+  deletedCount: number;
+  /** The raw result returned from MongoDB. Will vary depending on server version */
+  result: Document;
+  /** The connection object used for the operation */
+  connection: Connection;
 }
 
 export class DeleteOperation extends OperationBase<DeleteOptions> {

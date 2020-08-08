@@ -52,9 +52,14 @@ import {
   FindAndModifyOptions
 } from './operations/find_and_modify';
 import { InsertManyOperation } from './operations/insert_many';
-import { InsertOneOperation } from './operations/insert';
+import { InsertOneOperation, InsertOneResult } from './operations/insert';
 import { UpdateOneOperation, UpdateManyOperation, UpdateResult } from './operations/update';
-import { DeleteOneOperation, DeleteManyOperation, DeleteOptions } from './operations/delete';
+import {
+  DeleteOneOperation,
+  DeleteManyOperation,
+  DeleteOptions,
+  DeleteResult
+} from './operations/delete';
 import { IsCappedOperation } from './operations/is_capped';
 import {
   MapReduceOperation,
@@ -315,7 +320,11 @@ export class Collection {
    * @param options Optional settings for the command
    * @param callback An optional callback, a Promise will be returned if none is provided
    */
-  insertOne(doc: Document, options?: InsertOptions, callback?: Callback): Promise<void> | void {
+  insertOne(
+    doc: Document,
+    options?: InsertOptions,
+    callback?: Callback<InsertOneResult>
+  ): Promise<InsertOneResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -351,14 +360,6 @@ export class Collection {
       callback
     );
   }
-
-  /**
-   * The callback format for inserts
-   *
-   * @callback Collection~bulkWriteOpCallback
-   * @param {BulkWriteError} error An error instance representing the error during the execution.
-   * @param {Collection~BulkWriteOpResult} result The result object if the command was executed successfully.
-   */
 
   /**
    * Perform a bulkWrite operation without a fluent API
@@ -501,30 +502,17 @@ export class Collection {
   }
 
   /**
-   * @typedef {object} Collection~deleteWriteOpResult
-   * @property {object} result The raw result returned from MongoDB. Will vary depending on server version.
-   * @property {number} result.ok Is 1 if the command executed correctly.
-   * @property {number} result.n The total count of documents deleted.
-   * @property {object} connection The connection object used for the operation.
-   * @property {number} deletedCount The number of documents deleted.
-   */
-
-  /**
-   * The callback format for deletes
-   *
-   * @callback Collection~deleteWriteOpCallback
-   * @param {MongoError} error An error instance representing the error during the execution.
-   * @param {Collection~deleteWriteOpResult} result The result object if the command was executed successfully.
-   */
-
-  /**
    * Delete a document from a collection
    *
    * @param filter The Filter used to select the document to remove
    * @param options Optional settings for the command
    * @param callback An optional callback, a Promise will be returned if none is provided
    */
-  deleteOne(filter: Document, options?: DeleteOptions, callback?: Callback): Promise<void> | void {
+  deleteOne(
+    filter: Document,
+    options?: DeleteOptions,
+    callback?: Callback<DeleteResult>
+  ): Promise<DeleteResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, options);
 
@@ -548,13 +536,17 @@ export class Collection {
    * @param options Optional settings for the command
    * @param callback An optional callback, a Promise will be returned if none is provided
    */
-  deleteMany(filter: Document, options?: DeleteOptions, callback?: Callback): Promise<void> | void {
+  deleteMany(
+    filter: Document,
+    options?: DeleteOptions,
+    callback?: Callback<DeleteResult>
+  ): Promise<DeleteResult> | void {
     if (filter == null) {
       filter = {};
       options = {};
       callback = undefined;
     } else if (typeof filter === 'function') {
-      callback = filter as Callback;
+      callback = filter as Callback<DeleteResult>;
       filter = {};
       options = {};
     } else if (typeof options === 'function') {
@@ -578,21 +570,17 @@ export class Collection {
   }
 
   /**
-   * The callback format for the collection method, must be used if strict is specified
-   *
-   * @callback Collection~collectionResultCallback
-   * @param {MongoError} error An error instance representing the error during the execution.
-   * @param {Collection} collection The collection instance.
-   */
-
-  /**
    * Rename the collection.
    *
    * @param newName New name of of the collection.
    * @param options Optional settings for the command
    * @param callback An optional callback, a Promise will be returned if none is provided
    */
-  rename(newName: string, options?: RenameOptions, callback?: Callback): Promise<void> | void {
+  rename(
+    newName: string,
+    options?: RenameOptions,
+    callback?: Callback<Collection>
+  ): Promise<Collection> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, options, { readPreference: ReadPreference.PRIMARY });
 
@@ -605,7 +593,7 @@ export class Collection {
    * @param options Optional settings for the command
    * @param callback An optional callback, a Promise will be returned if none is provided
    */
-  drop(options?: DropCollectionOptions, callback?: Callback): Promise<void> | void {
+  drop(options?: DropCollectionOptions, callback?: Callback<boolean>): Promise<boolean> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -622,7 +610,7 @@ export class Collection {
    * @param options Optional settings for the command
    * @param callback An optional callback, a Promise will be returned if none is provided
    */
-  options(options?: OperationOptions, callback?: Callback): Promise<void> | void {
+  options(options?: OperationOptions, callback?: Callback<Document>): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -635,7 +623,7 @@ export class Collection {
    * @param options Optional settings for the command
    * @param callback An optional callback, a Promise will be returned if none is provided
    */
-  isCapped(options?: OperationOptions, callback?: Callback): Promise<void> | void {
+  isCapped(options?: OperationOptions, callback?: Callback<boolean>): Promise<boolean> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -672,8 +660,8 @@ export class Collection {
   createIndex(
     fieldOrSpec: string | Document,
     options?: CreateIndexesOptions,
-    callback?: Callback
-  ): Promise<void> | void {
+    callback?: Callback<string>
+  ): Promise<string> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -717,8 +705,8 @@ export class Collection {
   createIndexes(
     indexSpecs: any,
     options?: CreateIndexesOptions,
-    callback?: Callback
-  ): Promise<void> | void {
+    callback?: Callback<Document>
+  ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options ? Object.assign({}, options) : {};
     if (typeof options.maxTimeMS !== 'number') delete options.maxTimeMS;
@@ -740,8 +728,8 @@ export class Collection {
   dropIndex(
     indexName: string,
     options?: DropIndexesOptions,
-    callback?: Callback
-  ): Promise<void> | void {
+    callback?: Callback<Document>
+  ): Promise<Document> | void {
     const args = Array.prototype.slice.call(arguments, 1);
     callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
     options = args.length ? args.shift() : {};
@@ -763,7 +751,10 @@ export class Collection {
    * @param options Optional settings for the command
    * @param callback An optional callback, a Promise will be returned if none is provided
    */
-  dropIndexes(options?: DropIndexesOptions, callback?: Callback): Promise<void> | void {
+  dropIndexes(
+    options?: DropIndexesOptions,
+    callback?: Callback<Document>
+  ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options ? Object.assign({}, options) : {};
 
@@ -795,8 +786,8 @@ export class Collection {
   indexExists(
     indexes: string | string[],
     options?: IndexInformationOptions,
-    callback?: Callback
-  ): Promise<void> | void {
+    callback?: Callback<boolean>
+  ): Promise<boolean> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -813,7 +804,10 @@ export class Collection {
    * @param options Optional settings for the command
    * @param callback An optional callback, a Promise will be returned if none is provided
    */
-  indexInformation(options?: IndexInformationOptions, callback?: Callback): Promise<void> | void {
+  indexInformation(
+    options?: IndexInformationOptions,
+    callback?: Callback<Document>
+  ): Promise<Document> | void {
     const args = Array.prototype.slice.call(arguments, 0);
     callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
     options = args.length ? args.shift() || {} : {};
@@ -833,8 +827,8 @@ export class Collection {
    */
   estimatedDocumentCount(
     options?: EstimatedDocumentCountOptions,
-    callback?: Callback
-  ): Promise<void> | void {
+    callback?: Callback<number>
+  ): Promise<number> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -871,7 +865,11 @@ export class Collection {
    * @see https://docs.mongodb.com/manual/reference/operator/query/center/#op._S_center
    * @see https://docs.mongodb.com/manual/reference/operator/query/centerSphere/#op._S_centerSphere
    */
-  countDocuments(query: Document, options: CountDocumentsOptions, callback: Callback) {
+  countDocuments(
+    query: Document,
+    options: CountDocumentsOptions,
+    callback: Callback<number>
+  ): Promise<number> | void {
     const args = Array.prototype.slice.call(arguments, 0);
     callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
     query = args.length ? args.shift() || {} : {};
@@ -896,8 +894,8 @@ export class Collection {
     key: string,
     query?: Document,
     options?: DistinctOptions,
-    callback?: Callback
-  ): Promise<void> | void {
+    callback?: Callback<Document[]>
+  ): Promise<Document[]> | void {
     const args = Array.prototype.slice.call(arguments, 1);
     callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
     const queryOption = args.length ? args.shift() || {} : {};
@@ -929,28 +927,13 @@ export class Collection {
    * @param options Optional settings for the command
    * @param callback An optional callback, a Promise will be returned if none is provided
    */
-  stats(options?: CollStatsOptions, callback?: Callback): Promise<void> | void {
+  stats(options?: CollStatsOptions, callback?: Callback<Document>): Promise<Document> | void {
     const args = Array.prototype.slice.call(arguments, 0);
     callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
     options = args.length ? args.shift() || {} : {};
 
     return executeOperation(this.s.topology, new CollStatsOperation(this, options), callback);
   }
-
-  /**
-   * @typedef {object} Collection~findAndModifyWriteOpResult
-   * @property {object} value Document returned from the `findAndModify` command. If no documents were found, `value` will be `null` by default (`returnOriginal: true`), even if a document was upserted; if `returnOriginal` was false, the upserted document will be returned in that case.
-   * @property {object} lastErrorObject The raw lastErrorObject returned from the command. See {@link https://docs.mongodb.com/manual/reference/command/findAndModify/index.html#lasterrorobject|findAndModify command documentation}.
-   * @property {number} ok Is 1 if the command executed correctly.
-   */
-
-  /**
-   * The callback format for inserts
-   *
-   * @callback Collection~findAndModifyCallback
-   * @param {MongoError} error An error instance representing the error during the execution.
-   * @param {Collection~findAndModifyWriteOpResult} result The result object if the command was executed successfully.
-   */
 
   /**
    * Find a document and delete it in one atomic operation. Requires a write lock for the duration of the operation.
@@ -962,8 +945,8 @@ export class Collection {
   findOneAndDelete(
     filter: Document,
     options?: FindAndModifyOptions,
-    callback?: Callback
-  ): Promise<void> | void {
+    callback?: Callback<Document>
+  ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -986,8 +969,8 @@ export class Collection {
     filter: Document,
     replacement: Document,
     options?: FindAndModifyOptions,
-    callback?: Callback
-  ): Promise<void> | void {
+    callback?: Callback<Document>
+  ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -1010,8 +993,8 @@ export class Collection {
     filter: Document,
     update: Document,
     options?: FindAndModifyOptions,
-    callback?: Callback
-  ): Promise<void> | void {
+    callback?: Callback<Document>
+  ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -1116,8 +1099,8 @@ export class Collection {
     map: string | MapFunction,
     reduce: string | ReduceFunction,
     options?: MapReduceOptions,
-    callback?: Callback
-  ): Promise<void> | void {
+    callback?: Callback<Document[]>
+  ): Promise<Document[]> | void {
     if ('function' === typeof options) (callback = options), (options = {});
     // Out must allways be defined (make sure we don't break weirdly on pre 1.8+ servers)
     if (options?.out == null) {
@@ -1362,83 +1345,21 @@ Collection.prototype.find = deprecateOptions(
 );
 
 /**
- * @typedef {object} Collection~WriteOpResult
- * @property {object[]} ops All the documents inserted using insertOne/insertMany/replaceOne. Documents contain the _id field if forceServerObjectId == false for insertOne/insertMany
- * @property {object} connection The connection object used for the operation.
- * @property {object} result The command result object.
- */
-
-/**
- * The callback format for inserts
- *
- * @callback Collection~writeOpCallback
- * @param {MongoError} error An error instance representing the error during the execution.
- * @param {Collection~WriteOpResult} result The result object if the command was executed successfully.
- */
-
-/**
- * @typedef {object} Collection~insertWriteOpResult
- * @property {number} insertedCount The total amount of documents inserted.
- * @property {object[]} ops All the documents inserted using insertOne/insertMany/replaceOne. Documents contain the _id field if forceServerObjectId == false for insertOne/insertMany
- * @property {object.<number, ObjectId>} insertedIds Map of the index of the inserted document to the id of the inserted document.
- * @property {object} connection The connection object used for the operation.
- * @property {object} result The raw command result object returned from MongoDB (content might vary by server version).
- * @property {number} result.ok Is 1 if the command executed correctly.
- * @property {number} result.n The total count of documents inserted.
- */
-
-/**
- * @typedef {object} Collection~insertOneWriteOpResult
- * @property {number} insertedCount The total amount of documents inserted.
- * @property {object[]} ops All the documents inserted using insertOne/insertMany/replaceOne. Documents contain the _id field if forceServerObjectId == false for insertOne/insertMany
- * @property {ObjectId} insertedId The driver generated ObjectId for the insert operation.
- * @property {object} connection The connection object used for the operation.
- * @property {object} result The raw command result object returned from MongoDB (content might vary by server version).
- * @property {number} result.ok Is 1 if the command executed correctly.
- * @property {number} result.n The total count of documents inserted.
- */
-
-/**
- * The callback format for inserts
- *
- * @callback Collection~insertWriteOpCallback
- * @param {MongoError} error An error instance representing the error during the execution.
- * @param {Collection~insertWriteOpResult} result The result object if the command was executed successfully.
- */
-
-/**
- * The callback format for inserts
- *
- * @callback Collection~insertOneWriteOpCallback
- * @param {MongoError} error An error instance representing the error during the execution.
- * @param {Collection~insertOneWriteOpResult} result The result object if the command was executed successfully.
- */
-
-/**
  * Inserts a single document or a an array of documents into MongoDB. If documents passed in do not contain the **_id** field,
  * one will be added to each of the documents missing it by the driver, mutating the document. This behavior
  * can be overridden by setting the **forceServerObjectId** flag.
  *
- * @function
- * @param {(object|object[])} docs Documents to insert.
- * @param {object} [options] Optional settings.
- * @param {(number|string)} [options.w] The write concern.
- * @param {number} [options.wtimeout] The write concern timeout.
- * @param {boolean} [options.j=false] Specify a journal write concern.
- * @param {boolean} [options.serializeFunctions=false] Serialize functions on any object.
- * @param {boolean} [options.forceServerObjectId=false] Force server to assign _id values instead of driver.
- * @param {boolean} [options.bypassDocumentValidation=false] Allow driver to bypass schema validation in MongoDB 3.2 or higher.
- * @param {ClientSession} [options.session] optional session to use for this operation
- * @param {Collection~insertWriteOpCallback} [callback] The command result callback
- * @returns {Promise<void> | void} returns Promise if no callback passed
  * @deprecated Use insertOne, insertMany or bulkWrite
+ * @param docs The documents to insert
+ * @param options Optional settings for the command
+ * @param callback An optional callback, a Promise will be returned if none is provided
  */
 Collection.prototype.insert = deprecate(function (
-  this: any,
-  docs: any,
-  options: any,
-  callback: Callback
-) {
+  this: Collection,
+  docs: Document[],
+  options: InsertOptions,
+  callback: Callback<BulkWriteResult>
+): Promise<BulkWriteResult> | void {
   if (typeof options === 'function') (callback = options), (options = {});
   options = options || { ordered: false };
   docs = !Array.isArray(docs) ? [docs] : docs;

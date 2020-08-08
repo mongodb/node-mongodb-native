@@ -33,7 +33,7 @@ export class RenameOperation extends RunAdminCommandOperation {
     this.newName = newName;
   }
 
-  execute(server: Server, callback: Callback): void {
+  execute(server: Server, callback: Callback<Collection>): void {
     const Collection = loadCollection();
     const coll = this.collection;
 
