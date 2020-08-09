@@ -71,8 +71,8 @@ export class ListCollectionsOperation extends CommandOperation<ListCollectionsOp
       }
 
       // No filter, filter by current database
-      if (filter.name == null) {
-        filter.name = `/${databaseName}/`;
+      if (filter == null) {
+        filter = { name: `/${databaseName}/` };
       }
 
       // Rewrite the filter to use $and to filter out indexes
