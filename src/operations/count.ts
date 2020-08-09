@@ -30,7 +30,7 @@ export class CountOperation extends CommandOperation<CountOptions> {
     this.applySkipLimit = applySkipLimit;
   }
 
-  execute(server: Server, callback: Callback): void {
+  execute(server: Server, callback: Callback<number>): void {
     const cursor = this.cursor;
     const applySkipLimit = this.applySkipLimit;
     const options = this.options;
@@ -65,7 +65,7 @@ export class CountOperation extends CommandOperation<CountOptions> {
     }
 
     super.executeCommand(server, command, (err, result) => {
-      callback(err, result ? result.n : null);
+      callback(err, result ? result.n : 0);
     });
   }
 }

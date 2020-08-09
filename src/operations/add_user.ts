@@ -34,7 +34,7 @@ export class AddUserOperation extends CommandOperation<AddUserOptions> {
     this.password = password;
   }
 
-  execute(server: Server, callback: Callback): void {
+  execute(server: Server, callback: Callback<Document>): void {
     const db = this.db;
     const username = this.username;
     const password = this.password;

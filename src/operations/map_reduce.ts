@@ -4,7 +4,6 @@ import {
   applyWriteConcern,
   decorateWithCollation,
   decorateWithReadConcern,
-  handleCallback,
   isObject,
   toError
 } from '../utils';
@@ -95,7 +94,7 @@ export class MapReduceOperation extends CommandOperation<MapReduceOptions> {
     this.reduce = reduce;
   }
 
-  execute(server: Server, callback: Callback): void {
+  execute(server: Server, callback: Callback<Document | Document[]>): void {
     const coll = this.collection;
     const map = this.map;
     const reduce = this.reduce;
@@ -149,15 +148,15 @@ export class MapReduceOperation extends CommandOperation<MapReduceOptions> {
     try {
       decorateWithCollation(mapCommandHash, coll, options);
     } catch (err) {
-      return callback(err, null);
+      return callback(err);
     }
 
     // Execute command
     super.executeCommand(server, mapCommandHash, (err, result) => {
-      if (err) return handleCallback(callback, err);
+      if (err) return callback(err);
       // Check if we have an error
       if (1 !== result.ok || result.err || result.errmsg) {
-        return handleCallback(callback, toError(result));
+        return callback(toError(result));
       }
 
       // Create statistics value
@@ -170,10 +169,10 @@ export class MapReduceOperation extends CommandOperation<MapReduceOptions> {
       if (result.results) {
         // If we wish for no verbosity
         if (options['verbose'] == null || !options['verbose']) {
-          return handleCallback(callback, null, result.results);
+          return callback(undefined, result.results);
         }
 
-        return handleCallback(callback, null, { results: result.results, stats: stats });
+        return callback(undefined, { results: result.results, stats: stats });
       }
 
       // The returned collection
@@ -194,11 +193,11 @@ export class MapReduceOperation extends CommandOperation<MapReduceOptions> {
 
       // If we wish for no verbosity
       if (options['verbose'] == null || !options['verbose']) {
-        return handleCallback(callback, err, collection);
+        return callback(err, collection);
       }
 
       // Return stats as third set of values
-      handleCallback(callback, err, { collection: collection, stats: stats });
+      callback(err, { collection, stats });
     });
   }
 }

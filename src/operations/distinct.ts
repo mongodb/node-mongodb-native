@@ -43,7 +43,7 @@ export class DistinctOperation extends CommandOperation<DistinctOptions> {
    * @param {any} server
    * @param {Collection~resultCallback} [callback] The command result callback
    */
-  execute(server: Server, callback: Callback): void {
+  execute(server: Server, callback: Callback<Document[]>): void {
     const coll = this.collection;
     const key = this.key;
     const query = this.query;
@@ -68,7 +68,7 @@ export class DistinctOperation extends CommandOperation<DistinctOptions> {
     try {
       decorateWithCollation(cmd, coll, options);
     } catch (err) {
-      return callback(err, null);
+      return callback(err);
     }
 
     super.executeCommand(server, cmd, (err, result) => {

@@ -3,6 +3,7 @@ import { handleCallback } from '../utils';
 import { loadCollection } from '../dynamic_loaders';
 import type { Callback } from '../types';
 import type { Db } from '../db';
+import type { Collection } from '../collection';
 
 export interface CollectionsOptions extends OperationOptions {
   nameOnly?: boolean;
@@ -17,7 +18,7 @@ export class CollectionsOperation extends OperationBase<CollectionsOptions> {
     this.db = db;
   }
 
-  execute(callback: Callback): void {
+  execute(callback: Callback<Collection[]>): void {
     const db = this.db;
     let options: CollectionsOptions = this.options;
 
@@ -26,7 +27,7 @@ export class CollectionsOperation extends OperationBase<CollectionsOptions> {
     options = Object.assign({}, options, { nameOnly: true });
     // Let's get the collection names
     db.listCollections({}, options).toArray((err, documents) => {
-      if (err || !documents) return handleCallback(callback, err, null);
+      if (err || !documents) return callback(err);
       // Filter collections removing any illegal ones
       documents = documents.filter(doc => doc.name.indexOf('$') === -1);
 

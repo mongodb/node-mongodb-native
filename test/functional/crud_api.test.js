@@ -567,7 +567,6 @@ describe('CRUD API', function () {
             expect(err).to.not.exist;
             test.equal(1, r.result.n);
             test.equal(0, r.matchedCount);
-            test.equal(1, r.ops.length);
             test.ok(r.upsertedId != null);
 
             db.collection('t3_3').replaceOne({ a: 2 }, { a: 3 }, { upsert: true }, function (
@@ -577,7 +576,6 @@ describe('CRUD API', function () {
               expect(err).to.not.exist;
               test.equal(1, r.result.n);
               test.ok(r.result.upserted == null);
-              test.equal(1, r.ops.length);
 
               test.equal(1, r.matchedCount);
               test.ok(r.upsertedId == null);

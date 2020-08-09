@@ -8,10 +8,12 @@ import type { Document, Callback } from '../types';
 
 export type RunCommandOptions = CommandOperationOptions;
 
-export class RunCommandOperation extends CommandOperation<RunCommandOptions> {
+export class RunCommandOperation<
+  T extends RunCommandOptions = RunCommandOptions
+> extends CommandOperation<T> {
   command: Document;
 
-  constructor(parent: Parent, command: Document, options: RunCommandOptions) {
+  constructor(parent: Db | Collection, command: Document, options?: T) {
     super(parent, options);
     this.command = command;
   }
@@ -22,8 +24,10 @@ export class RunCommandOperation extends CommandOperation<RunCommandOptions> {
   }
 }
 
-export class RunAdminCommandOperation extends RunCommandOperation {
-  constructor(parent: Db | Collection, command: Document, options: RunCommandOptions) {
+export class RunAdminCommandOperation<
+  T extends RunCommandOptions = RunCommandOptions
+> extends RunCommandOperation<T> {
+  constructor(parent: Db | Collection, command: Document, options?: T) {
     super(parent, command, options);
     this.ns = new MongoDBNamespace('admin');
   }

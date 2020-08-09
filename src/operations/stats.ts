@@ -30,7 +30,7 @@ export class CollStatsOperation extends CommandOperation<CollStatsOptions> {
     this.collectionName = collection.collectionName;
   }
 
-  execute(server: Server, callback: Callback): void {
+  execute(server: Server, callback: Callback<Document>): void {
     const command: Document = { collStats: this.collectionName };
     if (this.options.scale != null) {
       command.scale = this.options.scale;
@@ -46,7 +46,7 @@ export interface DbStatsOptions extends CommandOperationOptions {
 }
 
 export class DbStatsOperation extends CommandOperation<DbStatsOptions> {
-  execute(server: Server, callback: Callback): void {
+  execute(server: Server, callback: Callback<Document>): void {
     const command: Document = { dbStats: true };
     if (this.options.scale != null) {
       command.scale = this.options.scale;

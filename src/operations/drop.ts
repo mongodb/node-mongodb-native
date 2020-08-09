@@ -15,9 +15,9 @@ export class DropCollectionOperation extends CommandOperation<DropCollectionOpti
     this.name = name;
   }
 
-  execute(server: Server, callback: Callback): void {
+  execute(server: Server, callback: Callback<boolean>): void {
     super.executeCommand(server, { drop: this.name }, (err, result) => {
-      if (err) return handleCallback(callback, err);
+      if (err) return callback(err);
       if (result.ok) return handleCallback(callback, null, true);
       handleCallback(callback, null, false);
     });
@@ -26,9 +26,9 @@ export class DropCollectionOperation extends CommandOperation<DropCollectionOpti
 
 export type DropDatabaseOptions = CommandOperationOptions;
 export class DropDatabaseOperation extends CommandOperation<DropDatabaseOptions> {
-  execute(server: Server, callback: Callback): void {
+  execute(server: Server, callback: Callback<boolean>): void {
     super.executeCommand(server, { dropDatabase: 1 }, (err, result) => {
-      if (err) return handleCallback(callback, err);
+      if (err) return callback(err);
       if (result.ok) return handleCallback(callback, null, true);
       handleCallback(callback, null, false);
     });

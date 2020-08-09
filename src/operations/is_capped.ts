@@ -11,8 +11,8 @@ export class IsCappedOperation extends OptionsOperation {
 
   execute(callback: Callback): void {
     super.execute((err, document) => {
-      if (err) return handleCallback(callback, err);
-      handleCallback(callback, null, !!(document && document.capped));
+      if (err) return callback(err);
+      callback(undefined, !!(document && document.capped));
     });
   }
 }

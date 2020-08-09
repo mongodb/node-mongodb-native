@@ -107,7 +107,7 @@ export class IndexesOperation extends OperationBase<IndexInformationOptions> {
     this.collection = collection;
   }
 
-  execute(callback: Callback): void {
+  execute(callback: Callback<Document>): void {
     const coll = this.collection;
     let options = this.options;
 
@@ -141,7 +141,7 @@ export class CreateIndexesOperation extends CommandOperation<CreateIndexesOption
     }
   }
 
-  execute(server: Server, callback: Callback): void {
+  execute(server: Server, callback: Callback<Document>): void {
     const options = this.options;
     const indexes = this.indexes;
 
@@ -261,12 +261,12 @@ export class DropIndexOperation extends CommandOperation<DropIndexesOptions> {
     this.indexName = indexName;
   }
 
-  execute(server: Server, callback: Callback): void {
+  execute(server: Server, callback: Callback<Document>): void {
     const cmd = { dropIndexes: this.collection.collectionName, index: this.indexName };
     super.executeCommand(server, cmd, (err, result) => {
       if (typeof callback !== 'function') return;
-      if (err) return handleCallback(callback, err, null);
-      handleCallback(callback, null, result);
+      if (err) return callback(err);
+      callback(undefined, result);
     });
   }
 }
@@ -278,8 +278,8 @@ export class DropIndexesOperation extends DropIndexOperation {
 
   execute(server: Server, callback: Callback): void {
     super.execute(server, err => {
-      if (err) return handleCallback(callback, err, false);
-      handleCallback(callback, null, true);
+      if (err) return callback(err, false);
+      callback(undefined, true);
     });
   }
 }
@@ -345,7 +345,7 @@ export class IndexExistsOperation extends OperationBase<IndexInformationOptions>
 
     indexInformation(coll.s.db, coll.collectionName, options, (err, indexInformation) => {
       // If we have an error return
-      if (err != null) return handleCallback(callback, err, null);
+      if (err != null) return callback(err);
       // Let's check for the index names
       if (!Array.isArray(indexes))
         return handleCallback(callback, null, indexInformation[indexes] != null);

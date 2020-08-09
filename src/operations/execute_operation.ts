@@ -12,6 +12,13 @@ const MMAPv1_RETRY_WRITES_ERROR_CODE = 20;
 const MMAPv1_RETRY_WRITES_ERROR_MESSAGE =
   'This MongoDB deployment does not support retryable writes. Please add retryWrites=false to your connection string.';
 
+type Tail<T extends any[]> = ((...t: T) => void) extends (arg: any, ...args: infer R) => void
+  ? R
+  : never;
+type Last<T extends any[]> = T[Exclude<keyof T, keyof Tail<T>>];
+type LastParameter<F extends (...args: any) => any> = Last<Parameters<F>>;
+type ResultType<T extends (...args: any) => any> = NonNullable<LastParameter<LastParameter<T>>>;
+
 /**
  * Executes the given operation with provided arguments.
  *
@@ -25,25 +32,25 @@ const MMAPv1_RETRY_WRITES_ERROR_MESSAGE =
  * @param {Operation} operation The operation to execute
  * @param {Function} callback The command result callback
  */
-export function executeOperation<T extends OperationBase, U>(
+export function executeOperation<T extends OperationBase>(
   topology: Topology,
   operation: T
-): Promise<U>;
-export function executeOperation<T extends OperationBase, U>(
+): Promise<ResultType<T['execute']>>;
+export function executeOperation<T extends OperationBase>(
   topology: Topology,
   operation: T,
-  callback: Callback<U>
+  callback: Callback<ResultType<T['execute']>>
 ): void;
-export function executeOperation<T extends OperationBase, U>(
+export function executeOperation<T extends OperationBase>(
   topology: Topology,
   operation: T,
-  callback?: Callback<U>
-): Promise<U> | void;
-export function executeOperation<T extends OperationBase, U>(
+  callback?: Callback<ResultType<T['execute']>>
+): Promise<ResultType<T['execute']>> | void;
+export function executeOperation<T extends OperationBase>(
   topology: Topology,
   operation: T,
-  callback?: Callback<U>
-): Promise<U> | void {
+  callback?: Callback<ResultType<T['execute']>>
+): Promise<ResultType<T['execute']>> | void {
   const Promise = PromiseProvider.get();
 
   if (topology == null) {
@@ -55,7 +62,7 @@ export function executeOperation<T extends OperationBase, U>(
   }
 
   if (topology.shouldCheckForSessionSupport()) {
-    return selectServerForSessionSupport<U>(topology, operation, callback!);
+    return selectServerForSessionSupport<ResultType<T['execute']>>(topology, operation, callback);
   }
 
   // The driver sessions spec mandates that we implicitly create sessions for operations
@@ -231,16 +238,16 @@ function supportsRetryableWrites(server: Server) {
 
 // TODO: This is only supported for unified topology, it should go away once
 //       we remove support for legacy topology types.
-function selectServerForSessionSupport<U>(
+function selectServerForSessionSupport<T>(
   topology: Topology,
   operation: any,
-  callback?: Callback
-): Promise<U> | void {
+  callback?: Callback<T>
+): Promise<T> | void {
   const Promise = PromiseProvider.get();
 
-  let result;
+  let result: Promise<T> | void;
   if (typeof callback !== 'function') {
-    result = new Promise<U>((resolve, reject) => {
+    result = new Promise((resolve: any, reject: any) => {
       callback = (err, result) => {
         if (err) return reject(err);
         resolve(result);

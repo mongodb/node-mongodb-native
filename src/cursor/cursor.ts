@@ -917,7 +917,11 @@ export class Cursor extends CoreCursor {
    * @param {Cursor~countResultCallback} [callback] The result callback.
    * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  count(applySkipLimit?: boolean, options?: any, callback?: Callback): Promise<void> | void {
+  count(
+    applySkipLimit?: boolean,
+    options?: any,
+    callback?: Callback<number>
+  ): Promise<number> | void {
     if (this.cmd.query == null)
       throw MongoError.create({
         message: 'count can only be used with find command',

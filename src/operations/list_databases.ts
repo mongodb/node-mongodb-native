@@ -20,7 +20,7 @@ export class ListDatabasesOperation extends CommandOperation<ListDatabasesOption
     this.ns = new MongoDBNamespace('admin', '$cmd');
   }
 
-  execute(server: Server, callback: Callback): void {
+  execute(server: Server, callback: Callback<string[]>): void {
     const cmd: Document = { listDatabases: 1 };
     if (this.options.nameOnly) {
       cmd.nameOnly = Number(cmd.nameOnly);

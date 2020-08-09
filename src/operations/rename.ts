@@ -38,7 +38,7 @@ export class RenameOperation extends RunAdminCommandOperation {
     const coll = this.collection;
 
     super.execute(server, (err, doc) => {
-      if (err) return handleCallback(callback, err, null);
+      if (err) return callback(err);
       // We have an error
       if (doc.errmsg) return handleCallback(callback, toError(doc), null);
       try {

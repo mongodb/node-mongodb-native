@@ -37,7 +37,7 @@ export class SetProfilingLevelOperation extends CommandOperation<SetProfilingLev
     this.level = level;
   }
 
-  execute(server: Server, callback: Callback): void {
+  execute(server: Server, callback: Callback<ProfilingLevel>): void {
     const level = this.level;
 
     if (!levelValues.has(level)) {
@@ -46,9 +46,7 @@ export class SetProfilingLevelOperation extends CommandOperation<SetProfilingLev
 
     super.executeCommand(server, { profile: this.profile }, (err, doc) => {
       if (err == null && doc.ok === 1) return callback(undefined, level);
-      return err != null
-        ? callback(err, null)
-        : callback(new Error('Error with profile command'), null);
+      return err != null ? callback(err) : callback(new Error('Error with profile command'));
     });
   }
 }

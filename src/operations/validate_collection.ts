@@ -28,19 +28,19 @@ export class ValidateCollectionOperation extends CommandOperation<ValidateCollec
     this.collectionName = collectionName;
   }
 
-  execute(server: Server, callback: Callback): void {
+  execute(server: Server, callback: Callback<Document>): void {
     const collectionName = this.collectionName;
 
     super.executeCommand(server, this.command, (err, doc) => {
-      if (err != null) return callback(err, null);
+      if (err != null) return callback(err);
 
-      if (doc.ok === 0) return callback(new Error('Error with validate command'), null);
+      if (doc.ok === 0) return callback(new Error('Error with validate command'));
       if (doc.result != null && doc.result.constructor !== String)
-        return callback(new Error('Error with validation data'), null);
+        return callback(new Error('Error with validation data'));
       if (doc.result != null && doc.result.match(/exception|corrupt/) != null)
-        return callback(new Error('Error: invalid collection ' + collectionName), null);
+        return callback(new Error('Error: invalid collection ' + collectionName));
       if (doc.valid != null && !doc.valid)
-        return callback(new Error('Error: invalid collection ' + collectionName), null);
+        return callback(new Error('Error: invalid collection ' + collectionName));
 
       return callback(undefined, doc);
     });

@@ -35,7 +35,7 @@ export class EstimatedDocumentCountOperation extends CommandOperation<
     }
   }
 
-  execute(server: Server, callback: Callback): void {
+  execute(server: Server, callback: Callback<number>): void {
     const options = this.options;
     const cmd: Document = { count: this.collectionName };
 
@@ -61,7 +61,7 @@ export class EstimatedDocumentCountOperation extends CommandOperation<
         return;
       }
 
-      callback(undefined, response.n);
+      callback(undefined, response.n || 0);
     });
   }
 }

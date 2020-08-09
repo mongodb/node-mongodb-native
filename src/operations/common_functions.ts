@@ -14,7 +14,7 @@ import type { ClientSession } from '../sessions';
 import type { Server } from '../sdam/server';
 import type { ReadPreference } from '../read_preference';
 import type { Collection } from '../collection';
-import type { UpdateOptions } from './update';
+import type { UpdateOptions, UpdateResult } from './update';
 import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
 
 export function deleteCallback(err: any, r: any, callback: Callback): void {
@@ -124,14 +124,14 @@ export function nextObject(cursor: Cursor, callback: Callback) {
     try {
       cursor.cmd.sort = formattedOrderClause(cursor.cmd.sort);
     } catch (err) {
-      return handleCallback(callback, err);
+      return callback(err);
     }
   }
 
   // Get the next object
   cursor._next((err, doc) => {
     cursor.s.state = CursorState.OPEN;
-    if (err) return handleCallback(callback, err);
+    if (err) return callback(err);
     handleCallback(callback, null, doc);
   });
 }
@@ -183,7 +183,7 @@ export function removeDocuments(
   // Execute the remove
   server.remove(coll.s.namespace.toString(), [op], finalOptions, (err, result) => {
     if (callback == null) return;
-    if (err) return handleCallback(callback, err, null);
+    if (err) return callback(err);
     if (result == null) return handleCallback(callback, null, null);
     if (result.result.code) return handleCallback(callback, toError(result.result));
     if (result.result.writeErrors) {
@@ -191,7 +191,7 @@ export function removeDocuments(
     }
 
     // Return the results
-    handleCallback(callback, null, result);
+    callback(undefined, result);
   });
 }
 
@@ -273,29 +273,13 @@ export function updateDocuments(
     finalOptions as WriteCommandOptions,
     (err, result) => {
       if (callback == null) return;
-      if (err) return handleCallback(callback, err, null);
+      if (err) return callback(err);
       if (result == null) return handleCallback(callback, null, null);
       if (result.result.code) return handleCallback(callback, toError(result.result));
       if (result.result.writeErrors)
         return handleCallback(callback, toError(result.result.writeErrors[0]));
       // Return the results
-      handleCallback(callback, null, result);
+      callback(undefined, result);
     }
   );
-}
-
-export function updateCallback(err?: AnyError, r?: Document, callback?: Callback): void {
-  if (!callback) return;
-  if (err) return callback(err);
-  if (!r) return callback(undefined, { result: { ok: 1 } });
-  r.modifiedCount = r.result.nModified != null ? r.result.nModified : r.result.n;
-  r.upsertedId =
-    Array.isArray(r.result.upserted) && r.result.upserted.length > 0
-      ? r.result.upserted[0] // FIXME(major): should be `r.result.upserted[0]._id`
-      : null;
-  r.upsertedCount =
-    Array.isArray(r.result.upserted) && r.result.upserted.length ? r.result.upserted.length : 0;
-  r.matchedCount =
-    Array.isArray(r.result.upserted) && r.result.upserted.length > 0 ? 0 : r.result.n;
-  callback(undefined, r);
 }

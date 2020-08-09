@@ -5,6 +5,19 @@ import { prepareDocs } from './common_functions';
 import type { Callback, Document } from '../types';
 import type { Collection } from '../collection';
 import type { InsertOptions } from './insert';
+import type { ObjectId } from '../bson';
+import type { BulkWriteResult } from '../bulk/common';
+
+export interface InsertManyResult {
+  /** The total amount of documents inserted. */
+  insertedCount: number;
+  /** Map of the index of the inserted document to the id of the inserted document. */
+  insertedIds: { [key: number]: ObjectId };
+  /** All the documents inserted using insertOne/insertMany/replaceOne. Documents contain the _id field if forceServerObjectId == false for insertOne/insertMany */
+  ops: Document[];
+  /** The raw command result object returned from MongoDB (content might vary by server version). */
+  result: Document;
+}
 
 export class InsertManyOperation extends OperationBase<InsertOptions> {
   collection: Collection;
@@ -17,7 +30,7 @@ export class InsertManyOperation extends OperationBase<InsertOptions> {
     this.docs = docs;
   }
 
-  execute(callback: Callback): void {
+  execute(callback: Callback<InsertManyResult>): void {
     const coll = this.collection;
     let docs = this.docs;
     const options = this.options;
@@ -43,14 +56,14 @@ export class InsertManyOperation extends OperationBase<InsertOptions> {
     const bulkWriteOperation = new BulkWriteOperation(coll, operations, options);
 
     bulkWriteOperation.execute((err, result) => {
-      if (err) return callback(err, null);
+      if (err || !result) return callback(err);
       callback(undefined, mapInsertManyResults(docs, result));
     });
   }
 }
 
-function mapInsertManyResults(docs: Document[], r: Document) {
-  const finalResult: Document = {
+function mapInsertManyResults(docs: Document[], r: BulkWriteResult): InsertManyResult {
+  const finalResult: InsertManyResult = {
     result: { ok: 1, n: r.insertedCount },
     ops: docs,
     insertedCount: r.insertedCount,

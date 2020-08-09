@@ -119,7 +119,7 @@ function insertDocuments(
     finalOptions as WriteCommandOptions,
     (err, result) => {
       if (callback == null) return;
-      if (err) return handleCallback(callback, err);
+      if (err) return callback(err);
       if (result == null) return handleCallback(callback, null, null);
       if (result.result.code) return handleCallback(callback, toError(result.result));
       if (result.result.writeErrors)
@@ -127,7 +127,7 @@ function insertDocuments(
       // Add docs to the list
       result.ops = docs;
       // Return the results
-      handleCallback(callback, null, result);
+      callback(undefined, result);
     }
   );
 }

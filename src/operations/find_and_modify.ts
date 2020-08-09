@@ -5,7 +5,6 @@ import {
   decorateWithCollation,
   applyWriteConcern,
   formattedOrderClause,
-  handleCallback,
   hasAtomicOperators
 } from '../utils';
 import { MongoError } from '../error';
@@ -64,7 +63,7 @@ export class FindAndModifyOperation extends CommandOperation<FindAndModifyOption
     this.doc = doc;
   }
 
-  execute(server: Server, callback: Callback): void {
+  execute(server: Server, callback: Callback<Document>): void {
     const coll = this.collection;
     const query = this.query;
     const sort = formattedOrderClause(this.sort);
@@ -128,7 +127,7 @@ export class FindAndModifyOperation extends CommandOperation<FindAndModifyOption
     try {
       decorateWithCollation(cmd, coll, options);
     } catch (err) {
-      return callback(err, null);
+      return callback(err);
     }
 
     if (options.hint) {
@@ -148,9 +147,8 @@ export class FindAndModifyOperation extends CommandOperation<FindAndModifyOption
 
     // Execute the command
     super.executeCommand(server, cmd, (err, result) => {
-      if (err) return handleCallback(callback, err, null);
-
-      return handleCallback(callback, null, result);
+      if (err) return callback(err);
+      return callback(undefined, result);
     });
   }
 }

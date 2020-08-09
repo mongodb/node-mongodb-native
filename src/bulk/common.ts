@@ -53,8 +53,24 @@ class Batch {
  * @classdesc
  * The result of a bulk write.
  */
-class BulkWriteResult {
+export class BulkWriteResult {
   result: any;
+  n: number;
+
+  /** Number of documents inserted. */
+  insertedCount: number;
+  /** Number of documents matched for update. */
+  matchedCount: number;
+  /** Number of documents modified. */
+  modifiedCount: number;
+  /** Number of documents deleted. */
+  deletedCount: number;
+  /** Number of documents upserted. */
+  upsertedCount: number;
+  /** Inserted document generated Id's, hash key is the index of the originating operation */
+  insertedIds: { [key: number]: ObjectId };
+  /** Upserted document generated Id's, hash key is the index of the originating operation */
+  upsertedIds: { [key: number]: ObjectId };
 
   /**
    * Create a new BulkWriteResult instance
@@ -65,6 +81,30 @@ class BulkWriteResult {
    */
   constructor(bulkResult: any) {
     this.result = bulkResult;
+    this.insertedCount = bulkResult.nInserted;
+    this.matchedCount = bulkResult.nMatched;
+    this.modifiedCount = bulkResult.nModified || 0;
+    this.deletedCount = bulkResult.nRemoved;
+    this.upsertedCount = bulkResult.upserted.length;
+    this.upsertedIds = {};
+    this.insertedIds = {};
+
+    // Update the n
+    this.n = bulkResult.insertedCount;
+
+    // Inserted documents
+    const inserted = bulkResult.insertedIds;
+    // Map inserted ids
+    for (let i = 0; i < inserted.length; i++) {
+      this.insertedIds[inserted[i].index] = inserted[i]._id;
+    }
+
+    // Upserted documents
+    const upserted = bulkResult.upserted;
+    // Map upserted ids
+    for (let i = 0; i < upserted.length; i++) {
+      this.upsertedIds[upserted[i].index] = upserted[i]._id;
+    }
   }
 
   /**
@@ -512,7 +552,7 @@ function mergeBatchResults(batch: any, bulkResult: any, err: any, result: any) {
   }
 }
 
-function executeCommands(bulkOperation: any, options: any, callback: Callback) {
+function executeCommands(bulkOperation: any, options: any, callback: Callback<BulkWriteResult>) {
   if (bulkOperation.s.batches.length === 0) {
     return handleCallback(callback, null, new BulkWriteResult(bulkOperation.s.bulkResult));
   }
@@ -522,7 +562,7 @@ function executeCommands(bulkOperation: any, options: any, callback: Callback) {
   function resultHandler(err?: any, result?: any) {
     // Error is a driver related error not a bulk op error, terminate
     if (((err && err.driver) || (err && err.message)) && !(err instanceof MongoWriteConcernError)) {
-      return handleCallback(callback, err);
+      return callback(err);
     }
 
     // If we have and error

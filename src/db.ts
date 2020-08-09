@@ -410,7 +410,7 @@ export class Db {
    * @param options Optional settings for the command
    * @param callback An optional callback, a Promise will be returned if none is provided
    */
-  stats(options?: DbStatsOptions, callback?: Callback): Promise<void> | void {
+  stats(options?: DbStatsOptions, callback?: Callback<Document>): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -446,8 +446,8 @@ export class Db {
     fromCollection: string,
     toCollection: string,
     options?: RenameOptions,
-    callback?: Callback
-  ): Promise<void> | void {
+    callback?: Callback<Collection>
+  ): Promise<Collection> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, options, { readPreference: ReadPreference.PRIMARY });
 
@@ -471,8 +471,8 @@ export class Db {
   dropCollection(
     name: string,
     options?: DropCollectionOptions,
-    callback?: Callback
-  ): Promise<void> | void {
+    callback?: Callback<boolean>
+  ): Promise<boolean> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -489,7 +489,10 @@ export class Db {
    * @param options Optional settings for the command
    * @param callback An optional callback, a Promise will be returned if none is provided
    */
-  dropDatabase(options?: DropDatabaseOptions, callback?: Callback): Promise<void> | void {
+  dropDatabase(
+    options?: DropDatabaseOptions,
+    callback?: Callback<boolean>
+  ): Promise<boolean> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -502,7 +505,10 @@ export class Db {
    * @param options Optional settings for the command
    * @param callback An optional callback, a Promise will be returned if none is provided
    */
-  collections(options?: ListCollectionsOptions, callback?: Callback): Promise<void> | void {
+  collections(
+    options?: ListCollectionsOptions,
+    callback?: Callback<Collection[]>
+  ): Promise<Collection[]> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -543,8 +549,8 @@ export class Db {
     name: string,
     fieldOrSpec: string | object,
     options?: CreateIndexesOptions,
-    callback?: Callback
-  ): Promise<void> | void {
+    callback?: Callback<Document>
+  ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options ? Object.assign({}, options) : {};
 
@@ -567,8 +573,8 @@ export class Db {
     username: string,
     password: string | undefined,
     options?: AddUserOptions,
-    callback?: Callback
-  ): Promise<void> | void {
+    callback?: Callback<Document>
+  ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -589,8 +595,8 @@ export class Db {
   removeUser(
     username: string,
     options?: RemoveUserOptions,
-    callback?: Callback
-  ): Promise<void> | void {
+    callback?: Callback<boolean>
+  ): Promise<boolean> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -611,8 +617,8 @@ export class Db {
   setProfilingLevel(
     level: ProfilingLevel,
     options?: SetProfilingLevelOptions,
-    callback?: Callback
-  ): Promise<void> | void {
+    callback?: Callback<ProfilingLevel>
+  ): Promise<ProfilingLevel> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -629,7 +635,10 @@ export class Db {
    * @param options Optional settings for the command
    * @param callback An optional callback, a Promise will be returned if none is provided
    */
-  profilingLevel(options?: ProfilingLevelOptions, callback?: Callback): Promise<void> | void {
+  profilingLevel(
+    options?: ProfilingLevelOptions,
+    callback?: Callback<string>
+  ): Promise<string> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 

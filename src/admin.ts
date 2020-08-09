@@ -1,11 +1,10 @@
-import { applyWriteConcern } from './utils';
 import { AddUserOperation, AddUserOptions } from './operations/add_user';
-import { RemoveUserOperation } from './operations/remove_user';
+import { RemoveUserOperation, RemoveUserOptions } from './operations/remove_user';
 import { ValidateCollectionOperation } from './operations/validate_collection';
 import { ListDatabasesOperation } from './operations/list_databases';
 import { executeOperation } from './operations/execute_operation';
 import { RunCommandOperation } from './operations/run_command';
-import type { Callback } from './types';
+import type { Callback, Document } from './types';
 
 /**
  * The **Admin** class is an internal class that allows convenient access to
@@ -152,8 +151,8 @@ export class Admin {
     username: string,
     password?: string,
     options?: AddUserOptions,
-    callback?: Callback
-  ): Promise<void> | void {
+    callback?: Callback<Document>
+  ): Promise<Document> | void {
     const args = Array.prototype.slice.call(arguments, 2);
     callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
     options = args.length ? args.shift() : {};
@@ -169,30 +168,26 @@ export class Admin {
   /**
    * Remove a user from a database
    *
-   * @function
-   * @param {string} username The username.
-   * @param {object} [options] Optional settings.
-   * @param {(number|string)} [options.w] The write concern.
-   * @param {number} [options.wtimeout] The write concern timeout.
-   * @param {boolean} [options.j=false] Specify a journal write concern.
-   * @param {boolean} [options.fsync=false] Specify a file sync write concern.
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {Admin~resultCallback} [callback] The command result callback
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param username The username to remove
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
    */
-  removeUser(username: string, options?: any, callback?: Callback): Promise<void> | void {
+  removeUser(
+    username: string,
+    options?: RemoveUserOptions,
+    callback?: Callback<boolean>
+  ): Promise<boolean> | void {
     const args = Array.prototype.slice.call(arguments, 1);
     callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
-
     options = args.length ? args.shift() : {};
     options = Object.assign({}, options);
-    // Get the options
-    options = applyWriteConcern(options, { db: this.s.db });
-    // Set the db name
     options.dbName = 'admin';
 
-    const removeUserOperation = new RemoveUserOperation(this.s.db, username, options);
-    return executeOperation(this.s.db.s.topology, removeUserOperation, callback);
+    return executeOperation(
+      this.s.db.s.topology,
+      new RemoveUserOperation(this.s.db, username, options),
+      callback
+    );
   }
 
   /**
@@ -208,18 +203,16 @@ export class Admin {
   validateCollection(
     collectionName: string,
     options?: any,
-    callback?: Callback
-  ): Promise<void> | void {
+    callback?: Callback<Document>
+  ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    const validateCollectionOperation = new ValidateCollectionOperation(
-      this,
-      collectionName,
-      options
+    return executeOperation(
+      this.s.db.s.topology,
+      new ValidateCollectionOperation(this, collectionName, options),
+      callback
     );
-
-    return executeOperation(this.s.db.s.topology, validateCollectionOperation, callback);
   }
 
   /**
@@ -231,7 +224,7 @@ export class Admin {
    * @param {Admin~resultCallback} [callback] The command result callback.
    * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  listDatabases(options?: any, callback?: Callback): Promise<void> | void {
+  listDatabases(options?: any, callback?: Callback<string[]>): Promise<string[]> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 

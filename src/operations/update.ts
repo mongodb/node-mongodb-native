@@ -1,14 +1,12 @@
 import { defineAspects, Aspect, OperationBase } from './operation';
-import { updateDocuments, updateCallback } from './common_functions';
+import { updateDocuments } from './common_functions';
 import { hasAtomicOperators, MongoDBNamespace } from '../utils';
 import { CommandOperation, CommandOperationOptions } from './command';
 import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { CollationOptions, WriteCommandOptions } from '../cmap/wire_protocol/write_command';
-import type { Connection } from '../cmap/connection';
 import type { ObjectId } from '../bson';
-import type { BinMsg, Response } from '../cmap/commands';
 
 export interface UpdateOptions extends CommandOperationOptions {
   /** A set of filters specifying to which array elements an update should apply */
@@ -37,15 +35,8 @@ export interface UpdateResult {
   /** The upserted id */
   upsertedId: ObjectId;
 
-  // FIXME: remove these internal details
-  /** @property {object} message The raw msg response wrapped in an internal class */
-  message: BinMsg | Response;
-  /** @property {object[]} [ops] In a response to {@link Collection#replaceOne replaceOne}, contains the new value of the document on the server. This is the same document that was originally passed in, and is only here for legacy purposes. */
-  ops: Document[];
-  /** @property {object} result The raw result returned from MongoDB. Will vary depending on server version. */
+  // FIXME: remove
   result: Document;
-  /** The connection object used for the operation */
-  connection: Connection;
 }
 
 export class UpdateOperation extends OperationBase<UpdateOptions> {
@@ -62,7 +53,7 @@ export class UpdateOperation extends OperationBase<UpdateOptions> {
     return this.operations.every(op => op.multi == null || op.multi === false);
   }
 
-  execute(server: Server, callback: Callback): void {
+  execute(server: Server, callback: Callback<Document>): void {
     server.update(
       this.namespace.toString(),
       this.operations,
@@ -89,7 +80,7 @@ export class UpdateOneOperation extends CommandOperation<UpdateOptions> {
     this.update = update;
   }
 
-  execute(server: Server, callback: Callback): void {
+  execute(server: Server, callback: Callback<UpdateResult>): void {
     const coll = this.collection;
     const filter = this.filter;
     const update = this.update;
@@ -98,9 +89,26 @@ export class UpdateOneOperation extends CommandOperation<UpdateOptions> {
     // Set single document update
     options.multi = false;
     // Execute update
-    updateDocuments(server, coll, filter, update, options, (err, r) =>
-      updateCallback(err, r, callback)
-    );
+    updateDocuments(server, coll, filter, update, options, (err, r) => {
+      if (err || !r) return callback(err);
+
+      const result: UpdateResult = {
+        modifiedCount: r.result.nModified != null ? r.result.nModified : r.result.n,
+        upsertedId:
+          Array.isArray(r.result.upserted) && r.result.upserted.length > 0
+            ? r.result.upserted[0] // FIXME(major): should be `r.result.upserted[0]._id`
+            : null,
+        upsertedCount:
+          Array.isArray(r.result.upserted) && r.result.upserted.length
+            ? r.result.upserted.length
+            : 0,
+        matchedCount:
+          Array.isArray(r.result.upserted) && r.result.upserted.length > 0 ? 0 : r.result.n,
+        result: r.result
+      };
+
+      callback(undefined, result);
+    });
   }
 }
 
@@ -117,7 +125,7 @@ export class UpdateManyOperation extends CommandOperation<UpdateOptions> {
     this.update = update;
   }
 
-  execute(server: Server, callback: Callback): void {
+  execute(server: Server, callback: Callback<UpdateResult>): void {
     const coll = this.collection;
     const filter = this.filter;
     const update = this.update;
@@ -126,9 +134,26 @@ export class UpdateManyOperation extends CommandOperation<UpdateOptions> {
     // Set single document update
     options.multi = true;
     // Execute update
-    updateDocuments(server, coll, filter, update, options, (err, r) =>
-      updateCallback(err, r, callback)
-    );
+    updateDocuments(server, coll, filter, update, options, (err, r) => {
+      if (err || !r) return callback(err);
+
+      const result: UpdateResult = {
+        modifiedCount: r.result.nModified != null ? r.result.nModified : r.result.n,
+        upsertedId:
+          Array.isArray(r.result.upserted) && r.result.upserted.length > 0
+            ? r.result.upserted[0] // FIXME(major): should be `r.result.upserted[0]._id`
+            : null,
+        upsertedCount:
+          Array.isArray(r.result.upserted) && r.result.upserted.length
+            ? r.result.upserted.length
+            : 0,
+        matchedCount:
+          Array.isArray(r.result.upserted) && r.result.upserted.length > 0 ? 0 : r.result.n,
+        result: r.result
+      };
+
+      callback(undefined, result);
+    });
   }
 }
 

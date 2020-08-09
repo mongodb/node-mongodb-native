@@ -27,7 +27,7 @@ export class EvalOperation extends CommandOperation<EvalOptions> {
     this.parameters = parameters;
   }
 
-  execute(server: Server, callback: Callback): void {
+  execute(server: Server, callback: Callback<Document>): void {
     let finalCode = this.code;
     let finalParameters: Document[] = [];
 
@@ -51,7 +51,7 @@ export class EvalOperation extends CommandOperation<EvalOptions> {
 
     // Execute the command
     super.executeCommand(server, cmd, (err, result) => {
-      if (err) return handleCallback(callback, err, null);
+      if (err) return callback(err);
       if (result && result.ok === 1) return handleCallback(callback, null, result.retval);
       if (result)
         return handleCallback(

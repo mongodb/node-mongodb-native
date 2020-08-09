@@ -10,16 +10,16 @@ export class ProfilingLevelOperation extends CommandOperation<ProfilingLevelOpti
     super(db, options);
   }
 
-  execute(server: Server, callback: Callback): void {
+  execute(server: Server, callback: Callback<string>): void {
     super.executeCommand(server, { profile: -1 }, (err, doc) => {
       if (err == null && doc.ok === 1) {
         const was = doc.was;
         if (was === 0) return callback(undefined, 'off');
         if (was === 1) return callback(undefined, 'slow_only');
         if (was === 2) return callback(undefined, 'all');
-        return callback(new Error('Error: illegal profiling level value ' + was), null);
+        return callback(new Error('Error: illegal profiling level value ' + was));
       } else {
-        err != null ? callback(err, null) : callback(new Error('Error with profile command'), null);
+        err != null ? callback(err) : callback(new Error('Error with profile command'));
       }
     });
   }

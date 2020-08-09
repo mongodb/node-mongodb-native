@@ -56,7 +56,7 @@ export class ListCollectionsOperation extends CommandOperation<ListCollectionsOp
     }
   }
 
-  execute(server: Server, callback: Callback): void {
+  execute(server: Server, callback: Callback<string[]>): void {
     if (maxWireVersion(server) < LIST_COLLECTIONS_WIRE_VERSION) {
       let filter = this.filter;
       const databaseName = this.db.s.namespace.db;

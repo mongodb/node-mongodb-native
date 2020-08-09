@@ -66,7 +66,7 @@ export class GroupOperation extends CommandOperation<GroupOptions> {
 
     // Execute command
     super.executeCommand(server, cmd, (err, result) => {
-      if (err) return handleCallback(callback, err, null);
+      if (err) return callback(err);
       handleCallback(callback, null, result.retval);
     });
   }
@@ -99,10 +99,10 @@ export class EvalGroupOperation extends EvalOperation {
     super(collection, new Code(groupfn, scope), undefined, options);
   }
 
-  execute(server: Server, callback: Callback) {
+  execute(server: Server, callback: Callback<Document>) {
     super.execute(server, (err?: any, results?: any) => {
-      if (err) return handleCallback(callback, err, null);
-      handleCallback(callback, null, results.result || results);
+      if (err) return callback(err);
+      callback(undefined, results.result || results);
     });
   }
 }

@@ -20,7 +20,7 @@ import { WriteConcern } from './write_concern';
 import { ReadConcern } from './read_concern';
 import { AggregationCursor, CommandCursor, Cursor } from './cursor';
 import { AggregateOperation, AggregateOptions } from './operations/aggregate';
-import { BulkWriteOperation, BulkWriteResult } from './operations/bulk_write';
+import { BulkWriteOperation } from './operations/bulk_write';
 import { CountDocumentsOperation, CountDocumentsOptions } from './operations/count_documents';
 import {
   CreateIndexesOperation,
@@ -51,9 +51,14 @@ import {
   FindOneAndUpdateOperation,
   FindAndModifyOptions
 } from './operations/find_and_modify';
-import { InsertManyOperation } from './operations/insert_many';
-import { InsertOneOperation, InsertOneResult } from './operations/insert';
-import { UpdateOneOperation, UpdateManyOperation, UpdateResult } from './operations/update';
+import { InsertManyOperation, InsertManyResult } from './operations/insert_many';
+import { InsertOneOperation, InsertOptions, InsertOneResult } from './operations/insert';
+import {
+  UpdateOneOperation,
+  UpdateManyOperation,
+  UpdateOptions,
+  UpdateResult
+} from './operations/update';
 import {
   DeleteOneOperation,
   DeleteManyOperation,
@@ -75,10 +80,10 @@ import { executeOperation } from './operations/execute_operation';
 import { EvalGroupOperation, GroupOperation } from './operations/group';
 import type { Callback, Document } from './types';
 import type { Db } from './db';
-import type { InsertOptions, UpdateOptions } from './cmap/wire_protocol';
 import type { OperationOptions } from './operations/operation';
 import type { IndexInformationOptions } from './operations/common_functions';
 import type { CountOptions } from './operations/count';
+import type { BulkWriteResult } from './bulk/common';
 const mergeKeys = ['ignoreUndefined'];
 
 export interface Collection {
@@ -102,8 +107,16 @@ export interface Collection {
     options: any,
     callback: any
   ): void;
-  removeMany(filter: object, options?: any, callback?: Callback): Promise<void> | void;
-  removeOne(filter: object, options?: any, callback?: Callback): Promise<void> | void;
+  removeMany(
+    filter: Document,
+    options?: DeleteOptions,
+    callback?: Callback<DeleteResult>
+  ): Promise<DeleteResult> | void;
+  removeOne(
+    filter: Document,
+    options?: DeleteOptions,
+    callback?: Callback<DeleteResult>
+  ): Promise<DeleteResult> | void;
   findAndModify(this: any, query: any, sort: any, doc: any, options: any, callback: Callback): any;
   _findAndModify(this: any, query: any, sort: any, doc: any, options: any, callback: Callback): any;
 }
@@ -349,8 +362,8 @@ export class Collection {
   insertMany(
     docs: Document[],
     options?: InsertOptions,
-    callback?: Callback<BulkWriteResult>
-  ): Promise<BulkWriteResult> | void {
+    callback?: Callback<InsertManyResult>
+  ): Promise<InsertManyResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options ? Object.assign({}, options) : { ordered: true };
 
@@ -660,8 +673,8 @@ export class Collection {
   createIndex(
     fieldOrSpec: string | Document,
     options?: CreateIndexesOptions,
-    callback?: Callback<string>
-  ): Promise<string> | void {
+    callback?: Callback<Document>
+  ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -914,7 +927,10 @@ export class Collection {
    * @param options Optional settings for the command
    * @param callback An optional callback, a Promise will be returned if none is provided
    */
-  indexes(options?: IndexInformationOptions, callback?: Callback): Promise<void> | void {
+  indexes(
+    options?: IndexInformationOptions,
+    callback?: Callback<Document>
+  ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -1099,8 +1115,8 @@ export class Collection {
     map: string | MapFunction,
     reduce: string | ReduceFunction,
     options?: MapReduceOptions,
-    callback?: Callback<Document[]>
-  ): Promise<Document[]> | void {
+    callback?: Callback<Document | Document[]>
+  ): Promise<Document | Document[]> | void {
     if ('function' === typeof options) (callback = options), (options = {});
     // Out must allways be defined (make sure we don't break weirdly on pre 1.8+ servers)
     if (options?.out == null) {
@@ -1358,8 +1374,8 @@ Collection.prototype.insert = deprecate(function (
   this: Collection,
   docs: Document[],
   options: InsertOptions,
-  callback: Callback<BulkWriteResult>
-): Promise<BulkWriteResult> | void {
+  callback: Callback<InsertManyResult>
+): Promise<InsertManyResult> | void {
   if (typeof options === 'function') (callback = options), (options = {});
   options = options || { ordered: false };
   docs = !Array.isArray(docs) ? [docs] : docs;
@@ -1395,11 +1411,11 @@ Collection.prototype.insert = deprecate(function (
  * @deprecated use updateOne, updateMany or bulkWrite
  */
 Collection.prototype.update = deprecate(function (
-  this: any,
-  selector: any,
-  update: any,
-  options: any,
-  callback: Callback
+  this: Collection,
+  selector: Document,
+  update: Document,
+  options: UpdateOptions,
+  callback: Callback<Document>
 ) {
   if (typeof options === 'function') (callback = options), (options = {});
   options = options || {};

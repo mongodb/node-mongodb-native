@@ -14,7 +14,7 @@ export class RemoveUserOperation extends CommandOperation<RemoveUserOptions> {
     this.username = username;
   }
 
-  execute(server: Server, callback: Callback): void {
+  execute(server: Server, callback: Callback<boolean>) {
     super.executeCommand(server, { dropUser: this.username }, err => {
       callback(err, err ? false : true);
     });

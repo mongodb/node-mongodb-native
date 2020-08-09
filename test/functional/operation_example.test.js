@@ -3484,8 +3484,8 @@ describe('Operation Examples', function () {
 
           // Remove the user from the db
           db.removeUser('user', function (err, result) {
-            test.ok(result);
             expect(err).to.not.exist;
+            test.ok(result);
 
             client.close(done);
           });
@@ -4490,9 +4490,11 @@ describe('Operation Examples', function () {
 
         // Add the new user to the admin database
         adminDb.addUser('admin11', 'admin11', function (err, result) {
+          expect(err).to.not.exist;
           test.ok(result);
 
           adminDb.removeUser('admin11', function (err, result) {
+            expect(err).to.not.exist;
             test.ok(result);
 
             client.close(done);

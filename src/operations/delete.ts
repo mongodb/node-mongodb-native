@@ -58,7 +58,7 @@ export class DeleteOneOperation extends CommandOperation<DeleteOptions> {
     this.filter = filter;
   }
 
-  execute(server: Server, callback: Callback): void {
+  execute(server: Server, callback: Callback<DeleteResult>): void {
     const coll = this.collection;
     const filter = this.filter;
     const options = this.options;
@@ -83,7 +83,7 @@ export class DeleteManyOperation extends CommandOperation<DeleteOptions> {
     this.filter = filter;
   }
 
-  execute(server: Server, callback: Callback): void {
+  execute(server: Server, callback: Callback<DeleteResult>): void {
     const coll = this.collection;
     const filter = this.filter;
     const options = this.options;

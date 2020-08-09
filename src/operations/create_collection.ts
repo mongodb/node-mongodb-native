@@ -6,6 +6,7 @@ import type { Server } from '../sdam/server';
 import type { Db } from '../db';
 import type { PkFactory } from '../mongo_client';
 import type { ListCollectionsOptions } from './list_collections';
+import type { Collection } from '../collection';
 
 const ILLEGAL_COMMAND_FIELDS = new Set([
   'w',
@@ -63,7 +64,7 @@ export class CreateCollectionOperation extends CommandOperation<CreateCollection
     this.name = name;
   }
 
-  execute(server: Server, callback: Callback): void {
+  execute(server: Server, callback: Callback<Collection>): void {
     const db = this.db;
     const name = this.name;
     const options = this.options;

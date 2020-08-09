@@ -32,7 +32,7 @@ export function each(cursor: Cursor, callback: Callback<Document>): void {
     each(cursor, callback);
   } else {
     cursor.next((err, item) => {
-      if (err) return handleCallback(callback, err);
+      if (err) return callback(err);
       if (item == null) {
         return cursor.close({ skipKillCursors: true }, () => handleCallback(callback, null, null));
       }
@@ -71,7 +71,7 @@ export function toArray(cursor: Cursor, callback: Callback<Document[]>): void {
   const fetchDocs = () => {
     cursor._next((err, doc) => {
       if (err) {
-        return handleCallback(callback, err);
+        return callback(err);
       }
 
       if (doc == null) {

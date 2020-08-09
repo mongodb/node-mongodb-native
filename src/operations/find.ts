@@ -82,7 +82,7 @@ export class FindOperation extends OperationBase<FindOptions> {
     this.readPreference = ReadPreference.resolve(collection, this.options);
   }
 
-  execute(server: Server, callback: Callback): void {
+  execute(server: Server, callback: Callback<Document>): void {
     // copied from `CommandOperationV2`, to be subclassed in the future
     this.server = server;
 

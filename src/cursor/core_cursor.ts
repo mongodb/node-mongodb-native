@@ -739,7 +739,7 @@ function nextFunction(self: any, callback: Callback) {
     // Execute the next get more
     self._getMore(function (err: any, doc: any, connection: any) {
       if (err) {
-        return handleCallback(callback, err);
+        return callback(err);
       }
 
       // Save the returned connection to ensure all getMore's fire over the same connection

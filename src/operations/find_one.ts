@@ -15,7 +15,7 @@ export class FindOneOperation extends OperationBase<FindOptions> {
     this.query = query;
   }
 
-  execute(callback: Callback): void {
+  execute(callback: Callback<Document>): void {
     const coll = this.collection;
     const query = this.query;
     const options = this.options;
@@ -25,8 +25,8 @@ export class FindOneOperation extends OperationBase<FindOptions> {
 
       // Return the item
       cursor.next((err, item) => {
-        if (err != null) return handleCallback(callback, toError(err), null);
-        handleCallback(callback, null, item);
+        if (err != null) return callback(toError(err));
+        callback(undefined, item);
       });
     } catch (e) {
       callback(e);
