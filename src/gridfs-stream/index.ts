@@ -1,8 +1,9 @@
 import { EventEmitter } from 'events';
 import { GridFSBucketReadStream } from './download';
 import { GridFSBucketWriteStream } from './upload';
-import { toError, executeLegacyOperation } from '../utils';
+import { executeLegacyOperation } from '../utils';
 import type { Callback } from '../types';
+import { MongoError } from '../error';
 
 const DEFAULT_GRIDFS_BUCKET_OPTIONS: any = {
   bucketName: 'fs',
@@ -322,7 +323,7 @@ function _rename(_this: any, id: any, filename: any, callback: Callback) {
       return callback(error);
     }
     if (!res.result.n) {
-      return callback(toError('File with id ' + id + ' not found'));
+      return callback(new MongoError(`File with id ${id} not found`));
     }
     callback();
   });

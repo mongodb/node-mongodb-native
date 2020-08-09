@@ -13,9 +13,7 @@ import { ReadConcern } from './read_concern';
 import { Logger } from './logger';
 import {
   getSingleProperty,
-  handleCallback,
   filterOptions,
-  toError,
   mergeOptionsAndWriteConcern,
   deprecateOptions,
   MongoDBNamespace
@@ -363,7 +361,9 @@ export class Db {
 
     // Strict mode
     if (typeof callback !== 'function') {
-      throw toError(`A callback is required in strict mode. While getting collection ${name}`);
+      throw new MongoError(
+        `A callback is required in strict mode. While getting collection ${name}`
+      );
     }
 
     // Did the user destroy the topology
@@ -374,34 +374,23 @@ export class Db {
     const listCollectionOptions = Object.assign({}, options, { nameOnly: true });
 
     // Strict mode
-    this.listCollections({ name }, listCollectionOptions).toArray(
-      (err?: any, collections?: any) => {
-        if (err != null) return handleCallback(callback!, err, null);
-        if (collections.length === 0)
-          return handleCallback(
-            callback!,
-            toError(`Collection ${name} does not exist. Currently in strict mode.`),
-            null
-          );
+    this.listCollections({ name }, listCollectionOptions).toArray((err, collections) => {
+      if (callback == null) return;
+      if (err != null || !collections) return callback(err);
+      if (collections.length === 0)
+        return callback(
+          new MongoError(`Collection ${name} does not exist. Currently in strict mode.`)
+        );
 
-        try {
-          return handleCallback(
-            callback!,
-            null,
-            new Collection(
-              this,
-              this.s.topology,
-              this.databaseName,
-              name,
-              this.s.pkFactory,
-              options
-            )
-          );
-        } catch (err) {
-          return handleCallback(callback!, err, null);
-        }
+      try {
+        return callback(
+          undefined,
+          new Collection(this, this.s.topology, this.databaseName, name, this.s.pkFactory, options)
+        );
+      } catch (err) {
+        return callback(err);
       }
-    );
+    });
   }
 
   /**

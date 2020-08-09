@@ -1,8 +1,8 @@
-import { handleCallback, toError } from '../utils';
 import { OperationBase } from './operation';
 import type { Callback, Document } from '../types';
 import type { Collection } from '../collection';
 import type { FindOptions } from './find';
+import { MongoError } from '../error';
 
 export class FindOneOperation extends OperationBase<FindOptions> {
   collection: Collection;
@@ -25,7 +25,7 @@ export class FindOneOperation extends OperationBase<FindOptions> {
 
       // Return the item
       cursor.next((err, item) => {
-        if (err != null) return callback(toError(err));
+        if (err != null) return callback(new MongoError(err));
         callback(undefined, item);
       });
     } catch (e) {

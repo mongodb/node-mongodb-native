@@ -1,6 +1,6 @@
 import { Logger } from '../logger';
 import { ReadPreference } from '../read_preference';
-import { handleCallback, MongoDBNamespace } from '../utils';
+import { MongoDBNamespace } from '../utils';
 import { executeOperation } from '../operations/execute_operation';
 import { Readable } from 'stream';
 import { MongoError, MongoNetworkError } from '../error';
@@ -607,7 +607,7 @@ function isCursorDeadButNotkilled(self: any, callback: any) {
  */
 function isCursorDeadAndKilled(self: any, callback: any) {
   if (self.cursorState.dead && self.cursorState.killed) {
-    handleCallback(callback, new MongoError('cursor is dead'));
+    callback(new MongoError('cursor is dead'));
     return true;
   }
 
@@ -647,7 +647,7 @@ function setCursorDeadAndNotified(self: any, callback: any) {
  * @param {any} callback
  */
 function setCursorNotified(self: any, callback: any) {
-  _setCursorNotifiedImpl(self, () => handleCallback(callback, null, null));
+  _setCursorNotifiedImpl(self, () => callback(undefined, null));
 }
 
 function _setCursorNotifiedImpl(self: any, callback: Callback) {
@@ -754,8 +754,7 @@ function nextFunction(self: any, callback: Callback) {
         Long.ZERO.equals(self.cursorState.cursorId)
       ) {
         // No more documents in the tailed cursor
-        return handleCallback(
-          callback,
+        return callback(
           new MongoError({
             message: 'No more documents in tailed cursor',
             tailable: self.cmd.tailable,
@@ -781,8 +780,7 @@ function nextFunction(self: any, callback: Callback) {
     self.cmd.tailable &&
     Long.ZERO.equals(self.cursorState.cursorId)
   ) {
-    return handleCallback(
-      callback,
+    return callback(
       new MongoError({
         message: 'No more documents in tailed cursor',
         tailable: self.cmd.tailable,
@@ -814,7 +812,7 @@ function nextFunction(self: any, callback: Callback) {
       self.kill();
       // Set cursor in dead and notified state
       return setCursorDeadAndNotified(self, () =>
-        handleCallback(callback, new MongoError(doc ? doc.$err : undefined))
+        callback(new MongoError(doc ? doc.$err : undefined))
       );
     }
 
@@ -824,7 +822,7 @@ function nextFunction(self: any, callback: Callback) {
     }
 
     // Return the document
-    handleCallback(callback, null, doc);
+    callback(undefined, doc);
   }
 }
 

@@ -5,7 +5,7 @@ import { Transform, PassThrough } from 'stream';
 import { deprecate } from 'util';
 import { MongoError } from '../error';
 import { CoreCursor, CursorState, CoreCursorOptions } from './core_cursor';
-import { handleCallback, maybePromise, formattedOrderClause } from '../utils';
+import { maybePromise, formattedOrderClause } from '../utils';
 import { executeOperation } from '../operations/execute_operation';
 import { each } from '../operations/cursor_ops';
 import { CountOperation } from '../operations/count';
@@ -874,11 +874,11 @@ export class Cursor extends CoreCursor {
       const fetchDocs = () => {
         cursor._next((err?: any, doc?: any) => {
           if (err) {
-            return handleCallback(cb, err);
+            return cb(err);
           }
 
           if (doc == null) {
-            return cursor.close({ skipKillCursors: true }, () => handleCallback(cb, null, items));
+            return cursor.close({ skipKillCursors: true }, () => cb(undefined, items));
           }
 
           // Add doc to items

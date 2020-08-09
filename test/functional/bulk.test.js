@@ -955,6 +955,8 @@ describe('Bulk', function () {
       });
 
       client.connect(function (err, client) {
+        expect(err).to.not.exist;
+
         var db = client.db(self.configuration.db);
         var col = db.collection('batch_write_unordered_ops_legacy_9');
 
@@ -965,14 +967,14 @@ describe('Bulk', function () {
           unorderedBatch.find();
           test.ok(false);
         } catch (e) {
-          test.equal('MongoError: Bulk find operation must specify a selector', e.toString());
+          expect(e).to.match(/Bulk find operation must specify a selector/);
         }
 
         try {
           orderedBatch.find();
           test.ok(false);
         } catch (e) {
-          test.equal('MongoError: Bulk find operation must specify a selector', e.toString());
+          expect(e).to.match(/Bulk find operation must specify a selector/);
         }
 
         client.close(done);
@@ -1458,10 +1460,7 @@ describe('Bulk', function () {
         expect(err).to.be.an.instanceOf(MongoError);
       },
       err => {
-        expect(err).to.be.an.instanceOf(MongoError);
-        expect(err).to.not.be.an.instanceOf(TypeError);
-        expect(err.driver).to.equal(true);
-        expect(err.name).to.equal('MongoError');
+        expect(err).to.be.an.instanceOf(TypeError);
       }
     );
   }

@@ -1,7 +1,7 @@
 import { MongoError } from '../error';
 import { defineAspects, Aspect, OperationBase } from './operation';
 import { CommandOperation, CommandOperationOptions } from './command';
-import { applyRetryableWrites, applyWriteConcern, handleCallback, toError } from '../utils';
+import { applyRetryableWrites, applyWriteConcern } from '../utils';
 import { prepareDocs } from './common_functions';
 import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
@@ -120,10 +120,10 @@ function insertDocuments(
     (err, result) => {
       if (callback == null) return;
       if (err) return callback(err);
-      if (result == null) return handleCallback(callback, null, null);
-      if (result.result.code) return handleCallback(callback, toError(result.result));
+      if (result == null) return callback();
+      if (result.result.code) return callback(new MongoError(result.result));
       if (result.result.writeErrors)
-        return handleCallback(callback, toError(result.result.writeErrors[0]));
+        return callback(new MongoError(result.result.writeErrors[0]));
       // Add docs to the list
       result.ops = docs;
       // Return the results

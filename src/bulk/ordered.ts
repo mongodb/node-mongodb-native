@@ -1,6 +1,5 @@
 import * as BSON from '../bson';
 import { BulkOperationBase, Batch, INSERT } from './common';
-import { toError } from '../utils';
 
 /**
  * Add to internal list of Operations
@@ -25,7 +24,9 @@ function addToOperationsList(
 
   // Throw error if the doc is bigger than the max BSON size
   if (bsonSize >= bulkOperation.s.maxBsonObjectSize)
-    throw toError('document is larger than the maximum size ' + bulkOperation.s.maxBsonObjectSize);
+    throw new TypeError(
+      `Document is larger than the maximum size ${bulkOperation.s.maxBsonObjectSize}`
+    );
 
   // Create a new batch object if we don't have a current one
   if (bulkOperation.s.currentBatch == null)
@@ -65,7 +66,7 @@ function addToOperationsList(
 
   // We have an array of documents
   if (Array.isArray(document)) {
-    throw toError('operation passed in cannot be an Array');
+    throw new TypeError('Operation passed in cannot be an Array');
   }
 
   bulkOperation.s.currentBatch.originalIndexes.push(bulkOperation.s.currentIndex);

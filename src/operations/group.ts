@@ -1,7 +1,6 @@
 import { CommandOperation, CommandOperationOptions } from './command';
 import { EvalOperation } from './eval';
 import { Code } from '../bson';
-import { handleCallback } from '../utils';
 import { defineAspects, Aspect } from './operation';
 import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
@@ -67,7 +66,7 @@ export class GroupOperation extends CommandOperation<GroupOptions> {
     // Execute command
     super.executeCommand(server, cmd, (err, result) => {
       if (err) return callback(err);
-      handleCallback(callback, null, result.retval);
+      callback(undefined, result.retval);
     });
   }
 }

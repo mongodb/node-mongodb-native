@@ -1,7 +1,6 @@
 import { CommandOperation, CommandOperationOptions } from './command';
 import { Code } from '../bson';
 import { ReadPreference } from '../read_preference';
-import { handleCallback } from '../utils';
 import { MongoError } from '../error';
 import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
@@ -52,14 +51,16 @@ export class EvalOperation extends CommandOperation<EvalOptions> {
     // Execute the command
     super.executeCommand(server, cmd, (err, result) => {
       if (err) return callback(err);
-      if (result && result.ok === 1) return handleCallback(callback, null, result.retval);
-      if (result)
-        return handleCallback(
-          callback,
-          MongoError.create({ message: `eval failed: ${result.errmsg}`, driver: true }),
-          null
-        );
-      handleCallback(callback, err, result);
+      if (result && result.ok === 1) {
+        return callback(undefined, result.retval);
+      }
+
+      if (result) {
+        callback(MongoError.create({ message: `eval failed: ${result.errmsg}`, driver: true }));
+        return;
+      }
+
+      callback(err, result);
     });
   }
 }

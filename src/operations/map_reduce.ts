@@ -4,8 +4,7 @@ import {
   applyWriteConcern,
   decorateWithCollation,
   decorateWithReadConcern,
-  isObject,
-  toError
+  isObject
 } from '../utils';
 import { ReadPreference, ReadPreferenceMode } from '../read_preference';
 import { CommandOperation, CommandOperationOptions } from './command';
@@ -14,6 +13,7 @@ import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { Sort } from './find';
+import { MongoError } from '../error';
 
 const exclusionList = [
   'readPreference',
@@ -156,7 +156,7 @@ export class MapReduceOperation extends CommandOperation<MapReduceOptions> {
       if (err) return callback(err);
       // Check if we have an error
       if (1 !== result.ok || result.err || result.errmsg) {
-        return callback(toError(result));
+        return callback(new MongoError(result));
       }
 
       // Create statistics value

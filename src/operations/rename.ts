@@ -1,4 +1,4 @@
-import { checkCollectionName, handleCallback, toError } from '../utils';
+import { checkCollectionName } from '../utils';
 import { loadCollection } from '../dynamic_loaders';
 import { RunAdminCommandOperation } from './run_command';
 import { defineAspects, Aspect } from './operation';
@@ -6,6 +6,7 @@ import type { Callback } from '../types';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { CommandOperationOptions } from './command';
+import { MongoError } from '../error';
 
 export interface RenameOptions extends CommandOperationOptions {
   /** Drop the target name collection if it previously exists. */
@@ -40,11 +41,13 @@ export class RenameOperation extends RunAdminCommandOperation {
     super.execute(server, (err, doc) => {
       if (err) return callback(err);
       // We have an error
-      if (doc.errmsg) return handleCallback(callback, toError(doc), null);
+      if (doc.errmsg) {
+        return callback(new MongoError(doc));
+      }
+
       try {
-        return handleCallback(
-          callback,
-          null,
+        return callback(
+          undefined,
           new Collection(
             coll.s.db,
             coll.s.topology,
@@ -55,7 +58,7 @@ export class RenameOperation extends RunAdminCommandOperation {
           )
         );
       } catch (err) {
-        return handleCallback(callback, toError(err), null);
+        return callback(new MongoError(err));
       }
     });
   }

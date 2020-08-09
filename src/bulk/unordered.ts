@@ -1,6 +1,5 @@
 import * as BSON from '../bson';
 import { BulkOperationBase, Batch, INSERT, UPDATE, REMOVE } from './common';
-import { toError } from '../utils';
 import type { Callback } from '../types';
 
 /**
@@ -25,8 +24,12 @@ function addToOperationsList(
     ignoreUndefined: false
   } as any);
   // Throw error if the doc is bigger than the max BSON size
-  if (bsonSize >= bulkOperation.s.maxBsonObjectSize)
-    throw toError('document is larger than the maximum size ' + bulkOperation.s.maxBsonObjectSize);
+  if (bsonSize >= bulkOperation.s.maxBsonObjectSize) {
+    throw new TypeError(
+      `Document is larger than the maximum size ${bulkOperation.s.maxBsonObjectSize}`
+    );
+  }
+
   // Holds the current batch
   bulkOperation.s.currentBatch = null;
   // Get the right type of batch
@@ -65,7 +68,7 @@ function addToOperationsList(
 
   // We have an array of documents
   if (Array.isArray(document)) {
-    throw toError('operation passed in cannot be an Array');
+    throw new TypeError('Operation passed in cannot be an Array');
   }
 
   bulkOperation.s.currentBatch.operations.push(document);

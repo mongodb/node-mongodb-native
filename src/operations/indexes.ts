@@ -1,7 +1,7 @@
 import { indexInformation, IndexInformationOptions } from './common_functions';
 import { OperationBase, Aspect, defineAspects } from './operation';
 import { MongoError } from '../error';
-import { maxWireVersion, parseIndexOptions, handleCallback, MongoDBNamespace } from '../utils';
+import { maxWireVersion, parseIndexOptions, MongoDBNamespace } from '../utils';
 import { CommandOperation, CommandOperationOptions } from './command';
 import { ReadPreference } from '../read_preference';
 
@@ -348,16 +348,16 @@ export class IndexExistsOperation extends OperationBase<IndexInformationOptions>
       if (err != null) return callback(err);
       // Let's check for the index names
       if (!Array.isArray(indexes))
-        return handleCallback(callback, null, indexInformation[indexes] != null);
+        return callback(undefined, indexInformation[indexes] != null);
       // Check in list of indexes
       for (let i = 0; i < indexes.length; i++) {
         if (indexInformation[indexes[i]] == null) {
-          return handleCallback(callback, null, false);
+          return callback(undefined, false);
         }
       }
 
       // All keys found return true
-      return handleCallback(callback, null, true);
+      return callback(undefined, true);
     });
   }
 }

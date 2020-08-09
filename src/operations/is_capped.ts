@@ -1,5 +1,4 @@
 import { OptionsOperation } from './options_operation';
-import { handleCallback } from '../utils';
 import type { Callback } from '../types';
 import type { Collection } from '../collection';
 import type { OperationOptions } from './operation';

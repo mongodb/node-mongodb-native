@@ -1,9 +1,7 @@
 import { OperationBase, OperationOptions } from './operation';
-import { handleCallback } from '../utils';
 import { loadCollection } from '../dynamic_loaders';
 import type { Callback } from '../types';
 import type { Db } from '../db';
-import type { Collection } from '../collection';
 
 export interface CollectionsOptions extends OperationOptions {
   nameOnly?: boolean;
@@ -32,9 +30,8 @@ export class CollectionsOperation extends OperationBase<CollectionsOptions> {
       documents = documents.filter(doc => doc.name.indexOf('$') === -1);
 
       // Return the collection objects
-      handleCallback(
-        callback,
-        null,
+      callback(
+        undefined,
         documents.map(d => {
           return new Collection(
             db,

@@ -2,8 +2,6 @@ import { PromiseProvider } from '../promise_provider';
 import { Long, ObjectId } from '../bson';
 import { MongoError, MongoWriteConcernError } from '../error';
 import {
-  toError,
-  handleCallback,
   applyWriteConcern,
   applyRetryableWrites,
   executeLegacyOperation,
@@ -554,7 +552,7 @@ function mergeBatchResults(batch: any, bulkResult: any, err: any, result: any) {
 
 function executeCommands(bulkOperation: any, options: any, callback: Callback<BulkWriteResult>) {
   if (bulkOperation.s.batches.length === 0) {
-    return handleCallback(callback, null, new BulkWriteResult(bulkOperation.s.bulkResult));
+    return callback(undefined, new BulkWriteResult(bulkOperation.s.bulkResult));
   }
 
   const batch = bulkOperation.s.batches.shift();
@@ -575,7 +573,7 @@ function executeCommands(bulkOperation: any, options: any, callback: Callback<Bu
     const writeResult = new BulkWriteResult(bulkOperation.s.bulkResult);
     const mergeResult = mergeBatchResults(batch, bulkOperation.s.bulkResult, err, result);
     if (mergeResult != null) {
-      return handleCallback(callback, null, writeResult);
+      return callback(undefined, writeResult);
     }
 
     if (bulkOperation.handleWriteError(callback, writeResult)) return;
@@ -607,10 +605,9 @@ function handleMongoWriteConcernError(
     errmsg: err.result.writeConcernError.errmsg,
     code: err.result.writeConcernError.result
   });
-  return handleCallback(
-    callback,
-    new BulkWriteError(toError(wrappedWriteConcernError), new BulkWriteResult(bulkResult)),
-    null
+
+  callback(
+    new BulkWriteError(new MongoError(wrappedWriteConcernError), new BulkWriteResult(bulkResult))
   );
 }
 
@@ -997,7 +994,7 @@ class BulkOperationBase {
    */
   find(selector: object): FindOperators {
     if (!selector) {
-      throw toError('Bulk find operation must specify a selector');
+      throw TypeError('Bulk find operation must specify a selector');
     }
 
     // Save a current selector
@@ -1118,7 +1115,7 @@ class BulkOperationBase {
     }
 
     // No valid type of operation
-    throw toError(
+    throw TypeError(
       'bulkWrite only supports insertOne, insertMany, updateOne, updateMany, removeOne, removeMany, deleteOne, deleteMany'
     );
   }
@@ -1159,7 +1156,7 @@ class BulkOperationBase {
     }
 
     if (this.s.executed) {
-      const executedError = toError('batch cannot be re-executed');
+      const executedError = new MongoError('batch cannot be re-executed');
       return this._handleEarlyError(executedError, callback);
     }
 
@@ -1173,7 +1170,7 @@ class BulkOperationBase {
     }
     // If we have no operations in the bulk raise an error
     if (this.s.batches.length === 0) {
-      const emptyBatchError = toError('Invalid Operation, no operations specified');
+      const emptyBatchError = new TypeError('Invalid Operation, no operations specified');
       return this._handleEarlyError(emptyBatchError, callback);
     }
     return { options, callback };
@@ -1296,7 +1293,7 @@ class BulkOperationBase {
       // Force top level error
       err.ok = 0;
       // Merge top level error and return
-      handleCallback(callback, null, mergeBatchResults(config.batch, this.s.bulkResult, err, null));
+      callback(undefined, mergeBatchResults(config.batch, this.s.bulkResult, err, null));
     }
   }
 
@@ -1315,28 +1312,22 @@ class BulkOperationBase {
         ? this.s.bulkResult.writeErrors[0].errmsg
         : 'write operation failed';
 
-      handleCallback(
-        callback,
+      callback(
         new BulkWriteError(
-          toError({
+          new MongoError({
             message: msg,
             code: this.s.bulkResult.writeErrors[0].code,
             writeErrors: this.s.bulkResult.writeErrors
           }),
           writeResult
-        ),
-        null
+        )
       );
 
       return true;
     }
 
     if (writeResult.getWriteConcernError()) {
-      handleCallback(
-        callback,
-        new BulkWriteError(toError(writeResult.getWriteConcernError()), writeResult),
-        null
-      );
+      callback(new BulkWriteError(new MongoError(writeResult.getWriteConcernError()), writeResult));
       return true;
     }
   }

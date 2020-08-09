@@ -1,7 +1,6 @@
-import { handleCallback } from '../utils';
 import { MongoError } from '../error';
 import { CursorState } from '../cursor/core_cursor';
-import type { Callback, Document } from '../types';
+import type { Callback, Document, AnyError } from '../types';
 import type { Cursor } from '../cursor';
 
 /**
@@ -12,11 +11,14 @@ import type { Cursor } from '../cursor';
  * @param {Cursor} cursor The Cursor instance on which to run.
  * @param {Cursor~resultCallback} callback The result callback.
  */
-export function each(cursor: Cursor, callback: Callback<Document>): void {
+export function each(
+  cursor: Cursor,
+  callback: (error?: AnyError, result?: Document | null) => boolean
+): void {
   if (!callback) throw MongoError.create({ message: 'callback is mandatory', driver: true });
   if (cursor.isNotified()) return;
   if (cursor.s.state === CursorState.CLOSED || cursor.isDead()) {
-    handleCallback(callback, MongoError.create({ message: 'Cursor is closed', driver: true }));
+    callback(MongoError.create({ message: 'Cursor is closed', driver: true }));
     return;
   }
 
@@ -34,10 +36,10 @@ export function each(cursor: Cursor, callback: Callback<Document>): void {
     cursor.next((err, item) => {
       if (err) return callback(err);
       if (item == null) {
-        return cursor.close({ skipKillCursors: true }, () => handleCallback(callback, null, null));
+        return cursor.close({ skipKillCursors: true }, () => callback(undefined, null));
       }
 
-      if (handleCallback(callback, null, item) === false) return;
+      if (callback(undefined, item) === false) return;
       each(cursor, callback);
     });
   }
@@ -75,7 +77,7 @@ export function toArray(cursor: Cursor, callback: Callback<Document[]>): void {
       }
 
       if (doc == null) {
-        return cursor.close({ skipKillCursors: true }, () => handleCallback(callback, null, items));
+        return cursor.close({ skipKillCursors: true }, () => callback(undefined, items));
       }
 
       // Add doc to items

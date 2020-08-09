@@ -1,5 +1,4 @@
 import { OperationBase, OperationOptions } from './operation';
-import { handleCallback } from '../utils';
 import { MongoError } from '../error';
 import type { Callback, Document } from '../types';
 import type { Collection } from '../collection';
@@ -20,13 +19,12 @@ export class OptionsOperation extends OperationBase<OperationOptions> {
     coll.s.db.listCollections({ name: coll.collectionName }, opts).toArray((err, collections) => {
       if (err || !collections) return callback(err);
       if (collections.length === 0) {
-        return handleCallback(
-          callback,
+        return callback(
           MongoError.create({ message: `collection ${coll.namespace} not found`, driver: true })
         );
       }
 
-      handleCallback(callback, err, collections[0].options || null);
+      callback(err, collections[0].options || null);
     });
   }
 }

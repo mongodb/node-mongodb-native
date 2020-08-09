@@ -3,7 +3,7 @@ import * as crypto from 'crypto';
 import { PromiseProvider } from './promise_provider';
 import { MongoError } from './error';
 import { WriteConcern } from './write_concern';
-import type { CallbackWithType, Callback, Callback2 } from './types';
+import type { CallbackWithType, Callback } from './types';
 
 const MAX_JS_INT = Number.MAX_SAFE_INTEGER + 1;
 
@@ -91,57 +91,6 @@ function checkCollectionName(collectionName: any) {
   if (collectionName.indexOf('\x00') !== -1) {
     throw new MongoError('collection names cannot contain a null character');
   }
-}
-
-/**
- * Tries to call a provided callback with an error or some result with logic to
- * catch any error and rethrow on next tick if encountered.
- *
- * @param {Function} callback
- * @param {any} err
- * @param {any} [value1]
- * @param {any} [value2]
- */
-function handleCallback(callback?: Callback | Callback2, err?: any, value1?: any, value2?: any) {
-  try {
-    if (callback == null) return;
-
-    if (callback) {
-      return value2 ? callback(err, value1, value2) : callback(err, value1);
-    }
-  } catch (err) {
-    process.nextTick(function () {
-      throw err;
-    });
-    return false;
-  }
-
-  return true;
-}
-
-/**
- * Wrap a Mongo error document in an Error instance
- *
- * @param {any} error
- */
-function toError(error: any) {
-  if (error instanceof Error) return error;
-
-  const msg = error.err || error.errmsg || error.errMessage || error;
-  const e: any = MongoError.create({ message: msg, driver: true });
-
-  // Get all object keys
-  const keys = typeof error === 'object' ? Object.keys(error) : [];
-
-  for (let i = 0; i < keys.length; i++) {
-    try {
-      e[keys[i]] = error[keys[i]];
-    } catch (err) {
-      // continue
-    }
-  }
-
-  return e;
 }
 
 /**
@@ -1051,12 +1000,10 @@ export {
   mergeOptions,
   getSingleProperty,
   checkCollectionName,
-  toError,
   formatSortValue,
   formattedOrderClause,
   parseIndexOptions,
   normalizeHintField,
-  handleCallback,
   decorateCommand,
   isObject,
   debugOptions,

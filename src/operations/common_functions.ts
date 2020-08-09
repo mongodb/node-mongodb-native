@@ -4,17 +4,15 @@ import {
   applyRetryableWrites,
   applyWriteConcern,
   decorateWithCollation,
-  formattedOrderClause,
-  handleCallback,
-  toError
+  formattedOrderClause
 } from '../utils';
-import type { Callback, Document, AnyError } from '../types';
+import type { Callback, Document } from '../types';
 import type { Db } from '../db';
 import type { ClientSession } from '../sessions';
 import type { Server } from '../sdam/server';
 import type { ReadPreference } from '../read_preference';
 import type { Collection } from '../collection';
-import type { UpdateOptions, UpdateResult } from './update';
+import type { UpdateOptions } from './update';
 import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
 
 export function deleteCallback(err: any, r: any, callback: Callback): void {
@@ -84,10 +82,10 @@ export function indexInformation(
   db.collection(name)
     .listIndexes(options)
     .toArray((err?: any, indexes?: any) => {
-      if (err) return callback(toError(err));
-      if (!Array.isArray(indexes)) return handleCallback(callback, null, []);
-      if (full) return handleCallback(callback, null, indexes);
-      handleCallback(callback, null, processResults(indexes));
+      if (err) return callback(new MongoError(err));
+      if (!Array.isArray(indexes)) return callback(undefined, []);
+      if (full) return callback(undefined, indexes);
+      callback(undefined, processResults(indexes));
     });
 }
 
@@ -114,10 +112,7 @@ export function prepareDocs(coll: any, docs: any, options: any) {
 // Get the next available document from the cursor, returns null if no more documents are available.
 export function nextObject(cursor: Cursor, callback: Callback) {
   if (cursor.s.state === CursorState.CLOSED || (cursor.isDead && cursor.isDead())) {
-    return handleCallback(
-      callback,
-      MongoError.create({ message: 'Cursor is closed', driver: true })
-    );
+    return callback(MongoError.create({ message: 'Cursor is closed', driver: true }));
   }
 
   if (cursor.s.state === CursorState.INIT && cursor.cmd && cursor.cmd.sort) {
@@ -132,7 +127,7 @@ export function nextObject(cursor: Cursor, callback: Callback) {
   cursor._next((err, doc) => {
     cursor.s.state = CursorState.OPEN;
     if (err) return callback(err);
-    handleCallback(callback, null, doc);
+    callback(undefined, doc);
   });
 }
 
@@ -184,10 +179,10 @@ export function removeDocuments(
   server.remove(coll.s.namespace.toString(), [op], finalOptions, (err, result) => {
     if (callback == null) return;
     if (err) return callback(err);
-    if (result == null) return handleCallback(callback, null, null);
-    if (result.result.code) return handleCallback(callback, toError(result.result));
+    if (result == null) return callback();
+    if (result.result.code) return callback(new MongoError(result.result));
     if (result.result.writeErrors) {
-      return handleCallback(callback, toError(result.result.writeErrors[0]));
+      return callback(new MongoError(result.result.writeErrors[0]));
     }
 
     // Return the results
@@ -227,9 +222,9 @@ export function updateDocuments(
 
   // If we are not providing a selector or document throw
   if (selector == null || typeof selector !== 'object')
-    return callback(toError('selector must be a valid JavaScript object'));
+    return callback(new TypeError('selector must be a valid JavaScript object'));
   if (document == null || typeof document !== 'object')
-    return callback(toError('document must be a valid JavaScript object'));
+    return callback(new TypeError('document must be a valid JavaScript object'));
 
   // Final options for retryable writes and write concern
   let finalOptions = Object.assign({}, options);
@@ -274,10 +269,9 @@ export function updateDocuments(
     (err, result) => {
       if (callback == null) return;
       if (err) return callback(err);
-      if (result == null) return handleCallback(callback, null, null);
-      if (result.result.code) return handleCallback(callback, toError(result.result));
-      if (result.result.writeErrors)
-        return handleCallback(callback, toError(result.result.writeErrors[0]));
+      if (result == null) return callback();
+      if (result.result.code) return callback(new MongoError(result.result));
+      if (result.result.writeErrors) return callback(new MongoError(result.result.writeErrors[0]));
       // Return the results
       callback(undefined, result);
     }
