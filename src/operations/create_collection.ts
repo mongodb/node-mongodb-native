@@ -7,6 +7,9 @@ import type { Db } from '../db';
 import type { PkFactory } from '../mongo_client';
 import type { ListCollectionsOptions } from './list_collections';
 
+// eslint-disable-next-line
+import type { Collection } from '../collection';
+
 const ILLEGAL_COMMAND_FIELDS = new Set([
   'w',
   'wtimeout',

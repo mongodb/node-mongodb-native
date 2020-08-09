@@ -347,8 +347,7 @@ export class IndexExistsOperation extends OperationBase<IndexInformationOptions>
       // If we have an error return
       if (err != null) return callback(err);
       // Let's check for the index names
-      if (!Array.isArray(indexes))
-        return callback(undefined, indexInformation[indexes] != null);
+      if (!Array.isArray(indexes)) return callback(undefined, indexInformation[indexes] != null);
       // Check in list of indexes
       for (let i = 0; i < indexes.length; i++) {
         if (indexInformation[indexes[i]] == null) {

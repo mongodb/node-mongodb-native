@@ -122,8 +122,7 @@ function insertDocuments(
       if (err) return callback(err);
       if (result == null) return callback();
       if (result.result.code) return callback(new MongoError(result.result));
-      if (result.result.writeErrors)
-        return callback(new MongoError(result.result.writeErrors[0]));
+      if (result.result.writeErrors) return callback(new MongoError(result.result.writeErrors[0]));
       // Add docs to the list
       result.ops = docs;
       // Return the results

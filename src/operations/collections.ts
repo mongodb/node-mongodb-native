@@ -3,6 +3,9 @@ import { loadCollection } from '../dynamic_loaders';
 import type { Callback } from '../types';
 import type { Db } from '../db';
 
+// eslint-disable-next-line
+import type { Collection } from '../collection';
+
 export interface CollectionsOptions extends OperationOptions {
   nameOnly?: boolean;
 }

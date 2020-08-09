@@ -7,7 +7,7 @@ import { MongoError } from '../error';
 import { CoreCursor, CursorState, CoreCursorOptions } from './core_cursor';
 import { maybePromise, formattedOrderClause } from '../utils';
 import { executeOperation } from '../operations/execute_operation';
-import { each } from '../operations/cursor_ops';
+import { each, EachCallback } from '../operations/cursor_ops';
 import { CountOperation } from '../operations/count';
 import type { Callback, Document } from '../types';
 import type { OperationBase } from '../operations/operation';
@@ -732,7 +732,7 @@ export class Cursor extends CoreCursor {
    * @throws {MongoError}
    * @returns {void}
    */
-  each(callback: Callback): void {
+  each(callback: EachCallback): void {
     // Rewind cursor state
     this.rewind();
     // Set current cursor to INIT
@@ -773,7 +773,7 @@ export class Cursor extends CoreCursor {
     this.s.state = CursorState.INIT;
 
     if (typeof callback === 'function') {
-      each(this, (err?: any, doc?: any) => {
+      each(this, (err, doc) => {
         if (err) {
           callback!(err);
           return false;

@@ -3,6 +3,8 @@ import { CursorState } from '../cursor/core_cursor';
 import type { Callback, Document, AnyError } from '../types';
 import type { Cursor } from '../cursor';
 
+export type EachCallback = (error?: AnyError, result?: Document | null) => boolean | void;
+
 /**
  * Iterates over all the documents for this cursor. See Cursor.prototype.each for more information.
  *
@@ -11,10 +13,7 @@ import type { Cursor } from '../cursor';
  * @param {Cursor} cursor The Cursor instance on which to run.
  * @param {Cursor~resultCallback} callback The result callback.
  */
-export function each(
-  cursor: Cursor,
-  callback: (error?: AnyError, result?: Document | null) => boolean
-): void {
+export function each(cursor: Cursor, callback: EachCallback): void {
   if (!callback) throw MongoError.create({ message: 'callback is mandatory', driver: true });
   if (cursor.isNotified()) return;
   if (cursor.s.state === CursorState.CLOSED || cursor.isDead()) {
