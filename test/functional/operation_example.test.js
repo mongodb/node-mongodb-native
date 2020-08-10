@@ -5734,6 +5734,7 @@ describe('Operation Examples', function () {
 
       const client = configuration.newClient(url);
       client.connect(function (err, client) {
+        expect(err).to.not.exist;
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -5745,7 +5746,6 @@ describe('Operation Examples', function () {
         // REMOVE-LINE done();
         // REMOVE-LINE var db = client.db(configuration.db);
         // BEGIN
-        expect(err).to.not.exist;
         test.ok(db != null);
 
         db.collection('replicaset_mongo_client_collection').updateOne(

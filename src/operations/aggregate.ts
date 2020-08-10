@@ -7,6 +7,7 @@ import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
 import type { Cursor } from '../cursor';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
+import type { MongoClient } from '..';
 
 const DB_AGGREGATE_COLLECTION = 1 as const;
 const MIN_WIRE_VERSION_$OUT_READ_CONCERN_SUPPORT = 8 as const;

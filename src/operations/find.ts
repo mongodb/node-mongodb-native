@@ -10,7 +10,11 @@ import type { InternalCursorState } from '../cursor/core_cursor';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 import type { QueryOptions } from '../cmap/wire_protocol/query';
 
-export type Sort = { [key: string]: number | string } | [string, number][];
+export type SortDirection = 1 | -1 | 'asc' | 'desc' | { $meta: string };
+export type Sort =
+  | { [key: string]: SortDirection }
+  | [string, SortDirection][]
+  | [string, SortDirection];
 
 export interface FindOptions extends QueryOptions {
   /** Sets the limit of documents returned in the query. */
@@ -67,7 +71,6 @@ export class FindOperation extends OperationBase<FindOptions> {
   cmd: Document;
   readPreference: ReadPreference;
   cursorState?: InternalCursorState;
-  server?: Server;
 
   constructor(
     collection: Collection,

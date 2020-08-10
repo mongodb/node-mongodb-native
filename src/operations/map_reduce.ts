@@ -132,7 +132,7 @@ export class MapReduceOperation extends CommandOperation<MapReduceOptions> {
       options.out !== 'inline'
     ) {
       // Force readPreference to primary
-      options.readPreference = 'primary';
+      options.readPreference = ReadPreference.primary;
       // Decorate command with writeConcern if supported
       applyWriteConcern(mapCommandHash, { db: coll.s.db, collection: coll }, options);
     } else {

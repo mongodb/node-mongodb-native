@@ -1,7 +1,11 @@
 import { MongoError } from '../error';
-import { Cursor } from './cursor';
+import { Cursor, CursorOptions } from './cursor';
 import { CursorState } from './core_cursor';
 import { deprecate } from 'util';
+import type { AggregateOperation, AggregateOptions } from '../operations/aggregate';
+import type { Document } from '../types';
+import type { Sort } from '../operations/find';
+import type { Topology } from '../sdam/topology';
 
 /**
  * @file The **AggregationCursor** class is an internal class that embodies an aggregation cursor on MongoDB
@@ -36,11 +40,7 @@ import { deprecate } from 'util';
  * });
  */
 
-/**
- * Namespace provided by the browser.
- *
- * @external Readable
- */
+export interface AggregationCursorOptions extends CursorOptions, AggregateOptions {}
 
 /**
  * Creates a new Aggregation Cursor instance (INTERNAL TYPE, do not instantiate directly)
@@ -53,183 +53,105 @@ import { deprecate } from 'util';
  * @fires AggregationCursor#readable
  * @returns {AggregationCursor} an AggregationCursor instance.
  */
-export class AggregationCursor extends Cursor {
-  constructor(topology: any, operation: any, options: any) {
+export class AggregationCursor extends Cursor<AggregationCursorOptions> {
+  operation!: AggregateOperation;
+
+  constructor(
+    topology: Topology,
+    operation: AggregateOperation,
+    options: AggregationCursorOptions = {}
+  ) {
     super(topology, operation, options);
   }
 
-  /**
-   * Set the batch size for the cursor.
-   *
-   * @function
-   * @param {number} value The number of documents to return per batch. See {@link https://docs.mongodb.com/manual/reference/command/aggregate|aggregation documentation}.
-   * @throws {MongoError}
-   * @returns {AggregationCursor}
-   */
-  batchSize(value: number): AggregationCursor {
+  /** Set the batch size for the cursor. See {@link https://docs.mongodb.com/manual/reference/command/aggregate|aggregation documentation} */
+  batchSize(batchSize: number): this {
     if (this.s.state === CursorState.CLOSED || this.isDead()) {
-      throw MongoError.create({ message: 'Cursor is closed', driver: true });
+      throw new MongoError('Cursor is closed');
     }
 
-    if (typeof value !== 'number') {
-      throw MongoError.create({ message: 'batchSize requires an integer', driver: true });
+    if (typeof batchSize !== 'number') {
+      throw new MongoError('batchSize requires an integer');
     }
 
-    this.operation.options.batchSize = value;
-    this.setCursorBatchSize(value);
+    this.operation.options.batchSize = batchSize;
+    this.cursorBatchSize = batchSize;
     return this;
   }
 
-  /**
-   * Add a geoNear stage to the aggregation pipeline
-   *
-   * @function
-   * @param {object} document The geoNear stage document.
-   * @returns {AggregationCursor}
-   */
-  geoNear(document: object): AggregationCursor {
-    this.operation.addToPipeline({ $geoNear: document });
+  /** Add a group stage to the aggregation pipeline */
+  group($group: Document): this {
+    this.operation.addToPipeline({ $group });
     return this;
   }
 
-  /**
-   * Add a group stage to the aggregation pipeline
-   *
-   * @function
-   * @param {object} document The group stage document.
-   * @returns {AggregationCursor}
-   */
-  group(document: object): AggregationCursor {
-    this.operation.addToPipeline({ $group: document });
+  /** Add a limit stage to the aggregation pipeline */
+  limit($limit: number): this {
+    this.operation.addToPipeline({ $limit });
     return this;
   }
 
-  /**
-   * Add a limit stage to the aggregation pipeline
-   *
-   * @function
-   * @param {number} value The state limit value.
-   * @returns {AggregationCursor}
-   */
-  limit(value: number): AggregationCursor {
-    this.operation.addToPipeline({ $limit: value });
+  /** Add a match stage to the aggregation pipeline */
+  match($match: Document): this {
+    this.operation.addToPipeline({ $match });
     return this;
   }
 
-  /**
-   * Add a match stage to the aggregation pipeline
-   *
-   * @function
-   * @param {object} document The match stage document.
-   * @returns {AggregationCursor}
-   */
-  match(document: object): AggregationCursor {
-    this.operation.addToPipeline({ $match: document });
+  /** Add a maxTimeMS stage to the aggregation pipeline */
+  maxTimeMS(maxTimeMS: number): this {
+    this.operation.options.maxTimeMS = maxTimeMS;
     return this;
   }
 
-  /**
-   * Add a maxTimeMS stage to the aggregation pipeline
-   *
-   * @function
-   * @param {number} value The state maxTimeMS value.
-   * @returns {AggregationCursor}
-   */
-  maxTimeMS(value: number): AggregationCursor {
-    this.operation.options.maxTimeMS = value;
+  /** Add a out stage to the aggregation pipeline */
+  out($out: number): this {
+    this.operation.addToPipeline({ $out });
     return this;
   }
 
-  /**
-   * Add a out stage to the aggregation pipeline
-   *
-   * @function
-   * @param {number} destination The destination name.
-   * @returns {AggregationCursor}
-   */
-  out(destination: number): AggregationCursor {
-    this.operation.addToPipeline({ $out: destination });
+  /** Add a project stage to the aggregation pipeline */
+  project($project: Document): this {
+    this.operation.addToPipeline({ $project });
     return this;
   }
 
-  /**
-   * Add a project stage to the aggregation pipeline
-   *
-   * @function
-   * @param {object} document The project stage document.
-   * @returns {AggregationCursor}
-   */
-  project(document: object): AggregationCursor {
-    this.operation.addToPipeline({ $project: document });
+  /** Add a lookup stage to the aggregation pipeline */
+  lookup($lookup: Document): this {
+    this.operation.addToPipeline({ $lookup });
     return this;
   }
 
-  /**
-   * Add a lookup stage to the aggregation pipeline
-   *
-   * @function
-   * @param {object} document The lookup stage document.
-   * @returns {AggregationCursor}
-   */
-  lookup(document: object): AggregationCursor {
-    this.operation.addToPipeline({ $lookup: document });
+  /** Add a redact stage to the aggregation pipeline */
+  redact($redact: Document): this {
+    this.operation.addToPipeline({ $redact });
     return this;
   }
 
-  /**
-   * Add a redact stage to the aggregation pipeline
-   *
-   * @function
-   * @param {object} document The redact stage document.
-   * @returns {AggregationCursor}
-   */
-  redact(document: object): AggregationCursor {
-    this.operation.addToPipeline({ $redact: document });
+  /** Add a skip stage to the aggregation pipeline */
+  skip($skip: number): this {
+    this.operation.addToPipeline({ $skip });
     return this;
   }
 
-  /**
-   * Add a skip stage to the aggregation pipeline
-   *
-   * @function
-   * @param {number} value The state skip value.
-   * @returns {AggregationCursor}
-   */
-  skip(value: number): AggregationCursor {
-    this.operation.addToPipeline({ $skip: value });
+  /** Add a sort stage to the aggregation pipeline */
+  sort($sort: Sort): this {
+    this.operation.addToPipeline({ $sort });
     return this;
   }
 
-  /**
-   * Add a sort stage to the aggregation pipeline
-   *
-   * @function
-   * @param {object} document The sort stage document.
-   * @returns {AggregationCursor}
-   */
-  sort(document: object): AggregationCursor {
-    this.operation.addToPipeline({ $sort: document });
+  /** Add a unwind stage to the aggregation pipeline */
+  unwind($unwind: number): this {
+    this.operation.addToPipeline({ $unwind });
     return this;
   }
 
-  /**
-   * Add a unwind stage to the aggregation pipeline
-   *
-   * @function
-   * @param {number} field The unwind field name.
-   * @returns {AggregationCursor}
-   */
-  unwind(field: number): AggregationCursor {
-    this.operation.addToPipeline({ $unwind: field });
+  // deprecated methods
+  /** @deprecated Add a geoNear stage to the aggregation pipeline */
+  geoNear = deprecate(($geoNear: Document) => {
+    this.operation.addToPipeline({ $geoNear });
     return this;
-  }
+  }, 'The `$geoNear` stage is deprecated in MongoDB 4.0, and removed in version 4.2.');
 }
-
-// deprecated methods
-deprecate(
-  AggregationCursor.prototype.geoNear,
-  'The `$geoNear` stage is deprecated in MongoDB 4.0, and removed in version 4.2.'
-);
 
 /**
  * AggregationCursor stream data event, fired for each document in the cursor.

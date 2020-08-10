@@ -489,7 +489,7 @@ export class MongoClient extends EventEmitter {
         err => cleanupHandler(err, null, { throw: true })
       );
     } catch (err) {
-      return cleanupHandler(err, null, { throw: false });
+      return cleanupHandler(err, null, { throw: false }) as Promise<void>;
     }
   }
 

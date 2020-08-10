@@ -21,7 +21,7 @@ export interface CommandOperationOptions extends OperationOptions, BSONSerialize
   /** Specify a read concern and level for the collection. (only MongoDB 3.2 or higher supported) */
   readConcern?: ReadConcern;
   /** The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST). */
-  readPreference?: ReadPreferenceLike;
+  readPreference?: ReadPreference;
   /** Specify ClientSession for this command */
   session?: ClientSession;
   /** WriteConcern for this command */
@@ -49,7 +49,6 @@ export class CommandOperation<
   explain: boolean;
   fullResponse?: boolean;
   logger?: Logger;
-  server?: Server;
 
   constructor(parent: Parent, options?: T) {
     super(options);

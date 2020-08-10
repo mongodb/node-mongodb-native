@@ -569,7 +569,7 @@ function* makeCounter(seed = 0) {
  * @param {Function} wrapper A function that wraps the callback
  * @returns {any|void} Returns nothing if a callback is supplied, else returns a Promise.
  */
-function maybePromise(callback: Callback | undefined, wrapper: Function): any | void {
+function maybePromise(callback: Callback | undefined, wrapper: (cb: Callback) => void): any | void {
   const Promise = PromiseProvider.get();
 
   let result;
