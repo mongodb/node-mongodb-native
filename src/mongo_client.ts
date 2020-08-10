@@ -3,7 +3,7 @@ import { EventEmitter } from 'events';
 import { ChangeStream } from './change_stream';
 import { ReadPreference, ReadPreferenceMode } from './read_preference';
 import { MongoError } from './error';
-import { WriteConcern } from './write_concern';
+import { WriteConcern, WriteConcernOptions } from './write_concern';
 import { maybePromise, MongoDBNamespace } from './utils';
 import { deprecate } from 'util';
 import { connect, validOptions } from './operations/connect';
@@ -64,7 +64,7 @@ type CleanUpHandlerFunction = (err?: AnyError, result?: any, opts?: any) => Prom
  * Describes all possible URI query options for the mongo client
  * https://docs.mongodb.com/manual/reference/connection-string
  */
-export interface MongoURIOptions {
+export interface MongoURIOptions extends Pick<WriteConcernOptions, 'journal' | 'w' | 'wtimeoutMS'> {
   /** Specifies the name of the replica set, if the mongod is a member of a replica set. */
   replicaSet?: string;
   /** Enables or disables TLS/SSL for the connection. */
@@ -101,12 +101,6 @@ export interface MongoURIOptions {
   waitQueueMultiple?: number;
   /** The maximum time in milliseconds that a thread can wait for a connection to become available. */
   waitQueueTimeoutMS?: number;
-  /** Corresponds to the write concern w Option. The w option requests acknowledgement that the write operation has propagated to a specified number of mongod instances or to mongod instances with specified tags. */
-  w?: number | 'majority';
-  /** Corresponds to the write concern wtimeout. wtimeoutMS specifies a time limit, in milliseconds, for the write concern. */
-  wtimeoutMS?: number;
-  /** Corresponds to the write concern j Option option. The journal option requests acknowledgement from MongoDB that the write operation has been written to the journal. */
-  journal?: boolean;
   /** The level of isolation */
   readConcernLevel?: ReadConcernLevel;
   /** Specifies the read preferences for this connection */
@@ -145,7 +139,10 @@ export interface MongoURIOptions {
   directConnection?: boolean;
 }
 
-export interface MongoClientOptions extends MongoURIOptions, BSONSerializeOptions {
+export interface MongoClientOptions
+  extends WriteConcernOptions,
+    MongoURIOptions,
+    BSONSerializeOptions {
   /** The maximum number of connections in the connection pool. */
   poolSize?: MongoURIOptions['maxPoolSize'];
   /** Validate mongod server certificate against Certificate Authority */
@@ -178,10 +175,6 @@ export interface MongoClientOptions extends MongoURIOptions, BSONSerializeOption
   ha?: boolean;
   /** The High availability period for replicaset inquiry */
   haInterval?: number;
-  /** The write concern timeout */
-  wtimeout?: MongoURIOptions['wtimeoutMS'];
-  /** Corresponds to the write concern j Option option. The journal option requests acknowledgement from MongoDB that the write operation has been written to the journal. */
-  j?: MongoURIOptions['journal'];
   /** Force server to assign `_id` values instead of driver */
   forceServerObjectId?: boolean;
   /** Return document results as raw BSON buffers */
@@ -206,8 +199,6 @@ export interface MongoClientOptions extends MongoURIOptions, BSONSerializeOption
   auth?: Auth;
   /** Type of compression to use?: snappy or zlib */
   compression?: CompressorName;
-  /** Specify a file sync write concern */
-  fsync?: boolean;
   /** The number of retries for a tailable cursor */
   numberOfRetries?: number;
   /** Enable command monitoring for this client */

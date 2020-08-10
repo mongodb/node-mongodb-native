@@ -100,7 +100,7 @@ class Transaction {
 
     const writeConcern = WriteConcern.fromOptions(options);
     if (writeConcern) {
-      if (writeConcern.w <= 0) {
+      if (writeConcern.w === 0) {
         throw new MongoError('Transactions do not support unacknowledged write concern');
       }
 

@@ -1,30 +1,44 @@
-const kWriteConcernKeys = new Set(['w', 'wtimeout', 'j', 'fsync']);
+export type W = number | 'majority';
 
-/**
- * The **WriteConcern** class is a class that represents a MongoDB WriteConcern.
- *
- * @class
- * @property {(number|string)} w The write concern
- * @property {number} wtimeout The write concern timeout
- * @property {boolean} j The journal write concern
- * @property {boolean} fsync The file sync write concern
- * @see https://docs.mongodb.com/manual/reference/write-concern/index.html
- */
+export interface WriteConcernOptions {
+  /** The write concern */
+  w?: W;
+  /** The write concern timeout */
+  wtimeout?: number;
+  /** The write concern timeout */
+  wtimeoutMS?: number;
+  /** The journal write concern */
+  j?: boolean;
+  /** The journal write concern */
+  journal?: boolean;
+  /** The file sync write concern */
+  fsync?: boolean | 1;
+  /** Write Concern as an object */
+  writeConcern?: WriteConcernOptions | WriteConcern | W;
+}
+
+/** The **WriteConcern** class is a class that represents a MongoDB WriteConcern. */
 export class WriteConcern {
-  w?: any;
-  wtimeout?: any;
-  j?: any;
-  fsync?: any;
+  /** The write concern */
+  w?: W;
+  /** The write concern timeout */
+  wtimeout?: number;
+  /** The journal write concern */
+  j?: boolean;
+  /** The file sync write concern */
+  fsync?: boolean | 1;
 
-  /**
-   * Constructs a WriteConcern from the write concern properties.
-   *
-   * @param {(number|string)} [w] The write concern
-   * @param {number} [wtimeout] The write concern timeout
-   * @param {boolean} [j] The journal write concern
-   * @param {boolean} [fsync] The file sync write concern
-   */
-  constructor(w?: any, wtimeout?: number, j?: boolean, fsync?: boolean) {
+  /** Constructs a WriteConcern from the write concern properties. */
+  constructor(
+    /** The write concern */
+    w?: W,
+    /** The write concern timeout */
+    wtimeout?: number,
+    /** The journal write concern */
+    j?: boolean,
+    /** The file sync write concern */
+    fsync?: boolean | 1
+  ) {
     if (w != null) {
       this.w = w;
     }
@@ -38,37 +52,32 @@ export class WriteConcern {
       this.fsync = fsync;
     }
   }
-  /**
-   * Construct a WriteConcern given an options object.
-   *
-   * @param {any} options The options object from which to extract the write concern.
-   * @returns {WriteConcern|undefined}
-   */
-  static fromOptions(options: any): WriteConcern | undefined {
-    if (
-      options == null ||
-      (options.writeConcern == null &&
-        options.w == null &&
-        options.wtimeout == null &&
-        options.j == null &&
-        options.fsync == null)
-    ) {
-      return;
-    }
+
+  /** Construct a WriteConcern given an options object. */
+  static fromOptions(
+    options?: WriteConcernOptions | WriteConcern | W,
+    inherit?: WriteConcernOptions | WriteConcern
+  ): WriteConcern | undefined {
+    const { fromOptions } = WriteConcern;
+    if (typeof options === 'undefined') return undefined;
+    if (typeof options === 'number') return fromOptions({ ...inherit, w: options });
+    if (typeof options === 'string') return fromOptions({ ...inherit, w: options });
+    if (options instanceof WriteConcern) return fromOptions({ ...inherit, ...options });
     if (options.writeConcern) {
-      if (typeof options.writeConcern === 'string') {
-        return new WriteConcern(options.writeConcern);
-      }
-      if (!Object.keys(options.writeConcern).some((key: any) => kWriteConcernKeys.has(key))) {
-        return;
-      }
-      return new WriteConcern(
-        options.writeConcern.w,
-        options.writeConcern.wtimeout,
-        options.writeConcern.j,
-        options.writeConcern.fsync
-      );
+      const { writeConcern, ...viable } = { ...inherit, ...options };
+      return fromOptions(writeConcern, viable);
     }
-    return new WriteConcern(options.w, options.wtimeout, options.j, options.fsync);
+    const { w, wtimeout, j, fsync, journal, wtimeoutMS } = { ...inherit, ...options };
+    if (
+      w != null ||
+      wtimeout != null ||
+      wtimeoutMS != null ||
+      j != null ||
+      journal != null ||
+      fsync != null
+    ) {
+      return new WriteConcern(w, wtimeout ?? wtimeoutMS, j ?? journal, fsync);
+    }
+    return undefined;
   }
 }
