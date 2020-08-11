@@ -2,7 +2,7 @@ import Denque = require('denque');
 import { EventEmitter } from 'events';
 import { MongoError, isResumableError } from './error';
 import { Cursor } from './cursor';
-import { AggregateOperation } from './operations/aggregate';
+import { AggregateOperation, AggregateOptions } from './operations/aggregate';
 import { loadCollection, loadDb, loadMongoClient } from './dynamic_loaders';
 import {
   relayEvents,
@@ -16,13 +16,10 @@ import type { Callback, Document, AnyError } from './types';
 import type { CursorOptions } from './cursor/cursor';
 import type { ReadPreference } from './read_preference';
 import type { Timestamp } from 'bson';
-import type { CollationOptions } from './cmap/wire_protocol/write_command';
-import type { Collection } from './collection';
-import type { Db } from './db';
-import type { MongoClient } from './mongo_client';
 import type { Topology } from './sdam/topology';
 import type { Writable } from 'stream';
 import type { StreamOptions } from './cursor/core_cursor';
+import type { Parent } from './operations/command';
 const kResumeQueue = Symbol('resumeQueue');
 
 const CHANGE_STREAM_OPTIONS = ['resumeAfter', 'startAfter', 'startAtOperationTime', 'fullDocument'];
@@ -46,8 +43,12 @@ export type ResumeToken = unknown;
  */
 export type OperationTime = Timestamp;
 
+export interface PipeOptions {
+  end?: boolean;
+}
+
 /** Options that can be passed to a ChangeStream. Note that startAfter, resumeAfter, and startAtOperationTime are all mutually exclusive, and the server will error if more than one is specified. */
-export interface ChangeStreamOptions {
+export interface ChangeStreamOptions extends AggregateOptions {
   /** Allowed values: ‘default’, ‘updateLookup’. When set to ‘updateLookup’, the change stream will include both a delta describing the changes to the document, as well as a copy of the entire document that was changed from some time after the change occurred. */
   fullDocument?: string;
   /** The maximum amount of time for the server to wait on new documents to satisfy a change stream query. */
@@ -60,10 +61,6 @@ export interface ChangeStreamOptions {
   startAtOperationTime?: OperationTime;
   /** The number of documents to return per batch. See {@link https://docs.mongodb.com/manual/reference/command/aggregate|aggregation documentation}. */
   batchSize?: number;
-  /** Specify collation settings for operation. See {@link https://docs.mongodb.com/manual/reference/command/aggregate|aggregation documentation}. */
-  collation?: CollationOptions;
-  /** The read preference. Defaults to the read preference of the database or collection. See {@link https://docs.mongodb.com/manual/reference/read-preference|read preference documentation}. */
-  readPreference?: ReadPreference;
 }
 
 interface ChangeStreamDocument {
@@ -143,9 +140,6 @@ interface UpdateDescription {
 /**
  * Creates a new Change Stream instance. Normally created using {@link Collection#watch|Collection.watch()}.
  *
- * @class ChangeStream
- * @since 3.0.0
- 
  * @fires ChangeStream#close
  * @fires ChangeStream#change
  * @fires ChangeStream#end
@@ -156,8 +150,8 @@ interface UpdateDescription {
 export class ChangeStream extends EventEmitter {
   pipeline: Document[];
   options: ChangeStreamOptions;
-  parent: Collection | Db | MongoClient;
-  namespace: string | MongoDBNamespace;
+  parent: Parent;
+  namespace: MongoDBNamespace;
   type: symbol;
   topology: Topology;
   cursor?: ChangeStreamCursor;
@@ -170,11 +164,7 @@ export class ChangeStream extends EventEmitter {
    * @param parent - The parent object that created this change stream
    * @param pipeline - An array of {@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents
    */
-  constructor(
-    parent: Collection | Db | MongoClient,
-    pipeline: Document[] = [],
-    options: ChangeStreamOptions = {}
-  ) {
+  constructor(parent: Parent, pipeline: Document[] = [], options: ChangeStreamOptions = {}) {
     super();
 
     const Collection = loadCollection();
@@ -311,12 +301,15 @@ export class ChangeStream extends EventEmitter {
    * @param {Writable} destination The destination for writing data
    * @param {object} [options] {@link https://nodejs.org/api/stream.html#stream_readable_pipe_destination_options|Pipe options}
    */
-  pipe(destination: Writable, options?: { end?: boolean }): Writable {
+  pipe(destination: Writable, options?: PipeOptions): Writable {
     if (!this.pipeDestinations) {
       this.pipeDestinations = [];
     }
     this.pipeDestinations.push(destination);
-    return this.cursor!.pipe(destination, options);
+    if (!this.cursor) {
+      throw new MongoError('ChangeStream has no cursor, unable to pipe');
+    }
+    return this.cursor.pipe(destination, options);
   }
 
   /**
@@ -329,23 +322,35 @@ export class ChangeStream extends EventEmitter {
     if (this.pipeDestinations && destinationIndex > -1) {
       this.pipeDestinations.splice(destinationIndex, 1);
     }
-    return this.cursor!.unpipe(destination);
+    if (!this.cursor) {
+      throw new MongoError('ChangeStream has no cursor, unable to unpipe');
+    }
+    return this.cursor.unpipe(destination);
   }
 
   /** Return a modified Readable stream including a possible transform method. */
   stream(options?: StreamOptions): ChangeStreamCursor {
     this.streamOptions = options;
-    return this.cursor!.stream(options);
+    if (!this.cursor) {
+      throw new MongoError('ChangeStream has no cursor, unable to stream');
+    }
+    return this.cursor.stream(options);
   }
 
   /** This method will cause a stream in flowing mode to stop emitting data events. Any data that becomes available will remain in the internal buffer. */
   pause(): ChangeStreamCursor {
-    return this.cursor!.pause();
+    if (!this.cursor) {
+      throw new MongoError('ChangeStream has no cursor, unable to pause');
+    }
+    return this.cursor.pause();
   }
 
   /** This method will cause the readable stream to resume emitting data events. */
   resume(): ChangeStreamCursor {
-    return this.cursor!.resume();
+    if (!this.cursor) {
+      throw new MongoError('ChangeStream has no cursor, unable to resume');
+    }
+    return this.cursor.resume();
   }
 }
 

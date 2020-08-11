@@ -3,7 +3,6 @@ import { MongoError } from '../error';
 import { Cursor, CursorOptions } from './cursor';
 import { CursorState } from './core_cursor';
 import type { Topology } from '../sdam/topology';
-import type { Document } from '../types';
 import type { CommandOperation } from '../operations/command';
 
 /**
@@ -52,11 +51,6 @@ export type CommandCursorOptions = CursorOptions;
  * @returns {CommandCursor} an CommandCursor instance.
  */
 export class CommandCursor extends Cursor<CommandCursorOptions> {
-  /**
-   * @param {any} topology
-   * @param {any} operation
-   * @param {any} [options]
-   */
   constructor(topology: Topology, operation: CommandOperation, options?: CommandCursorOptions) {
     super(topology, operation, options);
   }

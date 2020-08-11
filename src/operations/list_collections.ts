@@ -5,17 +5,11 @@ import * as CONSTANTS from '../constants';
 import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
+import type { DocumentTransforms } from '../cursor/core_cursor';
 
 const LIST_COLLECTIONS_WIRE_VERSION = 3;
 
-export interface TransformFunctions {
-  /** Transform each document returned */
-  doc(doc: Document): Document;
-  /** Transform the value returned from the initial query */
-  query?(doc: Document): Document | Document[];
-}
-
-function listCollectionsTransforms(databaseName: string): TransformFunctions {
+function listCollectionsTransforms(databaseName: string): DocumentTransforms {
   const matching = `${databaseName}.`;
 
   return {

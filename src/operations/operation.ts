@@ -34,7 +34,7 @@ export class OperationBase<T extends OperationOptions = OperationOptions> {
   ns!: MongoDBNamespace;
   cmd!: Document;
 
-  readPreference?: ReadPreference;
+  readPreference!: ReadPreference;
 
   server!: Server;
   // TODO: remove as part of NODE-2104, except this is closed?

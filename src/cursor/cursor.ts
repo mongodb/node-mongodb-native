@@ -10,7 +10,8 @@ import {
   CoreCursorOptions,
   CoreCursorPrivate,
   StreamOptions,
-  CursorCloseOptions
+  CursorCloseOptions,
+  DocumentTransforms
 } from './core_cursor';
 import { maybePromise, formattedOrderClause } from '../utils';
 import { executeOperation } from '../operations/execute_operation';
@@ -22,7 +23,6 @@ import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 import type { Sort, SortDirection } from '../operations/find';
-import type { TransformFunctions } from '../operations/list_collections';
 import type { Hint, OperationBase } from '../operations/operation';
 
 /**
@@ -64,7 +64,7 @@ const FIELDS = ['numberOfRetries', 'tailableRetryInterval'];
 
 export interface CursorPrivate extends CoreCursorPrivate {
   /** Transforms functions */
-  transforms?: TransformFunctions;
+  transforms?: DocumentTransforms;
   numberOfRetries: number;
   tailableRetryInterval: number;
   currentNumberOfRetries: number;
@@ -74,13 +74,13 @@ export interface CursorPrivate extends CoreCursorPrivate {
 }
 
 export interface CursorOptions extends CoreCursorOptions {
+  cursorFactory?: typeof Cursor;
   tailableRetryInterval?: number;
   explicitlyIgnoreSession?: boolean;
   cursor?: Cursor;
   /** The internal topology of the created cursor */
   topology?: Topology;
   maxTimeMS?: number;
-  cursorFactory?: typeof Cursor;
   /** Session to use for the operation */
   session?: ClientSession;
   numberOfRetries?: number;
@@ -177,12 +177,12 @@ export class Cursor<
     }
   }
 
-  get readPreference(): ReadPreferenceLike | undefined {
+  get readPreference(): ReadPreference {
     if (this.operation) {
       return this.operation.readPreference;
     }
 
-    return this.options.readPreference;
+    return this.options.readPreference!;
   }
 
   get sortValue(): Sort {
@@ -269,7 +269,8 @@ export class Cursor<
   }
 
   /**
-   * @deprecated Set the cursor maxScan
+   * @deprecated Instead, use maxTimeMS option or the helper {@link Cursor.maxTimeMS}.
+   * Set the cursor maxScan
    *
    * @param maxScan - Constrains the query to only scan the specified number of documents when fulfilling the query
    */
@@ -831,7 +832,7 @@ export class Cursor<
    *
    * @param transform - The mapping transformation method.
    */
-  map(transform: TransformFunctions['doc']): this {
+  map(transform: DocumentTransforms['doc']): this {
     if (this.cursorState.transforms && this.cursorState.transforms.doc) {
       const oldTransform = this.cursorState.transforms.doc;
       this.cursorState.transforms.doc = doc => {

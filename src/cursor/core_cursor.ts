@@ -9,16 +9,22 @@ import { Long } from '../bson';
 import type { BSONSerializeOptions, Callback, Callback2, Document } from '../types';
 import type { Topology } from '../sdam/topology';
 import type { Server } from '../sdam/server';
-import type { TransformFunctions } from '../operations/list_collections';
 import type { ClientSession } from '../sessions';
 import type { Connection } from '../cmap/connection';
-import type { Cursor } from '..';
-import type { ConnectionPool, CloseOptions } from '../cmap/connection_pool';
 import type { OperationTime, ResumeToken } from '../change_stream';
+import type { CommandOperationOptions } from '../operations/command';
+import type { CloseOptions } from '../cmap/connection_pool';
+
+export interface DocumentTransforms {
+  /** Transform each document returned */
+  doc(doc: Document): Document;
+  /** Transform the value returned from the initial query */
+  query?(doc: Document): Document | Document[];
+}
 
 export interface CoreCursorPrivate {
   /** Transforms functions */
-  transforms?: TransformFunctions;
+  transforms?: DocumentTransforms;
   numberOfRetries: number;
   tailableRetryInterval: number;
   currentNumberOfRetries: number;
@@ -33,13 +39,6 @@ export interface CursorCloseOptions {
   skipKillCursors?: boolean;
 }
 
-export interface DisconnectHandler {
-  add?(): void;
-  execute?(): void;
-  flush?(): void;
-  addObjectAndMethod(...args: unknown[]): void;
-}
-
 export interface StreamOptions {
   /** A transformation method applied to each document emitted by the stream */
   transform?(doc: Document): Document;
@@ -50,8 +49,8 @@ export interface InternalCursorState extends BSONSerializeOptions {
   batchSize: number;
   cmd: Document;
   currentLimit: number;
-  cursorId: Long | null;
-  lastCursorId?: Long | null;
+  cursorId?: Long;
+  lastCursorId?: Long;
   cursorIndex: number;
   dead: boolean;
   killed: boolean;
@@ -64,7 +63,7 @@ export interface InternalCursorState extends BSONSerializeOptions {
   session?: ClientSession;
   skip: number;
   streamOptions?: StreamOptions;
-  transforms?: TransformFunctions;
+  transforms?: DocumentTransforms;
   raw?: boolean;
 }
 
@@ -76,22 +75,19 @@ export enum CursorState {
   GET_MORE = 3
 }
 
-export interface CoreCursorOptions extends BSONSerializeOptions {
+export interface CoreCursorOptions extends CommandOperationOptions {
   noCursorTimeout?: boolean;
   tailable?: boolean;
   raw?: boolean;
   hint?: Hint;
-  disconnectHandler?: DisconnectHandler;
   limit?: number;
   skip?: number;
-  session?: ClientSession;
-  readPreference?: ReadPreference;
   /** The number of documents to return per batch. See {@link https://docs.mongodb.com/manual/reference/command/find/| find command documentation} and {@link https://docs.mongodb.com/manual/reference/command/aggregate|aggregation documentation}. */
   batchSize?: number;
   /** Initial documents list for cursor */
   documents?: Document[];
   /** Transform function */
-  transforms?: TransformFunctions;
+  transforms?: DocumentTransforms;
 }
 
 /**
@@ -105,9 +101,7 @@ export class CoreCursor<
   O extends OperationBase = OperationBase
 > extends Readable {
   operation: O;
-  pool!: ConnectionPool;
   server!: Server;
-  disconnectHandler?: DisconnectHandler;
   ns: string;
   namespace: MongoDBNamespace;
   cmd: Document;
@@ -143,8 +137,8 @@ export class CoreCursor<
 
     const { limit, skip, batchSize } = getLimitSkipBatchSizeDefaults(options, cmd);
 
-    let cursorId = null;
-    let lastCursorId = null;
+    let cursorId = undefined;
+    let lastCursorId = undefined;
     // Did we pass in a cursor id
     if (typeof cmd === 'number') {
       cursorId = Long.fromNumber(cmd);
@@ -156,7 +150,7 @@ export class CoreCursor<
 
     // All internal state
     this.cursorState = {
-      cursorId: null,
+      cursorId,
       cmd: this.cmd,
       lastCursorId,
       documents: options.documents || [],
@@ -336,7 +330,7 @@ export class CoreCursor<
       this.cursorState.killed = false;
       this.cursorState.notified = false;
       this.cursorState.documents = [];
-      this.cursorState.cursorId = null;
+      this.cursorState.cursorId = undefined;
       this.cursorState.cursorIndex = 0;
     }
   }
@@ -550,8 +544,8 @@ export class CoreCursor<
       );
     }
 
-    executeOperation(this.topology, this.operation, (err?: any, result?: any) => {
-      if (err) {
+    executeOperation(this.topology, this.operation, (err, result) => {
+      if (err || !result) {
         done(err);
         return;
       }
@@ -567,19 +561,6 @@ export class CoreCursor<
       queryCallback(err, result);
     });
   }
-}
-
-/** Validate if the pool is dead and return error */
-function isConnectionDead(self: CoreCursor, callback: Callback) {
-  if (self.pool && !self.pool.isConnected()) {
-    self.cursorState.killed = true;
-    const err = new MongoNetworkError(`connection to host ${self.pool.address} was destroyed`);
-
-    _setCursorNotifiedImpl(self, () => callback(err));
-    return true;
-  }
-
-  return false;
 }
 
 /** Validate if the cursor is dead but was not explicitly killed by user */
@@ -664,16 +645,6 @@ function nextFunction(self: CoreCursor, callback: Callback) {
         // Reconnect is disabled, so we'll never reconnect
         return callback(new MongoError('no connection available'));
       }
-
-      if (self.disconnectHandler != null) {
-        if (self.topology.isDestroyed()) {
-          // Topology was destroyed, so don't try to wait for it to reconnect
-          return callback(new MongoError('Topology was destroyed'));
-        }
-
-        self.disconnectHandler.addObjectAndMethod('cursor', self, 'next', [callback], callback);
-        return;
-      }
     }
 
     self._initializeCursor((err, result) => {
@@ -688,6 +659,11 @@ function nextFunction(self: CoreCursor, callback: Callback) {
     return;
   }
 
+  const cursorId = self.cursorState.cursorId;
+  if (!cursorId) {
+    return callback(new MongoError('Undefined cursor ID'));
+  }
+
   if (self.cursorState.limit > 0 && self.cursorState.currentLimit >= self.cursorState.limit) {
     // Ensure we kill the cursor on the server
     self.kill();
@@ -695,7 +671,7 @@ function nextFunction(self: CoreCursor, callback: Callback) {
     return setCursorDeadAndNotified(self, callback);
   } else if (
     self.cursorState.cursorIndex === self.cursorState.documents.length &&
-    !Long.ZERO.equals(self.cursorState.cursorId!)
+    !Long.ZERO.equals(cursorId)
   ) {
     // Ensure an empty cursor state
     self.cursorState.documents = [];
@@ -709,7 +685,7 @@ function nextFunction(self: CoreCursor, callback: Callback) {
 
     // Check if connection is dead and return if not possible to
     // execute a getMore on this connection
-    if (isConnectionDead(self as Cursor, callback)) return;
+    if (self.isKilled() || self.isDead()) return;
 
     // Execute the next get more
     self._getMore(function (err, doc, connection) {
@@ -726,7 +702,7 @@ function nextFunction(self: CoreCursor, callback: Callback) {
       if (
         self.cursorState.documents.length === 0 &&
         self.cmd.tailable &&
-        Long.ZERO.equals(self.cursorState.cursorId!)
+        Long.ZERO.equals(cursorId)
       ) {
         // No more documents in the tailed cursor
         return callback(
@@ -739,7 +715,7 @@ function nextFunction(self: CoreCursor, callback: Callback) {
       } else if (
         self.cursorState.documents.length === 0 &&
         self.cmd.tailable &&
-        !Long.ZERO.equals(self.cursorState.cursorId!)
+        !Long.ZERO.equals(cursorId)
       ) {
         return nextFunction(self, callback);
       }
@@ -753,7 +729,7 @@ function nextFunction(self: CoreCursor, callback: Callback) {
   } else if (
     self.cursorState.documents.length === self.cursorState.cursorIndex &&
     self.cmd.tailable &&
-    Long.ZERO.equals(self.cursorState.cursorId!)
+    Long.ZERO.equals(cursorId)
   ) {
     return callback(
       new MongoError({
@@ -764,7 +740,7 @@ function nextFunction(self: CoreCursor, callback: Callback) {
     );
   } else if (
     self.cursorState.documents.length === self.cursorState.cursorIndex &&
-    Long.ZERO.equals(self.cursorState.cursorId!)
+    Long.ZERO.equals(cursorId)
   ) {
     setCursorDeadAndNotified(self, callback);
   } else {
@@ -801,10 +777,7 @@ function nextFunction(self: CoreCursor, callback: Callback) {
   }
 }
 
-function getLimitSkipBatchSizeDefaults(
-  options: CoreCursorOptions,
-  cmd: Document | Long | undefined
-) {
+function getLimitSkipBatchSizeDefaults(options: CoreCursorOptions, cmd: Document) {
   cmd = cmd ? cmd : {};
   let limit = options.limit;
   if (!limit) {
