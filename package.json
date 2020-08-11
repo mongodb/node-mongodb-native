@@ -81,7 +81,7 @@
     "check:lint": "eslint -v && eslint src/**/*.ts test",
     "check:test": "mocha --recursive test/functional test/unit",
     "check:ts": "tsc --noEmit",
-    "check:atlas": "mocha --config \"test/manual/mocharc.json\" test/manual/atlas_connectivity.test.js",
+    "check:atlas": "mocha --timeout 60000 --config \"test/manual/mocharc.json\" test/manual/atlas_connectivity.test.js",
     "check:ocsp": "mocha --config \"test/manual/mocharc.json\" test/manual/ocsp_support.test.js",
     "prepare": "npm run build:ts",
     "release": "standard-version -i HISTORY.md",
