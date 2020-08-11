@@ -224,11 +224,11 @@ describe('MapReduce', function () {
               ) {
                 collection.findOne({ _id: 1 }, function (err, result) {
                   test.equal(1, result.value);
-                });
 
-                collection.findOne({ _id: 2 }, function (err, result) {
-                  test.equal(1, result.value);
-                  client.close(done);
+                  collection.findOne({ _id: 2 }, function (err, result) {
+                    test.equal(1, result.value);
+                    client.close(done);
+                  });
                 });
               });
             }
@@ -268,11 +268,11 @@ describe('MapReduce', function () {
 
                     collection.findOne({ _id: 2 }, function (err, result) {
                       test.equal(1, result.value);
-                    });
 
-                    collection.findOne({ _id: 3 }, function (err, result) {
-                      test.equal(1, result.value);
-                      client.close(done);
+                      collection.findOne({ _id: 3 }, function (err, result) {
+                        test.equal(1, result.value);
+                        client.close(done);
+                      });
                     });
                   });
                 }

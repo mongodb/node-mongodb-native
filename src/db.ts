@@ -3,12 +3,12 @@ import { emitDeprecatedOptionWarning } from './utils';
 import { loadAdmin } from './dynamic_loaders';
 import { AggregationCursor, CommandCursor } from './cursor';
 import { ObjectId } from './bson';
-import ReadPreference = require('./read_preference');
+import { ReadPreference } from './read_preference';
 import { MongoError } from './error';
 import Collection = require('./collection');
 import ChangeStream = require('./change_stream');
 import CONSTANTS = require('./constants');
-import WriteConcern = require('./write_concern');
+import { WriteConcern } from './write_concern';
 import ReadConcern = require('./read_concern');
 import Logger = require('./logger');
 import {
@@ -822,7 +822,7 @@ Db.prototype.createCollection = deprecateOptions(
     deprecatedOptions: ['autoIndexId'],
     optionsIndex: 1
   },
-  function(this: any, name: any, options: any, callback: Function) {
+  function (this: any, name: any, options: any, callback: Function) {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
     options.readConcern = options.readConcern
@@ -847,7 +847,7 @@ Db.prototype.createCollection = deprecateOptions(
  * @deprecated Eval is deprecated on MongoDB 3.2 and forward
  * @returns {Promise<void>} returns Promise if no callback passed
  */
-Db.prototype.eval = deprecate(function(
+Db.prototype.eval = deprecate(function (
   this: any,
   code: any,
   parameters: any,
@@ -891,7 +891,7 @@ Db.prototype.eval = deprecate(function(
  * @param {Db~resultCallback} [callback] The command result callback
  * @returns {Promise<void>} returns Promise if no callback passed
  */
-Db.prototype.ensureIndex = deprecate(function(
+Db.prototype.ensureIndex = deprecate(function (
   this: any,
   name: any,
   fieldOrSpec: any,
@@ -918,13 +918,11 @@ Db.prototype.ensureIndex = deprecate(function(
  * @returns {Promise<void>} returns Promise if no callback passed
  * @deprecated Query the system.profile collection directly.
  */
-Db.prototype.profilingInfo = deprecate(function(this: any, options: any, callback: Function) {
+Db.prototype.profilingInfo = deprecate(function (this: any, options: any, callback: Function) {
   if (typeof options === 'function') (callback = options), (options = {});
   options = options || {};
 
-  return this.collection('system.profile')
-    .find({}, options)
-    .toArray(callback);
+  return this.collection('system.profile').find({}, options).toArray(callback);
 }, 'Db.profilingInfo is deprecated. Query the system.profile collection directly.');
 
 // Validate the database name

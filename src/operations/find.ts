@@ -1,6 +1,6 @@
 import { OperationBase } from './operation';
 import { Aspect, defineAspects } from './operation';
-import ReadPreference = require('../read_preference');
+import { ReadPreference } from '../read_preference';
 import { maxWireVersion } from '../utils';
 import { MongoError } from '../error';
 

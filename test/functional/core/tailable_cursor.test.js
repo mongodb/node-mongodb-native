@@ -1,7 +1,5 @@
 'use strict';
-
-var expect = require('chai').expect,
-  f = require('util').format;
+const expect = require('chai').expect;
 const setupDatabase = require('./shared').setupDatabase;
 
 describe('Tailable cursor tests', function () {
@@ -11,73 +9,72 @@ describe('Tailable cursor tests', function () {
 
   it('should correctly perform awaitdata', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'], mongodb: '>=3.2' }
     },
 
     test: function (done) {
-      var self = this;
-      const config = this.configuration;
-      const server = config.newTopology();
+      const self = this;
+      const topology = this.configuration.newTopology();
+      const ns = `${this.configuration.db}.cursor_tailable`;
 
-      var ns = f('%s.cursor_tailable', self.configuration.db);
-      // Add event listeners
-      server.on('connect', function (_server) {
-        // Create a capped collection
-        _server.command(
-          f('%s.$cmd', self.configuration.db),
-          { create: 'cursor_tailable', capped: true, size: 10000 },
-          function (cmdErr, cmdRes) {
-            expect(cmdErr).to.not.exist;
-            expect(cmdRes).to.exist;
+      topology.connect(err => {
+        expect(err).to.not.exist;
+        this.defer(() => topology.close());
 
-            // Execute the write
-            _server.insert(
-              ns,
-              [{ a: 1 }],
-              {
-                writeConcern: { w: 1 },
-                ordered: true
-              },
-              function (insertErr, results) {
-                expect(insertErr).to.be.null;
-                expect(results.result.n).to.equal(1);
+        topology.selectServer('primary', (err, server) => {
+          expect(err).to.not.exist;
 
-                // Execute find
-                var cursor = _server.cursor(ns, {
-                  find: ns,
-                  query: {},
-                  batchSize: 2,
-                  tailable: true,
-                  awaitData: true
-                });
+          // Create a capped collection
+          server.command(
+            `${self.configuration.db}.$cmd`,
+            { create: 'cursor_tailable', capped: true, size: 10000 },
+            (cmdErr, cmdRes) => {
+              expect(cmdErr).to.not.exist;
+              expect(cmdRes).to.exist;
 
-                // Execute next
-                cursor._next(function (cursorErr, cursorD) {
-                  expect(cursorErr).to.be.null;
-                  expect(cursorD).to.exist;
+              // Execute the write
+              server.insert(
+                ns,
+                [{ a: 1 }],
+                {
+                  writeConcern: { w: 1 },
+                  ordered: true
+                },
+                (insertErr, results) => {
+                  expect(insertErr).to.not.exist;
+                  expect(results.result.n).to.equal(1);
 
-                  var s = new Date();
-
-                  cursor._next(function () {
-                    var e = new Date();
-                    expect(e.getTime() - s.getTime()).to.be.at.least(300);
-
-                    // Destroy the server connection
-                    _server.destroy(done);
+                  // Execute find
+                  const cursor = topology.cursor(ns, {
+                    find: 'cursor_tailable',
+                    filter: {},
+                    batchSize: 2,
+                    tailable: true,
+                    awaitData: true
                   });
 
-                  setTimeout(function () {
-                    cursor.kill();
-                  }, 300);
-                });
-              }
-            );
-          }
-        );
-      });
+                  // Execute next
+                  cursor._next((cursorErr, cursorD) => {
+                    expect(cursorErr).to.not.exist;
+                    expect(cursorD).to.exist;
 
-      // Start connection
-      server.connect();
+                    const s = new Date();
+                    cursor._next(() => {
+                      const e = new Date();
+                      expect(e.getTime() - s.getTime()).to.be.at.least(300);
+
+                      // Destroy the server connection
+                      server.destroy(done);
+                    });
+
+                    setTimeout(() => cursor.kill(), 300);
+                  });
+                }
+              );
+            }
+          );
+        });
+      });
     }
   });
 });

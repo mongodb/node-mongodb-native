@@ -135,39 +135,6 @@ describe('Insert', function () {
     }
   });
 
-  it('shouldCorrectlyExecuteSaveInsertUpdate', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function (err, client) {
-        var db = client.db(configuration.db);
-        var collection = db.collection('shouldCorrectlyExecuteSaveInsertUpdate');
-
-        collection.save({ email: 'save' }, configuration.writeConcernMax(), function () {
-          collection.insert({ email: 'insert' }, configuration.writeConcernMax(), function () {
-            collection.update(
-              { email: 'update' },
-              { email: 'update' },
-              { upsert: true, w: 1 },
-              function () {
-                collection.find().toArray(function (e, a) {
-                  test.equal(3, a.length);
-                  client.close(done);
-                });
-              }
-            );
-          });
-        });
-      });
-    }
-  });
-
   it('shouldCorrectlyInsertAndRetrieveLargeIntegratedArrayDocument', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -303,6 +270,7 @@ describe('Insert', function () {
         //convience curried handler for functions of type 'a -> (err, result)
         function getResult(callback) {
           return function (error, result) {
+            if (error) console.dir(error);
             test.ok(error == null);
             return callback(result);
           };
@@ -464,37 +432,6 @@ describe('Insert', function () {
             });
           }
         );
-      });
-    }
-  });
-
-  it('shouldCorrectlyInsertAndUpdateWithNoCallback', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function (err, client) {
-        var db = client.db(configuration.db);
-        var collection = db.collection('test_insert_and_update_no_callback');
-
-        // Insert the update
-        collection.insert({ i: 1 });
-        // Update the record
-        collection.update({ i: 1 }, { $set: { i: 2 } });
-
-        // Make sure we leave enough time for mongodb to record the data
-        setTimeout(function () {
-          // Locate document
-          collection.findOne({}, function (err, item) {
-            test.equal(2, item.i);
-            client.close(done);
-          });
-        }, 100);
       });
     }
   });
@@ -805,23 +742,25 @@ describe('Insert', function () {
           test.equal(null, err);
           test.ok(result);
 
-          collection.update({ a: 1 }, { a: 2 }, configuration.writeConcernMax(), function (
-            err,
-            result
-          ) {
-            test.equal(null, err);
-            test.ok(result);
-
-            collection.remove({ a: 2 }, configuration.writeConcernMax(), function (err, result) {
+          collection.update(
+            { a: 1 },
+            { $set: { a: 2 } },
+            configuration.writeConcernMax(),
+            function (err, result) {
               test.equal(null, err);
               test.ok(result);
 
-              collection.count(function (err, count) {
-                test.equal(0, count);
-                client.close(done);
+              collection.remove({ a: 2 }, configuration.writeConcernMax(), function (err, result) {
+                test.equal(null, err);
+                test.ok(result);
+
+                collection.count(function (err, count) {
+                  test.equal(0, count);
+                  client.close(done);
+                });
               });
-            });
-          });
+            }
+          );
         });
       });
     }
@@ -878,9 +817,10 @@ describe('Insert', function () {
 
         collection.update(
           { _id: new ObjectId() },
-          { email: 'update' },
+          { $set: { email: 'update' } },
           configuration.writeConcernMax(),
           function (err, result) {
+            expect(err).to.not.exist;
             test.equal(0, result.result.n);
             client.close(done);
           }
@@ -1271,13 +1211,20 @@ describe('Insert', function () {
         );
 
         // Upsert a new doc
-        collection.update({ a: 1 }, { a: 1 }, { upsert: true, w: 1 }, function (err, result) {
+        collection.update({ a: 1 }, { $set: { a: 1 } }, { upsert: true, w: 1 }, function (
+          err,
+          result
+        ) {
+          expect(err).to.not.exist;
           if (result.result.updatedExisting) test.equal(false, result.result.updatedExisting);
           test.equal(1, result.result.n);
           test.ok(result.result.upserted != null);
 
           // Upsert an existing doc
-          collection.update({ a: 1 }, { a: 1 }, { upsert: true, w: 1 }, function (err, result) {
+          collection.update({ a: 1 }, { $set: { a: 1 } }, { upsert: true, w: 1 }, function (
+            err,
+            result
+          ) {
             if (result.updatedExisting) test.equal(true, result.updatedExisting);
             test.equal(1, result.result.n);
             client.close(done);

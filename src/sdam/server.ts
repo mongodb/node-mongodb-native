@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 import Logger = require('../logger');
-import ReadPreference = require('../read_preference');
-import { ConnectionPool } from '../cmap/connection_pool';
+import { ReadPreference } from '../read_preference';
+import { ConnectionPool, ConnectionPoolOptions } from '../cmap/connection_pool';
 import { CMAP_EVENT_NAMES } from '../cmap/events';
 import { ServerDescription, compareTopologyVersion } from './server_description';
 import { Monitor } from './monitor';
@@ -11,14 +11,16 @@ import {
   collationNotSupported,
   debugOptions,
   makeStateMachine,
-  maxWireVersion
+  maxWireVersion,
+  ClientMetadataOptions
 } from '../utils';
 import {
   ServerType,
   STATE_CLOSED,
   STATE_CLOSING,
   STATE_CONNECTING,
-  STATE_CONNECTED
+  STATE_CONNECTED,
+  ClusterTime
 } from './common';
 import {
   MongoError,
@@ -29,6 +31,17 @@ import {
   isNodeShuttingDownError,
   isNetworkErrorBeforeHandshake
 } from '../error';
+import type { Document, Callback, CallbackWithType, AutoEncrypter } from '../types';
+import type { Topology } from './topology';
+import type { Connection } from '../cmap/connection';
+import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
+import type { ServerHeartbeatSucceededEvent } from './events';
+import type { ClientSession } from '../sessions';
+import type { CommandOptions } from '../cmap/wire_protocol/command';
+import type { InternalCursorState } from '../cursor/core_cursor';
+import type { QueryOptions } from '../cmap/wire_protocol/query';
+import type { GetMoreOptions } from '../cmap/wire_protocol/get_more';
+import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
 
 // Used for filtering out fields for logging
 const DEBUG_FIELDS = [
@@ -67,51 +80,62 @@ const stateTransition = makeStateMachine({
 
 const kMonitor = Symbol('monitor');
 
+export interface ServerOptions extends ConnectionPoolOptions, ClientMetadataOptions {
+  credentials?: MongoCredentials;
+}
+
+interface ServerPrivate {
+  /** The server description for this server */
+  description: ServerDescription;
+  /** A copy of the options used to construct this instance */
+  options?: ServerOptions;
+  /** A logger instance */
+  logger: Logger;
+  /** The current state of the Server */
+  state: string;
+  /** The topology this server is a part of */
+  topology: Topology;
+  /** A connection pool for this server */
+  pool: ConnectionPool;
+}
+
+export interface DestroyOptions {
+  force?: boolean;
+}
+
 /**
  * @fires Server#serverHeartbeatStarted
  * @fires Server#serverHeartbeatSucceeded
  * @fires Server#serverHeartbeatFailed
  */
-class Server extends EventEmitter {
-  s: any;
-  clusterTime: any;
-  [kMonitor]: any;
+export class Server extends EventEmitter {
+  s: ServerPrivate;
+  clusterTime?: ClusterTime;
+  ismaster?: Document;
+  [kMonitor]: Monitor;
 
   /**
    * Create a server
-   *
-   * @param {ServerDescription} description
-   * @param {any} options
-   * @param {any} topology
    */
-  constructor(description: ServerDescription, options: any, topology: any) {
+  constructor(topology: Topology, description: ServerDescription, options?: ServerOptions) {
     super();
 
     this.s = {
-      // the server description
       description,
-      // a saved copy of the incoming options
       options,
-      // the server logger
       logger: new Logger('Server', options),
-      // the server state
       state: STATE_CLOSED,
-      credentials: options.credentials,
-      topology
+      topology,
+      pool: new ConnectionPool({ host: description.host, port: description.port, ...options })
     };
 
-    // create the connection pool
-    // NOTE: this used to happen in `connect`, we supported overriding pool options there
-    const poolOptions = Object.assign({ host: description.host, port: description.port }, options);
-
-    this.s.pool = new ConnectionPool(poolOptions);
     relayEvents(
       this.s.pool,
       this,
       ['commandStarted', 'commandSucceeded', 'commandFailed'].concat(CMAP_EVENT_NAMES)
     );
 
-    this.s.pool.on('clusterTimeReceived', (clusterTime: any) => {
+    this.s.pool.on('clusterTimeReceived', (clusterTime: ClusterTime) => {
       this.clusterTime = clusterTime;
     });
 
@@ -130,8 +154,8 @@ class Server extends EventEmitter {
       this.s.pool.clear();
     });
 
-    this[kMonitor].on('resetServer', (error: any) => markServerUnknown(this, error));
-    this[kMonitor].on('serverHeartbeatSucceeded', (event: any) => {
+    this[kMonitor].on('resetServer', (error: MongoError) => markServerUnknown(this, error));
+    this[kMonitor].on('serverHeartbeatSucceeded', (event: ServerHeartbeatSucceededEvent) => {
       this.emit(
         'descriptionReceived',
         new ServerDescription(this.description.address, event.reply, {
@@ -150,22 +174,20 @@ class Server extends EventEmitter {
     return this.s.description;
   }
 
-  get name() {
+  get name(): string {
     return this.s.description.address;
   }
 
-  get autoEncrypter() {
+  get autoEncrypter(): AutoEncrypter | undefined {
     if (this.s.options && this.s.options.autoEncrypter) {
       return this.s.options.autoEncrypter;
     }
-
-    return null;
   }
 
   /**
    * Initiate server connect
    */
-  connect() {
+  connect(): void {
     if (this.s.state !== STATE_CLOSED) {
       return;
     }
@@ -181,7 +203,7 @@ class Server extends EventEmitter {
    * @param {boolean} [options.force=false] Force destroy the pool
    * @param {any} callback
    */
-  destroy(options?: any, callback?: any) {
+  destroy(options?: DestroyOptions, callback?: Callback): void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, { force: false }, options);
 
@@ -196,7 +218,7 @@ class Server extends EventEmitter {
     stateTransition(this, STATE_CLOSING);
 
     this[kMonitor].close();
-    this.s.pool.close(options, (err: any) => {
+    this.s.pool.close(options, err => {
       stateTransition(this, STATE_CLOSED);
       this.emit('closed');
       if (typeof callback === 'function') {
@@ -209,7 +231,7 @@ class Server extends EventEmitter {
    * Immediately schedule monitoring of this server. If there already an attempt being made
    * this will be a no-op.
    */
-  requestCheck() {
+  requestCheck(): void {
     this[kMonitor].requestCheck();
   }
 
@@ -227,7 +249,7 @@ class Server extends EventEmitter {
    * @param {ClientSession} [options.session] Session to use for the operation
    * @param {opResultCallback} callback A callback function
    */
-  command(ns: string, cmd: object, options?: any, callback?: any) {
+  command(ns: string, cmd: Document, options: CommandOptions, callback: Callback): void {
     if (typeof options === 'function') {
       (callback = options), (options = {}), (options = options || {});
     }
@@ -262,58 +284,81 @@ class Server extends EventEmitter {
       return;
     }
 
-    this.s.pool.withConnection((err: any, conn: any, cb: any) => {
-      if (err) {
+    this.s.pool.withConnection((err, conn, cb) => {
+      if (err || !conn) {
         markServerUnknown(this, err);
         return cb(err);
       }
 
-      conn.command(ns, cmd, options, makeOperationHandler(this, conn, cmd, options, cb));
+      conn.command(
+        ns,
+        cmd,
+        options,
+        makeOperationHandler(this, conn, cmd, options, cb) as Callback
+      );
     }, callback);
   }
 
   /**
    * Execute a query against the server
    *
-   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
-   * @param {object} cmd The command document for the query
-   * @param {any} cursorState
-   * @param {object} options Optional settings
-   * @param {Function} callback
+   * @param ns The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param cmd The command document for the query
+   * @param cursorState
+   * @param options Optional settings
+   * @param callback
    */
-  query(ns: string, cmd: object, cursorState: any, options: object, callback: Function) {
+  query(
+    ns: string,
+    cmd: Document,
+    cursorState: InternalCursorState,
+    options: QueryOptions,
+    callback: Callback
+  ): void {
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
       callback(new MongoError('server is closed'));
       return;
     }
 
-    this.s.pool.withConnection((err: any, conn: any, cb: any) => {
-      if (err) {
+    this.s.pool.withConnection((err, conn, cb) => {
+      if (err || !conn) {
         markServerUnknown(this, err);
         return cb(err);
       }
 
-      conn.query(ns, cmd, cursorState, options, makeOperationHandler(this, conn, cmd, options, cb));
+      conn.query(
+        ns,
+        cmd,
+        cursorState,
+        options,
+        makeOperationHandler(this, conn, cmd, options, cb) as Callback
+      );
     }, callback);
   }
 
   /**
    * Execute a `getMore` against the server
    *
-   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
-   * @param {object} cursorState State data associated with the cursor calling this method
-   * @param {any} batchSize
-   * @param {object} options Optional settings
-   * @param {Function} callback
+   * @param ns The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param cursorState State data associated with the cursor calling this method
+   * @param batchSize
+   * @param options Optional settings
+   * @param callback
    */
-  getMore(ns: string, cursorState: object, batchSize: any, options: object, callback: Function) {
+  getMore(
+    ns: string,
+    cursorState: InternalCursorState,
+    batchSize: number,
+    options: GetMoreOptions,
+    callback: Callback
+  ): void {
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
       callback(new MongoError('server is closed'));
       return;
     }
 
-    this.s.pool.withConnection((err: any, conn: any, cb: any) => {
-      if (err) {
+    this.s.pool.withConnection((err, conn, cb) => {
+      if (err || !conn) {
         markServerUnknown(this, err);
         return cb(err);
       }
@@ -323,7 +368,7 @@ class Server extends EventEmitter {
         cursorState,
         batchSize,
         options,
-        makeOperationHandler(this, conn, null, options, cb)
+        makeOperationHandler(this, conn, {}, options, cb) as Callback
       );
     }, callback);
   }
@@ -331,11 +376,11 @@ class Server extends EventEmitter {
   /**
    * Execute a `killCursors` command against the server
    *
-   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
-   * @param {object} cursorState State data associated with the cursor calling this method
-   * @param {Function} callback
+   * @param ns The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param cursorState State data associated with the cursor calling this method
+   * @param callback
    */
-  killCursors(ns: string, cursorState: object, callback: Function) {
+  killCursors(ns: string, cursorState: InternalCursorState, callback: Callback): void {
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
       if (typeof callback === 'function') {
         callback(new MongoError('server is closed'));
@@ -344,13 +389,17 @@ class Server extends EventEmitter {
       return;
     }
 
-    this.s.pool.withConnection((err: any, conn: any, cb: any) => {
-      if (err) {
+    this.s.pool.withConnection((err, conn, cb) => {
+      if (err || !conn) {
         markServerUnknown(this, err);
         return cb(err);
       }
 
-      conn.killCursors(ns, cursorState, makeOperationHandler(this, conn, null, undefined, cb));
+      conn.killCursors(
+        ns,
+        cursorState,
+        makeOperationHandler(this, conn, {}, undefined, cb) as Callback
+      );
     }, callback);
   }
 
@@ -360,14 +409,9 @@ class Server extends EventEmitter {
    * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
    * @param {Array} ops An array of documents to insert
    * @param {object} options
-   * @param {boolean} [options.ordered=true] Execute in order or out of order
-   * @param {object} [options.writeConcern={}] Write concern for the operation
-   * @param {boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
-   * @param {boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
-   * @param {ClientSession} [options.session] Session to use for the operation
    * @param {opResultCallback} callback A callback function
    */
-  insert(ns: string, ops: any[], options: any, callback: any) {
+  insert(ns: string, ops: Document[], options: WriteCommandOptions, callback: Callback): void {
     executeWriteOperation({ server: this, op: 'insert', ns, ops }, options, callback);
   }
 
@@ -377,14 +421,9 @@ class Server extends EventEmitter {
    * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
    * @param {Array} ops An array of updates
    * @param {object} options
-   * @param {boolean} [options.ordered=true] Execute in order or out of order
-   * @param {object} [options.writeConcern={}] Write concern for the operation
-   * @param {boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
-   * @param {boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
-   * @param {ClientSession} [options.session] Session to use for the operation
    * @param {opResultCallback} callback A callback function
    */
-  update(ns: string, ops: any[], options: any, callback: any) {
+  update(ns: string, ops: Document[], options: WriteCommandOptions, callback: Callback): void {
     executeWriteOperation({ server: this, op: 'update', ns, ops }, options, callback);
   }
 
@@ -394,14 +433,9 @@ class Server extends EventEmitter {
    * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
    * @param {Array} ops An array of removes
    * @param {object} options options for removal
-   * @param {boolean} [options.ordered=true] Execute in order or out of order
-   * @param {object} [options.writeConcern={}] Write concern for the operation
-   * @param {boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
-   * @param {boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
-   * @param {ClientSession} [options.session] Session to use for the operation
    * @param {opResultCallback} callback A callback function
    */
-  remove(ns: string, ops: any[], options: any, callback: any) {
+  remove(ns: string, ops: Document[], options: WriteCommandOptions, callback: Callback): void {
     executeWriteOperation({ server: this, op: 'remove', ns, ops }, options, callback);
   }
 }
@@ -410,12 +444,12 @@ Object.defineProperty(Server.prototype, 'clusterTime', {
   get() {
     return this.s.topology.clusterTime;
   },
-  set(clusterTime: any) {
+  set(clusterTime: ClusterTime) {
     this.s.topology.clusterTime = clusterTime;
   }
 });
 
-function supportsRetryableWrites(server: any) {
+function supportsRetryableWrites(server: Server) {
   return (
     server.description.maxWireVersion >= 6 &&
     server.description.logicalSessionTimeoutMinutes &&
@@ -423,7 +457,7 @@ function supportsRetryableWrites(server: any) {
   );
 }
 
-function calculateRoundTripTime(oldRtt: any, duration: any) {
+function calculateRoundTripTime(oldRtt: number, duration: number): number {
   if (oldRtt === -1) {
     return duration;
   }
@@ -432,22 +466,21 @@ function calculateRoundTripTime(oldRtt: any, duration: any) {
   return alpha * duration + (1 - alpha) * oldRtt;
 }
 
-function basicReadValidations(server: any, options: any) {
+function basicReadValidations(server: Server, options: CommandOptions) {
   if (options.readPreference && !(options.readPreference instanceof ReadPreference)) {
     return new MongoError('readPreference must be an instance of ReadPreference');
   }
 }
 
-function executeWriteOperation(args: any, options: any, callback: Function) {
-  if (typeof options === 'function') (callback = options), (options = {});
+function executeWriteOperation(
+  args: { server: Server; op: string; ns: string; ops: Document[] | Document },
+  options: WriteCommandOptions,
+  callback: Callback
+) {
   options = options || {};
 
-  // TODO: once we drop Node 4, use destructuring either here or in arguments.
-  const server = args.server;
-  const op = args.op;
-  const ns = args.ns;
+  const { server, op, ns } = args;
   const ops = Array.isArray(args.ops) ? args.ops : [args.ops];
-
   if (server.s.state === STATE_CLOSING || server.s.state === STATE_CLOSED) {
     callback(new MongoError('server is closed'));
     return;
@@ -460,30 +493,51 @@ function executeWriteOperation(args: any, options: any, callback: Function) {
 
   const unacknowledgedWrite = options.writeConcern && options.writeConcern.w === 0;
   if (unacknowledgedWrite || maxWireVersion(server) < 5) {
-    if ((op === 'update' || op === 'remove') && ops.find((o: any) => o.hint)) {
+    if ((op === 'update' || op === 'remove') && ops.find((o: Document) => o.hint)) {
       callback(new MongoError(`servers < 3.4 do not support hint on ${op}`));
       return;
     }
   }
 
-  server.s.pool.withConnection((err: any, conn: any, cb: any) => {
-    if (err) {
+  server.s.pool.withConnection((err, conn, cb) => {
+    if (err || !conn) {
       markServerUnknown(server, err);
       return cb(err);
     }
 
-    conn[op](ns, ops, options, makeOperationHandler(server, conn, ops, options, cb));
+    if (op === 'insert') {
+      conn.insert(
+        ns,
+        ops,
+        options,
+        makeOperationHandler(server, conn, ops, options, cb) as Callback
+      );
+    } else if (op === 'update') {
+      conn.update(
+        ns,
+        ops,
+        options,
+        makeOperationHandler(server, conn, ops, options, cb) as Callback
+      );
+    } else {
+      conn.remove(
+        ns,
+        ops,
+        options,
+        makeOperationHandler(server, conn, ops, options, cb) as Callback
+      );
+    }
   }, callback);
 }
 
-function markServerUnknown(server: any, error?: any) {
+function markServerUnknown(server: Server, error?: MongoError) {
   if (error instanceof MongoNetworkError && !(error instanceof MongoNetworkTimeoutError)) {
     server[kMonitor].reset();
   }
 
   server.emit(
     'descriptionReceived',
-    new ServerDescription(server.description.address, null, {
+    new ServerDescription(server.description.address, undefined, {
       error,
       topologyVersion:
         error && error.topologyVersion ? error.topologyVersion : server.description.topologyVersion
@@ -491,29 +545,29 @@ function markServerUnknown(server: any, error?: any) {
   );
 }
 
-function connectionIsStale(pool: any, connection: any) {
+function connectionIsStale(pool: ConnectionPool, connection: Connection) {
   return connection.generation !== pool.generation;
 }
 
-function shouldHandleStateChangeError(server: any, err?: any) {
+function shouldHandleStateChangeError(server: Server, err: MongoError) {
   const etv = err.topologyVersion;
   const stv = server.description.topologyVersion;
   return compareTopologyVersion(stv, etv) < 0;
 }
 
-function inActiveTransaction(session: any, cmd: any) {
+function inActiveTransaction(session: ClientSession | undefined, cmd: Document) {
   return session && session.inTransaction() && !isTransactionCommand(cmd);
 }
 
 function makeOperationHandler(
-  server: any,
-  connection: any,
-  cmd: any,
-  options: any,
-  callback: Function
-) {
-  const session = options && options.session;
-  return function handleOperationResult(err?: any, result?: any) {
+  server: Server,
+  connection: Connection,
+  cmd: Document,
+  options: CommandOptions | WriteCommandOptions | QueryOptions | GetMoreOptions | undefined,
+  callback: Callback
+): CallbackWithType<MongoError, Document> {
+  const session = options?.session;
+  return function handleOperationResult(err, result) {
     if (err && !connectionIsStale(server.s.pool, connection)) {
       if (err instanceof MongoNetworkError) {
         if (session && !session.hasEnded) {
@@ -554,5 +608,3 @@ function makeOperationHandler(
     callback(err, result);
   };
 }
-
-export { Server };

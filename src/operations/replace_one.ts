@@ -1,31 +1,37 @@
-import { OperationBase } from './operation';
+import { defineAspects, Aspect } from './operation';
 import { updateDocuments } from './common_functions';
+import { hasAtomicOperators } from '../utils';
+import CommandOperation = require('./command');
 
-class ReplaceOneOperation extends OperationBase {
+class ReplaceOneOperation extends CommandOperation {
   collection: any;
   filter: any;
-  doc: any;
+  replacement: any;
 
-  constructor(collection: any, filter: any, doc: any, options: any) {
-    super(options);
+  constructor(collection: any, filter: any, replacement: any, options: any) {
+    super(collection, options);
+
+    if (hasAtomicOperators(replacement)) {
+      throw new TypeError('Replacement document must not contain atomic operators');
+    }
 
     this.collection = collection;
     this.filter = filter;
-    this.doc = doc;
+    this.replacement = replacement;
   }
 
-  execute(callback: Function) {
+  execute(server: any, callback: Function) {
     const coll = this.collection;
     const filter = this.filter;
-    const doc = this.doc;
+    const replacement = this.replacement;
     const options = this.options;
 
     // Set single document update
     options.multi = false;
 
     // Execute update
-    updateDocuments(coll, filter, doc, options, (err?: any, r?: any) =>
-      replaceCallback(err, r, doc, callback)
+    updateDocuments(server, coll, filter, replacement, options, (err: Error, r: any) =>
+      replaceCallback(err, r, replacement, callback)
     );
   }
 }
@@ -47,5 +53,11 @@ function replaceCallback(err: any, r: any, doc: any, callback: Function) {
   r.ops = [doc]; // TODO: Should we still have this?
   if (callback) callback(null, r);
 }
+
+defineAspects(ReplaceOneOperation, [
+  Aspect.RETRYABLE,
+  Aspect.WRITE_OPERATION,
+  Aspect.EXECUTE_WITH_SELECTION
+]);
 
 export = ReplaceOneOperation;

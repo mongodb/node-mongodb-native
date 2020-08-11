@@ -1,23 +1,36 @@
 // Resolves the default auth mechanism according to
+
+import type { Document } from '../../types';
+import { AuthMechanism } from './defaultAuthProviders';
+
 // https://github.com/mongodb/specifications/blob/master/source/auth/auth.rst
-function getDefaultAuthMechanism(ismaster: any) {
+function getDefaultAuthMechanism(ismaster?: Document): AuthMechanism {
   if (ismaster) {
     // If ismaster contains saslSupportedMechs, use scram-sha-256
     // if it is available, else scram-sha-1
     if (Array.isArray(ismaster.saslSupportedMechs)) {
       return ismaster.saslSupportedMechs.indexOf('SCRAM-SHA-256') >= 0
-        ? 'scram-sha-256'
-        : 'scram-sha-1';
+        ? AuthMechanism.MONGODB_SCRAM_SHA256
+        : AuthMechanism.MONGODB_SCRAM_SHA1;
     }
 
     // Fallback to legacy selection method. If wire version >= 3, use scram-sha-1
     if (ismaster.maxWireVersion >= 3) {
-      return 'scram-sha-1';
+      return AuthMechanism.MONGODB_SCRAM_SHA1;
     }
   }
 
   // Default for wireprotocol < 3
-  return 'mongocr';
+  return AuthMechanism.MONGODB_CR;
+}
+
+export interface MongoCredentialsOptions {
+  username: string;
+  password: string;
+  source: string;
+  db?: string;
+  mechanism?: string;
+  mechanismProperties: Document;
 }
 
 /**
@@ -30,12 +43,12 @@ function getDefaultAuthMechanism(ismaster: any) {
  * @property {string} [source] The database that the user should authenticate against
  * @property {object} [mechanismProperties] Special properties used by some types of auth mechanisms
  */
-class MongoCredentials {
-  username: any;
-  password: any;
-  source: any;
-  mechanism: any;
-  mechanismProperties: any;
+export class MongoCredentials {
+  readonly username: string;
+  readonly password: string;
+  readonly source: string;
+  readonly mechanism: string;
+  readonly mechanismProperties: Document;
 
   /**
    * Creates a new MongoCredentials object
@@ -47,11 +60,13 @@ class MongoCredentials {
    * @param {string} [options.mechanism] The method used to authenticate
    * @param {object} [options.mechanismProperties] Special properties used by some types of auth mechanisms
    */
-  constructor(options?: any) {
-    options = options || {};
+  constructor(options: MongoCredentialsOptions) {
     this.username = options.username;
     this.password = options.password;
-    this.source = options.source || options.db;
+    this.source = options.source;
+    if (!this.source && options.db) {
+      this.source = options.db;
+    }
     this.mechanism = options.mechanism || 'default';
     this.mechanismProperties = options.mechanismProperties || {};
 
@@ -95,7 +110,7 @@ class MongoCredentials {
    * @param {object} [ismaster] An ismaster response from the server
    * @returns {MongoCredentials}
    */
-  resolveAuthMechanism(ismaster?: object): MongoCredentials {
+  resolveAuthMechanism(ismaster?: Document): MongoCredentials {
     // If the mechanism is not "default", then it does not need to be resolved
     if (this.mechanism.match(/DEFAULT/i)) {
       return new MongoCredentials({
@@ -110,5 +125,3 @@ class MongoCredentials {
     return this;
   }
 }
-
-export { MongoCredentials };

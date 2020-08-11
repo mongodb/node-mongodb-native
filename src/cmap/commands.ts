@@ -1,7 +1,11 @@
-import ReadPreference = require('../read_preference');
+import { ReadPreference } from '../read_preference';
 import * as BSON from '../bson';
 import { databaseNamespace } from '../utils';
 import { OP_QUERY, OP_GETMORE, OP_KILL_CURSORS, OP_MSG } from './wire_protocol/constants';
+import type { Long } from 'bson';
+import type { Connection } from './connection';
+import type { Document, BSONSerializeOptions } from '../types';
+import type { ClientSession } from '../sessions';
 
 // Incrementing request id
 let _requestId = 0;
@@ -21,32 +25,54 @@ const QUERY_FAILURE = 2;
 const SHARD_CONFIG_STALE = 4;
 const AWAIT_CAPABLE = 8;
 
+export type WriteProtocolMessageType = Query | Msg | GetMore | KillCursor;
+
+export interface OpQueryOptions {
+  socketTimeout?: number;
+  session?: ClientSession;
+  documentsReturnedIn?: string;
+  numberToSkip?: number;
+  numberToReturn?: number;
+  returnFieldSelector?: Document;
+  pre32Limit?: number;
+  serializeFunctions?: boolean;
+  ignoreUndefined?: boolean;
+  maxBsonSize?: number;
+  checkKeys?: boolean;
+  slaveOk?: boolean;
+
+  requestId?: number;
+  moreToCome?: boolean;
+  exhaustAllowed?: boolean;
+  readPreference?: ReadPreference;
+}
+
 /**************************************************************
  * QUERY
  **************************************************************/
-class Query {
-  ns: any;
-  query: any;
-  numberToSkip: any;
-  numberToReturn: any;
-  returnFieldSelector: any;
-  requestId: any;
-  pre32Limit: any;
-  serializeFunctions: any;
-  ignoreUndefined: any;
-  maxBsonSize: any;
-  checkKeys: any;
-  batchSize: any;
-  tailable: any;
-  slaveOk: any;
-  oplogReplay: any;
-  noCursorTimeout: any;
-  awaitData: any;
-  exhaust: any;
-  partial: any;
+export class Query {
+  ns: string;
+  query: Document;
+  numberToSkip: number;
+  numberToReturn: number;
+  returnFieldSelector?: Document;
+  requestId: number;
+  pre32Limit?: number;
+  serializeFunctions: boolean;
+  ignoreUndefined: boolean;
+  maxBsonSize: number;
+  checkKeys: boolean;
+  batchSize: number;
+  tailable: boolean;
+  slaveOk: boolean;
+  oplogReplay: boolean;
+  noCursorTimeout: boolean;
+  awaitData: boolean;
+  exhaust: boolean;
+  partial: boolean;
+  documentsReturnedIn?: string;
 
-  constructor(ns: any, query: any, options: any) {
-    var self = this;
+  constructor(ns: string, query: Document, options: OpQueryOptions) {
     // Basic options needed to be passed in
     if (ns == null) throw new Error('ns must be specified for query');
     if (query == null) throw new Error('query must be specified for query');
@@ -63,7 +89,7 @@ class Query {
     // Additional options
     this.numberToSkip = options.numberToSkip || 0;
     this.numberToReturn = options.numberToReturn || 0;
-    this.returnFieldSelector = options.returnFieldSelector || null;
+    this.returnFieldSelector = options.returnFieldSelector || undefined;
     this.requestId = Query.getRequestId();
 
     // special case for pre-3.2 find commands, delete ASAP
@@ -76,7 +102,7 @@ class Query {
       typeof options.ignoreUndefined === 'boolean' ? options.ignoreUndefined : false;
     this.maxBsonSize = options.maxBsonSize || 1024 * 1024 * 16;
     this.checkKeys = typeof options.checkKeys === 'boolean' ? options.checkKeys : true;
-    this.batchSize = self.numberToReturn;
+    this.batchSize = this.numberToReturn;
 
     // Flags
     this.tailable = false;
@@ -88,31 +114,28 @@ class Query {
     this.partial = false;
   }
 
-  //
-  // Assign a new request Id
-  incRequestId() {
+  /** Assign next request Id. */
+  incRequestId(): void {
     this.requestId = _requestId++;
   }
 
-  //
-  // Assign a new request Id
-  nextRequestId() {
+  /** Peek next request Id. */
+  nextRequestId(): number {
     return _requestId + 1;
   }
 
-  static getRequestId() {
+  /** Increment then return next request Id. */
+  static getRequestId(): number {
     return ++_requestId;
   }
 
-  //
   // Uses a single allocated buffer for the process, avoiding multiple memory allocations
-  toBin() {
-    var self = this;
-    var buffers = [];
-    var projection = null;
+  toBin(): Buffer[] {
+    const buffers = [];
+    let projection = null;
 
     // Set up the flags
-    var flags = 0;
+    let flags = 0;
     if (this.tailable) {
       flags |= OPTS_TAILABLE_CURSOR;
     }
@@ -141,14 +164,14 @@ class Query {
       flags |= OPTS_PARTIAL;
     }
 
-    // If batchSize is different to self.numberToReturn
-    if (self.batchSize !== self.numberToReturn) self.numberToReturn = self.batchSize;
+    // If batchSize is different to this.numberToReturn
+    if (this.batchSize !== this.numberToReturn) this.numberToReturn = this.batchSize;
 
     // Allocate write protocol header buffer
-    var header = Buffer.alloc(
+    const header = Buffer.alloc(
       4 * 4 + // Header
       4 + // Flags
-      Buffer.byteLength(self.ns) +
+      Buffer.byteLength(this.ns) +
       1 + // namespace
       4 + // numberToSkip
         4 // numberToReturn
@@ -158,7 +181,7 @@ class Query {
     buffers.push(header);
 
     // Serialize the query
-    var query = BSON.serialize(this.query, {
+    const query = BSON.serialize(this.query, {
       checkKeys: this.checkKeys,
       serializeFunctions: this.serializeFunctions,
       ignoreUndefined: this.ignoreUndefined
@@ -167,7 +190,7 @@ class Query {
     // Add query document
     buffers.push(query);
 
-    if (self.returnFieldSelector && Object.keys(self.returnFieldSelector).length > 0) {
+    if (this.returnFieldSelector && Object.keys(this.returnFieldSelector).length > 0) {
       // Serialize the projection document
       projection = BSON.serialize(this.returnFieldSelector, {
         checkKeys: this.checkKeys,
@@ -179,10 +202,10 @@ class Query {
     }
 
     // Total message size
-    var totalLength = header.length + query.length + (projection ? projection.length : 0);
+    const totalLength = header.length + query.length + (projection ? projection.length : 0);
 
     // Set up the index
-    var index = 4;
+    let index = 4;
 
     // Write total document length
     header[3] = (totalLength >> 24) & 0xff;
@@ -241,31 +264,33 @@ class Query {
   }
 }
 
+export interface OpGetMoreOptions {
+  numberToReturn?: number;
+}
+
 /**************************************************************
  * GETMORE
  **************************************************************/
-class GetMore {
-  numberToReturn: any;
-  requestId: any;
-  ns: any;
-  cursorId: any;
+export class GetMore {
+  numberToReturn: number;
+  requestId: number;
+  ns: string;
+  cursorId: Long;
 
-  constructor(ns: any, cursorId: any, opts: any) {
-    opts = opts || {};
+  constructor(ns: string, cursorId: Long, opts: OpGetMoreOptions = {}) {
     this.numberToReturn = opts.numberToReturn || 0;
     this.requestId = _requestId++;
     this.ns = ns;
     this.cursorId = cursorId;
   }
 
-  //
   // Uses a single allocated buffer for the process, avoiding multiple memory allocations
-  toBin() {
-    var length = 4 + Buffer.byteLength(this.ns) + 1 + 4 + 8 + 4 * 4;
+  toBin(): Buffer[] {
+    const length = 4 + Buffer.byteLength(this.ns) + 1 + 4 + 8 + 4 * 4;
     // Create command buffer
-    var index = 0;
+    let index = 0;
     // Allocate buffer
-    var _buffer = Buffer.alloc(length);
+    const _buffer = Buffer.alloc(length);
 
     // Write header information
     // index = write32bit(index, _buffer, length);
@@ -331,32 +356,31 @@ class GetMore {
     index = index + 4;
 
     // Return buffer
-    return _buffer;
+    return [_buffer];
   }
 }
 
 /**************************************************************
  * KILLCURSOR
  **************************************************************/
-class KillCursor {
-  ns: any;
-  requestId: any;
-  cursorIds: any;
+export class KillCursor {
+  ns: string;
+  requestId: number;
+  cursorIds: Long[];
 
-  constructor(ns: any, cursorIds: any) {
+  constructor(ns: string, cursorIds: Long[]) {
     this.ns = ns;
     this.requestId = _requestId++;
     this.cursorIds = cursorIds;
   }
 
-  //
   // Uses a single allocated buffer for the process, avoiding multiple memory allocations
-  toBin() {
-    var length = 4 + 4 + 4 * 4 + this.cursorIds.length * 8;
+  toBin(): Buffer[] {
+    const length = 4 + 4 + 4 * 4 + this.cursorIds.length * 8;
 
     // Create command buffer
-    var index = 0;
-    var _buffer = Buffer.alloc(length);
+    let index = 0;
+    const _buffer = Buffer.alloc(length);
 
     // Write header information
     // index = write32bit(index, _buffer, length);
@@ -403,7 +427,7 @@ class KillCursor {
     index = index + 4;
 
     // Write all the cursor ids into the array
-    for (var i = 0; i < this.cursorIds.length; i++) {
+    for (let i = 0; i < this.cursorIds.length; i++) {
       // Write cursor id
       // index = write32bit(index, _buffer, cursorIds[i].getLowBits());
       _buffer[index + 3] = (this.cursorIds[i].getLowBits() >> 24) & 0xff;
@@ -421,40 +445,57 @@ class KillCursor {
     }
 
     // Return buffer
-    return _buffer;
+    return [_buffer];
   }
 }
 
-class Response {
-  parsed: boolean;
-  raw: any;
-  data: any;
-  opts: any;
-  length: any;
-  requestId: any;
-  responseTo: any;
-  opCode: any;
-  fromCompressed: any;
-  responseFlags: any;
-  cursorId: any;
-  startingFrom: any;
-  numberReturned: any;
-  documents: any;
-  cursorNotFound: any;
-  queryFailure: any;
-  shardConfigStale: any;
-  awaitCapable: any;
-  promoteLongs: any;
-  promoteValues: any;
-  promoteBuffers: any;
-  index: any;
+export interface MessageHeader {
+  length: number;
+  requestId: number;
+  responseTo: number;
+  opCode: number;
+  fromCompressed?: boolean;
+}
 
-  constructor(message: any, msgHeader: any, msgBody: any, opts: any) {
-    opts = opts || { promoteLongs: true, promoteValues: true, promoteBuffers: false };
+export interface OpResponseOptions extends BSONSerializeOptions {
+  raw?: boolean;
+  documentsReturnedIn?: string | null;
+}
+
+export class Response {
+  parsed: boolean;
+  raw: Buffer;
+  data: Buffer;
+  opts: OpResponseOptions;
+  length: number;
+  requestId: number;
+  responseTo: number;
+  opCode: number;
+  fromCompressed?: boolean;
+  responseFlags: number;
+  cursorId: Long;
+  startingFrom: number;
+  numberReturned: number;
+  documents: (Document | Buffer)[];
+  cursorNotFound: boolean;
+  queryFailure: boolean;
+  shardConfigStale: boolean;
+  awaitCapable: boolean;
+  promoteLongs: boolean;
+  promoteValues: boolean;
+  promoteBuffers: boolean;
+  index?: number;
+
+  constructor(
+    message: Buffer,
+    msgHeader: MessageHeader,
+    msgBody: Buffer,
+    opts?: OpResponseOptions
+  ) {
     this.parsed = false;
     this.raw = message;
     this.data = msgBody;
-    this.opts = opts;
+    this.opts = opts ?? { promoteLongs: true, promoteValues: true, promoteBuffers: false };
 
     // Read the message header
     this.length = msgHeader.length;
@@ -477,35 +518,32 @@ class Response {
     this.queryFailure = (this.responseFlags & QUERY_FAILURE) !== 0;
     this.shardConfigStale = (this.responseFlags & SHARD_CONFIG_STALE) !== 0;
     this.awaitCapable = (this.responseFlags & AWAIT_CAPABLE) !== 0;
-    this.promoteLongs = typeof opts.promoteLongs === 'boolean' ? opts.promoteLongs : true;
-    this.promoteValues = typeof opts.promoteValues === 'boolean' ? opts.promoteValues : true;
-    this.promoteBuffers = typeof opts.promoteBuffers === 'boolean' ? opts.promoteBuffers : false;
+    this.promoteLongs = typeof this.opts.promoteLongs === 'boolean' ? this.opts.promoteLongs : true;
+    this.promoteValues =
+      typeof this.opts.promoteValues === 'boolean' ? this.opts.promoteValues : true;
+    this.promoteBuffers =
+      typeof this.opts.promoteBuffers === 'boolean' ? this.opts.promoteBuffers : false;
   }
 
-  isParsed() {
+  isParsed(): boolean {
     return this.parsed;
   }
 
-  parse(options: any) {
+  parse(options: OpResponseOptions): void {
     // Don't parse again if not needed
     if (this.parsed) return;
     options = options || {};
 
     // Allow the return of raw documents instead of parsing
-    var raw = options.raw || false;
-    var documentsReturnedIn = options.documentsReturnedIn || null;
-    var promoteLongs =
-      typeof options.promoteLongs === 'boolean' ? options.promoteLongs : this.opts.promoteLongs;
-    var promoteValues =
-      typeof options.promoteValues === 'boolean' ? options.promoteValues : this.opts.promoteValues;
-    var promoteBuffers =
-      typeof options.promoteBuffers === 'boolean'
-        ? options.promoteBuffers
-        : this.opts.promoteBuffers;
-    var bsonSize;
+    const raw = options.raw || false;
+    const documentsReturnedIn = options.documentsReturnedIn || null;
+    const promoteLongs = options.promoteLongs ?? this.opts.promoteLongs;
+    const promoteValues = options.promoteValues ?? this.opts.promoteValues;
+    const promoteBuffers = options.promoteBuffers ?? this.opts.promoteBuffers;
+    let bsonSize;
 
     // Set up the options
-    const _options: any = {
+    const _options: BSONSerializeOptions = {
       promoteLongs: promoteLongs,
       promoteValues: promoteValues,
       promoteBuffers: promoteBuffers
@@ -515,10 +553,8 @@ class Response {
     // (See https://docs.mongodb.com/manual/reference/mongodb-wire-protocol/#wire-op-reply)
     this.index = 20;
 
-    //
     // Parse Body
-    //
-    for (var i = 0; i < this.numberReturned; i++) {
+    for (let i = 0; i < this.numberReturned; i++) {
       bsonSize =
         this.data[this.index] |
         (this.data[this.index + 1] << 8) |
@@ -540,11 +576,11 @@ class Response {
     }
 
     if (this.documents.length === 1 && documentsReturnedIn != null && raw) {
-      const fieldsAsRaw: any = {};
+      const fieldsAsRaw: Document = {};
       fieldsAsRaw[documentsReturnedIn] = true;
       _options.fieldsAsRaw = fieldsAsRaw;
 
-      const doc = BSON.deserialize(this.documents[0], _options);
+      const doc = BSON.deserialize(this.documents[0] as Buffer, _options);
       this.documents = [doc];
     }
 
@@ -585,20 +621,31 @@ const OPTS_CHECKSUM_PRESENT = 1;
 const OPTS_MORE_TO_COME = 2;
 const OPTS_EXHAUST_ALLOWED = 1 << 16;
 
-class Msg {
-  ns: any;
-  command: any;
-  options: any;
-  requestId: any;
-  serializeFunctions: any;
-  ignoreUndefined: any;
-  checkKeys: any;
-  maxBsonSize: any;
-  checksumPresent: any;
-  moreToCome: any;
-  exhaustAllowed: any;
+export interface OpMsgOptions {
+  requestId: number;
+  serializeFunctions: boolean;
+  ignoreUndefined: boolean;
+  checkKeys: boolean;
+  maxBsonSize: number;
+  moreToCome: boolean;
+  exhaustAllowed: boolean;
+  readPreference: ReadPreference;
+}
 
-  constructor(ns: any, command: any, options: any) {
+export class Msg {
+  ns: string;
+  command: Document;
+  options: OpQueryOptions;
+  requestId: number;
+  serializeFunctions: boolean;
+  ignoreUndefined: boolean;
+  checkKeys: boolean;
+  maxBsonSize: number;
+  checksumPresent: boolean;
+  moreToCome: boolean;
+  exhaustAllowed: boolean;
+
+  constructor(ns: string, command: Document, options: OpQueryOptions) {
     // Basic options needed to be passed in
     if (command == null) throw new Error('query must be specified for query');
 
@@ -622,7 +669,7 @@ class Msg {
       typeof options.serializeFunctions === 'boolean' ? options.serializeFunctions : false;
     this.ignoreUndefined =
       typeof options.ignoreUndefined === 'boolean' ? options.ignoreUndefined : false;
-    this.checkKeys = typeof options.checkKeys === 'boolean' ? options.checkKeys : false;
+    this.checkKeys = typeof options.checkKeys === 'boolean' ? options.checkKeys : true;
     this.maxBsonSize = options.maxBsonSize || 1024 * 1024 * 16;
 
     // flags
@@ -632,8 +679,8 @@ class Msg {
       typeof options.exhaustAllowed === 'boolean' ? options.exhaustAllowed : false;
   }
 
-  toBin() {
-    const buffers = [];
+  toBin(): Buffer[] {
+    const buffers: Buffer[] = [];
     let flags = 0;
 
     if (this.checksumPresent) {
@@ -667,7 +714,7 @@ class Msg {
     return buffers;
   }
 
-  makeDocumentSegment(buffers: any, document: any) {
+  makeDocumentSegment(buffers: Buffer[], document: Document): number {
     const payloadTypeBuffer = Buffer.alloc(1);
     payloadTypeBuffer[0] = 0;
 
@@ -678,7 +725,7 @@ class Msg {
     return payloadTypeBuffer.length + documentBuffer.length;
   }
 
-  serializeBson(document: any) {
+  serializeBson(document: Document): Buffer {
     return BSON.serialize(document, {
       checkKeys: this.checkKeys,
       serializeFunctions: this.serializeFunctions,
@@ -686,38 +733,42 @@ class Msg {
     });
   }
 
-  static getRequestId() {
+  static getRequestId(): number {
     _requestId = (_requestId + 1) & 0x7fffffff;
     return _requestId;
   }
 }
 
-class BinMsg {
-  parsed: any;
-  raw: any;
-  data: any;
-  opts: any;
-  length: any;
-  requestId: any;
-  responseTo: any;
-  opCode: any;
-  fromCompressed: any;
-  responseFlags: any;
-  checksumPresent: any;
-  moreToCome: any;
-  exhaustAllowed: any;
-  promoteLongs: any;
-  promoteValues: any;
-  promoteBuffers: any;
-  documents: any;
-  index: any;
+export class BinMsg {
+  parsed: boolean;
+  raw: Buffer;
+  data: Buffer;
+  opts: OpResponseOptions;
+  length: number;
+  requestId: number;
+  responseTo: number;
+  opCode: number;
+  fromCompressed?: boolean;
+  responseFlags: number;
+  checksumPresent: boolean;
+  moreToCome: boolean;
+  exhaustAllowed: boolean;
+  promoteLongs: boolean;
+  promoteValues: boolean;
+  promoteBuffers: boolean;
+  documents: (Document | Buffer)[];
+  index?: number;
 
-  constructor(message: any, msgHeader: any, msgBody: any, opts: any) {
-    opts = opts || { promoteLongs: true, promoteValues: true, promoteBuffers: false };
+  constructor(
+    message: Buffer,
+    msgHeader: MessageHeader,
+    msgBody: Buffer,
+    opts?: OpResponseOptions
+  ) {
     this.parsed = false;
     this.raw = message;
     this.data = msgBody;
-    this.opts = opts;
+    this.opts = opts ?? { promoteLongs: true, promoteValues: true, promoteBuffers: false };
 
     // Read the message header
     this.length = msgHeader.length;
@@ -731,18 +782,20 @@ class BinMsg {
     this.checksumPresent = (this.responseFlags & OPTS_CHECKSUM_PRESENT) !== 0;
     this.moreToCome = (this.responseFlags & OPTS_MORE_TO_COME) !== 0;
     this.exhaustAllowed = (this.responseFlags & OPTS_EXHAUST_ALLOWED) !== 0;
-    this.promoteLongs = typeof opts.promoteLongs === 'boolean' ? opts.promoteLongs : true;
-    this.promoteValues = typeof opts.promoteValues === 'boolean' ? opts.promoteValues : true;
-    this.promoteBuffers = typeof opts.promoteBuffers === 'boolean' ? opts.promoteBuffers : false;
+    this.promoteLongs = typeof this.opts.promoteLongs === 'boolean' ? this.opts.promoteLongs : true;
+    this.promoteValues =
+      typeof this.opts.promoteValues === 'boolean' ? this.opts.promoteValues : true;
+    this.promoteBuffers =
+      typeof this.opts.promoteBuffers === 'boolean' ? this.opts.promoteBuffers : false;
 
     this.documents = [];
   }
 
-  isParsed() {
+  isParsed(): boolean {
     return this.parsed;
   }
 
-  parse(options: any) {
+  parse(options: OpResponseOptions): void {
     // Don't parse again if not needed
     if (this.parsed) return;
     options = options || {};
@@ -751,21 +804,16 @@ class BinMsg {
     // Allow the return of raw documents instead of parsing
     const raw = options.raw || false;
     const documentsReturnedIn = options.documentsReturnedIn || null;
-    const promoteLongs =
-      typeof options.promoteLongs === 'boolean' ? options.promoteLongs : this.opts.promoteLongs;
-    const promoteValues =
-      typeof options.promoteValues === 'boolean' ? options.promoteValues : this.opts.promoteValues;
-    const promoteBuffers =
-      typeof options.promoteBuffers === 'boolean'
-        ? options.promoteBuffers
-        : this.opts.promoteBuffers;
+    const promoteLongs = options.promoteLongs ?? this.opts.promoteLongs;
+    const promoteValues = options.promoteValues ?? this.opts.promoteValues;
+    const promoteBuffers = options.promoteBuffers ?? this.opts.promoteBuffers;
 
     // Set up the options
-    const _options = {
+    const _options: BSONSerializeOptions = {
       promoteLongs: promoteLongs,
       promoteValues: promoteValues,
       promoteBuffers: promoteBuffers
-    } as any;
+    };
 
     while (this.index < this.data.length) {
       const payloadType = this.data.readUInt8(this.index++);
@@ -781,11 +829,11 @@ class BinMsg {
     }
 
     if (this.documents.length === 1 && documentsReturnedIn != null && raw) {
-      const fieldsAsRaw: any = {};
+      const fieldsAsRaw: Document = {};
       fieldsAsRaw[documentsReturnedIn] = true;
       _options.fieldsAsRaw = fieldsAsRaw;
 
-      const doc = BSON.deserialize(this.documents[0], _options);
+      const doc = BSON.deserialize(this.documents[0] as Buffer, _options);
       this.documents = [doc];
     }
 
@@ -796,17 +844,17 @@ class BinMsg {
 /**
  * Creates a new CommandResult instance
  *
- * @class
  * @param {object} result CommandResult object
  * @param {Connection} connection A connection instance associated with this result
  * @returns {CommandResult} A cursor instance
  */
-class CommandResult {
-  result: any;
-  connection: any;
-  message: any;
+export class CommandResult {
+  ok?: number;
+  result: Document;
+  connection: Connection;
+  message: Document;
 
-  constructor(result: any, connection: any, message: any) {
+  constructor(result: Document, connection: Connection, message: Document) {
     this.result = result;
     this.connection = connection;
     this.message = message;
@@ -818,8 +866,8 @@ class CommandResult {
    * @function
    * @returns {object}
    */
-  toJSON(): object {
-    let result = Object.assign({}, this, this.result);
+  toJSON(): Document {
+    const result = Object.assign({}, this, this.result);
     delete result.message;
     return result;
   }
@@ -834,5 +882,3 @@ class CommandResult {
     return JSON.stringify(this.toJSON());
   }
 }
-
-export { Query, GetMore, Response, KillCursor, Msg, BinMsg, CommandResult };

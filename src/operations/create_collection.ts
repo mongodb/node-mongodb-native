@@ -1,5 +1,5 @@
 import CommandOperation = require('./command');
-import ReadPreference = require('../read_preference');
+import { ReadPreference } from '../read_preference';
 import { Aspect, defineAspects } from './operation';
 import { applyWriteConcern } from '../utils';
 import { loadCollection } from '../dynamic_loaders';

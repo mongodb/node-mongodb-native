@@ -1,3 +1,7 @@
+import type { ServerDescription } from './server_description';
+import type { TopologyDescription } from './topology_description';
+import type { Document } from '../types';
+
 /**
  * Published when server description changes, but does NOT include changes to the RTT.
  *
@@ -6,9 +10,22 @@
  * @property {ServerDescription} previousDescription The previous server description
  * @property {ServerDescription} newDescription The new server description
  */
-class ServerDescriptionChangedEvent {
-  constructor(topologyId: any, address: any, previousDescription: any, newDescription: any) {
-    Object.assign(this, { topologyId, address, previousDescription, newDescription });
+export class ServerDescriptionChangedEvent {
+  topologyId: number;
+  address: string;
+  previousDescription: ServerDescription;
+  newDescription: ServerDescription;
+
+  constructor(
+    topologyId: number,
+    address: string,
+    previousDescription: ServerDescription,
+    newDescription: ServerDescription
+  ) {
+    this.topologyId = topologyId;
+    this.address = address;
+    this.previousDescription = previousDescription;
+    this.newDescription = newDescription;
   }
 }
 
@@ -18,9 +35,13 @@ class ServerDescriptionChangedEvent {
  * @property {object} topologyId A unique identifier for the topology
  * @property {ServerAddress} address The address (host/port pair) of the server
  */
-class ServerOpeningEvent {
-  constructor(topologyId: any, address: any) {
-    Object.assign(this, { topologyId, address });
+export class ServerOpeningEvent {
+  topologyId: number;
+  address: string;
+
+  constructor(topologyId: number, address: string) {
+    this.topologyId = topologyId;
+    this.address = address;
   }
 }
 
@@ -30,9 +51,13 @@ class ServerOpeningEvent {
  * @property {ServerAddress} address The address (host/port pair) of the server
  * @property {object} topologyId A unique identifier for the topology
  */
-class ServerClosedEvent {
-  constructor(topologyId: any, address: any) {
-    Object.assign(this, { topologyId, address });
+export class ServerClosedEvent {
+  topologyId: number;
+  address: string;
+
+  constructor(topologyId: number, address: string) {
+    this.topologyId = topologyId;
+    this.address = address;
   }
 }
 
@@ -43,9 +68,19 @@ class ServerClosedEvent {
  * @property {TopologyDescription} previousDescription The old topology description
  * @property {TopologyDescription} newDescription The new topology description
  */
-class TopologyDescriptionChangedEvent {
-  constructor(topologyId: any, previousDescription: any, newDescription: any) {
-    Object.assign(this, { topologyId, previousDescription, newDescription });
+export class TopologyDescriptionChangedEvent {
+  topologyId: number;
+  previousDescription: TopologyDescription;
+  newDescription: TopologyDescription;
+
+  constructor(
+    topologyId: number,
+    previousDescription: TopologyDescription,
+    newDescription: TopologyDescription
+  ) {
+    this.topologyId = topologyId;
+    this.previousDescription = previousDescription;
+    this.newDescription = newDescription;
   }
 }
 
@@ -54,9 +89,11 @@ class TopologyDescriptionChangedEvent {
  *
  * @param {object} topologyId A unique identifier for the topology
  */
-class TopologyOpeningEvent {
-  constructor(topologyId: any) {
-    Object.assign(this, { topologyId });
+export class TopologyOpeningEvent {
+  topologyId: number;
+
+  constructor(topologyId: number) {
+    this.topologyId = topologyId;
   }
 }
 
@@ -65,9 +102,11 @@ class TopologyOpeningEvent {
  *
  * @param {object} topologyId A unique identifier for the topology
  */
-class TopologyClosedEvent {
-  constructor(topologyId: any) {
-    Object.assign(this, { topologyId });
+export class TopologyClosedEvent {
+  topologyId: number;
+
+  constructor(topologyId: number) {
+    this.topologyId = topologyId;
   }
 }
 
@@ -77,9 +116,11 @@ class TopologyClosedEvent {
  *
  * @property {object} connectionId The connection id for the command
  */
-class ServerHeartbeatStartedEvent {
-  constructor(connectionId: any) {
-    Object.assign(this, { connectionId });
+export class ServerHeartbeatStartedEvent {
+  connectionId: string;
+
+  constructor(connectionId: string) {
+    this.connectionId = connectionId;
   }
 }
 
@@ -90,9 +131,15 @@ class ServerHeartbeatStartedEvent {
  * @param {object} reply The command reply
  * @param {object} connectionId The connection id for the command
  */
-class ServerHeartbeatSucceededEvent {
-  constructor(duration: any, reply: any, connectionId: any) {
-    Object.assign(this, { connectionId, duration, reply });
+export class ServerHeartbeatSucceededEvent {
+  connectionId: string;
+  duration: number;
+  reply: Document;
+
+  constructor(connectionId: string, duration: number, reply: Document) {
+    this.connectionId = connectionId;
+    this.duration = duration;
+    this.reply = reply;
   }
 }
 
@@ -103,20 +150,14 @@ class ServerHeartbeatSucceededEvent {
  * @param {MongoError|object} failure The command failure
  * @param {object} connectionId The connection id for the command
  */
-class ServerHeartbeatFailedEvent {
-  constructor(duration: any, failure: any, connectionId: any) {
-    Object.assign(this, { connectionId, duration, failure });
+export class ServerHeartbeatFailedEvent {
+  connectionId: string;
+  duration: number;
+  failure: Error;
+
+  constructor(connectionId: string, duration: number, failure: Error) {
+    this.connectionId = connectionId;
+    this.duration = duration;
+    this.failure = failure;
   }
 }
-
-export {
-  ServerDescriptionChangedEvent,
-  ServerOpeningEvent,
-  ServerClosedEvent,
-  TopologyDescriptionChangedEvent,
-  TopologyOpeningEvent,
-  TopologyClosedEvent,
-  ServerHeartbeatStartedEvent,
-  ServerHeartbeatSucceededEvent,
-  ServerHeartbeatFailedEvent
-};

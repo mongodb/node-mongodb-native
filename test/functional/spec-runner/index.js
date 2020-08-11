@@ -163,8 +163,8 @@ function generateTopologyTests(testSuites, testContext, filter) {
 
 // Test runner helpers
 function prepareDatabaseForSuite(suite, context) {
-  context.dbName = suite.database_name;
-  context.collectionName = suite.collection_name;
+  context.dbName = suite.database_name || 'spec_db';
+  context.collectionName = suite.collection_name || 'spec_collection';
 
   const db = context.sharedClient.db(context.dbName);
   const setupPromise = db
@@ -178,7 +178,7 @@ function prepareDatabaseForSuite(suite, context) {
       throw err;
     });
 
-  if (context.collectionName == null) {
+  if (context.collectionName == null || context.dbName === 'admin') {
     return setupPromise;
   }
 

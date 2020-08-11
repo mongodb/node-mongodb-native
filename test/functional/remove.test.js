@@ -155,7 +155,7 @@ describe('Remove', function () {
         test.equal(null, err);
         const collection = db.collection('remove_test');
 
-        collection.remove().then(
+        collection.deleteMany({}).then(
           () => {
             client.close(done);
           },

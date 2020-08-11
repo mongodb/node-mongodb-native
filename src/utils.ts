@@ -2,7 +2,8 @@ import PromiseProvider = require('./promise_provider');
 import os = require('os');
 import crypto = require('crypto');
 import { MongoError } from './error';
-import WriteConcern = require('./write_concern');
+import { WriteConcern } from './write_concern';
+import type { CallbackWithType, Callback } from './types';
 
 const MAX_JS_INT = Number.MAX_SAFE_INTEGER + 1;
 
@@ -224,12 +225,12 @@ function isObject(arg: any) {
 }
 
 function debugOptions(debugFields: any, options: any) {
-  var finaloptions: any = {};
+  var finalOptions: any = {};
   debugFields.forEach(function (n: any) {
-    finaloptions[n] = options[n];
+    finalOptions[n] = options[n];
   });
 
-  return finaloptions;
+  return finalOptions;
 }
 
 function decorateCommand(command: any, options: any, exclude: any) {
@@ -243,39 +244,6 @@ function decorateCommand(command: any, options: any, exclude: any) {
 function mergeOptions(target: any, source: any) {
   for (var name in source) {
     target[name] = source[name];
-  }
-
-  return target;
-}
-
-// Merge options with translation
-function translateOptions(target: any, source: any) {
-  var translations: any = {
-    // SSL translation options
-    sslCA: 'ca',
-    sslCRL: 'crl',
-    sslValidate: 'rejectUnauthorized',
-    sslKey: 'key',
-    sslCert: 'cert',
-    sslPass: 'passphrase',
-    // SocketTimeout translation options
-    socketTimeoutMS: 'socketTimeout',
-    connectTimeoutMS: 'connectionTimeout',
-    // Replicaset options
-    replicaSet: 'setName',
-    rs_name: 'setName',
-    secondaryAcceptableLatencyMS: 'acceptableLatency',
-    connectWithNoPrimary: 'secondaryOnlyConnectionAllowed',
-    // Mongos options
-    acceptableLatencyMS: 'localThresholdMS'
-  };
-
-  for (var name in source) {
-    if (translations[name]) {
-      target[translations[name]] = source[name];
-    } else {
-      target[name] = source[name];
-    }
   }
 
   return target;
@@ -636,8 +604,8 @@ class MongoDBNamespace {
   }
 }
 
-function* makeCounter(seed: any) {
-  let count = seed || 0;
+function* makeCounter(seed = 0) {
+  let count = seed;
   while (true) {
     const newCount = count;
     count += 1;
@@ -683,11 +651,11 @@ function maybePromise(callback: Function | undefined, wrapper: Function): any | 
   return result;
 }
 
-function databaseNamespace(ns: any) {
+function databaseNamespace(ns: string) {
   return ns.split('.')[0];
 }
 
-function collectionNamespace(ns: any) {
+function collectionNamespace(ns: string) {
   return ns.split('.').slice(1).join('.');
 }
 
@@ -721,7 +689,7 @@ function relayEvents(listener: any, emitter: any, events: any) {
  * @private
  * @param {(Topology|Server)} topologyOrServer
  */
-function maxWireVersion(topologyOrServer: any) {
+function maxWireVersion(topologyOrServer?: any) {
   if (topologyOrServer) {
     if (topologyOrServer.ismaster) {
       return topologyOrServer.ismaster.maxWireVersion;
@@ -757,11 +725,15 @@ function collationNotSupported(server: any, cmd: any) {
 /**
  * Applies the function `eachFn` to each item in `arr`, in parallel.
  *
- * @param {Array} arr an array of items to asynchronusly iterate over
+ * @param {Array} arr an array of items to asynchronously iterate over
  * @param {Function} eachFn A function to call on each item of the array. The callback signature is `(item, callback)`, where the callback indicates iteration is complete.
  * @param {Function} callback The callback called after every item has been iterated
  */
-function eachAsync(arr: any[], eachFn: Function, callback: Function) {
+function eachAsync<T, E = any>(
+  arr: T[],
+  eachFn: (item: T, callback: Callback<CallbackWithType<E>>) => void,
+  callback: CallbackWithType<E>
+) {
   arr = arr || [];
 
   let idx = 0;
@@ -826,14 +798,6 @@ function arrayStrictEqual(arr: any, arr2: any) {
   return arr.length === arr2.length && arr.every((elt: any, idx: any) => elt === arr2[idx]);
 }
 
-function tagsStrictEqual(tags: any, tags2: any) {
-  const tagsKeys = Object.keys(tags);
-  const tags2Keys = Object.keys(tags2);
-  return (
-    tagsKeys.length === tags2Keys.length && tagsKeys.every((key: any) => tags2[key] === tags[key])
-  );
-}
-
 function errorStrictEqual(lhs: any, rhs: any) {
   if (lhs === rhs) {
     return true;
@@ -868,10 +832,37 @@ function makeStateMachine(stateTable: any) {
   };
 }
 
-function makeClientMetadata(options: any) {
+export interface ClientMetadata {
+  driver: {
+    name: string;
+    version: string;
+  };
+  os: {
+    type: string;
+    name: NodeJS.Platform;
+    architecture: string;
+    version: string;
+  };
+  platform: string;
+  version?: string;
+  application?: {
+    name: string;
+  };
+}
+
+export interface ClientMetadataOptions {
+  driverInfo?: {
+    name?: string;
+    version?: string;
+    platform?: string;
+  };
+  appname?: string;
+}
+
+function makeClientMetadata(options: ClientMetadataOptions): ClientMetadata {
   options = options || {};
 
-  const metadata = {
+  const metadata: ClientMetadata = {
     driver: {
       name: 'nodejs',
       version: require('../package.json').version
@@ -883,7 +874,7 @@ function makeClientMetadata(options: any) {
       version: os.release()
     },
     platform: `'Node.js ${process.version}, ${os.endianness} (unified)`
-  } as any;
+  };
 
   // support optionally provided wrapping driver info
   if (options.driverInfo) {
@@ -932,13 +923,27 @@ function now() {
   return Math.floor(hrtime[0] * 1000 + hrtime[1] / 1000000);
 }
 
-function calculateDurationInMs(started: any) {
+function calculateDurationInMs(started: number) {
   if (typeof started !== 'number') {
     throw TypeError('numeric value required to calculate duration');
   }
 
   const elapsed = now() - started;
   return elapsed < 0 ? 0 : elapsed;
+}
+
+export interface InterruptableAsyncIntervalOptions {
+  /** The interval to execute a method on */
+  interval: number;
+  /** A minumum interval that must elapse before the method is called */
+  minInterval: number;
+  /** Whether the method should be called immediately when the interval is started  */
+  immediate: boolean;
+}
+
+export interface InterruptableAsyncInterval {
+  wake(): void;
+  stop(): void;
 }
 
 /**
@@ -953,10 +958,13 @@ function calculateDurationInMs(started: any) {
  * @param {number} [options.minInterval] The minimum time which must pass between invocations of the provided function
  * @param {boolean} [options.immediate] Execute the function immediately when the interval is started
  */
-function makeInterruptableAsyncInterval(fn: Function, options?: any) {
-  let timerId: any;
-  let lastCallTime: any;
-  let lastWakeTime: any;
+function makeInterruptableAsyncInterval(
+  fn: Function,
+  options?: Partial<InterruptableAsyncIntervalOptions>
+): InterruptableAsyncInterval {
+  let timerId: NodeJS.Timeout | undefined;
+  let lastCallTime: number;
+  let lastWakeTime: number;
   let stopped = false;
 
   options = options || {};
@@ -993,7 +1001,7 @@ function makeInterruptableAsyncInterval(fn: Function, options?: any) {
     stopped = true;
     if (timerId) {
       clearTimeout(timerId);
-      timerId = null;
+      timerId = undefined;
     }
 
     lastCallTime = 0;
@@ -1002,7 +1010,10 @@ function makeInterruptableAsyncInterval(fn: Function, options?: any) {
 
   function reschedule(ms: any) {
     if (stopped) return;
-    clearTimeout(timerId);
+    if (timerId) {
+      clearTimeout(timerId);
+    }
+
     timerId = setTimeout(executeAndReschedule, ms || interval);
   }
 
@@ -1026,10 +1037,18 @@ function makeInterruptableAsyncInterval(fn: Function, options?: any) {
   return { wake, stop };
 }
 
+function hasAtomicOperators(doc: any): boolean {
+  if (Array.isArray(doc)) {
+    return doc.reduce((err, u) => err || hasAtomicOperators(u), null);
+  }
+
+  const keys = Object.keys(doc);
+  return keys.length > 0 && keys[0][0] === '$';
+}
+
 export {
   filterOptions,
   mergeOptions,
-  translateOptions,
   getSingleProperty,
   checkCollectionName,
   toError,
@@ -1064,12 +1083,12 @@ export {
   eachAsync,
   eachAsyncSeries,
   arrayStrictEqual,
-  tagsStrictEqual,
   errorStrictEqual,
   makeStateMachine,
   makeClientMetadata,
   noop,
   now,
   calculateDurationInMs,
-  makeInterruptableAsyncInterval
+  makeInterruptableAsyncInterval,
+  hasAtomicOperators
 };

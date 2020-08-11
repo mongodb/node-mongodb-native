@@ -1,55 +1,66 @@
+import type { Timestamp, Binary, Long } from '../bson';
+import type { Topology } from './topology';
+import type { ClientSession } from '../sessions';
+
 // shared state names
-const STATE_CLOSING = 'closing';
-const STATE_CLOSED = 'closed';
-const STATE_CONNECTING = 'connecting';
-const STATE_CONNECTED = 'connected';
+export const STATE_CLOSING = 'closing';
+export const STATE_CLOSED = 'closed';
+export const STATE_CONNECTING = 'connecting';
+export const STATE_CONNECTED = 'connected';
 
 // An enumeration of topology types we know about
-const TopologyType = {
-  Single: 'Single',
-  ReplicaSetNoPrimary: 'ReplicaSetNoPrimary',
-  ReplicaSetWithPrimary: 'ReplicaSetWithPrimary',
-  Sharded: 'Sharded',
-  Unknown: 'Unknown'
-};
+export enum TopologyType {
+  Single = 'Single',
+  ReplicaSetNoPrimary = 'ReplicaSetNoPrimary',
+  ReplicaSetWithPrimary = 'ReplicaSetWithPrimary',
+  Sharded = 'Sharded',
+  Unknown = 'Unknown'
+}
 
 // An enumeration of server types we know about
-const ServerType = {
-  Standalone: 'Standalone',
-  Mongos: 'Mongos',
-  PossiblePrimary: 'PossiblePrimary',
-  RSPrimary: 'RSPrimary',
-  RSSecondary: 'RSSecondary',
-  RSArbiter: 'RSArbiter',
-  RSOther: 'RSOther',
-  RSGhost: 'RSGhost',
-  Unknown: 'Unknown'
-};
+export enum ServerType {
+  Standalone = 'Standalone',
+  Mongos = 'Mongos',
+  PossiblePrimary = 'PossiblePrimary',
+  RSPrimary = 'RSPrimary',
+  RSSecondary = 'RSSecondary',
+  RSArbiter = 'RSArbiter',
+  RSOther = 'RSOther',
+  RSGhost = 'RSGhost',
+  Unknown = 'Unknown'
+}
 
-const TOPOLOGY_DEFAULTS = {
+export const TOPOLOGY_DEFAULTS = {
   localThresholdMS: 15,
   serverSelectionTimeoutMS: 30000,
   heartbeatFrequencyMS: 10000,
   minHeartbeatFrequencyMS: 500
 };
 
-function drainTimerQueue(queue: any) {
+export type TimerQueue = Set<NodeJS.Timeout>;
+export function drainTimerQueue(queue: TimerQueue): void {
   queue.forEach(clearTimeout);
   queue.clear();
 }
 
-function clearAndRemoveTimerFrom(timer: any, timers: any) {
+export function clearAndRemoveTimerFrom(timer: NodeJS.Timeout, timers: TimerQueue): boolean {
   clearTimeout(timer);
   return timers.delete(timer);
 }
 
-/**
- * Shared function to determine clusterTime for a given topology
- *
- * @param {any} topology
- * @param {any} $clusterTime
- */
-function resolveClusterTime(topology: any, $clusterTime: any) {
+export interface ClusterTime {
+  clusterTime: Timestamp;
+  signature: {
+    hash: Binary;
+    keyId: Long;
+  };
+}
+
+/** Shared function to determine clusterTime for a given topology */
+export function resolveClusterTime(
+  topology: Topology | ClientSession,
+  $clusterTime: ClusterTime
+): void {
   if (topology.clusterTime == null) {
     topology.clusterTime = $clusterTime;
   } else {
@@ -58,16 +69,3 @@ function resolveClusterTime(topology: any, $clusterTime: any) {
     }
   }
 }
-
-export {
-  STATE_CLOSING,
-  STATE_CLOSED,
-  STATE_CONNECTING,
-  STATE_CONNECTED,
-  TOPOLOGY_DEFAULTS,
-  TopologyType,
-  ServerType,
-  drainTimerQueue,
-  clearAndRemoveTimerFrom,
-  resolveClusterTime
-};

@@ -323,7 +323,7 @@ describe.skip('ReplSet (Failover)', function () {
                           });
 
                           // Run second check
-                          collection.save({ a: 80 }, { w: 1 }, function (err) {
+                          collection.insertOne({ a: 80 }, { w: 1 }, function (err) {
                             expect(err).to.not.exist;
 
                             collection.find().toArray(function (err, items) {

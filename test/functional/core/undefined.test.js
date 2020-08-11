@@ -7,117 +7,117 @@ const { ObjectId } = require('bson');
 describe('A server', function () {
   it('should correctly execute insert culling undefined', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'], mongodb: '>=3.2' }
     },
 
     test: function (done) {
-      var self = this;
-      const config = this.configuration;
-      const server = config.newTopology();
+      const self = this;
+      const topology = this.configuration.newTopology();
 
-      // Add event listeners
-      server.on('connect', function (_server) {
-        // Drop collection
-        _server.command(f('%s.$cmd', self.configuration.db), { drop: 'insert1' }, function () {
-          var ns = f('%s.insert1', self.configuration.db);
-          var objectId = new ObjectId();
-          // Execute the write
-          _server.insert(
-            ns,
-            [{ _id: objectId, a: 1, b: undefined }],
-            {
-              writeConcern: { w: 1 },
-              ordered: true,
-              ignoreUndefined: true
-            },
-            function (insertErr, results) {
-              expect(insertErr).to.be.null;
-              expect(results.result.n).to.eql(1);
+      topology.connect(err => {
+        expect(err).to.not.exist;
+        this.defer(() => topology.close());
 
-              // Execute find
-              var cursor = _server.cursor(ns, {
-                find: f('%s.insert1', self.configuration.db),
-                query: { _id: objectId },
-                batchSize: 2
-              });
+        topology.selectServer('primary', (err, server) => {
+          expect(err).to.not.exist;
 
-              // Execute next
-              cursor._next(function (nextErr, d) {
-                expect(nextErr).to.be.null;
-                expect(d.b).to.be.undefined;
+          // Drop collection
+          server.command(f('%s.$cmd', self.configuration.db), { drop: 'insert1' }, () => {
+            const ns = f('%s.insert1', self.configuration.db);
+            const objectId = new ObjectId();
+            // Execute the write
+            server.insert(
+              ns,
+              [{ _id: objectId, a: 1, b: undefined }],
+              {
+                writeConcern: { w: 1 },
+                ordered: true,
+                ignoreUndefined: true
+              },
+              (insertErr, results) => {
+                expect(insertErr).to.not.exist;
+                expect(results.result.n).to.eql(1);
 
-                // Destroy the connection
-                _server.destroy();
-                // Finish the test
-                done();
-              });
-            }
-          );
+                // Execute find
+                var cursor = topology.cursor(ns, {
+                  find: 'insert1',
+                  filter: { _id: objectId },
+                  batchSize: 2
+                });
+
+                // Execute next
+                cursor._next((nextErr, d) => {
+                  expect(nextErr).to.not.exist;
+                  expect(d.b).to.be.undefined;
+
+                  // Destroy the connection
+                  server.destroy(done);
+                });
+              }
+            );
+          });
         });
       });
-
-      // Start connection
-      server.connect();
     }
   });
 
   it('should correctly execute update culling undefined', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'], mongodb: '>=3.2' }
     },
 
     test: function (done) {
       var self = this;
-      const config = this.configuration;
-      const server = config.newTopology();
+      const topology = this.configuration.newTopology();
 
-      // Add event listeners
-      server.on('connect', function (_server) {
-        // Drop collection
-        _server.command(f('%s.$cmd', self.configuration.db), { drop: 'update1' }, function () {
-          var ns = f('%s.update1', self.configuration.db);
-          var objectId = new ObjectId();
-          // Execute the write
-          _server.update(
-            ns,
-            {
-              q: { _id: objectId, a: 1, b: undefined },
-              u: { $set: { a: 1, b: undefined } },
-              upsert: true
-            },
-            {
-              writeConcern: { w: 1 },
-              ordered: true,
-              ignoreUndefined: true
-            },
-            function (insertErr, results) {
-              expect(insertErr).to.be.null;
-              expect(results.result.n).to.eql(1);
+      topology.connect(err => {
+        expect(err).to.not.exist;
+        this.defer(() => topology.close());
 
-              // Execute find
-              var cursor = _server.cursor(ns, {
-                find: f('%s.update1', self.configuration.db),
-                query: { _id: objectId },
-                batchSize: 2
-              });
+        topology.selectServer('primary', (err, server) => {
+          expect(err).to.not.exist;
 
-              // Execute next
-              cursor._next(function (nextErr, d) {
-                expect(nextErr).to.be.null;
-                expect(d.b).to.be.undefined;
+          // Drop collection
+          server.command(f('%s.$cmd', self.configuration.db), { drop: 'update1' }, () => {
+            const ns = f('%s.update1', self.configuration.db);
+            const objectId = new ObjectId();
+            // Execute the write
+            server.update(
+              ns,
+              {
+                q: { _id: objectId, a: 1, b: undefined },
+                u: { $set: { a: 1, b: undefined } },
+                upsert: true
+              },
+              {
+                writeConcern: { w: 1 },
+                ordered: true,
+                ignoreUndefined: true
+              },
+              (insertErr, results) => {
+                expect(insertErr).to.not.exist;
+                expect(results.result.n).to.eql(1);
 
-                // Destroy the connection
-                _server.destroy();
-                // Finish the test
-                done();
-              });
-            }
-          );
+                // Execute find
+                const cursor = topology.cursor(ns, {
+                  find: 'update1',
+                  filter: { _id: objectId },
+                  batchSize: 2
+                });
+
+                // Execute next
+                cursor._next((nextErr, d) => {
+                  expect(nextErr).to.not.exist;
+                  expect(d.b).to.be.undefined;
+
+                  // Destroy the connection
+                  server.destroy(done);
+                });
+              }
+            );
+          });
         });
       });
-
-      // Start connection
-      server.connect();
     }
   });
 
@@ -127,62 +127,61 @@ describe('A server', function () {
     },
 
     test: function (done) {
-      var self = this;
-      const config = this.configuration;
-      const server = config.newTopology();
+      const self = this;
+      const topology = this.configuration.newTopology();
+      const ns = f('%s.remove1', this.configuration.db);
 
-      // Add event listeners
-      server.on('connect', function (_server) {
-        var ns = f('%s.remove1', self.configuration.db);
-        var objectId = new ObjectId();
+      topology.connect(err => {
+        expect(err).to.not.exist;
+        this.defer(() => topology.close());
 
-        _server.command(f('%s.$cmd', self.configuration.db), { drop: 'remove1' }, function () {
-          // Execute the write
-          _server.insert(
-            ns,
-            [
-              { id: objectId, a: 1, b: undefined },
-              { id: objectId, a: 2, b: 1 }
-            ],
-            {
-              writeConcern: { w: 1 },
-              ordered: true
-            },
-            function (insertErr, results) {
-              expect(insertErr).to.be.null;
-              expect(results.result.n).to.eql(2);
+        topology.selectServer('primary', (err, server) => {
+          expect(err).to.not.exist;
 
-              // Execute the write
-              _server.remove(
-                ns,
-                [
+          const objectId = new ObjectId();
+          server.command(f('%s.$cmd', self.configuration.db), { drop: 'remove1' }, () => {
+            // Execute the write
+            server.insert(
+              ns,
+              [
+                { id: objectId, a: 1, b: undefined },
+                { id: objectId, a: 2, b: 1 }
+              ],
+              {
+                writeConcern: { w: 1 },
+                ordered: true
+              },
+              (insertErr, results) => {
+                expect(insertErr).to.not.exist;
+                expect(results.result.n).to.eql(2);
+
+                // Execute the write
+                server.remove(
+                  ns,
+                  [
+                    {
+                      q: { b: undefined },
+                      limit: 0
+                    }
+                  ],
                   {
-                    q: { b: undefined },
-                    limit: 0
-                  }
-                ],
-                {
-                  writeConcern: { w: 1 },
-                  ordered: true,
-                  ignoreUndefined: true
-                },
-                function (removeErr, removeResults) {
-                  expect(removeErr).to.be.null;
-                  expect(removeResults.result.n).to.eql(2);
+                    writeConcern: { w: 1 },
+                    ordered: true,
+                    ignoreUndefined: true
+                  },
+                  (removeErr, removeResults) => {
+                    expect(removeErr).to.not.exist;
+                    expect(removeResults.result.n).to.eql(2);
 
-                  // Destroy the connection
-                  _server.destroy();
-                  // Finish the test
-                  done();
-                }
-              );
-            }
-          );
+                    // Destroy the connection
+                    server.destroy(done);
+                  }
+                );
+              }
+            );
+          });
         });
       });
-
-      // Start connection
-      server.connect();
     }
   });
 
@@ -192,61 +191,62 @@ describe('A server', function () {
     },
 
     test: function (done) {
-      var self = this;
-      const config = this.configuration;
-      const server = config.newTopology();
+      const self = this;
+      const topology = this.configuration.newTopology();
+      const ns = f('%s.remove2', this.configuration.db);
 
-      // Add event listeners
-      server.on('connect', function (_server) {
-        var ns = f('%s.remove2', self.configuration.db);
-        var objectId = new ObjectId();
+      topology.connect(err => {
+        expect(err).to.not.exist;
+        this.defer(() => topology.close());
 
-        _server.command(f('%s.$cmd', self.configuration.db), { drop: 'remove2' }, function () {
-          // Execute the write
-          _server.insert(
-            ns,
-            [
-              { id: objectId, a: 1, b: undefined },
-              { id: objectId, a: 2, b: 1 }
-            ],
-            {
-              writeConcern: { w: 1 },
-              ordered: true
-            },
-            function (insertErr, results) {
-              expect(insertErr).to.be.null;
-              expect(results.result.n).to.eql(2);
+        topology.selectServer('primary', (err, server) => {
+          expect(err).to.not.exist;
 
-              // Execute the write
-              _server.remove(
-                ns,
-                [
+          const objectId = new ObjectId();
+          server.command(f('%s.$cmd', self.configuration.db), { drop: 'remove2' }, () => {
+            // Execute the write
+            server.insert(
+              ns,
+              [
+                { id: objectId, a: 1, b: undefined },
+                { id: objectId, a: 2, b: 1 }
+              ],
+              {
+                writeConcern: { w: 1 },
+                ordered: true
+              },
+              (insertErr, results) => {
+                expect(insertErr).to.not.exist;
+                expect(results.result.n).to.eql(2);
+
+                // Execute the write
+                server.remove(
+                  ns,
+                  [
+                    {
+                      q: { b: null },
+                      limit: 0
+                    }
+                  ],
                   {
-                    q: { b: null },
-                    limit: 0
-                  }
-                ],
-                {
-                  writeConcern: { w: 1 },
-                  ordered: true
-                },
-                function (removeErr, removeResults) {
-                  expect(removeErr).to.be.null;
-                  expect(removeResults.result.n).to.eql(1);
+                    writeConcern: { w: 1 },
+                    ordered: true
+                  },
+                  (removeErr, removeResults) => {
+                    expect(removeErr).to.not.exist;
+                    expect(removeResults.result.n).to.eql(1);
 
-                  // Destroy the connection
-                  _server.destroy();
-                  // Finish the test
-                  done();
-                }
-              );
-            }
-          );
+                    // Destroy the connection
+                    server.destroy();
+                    // Finish the test
+                    done();
+                  }
+                );
+              }
+            );
+          });
         });
       });
-
-      // Start connection
-      server.connect();
     }
   });
 });

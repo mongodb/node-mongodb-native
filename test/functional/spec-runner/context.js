@@ -168,8 +168,8 @@ class TestRunnerContext {
     expect(matchingEvents).to.have.lengthOf.at.least(count);
   }
 
-  runAdminCommand(command) {
-    return this.sharedClient.db('admin').command(command);
+  runAdminCommand(command, options) {
+    return this.sharedClient.db('admin').command(command, options);
   }
 
   // simulated thread helpers

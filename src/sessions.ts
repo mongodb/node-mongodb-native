@@ -1,7 +1,7 @@
 import PromiseProvider = require('./promise_provider');
 import { EventEmitter } from 'events';
 import { Binary, Long } from './bson';
-import ReadPreference = require('./read_preference');
+import { ReadPreference } from './read_preference';
 import { isTransactionCommand, TxnState, Transaction } from './transactions';
 import { resolveClusterTime } from './sdam/common';
 import { isSharded } from './cmap/wire_protocol/shared';

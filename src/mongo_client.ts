@@ -1,9 +1,9 @@
 import Db = require('./db');
 import { EventEmitter } from 'events';
 import ChangeStream = require('./change_stream');
-import ReadPreference = require('./read_preference');
+import { ReadPreference } from './read_preference';
 import { MongoError } from './error';
-import WriteConcern = require('./write_concern');
+import { WriteConcern } from './write_concern';
 import { maybePromise, MongoDBNamespace } from './utils';
 import { deprecate } from 'util';
 import { connect, validOptions } from './operations/connect';
@@ -14,15 +14,6 @@ import PromiseProvider = require('./promise_provider');
  *
  * @typedef {'local'|'available'|'majority'|'linearizable'|'snapshot'} ReadConcernLevel
  * @see https://docs.mongodb.com/manual/reference/read-concern/index.html#read-concern-levels
- */
-
-/**
- * Configuration options for drivers wrapping the node driver.
- *
- * @typedef {object} DriverInfoOptions
- * @property {string} [name] The name of the driver
- * @property {string} [version] The version of the driver
- * @property {string} [platform] Optional platform information
  */
 
 /**

@@ -9,9 +9,9 @@ tests:
         operation:
             name: "replaceOne"
             arguments:
-                filter: {x: 'PING'}
-                replacement: {_id: 2, x: 'pong'}
-                collation: {locale: 'en_US', strength: 2} # https://docs.mongodb.com/master/reference/collation/#collation-document
+                filter: { x: 'PING' }
+                replacement: { _id: 2, x: 'pong' }
+                collation: { locale: 'en_US', strength: 2 } # https://docs.mongodb.com/master/reference/collation/#collation-document
 
         outcome:
             result:

@@ -1,9 +1,14 @@
 import { Binary } from '../../bson';
-import { AuthProvider } from './auth_provider';
+import { AuthProvider, AuthContext } from './auth_provider';
+import type { Callback } from '../../types';
+import { MongoError } from '../../error';
 
-class Plain extends AuthProvider {
-  auth(authContext: any, callback: Function) {
+export class Plain extends AuthProvider {
+  auth(authContext: AuthContext, callback: Callback): void {
     const { connection, credentials } = authContext;
+    if (!credentials) {
+      return callback(new MongoError('AuthContext must provide credentials.'));
+    }
     const username = credentials.username;
     const password = credentials.password;
 
@@ -18,5 +23,3 @@ class Plain extends AuthProvider {
     connection.command('$external.$cmd', command, callback);
   }
 }
-
-export = Plain;

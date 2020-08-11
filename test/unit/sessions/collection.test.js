@@ -22,7 +22,9 @@ describe('Sessions', function () {
         test.server.setMessageHandler(request => {
           const doc = request.document;
           if (doc.ismaster) {
-            request.reply(mock.DEFAULT_ISMASTER_36);
+            request.reply(
+              Object.assign({ logicalSessionTimeoutMinutes: 15 }, mock.DEFAULT_ISMASTER_36)
+            );
           } else if (doc.insert) {
             request.reply({ ok: 1, operationTime: insertOperationTime });
           } else if (doc.find) {

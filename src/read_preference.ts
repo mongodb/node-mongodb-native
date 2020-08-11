@@ -7,7 +7,7 @@ const needSlaveOk = ['primaryPreferred', 'secondary', 'secondaryPreferred', 'nea
  * @see https://docs.mongodb.com/manual/core/read-preference/
  * @returns {ReadPreference}
  */
-class ReadPreference {
+export class ReadPreference {
   mode: any;
   tags: any;
   hedge: any;
@@ -194,7 +194,7 @@ class ReadPreference {
    * @param {string} mode The string representing the read preference mode.
    * @returns {boolean} True if a mode is valid
    */
-  isValid(mode: string): boolean {
+  isValid(mode?: string): boolean {
     return ReadPreference.isValid(typeof mode === 'string' ? mode : this.mode);
   }
 
@@ -234,5 +234,3 @@ class ReadPreference {
     return readPreference;
   }
 }
-
-export = ReadPreference;

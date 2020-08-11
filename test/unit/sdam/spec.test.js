@@ -364,11 +364,21 @@ function assertOutcomeExpectations(topology, events, outcome) {
     }
 
     if (key === 'compatible' || key === 'setName') {
-      expect(topology.description[key]).to.equal(outcomeValue);
+      if (outcomeValue == null) {
+        expect(topology.description[key]).to.not.exist;
+      } else {
+        expect(topology.description).property(key).to.equal(outcomeValue);
+      }
+
       return;
     }
 
     expect(description).to.include.keys(translatedKey);
-    expect(description[translatedKey]).to.eql(outcomeValue, `(key="${translatedKey}")`);
+
+    if (outcomeValue == null) {
+      expect(description[translatedKey]).to.not.exist;
+    } else {
+      expect(description).property(translatedKey).to.eql(outcomeValue, `(key="${translatedKey}")`);
+    }
   });
 }

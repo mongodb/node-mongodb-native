@@ -1,6 +1,6 @@
 import { emitDeprecatedOptionWarning } from '../utils';
 import PromiseProvider = require('../promise_provider');
-import ReadPreference = require('../read_preference');
+import { ReadPreference } from '../read_preference';
 import { Transform, PassThrough } from 'stream';
 import { deprecate } from 'util';
 import { MongoError } from '../error';
@@ -9,6 +9,7 @@ import { handleCallback, maybePromise, formattedOrderClause } from '../utils';
 import executeOperation = require('../operations/execute_operation');
 import { each } from '../operations/cursor_ops';
 import CountOperation = require('../operations/count');
+import type { OperationBase } from '../operations/operation';
 
 /**
  * @file The **Cursor** class is an internal class that embodies a cursor on MongoDB
@@ -97,12 +98,13 @@ const fields = ['numberOfRetries', 'tailableRetryInterval'];
 class Cursor extends CoreCursor {
   /**
    * @param {any} topology
-   * @param {any} ns
-   * @param {any} [cmd]
+   * @param {any} operation
    * @param {any} [options]
    */
-  constructor(topology: any, ns: any, cmd?: any, options?: any) {
-    super(topology, ns, cmd, options);
+  constructor(topology: any, operation: OperationBase, options?: any) {
+    super(topology, operation, options);
+
+    options = options || {};
     if (this.operation) {
       options = this.operation.options;
     }
@@ -686,13 +688,6 @@ class Cursor extends CoreCursor {
    * @callback Cursor~resultCallback
    * @param {MongoError} error An error instance representing the error during the execution.
    * @param {(object|null|boolean)} result The result object if the command was executed successfully.
-   */
-
-  /**
-   * Clone the cursor
-   *
-   * @function external:CoreCursor#clone
-   * @returns {Cursor}
    */
 
   /**
