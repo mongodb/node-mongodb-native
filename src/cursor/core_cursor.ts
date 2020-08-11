@@ -206,8 +206,8 @@ class CoreCursor extends Readable {
   }
 
   /** Clone the cursor */
-  clone(): CoreCursor {
-    return new CoreCursor(this.topology, this.operation, this.options);
+  clone(): this {
+    return new (this.constructor as any)(this.topology, this.operation, this.options);
   }
 
   /**

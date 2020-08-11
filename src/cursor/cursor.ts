@@ -1061,11 +1061,6 @@ class Cursor extends CoreCursor {
   getLogger(): any {
     return this.logger;
   }
-
-  /** Clone the cursor */
-  clone(): Cursor {
-    return new Cursor(this.topology, this.operation, this.options);
-  }
 }
 
 /**
