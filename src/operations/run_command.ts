@@ -9,7 +9,11 @@ import type { Server } from '../sdam/server';
 class RunCommandOperation extends CommandOperation {
   command: any;
 
-  constructor(parent: MongoClient | Db | Collection, command: any, options: any) {
+  constructor(
+    parent: MongoClient | Db | Collection | { s: { namespace: MongoDBNamespace } },
+    command: any,
+    options: any
+  ) {
     super(parent, options);
     this.command = command;
   }

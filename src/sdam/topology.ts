@@ -1,4 +1,4 @@
-import { emitDeprecatedOptionWarning, ClientMetadata } from '../utils';
+import { emitDeprecatedOptionWarning, ClientMetadata, MongoDBNamespace } from '../utils';
 import Denque = require('denque');
 import { EventEmitter } from 'events';
 import { ReadPreference } from '../read_preference';
@@ -39,6 +39,7 @@ import type { CloseOptions } from '../cmap/connection_pool';
 import type { Logger } from '..';
 import type { DestroyOptions } from '../cmap/connection';
 import type { CommandOptions } from '../cmap/wire_protocol/command';
+import { RunCommandOperation } from '../operations/run_command';
 
 // Global state
 let globalTopologyCounter = 0;
@@ -718,7 +719,14 @@ export class Topology extends EventEmitter {
     const CursorClass = options.cursorFactory ?? this.s.Cursor;
     ReadPreference.translate(options);
 
-    return new CursorClass(topology, ns, cmd, options);
+    return new CursorClass(
+      topology,
+      new RunCommandOperation({ s: { namespace: MongoDBNamespace.fromString(ns) } }, cmd, {
+        fullResponse: true,
+        ...options
+      }),
+      options
+    );
   }
 
   get clientMetadata(): ClientMetadata {

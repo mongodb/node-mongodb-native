@@ -2,6 +2,7 @@ import { ReadPreference } from '../read_preference';
 import { MongoError } from '../error';
 import Cursor = require('./cursor');
 import { CursorState } from './core_cursor';
+import type { OperationBase } from '../operations/operation';
 
 /**
  * @file The **CommandCursor** class is an internal class that embodies a
@@ -55,12 +56,11 @@ import { CursorState } from './core_cursor';
 class CommandCursor extends Cursor {
   /**
    * @param {any} topology
-   * @param {any} ns
-   * @param {any} cmd
+   * @param {any} operation
    * @param {any} [options]
    */
-  constructor(topology: any, ns: any, cmd: any, options?: any) {
-    super(topology, ns, cmd, options);
+  constructor(topology: any, operation: OperationBase, options?: any) {
+    super(topology, operation, options);
   }
 
   /**

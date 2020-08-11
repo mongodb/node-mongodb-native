@@ -7,7 +7,7 @@ const { ObjectId } = require('bson');
 describe('A server', function () {
   it('should correctly execute insert culling undefined', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'], mongodb: '>=3.2' }
     },
 
     test: function (done) {
@@ -40,8 +40,8 @@ describe('A server', function () {
 
                 // Execute find
                 var cursor = topology.cursor(ns, {
-                  find: f('%s.insert1', self.configuration.db),
-                  query: { _id: objectId },
+                  find: 'insert1',
+                  filter: { _id: objectId },
                   batchSize: 2
                 });
 
@@ -63,7 +63,7 @@ describe('A server', function () {
 
   it('should correctly execute update culling undefined', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'], mongodb: '>=3.2' }
     },
 
     test: function (done) {
@@ -100,8 +100,8 @@ describe('A server', function () {
 
                 // Execute find
                 const cursor = topology.cursor(ns, {
-                  find: f('%s.update1', self.configuration.db),
-                  query: { _id: objectId },
+                  find: 'update1',
+                  filter: { _id: objectId },
                   batchSize: 2
                 });
 

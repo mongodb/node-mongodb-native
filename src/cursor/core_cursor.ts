@@ -1,12 +1,12 @@
 import Logger = require('../logger');
 import { ReadPreference } from '../read_preference';
-import { handleCallback, collationNotSupported, MongoDBNamespace } from '../utils';
+import { handleCallback, MongoDBNamespace } from '../utils';
 import executeOperation = require('../operations/execute_operation');
 import { Readable } from 'stream';
-import { OperationBase } from '../operations/operation';
 import { MongoError, MongoNetworkError } from '../error';
 import { Long } from '../bson';
 import type { BSONSerializeOptions } from '../types';
+import type { OperationBase } from '../operations/operation';
 
 export interface InternalCursorState extends BSONSerializeOptions {
   [key: string]: any;
@@ -80,9 +80,8 @@ class CoreCursor extends Readable {
    * Create a new core `Cursor` instance.
    * **NOTE** Not to be instantiated directly
    *
-   * @param {any} topology The server topology instance.
-   * @param {any} ns The MongoDB fully qualified namespace (ex: db1.collection1)
-   * @param {{object}|Long} cmd The selector (can be a command or a cursorId)
+   * @param {Topology} topology The server topology instance.
+   * @param {OperationBase} operation The operation to run against the cluster
    * @param {object} [options=null] Optional settings.
    * @param {object} [options.batchSize=1000] The number of documents to return per batch. See {@link https://docs.mongodb.com/manual/reference/command/find/| find command documentation} and {@link https://docs.mongodb.com/manual/reference/command/aggregate|aggregation documentation}.
    * @param {Array} [options.documents=[]] Initial documents list for cursor
@@ -90,36 +89,24 @@ class CoreCursor extends Readable {
    * @param {Function} [options.transforms.query] Transform the value returned from the initial query
    * @param {Function} [options.transforms.doc] Transform each document returned from Cursor.prototype._next
    */
-  constructor(topology: any, ns: any, cmd: any, options?: any) {
+  constructor(topology: any, operation: OperationBase, options?: any) {
     super({ objectMode: true });
     options = options || {};
 
-    if (ns instanceof OperationBase) {
-      this.operation = ns;
-      ns = this.operation.ns.toString();
-      options = this.operation.options;
-      cmd = this.operation.cmd ? this.operation.cmd : {};
-    }
-
-    // Cursor pool
-    this.pool = null;
-    // Cursor server
-    this.server = null;
-
-    // Do we have a not connected handler
-    this.disconnectHandler = options.disconnectHandler;
+    const cmd = operation.cmd ? operation.cmd : {};
 
     // Set local values
-    this.ns = ns;
-    this.namespace = MongoDBNamespace.fromString(ns);
+    this.operation = operation;
+    this.ns = this.operation.ns.toString();
+    this.namespace = MongoDBNamespace.fromString(this.ns);
     this.cmd = cmd;
-    this.options = options;
+    this.options = this.operation.options;
     this.topology = topology;
 
     // All internal state
     this.cursorState = {
       cursorId: null,
-      cmd,
+      cmd: this.cmd,
       documents: options.documents || [],
       cursorIndex: 0,
       dead: false,
@@ -218,14 +205,9 @@ class CoreCursor extends Readable {
     nextFunction(this, callback);
   }
 
-  /**
-   * Clone the cursor
-   *
-   * @function
-   * @returns {CoreCursor}
-   */
-  clone(): CoreCursor {
-    return this.topology.cursor(this.ns, this.cmd, this.options);
+  /** Clone the cursor */
+  clone(): this {
+    return new (this.constructor as any)(this.topology, this.operation, this.options);
   }
 
   /**
@@ -552,89 +534,29 @@ class CoreCursor extends Readable {
       done(null, result);
     };
 
-    if (cursor.operation) {
-      if (cursor.logger.isDebug()) {
-        cursor.logger.debug(
-          `issue initial query [${JSON.stringify(cursor.cmd)}] with flags [${JSON.stringify(
-            cursor.query
-          )}]`
-        );
-      }
-
-      executeOperation(cursor.topology, cursor.operation, (err?: any, result?: any) => {
-        if (err) {
-          done(err);
-          return;
-        }
-
-        cursor.server = cursor.operation.server;
-        cursor.cursorState.init = true;
-
-        // NOTE: this is a special internal method for cloning a cursor, consider removing
-        if (cursor.cursorState.cursorId != null) {
-          return done();
-        }
-
-        queryCallback(err, result);
-      });
-
-      return;
+    if (cursor.logger.isDebug()) {
+      cursor.logger.debug(
+        `issue initial query [${JSON.stringify(cursor.cmd)}] with flags [${JSON.stringify(
+          cursor.query
+        )}]`
+      );
     }
 
-    // Very explicitly choose what is passed to selectServer
-    const serverSelectOptions = {} as any;
-    if (cursor.cursorState.session) {
-      serverSelectOptions.session = cursor.cursorState.session;
-    }
-
-    if (cursor.operation) {
-      serverSelectOptions.readPreference = cursor.operation.readPreference;
-    } else if (cursor.options.readPreference) {
-      serverSelectOptions.readPreference = cursor.options.readPreference;
-    }
-
-    return cursor.topology.selectServer(serverSelectOptions, (err?: any, server?: any) => {
+    executeOperation(cursor.topology, cursor.operation, (err?: any, result?: any) => {
       if (err) {
-        const disconnectHandler = cursor.disconnectHandler;
-        if (disconnectHandler != null) {
-          return disconnectHandler.addObjectAndMethod(
-            'cursor',
-            cursor,
-            'next',
-            [callback],
-            callback
-          );
-        }
-
-        return callback(err);
+        done(err);
+        return;
       }
 
-      cursor.server = server;
+      cursor.server = cursor.operation.server;
       cursor.cursorState.init = true;
-      if (collationNotSupported(cursor.server, cursor.cmd)) {
-        return callback(new MongoError(`server ${cursor.server.name} does not support collation`));
-      }
 
       // NOTE: this is a special internal method for cloning a cursor, consider removing
       if (cursor.cursorState.cursorId != null) {
         return done();
       }
 
-      if (cursor.logger.isDebug()) {
-        cursor.logger.debug(
-          `issue initial query [${JSON.stringify(cursor.cmd)}] with flags [${JSON.stringify(
-            cursor.query
-          )}]`
-        );
-      }
-
-      if (cursor.cmd.find != null) {
-        server.query(cursor.ns, cursor.cmd, cursor.cursorState, cursor.options, queryCallback);
-        return;
-      }
-
-      const commandOptions = Object.assign({ session: cursor.cursorState.session }, cursor.options);
-      server.command(cursor.ns, cursor.cmd, commandOptions, queryCallback);
+      queryCallback(err, result);
     });
   }
 }

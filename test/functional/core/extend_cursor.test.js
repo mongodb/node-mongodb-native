@@ -6,7 +6,7 @@ const { CoreCursor } = require('../../../src/cursor');
 describe('Extend cursor tests', function () {
   it('should correctly extend the cursor with custom implementation', {
     metadata: {
-      requires: { topology: ['single'] }
+      requires: { topology: ['single'], mongodb: '>=3.2' }
     },
 
     test: function (done) {
@@ -67,7 +67,7 @@ describe('Extend cursor tests', function () {
               expect(results.result.n).to.equal(3);
 
               // Execute find
-              const cursor = topology.cursor(ns, { find: ns, query: {} });
+              const cursor = topology.cursor(ns, { find: 'inserts_extend_cursors', filter: {} });
 
               // Force a single
               // Logger.setLevel('debug');

@@ -11,7 +11,7 @@ describe('Cursor tests', function () {
 
   it('Should iterate cursor', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'], mongodb: '>=3.2' }
     },
 
     test: function (done) {
@@ -38,8 +38,8 @@ describe('Cursor tests', function () {
 
               // Execute find
               var cursor = topology.cursor(ns, {
-                find: ns,
-                query: {},
+                find: 'cursor1',
+                filter: {},
                 batchSize: 2
               });
 
@@ -67,7 +67,7 @@ describe('Cursor tests', function () {
 
   it('Should iterate cursor but readBuffered', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'], mongodb: '>=3.2' }
     },
 
     test: function (done) {
@@ -95,8 +95,8 @@ describe('Cursor tests', function () {
 
               // Execute find
               const cursor = topology.cursor(ns, {
-                find: ns,
-                query: {},
+                find: 'cursor2',
+                filter: {},
                 batchSize: 5
               });
 
@@ -127,7 +127,7 @@ describe('Cursor tests', function () {
 
   it('Should callback exhausted cursor with error', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'], mongodb: '>=3.2' }
     },
 
     test: function (done) {
@@ -154,7 +154,7 @@ describe('Cursor tests', function () {
               expect(results.result.n).to.equal(1);
 
               // Execute find
-              const cursor = topology.cursor(ns, { find: ns, query: {}, batchSize: 5 });
+              const cursor = topology.cursor(ns, { find: 'cursor3', filter: {}, batchSize: 5 });
 
               // Execute next
               cursor._next((nextCursorErr, nextCursorD) => {
@@ -183,7 +183,7 @@ describe('Cursor tests', function () {
 
   it('Should force a getMore call to happen', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'], mongodb: '>=3.2' }
     },
 
     test: function (done) {
@@ -210,7 +210,7 @@ describe('Cursor tests', function () {
               expect(results.result.n).to.equal(3);
 
               // Execute find
-              const cursor = topology.cursor(ns, { find: ns, query: {}, batchSize: 2 });
+              const cursor = topology.cursor(ns, { find: 'cursor4', filter: {}, batchSize: 2 });
 
               // Execute next
               cursor._next((nextCursorErr, nextCursorD) => {
@@ -239,7 +239,7 @@ describe('Cursor tests', function () {
 
   it('Should force a getMore call to happen then call killCursor', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'], mongodb: '>=3.2' }
     },
 
     test: function (done) {
@@ -266,7 +266,7 @@ describe('Cursor tests', function () {
               expect(results.result.n).to.equal(3);
 
               // Execute find
-              const cursor = topology.cursor(ns, { find: ns, query: {}, batchSize: 2 });
+              const cursor = topology.cursor(ns, { find: 'cursor4', filter: {}, batchSize: 2 });
 
               // Execute next
               cursor._next((nextCursorErr, nextCursorD) => {
@@ -301,7 +301,7 @@ describe('Cursor tests', function () {
   // Skipped due to usage of the topology manager
   it.skip('Should fail cursor correctly after server restart', {
     metadata: {
-      requires: { topology: ['single'] }
+      requires: { topology: ['single'], mongodb: '>=3.2' }
     },
 
     test: function (done) {
@@ -323,7 +323,7 @@ describe('Cursor tests', function () {
             expect(results.result.n).to.equal(3);
 
             // Execute find
-            var cursor = _server.cursor(ns, { find: ns, query: {}, batchSize: 2 });
+            var cursor = _server.cursor(ns, { find: 'cursor5', filter: {}, batchSize: 2 });
 
             // Execute next
             cursor._next(function (nextCursorErr, nextCursorD) {
@@ -359,7 +359,7 @@ describe('Cursor tests', function () {
   // NOTE: a notoriously flakey test, needs rewriting
   // Commented out to stop before task from running and breaking auth tests
   // it.skip('should not hang if autoReconnect=false and pools sockets all timed out', {
-  //   metadata: { requires: { topology: ['single'] } },
+  //   metadata: { requires: { topology: ['single'], mongodb: '>=3.2' } },
   //   test: function(done) {
   //     var configuration = this.configuration,
   //       Server = require('../../../src/core/topologies/server'),
@@ -389,8 +389,8 @@ describe('Cursor tests', function () {
 
   //           // Execute slow find
   //           var cursor = server.cursor(ns, {
-  //             find: ns,
-  //             query: { $where: 'sleep(250) || true' },
+  //             find: 'cursor7',
+  //             filter: { $where: 'sleep(250) || true' },
   //             batchSize: 1
   //           });
 
@@ -399,8 +399,8 @@ describe('Cursor tests', function () {
   //             expect(err).to.exist;
 
   //             cursor = server.cursor(ns, {
-  //               find: ns,
-  //               query: {},
+  //               find: 'cursor7',
+  //               filter: {},
   //               batchSize: 1
   //             });
 
