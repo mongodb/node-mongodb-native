@@ -19,7 +19,7 @@ import ordered = require('./bulk/ordered');
 import ChangeStream = require('./change_stream');
 import { WriteConcern } from './write_concern';
 import ReadConcern = require('./read_concern');
-import { AggregationCursor, CommandCursor } from './cursor';
+import { AggregationCursor, CommandCursor, Cursor } from './cursor';
 import AggregateOperation = require('./operations/aggregate');
 import BulkWriteOperation = require('./operations/bulk_write');
 import CountDocumentsOperation = require('./operations/count_documents');
@@ -1594,7 +1594,8 @@ Collection.prototype.find = deprecateOptions(
 
     decorateWithCollation(findCommand, this, options);
 
-    const cursor = this.s.topology.cursor(
+    const cursor = new Cursor(
+      this.s.topology,
       new FindOperation(this, this.s.namespace, findCommand, newOptions),
       newOptions
     );

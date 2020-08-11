@@ -1,3 +1,5 @@
+import type { Document } from '../types';
+
 const Aspect = {
   READ_OPERATION: Symbol('READ_OPERATION'),
   WRITE_OPERATION: Symbol('WRITE_OPERATION'),
@@ -14,6 +16,7 @@ const Aspect = {
  */
 class OperationBase {
   options: any;
+  cmd?: Document;
 
   constructor(options: any) {
     this.options = Object.assign({}, options);

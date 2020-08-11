@@ -9,6 +9,7 @@ import { handleCallback, maybePromise, formattedOrderClause } from '../utils';
 import executeOperation = require('../operations/execute_operation');
 import { each } from '../operations/cursor_ops';
 import CountOperation = require('../operations/count');
+import type { OperationBase } from '../operations/operation';
 
 /**
  * @file The **Cursor** class is an internal class that embodies a cursor on MongoDB
@@ -97,12 +98,11 @@ const fields = ['numberOfRetries', 'tailableRetryInterval'];
 class Cursor extends CoreCursor {
   /**
    * @param {any} topology
-   * @param {any} ns
-   * @param {any} [cmd]
+   * @param {any} operation
    * @param {any} [options]
    */
-  constructor(topology: any, ns: any, cmd?: any, options?: any) {
-    super(topology, ns, cmd, options);
+  constructor(topology: any, operation: OperationBase, options?: any) {
+    super(topology, operation, options);
 
     options = options || {};
     if (this.operation) {
@@ -691,13 +691,6 @@ class Cursor extends CoreCursor {
    */
 
   /**
-   * Clone the cursor
-   *
-   * @function external:CoreCursor#clone
-   * @returns {Cursor}
-   */
-
-  /**
    * Resets the cursor
    *
    * @function external:CoreCursor#rewind
@@ -1067,6 +1060,11 @@ class Cursor extends CoreCursor {
    */
   getLogger(): any {
     return this.logger;
+  }
+
+  /** Clone the cursor */
+  clone(): Cursor {
+    return new Cursor(this.topology, this.operation, this.options);
   }
 }
 

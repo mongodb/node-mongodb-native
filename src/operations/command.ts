@@ -51,8 +51,12 @@ class CommandOperation extends OperationBase {
     this.writeConcern = resolveWriteConcern(propertyProvider, this.options);
     this.explain = false;
 
+    if (options && typeof options.fullResponse === 'boolean') {
+      this.fullResponse = options.fullResponse;
+    }
+
     if (operationOptions && typeof operationOptions.fullResponse === 'boolean') {
-      this.fullResponse = true;
+      this.fullResponse = operationOptions.fullResponse;
     }
 
     // TODO: A lot of our code depends on having the read preference in the options. This should

@@ -9,7 +9,7 @@ describe('Tailable cursor tests', function () {
 
   it('should correctly perform awaitdata', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'], mongodb: '>=3.2' }
     },
 
     test: function (done) {
@@ -46,8 +46,8 @@ describe('Tailable cursor tests', function () {
 
                   // Execute find
                   const cursor = topology.cursor(ns, {
-                    find: ns,
-                    query: {},
+                    find: 'cursor_tailable',
+                    filter: {},
                     batchSize: 2,
                     tailable: true,
                     awaitData: true
