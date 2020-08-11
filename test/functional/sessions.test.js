@@ -45,7 +45,7 @@ describe('Sessions', function () {
 
     it('should send endSessions for multiple sessions', {
       metadata: {
-        requires: { topology: ['single'], mongodb: '>3.6.0' },
+        requires: { topology: ['single'], mongodb: '>=3.6.0' },
         // Skipping session leak tests b/c these are explicit sessions
         sessions: { skipLeakTests: true }
       },
@@ -67,7 +67,7 @@ describe('Sessions', function () {
   });
 
   describe('withSession', {
-    metadata: { requires: { mongodb: '>3.6.0' } },
+    metadata: { requires: { mongodb: '>=3.6.0' } },
     test: function () {
       beforeEach(function () {
         return test.setup(this.configuration);
@@ -199,7 +199,7 @@ describe('Sessions', function () {
 
   context('unacknowledged writes', () => {
     it('should not include session for unacknowledged writes', {
-      metadata: { requires: { topology: 'single' } },
+      metadata: { requires: { topology: 'single', mongodb: '>=3.6.0' } },
       test: withMonitoredClient('insert', { clientOptions: { w: 0 } }, function (
         client,
         events,
@@ -218,7 +218,7 @@ describe('Sessions', function () {
       })
     });
     it('should throw error with explicit session', {
-      metadata: { requires: { topology: 'replicaset', mongodb: '>3.6.0' } },
+      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6.0' } },
       test: withMonitoredClient('insert', { clientOptions: { w: 0 } }, function (
         client,
         events,
