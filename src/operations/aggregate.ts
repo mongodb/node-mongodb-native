@@ -1,4 +1,4 @@
-import { CommandOperation, CommandOperationOptions } from './command';
+import { CommandOperation, CommandOperationOptions, Parent } from './command';
 import { ReadPreference } from '../read_preference';
 import { MongoError } from '../error';
 import { maxWireVersion } from '../utils';
@@ -41,7 +41,7 @@ export class AggregateOperation extends CommandOperation<AggregateOptions> {
   pipeline: Document[];
   hasWriteStage: boolean;
 
-  constructor(parent: Collection | Db, pipeline: Document[], options?: AggregateOptions) {
+  constructor(parent: Parent, pipeline: Document[], options?: AggregateOptions) {
     super(parent, { fullResponse: true, ...options });
 
     this.target =

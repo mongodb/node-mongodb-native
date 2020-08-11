@@ -2,7 +2,7 @@ import { indexInformation, IndexInformationOptions } from './common_functions';
 import { OperationBase, Aspect, defineAspects } from './operation';
 import { MongoError } from '../error';
 import { maxWireVersion, parseIndexOptions, MongoDBNamespace } from '../utils';
-import { CommandOperation, CommandOperationOptions } from './command';
+import { CommandOperation, CommandOperationOptions, Parent } from './command';
 import { ReadPreference } from '../read_preference';
 
 import type { Server } from '../sdam/server';
@@ -127,7 +127,7 @@ export class CreateIndexesOperation extends CommandOperation<CreateIndexesOption
   indexes: IndexDescription[];
 
   constructor(
-    parent: Collection | Db,
+    parent: Parent,
     collectionName: string,
     indexes: IndexDescription[],
     options?: CreateIndexesOptions
@@ -200,7 +200,7 @@ export class CreateIndexesOperation extends CommandOperation<CreateIndexesOption
 
 export class CreateIndexOperation extends CreateIndexesOperation {
   constructor(
-    parent: Collection | Db,
+    parent: Parent,
     collectionName: string,
     indexOrSpec: any,
     options?: CreateIndexesOptions

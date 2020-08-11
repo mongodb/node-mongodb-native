@@ -37,7 +37,7 @@ export interface CommandOperationOptions extends OperationOptions, BSONSerialize
   authdb?: string;
 }
 
-type Parent = MongoClient | Db | Collection | { s: any };
+export type Parent = MongoClient | Db | Collection | { s: any };
 
 export class CommandOperation<
   T extends CommandOperationOptions = CommandOperationOptions

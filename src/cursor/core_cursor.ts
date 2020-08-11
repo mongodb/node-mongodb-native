@@ -6,6 +6,7 @@ import { Readable } from 'stream';
 import { MongoError, MongoNetworkError } from '../error';
 import { Long } from '../bson';
 import type { BSONSerializeOptions, Callback, Callback2, Document } from '../types';
+import type { OperationBase } from '../operations/operation';
 
 export interface InternalCursorState extends BSONSerializeOptions {
   [key: string]: any;
