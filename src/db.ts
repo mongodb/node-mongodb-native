@@ -3,12 +3,12 @@ import { emitDeprecatedOptionWarning } from './utils';
 import { loadAdmin } from './dynamic_loaders';
 import { AggregationCursor, CommandCursor } from './cursor';
 import { ObjectId, Code } from './bson';
-import { ReadPreference } from './read_preference';
+import { ReadPreference, ReadPreferenceLike } from './read_preference';
 import { MongoError } from './error';
 import { Collection } from './collection';
 import { ChangeStream } from './change_stream';
 import * as CONSTANTS from './constants';
-import { WriteConcern } from './write_concern';
+import { WriteConcern, WriteConcernOptions } from './write_concern';
 import { ReadConcern } from './read_concern';
 import { Logger } from './logger';
 import {
@@ -18,7 +18,7 @@ import {
   deprecateOptions,
   MongoDBNamespace
 } from './utils';
-import { AggregateOperation } from './operations/aggregate';
+import { AggregateOperation, AggregateOptions } from './operations/aggregate';
 import { AddUserOperation, AddUserOptions } from './operations/add_user';
 import { CollectionsOperation } from './operations/collections';
 import { DbStatsOperation, DbStatsOptions } from './operations/stats';
@@ -51,8 +51,10 @@ import {
 } from './operations/set_profiling_level';
 import { executeOperation } from './operations/execute_operation';
 import { EvalOperation, EvalOptions } from './operations/eval';
-import type { Callback, Document } from './types';
+import type { Callback, Document, BSONSerializeOptions } from './types';
 import type { IndexInformationOptions } from './operations/common_functions';
+import type { PkFactory } from './mongo_client';
+import type { Topology } from './sdam/topology';
 
 // Allowed parameters
 const legalOptionNames = [
@@ -74,7 +76,6 @@ const legalOptionNames = [
   'readConcern',
   'retryMiliSeconds',
   'numberOfRetries',
-  'noListener',
   'loggerLevel',
   'logger',
   'promoteBuffers',
@@ -83,6 +84,30 @@ const legalOptionNames = [
   'compression',
   'retryWrites'
 ];
+
+interface DbPrivate {
+  topology: Topology;
+  options?: DbOptions;
+  logger: Logger;
+  readPreference?: ReadPreference;
+  pkFactory: PkFactory | typeof ObjectId;
+  readConcern?: ReadConcern;
+  writeConcern?: WriteConcern;
+  namespace: MongoDBNamespace;
+}
+
+export interface DbOptions extends BSONSerializeOptions, WriteConcernOptions {
+  /** If the database authentication is dependent on another databaseName. */
+  authSource?: string;
+  /** Force server to assign _id values instead of driver. */
+  forceServerObjectId?: boolean;
+  /** The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST). */
+  readPreference?: ReadPreferenceLike;
+  /** A primary key factory object for generation of custom _id keys. */
+  pkFactory?: PkFactory;
+  /** Specify a read concern for the collection. (only MongoDB 3.2 or higher supported) */
+  readConcern?: ReadConcern;
+}
 
 export interface Db {
   createCollection(name: any, options: any, callback: any): void;
@@ -109,7 +134,7 @@ export interface Db {
  * });
  */
 export class Db {
-  s: any;
+  s: DbPrivate;
   databaseName: any;
   serverConfig: any;
 
@@ -123,39 +148,12 @@ export class Db {
   /**
    * Creates a new Db instance
    *
-   * @param {string} databaseName The name of the database this instance represents.
-   * @param {(Server|ReplSet|Mongos)} topology The server topology for the database.
-   * @param {object} [options] Optional settings.
-   * @param {string} [options.authSource] If the database authentication is dependent on another databaseName.
-   * @param {(number|string)} [options.w] The write concern.
-   * @param {number} [options.wtimeout] The write concern timeout.
-   * @param {boolean} [options.j=false] Specify a journal write concern.
-   * @param {boolean} [options.forceServerObjectId=false] Force server to assign _id values instead of driver.
-   * @param {boolean} [options.serializeFunctions=false] Serialize functions on any object.
-   * @param {boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
-   * @param {boolean} [options.raw=false] Return document results as raw BSON buffers.
-   * @param {boolean} [options.promoteLongs=true] Promotes Long values to number if they fit inside the 53 bits resolution.
-   * @param {boolean} [options.promoteBuffers=false] Promotes Binary BSON values to native Node Buffers.
-   * @param {boolean} [options.promoteValues=true] Promotes BSON values to native types where possible, set to false to only receive wrapper types.
-   * @param {number} [options.bufferMaxEntries=-1] Sets a cap on how many operations the driver will buffer up before giving up on getting a working connection, default is -1 which is unlimited.
-   * @param {(ReadPreference|string)} [options.readPreference] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
-   * @param {object} [options.pkFactory] A primary key factory object for generation of custom _id keys.
-   * @param {object} [options.promiseLibrary] DEPRECATED: A Promise library class the application wishes to use such as Bluebird, must be ES6 compatible
-   * @param {object} [options.readConcern] Specify a read concern for the collection. (only MongoDB 3.2 or higher supported)
-   * @param {ReadConcernLevel} [options.readConcern.level='local'] Specify a read concern level for the collection operations (only MongoDB 3.2 or higher supported)
-   * @property {(Server|ReplSet|Mongos)} serverConfig Get the current db topology.
-   * @property {number} bufferMaxEntries Current bufferMaxEntries value for the database
-   * @property {string} databaseName The name of the database this instance represents.
-   * @property {object} options The options associated with the db instance.
-   * @property {boolean} native_parser The current value of the parameter native_parser.
-   * @property {boolean} slaveOk The current slaveOk value for the db instance.
-   * @property {object} writeConcern The current write concern values.
-   * @property {object} topology Access the topology object (single server, replicaset or mongos).
-   * @returns {Db} a Db instance.
+   * @param databaseName The name of the database this instance represents.
+   * @param topology The server topology for the database.
+   * @param options Optional settings for Db construction
    */
-  constructor(databaseName: string, topology: any, options?: any) {
+  constructor(databaseName: string, topology: Topology, options?: DbOptions) {
     options = options || {};
-    if (!(this instanceof Db)) return new Db(databaseName, topology, options);
     emitDeprecatedOptionWarning(options, ['promiseLibrary']);
 
     // Filter the options
@@ -163,8 +161,6 @@ export class Db {
 
     // Internal state of the db object
     this.s = {
-      // DbCache
-      dbCache: {},
       // Topology
       topology,
       // Options
@@ -173,13 +169,8 @@ export class Db {
       logger: new Logger('Db', options),
       // Unpack read preference
       readPreference: ReadPreference.fromOptions(options),
-      // Set buffermaxEntries
-      bufferMaxEntries:
-        typeof options.bufferMaxEntries === 'number' ? options.bufferMaxEntries : -1,
       // Set up the primary key factory or fallback to ObjectId
-      pkFactory: options.pkFactory || ObjectId,
-      // No listener
-      noListener: typeof options.noListener === 'boolean' ? options.noListener : false,
+      pkFactory: options?.pkFactory || ObjectId,
       // ReadConcern
       readConcern: ReadConcern.fromOptions(options),
       writeConcern: WriteConcern.fromOptions(options),
@@ -192,10 +183,7 @@ export class Db {
 
     // Add a read Only property
     getSingleProperty(this, 'serverConfig', this.s.topology);
-    getSingleProperty(this, 'bufferMaxEntries', this.s.bufferMaxEntries);
     getSingleProperty(this, 'databaseName', this.s.namespace.db);
-
-    if (this.s.noListener) return;
   }
 
   // Topology
@@ -210,14 +198,7 @@ export class Db {
 
   // slaveOk specified
   get slaveOk() {
-    if (
-      this.s.options.readPreference != null &&
-      (this.s.options.readPreference !== 'primary' ||
-        this.s.options.readPreference.mode !== 'primary')
-    ) {
-      return true;
-    }
-    return false;
+    return this.s.readPreference && this.s.readPreference.preference !== 'primary';
   }
 
   get readConcern() {
@@ -267,10 +248,10 @@ export class Db {
   /**
    * Execute an aggregation framework pipeline against the database, needs MongoDB >= 3.6
    *
-   * @param pipeline An array of aggregation stages to be executed
-   * @param options Optional settings for the command
+   * @param pipeline - An array of aggregation stages to be executed
+   * @param options - Optional settings for the command
    */
-  aggregate(pipeline: Document[] = [], options?: any): AggregationCursor {
+  aggregate(pipeline: Document[] = [], options?: AggregateOptions): AggregationCursor {
     if (arguments.length > 2) {
       throw new TypeError('Third parameter to `db.aggregate()` must be undefined');
     }
@@ -291,11 +272,7 @@ export class Db {
     return cursor;
   }
 
-  /**
-   * Return the Admin db instance
-   *
-   * @returns {Admin} return the new Admin db instance
-   */
+  /** Return the Admin db instance */
   admin(): any {
     const Admin = loadAdmin();
     return new Admin(this, this.s.topology);
@@ -333,7 +310,7 @@ export class Db {
       : this.readConcern;
 
     // Do we have ignoreUndefined set
-    if (this.s.options.ignoreUndefined) {
+    if (this.s.options?.ignoreUndefined) {
       options.ignoreUndefined = this.s.options.ignoreUndefined;
     }
 

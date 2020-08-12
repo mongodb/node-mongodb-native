@@ -128,7 +128,7 @@ interface MongoClientOptions extends TopologyOptions, Omit<ConnectionOptions, 'h
 }
 
 // Validate options object
-export function validOptions(options: MongoClientOptions): void | MongoError {
+export function validOptions(options?: MongoClientOptions): void | MongoError {
   const _validOptions = validOptionNames.concat(legacyOptionNames);
 
   for (const name in options) {

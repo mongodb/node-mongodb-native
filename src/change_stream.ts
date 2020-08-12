@@ -99,8 +99,8 @@ export class ChangeStream extends EventEmitter {
       );
     }
 
-    if (!this.options.readPreference && parent.s.readPreference) {
-      this.options.readPreference = parent.s.readPreference;
+    if (!this.options.readPreference && parent.readPreference) {
+      this.options.readPreference = parent.readPreference;
     }
 
     this[kResumeQueue] = new Denque();

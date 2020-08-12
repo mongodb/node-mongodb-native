@@ -64,7 +64,7 @@ describe('Causal Consistency', function () {
     test: function () {
       const session = test.client.startSession({ causalConsistency: true });
       const db = test.client.db(this.configuration.db);
-      expect(session.operationTime).to.be.null;
+      expect(session.operationTime).to.not.exist;
 
       return db
         .collection('causal_test')
@@ -90,7 +90,7 @@ describe('Causal Consistency', function () {
     test: function () {
       const session = test.client.startSession({ causalConsistency: true });
       const db = test.client.db(this.configuration.db);
-      expect(session.operationTime).to.be.null;
+      expect(session.operationTime).to.not.exist;
 
       let firstOperationTime;
       return db
@@ -149,7 +149,7 @@ describe('Causal Consistency', function () {
     test: function () {
       const session = test.client.startSession({ causalConsistency: true });
       const db = test.client.db(this.configuration.db);
-      expect(session.operationTime).to.be.null;
+      expect(session.operationTime).to.not.exist;
 
       let firstOperationTime;
       return db

@@ -46,6 +46,7 @@ import type { DestroyOptions } from '../cmap/connection';
 import type { CommandOptions } from '../cmap/wire_protocol/command';
 import { RunCommandOperation } from '../operations/run_command';
 import type { CursorOptions } from '../cursor/cursor';
+import type { MongoClientOptions } from '../mongo_client';
 
 // Global state
 let globalTopologyCounter = 0;
@@ -524,10 +525,7 @@ export class Topology extends EventEmitter {
   }
 
   /** Start a logical session */
-  startSession(
-    options: ClientSessionOptions,
-    clientOptions?: Record<string, unknown>
-  ): ClientSession {
+  startSession(options: ClientSessionOptions, clientOptions?: MongoClientOptions): ClientSession {
     const session = new ClientSession(this, this.s.sessionPool, options, clientOptions);
     session.once('ended', () => {
       this.s.sessions.delete(session);

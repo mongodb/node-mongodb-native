@@ -1,4 +1,4 @@
-import { Db } from './db';
+import { Db, DbOptions } from './db';
 import { EventEmitter } from 'events';
 import { ChangeStream } from './change_stream';
 import { ReadPreference, ReadPreferenceMode } from './read_preference';
@@ -8,10 +8,13 @@ import { maybePromise, MongoDBNamespace } from './utils';
 import { deprecate } from 'util';
 import { connect, validOptions } from './operations/connect';
 import { PromiseProvider } from './promise_provider';
+import { Logger } from './logger';
 import type { Callback, BSONSerializeOptions, AutoEncryptionOptions, AnyError } from './types';
 import type { CompressorName } from './cmap/wire_protocol/compression';
 import type { ReadConcernLevel, ReadConcern } from './read_concern';
 import type { AuthMechanism } from './cmap/auth/defaultAuthProviders';
+import type { Topology } from './sdam/topology';
+import type { ClientSession, ClientSessionOptions } from './sessions';
 
 export enum LogLevel {
   'error' = 'error',
@@ -31,21 +34,6 @@ export interface Auth {
   user?: string;
   /** The password for auth */
   pass?: string;
-}
-
-export interface KMSProviders {
-  /** Configuration options for using 'aws' as your KMS provider */
-  aws?: {
-    /** The access key used for the AWS KMS provider */
-    accessKeyId?: string;
-    /** The secret access key used for the AWS KMS provider */
-    secretAccessKey?: string;
-  };
-  /** Configuration options for using 'local' as your KMS provider */
-  local?: {
-    /** The master key used to encrypt/decrypt data keys. A 96-byte long Buffer. */
-    key?: Buffer;
-  };
 }
 
 export abstract class PkFactoryAbstract {
@@ -188,7 +176,7 @@ export interface MongoClientOptions
   /** The logging level */
   loggerLevel?: LogLevel;
   /** Custom logger object */
-  logger?: object;
+  logger?: Logger;
   /** Enable the wrapping of the callback in the current domain, disabled by default to avoid perf hit */
   domainsEnabled?: boolean;
   /** Validate MongoClient passed in options for correctness */
@@ -215,26 +203,24 @@ export interface MongoClientOptions
   driverInfo?: DriverInfo;
   /** String containing the server name requested via TLS SNI. */
   servername?: string;
+
+  dbName?: string;
 }
-
-/**
- * A string specifying the level of a ReadConcern
- *
- * @typedef {'local'|'available'|'majority'|'linearizable'|'snapshot'} ReadConcernLevel
- * @see https://docs.mongodb.com/manual/reference/read-concern/index.html#read-concern-levels
- */
-
-/**
- * Configuration options for drivers wrapping the node driver.
- *
- * @typedef {object} DriverInfoOptions
- * @property {string} [name] The name of the driver
- * @property {string} [version] The version of the driver
- * @property {string} [platform] Optional platform information
- */
 
 export interface MongoClient {
   logout(options: any, callback: Callback): void;
+}
+
+export type WithSessionCallback = (session: ClientSession) => Promise<any> | void;
+
+interface MongoClientPrivate {
+  url: string;
+  options?: MongoClientOptions;
+  dbCache: Map<string, Db>;
+  sessions: Set<ClientSession>;
+  writeConcern?: WriteConcern;
+  namespace: MongoDBNamespace;
+  logger: Logger;
 }
 
 /**
@@ -270,8 +256,8 @@ export interface MongoClient {
  * });
  */
 export class MongoClient extends EventEmitter {
-  s: any;
-  topology: any;
+  s: MongoClientPrivate;
+  topology?: Topology;
   constructor(url: string, options?: MongoClientOptions) {
     super();
 
@@ -286,7 +272,8 @@ export class MongoClient extends EventEmitter {
       dbCache: new Map(),
       sessions: new Set(),
       writeConcern: WriteConcern.fromOptions(options),
-      namespace: new MongoDBNamespace('admin')
+      namespace: new MongoDBNamespace('admin'),
+      logger: options?.logger ?? new Logger('MongoClient')
     };
   }
 
@@ -299,35 +286,21 @@ export class MongoClient extends EventEmitter {
   }
 
   /**
-   * The callback format for results
+   * Connect to MongoDB using a url
    *
-   * @callback MongoClient~connectCallback
-   * @param {MongoError} error An error instance representing the error during the execution.
-   * @param {MongoClient} client The connected client.
+   * @see docs.mongodb.org/manual/reference/connection-string/
    */
-
-  /**
-   * Connect to MongoDB using a url as documented at
-   *
-   *  docs.mongodb.org/manual/reference/connection-string/
-   *
-   * Note that for replica sets the replicaSet query parameter is required in the 2.0 driver
-   *
-   * @function
-   * @param {MongoClient~connectCallback} [callback] The command result callback
-   * @returns {Promise<MongoClient>} returns Promise if no callback passed
-   */
-  connect(callback?: Callback): Promise<MongoClient> | void {
-    if (typeof callback === 'string') {
+  connect(callback?: Callback<MongoClient>): Promise<MongoClient> | void {
+    if (callback && typeof callback !== 'function') {
       throw new TypeError('`connect` only accepts a callback');
     }
 
     const client = this;
     return maybePromise(callback, (cb: any) => {
-      const err = validOptions(client.s.options);
+      const err = validOptions(client.s.options as any);
       if (err) return cb(err);
 
-      connect(client, client.s.url, client.s.options, (err: any) => {
+      connect(client, client.s.url, client.s.options as any, (err: any) => {
         if (err) return cb(err);
         cb(undefined, client);
       });
@@ -337,12 +310,10 @@ export class MongoClient extends EventEmitter {
   /**
    * Close the db and its underlying connections
    *
-   * @function
-   * @param {boolean} [force=false] Force close, emitting no events
-   * @param {Db~noResultCallback} [callback] The result callback
-   * @returns {Promise<void>} returns Promise if no callback passed
+   * @param force - Force close, emitting no events
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  close(force?: boolean, callback?: Callback): Promise<void> {
+  close(force = false, callback?: Callback<void>): Promise<void> {
     if (typeof force === 'function') {
       callback = force;
       force = false;
@@ -355,8 +326,9 @@ export class MongoClient extends EventEmitter {
         return;
       }
 
-      client.topology.close(force, (err: any) => {
-        const autoEncrypter = client.topology.s.options.autoEncrypter;
+      const topology = client.topology;
+      topology.close({ force }, err => {
+        const autoEncrypter = topology.s.options.autoEncrypter;
         if (!autoEncrypter) {
           cb(err);
           return;
@@ -372,19 +344,15 @@ export class MongoClient extends EventEmitter {
    * Db instances are cached so performing db('db1') twice will return the same instance.
    * You can control these behaviors with the options noListener and returnNonCachedInstance.
    *
-   * @function
-   * @param {string} [dbName] The name of the database we want to use. If not provided, use database name from connection string.
-   * @param {object} [options] Optional settings.
-   * @param {boolean} [options.noListener=false] Do not make the db an event listener to the original connection.
-   * @param {boolean} [options.returnNonCachedInstance=false] Control if you want to return a cached instance or have a new one created
-   * @returns {Db}
+   * @param dbName - The name of the database we want to use. If not provided, use database name from connection string.
+   * @param options - Optional settings for Db construction
    */
-  db(dbName: string, options?: any): Db {
+  db(dbName: string, options?: DbOptions & { returnNonCachedInstance?: boolean }): Db {
     options = options || {};
 
     // Default to db from connection string if not provided
-    if (!dbName) {
-      dbName = this.s.options.dbName;
+    if (!dbName && this.s.options?.dbName) {
+      dbName = this.s.options?.dbName;
     }
 
     // Copy the options and add out internal override of the not shared flag
@@ -392,7 +360,7 @@ export class MongoClient extends EventEmitter {
 
     // Do we have the db in the cache already
     if (this.s.dbCache.has(dbName) && finalOptions.returnNonCachedInstance !== true) {
-      return this.s.dbCache.get(dbName);
+      return this.s.dbCache.get(dbName)!;
     }
 
     // If no topology throw an error message
@@ -409,28 +377,16 @@ export class MongoClient extends EventEmitter {
     return db;
   }
 
-  /**
-   * Check if MongoClient is connected
-   *
-   * @function
-   * @param {object} [options] Optional settings.
-   * @param {boolean} [options.noListener=false] Do not make the db an event listener to the original connection.
-   * @param {boolean} [options.returnNonCachedInstance=false] Control if you want to return a cached instance or have a new one created
-   * @returns {boolean}
-   */
-  isConnected(options?: any): boolean {
-    options = options || {};
-
+  /** Check if MongoClient is connected */
+  isConnected(): boolean {
     if (!this.topology) return false;
-    return this.topology.isConnected(options);
+    return this.topology.isConnected();
   }
 
   /**
-   * Connect to MongoDB using a url as documented at
+   * Connect to MongoDB using a url
    *
-   *  docs.mongodb.org/manual/reference/connection-string/
-   *
-   * Note that for replica sets the replicaSet query parameter is required in the 2.0 driver
+   * @see https://docs.mongodb.org/manual/reference/connection-string/
    */
   static connect(
     url: string,
@@ -452,13 +408,8 @@ export class MongoClient extends EventEmitter {
     return mongoClient.connect(callback!);
   }
 
-  /**
-   * Starts a new session on the server
-   *
-   * @param {SessionOptions} [options] optional settings for a driver session
-   * @returns {ClientSession} the newly established session
-   */
-  startSession(options?: any): any {
+  /** Starts a new session on the server */
+  startSession(options?: ClientSessionOptions): ClientSession {
     options = Object.assign({ explicit: true }, options);
     if (!this.topology) {
       throw new MongoError('Must connect to a server before calling this method');
@@ -477,12 +428,25 @@ export class MongoClient extends EventEmitter {
    *
    * NOTE: presently the operation MUST return a Promise (either explicit or implicity as an async function)
    *
-   * @param {object} [options] Optional settings to be appled to implicitly created session
-   * @param {Function} operation An operation to execute with an implicitly created session. The signature of this MUST be `(session) => {}`
-   * @returns {Promise<void>}
+   * @param options - Optional settings for the command
+   * @param callback - An callback to execute with an implicitly created session
    */
-  withSession(options?: object, operation?: Function): Promise<void> {
-    if (typeof options === 'function') (operation = options), (options = undefined);
+  withSession(callback: WithSessionCallback): Promise<void>;
+  withSession(options: ClientSessionOptions, callback: WithSessionCallback): Promise<void>;
+  withSession(
+    optionsOrOperation?: ClientSessionOptions | WithSessionCallback,
+    callback?: WithSessionCallback
+  ): Promise<void> {
+    let options: ClientSessionOptions = optionsOrOperation as ClientSessionOptions;
+    if (typeof optionsOrOperation === 'function') {
+      callback = optionsOrOperation as WithSessionCallback;
+      options = { owner: Symbol() };
+    }
+
+    if (callback == null) {
+      throw new TypeError('Missing required callback parameter');
+    }
+
     const session = this.startSession(options);
     const Promise = PromiseProvider.get();
 
@@ -502,10 +466,11 @@ export class MongoClient extends EventEmitter {
     }) as CleanUpHandlerFunction;
 
     try {
-      const result = operation!(session);
-      return Promise.resolve(result)
-        .then(result => cleanupHandler(undefined, result, undefined))
-        .catch(err => cleanupHandler(err, null, { throw: true }));
+      const result = callback(session);
+      return Promise.resolve(result).then(
+        result => cleanupHandler(undefined, result, undefined),
+        err => cleanupHandler(err, null, { throw: true })
+      );
     } catch (err) {
       return cleanupHandler(err, null, { throw: false });
     }
@@ -542,14 +507,9 @@ export class MongoClient extends EventEmitter {
     return new ChangeStream(this, pipeline, options);
   }
 
-  /**
-   * Return the mongo client logger
-   *
-   * @function
-   * @returns {Logger} return the mongo client logger
-   */
-  getLogger(): any {
-    return this.s.options.logger;
+  /** Return the mongo client logger */
+  getLogger(): Logger {
+    return this.s.logger;
   }
 }
 
