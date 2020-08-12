@@ -59,8 +59,18 @@ import type { Hint, OperationBase } from '../operations/operation';
  */
 
 // Flags allowed for cursor
-const FLAGS = ['tailable', 'oplogReplay', 'noCursorTimeout', 'awaitData', 'exhaust', 'partial'];
-const FIELDS = ['numberOfRetries', 'tailableRetryInterval'];
+const FLAGS = [
+  'tailable',
+  'oplogReplay',
+  'noCursorTimeout',
+  'awaitData',
+  'exhaust',
+  'partial'
+] as const;
+
+export type CursorFlag = typeof FLAGS[number];
+
+const FIELDS = ['numberOfRetries', 'tailableRetryInterval'] as const;
 
 export interface CursorPrivate extends CoreCursorPrivate {
   /** Transforms functions */
@@ -80,9 +90,7 @@ export interface CursorOptions extends CoreCursorOptions {
   cursor?: Cursor;
   /** The internal topology of the created cursor */
   topology?: Topology;
-  maxTimeMS?: number;
   /** Session to use for the operation */
-  session?: ClientSession;
   numberOfRetries?: number;
 }
 
@@ -126,9 +134,9 @@ export interface CursorOptions extends CoreCursorOptions {
  * collection.find({}).maxTimeMS(1000).maxScan(100).skip(1).toArray(..)
  */
 export class Cursor<
-  T extends CursorOptions = CursorOptions,
-  O extends OperationBase = OperationBase
-> extends CoreCursor<T, O> {
+  O extends OperationBase = OperationBase,
+  T extends CursorOptions = CursorOptions
+> extends CoreCursor<O, T> {
   s: CursorPrivate;
   constructor(topology: Topology, operation: O, options: T = {} as T) {
     super(topology, operation, options);
@@ -179,7 +187,7 @@ export class Cursor<
 
   get readPreference(): ReadPreference {
     if (this.operation) {
-      return this.operation.readPreference;
+      return this.operation.readPreference!;
     }
 
     return this.options.readPreference!;
@@ -374,11 +382,11 @@ export class Cursor<
   /**
    * Set a node.js specific cursor option
    *
-   * @param field The cursor option to set ['numberOfRetries', 'tailableRetryInterval' -.
+   * @param field - The cursor option to set 'numberOfRetries' | 'tailableRetryInterval'.
    *
    * @param value - The field value.
    */
-  setCursorOption(field: keyof CursorPrivate, value: CursorPrivate[keyof CursorPrivate]): this {
+  setCursorOption(field: typeof FIELDS[number], value: number): this {
     if (this.s.state === CursorState.CLOSED || this.s.state === CursorState.OPEN || this.isDead()) {
       throw new MongoError('Cursor is closed');
     }
@@ -399,7 +407,7 @@ export class Cursor<
    *
    * @param value - The flag boolean value.
    */
-  addCursorFlag(flag: string, value: boolean): this {
+  addCursorFlag(flag: CursorFlag, value: boolean): this {
     if (this.s.state === CursorState.CLOSED || this.s.state === CursorState.OPEN || this.isDead()) {
       throw new MongoError('Cursor is closed');
     }
@@ -730,7 +738,9 @@ export class Cursor<
    *
    * @param callback - The result callback.
    */
-  toArray(callback: Callback<Document[]>): Promise<void> | void {
+  toArray(): Promise<Document[]>;
+  toArray(callback: Callback<Document[]>): void;
+  toArray(callback?: Callback<Document[]>): Promise<Document[]> | void {
     if (this.options.tailable) {
       throw new MongoError('Tailable cursor cannot be converted to array');
     }

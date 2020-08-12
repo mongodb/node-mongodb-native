@@ -25,6 +25,17 @@ export interface ReadPreferenceOptions {
   hedge?: HedgeOptions;
 }
 
+export interface ReadPreferenceLikeOptions {
+  readPreference?:
+    | ReadPreferenceLike
+    | {
+        mode: ReadPreferenceMode;
+        preference: ReadPreferenceMode;
+        tags: TagSet[];
+        maxStalenessSeconds: number;
+      };
+}
+
 /**
  * The **ReadPreference** class is a class that represents a MongoDB ReadPreference and is
  * used to construct connections.
@@ -178,7 +189,7 @@ export class ReadPreference {
   /**
    * Replaces options.readPreference with a ReadPreference instance
    */
-  static translate(options: any) {
+  static translate(options: ReadPreferenceLikeOptions) {
     if (options.readPreference == null) return options;
     const r = options.readPreference;
 

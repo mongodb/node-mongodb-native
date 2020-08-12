@@ -254,7 +254,8 @@ export class ChangeStream extends EventEmitter {
   next(callback?: Callback): Promise<void> | void {
     return maybePromise(callback, cb => {
       getCursor(this, (err, cursor) => {
-        if (err || !cursor) return cb(err); // failed to resume, raise an error
+        if (err) return cb(err); // failed to resume, raise an error
+        if (!cursor) return cb(new MongoError('Cursor is undefined'));
         cursor.next((error, change) => {
           if (error || !change) {
             this[kResumeQueue].push(() => this.next(cb));
@@ -360,7 +361,7 @@ export interface ChangeStreamCursorOptions extends CursorOptions {
   startAfter?: boolean;
 }
 
-class ChangeStreamCursor extends Cursor<ChangeStreamCursorOptions, AggregateOperation> {
+class ChangeStreamCursor extends Cursor<AggregateOperation, ChangeStreamCursorOptions> {
   _resumeToken: ResumeToken;
   startAtOperationTime?: OperationTime;
   hasReceived?: boolean;
@@ -608,8 +609,6 @@ function processNewChange(
   change: ChangeStreamDocument,
   callback?: Callback
 ) {
-  const cursor = changeStream.cursor;
-
   // a null change means the cursor has been notified, implicitly closing the change stream
   if (change == null) {
     changeStream.closed = true;
@@ -630,7 +629,7 @@ function processNewChange(
   }
 
   // cache the resume token
-  cursor?.cacheResumeToken(change._id);
+  changeStream.cursor?.cacheResumeToken(change._id);
 
   // wipe the startAtOperationTime if there was one so that there won't be a conflict
   // between resumeToken and startAtOperationTime if we need to reconnect the cursor

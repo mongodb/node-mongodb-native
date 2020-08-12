@@ -4,13 +4,9 @@ import type { MongoClient } from './mongo_client';
 
 export type AnyError = MongoError | Error;
 
-// export type Callback<T = any> = (error?: AnyError, result?: T) => void;
+export type Callback<T = any> = (error?: AnyError, result?: T) => void;
 export type Callback2<T0 = any, T1 = any> = (error?: AnyError, result0?: T0, result1?: T1) => void;
 export type CallbackWithType<E = AnyError, T0 = any> = (error?: E, result?: T0) => void;
-
-export interface Callback<T = any> {
-  (error?: AnyError, result?: T): void;
-}
 
 export interface Document {
   [key: string]: any;

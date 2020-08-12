@@ -97,11 +97,11 @@ export interface CoreCursorOptions extends CommandOperationOptions {
  * **CURSORS Cannot directly be instantiated**
  */
 export class CoreCursor<
-  T extends CoreCursorOptions = CoreCursorOptions,
-  O extends OperationBase = OperationBase
+  O extends OperationBase = OperationBase,
+  T extends CoreCursorOptions = CoreCursorOptions
 > extends Readable {
   operation: O;
-  server!: Server;
+  server?: Server;
   ns: string;
   namespace: MongoDBNamespace;
   cmd: Document;
@@ -111,8 +111,6 @@ export class CoreCursor<
   logger: Logger;
   query?: Document;
   s!: CoreCursorPrivate;
-
-  connection?: Connection;
 
   /**
    * Create a new core `Cursor` instance.
@@ -314,6 +312,11 @@ export class CoreCursor<
       return;
     }
 
+    if (!this.server) {
+      if (callback) callback(new MongoError('Cursor is uninitialized.'));
+      return;
+    }
+
     this.server.killCursors(this.ns, this.cursorState, callback);
   }
 
@@ -429,6 +432,10 @@ export class CoreCursor<
       this.cursorState.currentLimit + batchSize > this.cursorState.limit
     ) {
       batchSize = this.cursorState.limit - this.cursorState.currentLimit;
+    }
+
+    if (!this.server) {
+      return callback(new MongoError('Cursor is uninitialized.'));
     }
 
     const cursorState = this.cursorState;
@@ -563,6 +570,22 @@ export class CoreCursor<
   }
 }
 
+/** Validate if the pool is dead and return error */
+function isConnectionDead(self: CoreCursor, callback: Callback) {
+  // TODO(NODE-2765): Remove me and CoreCursor.pool
+  if ((self as any).pool && (self as any).pool.isDestroyed()) {
+    self.cursorState.killed = true;
+    const err = new MongoNetworkError(
+      `connection to host ${(self as any).pool.host}:${(self as any).pool.port} was destroyed`
+    );
+
+    _setCursorNotifiedImpl(self, () => callback(err));
+    return true;
+  }
+
+  return false;
+}
+
 /** Validate if the cursor is dead but was not explicitly killed by user */
 function isCursorDeadButNotkilled(self: CoreCursor, callback: Callback) {
   // Cursor is dead but not marked killed, return null
@@ -678,23 +701,21 @@ function nextFunction(self: CoreCursor, callback: Callback) {
     self.cursorState.cursorIndex = 0;
 
     // Check if topology is destroyed
-    if (self.topology.isDestroyed())
+    if (self.topology.isDestroyed()) {
       return callback(
         new MongoNetworkError('connection destroyed, not possible to instantiate cursor')
       );
+    }
 
     // Check if connection is dead and return if not possible to
     // execute a getMore on this connection
-    if (self.isKilled() || self.isDead()) return;
+    if (isConnectionDead(self, callback)) return;
 
     // Execute the next get more
-    self._getMore(function (err, doc, connection) {
+    self._getMore(err => {
       if (err) {
         return callback(err);
       }
-
-      // Save the returned connection to ensure all getMore's fire over the same connection
-      self.connection = connection;
 
       // Tailable cursor getMore result, notify owner about it
       // No attempt is made here to retry, this is left to the user of the

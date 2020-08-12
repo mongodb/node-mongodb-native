@@ -53,9 +53,7 @@ export interface AggregationCursorOptions extends CursorOptions, AggregateOption
  * @fires AggregationCursor#readable
  * @returns {AggregationCursor} an AggregationCursor instance.
  */
-export class AggregationCursor extends Cursor<AggregationCursorOptions> {
-  operation!: AggregateOperation;
-
+export class AggregationCursor extends Cursor<AggregateOperation, AggregationCursorOptions> {
   constructor(
     topology: Topology,
     operation: AggregateOperation,

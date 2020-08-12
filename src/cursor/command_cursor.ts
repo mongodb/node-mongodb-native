@@ -50,7 +50,7 @@ export type CommandCursorOptions = CursorOptions;
  * @fires CommandCursor#readable
  * @returns {CommandCursor} an CommandCursor instance.
  */
-export class CommandCursor extends Cursor<CommandCursorOptions> {
+export class CommandCursor extends Cursor<CommandOperation, CommandCursorOptions> {
   constructor(topology: Topology, operation: CommandOperation, options?: CommandCursorOptions) {
     super(topology, operation, options);
   }

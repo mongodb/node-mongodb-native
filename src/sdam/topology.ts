@@ -658,46 +658,42 @@ export class Topology extends EventEmitter {
     }
 
     ReadPreference.translate(options);
-    const readPreference = options.readPreference || ReadPreference.primary;
+    const readPreference = (options.readPreference as ReadPreference) || ReadPreference.primary;
 
-    this.selectServer(
-      readPreferenceServerSelector(readPreference as ReadPreference),
-      options,
-      (err, server) => {
-        if (err || !server) {
-          callback(err);
-          return;
-        }
-
-        const willRetryWrite =
-          !options.retrying &&
-          !!options.retryWrites &&
-          options.session &&
-          isRetryableWritesSupported(this) &&
-          !options.session.inTransaction() &&
-          isWriteCommand(cmd);
-
-        // increment and assign txnNumber
-        if (willRetryWrite) {
-          options.session?.incrementTransactionNumber();
-          options.willRetryWrite = willRetryWrite;
-        }
-
-        server.command(ns, cmd, options, (err, result) => {
-          if (!err) return callback(undefined, result);
-          if (!shouldRetryOperation(err)) {
-            return callback(err);
-          }
-
-          if (willRetryWrite) {
-            const newOptions = Object.assign({}, options, { retrying: true });
-            return this.command(ns, cmd, newOptions, callback);
-          }
-
-          return callback(err);
-        });
+    this.selectServer(readPreferenceServerSelector(readPreference), options, (err, server) => {
+      if (err || !server) {
+        callback(err);
+        return;
       }
-    );
+
+      const willRetryWrite =
+        !options.retrying &&
+        !!options.retryWrites &&
+        options.session &&
+        isRetryableWritesSupported(this) &&
+        !options.session.inTransaction() &&
+        isWriteCommand(cmd);
+
+      // increment and assign txnNumber
+      if (willRetryWrite) {
+        options.session?.incrementTransactionNumber();
+        options.willRetryWrite = willRetryWrite;
+      }
+
+      server.command(ns, cmd, options, (err, result) => {
+        if (!err) return callback(undefined, result);
+        if (!shouldRetryOperation(err)) {
+          return callback(err);
+        }
+
+        if (willRetryWrite) {
+          const newOptions = Object.assign({}, options, { retrying: true });
+          return this.command(ns, cmd, newOptions, callback);
+        }
+
+        return callback(err);
+      });
+    });
   }
 
   /**
