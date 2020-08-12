@@ -7,7 +7,7 @@ import type { Db } from '../db';
 
 export interface ListDatabasesOptions extends CommandOperationOptions {
   /** A query predicate that determines which databases are listed */
-  filter: Document;
+  filter?: Document;
   /** A flag to indicate whether the command should return just the database names, or return both database names and size information */
   nameOnly?: boolean;
   /** A flag that determines which databases are returned based on the user privileges when access control is enabled */
@@ -15,7 +15,7 @@ export interface ListDatabasesOptions extends CommandOperationOptions {
 }
 
 export class ListDatabasesOperation extends CommandOperation<ListDatabasesOptions> {
-  constructor(db: Db, options: ListDatabasesOptions) {
+  constructor(db: Db, options?: ListDatabasesOptions) {
     super(db, options);
     this.ns = new MongoDBNamespace('admin', '$cmd');
   }

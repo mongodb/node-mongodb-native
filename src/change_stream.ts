@@ -86,10 +86,10 @@ export class ChangeStream extends EventEmitter {
     this.namespace = parent.s.namespace;
     if (parent instanceof Collection) {
       this.type = CHANGE_DOMAIN_TYPES.COLLECTION;
-      this.topology = parent.s.db.serverConfig;
+      this.topology = parent.s.db.s.topology;
     } else if (parent instanceof Db) {
       this.type = CHANGE_DOMAIN_TYPES.DATABASE;
-      this.topology = parent.serverConfig;
+      this.topology = parent.s.topology;
     } else if (parent instanceof MongoClient) {
       this.type = CHANGE_DOMAIN_TYPES.CLUSTER;
       this.topology = parent.topology;

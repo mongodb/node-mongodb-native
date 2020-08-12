@@ -59,7 +59,7 @@ export function indexInformation(
   const full = options.full == null ? false : options.full;
 
   // Did the user destroy the topology
-  if (db.serverConfig && db.serverConfig.isDestroyed())
+  if (db.s.topology && db.s.topology.isDestroyed())
     return callback(new MongoError('topology was destroyed'));
   // Process all the results from the index command and collection
   function processResults(indexes: any) {

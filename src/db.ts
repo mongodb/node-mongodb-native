@@ -12,7 +12,6 @@ import { WriteConcern, WriteConcernOptions } from './write_concern';
 import { ReadConcern } from './read_concern';
 import { Logger } from './logger';
 import {
-  getSingleProperty,
   filterOptions,
   mergeOptionsAndWriteConcern,
   deprecateOptions,
@@ -135,8 +134,6 @@ export interface Db {
  */
 export class Db {
   s: DbPrivate;
-  databaseName: any;
-  serverConfig: any;
 
   public static SYSTEM_NAMESPACE_COLLECTION = CONSTANTS.SYSTEM_NAMESPACE_COLLECTION;
   public static SYSTEM_INDEX_COLLECTION = CONSTANTS.SYSTEM_INDEX_COLLECTION;
@@ -159,6 +156,9 @@ export class Db {
     // Filter the options
     options = filterOptions(options, legalOptionNames);
 
+    // Ensure we have a valid db name
+    validateDatabaseName(databaseName);
+
     // Internal state of the db object
     this.s = {
       // Topology
@@ -177,13 +177,10 @@ export class Db {
       // Namespace
       namespace: new MongoDBNamespace(databaseName)
     };
+  }
 
-    // Ensure we have a valid db name
-    validateDatabaseName(databaseName);
-
-    // Add a read Only property
-    getSingleProperty(this, 'serverConfig', this.s.topology);
-    getSingleProperty(this, 'databaseName', this.s.namespace.db);
+  get databaseName() {
+    return this.s.namespace.db;
   }
 
   // Topology
@@ -230,13 +227,17 @@ export class Db {
    * @param options Optional settings for the command
    * @param callback An optional callback, a Promise will be returned if none is provided
    */
+  command(command: Document): Promise<Document>;
+  command(command: Document, callback: Callback<Document>): void;
+  command(command: Document, options: RunCommandOptions): Promise<Document>;
+  command(command: Document, options: RunCommandOptions, callback: Callback<Document>): void;
   command(
     command: Document,
-    options?: RunCommandOptions,
-    callback?: Callback
-  ): Promise<void> | void {
+    options?: RunCommandOptions | Callback<Document>,
+    callback?: Callback<Document>
+  ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = Object.assign({}, options);
+    options = options || {};
 
     return executeOperation(
       this.s.topology,
@@ -344,7 +345,7 @@ export class Db {
     }
 
     // Did the user destroy the topology
-    if (this.serverConfig && this.serverConfig.isDestroyed()) {
+    if (this.s.topology && this.s.topology.isDestroyed()) {
       return callback(new MongoError('topology was destroyed'));
     }
 
@@ -373,10 +374,17 @@ export class Db {
   /**
    * Get all the db statistics.
    *
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  stats(options?: DbStatsOptions, callback?: Callback<Document>): Promise<Document> | void {
+  stats(): Promise<Document>;
+  stats(callback: Callback<Document>): void;
+  stats(options: DbStatsOptions): Promise<Document>;
+  stats(options: DbStatsOptions, callback: Callback<Document>): void;
+  stats(
+    options?: DbStatsOptions | Callback<Document>,
+    callback?: Callback<Document>
+  ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -386,8 +394,8 @@ export class Db {
   /**
    * List all collections of this database with optional filter
    *
-   * @param filter Query to filter collections by
-   * @param options Optional settings for the command
+   * @param filter - Query to filter collections by
+   * @param options - Optional settings for the command
    */
   listCollections(filter?: Document, options?: ListCollectionsOptions): CommandCursor {
     filter = filter || {};
@@ -403,15 +411,32 @@ export class Db {
   /**
    * Rename a collection.
    *
-   * @param fromCollection Name of current collection to rename
-   * @param toCollection New name of of the collection
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param fromCollection - Name of current collection to rename
+   * @param toCollection - New name of of the collection
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
+  renameCollection(fromCollection: string, toCollection: string): Promise<Collection>;
   renameCollection(
     fromCollection: string,
     toCollection: string,
-    options?: RenameOptions,
+    callback: Callback<Collection>
+  ): void;
+  renameCollection(
+    fromCollection: string,
+    toCollection: string,
+    options: RenameOptions
+  ): Promise<Collection>;
+  renameCollection(
+    fromCollection: string,
+    toCollection: string,
+    options: RenameOptions,
+    callback: Callback<Collection>
+  ): void;
+  renameCollection(
+    fromCollection: string,
+    toCollection: string,
+    options?: RenameOptions | Callback<Collection>,
     callback?: Callback<Collection>
   ): Promise<Collection> | void {
     if (typeof options === 'function') (callback = options), (options = {});
@@ -430,13 +455,17 @@ export class Db {
   /**
    * Drop a collection from the database, removing it permanently. New accesses will create a new collection.
    *
-   * @param name Name of collection to drop
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param name - Name of collection to drop
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
+  dropCollection(name: string): Promise<boolean>;
+  dropCollection(name: string, callback: Callback<boolean>): void;
+  dropCollection(name: string, options: DropCollectionOptions): Promise<boolean>;
+  dropCollection(name: string, options: DropCollectionOptions, callback: Callback<boolean>): void;
   dropCollection(
     name: string,
-    options?: DropCollectionOptions,
+    options?: DropCollectionOptions | Callback<boolean>,
     callback?: Callback<boolean>
   ): Promise<boolean> | void {
     if (typeof options === 'function') (callback = options), (options = {});
@@ -452,11 +481,15 @@ export class Db {
   /**
    * Drop a database, removing it permanently from the server.
    *
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
+  dropDatabase(): Promise<boolean>;
+  dropDatabase(callback: Callback<boolean>): void;
+  dropDatabase(options: DropDatabaseOptions): Promise<boolean>;
+  dropDatabase(options: DropDatabaseOptions, callback: Callback<boolean>): void;
   dropDatabase(
-    options?: DropDatabaseOptions,
+    options?: DropDatabaseOptions | Callback<boolean>,
     callback?: Callback<boolean>
   ): Promise<boolean> | void {
     if (typeof options === 'function') (callback = options), (options = {});
@@ -468,11 +501,15 @@ export class Db {
   /**
    * Fetch all collections for the current db.
    *
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
+  collections(): Promise<Collection[]>;
+  collections(callback: Callback<Collection[]>): void;
+  collections(options: ListCollectionsOptions): Promise<Collection[]>;
+  collections(options: ListCollectionsOptions, callback: Callback<Collection[]>): void;
   collections(
-    options?: ListCollectionsOptions,
+    options?: ListCollectionsOptions | Callback<Collection[]>,
     callback?: Callback<Collection[]>
   ): Promise<Collection[]> | void {
     if (typeof options === 'function') (callback = options), (options = {});
@@ -488,10 +525,18 @@ export class Db {
    * @param options Optional settings for the command
    * @param callback An optional callback, a Promise will be returned if none is provided
    */
+  executeDbAdminCommand(command: Document): Promise<void>;
+  executeDbAdminCommand(command: Document, callback: Callback): void;
+  executeDbAdminCommand(command: Document, options: RunCommandOptions): Promise<void>;
   executeDbAdminCommand(
     command: Document,
-    options?: RunCommandOptions,
-    callback?: Callback
+    options: RunCommandOptions,
+    callback: Callback<void>
+  ): void;
+  executeDbAdminCommand(
+    command: Document,
+    options?: RunCommandOptions | Callback<void>,
+    callback?: Callback<void>
   ): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
@@ -511,10 +556,23 @@ export class Db {
    * @param options Optional settings for the command
    * @param callback An optional callback, a Promise will be returned if none is provided
    */
+  createIndex(name: string, fieldOrSpec: string | object): Promise<Document>;
+  createIndex(name: string, fieldOrSpec: string | object, callback?: Callback<Document>): void;
   createIndex(
     name: string,
     fieldOrSpec: string | object,
-    options?: CreateIndexesOptions,
+    options: CreateIndexesOptions
+  ): Promise<Document>;
+  createIndex(
+    name: string,
+    fieldOrSpec: string | object,
+    options: CreateIndexesOptions,
+    callback: Callback<Document>
+  ): void;
+  createIndex(
+    name: string,
+    fieldOrSpec: string | object,
+    options?: CreateIndexesOptions | Callback<Document>,
     callback?: Callback<Document>
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
@@ -535,15 +593,38 @@ export class Db {
    * @param options Optional settings for the command
    * @param callback An optional callback, a Promise will be returned if none is provided
    */
+  addUser(username: string): Promise<Document>;
+  addUser(username: string, callback: Callback<Document>): void;
+  addUser(username: string, password: string): Promise<Document>;
+  addUser(username: string, password: string, callback: Callback<Document>): void;
+  addUser(username: string, options: AddUserOptions): Promise<Document>;
+  addUser(username: string, options: AddUserOptions, callback: Callback<Document>): void;
+  addUser(username: string, password: string, options: AddUserOptions): Promise<Document>;
   addUser(
     username: string,
-    password: string | undefined,
-    options?: AddUserOptions,
+    password: string,
+    options: AddUserOptions,
+    callback: Callback<Document>
+  ): void;
+  addUser(
+    username: string,
+    password?: string | AddUserOptions | Callback<Document>,
+    options?: AddUserOptions | Callback<Document>,
     callback?: Callback<Document>
   ): Promise<Document> | void {
-    if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
+    if (typeof password === 'function') {
+      (callback = password), (password = undefined), (options = {});
+    } else if (typeof password !== 'string') {
+      if (typeof options === 'function') {
+        (callback = options), (options = password), (password = undefined);
+      } else {
+        (options = password), (callback = undefined), (password = undefined);
+      }
+    } else {
+      if (typeof options === 'function') (callback = options), (options = {});
+    }
 
+    options = options || {};
     return executeOperation(
       this.s.topology,
       new AddUserOperation(this, username, password, options),
@@ -554,13 +635,17 @@ export class Db {
   /**
    * Remove a user from a database
    *
-   * @param username The username to remove
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param username - The username to remove
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
+  removeUser(username: string): Promise<boolean>;
+  removeUser(username: string, callback: Callback<boolean>): void;
+  removeUser(username: string, options: RemoveUserOptions): Promise<boolean>;
+  removeUser(username: string, options: RemoveUserOptions, callback: Callback<boolean>): void;
   removeUser(
     username: string,
-    options?: RemoveUserOptions,
+    options?: RemoveUserOptions | Callback<boolean>,
     callback?: Callback<boolean>
   ): Promise<boolean> | void {
     if (typeof options === 'function') (callback = options), (options = {});
@@ -576,13 +661,24 @@ export class Db {
   /**
    * Set the current profiling level of MongoDB
    *
-   * @param level The new profiling level (off, slow_only, all).
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param level - The new profiling level (off, slow_only, all).
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
+  setProfilingLevel(level: ProfilingLevel): Promise<ProfilingLevel>;
+  setProfilingLevel(level: ProfilingLevel, callback: Callback<ProfilingLevel>): void;
   setProfilingLevel(
     level: ProfilingLevel,
-    options?: SetProfilingLevelOptions,
+    options: SetProfilingLevelOptions
+  ): Promise<ProfilingLevel>;
+  setProfilingLevel(
+    level: ProfilingLevel,
+    options: SetProfilingLevelOptions,
+    callback: Callback<ProfilingLevel>
+  ): void;
+  setProfilingLevel(
+    level: ProfilingLevel,
+    options?: SetProfilingLevelOptions | Callback<ProfilingLevel>,
     callback?: Callback<ProfilingLevel>
   ): Promise<ProfilingLevel> | void {
     if (typeof options === 'function') (callback = options), (options = {});
@@ -598,11 +694,15 @@ export class Db {
   /**
    * Retrieve the current profiling Level for MongoDB
    *
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
+  profilingLevel(): Promise<string>;
+  profilingLevel(callback: Callback<string>): void;
+  profilingLevel(options: ProfilingLevelOptions): Promise<string>;
+  profilingLevel(options: ProfilingLevelOptions, callback: Callback<string>): void;
   profilingLevel(
-    options?: ProfilingLevelOptions,
+    options?: ProfilingLevelOptions | Callback<string>,
     callback?: Callback<string>
   ): Promise<string> | void {
     if (typeof options === 'function') (callback = options), (options = {});
@@ -614,14 +714,18 @@ export class Db {
   /**
    * Retrieves this collections index info.
    *
-   * @param name The name of the collection.
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param name - The name of the collection.
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
+  indexInformation(name: string): Promise<void>;
+  indexInformation(name: string, callback: Callback<void>): void;
+  indexInformation(name: string, options: IndexInformationOptions): Promise<void>;
+  indexInformation(name: string, options: IndexInformationOptions, callback: Callback<void>): void;
   indexInformation(
     name: string,
-    options?: IndexInformationOptions,
-    callback?: Callback
+    options?: IndexInformationOptions | Callback<void>,
+    callback?: Callback<void>
   ): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
@@ -672,22 +776,6 @@ export class Db {
     return this.s.logger;
   }
 }
-
-/**
- * The callback format for the collection method, must be used if strict is specified
- *
- * @callback Db~collectionResultCallback
- * @param {MongoError} error An error instance representing the error during the execution.
- * @param {Collection} collection The collection instance.
- */
-
-/**
- * The callback format for an aggregation call
- *
- * @callback Database~aggregationCallback
- * @param {MongoError} error An error instance representing the error during the execution.
- * @param {AggregationCursor} cursor The cursor if the aggregation command was executed successfully.
- */
 
 const collectionKeys = [
   'pkFactory',

@@ -97,7 +97,7 @@ describe('ReadPreference', function () {
             test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.mode);
           }
 
-          return command.apply(db.serverConfig, args);
+          return command.apply(db.s.topology, args);
         };
 
         // Execute count
@@ -134,7 +134,7 @@ describe('ReadPreference', function () {
             test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.mode);
           }
 
-          return command.apply(db.serverConfig, args);
+          return command.apply(db.s.topology, args);
         };
 
         // Execute count
@@ -172,7 +172,7 @@ describe('ReadPreference', function () {
             test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.mode);
           }
 
-          return command.apply(db.serverConfig, args);
+          return command.apply(db.s.topology, args);
         };
 
         // Map function
@@ -221,7 +221,7 @@ describe('ReadPreference', function () {
               test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.mode);
             }
 
-            return command.apply(db.serverConfig, args);
+            return command.apply(db.s.topology, args);
           };
 
           // Map function
@@ -299,7 +299,7 @@ describe('ReadPreference', function () {
             test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.mode);
           }
 
-          return command.apply(db.serverConfig, args);
+          return command.apply(db.s.topology, args);
         };
 
         const cursor = collection.aggregate([
@@ -350,7 +350,7 @@ describe('ReadPreference', function () {
             test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.mode);
           }
 
-          return command.apply(db.serverConfig, args);
+          return command.apply(db.s.topology, args);
         };
 
         // Perform the map reduce
@@ -380,7 +380,7 @@ describe('ReadPreference', function () {
             test.equal(ReadPreference.SECONDARY, args[2].readPreference.mode);
           }
 
-          return command.apply(db.serverConfig, args);
+          return command.apply(db.s.topology, args);
         };
 
         db.command({ dbStats: true }, function (err) {
@@ -392,7 +392,7 @@ describe('ReadPreference', function () {
               test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.mode);
             }
 
-            return command.apply(db.serverConfig, args);
+            return command.apply(db.s.topology, args);
           };
 
           db.command({ dbStats: true }, { readPreference: 'secondaryPreferred' }, function (err) {

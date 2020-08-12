@@ -1,10 +1,11 @@
 import { AddUserOperation, AddUserOptions } from './operations/add_user';
 import { RemoveUserOperation, RemoveUserOptions } from './operations/remove_user';
 import { ValidateCollectionOperation } from './operations/validate_collection';
-import { ListDatabasesOperation } from './operations/list_databases';
+import { ListDatabasesOperation, ListDatabasesOptions } from './operations/list_databases';
 import { executeOperation } from './operations/execute_operation';
 import { RunCommandOperation } from './operations/run_command';
 import type { Callback, Document } from './types';
+import type { CommandOperationOptions } from './operations/command';
 
 /**
  * The **Admin** class is an internal class that allows convenient access to
@@ -70,7 +71,7 @@ export class Admin {
    * @param {Admin~resultCallback} [callback] The command result callback
    * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  command(command: object, options?: any, callback?: Callback): Promise<void> | void {
+  command(command: object, options?: any, callback?: Callback<Document>): Promise<Document> | void {
     const args = Array.prototype.slice.call(arguments, 1);
     callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
     options = Object.assign({ dbName: 'admin' }, args.length ? args.shift() : {});
@@ -90,7 +91,7 @@ export class Admin {
    * @param {Admin~resultCallback} [callback] The command result callback
    * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  buildInfo(options?: any, callback?: Callback): Promise<void> | void {
+  buildInfo(options?: any, callback?: Callback<Document>): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
     return this.command({ buildinfo: 1 }, options, callback);
@@ -105,7 +106,7 @@ export class Admin {
    * @param {Admin~resultCallback} [callback] The command result callback
    * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  serverInfo(options?: any, callback?: Callback): Promise<void> | void {
+  serverInfo(options?: any, callback?: Callback<Document>): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
     return this.command({ buildinfo: 1 }, options, callback);
@@ -119,7 +120,7 @@ export class Admin {
    * @param {Admin~resultCallback} [callback] The command result callback
    * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  serverStatus(options?: any, callback?: Callback): Promise<void> | void {
+  serverStatus(options?: any, callback?: Callback<Document>): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
     return this.command({ serverStatus: 1 }, options, callback);
@@ -133,7 +134,7 @@ export class Admin {
    * @param {Admin~resultCallback} [callback] The command result callback
    * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  ping(options?: any, callback?: Callback): Promise<void> | void {
+  ping(options?: any, callback?: Callback<Document>): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
     return this.command({ ping: 1 }, options, callback);
@@ -224,7 +225,10 @@ export class Admin {
    * @param {Admin~resultCallback} [callback] The command result callback.
    * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  listDatabases(options?: any, callback?: Callback<string[]>): Promise<string[]> | void {
+  listDatabases(
+    options?: ListDatabasesOptions,
+    callback?: Callback<string[]>
+  ): Promise<string[]> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -243,7 +247,10 @@ export class Admin {
    * @param {Admin~resultCallback} [callback] The command result callback.
    * @returns {Promise<void> | void} returns Promise if no callback passed
    */
-  replSetGetStatus(options?: any, callback?: Callback): Promise<void> | void {
+  replSetGetStatus(
+    options?: CommandOperationOptions,
+    callback?: Callback<Document>
+  ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
     return this.command({ replSetGetStatus: 1 }, options, callback);
