@@ -152,17 +152,7 @@ export class Collection {
     [key: string]: any;
   };
 
-  /**
-   * Create a new Collection instance (INTERNAL TYPE, do not instantiate directly)
-   *
-   * @class
-   * @param {any} db
-   * @param {any} topology
-   * @param {any} dbName
-   * @param {any} name
-   * @param {any} pkFactory
-   * @param {any} options
-   */
+  /** Create a new Collection instance (INTERNAL TYPE, do not instantiate directly) */
   constructor(db: any, topology: any, dbName: any, name: any, pkFactory: any, options: any) {
     checkCollectionName(name);
     emitDeprecatedOptionWarning(options, ['promiseLibrary']);
@@ -329,13 +319,17 @@ export class Collection {
    * one will be added to each of the documents missing it by the driver, mutating the document. This behavior
    * can be overridden by setting the **forceServerObjectId** flag.
    *
-   * @param doc The document to insert
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param doc - The document to insert
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
+  insertOne(doc: Document): Promise<InsertOneResult>;
+  insertOne(doc: Document, callback: Callback<InsertOneResult>): void;
+  insertOne(doc: Document, options: InsertOptions): Promise<InsertOneResult>;
+  insertOne(doc: Document, options: InsertOptions, callback: Callback<InsertOneResult>): void;
   insertOne(
     doc: Document,
-    options?: InsertOptions,
+    options?: InsertOptions | Callback<InsertOneResult>,
     callback?: Callback<InsertOneResult>
   ): Promise<InsertOneResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
@@ -355,13 +349,17 @@ export class Collection {
    * one will be added to each of the documents missing it by the driver, mutating the document. This behavior
    * can be overridden by setting the **forceServerObjectId** flag.
    *
-   * @param docs The documents to insert
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param docs - The documents to insert
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
+  insertMany(docs: Document[]): Promise<InsertManyResult>;
+  insertMany(docs: Document[], callback: Callback<InsertManyResult>): void;
+  insertMany(docs: Document[], options: InsertOptions): Promise<InsertManyResult>;
+  insertMany(docs: Document[], options: InsertOptions, callback: Callback<InsertManyResult>): void;
   insertMany(
     docs: Document[],
-    options?: InsertOptions,
+    options?: InsertOptions | Callback<InsertManyResult>,
     callback?: Callback<InsertManyResult>
   ): Promise<InsertManyResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
@@ -397,13 +395,21 @@ export class Collection {
    * one will be added to each of the documents missing it by the driver, mutating the document. This behavior
    * can be overridden by setting the **forceServerObjectId** flag.
    *
-   * @param operations Bulk operations to perform
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param operations - Bulk operations to perform
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
+  bulkWrite(operations: Document[]): Promise<BulkWriteResult>;
+  bulkWrite(operations: Document[], callback: Callback<BulkWriteResult>): void;
+  bulkWrite(operations: Document[], options: InsertOptions): Promise<BulkWriteResult>;
   bulkWrite(
     operations: Document[],
-    options?: InsertOptions,
+    options: InsertOptions,
+    callback: Callback<BulkWriteResult>
+  ): void;
+  bulkWrite(
+    operations: Document[],
+    options?: InsertOptions | Callback<BulkWriteResult>,
     callback?: Callback<BulkWriteResult>
   ): Promise<BulkWriteResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
@@ -426,15 +432,24 @@ export class Collection {
   /**
    * Update a single document in a collection
    *
-   * @param filter The Filter used to select the document to update
-   * @param update The update operations to be applied to the document
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param filter - The Filter used to select the document to update
+   * @param update - The update operations to be applied to the document
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
+  updateOne(filter: Document, update: Document): Promise<UpdateResult>;
+  updateOne(filter: Document, update: Document, callback: Callback<UpdateResult>): void;
+  updateOne(filter: Document, update: Document, options: UpdateOptions): Promise<UpdateResult>;
   updateOne(
     filter: Document,
     update: Document,
-    options?: UpdateOptions,
+    options: UpdateOptions,
+    callback: Callback<UpdateResult>
+  ): void;
+  updateOne(
+    filter: Document,
+    update: Document,
+    options?: UpdateOptions | Callback<UpdateResult>,
     callback?: Callback<UpdateResult>
   ): Promise<UpdateResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
@@ -456,15 +471,28 @@ export class Collection {
   /**
    * Replace a document in a collection with another document
    *
-   * @param filter The Filter used to select the document to replace
-   * @param doc The Document that replaces the matching document
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param filter - The Filter used to select the document to replace
+   * @param replacement - The Document that replaces the matching document
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
+  replaceOne(filter: Document, replacement: Document): Promise<UpdateResult>;
+  replaceOne(filter: Document, replacement: Document, callback: Callback<UpdateResult>): void;
   replaceOne(
     filter: Document,
-    doc: Document,
-    options?: ReplaceOptions,
+    replacement: Document,
+    options: ReplaceOptions
+  ): Promise<UpdateResult>;
+  replaceOne(
+    filter: Document,
+    replacement: Document,
+    options: ReplaceOptions,
+    callback: Callback<UpdateResult>
+  ): void;
+  replaceOne(
+    filter: Document,
+    replacement: Document,
+    options?: ReplaceOptions | Callback<UpdateResult>,
     callback?: Callback<UpdateResult>
   ): Promise<UpdateResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
@@ -478,7 +506,7 @@ export class Collection {
 
     return executeOperation(
       this.s.topology,
-      new ReplaceOneOperation(this, filter, doc, options),
+      new ReplaceOneOperation(this, filter, replacement, options),
       callback
     );
   }
@@ -486,16 +514,24 @@ export class Collection {
   /**
    * Update multiple documents in a collection
    *
-   * @function
-   * @param filter The Filter used to select the documents to update
-   * @param update The update operations to be applied to the documents
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param filter - The Filter used to select the documents to update
+   * @param update - The update operations to be applied to the documents
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
+  updateMany(filter: Document, update: Document): Promise<UpdateResult>;
+  updateMany(filter: Document, update: Document, callback: Callback<UpdateResult>): void;
+  updateMany(filter: Document, update: Document, options: UpdateOptions): Promise<UpdateResult>;
   updateMany(
     filter: Document,
     update: Document,
-    options?: UpdateOptions,
+    options: UpdateOptions,
+    callback: Callback<UpdateResult>
+  ): void;
+  updateMany(
+    filter: Document,
+    update: Document,
+    options?: UpdateOptions | Callback<UpdateResult>,
     callback?: Callback<UpdateResult>
   ): Promise<UpdateResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
@@ -517,13 +553,17 @@ export class Collection {
   /**
    * Delete a document from a collection
    *
-   * @param filter The Filter used to select the document to remove
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param filter - The Filter used to select the document to remove
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
+  deleteOne(filter: Document): Promise<DeleteResult>;
+  deleteOne(filter: Document, callback: Callback<DeleteResult>): void;
+  deleteOne(filter: Document, options: DeleteOptions): Promise<DeleteResult>;
+  deleteOne(filter: Document, options: DeleteOptions, callback?: Callback<DeleteResult>): void;
   deleteOne(
     filter: Document,
-    options?: DeleteOptions,
+    options?: DeleteOptions | Callback<DeleteResult>,
     callback?: Callback<DeleteResult>
   ): Promise<DeleteResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
@@ -545,13 +585,17 @@ export class Collection {
   /**
    * Delete multiple documents from a collection
    *
-   * @param filter The Filter used to select the documents to remove
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param filter - The Filter used to select the documents to remove
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
+  deleteMany(filter: Document): Promise<DeleteResult>;
+  deleteMany(filter: Document, callback: Callback<DeleteResult>): void;
+  deleteMany(filter: Document, options: DeleteOptions): Promise<DeleteResult>;
+  deleteMany(filter: Document, options: DeleteOptions, callback: Callback<DeleteResult>): void;
   deleteMany(
     filter: Document,
-    options?: DeleteOptions,
+    options?: DeleteOptions | Callback<DeleteResult>,
     callback?: Callback<DeleteResult>
   ): Promise<DeleteResult> | void {
     if (filter == null) {
@@ -585,13 +629,17 @@ export class Collection {
   /**
    * Rename the collection.
    *
-   * @param newName New name of of the collection.
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param newName - New name of of the collection.
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
+  rename(newName: string): Promise<Collection>;
+  rename(newName: string, callback: Callback<Collection>): void;
+  rename(newName: string, options: RenameOptions): Promise<Collection> | void;
+  rename(newName: string, options: RenameOptions, callback: Callback<Collection>): void;
   rename(
     newName: string,
-    options?: RenameOptions,
+    options?: RenameOptions | Callback<Collection>,
     callback?: Callback<Collection>
   ): Promise<Collection> | void {
     if (typeof options === 'function') (callback = options), (options = {});
@@ -603,10 +651,17 @@ export class Collection {
   /**
    * Drop the collection from the database, removing it permanently. New accesses will create a new collection.
    *
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  drop(options?: DropCollectionOptions, callback?: Callback<boolean>): Promise<boolean> | void {
+  drop(): Promise<boolean>;
+  drop(callback: Callback<boolean>): void;
+  drop(options: DropCollectionOptions): Promise<boolean>;
+  drop(options: DropCollectionOptions, callback: Callback<boolean>): void;
+  drop(
+    options?: DropCollectionOptions | Callback<boolean>,
+    callback?: Callback<boolean>
+  ): Promise<boolean> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -620,10 +675,17 @@ export class Collection {
   /**
    * Returns the options of the collection.
    *
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  options(options?: OperationOptions, callback?: Callback<Document>): Promise<Document> | void {
+  options(): Promise<Document>;
+  options(callback: Callback<Document>): void;
+  options(options: OperationOptions): Promise<Document>;
+  options(options: OperationOptions, callback: Callback<Document>): void;
+  options(
+    options?: OperationOptions | Callback<Document>,
+    callback?: Callback<Document>
+  ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -633,10 +695,17 @@ export class Collection {
   /**
    * Returns if the collection is a capped collection
    *
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  isCapped(options?: OperationOptions, callback?: Callback<boolean>): Promise<boolean> | void {
+  isCapped(): Promise<boolean>;
+  isCapped(callback: Callback<boolean>): void;
+  isCapped(options: OperationOptions): Promise<boolean>;
+  isCapped(options: OperationOptions, callback: Callback<boolean>): void;
+  isCapped(
+    options?: OperationOptions | Callback<boolean>,
+    callback?: Callback<boolean>
+  ): Promise<boolean> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -646,9 +715,9 @@ export class Collection {
   /**
    * Creates an index on the db and collection collection.
    *
-   * @param fieldOrSpec The field name or index specification to create an index for
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param fieldOrSpec - The field name or index specification to create an index for
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    *
    * @example
    * const collection = client.db('foo').collection('bar');
@@ -670,9 +739,17 @@ export class Collection {
    * // Equivalent to { j: 1, k: -1, l: 2d }
    * await collection.createIndex(['j', ['k', -1], { l: '2d' }])
    */
+  createIndex(fieldOrSpec: string | Document): Promise<Document>;
+  createIndex(fieldOrSpec: string | Document, callback: Callback<Document>): void;
+  createIndex(fieldOrSpec: string | Document, options: CreateIndexesOptions): Promise<Document>;
   createIndex(
     fieldOrSpec: string | Document,
-    options?: CreateIndexesOptions,
+    options: CreateIndexesOptions,
+    callback: Callback<Document>
+  ): void;
+  createIndex(
+    fieldOrSpec: string | Document,
+    options?: CreateIndexesOptions | Callback<Document>,
     callback?: Callback<Document>
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
@@ -693,9 +770,9 @@ export class Collection {
    * **Note**: Unlike {@link Collection#createIndex createIndex}, this function takes in raw index specifications.
    * Index specifications are defined {@link http://docs.mongodb.org/manual/reference/command/createIndexes/ here}.
    *
-   * @param indexSpecs An array of index specifications to be created
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param indexSpecs - An array of index specifications to be created
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    *
    * @example
    * const collection = client.db('foo').collection('bar');
@@ -715,9 +792,13 @@ export class Collection {
    *   }
    * ]);
    */
+  createIndexes(indexSpecs: any): Promise<Document>;
+  createIndexes(indexSpecs: any, callback: Callback<Document>): void;
+  createIndexes(indexSpecs: any, options: CreateIndexesOptions): Promise<Document>;
+  createIndexes(indexSpecs: any, options: CreateIndexesOptions, callback: Callback<Document>): void;
   createIndexes(
     indexSpecs: any,
-    options?: CreateIndexesOptions,
+    options?: CreateIndexesOptions | Callback<Document>,
     callback?: Callback<Document>
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
@@ -734,18 +815,20 @@ export class Collection {
   /**
    * Drops an index from this collection.
    *
-   * @param indexName Name of the index to drop.
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param indexName - Name of the index to drop.
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
+  dropIndex(indexName: string): Promise<Document>;
+  dropIndex(indexName: string, callback: Callback<Document>): void;
+  dropIndex(indexName: string, options: DropIndexesOptions): Promise<Document>;
+  dropIndex(indexName: string, options: DropIndexesOptions, callback: Callback<Document>): void;
   dropIndex(
     indexName: string,
-    options?: DropIndexesOptions,
+    options?: DropIndexesOptions | Callback<Document>,
     callback?: Callback<Document>
   ): Promise<Document> | void {
-    const args = Array.prototype.slice.call(arguments, 1);
-    callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
-    options = args.length ? args.shift() : {};
+    if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
     // Run only against primary
@@ -761,11 +844,15 @@ export class Collection {
   /**
    * Drops all indexes from this collection.
    *
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
+  dropIndexes(): Promise<Document>;
+  dropIndexes(callback: Callback<Document>): void;
+  dropIndexes(options: DropIndexesOptions): Promise<Document>;
+  dropIndexes(options: DropIndexesOptions, callback: Callback<Document>): void;
   dropIndexes(
-    options?: DropIndexesOptions,
+    options?: DropIndexesOptions | Callback<Document>,
     callback?: Callback<Document>
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
@@ -777,7 +864,7 @@ export class Collection {
   /**
    * Get the list of all indexes information for the collection.
    *
-   * @param options Optional settings for the command
+   * @param options - Optional settings for the command
    */
   listIndexes(options?: ListIndexesOptions): CommandCursor {
     const cursor = new CommandCursor(
@@ -792,13 +879,21 @@ export class Collection {
   /**
    * Checks if one or more indexes exist on the collection, fails on first non-existing index
    *
-   * @param indexes One or more index names to check.
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param indexes - One or more index names to check.
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
+  indexExists(indexes: string | string[]): Promise<boolean>;
+  indexExists(indexes: string | string[], callback: Callback<boolean>): void;
+  indexExists(indexes: string | string[], options: IndexInformationOptions): Promise<boolean>;
   indexExists(
     indexes: string | string[],
-    options?: IndexInformationOptions,
+    options: IndexInformationOptions,
+    callback: Callback<boolean>
+  ): void;
+  indexExists(
+    indexes: string | string[],
+    options?: IndexInformationOptions | Callback<boolean>,
     callback?: Callback<boolean>
   ): Promise<boolean> | void {
     if (typeof options === 'function') (callback = options), (options = {});
@@ -814,16 +909,19 @@ export class Collection {
   /**
    * Retrieves this collections index info.
    *
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
+  indexInformation(): Promise<Document>;
+  indexInformation(callback: Callback<Document>): void;
+  indexInformation(options: IndexInformationOptions): Promise<Document>;
+  indexInformation(options: IndexInformationOptions, callback: Callback<Document>): void;
   indexInformation(
-    options?: IndexInformationOptions,
+    options?: IndexInformationOptions | Callback<Document>,
     callback?: Callback<Document>
   ): Promise<Document> | void {
-    const args = Array.prototype.slice.call(arguments, 0);
-    callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
-    options = args.length ? args.shift() || {} : {};
+    if (typeof options === 'function') (callback = options), (options = {});
+    options = options || {};
 
     return executeOperation(
       this.s.topology,
@@ -835,11 +933,15 @@ export class Collection {
   /**
    * Gets an estimate of the count of documents in a collection using collection metadata.
    *
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
+  estimatedDocumentCount(): Promise<number>;
+  estimatedDocumentCount(callback: Callback<number>): void;
+  estimatedDocumentCount(options: EstimatedDocumentCountOptions): Promise<number>;
+  estimatedDocumentCount(options: EstimatedDocumentCountOptions, callback: Callback<number>): void;
   estimatedDocumentCount(
-    options?: EstimatedDocumentCountOptions,
+    options?: EstimatedDocumentCountOptions | Callback<number>,
     callback?: Callback<number>
   ): Promise<number> | void {
     if (typeof options === 'function') (callback = options), (options = {});
@@ -869,24 +971,26 @@ export class Collection {
    * [3]: https://docs.mongodb.com/manual/reference/operator/query/center/#op._S_center
    * [4]: https://docs.mongodb.com/manual/reference/operator/query/centerSphere/#op._S_centerSphere
    *
-   * @param query The query for the count
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param query - The query for the count
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    *
    * @see https://docs.mongodb.com/manual/reference/operator/query/expr/
    * @see https://docs.mongodb.com/manual/reference/operator/query/geoWithin/
    * @see https://docs.mongodb.com/manual/reference/operator/query/center/#op._S_center
    * @see https://docs.mongodb.com/manual/reference/operator/query/centerSphere/#op._S_centerSphere
    */
+  countDocuments(query: Document): Promise<number>;
+  countDocuments(callback: Callback<number>): void;
+  countDocuments(query: Document, options: CountDocumentsOptions): Promise<number>;
+  countDocuments(query: Document, options: CountDocumentsOptions, callback: Callback<number>): void;
   countDocuments(
     query: Document,
-    options: CountDocumentsOptions,
-    callback: Callback<number>
+    options?: CountDocumentsOptions | Callback<number>,
+    callback?: Callback<number>
   ): Promise<number> | void {
-    const args = Array.prototype.slice.call(arguments, 0);
-    callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
-    query = args.length ? args.shift() || {} : {};
-    options = args.length ? args.shift() || {} : {};
+    if (typeof options === 'function') (callback = options), (options = {});
+    options = options || {};
 
     return executeOperation(
       this.s.topology,
@@ -898,15 +1002,26 @@ export class Collection {
   /**
    * The distinct command returns a list of distinct values for the given key across a collection.
    *
-   * @param key Field of the document to find distinct values for
-   * @param query The query for filtering the set of documents to which we apply the distinct filter.
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param key - Field of the document to find distinct values for
+   * @param query - The query for filtering the set of documents to which we apply the distinct filter.
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
+  distinct(key: string): Promise<Document[]>;
+  distinct(key: string, callback?: Callback<Document[]>): void;
+  distinct(key: string, query: Document): Promise<Document[]>;
+  distinct(key: string, query: Document): void;
+  distinct(key: string, query: Document, options: DistinctOptions): Promise<Document[]>;
   distinct(
     key: string,
-    query?: Document,
-    options?: DistinctOptions,
+    query: Document,
+    options: DistinctOptions,
+    callback: Callback<Document[]>
+  ): void;
+  distinct(
+    key: string,
+    query?: Document | DistinctOptions | Callback<Document[]>,
+    options?: DistinctOptions | Callback<Document[]>,
     callback?: Callback<Document[]>
   ): Promise<Document[]> | void {
     const args = Array.prototype.slice.call(arguments, 1);
@@ -924,11 +1039,15 @@ export class Collection {
   /**
    * Retrieve all the indexes on the collection.
    *
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
+  indexes(): Promise<Document>;
+  indexes(callback: Callback<Document>): void;
+  indexes(options: IndexInformationOptions): Promise<Document>;
+  indexes(options: IndexInformationOptions, callback: Callback<Document>): void;
   indexes(
-    options?: IndexInformationOptions,
+    options?: IndexInformationOptions | Callback<Document>,
     callback?: Callback<Document>
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
@@ -940,13 +1059,19 @@ export class Collection {
   /**
    * Get all the collection statistics.
    *
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  stats(options?: CollStatsOptions, callback?: Callback<Document>): Promise<Document> | void {
-    const args = Array.prototype.slice.call(arguments, 0);
-    callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
-    options = args.length ? args.shift() || {} : {};
+  stats(): Promise<Document>;
+  stats(callback: Callback<Document>): void;
+  stats(options: CollStatsOptions): Promise<Document>;
+  stats(options: CollStatsOptions, callback: Callback<Document>): void;
+  stats(
+    options?: CollStatsOptions | Callback<Document>,
+    callback?: Callback<Document>
+  ): Promise<Document> | void {
+    if (typeof options === 'function') (callback = options), (options = {});
+    options = options || {};
 
     return executeOperation(this.s.topology, new CollStatsOperation(this, options), callback);
   }
@@ -954,13 +1079,21 @@ export class Collection {
   /**
    * Find a document and delete it in one atomic operation. Requires a write lock for the duration of the operation.
    *
-   * @param filter The Filter used to select the document to remove
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param filter - The Filter used to select the document to remove
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
+  findOneAndDelete(filter: Document): Promise<Document>;
+  findOneAndDelete(filter: Document, callback: Callback<Document>): void;
+  findOneAndDelete(filter: Document, options: FindAndModifyOptions): Promise<Document>;
   findOneAndDelete(
     filter: Document,
-    options?: FindAndModifyOptions,
+    options: FindAndModifyOptions,
+    callback: Callback<Document>
+  ): void;
+  findOneAndDelete(
+    filter: Document,
+    options?: FindAndModifyOptions | Callback<Document>,
     callback?: Callback<Document>
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
@@ -976,15 +1109,28 @@ export class Collection {
   /**
    * Find a document and replace it in one atomic operation. Requires a write lock for the duration of the operation.
    *
-   * @param filter The Filter used to select the document to replace
-   * @param replacement The Document that replaces the matching document
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param filter - The Filter used to select the document to replace
+   * @param replacement - The Document that replaces the matching document
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
+  findOneAndReplace(filter: Document, replacement: Document): Promise<Document>;
+  findOneAndReplace(filter: Document, replacement: Document, callback: Callback<Document>): void;
   findOneAndReplace(
     filter: Document,
     replacement: Document,
-    options?: FindAndModifyOptions,
+    options: FindAndModifyOptions
+  ): Promise<Document>;
+  findOneAndReplace(
+    filter: Document,
+    replacement: Document,
+    options: FindAndModifyOptions,
+    callback: Callback<Document>
+  ): void;
+  findOneAndReplace(
+    filter: Document,
+    replacement: Document,
+    options?: FindAndModifyOptions | Callback<Document>,
     callback?: Callback<Document>
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
@@ -1000,15 +1146,28 @@ export class Collection {
   /**
    * Find a document and update it in one atomic operation. Requires a write lock for the duration of the operation.
    *
-   * @param filter The Filter used to select the document to update
-   * @param update Update operations to be performed on the document
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param filter - The Filter used to select the document to update
+   * @param update - Update operations to be performed on the document
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
+  findOneAndUpdate(filter: Document, update: Document): Promise<Document>;
+  findOneAndUpdate(filter: Document, update: Document, callback: Callback<Document>): void;
   findOneAndUpdate(
     filter: Document,
     update: Document,
-    options?: FindAndModifyOptions,
+    options: FindAndModifyOptions
+  ): Promise<Document>;
+  findOneAndUpdate(
+    filter: Document,
+    update: Document,
+    options: FindAndModifyOptions,
+    callback: Callback<Document>
+  ): void;
+  findOneAndUpdate(
+    filter: Document,
+    update: Document,
+    options?: FindAndModifyOptions | Callback<Document>,
     callback?: Callback<Document>
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
@@ -1024,9 +1183,10 @@ export class Collection {
   /**
    * Execute an aggregation framework pipeline against the collection, needs MongoDB >= 2.2
    *
-   * @param pipeline An array of aggregation pipelines to execute
-   * @param options Optional settings for the command
+   * @param pipeline - An array of aggregation pipelines to execute
+   * @param options - Optional settings for the command
    */
+  aggregate(pipeline: Document[]): AggregationCursor;
   aggregate(pipeline: Document[], options?: AggregateOptions): AggregationCursor {
     if (arguments.length > 2) {
       throw new TypeError('Third parameter to `collection.aggregate()` must be undefined');
@@ -1106,15 +1266,35 @@ export class Collection {
   /**
    * Run Map Reduce across a collection. Be aware that the inline option for out will return an array of results not a collection.
    *
-   * @param map The mapping function.
-   * @param reduce The reduce function.
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param map - The mapping function.
+   * @param reduce - The reduce function.
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   mapReduce(
     map: string | MapFunction,
+    reduce: string | ReduceFunction
+  ): Promise<Document | Document[]>;
+  mapReduce(
+    map: string | MapFunction,
     reduce: string | ReduceFunction,
-    options?: MapReduceOptions,
+    callback: Callback<Document | Document[]>
+  ): void;
+  mapReduce(
+    map: string | MapFunction,
+    reduce: string | ReduceFunction,
+    options: MapReduceOptions
+  ): Promise<Document | Document[]>;
+  mapReduce(
+    map: string | MapFunction,
+    reduce: string | ReduceFunction,
+    options: MapReduceOptions,
+    callback: Callback<Document | Document[]>
+  ): void;
+  mapReduce(
+    map: string | MapFunction,
+    reduce: string | ReduceFunction,
+    options?: MapReduceOptions | Callback<Document | Document[]>,
     callback?: Callback<Document | Document[]>
   ): Promise<Document | Document[]> | void {
     if ('function' === typeof options) (callback = options), (options = {});
@@ -1204,9 +1384,9 @@ const DEPRECATED_FIND_OPTIONS = ['maxScan', 'fields', 'snapshot', 'oplogReplay']
 /**
  * Creates a cursor for a query that can be used to iterate over results from MongoDB
  *
- * @param query The cursor query object.
- * @param options Optional settings for the command
- * @param callback An optional callback, a Promise will be returned if none is provided
+ * @param query - The cursor query object.
+ * @param options - Optional settings for the command
+ * @param callback - An optional callback, a Promise will be returned if none is provided
  */
 Collection.prototype.find = deprecateOptions(
   {
@@ -1366,9 +1546,9 @@ Collection.prototype.find = deprecateOptions(
  * can be overridden by setting the **forceServerObjectId** flag.
  *
  * @deprecated Use insertOne, insertMany or bulkWrite
- * @param docs The documents to insert
- * @param options Optional settings for the command
- * @param callback An optional callback, a Promise will be returned if none is provided
+ * @param docs - The documents to insert
+ * @param options - Optional settings for the command
+ * @param callback - An optional callback, a Promise will be returned if none is provided
  */
 Collection.prototype.insert = deprecate(function (
   this: Collection,
@@ -1391,24 +1571,11 @@ Collection.prototype.insert = deprecate(function (
 /**
  * Updates documents.
  *
- * @function
- * @param {object} selector The selector for the update operation.
- * @param {object} update The update operations to be applied to the documents
- * @param {object} [options] Optional settings.
- * @param {(number|string)} [options.w] The write concern.
- * @param {number} [options.wtimeout] The write concern timeout.
- * @param {boolean} [options.j=false] Specify a journal write concern.
- * @param {boolean} [options.upsert=false] Update operation is an upsert.
- * @param {boolean} [options.multi=false] Update one/all documents with operation.
- * @param {boolean} [options.bypassDocumentValidation=false] Allow driver to bypass schema validation in MongoDB 3.2 or higher.
- * @param {object} [options.collation] Specify collation (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields).
- * @param {Array} [options.arrayFilters] optional list of array filters referenced in filtered positional operators
- * @param {ClientSession} [options.session] optional session to use for this operation
- * @param {object} [options.hint] An optional hint for query optimization. See the {@link https://docs.mongodb.com/manual/reference/command/update/#update-command-hint|update command} reference for more information.
- * @param {Collection~writeOpCallback} [callback] The command result callback
- * @throws {MongoError}
- * @returns {Promise<void> | void} returns Promise if no callback passed
  * @deprecated use updateOne, updateMany or bulkWrite
+ * @param selector - The selector for the update operation.
+ * @param update - The update operations to be applied to the documents
+ * @param options - Optional settings for the command
+ * @param callback - An optional callback, a Promise will be returned if none is provided
  */
 Collection.prototype.update = deprecate(function (
   this: Collection,
@@ -1436,18 +1603,10 @@ Collection.prototype.removeMany = Collection.prototype.deleteMany;
 /**
  * Remove documents.
  *
- * @function
- * @param {object} selector The selector for the update operation.
- * @param {object} [options] Optional settings.
- * @param {object} [options.collation] Specify collation (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields).
- * @param {(number|string)} [options.w] The write concern.
- * @param {number} [options.wtimeout] The write concern timeout.
- * @param {boolean} [options.j=false] Specify a journal write concern.
- * @param {boolean} [options.single=false] Removes the first document found.
- * @param {ClientSession} [options.session] optional session to use for this operation
- * @param {Collection~writeOpCallback} [callback] The command result callback
- * @returns {Promise<void> | void} returns Promise if no callback passed
  * @deprecated use deleteOne, deleteMany or bulkWrite
+ * @param selector - The selector for the update operation.
+ * @param options - Optional settings for the command
+ * @param callback - An optional callback, a Promise will be returned if none is provided
  */
 Collection.prototype.remove = deprecate(function (
   this: any,
@@ -1469,27 +1628,11 @@ Collection.prototype.remove = deprecate(function (
 'collection.remove is deprecated. Use deleteOne, deleteMany, or bulkWrite instead.');
 
 /**
- * The callback format for results
- *
- * @callback Collection~resultCallback
- * @param {MongoError} error An error instance representing the error during the execution.
- * @param {object} result The result object if the command was executed successfully.
- */
-
-/**
- * The callback format for an aggregation call
- *
- * @callback Collection~aggregationCallback
- * @param {MongoError} error An error instance representing the error during the execution.
- * @param {AggregationCursor} cursor The cursor if the aggregation command was executed successfully.
- */
-
-/**
  * Fetches the first document that matches the query
  *
- * @param query Query for find Operation
- * @param options Optional settings for the command
- * @param callback An optional callback, a Promise will be returned if none is provided
+ * @param query - Query for find Operation
+ * @param options - Optional settings for the command
+ * @param callback - An optional callback, a Promise will be returned if none is provided
  */
 Collection.prototype.findOne = deprecateOptions(
   {
@@ -1514,10 +1657,7 @@ Collection.prototype.findOne = deprecateOptions(
 /**
  * Drops all indexes from this collection.
  *
- * @function
  * @deprecated use dropIndexes
- * @param {Collection~resultCallback} callback The command result callback
- * @returns {Promise<void> | void} returns Promise if no [callback] passed
  */
 Collection.prototype.dropAllIndexes = deprecate(
   Collection.prototype.dropIndexes,
@@ -1528,9 +1668,9 @@ Collection.prototype.dropAllIndexes = deprecate(
  * Ensures that an index exists, if it does not it creates it
  *
  * @deprecated use createIndexes instead
- * @param fieldOrSpec Defines the index.
- * @param options Optional settings for the command
- * @param callback An optional callback, a Promise will be returned if none is provided
+ * @param fieldOrSpec - Defines the index.
+ * @param options - Optional settings for the command
+ * @param callback - An optional callback, a Promise will be returned if none is provided
  */
 Collection.prototype.ensureIndex = deprecate(function (
   this: any,
@@ -1550,14 +1690,6 @@ Collection.prototype.ensureIndex = deprecate(function (
 'collection.ensureIndex is deprecated. Use createIndexes instead.');
 
 /**
- * The callback format for results
- *
- * @callback Collection~countCallback
- * @param {MongoError} error An error instance representing the error during the execution.
- * @param {number} result The count of documents that matched the query.
- */
-
-/**
  * An estimated count of matching documents in the db to a query.
  *
  * **NOTE:** This method has been deprecated, since it does not provide an accurate count of the documents
@@ -1566,9 +1698,9 @@ Collection.prototype.ensureIndex = deprecate(function (
  *
  * @deprecated use {@link Collection#countDocuments countDocuments} or {@link Collection#estimatedDocumentCount estimatedDocumentCount} instead
  *
- * @param query The query for the count.
- * @param options Optional settings for the command
- * @param callback An optional callback, a Promise will be returned if none is provided
+ * @param query - The query for the count.
+ * @param options - Optional settings for the command
+ * @param callback - An optional callback, a Promise will be returned if none is provided
  */
 Collection.prototype.count = deprecate(function (
   this: Collection,
@@ -1597,11 +1729,11 @@ Collection.prototype.count = deprecate(function (
  *
  * @deprecated use findOneAndUpdate, findOneAndReplace or findOneAndDelete instead
  *
- * @param query Query object to locate the object to modify.
- * @param sort If multiple docs match, choose the first one in the specified sort order as the object to manipulate.
- * @param doc The fields/vals to be updated.
- * @param options Optional settings for the command
- * @param callback An optional callback, a Promise will be returned if none is provided
+ * @param query - Query object to locate the object to modify.
+ * @param sort - If multiple docs match, choose the first one in the specified sort order as the object to manipulate.
+ * @param doc - The fields/vals to be updated.
+ * @param options - Optional settings for the command
+ * @param callback - An optional callback, a Promise will be returned if none is provided
  */
 Collection.prototype.findAndModify = deprecate(
   _findAndModify,
@@ -1641,10 +1773,10 @@ function _findAndModify(
  *
  * @deprecated use findOneAndDelete instead
  *
- * @param query Query object to locate the object to modify.
- * @param sort If multiple docs match, choose the first one in the specified sort order as the object to manipulate.
- * @param options Optional settings for the command
- * @param callback An optional callback, a Promise will be returned if none is provided
+ * @param query - Query object to locate the object to modify.
+ * @param sort - If multiple docs match, choose the first one in the specified sort order as the object to manipulate.
+ * @param options - Optional settings for the command
+ * @param callback - An optional callback, a Promise will be returned if none is provided
  */
 Collection.prototype.findAndRemove = deprecate(function (
   this: Collection,
@@ -1672,19 +1804,15 @@ Collection.prototype.findAndRemove = deprecate(function (
 /**
  * Run a group command across a collection
  *
- * @function
- * @param {(object|Array|Function|code)} keys An object, array or function expressing the keys to group by.
- * @param {object} condition An optional condition that must be true for a row to be considered.
- * @param {object} initial Initial value of the aggregation counter object.
- * @param {(Function|Code)} reduce The reduce function aggregates (reduces) the objects iterated
- * @param {(Function|Code)} finalize An optional function to be run on each item in the result set just before the item is returned.
- * @param {boolean} command Specify if you wish to run using the internal group command or using eval, default is true.
- * @param {object} [options] Optional settings.
- * @param {(ReadPreference|string)} [options.readPreference] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
- * @param {ClientSession} [options.session] optional session to use for this operation
- * @param {Collection~resultCallback} [callback] The command result callback
- * @returns {Promise<void> | void} returns Promise if no callback passed
  * @deprecated MongoDB 3.6 or higher no longer supports the group command. We recommend rewriting using the aggregation framework.
+ * @param keys - An object, array or function expressing the keys to group by.
+ * @param condition - An optional condition that must be true for a row to be considered.
+ * @param initial - Initial value of the aggregation counter object.
+ * @param reduce - The reduce function aggregates (reduces) the objects iterated
+ * @param finalize - An optional function to be run on each item in the result set just before the item is returned.
+ * @param command - Specify if you wish to run using the internal group command or using eval, default is true.
+ * @param options - Optional settings for the command
+ * @param callback - An optional callback, a Promise will be returned if none is provided
  */
 Collection.prototype.group = deprecate(function (
   this: any,
