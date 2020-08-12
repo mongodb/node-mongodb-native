@@ -980,17 +980,21 @@ export class Collection {
    * @see https://docs.mongodb.com/manual/reference/operator/query/center/#op._S_center
    * @see https://docs.mongodb.com/manual/reference/operator/query/centerSphere/#op._S_centerSphere
    */
+  countDocuments(): Promise<number>;
+  countDocuments(callback: Callback<number>): void;
   countDocuments(query: Document): Promise<number>;
   countDocuments(callback: Callback<number>): void;
   countDocuments(query: Document, options: CountDocumentsOptions): Promise<number>;
   countDocuments(query: Document, options: CountDocumentsOptions, callback: Callback<number>): void;
   countDocuments(
-    query: Document,
+    query?: Document | CountDocumentsOptions | Callback<number>,
     options?: CountDocumentsOptions | Callback<number>,
     callback?: Callback<number>
   ): Promise<number> | void {
-    if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
+    const args = Array.prototype.slice.call(arguments, 0);
+    callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
+    query = args.length ? args.shift() || {} : {};
+    options = args.length ? args.shift() || {} : {};
 
     return executeOperation(
       this.s.topology,
