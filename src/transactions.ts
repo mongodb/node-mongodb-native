@@ -2,97 +2,68 @@ import { ReadPreference } from './read_preference';
 import { MongoError } from './error';
 import { ReadConcern } from './read_concern';
 import { WriteConcern } from './write_concern';
+import type { Server } from './sdam/server';
+import type { CommandOperationOptions } from './operations/command';
+import type { Document } from './types';
 
-let TxnState: any;
-let stateMachine: any;
+export enum TxnState {
+  NO_TRANSACTION = 'NO_TRANSACTION',
+  STARTING_TRANSACTION = 'STARTING_TRANSACTION',
+  TRANSACTION_IN_PROGRESS = 'TRANSACTION_IN_PROGRESS',
+  TRANSACTION_COMMITTED = 'TRANSACTION_COMMITTED',
+  TRANSACTION_COMMITTED_EMPTY = 'TRANSACTION_COMMITTED_EMPTY',
+  TRANSACTION_ABORTED = 'TRANSACTION_ABORTED'
+}
 
-(() => {
-  const NO_TRANSACTION = 'NO_TRANSACTION';
-  const STARTING_TRANSACTION = 'STARTING_TRANSACTION';
-  const TRANSACTION_IN_PROGRESS = 'TRANSACTION_IN_PROGRESS';
-  const TRANSACTION_COMMITTED = 'TRANSACTION_COMMITTED';
-  const TRANSACTION_COMMITTED_EMPTY = 'TRANSACTION_COMMITTED_EMPTY';
-  const TRANSACTION_ABORTED = 'TRANSACTION_ABORTED';
+const stateMachine = {
+  [TxnState.NO_TRANSACTION]: [TxnState.NO_TRANSACTION, TxnState.STARTING_TRANSACTION],
+  [TxnState.STARTING_TRANSACTION]: [
+    TxnState.TRANSACTION_IN_PROGRESS,
+    TxnState.TRANSACTION_COMMITTED,
+    TxnState.TRANSACTION_COMMITTED_EMPTY,
+    TxnState.TRANSACTION_ABORTED
+  ],
+  [TxnState.TRANSACTION_IN_PROGRESS]: [
+    TxnState.TRANSACTION_IN_PROGRESS,
+    TxnState.TRANSACTION_COMMITTED,
+    TxnState.TRANSACTION_ABORTED
+  ],
+  [TxnState.TRANSACTION_COMMITTED]: [
+    TxnState.TRANSACTION_COMMITTED,
+    TxnState.TRANSACTION_COMMITTED_EMPTY,
+    TxnState.STARTING_TRANSACTION,
+    TxnState.NO_TRANSACTION
+  ],
+  [TxnState.TRANSACTION_ABORTED]: [TxnState.STARTING_TRANSACTION, TxnState.NO_TRANSACTION],
+  [TxnState.TRANSACTION_COMMITTED_EMPTY]: [
+    TxnState.TRANSACTION_COMMITTED_EMPTY,
+    TxnState.NO_TRANSACTION
+  ]
+};
 
-  TxnState = {
-    NO_TRANSACTION,
-    STARTING_TRANSACTION,
-    TRANSACTION_IN_PROGRESS,
-    TRANSACTION_COMMITTED,
-    TRANSACTION_COMMITTED_EMPTY,
-    TRANSACTION_ABORTED
-  };
+/** Configuration options for a transaction. */
+export interface TransactionOptions extends CommandOperationOptions {
+  /** @property {ReadConcern} [readConcern] A default read concern for commands in this transaction */
+  readConcern?: ReadConcern;
+  /** A default writeConcern for commands in this transaction */
+  writeConcern?: WriteConcern;
+  /** A default read preference for commands in this transaction */
+  readPreference?: ReadPreference;
 
-  stateMachine = {
-    [NO_TRANSACTION]: [NO_TRANSACTION, STARTING_TRANSACTION],
-    [STARTING_TRANSACTION]: [
-      TRANSACTION_IN_PROGRESS,
-      TRANSACTION_COMMITTED,
-      TRANSACTION_COMMITTED_EMPTY,
-      TRANSACTION_ABORTED
-    ],
-    [TRANSACTION_IN_PROGRESS]: [
-      TRANSACTION_IN_PROGRESS,
-      TRANSACTION_COMMITTED,
-      TRANSACTION_ABORTED
-    ],
-    [TRANSACTION_COMMITTED]: [
-      TRANSACTION_COMMITTED,
-      TRANSACTION_COMMITTED_EMPTY,
-      STARTING_TRANSACTION,
-      NO_TRANSACTION
-    ],
-    [TRANSACTION_ABORTED]: [STARTING_TRANSACTION, NO_TRANSACTION],
-    [TRANSACTION_COMMITTED_EMPTY]: [TRANSACTION_COMMITTED_EMPTY, NO_TRANSACTION]
-  };
-})();
-
-/**
- * The MongoDB ReadConcern, which allows for control of the consistency and isolation properties
- * of the data read from replica sets and replica set shards.
- *
- * @typedef {object} ReadConcern
- * @property {'local'|'available'|'majority'|'linearizable'|'snapshot'} level The readConcern Level
- * @see https://docs.mongodb.com/manual/reference/read-concern/
- */
-
-/**
- * A MongoDB WriteConcern, which describes the level of acknowledgement
- * requested from MongoDB for write operations.
- *
- * @typedef {object} WriteConcern
- * @property {number|'majority'|string} [w=1] requests acknowledgement that the write operation has
- * propagated to a specified number of mongod hosts
- * @property {boolean} [j=false] requests acknowledgement from MongoDB that the write operation has
- * been written to the journal
- * @property {number} [wtimeout] a time limit, in milliseconds, for the write concern
- * @see https://docs.mongodb.com/manual/reference/write-concern/
- */
-
-/**
- * Configuration options for a transaction.
- *
- * @typedef {object} TransactionOptions
- * @property {ReadConcern} [readConcern] A default read concern for commands in this transaction
- * @property {WriteConcern} [writeConcern] A default writeConcern for commands in this transaction
- * @property {ReadPreference} [readPreference] A default read preference for commands in this transaction
- */
+  maxCommitTimeMS?: number;
+}
 
 /**
  * A class maintaining state related to a server transaction. Internal Only
  */
-class Transaction {
-  state: any;
-  options: any;
-  _pinnedServer: any;
-  _recoveryToken: any;
+export class Transaction {
+  state: TxnState;
+  options: TransactionOptions;
+  _pinnedServer?: Server;
+  _recoveryToken?: Document;
 
-  /**
-   * Create a transaction
-   *
-   * @param {TransactionOptions} [options] Optional settings
-   */
-  constructor(options?: any) {
+  /** Create a transaction */
+  constructor(options?: TransactionOptions) {
     options = options || {};
 
     this.state = TxnState.NO_TRANSACTION;
@@ -148,9 +119,9 @@ class Transaction {
   /**
    * Transition the transaction in the state machine
    *
-   * @param {TxnState} nextState The new state to transition to
+   * @param nextState The new state to transition to
    */
-  transition(nextState: any) {
+  transition(nextState: TxnState) {
     const nextStates = stateMachine[this.state];
     if (nextStates && nextStates.indexOf(nextState) !== -1) {
       this.state = nextState;
@@ -165,7 +136,7 @@ class Transaction {
     );
   }
 
-  pinServer(server: any) {
+  pinServer(server: Server) {
     if (this.isActive) {
       this._pinnedServer = server;
     }
@@ -176,8 +147,6 @@ class Transaction {
   }
 }
 
-function isTransactionCommand(command: any) {
+export function isTransactionCommand(command: Document) {
   return !!(command.commitTransaction || command.abortTransaction);
 }
-
-export { TxnState, Transaction, isTransactionCommand };

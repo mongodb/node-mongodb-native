@@ -1,4 +1,5 @@
 import type { TopologyVersion } from './sdam/server_description';
+import type { Document } from './types';
 
 const kErrorLabels = Symbol('errorLabels');
 
@@ -34,6 +35,8 @@ const GET_MORE_RESUMABLE_CODES = new Set([
 class MongoError extends Error {
   [kErrorLabels]: any;
   code?: number;
+  codeName?: string;
+  writeConcernError?: Document;
   topologyVersion?: TopologyVersion;
 
   constructor(message: any) {

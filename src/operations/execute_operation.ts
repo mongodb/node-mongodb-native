@@ -71,7 +71,7 @@ export function executeOperation<T extends OperationBase>(
   if (topology.hasSessionSupport()) {
     if (operation.session == null) {
       owner = Symbol();
-      session = topology.startSession({ owner });
+      session = topology.startSession({ owner, explicit: false });
       operation.session = session;
     } else if (operation.session.hasEnded) {
       throw new MongoError('Use of expired sessions is not permitted');

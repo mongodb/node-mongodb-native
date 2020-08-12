@@ -570,7 +570,7 @@ function makeOperationHandler(
   return function handleOperationResult(err, result) {
     if (err && !connectionIsStale(server.s.pool, connection)) {
       if (err instanceof MongoNetworkError) {
-        if (session && !session.hasEnded) {
+        if (session && !session.hasEnded && session.serverSession) {
           session.serverSession.isDirty = true;
         }
 

@@ -7,7 +7,12 @@ import { ServerDescription } from './server_description';
 import { TopologyDescription } from './topology_description';
 import { Server, ServerOptions } from './server';
 import { Cursor } from '../cursor';
-import { ClientSession, ServerSessionPool } from '../sessions';
+import {
+  ClientSession,
+  ServerSessionPool,
+  ServerSessionId,
+  ClientSessionOptions
+} from '../sessions';
 import { SrvPoller, SrvPollingEvent } from './srv_polling';
 import { CMAP_EVENT_NAMES } from '../cmap/events';
 import { MongoError, MongoServerSelectionError } from '../error';
@@ -74,7 +79,7 @@ const kWaitQueue = Symbol('waitQueue');
 type ServerSelectionCallback = Callback<Server>;
 interface ServerSelectionRequest {
   serverSelector: ServerSelector;
-  transaction: Transaction;
+  transaction?: Transaction;
   callback: ServerSelectionCallback;
   timer?: NodeJS.Timeout;
   [kCancelled]?: boolean;
@@ -138,6 +143,7 @@ export interface TopologyOptions extends ServerOptions, BSONSerializeOptions {
   directConnection: boolean;
 
   metadata: ClientMetadata;
+  useRecoveryToken: boolean;
 }
 
 interface ConnectOptions {
@@ -518,7 +524,10 @@ export class Topology extends EventEmitter {
   }
 
   /** Start a logical session */
-  startSession(options: unknown, clientOptions?: Record<string, unknown>): ClientSession {
+  startSession(
+    options: ClientSessionOptions,
+    clientOptions?: Record<string, unknown>
+  ): ClientSession {
     const session = new ClientSession(this, this.s.sessionPool, options, clientOptions);
     session.once('ended', () => {
       this.s.sessions.delete(session);
@@ -529,7 +538,7 @@ export class Topology extends EventEmitter {
   }
 
   /** Send endSessions command(s) with the given session ids */
-  endSessions(sessions: ClientSession[], callback?: Callback): void {
+  endSessions(sessions: ServerSessionId[], callback?: Callback): void {
     if (!Array.isArray(sessions)) {
       sessions = [sessions];
     }
@@ -1002,7 +1011,7 @@ function processWaitQueue(topology: Topology) {
     const selectedServerDescription = randomSelection(selectedDescriptions);
     const selectedServer = topology.s.servers.get(selectedServerDescription.address);
     const transaction = waitQueueMember.transaction;
-    if (isSharded && transaction && transaction.isActive) {
+    if (isSharded && transaction && transaction.isActive && selectedServer) {
       transaction.pinServer(selectedServer);
     }
 

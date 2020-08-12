@@ -5,8 +5,6 @@ import { maxWireVersion } from '../utils';
 import { Aspect, defineAspects, Hint } from './operation';
 import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
-import type { Collection } from '../collection';
-import type { Db } from '../db';
 import type { Cursor } from '../cursor';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 

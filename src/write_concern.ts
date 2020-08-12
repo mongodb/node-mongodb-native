@@ -17,7 +17,12 @@ export interface WriteConcernOptions {
   writeConcern?: WriteConcernOptions | WriteConcern | W;
 }
 
-/** The **WriteConcern** class is a class that represents a MongoDB WriteConcern. */
+/**
+ * A MongoDB WriteConcern, which describes the level of acknowledgement
+ * requested from MongoDB for write operations.
+ *
+ * @see https://docs.mongodb.com/manual/reference/write-concern/
+ */
 export class WriteConcern {
   /** The write concern */
   w?: W;

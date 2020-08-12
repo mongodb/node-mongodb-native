@@ -2,24 +2,28 @@ import { PromiseProvider } from './promise_provider';
 import { EventEmitter } from 'events';
 import { Binary, Long } from './bson';
 import { ReadPreference } from './read_preference';
-import { isTransactionCommand, TxnState, Transaction } from './transactions';
-import { resolveClusterTime } from './sdam/common';
+import { isTransactionCommand, TxnState, Transaction, TransactionOptions } from './transactions';
+import { resolveClusterTime, ClusterTime } from './sdam/common';
 import { isSharded } from './cmap/wire_protocol/shared';
-import { isPromiseLike, uuidV4, maxWireVersion } from './utils';
+import { isPromiseLike, uuidV4, maxWireVersion, maybePromise } from './utils';
 import { MongoError, isRetryableError, MongoNetworkError, MongoWriteConcernError } from './error';
 import { now, calculateDurationInMs } from './utils';
-import type { Callback } from './types';
+import type { Callback, Document } from './types';
+import type { Topology } from './sdam/topology';
+import type { CommandOptions } from './cmap/wire_protocol/command';
+import type { MongoClientOptions } from './mongo_client';
+import type { Timestamp } from 'bson';
 const minWireVersionForShardedTransactions = 8;
 
 /**
  * @param {ClientSession} session
  * @param {Function} [callback]
  */
-function assertAlive(session: any, callback?: Callback) {
+function assertAlive(session: ClientSession, callback?: Callback): boolean {
   if (session.serverSession == null) {
     const error = new MongoError('Cannot use a session that has ended');
     if (typeof callback === 'function') {
-      callback(error, null);
+      callback(error);
       return false;
     }
 
@@ -29,45 +33,52 @@ function assertAlive(session: any, callback?: Callback) {
   return true;
 }
 
-/**
- * Options to pass when creating a Client Session
- *
- * @typedef {object} SessionOptions
- * @property {boolean} [causalConsistency=true] Whether causal consistency should be enabled on this session
- * @property {TransactionOptions} [defaultTransactionOptions] The default TransactionOptions to use for transactions started on this session.
- */
+export interface ClientSessionOptions {
+  /** Whether causal consistency should be enabled on this session */
+  causalConsistency?: boolean;
+  /** The default TransactionOptions to use for transactions started on this session. */
+  defaultTransactionOptions?: TransactionOptions;
+
+  owner: symbol;
+  explicit?: boolean;
+  initialClusterTime?: ClusterTime;
+}
+
+export type WithTransactionCallback = (session: ClientSession) => Promise<any> | void;
 
 /**
  * A class representing a client session on the server
- * WARNING: not meant to be instantiated directly.
  *
- * @class
- * @hideconstructor
+ * NOTE: not meant to be instantiated directly.
  */
 class ClientSession extends EventEmitter {
-  topology: any;
-  sessionPool: any;
-  hasEnded: any;
-  serverSession: any;
-  clientOptions: any;
-  supports: any;
-  clusterTime: any;
-  operationTime: any;
-  explicit: any;
-  owner: any;
-  defaultTransactionOptions: any;
-  transaction: any;
+  topology: Topology;
+  sessionPool: ServerSessionPool;
+  hasEnded: boolean;
+  serverSession?: ServerSession;
+  clientOptions?: MongoClientOptions;
+  supports: { causalConsistency: boolean };
+  clusterTime?: ClusterTime;
+  operationTime?: Timestamp;
+  explicit: boolean;
+  owner: symbol;
+  defaultTransactionOptions: TransactionOptions;
+  transaction: Transaction;
 
   /**
    * Create a client session.
-   * WARNING: not meant to be instantiated directly
    *
-   * @param {Topology} topology The current client's topology (Internal Class)
-   * @param {ServerSessionPool} sessionPool The server session pool (Internal Class)
-   * @param {SessionOptions} [options] Optional settings
-   * @param {object} [clientOptions] Optional settings provided when creating a client in the porcelain driver
+   * @param topology - The current client's topology (Internal Class)
+   * @param sessionPool - The server session pool (Internal Class)
+   * @param options - Optional settings
+   * @param clientOptions - Optional settings provided when creating a MongoClient
    */
-  constructor(topology: any, sessionPool: any, options?: any, clientOptions?: object) {
+  constructor(
+    topology: Topology,
+    sessionPool: ServerSessionPool,
+    options: ClientSessionOptions,
+    clientOptions?: MongoClientOptions
+  ) {
     super();
 
     if (topology == null) {
@@ -89,26 +100,21 @@ class ClientSession extends EventEmitter {
 
     this.supports = {
       causalConsistency:
-        typeof options.causalConsistency !== 'undefined' ? options.causalConsistency : true
+        typeof options.causalConsistency === 'boolean' ? options.causalConsistency : true
     };
 
     this.clusterTime = options.initialClusterTime;
 
-    this.operationTime = null;
+    this.operationTime = undefined;
     this.explicit = !!options.explicit;
     this.owner = options.owner;
     this.defaultTransactionOptions = Object.assign({}, options.defaultTransactionOptions);
     this.transaction = new Transaction();
   }
 
-  /**
-   * The server id associated with this session
-   * SessionId is A BSON document reflecting the lsid of a {@link ClientSession}
-   *
-   * @type {SessionId}
-   */
-  get id() {
-    return this.serverSession.id;
+  /** The server id associated with this session */
+  get id(): ServerSessionId | undefined {
+    return this.serverSession?.id;
   }
 
   /**
@@ -117,12 +123,12 @@ class ClientSession extends EventEmitter {
    * @param {object} [options] Optional settings. Currently reserved for future use
    * @param {Function} [callback] Optional callback for completion of this operation
    */
-  endSession(options?: object, callback?: Callback) {
+  endSession(options?: object, callback?: Callback<void>): void {
     if (typeof options === 'function') (callback = options as Callback), (options = {});
     options = options || {};
 
     if (this.hasEnded) {
-      if (typeof callback === 'function') callback(undefined, null);
+      if (typeof callback === 'function') callback();
       return;
     }
 
@@ -135,19 +141,22 @@ class ClientSession extends EventEmitter {
     this.emit('ended', this);
 
     // release the server session back to the pool
-    this.sessionPool.release(this.serverSession);
-    this.serverSession = null;
+    if (this.serverSession) {
+      this.sessionPool.release(this.serverSession);
+    }
+
+    this.serverSession = undefined;
 
     // spec indicates that we should ignore all errors for `endSessions`
-    if (typeof callback === 'function') callback(undefined, null);
+    if (typeof callback === 'function') callback();
   }
 
   /**
    * Advances the operationTime for a ClientSession.
    *
-   * @param {Timestamp} operationTime the `BSON.Timestamp` of the operation type it is desired to advance to
+   * @param operationTime - the `BSON.Timestamp` of the operation type it is desired to advance to
    */
-  advanceOperationTime(operationTime: any) {
+  advanceOperationTime(operationTime: Timestamp) {
     if (this.operationTime == null) {
       this.operationTime = operationTime;
       return;
@@ -161,27 +170,28 @@ class ClientSession extends EventEmitter {
   /**
    * Used to determine if this session equals another
    *
-   * @param {ClientSession} session
-   * @returns {boolean} true if the sessions are equal
+   * @param session - The session to compare to
    */
-  equals(session: any): boolean {
+  equals(session: ClientSession): boolean {
     if (!(session instanceof ClientSession)) {
+      return false;
+    }
+
+    if (this.id == null || session.id == null) {
       return false;
     }
 
     return this.id.id.buffer.equals(session.id.id.buffer);
   }
 
-  /**
-   * Increment the transaction number on the internal ServerSession
-   */
+  /** Increment the transaction number on the internal ServerSession */
   incrementTransactionNumber() {
-    this.serverSession.txnNumber++;
+    if (this.serverSession) {
+      this.serverSession.txnNumber++;
+    }
   }
 
-  /**
-   * @returns {boolean} whether this session is currently in a transaction or not
-   */
+  /** @returns whether this session is currently in a transaction or not */
   inTransaction(): boolean {
     return this.transaction.isActive;
   }
@@ -189,9 +199,9 @@ class ClientSession extends EventEmitter {
   /**
    * Starts a new transaction with the given options.
    *
-   * @param {TransactionOptions} options Options for the transaction
+   * @param options - Options for the transaction
    */
-  startTransaction(options: any) {
+  startTransaction(options?: TransactionOptions): void {
     assertAlive(this);
     if (this.inTransaction()) {
       throw new MongoError('Transaction already in progress');
@@ -220,43 +230,27 @@ class ClientSession extends EventEmitter {
   /**
    * Commits the currently active transaction in this session.
    *
-   * @param {Function} [callback] optional callback for completion of this operation
-   * @returns {Promise<void>|undefined} A promise is returned if no callback is provided
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  commitTransaction(callback?: Callback): Promise<void> | undefined {
-    const Promise = PromiseProvider.get();
-
-    if (typeof callback === 'function') {
-      endTransaction(this, 'commitTransaction', callback);
-      return;
-    }
-
-    return new Promise((resolve: any, reject: any) => {
-      endTransaction(this, 'commitTransaction', (err?: any, reply?: any) =>
-        err ? reject(err) : resolve(reply)
-      );
-    });
+  commitTransaction(): Promise<Document>;
+  commitTransaction(callback: Callback<Document>): void;
+  commitTransaction(callback?: Callback<Document>): Promise<Document> | void {
+    return maybePromise(callback, (cb: Callback<Document>) =>
+      endTransaction(this, 'commitTransaction', cb)
+    );
   }
 
   /**
    * Aborts the currently active transaction in this session.
    *
-   * @param {Function} [callback] optional callback for completion of this operation
-   * @returns {Promise<void>|undefined} A promise is returned if no callback is provided
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  abortTransaction(callback?: Callback): Promise<void> | undefined {
-    const Promise = PromiseProvider.get();
-
-    if (typeof callback === 'function') {
-      endTransaction(this, 'abortTransaction', callback);
-      return;
-    }
-
-    return new Promise((resolve: any, reject: any) => {
-      endTransaction(this, 'abortTransaction', (err?: any, reply?: any) =>
-        err ? reject(err) : resolve(reply)
-      );
-    });
+  abortTransaction(): Promise<Document>;
+  abortTransaction(callback: Callback<Document>): void;
+  abortTransaction(callback?: Callback<Document>): Promise<Document> | void {
+    return maybePromise(callback, (cb: Callback<Document>) =>
+      endTransaction(this, 'abortTransaction', cb)
+    );
   }
 
   /**
@@ -267,14 +261,6 @@ class ClientSession extends EventEmitter {
   }
 
   /**
-   * A user provided function to be run within a transaction
-   *
-   * @callback WithTransactionCallback
-   * @param {ClientSession} session The parent session of the transaction running the operation. This should be passed into each operation within the lambda.
-   * @returns {Promise<void>} The resulting Promise of operations run within this transaction
-   */
-
-  /**
    * Runs a provided lambda within a transaction, retrying either the commit operation
    * or entire transaction as needed (and when the error permits) to better ensure that
    * the transaction can complete successfully.
@@ -282,10 +268,10 @@ class ClientSession extends EventEmitter {
    * IMPORTANT: This method requires the user to return a Promise, all lambdas that do not
    * return a Promise will result in undefined behavior.
    *
-   * @param {WithTransactionCallback} fn
-   * @param {TransactionOptions} [options] Optional settings for the transaction
+   * @param fn - A lambda to run within a transaction
+   * @param options - Optional settings for the transaction
    */
-  withTransaction(fn: any, options?: any) {
+  withTransaction(fn: WithTransactionCallback, options?: TransactionOptions) {
     const startTime = now();
     return attemptTransaction(this, startTime, fn, options);
   }
@@ -301,20 +287,23 @@ const NON_DETERMINISTIC_WRITE_CONCERN_ERRORS = new Set([
   'UnsatisfiableWriteConcern'
 ]);
 
-function hasNotTimedOut(startTime: any, max: any) {
+function hasNotTimedOut(startTime: number, max: number) {
   return calculateDurationInMs(startTime) < max;
 }
 
-function isUnknownTransactionCommitResult(err: any) {
+function isUnknownTransactionCommitResult(err: MongoError) {
+  const isNonDeterministicWriteConcernError =
+    err.codeName && NON_DETERMINISTIC_WRITE_CONCERN_ERRORS.has(err.codeName);
+
   return (
     isMaxTimeMSExpiredError(err) ||
-    (!NON_DETERMINISTIC_WRITE_CONCERN_ERRORS.has(err.codeName) &&
+    (!isNonDeterministicWriteConcernError &&
       err.code !== UNSATISFIABLE_WRITE_CONCERN_CODE &&
       err.code !== UNKNOWN_REPL_WRITE_CONCERN_CODE)
   );
 }
 
-function isMaxTimeMSExpiredError(err: any) {
+function isMaxTimeMSExpiredError(err: MongoError) {
   if (err == null) {
     return false;
   }
@@ -325,8 +314,13 @@ function isMaxTimeMSExpiredError(err: any) {
   );
 }
 
-function attemptTransactionCommit(session: any, startTime: any, fn: any, options: any) {
-  return session.commitTransaction().catch((err: any) => {
+function attemptTransactionCommit(
+  session: ClientSession,
+  startTime: number,
+  fn: WithTransactionCallback,
+  options?: TransactionOptions
+): Promise<Document> {
+  return session.commitTransaction().catch((err: MongoError) => {
     if (
       err instanceof MongoError &&
       hasNotTimedOut(startTime, MAX_WITH_TRANSACTION_TIMEOUT) &&
@@ -351,11 +345,16 @@ const USER_EXPLICIT_TXN_END_STATES = new Set([
   TxnState.TRANSACTION_ABORTED
 ]);
 
-function userExplicitlyEndedTransaction(session: any) {
+function userExplicitlyEndedTransaction(session: ClientSession) {
   return USER_EXPLICIT_TXN_END_STATES.has(session.transaction.state);
 }
 
-function attemptTransaction(session: any, startTime: any, fn: any, options: any): Promise<any> {
+function attemptTransaction(
+  session: ClientSession,
+  startTime: number,
+  fn: WithTransactionCallback,
+  options?: TransactionOptions
+): Promise<any> {
   const Promise = PromiseProvider.get();
   session.startTransaction(options);
 
@@ -371,16 +370,16 @@ function attemptTransaction(session: any, startTime: any, fn: any, options: any)
     throw new TypeError('Function provided to `withTransaction` must return a Promise');
   }
 
-  return promise
-    .then(() => {
+  return promise.then(
+    () => {
       if (userExplicitlyEndedTransaction(session)) {
         return;
       }
 
       return attemptTransactionCommit(session, startTime, fn, options);
-    })
-    .catch(err => {
-      function maybeRetryOrThrow(err: any): Promise<any> {
+    },
+    err => {
+      function maybeRetryOrThrow(err: MongoError): Promise<any> {
         if (
           err instanceof MongoError &&
           err.hasErrorLabel('TransientTransactionError') &&
@@ -401,10 +400,11 @@ function attemptTransaction(session: any, startTime: any, fn: any, options: any)
       }
 
       return maybeRetryOrThrow(err);
-    });
+    }
+  );
 }
 
-function endTransaction(session: any, commandName: any, callback: Callback) {
+function endTransaction(session: ClientSession, commandName: string, callback: Callback<Document>) {
   if (!assertAlive(session, callback)) {
     // checking result in case callback was called
     return;
@@ -425,7 +425,7 @@ function endTransaction(session: any, commandName: any, callback: Callback) {
     ) {
       // the transaction was never started, we can safely exit here
       session.transaction.transition(TxnState.TRANSACTION_COMMITTED_EMPTY);
-      callback(undefined, null);
+      callback();
       return;
     }
 
@@ -437,7 +437,7 @@ function endTransaction(session: any, commandName: any, callback: Callback) {
     if (txnState === TxnState.STARTING_TRANSACTION) {
       // the transaction was never started, we can safely exit here
       session.transaction.transition(TxnState.TRANSACTION_ABORTED);
-      callback(undefined, null);
+      callback();
       return;
     }
 
@@ -456,7 +456,7 @@ function endTransaction(session: any, commandName: any, callback: Callback) {
   }
 
   // construct and send the command
-  const command = { [commandName]: 1 } as any;
+  const command: Document = { [commandName]: 1 };
 
   // apply a writeConcern if specified
   let writeConcern;
@@ -478,7 +478,7 @@ function endTransaction(session: any, commandName: any, callback: Callback) {
     Object.assign(command, { maxTimeMS: session.transaction.options.maxTimeMS });
   }
 
-  function commandHandler(e: any, r: any) {
+  function commandHandler(e?: MongoError, r?: Document) {
     if (commandName === 'commitTransaction') {
       session.transaction.transition(TxnState.TRANSACTION_COMMITTED);
 
@@ -498,14 +498,12 @@ function endTransaction(session: any, commandName: any, callback: Callback) {
       }
     } else {
       session.transaction.transition(TxnState.TRANSACTION_ABORTED);
+
+      // The spec indicates that we should ignore all errors on `abortTransaction`
+      return callback();
     }
 
     callback(e, r);
-  }
-
-  // The spec indicates that we should ignore all errors on `abortTransaction`
-  function transactionError(err: any) {
-    return commandName === 'commitTransaction' ? err : null;
   }
 
   if (
@@ -517,7 +515,7 @@ function endTransaction(session: any, commandName: any, callback: Callback) {
   }
 
   // send the command
-  session.topology.command('admin.$cmd', command, { session }, (err?: any, reply?: any) => {
+  session.topology.command('admin.$cmd', command, { session }, (err, reply) => {
     if (err && isRetryableError(err)) {
       // SPEC-1185: apply majority write concern when retrying commitTransaction
       if (command.commitTransaction) {
@@ -529,32 +527,31 @@ function endTransaction(session: any, commandName: any, callback: Callback) {
         });
       }
 
-      return session.topology.command(
-        'admin.$cmd',
-        command,
-        { session },
-        (_err?: any, _reply?: any) => commandHandler(transactionError(_err), _reply)
+      return session.topology.command('admin.$cmd', command, { session }, (_err, _reply) =>
+        commandHandler(_err as MongoError, _reply)
       );
     }
 
-    commandHandler(transactionError(err), reply);
+    commandHandler(err as MongoError, reply);
   });
 }
 
-function supportsRecoveryToken(session: any) {
+function supportsRecoveryToken(session: ClientSession) {
   const topology = session.topology;
   return !!topology.s.options.useRecoveryToken;
 }
+
+export type ServerSessionId = { id: Binary };
 
 /**
  * Reflects the existence of a session on the server. Can be reused by the session pool.
  * WARNING: not meant to be instantiated directly. For internal use only.
  */
 class ServerSession {
-  id: any;
-  lastUse: any;
-  txnNumber: any;
-  isDirty: any;
+  id: ServerSessionId;
+  lastUse: number;
+  txnNumber: number;
+  isDirty: boolean;
 
   constructor() {
     this.id = { id: new Binary(uuidV4(), Binary.SUBTYPE_UUID) };
@@ -585,10 +582,10 @@ class ServerSession {
  * For internal use only
  */
 class ServerSessionPool {
-  topology: any;
-  sessions: any;
+  topology: Topology;
+  sessions: ServerSession[];
 
-  constructor(topology: any) {
+  constructor(topology: Topology) {
     if (topology == null) {
       throw new Error('ServerSessionPool requires a topology');
     }
@@ -597,15 +594,11 @@ class ServerSessionPool {
     this.sessions = [];
   }
 
-  /**
-   * Ends all sessions in the session pool.
-   *
-   * @param {any} callback
-   */
-  endAllPooledSessions(callback: any) {
+  /** Ends all sessions in the session pool */
+  endAllPooledSessions(callback?: Callback<void>): void {
     if (this.sessions.length) {
       this.topology.endSessions(
-        this.sessions.map((session: any) => session.id),
+        this.sessions.map((session: ServerSession) => session.id),
         () => {
           this.sessions = [];
           if (typeof callback === 'function') {
@@ -632,10 +625,11 @@ class ServerSessionPool {
    * @returns {ServerSession}
    */
   acquire(): ServerSession {
-    const sessionTimeoutMinutes = this.topology.logicalSessionTimeoutMinutes;
+    const sessionTimeoutMinutes = this.topology.logicalSessionTimeoutMinutes || 10;
+
     while (this.sessions.length) {
       const session = this.sessions.shift();
-      if (!session.hasTimedOut(sessionTimeoutMinutes)) {
+      if (session && !session.hasTimedOut(sessionTimeoutMinutes)) {
         return session;
       }
     }
@@ -652,6 +646,10 @@ class ServerSessionPool {
    */
   release(session: ServerSession) {
     const sessionTimeoutMinutes = this.topology.logicalSessionTimeoutMinutes;
+    if (!sessionTimeoutMinutes) {
+      return;
+    }
+
     while (this.sessions.length) {
       const pooledSession = this.sessions[this.sessions.length - 1];
       if (pooledSession.hasTimedOut(sessionTimeoutMinutes)) {
@@ -674,11 +672,7 @@ class ServerSessionPool {
 
 // TODO: this should be codified in command construction
 // @see https://github.com/mongodb/specifications/blob/master/source/read-write-concern/read-write-concern.rst#read-concern
-/**
- * @param {any} command
- * @param {any} [options]
- */
-function commandSupportsReadConcern(command: any, options?: any) {
+function commandSupportsReadConcern(command: Document, options?: Document) {
   if (
     command.aggregate ||
     command.count ||
@@ -705,12 +699,15 @@ function commandSupportsReadConcern(command: any, options?: any) {
 /**
  * Optionally decorate a command with sessions specific keys
  *
- * @param {ClientSession} session the session tracking transaction state
- * @param {any} command the command to decorate
- * @param {any} [options] Optional settings passed to calling operation
- * @returns {MongoError|undefined} An error, if some error condition was met
+ * @param session the session tracking transaction state
+ * @param command the command to decorate
+ * @param options Optional settings passed to calling operation
  */
-function applySession(session: any, command: any, options?: any): MongoError | undefined {
+function applySession(
+  session: ClientSession,
+  command: Document,
+  options?: CommandOptions
+): MongoError | undefined {
   const serverSession = session.serverSession;
   if (serverSession == null) {
     // TODO: merge this with `assertAlive`, did not want to throw a try/catch here
@@ -723,7 +720,7 @@ function applySession(session: any, command: any, options?: any): MongoError | u
 
   // first apply non-transaction-specific sessions data
   const inTransaction = session.inTransaction() || isTransactionCommand(command);
-  const isRetryableWrite = options.willRetryWrite;
+  const isRetryableWrite = options?.willRetryWrite || false;
   const shouldApplyReadConcern = commandSupportsReadConcern(command, options);
 
   if (serverSession.txnNumber && (isRetryableWrite || inTransaction)) {
@@ -746,7 +743,7 @@ function applySession(session: any, command: any, options?: any): MongoError | u
     return;
   }
 
-  if (options.readPreference && !options.readPreference.equals(ReadPreference.primary)) {
+  if (options && options.readPreference && !options.readPreference.equals(ReadPreference.primary)) {
     return new MongoError(
       `Read preference in a transaction must be primary, not: ${options.readPreference.mode}`
     );
@@ -760,7 +757,7 @@ function applySession(session: any, command: any, options?: any): MongoError | u
     command.startTransaction = true;
 
     const readConcern =
-      session.transaction.options.readConcern || session.clientOptions.readConcern;
+      session.transaction.options.readConcern || session?.clientOptions?.readConcern;
     if (readConcern) {
       command.readConcern = readConcern;
     }
@@ -772,7 +769,7 @@ function applySession(session: any, command: any, options?: any): MongoError | u
   }
 }
 
-function updateSessionFromResponse(session: any, document: any) {
+function updateSessionFromResponse(session: ClientSession, document: Document) {
   if (document.$clusterTime) {
     resolveClusterTime(session, document.$clusterTime);
   }
