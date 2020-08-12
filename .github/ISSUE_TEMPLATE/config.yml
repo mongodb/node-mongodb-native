@@ -1,0 +1,15 @@
+---
+blank_issues_enabled: false
+contact_links:
+  -
+    about: "Please ask and answer usage questions on our Community Forums."
+    name: Questions
+    url: "https://developer.mongodb.com/community/forums/tags/c/drivers-odms/7/node-js"
+   -
+    about: "Please submit all issues or feature requests to our JIRA."
+    name: Issues & Feature Requests
+    url: "https://jira.mongodb.org/browse/NODE"
+  -
+    about: "Please check the FAQ before filing new issues"
+    name: "MongoDB NodeJS FAQ"
+    url: "https://docs.mongodb.com/drivers/node/faq"
