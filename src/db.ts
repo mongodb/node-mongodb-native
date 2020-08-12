@@ -798,7 +798,6 @@ const collectionKeys = [
  * @param {object} [options.pkFactory] A primary key factory object for generation of custom _id keys.
  * @param {(ReadPreference|string)} [options.readPreference] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
  * @param {boolean} [options.serializeFunctions=false] Serialize functions on any object.
- * @param {boolean} [options.strict=false] Returns an error if the collection does not exist
  * @param {boolean} [options.capped=false] Create a capped collection.
  * @param {boolean} [options.autoIndexId=true] DEPRECATED: Create an index on the _id field of the document, True by default on MongoDB 2.6 - 3.0
  * @param {number} [options.size] The size of the capped collection in bytes.
