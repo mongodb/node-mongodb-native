@@ -258,6 +258,7 @@ interface MongoClientPrivate {
 export class MongoClient extends EventEmitter {
   s: MongoClientPrivate;
   topology?: Topology;
+
   constructor(url: string, options?: MongoClientOptions) {
     super();
 
@@ -290,6 +291,8 @@ export class MongoClient extends EventEmitter {
    *
    * @see docs.mongodb.org/manual/reference/connection-string/
    */
+  connect(): Promise<MongoClient>;
+  connect(callback: Callback<MongoClient>): void;
   connect(callback?: Callback<MongoClient>): Promise<MongoClient> | void {
     if (callback && typeof callback !== 'function') {
       throw new TypeError('`connect` only accepts a callback');
@@ -313,11 +316,19 @@ export class MongoClient extends EventEmitter {
    * @param force - Force close, emitting no events
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  close(force = false, callback?: Callback<void>): Promise<void> {
-    if (typeof force === 'function') {
-      callback = force;
-      force = false;
+  close(): Promise<void>;
+  close(callback: Callback<void>): void;
+  close(force: boolean): Promise<void>;
+  close(force: boolean, callback: Callback<void>): void;
+  close(
+    forceOrCallback?: boolean | Callback<void>,
+    callback?: Callback<void>
+  ): Promise<void> | void {
+    if (typeof forceOrCallback === 'function') {
+      callback = forceOrCallback;
     }
+
+    const force = typeof forceOrCallback === 'boolean' ? forceOrCallback : false;
 
     const client = this;
     return maybePromise(callback, (cb: any) => {
@@ -347,6 +358,8 @@ export class MongoClient extends EventEmitter {
    * @param dbName - The name of the database we want to use. If not provided, use database name from connection string.
    * @param options - Optional settings for Db construction
    */
+  db(dbName: string): Db;
+  db(dbName: string, options: DbOptions & { returnNonCachedInstance?: boolean }): Db;
   db(dbName: string, options?: DbOptions & { returnNonCachedInstance?: boolean }): Db {
     options = options || {};
 
@@ -388,14 +401,16 @@ export class MongoClient extends EventEmitter {
    *
    * @see https://docs.mongodb.org/manual/reference/connection-string/
    */
+  static connect(url: string): Promise<MongoClient>;
+  static connect(url: string, callback: Callback<MongoClient>): void;
+  static connect(url: string, options: MongoClientOptions): Promise<MongoClient>;
+  static connect(url: string, options: MongoClientOptions, callback: Callback<MongoClient>): void;
   static connect(
     url: string,
-    options?: MongoClientOptions,
+    options?: MongoClientOptions | Callback<MongoClient>,
     callback?: Callback<MongoClient>
   ): Promise<MongoClient> | void {
-    const args = Array.prototype.slice.call(arguments, 1);
-    callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
-    options = args.length ? args.shift() : null;
+    if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
     if (options && options.promiseLibrary) {
@@ -409,6 +424,8 @@ export class MongoClient extends EventEmitter {
   }
 
   /** Starts a new session on the server */
+  startSession(): ClientSession;
+  startSession(options: ClientSessionOptions): ClientSession;
   startSession(options?: ClientSessionOptions): ClientSession {
     options = Object.assign({ explicit: true }, options);
     if (!this.topology) {
