@@ -77,10 +77,7 @@ export class CreateCollectionOperation extends CommandOperation<CreateCollection
       }
 
       try {
-        callback(
-          undefined,
-          new Collection(db, db.s.topology, db.databaseName, name, db.s.pkFactory, options)
-        );
+        callback(undefined, new Collection(db, name, options));
       } catch (err) {
         callback(err);
       }

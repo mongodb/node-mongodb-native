@@ -80,34 +80,19 @@ import { executeOperation } from './operations/execute_operation';
 import { EvalGroupOperation, GroupOperation } from './operations/group';
 import type { Callback, Document } from './types';
 import type { Db } from './db';
-import type { OperationOptions } from './operations/operation';
+import type { OperationOptions, Hint } from './operations/operation';
 import type { IndexInformationOptions } from './operations/common_functions';
 import type { CountOptions } from './operations/count';
 import type { BulkWriteResult } from './bulk/common';
+import type { PkFactory } from './mongo_client';
+import type { Topology } from './sdam/topology';
+import type { Logger } from './logger';
 
 const mergeKeys = ['ignoreUndefined'];
 
 export interface Collection {
   /** @deprecated */
-  find(query: any, options: any): Cursor;
-  insert(docs: any, options: any, callback: any): void;
-  update(selector: any, update: any, options: any, callback: any): void;
-  remove(selector: any, options: any, callback: any): void;
-  findOne(query: any, options: any, callback: any): void;
   dropAllIndexes(): void;
-  ensureIndex(fieldOrSpec: any, options: any, callback: any): void;
-  count(query: any, options: any, callback: any): void;
-  findAndRemove(query: any, sort: any, options: any, callback: any): void;
-  group(
-    keys: any,
-    condition: any,
-    initial: any,
-    reduce: any,
-    finalize: any,
-    command: any,
-    options: any,
-    callback: any
-  ): void;
   removeMany(
     filter: Document,
     options?: DeleteOptions,
@@ -119,7 +104,24 @@ export interface Collection {
     callback?: Callback<DeleteResult>
   ): Promise<DeleteResult> | void;
   findAndModify(this: any, query: any, sort: any, doc: any, options: any, callback: Callback): any;
-  _findAndModify(this: any, query: any, sort: any, doc: any, options: any, callback: Callback): any;
+}
+
+interface CollectionPrivate {
+  pkFactory: PkFactory | typeof ObjectId;
+  db: Db;
+  topology: Topology;
+  options: any;
+  namespace: MongoDBNamespace;
+  readPreference?: ReadPreference;
+  slaveOk: boolean;
+  serializeFunctions: boolean;
+  raw: boolean;
+  promoteLongs: boolean;
+  promoteValues: boolean;
+  promoteBuffers: boolean;
+  collectionHint?: Hint;
+  readConcern?: ReadConcern;
+  writeConcern?: WriteConcern;
 }
 
 /**
@@ -148,77 +150,41 @@ export interface Collection {
  * });
  */
 export class Collection {
-  s: {
-    db: Db;
-    [key: string]: any;
-  };
+  s: CollectionPrivate;
 
   /** Create a new Collection instance (INTERNAL TYPE, do not instantiate directly) */
-  constructor(db: any, topology: any, dbName: any, name: any, pkFactory: any, options: any) {
+  constructor(db: Db, name: string, options: any) {
     checkCollectionName(name);
     emitDeprecatedOptionWarning(options, ['promiseLibrary']);
 
-    // Unpack variables
-    const internalHint = null;
-    const slaveOk = options == null || options.slaveOk == null ? db.slaveOk : options.slaveOk;
-    const serializeFunctions =
-      options == null || options.serializeFunctions == null
-        ? db.s.options.serializeFunctions
-        : options.serializeFunctions;
-    const raw = options == null || options.raw == null ? db.s.options.raw : options.raw;
-    const promoteLongs =
-      options == null || options.promoteLongs == null
-        ? db.s.options.promoteLongs
-        : options.promoteLongs;
-    const promoteValues =
-      options == null || options.promoteValues == null
-        ? db.s.options.promoteValues
-        : options.promoteValues;
-    const promoteBuffers =
-      options == null || options.promoteBuffers == null
-        ? db.s.options.promoteBuffers
-        : options.promoteBuffers;
-    const collectionHint = null;
-
-    const namespace = new MongoDBNamespace(dbName, name);
-
-    // Set custom primary key factory if provided
-    pkFactory = pkFactory == null ? ObjectId : pkFactory;
-
     // Internal state
     this.s = {
-      // Set custom primary key factory if provided
-      pkFactory,
-      // Db
       db,
-      // Topology
-      topology,
-      // Options
       options,
-      // Namespace
-      namespace,
-      // Read preference
+      topology: db.s.topology,
+      namespace: new MongoDBNamespace(db.databaseName, name),
+      pkFactory: db.options?.pkFactory ? db.options.pkFactory : ObjectId,
       readPreference: ReadPreference.fromOptions(options),
-      // SlaveOK
-      slaveOk,
-      // Serialize functions
-      serializeFunctions,
-      // Raw
-      raw,
-      // promoteLongs
-      promoteLongs,
-      // promoteValues
-      promoteValues,
-      // promoteBuffers
-      promoteBuffers,
-      // internalHint
-      internalHint,
-      // collectionHint
-      collectionHint,
-      // Read Concern
       readConcern: ReadConcern.fromOptions(options),
-      // Write Concern
-      writeConcern: WriteConcern.fromOptions(options)
+      writeConcern: WriteConcern.fromOptions(options),
+      slaveOk: options == null || options.slaveOk == null ? db.slaveOk : options.slaveOk,
+      serializeFunctions:
+        options == null || options.serializeFunctions == null
+          ? db.s.options?.serializeFunctions
+          : options.serializeFunctions,
+      raw: options == null || options.raw == null ? db.s.options?.raw : options.raw,
+      promoteLongs:
+        options == null || options.promoteLongs == null
+          ? db.s.options?.promoteLongs
+          : options.promoteLongs,
+      promoteValues:
+        options == null || options.promoteValues == null
+          ? db.s.options?.promoteValues
+          : options.promoteValues,
+      promoteBuffers:
+        options == null || options.promoteBuffers == null
+          ? db.s.options?.promoteBuffers
+          : options.promoteBuffers
     };
   }
 
@@ -241,7 +207,7 @@ export class Collection {
    * @readonly
    */
   get collectionName(): string {
-    return this.s.namespace.collection;
+    return this.s.namespace.collection!;
   }
 
   /**
@@ -251,7 +217,7 @@ export class Collection {
    * @memberof Collection#
    * @readonly
    */
-  get namespace() {
+  get namespace(): string {
     return this.s.namespace.toString();
   }
 
@@ -263,7 +229,7 @@ export class Collection {
    * @memberof Collection#
    * @readonly
    */
-  get readConcern() {
+  get readConcern(): ReadConcern | undefined {
     if (this.s.readConcern == null) {
       return this.s.db.readConcern;
     }
@@ -278,7 +244,7 @@ export class Collection {
    * @memberof Collection#
    * @readonly
    */
-  get readPreference() {
+  get readPreference(): ReadPreference | undefined {
     if (this.s.readPreference == null) {
       return this.s.db.readPreference;
     }
@@ -294,7 +260,7 @@ export class Collection {
    * @memberof Collection#
    * @readonly
    */
-  get writeConcern() {
+  get writeConcern(): WriteConcern | undefined {
     if (this.s.writeConcern == null) {
       return this.s.db.writeConcern;
     }
@@ -307,12 +273,14 @@ export class Collection {
    * @member {object} [hint]
    * @memberof Collection#
    */
-  get hint() {
+  get hint(): Hint | undefined {
     return this.s.collectionHint;
   }
 
-  set hint(v: any) {
-    this.s.collectionHint = normalizeHintField(v);
+  set hint(v: Hint | undefined) {
+    if (v) {
+      this.s.collectionHint = normalizeHintField(v);
+    }
   }
 
   /**
@@ -671,6 +639,190 @@ export class Collection {
       new DropCollectionOperation(this.s.db, this.collectionName, options),
       callback
     );
+  }
+
+  /**
+   * Fetches the first document that matches the query
+   *
+   * @param query - Query for find Operation
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
+   */
+  findOne(): Promise<Document>;
+  findOne(callback: Callback<Document>): void;
+  findOne(query: Document): Promise<Document>;
+  findOne(query: Document, callback?: Callback<Document>): void;
+  findOne(query: Document, options: FindOptions): Promise<Document>;
+  findOne(query: Document, options: FindOptions, callback: Callback<Document>): void;
+  findOne(
+    query?: Document | Callback<Document>,
+    options?: FindOptions | Callback<Document>,
+    callback?: Callback<Document>
+  ) {
+    if (callback !== undefined && typeof callback !== 'function') {
+      throw new TypeError('Third parameter to `findOne()` must be a callback or undefined');
+    }
+
+    if (typeof query === 'function')
+      (callback = query as Callback<Document>), (query = {}), (options = {});
+    if (typeof options === 'function') (callback = options), (options = {});
+    query = query || {};
+    options = options || {};
+
+    return executeOperation(this.s.topology, new FindOneOperation(this, query, options), callback);
+  }
+
+  /**
+   * Creates a cursor for a query that can be used to iterate over results from MongoDB
+   *
+   * @param query - The cursor query object.
+   * @param options - Optional settings for the command
+   */
+  find(query: Document): Cursor;
+  find(query: Document, options: FindOptions): Cursor;
+  find(query: Document, options?: FindOptions): Cursor {
+    if (arguments.length > 2) {
+      throw new TypeError('Third parameter to `collection.find()` must be undefined');
+    }
+    if (typeof query === 'function') {
+      throw new TypeError('`query` parameter must not be function');
+    }
+    if (typeof options === 'function') {
+      throw new TypeError('`options` parameter must not be function');
+    }
+
+    let selector =
+      query !== null && typeof query === 'object' && Array.isArray(query) === false ? query : {};
+
+    // Validate correctness off the selector
+    const object = selector;
+    if (Buffer.isBuffer(object)) {
+      const object_size = object[0] | (object[1] << 8) | (object[2] << 16) | (object[3] << 24);
+      if (object_size !== object.length) {
+        const error = new Error(
+          'query selector raw message size does not match message header size [' +
+            object.length +
+            '] != [' +
+            object_size +
+            ']'
+        );
+        error.name = 'MongoError';
+        throw error;
+      }
+    }
+
+    // Check special case where we are using an objectId
+    if (selector != null && selector._bsontype === 'ObjectID') {
+      selector = { _id: selector };
+    }
+
+    if (!options) {
+      options = {};
+    }
+
+    let projection = options.projection || options.fields;
+
+    if (projection && !Buffer.isBuffer(projection) && Array.isArray(projection)) {
+      projection = projection.length
+        ? projection.reduce((result: any, field: any) => {
+            result[field] = 1;
+            return result;
+          }, {})
+        : { _id: 1 };
+    }
+
+    // Make a shallow copy of options
+    const newOptions: Document = Object.assign({}, options);
+
+    // Make a shallow copy of the collection options
+    for (const key in this.s.options) {
+      if (mergeKeys.indexOf(key) !== -1) {
+        newOptions[key] = this.s.options[key];
+      }
+    }
+
+    // Unpack options
+    newOptions.skip = options.skip ? options.skip : 0;
+    newOptions.limit = options.limit ? options.limit : 0;
+    newOptions.raw = typeof options.raw === 'boolean' ? options.raw : this.s.raw;
+    newOptions.hint =
+      options.hint != null ? normalizeHintField(options.hint) : this.s.collectionHint;
+    newOptions.timeout = typeof options.timeout === 'undefined' ? undefined : options.timeout;
+    // // If we have overridden slaveOk otherwise use the default db setting
+    newOptions.slaveOk = options.slaveOk != null ? options.slaveOk : this.s.db.slaveOk;
+
+    // Add read preference if needed
+    newOptions.readPreference = ReadPreference.resolve(this, newOptions);
+
+    // Set slave ok to true if read preference different from primary
+    if (
+      newOptions.readPreference != null &&
+      (newOptions.readPreference !== 'primary' || newOptions.readPreference.mode !== 'primary')
+    ) {
+      newOptions.slaveOk = true;
+    }
+
+    // Ensure the query is an object
+    if (selector != null && typeof selector !== 'object') {
+      throw MongoError.create({ message: 'query selector must be an object', driver: true });
+    }
+
+    // Build the find command
+    const findCommand: Document = {
+      find: this.s.namespace.toString(),
+      limit: newOptions.limit,
+      skip: newOptions.skip,
+      query: selector
+    };
+
+    if (typeof options.allowDiskUse === 'boolean') {
+      findCommand.allowDiskUse = options.allowDiskUse;
+    }
+
+    // Ensure we use the right await data option
+    if (typeof newOptions.awaitdata === 'boolean') {
+      newOptions.awaitData = newOptions.awaitdata;
+    }
+
+    // Translate to new command option noCursorTimeout
+    if (typeof newOptions.timeout === 'boolean') newOptions.noCursorTimeout = newOptions.timeout;
+
+    decorateCommand(findCommand, newOptions, ['session', 'collation']);
+
+    if (projection) findCommand.fields = projection;
+
+    // Add db object to the new options
+    newOptions.db = this.s.db;
+
+    // Set raw if available at collection level
+    if (newOptions.raw == null && typeof this.s.raw === 'boolean') newOptions.raw = this.s.raw;
+    // Set promoteLongs if available at collection level
+    if (newOptions.promoteLongs == null && typeof this.s.promoteLongs === 'boolean')
+      newOptions.promoteLongs = this.s.promoteLongs;
+    if (newOptions.promoteValues == null && typeof this.s.promoteValues === 'boolean')
+      newOptions.promoteValues = this.s.promoteValues;
+    if (newOptions.promoteBuffers == null && typeof this.s.promoteBuffers === 'boolean')
+      newOptions.promoteBuffers = this.s.promoteBuffers;
+
+    // Sort options
+    if (findCommand.sort) {
+      findCommand.sort = formattedOrderClause(findCommand.sort);
+    }
+
+    // Set the readConcern
+    decorateWithReadConcern(findCommand, this, options);
+
+    // Decorate find command with collation options
+
+    decorateWithCollation(findCommand, this, options);
+
+    const cursor = new Cursor(
+      this.s.topology,
+      new FindOperation(this, this.s.namespace, findCommand, newOptions),
+      newOptions
+    );
+
+    return cursor;
   }
 
   /**
@@ -1372,502 +1524,351 @@ export class Collection {
    * @function
    * @returns {Logger} return the db logger
    */
-  getLogger(): any {
+  getLogger(): Logger {
     return this.s.db.s.logger;
+  }
+
+  /** @deprecated */
+  /**
+   * Inserts a single document or a an array of documents into MongoDB. If documents passed in do not contain the **_id** field,
+   * one will be added to each of the documents missing it by the driver, mutating the document. This behavior
+   * can be overridden by setting the **forceServerObjectId** flag.
+   *
+   * @deprecated Use insertOne, insertMany or bulkWrite
+   * @param docs - The documents to insert
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
+   */
+  insert(
+    docs: Document[],
+    options: InsertOptions,
+    callback: Callback<InsertManyResult>
+  ): Promise<InsertManyResult> | void {
+    if (typeof options === 'function') (callback = options), (options = {});
+    options = options || { ordered: false };
+    docs = !Array.isArray(docs) ? [docs] : docs;
+
+    if (options.keepGoing === true) {
+      options.ordered = false;
+    }
+
+    return this.insertMany(docs, options, callback);
+  }
+
+  /**
+   * Updates documents.
+   *
+   * @deprecated use updateOne, updateMany or bulkWrite
+   * @param selector - The selector for the update operation.
+   * @param update - The update operations to be applied to the documents
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
+   */
+  update(
+    selector: Document,
+    update: Document,
+    options: UpdateOptions,
+    callback: Callback<Document>
+  ) {
+    if (typeof options === 'function') (callback = options), (options = {});
+    options = options || {};
+
+    // Add ignoreUndefined
+    if (this.s.options.ignoreUndefined) {
+      options = Object.assign({}, options);
+      options.ignoreUndefined = this.s.options.ignoreUndefined;
+    }
+
+    return this.updateMany(selector, update, options, callback);
+  }
+
+  /**
+   * Remove documents.
+   *
+   * @deprecated use deleteOne, deleteMany or bulkWrite
+   * @param selector - The selector for the update operation.
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
+   */
+  remove(selector: Document, options: DeleteOptions, callback: Callback) {
+    if (typeof options === 'function') (callback = options), (options = {});
+    options = options || {};
+
+    // Add ignoreUndefined
+    if (this.s.options.ignoreUndefined) {
+      options = Object.assign({}, options);
+      options.ignoreUndefined = this.s.options.ignoreUndefined;
+    }
+
+    return this.deleteMany(selector, options, callback);
+  }
+
+  /**
+   * Ensures that an index exists, if it does not it creates it
+   *
+   * @deprecated use createIndexes instead
+   * @param fieldOrSpec - Defines the index.
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
+   */
+  ensureIndex(fieldOrSpec: string | Document, options: CreateIndexesOptions, callback: Callback) {
+    if (typeof options === 'function') (callback = options), (options = {});
+    options = options || {};
+
+    return executeOperation(
+      this.s.topology,
+      new EnsureIndexOperation(this.s.db, this.collectionName, fieldOrSpec, options),
+      callback
+    );
+  }
+
+  /**
+   * An estimated count of matching documents in the db to a query.
+   *
+   * **NOTE:** This method has been deprecated, since it does not provide an accurate count of the documents
+   * in a collection. To obtain an accurate count of documents in the collection, use {@link Collection#countDocuments countDocuments}.
+   * To obtain an estimated count of all documents in the collection, use {@link Collection#estimatedDocumentCount estimatedDocumentCount}.
+   *
+   * @deprecated use {@link Collection#countDocuments countDocuments} or {@link Collection#estimatedDocumentCount estimatedDocumentCount} instead
+   *
+   * @param query - The query for the count.
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
+   */
+  count(query: Document, options: CountOptions, callback: Callback) {
+    const args = Array.prototype.slice.call(arguments, 0);
+    callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
+    query = args.length ? args.shift() || {} : {};
+    options = args.length ? args.shift() || {} : {};
+
+    if (typeof options === 'function') (callback = options), (options = {});
+    options = options || {};
+
+    return executeOperation(
+      this.s.topology,
+      new EstimatedDocumentCountOperation(this, query, options),
+      callback
+    );
+  }
+
+  /**
+   * Find and remove a document.
+   *
+   * @deprecated use findOneAndDelete instead
+   *
+   * @param query - Query object to locate the object to modify.
+   * @param sort - If multiple docs match, choose the first one in the specified sort order as the object to manipulate.
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
+   */
+  findAndRemove(
+    query: Document,
+    sort: Document,
+    options: FindAndModifyOptions,
+    callback: Callback
+  ) {
+    const args = Array.prototype.slice.call(arguments, 1);
+    callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
+    sort = args.length ? args.shift() || [] : [];
+    options = args.length ? args.shift() || {} : {};
+
+    // Add the remove option
+    options.remove = true;
+
+    return executeOperation(
+      this.s.topology,
+      new FindAndModifyOperation(this, query, sort, undefined, options),
+      callback
+    );
+  }
+
+  /**
+   * Run a group command across a collection
+   *
+   * @deprecated MongoDB 3.6 or higher no longer supports the group command. We recommend rewriting using the aggregation framework.
+   * @param keys - An object, array or function expressing the keys to group by.
+   * @param condition - An optional condition that must be true for a row to be considered.
+   * @param initial - Initial value of the aggregation counter object.
+   * @param reduce - The reduce function aggregates (reduces) the objects iterated
+   * @param finalize - An optional function to be run on each item in the result set just before the item is returned.
+   * @param command - Specify if you wish to run using the internal group command or using eval, default is true.
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
+   */
+  group(
+    keys: any,
+    condition: any,
+    initial: any,
+    reduce: any,
+    finalize: any,
+    command: any,
+    options: any,
+    callback: Callback
+  ) {
+    const args = Array.prototype.slice.call(arguments, 3);
+    callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
+    reduce = args.length ? args.shift() : null;
+    finalize = args.length ? args.shift() : null;
+    command = args.length ? args.shift() : null;
+    options = args.length ? args.shift() || {} : {};
+
+    // Make sure we are backward compatible
+    if (!(typeof finalize === 'function')) {
+      command = finalize;
+      finalize = null;
+    }
+
+    if (
+      !Array.isArray(keys) &&
+      keys instanceof Object &&
+      typeof keys !== 'function' &&
+      !(keys._bsontype === 'Code')
+    ) {
+      keys = Object.keys(keys);
+    }
+
+    if (typeof reduce === 'function') {
+      reduce = reduce.toString();
+    }
+
+    if (typeof finalize === 'function') {
+      finalize = finalize.toString();
+    }
+
+    // Set up the command as default
+    command = command == null ? true : command;
+
+    if (command == null) {
+      return executeOperation(
+        this.s.topology,
+        new EvalGroupOperation(this, keys, condition, initial, reduce, finalize, options),
+        callback
+      );
+    }
+
+    return executeOperation(
+      this.s.topology,
+      new GroupOperation(this, keys, condition, initial, reduce, finalize, options),
+      callback
+    );
+  }
+
+  /**
+   * Find and modify a document.
+   *
+   * @deprecated use findOneAndUpdate, findOneAndReplace or findOneAndDelete instead
+   *
+   * @param query - Query object to locate the object to modify.
+   * @param sort - If multiple docs match, choose the first one in the specified sort order as the object to manipulate.
+   * @param doc - The fields/vals to be updated.
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
+   */
+  _findAndModify(query: Document, sort: Document, doc: Document): Promise<Document>;
+  _findAndModify(
+    query: Document,
+    sort: Document,
+    doc: Document,
+    callback: Callback<Document>
+  ): void;
+  _findAndModify(
+    query: Document,
+    sort: Document,
+    doc: Document,
+    options: FindAndModifyOptions
+  ): Promise<Document>;
+  _findAndModify(
+    query: Document,
+    sort: Document,
+    doc: Document,
+    options: FindAndModifyOptions,
+    callback: Callback<Document>
+  ): Promise<Document> | void;
+  _findAndModify(
+    query: Document,
+    sort: Document,
+    doc: Document,
+    options?: FindAndModifyOptions | Callback<Document>,
+    callback?: Callback<Document>
+  ): Promise<Document> | void {
+    if (typeof options === 'function') (callback = options), (options = {});
+    options = options || {};
+
+    // Force read preference primary
+    options.readPreference = ReadPreference.primary;
+
+    return executeOperation(
+      this.s.topology,
+      new FindAndModifyOperation(this, query, sort, doc, options),
+      callback
+    );
   }
 }
 
 const DEPRECATED_FIND_OPTIONS = ['maxScan', 'fields', 'snapshot', 'oplogReplay'];
-
-/**
- * Creates a cursor for a query that can be used to iterate over results from MongoDB
- *
- * @param query - The cursor query object.
- * @param options - Optional settings for the command
- * @param callback - An optional callback, a Promise will be returned if none is provided
- */
 Collection.prototype.find = deprecateOptions(
   {
     name: 'collection.find',
     deprecatedOptions: DEPRECATED_FIND_OPTIONS,
     optionsIndex: 1
   },
-  function (this: Collection, query: Document, options?: FindOptions) {
-    if (arguments.length > 2) {
-      throw new TypeError('Third parameter to `collection.find()` must be undefined');
-    }
-    if (typeof query === 'function') {
-      throw new TypeError('`query` parameter must not be function');
-    }
-    if (typeof options === 'function') {
-      throw new TypeError('`options` parameter must not be function');
-    }
-
-    let selector =
-      query !== null && typeof query === 'object' && Array.isArray(query) === false ? query : {};
-
-    // Validate correctness off the selector
-    const object = selector;
-    if (Buffer.isBuffer(object)) {
-      const object_size = object[0] | (object[1] << 8) | (object[2] << 16) | (object[3] << 24);
-      if (object_size !== object.length) {
-        const error = new Error(
-          'query selector raw message size does not match message header size [' +
-            object.length +
-            '] != [' +
-            object_size +
-            ']'
-        );
-        error.name = 'MongoError';
-        throw error;
-      }
-    }
-
-    // Check special case where we are using an objectId
-    if (selector != null && selector._bsontype === 'ObjectID') {
-      selector = { _id: selector };
-    }
-
-    if (!options) {
-      options = {};
-    }
-
-    let projection = options.projection || options.fields;
-
-    if (projection && !Buffer.isBuffer(projection) && Array.isArray(projection)) {
-      projection = projection.length
-        ? projection.reduce((result: any, field: any) => {
-            result[field] = 1;
-            return result;
-          }, {})
-        : { _id: 1 };
-    }
-
-    // Make a shallow copy of options
-    const newOptions: Document = Object.assign({}, options);
-
-    // Make a shallow copy of the collection options
-    for (const key in this.s.options) {
-      if (mergeKeys.indexOf(key) !== -1) {
-        newOptions[key] = this.s.options[key];
-      }
-    }
-
-    // Unpack options
-    newOptions.skip = options.skip ? options.skip : 0;
-    newOptions.limit = options.limit ? options.limit : 0;
-    newOptions.raw = typeof options.raw === 'boolean' ? options.raw : this.s.raw;
-    newOptions.hint =
-      options.hint != null ? normalizeHintField(options.hint) : this.s.collectionHint;
-    newOptions.timeout = typeof options.timeout === 'undefined' ? undefined : options.timeout;
-    // // If we have overridden slaveOk otherwise use the default db setting
-    newOptions.slaveOk = options.slaveOk != null ? options.slaveOk : this.s.db.slaveOk;
-
-    // Add read preference if needed
-    newOptions.readPreference = ReadPreference.resolve(this, newOptions);
-
-    // Set slave ok to true if read preference different from primary
-    if (
-      newOptions.readPreference != null &&
-      (newOptions.readPreference !== 'primary' || newOptions.readPreference.mode !== 'primary')
-    ) {
-      newOptions.slaveOk = true;
-    }
-
-    // Ensure the query is an object
-    if (selector != null && typeof selector !== 'object') {
-      throw MongoError.create({ message: 'query selector must be an object', driver: true });
-    }
-
-    // Build the find command
-    const findCommand = {
-      find: this.s.namespace.toString(),
-      limit: newOptions.limit,
-      skip: newOptions.skip,
-      query: selector
-    } as any;
-
-    if (typeof options.allowDiskUse === 'boolean') {
-      findCommand.allowDiskUse = options.allowDiskUse;
-    }
-
-    // Ensure we use the right await data option
-    if (typeof newOptions.awaitdata === 'boolean') {
-      newOptions.awaitData = newOptions.awaitdata;
-    }
-
-    // Translate to new command option noCursorTimeout
-    if (typeof newOptions.timeout === 'boolean') newOptions.noCursorTimeout = newOptions.timeout;
-
-    decorateCommand(findCommand, newOptions, ['session', 'collation']);
-
-    if (projection) findCommand.fields = projection;
-
-    // Add db object to the new options
-    newOptions.db = this.s.db;
-
-    // Set raw if available at collection level
-    if (newOptions.raw == null && typeof this.s.raw === 'boolean') newOptions.raw = this.s.raw;
-    // Set promoteLongs if available at collection level
-    if (newOptions.promoteLongs == null && typeof this.s.promoteLongs === 'boolean')
-      newOptions.promoteLongs = this.s.promoteLongs;
-    if (newOptions.promoteValues == null && typeof this.s.promoteValues === 'boolean')
-      newOptions.promoteValues = this.s.promoteValues;
-    if (newOptions.promoteBuffers == null && typeof this.s.promoteBuffers === 'boolean')
-      newOptions.promoteBuffers = this.s.promoteBuffers;
-
-    // Sort options
-    if (findCommand.sort) {
-      findCommand.sort = formattedOrderClause(findCommand.sort);
-    }
-
-    // Set the readConcern
-    decorateWithReadConcern(findCommand, this, options);
-
-    // Decorate find command with collation options
-
-    decorateWithCollation(findCommand, this, options);
-
-    const cursor = new Cursor(
-      this.s.topology,
-      new FindOperation(this, this.s.namespace, findCommand, newOptions),
-      newOptions
-    );
-
-    return cursor;
-  }
+  Collection.prototype.find
 );
 
-/**
- * Inserts a single document or a an array of documents into MongoDB. If documents passed in do not contain the **_id** field,
- * one will be added to each of the documents missing it by the driver, mutating the document. This behavior
- * can be overridden by setting the **forceServerObjectId** flag.
- *
- * @deprecated Use insertOne, insertMany or bulkWrite
- * @param docs - The documents to insert
- * @param options - Optional settings for the command
- * @param callback - An optional callback, a Promise will be returned if none is provided
- */
-Collection.prototype.insert = deprecate(function (
-  this: Collection,
-  docs: Document[],
-  options: InsertOptions,
-  callback: Callback<InsertManyResult>
-): Promise<InsertManyResult> | void {
-  if (typeof options === 'function') (callback = options), (options = {});
-  options = options || { ordered: false };
-  docs = !Array.isArray(docs) ? [docs] : docs;
-
-  if (options.keepGoing === true) {
-    options.ordered = false;
-  }
-
-  return this.insertMany(docs, options, callback);
-},
-'collection.insert is deprecated. Use insertOne, insertMany or bulkWrite instead.');
-
-/**
- * Updates documents.
- *
- * @deprecated use updateOne, updateMany or bulkWrite
- * @param selector - The selector for the update operation.
- * @param update - The update operations to be applied to the documents
- * @param options - Optional settings for the command
- * @param callback - An optional callback, a Promise will be returned if none is provided
- */
-Collection.prototype.update = deprecate(function (
-  this: Collection,
-  selector: Document,
-  update: Document,
-  options: UpdateOptions,
-  callback: Callback<Document>
-) {
-  if (typeof options === 'function') (callback = options), (options = {});
-  options = options || {};
-
-  // Add ignoreUndefined
-  if (this.s.options.ignoreUndefined) {
-    options = Object.assign({}, options);
-    options.ignoreUndefined = this.s.options.ignoreUndefined;
-  }
-
-  return this.updateMany(selector, update, options, callback);
-},
-'collection.update is deprecated. Use updateOne, updateMany, or bulkWrite instead.');
-
-Collection.prototype.removeOne = Collection.prototype.deleteOne;
-Collection.prototype.removeMany = Collection.prototype.deleteMany;
-
-/**
- * Remove documents.
- *
- * @deprecated use deleteOne, deleteMany or bulkWrite
- * @param selector - The selector for the update operation.
- * @param options - Optional settings for the command
- * @param callback - An optional callback, a Promise will be returned if none is provided
- */
-Collection.prototype.remove = deprecate(function (
-  this: any,
-  selector: any,
-  options: any,
-  callback: Callback
-) {
-  if (typeof options === 'function') (callback = options), (options = {});
-  options = options || {};
-
-  // Add ignoreUndefined
-  if (this.s.options.ignoreUndefined) {
-    options = Object.assign({}, options);
-    options.ignoreUndefined = this.s.options.ignoreUndefined;
-  }
-
-  return this.deleteMany(selector, options, callback);
-},
-'collection.remove is deprecated. Use deleteOne, deleteMany, or bulkWrite instead.');
-
-/**
- * Fetches the first document that matches the query
- *
- * @param query - Query for find Operation
- * @param options - Optional settings for the command
- * @param callback - An optional callback, a Promise will be returned if none is provided
- */
 Collection.prototype.findOne = deprecateOptions(
   {
     name: 'collection.find',
     deprecatedOptions: DEPRECATED_FIND_OPTIONS,
     optionsIndex: 1
   },
-  function (this: Collection, query: any, options?: any, callback?: Callback) {
-    if (callback !== undefined && typeof callback !== 'function') {
-      throw new TypeError('Third parameter to `findOne()` must be a callback or undefined');
-    }
-
-    if (typeof query === 'function') (callback = query), (query = {}), (options = {});
-    if (typeof options === 'function') (callback = options), (options = {});
-    query = query || {};
-    options = options || {};
-
-    return executeOperation(this.s.topology, new FindOneOperation(this, query, options), callback);
-  }
+  Collection.prototype.findOne
 );
 
-/**
- * Drops all indexes from this collection.
- *
- * @deprecated use dropIndexes
- */
+Collection.prototype.insert = deprecate(
+  Collection.prototype.insert,
+  'collection.insert is deprecated. Use insertOne, insertMany or bulkWrite instead.'
+);
+
+Collection.prototype.update = deprecate(
+  Collection.prototype.update,
+  'collection.update is deprecated. Use updateOne, updateMany, or bulkWrite instead.'
+);
+
+Collection.prototype.removeOne = Collection.prototype.deleteOne;
+Collection.prototype.removeMany = Collection.prototype.deleteMany;
+
+Collection.prototype.remove = deprecate(
+  Collection.prototype.remove,
+  'collection.remove is deprecated. Use deleteOne, deleteMany, or bulkWrite instead.'
+);
+
 Collection.prototype.dropAllIndexes = deprecate(
   Collection.prototype.dropIndexes,
   'collection.dropAllIndexes is deprecated. Use dropIndexes instead.'
 );
 
-/**
- * Ensures that an index exists, if it does not it creates it
- *
- * @deprecated use createIndexes instead
- * @param fieldOrSpec - Defines the index.
- * @param options - Optional settings for the command
- * @param callback - An optional callback, a Promise will be returned if none is provided
- */
-Collection.prototype.ensureIndex = deprecate(function (
-  this: any,
-  fieldOrSpec: string | Document,
-  options: CreateIndexesOptions,
-  callback: Callback
-) {
-  if (typeof options === 'function') (callback = options), (options = {});
-  options = options || {};
+Collection.prototype.ensureIndex = deprecate(
+  Collection.prototype.ensureIndex,
+  'collection.ensureIndex is deprecated. Use createIndexes instead.'
+);
 
-  return executeOperation(
-    this.s.topology,
-    new EnsureIndexOperation(this.s.db, this.collectionName, fieldOrSpec, options),
-    callback
-  );
-},
-'collection.ensureIndex is deprecated. Use createIndexes instead.');
+Collection.prototype.count = deprecate(
+  Collection.prototype.count,
+  'collection.count is deprecated, and will be removed in a future version.' +
+    ' Use Collection.countDocuments or Collection.estimatedDocumentCount instead'
+);
 
-/**
- * An estimated count of matching documents in the db to a query.
- *
- * **NOTE:** This method has been deprecated, since it does not provide an accurate count of the documents
- * in a collection. To obtain an accurate count of documents in the collection, use {@link Collection#countDocuments countDocuments}.
- * To obtain an estimated count of all documents in the collection, use {@link Collection#estimatedDocumentCount estimatedDocumentCount}.
- *
- * @deprecated use {@link Collection#countDocuments countDocuments} or {@link Collection#estimatedDocumentCount estimatedDocumentCount} instead
- *
- * @param query - The query for the count.
- * @param options - Optional settings for the command
- * @param callback - An optional callback, a Promise will be returned if none is provided
- */
-Collection.prototype.count = deprecate(function (
-  this: Collection,
-  query: Document,
-  options: CountOptions,
-  callback: Callback
-) {
-  const args = Array.prototype.slice.call(arguments, 0);
-  callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
-  query = args.length ? args.shift() || {} : {};
-  options = args.length ? args.shift() || {} : {};
-
-  if (typeof options === 'function') (callback = options), (options = {});
-  options = options || {};
-
-  return executeOperation(
-    this.s.topology,
-    new EstimatedDocumentCountOperation(this, query, options),
-    callback
-  );
-},
-'collection.count is deprecated, and will be removed in a future version.' + ' Use Collection.countDocuments or Collection.estimatedDocumentCount instead');
-
-/**
- * Find and update a document.
- *
- * @deprecated use findOneAndUpdate, findOneAndReplace or findOneAndDelete instead
- *
- * @param query - Query object to locate the object to modify.
- * @param sort - If multiple docs match, choose the first one in the specified sort order as the object to manipulate.
- * @param doc - The fields/vals to be updated.
- * @param options - Optional settings for the command
- * @param callback - An optional callback, a Promise will be returned if none is provided
- */
 Collection.prototype.findAndModify = deprecate(
-  _findAndModify,
+  Collection.prototype._findAndModify,
   'collection.findAndModify is deprecated. Use findOneAndUpdate, findOneAndReplace or findOneAndDelete instead.'
 );
 
-Collection.prototype._findAndModify = _findAndModify;
+Collection.prototype.findAndRemove = deprecate(
+  Collection.prototype.findAndRemove,
+  'collection.findAndRemove is deprecated. Use findOneAndDelete instead.'
+);
 
-function _findAndModify(
-  this: Collection,
-  query: Document,
-  sort: Document,
-  doc: Document,
-  options: FindAndModifyOptions,
-  callback: Callback
-) {
-  const args = Array.prototype.slice.call(arguments, 1);
-  callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
-  sort = args.length ? args.shift() || [] : [];
-  doc = args.length ? args.shift() : null;
-  options = args.length ? args.shift() || {} : {};
-
-  // Clone options
-  options = Object.assign({}, options);
-  // Force read preference primary
-  options.readPreference = ReadPreference.primary;
-
-  return executeOperation(
-    this.s.topology,
-    new FindAndModifyOperation(this, query, sort, doc, options),
-    callback
-  );
-}
-
-/**
- * Find and remove a document.
- *
- * @deprecated use findOneAndDelete instead
- *
- * @param query - Query object to locate the object to modify.
- * @param sort - If multiple docs match, choose the first one in the specified sort order as the object to manipulate.
- * @param options - Optional settings for the command
- * @param callback - An optional callback, a Promise will be returned if none is provided
- */
-Collection.prototype.findAndRemove = deprecate(function (
-  this: Collection,
-  query: Document,
-  sort: Document,
-  options: FindAndModifyOptions,
-  callback: Callback
-) {
-  const args = Array.prototype.slice.call(arguments, 1);
-  callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
-  sort = args.length ? args.shift() || [] : [];
-  options = args.length ? args.shift() || {} : {};
-
-  // Add the remove option
-  options.remove = true;
-
-  return executeOperation(
-    this.s.topology,
-    new FindAndModifyOperation(this, query, sort, undefined, options),
-    callback
-  );
-},
-'collection.findAndRemove is deprecated. Use findOneAndDelete instead.');
-
-/**
- * Run a group command across a collection
- *
- * @deprecated MongoDB 3.6 or higher no longer supports the group command. We recommend rewriting using the aggregation framework.
- * @param keys - An object, array or function expressing the keys to group by.
- * @param condition - An optional condition that must be true for a row to be considered.
- * @param initial - Initial value of the aggregation counter object.
- * @param reduce - The reduce function aggregates (reduces) the objects iterated
- * @param finalize - An optional function to be run on each item in the result set just before the item is returned.
- * @param command - Specify if you wish to run using the internal group command or using eval, default is true.
- * @param options - Optional settings for the command
- * @param callback - An optional callback, a Promise will be returned if none is provided
- */
-Collection.prototype.group = deprecate(function (
-  this: any,
-  keys: any,
-  condition: any,
-  initial: any,
-  reduce: any,
-  finalize: any,
-  command: any,
-  options: any,
-  callback: Callback
-) {
-  const args = Array.prototype.slice.call(arguments, 3);
-  callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
-  reduce = args.length ? args.shift() : null;
-  finalize = args.length ? args.shift() : null;
-  command = args.length ? args.shift() : null;
-  options = args.length ? args.shift() || {} : {};
-
-  // Make sure we are backward compatible
-  if (!(typeof finalize === 'function')) {
-    command = finalize;
-    finalize = null;
-  }
-
-  if (
-    !Array.isArray(keys) &&
-    keys instanceof Object &&
-    typeof keys !== 'function' &&
-    !(keys._bsontype === 'Code')
-  ) {
-    keys = Object.keys(keys);
-  }
-
-  if (typeof reduce === 'function') {
-    reduce = reduce.toString();
-  }
-
-  if (typeof finalize === 'function') {
-    finalize = finalize.toString();
-  }
-
-  // Set up the command as default
-  command = command == null ? true : command;
-
-  if (command == null) {
-    return executeOperation(
-      this.s.topology,
-      new EvalGroupOperation(this, keys, condition, initial, reduce, finalize, options),
-      callback
-    );
-  }
-
-  return executeOperation(
-    this.s.topology,
-    new GroupOperation(this, keys, condition, initial, reduce, finalize, options),
-    callback
-  );
-},
-'MongoDB 3.6 or higher no longer supports the group command. We recommend rewriting using the aggregation framework.');
+Collection.prototype.group = deprecate(
+  Collection.prototype.group,
+  'MongoDB 3.6 or higher no longer supports the group command. We recommend rewriting using the aggregation framework.'
+);

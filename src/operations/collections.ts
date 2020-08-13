@@ -36,14 +36,7 @@ export class CollectionsOperation extends OperationBase<CollectionsOptions> {
       callback(
         undefined,
         documents.map(d => {
-          return new Collection(
-            db,
-            db.s.topology,
-            db.databaseName,
-            d.name,
-            db.s.pkFactory,
-            db.s.options
-          );
+          return new Collection(db, d.name, db.s.options);
         })
       );
     });

@@ -321,14 +321,7 @@ export class Db {
     // Execute
     if (options == null || !options.strict) {
       try {
-        const collection = new Collection(
-          this,
-          this.s.topology,
-          this.databaseName,
-          name,
-          this.s.pkFactory,
-          options
-        );
+        const collection = new Collection(this, name, options);
         if (callback) callback(undefined, collection);
         return collection;
       } catch (err) {
@@ -361,10 +354,7 @@ export class Db {
         );
 
       try {
-        return callback(
-          undefined,
-          new Collection(this, this.s.topology, this.databaseName, name, this.s.pkFactory, options)
-        );
+        return callback(undefined, new Collection(this, name, options));
       } catch (err) {
         return callback(err);
       }

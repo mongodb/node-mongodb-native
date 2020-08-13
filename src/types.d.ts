@@ -26,6 +26,8 @@ export interface BSONSerializeOptions extends BSON.SerializeOptions {
   serializeFunctions?: boolean;
   /** Specify if the BSON serializer should ignore undefined fields */
   ignoreUndefined?: boolean;
+
+  raw?: boolean;
 }
 
 export const enum AutoEncryptionLoggerLevels {
