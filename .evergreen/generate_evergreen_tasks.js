@@ -109,11 +109,27 @@ TASKS.push(
     commands: [{ func: 'install dependencies' }, { func: 'run atlas tests' }]
   },
   {
-    name: 'test-auth-kerberos',
-    tags: ['auth', 'kerberos'],
+    name: 'test-auth-kerberos-legacy',
+    tags: ['auth', 'kerberos', 'legacy'],
     commands: [
       { func: 'install dependencies' },
-      { func: 'run kerberos tests' }
+      { func: 'run kerberos tests',
+        vars: {
+          UNIFIED: 0
+        }
+      }
+    ]
+  },
+  {
+    name: 'test-auth-kerberos-unified',
+    tags: ['auth', 'kerberos', 'unified'],
+    commands: [
+      { func: 'install dependencies' },
+      { func: 'run kerberos tests',
+        vars: {
+          UNIFIED: 1
+        }
+      }
     ]
   },
   {
@@ -308,6 +324,11 @@ const getTaskList = (() => {
       if (task.name.match(/^aws/)) return false;
 
       if (!tasksWithVars.length) {
+        return true;
+      }
+
+      // kerberos tests don't require mongo orchestration
+      if (task.tags.filter(tag => tag === 'kerberos').length) {
         return true;
       }
 

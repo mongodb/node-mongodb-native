@@ -3,6 +3,8 @@ const MongoClient = require('../..').MongoClient;
 const chai = require('chai');
 const expect = chai.expect;
 
+const clientOptions = parseInt(process.env.UNIFIED) ? { useUnifiedTopology: true } : {};
+
 describe('Kerberos', function() {
   if (process.env.MONGODB_URI == null) {
     console.log('skipping Kerberos tests, MONGODB_URI environment variable is not defined');
@@ -19,7 +21,7 @@ describe('Kerberos', function() {
   }
 
   it('should authenticate with original uri', function(done) {
-    const client = new MongoClient(krb5Uri);
+    const client = new MongoClient(krb5Uri, clientOptions);
     client.connect(function(err, client) {
       expect(err).to.not.exist;
       client
@@ -37,7 +39,8 @@ describe('Kerberos', function() {
 
   it('validate that SERVICE_REALM and CANONICALIZE_HOST_NAME can be passed in', function(done) {
     const client = new MongoClient(
-      `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:false,SERVICE_REALM:windows&maxPoolSize=1`
+      `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:false,SERVICE_REALM:windows&maxPoolSize=1`,
+      clientOptions
     );
     client.connect(function(err, client) {
       expect(err).to.not.exist;
@@ -56,7 +59,8 @@ describe('Kerberos', function() {
 
   it('should authenticate with additional authentication properties', function(done) {
     const client = new MongoClient(
-      `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:false&maxPoolSize=1`
+      `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:false&maxPoolSize=1`,
+      clientOptions
     );
     client.connect(function(err, client) {
       expect(err).to.not.exist;
@@ -75,11 +79,13 @@ describe('Kerberos', function() {
 
   it('should fail to authenticate with bad credentials', function(done) {
     const client = new MongoClient(
-      krb5Uri.replace(encodeURIComponent(process.env.KRB5_PRINCIPAL), 'bad%40creds.cc')
+      krb5Uri.replace(encodeURIComponent(process.env.KRB5_PRINCIPAL), 'bad%40creds.cc'),
+      clientOptions
     );
     client.connect(function(err) {
       expect(err).to.exist;
       expect(err.message).to.match(/Authentication failed/);
+      expect(client.isConnected()).to.be.false;
       done();
     });
   });
