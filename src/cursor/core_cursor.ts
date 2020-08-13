@@ -827,5 +827,6 @@ function getLimitSkipBatchSizeDefaults(options: CoreCursorOptions, cmd: Document
       batchSize = 1000;
     }
   }
+
   return { limit, skip, batchSize };
 }

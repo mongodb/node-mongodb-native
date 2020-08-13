@@ -49,29 +49,29 @@ describe('Collection', function () {
             db.dropCollection('test_collection_methods2', (err, result) => {
               expect(result).to.be.true;
             });
-          });
 
-          db.createCollection('test_collection_methods3', (err, collection) => {
-            // Verify that all the result are correct coming back (should contain the value ok)
-            expect(collection.collectionName).to.equal('test_collection_methods3');
-
-            db.createCollection('test_collection_methods4', (err, collection) => {
+            db.createCollection('test_collection_methods3', (err, collection) => {
               // Verify that all the result are correct coming back (should contain the value ok)
-              expect(collection.collectionName).to.equal('test_collection_methods4');
-              // Rename the collection and with the dropTarget boolean, and check to make sure only onen exists.
-              db.renameCollection(
-                'test_collection_methods4',
-                'test_collection_methods3',
-                { dropTarget: true },
-                err => {
-                  expect(err).to.not.exist;
+              expect(collection.collectionName).to.equal('test_collection_methods3');
 
-                  db.dropCollection('test_collection_methods3', (err, result) => {
-                    expect(result).to.be.true;
-                    done();
-                  });
-                }
-              );
+              db.createCollection('test_collection_methods4', (err, collection) => {
+                // Verify that all the result are correct coming back (should contain the value ok)
+                expect(collection.collectionName).to.equal('test_collection_methods4');
+                // Rename the collection and with the dropTarget boolean, and check to make sure only onen exists.
+                db.renameCollection(
+                  'test_collection_methods4',
+                  'test_collection_methods3',
+                  { dropTarget: true },
+                  err => {
+                    expect(err).to.not.exist;
+
+                    db.dropCollection('test_collection_methods3', (err, result) => {
+                      expect(result).to.be.true;
+                      done();
+                    });
+                  }
+                );
+              });
             });
           });
         });

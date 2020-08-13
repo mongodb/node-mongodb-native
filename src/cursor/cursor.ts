@@ -87,7 +87,7 @@ export interface CursorOptions extends CoreCursorOptions {
   cursorFactory?: typeof Cursor;
   tailableRetryInterval?: number;
   explicitlyIgnoreSession?: boolean;
-  cursor?: Cursor;
+  cursor?: Document;
   /** The internal topology of the created cursor */
   topology?: Topology;
   /** Session to use for the operation */
@@ -154,7 +154,7 @@ export class Cursor<
     if (this.cmd.cursor && this.cmd.cursor.batchSize) {
       batchSize = this.cmd.cursor.batchSize;
     } else if (options.cursor && options.cursor.batchSize) {
-      batchSize = options.cursor.cursorBatchSize ?? 1000;
+      batchSize = options.cursor.batchSize ?? 1000;
     } else if (typeof options.batchSize === 'number') {
       batchSize = options.batchSize;
     }
@@ -180,6 +180,9 @@ export class Cursor<
     if (this.options.noCursorTimeout === true) {
       this.addCursorFlag('noCursorTimeout', true);
     }
+
+    // Set the batch size
+    this.cursorBatchSize = batchSize;
   }
 
   get readPreference(): ReadPreference {
@@ -789,30 +792,26 @@ export class Cursor<
    * @param applySkipLimit - Should the count command apply limit and skip settings on the cursor or in the passed in options.
    */
   count(): Promise<number>;
-  count(applySkipLimit: boolean): Promise<number>;
-  count(options: CountOptions): Promise<number>;
-  count(applySkipLimit: boolean, options: CountOptions): Promise<number>;
   count(callback: Callback<number>): void;
+  count(applySkipLimit: boolean): Promise<number>;
   count(applySkipLimit: boolean, callback: Callback<number>): void;
+  count(applySkipLimit: boolean, options: CountOptions): Promise<number>;
   count(applySkipLimit: boolean, options: CountOptions, callback: Callback<number>): void;
-  count(...args: (boolean | CountOptions | Callback<number>)[]): Promise<number> | void {
+  count(
+    applySkipLimit?: boolean | CountOptions | Callback<number>,
+    options?: CountOptions | Callback<number>,
+    callback?: Callback<number>
+  ): Promise<number> | void {
     if (this.cmd.query == null) {
       throw new MongoError('count can only be used with find command');
     }
 
-    let applySkipLimit: boolean | undefined = undefined;
-    let options: CountOptions = {};
-    let callback: Callback<number> | undefined = undefined;
-    for (const arg of args) {
-      if ('function' === typeof arg) {
-        callback = arg;
-      }
-      if ('boolean' === typeof arg) {
-        applySkipLimit = arg;
-      }
-      if ('object' === typeof arg && arg !== null) {
-        options = arg;
-      }
+    if (typeof options === 'function') (callback = options), (options = {});
+    options = options || {};
+
+    if (typeof applySkipLimit === 'function') {
+      callback = applySkipLimit;
+      applySkipLimit = true;
     }
 
     if (this.cursorState.session) {
@@ -833,7 +832,9 @@ export class Cursor<
     callback?: Callback
   ): Promise<void> | void {
     const options =
-      typeof optionsOrCallback === 'function' ? { skipKillCursors: false } : optionsOrCallback!;
+      typeof optionsOrCallback === 'function'
+        ? { skipKillCursors: false }
+        : Object.assign({}, optionsOrCallback);
     callback = typeof optionsOrCallback === 'function' ? optionsOrCallback : callback;
 
     return maybePromise(callback, (cb: Callback) => {

@@ -29,7 +29,7 @@ export class EstimatedDocumentCountOperation extends CommandOperation<
     }
 
     super(collection, options);
-    this.collectionName = collection.s.namespace.collection;
+    this.collectionName = collection.collectionName;
     if (query) {
       this.query = query;
     }

@@ -270,7 +270,6 @@ describe('Insert', function () {
         //convience curried handler for functions of type 'a -> (err, result)
         function getResult(callback) {
           return function (error, result) {
-            if (error) console.dir(error);
             test.ok(error == null);
             return callback(result);
           };

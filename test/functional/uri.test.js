@@ -122,7 +122,6 @@ describe('URI', function () {
 
       const client = this.configuration.newClient(uri, { useNewUrlParser: true });
       client.connect((err, client) => {
-        if (err) console.dir(err);
         expect(err).to.not.exist;
         expect(client).to.exist;
         expect(client.s.options.replicaSet).to.exist.and.equal(config.replicasetName);

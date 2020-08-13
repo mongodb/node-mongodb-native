@@ -257,7 +257,7 @@ export class ChangeStream extends EventEmitter {
         if (err) return cb(err); // failed to resume, raise an error
         if (!cursor) return cb(new MongoError('Cursor is undefined'));
         cursor.next((error, change) => {
-          if (error || !change) {
+          if (error) {
             this[kResumeQueue].push(() => this.next(cb));
             processError(this, error, cb);
             return;

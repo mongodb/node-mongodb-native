@@ -46,17 +46,7 @@ export class RenameOperation extends RunAdminCommandOperation {
       }
 
       try {
-        return callback(
-          undefined,
-          new Collection(
-            coll.s.db,
-            coll.s.topology,
-            coll.s.namespace.db,
-            this.newName,
-            coll.s.pkFactory,
-            coll.s.options
-          )
-        );
+        return callback(undefined, new Collection(coll.s.db, this.newName, coll.s.options));
       } catch (err) {
         return callback(new MongoError(err));
       }

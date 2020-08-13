@@ -278,9 +278,7 @@ export class Collection {
   }
 
   set hint(v: Hint | undefined) {
-    if (v) {
-      this.s.collectionHint = normalizeHintField(v);
-    }
+    this.s.collectionHint = normalizeHintField(v);
   }
 
   /**
@@ -678,9 +676,10 @@ export class Collection {
    * @param query - The cursor query object.
    * @param options - Optional settings for the command
    */
+  find(): Cursor;
   find(query: Document): Cursor;
   find(query: Document, options: FindOptions): Cursor;
-  find(query: Document, options?: FindOptions): Cursor {
+  find(query?: Document, options?: FindOptions): Cursor {
     if (arguments.length > 2) {
       throw new TypeError('Third parameter to `collection.find()` must be undefined');
     }
