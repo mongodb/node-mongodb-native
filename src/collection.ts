@@ -999,7 +999,7 @@ export class Collection {
 
     return executeOperation(
       this.s.topology,
-      new CountDocumentsOperation(this, query, options),
+      new CountDocumentsOperation(this, query as Document, options as CountDocumentsOptions),
       callback
     );
   }

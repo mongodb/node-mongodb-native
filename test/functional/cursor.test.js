@@ -157,9 +157,9 @@ describe('Cursor', function () {
           collection.insert({ a: 1 }, configuration.writeConcernMax(), function (err) {
             expect(err).to.not.exist;
 
-            collection.find({ a: 1 }).explain(function (err, explaination) {
+            collection.find({ a: 1 }).explain(function (err, explanation) {
               expect(err).to.not.exist;
-              test.ok(explaination != null);
+              expect(explanation).to.exist;
 
               // Let's close the db
               client.close(done);

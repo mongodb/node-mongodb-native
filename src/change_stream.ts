@@ -184,7 +184,7 @@ export class ChangeStream extends EventEmitter {
       this.topology = parent.s.topology;
     } else if (parent instanceof MongoClient) {
       this.type = CHANGE_DOMAIN_TYPES.CLUSTER;
-      this.topology = parent.topology;
+      this.topology = parent.topology!;
     } else {
       throw new TypeError(
         'parent provided to ChangeStream constructor is not an instance of Collection, Db, or MongoClient'

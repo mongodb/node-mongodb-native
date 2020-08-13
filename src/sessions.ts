@@ -13,6 +13,8 @@ import type { Topology } from './sdam/topology';
 import type { CommandOptions } from './cmap/wire_protocol/command';
 import type { MongoClientOptions } from './mongo_client';
 import type { Timestamp } from 'bson';
+import type { Cursor } from '.';
+import type { CoreCursor } from './cursor/core_cursor';
 const minWireVersionForShardedTransactions = 8;
 
 /**
@@ -39,7 +41,7 @@ export interface ClientSessionOptions {
   /** The default TransactionOptions to use for transactions started on this session. */
   defaultTransactionOptions?: TransactionOptions;
 
-  owner: symbol;
+  owner: symbol | Cursor;
   explicit?: boolean;
   initialClusterTime?: ClusterTime;
 }
@@ -61,7 +63,7 @@ class ClientSession extends EventEmitter {
   clusterTime?: ClusterTime;
   operationTime?: Timestamp;
   explicit: boolean;
-  owner: symbol;
+  owner: symbol | CoreCursor;
   defaultTransactionOptions: TransactionOptions;
   transaction: Transaction;
 
@@ -743,10 +745,14 @@ function applySession(
     return;
   }
 
-  if (options && options.readPreference && !options.readPreference.equals(ReadPreference.primary)) {
-    return new MongoError(
-      `Read preference in a transaction must be primary, not: ${options.readPreference.mode}`
-    );
+  if (options) {
+    ReadPreference.translate(options);
+    const readPreference = options.readPreference as ReadPreference;
+    if (readPreference && !readPreference.equals(ReadPreference.primary)) {
+      return new MongoError(
+        `Read preference in a transaction must be primary, not: ${readPreference.mode}`
+      );
+    }
   }
 
   // `autocommit` must always be false to differentiate from retryable writes

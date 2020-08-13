@@ -97,9 +97,6 @@ export interface CursorOptions extends CoreCursorOptions {
 /**
  * Creates a new Cursor instance (INTERNAL TYPE, do not instantiate directly)
  *
- * @class Cursor
- * @extends external:CoreCursor
- * @extends external:Readable
  * @property {string} sortValue Cursor query sort setting.
  * @property {boolean} timeout Is Cursor able to time out.
  * @property {ReadPreference} readPreference Get cursor ReadPreference.
@@ -219,6 +216,8 @@ export class Cursor<
   }
 
   /** Check if there is any document still available in the cursor */
+  hasNext(): Promise<void>;
+  hasNext(callback: Callback): void;
   hasNext(callback?: Callback): Promise<void> | void {
     if (this.s.state === CursorState.CLOSED || (this.isDead && this.isDead())) {
       throw new MongoError('Cursor is closed');
@@ -243,6 +242,8 @@ export class Cursor<
   }
 
   /** Get the next available document from the cursor, returns null if no more documents are available. */
+  next(): Promise<Document>;
+  next(callback: Callback<Document>): void;
   next(callback?: Callback<Document>): Promise<Document> | void {
     return maybePromise(callback, (cb: Callback) => {
       if (this.s.state === CursorState.CLOSED || (this.isDead && this.isDead())) {
@@ -666,6 +667,8 @@ export class Cursor<
    * @param iterator - The iteration callback.
    * @param callback - The end callback.
    */
+  forEach(iterator: (doc: Document) => void): Promise<Document>;
+  forEach(iterator: (doc: Document) => void, callback: Callback): void;
   forEach(iterator: (doc: Document) => void, callback?: Callback): Promise<Document> | void {
     const Promise = PromiseProvider.get();
     // Rewind cursor state
@@ -785,21 +788,31 @@ export class Cursor<
    *
    * @param applySkipLimit - Should the count command apply limit and skip settings on the cursor or in the passed in options.
    */
-  count(
-    applySkipLimit?: boolean,
-    options?: CountOptions,
-    callback?: Callback<number>
-  ): Promise<number> | void {
+  count(): Promise<number>;
+  count(applySkipLimit: boolean): Promise<number>;
+  count(options: CountOptions): Promise<number>;
+  count(applySkipLimit: boolean, options: CountOptions): Promise<number>;
+  count(callback: Callback<number>): void;
+  count(applySkipLimit: boolean, callback: Callback<number>): void;
+  count(applySkipLimit: boolean, options: CountOptions, callback: Callback<number>): void;
+  count(...args: (boolean | CountOptions | Callback<number>)[]): Promise<number> | void {
     if (this.cmd.query == null) {
       throw new MongoError('count can only be used with find command');
     }
 
-    if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
-
-    if (typeof applySkipLimit === 'function') {
-      callback = applySkipLimit;
-      applySkipLimit = true;
+    let applySkipLimit: boolean | undefined = undefined;
+    let options: CountOptions = {};
+    let callback: Callback<number> | undefined = undefined;
+    for (const arg of args) {
+      if ('function' === typeof arg) {
+        callback = arg;
+      }
+      if ('boolean' === typeof arg) {
+        applySkipLimit = arg;
+      }
+      if ('object' === typeof arg && arg !== null) {
+        options = arg;
+      }
     }
 
     if (this.cursorState.session) {
@@ -900,6 +913,8 @@ export class Cursor<
    *
    * @param callback - The result callback.
    */
+  explain(): Promise<unknown>;
+  explain(callback: Callback): void;
   explain(callback?: Callback): Promise<unknown> | void {
     // NOTE: the next line includes a special case for operations which do not
     //       subclass `CommandOperationV2`. To be removed asap.
@@ -916,9 +931,7 @@ export class Cursor<
       delete this.cmd['readConcern'];
     }
 
-    return maybePromise(callback, (cb: Callback) => {
-      CoreCursor.prototype._next.apply(this, [cb]);
-    });
+    return maybePromise(callback, cb => this._next(cb));
   }
 
   /** Return the cursor logger */
