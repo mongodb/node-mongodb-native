@@ -1,6 +1,6 @@
 import { Db, DbOptions } from './db';
 import { EventEmitter } from 'events';
-import { ChangeStream } from './change_stream';
+import { ChangeStream, ChangeStreamOptions } from './change_stream';
 import { ReadPreference, ReadPreferenceMode } from './read_preference';
 import { MongoError } from './error';
 import { WriteConcern, WriteConcernOptions } from './write_concern';
@@ -9,7 +9,7 @@ import { deprecate } from 'util';
 import { connect, validOptions } from './operations/connect';
 import { PromiseProvider } from './promise_provider';
 import { Logger } from './logger';
-import type { Callback, BSONSerializeOptions, AutoEncryptionOptions, AnyError } from './types';
+import type { Callback, BSONSerializeOptions, AutoEncryptionOptions, AnyError, Document } from './types';
 import type { CompressorName } from './cmap/wire_protocol/compression';
 import type { ReadConcernLevel, ReadConcern } from './read_concern';
 import type { AuthMechanism } from './cmap/auth/defaultAuthProviders';
@@ -494,24 +494,16 @@ export class MongoClient extends EventEmitter {
   }
 
   /**
-   * Create a new Change Stream, watching for new changes (insertions, updates, replacements, deletions, and invalidations) in this cluster. Will ignore all changes to system collections, as well as the local, admin,
-   * and config databases.
+   * Create a new Change Stream, watching for new changes (insertions, updates,
+   * replacements, deletions, and invalidations) in this cluster. Will ignore all
+   * changes to system collections, as well as the local, admin, and config databases.
    *
-   * @function
-   * @since 3.1.0
-   * @param {Array} [pipeline] An array of {@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents. This allows for filtering (using $match) and manipulating the change stream documents.
-   * @param {object} [options] Optional settings
-   * @param {string} [options.fullDocument='default'] Allowed values: ‘default’, ‘updateLookup’. When set to ‘updateLookup’, the change stream will include both a delta describing the changes to the document, as well as a copy of the entire document that was changed from some time after the change occurred.
-   * @param {object} [options.resumeAfter] Specifies the logical starting point for the new change stream. This should be the _id field from a previously returned change stream document.
-   * @param {number} [options.maxAwaitTimeMS] The maximum amount of time for the server to wait on new documents to satisfy a change stream query
-   * @param {number} [options.batchSize=1000] The number of documents to return per batch. See {@link https://docs.mongodb.com/manual/reference/command/aggregate|aggregation documentation}.
-   * @param {object} [options.collation] Specify collation settings for operation. See {@link https://docs.mongodb.com/manual/reference/command/aggregate|aggregation documentation}.
-   * @param {ReadPreference} [options.readPreference] The read preference. See {@link https://docs.mongodb.com/manual/reference/read-preference|read preference documentation}.
-   * @param {Timestamp} [options.startAtOperationTime] receive change events that occur after the specified timestamp
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @returns {ChangeStream} a ChangeStream instance.
+   * @param pipeline - An array of {@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents. This allows for filtering (using $match) and manipulating the change stream documents.
+   * @param options - Optional settings for the command
    */
-  watch(pipeline?: any[], options?: any): ChangeStream {
+  watch(): ChangeStream;
+  watch(pipeline?: Document[]): ChangeStream;
+  watch(pipeline?: Document[], options?: ChangeStreamOptions): ChangeStream {
     pipeline = pipeline || [];
     options = options || {};
 
