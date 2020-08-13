@@ -20,7 +20,6 @@ import { CountOperation, CountOptions } from '../operations/count';
 import type { Callback, Document, AnyError } from '../types';
 import type { Logger } from '../logger';
 import type { Topology } from '../sdam/topology';
-import type { ClientSession } from '../sessions';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 import type { Sort, SortDirection } from '../operations/find';
 import type { Hint, OperationBase } from '../operations/operation';
@@ -158,6 +157,7 @@ export class Cursor<
     } else if (typeof options.batchSize === 'number') {
       batchSize = options.batchSize;
     }
+
     // Internal cursor state
     this.s = {
       // Tailable cursor options
@@ -791,6 +791,7 @@ export class Cursor<
    *
    * @param applySkipLimit - Should the count command apply limit and skip settings on the cursor or in the passed in options.
    */
+
   count(): Promise<number>;
   count(callback: Callback<number>): void;
   count(applySkipLimit: boolean): Promise<number>;

@@ -1060,76 +1060,43 @@ function isRetryableWritesSupported(topology: Topology) {
 
   return true;
 }
-
 class ServerCapabilities {
+  maxWireVersion: number;
+  minWireVersion: number;
+
   constructor(ismaster: Document) {
-    // Capabilities
-    let aggregationCursor = false;
-    let writeCommands = false;
-    let textSearch = false;
-    let authCommands = false;
-    let listCollections = false;
-    let listIndexes = false;
-    const maxNumberOfDocsInBatch = ismaster.maxWriteBatchSize || 1000;
-    let commandsTakeWriteConcern = false;
-    let commandsTakeCollation = false;
+    this.minWireVersion = ismaster.minWireVersion || 0;
+    this.maxWireVersion = ismaster.maxWireVersion || 0;
+  }
 
-    if (ismaster.minWireVersion >= 0) {
-      textSearch = true;
-    }
+  get hasAggregationCursor() {
+    return this.maxWireVersion >= 1;
+  }
 
-    if (ismaster.maxWireVersion >= 1) {
-      aggregationCursor = true;
-      authCommands = true;
-    }
+  get hasWriteCommands() {
+    return this.maxWireVersion >= 2;
+  }
+  get hasTextSearch() {
+    return this.minWireVersion >= 0;
+  }
 
-    if (ismaster.maxWireVersion >= 2) {
-      writeCommands = true;
-    }
+  get hasAuthCommands() {
+    return this.maxWireVersion >= 1;
+  }
 
-    if (ismaster.maxWireVersion >= 3) {
-      listCollections = true;
-      listIndexes = true;
-    }
+  get hasListCollectionsCommand() {
+    return this.maxWireVersion >= 3;
+  }
 
-    if (ismaster.maxWireVersion >= 5) {
-      commandsTakeWriteConcern = true;
-      commandsTakeCollation = true;
-    }
+  get hasListIndexesCommand() {
+    return this.maxWireVersion >= 3;
+  }
 
-    // If no min or max wire version set to 0
-    if (ismaster.minWireVersion == null) {
-      ismaster.minWireVersion = 0;
-    }
+  get commandsTakeWriteConcern() {
+    return this.maxWireVersion >= 5;
+  }
 
-    if (ismaster.maxWireVersion == null) {
-      ismaster.maxWireVersion = 0;
-    }
-
-    function setup_get_property(
-      object: ServerCapabilities,
-      name: string,
-      value: string | boolean | number
-    ) {
-      Object.defineProperty(object, name, {
-        enumerable: true,
-        get() {
-          return value;
-        }
-      });
-    }
-
-    // Map up read only parameters
-    setup_get_property(this, 'hasAggregationCursor', aggregationCursor);
-    setup_get_property(this, 'hasWriteCommands', writeCommands);
-    setup_get_property(this, 'hasTextSearch', textSearch);
-    setup_get_property(this, 'hasAuthCommands', authCommands);
-    setup_get_property(this, 'hasListCollectionsCommand', listCollections);
-    setup_get_property(this, 'hasListIndexesCommand', listIndexes);
-    setup_get_property(this, 'minWireVersion', ismaster.minWireVersion);
-    setup_get_property(this, 'maxWireVersion', ismaster.maxWireVersion);
-    setup_get_property(this, 'maxNumberOfDocsInBatch', maxNumberOfDocsInBatch);
-    setup_get_property(this, 'commandsTakeWriteConcern', commandsTakeWriteConcern);
-    setup_get_property(this, 'commandsTakeCollation', commandsTakeCollation);
+  get commandsTakeCollation() {
+    return this.maxWireVersion >= 5;
   }
 }

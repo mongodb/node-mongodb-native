@@ -1,4 +1,4 @@
-import { CommandOperation, CommandOperationOptions, Parent } from './command';
+import { CommandOperation, CommandOperationOptions, OperationParent } from './command';
 import { ReadPreference } from '../read_preference';
 import { MongoError } from '../error';
 import { maxWireVersion } from '../utils';
@@ -19,7 +19,7 @@ export interface AggregateOptions extends CommandOperationOptions {
   /** Allow driver to bypass schema validation in MongoDB 3.2 or higher. */
   bypassDocumentValidation?: boolean;
   /** Return the query as cursor, on 2.6 > it returns as a real cursor on pre 2.6 it returns as an emulated cursor. */
-  cursor?: Cursor;
+  cursor?: Document;
   /** Explain returns the aggregation execution plan (requires mongodb 2.6 >) */
   explain?: boolean;
   /** specifies a cumulative time limit in milliseconds for processing operations on the cursor. MongoDB interrupts the operation at the earliest following interrupt point. */
@@ -39,7 +39,7 @@ export class AggregateOperation extends CommandOperation<AggregateOptions> {
   pipeline: Document[];
   hasWriteStage: boolean;
 
-  constructor(parent: Parent, pipeline: Document[], options?: AggregateOptions) {
+  constructor(parent: OperationParent, pipeline: Document[], options?: AggregateOptions) {
     super(parent, { fullResponse: true, ...options });
 
     this.target =

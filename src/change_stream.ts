@@ -19,7 +19,7 @@ import type { Timestamp } from 'bson';
 import type { Topology } from './sdam/topology';
 import type { Writable } from 'stream';
 import type { StreamOptions } from './cursor/core_cursor';
-import type { Parent } from './operations/command';
+import type { OperationParent } from './operations/command';
 const kResumeQueue = Symbol('resumeQueue');
 
 const CHANGE_STREAM_OPTIONS = ['resumeAfter', 'startAfter', 'startAtOperationTime', 'fullDocument'];
@@ -150,7 +150,7 @@ interface UpdateDescription {
 export class ChangeStream extends EventEmitter {
   pipeline: Document[];
   options: ChangeStreamOptions;
-  parent: Parent;
+  parent: OperationParent;
   namespace: MongoDBNamespace;
   type: symbol;
   topology: Topology;
@@ -164,7 +164,11 @@ export class ChangeStream extends EventEmitter {
    * @param parent - The parent object that created this change stream
    * @param pipeline - An array of {@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents
    */
-  constructor(parent: Parent, pipeline: Document[] = [], options: ChangeStreamOptions = {}) {
+  constructor(
+    parent: OperationParent,
+    pipeline: Document[] = [],
+    options: ChangeStreamOptions = {}
+  ) {
     super();
 
     const Collection = loadCollection();

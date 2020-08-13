@@ -16,7 +16,7 @@ import { MongoError } from './error';
 import { initializeUnorderedBulkOp as unordered } from './bulk/unordered';
 import { initializeOrderedBulkOp as ordered } from './bulk/ordered';
 import { ChangeStream, ChangeStreamOptions } from './change_stream';
-import { WriteConcern } from './write_concern';
+import { WriteConcern, WriteConcernOptions } from './write_concern';
 import { ReadConcern } from './read_concern';
 import { AggregationCursor, CommandCursor, Cursor } from './cursor';
 import { AggregateOperation, AggregateOptions } from './operations/aggregate';
@@ -78,7 +78,7 @@ import { ReplaceOneOperation, ReplaceOptions } from './operations/replace_one';
 import { CollStatsOperation, CollStatsOptions } from './operations/stats';
 import { executeOperation } from './operations/execute_operation';
 import { EvalGroupOperation, GroupOperation } from './operations/group';
-import type { Callback, Document } from './types';
+import type { Callback, Document, BSONSerializeOptions } from './types';
 import type { Db } from './db';
 import type { OperationOptions, Hint } from './operations/operation';
 import type { IndexInformationOptions } from './operations/common_functions';
@@ -87,6 +87,7 @@ import type { BulkWriteResult } from './bulk/common';
 import type { PkFactory } from './mongo_client';
 import type { Topology } from './sdam/topology';
 import type { Logger } from './logger';
+import type { OperationParent } from './operations/command';
 
 const mergeKeys = ['ignoreUndefined'];
 
@@ -106,6 +107,10 @@ export interface Collection {
   findAndModify(this: any, query: any, sort: any, doc: any, options: any, callback: Callback): any;
 }
 
+export interface CollectionOptions extends BSONSerializeOptions, WriteConcernOptions {
+  slaveOk?: boolean;
+}
+
 interface CollectionPrivate {
   pkFactory: PkFactory | typeof ObjectId;
   db: Db;
@@ -113,12 +118,12 @@ interface CollectionPrivate {
   options: any;
   namespace: MongoDBNamespace;
   readPreference?: ReadPreference;
-  slaveOk: boolean;
-  serializeFunctions: boolean;
-  raw: boolean;
-  promoteLongs: boolean;
-  promoteValues: boolean;
-  promoteBuffers: boolean;
+  slaveOk?: boolean;
+  serializeFunctions?: boolean;
+  raw?: boolean;
+  promoteLongs?: boolean;
+  promoteValues?: boolean;
+  promoteBuffers?: boolean;
   collectionHint?: Hint;
   readConcern?: ReadConcern;
   writeConcern?: WriteConcern;
@@ -149,11 +154,11 @@ interface CollectionPrivate {
  *   });
  * });
  */
-export class Collection {
+export class Collection implements OperationParent {
   s: CollectionPrivate;
 
   /** Create a new Collection instance (INTERNAL TYPE, do not instantiate directly) */
-  constructor(db: Db, name: string, options: any) {
+  constructor(db: Db, name: string, options?: CollectionOptions) {
     checkCollectionName(name);
     emitDeprecatedOptionWarning(options, ['promiseLibrary']);
 
@@ -1524,6 +1529,10 @@ export class Collection {
    * @returns {Logger} return the db logger
    */
   getLogger(): Logger {
+    return this.s.db.s.logger;
+  }
+
+  get logger(): Logger {
     return this.s.db.s.logger;
   }
 

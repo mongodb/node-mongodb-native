@@ -54,6 +54,7 @@ import type { Callback, Document, BSONSerializeOptions } from './types';
 import type { IndexInformationOptions } from './operations/common_functions';
 import type { PkFactory } from './mongo_client';
 import type { Topology } from './sdam/topology';
+import type { OperationParent } from './operations/command';
 
 // Allowed parameters
 const legalOptionNames = [
@@ -132,7 +133,7 @@ export interface Db {
  *   client.close();
  * });
  */
-export class Db {
+export class Db implements OperationParent {
   s: DbPrivate;
 
   public static SYSTEM_NAMESPACE_COLLECTION = CONSTANTS.SYSTEM_NAMESPACE_COLLECTION;
@@ -757,6 +758,10 @@ export class Db {
 
   /** Return the db logger */
   getLogger(): Logger {
+    return this.s.logger;
+  }
+
+  get logger(): Logger {
     return this.s.logger;
   }
 }

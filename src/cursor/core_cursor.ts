@@ -10,7 +10,6 @@ import type { BSONSerializeOptions, Callback, Callback2, Document } from '../typ
 import type { Topology } from '../sdam/topology';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import type { Connection } from '../cmap/connection';
 import type { OperationTime, ResumeToken } from '../change_stream';
 import type { CommandOperationOptions } from '../operations/command';
 import type { CloseOptions } from '../cmap/connection_pool';
@@ -116,9 +115,9 @@ export class CoreCursor<
    * Create a new core `Cursor` instance.
    * **NOTE** Not to be instantiated directly
    *
-   * @param topology The server topology instance.
-   * @param ns The MongoDB fully qualified namespace (ex: db1.collection1)
-   * @param cmd The selector (can be a command or a cursorId)
+   * @param topology - The server topology instance.
+   * @param operation - The cursor-generating operation to run
+   * @param options - Optional settings for the cursor
    */
   constructor(topology: Topology, operation: O, options: T = {} as T) {
     super({ objectMode: true });
@@ -801,6 +800,7 @@ function nextFunction(self: CoreCursor, callback: Callback) {
 function getLimitSkipBatchSizeDefaults(options: CoreCursorOptions, cmd: Document) {
   cmd = cmd ? cmd : {};
   let limit = options.limit;
+
   if (!limit) {
     if ('limit' in cmd) {
       limit = cmd.limit;

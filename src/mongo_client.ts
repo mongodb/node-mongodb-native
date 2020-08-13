@@ -9,12 +9,19 @@ import { deprecate } from 'util';
 import { connect, validOptions } from './operations/connect';
 import { PromiseProvider } from './promise_provider';
 import { Logger } from './logger';
-import type { Callback, BSONSerializeOptions, AutoEncryptionOptions, AnyError, Document } from './types';
+import { ReadConcernLevel, ReadConcern } from './read_concern';
+import type {
+  Callback,
+  BSONSerializeOptions,
+  AutoEncryptionOptions,
+  AnyError,
+  Document
+} from './types';
 import type { CompressorName } from './cmap/wire_protocol/compression';
-import type { ReadConcernLevel, ReadConcern } from './read_concern';
 import type { AuthMechanism } from './cmap/auth/defaultAuthProviders';
 import type { Topology } from './sdam/topology';
 import type { ClientSession, ClientSessionOptions } from './sessions';
+import type { OperationParent } from './operations/command';
 
 export enum LogLevel {
   'error' = 'error',
@@ -218,6 +225,7 @@ interface MongoClientPrivate {
   options?: MongoClientOptions;
   dbCache: Map<string, Db>;
   sessions: Set<ClientSession>;
+  readConcern?: ReadConcern;
   writeConcern?: WriteConcern;
   namespace: MongoDBNamespace;
   logger: Logger;
@@ -255,7 +263,7 @@ interface MongoClientPrivate {
  *   client.close();
  * });
  */
-export class MongoClient extends EventEmitter {
+export class MongoClient extends EventEmitter implements OperationParent {
   s: MongoClientPrivate;
   topology?: Topology;
 
@@ -272,10 +280,15 @@ export class MongoClient extends EventEmitter {
       options: options || {},
       dbCache: new Map(),
       sessions: new Set(),
+      readConcern: ReadConcern.fromOptions(options),
       writeConcern: WriteConcern.fromOptions(options),
       namespace: new MongoDBNamespace('admin'),
       logger: options?.logger ?? new Logger('MongoClient')
     };
+  }
+
+  get readConcern() {
+    return this.s.readConcern;
   }
 
   get writeConcern() {
@@ -284,6 +297,10 @@ export class MongoClient extends EventEmitter {
 
   get readPreference() {
     return ReadPreference.primary;
+  }
+
+  get logger(): Logger {
+    return this.s.logger;
   }
 
   /**

@@ -9,9 +9,6 @@ import type { Logger } from '../logger';
 
 import type { Server } from '../sdam/server';
 import type { Callback, Document } from '../types';
-import type { Collection } from '../collection';
-import type { Db } from '../db';
-import type { MongoClient } from '../mongo_client';
 import type { CommandOptions } from '../cmap/wire_protocol/command';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 
@@ -38,7 +35,13 @@ export interface CommandOperationOptions extends OperationOptions {
   authdb?: string;
 }
 
-export type Parent = MongoClient | Db | Collection | { s: any };
+export interface OperationParent {
+  s: { namespace: MongoDBNamespace };
+  readConcern?: ReadConcern;
+  writeConcern?: WriteConcern;
+  readPreference?: ReadPreference;
+  logger?: Logger;
+}
 
 export class CommandOperation<
   T extends CommandOperationOptions = CommandOperationOptions
@@ -51,7 +54,7 @@ export class CommandOperation<
   fullResponse?: boolean;
   logger?: Logger;
 
-  constructor(parent: Parent, options?: T) {
+  constructor(parent: OperationParent, options?: T) {
     super(options);
 
     // NOTE: this was explicitly added for the add/remove user operations, it's likely
@@ -79,10 +82,8 @@ export class CommandOperation<
     this.options.readPreference = this.readPreference;
 
     // TODO(NODE-2056): make logger another "inheritable" property
-    if (parent.s.logger) {
-      this.logger = parent.s.logger;
-    } else if (parent.s.db && parent.s.db.logger) {
-      this.logger = parent.s.db.logger;
+    if (parent.logger) {
+      this.logger = parent.logger;
     }
   }
 
@@ -145,14 +146,10 @@ export class CommandOperation<
   }
 }
 
-function resolveWriteConcern(parent: Parent | undefined, options: any) {
-  return (
-    WriteConcern.fromOptions(options) || (parent && 'writeConcern' in parent && parent.writeConcern)
-  );
+function resolveWriteConcern(parent: OperationParent | undefined, options: any) {
+  return WriteConcern.fromOptions(options) || parent?.writeConcern;
 }
 
-function resolveReadConcern(parent: Parent | undefined, options: any) {
-  return (
-    ReadConcern.fromOptions(options) || (parent && 'readConcern' in parent && parent.readConcern)
-  );
+function resolveReadConcern(parent: OperationParent | undefined, options: any) {
+  return ReadConcern.fromOptions(options) || parent?.readConcern;
 }
