@@ -84,6 +84,7 @@ import type { OperationOptions } from './operations/operation';
 import type { IndexInformationOptions } from './operations/common_functions';
 import type { CountOptions } from './operations/count';
 import type { BulkWriteResult } from './bulk/common';
+
 const mergeKeys = ['ignoreUndefined'];
 
 export interface Collection {
@@ -832,7 +833,7 @@ export class Collection {
     options = options || {};
 
     // Run only against primary
-    options.readPreference = ReadPreference.PRIMARY;
+    options.readPreference = ReadPreference.primary;
 
     return executeOperation(
       this.s.topology,
@@ -998,7 +999,7 @@ export class Collection {
 
     return executeOperation(
       this.s.topology,
-      new CountDocumentsOperation(this, query, options),
+      new CountDocumentsOperation(this, query as Document, options as CountDocumentsOptions),
       callback
     );
   }
@@ -1763,7 +1764,7 @@ function _findAndModify(
   // Clone options
   options = Object.assign({}, options);
   // Force read preference primary
-  options.readPreference = ReadPreference.PRIMARY;
+  options.readPreference = ReadPreference.primary;
 
   return executeOperation(
     this.s.topology,

@@ -3,6 +3,7 @@ import type { Document, BSONSerializeOptions } from '../types';
 import type { MongoDBNamespace } from '../utils';
 import type { InternalCursorState } from '../cursor/core_cursor';
 import type { ReadPreference } from '../read_preference';
+import type { Server } from '../sdam/server';
 
 export const Aspect = {
   READ_OPERATION: Symbol('READ_OPERATION'),
@@ -35,6 +36,7 @@ export class OperationBase<T extends OperationOptions = OperationOptions> {
 
   readPreference?: ReadPreference;
 
+  server!: Server;
   // TODO: remove as part of NODE-2104, except this is closed?
   cursorState?: InternalCursorState;
   fullResponse?: boolean;

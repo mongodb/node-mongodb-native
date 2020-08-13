@@ -2,32 +2,33 @@ import { Aspect, OperationBase, OperationOptions } from './operation';
 import { ReadConcern } from '../read_concern';
 import { WriteConcern } from '../write_concern';
 import { maxWireVersion, MongoDBNamespace } from '../utils';
-import { ReadPreference, ReadPreferenceLike } from '../read_preference';
+import { ReadPreference } from '../read_preference';
 import { commandSupportsReadConcern, ClientSession } from '../sessions';
 import { MongoError } from '../error';
 import type { Logger } from '../logger';
 
 import type { Server } from '../sdam/server';
-import type { Callback, Document, BSONSerializeOptions } from '../types';
+import type { Callback, Document } from '../types';
 import type { Collection } from '../collection';
 import type { Db } from '../db';
 import type { MongoClient } from '../mongo_client';
 import type { CommandOptions } from '../cmap/wire_protocol/command';
+import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 
 const SUPPORTS_WRITE_CONCERN_AND_COLLATION = 5;
 
-export interface CommandOperationOptions extends OperationOptions, BSONSerializeOptions {
+export interface CommandOperationOptions extends OperationOptions {
   fullResponse?: boolean;
   /** Specify a read concern and level for the collection. (only MongoDB 3.2 or higher supported) */
   readConcern?: ReadConcern;
-  /** The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST). */
-  readPreference?: ReadPreferenceLike;
+  /** The preferred read preference (ReadPreference.primary, ReadPreference.primary_preferred, ReadPreference.secondary, ReadPreference.secondary_preferred, ReadPreference.nearest). */
+  readPreference?: ReadPreference;
   /** Specify ClientSession for this command */
   session?: ClientSession;
   /** WriteConcern for this command */
   writeConcern?: WriteConcern;
   /** Collation */
-  collation?: any;
+  collation?: CollationOptions;
   maxTimeMS?: number;
   /** A user-provided comment to attach to this command */
   comment?: string | Document;
@@ -49,7 +50,6 @@ export class CommandOperation<
   explain: boolean;
   fullResponse?: boolean;
   logger?: Logger;
-  server?: Server;
 
   constructor(parent: Parent, options?: T) {
     super(options);

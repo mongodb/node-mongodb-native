@@ -14,6 +14,7 @@ import { InsertOperation } from '../operations/insert';
 import { UpdateOperation } from '../operations/update';
 import { DeleteOperation } from '../operations/delete';
 import type { Callback } from '../types';
+import type { WriteConcern } from '../write_concern';
 
 // Error codes
 const WRITE_CONCERN_ERROR = 64;
@@ -1126,7 +1127,7 @@ class BulkOperationBase {
    * @param {any} err
    * @param {any} callback
    */
-  _handleEarlyError(err?: any, callback?: any) {
+  _handleEarlyError(err?: any, callback?: any): Promise<void> | void {
     const Promise = PromiseProvider.get();
 
     if (typeof callback === 'function') {
@@ -1145,7 +1146,11 @@ class BulkOperationBase {
    * @param {object} options
    * @param {Function} callback
    */
-  bulkExecute(_writeConcern: object, options: object, callback: Callback) {
+  bulkExecute(
+    _writeConcern?: WriteConcern,
+    options?: object,
+    callback?: Callback
+  ): Promise<void> | { options: any; callback?: Callback } | void {
     if (typeof options === 'function') (callback = options as Callback), (options = {});
     options = options || {};
 
@@ -1199,14 +1204,14 @@ class BulkOperationBase {
    * @throws {MongoError} Throws error if the bulk object does not have any operations
    * @returns {Promise<void>|void} returns Promise if no callback passed
    */
-  execute(_writeConcern?: any, options?: any, callback?: Callback): Promise<void> | void {
+  execute(_writeConcern?: WriteConcern, options?: any, callback?: Callback): Promise<void> | void {
     const ret = this.bulkExecute(_writeConcern, options, callback!);
     if (!ret || isPromiseLike(ret)) {
-      return ret;
+      return ret as Promise<void>;
     }
 
-    options = ret.options;
-    callback = ret.callback;
+    options = (ret as any).options;
+    callback = (ret as any).callback;
 
     return executeLegacyOperation(this.s.topology, executeCommands, [this, options, callback]);
   }

@@ -7,12 +7,12 @@ import { MongoError, MongoNetworkError } from '../../error';
 import type { Callback, Document, BSONSerializeOptions } from '../../types';
 import type { Server } from '../../sdam/server';
 import type { Topology } from '../../sdam/topology';
-import type { ReadPreference } from '../../read_preference';
+import type { ReadPreferenceLike } from '../../read_preference';
 
 export interface CommandOptions extends BSONSerializeOptions {
   command?: Document;
   slaveOk?: boolean;
-  readPreference?: ReadPreference;
+  readPreference?: ReadPreferenceLike;
   raw?: boolean;
   monitoring?: boolean;
   fullResult?: boolean;

@@ -1,8 +1,9 @@
-import { ReadPreference } from '../read_preference';
+import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import { MongoError } from '../error';
-import { Cursor } from './cursor';
+import { Cursor, CursorOptions } from './cursor';
 import { CursorState } from './core_cursor';
-import type { OperationBase } from '../operations/operation';
+import type { Topology } from '../sdam/topology';
+import type { CommandOperation } from '../operations/command';
 
 /**
  * @file The **CommandCursor** class is an internal class that embodies a
@@ -36,11 +37,7 @@ import type { OperationBase } from '../operations/operation';
  * });
  */
 
-/**
- * Namespace provided by the browser.
- *
- * @external Readable
- */
+export type CommandCursorOptions = CursorOptions;
 
 /**
  * Creates a new Command Cursor instance (INTERNAL TYPE, do not instantiate directly)
@@ -53,34 +50,25 @@ import type { OperationBase } from '../operations/operation';
  * @fires CommandCursor#readable
  * @returns {CommandCursor} an CommandCursor instance.
  */
-export class CommandCursor extends Cursor {
-  /**
-   * @param {any} topology
-   * @param {any} operation
-   * @param {any} [options]
-   */
-  constructor(topology: any, operation: OperationBase, options?: any) {
+export class CommandCursor extends Cursor<CommandOperation, CommandCursorOptions> {
+  constructor(topology: Topology, operation: CommandOperation, options?: CommandCursorOptions) {
     super(topology, operation, options);
   }
 
   /**
    * Set the ReadPreference for the cursor.
    *
-   * @function
    * @param {(string|ReadPreference)} readPreference The new read preference for the cursor.
    * @throws {MongoError}
    * @returns {Cursor}
    */
-  setReadPreference(readPreference: any): Cursor {
+  setReadPreference(readPreference: ReadPreferenceLike): this {
     if (this.s.state === CursorState.CLOSED || this.isDead()) {
-      throw MongoError.create({ message: 'Cursor is closed', driver: true });
+      throw new MongoError('Cursor is closed');
     }
 
     if (this.s.state !== CursorState.INIT) {
-      throw MongoError.create({
-        message: 'cannot change cursor readPreference after cursor has been accessed',
-        driver: true
-      });
+      throw new MongoError('cannot change cursor readPreference after cursor has been accessed');
     }
 
     if (readPreference instanceof ReadPreference) {
@@ -97,36 +85,34 @@ export class CommandCursor extends Cursor {
   /**
    * Set the batch size for the cursor.
    *
-   * @function
    * @param {number} value The number of documents to return per batch. See {@link https://docs.mongodb.com/manual/reference/command/find/|find command documentation}.
    * @throws {MongoError}
    * @returns {CommandCursor}
    */
-  batchSize(value: number): CommandCursor {
+  batchSize(value: number): this {
     if (this.s.state === CursorState.CLOSED || this.isDead()) {
-      throw MongoError.create({ message: 'Cursor is closed', driver: true });
+      throw new MongoError('Cursor is closed');
     }
 
     if (typeof value !== 'number') {
-      throw MongoError.create({ message: 'batchSize requires an integer', driver: true });
+      throw new MongoError('batchSize requires an integer');
     }
 
     if (this.cmd.cursor) {
       this.cmd.cursor.batchSize = value;
     }
 
-    this.setCursorBatchSize(value);
+    this.cursorBatchSize = value;
     return this;
   }
 
   /**
    * Add a maxTimeMS stage to the aggregation pipeline
    *
-   * @function
    * @param {number} value The state maxTimeMS value.
    * @returns {CommandCursor}
    */
-  maxTimeMS(value: number): CommandCursor {
+  maxTimeMS(value: number): this {
     if (this.topology.lastIsMaster().minWireVersion > 2) {
       this.cmd.maxTimeMS = value;
     }

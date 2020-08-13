@@ -36,8 +36,8 @@ export class CountOperation extends CommandOperation<CountOptions> {
     const options = this.options;
 
     if (applySkipLimit) {
-      if (typeof cursor.cursorSkip() === 'number') options.skip = cursor.cursorSkip();
-      if (typeof cursor.cursorLimit() === 'number') options.limit = cursor.cursorLimit();
+      if (typeof cursor.cursorSkip === 'number') options.skip = cursor.cursorSkip;
+      if (typeof cursor.cursorLimit === 'number') options.limit = cursor.cursorLimit;
     }
 
     if (

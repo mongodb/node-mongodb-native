@@ -1,7 +1,7 @@
 import { emitDeprecatedOptionWarning, ClientMetadata, MongoDBNamespace } from '../utils';
 import Denque = require('denque');
 import { EventEmitter } from 'events';
-import { ReadPreference } from '../read_preference';
+import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import { TopologyType, ServerType, ClusterTime, TimerQueue } from './common';
 import { ServerDescription } from './server_description';
 import { TopologyDescription } from './topology_description';
@@ -152,7 +152,7 @@ interface ConnectOptions {
 }
 
 export interface SelectServerOptions {
-  readPreference?: ReadPreference;
+  readPreference?: ReadPreferenceLike;
   serverSelectionTimeoutMS?: number;
   session?: ClientSession;
 }
@@ -658,7 +658,7 @@ export class Topology extends EventEmitter {
     }
 
     ReadPreference.translate(options);
-    const readPreference = options.readPreference || ReadPreference.primary;
+    const readPreference = (options.readPreference as ReadPreference) || ReadPreference.primary;
 
     this.selectServer(readPreferenceServerSelector(readPreference), options, (err, server) => {
       if (err || !server) {

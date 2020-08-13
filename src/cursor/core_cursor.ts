@@ -3,97 +3,125 @@ import { ReadPreference } from '../read_preference';
 import { MongoDBNamespace } from '../utils';
 import { executeOperation } from '../operations/execute_operation';
 import { Readable } from 'stream';
+import type { OperationBase, Hint } from '../operations/operation';
 import { MongoError, MongoNetworkError } from '../error';
 import { Long } from '../bson';
 import type { BSONSerializeOptions, Callback, Callback2, Document } from '../types';
-import type { OperationBase } from '../operations/operation';
+import type { Topology } from '../sdam/topology';
+import type { Server } from '../sdam/server';
+import type { ClientSession } from '../sessions';
+import type { Connection } from '../cmap/connection';
+import type { OperationTime, ResumeToken } from '../change_stream';
+import type { CommandOperationOptions } from '../operations/command';
+import type { CloseOptions } from '../cmap/connection_pool';
+
+export interface DocumentTransforms {
+  /** Transform each document returned */
+  doc(doc: Document): Document;
+  /** Transform the value returned from the initial query */
+  query?(doc: Document): Document | Document[];
+}
+
+export interface CoreCursorPrivate {
+  /** Transforms functions */
+  transforms?: DocumentTransforms;
+  numberOfRetries: number;
+  tailableRetryInterval: number;
+  currentNumberOfRetries: number;
+  explicitlyIgnoreSession: boolean;
+  batchSize: number;
+
+  state: CursorState;
+}
+
+export interface CursorCloseOptions {
+  /** Bypass calling killCursors when closing the cursor. */
+  skipKillCursors?: boolean;
+}
+
+export interface StreamOptions {
+  /** A transformation method applied to each document emitted by the stream */
+  transform?(doc: Document): Document;
+}
 
 export interface InternalCursorState extends BSONSerializeOptions {
-  [key: string]: any;
-  batchSize?: any;
-  cmd?: any;
-  currentLimit?: any;
-  cursorId?: any;
-  cursorIndex?: any;
-  dead?: any;
-  documents?: any;
-  init?: any;
-  killed?: any;
-  lastCursorId?: any;
-  limit?: any;
-  notified?: any;
-  operationTime?: any;
-  reconnect?: any;
-  session?: any;
-  skip?: any;
-  streamOptions?: any;
-  transforms?: any;
-  raw?: any;
+  postBatchResumeToken?: ResumeToken;
+  batchSize: number;
+  cmd: Document;
+  currentLimit: number;
+  cursorId?: Long;
+  lastCursorId?: Long;
+  cursorIndex: number;
+  dead: boolean;
+  killed: boolean;
+  init: boolean;
+  notified: boolean;
+  documents: Document[];
+  limit: number;
+  operationTime?: OperationTime;
+  reconnect?: boolean;
+  session?: ClientSession;
+  skip: number;
+  streamOptions?: StreamOptions;
+  transforms?: DocumentTransforms;
+  raw?: boolean;
 }
-
-export type CoreCursorOptions = BSONSerializeOptions;
 
 // Possible states for a cursor
-const CursorState = {
-  INIT: 0,
-  OPEN: 1,
-  CLOSED: 2,
-  GET_MORE: 3
-};
-
-interface CoreCursor {
-  close(options?: any, callback?: Callback): Promise<void> | void;
+export enum CursorState {
+  INIT = 0,
+  OPEN = 1,
+  CLOSED = 2,
+  GET_MORE = 3
 }
 
-/**
- * This is a cursor results callback
- *
- * @callback resultCallback
- * @param {error} error An error object. Set to null if no error present
- * @param {object} document
- */
+export interface CoreCursorOptions extends CommandOperationOptions {
+  noCursorTimeout?: boolean;
+  tailable?: boolean;
+  raw?: boolean;
+  hint?: Hint;
+  limit?: number;
+  skip?: number;
+  /** The number of documents to return per batch. See {@link https://docs.mongodb.com/manual/reference/command/find/| find command documentation} and {@link https://docs.mongodb.com/manual/reference/command/aggregate|aggregation documentation}. */
+  batchSize?: number;
+  /** Initial documents list for cursor */
+  documents?: Document[];
+  /** Transform function */
+  transforms?: DocumentTransforms;
+}
 
 /**
  * The **CoreCursor** class is an internal class that embodies a cursor on MongoDB
  * allowing for iteration over the results returned from the underlying query.
  *
  * **CURSORS Cannot directly be instantiated**
- *
- * @property {number} cursorBatchSize The current cursorBatchSize for the cursor
- * @property {number} cursorLimit The current cursorLimit for the cursor
- * @property {number} cursorSkip The current cursorSkip for the cursor
  */
-class CoreCursor extends Readable {
-  operation: any;
-  pool: any;
-  server: any;
-  disconnectHandler: any;
-  ns: any;
-  namespace: any;
-  cmd: any;
-  options: any;
-  topology: any;
+export class CoreCursor<
+  O extends OperationBase = OperationBase,
+  T extends CoreCursorOptions = CoreCursorOptions
+> extends Readable {
+  operation: O;
+  server?: Server;
+  ns: string;
+  namespace: MongoDBNamespace;
+  cmd: Document;
+  options: T;
+  topology: Topology;
   cursorState: InternalCursorState;
-  logger: any;
-  query: any;
-  s: any;
+  logger: Logger;
+  query?: Document;
+  s!: CoreCursorPrivate;
 
   /**
    * Create a new core `Cursor` instance.
    * **NOTE** Not to be instantiated directly
    *
-   * @param {Topology} topology The server topology instance.
-   * @param {OperationBase} operation The operation to run against the cluster
-   * @param {object} [options=null] Optional settings.
-   * @param {object} [options.batchSize=1000] The number of documents to return per batch. See {@link https://docs.mongodb.com/manual/reference/command/find/| find command documentation} and {@link https://docs.mongodb.com/manual/reference/command/aggregate|aggregation documentation}.
-   * @param {Array} [options.documents=[]] Initial documents list for cursor
-   * @param {object} [options.transforms=null] Transform methods for the cursor results
-   * @param {Function} [options.transforms.query] Transform the value returned from the initial query
-   * @param {Function} [options.transforms.doc] Transform each document returned from Cursor.prototype._next
+   * @param topology The server topology instance.
+   * @param ns The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param cmd The selector (can be a command or a cursorId)
    */
-  constructor(topology: any, operation: OperationBase, options?: any) {
+  constructor(topology: Topology, operation: O, options: T = {} as T) {
     super({ objectMode: true });
-    options = options || {};
 
     const cmd = operation.cmd ? operation.cmd : {};
 
@@ -102,27 +130,41 @@ class CoreCursor extends Readable {
     this.ns = this.operation.ns.toString();
     this.namespace = MongoDBNamespace.fromString(this.ns);
     this.cmd = cmd;
-    this.options = this.operation.options;
+    this.options = this.operation.options as T;
     this.topology = topology;
+
+    const { limit, skip, batchSize } = getLimitSkipBatchSizeDefaults(options, cmd);
+
+    let cursorId = undefined;
+    let lastCursorId = undefined;
+    // Did we pass in a cursor id
+    if (typeof cmd === 'number') {
+      cursorId = Long.fromNumber(cmd);
+      lastCursorId = cursorId;
+    } else if (cmd instanceof Long) {
+      cursorId = cmd;
+      lastCursorId = cmd;
+    }
 
     // All internal state
     this.cursorState = {
-      cursorId: null,
+      cursorId,
       cmd: this.cmd,
+      lastCursorId,
       documents: options.documents || [],
       cursorIndex: 0,
       dead: false,
       killed: false,
       init: false,
       notified: false,
-      limit: options.limit || cmd.limit || 0,
-      skip: options.skip || cmd.skip || 0,
-      batchSize: options.batchSize || cmd.batchSize || 1000,
+      limit,
+      skip,
+      batchSize,
       currentLimit: 0,
       // Result field name if not a cursor (contains the array of results)
       transforms: options.transforms,
-      raw: options.raw || (cmd && cmd.raw)
-    } as InternalCursorState;
+      raw: options.raw || (cmd && 'raw' in cmd && cmd.raw)
+    };
 
     if (typeof options.session === 'object') {
       this.cursorState.session = options.session;
@@ -157,53 +199,38 @@ class CoreCursor extends Readable {
     // Logger
     this.logger = new Logger('Cursor', topologyOptions);
 
-    //
-    // Did we pass in a cursor id
-    if (typeof cmd === 'number') {
-      this.cursorState.cursorId = Long.fromNumber(cmd);
-      this.cursorState.lastCursorId = this.cursorState.cursorId;
-    } else if (cmd instanceof Long) {
-      this.cursorState.cursorId = cmd;
-      this.cursorState.lastCursorId = cmd;
-    }
-
-    // TODO: remove as part of NODE-2104
+    // TODO: remove as part of NODE-2104, except this is closed?
     if (this.operation) {
       this.operation.cursorState = this.cursorState;
     }
   }
 
-  setCursorBatchSize(value: any) {
+  set cursorBatchSize(value: number) {
     this.cursorState.batchSize = value;
   }
 
-  cursorBatchSize() {
+  get cursorBatchSize(): number {
     return this.cursorState.batchSize;
   }
 
-  setCursorLimit(value: any) {
+  set cursorLimit(value: number) {
     this.cursorState.limit = value;
   }
 
-  cursorLimit() {
-    return this.cursorState.limit;
+  get cursorLimit(): number {
+    return this.cursorState.limit ?? 0;
   }
 
-  setCursorSkip(value: any) {
+  set cursorSkip(value: number) {
     this.cursorState.skip = value;
   }
 
-  cursorSkip() {
+  get cursorSkip(): number {
     return this.cursorState.skip;
   }
 
-  /**
-   * Retrieve the next document from the cursor
-   *
-   * @function
-   * @param {resultCallback} callback A callback function
-   */
-  _next(callback: Callback<Document>) {
+  /** Retrieve the next document from the cursor */
+  _next(callback: Callback<Document>): void {
     nextFunction(this, callback);
   }
 
@@ -212,53 +239,27 @@ class CoreCursor extends Readable {
     return new (this.constructor as any)(this.topology, this.operation, this.options);
   }
 
-  /**
-   * Checks if the cursor is dead
-   *
-   * @function
-   * @returns {boolean} A boolean signifying if the cursor is dead or not
-   */
+  /** Checks if the cursor is dead */
   isDead(): boolean {
     return this.cursorState.dead === true;
   }
 
-  /**
-   * Checks if the cursor was killed by the application
-   *
-   * @function
-   * @returns {boolean} A boolean signifying if the cursor was killed by the application
-   */
+  /** Checks if the cursor was killed by the application */
   isKilled(): boolean {
     return this.cursorState.killed === true;
   }
 
-  /**
-   * Checks if the cursor notified it's caller about it's death
-   *
-   * @function
-   * @returns {boolean} A boolean signifying if the cursor notified the callback
-   */
+  /** Checks if the cursor notified it's caller about it's death */
   isNotified(): boolean {
     return this.cursorState.notified === true;
   }
 
-  /**
-   * Returns current buffered documents length
-   *
-   * @function
-   * @returns {number} The number of items in the buffered documents
-   */
+  /** Returns current buffered documents length */
   bufferedCount(): number {
     return this.cursorState.documents.length - this.cursorState.cursorIndex;
   }
 
-  /**
-   * Returns current buffered documents
-   *
-   * @function
-   * @param {any} number
-   * @returns {any[]} An array of buffered documents
-   */
+  /** Returns current buffered documents */
   readBufferedDocuments(number: number): Document[] {
     const unreadDocumentsLength = this.cursorState.documents.length - this.cursorState.cursorIndex;
     const length = number < unreadDocumentsLength ? number : unreadDocumentsLength;
@@ -293,12 +294,8 @@ class CoreCursor extends Readable {
     return elements;
   }
 
-  /**
-   * Resets local state for this cursor instance, and issues a `killCursors` command to the server
-   *
-   * @param {resultCallback} [callback] A callback function
-   */
-  kill(callback?: any) {
+  /** Resets local state for this cursor instance, and issues a `killCursors` command to the server */
+  kill(callback?: Callback): void {
     // Set cursor to dead
     this.cursorState.dead = true;
     this.cursorState.killed = true;
@@ -315,13 +312,16 @@ class CoreCursor extends Readable {
       return;
     }
 
+    if (!this.server) {
+      if (callback) callback(new MongoError('Cursor is uninitialized.'));
+      return;
+    }
+
     this.server.killCursors(this.ns, this.cursorState, callback);
   }
 
-  /**
-   * Resets the cursor
-   */
-  rewind() {
+  /** Resets the cursor */
+  rewind(): void {
     if (this.cursorState.init) {
       if (!this.cursorState.dead) {
         this.kill();
@@ -333,19 +333,20 @@ class CoreCursor extends Readable {
       this.cursorState.killed = false;
       this.cursorState.notified = false;
       this.cursorState.documents = [];
-      this.cursorState.cursorId = null;
+      this.cursorState.cursorId = undefined;
       this.cursorState.cursorIndex = 0;
     }
   }
 
   // Internal methods
-  _read() {
+  _read(): void {
     if ((this.s && this.s.state === CursorState.CLOSED) || this.isDead()) {
-      return this.push(null);
+      this.push(null);
+      return;
     }
 
     // Get the next item
-    this._next((err?: any, result?: any) => {
+    this._next((err, result) => {
       if (err) {
         if (this.listeners('error') && this.listeners('error').length > 0) {
           this.emit('error', err);
@@ -354,7 +355,8 @@ class CoreCursor extends Readable {
 
         // Emit end event
         this.emit('end');
-        return this.emit('finish');
+        this.emit('finish');
+        return;
       }
 
       // If we provided a transformation method
@@ -363,7 +365,8 @@ class CoreCursor extends Readable {
         typeof this.cursorState.streamOptions.transform === 'function' &&
         result != null
       ) {
-        return this.push(this.cursorState.streamOptions.transform(result));
+        this.push(this.cursorState.streamOptions.transform(result));
+        return;
       }
 
       // Return the result
@@ -378,11 +381,19 @@ class CoreCursor extends Readable {
     });
   }
 
-  /**
-   * @param {any} [options]
-   * @param {Function} [callback]
-   */
-  _endSession(options?: any, callback?: Callback) {
+  close(): void;
+  close(callback: Callback): void;
+  close(options: CursorCloseOptions): Promise<void>;
+  close(options: CursorCloseOptions, callback: Callback): void;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  close(options?: CursorCloseOptions | Callback, callback?: Callback): Promise<void> | void {
+    throw new Error('Method not implemented.');
+  }
+
+  _endSession(): boolean;
+  _endSession(options: CloseOptions): boolean;
+  _endSession(callback: Callback): void;
+  _endSession(options?: CloseOptions | Callback, callback?: Callback): boolean {
     if (typeof options === 'function') {
       callback = options;
       options = {};
@@ -409,7 +420,7 @@ class CoreCursor extends Readable {
     return false;
   }
 
-  _getMore(callback: Callback2) {
+  _getMore(callback: Callback2): void {
     if (this.logger.isDebug()) {
       this.logger.debug(`schedule getMore call for query [${JSON.stringify(this.query)}]`);
     }
@@ -423,28 +434,24 @@ class CoreCursor extends Readable {
       batchSize = this.cursorState.limit - this.cursorState.currentLimit;
     }
 
+    if (!this.server) {
+      return callback(new MongoError('Cursor is uninitialized.'));
+    }
+
     const cursorState = this.cursorState;
-    this.server.getMore(
-      this.ns,
-      cursorState,
-      batchSize,
-      this.options,
-      (err: any, result: any, conn: any) => {
-        // NOTE: `getMore` modifies `cursorState`, would be very ideal not to do so in the future
-        if (err || (cursorState.cursorId && cursorState.cursorId.isZero())) {
-          this._endSession();
-        }
-        callback(err, result, conn);
+    this.server.getMore(this.ns, cursorState, batchSize, this.options, (err, result, conn) => {
+      // NOTE: `getMore` modifies `cursorState`, would be very ideal not to do so in the future
+      if (err || (cursorState.cursorId && cursorState.cursorId.isZero())) {
+        this._endSession();
       }
-    );
+      callback(err, result, conn);
+    });
   }
 
-  _initializeCursor(callback: Callback) {
-    const cursor = this;
-
+  _initializeCursor(callback: Callback): void {
     // NOTE: this goes away once cursors use `executeOperation`
-    if (cursor.topology.shouldCheckForSessionSupport()) {
-      cursor.topology.selectServer(ReadPreference.primaryPreferred, (err: any) => {
+    if (this.topology.shouldCheckForSessionSupport()) {
+      this.topology.selectServer(ReadPreference.primaryPreferred, err => {
         if (err) {
           callback(err);
           return;
@@ -456,26 +463,26 @@ class CoreCursor extends Readable {
       return;
     }
 
-    function done(err?: any, result?: any) {
-      const cursorState = cursor.cursorState;
+    const done: Callback = (err, result) => {
+      const cursorState = this.cursorState;
       if (err || (cursorState.cursorId && cursorState.cursorId.isZero())) {
-        cursor._endSession();
+        this._endSession();
       }
 
       if (
         cursorState.documents.length === 0 &&
         cursorState.cursorId &&
         cursorState.cursorId.isZero() &&
-        !cursor.cmd.tailable &&
-        !cursor.cmd.awaitData
+        !this.cmd.tailable &&
+        !this.cmd.awaitData
       ) {
-        return setCursorNotified(cursor, callback);
+        return setCursorNotified(this, callback);
       }
 
       callback(err, result);
-    }
+    };
 
-    const queryCallback = (err?: any, r?: any) => {
+    const queryCallback: Callback = (err, r) => {
       if (err) {
         return done(err);
       }
@@ -490,7 +497,7 @@ class CoreCursor extends Readable {
         }
 
         // Check if we have a command cursor
-        if (!cursor.cmd.find || (cursor.cmd.find && cursor.cmd.virtual === false)) {
+        if (!this.cmd.find || (this.cmd.find && this.cmd.virtual === false)) {
           // We have an error document, return the error
           if (document.$err || document.errmsg) {
             return done(new MongoError(document), null);
@@ -501,16 +508,16 @@ class CoreCursor extends Readable {
             const id = document.cursor.id;
             // If we have a namespace change set the new namespace for getmores
             if (document.cursor.ns) {
-              cursor.ns = document.cursor.ns;
+              this.ns = document.cursor.ns;
             }
             // Promote id to long if needed
-            cursor.cursorState.cursorId = typeof id === 'number' ? Long.fromNumber(id) : id;
-            cursor.cursorState.lastCursorId = cursor.cursorState.cursorId;
-            cursor.cursorState.operationTime = document.operationTime;
+            this.cursorState.cursorId = typeof id === 'number' ? Long.fromNumber(id) : id;
+            this.cursorState.lastCursorId = this.cursorState.cursorId;
+            this.cursorState.operationTime = document.operationTime;
 
             // If we have a firstBatch set it
             if (Array.isArray(document.cursor.firstBatch)) {
-              cursor.cursorState.documents = document.cursor.firstBatch;
+              this.cursorState.documents = document.cursor.firstBatch;
             }
 
             // Return after processing command cursor
@@ -521,40 +528,40 @@ class CoreCursor extends Readable {
 
       // Otherwise fall back to regular find path
       const cursorId = result.cursorId || 0;
-      cursor.cursorState.cursorId = cursorId instanceof Long ? cursorId : Long.fromNumber(cursorId);
-      cursor.cursorState.documents = result.documents;
-      cursor.cursorState.lastCursorId = result.cursorId;
+      this.cursorState.cursorId = cursorId instanceof Long ? cursorId : Long.fromNumber(cursorId);
+      this.cursorState.documents = result.documents;
+      this.cursorState.lastCursorId = result.cursorId;
 
       // Transform the results with passed in transformation method if provided
-      if (
-        cursor.cursorState.transforms &&
-        typeof cursor.cursorState.transforms.query === 'function'
-      ) {
-        cursor.cursorState.documents = cursor.cursorState.transforms.query(result);
+      if (this.cursorState.transforms && typeof this.cursorState.transforms.query === 'function') {
+        const transformedQuery = this.cursorState.transforms.query(result);
+        this.cursorState.documents = Array.isArray(transformedQuery)
+          ? transformedQuery
+          : [transformedQuery];
       }
 
       done(undefined, result);
     };
 
-    if (cursor.logger.isDebug()) {
-      cursor.logger.debug(
-        `issue initial query [${JSON.stringify(cursor.cmd)}] with flags [${JSON.stringify(
-          cursor.query
+    if (this.logger.isDebug()) {
+      this.logger.debug(
+        `issue initial query [${JSON.stringify(this.cmd)}] with flags [${JSON.stringify(
+          this.query
         )}]`
       );
     }
 
-    executeOperation(cursor.topology, cursor.operation, (err?: any, result?: any) => {
-      if (err) {
+    executeOperation(this.topology, this.operation, (err, result) => {
+      if (err || !result) {
         done(err);
         return;
       }
 
-      cursor.server = cursor.operation.server;
-      cursor.cursorState.init = true;
+      this.server = this.operation.server;
+      this.cursorState.init = true;
 
       // NOTE: this is a special internal method for cloning a cursor, consider removing
-      if (cursor.cursorState.cursorId != null) {
+      if (this.cursorState.cursorId != null) {
         return done();
       }
 
@@ -563,17 +570,13 @@ class CoreCursor extends Readable {
   }
 }
 
-/**
- * Validate if the pool is dead and return error
- *
- * @param {any} self
- * @param {any} callback
- */
-function isConnectionDead(self: any, callback: any) {
-  if (self.pool && self.pool.isDestroyed()) {
+/** Validate if the pool is dead and return error */
+function isConnectionDead(self: CoreCursor, callback: Callback) {
+  // TODO(NODE-2765): Remove me and CoreCursor.pool
+  if ((self as any).pool && (self as any).pool.isDestroyed()) {
     self.cursorState.killed = true;
     const err = new MongoNetworkError(
-      `connection to host ${self.pool.host}:${self.pool.port} was destroyed`
+      `connection to host ${(self as any).pool.host}:${(self as any).pool.port} was destroyed`
     );
 
     _setCursorNotifiedImpl(self, () => callback(err));
@@ -583,13 +586,8 @@ function isConnectionDead(self: any, callback: any) {
   return false;
 }
 
-/**
- * Validate if the cursor is dead but was not explicitly killed by user
- *
- * @param {any} self
- * @param {any} callback
- */
-function isCursorDeadButNotkilled(self: any, callback: any) {
+/** Validate if the cursor is dead but was not explicitly killed by user */
+function isCursorDeadButNotkilled(self: CoreCursor, callback: Callback) {
   // Cursor is dead but not marked killed, return null
   if (self.cursorState.dead && !self.cursorState.killed) {
     self.cursorState.killed = true;
@@ -600,13 +598,8 @@ function isCursorDeadButNotkilled(self: any, callback: any) {
   return false;
 }
 
-/**
- * Validate if the cursor is dead and was killed by user
- *
- * @param {any} self
- * @param {any} callback
- */
-function isCursorDeadAndKilled(self: any, callback: any) {
+/** Validate if the cursor is dead and was killed by user */
+function isCursorDeadAndKilled(self: CoreCursor, callback: Callback) {
   if (self.cursorState.dead && self.cursorState.killed) {
     callback(new MongoError('cursor is dead'));
     return true;
@@ -615,13 +608,8 @@ function isCursorDeadAndKilled(self: any, callback: any) {
   return false;
 }
 
-/**
- * Validate if the cursor was killed by the user
- *
- * @param {any} self
- * @param {any} callback
- */
-function isCursorKilled(self: any, callback: any) {
+/** Validate if the cursor was killed by the user */
+function isCursorKilled(self: CoreCursor, callback: Callback) {
   if (self.cursorState.killed) {
     setCursorNotified(self, callback);
     return true;
@@ -630,28 +618,18 @@ function isCursorKilled(self: any, callback: any) {
   return false;
 }
 
-/**
- * Mark cursor as being dead and notified
- *
- * @param {any} self
- * @param {any} callback
- */
-function setCursorDeadAndNotified(self: any, callback: any) {
+/** Mark cursor as being dead and notified */
+function setCursorDeadAndNotified(self: CoreCursor, callback: Callback) {
   self.cursorState.dead = true;
   setCursorNotified(self, callback);
 }
 
-/**
- * Mark cursor as being notified
- *
- * @param {any} self
- * @param {any} callback
- */
-function setCursorNotified(self: any, callback: any) {
+/** Mark cursor as being notified */
+function setCursorNotified(self: CoreCursor, callback: Callback) {
   _setCursorNotifiedImpl(self, () => callback(undefined, null));
 }
 
-function _setCursorNotifiedImpl(self: any, callback: Callback) {
+function _setCursorNotifiedImpl(self: CoreCursor, callback: Callback) {
   self.cursorState.notified = true;
   self.cursorState.documents = [];
   self.cursorState.cursorIndex = 0;
@@ -664,7 +642,7 @@ function _setCursorNotifiedImpl(self: any, callback: Callback) {
   return callback();
 }
 
-function nextFunction(self: any, callback: Callback) {
+function nextFunction(self: CoreCursor, callback: Callback) {
   // We have notified about it
   if (self.cursorState.notified) {
     return callback(new Error('cursor is exhausted'));
@@ -683,26 +661,16 @@ function nextFunction(self: any, callback: Callback) {
   if (!self.cursorState.init) {
     // Topology is not connected, save the call in the provided store to be
     // Executed at some point when the handler deems it's reconnected
-    if (!self.topology.isConnected(self.options)) {
+    if (!self.topology.isConnected()) {
       // Only need this for single server, because repl sets and mongos
       // will always continue trying to reconnect
       if (self.topology._type === 'server' && !self.topology.s.options.reconnect) {
         // Reconnect is disabled, so we'll never reconnect
         return callback(new MongoError('no connection available'));
       }
-
-      if (self.disconnectHandler != null) {
-        if (self.topology.isDestroyed()) {
-          // Topology was destroyed, so don't try to wait for it to reconnect
-          return callback(new MongoError('Topology was destroyed'));
-        }
-
-        self.disconnectHandler.addObjectAndMethod('cursor', self, 'next', [callback], callback);
-        return;
-      }
     }
 
-    self._initializeCursor((err?: any, result?: any) => {
+    self._initializeCursor((err, result) => {
       if (err || result === null) {
         callback(err, result);
         return;
@@ -714,6 +682,11 @@ function nextFunction(self: any, callback: Callback) {
     return;
   }
 
+  const cursorId = self.cursorState.cursorId;
+  if (!cursorId) {
+    return callback(new MongoError('Undefined cursor ID'));
+  }
+
   if (self.cursorState.limit > 0 && self.cursorState.currentLimit >= self.cursorState.limit) {
     // Ensure we kill the cursor on the server
     self.kill();
@@ -721,30 +694,28 @@ function nextFunction(self: any, callback: Callback) {
     return setCursorDeadAndNotified(self, callback);
   } else if (
     self.cursorState.cursorIndex === self.cursorState.documents.length &&
-    !Long.ZERO.equals(self.cursorState.cursorId)
+    !Long.ZERO.equals(cursorId)
   ) {
     // Ensure an empty cursor state
     self.cursorState.documents = [];
     self.cursorState.cursorIndex = 0;
 
     // Check if topology is destroyed
-    if (self.topology.isDestroyed())
+    if (self.topology.isDestroyed()) {
       return callback(
         new MongoNetworkError('connection destroyed, not possible to instantiate cursor')
       );
+    }
 
     // Check if connection is dead and return if not possible to
     // execute a getMore on this connection
     if (isConnectionDead(self, callback)) return;
 
     // Execute the next get more
-    self._getMore(function (err: any, doc: any, connection: any) {
+    self._getMore(err => {
       if (err) {
         return callback(err);
       }
-
-      // Save the returned connection to ensure all getMore's fire over the same connection
-      self.connection = connection;
 
       // Tailable cursor getMore result, notify owner about it
       // No attempt is made here to retry, this is left to the user of the
@@ -752,7 +723,7 @@ function nextFunction(self: any, callback: Callback) {
       if (
         self.cursorState.documents.length === 0 &&
         self.cmd.tailable &&
-        Long.ZERO.equals(self.cursorState.cursorId)
+        Long.ZERO.equals(cursorId)
       ) {
         // No more documents in the tailed cursor
         return callback(
@@ -765,7 +736,7 @@ function nextFunction(self: any, callback: Callback) {
       } else if (
         self.cursorState.documents.length === 0 &&
         self.cmd.tailable &&
-        !Long.ZERO.equals(self.cursorState.cursorId)
+        !Long.ZERO.equals(cursorId)
       ) {
         return nextFunction(self, callback);
       }
@@ -779,7 +750,7 @@ function nextFunction(self: any, callback: Callback) {
   } else if (
     self.cursorState.documents.length === self.cursorState.cursorIndex &&
     self.cmd.tailable &&
-    Long.ZERO.equals(self.cursorState.cursorId)
+    Long.ZERO.equals(cursorId)
   ) {
     return callback(
       new MongoError({
@@ -790,7 +761,7 @@ function nextFunction(self: any, callback: Callback) {
     );
   } else if (
     self.cursorState.documents.length === self.cursorState.cursorIndex &&
-    Long.ZERO.equals(self.cursorState.cursorId)
+    Long.ZERO.equals(cursorId)
   ) {
     setCursorDeadAndNotified(self, callback);
   } else {
@@ -827,4 +798,34 @@ function nextFunction(self: any, callback: Callback) {
   }
 }
 
-export { CursorState, CoreCursor };
+function getLimitSkipBatchSizeDefaults(options: CoreCursorOptions, cmd: Document) {
+  cmd = cmd ? cmd : {};
+  let limit = options.limit;
+  if (!limit) {
+    if ('limit' in cmd) {
+      limit = cmd.limit;
+    }
+    if (!limit) {
+      limit = 0;
+    }
+  }
+  let skip = options.skip;
+  if (!skip) {
+    if ('skip' in cmd) {
+      skip = cmd.skip;
+    }
+    if (!skip) {
+      skip = 0;
+    }
+  }
+  let batchSize = options.batchSize;
+  if (!batchSize) {
+    if ('batchSize' in cmd) {
+      batchSize = cmd.batchSize;
+    }
+    if (!batchSize) {
+      batchSize = 1000;
+    }
+  }
+  return { limit, skip, batchSize };
+}
