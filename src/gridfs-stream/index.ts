@@ -51,7 +51,7 @@ interface GridFSBucketPrivate {
 export class GridFSBucket extends EventEmitter {
   s: GridFSBucketPrivate;
 
-  constructor(db: Db, options: GridFSBucketOptions) {
+  constructor(db: Db, options?: GridFSBucketOptions) {
     super();
     this.setMaxListeners(0);
     const privateOptions = {
@@ -110,7 +110,7 @@ export class GridFSBucket extends EventEmitter {
   }
 
   /** Returns a readable stream (GridFSBucketReadStream) for streaming file data from GridFS. */
-  openDownloadStream(id: TFileId, options: GridFSBucketReadStreamOptions): GridFSBucketReadStream {
+  openDownloadStream(id: TFileId, options?: GridFSBucketReadStreamOptions): GridFSBucketReadStream {
     return new GridFSBucketReadStream(
       this.s._chunksCollection,
       this.s._filesCollection,
@@ -136,7 +136,7 @@ export class GridFSBucket extends EventEmitter {
   }
 
   /** Convenience wrapper around find on the files collection */
-  find(filter: Document, options: FindOptions): Cursor {
+  find(filter: Document, options?: FindOptions): Cursor {
     filter = filter || {};
     options = options || {};
     return this.s._filesCollection.find(filter, options);
@@ -151,7 +151,7 @@ export class GridFSBucket extends EventEmitter {
    */
   openDownloadStreamByName(
     filename: string,
-    options: GridFSBucketReadStreamOptionsWithRevision
+    options?: GridFSBucketReadStreamOptionsWithRevision
   ): GridFSBucketReadStream {
     var sort: Sort = { uploadDate: -1 };
     var skip = undefined;
