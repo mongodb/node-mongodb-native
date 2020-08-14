@@ -5,6 +5,7 @@ import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
 
+export type ListDatabasesResult = string[] | Document[];
 export interface ListDatabasesOptions extends CommandOperationOptions {
   /** A query predicate that determines which databases are listed */
   filter?: Document;
@@ -20,7 +21,7 @@ export class ListDatabasesOperation extends CommandOperation<ListDatabasesOption
     this.ns = new MongoDBNamespace('admin', '$cmd');
   }
 
-  execute(server: Server, callback: Callback<string[]>): void {
+  execute(server: Server, callback: Callback<ListDatabasesResult>): void {
     const cmd: Document = { listDatabases: 1 };
     if (this.options.nameOnly) {
       cmd.nameOnly = Number(cmd.nameOnly);

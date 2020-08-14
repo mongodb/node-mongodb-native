@@ -6,7 +6,7 @@ import type { Admin } from '../admin';
 
 export interface ValidateCollectionOptions extends CommandOperationOptions {
   /** Validates a collection in the background, without interrupting read or write traffic (only in MongoDB 4.4+) */
-  background: boolean;
+  background?: boolean;
 }
 
 export class ValidateCollectionOperation extends CommandOperation<ValidateCollectionOptions> {

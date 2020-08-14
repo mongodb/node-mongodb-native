@@ -1,11 +1,23 @@
 import { AddUserOperation, AddUserOptions } from './operations/add_user';
 import { RemoveUserOperation, RemoveUserOptions } from './operations/remove_user';
-import { ValidateCollectionOperation } from './operations/validate_collection';
-import { ListDatabasesOperation, ListDatabasesOptions } from './operations/list_databases';
+import {
+  ValidateCollectionOperation,
+  ValidateCollectionOptions
+} from './operations/validate_collection';
+import {
+  ListDatabasesOperation,
+  ListDatabasesOptions,
+  ListDatabasesResult
+} from './operations/list_databases';
 import { executeOperation } from './operations/execute_operation';
-import { RunCommandOperation } from './operations/run_command';
+import { RunCommandOperation, RunCommandOptions } from './operations/run_command';
 import type { Callback, Document } from './types';
 import type { CommandOperationOptions } from './operations/command';
+import type { Db } from '.';
+
+interface AdminPrivate {
+  db: Db;
+}
 
 /**
  * The **Admin** class is an internal class that allows convenient access to
@@ -36,45 +48,32 @@ import type { CommandOperationOptions } from './operations/command';
  */
 
 export class Admin {
-  s: any;
+  s: AdminPrivate;
 
-  /**
-   * Create a new Admin instance (INTERNAL TYPE, do not instantiate directly)
-   *
-   * @param {any} db
-   * @param {any} topology
-   * @returns {Admin} a collection instance.
-   */
-  constructor(db: any, topology: any) {
-    this.s = {
-      db,
-      topology
-    };
+  /** Create a new Admin instance (INTERNAL TYPE, do not instantiate directly) */
+  constructor(db: Db) {
+    this.s = { db };
   }
-
-  /**
-   * The callback format for results
-   *
-   * @callback Admin~resultCallback
-   * @param {MongoError} error An error instance representing the error during the execution.
-   * @param {object} result The result object if the command was executed successfully.
-   */
 
   /**
    * Execute a command
    *
-   * @function
-   * @param {object} command The command hash
-   * @param {object} [options] Optional settings.
-   * @param {(ReadPreference|string)} [options.readPreference] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
-   * @param {number} [options.maxTimeMS] Number of milliseconds to wait before aborting the query.
-   * @param {Admin~resultCallback} [callback] The command result callback
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param command - The command to execute
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  command(command: object, options?: any, callback?: Callback<Document>): Promise<Document> | void {
-    const args = Array.prototype.slice.call(arguments, 1);
-    callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
-    options = Object.assign({ dbName: 'admin' }, args.length ? args.shift() : {});
+  command(command: Document): Promise<Document>;
+  command(command: Document, callback: Callback<Document>): void;
+  command(command: Document, options: RunCommandOptions): Promise<Document>;
+  command(command: Document, options: RunCommandOptions, callback: Callback<Document>): void;
+  command(
+    command: Document,
+    options?: RunCommandOptions | Callback<Document>,
+    callback?: Callback<Document>
+  ): Promise<Document> | void {
+    if (typeof options === 'function') (callback = options), (options = {});
+    options = Object.assign({ dbName: 'admin' }, options);
+
     return executeOperation(
       this.s.db.s.topology,
       new RunCommandOperation(this.s.db, command, options),
@@ -83,80 +82,120 @@ export class Admin {
   }
 
   /**
-   * Retrieve the server information for the current
-   * instance of the db client
+   * Retrieve the server build information
    *
-   * @param {object} [options] optional parameters for this operation
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {Admin~resultCallback} [callback] The command result callback
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  buildInfo(options?: any, callback?: Callback<Document>): Promise<Document> | void {
+  buildInfo(): Promise<Document>;
+  buildInfo(callback: Callback<Document>): void;
+  buildInfo(options: CommandOperationOptions): Promise<Document>;
+  buildInfo(options: CommandOperationOptions, callback: Callback<Document>): void;
+  buildInfo(
+    options?: CommandOperationOptions | Callback<Document>,
+    callback?: Callback<Document>
+  ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
-    return this.command({ buildinfo: 1 }, options, callback);
+    return this.command({ buildinfo: 1 }, options, callback as Callback<Document>);
   }
 
   /**
-   * Retrieve the server information for the current
-   * instance of the db client
+   * Retrieve the server build information
    *
-   * @param {object} [options] optional parameters for this operation
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {Admin~resultCallback} [callback] The command result callback
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  serverInfo(options?: any, callback?: Callback<Document>): Promise<Document> | void {
+  serverInfo(): Promise<Document>;
+  serverInfo(callback: Callback<Document>): void;
+  serverInfo(options: CommandOperationOptions): Promise<Document>;
+  serverInfo(options: CommandOperationOptions, callback: Callback<Document>): void;
+  serverInfo(
+    options?: CommandOperationOptions | Callback<Document>,
+    callback?: Callback<Document>
+  ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
-    return this.command({ buildinfo: 1 }, options, callback);
+    return this.command({ buildinfo: 1 }, options, callback as Callback<Document>);
   }
 
   /**
    * Retrieve this db's server status.
    *
-   * @param {object} [options] optional parameters for this operation
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {Admin~resultCallback} [callback] The command result callback
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  serverStatus(options?: any, callback?: Callback<Document>): Promise<Document> | void {
+  serverStatus(): Promise<Document>;
+  serverStatus(callback: Callback<Document>): void;
+  serverStatus(options: CommandOperationOptions): Promise<Document>;
+  serverStatus(options: CommandOperationOptions, callback: Callback<Document>): void;
+  serverStatus(
+    options?: CommandOperationOptions | Callback<Document>,
+    callback?: Callback<Document>
+  ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
-    return this.command({ serverStatus: 1 }, options, callback);
+    return this.command({ serverStatus: 1 }, options, callback as Callback<Document>);
   }
 
   /**
    * Ping the MongoDB server and retrieve results
    *
-   * @param {object} [options] optional parameters for this operation
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {Admin~resultCallback} [callback] The command result callback
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  ping(options?: any, callback?: Callback<Document>): Promise<Document> | void {
+  ping(): Promise<Document>;
+  ping(callback: Callback<Document>): void;
+  ping(options: CommandOperationOptions): Promise<Document>;
+  ping(options: CommandOperationOptions, callback: Callback<Document>): void;
+  ping(
+    options?: CommandOperationOptions | Callback<Document>,
+    callback?: Callback<Document>
+  ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
-    return this.command({ ping: 1 }, options, callback);
+    return this.command({ ping: 1 }, options, callback as Callback<Document>);
   }
 
   /**
    * Add a user to the database
    *
-   * @param username The username for the new user
-   * @param password An optional password for the new user
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param username - The username for the new user
+   * @param password - An optional password for the new user
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
+  addUser(username: string): Promise<Document>;
+  addUser(username: string, callback: Callback<Document>): void;
+  addUser(username: string, password: string): Promise<Document>;
+  addUser(username: string, password: string, callback: Callback<Document>): void;
+  addUser(username: string, options: AddUserOptions): Promise<Document>;
+  addUser(username: string, options: AddUserOptions, callback: Callback<Document>): void;
+  addUser(username: string, password: string, options: AddUserOptions): Promise<Document>;
   addUser(
     username: string,
-    password?: string,
-    options?: AddUserOptions,
+    password: string,
+    options: AddUserOptions,
+    callback: Callback<Document>
+  ): void;
+  addUser(
+    username: string,
+    password?: string | AddUserOptions | Callback<Document>,
+    options?: AddUserOptions | Callback<Document>,
     callback?: Callback<Document>
   ): Promise<Document> | void {
-    const args = Array.prototype.slice.call(arguments, 2);
-    callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
-    options = args.length ? args.shift() : {};
+    if (typeof password === 'function') {
+      (callback = password), (password = undefined), (options = {});
+    } else if (typeof password !== 'string') {
+      if (typeof options === 'function') {
+        (callback = options), (options = password), (password = undefined);
+      } else {
+        (options = password), (callback = undefined), (password = undefined);
+      }
+    } else {
+      if (typeof options === 'function') (callback = options), (options = {});
+    }
+
     options = Object.assign({ dbName: 'admin' }, options);
 
     return executeOperation(
@@ -169,20 +208,21 @@ export class Admin {
   /**
    * Remove a user from a database
    *
-   * @param username The username to remove
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param username - The username to remove
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
+  removeUser(username: string): Promise<boolean>;
+  removeUser(username: string, callback: Callback<boolean>): void;
+  removeUser(username: string, options: RemoveUserOptions): Promise<boolean>;
+  removeUser(username: string, options: RemoveUserOptions, callback: Callback<boolean>): void;
   removeUser(
     username: string,
-    options?: RemoveUserOptions,
+    options?: RemoveUserOptions | Callback<boolean>,
     callback?: Callback<boolean>
   ): Promise<boolean> | void {
-    const args = Array.prototype.slice.call(arguments, 1);
-    callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
-    options = args.length ? args.shift() : {};
-    options = Object.assign({}, options);
-    options.dbName = 'admin';
+    if (typeof options === 'function') (callback = options), (options = {});
+    options = Object.assign({ dbName: 'admin' }, options);
 
     return executeOperation(
       this.s.db.s.topology,
@@ -194,16 +234,21 @@ export class Admin {
   /**
    * Validate an existing collection
    *
-   * @param {string} collectionName The name of the collection to validate.
-   * @param {object} [options] Optional settings.
-   * @param {boolean} [options.background] Validates a collection in the background, without interrupting read or write traffic (only in MongoDB 4.4+)
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {Admin~resultCallback} [callback] The command result callback.
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param collectionName - The name of the collection to validate.
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
+  validateCollection(collectionName: string): Promise<Document>;
+  validateCollection(collectionName: string, callback: Callback<Document>): void;
+  validateCollection(collectionName: string, options: ValidateCollectionOptions): Promise<Document>;
   validateCollection(
     collectionName: string,
-    options?: any,
+    options: ValidateCollectionOptions,
+    callback: Callback<Document>
+  ): void;
+  validateCollection(
+    collectionName: string,
+    options?: ValidateCollectionOptions | Callback<Document>,
     callback?: Callback<Document>
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
@@ -219,16 +264,17 @@ export class Admin {
   /**
    * List the available databases
    *
-   * @param {object} [options] Optional settings.
-   * @param {boolean} [options.nameOnly=false] Whether the command should return only db names, or names and size info.
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {Admin~resultCallback} [callback] The command result callback.
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
+  listDatabases(): Promise<ListDatabasesResult>;
+  listDatabases(callback: Callback<ListDatabasesResult>): void;
+  listDatabases(options: ListDatabasesOptions): Promise<ListDatabasesResult>;
+  listDatabases(options: ListDatabasesOptions, callback: Callback<ListDatabasesResult>): void;
   listDatabases(
-    options?: ListDatabasesOptions,
-    callback?: Callback<string[]>
-  ): Promise<string[]> | void {
+    options?: ListDatabasesOptions | Callback<ListDatabasesResult>,
+    callback?: Callback<ListDatabasesResult>
+  ): Promise<ListDatabasesResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -242,17 +288,19 @@ export class Admin {
   /**
    * Get ReplicaSet status
    *
-   * @param {object} [options] optional parameters for this operation
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {Admin~resultCallback} [callback] The command result callback.
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
+  replSetGetStatus(): Promise<Document>;
+  replSetGetStatus(callback: Callback<Document>): void;
+  replSetGetStatus(options: CommandOperationOptions): Promise<Document>;
+  replSetGetStatus(options: CommandOperationOptions, callback: Callback<Document>): void;
   replSetGetStatus(
-    options?: CommandOperationOptions,
+    options?: CommandOperationOptions | Callback<Document>,
     callback?: Callback<Document>
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
-    return this.command({ replSetGetStatus: 1 }, options, callback);
+    return this.command({ replSetGetStatus: 1 }, options, callback as Callback<Document>);
   }
 }
