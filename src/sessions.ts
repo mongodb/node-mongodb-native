@@ -716,11 +716,10 @@ function applySession(session: any, command: any, options?: any): MongoError | u
     return new MongoError('Cannot use a session that has ended');
   }
 
-
   // SPEC-1019: silently ignore explicit session with unacknowledged write for backwards compatibility
   if (options && options.writeConcern && options.writeConcern.w === 0) {
     if (session && session.explicit) {
-      return new MongoError('Cannot have explicit session with unacknowledged writes')
+      return new MongoError('Cannot have explicit session with unacknowledged writes');
     }
     return;
   }
