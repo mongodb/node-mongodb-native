@@ -5,6 +5,7 @@ import type { Callback, Document } from '../types';
 import type { Collection } from '../collection';
 import type { BulkOperationBase, BulkWriteResult } from '../bulk/common';
 import type { InsertOptions } from './insert';
+import { WriteConcern } from '../write_concern';
 
 export class BulkWriteOperation extends OperationBase {
   collection: Collection;
@@ -59,7 +60,7 @@ export class BulkWriteOperation extends OperationBase {
     finalOptions = applyRetryableWrites(finalOptions, coll.s.db);
     finalOptions = applyWriteConcern(finalOptions, { db: coll.s.db, collection: coll }, options);
 
-    const writeCon = finalOptions.writeConcern ? finalOptions.writeConcern : {};
+    const writeCon = WriteConcern.fromOptions(finalOptions);
     const capabilities = coll.s.topology.capabilities();
 
     // Did the user pass in a collation, check if our write server supports it

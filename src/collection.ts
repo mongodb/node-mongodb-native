@@ -1,5 +1,5 @@
 import { emitDeprecatedOptionWarning } from './utils';
-import { ReadPreference } from './read_preference';
+import { ReadPreference, ReadPreferenceLike } from './read_preference';
 import { deprecate } from 'util';
 import {
   normalizeHintField,
@@ -109,6 +109,10 @@ export interface Collection {
 
 export interface CollectionOptions extends BSONSerializeOptions, WriteConcernOptions {
   slaveOk?: boolean;
+  strict?: boolean;
+  readConcern?: ReadConcern;
+  readPreference?: ReadPreferenceLike;
+  logger?: Logger;
 }
 
 interface CollectionPrivate {

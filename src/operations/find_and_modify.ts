@@ -133,7 +133,7 @@ export class FindAndModifyOperation extends CommandOperation<FindAndModifyOption
     if (options.hint) {
       // TODO: once this method becomes a CommandOperation we will have the server
       // in place to check.
-      const unacknowledgedWrite = options.writeConcern && options.writeConcern.w === 0;
+      const unacknowledgedWrite = this.writeConcern?.w === 0;
       if (unacknowledgedWrite || maxWireVersion(server) < 8) {
         callback(
           new MongoError('The current topology does not support a hint on findAndModify commands')

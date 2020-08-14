@@ -186,11 +186,7 @@ export class Cursor<
   }
 
   get readPreference(): ReadPreference {
-    if (this.operation) {
-      return this.operation.readPreference!;
-    }
-
-    return this.options.readPreference!;
+    return this.operation.readPreference;
   }
 
   get sortValue(): Sort {

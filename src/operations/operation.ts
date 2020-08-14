@@ -1,8 +1,8 @@
+import { ReadPreference } from '../read_preference';
 import type { ClientSession } from '../sessions';
 import type { Document, BSONSerializeOptions } from '../types';
 import type { MongoDBNamespace } from '../utils';
 import type { InternalCursorState } from '../cursor/core_cursor';
-import type { ReadPreference } from '../read_preference';
 import type { Server } from '../sdam/server';
 
 export const Aspect = {
@@ -34,7 +34,7 @@ export class OperationBase<T extends OperationOptions = OperationOptions> {
   ns!: MongoDBNamespace;
   cmd!: Document;
 
-  readPreference?: ReadPreference;
+  readPreference: ReadPreference;
 
   server!: Server;
   // TODO: remove as part of NODE-2104, except this is closed?
@@ -43,6 +43,7 @@ export class OperationBase<T extends OperationOptions = OperationOptions> {
 
   constructor(options: T = {} as T) {
     this.options = Object.assign({}, options);
+    this.readPreference = ReadPreference.primary;
   }
 
   hasAspect(aspect: symbol): boolean {

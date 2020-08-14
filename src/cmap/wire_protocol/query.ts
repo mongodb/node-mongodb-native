@@ -5,11 +5,11 @@ import { maxWireVersion, collectionNamespace } from '../../utils';
 import { getReadPreference, isSharded, applyCommonQueryOptions } from './shared';
 import type { Callback, Document } from '../../types';
 import type { Server } from '../../sdam/server';
-import type { ReadPreference } from '../../read_preference';
+import type { ReadPreferenceLike } from '../../read_preference';
 import type { InternalCursorState } from '../../cursor/core_cursor';
 
 export interface QueryOptions extends CommandOptions {
-  readPreference?: ReadPreference;
+  readPreference?: ReadPreferenceLike;
 }
 
 export function query(

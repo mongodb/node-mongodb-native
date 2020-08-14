@@ -5,7 +5,7 @@ import { AggregationCursor, CommandCursor } from './cursor';
 import { ObjectId, Code } from './bson';
 import { ReadPreference, ReadPreferenceLike } from './read_preference';
 import { MongoError } from './error';
-import { Collection } from './collection';
+import { Collection, CollectionOptions } from './collection';
 import { ChangeStream, ChangeStreamOptions } from './change_stream';
 import * as CONSTANTS from './constants';
 import { WriteConcern, WriteConcernOptions } from './write_concern';
@@ -327,11 +327,16 @@ export class Db implements OperationParent {
    * @param {Db~collectionResultCallback} [callback] The collection result callback
    * @returns {Collection} return the new Collection instance if not in strict mode
    */
-  collection(name: string, options?: any): Collection;
-  collection(name: string, options: any, callback: Callback): void;
-  collection(name: string, options?: any, callback?: Callback): Collection | void {
+  collection(name: string): Collection;
+  collection(name: string, options: CollectionOptions): Collection;
+  collection(name: string, callback: Callback<Collection>): void;
+  collection(name: string, options: CollectionOptions, callback: Callback<Collection>): void;
+  collection(
+    name: string,
+    options?: CollectionOptions | Callback<Collection>,
+    callback?: Callback<Collection>
+  ): Collection | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
     options = Object.assign({}, options);
 
     // If we have not set a collection level readConcern set the db level one
@@ -345,12 +350,17 @@ export class Db implements OperationParent {
     }
 
     // Merge in all needed options and ensure correct writeConcern merging from db level
-    options = mergeOptionsAndWriteConcern(options, this.s.options, collectionKeys, true);
+    const finalOptions = mergeOptionsAndWriteConcern(
+      options,
+      this.s.options,
+      collectionKeys,
+      true
+    ) as CollectionOptions;
 
     // Execute
-    if (options == null || !options.strict) {
+    if (finalOptions == null || !finalOptions.strict) {
       try {
-        const collection = new Collection(this, name, options);
+        const collection = new Collection(this, name, finalOptions);
         if (callback) callback(undefined, collection);
         return collection;
       } catch (err) {
@@ -371,7 +381,9 @@ export class Db implements OperationParent {
       return callback(new MongoError('topology was destroyed'));
     }
 
-    const listCollectionOptions = Object.assign({}, options, { nameOnly: true });
+    const listCollectionOptions: ListCollectionsOptions = Object.assign({}, finalOptions, {
+      nameOnly: true
+    });
 
     // Strict mode
     this.listCollections({ name }, listCollectionOptions).toArray((err, collections) => {
@@ -383,7 +395,7 @@ export class Db implements OperationParent {
         );
 
       try {
-        return callback(undefined, new Collection(this, name, options));
+        return callback(undefined, new Collection(this, name, finalOptions));
       } catch (err) {
         return callback(err);
       }

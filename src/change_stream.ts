@@ -679,7 +679,7 @@ function processError(changeStream: ChangeStream, error?: AnyError, callback?: C
     // close internal cursor, ignore errors
     cursor.close();
 
-    waitForTopologyConnected(topology, { readPreference: cursor.options.readPreference }, err => {
+    waitForTopologyConnected(topology, { readPreference: cursor.readPreference }, err => {
       // if the topology can't reconnect, close the stream
       if (err) return unresumableError(err);
 
