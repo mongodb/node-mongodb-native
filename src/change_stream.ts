@@ -274,7 +274,7 @@ export class ChangeStream extends EventEmitter {
 
   /** Is the cursor closed */
   isClosed(): boolean {
-    return this.closed ?? (this.cursor && this.cursor.isClosed());
+    return this.closed || (this.cursor?.isClosed() ?? false);
   }
 
   /** Close the Change Stream */
