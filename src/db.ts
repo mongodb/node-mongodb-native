@@ -10,7 +10,7 @@ import { ChangeStream, ChangeStreamOptions } from './change_stream';
 import * as CONSTANTS from './constants';
 import { WriteConcern, WriteConcernOptions } from './write_concern';
 import { ReadConcern } from './read_concern';
-import { Logger } from './logger';
+import { Logger, LoggerOptions } from './logger';
 import {
   filterOptions,
   mergeOptionsAndWriteConcern,
@@ -97,7 +97,7 @@ interface DbPrivate {
   namespace: MongoDBNamespace;
 }
 
-export interface DbOptions extends BSONSerializeOptions, WriteConcernOptions {
+export interface DbOptions extends BSONSerializeOptions, WriteConcernOptions, LoggerOptions {
   /** If the database authentication is dependent on another databaseName. */
   authSource?: string;
   /** Force server to assign _id values instead of driver. */

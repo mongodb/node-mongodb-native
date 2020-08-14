@@ -25,6 +25,7 @@ import type { InternalCursorState } from '../cursor/core_cursor';
 import type { GetMoreOptions } from './wire_protocol/get_more';
 import type { InsertOptions, UpdateOptions, RemoveOptions } from './wire_protocol/index';
 import type { Stream } from './connect';
+import type { LoggerOptions } from '../logger';
 
 const kStream = Symbol('stream');
 const kQueue = Symbol('queue');
@@ -40,7 +41,8 @@ export interface ConnectionOptions
   extends Partial<TcpNetConnectOpts>,
     Partial<IpcNetConnectOpts>,
     Partial<TLSConnectionOptions>,
-    StreamDescriptionOptions {
+    StreamDescriptionOptions,
+    LoggerOptions {
   id: number;
   monitorCommands: boolean;
   generation: number;

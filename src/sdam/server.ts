@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import { Logger } from '../logger';
+import { Logger, LoggerOptions } from '../logger';
 import { ReadPreference } from '../read_preference';
 import { ConnectionPool, ConnectionPoolOptions } from '../cmap/connection_pool';
 import { CMAP_EVENT_NAMES } from '../cmap/events';

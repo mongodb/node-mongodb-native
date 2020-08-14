@@ -63,12 +63,12 @@ export function executeOperation<T extends OperationBase>(
   }
 
   if (topology.shouldCheckForSessionSupport()) {
-    return selectServerForSessionSupport<ResultType<T['execute']>>(topology, operation, callback);
+    return selectServerForSessionSupport<ResultType<T['execute']>>(topology, operation, callback!);
   }
 
   // The driver sessions spec mandates that we implicitly create sessions for operations
   // that are not explicitly provided with a session.
-  let session: ClientSession, owner: symbol;
+  let session: any, owner: any;
   if (topology.hasSessionSupport()) {
     if (operation.session == null) {
       owner = Symbol();
@@ -262,7 +262,7 @@ function selectServerForSessionSupport<T>(
       return;
     }
 
-    executeOperation(topology, operation, callback!);
+    executeOperation(topology, operation, callback as Callback<unknown>);
   });
 
   return result;

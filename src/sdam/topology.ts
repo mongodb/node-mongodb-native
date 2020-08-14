@@ -41,7 +41,7 @@ import type { Document, Callback, AnyError, BSONSerializeOptions } from '../type
 import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
 import type { Transaction } from '../transactions';
 import type { CloseOptions } from '../cmap/connection_pool';
-import type { Logger } from '../logger';
+import type { Logger, LoggerOptions } from '../logger';
 import type { DestroyOptions } from '../cmap/connection';
 import type { CommandOptions } from '../cmap/wire_protocol/command';
 import { RunCommandOperation } from '../operations/run_command';
@@ -125,7 +125,7 @@ export interface ServerAddress {
   domain_socket?: string;
 }
 
-export interface TopologyOptions extends ServerOptions, BSONSerializeOptions {
+export interface TopologyOptions extends ServerOptions, BSONSerializeOptions, LoggerOptions {
   reconnect: boolean;
   retryWrites?: boolean;
   retryReads?: boolean;
@@ -139,8 +139,6 @@ export interface TopologyOptions extends ServerOptions, BSONSerializeOptions {
   cursorFactory: typeof Cursor;
   srvHost?: string;
   srvPoller?: SrvPoller;
-  logger?: Logger;
-  loggerLevel?: string;
   directConnection: boolean;
 
   metadata: ClientMetadata;

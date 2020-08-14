@@ -119,7 +119,7 @@ function buildCountCommand(
   return cmd;
 }
 
-function isCursor(c: Cursor): boolean {
+function isCursor(c: Collection | Cursor): c is Cursor {
   return 'numberOfRetries' in c.s && 'undefined' !== typeof c.s.numberOfRetries;
 }
 

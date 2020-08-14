@@ -1,5 +1,5 @@
 import * as dns from 'dns';
-import { Logger } from '../logger';
+import { Logger, LoggerOptions } from '../logger';
 import { EventEmitter } from 'events';
 
 /**
@@ -28,7 +28,7 @@ class SrvPollingEvent {
   }
 }
 
-interface SrvPollerOptions {
+interface SrvPollerOptions extends LoggerOptions {
   srvHost: string;
   heartbeatFrequencyMS: number;
 }

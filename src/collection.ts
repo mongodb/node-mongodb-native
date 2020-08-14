@@ -86,7 +86,7 @@ import type { CountOptions } from './operations/count';
 import type { BulkWriteResult } from './bulk/common';
 import type { PkFactory } from './mongo_client';
 import type { Topology } from './sdam/topology';
-import type { Logger } from './logger';
+import type { Logger, LoggerOptions } from './logger';
 import type { OperationParent } from './operations/command';
 
 const mergeKeys = ['ignoreUndefined'];
@@ -107,12 +107,16 @@ export interface Collection {
   findAndModify(this: any, query: any, sort: any, doc: any, options: any, callback: Callback): any;
 }
 
-export interface CollectionOptions extends BSONSerializeOptions, WriteConcernOptions {
+export interface CollectionOptions
+  extends BSONSerializeOptions,
+    WriteConcernOptions,
+    LoggerOptions {
   slaveOk?: boolean;
   strict?: boolean;
+  /** Specify a read concern for the collection. (only MongoDB 3.2 or higher supported) */
   readConcern?: ReadConcern;
+  /** The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST). */
   readPreference?: ReadPreferenceLike;
-  logger?: Logger;
 }
 
 interface CollectionPrivate {

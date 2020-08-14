@@ -164,7 +164,7 @@ export class ReadPreference {
    * @param {any} options The options passed into the method, potentially containing a read preference
    * @returns {(ReadPreference|null)} The resolved read preference
    */
-  static resolve(parent?: OperationParent, options: any): ReadPreference {
+  static resolve(parent?: OperationParent, options?: any): ReadPreference {
     options = options || {};
     const session = options.session;
 
