@@ -7,7 +7,7 @@ import type { Server } from '../sdam/server';
 import type { Db } from '../db';
 
 export interface EvalOptions extends CommandOperationOptions {
-  nolock: boolean;
+  nolock?: boolean;
 }
 
 export class EvalOperation extends CommandOperation<EvalOptions> {

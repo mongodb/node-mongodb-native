@@ -55,6 +55,7 @@ import type { IndexInformationOptions } from './operations/common_functions';
 import type { PkFactory } from './mongo_client';
 import type { Topology } from './sdam/topology';
 import type { OperationParent } from './operations/command';
+import type { Admin } from './admin';
 
 // Allowed parameters
 const legalOptionNames = [
@@ -107,13 +108,6 @@ export interface DbOptions extends BSONSerializeOptions, WriteConcernOptions {
   pkFactory?: PkFactory;
   /** Specify a read concern for the collection. (only MongoDB 3.2 or higher supported) */
   readConcern?: ReadConcern;
-}
-
-export interface Db {
-  createCollection(name: any, options: any, callback: any): void;
-  eval(code: any, parameters: any, options: any, callback: any): void;
-  ensureIndex(name: any, fieldOrSpec: any, options: any, callback: any): void;
-  profilingInfo(options: any, callback: any): void;
 }
 
 /**
@@ -222,6 +216,40 @@ export class Db implements OperationParent {
   }
 
   /**
+   * Create a new collection on a server with the specified options. Use this to create capped collections.
+   * More information about command options available at https://docs.mongodb.com/manual/reference/command/create/
+   *
+   * @param name The name of the collection to create
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
+   */
+  createCollection(name: string): Promise<Collection>;
+  createCollection(name: string, callback: Callback<Collection>): void;
+  createCollection(name: string, options: CreateCollectionOptions): Promise<Collection>;
+  createCollection(
+    name: string,
+    options: CreateCollectionOptions,
+    callback: Callback<Collection>
+  ): void;
+  createCollection(
+    name: string,
+    options?: CreateCollectionOptions | Callback<Collection>,
+    callback?: Callback<Collection>
+  ): Promise<Collection> | void {
+    if (typeof options === 'function') (callback = options), (options = {});
+    options = options || {};
+    options.readConcern = options.readConcern
+      ? new ReadConcern(options.readConcern.level)
+      : this.readConcern;
+
+    return executeOperation(
+      this.s.topology,
+      new CreateCollectionOperation(this, name, options),
+      callback
+    );
+  }
+
+  /**
    * Execute a command
    *
    * @param command The command to run
@@ -275,9 +303,9 @@ export class Db implements OperationParent {
   }
 
   /** Return the Admin db instance */
-  admin(): any {
-    const Admin = loadAdmin();
-    return new Admin(this, this.s.topology);
+  admin(): Admin {
+    const AdminClass = loadAdmin();
+    return new AdminClass(this, this.s.topology);
   }
 
   /**
@@ -764,6 +792,100 @@ export class Db implements OperationParent {
   get logger(): Logger {
     return this.s.logger;
   }
+
+  /**
+   * Evaluate JavaScript on the server
+   *
+   * @deprecated Eval is deprecated on MongoDB 3.2 and forward
+   * @param code JavaScript to execute on server.
+   * @param parameters The parameters for the call.
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
+   */
+  eval(code: Code, parameters: Document | Document[]): Promise<Document>;
+  eval(code: Code, parameters: Document | Document[], callback: Callback<Document>): void;
+  eval(code: Code, parameters: Document | Document[], options: EvalOptions): Promise<Document>;
+  eval(
+    code: Code,
+    parameters: Document | Document[],
+    options: EvalOptions,
+    callback: Callback<Document>
+  ): Promise<Document>;
+  eval(
+    code: Code,
+    parameters: Document | Document[],
+    options?: EvalOptions | Callback<Document>,
+    callback?: Callback<Document>
+  ): Promise<Document> | void {
+    if (typeof options === 'function') (callback = options), (options = {});
+    options = options || {};
+
+    return executeOperation(
+      this.s.topology,
+      new EvalOperation(this, code, parameters, options),
+      callback
+    );
+  }
+
+  /**
+   * Ensures that an index exists, if it does not it creates it
+   *
+   * @deprecated since version 2.0
+   * @param name The index name
+   * @param fieldOrSpec Defines the index.
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
+   */
+  ensureIndex(name: string, fieldOrSpec: string | Document): Promise<Document>;
+  ensureIndex(name: string, fieldOrSpec: string | Document, callback: Callback<Document>): void;
+  ensureIndex(
+    name: string,
+    fieldOrSpec: string | Document,
+    options: CreateIndexesOptions
+  ): Promise<Document>;
+  ensureIndex(
+    name: string,
+    fieldOrSpec: string | Document,
+    options: CreateIndexesOptions,
+    callback: Callback<Document>
+  ): void;
+  ensureIndex(
+    name: string,
+    fieldOrSpec: string | Document,
+    options?: CreateIndexesOptions | Callback<Document>,
+    callback?: Callback<Document>
+  ) {
+    if (typeof options === 'function') (callback = options), (options = {});
+    options = options || {};
+
+    return executeOperation(
+      this.s.topology,
+      new EnsureIndexOperation(this, name, fieldOrSpec, options),
+      callback
+    );
+  }
+
+  /**
+   * Retrieve the current profiling information for MongoDB
+   *
+   * @deprecated Query the `system.profile` collection directly.
+   * @param options Optional settings for the command
+   * @param callback An optional callback, a Promise will be returned if none is provided
+   */
+  profilingInfo(): Promise<Document[]>;
+  profilingInfo(callback: Callback<Document[]>): void;
+  profilingInfo(options: ProfilingLevelOptions): Promise<Document[]>;
+  profilingInfo(options: ProfilingLevelOptions, callback: Callback<Document[]>): void;
+  profilingInfo(
+    options?: ProfilingLevelOptions | Callback<Document[]>,
+    callback?: Callback<Document[]>
+  ): Promise<Document[]> | void {
+    if (typeof options === 'function') (callback = options), (options = {});
+    options = options || {};
+
+    const cursor = this.collection('system.profile').find({}, options);
+    return callback ? cursor.toArray(callback) : cursor.toArray();
+  }
 }
 
 const collectionKeys = [
@@ -778,112 +900,27 @@ const collectionKeys = [
   'promoteLongs'
 ];
 
-/**
- * Create a new collection on a server with the specified options. Use this to create capped collections.
- * More information about command options available at https://docs.mongodb.com/manual/reference/command/create/
- *
- * @param name The name of the collection to create
- * @param options Optional settings for the command
- * @param callback An optional callback, a Promise will be returned if none is provided
- */
 Db.prototype.createCollection = deprecateOptions(
   {
     name: 'Db.createCollection',
     deprecatedOptions: ['autoIndexId'],
     optionsIndex: 1
   },
-  function (this: Db, name: string, options?: CreateCollectionOptions, callback?: Callback) {
-    if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
-    options.readConcern = options.readConcern
-      ? new ReadConcern(options.readConcern.level)
-      : this.readConcern;
-
-    return executeOperation(
-      this.s.topology,
-      new CreateCollectionOperation(this, name, options),
-      callback
-    );
-  }
+  Db.prototype.createCollection
 );
 
-/**
- * Evaluate JavaScript on the server
- *
- * @deprecated Eval is deprecated on MongoDB 3.2 and forward
- * @param code JavaScript to execute on server.
- * @param parameters The parameters for the call.
- * @param options Optional settings for the command
- * @param callback An optional callback, a Promise will be returned if none is provided
- */
-Db.prototype.eval = deprecate(function (
-  this: Db,
-  code: Code,
-  parameters: Document | Document[],
-  options: EvalOptions,
-  callback: Callback
-) {
-  const args = Array.prototype.slice.call(arguments, 1);
-  callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
-  parameters = args.length ? args.shift() : parameters;
-  options = args.length ? args.shift() || {} : {};
-
-  return executeOperation(
-    this.s.topology,
-    new EvalOperation(this, code, parameters, options),
-    callback
-  );
-},
-'Db.eval is deprecated as of MongoDB version 3.2');
-
-/**
- * Ensures that an index exists, if it does not it creates it
- *
- * @deprecated since version 2.0
- * @param name The index name
- * @param fieldOrSpec Defines the index.
- * @param options Optional settings for the command
- * @param callback An optional callback, a Promise will be returned if none is provided
- */
-Db.prototype.ensureIndex = deprecate(function (
-  this: Db,
-  name: string,
-  fieldOrSpec: string | Document,
-  options: CreateIndexesOptions,
-  callback: Callback
-) {
-  if (typeof options === 'function') (callback = options), (options = {});
-  options = options || {};
-
-  return executeOperation(
-    this.s.topology,
-    new EnsureIndexOperation(this, name, fieldOrSpec, options),
-    callback
-  );
-},
-'Db.ensureIndex is deprecated as of MongoDB version 3.0 / driver version 2.0');
-
-/**
- * Retrieve the current profiling information for MongoDB
- *
- * @deprecated Query the `system.profile` collection directly.
- * @param options Optional settings for the command
- * @param callback An optional callback, a Promise will be returned if none is provided
- */
-Db.prototype.profilingInfo = deprecate(function (
-  this: Db,
-  options: ProfilingLevelOptions,
-  callback: Callback
-) {
-  if (typeof options === 'function') (callback = options), (options = {});
-  options = options || {};
-
-  return this.collection('system.profile').find({}, options).toArray(callback);
-},
-'Db.profilingInfo is deprecated. Query the system.profile collection directly.');
+Db.prototype.eval = deprecate(Db.prototype.eval, 'Db.eval is deprecated as of MongoDB version 3.2');
+Db.prototype.ensureIndex = deprecate(
+  Db.prototype.ensureIndex,
+  'Db.ensureIndex is deprecated as of MongoDB version 3.0 / driver version 2.0'
+);
+Db.prototype.profilingInfo = deprecate(
+  Db.prototype.profilingInfo,
+  'Db.profilingInfo is deprecated. Query the system.profile collection directly.'
+);
 
 // Validate the database name
-function validateDatabaseName(databaseName: any) {
+function validateDatabaseName(databaseName: string) {
   if (typeof databaseName !== 'string')
     throw MongoError.create({ message: 'database name must be a string', driver: true });
   if (databaseName.length === 0)
