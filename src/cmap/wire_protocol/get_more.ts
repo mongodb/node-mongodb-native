@@ -61,10 +61,8 @@ export function getMore(
     callback(undefined, response.documents[0], response.connection);
   };
 
-  if (wireVersion < 4) {
-    const getMoreOp = new GetMore(ns, cursorState.cursorId!, { numberToReturn: batchSize });
-    const queryOptions = applyCommonQueryOptions({}, cursorState);
-    server.s.pool.write(getMoreOp, queryOptions, queryCallback);
+  if (!cursorState.cursorId) {
+    callback(new MongoError('Invalid internal cursor state, no known cursor id'));
     return;
   }
 
@@ -72,6 +70,13 @@ export function getMore(
     cursorState.cursorId instanceof Long
       ? cursorState.cursorId
       : Long.fromNumber((cursorState.cursorId as unknown) as number);
+
+  if (wireVersion < 4) {
+    const getMoreOp = new GetMore(ns, cursorId, { numberToReturn: batchSize });
+    const queryOptions = applyCommonQueryOptions({}, cursorState);
+    server.s.pool.write(getMoreOp, queryOptions, queryCallback);
+    return;
+  }
 
   const getMoreCmd: Document = {
     getMore: cursorId,

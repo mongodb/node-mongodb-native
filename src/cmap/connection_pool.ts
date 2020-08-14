@@ -20,6 +20,7 @@ import {
 } from './events';
 import type { Callback } from '../types';
 import type { CommandResult } from './commands';
+import type { CommandOptions } from './wire_protocol/command';
 
 const kLogger = Symbol('logger');
 const kConnections = Symbol('connections');
@@ -96,7 +97,7 @@ function resolveOptions(
   const newOptions = {};
   for (const key of VALID_POOL_OPTIONS) {
     if (key in options) {
-      (newOptions as { [key: string]: any })[key] = options[key];
+      (newOptions as { [key: string]: unknown })[key] = options[key];
     }
   }
 
@@ -129,7 +130,7 @@ export interface ConnectionPool {
   isConnected(): boolean;
   write(
     message: any,
-    commandOptions: any,
+    commandOptions: CommandOptions,
     callback: (err: MongoError, ...args: CommandResult[]) => void
   ): void;
 }
@@ -374,10 +375,10 @@ export class ConnectionPool extends EventEmitter {
    * @param {Function} callback The original callback
    * @returns {void}
    */
-  withConnection(fn: WithConnectionCallback, callback: Callback<Connection>): void {
+  withConnection(fn: WithConnectionCallback, callback?: Callback<Connection>): void {
     this.checkOut((err, conn) => {
       // don't callback with `err` here, we might want to act upon it inside `fn`
-      fn(err as any, conn, (fnErr, result) => {
+      fn(err as MongoError, conn, (fnErr, result) => {
         if (typeof callback === 'function') {
           if (fnErr) {
             callback(fnErr);

@@ -7,6 +7,7 @@ import { ServerType } from '../sdam/common';
 import type { Callback } from '../types';
 import type { Server } from '../sdam/server';
 import type { Topology } from '../sdam/topology';
+import type { ClientSession } from '../sessions';
 
 const MMAPv1_RETRY_WRITES_ERROR_CODE = 20;
 const MMAPv1_RETRY_WRITES_ERROR_MESSAGE =
@@ -67,7 +68,7 @@ export function executeOperation<T extends OperationBase>(
 
   // The driver sessions spec mandates that we implicitly create sessions for operations
   // that are not explicitly provided with a session.
-  let session: any, owner: any;
+  let session: ClientSession, owner: symbol;
   if (topology.hasSessionSupport()) {
     if (operation.session == null) {
       owner = Symbol();
@@ -78,9 +79,9 @@ export function executeOperation<T extends OperationBase>(
     }
   }
 
-  let result;
+  let result: Promise<ResultType<T['execute']>> | void;
   if (typeof callback !== 'function') {
-    result = new Promise((resolve: any, reject: any) => {
+    result = new Promise((resolve, reject) => {
       callback = (err, res) => {
         if (err) return reject(err);
         resolve(res);
@@ -116,7 +117,7 @@ export function executeOperation<T extends OperationBase>(
     throw e;
   }
 
-  return result as any;
+  return result;
 }
 
 function supportsRetryableReads(server: Server) {
@@ -240,14 +241,14 @@ function supportsRetryableWrites(server: Server) {
 //       we remove support for legacy topology types.
 function selectServerForSessionSupport<T>(
   topology: Topology,
-  operation: any,
-  callback?: Callback<T>
+  operation: OperationBase,
+  callback: Callback<T>
 ): Promise<T> | void {
   const Promise = PromiseProvider.get();
 
   let result: Promise<T> | void;
   if (typeof callback !== 'function') {
-    result = new Promise((resolve: any, reject: any) => {
+    result = new Promise((resolve, reject) => {
       callback = (err, result) => {
         if (err) return reject(err);
         resolve(result);
@@ -257,7 +258,7 @@ function selectServerForSessionSupport<T>(
 
   topology.selectServer(ReadPreference.primaryPreferred, err => {
     if (err) {
-      callback!(err);
+      callback(err);
       return;
     }
 

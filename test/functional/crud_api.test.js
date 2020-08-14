@@ -161,8 +161,7 @@ describe('CRUD API', function () {
 
           var testAllMethods = function () {
             // Get the cursor
-            var cursor = db.collection('t1').aggregate({
-              pipeline: [{ $match: {} }],
+            var cursor = db.collection('t1').aggregate([{ $match: {} }], {
               allowDiskUse: true,
               batchSize: 2,
               maxTimeMS: 50

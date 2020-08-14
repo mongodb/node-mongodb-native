@@ -235,7 +235,7 @@ function parseSslOptions(family: number, options: ConnectionOptions): TLSConnect
   // Merge in valid SSL options
   for (const name of LEGAL_SSL_SOCKET_OPTIONS) {
     if (options[name]) {
-      (result as { [k: string]: any })[name] = options[name];
+      (result as { [k: string]: unknown })[name] = options[name];
     }
   }
 

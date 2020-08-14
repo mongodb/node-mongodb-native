@@ -6,7 +6,6 @@ import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
 import type { DocumentTransforms } from '../cursor/core_cursor';
-import type { WriteConcernOptions } from '../write_concern';
 
 const LIST_COLLECTIONS_WIRE_VERSION = 3;
 

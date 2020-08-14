@@ -47,19 +47,19 @@ export class ReadConcern {
     }
   }
 
-  static get MAJORITY() {
+  static get MAJORITY(): string {
     return ReadConcernLevel.majority;
   }
 
-  static get AVAILABLE() {
+  static get AVAILABLE(): string {
     return ReadConcernLevel.available;
   }
 
-  static get LINEARIZABLE() {
+  static get LINEARIZABLE(): string {
     return ReadConcernLevel.linearizable;
   }
 
-  static get SNAPSHOT() {
+  static get SNAPSHOT(): string {
     return ReadConcernLevel.snapshot;
   }
 }

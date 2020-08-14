@@ -368,7 +368,6 @@ function write(
   options: CommandOptions,
   callback: Callback
 ) {
-  const connection = this;
   if (typeof options === 'function') {
     callback = options;
   }
@@ -391,40 +390,40 @@ function write(
     started: 0
   };
 
-  if (connection[kDescription] && connection[kDescription].compressor) {
-    operationDescription.agreedCompressor = connection[kDescription].compressor;
+  if (this[kDescription] && this[kDescription].compressor) {
+    operationDescription.agreedCompressor = this[kDescription].compressor;
 
-    if (connection[kDescription].zlibCompressionLevel) {
-      operationDescription.zlibCompressionLevel = connection[kDescription].zlibCompressionLevel;
+    if (this[kDescription].zlibCompressionLevel) {
+      operationDescription.zlibCompressionLevel = this[kDescription].zlibCompressionLevel;
     }
   }
 
   if (typeof options.socketTimeout === 'number') {
     operationDescription.socketTimeoutOverride = true;
-    connection[kStream].setTimeout(options.socketTimeout);
+    this[kStream].setTimeout(options.socketTimeout);
   }
 
   // if command monitoring is enabled we need to modify the callback here
-  if (connection.monitorCommands) {
-    connection.emit('commandStarted', new CommandStartedEvent(connection, command));
+  if (this.monitorCommands) {
+    this.emit('commandStarted', new CommandStartedEvent(this, command));
 
     operationDescription.started = now();
     operationDescription.cb = (err, reply) => {
       if (err) {
-        connection.emit(
+        this.emit(
           'commandFailed',
-          new CommandFailedEvent(connection, command, err, operationDescription.started)
+          new CommandFailedEvent(this, command, err, operationDescription.started)
         );
       } else {
         if (reply && reply.result && (reply.result.ok === 0 || reply.result.$err)) {
-          connection.emit(
+          this.emit(
             'commandFailed',
-            new CommandFailedEvent(connection, command, reply.result, operationDescription.started)
+            new CommandFailedEvent(this, command, reply.result, operationDescription.started)
           );
         } else {
-          connection.emit(
+          this.emit(
             'commandSucceeded',
-            new CommandSucceededEvent(connection, command, reply, operationDescription.started)
+            new CommandSucceededEvent(this, command, reply, operationDescription.started)
           );
         }
       }
@@ -436,14 +435,14 @@ function write(
   }
 
   if (!operationDescription.noResponse) {
-    connection[kQueue].set(operationDescription.requestId, operationDescription);
+    this[kQueue].set(operationDescription.requestId, operationDescription);
   }
 
   try {
-    connection[kMessageStream].writeCommand(command, operationDescription);
+    this[kMessageStream].writeCommand(command, operationDescription);
   } catch (e) {
     if (!operationDescription.noResponse) {
-      connection[kQueue].delete(operationDescription.requestId);
+      this[kQueue].delete(operationDescription.requestId);
       operationDescription.cb(e);
       return;
     }

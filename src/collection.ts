@@ -665,7 +665,7 @@ export class Collection implements OperationParent {
     query?: Document | Callback<Document>,
     options?: FindOptions | Callback<Document>,
     callback?: Callback<Document>
-  ) {
+  ): Promise<Document> | void {
     if (callback !== undefined && typeof callback !== 'function') {
       throw new TypeError('Third parameter to `findOne()` must be a callback or undefined');
     }
@@ -732,7 +732,7 @@ export class Collection implements OperationParent {
 
     if (projection && !Buffer.isBuffer(projection) && Array.isArray(projection)) {
       projection = projection.length
-        ? projection.reduce((result: any, field: any) => {
+        ? projection.reduce((result, field) => {
             result[field] = 1;
             return result;
           }, {})
@@ -1152,11 +1152,18 @@ export class Collection implements OperationParent {
     options?: CountDocumentsOptions | Callback<number>,
     callback?: Callback<number>
   ): Promise<number> | void {
-    const args = Array.prototype.slice.call(arguments, 0);
-    callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
-    query = args.length ? args.shift() || {} : {};
-    options = args.length ? args.shift() || {} : {};
+    if (typeof query === 'undefined') {
+      (query = {}), (options = {}), (callback = undefined);
+    } else if (typeof query === 'function') {
+      (callback = query as Callback<number>), (query = {}), (options = {});
+    } else {
+      if (arguments.length === 2) {
+        if (typeof options === 'function') (callback = options), (options = {});
+      }
+    }
 
+    query = query || {};
+    options = options || {};
     return executeOperation(
       this.s.topology,
       new CountDocumentsOperation(this, query as Document, options as CountDocumentsOptions),
@@ -1173,9 +1180,9 @@ export class Collection implements OperationParent {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   distinct(key: string): Promise<Document[]>;
-  distinct(key: string, callback?: Callback<Document[]>): void;
+  distinct(key: string, callback: Callback<Document[]>): void;
   distinct(key: string, query: Document): Promise<Document[]>;
-  distinct(key: string, query: Document): void;
+  distinct(key: string, query: Document, callback: Callback<Document[]>): void;
   distinct(key: string, query: Document, options: DistinctOptions): Promise<Document[]>;
   distinct(
     key: string,
@@ -1189,14 +1196,19 @@ export class Collection implements OperationParent {
     options?: DistinctOptions | Callback<Document[]>,
     callback?: Callback<Document[]>
   ): Promise<Document[]> | void {
-    const args = Array.prototype.slice.call(arguments, 1);
-    callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
-    const queryOption = args.length ? args.shift() || {} : {};
-    const optionsOption = args.length ? args.shift() || {} : {};
+    if (typeof query === 'function') {
+      (callback = query as Callback<Document[]>), (query = {}), (options = {});
+    } else {
+      if (arguments.length === 3 && typeof options === 'function') {
+        (callback = options), (options = {});
+      }
+    }
 
+    query = query || {};
+    options = options || {};
     return executeOperation(
       this.s.topology,
-      new DistinctOperation(this, key, queryOption, optionsOption),
+      new DistinctOperation(this, key, query as Document, options as DistinctOptions),
       callback
     );
   }
@@ -1351,52 +1363,23 @@ export class Collection implements OperationParent {
    * @param pipeline - An array of aggregation pipelines to execute
    * @param options - Optional settings for the command
    */
-  aggregate(pipeline: Document[]): AggregationCursor;
-  aggregate(pipeline: Document[], options?: AggregateOptions): AggregationCursor {
+  aggregate(pipeline: Document[] = [], options?: AggregateOptions): AggregationCursor {
     if (arguments.length > 2) {
       throw new TypeError('Third parameter to `collection.aggregate()` must be undefined');
     }
-    if (typeof pipeline === 'function') {
-      throw new TypeError('`pipeline` parameter must not be function');
+    if (!Array.isArray(pipeline)) {
+      throw new TypeError('`pipeline` parameter must be an array of aggregation stages');
     }
     if (typeof options === 'function') {
       throw new TypeError('`options` parameter must not be function');
     }
 
-    if (Array.isArray(pipeline)) {
-      // If we have no options or callback we are doing
-      // a cursor based aggregation
-      if (options == null) {
-        options = {};
-      }
-    } else {
-      // Aggregation pipeline passed as arguments on the method
-      const args = Array.prototype.slice.call(arguments, 0);
-      // Get the possible options object
-      const opts = args[args.length - 1];
-      // If it contains any of the admissible options pop it of the args
-      options =
-        opts &&
-        (opts.readPreference ||
-          opts.explain ||
-          opts.cursor ||
-          opts.out ||
-          opts.maxTimeMS ||
-          opts.hint ||
-          opts.allowDiskUse)
-          ? args.pop()
-          : {};
-      // Left over arguments is the pipeline
-      pipeline = args;
-    }
-
-    const cursor = new AggregationCursor(
+    options = options || {};
+    return new AggregationCursor(
       this.s.topology,
       new AggregateOperation(this, pipeline, options),
       options
     );
-
-    return cursor;
   }
 
   /**
@@ -1581,7 +1564,7 @@ export class Collection implements OperationParent {
     update: Document,
     options: UpdateOptions,
     callback: Callback<Document>
-  ) {
+  ): Promise<UpdateResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -1602,7 +1585,11 @@ export class Collection implements OperationParent {
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  remove(selector: Document, options: DeleteOptions, callback: Callback) {
+  remove(
+    selector: Document,
+    options: DeleteOptions,
+    callback: Callback
+  ): Promise<DeleteResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -1623,7 +1610,11 @@ export class Collection implements OperationParent {
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  ensureIndex(fieldOrSpec: string | Document, options: CreateIndexesOptions, callback: Callback) {
+  ensureIndex(
+    fieldOrSpec: string | Document,
+    options: CreateIndexesOptions,
+    callback: Callback<Document>
+  ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -1647,15 +1638,25 @@ export class Collection implements OperationParent {
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  count(query: Document, options: CountOptions, callback: Callback) {
-    const args = Array.prototype.slice.call(arguments, 0);
-    callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
-    query = args.length ? args.shift() || {} : {};
-    options = args.length ? args.shift() || {} : {};
+  count(): Promise<number>;
+  count(callback: Callback<number>): void;
+  count(query: Document): Promise<number>;
+  count(query: Document, callback: Callback<number>): void;
+  count(query: Document, options: CountOptions): Promise<number>;
+  count(query: Document, options: CountOptions, callback: Callback<number>): Promise<number> | void;
+  count(
+    query?: Document | CountOptions | Callback<number>,
+    options?: CountOptions | Callback<number>,
+    callback?: Callback<number>
+  ): Promise<number> | void {
+    if (typeof query === 'function') {
+      (callback = query as Callback<number>), (query = {}), (options = {});
+    } else {
+      if (typeof options === 'function') (callback = options), (options = {});
+    }
 
-    if (typeof options === 'function') (callback = options), (options = {});
+    query = query || {};
     options = options || {};
-
     return executeOperation(
       this.s.topology,
       new EstimatedDocumentCountOperation(this, query, options),
@@ -1678,7 +1679,7 @@ export class Collection implements OperationParent {
     sort: Document,
     options: FindAndModifyOptions,
     callback: Callback
-  ) {
+  ): Promise<Document> | void {
     const args = Array.prototype.slice.call(arguments, 1);
     callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
     sort = args.length ? args.shift() || [] : [];

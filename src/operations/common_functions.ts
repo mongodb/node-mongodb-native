@@ -15,14 +15,6 @@ import type { Collection } from '../collection';
 import type { UpdateOptions } from './update';
 import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
 
-export function deleteCallback(err: any, r: any, callback: Callback): void {
-  if (callback == null) return;
-  if (err && callback) return callback(err);
-  if (r == null) return callback(undefined, { result: { ok: 1 } });
-  r.deletedCount = r.result.n;
-  if (callback) callback(undefined, r);
-}
-
 export interface IndexInformationOptions {
   full?: boolean;
   readPreference?: ReadPreference;

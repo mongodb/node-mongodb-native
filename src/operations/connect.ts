@@ -512,8 +512,8 @@ function relayEvents(mongoClient: MongoClient, topology: Topology) {
     'ha'
   ].concat(CMAP_EVENT_NAMES);
 
-  serverOrCommandEvents.forEach((event: any) => {
-    topology.on(event, (object1: any, object2: any) => {
+  serverOrCommandEvents.forEach(event => {
+    topology.on(event, (object1, object2) => {
       mongoClient.emit(event, object1, object2);
     });
   });

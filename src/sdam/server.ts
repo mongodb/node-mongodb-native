@@ -249,23 +249,31 @@ export class Server extends EventEmitter {
    * @param {ClientSession} [options.session] Session to use for the operation
    * @param {opResultCallback} callback A callback function
    */
-  command(ns: string, cmd: Document, options: CommandOptions, callback: Callback): void {
+  command(ns: string, cmd: Document, callback: Callback): void;
+  command(ns: string, cmd: Document, options: CommandOptions, callback: Callback<Document>): void;
+  command(
+    ns: string,
+    cmd: Document,
+    options?: CommandOptions | Callback<Document>,
+    callback?: Callback<Document>
+  ): void {
     if (typeof options === 'function') {
       (callback = options), (options = {}), (options = options || {});
     }
 
+    if (!callback) return;
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
-      callback!(new MongoError('server is closed'));
+      callback(new MongoError('server is closed'));
       return;
     }
 
     const error = basicReadValidations(this, options);
     if (error) {
-      return callback!(error);
+      return callback(error);
     }
 
     // Clone the options
-    options = Object.assign({}, options, { wireProtocolCommand: false });
+    const finalOptions = Object.assign({}, options, { wireProtocolCommand: false });
 
     // Debug log
     if (this.s.logger.isDebug()) {
@@ -280,7 +288,7 @@ export class Server extends EventEmitter {
 
     // error if collation not supported
     if (collationNotSupported(this, cmd)) {
-      callback!(new MongoError(`server ${this.name} does not support collation`));
+      callback(new MongoError(`server ${this.name} does not support collation`));
       return;
     }
 
@@ -293,8 +301,8 @@ export class Server extends EventEmitter {
       conn.command(
         ns,
         cmd,
-        options,
-        makeOperationHandler(this, conn, cmd, options, cb) as Callback
+        finalOptions,
+        makeOperationHandler(this, conn, cmd, finalOptions, cb) as Callback<Document>
       );
     }, callback);
   }
@@ -400,7 +408,7 @@ export class Server extends EventEmitter {
         cursorState,
         makeOperationHandler(this, conn, {}, undefined, cb) as Callback
       );
-    }, callback!);
+    }, callback);
   }
 
   /**
@@ -466,8 +474,8 @@ function calculateRoundTripTime(oldRtt: number, duration: number): number {
   return alpha * duration + (1 - alpha) * oldRtt;
 }
 
-function basicReadValidations(server: Server, options: CommandOptions) {
-  if (options.readPreference && !(options.readPreference instanceof ReadPreference)) {
+function basicReadValidations(server: Server, options?: CommandOptions) {
+  if (options?.readPreference && !(options.readPreference instanceof ReadPreference)) {
     return new MongoError('readPreference must be an instance of ReadPreference');
   }
 }

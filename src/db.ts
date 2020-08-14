@@ -174,30 +174,30 @@ export class Db implements OperationParent {
     };
   }
 
-  get databaseName() {
+  get databaseName(): string {
     return this.s.namespace.db;
   }
 
   // Topology
-  get topology() {
+  get topology(): Topology {
     return this.s.topology;
   }
 
   // Options
-  get options() {
+  get options(): DbOptions | undefined {
     return this.s.options;
   }
 
   // slaveOk specified
-  get slaveOk() {
-    return this.s.readPreference && this.s.readPreference.preference !== 'primary';
+  get slaveOk(): boolean {
+    return this.s.readPreference?.preference !== 'primary' || false;
   }
 
-  get readConcern() {
+  get readConcern(): ReadConcern | undefined {
     return this.s.readConcern;
   }
 
-  get readPreference() {
+  get readPreference(): ReadPreference {
     if (this.s.readPreference == null) {
       // TODO: check client
       return ReadPreference.primary;
@@ -207,11 +207,11 @@ export class Db implements OperationParent {
   }
 
   // get the write Concern
-  get writeConcern() {
+  get writeConcern(): WriteConcern | undefined {
     return this.s.writeConcern;
   }
 
-  get namespace() {
+  get namespace(): string {
     return this.s.namespace.toString();
   }
 
@@ -305,7 +305,7 @@ export class Db implements OperationParent {
   /** Return the Admin db instance */
   admin(): Admin {
     const AdminClass = loadAdmin();
-    return new AdminClass(this, this.s.topology);
+    return new AdminClass(this);
   }
 
   /**
@@ -587,22 +587,22 @@ export class Db implements OperationParent {
    * @param options Optional settings for the command
    * @param callback An optional callback, a Promise will be returned if none is provided
    */
-  createIndex(name: string, fieldOrSpec: string | object): Promise<Document>;
-  createIndex(name: string, fieldOrSpec: string | object, callback?: Callback<Document>): void;
+  createIndex(name: string, fieldOrSpec: string | Document): Promise<Document>;
+  createIndex(name: string, fieldOrSpec: string | Document, callback?: Callback<Document>): void;
   createIndex(
     name: string,
-    fieldOrSpec: string | object,
+    fieldOrSpec: string | Document,
     options: CreateIndexesOptions
   ): Promise<Document>;
   createIndex(
     name: string,
-    fieldOrSpec: string | object,
+    fieldOrSpec: string | Document,
     options: CreateIndexesOptions,
     callback: Callback<Document>
   ): void;
   createIndex(
     name: string,
-    fieldOrSpec: string | object,
+    fieldOrSpec: string | Document,
     options?: CreateIndexesOptions | Callback<Document>,
     callback?: Callback<Document>
   ): Promise<Document> | void {
@@ -769,7 +769,7 @@ export class Db implements OperationParent {
   }
 
   /** Unref all sockets */
-  unref() {
+  unref(): void {
     this.s.topology.unref();
   }
 
@@ -866,7 +866,7 @@ export class Db implements OperationParent {
     fieldOrSpec: string | Document,
     options?: CreateIndexesOptions | Callback<Document>,
     callback?: Callback<Document>
-  ) {
+  ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 

@@ -17,7 +17,7 @@ export class PromiseProvider {
   }
 
   /** Sets the promise library */
-  static set(lib: PromiseConstructor) {
+  static set(lib: PromiseConstructor): void {
     if (!PromiseProvider.validate(lib)) {
       // validate
       return;

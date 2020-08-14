@@ -139,7 +139,7 @@ export class CommandOperation<
         return;
       }
 
-      callback(undefined, result.result);
+      callback(undefined, result?.result);
     });
   }
 }

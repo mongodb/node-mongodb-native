@@ -1,4 +1,5 @@
 import type { TagSet } from './sdam/server_description';
+import type { OperationParent } from './operations/command';
 
 export type ReadPreferenceLike =
   | ReadPreference
@@ -116,7 +117,7 @@ export class ReadPreference {
   }
 
   // Support the deprecated `preference` property introduced in the porcelain layer
-  get preference() {
+  get preference(): ReadPreferenceMode {
     return this.mode;
   }
 
@@ -163,11 +164,11 @@ export class ReadPreference {
    * @param {any} options The options passed into the method, potentially containing a read preference
    * @returns {(ReadPreference|null)} The resolved read preference
    */
-  static resolve(parent: any, options: any): ReadPreference {
+  static resolve(parent?: OperationParent, options: any): ReadPreference {
     options = options || {};
     const session = options.session;
 
-    const inheritedReadPreference = parent && parent.readPreference;
+    const inheritedReadPreference = parent?.readPreference;
 
     let readPreference;
     if (options.readPreference) {
@@ -189,7 +190,7 @@ export class ReadPreference {
   /**
    * Replaces options.readPreference with a ReadPreference instance
    */
-  static translate(options: ReadPreferenceLikeOptions) {
+  static translate(options: ReadPreferenceLikeOptions): ReadPreferenceLikeOptions {
     if (options.readPreference == null) return options;
     const r = options.readPreference;
 

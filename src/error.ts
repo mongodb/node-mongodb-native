@@ -33,7 +33,7 @@ const GET_MORE_RESUMABLE_CODES = new Set([
  * @property {string} stack The error call stack
  */
 class MongoError extends Error {
-  [kErrorLabels]: any;
+  [kErrorLabels]: Set<string>;
   code?: number;
   codeName?: string;
   writeConcernError?: Document;

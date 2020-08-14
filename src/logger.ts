@@ -10,7 +10,7 @@ let level: any = null;
 const pid = process.pid;
 
 // current logger
-let currentLogger: any = null;
+let currentLogger: Logger = null;
 
 /**
  * @callback LoggerCallback

@@ -326,14 +326,14 @@ function extractCommand(command: WriteProtocolMessageType): Document {
     }
 
     Object.keys(LEGACY_FIND_OPTIONS_MAP).forEach(key => {
-      let legacyKey = key as keyof typeof LEGACY_FIND_OPTIONS_MAP;
+      const legacyKey = key as keyof typeof LEGACY_FIND_OPTIONS_MAP;
       if (typeof command[legacyKey] !== 'undefined') {
         result[LEGACY_FIND_OPTIONS_MAP[legacyKey]] = command[legacyKey];
       }
     });
 
     OP_QUERY_KEYS.forEach(key => {
-      let opKey = key as typeof OP_QUERY_KEYS[number];
+      const opKey = key as typeof OP_QUERY_KEYS[number];
       if (command[opKey]) {
         result[opKey] = command[opKey];
       }

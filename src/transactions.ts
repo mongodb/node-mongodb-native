@@ -95,22 +95,22 @@ export class Transaction {
     this._recoveryToken = undefined;
   }
 
-  get server() {
+  get server(): Server | undefined {
     return this._pinnedServer;
   }
 
-  get recoveryToken() {
+  get recoveryToken(): Document | undefined {
     return this._recoveryToken;
   }
 
-  get isPinned() {
+  get isPinned(): boolean {
     return !!this.server;
   }
 
   /**
    * @returns Whether this session is presently in a transaction
    */
-  get isActive() {
+  get isActive(): boolean {
     return (
       [TxnState.STARTING_TRANSACTION, TxnState.TRANSACTION_IN_PROGRESS].indexOf(this.state) !== -1
     );
@@ -121,7 +121,7 @@ export class Transaction {
    *
    * @param nextState The new state to transition to
    */
-  transition(nextState: TxnState) {
+  transition(nextState: TxnState): void {
     const nextStates = stateMachine[this.state];
     if (nextStates && nextStates.indexOf(nextState) !== -1) {
       this.state = nextState;
@@ -136,17 +136,17 @@ export class Transaction {
     );
   }
 
-  pinServer(server: Server) {
+  pinServer(server: Server): void {
     if (this.isActive) {
       this._pinnedServer = server;
     }
   }
 
-  unpinServer() {
+  unpinServer(): void {
     this._pinnedServer = undefined;
   }
 }
 
-export function isTransactionCommand(command: Document) {
+export function isTransactionCommand(command: Document): boolean {
   return !!(command.commitTransaction || command.abortTransaction);
 }

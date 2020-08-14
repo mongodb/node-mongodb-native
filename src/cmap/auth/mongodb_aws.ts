@@ -222,11 +222,7 @@ interface RequestOptions {
   json?: boolean;
   method?: string;
   timeout?: number;
-  headers?: {
-    'X-aws-ec2-metadata-token-ttl-seconds'?: number;
-    'X-aws-ec2-metadata-token'?: string;
-    [key: string]: any;
-  };
+  headers?: http.OutgoingHttpHeaders;
 }
 
 function request(uri: string, callback: Callback): void;

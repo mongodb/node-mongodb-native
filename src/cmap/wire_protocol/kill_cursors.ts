@@ -20,7 +20,13 @@ export function killCursors(
   callback: Callback
 ): void {
   callback = typeof callback === 'function' ? callback : () => undefined;
-  const cursorIds = [cursorState.cursorId!];
+
+  if (!cursorState.cursorId) {
+    callback(new MongoError('Invalid internal cursor state, no known cursor id'));
+    return;
+  }
+
+  const cursorIds = [cursorState.cursorId];
 
   if (maxWireVersion(server) < 4) {
     const pool = server.s.pool;

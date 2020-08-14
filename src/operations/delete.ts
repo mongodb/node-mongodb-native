@@ -1,5 +1,5 @@
 import { defineAspects, Aspect, OperationBase } from './operation';
-import { deleteCallback, removeDocuments } from './common_functions';
+import { removeDocuments } from './common_functions';
 import { CommandOperation, CommandOperationOptions } from './command';
 import { isObject } from 'util';
 import type { Callback, Document } from '../types';
@@ -20,7 +20,7 @@ export interface DeleteResult {
   /** The raw result returned from MongoDB. Will vary depending on server version */
   result: Document;
   /** The connection object used for the operation */
-  connection: Connection;
+  connection?: Connection;
 }
 
 export class DeleteOperation extends OperationBase<DeleteOptions> {
@@ -64,7 +64,16 @@ export class DeleteOneOperation extends CommandOperation<DeleteOptions> {
     const options = this.options;
 
     options.single = true;
-    removeDocuments(server, coll, filter, options, (err, r) => deleteCallback(err, r, callback));
+    removeDocuments(server, coll, filter, options, (err, r) => {
+      if (callback == null) return;
+      if (err && callback) return callback(err);
+      if (r == null) {
+        return callback(undefined, { acknowledged: true, deletedCount: 0, result: { ok: 1 } });
+      }
+
+      r.deletedCount = r.result.n;
+      if (callback) callback(undefined, r);
+    });
   }
 }
 
@@ -93,7 +102,16 @@ export class DeleteManyOperation extends CommandOperation<DeleteOptions> {
       options.single = false;
     }
 
-    removeDocuments(server, coll, filter, options, (err, r) => deleteCallback(err, r, callback));
+    removeDocuments(server, coll, filter, options, (err, r) => {
+      if (callback == null) return;
+      if (err && callback) return callback(err);
+      if (r == null) {
+        return callback(undefined, { acknowledged: true, deletedCount: 0, result: { ok: 1 } });
+      }
+
+      r.deletedCount = r.result.n;
+      if (callback) callback(undefined, r);
+    });
   }
 }
 
