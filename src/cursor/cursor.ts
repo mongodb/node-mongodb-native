@@ -222,7 +222,7 @@ export class Cursor<
       throw new MongoError('Cursor is closed');
     }
 
-    return maybePromise(callback, (cb: Callback) => {
+    return maybePromise(callback, cb => {
       if (this.isNotified()) {
         return cb(undefined, false);
       }
@@ -244,7 +244,7 @@ export class Cursor<
   next(): Promise<Document>;
   next(callback: Callback<Document>): void;
   next(callback?: Callback<Document>): Promise<Document> | void {
-    return maybePromise(callback, (cb: Callback) => {
+    return maybePromise(callback, cb => {
       if (this.s.state === CursorState.CLOSED || (this.isDead && this.isDead())) {
         cb(new MongoError('Cursor is closed'));
         return;
@@ -747,7 +747,7 @@ export class Cursor<
       throw new MongoError('Tailable cursor cannot be converted to array');
     }
 
-    return maybePromise(callback, (cb: Callback) => {
+    return maybePromise(callback, cb => {
       const items: Document[] = [];
       // Reset cursor
       this.rewind();
@@ -834,7 +834,7 @@ export class Cursor<
         : Object.assign({}, optionsOrCallback);
     callback = typeof optionsOrCallback === 'function' ? optionsOrCallback : callback;
 
-    return maybePromise(callback, (cb: Callback) => {
+    return maybePromise(callback, cb => {
       this.s.state = CursorState.CLOSED;
       if (!options.skipKillCursors) {
         // Kill the cursor

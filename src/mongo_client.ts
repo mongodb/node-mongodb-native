@@ -287,15 +287,15 @@ export class MongoClient extends EventEmitter implements OperationParent {
     };
   }
 
-  get readConcern() {
+  get readConcern(): ReadConcern | undefined {
     return this.s.readConcern;
   }
 
-  get writeConcern() {
+  get writeConcern(): WriteConcern | undefined {
     return this.s.writeConcern;
   }
 
-  get readPreference() {
+  get readPreference(): ReadPreference {
     return ReadPreference.primary;
   }
 
@@ -315,14 +315,13 @@ export class MongoClient extends EventEmitter implements OperationParent {
       throw new TypeError('`connect` only accepts a callback');
     }
 
-    const client = this;
-    return maybePromise(callback, (cb: any) => {
-      const err = validOptions(client.s.options as any);
+    return maybePromise(callback, cb => {
+      const err = validOptions(this.s.options as any);
       if (err) return cb(err);
 
-      connect(client, client.s.url, client.s.options as any, (err: any) => {
+      connect(this, this.s.url, this.s.options as any, err => {
         if (err) return cb(err);
-        cb(undefined, client);
+        cb(undefined, this);
       });
     });
   }
@@ -348,10 +347,9 @@ export class MongoClient extends EventEmitter implements OperationParent {
     const force = typeof forceOrCallback === 'boolean' ? forceOrCallback : false;
 
     const client = this;
-    return maybePromise(callback, (cb: any) => {
+    return maybePromise(callback, cb => {
       if (client.topology == null) {
-        cb();
-        return;
+        return cb();
       }
 
       const topology = client.topology;
@@ -362,7 +360,7 @@ export class MongoClient extends EventEmitter implements OperationParent {
           return;
         }
 
-        autoEncrypter.teardown(force, (err2: any) => cb(err || err2));
+        autoEncrypter.teardown(force, err2 => cb(err || err2));
       });
     });
   }

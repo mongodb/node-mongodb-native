@@ -237,9 +237,7 @@ class ClientSession extends EventEmitter {
   commitTransaction(): Promise<Document>;
   commitTransaction(callback: Callback<Document>): void;
   commitTransaction(callback?: Callback<Document>): Promise<Document> | void {
-    return maybePromise(callback, (cb: Callback<Document>) =>
-      endTransaction(this, 'commitTransaction', cb)
-    );
+    return maybePromise(callback, cb => endTransaction(this, 'commitTransaction', cb));
   }
 
   /**
@@ -250,9 +248,7 @@ class ClientSession extends EventEmitter {
   abortTransaction(): Promise<Document>;
   abortTransaction(callback: Callback<Document>): void;
   abortTransaction(callback?: Callback<Document>): Promise<Document> | void {
-    return maybePromise(callback, (cb: Callback<Document>) =>
-      endTransaction(this, 'abortTransaction', cb)
-    );
+    return maybePromise(callback, cb => endTransaction(this, 'abortTransaction', cb));
   }
 
   /**
