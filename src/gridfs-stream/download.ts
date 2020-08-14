@@ -185,7 +185,7 @@ export class GridFSBucketReadStream extends Readable {
    * @fires GridFSBucketWriteStream#close
    * @fires GridFSBucketWriteStream#end
    */
-  abort(callback: Callback<void>): void {
+  abort(callback?: Callback<void>): void {
     this.push(null);
     this.destroyed = true;
     if (this.s.cursor) {
