@@ -47,5 +47,5 @@ build/Release
 node_modules
 yarn.lock
 
-# Hide compiled output from TypeScript branch(s)
+# Hide TypeScript files from other branches
 src
