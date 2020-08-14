@@ -305,7 +305,7 @@ export class Db implements OperationParent {
   /** Return the Admin db instance */
   admin(): Admin {
     const AdminClass = loadAdmin();
-    return new AdminClass(this, this.s.topology);
+    return new AdminClass(this);
   }
 
   /**
