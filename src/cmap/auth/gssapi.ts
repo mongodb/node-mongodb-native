@@ -1,8 +1,7 @@
 import { AuthProvider, AuthContext } from './auth_provider';
-import type { Callback } from '../../types';
 import { MongoError } from '../../error';
-
 import { Kerberos } from '../../deps';
+import type { Callback } from '../../utils';
 
 export class GSSAPI extends AuthProvider {
   auth(authContext: AuthContext, callback: Callback): void {

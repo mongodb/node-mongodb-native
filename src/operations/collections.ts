@@ -1,6 +1,6 @@
 import { OperationBase, OperationOptions } from './operation';
 import { loadCollection } from '../dynamic_loaders';
-import type { Callback } from '../types';
+import type { Callback } from '../utils';
 import type { Db } from '../db';
 
 // eslint-disable-next-line

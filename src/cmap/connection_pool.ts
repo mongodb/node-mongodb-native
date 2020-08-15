@@ -1,9 +1,9 @@
 import Denque = require('denque');
 import { EventEmitter } from 'events';
-import { Logger, LoggerOptions } from '../logger';
+import { Logger } from '../logger';
 import { Connection, ConnectionOptions } from './connection';
 import { connect } from './connect';
-import { eachAsync, relayEvents, makeCounter } from '../utils';
+import { eachAsync, relayEvents, makeCounter, Callback } from '../utils';
 import { MongoError } from '../error';
 import { PoolClosedError, WaitQueueTimeoutError } from './errors';
 import {
@@ -18,7 +18,6 @@ import {
   ConnectionCheckedInEvent,
   ConnectionPoolClearedEvent
 } from './events';
-import type { Callback } from '../types';
 import type { CommandResult } from './commands';
 import type { CommandOptions } from './wire_protocol/command';
 

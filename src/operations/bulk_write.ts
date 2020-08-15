@@ -1,7 +1,7 @@
-import { applyRetryableWrites, applyWriteConcern } from '../utils';
+import { applyRetryableWrites, applyWriteConcern, Callback } from '../utils';
 import { MongoError } from '../error';
 import { OperationBase } from './operation';
-import type { Callback, Document } from '../types';
+import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import type { BulkOperationBase, BulkWriteResult } from '../bulk/common';
 import type { InsertOptions } from './insert';

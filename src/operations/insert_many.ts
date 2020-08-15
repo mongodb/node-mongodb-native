@@ -2,10 +2,10 @@ import { OperationBase } from './operation';
 import { BulkWriteOperation } from './bulk_write';
 import { MongoError } from '../error';
 import { prepareDocs } from './common_functions';
-import type { Callback, Document } from '../types';
+import type { Callback } from '../utils';
 import type { Collection } from '../collection';
 import type { InsertOptions } from './insert';
-import type { ObjectId } from '../bson';
+import type { ObjectId, Document } from '../bson';
 import type { BulkWriteResult } from '../bulk/common';
 
 export interface InsertManyResult {

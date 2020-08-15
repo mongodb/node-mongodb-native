@@ -1,8 +1,8 @@
 import { CommandOperation, CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
-import { maxWireVersion } from '../utils';
+import { maxWireVersion, Callback } from '../utils';
 import * as CONSTANTS from '../constants';
-import type { Callback, Document } from '../types';
+import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
 import type { DocumentTransforms } from '../cursor/core_cursor';

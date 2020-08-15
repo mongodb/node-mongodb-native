@@ -4,9 +4,10 @@ import {
   applyRetryableWrites,
   applyWriteConcern,
   decorateWithCollation,
-  formattedOrderClause
+  formattedOrderClause,
+  Callback
 } from '../utils';
-import type { Callback, Document } from '../types';
+import type { Document } from '../bson';
 import type { Db } from '../db';
 import type { ClientSession } from '../sessions';
 import type { Server } from '../sdam/server';

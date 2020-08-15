@@ -1,6 +1,6 @@
 import * as BSON from '../bson';
 import { BulkOperationBase, Batch, INSERT, UPDATE, REMOVE } from './common';
-import type { Callback } from '../types';
+import type { Callback } from '../utils';
 
 /**
  * Add to internal list of Operations

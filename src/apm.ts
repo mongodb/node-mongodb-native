@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import type { Callback } from './types';
+import type { Callback } from './utils';
 export class Instrumentation extends EventEmitter {
   $MongoClient: any;
   $prototypeConnect: any;

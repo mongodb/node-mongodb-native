@@ -2,7 +2,7 @@ import { ServerType } from '../../sdam/common';
 import { TopologyDescription } from '../../sdam/topology_description';
 import { MongoError } from '../../error';
 import { ReadPreference } from '../../read_preference';
-import type { Document } from '../../types';
+import type { Document } from '../../bson';
 import type { CommandOptions } from './command';
 import type { OpQueryOptions } from '../commands';
 import type { Topology } from '../../sdam/topology';

@@ -1,9 +1,8 @@
 import { ServerDescription } from './server_description';
 import * as WIRE_CONSTANTS from '../cmap/wire_protocol/constants';
 import { TopologyType, ServerType } from './common';
-import type { ObjectId } from '../bson';
+import type { ObjectId, Document } from '../bson';
 import type { SrvPollingEvent } from './srv_polling';
-import type { Document } from '../types';
 
 // contstants related to compatability checks
 const MIN_SUPPORTED_SERVER_VERSION = WIRE_CONSTANTS.MIN_SUPPORTED_SERVER_VERSION;

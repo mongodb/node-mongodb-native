@@ -1,7 +1,8 @@
-import { MongoError } from '../error';
+import { MongoError, AnyError } from '../error';
 import { CursorState } from '../cursor/core_cursor';
-import type { Callback, Document, AnyError } from '../types';
 import type { Cursor } from '../cursor';
+import type { Callback } from '../utils';
+import type { Document } from '../bson';
 
 export type EachCallback = (error?: AnyError, result?: Document | null) => boolean | void;
 

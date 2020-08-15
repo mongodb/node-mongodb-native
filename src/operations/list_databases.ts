@@ -1,7 +1,7 @@
 import { CommandOperation, CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
-import { MongoDBNamespace } from '../utils';
-import type { Callback, Document } from '../types';
+import { MongoDBNamespace, Callback } from '../utils';
+import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
 

@@ -3,7 +3,7 @@ import { Cursor, CursorOptions } from './cursor';
 import { CursorState } from './core_cursor';
 import { deprecate } from 'util';
 import type { AggregateOperation, AggregateOptions } from '../operations/aggregate';
-import type { Document } from '../types';
+import type { Document } from '../bson';
 import type { Sort } from '../operations/find';
 import type { Topology } from '../sdam/topology';
 

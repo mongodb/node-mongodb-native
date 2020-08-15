@@ -1,6 +1,6 @@
 import { defineAspects, Aspect } from './operation';
 import { CommandOperation, CommandOperationOptions } from './command';
-import type { Callback } from '../types';
+import type { Callback } from '../utils';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
 

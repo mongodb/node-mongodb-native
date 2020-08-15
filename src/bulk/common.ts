@@ -7,13 +7,13 @@ import {
   executeLegacyOperation,
   isPromiseLike,
   hasAtomicOperators,
-  maxWireVersion
+  maxWireVersion,
+  Callback
 } from '../utils';
 import { executeOperation } from '../operations/execute_operation';
 import { InsertOperation } from '../operations/insert';
 import { UpdateOperation } from '../operations/update';
 import { DeleteOperation } from '../operations/delete';
-import type { Callback } from '../types';
 import type { WriteConcern } from '../write_concern';
 
 // Error codes

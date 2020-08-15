@@ -1,8 +1,8 @@
 import { CommandOperation, CommandOperationOptions } from './command';
-import { Code } from '../bson';
+import { Code, Document } from '../bson';
 import { ReadPreference } from '../read_preference';
 import { MongoError } from '../error';
-import type { Callback, Document } from '../types';
+import type { Callback } from '../utils';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
 

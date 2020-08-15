@@ -1,6 +1,7 @@
 import { OperationBase, OperationOptions } from './operation';
 import { MongoError } from '../error';
-import type { Callback, Document } from '../types';
+import type { Callback } from '../utils';
+import type { Document } from '../bson';
 import type { Collection } from '../collection';
 
 export class OptionsOperation extends OperationBase<OperationOptions> {

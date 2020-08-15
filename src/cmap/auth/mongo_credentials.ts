@@ -1,6 +1,6 @@
 // Resolves the default auth mechanism according to
 
-import type { Document } from '../../types';
+import type { Document } from '../../bson';
 import { AuthMechanism } from './defaultAuthProviders';
 
 // https://github.com/mongodb/specifications/blob/master/source/auth/auth.rst

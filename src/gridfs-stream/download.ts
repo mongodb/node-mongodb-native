@@ -1,5 +1,5 @@
 import { Readable } from 'stream';
-import type { Callback } from '../types';
+import type { Callback } from '../utils';
 
 /**
  * A readable stream that enables you to read buffers from GridFS.

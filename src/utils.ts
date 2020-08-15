@@ -1,11 +1,14 @@
 import * as os from 'os';
 import * as crypto from 'crypto';
 import { PromiseProvider } from './promise_provider';
-import { MongoError } from './error';
+import { MongoError, AnyError } from './error';
 import { WriteConcern } from './write_concern';
-import type { CallbackWithType, Callback } from './types';
 
 const MAX_JS_INT = Number.MAX_SAFE_INTEGER + 1;
+
+export type Callback<T = any> = (error?: AnyError, result?: T) => void;
+export type Callback2<T0 = any, T1 = any> = (error?: AnyError, result0?: T0, result1?: T1) => void;
+export type CallbackWithType<E = AnyError, T0 = any> = (error?: E, result?: T0) => void;
 
 // Set simple property
 function getSingleProperty(obj: any, name: any, value: any) {

@@ -1,7 +1,7 @@
 import { Aspect, defineAspects } from './operation';
 import { CommandOperation, CommandOperationOptions } from './command';
-import { decorateWithCollation, decorateWithReadConcern } from '../utils';
-import type { Callback, Document } from '../types';
+import { decorateWithCollation, decorateWithReadConcern, Callback } from '../utils';
+import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 

@@ -2,7 +2,8 @@ import { GetMore, KillCursor, Msg, CommandResult, WriteProtocolMessageType } fro
 import { calculateDurationInMs } from '../utils';
 import type { ConnectionPool, ConnectionPoolOptions } from './connection_pool';
 import type { Connection } from './connection';
-import type { Document, AnyError } from '../types';
+import type { Document } from '../bson';
+import type { AnyError } from '../error';
 
 /** The base export class for all monitoring events published from the connection pool */
 export class ConnectionPoolMonitoringEvent {

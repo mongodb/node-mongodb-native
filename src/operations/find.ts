@@ -1,9 +1,9 @@
 import { OperationBase, Hint } from './operation';
 import { Aspect, defineAspects } from './operation';
 import { ReadPreference } from '../read_preference';
-import { maxWireVersion, MongoDBNamespace } from '../utils';
+import { maxWireVersion, MongoDBNamespace, Callback } from '../utils';
 import { MongoError } from '../error';
-import type { Callback, Document } from '../types';
+import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { InternalCursorState } from '../cursor/core_cursor';

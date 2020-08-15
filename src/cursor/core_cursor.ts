@@ -1,12 +1,11 @@
 import { Logger } from '../logger';
 import { ReadPreference } from '../read_preference';
-import { MongoDBNamespace } from '../utils';
+import { MongoDBNamespace, Callback, Callback2 } from '../utils';
 import { executeOperation } from '../operations/execute_operation';
 import { Readable } from 'stream';
-import type { OperationBase, Hint } from '../operations/operation';
 import { MongoError, MongoNetworkError } from '../error';
-import { Long } from '../bson';
-import type { BSONSerializeOptions, Callback, Callback2, Document } from '../types';
+import { Long, Document, BSONSerializeOptions } from '../bson';
+import type { OperationBase, Hint } from '../operations/operation';
 import type { Topology } from '../sdam/topology';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';

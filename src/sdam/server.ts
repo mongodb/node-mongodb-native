@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import { Logger, LoggerOptions } from '../logger';
+import { Logger } from '../logger';
 import { ReadPreference } from '../read_preference';
 import { ConnectionPool, ConnectionPoolOptions } from '../cmap/connection_pool';
 import { CMAP_EVENT_NAMES } from '../cmap/events';
@@ -12,7 +12,10 @@ import {
   debugOptions,
   makeStateMachine,
   maxWireVersion,
-  ClientMetadataOptions
+  ClientMetadataOptions,
+  Callback,
+  CallbackWithType,
+  Callback2
 } from '../utils';
 import {
   ServerType,
@@ -31,7 +34,6 @@ import {
   isNodeShuttingDownError,
   isNetworkErrorBeforeHandshake
 } from '../error';
-import type { Document, Callback, CallbackWithType, AutoEncrypter, Callback2 } from '../types';
 import type { Topology } from './topology';
 import type { Connection } from '../cmap/connection';
 import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
@@ -42,6 +44,8 @@ import type { InternalCursorState } from '../cursor/core_cursor';
 import type { QueryOptions } from '../cmap/wire_protocol/query';
 import type { GetMoreOptions } from '../cmap/wire_protocol/get_more';
 import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
+import type { Document } from '../bson';
+import type { AutoEncrypter } from '../deps';
 
 // Used for filtering out fields for logging
 const DEBUG_FIELDS = [

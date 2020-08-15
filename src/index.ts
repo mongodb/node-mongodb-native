@@ -8,7 +8,7 @@ import { Collection } from './collection';
 import { ReadPreference } from './read_preference';
 import { Logger } from './logger';
 import { GridFSBucket } from './gridfs-stream';
-import type { Callback } from './types';
+import type { Callback } from './utils';
 
 // Set up the instrumentation method
 function instrument(options: any, callback: Callback) {
@@ -37,7 +37,7 @@ export {
 } from './bson';
 
 // NOTE: fix this up after ts-bson lands
-const { Map, BSONSymbol, BSONRegExp } = require('./bson');
+const { Map, BSONSymbol, BSONRegExp } = require('bson');
 export { Map, BSONSymbol, BSONRegExp };
 
 export {

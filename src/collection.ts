@@ -9,9 +9,10 @@ import {
   formattedOrderClause,
   checkCollectionName,
   deprecateOptions,
-  MongoDBNamespace
+  MongoDBNamespace,
+  Callback
 } from './utils';
-import { ObjectId } from './bson';
+import { ObjectId, Document, BSONSerializeOptions } from './bson';
 import { MongoError } from './error';
 import { initializeUnorderedBulkOp as unordered } from './bulk/unordered';
 import { initializeOrderedBulkOp as ordered } from './bulk/ordered';
@@ -78,7 +79,6 @@ import { ReplaceOneOperation, ReplaceOptions } from './operations/replace_one';
 import { CollStatsOperation, CollStatsOptions } from './operations/stats';
 import { executeOperation } from './operations/execute_operation';
 import { EvalGroupOperation, GroupOperation } from './operations/group';
-import type { Callback, Document, BSONSerializeOptions } from './types';
 import type { Db } from './db';
 import type { OperationOptions, Hint } from './operations/operation';
 import type { IndexInformationOptions } from './operations/common_functions';

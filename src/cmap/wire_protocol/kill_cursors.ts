@@ -1,9 +1,8 @@
 import { KillCursor } from '../commands';
-import { maxWireVersion, collectionNamespace } from '../../utils';
+import { maxWireVersion, collectionNamespace, Callback } from '../../utils';
 import { command, CommandOptions } from './command';
 import { MongoError, MongoNetworkError } from '../../error';
 import type { Server } from '../../sdam/server';
-import type { Callback } from '../../types';
 import type { InternalCursorState } from '../../cursor/core_cursor';
 import type { ClientSession } from '../../sessions';
 

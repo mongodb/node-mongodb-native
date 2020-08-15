@@ -1,9 +1,8 @@
 import { ReadPreference } from '../read_preference';
 import { MongoError, isRetryableError } from '../error';
 import { Aspect, OperationBase } from './operation';
-import { maxWireVersion, maybePromise } from '../utils';
+import { maxWireVersion, maybePromise, Callback } from '../utils';
 import { ServerType } from '../sdam/common';
-import type { Callback } from '../types';
 import type { Server } from '../sdam/server';
 import type { Topology } from '../sdam/topology';
 

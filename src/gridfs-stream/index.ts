@@ -1,8 +1,7 @@
 import { EventEmitter } from 'events';
 import { GridFSBucketReadStream } from './download';
 import { GridFSBucketWriteStream } from './upload';
-import { executeLegacyOperation } from '../utils';
-import type { Callback } from '../types';
+import { executeLegacyOperation, Callback } from '../utils';
 import { MongoError } from '../error';
 
 const DEFAULT_GRIDFS_BUCKET_OPTIONS: any = {

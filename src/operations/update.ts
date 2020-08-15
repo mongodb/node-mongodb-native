@@ -1,12 +1,11 @@
 import { defineAspects, Aspect, OperationBase } from './operation';
 import { updateDocuments } from './common_functions';
-import { hasAtomicOperators, MongoDBNamespace } from '../utils';
+import { hasAtomicOperators, MongoDBNamespace, Callback } from '../utils';
 import { CommandOperation, CommandOperationOptions } from './command';
-import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { CollationOptions, WriteCommandOptions } from '../cmap/wire_protocol/write_command';
-import type { ObjectId } from '../bson';
+import type { ObjectId, Document } from '../bson';
 
 export interface UpdateOptions extends CommandOperationOptions {
   /** A set of filters specifying to which array elements an update should apply */

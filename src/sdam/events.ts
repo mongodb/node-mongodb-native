@@ -1,6 +1,6 @@
 import type { ServerDescription } from './server_description';
 import type { TopologyDescription } from './topology_description';
-import type { Document } from '../types';
+import type { Document } from '../bson';
 
 /**
  * Published when server description changes, but does NOT include changes to the RTT.

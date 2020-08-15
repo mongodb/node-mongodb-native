@@ -6,7 +6,8 @@ export { query } from './query';
 export { command } from './command';
 
 import { writeCommand, WriteCommandOptions } from './write_command';
-import type { Callback, Document } from '../../types';
+import type { Document } from '../../bson';
+import type { Callback } from '../../utils';
 
 export { writeCommand };
 

@@ -1,9 +1,9 @@
 import { command, CommandOptions } from './command';
 import { Query } from '../commands';
 import { MongoError } from '../../error';
-import { maxWireVersion, collectionNamespace } from '../../utils';
+import { maxWireVersion, collectionNamespace, Callback } from '../../utils';
 import { getReadPreference, isSharded, applyCommonQueryOptions } from './shared';
-import type { Callback, Document } from '../../types';
+import type { Document } from '../../bson';
 import type { Server } from '../../sdam/server';
 import type { ReadPreferenceLike } from '../../read_preference';
 import type { InternalCursorState } from '../../cursor/core_cursor';

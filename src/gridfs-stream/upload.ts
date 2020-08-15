@@ -2,7 +2,7 @@ import * as crypto from 'crypto';
 import { PromiseProvider } from '../promise_provider';
 import { Writable } from 'stream';
 import { ObjectId } from '../bson';
-import type { Callback } from '../types';
+import type { Callback } from '../utils';
 
 const ERROR_NAMESPACE_NOT_FOUND = 26;
 

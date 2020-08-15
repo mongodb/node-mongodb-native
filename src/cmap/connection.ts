@@ -5,16 +5,15 @@ import { StreamDescription, StreamDescriptionOptions } from './stream_descriptio
 import * as wp from './wire_protocol';
 import { CommandStartedEvent, CommandFailedEvent, CommandSucceededEvent } from './events';
 import { updateSessionFromResponse } from '../sessions';
-import { uuidV4, ClientMetadata } from '../utils';
+import { uuidV4, ClientMetadata, now, calculateDurationInMs, Callback } from '../utils';
 import {
   MongoError,
   MongoNetworkError,
   MongoNetworkTimeoutError,
   MongoWriteConcernError
 } from '../error';
-import { now, calculateDurationInMs } from '../utils';
-
-import type { Callback, Document, AutoEncrypter } from '../types';
+import type { Document } from '../bson';
+import type { AutoEncrypter } from '../deps';
 import type { ConnectionOptions as TLSConnectionOptions } from 'tls';
 import type { TcpNetConnectOpts, IpcNetConnectOpts } from 'net';
 import type { Server } from '../sdam/server';

@@ -1,5 +1,7 @@
 import type { TopologyVersion } from './sdam/server_description';
-import type { Document } from './types';
+import type { Document } from './bson';
+
+export type AnyError = MongoError | Error;
 
 const kErrorLabels = Symbol('errorLabels');
 

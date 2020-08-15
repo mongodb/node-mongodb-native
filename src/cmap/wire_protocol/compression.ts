@@ -1,5 +1,5 @@
 import * as zlib from 'zlib';
-import type { Callback } from '../../types';
+import type { Callback } from '../../utils';
 import type { OperationDescription } from '../message_stream';
 import type { bufferCallback } from 'snappy';
 

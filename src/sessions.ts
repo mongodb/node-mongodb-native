@@ -1,19 +1,24 @@
 import { PromiseProvider } from './promise_provider';
 import { EventEmitter } from 'events';
-import { Binary, Long } from './bson';
+import { Binary, Long, Timestamp, Document } from './bson';
 import { ReadPreference } from './read_preference';
 import { isTransactionCommand, TxnState, Transaction, TransactionOptions } from './transactions';
 import { resolveClusterTime, ClusterTime } from './sdam/common';
 import { isSharded } from './cmap/wire_protocol/shared';
-import { isPromiseLike, uuidV4, maxWireVersion, maybePromise } from './utils';
 import { MongoError, isRetryableError, MongoNetworkError, MongoWriteConcernError } from './error';
-import { now, calculateDurationInMs } from './utils';
-import type { Callback, Document } from './types';
+import {
+  now,
+  calculateDurationInMs,
+  Callback,
+  isPromiseLike,
+  uuidV4,
+  maxWireVersion,
+  maybePromise
+} from './utils';
 import type { Topology } from './sdam/topology';
 import type { CommandOptions } from './cmap/wire_protocol/command';
 import type { MongoClientOptions } from './mongo_client';
-import type { Timestamp } from 'bson';
-import type { Cursor } from '.';
+import type { Cursor } from './cursor/cursor';
 import type { CoreCursor } from './cursor/core_cursor';
 const minWireVersionForShardedTransactions = 8;
 

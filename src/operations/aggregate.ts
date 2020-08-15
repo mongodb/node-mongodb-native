@@ -3,7 +3,8 @@ import { ReadPreference } from '../read_preference';
 import { MongoError } from '../error';
 import { maxWireVersion } from '../utils';
 import { Aspect, defineAspects, Hint } from './operation';
-import type { Callback, Document } from '../types';
+import type { Callback } from '../utils';
+import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 

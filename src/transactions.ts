@@ -4,7 +4,7 @@ import { ReadConcern } from './read_concern';
 import { WriteConcern } from './write_concern';
 import type { Server } from './sdam/server';
 import type { CommandOperationOptions } from './operations/command';
-import type { Document } from './types';
+import type { Document } from './bson';
 
 export enum TxnState {
   NO_TRANSACTION = 'NO_TRANSACTION',

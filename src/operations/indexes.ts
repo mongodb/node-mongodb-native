@@ -1,12 +1,11 @@
 import { indexInformation, IndexInformationOptions } from './common_functions';
 import { OperationBase, Aspect, defineAspects } from './operation';
 import { MongoError } from '../error';
-import { maxWireVersion, parseIndexOptions, MongoDBNamespace } from '../utils';
+import { maxWireVersion, parseIndexOptions, MongoDBNamespace, Callback } from '../utils';
 import { CommandOperation, CommandOperationOptions, OperationParent } from './command';
 import { ReadPreference } from '../read_preference';
-
 import type { Server } from '../sdam/server';
-import type { Callback, Document } from '../types';
+import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import type { Db } from '../db';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';

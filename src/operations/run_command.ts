@@ -1,8 +1,8 @@
 import { CommandOperation, CommandOperationOptions, OperationParent } from './command';
 import { defineAspects, Aspect } from './operation';
-import { MongoDBNamespace } from '../utils';
+import { MongoDBNamespace, Callback } from '../utils';
 import type { Server } from '../sdam/server';
-import type { Document, Callback } from '../types';
+import type { Document } from '../bson';
 
 export type RunCommandOptions = CommandOperationOptions;
 

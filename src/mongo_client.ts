@@ -2,21 +2,16 @@ import { Db, DbOptions } from './db';
 import { EventEmitter } from 'events';
 import { ChangeStream, ChangeStreamOptions } from './change_stream';
 import { ReadPreference, ReadPreferenceMode } from './read_preference';
-import { MongoError } from './error';
+import { MongoError, AnyError } from './error';
 import { WriteConcern, WriteConcernOptions } from './write_concern';
-import { maybePromise, MongoDBNamespace } from './utils';
+import { maybePromise, MongoDBNamespace, Callback } from './utils';
 import { deprecate } from 'util';
 import { connect, validOptions } from './operations/connect';
 import { PromiseProvider } from './promise_provider';
 import { Logger } from './logger';
 import { ReadConcernLevel, ReadConcern } from './read_concern';
-import type {
-  Callback,
-  BSONSerializeOptions,
-  AutoEncryptionOptions,
-  AnyError,
-  Document
-} from './types';
+import type { BSONSerializeOptions, Document } from './bson';
+import type { AutoEncryptionOptions } from './deps';
 import type { CompressorName } from './cmap/wire_protocol/compression';
 import type { AuthMechanism } from './cmap/auth/defaultAuthProviders';
 import type { Topology } from './sdam/topology';

@@ -1,13 +1,12 @@
 import { MongoError } from '../error';
 import { defineAspects, Aspect, OperationBase } from './operation';
 import { CommandOperation, CommandOperationOptions } from './command';
-import { applyRetryableWrites, applyWriteConcern } from '../utils';
+import { applyRetryableWrites, applyWriteConcern, Callback } from '../utils';
 import { prepareDocs } from './common_functions';
-import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
-import type { ObjectId } from 'bson';
+import type { ObjectId, Document } from '../bson';
 import type { Connection } from '../cmap/connection';
 
 export interface InsertOptions extends CommandOperationOptions {

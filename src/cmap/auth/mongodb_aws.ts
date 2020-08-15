@@ -5,8 +5,8 @@ import * as BSON from '../../bson';
 import { AuthProvider, AuthContext } from './auth_provider';
 import { MongoCredentials } from './mongo_credentials';
 import { MongoError } from '../../error';
-import { maxWireVersion } from '../../utils';
-import type { Callback, BSONSerializeOptions } from '../../types';
+import { maxWireVersion, Callback } from '../../utils';
+import type { BSONSerializeOptions } from '../../bson';
 
 import { aws4 } from '../../deps';
 import { AuthMechanism } from './defaultAuthProviders';

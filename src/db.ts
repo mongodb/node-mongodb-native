@@ -1,8 +1,8 @@
 import { deprecate } from 'util';
-import { emitDeprecatedOptionWarning } from './utils';
+import { emitDeprecatedOptionWarning, Callback } from './utils';
 import { loadAdmin } from './dynamic_loaders';
 import { AggregationCursor, CommandCursor } from './cursor';
-import { ObjectId, Code } from './bson';
+import { ObjectId, Code, Document, BSONSerializeOptions } from './bson';
 import { ReadPreference, ReadPreferenceLike } from './read_preference';
 import { MongoError } from './error';
 import { Collection, CollectionOptions } from './collection';
@@ -50,7 +50,6 @@ import {
 } from './operations/set_profiling_level';
 import { executeOperation } from './operations/execute_operation';
 import { EvalOperation, EvalOptions } from './operations/eval';
-import type { Callback, Document, BSONSerializeOptions } from './types';
 import type { IndexInformationOptions } from './operations/common_functions';
 import type { PkFactory } from './mongo_client';
 import type { Topology } from './sdam/topology';
