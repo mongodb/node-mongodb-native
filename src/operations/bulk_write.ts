@@ -1,6 +1,6 @@
 import { applyRetryableWrites, applyWriteConcern, Callback } from '../utils';
 import { MongoError } from '../error';
-import { OperationBase } from './operation';
+import { OperationBase, OperationOptions } from './operation';
 import { WriteConcern } from '../write_concern';
 import type { Document } from '../bson';
 import type { Collection } from '../collection';
@@ -8,7 +8,7 @@ import type { BulkOperationBase, BulkWriteResult } from '../bulk/common';
 import type { InsertOptions } from './insert';
 import type { Server } from '../sdam/server';
 
-export class BulkWriteOperation extends OperationBase {
+export class BulkWriteOperation extends OperationBase<OperationOptions, BulkWriteResult> {
   collection: Collection;
   operations: Document[];
 

@@ -748,15 +748,19 @@ export class Db implements OperationParent {
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  indexInformation(name: string): Promise<void>;
-  indexInformation(name: string, callback: Callback<void>): void;
-  indexInformation(name: string, options: IndexInformationOptions): Promise<void>;
-  indexInformation(name: string, options: IndexInformationOptions, callback: Callback<void>): void;
+  indexInformation(name: string): Promise<Document>;
+  indexInformation(name: string, callback: Callback<Document>): void;
+  indexInformation(name: string, options: IndexInformationOptions): Promise<Document>;
   indexInformation(
     name: string,
-    options?: IndexInformationOptions | Callback<void>,
-    callback?: Callback<void>
-  ): Promise<void> | void {
+    options: IndexInformationOptions,
+    callback: Callback<Document>
+  ): void;
+  indexInformation(
+    name: string,
+    options?: IndexInformationOptions | Callback<Document>,
+    callback?: Callback<Document>
+  ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 

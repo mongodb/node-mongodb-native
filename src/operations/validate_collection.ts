@@ -1,4 +1,3 @@
-import { defineAspects, Aspect } from './operation';
 import { CommandOperation, CommandOperationOptions } from './command';
 import type { Callback } from '../utils';
 import type { Document } from '../bson';
@@ -10,7 +9,10 @@ export interface ValidateCollectionOptions extends CommandOperationOptions {
   background?: boolean;
 }
 
-export class ValidateCollectionOperation extends CommandOperation<ValidateCollectionOptions> {
+export class ValidateCollectionOperation extends CommandOperation<
+  ValidateCollectionOptions,
+  Document
+> {
   collectionName: string;
   command: Document;
 

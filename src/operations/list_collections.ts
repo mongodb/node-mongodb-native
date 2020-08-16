@@ -32,7 +32,7 @@ export interface ListCollectionsOptions extends CommandOperationOptions {
   batchSize?: number;
 }
 
-export class ListCollectionsOperation extends CommandOperation<ListCollectionsOptions> {
+export class ListCollectionsOperation extends CommandOperation<ListCollectionsOptions, string[]> {
   db: Db;
   filter: Document;
   nameOnly: boolean;

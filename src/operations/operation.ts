@@ -28,7 +28,10 @@ export interface OperationOptions extends BSONSerializeOptions {
  * Additionally, this class implements `hasAspect`, which determines whether an operation has
  * a specific aspect.
  */
-export abstract class OperationBase<T extends OperationOptions = OperationOptions> {
+export abstract class OperationBase<
+  T extends OperationOptions = OperationOptions,
+  TResult = Document
+> {
   options: T;
   ns!: MongoDBNamespace;
   cmd!: Document;
@@ -45,7 +48,7 @@ export abstract class OperationBase<T extends OperationOptions = OperationOption
     this.readPreference = ReadPreference.primary;
   }
 
-  abstract execute(server: Server, callback: Callback): void
+  abstract execute(server: Server, callback: Callback<TResult>): void;
 
   hasAspect(aspect: symbol): boolean {
     const ctor = this.constructor as OperationConstructor;
@@ -78,7 +81,6 @@ export abstract class OperationBase<T extends OperationOptions = OperationOption
   get canRetryWrite(): boolean {
     return true;
   }
-
 }
 
 export function defineAspects(

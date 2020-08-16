@@ -16,7 +16,7 @@ export type DistinctOptions = CommandOperationOptions;
  * @property {object} query The query for filtering the set of documents to which we apply the distinct filter.
  * @property {object} [options] Optional settings. See Collection.prototype.distinct for a list of options.
  */
-export class DistinctOperation extends CommandOperation<DistinctOptions> {
+export class DistinctOperation extends CommandOperation<DistinctOptions, Document[]> {
   collection: Collection;
   key: string;
   query: Document;

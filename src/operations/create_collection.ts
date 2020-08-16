@@ -56,7 +56,10 @@ export interface CreateCollectionOptions extends CommandOperationOptions {
   pkFactory?: PkFactory;
 }
 
-export class CreateCollectionOperation extends CommandOperation<CreateCollectionOptions> {
+export class CreateCollectionOperation extends CommandOperation<
+  CreateCollectionOptions,
+  Collection
+> {
   db: Db;
   name: string;
 

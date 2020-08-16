@@ -17,7 +17,7 @@ export interface CollStatsOptions extends CommandOperationOptions {
  * @property {Collection} collection Collection instance.
  * @property {object} [options] Optional settings. See Collection.prototype.stats for a list of options.
  */
-export class CollStatsOperation extends CommandOperation<CollStatsOptions> {
+export class CollStatsOperation extends CommandOperation<CollStatsOptions, Document> {
   collectionName: string;
 
   /**
@@ -46,7 +46,7 @@ export interface DbStatsOptions extends CommandOperationOptions {
   scale?: number;
 }
 
-export class DbStatsOperation extends CommandOperation<DbStatsOptions> {
+export class DbStatsOperation extends CommandOperation<DbStatsOptions, Document> {
   execute(server: Server, callback: Callback<Document>): void {
     const command: Document = { dbStats: true };
     if (this.options.scale != null) {

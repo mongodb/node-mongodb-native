@@ -22,7 +22,7 @@ export interface ReplaceOptions extends CommandOperationOptions {
   multi?: boolean;
 }
 
-export class ReplaceOneOperation extends CommandOperation<ReplaceOptions> {
+export class ReplaceOneOperation extends CommandOperation<ReplaceOptions, UpdateResult> {
   collection: Collection;
   filter: Document;
   replacement: Document;

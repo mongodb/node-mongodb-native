@@ -20,7 +20,7 @@ export interface InsertManyResult {
   result: Document;
 }
 
-export class InsertManyOperation extends OperationBase<InsertOptions> {
+export class InsertManyOperation extends OperationBase<InsertOptions, InsertManyResult> {
   collection: Collection;
   docs: Document[];
 

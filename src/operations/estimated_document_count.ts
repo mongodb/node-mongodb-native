@@ -12,7 +12,8 @@ export interface EstimatedDocumentCountOptions extends CommandOperationOptions {
 }
 
 export class EstimatedDocumentCountOperation extends CommandOperation<
-  EstimatedDocumentCountOptions
+  EstimatedDocumentCountOptions,
+  number
 > {
   collectionName: string;
   query?: Document;

@@ -6,7 +6,7 @@ import type { FindOptions } from './find';
 import { MongoError } from '../error';
 import type { Server } from '../sdam/server';
 
-export class FindOneOperation extends OperationBase<FindOptions> {
+export class FindOneOperation extends OperationBase<FindOptions, Document> {
   collection: Collection;
   query: Document;
 

@@ -40,7 +40,7 @@ export interface FindAndModifyOptions extends CommandOperationOptions {
   new?: boolean;
 }
 
-export class FindAndModifyOperation extends CommandOperation<FindAndModifyOptions> {
+export class FindAndModifyOperation extends CommandOperation<FindAndModifyOptions, Document> {
   collection: Collection;
   query: Document;
   sort?: Sort;

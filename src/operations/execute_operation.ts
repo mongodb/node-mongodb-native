@@ -1,6 +1,6 @@
 import { ReadPreference } from '../read_preference';
 import { MongoError, isRetryableError } from '../error';
-import { Aspect, OperationBase } from './operation';
+import { Aspect, OperationBase, OperationOptions } from './operation';
 import { maxWireVersion, maybePromise, Callback } from '../utils';
 import { ServerType } from '../sdam/common';
 import type { Server } from '../sdam/server';
@@ -10,12 +10,15 @@ const MMAPv1_RETRY_WRITES_ERROR_CODE = 20;
 const MMAPv1_RETRY_WRITES_ERROR_MESSAGE =
   'This MongoDB deployment does not support retryable writes. Please add retryWrites=false to your connection string.';
 
-type Tail<T extends any[]> = ((...t: T) => void) extends (arg: any, ...args: infer R) => void
-  ? R
+type ResultTypeFromOperation<TOperation> = TOperation extends OperationBase<
+  OperationOptions,
+  infer K
+>
+  ? K
   : never;
-type Last<T extends any[]> = T[Exclude<keyof T, keyof Tail<T>>];
-type LastParameter<F extends (...args: any) => any> = Last<Parameters<F>>;
-type ResultType<T extends (...args: any) => any> = NonNullable<LastParameter<LastParameter<T>>>;
+type OptionsFromOperation<TOperation> = TOperation extends OperationBase<infer K, unknown>
+  ? K
+  : never;
 
 /**
  * Executes the given operation with provided arguments.
@@ -30,25 +33,26 @@ type ResultType<T extends (...args: any) => any> = NonNullable<LastParameter<Las
  * @param {Operation} operation The operation to execute
  * @param {Function} callback The command result callback
  */
-export function executeOperation<T extends OperationBase>(
-  topology: Topology,
-  operation: T
-): Promise<ResultType<T['execute']>>;
-export function executeOperation<T extends OperationBase>(
-  topology: Topology,
-  operation: T,
-  callback: Callback<ResultType<T['execute']>>
-): void;
-export function executeOperation<T extends OperationBase>(
-  topology: Topology,
-  operation: T,
-  callback?: Callback<ResultType<T['execute']>>
-): Promise<ResultType<T['execute']>> | void;
-export function executeOperation<T extends OperationBase>(
-  topology: Topology,
-  operation: T,
-  callback?: Callback<ResultType<T['execute']>>
-): Promise<ResultType<T['execute']>> | void {
+export function executeOperation<
+  T extends OperationBase<TOptions, TResult>,
+  TOptions = OptionsFromOperation<T>,
+  TResult = ResultTypeFromOperation<T>
+>(topology: Topology, operation: T): Promise<TResult>;
+export function executeOperation<
+  T extends OperationBase<TOptions, TResult>,
+  TOptions = OptionsFromOperation<T>,
+  TResult = ResultTypeFromOperation<T>
+>(topology: Topology, operation: T, callback: Callback<TResult>): void;
+export function executeOperation<
+  T extends OperationBase<TOptions, TResult>,
+  TOptions = OptionsFromOperation<T>,
+  TResult = ResultTypeFromOperation<T>
+>(topology: Topology, operation: T, callback?: Callback<TResult>): Promise<TResult> | void;
+export function executeOperation<
+  T extends OperationBase<TOptions, TResult>,
+  TOptions = OptionsFromOperation<T>,
+  TResult = ResultTypeFromOperation<T>
+>(topology: Topology, operation: T, callback?: Callback<TResult>): Promise<TResult> | void {
   if (topology == null) {
     throw new TypeError('This method requires a valid topology instance');
   }
@@ -65,7 +69,7 @@ export function executeOperation<T extends OperationBase>(
           return;
         }
 
-        executeOperation(topology, operation, cb);
+        executeOperation<T, TOptions, TResult>(topology, operation, cb);
       });
     });
   }

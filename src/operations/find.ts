@@ -67,7 +67,7 @@ export interface FindOptions extends QueryOptions {
   allowDiskUse?: boolean;
 }
 
-export class FindOperation extends OperationBase<FindOptions> {
+export class FindOperation extends OperationBase<FindOptions, Document> {
   cmd: Document;
   readPreference: ReadPreference;
   cursorState?: InternalCursorState;

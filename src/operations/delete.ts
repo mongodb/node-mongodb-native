@@ -24,7 +24,7 @@ export interface DeleteResult {
   connection?: Connection;
 }
 
-export class DeleteOperation extends OperationBase<DeleteOptions> {
+export class DeleteOperation extends OperationBase<DeleteOptions, Document> {
   namespace: string;
   operations: Document[];
 
@@ -48,7 +48,7 @@ export class DeleteOperation extends OperationBase<DeleteOptions> {
   }
 }
 
-export class DeleteOneOperation extends CommandOperation<DeleteOptions> {
+export class DeleteOneOperation extends CommandOperation<DeleteOptions, DeleteResult> {
   collection: Collection;
   filter: Document;
 
@@ -78,7 +78,7 @@ export class DeleteOneOperation extends CommandOperation<DeleteOptions> {
   }
 }
 
-export class DeleteManyOperation extends CommandOperation<DeleteOptions> {
+export class DeleteManyOperation extends CommandOperation<DeleteOptions, DeleteResult> {
   collection: Collection;
   filter: Document;
 

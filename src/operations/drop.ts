@@ -6,7 +6,7 @@ import type { Db } from '../db';
 
 export type DropCollectionOptions = CommandOperationOptions;
 
-export class DropCollectionOperation extends CommandOperation<DropCollectionOptions> {
+export class DropCollectionOperation extends CommandOperation<DropCollectionOptions, boolean> {
   name: string;
 
   constructor(db: Db, name: string, options: DropCollectionOptions) {
@@ -24,7 +24,7 @@ export class DropCollectionOperation extends CommandOperation<DropCollectionOpti
 }
 
 export type DropDatabaseOptions = CommandOperationOptions;
-export class DropDatabaseOperation extends CommandOperation<DropDatabaseOptions> {
+export class DropDatabaseOperation extends CommandOperation<DropDatabaseOptions, boolean> {
   execute(server: Server, callback: Callback<boolean>): void {
     super.executeCommand(server, { dropDatabase: 1 }, (err, result) => {
       if (err) return callback(err);

@@ -919,7 +919,7 @@ export class Cursor<
     if (this.operation && this.operation.cmd == null) {
       this.operation.options.explain = true;
       this.operation.fullResponse = false;
-      return executeOperation(this.topology, this.operation, callback);
+      return executeOperation(this.topology, this.operation as any, callback);
     }
 
     this.cmd.explain = true;

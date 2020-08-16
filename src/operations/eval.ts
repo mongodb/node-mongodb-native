@@ -10,7 +10,7 @@ export interface EvalOptions extends CommandOperationOptions {
   nolock?: boolean;
 }
 
-export class EvalOperation extends CommandOperation<EvalOptions> {
+export class EvalOperation extends CommandOperation<EvalOptions, Document> {
   code: Code;
   parameters?: Document | Document[];
 

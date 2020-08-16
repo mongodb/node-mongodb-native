@@ -5,7 +5,7 @@ import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import type { Server } from '../sdam/server';
 
-export class OptionsOperation extends OperationBase<OperationOptions> {
+export class OptionsOperation extends OperationBase<OperationOptions, Document> {
   collection: Collection;
 
   constructor(collection: Collection, options: OperationOptions) {

@@ -15,7 +15,10 @@ export interface ListDatabasesOptions extends CommandOperationOptions {
   authorizedDatabases?: boolean;
 }
 
-export class ListDatabasesOperation extends CommandOperation<ListDatabasesOptions> {
+export class ListDatabasesOperation extends CommandOperation<
+  ListDatabasesOptions,
+  ListDatabasesResult
+> {
   constructor(db: Db, options?: ListDatabasesOptions) {
     super(db, options);
     this.ns = new MongoDBNamespace('admin', '$cmd');

@@ -34,7 +34,7 @@ export interface AggregateOptions extends CommandOperationOptions {
   out?: string;
 }
 
-export class AggregateOperation extends CommandOperation<AggregateOptions> {
+export class AggregateOperation<T = Document> extends CommandOperation<AggregateOptions, T> {
   target: string | typeof DB_AGGREGATE_COLLECTION;
   pipeline: Document[];
   hasWriteStage: boolean;
@@ -84,7 +84,7 @@ export class AggregateOperation extends CommandOperation<AggregateOptions> {
     this.pipeline.push(stage);
   }
 
-  execute(server: Server, callback: Callback<Document>): void {
+  execute(server: Server, callback: Callback<T>): void {
     const options: AggregateOptions = this.options;
     const serverWireVersion = maxWireVersion(server);
     const command: Document = { aggregate: this.target, pipeline: this.pipeline };

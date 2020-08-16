@@ -549,7 +549,7 @@ export class CoreCursor<
       );
     }
 
-    executeOperation(this.topology, this.operation, (err, result) => {
+    executeOperation(this.topology, this.operation as any, (err, result) => {
       if (err || !result) {
         done(err);
         return;
