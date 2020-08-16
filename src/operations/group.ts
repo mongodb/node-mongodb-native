@@ -1,7 +1,6 @@
 import { CommandOperation, CommandOperationOptions } from './command';
 import { EvalOperation } from './eval';
 import { Code, Document } from '../bson';
-import { defineAspects, Aspect } from './operation';
 import type { Callback } from '../utils';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
