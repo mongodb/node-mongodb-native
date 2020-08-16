@@ -125,8 +125,4 @@ export class AggregateOperation extends CommandOperation<AggregateOptions> {
   }
 }
 
-defineAspects(AggregateOperation, [
-  Aspect.READ_OPERATION,
-  Aspect.RETRYABLE,
-  Aspect.EXECUTE_WITH_SELECTION
-]);
+defineAspects(AggregateOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE]);

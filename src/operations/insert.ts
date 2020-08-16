@@ -130,14 +130,5 @@ function insertDocuments(
   );
 }
 
-defineAspects(InsertOperation, [
-  Aspect.RETRYABLE,
-  Aspect.WRITE_OPERATION,
-  Aspect.EXECUTE_WITH_SELECTION
-]);
-
-defineAspects(InsertOneOperation, [
-  Aspect.RETRYABLE,
-  Aspect.WRITE_OPERATION,
-  Aspect.EXECUTE_WITH_SELECTION
-]);
+defineAspects(InsertOperation, [Aspect.RETRYABLE, Aspect.WRITE_OPERATION]);
+defineAspects(InsertOneOperation, [Aspect.RETRYABLE, Aspect.WRITE_OPERATION]);

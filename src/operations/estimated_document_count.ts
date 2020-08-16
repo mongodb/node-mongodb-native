@@ -67,8 +67,4 @@ export class EstimatedDocumentCountOperation extends CommandOperation<
   }
 }
 
-defineAspects(EstimatedDocumentCountOperation, [
-  Aspect.READ_OPERATION,
-  Aspect.RETRYABLE,
-  Aspect.EXECUTE_WITH_SELECTION
-]);
+defineAspects(EstimatedDocumentCountOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE]);

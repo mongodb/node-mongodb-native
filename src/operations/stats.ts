@@ -57,5 +57,5 @@ export class DbStatsOperation extends CommandOperation<DbStatsOptions> {
   }
 }
 
-defineAspects(CollStatsOperation, [Aspect.READ_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
-defineAspects(DbStatsOperation, [Aspect.READ_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
+defineAspects(CollStatsOperation, [Aspect.READ_OPERATION]);
+defineAspects(DbStatsOperation, [Aspect.READ_OPERATION]);

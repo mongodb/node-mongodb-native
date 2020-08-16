@@ -222,5 +222,3 @@ function processScope(scope: Document) {
 
   return newScope;
 }
-
-defineAspects(MapReduceOperation, [Aspect.EXECUTE_WITH_SELECTION]);

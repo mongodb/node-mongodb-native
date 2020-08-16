@@ -100,4 +100,4 @@ export class CreateCollectionOperation extends CommandOperation<CreateCollection
   }
 }
 
-defineAspects(CreateCollectionOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
+defineAspects(CreateCollectionOperation, [Aspect.WRITE_OPERATION]);

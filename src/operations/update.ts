@@ -156,16 +156,6 @@ export class UpdateManyOperation extends CommandOperation<UpdateOptions> {
   }
 }
 
-defineAspects(UpdateOperation, [
-  Aspect.RETRYABLE,
-  Aspect.WRITE_OPERATION,
-  Aspect.EXECUTE_WITH_SELECTION
-]);
-
-defineAspects(UpdateOneOperation, [
-  Aspect.RETRYABLE,
-  Aspect.WRITE_OPERATION,
-  Aspect.EXECUTE_WITH_SELECTION
-]);
-
-defineAspects(UpdateManyOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
+defineAspects(UpdateOperation, [Aspect.RETRYABLE, Aspect.WRITE_OPERATION]);
+defineAspects(UpdateOneOperation, [Aspect.RETRYABLE, Aspect.WRITE_OPERATION]);
+defineAspects(UpdateManyOperation, [Aspect.WRITE_OPERATION]);

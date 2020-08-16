@@ -21,4 +21,4 @@ export class RemoveUserOperation extends CommandOperation<RemoveUserOptions> {
   }
 }
 
-defineAspects(RemoveUserOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
+defineAspects(RemoveUserOperation, [Aspect.WRITE_OPERATION]);

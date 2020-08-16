@@ -1,7 +1,7 @@
 import { ReadPreference } from '../read_preference';
 import type { ClientSession } from '../sessions';
 import type { Document, BSONSerializeOptions } from '../bson';
-import type { MongoDBNamespace } from '../utils';
+import type { MongoDBNamespace, Callback } from '../utils';
 import type { InternalCursorState } from '../cursor/core_cursor';
 import type { Server } from '../sdam/server';
 
@@ -9,7 +9,6 @@ export const Aspect = {
   READ_OPERATION: Symbol('READ_OPERATION'),
   WRITE_OPERATION: Symbol('WRITE_OPERATION'),
   RETRYABLE: Symbol('RETRYABLE'),
-  EXECUTE_WITH_SELECTION: Symbol('EXECUTE_WITH_SELECTION'),
   NO_INHERIT_OPTIONS: Symbol('NO_INHERIT_OPTIONS')
 } as const;
 
@@ -29,7 +28,7 @@ export interface OperationOptions extends BSONSerializeOptions {
  * Additionally, this class implements `hasAspect`, which determines whether an operation has
  * a specific aspect.
  */
-export class OperationBase<T extends OperationOptions = OperationOptions> {
+export abstract class OperationBase<T extends OperationOptions = OperationOptions> {
   options: T;
   ns!: MongoDBNamespace;
   cmd!: Document;
@@ -45,6 +44,8 @@ export class OperationBase<T extends OperationOptions = OperationOptions> {
     this.options = Object.assign({}, options);
     this.readPreference = ReadPreference.primary;
   }
+
+  abstract execute(server: Server, callback: Callback): void
 
   hasAspect(aspect: symbol): boolean {
     const ctor = this.constructor as OperationConstructor;
@@ -78,14 +79,6 @@ export class OperationBase<T extends OperationOptions = OperationOptions> {
     return true;
   }
 
-  /**
-   * @param {any} [server]
-   * @param {any} [callback]
-   */
-  // eslint-disable-next-line
-  execute(server?: any, callback?: any) {
-    throw new TypeError('`execute` must be implemented for OperationBase subclasses');
-  }
 }
 
 export function defineAspects(

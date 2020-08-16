@@ -77,8 +77,4 @@ export class ReplaceOneOperation extends CommandOperation<ReplaceOptions> {
   }
 }
 
-defineAspects(ReplaceOneOperation, [
-  Aspect.RETRYABLE,
-  Aspect.WRITE_OPERATION,
-  Aspect.EXECUTE_WITH_SELECTION
-]);
+defineAspects(ReplaceOneOperation, [Aspect.RETRYABLE, Aspect.WRITE_OPERATION]);

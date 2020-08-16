@@ -3,6 +3,7 @@ import { MongoError } from '../error';
 import type { Callback } from '../utils';
 import type { Document } from '../bson';
 import type { Collection } from '../collection';
+import type { Server } from '../sdam/server';
 
 export class OptionsOperation extends OperationBase<OperationOptions> {
   collection: Collection;
@@ -13,7 +14,7 @@ export class OptionsOperation extends OperationBase<OperationOptions> {
     this.collection = collection;
   }
 
-  execute(callback: Callback<Document>): void {
+  execute(server: Server, callback: Callback<Document>): void {
     const coll = this.collection;
     const opts = this.options;
 

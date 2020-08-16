@@ -53,4 +53,4 @@ export class RenameOperation extends RunAdminCommandOperation {
   }
 }
 
-defineAspects(RenameOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
+defineAspects(RenameOperation, [Aspect.WRITE_OPERATION]);

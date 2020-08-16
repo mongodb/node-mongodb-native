@@ -50,5 +50,3 @@ export class SetProfilingLevelOperation extends CommandOperation<SetProfilingLev
     });
   }
 }
-
-defineAspects(SetProfilingLevelOperation, [Aspect.EXECUTE_WITH_SELECTION]);

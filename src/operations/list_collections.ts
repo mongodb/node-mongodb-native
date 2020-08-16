@@ -110,8 +110,4 @@ export class ListCollectionsOperation extends CommandOperation<ListCollectionsOp
   }
 }
 
-defineAspects(ListCollectionsOperation, [
-  Aspect.READ_OPERATION,
-  Aspect.RETRYABLE,
-  Aspect.EXECUTE_WITH_SELECTION
-]);
+defineAspects(ListCollectionsOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE]);

@@ -40,7 +40,7 @@ export interface OperationParent {
   logger?: Logger;
 }
 
-export class CommandOperation<
+export abstract class CommandOperation<
   T extends CommandOperationOptions = CommandOperationOptions
 > extends OperationBase<T> {
   ns: MongoDBNamespace;
@@ -83,6 +83,8 @@ export class CommandOperation<
       this.logger = parent.logger;
     }
   }
+
+  abstract execute(server: Server, callback: Callback): void
 
   executeCommand(server: Server, cmd: Document, callback: Callback): void {
     // TODO: consider making this a non-enumerable property

@@ -123,8 +123,4 @@ function isCursor(c: Collection | Cursor): c is Cursor {
   return 'numberOfRetries' in c.s && 'undefined' !== typeof c.s.numberOfRetries;
 }
 
-defineAspects(CountOperation, [
-  Aspect.READ_OPERATION,
-  Aspect.RETRYABLE,
-  Aspect.EXECUTE_WITH_SELECTION
-]);
+defineAspects(CountOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE]);

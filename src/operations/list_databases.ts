@@ -39,8 +39,4 @@ export class ListDatabasesOperation extends CommandOperation<ListDatabasesOption
   }
 }
 
-defineAspects(ListDatabasesOperation, [
-  Aspect.READ_OPERATION,
-  Aspect.RETRYABLE,
-  Aspect.EXECUTE_WITH_SELECTION
-]);
+defineAspects(ListDatabasesOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE]);

@@ -100,8 +100,4 @@ export class FindOperation extends OperationBase<FindOptions> {
   }
 }
 
-defineAspects(FindOperation, [
-  Aspect.READ_OPERATION,
-  Aspect.RETRYABLE,
-  Aspect.EXECUTE_WITH_SELECTION
-]);
+defineAspects(FindOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE]);

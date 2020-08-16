@@ -105,5 +105,3 @@ export class EvalGroupOperation extends EvalOperation {
     });
   }
 }
-
-defineAspects(GroupOperation, [Aspect.EXECUTE_WITH_SELECTION]);

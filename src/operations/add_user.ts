@@ -99,4 +99,4 @@ export class AddUserOperation extends CommandOperation<AddUserOptions> {
   }
 }
 
-defineAspects(AddUserOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
+defineAspects(AddUserOperation, [Aspect.WRITE_OPERATION]);

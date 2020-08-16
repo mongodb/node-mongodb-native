@@ -47,5 +47,3 @@ export class ValidateCollectionOperation extends CommandOperation<ValidateCollec
     });
   }
 }
-
-defineAspects(ValidateCollectionOperation, [Aspect.EXECUTE_WITH_SELECTION]);

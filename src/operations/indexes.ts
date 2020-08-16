@@ -106,7 +106,7 @@ export class IndexesOperation extends OperationBase<IndexInformationOptions> {
     this.collection = collection;
   }
 
-  execute(callback: Callback<Document>): void {
+  execute(server: Server, callback: Callback<Document>): void {
     const coll = this.collection;
     let options = this.options;
 
@@ -337,7 +337,7 @@ export class IndexExistsOperation extends OperationBase<IndexInformationOptions>
     this.indexes = indexes;
   }
 
-  execute(callback: Callback): void {
+  execute(server: Server, callback: Callback): void {
     const coll = this.collection;
     const indexes = this.indexes;
     const options = this.options;
@@ -371,7 +371,7 @@ export class IndexInformationOperation extends OperationBase<IndexInformationOpt
     this.name = name;
   }
 
-  execute(callback: Callback): void {
+  execute(server: Server, callback: Callback): void {
     const db = this.db;
     const name = this.name;
     const options = this.options;
@@ -380,14 +380,9 @@ export class IndexInformationOperation extends OperationBase<IndexInformationOpt
   }
 }
 
-defineAspects(ListIndexesOperation, [
-  Aspect.READ_OPERATION,
-  Aspect.RETRYABLE,
-  Aspect.EXECUTE_WITH_SELECTION
-]);
-
-defineAspects(CreateIndexesOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
-defineAspects(CreateIndexOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
-defineAspects(EnsureIndexOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
-defineAspects(DropIndexOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
-defineAspects(DropIndexesOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
+defineAspects(ListIndexesOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE]);
+defineAspects(CreateIndexesOperation, [Aspect.WRITE_OPERATION]);
+defineAspects(CreateIndexOperation, [Aspect.WRITE_OPERATION]);
+defineAspects(EnsureIndexOperation, [Aspect.WRITE_OPERATION]);
+defineAspects(DropIndexOperation, [Aspect.WRITE_OPERATION]);
+defineAspects(DropIndexesOperation, [Aspect.WRITE_OPERATION]);

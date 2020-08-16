@@ -24,5 +24,3 @@ export class ProfilingLevelOperation extends CommandOperation<ProfilingLevelOpti
     });
   }
 }
-
-defineAspects(ProfilingLevelOperation, [Aspect.EXECUTE_WITH_SELECTION]);

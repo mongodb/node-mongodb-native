@@ -31,5 +31,5 @@ export class RunAdminCommandOperation<
   }
 }
 
-defineAspects(RunCommandOperation, [Aspect.EXECUTE_WITH_SELECTION, Aspect.NO_INHERIT_OPTIONS]);
-defineAspects(RunAdminCommandOperation, [Aspect.EXECUTE_WITH_SELECTION, Aspect.NO_INHERIT_OPTIONS]);
+defineAspects(RunCommandOperation, [Aspect.NO_INHERIT_OPTIONS]);
+defineAspects(RunAdminCommandOperation, [Aspect.NO_INHERIT_OPTIONS]);

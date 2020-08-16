@@ -96,11 +96,7 @@ export function executeOperation<T extends OperationBase>(
     }
 
     try {
-      if (operation.hasAspect(Aspect.EXECUTE_WITH_SELECTION)) {
-        executeWithServerSelection(topology, operation, executeCallback);
-      } else {
-        operation.execute(executeCallback);
-      }
+      executeWithServerSelection(topology, operation, executeCallback);
     } catch (e) {
       if (session && session.owner === owner) {
         session.endSession();

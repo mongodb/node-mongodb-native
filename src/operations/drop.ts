@@ -34,5 +34,5 @@ export class DropDatabaseOperation extends CommandOperation<DropDatabaseOptions>
   }
 }
 
-defineAspects(DropCollectionOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
-defineAspects(DropDatabaseOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
+defineAspects(DropCollectionOperation, [Aspect.WRITE_OPERATION]);
+defineAspects(DropDatabaseOperation, [Aspect.WRITE_OPERATION]);
