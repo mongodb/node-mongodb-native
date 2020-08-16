@@ -12,7 +12,7 @@ import { Readable } from 'stream';
  * @param {object} readPreference The read preference to use
  * @param {object} filter The query to use to find the file document
  * @param {object} [options] Optional settings.
- * @param {number} [options.sort] Optional sort for the file find query
+ * @param {(array|object)} [options.sort] Optional sort for the file find query. Array of indexes, [['a', 1]] etc.
  * @param {number} [options.skip] Optional skip for the file find query
  * @param {number} [options.start] Optional 0-based offset in bytes to start streaming from
  * @param {number} [options.end] Optional 0-based offset in bytes to stop streaming before
