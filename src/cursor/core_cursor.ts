@@ -1,6 +1,6 @@
 import { Logger } from '../logger';
 import { ReadPreference } from '../read_preference';
-import { MongoDBNamespace, Callback, Callback2 } from '../utils';
+import { MongoDBNamespace, Callback } from '../utils';
 import { executeOperation } from '../operations/execute_operation';
 import { Readable } from 'stream';
 import { MongoError, MongoNetworkError } from '../error';
@@ -420,7 +420,7 @@ export class CoreCursor<
     return false;
   }
 
-  _getMore(callback: Callback2): void {
+  _getMore(callback: Callback<Document>): void {
     if (this.logger.isDebug()) {
       this.logger.debug(`schedule getMore call for query [${JSON.stringify(this.query)}]`);
     }
@@ -439,12 +439,12 @@ export class CoreCursor<
     }
 
     const cursorState = this.cursorState;
-    this.server.getMore(this.ns, cursorState, batchSize, this.options, (err, result, conn) => {
+    this.server.getMore(this.ns, cursorState, batchSize, this.options, (err, result) => {
       // NOTE: `getMore` modifies `cursorState`, would be very ideal not to do so in the future
       if (err || (cursorState.cursorId && cursorState.cursorId.isZero())) {
         this._endSession();
       }
-      callback(err, result, conn);
+      callback(err, result);
     });
   }
 

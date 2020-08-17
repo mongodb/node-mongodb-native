@@ -14,8 +14,7 @@ import {
   maxWireVersion,
   ClientMetadataOptions,
   Callback,
-  CallbackWithType,
-  Callback2
+  CallbackWithType
 } from '../utils';
 import {
   ServerType,
@@ -362,7 +361,7 @@ export class Server extends EventEmitter {
     cursorState: InternalCursorState,
     batchSize: number,
     options: GetMoreOptions,
-    callback: Callback2
+    callback: Callback<Document>
   ): void {
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
       callback(new MongoError('server is closed'));

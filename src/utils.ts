@@ -19,7 +19,6 @@ import type { Document } from './bson';
 import type { IndexSpecification, IndexDirection } from './operations/indexes';
 
 export type Callback<T = any> = (error?: AnyError, result?: T) => void;
-export type Callback2<T0 = any, T1 = any> = (error?: AnyError, result0?: T0, result1?: T1) => void;
 export type CallbackWithType<E = AnyError, T0 = any> = (error?: E, result?: T0) => void;
 
 export const MAX_JS_INT = Number.MAX_SAFE_INTEGER + 1;

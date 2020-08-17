@@ -431,8 +431,8 @@ class ChangeStreamCursor extends Cursor<AggregateOperation, ChangeStreamCursorOp
     this.hasReceived = true;
   }
 
-  _processBatch(batchName: string, response: Document) {
-    const cursor = response.cursor;
+  _processBatch(batchName: string, response?: Document) {
+    const cursor = response?.cursor || {};
     if (cursor.postBatchResumeToken) {
       this.cursorState.postBatchResumeToken = cursor.postBatchResumeToken;
 

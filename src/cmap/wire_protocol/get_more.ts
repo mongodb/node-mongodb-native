@@ -2,10 +2,9 @@ import { GetMore } from '../commands';
 import { Long, Document } from '../../bson';
 import { MongoError, MongoNetworkError } from '../../error';
 import { applyCommonQueryOptions } from './shared';
-import { maxWireVersion, collectionNamespace, Callback, Callback2 } from '../../utils';
+import { maxWireVersion, collectionNamespace, Callback } from '../../utils';
 import { command, CommandOptions } from './command';
 import type { Server } from '../../sdam/server';
-import type { Connection } from '../connection';
 import type { InternalCursorState } from '../../cursor/core_cursor';
 
 export type GetMoreOptions = CommandOptions;
@@ -16,7 +15,7 @@ export function getMore(
   cursorState: InternalCursorState,
   batchSize: number,
   options: GetMoreOptions,
-  callback: Callback2<Document, Connection>
+  callback: Callback<Document>
 ): void {
   options = options || {};
 
@@ -39,7 +38,7 @@ export function getMore(
       cursorState.documents = response.documents;
       cursorState.cursorId = cursorId;
 
-      callback(undefined, undefined, response.connection);
+      callback();
       return;
     }
 
@@ -57,7 +56,7 @@ export function getMore(
     cursorState.documents = response.documents[0].cursor.nextBatch;
     cursorState.cursorId = cursorId;
 
-    callback(undefined, response.documents[0], response.connection);
+    callback(undefined, response.documents[0]);
   };
 
   if (!cursorState.cursorId) {
