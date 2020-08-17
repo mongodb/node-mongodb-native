@@ -1,6 +1,7 @@
 import { AuthProvider, AuthContext } from './auth_provider';
 import type { Callback } from '../../types';
 import { MongoError } from '../../error';
+import { MongoAuthProcess } from './kerberosAuthProcess';
 
 import { Kerberos } from '../../deps';
 
@@ -29,8 +30,6 @@ export class GSSAPI extends AuthProvider {
       mechanismProperties['gssapiservicename'] ||
       mechanismProperties['gssapiServiceName'] ||
       'mongodb';
-
-    const MongoAuthProcess = Kerberos.processes.MongoAuthProcess;
 
     const authProcess = new MongoAuthProcess(host, port, gssapiServiceName, mechanismProperties);
 
