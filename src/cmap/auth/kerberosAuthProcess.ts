@@ -5,13 +5,13 @@ type TransitionCallback = (err?: Error | null, payload?: any) => void;
 type Transition = typeof MongoAuthProcess.prototype.transition;
 
 interface KerberosClient {
-  step: (challenge: string, callback?: TransitionCallback) => Promise<string> | string;
+  step: (challenge: string, callback?: TransitionCallback) => Promise<string> | void;
   wrap: (
     challenge: string,
     options?: { user: string },
     callback?: TransitionCallback
-  ) => Promise<string> | string;
-  unwrap: (challenge: string, callback?: TransitionCallback) => Promise<string> | string;
+  ) => Promise<string> | void;
+  unwrap: (challenge: string, callback?: TransitionCallback) => Promise<string> | void;
 }
 
 interface gssapiOptions {
