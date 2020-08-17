@@ -1,16 +1,16 @@
 const dns = require('dns');
 const kerberos = require('kerberos');
 
-type KerberosCallback = (err: Error | null, response: any) => void;
-
+type TransitionCallback = (err?: Error | null, payload?: any) => void;
+type Transition = typeof MongoAuthProcess.prototype.transition;
 interface KerberosClient {
-  step: (challenge: string, callback?: KerberosCallback) => Promise<void> | void;
+  step: (challenge: string, callback?: TransitionCallback) => Promise<void> | void;
   wrap: (
     challenge: string,
     options?: { user: string },
-    callback?: KerberosCallback
+    callback?: TransitionCallback
   ) => Promise<void> | void;
-  unwrap: (challenge: string, callback?: KerberosCallback) => Promise<void> | void;
+  unwrap: (challenge: string, callback?: TransitionCallback) => Promise<void> | void;
 }
 
 interface gssapiOptions {
@@ -18,15 +18,13 @@ interface gssapiOptions {
   gssapiCanonicalizeHostName?: boolean;
 }
 
-type TransitionCallback = (err: Error | null, payload?: any) => void;
-
 export class MongoAuthProcess {
   host: string;
   port: string | number;
   serviceName: string;
   canonicalizeHostName: boolean;
   retries: number;
-  _transition: ((payload: any, callback: any) => void) | null;
+  _transition: ((payload: any, callback: TransitionCallback) => void) | null;
   username?: string;
   password?: string;
   client?: KerberosClient;
@@ -105,7 +103,7 @@ export class MongoAuthProcess {
     });
   }
 
-  transition(payload: any, callback: TransitionCallback | Function) {
+  transition(payload: any, callback: TransitionCallback) {
     if (this._transition == null) {
       return callback(new Error('Transition finished'));
     }
@@ -114,8 +112,8 @@ export class MongoAuthProcess {
   }
 }
 
-function firstTransition(auth: MongoAuthProcess) {
-  return (payload: any, callback: Function) => {
+function firstTransition(auth: MongoAuthProcess): Transition {
+  return (payload, callback) => {
     auth.client!.step('', (err, response) => {
       if (err) return callback(err);
 
@@ -128,8 +126,8 @@ function firstTransition(auth: MongoAuthProcess) {
   };
 }
 
-function secondTransition(auth: MongoAuthProcess) {
-  return (payload: any, callback: Function) => {
+function secondTransition(auth: MongoAuthProcess): Transition {
+  return (payload, callback) => {
     auth.client!.step(payload, (err, response) => {
       if (err && auth.retries === 0) return callback(err);
 
@@ -151,8 +149,8 @@ function secondTransition(auth: MongoAuthProcess) {
   };
 }
 
-function thirdTransition(auth: MongoAuthProcess) {
-  return (payload: any, callback: Function) => {
+function thirdTransition(auth: MongoAuthProcess): Transition {
+  return (payload, callback) => {
     // GSS Client Unwrap
     auth.client!.unwrap(payload, (err, response) => {
       if (err) return callback(err, false);
@@ -171,8 +169,8 @@ function thirdTransition(auth: MongoAuthProcess) {
   };
 }
 
-function fourthTransition(auth: MongoAuthProcess) {
-  return (payload: any, callback: Function) => {
+function fourthTransition(auth: MongoAuthProcess): Transition {
+  return (payload, callback) => {
     // Set the transition to null
     auth._transition = null;
 
@@ -180,4 +178,3 @@ function fourthTransition(auth: MongoAuthProcess) {
     callback(null, true);
   };
 }
-
