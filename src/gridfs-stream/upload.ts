@@ -135,6 +135,10 @@ export class GridFSBucketWriteStream extends Writable {
    * @param callback - Function to call when the chunk was added to the buffer, or if the entire chunk was persisted to MongoDB if this chunk caused a flush.
    * @returns False if this write required flushing a chunk to MongoDB. True otherwise.
    */
+  write(chunk: Buffer): boolean;
+  write(chunk: Buffer, callback: Callback<void>): boolean;
+  write(chunk: Buffer, encoding: BufferEncoding | undefined): boolean;
+  write(chunk: Buffer, encoding: BufferEncoding | undefined, callback: Callback<void>): boolean;
   write(
     chunk: Buffer,
     encodingOrCallback?: Callback<void> | BufferEncoding,
@@ -189,6 +193,16 @@ export class GridFSBucketWriteStream extends Writable {
    * @param {GridFSBucket~errorCallback} callback Function to call when all files and chunks have been persisted to MongoDB
    */
 
+  end(): void;
+  end(chunk: Buffer): void;
+  end(callback: Callback<GridFSFile | void>): void;
+  end(chunk: Buffer, callback: Callback<GridFSFile | void>): void;
+  end(chunk: Buffer, encoding: BufferEncoding): void;
+  end(
+    chunk: Buffer,
+    encoding: BufferEncoding | undefined,
+    callback: Callback<GridFSFile | void>
+  ): void;
   end(
     chunkOrCallback?: Buffer | Callback<GridFSFile | void>,
     encodingOrCallback?: BufferEncoding | Callback<GridFSFile | void>,
