@@ -2,7 +2,8 @@ import * as crypto from 'crypto';
 import { Aspect, defineAspects } from './operation';
 import { CommandOperation, CommandOperationOptions } from './command';
 import { MongoError } from '../error';
-import type { Callback, Document } from '../types';
+import type { Callback } from '../utils';
+import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
 
@@ -15,7 +16,7 @@ export interface AddUserOptions extends CommandOperationOptions {
   customData?: Document;
 }
 
-export class AddUserOperation extends CommandOperation<AddUserOptions> {
+export class AddUserOperation extends CommandOperation<AddUserOptions, Document> {
   db: Db;
   username: string;
   password?: string;
@@ -98,4 +99,4 @@ export class AddUserOperation extends CommandOperation<AddUserOptions> {
   }
 }
 
-defineAspects(AddUserOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
+defineAspects(AddUserOperation, [Aspect.WRITE_OPERATION]);

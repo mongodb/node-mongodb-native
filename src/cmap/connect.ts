@@ -1,17 +1,17 @@
 import * as net from 'net';
 import * as tls from 'tls';
 import { Connection, ConnectionOptions } from './connection';
-import { MongoError, MongoNetworkError, MongoNetworkTimeoutError } from '../error';
+import { MongoError, MongoNetworkError, MongoNetworkTimeoutError, AnyError } from '../error';
 import { defaultAuthProviders, AuthMechanism } from './auth/defaultAuthProviders';
 import { AuthContext } from './auth/auth_provider';
-import { makeClientMetadata, ClientMetadata } from '../utils';
+import { makeClientMetadata, ClientMetadata, Callback, CallbackWithType } from '../utils';
 import {
   MAX_SUPPORTED_WIRE_VERSION,
   MAX_SUPPORTED_SERVER_VERSION,
   MIN_SUPPORTED_WIRE_VERSION,
   MIN_SUPPORTED_SERVER_VERSION
 } from './wire_protocol/constants';
-import type { Callback, CallbackWithType, Document, AnyError } from '../types';
+import type { Document } from '../bson';
 import type { EventEmitter } from 'events';
 
 import type { Socket, SocketConnectOpts } from 'net';
@@ -235,7 +235,7 @@ function parseSslOptions(family: number, options: ConnectionOptions): TLSConnect
   // Merge in valid SSL options
   for (const name of LEGAL_SSL_SOCKET_OPTIONS) {
     if (options[name]) {
-      (result as { [k: string]: any })[name] = options[name];
+      (result as { [k: string]: unknown })[name] = options[name];
     }
   }
 

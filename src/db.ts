@@ -1,8 +1,8 @@
 import { deprecate } from 'util';
-import { emitDeprecatedOptionWarning } from './utils';
+import { emitDeprecatedOptionWarning, Callback } from './utils';
 import { loadAdmin } from './dynamic_loaders';
 import { AggregationCursor, CommandCursor } from './cursor';
-import { ObjectId, Code } from './bson';
+import { ObjectId, Code, Document, BSONSerializeOptions } from './bson';
 import { ReadPreference, ReadPreferenceLike } from './read_preference';
 import { MongoError } from './error';
 import { Collection, CollectionOptions } from './collection';
@@ -10,7 +10,7 @@ import { ChangeStream, ChangeStreamOptions } from './change_stream';
 import * as CONSTANTS from './constants';
 import { WriteConcern, WriteConcernOptions } from './write_concern';
 import { ReadConcern } from './read_concern';
-import { Logger } from './logger';
+import { Logger, LoggerOptions } from './logger';
 import {
   filterOptions,
   mergeOptionsAndWriteConcern,
@@ -50,7 +50,6 @@ import {
 } from './operations/set_profiling_level';
 import { executeOperation } from './operations/execute_operation';
 import { EvalOperation, EvalOptions } from './operations/eval';
-import type { Callback, Document, BSONSerializeOptions } from './types';
 import type { IndexInformationOptions } from './operations/common_functions';
 import type { PkFactory } from './mongo_client';
 import type { Topology } from './sdam/topology';
@@ -97,7 +96,7 @@ interface DbPrivate {
   namespace: MongoDBNamespace;
 }
 
-export interface DbOptions extends BSONSerializeOptions, WriteConcernOptions {
+export interface DbOptions extends BSONSerializeOptions, WriteConcernOptions, LoggerOptions {
   /** If the database authentication is dependent on another databaseName. */
   authSource?: string;
   /** Force server to assign _id values instead of driver. */
@@ -174,30 +173,30 @@ export class Db implements OperationParent {
     };
   }
 
-  get databaseName() {
+  get databaseName(): string {
     return this.s.namespace.db;
   }
 
   // Topology
-  get topology() {
+  get topology(): Topology {
     return this.s.topology;
   }
 
   // Options
-  get options() {
+  get options(): DbOptions | undefined {
     return this.s.options;
   }
 
   // slaveOk specified
-  get slaveOk() {
-    return this.s.readPreference && this.s.readPreference.preference !== 'primary';
+  get slaveOk(): boolean {
+    return this.s.readPreference?.preference !== 'primary' || false;
   }
 
-  get readConcern() {
+  get readConcern(): ReadConcern | undefined {
     return this.s.readConcern;
   }
 
-  get readPreference() {
+  get readPreference(): ReadPreference {
     if (this.s.readPreference == null) {
       // TODO: check client
       return ReadPreference.primary;
@@ -207,11 +206,11 @@ export class Db implements OperationParent {
   }
 
   // get the write Concern
-  get writeConcern() {
+  get writeConcern(): WriteConcern | undefined {
     return this.s.writeConcern;
   }
 
-  get namespace() {
+  get namespace(): string {
     return this.s.namespace.toString();
   }
 
@@ -587,22 +586,22 @@ export class Db implements OperationParent {
    * @param options Optional settings for the command
    * @param callback An optional callback, a Promise will be returned if none is provided
    */
-  createIndex(name: string, fieldOrSpec: string | object): Promise<Document>;
-  createIndex(name: string, fieldOrSpec: string | object, callback?: Callback<Document>): void;
+  createIndex(name: string, fieldOrSpec: string | Document): Promise<Document>;
+  createIndex(name: string, fieldOrSpec: string | Document, callback?: Callback<Document>): void;
   createIndex(
     name: string,
-    fieldOrSpec: string | object,
+    fieldOrSpec: string | Document,
     options: CreateIndexesOptions
   ): Promise<Document>;
   createIndex(
     name: string,
-    fieldOrSpec: string | object,
+    fieldOrSpec: string | Document,
     options: CreateIndexesOptions,
     callback: Callback<Document>
   ): void;
   createIndex(
     name: string,
-    fieldOrSpec: string | object,
+    fieldOrSpec: string | Document,
     options?: CreateIndexesOptions | Callback<Document>,
     callback?: Callback<Document>
   ): Promise<Document> | void {
@@ -749,15 +748,19 @@ export class Db implements OperationParent {
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  indexInformation(name: string): Promise<void>;
-  indexInformation(name: string, callback: Callback<void>): void;
-  indexInformation(name: string, options: IndexInformationOptions): Promise<void>;
-  indexInformation(name: string, options: IndexInformationOptions, callback: Callback<void>): void;
+  indexInformation(name: string): Promise<Document>;
+  indexInformation(name: string, callback: Callback<Document>): void;
+  indexInformation(name: string, options: IndexInformationOptions): Promise<Document>;
   indexInformation(
     name: string,
-    options?: IndexInformationOptions | Callback<void>,
-    callback?: Callback<void>
-  ): Promise<void> | void {
+    options: IndexInformationOptions,
+    callback: Callback<Document>
+  ): void;
+  indexInformation(
+    name: string,
+    options?: IndexInformationOptions | Callback<Document>,
+    callback?: Callback<Document>
+  ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
@@ -769,7 +772,7 @@ export class Db implements OperationParent {
   }
 
   /** Unref all sockets */
-  unref() {
+  unref(): void {
     this.s.topology.unref();
   }
 
@@ -866,7 +869,7 @@ export class Db implements OperationParent {
     fieldOrSpec: string | Document,
     options?: CreateIndexesOptions | Callback<Document>,
     callback?: Callback<Document>
-  ) {
+  ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 

@@ -1,8 +1,8 @@
 import { defineAspects, Aspect } from './operation';
 import { updateDocuments } from './common_functions';
-import { hasAtomicOperators } from '../utils';
+import { hasAtomicOperators, Callback } from '../utils';
 import { CommandOperation, CommandOperationOptions } from './command';
-import type { Callback, Document } from '../types';
+import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
@@ -22,7 +22,7 @@ export interface ReplaceOptions extends CommandOperationOptions {
   multi?: boolean;
 }
 
-export class ReplaceOneOperation extends CommandOperation<ReplaceOptions> {
+export class ReplaceOneOperation extends CommandOperation<ReplaceOptions, UpdateResult> {
   collection: Collection;
   filter: Document;
   replacement: Document;
@@ -77,8 +77,4 @@ export class ReplaceOneOperation extends CommandOperation<ReplaceOptions> {
   }
 }
 
-defineAspects(ReplaceOneOperation, [
-  Aspect.RETRYABLE,
-  Aspect.WRITE_OPERATION,
-  Aspect.EXECUTE_WITH_SELECTION
-]);
+defineAspects(ReplaceOneOperation, [Aspect.RETRYABLE, Aspect.WRITE_OPERATION]);

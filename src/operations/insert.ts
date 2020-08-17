@@ -1,13 +1,12 @@
 import { MongoError } from '../error';
 import { defineAspects, Aspect, OperationBase } from './operation';
 import { CommandOperation, CommandOperationOptions } from './command';
-import { applyRetryableWrites, applyWriteConcern } from '../utils';
+import { applyRetryableWrites, applyWriteConcern, Callback } from '../utils';
 import { prepareDocs } from './common_functions';
-import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
-import type { ObjectId } from 'bson';
+import type { ObjectId, Document } from '../bson';
 import type { Connection } from '../cmap/connection';
 
 export interface InsertOptions extends CommandOperationOptions {
@@ -21,7 +20,7 @@ export interface InsertOptions extends CommandOperationOptions {
   forceServerObjectId?: boolean;
 }
 
-export class InsertOperation extends OperationBase<InsertOptions> {
+export class InsertOperation extends OperationBase<InsertOptions, Document> {
   namespace: string;
   operations: Document[];
 
@@ -31,7 +30,7 @@ export class InsertOperation extends OperationBase<InsertOptions> {
     this.operations = ops;
   }
 
-  execute(server: Server, callback: Callback): void {
+  execute(server: Server, callback: Callback<Document>): void {
     server.insert(
       this.namespace.toString(),
       this.operations,
@@ -45,16 +44,16 @@ export interface InsertOneResult {
   /** The total amount of documents inserted */
   insertedCount: number;
   /** The driver generated ObjectId for the insert operation */
-  insertedId: ObjectId;
+  insertedId?: ObjectId;
   /** All the documents inserted using insertOne/insertMany/replaceOne. Documents contain the _id field if forceServerObjectId == false for insertOne/insertMany */
-  ops: Document[];
+  ops?: Document[];
   /** The connection object used for the operation */
-  connection: Connection;
+  connection?: Connection;
   /** The raw command result object returned from MongoDB (content might vary by server version) */
   result: Document;
 }
 
-export class InsertOneOperation extends CommandOperation<InsertOptions> {
+export class InsertOneOperation extends CommandOperation<InsertOptions, InsertOneResult> {
   collection: Collection;
   doc: Document;
 
@@ -65,7 +64,7 @@ export class InsertOneOperation extends CommandOperation<InsertOptions> {
     this.doc = doc;
   }
 
-  execute(server: Server, callback: Callback): void {
+  execute(server: Server, callback: Callback<InsertOneResult>): void {
     const coll = this.collection;
     const doc = this.doc;
     const options = this.options;
@@ -80,11 +79,11 @@ export class InsertOneOperation extends CommandOperation<InsertOptions> {
       if (callback == null) return;
       if (err && callback) return callback(err);
       // Workaround for pre 2.6 servers
-      if (r == null) return callback(undefined, { result: { ok: 1 } });
+      if (r == null) return callback(undefined, { insertedCount: 0, result: { ok: 1 } });
       // Add values to top level to ensure crud spec compatibility
       r.insertedCount = r.result.n;
       r.insertedId = doc._id;
-      if (callback) callback(undefined, r);
+      if (callback) callback(undefined, r as InsertOneResult);
     });
   }
 }
@@ -131,14 +130,5 @@ function insertDocuments(
   );
 }
 
-defineAspects(InsertOperation, [
-  Aspect.RETRYABLE,
-  Aspect.WRITE_OPERATION,
-  Aspect.EXECUTE_WITH_SELECTION
-]);
-
-defineAspects(InsertOneOperation, [
-  Aspect.RETRYABLE,
-  Aspect.WRITE_OPERATION,
-  Aspect.EXECUTE_WITH_SELECTION
-]);
+defineAspects(InsertOperation, [Aspect.RETRYABLE, Aspect.WRITE_OPERATION]);
+defineAspects(InsertOneOperation, [Aspect.RETRYABLE, Aspect.WRITE_OPERATION]);

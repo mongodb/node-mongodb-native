@@ -1,14 +1,13 @@
 import { CommandOperation, CommandOperationOptions } from './command';
 import { EvalOperation } from './eval';
-import { Code } from '../bson';
-import { defineAspects, Aspect } from './operation';
-import type { Callback, Document } from '../types';
+import { Code, Document } from '../bson';
+import type { Callback } from '../utils';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 
 export type GroupOptions = CommandOperationOptions;
 
-export class GroupOperation extends CommandOperation<GroupOptions> {
+export class GroupOperation extends CommandOperation<GroupOptions, Document> {
   collectionName: string;
   keys: any;
   condition: any;
@@ -34,7 +33,7 @@ export class GroupOperation extends CommandOperation<GroupOptions> {
     this.reduceFunction = reduce && reduce._bsontype === 'Code' ? reduce : new Code(reduce);
   }
 
-  execute(server: Server, callback: Callback) {
+  execute(server: Server, callback: Callback<Document>) {
     const cmd: Document = {
       group: {
         ns: this.collectionName,
@@ -105,5 +104,3 @@ export class EvalGroupOperation extends EvalOperation {
     });
   }
 }
-
-defineAspects(GroupOperation, [Aspect.EXECUTE_WITH_SELECTION]);

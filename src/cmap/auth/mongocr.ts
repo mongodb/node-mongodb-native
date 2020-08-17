@@ -1,6 +1,6 @@
 import * as crypto from 'crypto';
 import { AuthProvider, AuthContext } from './auth_provider';
-import type { Callback } from '../../types';
+import type { Callback } from '../../utils';
 import { MongoError } from '../../error';
 
 export class MongoCR extends AuthProvider {

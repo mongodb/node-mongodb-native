@@ -1,9 +1,9 @@
 import { OperationBase, Hint } from './operation';
 import { Aspect, defineAspects } from './operation';
 import { ReadPreference } from '../read_preference';
-import { maxWireVersion, MongoDBNamespace } from '../utils';
+import { maxWireVersion, MongoDBNamespace, Callback } from '../utils';
 import { MongoError } from '../error';
-import type { Callback, Document } from '../types';
+import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { InternalCursorState } from '../cursor/core_cursor';
@@ -67,7 +67,7 @@ export interface FindOptions extends QueryOptions {
   allowDiskUse?: boolean;
 }
 
-export class FindOperation extends OperationBase<FindOptions> {
+export class FindOperation extends OperationBase<FindOptions, Document> {
   cmd: Document;
   readPreference: ReadPreference;
   cursorState?: InternalCursorState;
@@ -100,8 +100,4 @@ export class FindOperation extends OperationBase<FindOptions> {
   }
 }
 
-defineAspects(FindOperation, [
-  Aspect.READ_OPERATION,
-  Aspect.RETRYABLE,
-  Aspect.EXECUTE_WITH_SELECTION
-]);
+defineAspects(FindOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE]);

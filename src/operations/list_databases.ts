@@ -1,7 +1,7 @@
 import { CommandOperation, CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
-import { MongoDBNamespace } from '../utils';
-import type { Callback, Document } from '../types';
+import { MongoDBNamespace, Callback } from '../utils';
+import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
 
@@ -15,7 +15,10 @@ export interface ListDatabasesOptions extends CommandOperationOptions {
   authorizedDatabases?: boolean;
 }
 
-export class ListDatabasesOperation extends CommandOperation<ListDatabasesOptions> {
+export class ListDatabasesOperation extends CommandOperation<
+  ListDatabasesOptions,
+  ListDatabasesResult
+> {
   constructor(db: Db, options?: ListDatabasesOptions) {
     super(db, options);
     this.ns = new MongoDBNamespace('admin', '$cmd');
@@ -39,8 +42,4 @@ export class ListDatabasesOperation extends CommandOperation<ListDatabasesOption
   }
 }
 
-defineAspects(ListDatabasesOperation, [
-  Aspect.READ_OPERATION,
-  Aspect.RETRYABLE,
-  Aspect.EXECUTE_WITH_SELECTION
-]);
+defineAspects(ListDatabasesOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE]);

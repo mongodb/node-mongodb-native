@@ -1,9 +1,11 @@
 import { OperationBase, OperationOptions } from './operation';
 import { MongoError } from '../error';
-import type { Callback, Document } from '../types';
+import type { Callback } from '../utils';
+import type { Document } from '../bson';
 import type { Collection } from '../collection';
+import type { Server } from '../sdam/server';
 
-export class OptionsOperation extends OperationBase<OperationOptions> {
+export class OptionsOperation extends OperationBase<OperationOptions, Document> {
   collection: Collection;
 
   constructor(collection: Collection, options: OperationOptions) {
@@ -12,7 +14,7 @@ export class OptionsOperation extends OperationBase<OperationOptions> {
     this.collection = collection;
   }
 
-  execute(callback: Callback<Document>): void {
+  execute(server: Server, callback: Callback<Document>): void {
     const coll = this.collection;
     const opts = this.options;
 

@@ -1,5 +1,7 @@
 import type { TopologyVersion } from './sdam/server_description';
-import type { Document } from './types';
+import type { Document } from './bson';
+
+export type AnyError = MongoError | Error;
 
 const kErrorLabels = Symbol('errorLabels');
 
@@ -33,7 +35,7 @@ const GET_MORE_RESUMABLE_CODES = new Set([
  * @property {string} stack The error call stack
  */
 class MongoError extends Error {
-  [kErrorLabels]: any;
+  [kErrorLabels]: Set<string>;
   code?: number;
   codeName?: string;
   writeConcernError?: Document;

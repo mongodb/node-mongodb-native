@@ -1,7 +1,8 @@
 import { CommandOperation, CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 import { loadCollection } from '../dynamic_loaders';
-import type { Callback, Document } from '../types';
+import type { Callback } from '../utils';
+import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
 import type { PkFactory } from '../mongo_client';
@@ -55,7 +56,10 @@ export interface CreateCollectionOptions extends CommandOperationOptions {
   pkFactory?: PkFactory;
 }
 
-export class CreateCollectionOperation extends CommandOperation<CreateCollectionOptions> {
+export class CreateCollectionOperation extends CommandOperation<
+  CreateCollectionOptions,
+  Collection
+> {
   db: Db;
   name: string;
 
@@ -99,4 +103,4 @@ export class CreateCollectionOperation extends CommandOperation<CreateCollection
   }
 }
 
-defineAspects(CreateCollectionOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
+defineAspects(CreateCollectionOperation, [Aspect.WRITE_OPERATION]);

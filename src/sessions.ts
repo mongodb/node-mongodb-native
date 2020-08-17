@@ -1,19 +1,24 @@
 import { PromiseProvider } from './promise_provider';
 import { EventEmitter } from 'events';
-import { Binary, Long } from './bson';
+import { Binary, Long, Timestamp, Document } from './bson';
 import { ReadPreference } from './read_preference';
 import { isTransactionCommand, TxnState, Transaction, TransactionOptions } from './transactions';
 import { resolveClusterTime, ClusterTime } from './sdam/common';
 import { isSharded } from './cmap/wire_protocol/shared';
-import { isPromiseLike, uuidV4, maxWireVersion, maybePromise } from './utils';
 import { MongoError, isRetryableError, MongoNetworkError, MongoWriteConcernError } from './error';
-import { now, calculateDurationInMs } from './utils';
-import type { Callback, Document } from './types';
+import {
+  now,
+  calculateDurationInMs,
+  Callback,
+  isPromiseLike,
+  uuidV4,
+  maxWireVersion,
+  maybePromise
+} from './utils';
 import type { Topology } from './sdam/topology';
 import type { CommandOptions } from './cmap/wire_protocol/command';
 import type { MongoClientOptions } from './mongo_client';
-import type { Timestamp } from 'bson';
-import type { Cursor } from '.';
+import type { Cursor } from './cursor/cursor';
 import type { CoreCursor } from './cursor/core_cursor';
 const minWireVersionForShardedTransactions = 8;
 
@@ -122,10 +127,13 @@ class ClientSession extends EventEmitter {
   /**
    * Ends this session on the server
    *
-   * @param {object} [options] Optional settings. Currently reserved for future use
-   * @param {Function} [callback] Optional callback for completion of this operation
+   * @param options - Optional settings. Currently reserved for future use
+   * @param callback - Optional callback for completion of this operation
    */
-  endSession(options?: object, callback?: Callback<void>): void {
+  endSession(): void;
+  endSession(callback: Callback<void>): void;
+  endSession(options: Record<string, unknown>, callback: Callback<void>): void;
+  endSession(options?: Record<string, unknown> | Callback<void>, callback?: Callback<void>): void {
     if (typeof options === 'function') (callback = options as Callback), (options = {});
     options = options || {};
 
@@ -158,7 +166,7 @@ class ClientSession extends EventEmitter {
    *
    * @param operationTime - the `BSON.Timestamp` of the operation type it is desired to advance to
    */
-  advanceOperationTime(operationTime: Timestamp) {
+  advanceOperationTime(operationTime: Timestamp): void {
     if (this.operationTime == null) {
       this.operationTime = operationTime;
       return;
@@ -187,7 +195,7 @@ class ClientSession extends EventEmitter {
   }
 
   /** Increment the transaction number on the internal ServerSession */
-  incrementTransactionNumber() {
+  incrementTransactionNumber(): void {
     if (this.serverSession) {
       this.serverSession.txnNumber++;
     }
@@ -254,7 +262,7 @@ class ClientSession extends EventEmitter {
   /**
    * This is here to ensure that ClientSession is never serialized to BSON.
    */
-  toBSON() {
+  toBSON(): void {
     throw new Error('ClientSession cannot be serialized to BSON.');
   }
 
@@ -269,7 +277,7 @@ class ClientSession extends EventEmitter {
    * @param fn - A lambda to run within a transaction
    * @param options - Optional settings for the transaction
    */
-  withTransaction(fn: WithTransactionCallback, options?: TransactionOptions) {
+  withTransaction(fn: WithTransactionCallback, options?: TransactionOptions): Promise<any> {
     const startTime = now();
     return attemptTransaction(this, startTime, fn, options);
   }
@@ -409,7 +417,7 @@ function endTransaction(session: ClientSession, commandName: string, callback: C
   }
 
   // handle any initial problematic cases
-  let txnState = session.transaction.state;
+  const txnState = session.transaction.state;
 
   if (txnState === TxnState.NO_TRANSACTION) {
     callback(new MongoError('No transaction started'));
@@ -642,7 +650,7 @@ class ServerSessionPool {
    *
    * @param {ServerSession} session The session to release to the pool
    */
-  release(session: ServerSession) {
+  release(session: ServerSession): void {
     const sessionTimeoutMinutes = this.topology.logicalSessionTimeoutMinutes;
     if (!sessionTimeoutMinutes) {
       return;
@@ -670,7 +678,7 @@ class ServerSessionPool {
 
 // TODO: this should be codified in command construction
 // @see https://github.com/mongodb/specifications/blob/master/source/read-write-concern/read-write-concern.rst#read-concern
-function commandSupportsReadConcern(command: Document, options?: Document) {
+function commandSupportsReadConcern(command: Document, options?: Document): boolean {
   if (
     command.aggregate ||
     command.count ||
@@ -771,7 +779,7 @@ function applySession(
   }
 }
 
-function updateSessionFromResponse(session: ClientSession, document: Document) {
+function updateSessionFromResponse(session: ClientSession, document: Document): void {
   if (document.$clusterTime) {
     resolveClusterTime(session, document.$clusterTime);
   }

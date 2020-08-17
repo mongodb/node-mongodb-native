@@ -1,10 +1,8 @@
-import { PromiseProvider } from '../promise_provider';
 import { ReadPreference } from '../read_preference';
 import { MongoError, isRetryableError } from '../error';
-import { Aspect, OperationBase } from './operation';
-import { maxWireVersion } from '../utils';
+import { Aspect, OperationBase, OperationOptions } from './operation';
+import { maxWireVersion, maybePromise, Callback } from '../utils';
 import { ServerType } from '../sdam/common';
-import type { Callback } from '../types';
 import type { Server } from '../sdam/server';
 import type { Topology } from '../sdam/topology';
 
@@ -12,12 +10,15 @@ const MMAPv1_RETRY_WRITES_ERROR_CODE = 20;
 const MMAPv1_RETRY_WRITES_ERROR_MESSAGE =
   'This MongoDB deployment does not support retryable writes. Please add retryWrites=false to your connection string.';
 
-type Tail<T extends any[]> = ((...t: T) => void) extends (arg: any, ...args: infer R) => void
-  ? R
+type ResultTypeFromOperation<TOperation> = TOperation extends OperationBase<
+  OperationOptions,
+  infer K
+>
+  ? K
   : never;
-type Last<T extends any[]> = T[Exclude<keyof T, keyof Tail<T>>];
-type LastParameter<F extends (...args: any) => any> = Last<Parameters<F>>;
-type ResultType<T extends (...args: any) => any> = NonNullable<LastParameter<LastParameter<T>>>;
+type OptionsFromOperation<TOperation> = TOperation extends OperationBase<infer K, unknown>
+  ? K
+  : never;
 
 /**
  * Executes the given operation with provided arguments.
@@ -32,27 +33,26 @@ type ResultType<T extends (...args: any) => any> = NonNullable<LastParameter<Las
  * @param {Operation} operation The operation to execute
  * @param {Function} callback The command result callback
  */
-export function executeOperation<T extends OperationBase>(
-  topology: Topology,
-  operation: T
-): Promise<ResultType<T['execute']>>;
-export function executeOperation<T extends OperationBase>(
-  topology: Topology,
-  operation: T,
-  callback: Callback<ResultType<T['execute']>>
-): void;
-export function executeOperation<T extends OperationBase>(
-  topology: Topology,
-  operation: T,
-  callback?: Callback<ResultType<T['execute']>>
-): Promise<ResultType<T['execute']>> | void;
-export function executeOperation<T extends OperationBase>(
-  topology: Topology,
-  operation: T,
-  callback?: Callback<ResultType<T['execute']>>
-): Promise<ResultType<T['execute']>> | void {
-  const Promise = PromiseProvider.get();
-
+export function executeOperation<
+  T extends OperationBase<TOptions, TResult>,
+  TOptions = OptionsFromOperation<T>,
+  TResult = ResultTypeFromOperation<T>
+>(topology: Topology, operation: T): Promise<TResult>;
+export function executeOperation<
+  T extends OperationBase<TOptions, TResult>,
+  TOptions = OptionsFromOperation<T>,
+  TResult = ResultTypeFromOperation<T>
+>(topology: Topology, operation: T, callback: Callback<TResult>): void;
+export function executeOperation<
+  T extends OperationBase<TOptions, TResult>,
+  TOptions = OptionsFromOperation<T>,
+  TResult = ResultTypeFromOperation<T>
+>(topology: Topology, operation: T, callback?: Callback<TResult>): Promise<TResult> | void;
+export function executeOperation<
+  T extends OperationBase<TOptions, TResult>,
+  TOptions = OptionsFromOperation<T>,
+  TResult = ResultTypeFromOperation<T>
+>(topology: Topology, operation: T, callback?: Callback<TResult>): Promise<TResult> | void {
   if (topology == null) {
     throw new TypeError('This method requires a valid topology instance');
   }
@@ -62,7 +62,16 @@ export function executeOperation<T extends OperationBase>(
   }
 
   if (topology.shouldCheckForSessionSupport()) {
-    return selectServerForSessionSupport<ResultType<T['execute']>>(topology, operation, callback);
+    return maybePromise(callback, cb => {
+      topology.selectServer(ReadPreference.primaryPreferred, err => {
+        if (err) {
+          cb(err);
+          return;
+        }
+
+        executeOperation<T, TOptions, TResult>(topology, operation, cb);
+      });
+    });
   }
 
   // The driver sessions spec mandates that we implicitly create sessions for operations
@@ -78,45 +87,31 @@ export function executeOperation<T extends OperationBase>(
     }
   }
 
-  let result;
-  if (typeof callback !== 'function') {
-    result = new Promise((resolve: any, reject: any) => {
-      callback = (err, res) => {
-        if (err) return reject(err);
-        resolve(res);
-      };
-    });
-  }
-
-  function executeCallback(err?: any, result?: any) {
-    if (session && session.owner === owner) {
-      session.endSession();
-      if (operation.session === session) {
-        operation.clearSession();
+  return maybePromise(callback, cb => {
+    function executeCallback(err?: any, result?: any) {
+      if (session && session.owner === owner) {
+        session.endSession();
+        if (operation.session === session) {
+          operation.clearSession();
+        }
       }
+
+      cb(err, result);
     }
 
-    callback!(err, result);
-  }
-
-  try {
-    if (operation.hasAspect(Aspect.EXECUTE_WITH_SELECTION)) {
+    try {
       executeWithServerSelection(topology, operation, executeCallback);
-    } else {
-      operation.execute(executeCallback);
-    }
-  } catch (e) {
-    if (session && session.owner === owner) {
-      session.endSession();
-      if (operation.session === session) {
-        operation.clearSession();
+    } catch (e) {
+      if (session && session.owner === owner) {
+        session.endSession();
+        if (operation.session === session) {
+          operation.clearSession();
+        }
       }
+
+      throw e;
     }
-
-    throw e;
-  }
-
-  return result as any;
+  });
 }
 
 function supportsRetryableReads(server: Server) {
@@ -234,35 +229,4 @@ function supportsRetryableWrites(server: Server) {
     server.description.logicalSessionTimeoutMinutes &&
     server.description.type !== ServerType.Standalone
   );
-}
-
-// TODO: This is only supported for unified topology, it should go away once
-//       we remove support for legacy topology types.
-function selectServerForSessionSupport<T>(
-  topology: Topology,
-  operation: any,
-  callback?: Callback<T>
-): Promise<T> | void {
-  const Promise = PromiseProvider.get();
-
-  let result: Promise<T> | void;
-  if (typeof callback !== 'function') {
-    result = new Promise((resolve: any, reject: any) => {
-      callback = (err, result) => {
-        if (err) return reject(err);
-        resolve(result);
-      };
-    });
-  }
-
-  topology.selectServer(ReadPreference.primaryPreferred, err => {
-    if (err) {
-      callback!(err);
-      return;
-    }
-
-    executeOperation(topology, operation, callback!);
-  });
-
-  return result;
 }

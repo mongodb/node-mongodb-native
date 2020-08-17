@@ -3,7 +3,7 @@ import * as qs from 'querystring';
 import * as dns from 'dns';
 import { ReadPreference } from './read_preference';
 import { MongoParseError } from './error';
-import type { Callback } from './types';
+import type { Callback } from './utils';
 
 /**
  * The following regular expression validates a connection string and breaks the

@@ -3,9 +3,9 @@ import { ReadPreference } from '../read_preference';
 import { MongoError } from '../error';
 import { maxWireVersion } from '../utils';
 import { Aspect, defineAspects, Hint } from './operation';
-import type { Callback, Document } from '../types';
+import type { Callback } from '../utils';
+import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
-import type { Cursor } from '../cursor';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 
 const DB_AGGREGATE_COLLECTION = 1 as const;
@@ -34,7 +34,7 @@ export interface AggregateOptions extends CommandOperationOptions {
   out?: string;
 }
 
-export class AggregateOperation extends CommandOperation<AggregateOptions> {
+export class AggregateOperation<T = Document> extends CommandOperation<AggregateOptions, T> {
   target: string | typeof DB_AGGREGATE_COLLECTION;
   pipeline: Document[];
   hasWriteStage: boolean;
@@ -84,7 +84,7 @@ export class AggregateOperation extends CommandOperation<AggregateOptions> {
     this.pipeline.push(stage);
   }
 
-  execute(server: Server, callback: Callback<Document>): void {
+  execute(server: Server, callback: Callback<T>): void {
     const options: AggregateOptions = this.options;
     const serverWireVersion = maxWireVersion(server);
     const command: Document = { aggregate: this.target, pipeline: this.pipeline };
@@ -125,8 +125,4 @@ export class AggregateOperation extends CommandOperation<AggregateOptions> {
   }
 }
 
-defineAspects(AggregateOperation, [
-  Aspect.READ_OPERATION,
-  Aspect.RETRYABLE,
-  Aspect.EXECUTE_WITH_SELECTION
-]);
+defineAspects(AggregateOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE]);

@@ -1,15 +1,14 @@
-import { Code } from '../bson';
+import { Code, Document } from '../bson';
 import { loadDb } from '../dynamic_loaders';
 import {
   applyWriteConcern,
   decorateWithCollation,
   decorateWithReadConcern,
-  isObject
+  isObject,
+  Callback
 } from '../utils';
 import { ReadPreference, ReadPreferenceMode } from '../read_preference';
 import { CommandOperation, CommandOperationOptions } from './command';
-import { defineAspects, Aspect } from './operation';
-import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { Sort } from './find';
@@ -68,7 +67,7 @@ interface MapReduceStats {
  * @property {(Function|string)} reduce The reduce function.
  * @property {object} [options] Optional settings. See Collection.prototype.mapReduce for a list of options.
  */
-export class MapReduceOperation extends CommandOperation<MapReduceOptions> {
+export class MapReduceOperation extends CommandOperation<MapReduceOptions, Document | Document[]> {
   collection: Collection;
   map: MapFunction | string;
   reduce: ReduceFunction | string;
@@ -222,5 +221,3 @@ function processScope(scope: Document) {
 
   return newScope;
 }
-
-defineAspects(MapReduceOperation, [Aspect.EXECUTE_WITH_SELECTION]);

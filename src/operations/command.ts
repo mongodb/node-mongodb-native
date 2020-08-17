@@ -1,14 +1,13 @@
 import { Aspect, OperationBase, OperationOptions } from './operation';
 import { ReadConcern } from '../read_concern';
 import { WriteConcern, WriteConcernOptions } from '../write_concern';
-import { maxWireVersion, MongoDBNamespace } from '../utils';
+import { maxWireVersion, MongoDBNamespace, Callback } from '../utils';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import { commandSupportsReadConcern, ClientSession } from '../sessions';
 import { MongoError } from '../error';
 import type { Logger } from '../logger';
-
 import type { Server } from '../sdam/server';
-import type { Callback, Document } from '../types';
+import type { Document } from '../bson';
 import type { CommandOptions } from '../cmap/wire_protocol/command';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 
@@ -41,8 +40,9 @@ export interface OperationParent {
   logger?: Logger;
 }
 
-export class CommandOperation<
-  T extends CommandOperationOptions = CommandOperationOptions
+export abstract class CommandOperation<
+  T extends CommandOperationOptions = CommandOperationOptions,
+  TResult = Document
 > extends OperationBase<T> {
   ns: MongoDBNamespace;
   readPreference: ReadPreference;
@@ -84,6 +84,8 @@ export class CommandOperation<
       this.logger = parent.logger;
     }
   }
+
+  abstract execute(server: Server, callback: Callback<TResult>): void;
 
   executeCommand(server: Server, cmd: Document, callback: Callback): void {
     // TODO: consider making this a non-enumerable property
@@ -139,7 +141,7 @@ export class CommandOperation<
         return;
       }
 
-      callback(undefined, result.result);
+      callback(undefined, result?.result);
     });
   }
 }

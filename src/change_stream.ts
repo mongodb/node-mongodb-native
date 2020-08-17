@@ -1,6 +1,6 @@
 import Denque = require('denque');
 import { EventEmitter } from 'events';
-import { MongoError, isResumableError } from './error';
+import { MongoError, AnyError, isResumableError } from './error';
 import { Cursor } from './cursor';
 import { AggregateOperation, AggregateOptions } from './operations/aggregate';
 import { loadCollection, loadDb, loadMongoClient } from './dynamic_loaders';
@@ -10,12 +10,12 @@ import {
   calculateDurationInMs,
   now,
   maybePromise,
-  MongoDBNamespace
+  MongoDBNamespace,
+  Callback
 } from './utils';
-import type { Callback, Document, AnyError } from './types';
 import type { CursorOptions } from './cursor/cursor';
 import type { ReadPreference } from './read_preference';
-import type { Timestamp } from 'bson';
+import type { Timestamp, Document } from './bson';
 import type { Topology } from './sdam/topology';
 import type { Writable } from 'stream';
 import type { StreamOptions } from './cursor/core_cursor';

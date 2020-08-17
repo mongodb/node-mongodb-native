@@ -1,15 +1,15 @@
 import * as fs from 'fs';
 import { Logger } from '../logger';
 import { ReadPreference } from '../read_preference';
-import { MongoError } from '../error';
+import { MongoError, AnyError } from '../error';
 import { Topology, TopologyOptions, ServerAddress } from '../sdam/topology';
 import { parseConnectionString } from '../connection_string';
 import { ReadConcern } from '../read_concern';
-import { emitDeprecationWarning } from '../utils';
+import { emitDeprecationWarning, Callback } from '../utils';
 import { CMAP_EVENT_NAMES } from '../cmap/events';
 import { MongoCredentials } from '../cmap/auth/mongo_credentials';
 import * as BSON from '../bson';
-import type { Callback, Document, AnyError } from '../types';
+import type { Document } from '../bson';
 import type { MongoClient } from '../mongo_client';
 import type { ConnectionOptions } from '../cmap/connection';
 import type { AuthMechanism } from '../cmap/auth/defaultAuthProviders';
@@ -512,8 +512,8 @@ function relayEvents(mongoClient: MongoClient, topology: Topology) {
     'ha'
   ].concat(CMAP_EVENT_NAMES);
 
-  serverOrCommandEvents.forEach((event: any) => {
-    topology.on(event, (object1: any, object2: any) => {
+  serverOrCommandEvents.forEach(event => {
+    topology.on(event, (object1, object2) => {
       mongoClient.emit(event, object1, object2);
     });
   });

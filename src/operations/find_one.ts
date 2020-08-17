@@ -1,10 +1,12 @@
 import { OperationBase } from './operation';
-import type { Callback, Document } from '../types';
+import type { Callback } from '../utils';
+import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import type { FindOptions } from './find';
 import { MongoError } from '../error';
+import type { Server } from '../sdam/server';
 
-export class FindOneOperation extends OperationBase<FindOptions> {
+export class FindOneOperation extends OperationBase<FindOptions, Document> {
   collection: Collection;
   query: Document;
 
@@ -15,7 +17,7 @@ export class FindOneOperation extends OperationBase<FindOptions> {
     this.query = query;
   }
 
-  execute(callback: Callback<Document>): void {
+  execute(server: Server, callback: Callback<Document>): void {
     const coll = this.collection;
     const query = this.query;
     const options = this.options;

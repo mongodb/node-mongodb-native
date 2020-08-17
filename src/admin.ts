@@ -11,9 +11,10 @@ import {
 } from './operations/list_databases';
 import { executeOperation } from './operations/execute_operation';
 import { RunCommandOperation, RunCommandOptions } from './operations/run_command';
-import type { Callback, Document } from './types';
+import type { Callback } from './utils';
+import type { Document } from './bson';
 import type { CommandOperationOptions } from './operations/command';
-import type { Db } from '.';
+import type { Db } from './db';
 
 interface AdminPrivate {
   db: Db;

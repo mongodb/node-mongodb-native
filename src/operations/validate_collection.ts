@@ -1,6 +1,6 @@
-import { defineAspects, Aspect } from './operation';
 import { CommandOperation, CommandOperationOptions } from './command';
-import type { Document, Callback } from '../types';
+import type { Callback } from '../utils';
+import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Admin } from '../admin';
 
@@ -9,7 +9,10 @@ export interface ValidateCollectionOptions extends CommandOperationOptions {
   background?: boolean;
 }
 
-export class ValidateCollectionOperation extends CommandOperation<ValidateCollectionOptions> {
+export class ValidateCollectionOperation extends CommandOperation<
+  ValidateCollectionOptions,
+  Document
+> {
   collectionName: string;
   command: Document;
 
@@ -46,5 +49,3 @@ export class ValidateCollectionOperation extends CommandOperation<ValidateCollec
     });
   }
 }
-
-defineAspects(ValidateCollectionOperation, [Aspect.EXECUTE_WITH_SELECTION]);

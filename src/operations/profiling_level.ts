@@ -1,11 +1,10 @@
-import { defineAspects, Aspect } from './operation';
 import { CommandOperation, CommandOperationOptions } from './command';
-import type { Callback } from '../types';
+import type { Callback } from '../utils';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
 
 export type ProfilingLevelOptions = CommandOperationOptions;
-export class ProfilingLevelOperation extends CommandOperation<ProfilingLevelOptions> {
+export class ProfilingLevelOperation extends CommandOperation<ProfilingLevelOptions, string> {
   constructor(db: Db, options: ProfilingLevelOptions) {
     super(db, options);
   }
@@ -24,5 +23,3 @@ export class ProfilingLevelOperation extends CommandOperation<ProfilingLevelOpti
     });
   }
 }
-
-defineAspects(ProfilingLevelOperation, [Aspect.EXECUTE_WITH_SELECTION]);

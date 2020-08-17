@@ -1,8 +1,9 @@
 import { defineAspects, Aspect, OperationBase } from './operation';
-import { deleteCallback, removeDocuments } from './common_functions';
+import { removeDocuments } from './common_functions';
 import { CommandOperation, CommandOperationOptions } from './command';
 import { isObject } from 'util';
-import type { Callback, Document } from '../types';
+import type { Callback } from '../utils';
+import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
@@ -20,10 +21,10 @@ export interface DeleteResult {
   /** The raw result returned from MongoDB. Will vary depending on server version */
   result: Document;
   /** The connection object used for the operation */
-  connection: Connection;
+  connection?: Connection;
 }
 
-export class DeleteOperation extends OperationBase<DeleteOptions> {
+export class DeleteOperation extends OperationBase<DeleteOptions, Document> {
   namespace: string;
   operations: Document[];
 
@@ -47,7 +48,7 @@ export class DeleteOperation extends OperationBase<DeleteOptions> {
   }
 }
 
-export class DeleteOneOperation extends CommandOperation<DeleteOptions> {
+export class DeleteOneOperation extends CommandOperation<DeleteOptions, DeleteResult> {
   collection: Collection;
   filter: Document;
 
@@ -64,11 +65,20 @@ export class DeleteOneOperation extends CommandOperation<DeleteOptions> {
     const options = this.options;
 
     options.single = true;
-    removeDocuments(server, coll, filter, options, (err, r) => deleteCallback(err, r, callback));
+    removeDocuments(server, coll, filter, options, (err, r) => {
+      if (callback == null) return;
+      if (err && callback) return callback(err);
+      if (r == null) {
+        return callback(undefined, { acknowledged: true, deletedCount: 0, result: { ok: 1 } });
+      }
+
+      r.deletedCount = r.result.n;
+      if (callback) callback(undefined, r);
+    });
   }
 }
 
-export class DeleteManyOperation extends CommandOperation<DeleteOptions> {
+export class DeleteManyOperation extends CommandOperation<DeleteOptions, DeleteResult> {
   collection: Collection;
   filter: Document;
 
@@ -93,20 +103,19 @@ export class DeleteManyOperation extends CommandOperation<DeleteOptions> {
       options.single = false;
     }
 
-    removeDocuments(server, coll, filter, options, (err, r) => deleteCallback(err, r, callback));
+    removeDocuments(server, coll, filter, options, (err, r) => {
+      if (callback == null) return;
+      if (err && callback) return callback(err);
+      if (r == null) {
+        return callback(undefined, { acknowledged: true, deletedCount: 0, result: { ok: 1 } });
+      }
+
+      r.deletedCount = r.result.n;
+      if (callback) callback(undefined, r);
+    });
   }
 }
 
-defineAspects(DeleteOperation, [
-  Aspect.RETRYABLE,
-  Aspect.WRITE_OPERATION,
-  Aspect.EXECUTE_WITH_SELECTION
-]);
-
-defineAspects(DeleteOneOperation, [
-  Aspect.RETRYABLE,
-  Aspect.WRITE_OPERATION,
-  Aspect.EXECUTE_WITH_SELECTION
-]);
-
-defineAspects(DeleteManyOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
+defineAspects(DeleteOperation, [Aspect.RETRYABLE, Aspect.WRITE_OPERATION]);
+defineAspects(DeleteOneOperation, [Aspect.RETRYABLE, Aspect.WRITE_OPERATION]);
+defineAspects(DeleteManyOperation, [Aspect.WRITE_OPERATION]);

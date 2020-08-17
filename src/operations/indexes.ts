@@ -1,12 +1,11 @@
 import { indexInformation, IndexInformationOptions } from './common_functions';
 import { OperationBase, Aspect, defineAspects } from './operation';
 import { MongoError } from '../error';
-import { maxWireVersion, parseIndexOptions, MongoDBNamespace } from '../utils';
+import { maxWireVersion, parseIndexOptions, MongoDBNamespace, Callback } from '../utils';
 import { CommandOperation, CommandOperationOptions, OperationParent } from './command';
 import { ReadPreference } from '../read_preference';
-
 import type { Server } from '../sdam/server';
-import type { Callback, Document } from '../types';
+import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import type { Db } from '../db';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
@@ -98,7 +97,7 @@ function makeIndexSpec(indexOrSpec: any, options: any): IndexDescription {
   return indexSpec as IndexDescription;
 }
 
-export class IndexesOperation extends OperationBase<IndexInformationOptions> {
+export class IndexesOperation extends OperationBase<IndexInformationOptions, Document> {
   collection: Collection;
 
   constructor(collection: Collection, options: IndexInformationOptions) {
@@ -107,7 +106,7 @@ export class IndexesOperation extends OperationBase<IndexInformationOptions> {
     this.collection = collection;
   }
 
-  execute(callback: Callback<Document>): void {
+  execute(server: Server, callback: Callback<Document>): void {
     const coll = this.collection;
     let options = this.options;
 
@@ -121,7 +120,7 @@ export interface IndexDescription {
   key: Document;
 }
 
-export class CreateIndexesOperation extends CommandOperation<CreateIndexesOptions> {
+export class CreateIndexesOperation extends CommandOperation<CreateIndexesOptions, Document> {
   collectionName: string;
   onlyReturnNameOfCreatedIndex?: boolean;
   indexes: IndexDescription[];
@@ -251,7 +250,7 @@ export class EnsureIndexOperation extends CreateIndexOperation {
 
 export type DropIndexesOptions = CommandOperationOptions;
 
-export class DropIndexOperation extends CommandOperation<DropIndexesOptions> {
+export class DropIndexOperation extends CommandOperation<DropIndexesOptions, Document> {
   collection: Collection;
   indexName: string;
 
@@ -289,7 +288,7 @@ export interface ListIndexesOptions extends CommandOperationOptions {
   batchSize?: number;
 }
 
-export class ListIndexesOperation extends CommandOperation<ListIndexesOptions> {
+export class ListIndexesOperation extends CommandOperation<ListIndexesOptions, Document> {
   collectionNamespace: MongoDBNamespace;
 
   constructor(collection: Collection, options?: ListIndexesOptions) {
@@ -298,7 +297,7 @@ export class ListIndexesOperation extends CommandOperation<ListIndexesOptions> {
     this.collectionNamespace = collection.s.namespace;
   }
 
-  execute(server: Server, callback: Callback): void {
+  execute(server: Server, callback: Callback<Document>): void {
     const serverWireVersion = maxWireVersion(server);
     if (serverWireVersion < LIST_INDEXES_WIRE_VERSION) {
       const systemIndexesNS = this.collectionNamespace.withCollection('system.indexes').toString();
@@ -323,7 +322,7 @@ export class ListIndexesOperation extends CommandOperation<ListIndexesOptions> {
   }
 }
 
-export class IndexExistsOperation extends OperationBase<IndexInformationOptions> {
+export class IndexExistsOperation extends OperationBase<IndexInformationOptions, boolean> {
   collection: Collection;
   indexes: string | string[];
 
@@ -338,7 +337,7 @@ export class IndexExistsOperation extends OperationBase<IndexInformationOptions>
     this.indexes = indexes;
   }
 
-  execute(callback: Callback): void {
+  execute(server: Server, callback: Callback<boolean>): void {
     const coll = this.collection;
     const indexes = this.indexes;
     const options = this.options;
@@ -361,7 +360,7 @@ export class IndexExistsOperation extends OperationBase<IndexInformationOptions>
   }
 }
 
-export class IndexInformationOperation extends OperationBase<IndexInformationOptions> {
+export class IndexInformationOperation extends OperationBase<IndexInformationOptions, Document> {
   db: Db;
   name: string;
 
@@ -372,7 +371,7 @@ export class IndexInformationOperation extends OperationBase<IndexInformationOpt
     this.name = name;
   }
 
-  execute(callback: Callback): void {
+  execute(server: Server, callback: Callback<Document>): void {
     const db = this.db;
     const name = this.name;
     const options = this.options;
@@ -381,14 +380,9 @@ export class IndexInformationOperation extends OperationBase<IndexInformationOpt
   }
 }
 
-defineAspects(ListIndexesOperation, [
-  Aspect.READ_OPERATION,
-  Aspect.RETRYABLE,
-  Aspect.EXECUTE_WITH_SELECTION
-]);
-
-defineAspects(CreateIndexesOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
-defineAspects(CreateIndexOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
-defineAspects(EnsureIndexOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
-defineAspects(DropIndexOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
-defineAspects(DropIndexesOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
+defineAspects(ListIndexesOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE]);
+defineAspects(CreateIndexesOperation, [Aspect.WRITE_OPERATION]);
+defineAspects(CreateIndexOperation, [Aspect.WRITE_OPERATION]);
+defineAspects(EnsureIndexOperation, [Aspect.WRITE_OPERATION]);
+defineAspects(DropIndexOperation, [Aspect.WRITE_OPERATION]);
+defineAspects(DropIndexesOperation, [Aspect.WRITE_OPERATION]);

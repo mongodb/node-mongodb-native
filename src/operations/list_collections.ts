@@ -1,12 +1,11 @@
 import { CommandOperation, CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
-import { maxWireVersion } from '../utils';
+import { maxWireVersion, Callback } from '../utils';
 import * as CONSTANTS from '../constants';
-import type { Callback, Document } from '../types';
+import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
 import type { DocumentTransforms } from '../cursor/core_cursor';
-import type { WriteConcernOptions } from '../write_concern';
 
 const LIST_COLLECTIONS_WIRE_VERSION = 3;
 
@@ -33,7 +32,7 @@ export interface ListCollectionsOptions extends CommandOperationOptions {
   batchSize?: number;
 }
 
-export class ListCollectionsOperation extends CommandOperation<ListCollectionsOptions> {
+export class ListCollectionsOperation extends CommandOperation<ListCollectionsOptions, string[]> {
   db: Db;
   filter: Document;
   nameOnly: boolean;
@@ -111,8 +110,4 @@ export class ListCollectionsOperation extends CommandOperation<ListCollectionsOp
   }
 }
 
-defineAspects(ListCollectionsOperation, [
-  Aspect.READ_OPERATION,
-  Aspect.RETRYABLE,
-  Aspect.EXECUTE_WITH_SELECTION
-]);
+defineAspects(ListCollectionsOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE]);

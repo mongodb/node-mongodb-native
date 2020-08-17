@@ -4,13 +4,27 @@ import { MongoError } from './error';
 // Filters for classes
 const classFilters: any = {};
 let filteredClasses: any = {};
-let level: any = null;
+let level: LoggerLevel;
 
 // Save the process id
 const pid = process.pid;
 
 // current logger
-let currentLogger: any = null;
+let currentLogger: LoggerFunction;
+
+export enum LoggerLevel {
+  ERROR = 'error',
+  WARN = 'warn',
+  INFO = 'info',
+  DEBUG = 'debug'
+}
+
+type LoggerFunction = (message?: any, ...optionalParams: any[]) => void;
+
+export interface LoggerOptions {
+  logger?: LoggerFunction;
+  loggerLevel?: LoggerLevel;
+}
 
 /**
  * @callback LoggerCallback
@@ -18,18 +32,15 @@ let currentLogger: any = null;
  * @param {object} state an object containing more metadata about the logging message
  */
 export class Logger {
-  className: any;
+  className: string;
 
   /**
    * Creates a new Logger instance
    *
-   * @param {string} className The Class name associated with the logging instance
-   * @param {object} [options] Optional settings.
-   * @param {LoggerCallback} [options.logger=null] Custom logger function;
-   * @param {string} [options.loggerLevel=error] Override default global log level.
+   * @param className - The Class name associated with the logging instance
+   * @param options - Optional logging settings
    */
-  constructor(className: string, options?: any) {
-    if (!(this instanceof Logger)) return new Logger(className, options);
+  constructor(className: string, options?: LoggerOptions) {
     options = options || {};
 
     // Current reference
@@ -44,20 +55,20 @@ export class Logger {
 
     // Set level of logging, default is error
     if (options.loggerLevel) {
-      level = options.loggerLevel || 'error';
+      level = options.loggerLevel || LoggerLevel.ERROR;
     }
 
     // Add all class names
-    if (filteredClasses[this.className] == null) classFilters[this.className] = true;
+    if (filteredClasses[this.className] == null) {
+      classFilters[this.className] = true;
+    }
   }
 
   /**
    * Log a message at the debug level
    *
-   * @function
-   * @param {string} message The message to log
-   * @param {any} [object] additional meta data to log
-   * @returns {void}
+   * @param message - The message to log
+   * @param object - Additional meta data to log
    */
   debug(message: string, object?: any): void {
     if (
@@ -68,7 +79,7 @@ export class Logger {
       const dateTime = new Date().getTime();
       const msg = f('[%s-%s:%s] %s %s', 'DEBUG', this.className, pid, dateTime, message);
       const state = {
-        type: 'debug',
+        type: LoggerLevel.DEBUG,
         message,
         className: this.className,
         pid,
@@ -83,10 +94,8 @@ export class Logger {
   /**
    * Log a message at the warn level
    *
-   * @function
-   * @param {string} message The message to log
-   * @param {any} [object] additional meta data to log
-   * @returns {void}
+   * @param message - The message to log
+   * @param object - Additional meta data to log
    */
   warn(message: string, object?: any): void {
     if (
@@ -97,7 +106,7 @@ export class Logger {
       const dateTime = new Date().getTime();
       const msg = f('[%s-%s:%s] %s %s', 'WARN', this.className, pid, dateTime, message);
       const state = {
-        type: 'warn',
+        type: LoggerLevel.WARN,
         message,
         className: this.className,
         pid,
@@ -112,10 +121,8 @@ export class Logger {
   /**
    * Log a message at the info level
    *
-   * @function
-   * @param {string} message The message to log
-   * @param {any} [object] additional meta data to log
-   * @returns {void}
+   * @param message - The message to log
+   * @param object - Additional meta data to log
    */
   info(message: string, object?: any): void {
     if (
@@ -126,7 +133,7 @@ export class Logger {
       const dateTime = new Date().getTime();
       const msg = f('[%s-%s:%s] %s %s', 'INFO', this.className, pid, dateTime, message);
       const state = {
-        type: 'info',
+        type: LoggerLevel.INFO,
         message,
         className: this.className,
         pid,
@@ -141,10 +148,8 @@ export class Logger {
   /**
    * Log a message at the error level
    *
-   * @function
-   * @param {string} message The message to log
-   * @param {any} [object] additional meta data to log
-   * @returns {void}
+   * @param message - The message to log
+   * @param object - Additional meta data to log
    */
   error(message: string, object?: any): void {
     if (
@@ -155,7 +160,7 @@ export class Logger {
       const dateTime = new Date().getTime();
       const msg = f('[%s-%s:%s] %s %s', 'ERROR', this.className, pid, dateTime, message);
       const state = {
-        type: 'error',
+        type: LoggerLevel.ERROR,
         message,
         className: this.className,
         pid,
@@ -167,108 +172,83 @@ export class Logger {
     }
   }
 
-  /**
-   * Is the logger set at info level
-   *
-   * @function
-   * @returns {boolean}
-   */
+  /** Is the logger set at info level */
   isInfo(): boolean {
-    return level === 'info' || level === 'debug';
+    return level === LoggerLevel.INFO || level === LoggerLevel.DEBUG;
   }
 
-  /**
-   * Is the logger set at error level
-   *
-   * @function
-   * @returns {boolean}
-   */
+  /** Is the logger set at error level */
   isError(): boolean {
-    return level === 'error' || level === 'info' || level === 'debug';
+    return level === LoggerLevel.ERROR || level === LoggerLevel.INFO || level === LoggerLevel.DEBUG;
   }
 
-  /**
-   * Is the logger set at error level
-   *
-   * @function
-   * @returns {boolean}
-   */
+  /** Is the logger set at error level */
   isWarn(): boolean {
-    return level === 'error' || level === 'warn' || level === 'info' || level === 'debug';
+    return (
+      level === LoggerLevel.ERROR ||
+      level === LoggerLevel.WARN ||
+      level === LoggerLevel.INFO ||
+      level === LoggerLevel.DEBUG
+    );
   }
 
-  /**
-   * Is the logger set at debug level
-   *
-   * @function
-   * @returns {boolean}
-   */
+  /** Is the logger set at debug level */
   isDebug(): boolean {
-    return level === 'debug';
+    return level === LoggerLevel.DEBUG;
   }
 
-  /**
-   * Resets the logger to default settings, error and no filtered classes
-   *
-   * @function
-   * @returns {void}
-   */
+  /** Resets the logger to default settings, error and no filtered classes */
   static reset(): void {
-    level = 'error';
+    level = LoggerLevel.ERROR;
     filteredClasses = {};
   }
 
-  /**
-   * Get the current logger function
-   *
-   * @function
-   * @returns {LoggerCallback}
-   */
-  static currentLogger(): any {
+  /** Get the current logger function */
+  static currentLogger(): LoggerFunction {
     return currentLogger;
   }
 
   /**
    * Set the current logger function
    *
-   * @function
-   * @param {LoggerCallback} logger Logger function.
-   * @returns {void}
+   * @param logger - Custom logging function
    */
-  static setCurrentLogger(logger: any): void {
-    if (typeof logger !== 'function') throw new MongoError('current logger must be a function');
+  static setCurrentLogger(logger: LoggerFunction): void {
+    if (typeof logger !== 'function') {
+      throw new MongoError('current logger must be a function');
+    }
+
     currentLogger = logger;
   }
 
   /**
-   * Set what classes to log.
+   * Filter log messages for a particular classs
    *
-   * @function
-   * @param {string} type The type of filter (currently only class)
-   * @param {string[]} values The filters to apply
-   * @returns {void}
+   * @param type - The type of filter (currently only class)
+   * @param values - The filters to apply
    */
-  static filter(type: string, values: any): void {
+  static filter(type: string, values: string[]): void {
     if (type === 'class' && Array.isArray(values)) {
       filteredClasses = {};
-      values.forEach((x: any) => {
-        filteredClasses[x] = true;
-      });
+      values.forEach(x => (filteredClasses[x] = true));
     }
   }
 
   /**
    * Set the current log level
    *
-   * @function
-   * @param {string} _level Set current log level (debug, info, error)
-   * @returns {void}
+   * @param newLevel Set current log level (debug, warn, info, error)
    */
-  static setLevel(_level: string): void {
-    if (_level !== 'info' && _level !== 'error' && _level !== 'debug' && _level !== 'warn') {
-      throw new Error(f('%s is an illegal logging level', _level));
+  static setLevel(newLevel: LoggerLevel): void {
+    if (
+      newLevel !== LoggerLevel.INFO &&
+      newLevel !== LoggerLevel.ERROR &&
+      newLevel !== LoggerLevel.DEBUG &&
+      newLevel !== LoggerLevel.WARN
+    ) {
+      throw new TypeError(`${newLevel} is an illegal logging level`);
     }
 
-    level = _level;
+    level = newLevel;
   }
 }

@@ -2,7 +2,8 @@ import { GetMore, KillCursor, Msg, CommandResult, WriteProtocolMessageType } fro
 import { calculateDurationInMs } from '../utils';
 import type { ConnectionPool, ConnectionPoolOptions } from './connection_pool';
 import type { Connection } from './connection';
-import type { Document, AnyError } from '../types';
+import type { Document } from '../bson';
+import type { AnyError } from '../error';
 
 /** The base export class for all monitoring events published from the connection pool */
 export class ConnectionPoolMonitoringEvent {
@@ -326,14 +327,14 @@ function extractCommand(command: WriteProtocolMessageType): Document {
     }
 
     Object.keys(LEGACY_FIND_OPTIONS_MAP).forEach(key => {
-      let legacyKey = key as keyof typeof LEGACY_FIND_OPTIONS_MAP;
+      const legacyKey = key as keyof typeof LEGACY_FIND_OPTIONS_MAP;
       if (typeof command[legacyKey] !== 'undefined') {
         result[LEGACY_FIND_OPTIONS_MAP[legacyKey]] = command[legacyKey];
       }
     });
 
     OP_QUERY_KEYS.forEach(key => {
-      let opKey = key as typeof OP_QUERY_KEYS[number];
+      const opKey = key as typeof OP_QUERY_KEYS[number];
       if (command[opKey]) {
         result[opKey] = command[opKey];
       }

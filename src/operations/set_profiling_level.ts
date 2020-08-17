@@ -1,6 +1,5 @@
-import { defineAspects, Aspect } from './operation';
 import { CommandOperation, CommandOperationOptions } from './command';
-import type { Callback } from '../types';
+import type { Callback } from '../utils';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
 const levelValues = new Set(['off', 'slow_only', 'all']);
@@ -13,7 +12,10 @@ export enum ProfilingLevel {
 
 export type SetProfilingLevelOptions = CommandOperationOptions;
 
-export class SetProfilingLevelOperation extends CommandOperation<SetProfilingLevelOptions> {
+export class SetProfilingLevelOperation extends CommandOperation<
+  SetProfilingLevelOptions,
+  ProfilingLevel
+> {
   level: ProfilingLevel;
   profile: 0 | 1 | 2;
 
@@ -50,5 +52,3 @@ export class SetProfilingLevelOperation extends CommandOperation<SetProfilingLev
     });
   }
 }
-
-defineAspects(SetProfilingLevelOperation, [Aspect.EXECUTE_WITH_SELECTION]);

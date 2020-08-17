@@ -1,13 +1,14 @@
-import { applyRetryableWrites, applyWriteConcern } from '../utils';
+import { applyRetryableWrites, applyWriteConcern, Callback } from '../utils';
 import { MongoError } from '../error';
-import { OperationBase } from './operation';
-import type { Callback, Document } from '../types';
+import { OperationBase, OperationOptions } from './operation';
+import { WriteConcern } from '../write_concern';
+import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import type { BulkOperationBase, BulkWriteResult } from '../bulk/common';
 import type { InsertOptions } from './insert';
-import { WriteConcern } from '../write_concern';
+import type { Server } from '../sdam/server';
 
-export class BulkWriteOperation extends OperationBase {
+export class BulkWriteOperation extends OperationBase<OperationOptions, BulkWriteResult> {
   collection: Collection;
   operations: Document[];
 
@@ -18,7 +19,7 @@ export class BulkWriteOperation extends OperationBase {
     this.operations = operations;
   }
 
-  execute(callback: Callback<BulkWriteResult>): void {
+  execute(server: Server, callback: Callback<BulkWriteResult>): void {
     const coll = this.collection;
     const operations = this.operations;
     let options = this.options as InsertOptions;

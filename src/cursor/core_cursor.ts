@@ -1,12 +1,11 @@
 import { Logger } from '../logger';
 import { ReadPreference } from '../read_preference';
-import { MongoDBNamespace } from '../utils';
+import { MongoDBNamespace, Callback, Callback2 } from '../utils';
 import { executeOperation } from '../operations/execute_operation';
 import { Readable } from 'stream';
-import type { OperationBase, Hint } from '../operations/operation';
 import { MongoError, MongoNetworkError } from '../error';
-import { Long } from '../bson';
-import type { BSONSerializeOptions, Callback, Callback2, Document } from '../types';
+import { Long, Document, BSONSerializeOptions } from '../bson';
+import type { OperationBase, Hint } from '../operations/operation';
 import type { Topology } from '../sdam/topology';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
@@ -391,8 +390,8 @@ export class CoreCursor<
 
   _endSession(): boolean;
   _endSession(options: CloseOptions): boolean;
-  _endSession(callback: Callback): void;
-  _endSession(options?: CloseOptions | Callback, callback?: Callback): boolean {
+  _endSession(callback: Callback<void>): void;
+  _endSession(options?: CloseOptions | Callback<void>, callback?: Callback<void>): boolean {
     if (typeof options === 'function') {
       callback = options;
       options = {};
@@ -408,7 +407,7 @@ export class CoreCursor<
         this.operation.clearSession();
       }
 
-      session.endSession(callback);
+      session.endSession(callback as Callback<void>);
       return true;
     }
 
@@ -550,7 +549,7 @@ export class CoreCursor<
       );
     }
 
-    executeOperation(this.topology, this.operation, (err, result) => {
+    executeOperation(this.topology, this.operation as any, (err, result) => {
       if (err || !result) {
         done(err);
         return;
@@ -567,22 +566,6 @@ export class CoreCursor<
       queryCallback(err, result);
     });
   }
-}
-
-/** Validate if the pool is dead and return error */
-function isConnectionDead(self: CoreCursor, callback: Callback) {
-  // TODO(NODE-2765): Remove me and CoreCursor.pool
-  if ((self as any).pool && (self as any).pool.isDestroyed()) {
-    self.cursorState.killed = true;
-    const err = new MongoNetworkError(
-      `connection to host ${(self as any).pool.host}:${(self as any).pool.port} was destroyed`
-    );
-
-    _setCursorNotifiedImpl(self, () => callback(err));
-    return true;
-  }
-
-  return false;
 }
 
 /** Validate if the cursor is dead but was not explicitly killed by user */
@@ -705,10 +688,6 @@ function nextFunction(self: CoreCursor, callback: Callback) {
         new MongoNetworkError('connection destroyed, not possible to instantiate cursor')
       );
     }
-
-    // Check if connection is dead and return if not possible to
-    // execute a getMore on this connection
-    if (isConnectionDead(self, callback)) return;
 
     // Execute the next get more
     self._getMore(err => {

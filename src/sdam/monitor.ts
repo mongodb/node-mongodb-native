@@ -8,8 +8,8 @@ import {
 import { EventEmitter } from 'events';
 import { connect } from '../cmap/connect';
 import { Connection } from '../cmap/connection';
-import { MongoNetworkError } from '../error';
-import { Long } from '../bson';
+import { MongoNetworkError, AnyError } from '../error';
+import { Long, Document } from '../bson';
 import {
   ServerHeartbeatStartedEvent,
   ServerHeartbeatSucceededEvent,
@@ -17,9 +17,8 @@ import {
 } from './events';
 
 import type { Server } from './server';
-import type { InterruptableAsyncInterval } from '../utils';
+import type { InterruptableAsyncInterval, Callback } from '../utils';
 import type { TopologyVersion } from './server_description';
-import type { Document, Callback, AnyError } from '../types';
 import type { ConnectionOptions } from '../cmap/connection';
 
 const kServer = Symbol('server');

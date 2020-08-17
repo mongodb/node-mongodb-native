@@ -6,9 +6,9 @@ import {
   GridFSBucketReadStreamOptionsWithRevision
 } from './download';
 import { GridFSBucketWriteStream, GridFSBucketWriteStreamOptions, TFileId } from './upload';
-import { executeLegacyOperation } from '../utils';
+import { executeLegacyOperation, Callback } from '../utils';
 import { WriteConcernOptions, WriteConcern } from '../write_concern';
-import type { Document, Callback } from '../types';
+import type { Document } from '../bson';
 import type { Db } from '../db';
 import type { ReadPreference } from '../read_preference';
 import type { Collection } from '../collection';

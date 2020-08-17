@@ -1,9 +1,8 @@
 import { KillCursor } from '../commands';
-import { maxWireVersion, collectionNamespace } from '../../utils';
+import { maxWireVersion, collectionNamespace, Callback } from '../../utils';
 import { command, CommandOptions } from './command';
 import { MongoError, MongoNetworkError } from '../../error';
 import type { Server } from '../../sdam/server';
-import type { Callback } from '../../types';
 import type { InternalCursorState } from '../../cursor/core_cursor';
 import type { ClientSession } from '../../sessions';
 
@@ -20,7 +19,13 @@ export function killCursors(
   callback: Callback
 ): void {
   callback = typeof callback === 'function' ? callback : () => undefined;
-  const cursorIds = [cursorState.cursorId!];
+
+  if (!cursorState.cursorId) {
+    callback(new MongoError('Invalid internal cursor state, no known cursor id'));
+    return;
+  }
+
+  const cursorIds = [cursorState.cursorId];
 
   if (maxWireVersion(server) < 4) {
     const pool = server.s.pool;

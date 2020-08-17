@@ -1,5 +1,6 @@
 import { AggregateOperation, AggregateOptions } from './aggregate';
-import type { Callback, Document } from '../types';
+import type { Callback } from '../utils';
+import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 
@@ -10,7 +11,7 @@ export interface CountDocumentsOptions extends AggregateOptions {
   limit?: number;
 }
 
-export class CountDocumentsOperation extends AggregateOperation {
+export class CountDocumentsOperation extends AggregateOperation<number> {
   constructor(collection: Collection, query: Document, options: CountDocumentsOptions) {
     const pipeline = [];
     pipeline.push({ $match: query });
@@ -28,7 +29,7 @@ export class CountDocumentsOperation extends AggregateOperation {
     super(collection, pipeline, options);
   }
 
-  execute(server: Server, callback: Callback): void {
+  execute(server: Server, callback: Callback<number>): void {
     super.execute(server, (err, result) => {
       if (err || !result) {
         callback(err);
@@ -36,7 +37,7 @@ export class CountDocumentsOperation extends AggregateOperation {
       }
 
       // NOTE: We're avoiding creating a cursor here to reduce the callstack.
-      const response = result.result;
+      const response = ((result as unknown) as Document).result;
       if (response.cursor == null || response.cursor.firstBatch == null) {
         callback(undefined, 0);
         return;

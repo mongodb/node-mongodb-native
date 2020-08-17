@@ -18,7 +18,8 @@ import {
   Compressor,
   CompressorName
 } from './wire_protocol/compression';
-import type { Callback, Document, BSONSerializeOptions } from '../types';
+import type { Document, BSONSerializeOptions } from '../bson';
+import type { Callback } from '../utils';
 import type { ClientSession } from '../sessions';
 
 const MESSAGE_HEADER_SIZE = 16;

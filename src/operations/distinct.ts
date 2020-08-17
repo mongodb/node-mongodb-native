@@ -1,7 +1,7 @@
 import { Aspect, defineAspects } from './operation';
 import { CommandOperation, CommandOperationOptions } from './command';
-import { decorateWithCollation, decorateWithReadConcern } from '../utils';
-import type { Callback, Document } from '../types';
+import { decorateWithCollation, decorateWithReadConcern, Callback } from '../utils';
+import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 
@@ -16,7 +16,7 @@ export type DistinctOptions = CommandOperationOptions;
  * @property {object} query The query for filtering the set of documents to which we apply the distinct filter.
  * @property {object} [options] Optional settings. See Collection.prototype.distinct for a list of options.
  */
-export class DistinctOperation extends CommandOperation<DistinctOptions> {
+export class DistinctOperation extends CommandOperation<DistinctOptions, Document[]> {
   collection: Collection;
   key: string;
   query: Document;
@@ -82,8 +82,4 @@ export class DistinctOperation extends CommandOperation<DistinctOptions> {
   }
 }
 
-defineAspects(DistinctOperation, [
-  Aspect.READ_OPERATION,
-  Aspect.RETRYABLE,
-  Aspect.EXECUTE_WITH_SELECTION
-]);
+defineAspects(DistinctOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE]);

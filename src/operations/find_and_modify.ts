@@ -5,12 +5,13 @@ import {
   decorateWithCollation,
   applyWriteConcern,
   formattedOrderClause,
-  hasAtomicOperators
+  hasAtomicOperators,
+  Callback
 } from '../utils';
 import { MongoError } from '../error';
 import { CommandOperation, CommandOperationOptions } from './command';
 import { defineAspects, Aspect } from './operation';
-import type { Callback, Document } from '../types';
+import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { Sort } from './find';
@@ -39,7 +40,7 @@ export interface FindAndModifyOptions extends CommandOperationOptions {
   new?: boolean;
 }
 
-export class FindAndModifyOperation extends CommandOperation<FindAndModifyOptions> {
+export class FindAndModifyOperation extends CommandOperation<FindAndModifyOptions, Document> {
   collection: Collection;
   query: Document;
   sort?: Sort;
@@ -230,8 +231,4 @@ export class FindOneAndUpdateOperation extends FindAndModifyOperation {
   }
 }
 
-defineAspects(FindAndModifyOperation, [
-  Aspect.WRITE_OPERATION,
-  Aspect.RETRYABLE,
-  Aspect.EXECUTE_WITH_SELECTION
-]);
+defineAspects(FindAndModifyOperation, [Aspect.WRITE_OPERATION, Aspect.RETRYABLE]);

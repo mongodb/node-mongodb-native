@@ -2,11 +2,12 @@ import { OperationBase } from './operation';
 import { BulkWriteOperation } from './bulk_write';
 import { MongoError } from '../error';
 import { prepareDocs } from './common_functions';
-import type { Callback, Document } from '../types';
+import type { Callback } from '../utils';
 import type { Collection } from '../collection';
 import type { InsertOptions } from './insert';
-import type { ObjectId } from '../bson';
+import type { ObjectId, Document } from '../bson';
 import type { BulkWriteResult } from '../bulk/common';
+import type { Server } from '../sdam/server';
 
 export interface InsertManyResult {
   /** The total amount of documents inserted. */
@@ -19,7 +20,7 @@ export interface InsertManyResult {
   result: Document;
 }
 
-export class InsertManyOperation extends OperationBase<InsertOptions> {
+export class InsertManyOperation extends OperationBase<InsertOptions, InsertManyResult> {
   collection: Collection;
   docs: Document[];
 
@@ -30,7 +31,7 @@ export class InsertManyOperation extends OperationBase<InsertOptions> {
     this.docs = docs;
   }
 
-  execute(callback: Callback<InsertManyResult>): void {
+  execute(server: Server, callback: Callback<InsertManyResult>): void {
     const coll = this.collection;
     let docs = this.docs;
     const options = this.options;
@@ -55,7 +56,7 @@ export class InsertManyOperation extends OperationBase<InsertOptions> {
 
     const bulkWriteOperation = new BulkWriteOperation(coll, operations, options);
 
-    bulkWriteOperation.execute((err, result) => {
+    bulkWriteOperation.execute(server, (err, result) => {
       if (err || !result) return callback(err);
       callback(undefined, mapInsertManyResults(docs, result));
     });

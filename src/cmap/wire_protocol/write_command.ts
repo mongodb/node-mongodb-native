@@ -1,9 +1,8 @@
 import { MongoError } from '../../error';
-import { collectionNamespace } from '../../utils';
+import { collectionNamespace, Callback } from '../../utils';
 import { command, CommandOptions } from './command';
-
 import type { Server } from '../../sdam/server';
-import type { Callback, Document, BSONSerializeOptions } from '../../types';
+import type { Document, BSONSerializeOptions } from '../../bson';
 import type { WriteConcern } from '../../write_concern';
 
 export interface CollationOptions {

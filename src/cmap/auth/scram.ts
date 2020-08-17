@@ -1,8 +1,8 @@
 import * as crypto from 'crypto';
-import { Binary } from '../../bson';
-import { MongoError } from '../../error';
+import { Binary, Document } from '../../bson';
+import { MongoError, AnyError } from '../../error';
 import { AuthProvider, AuthContext } from './auth_provider';
-import type { Callback, AnyError, Document } from '../../types';
+import type { Callback } from '../../utils';
 import type { MongoCredentials } from './mongo_credentials';
 import type { HandshakeDocument } from '../connect';
 

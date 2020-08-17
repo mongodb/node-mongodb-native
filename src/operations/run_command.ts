@@ -1,14 +1,15 @@
 import { CommandOperation, CommandOperationOptions, OperationParent } from './command';
 import { defineAspects, Aspect } from './operation';
-import { MongoDBNamespace } from '../utils';
+import { MongoDBNamespace, Callback } from '../utils';
 import type { Server } from '../sdam/server';
-import type { Document, Callback } from '../types';
+import type { Document } from '../bson';
 
 export type RunCommandOptions = CommandOperationOptions;
 
 export class RunCommandOperation<
-  T extends RunCommandOptions = RunCommandOptions
-> extends CommandOperation<T> {
+  T extends RunCommandOptions = RunCommandOptions,
+  TResult = Document
+> extends CommandOperation<T, TResult> {
   command: Document;
 
   constructor(parent: OperationParent, command: Document, options?: T) {
@@ -23,13 +24,14 @@ export class RunCommandOperation<
 }
 
 export class RunAdminCommandOperation<
-  T extends RunCommandOptions = RunCommandOptions
-> extends RunCommandOperation<T> {
+  T extends RunCommandOptions = RunCommandOptions,
+  TResult = Document
+> extends RunCommandOperation<T, TResult> {
   constructor(parent: OperationParent, command: Document, options?: T) {
     super(parent, command, options);
     this.ns = new MongoDBNamespace('admin');
   }
 }
 
-defineAspects(RunCommandOperation, [Aspect.EXECUTE_WITH_SELECTION, Aspect.NO_INHERIT_OPTIONS]);
-defineAspects(RunAdminCommandOperation, [Aspect.EXECUTE_WITH_SELECTION, Aspect.NO_INHERIT_OPTIONS]);
+defineAspects(RunCommandOperation, [Aspect.NO_INHERIT_OPTIONS]);
+defineAspects(RunAdminCommandOperation, [Aspect.NO_INHERIT_OPTIONS]);

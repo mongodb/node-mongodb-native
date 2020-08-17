@@ -3,7 +3,7 @@ import { PromiseProvider } from '../promise_provider';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import { Transform, PassThrough } from 'stream';
 import { deprecate } from 'util';
-import { MongoError } from '../error';
+import { MongoError, AnyError } from '../error';
 import {
   CoreCursor,
   CursorState,
@@ -13,16 +13,16 @@ import {
   CursorCloseOptions,
   DocumentTransforms
 } from './core_cursor';
-import { maybePromise, formattedOrderClause } from '../utils';
+import { maybePromise, formattedOrderClause, Callback } from '../utils';
 import { executeOperation } from '../operations/execute_operation';
 import { each, EachCallback } from '../operations/cursor_ops';
 import { CountOperation, CountOptions } from '../operations/count';
-import type { Callback, Document, AnyError } from '../types';
 import type { Logger } from '../logger';
 import type { Topology } from '../sdam/topology';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 import type { Sort, SortDirection } from '../operations/find';
 import type { Hint, OperationBase } from '../operations/operation';
+import type { Document } from '../bson';
 
 /**
  * @file The **Cursor** class is an internal class that embodies a cursor on MongoDB
@@ -919,7 +919,7 @@ export class Cursor<
     if (this.operation && this.operation.cmd == null) {
       this.operation.options.explain = true;
       this.operation.fullResponse = false;
-      return executeOperation(this.topology, this.operation, callback);
+      return executeOperation(this.topology, this.operation as any, callback);
     }
 
     this.cmd.explain = true;

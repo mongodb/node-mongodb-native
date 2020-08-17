@@ -1,8 +1,6 @@
-import { emitDeprecatedOptionWarning, ClientMetadata, MongoDBNamespace } from '../utils';
 import Denque = require('denque');
 import { EventEmitter } from 'events';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
-import { TopologyType, ServerType, ClusterTime, TimerQueue } from './common';
 import { ServerDescription } from './server_description';
 import { TopologyDescription } from './topology_description';
 import { Server, ServerOptions } from './server';
@@ -15,11 +13,24 @@ import {
 } from '../sessions';
 import { SrvPoller, SrvPollingEvent } from './srv_polling';
 import { CMAP_EVENT_NAMES } from '../cmap/events';
-import { MongoError, MongoServerSelectionError } from '../error';
+import { MongoError, MongoServerSelectionError, AnyError } from '../error';
 import { readPreferenceServerSelector, ServerSelector } from './server_selection';
 import { deprecate } from 'util';
-import { relayEvents, makeStateMachine, eachAsync, makeClientMetadata } from '../utils';
 import {
+  relayEvents,
+  makeStateMachine,
+  eachAsync,
+  makeClientMetadata,
+  emitDeprecatedOptionWarning,
+  ClientMetadata,
+  MongoDBNamespace,
+  Callback
+} from '../utils';
+import {
+  TopologyType,
+  ServerType,
+  ClusterTime,
+  TimerQueue,
   resolveClusterTime,
   drainTimerQueue,
   clearAndRemoveTimerFrom,
@@ -37,11 +48,11 @@ import {
   TopologyClosedEvent,
   TopologyDescriptionChangedEvent
 } from './events';
-import type { Document, Callback, AnyError, BSONSerializeOptions } from '../types';
+import type { Document, BSONSerializeOptions } from '../bson';
 import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
 import type { Transaction } from '../transactions';
 import type { CloseOptions } from '../cmap/connection_pool';
-import type { Logger } from '../logger';
+import type { LoggerOptions } from '../logger';
 import type { DestroyOptions } from '../cmap/connection';
 import type { CommandOptions } from '../cmap/wire_protocol/command';
 import { RunCommandOperation } from '../operations/run_command';
@@ -125,7 +136,7 @@ export interface ServerAddress {
   domain_socket?: string;
 }
 
-export interface TopologyOptions extends ServerOptions, BSONSerializeOptions {
+export interface TopologyOptions extends ServerOptions, BSONSerializeOptions, LoggerOptions {
   reconnect: boolean;
   retryWrites?: boolean;
   retryReads?: boolean;
@@ -139,8 +150,6 @@ export interface TopologyOptions extends ServerOptions, BSONSerializeOptions {
   cursorFactory: typeof Cursor;
   srvHost?: string;
   srvPoller?: SrvPoller;
-  logger?: Logger;
-  loggerLevel?: string;
   directConnection: boolean;
 
   metadata: ClientMetadata;

@@ -1,12 +1,11 @@
 import { defineAspects, Aspect, OperationBase } from './operation';
 import { updateDocuments } from './common_functions';
-import { hasAtomicOperators, MongoDBNamespace } from '../utils';
+import { hasAtomicOperators, MongoDBNamespace, Callback } from '../utils';
 import { CommandOperation, CommandOperationOptions } from './command';
-import type { Callback, Document } from '../types';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { CollationOptions, WriteCommandOptions } from '../cmap/wire_protocol/write_command';
-import type { ObjectId } from '../bson';
+import type { ObjectId, Document } from '../bson';
 
 export interface UpdateOptions extends CommandOperationOptions {
   /** A set of filters specifying to which array elements an update should apply */
@@ -39,7 +38,7 @@ export interface UpdateResult {
   result: Document;
 }
 
-export class UpdateOperation extends OperationBase<UpdateOptions> {
+export class UpdateOperation extends OperationBase<UpdateOptions, Document> {
   namespace: MongoDBNamespace;
   operations: Document[];
 
@@ -63,7 +62,7 @@ export class UpdateOperation extends OperationBase<UpdateOptions> {
   }
 }
 
-export class UpdateOneOperation extends CommandOperation<UpdateOptions> {
+export class UpdateOneOperation extends CommandOperation<UpdateOptions, UpdateResult> {
   collection: Collection;
   filter: Document;
   update: Document;
@@ -112,7 +111,7 @@ export class UpdateOneOperation extends CommandOperation<UpdateOptions> {
   }
 }
 
-export class UpdateManyOperation extends CommandOperation<UpdateOptions> {
+export class UpdateManyOperation extends CommandOperation<UpdateOptions, UpdateResult> {
   collection: Collection;
   filter: Document;
   update: Document;
@@ -157,16 +156,6 @@ export class UpdateManyOperation extends CommandOperation<UpdateOptions> {
   }
 }
 
-defineAspects(UpdateOperation, [
-  Aspect.RETRYABLE,
-  Aspect.WRITE_OPERATION,
-  Aspect.EXECUTE_WITH_SELECTION
-]);
-
-defineAspects(UpdateOneOperation, [
-  Aspect.RETRYABLE,
-  Aspect.WRITE_OPERATION,
-  Aspect.EXECUTE_WITH_SELECTION
-]);
-
-defineAspects(UpdateManyOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
+defineAspects(UpdateOperation, [Aspect.RETRYABLE, Aspect.WRITE_OPERATION]);
+defineAspects(UpdateOneOperation, [Aspect.RETRYABLE, Aspect.WRITE_OPERATION]);
+defineAspects(UpdateManyOperation, [Aspect.WRITE_OPERATION]);

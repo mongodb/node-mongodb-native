@@ -1,8 +1,7 @@
-import { checkCollectionName } from '../utils';
+import { checkCollectionName, Callback } from '../utils';
 import { loadCollection } from '../dynamic_loaders';
 import { RunAdminCommandOperation } from './run_command';
 import { defineAspects, Aspect } from './operation';
-import type { Callback } from '../types';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { CommandOperationOptions } from './command';
@@ -54,4 +53,4 @@ export class RenameOperation extends RunAdminCommandOperation {
   }
 }
 
-defineAspects(RenameOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
+defineAspects(RenameOperation, [Aspect.WRITE_OPERATION]);

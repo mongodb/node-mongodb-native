@@ -1,16 +1,17 @@
 import { OperationBase, OperationOptions } from './operation';
 import { loadCollection } from '../dynamic_loaders';
-import type { Callback } from '../types';
+import type { Callback } from '../utils';
 import type { Db } from '../db';
 
 // eslint-disable-next-line
 import type { Collection } from '../collection';
+import type { Server } from '../sdam/server';
 
 export interface CollectionsOptions extends OperationOptions {
   nameOnly?: boolean;
 }
 
-export class CollectionsOperation extends OperationBase<CollectionsOptions> {
+export class CollectionsOperation extends OperationBase<CollectionsOptions, Collection[]> {
   db: Db;
 
   constructor(db: Db, options: CollectionsOptions) {
@@ -19,7 +20,7 @@ export class CollectionsOperation extends OperationBase<CollectionsOptions> {
     this.db = db;
   }
 
-  execute(callback: Callback<Collection[]>): void {
+  execute(server: Server, callback: Callback<Collection[]>): void {
     const db = this.db;
     let options: CollectionsOptions = this.options;
 

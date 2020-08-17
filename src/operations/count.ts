@@ -1,7 +1,7 @@
 import { Aspect, defineAspects } from './operation';
 import { CommandOperation, CommandOperationOptions } from './command';
-import { decorateWithCollation, decorateWithReadConcern } from '../utils';
-import type { Callback, Document } from '../types';
+import { decorateWithCollation, decorateWithReadConcern, Callback } from '../utils';
+import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { Cursor } from '../cursor/cursor';
@@ -19,7 +19,7 @@ export interface CountOptions extends CommandOperationOptions {
 
 type BuildCountCommandOptions = CountOptions & { collectionName: string };
 
-export class CountOperation extends CommandOperation<CountOptions> {
+export class CountOperation extends CommandOperation<CountOptions, number> {
   cursor: Cursor;
   applySkipLimit: boolean;
 
@@ -119,12 +119,8 @@ function buildCountCommand(
   return cmd;
 }
 
-function isCursor(c: any): c is Cursor {
+function isCursor(c: Collection | Cursor): c is Cursor {
   return 'numberOfRetries' in c.s && 'undefined' !== typeof c.s.numberOfRetries;
 }
 
-defineAspects(CountOperation, [
-  Aspect.READ_OPERATION,
-  Aspect.RETRYABLE,
-  Aspect.EXECUTE_WITH_SELECTION
-]);
+defineAspects(CountOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE]);

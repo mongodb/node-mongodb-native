@@ -1,6 +1,7 @@
 import { Aspect, defineAspects, Hint } from './operation';
 import { CommandOperation, CommandOperationOptions } from './command';
-import type { Callback, Document } from '../types';
+import type { Callback } from '../utils';
+import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 
@@ -11,7 +12,8 @@ export interface EstimatedDocumentCountOptions extends CommandOperationOptions {
 }
 
 export class EstimatedDocumentCountOperation extends CommandOperation<
-  EstimatedDocumentCountOptions
+  EstimatedDocumentCountOptions,
+  number
 > {
   collectionName: string;
   query?: Document;
@@ -66,8 +68,4 @@ export class EstimatedDocumentCountOperation extends CommandOperation<
   }
 }
 
-defineAspects(EstimatedDocumentCountOperation, [
-  Aspect.READ_OPERATION,
-  Aspect.RETRYABLE,
-  Aspect.EXECUTE_WITH_SELECTION
-]);
+defineAspects(EstimatedDocumentCountOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE]);
