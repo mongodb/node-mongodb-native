@@ -107,6 +107,8 @@ export interface DbOptions extends BSONSerializeOptions, WriteConcernOptions, Lo
   pkFactory?: PkFactory;
   /** Specify a read concern for the collection. (only MongoDB 3.2 or higher supported) */
   readConcern?: ReadConcern;
+  /** Should retry failed writes */
+  retryWrites?: boolean;
 }
 
 /**
@@ -351,7 +353,7 @@ export class Db implements OperationParent {
     // Merge in all needed options and ensure correct writeConcern merging from db level
     const finalOptions = mergeOptionsAndWriteConcern(
       options,
-      this.s.options,
+      this.s.options ?? {},
       collectionKeys,
       true
     ) as CollectionOptions;

@@ -1206,7 +1206,7 @@ class BulkOperationBase {
    */
   execute(_writeConcern?: WriteConcern, options?: any, callback?: Callback): Promise<void> | void {
     const ret = this.bulkExecute(_writeConcern, options, callback!);
-    if (!ret || isPromiseLike(ret)) {
+    if (!ret || isPromiseLike(ret as any)) {
       return ret as Promise<void>;
     }
 

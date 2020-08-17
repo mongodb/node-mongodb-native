@@ -71,16 +71,7 @@ export type CursorFlag = typeof FLAGS[number];
 
 const FIELDS = ['numberOfRetries', 'tailableRetryInterval'] as const;
 
-export interface CursorPrivate extends CoreCursorPrivate {
-  /** Transforms functions */
-  transforms?: DocumentTransforms;
-  numberOfRetries: number;
-  tailableRetryInterval: number;
-  currentNumberOfRetries: number;
-  explicitlyIgnoreSession: boolean;
-
-  state: number; // Should be enum
-}
+export type CursorPrivate = CoreCursorPrivate;
 
 export interface CursorOptions extends CoreCursorOptions {
   cursorFactory?: typeof Cursor;

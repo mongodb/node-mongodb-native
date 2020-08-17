@@ -4,7 +4,6 @@ import { MongoError, AnyError } from '../error';
 import { WriteConcern } from './../write_concern';
 import { PromiseProvider } from '../promise_provider';
 import { ObjectId } from '../bson';
-import type { ObjectID } from 'bson';
 import type { Callback } from '../utils';
 import type { Collection } from '../collection';
 import type { Document } from '../bson';
@@ -17,7 +16,7 @@ const ERROR_NAMESPACE_NOT_FOUND = 26;
 export type TFileId = string | number | object | ObjectId;
 
 export interface ChunkDoc {
-  _id: ObjectID;
+  _id: ObjectId;
   files_id: TFileId;
   n: number;
   data: Buffer;

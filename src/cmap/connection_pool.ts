@@ -350,7 +350,7 @@ export class ConnectionPool extends EventEmitter {
     // mark the pool as closed immediately
     this.closed = true;
 
-    eachAsync<Connection, MongoError>(
+    eachAsync<Connection>(
       this[kConnections].toArray(),
       (conn, cb) => {
         this.emit('connectionClosed', new ConnectionClosedEvent(this, conn, 'poolClosed'));

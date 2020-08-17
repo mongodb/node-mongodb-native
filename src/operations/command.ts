@@ -26,6 +26,8 @@ export interface CommandOperationOptions extends OperationOptions, WriteConcernO
   maxTimeMS?: number;
   /** A user-provided comment to attach to this command */
   comment?: string | Document;
+  /** Should retry failed writes */
+  retryWrites?: boolean;
 
   // Admin command overrides.
   dbName?: string;

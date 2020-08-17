@@ -13,6 +13,7 @@ import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { Sort } from './find';
 import { MongoError } from '../error';
+import type { ObjectId } from '../bson';
 
 const exclusionList = [
   'readPreference',
@@ -202,20 +203,20 @@ export class MapReduceOperation extends CommandOperation<MapReduceOptions, Docum
 }
 
 /** Functions that are passed as scope args must be converted to Code instances. */
-function processScope(scope: Document) {
-  if (!isObject(scope) || scope._bsontype === 'ObjectID') {
+function processScope(scope: Document | ObjectId) {
+  if (!isObject(scope) || (scope as any)._bsontype === 'ObjectID') {
     return scope;
   }
 
   const newScope: Document = {};
 
   for (const key of Object.keys(scope)) {
-    if ('function' === typeof scope[key]) {
-      newScope[key] = new Code(String(scope[key]));
-    } else if (scope[key]._bsontype === 'Code') {
-      newScope[key] = scope[key];
+    if ('function' === typeof (scope as Document)[key]) {
+      newScope[key] = new Code(String((scope as Document)[key]));
+    } else if ((scope as Document)[key]._bsontype === 'Code') {
+      newScope[key] = (scope as Document)[key];
     } else {
-      newScope[key] = processScope(scope[key]);
+      newScope[key] = processScope((scope as Document)[key]);
     }
   }
 

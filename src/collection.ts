@@ -35,7 +35,9 @@ import {
   ListIndexesOperation,
   CreateIndexesOptions,
   DropIndexesOptions,
-  ListIndexesOptions
+  ListIndexesOptions,
+  IndexSpecification,
+  IndexDescription
 } from './operations/indexes';
 import { DistinctOperation, DistinctOptions } from './operations/distinct';
 import { DropCollectionOperation, DropCollectionOptions } from './operations/drop';
@@ -880,7 +882,7 @@ export class Collection implements OperationParent {
   /**
    * Creates an index on the db and collection collection.
    *
-   * @param fieldOrSpec - The field name or index specification to create an index for
+   * @param indexSpec - The field name or index specification to create an index for
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    *
@@ -904,16 +906,16 @@ export class Collection implements OperationParent {
    * // Equivalent to { j: 1, k: -1, l: 2d }
    * await collection.createIndex(['j', ['k', -1], { l: '2d' }])
    */
-  createIndex(fieldOrSpec: string | Document): Promise<Document>;
-  createIndex(fieldOrSpec: string | Document, callback: Callback<Document>): void;
-  createIndex(fieldOrSpec: string | Document, options: CreateIndexesOptions): Promise<Document>;
+  createIndex(indexSpec: IndexSpecification): Promise<Document>;
+  createIndex(indexSpec: IndexSpecification, callback: Callback<Document>): void;
+  createIndex(indexSpec: IndexSpecification, options: CreateIndexesOptions): Promise<Document>;
   createIndex(
-    fieldOrSpec: string | Document,
+    indexSpec: IndexSpecification,
     options: CreateIndexesOptions,
     callback: Callback<Document>
   ): void;
   createIndex(
-    fieldOrSpec: string | Document,
+    indexSpec: IndexSpecification,
     options?: CreateIndexesOptions | Callback<Document>,
     callback?: Callback<Document>
   ): Promise<Document> | void {
@@ -922,7 +924,7 @@ export class Collection implements OperationParent {
 
     return executeOperation(
       this.s.topology,
-      new CreateIndexOperation(this, this.collectionName, fieldOrSpec, options),
+      new CreateIndexOperation(this, this.collectionName, indexSpec, options),
       callback
     );
   }
@@ -957,12 +959,16 @@ export class Collection implements OperationParent {
    *   }
    * ]);
    */
-  createIndexes(indexSpecs: any): Promise<Document>;
-  createIndexes(indexSpecs: any, callback: Callback<Document>): void;
-  createIndexes(indexSpecs: any, options: CreateIndexesOptions): Promise<Document>;
-  createIndexes(indexSpecs: any, options: CreateIndexesOptions, callback: Callback<Document>): void;
+  createIndexes(indexSpecs: IndexDescription[]): Promise<Document>;
+  createIndexes(indexSpecs: IndexDescription[], callback: Callback<Document>): void;
+  createIndexes(indexSpecs: IndexDescription[], options: CreateIndexesOptions): Promise<Document>;
   createIndexes(
-    indexSpecs: any,
+    indexSpecs: IndexDescription[],
+    options: CreateIndexesOptions,
+    callback: Callback<Document>
+  ): void;
+  createIndexes(
+    indexSpecs: IndexDescription[],
     options?: CreateIndexesOptions | Callback<Document>,
     callback?: Callback<Document>
   ): Promise<Document> | void {

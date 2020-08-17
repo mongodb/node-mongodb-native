@@ -43,6 +43,21 @@ const VALID_INDEX_OPTIONS = new Set([
   'wildcardProjection'
 ]);
 
+export type IndexDirection = -1 | 1 | '2d' | number;
+export type IndexSpecification =
+  | string
+  | [string, IndexDirection]
+  | { [key: string]: IndexDirection }
+  | [string, IndexDirection][]
+  | { [key: string]: IndexDirection }[]
+  | IndexSpecification[];
+
+export interface IndexDescription {
+  collation?: CollationOptions;
+  name?: string;
+  key: Document;
+}
+
 export interface CreateIndexesOptions extends CommandOperationOptions {
   /** Creates the index in the background, yielding whenever possible. */
   background?: boolean;
@@ -78,23 +93,23 @@ export interface CreateIndexesOptions extends CommandOperationOptions {
   wildcardProjection?: Document;
 }
 
-function makeIndexSpec(indexOrSpec: any, options: any): IndexDescription {
-  const indexParameters = parseIndexOptions(indexOrSpec);
+function makeIndexSpec(indexSpec: IndexSpecification, options: any): IndexDescription {
+  const indexParameters = parseIndexOptions(indexSpec);
 
   // Generate the index name
   const name = typeof options.name === 'string' ? options.name : indexParameters.name;
 
   // Set up the index
-  const indexSpec: Document = { name, key: indexParameters.fieldHash };
+  const finalIndexSpec: Document = { name, key: indexParameters.fieldHash };
 
   // merge valid index options into the index spec
   for (const optionName in options) {
     if (VALID_INDEX_OPTIONS.has(optionName)) {
-      indexSpec[optionName] = options[optionName];
+      finalIndexSpec[optionName] = options[optionName];
     }
   }
 
-  return indexSpec as IndexDescription;
+  return finalIndexSpec as IndexDescription;
 }
 
 export class IndexesOperation extends OperationBase<IndexInformationOptions, Document> {
@@ -108,16 +123,10 @@ export class IndexesOperation extends OperationBase<IndexInformationOptions, Doc
 
   execute(server: Server, callback: Callback<Document>): void {
     const coll = this.collection;
-    let options = this.options;
+    const options = this.options;
 
     indexInformation(coll.s.db, coll.collectionName, { full: true, ...options }, callback);
   }
-}
-
-export interface IndexDescription {
-  collation: CollationOptions;
-  name: string;
-  key: Document;
 }
 
 export class CreateIndexesOperation extends CommandOperation<CreateIndexesOptions, Document> {
@@ -201,7 +210,7 @@ export class CreateIndexOperation extends CreateIndexesOperation {
   constructor(
     parent: OperationParent,
     collectionName: string,
-    indexOrSpec: any,
+    indexSpec: IndexSpecification,
     options?: CreateIndexesOptions
   ) {
     // createIndex can be called with a variety of styles:
@@ -210,7 +219,7 @@ export class CreateIndexOperation extends CreateIndexesOperation {
     //   coll.createIndex([['a', 1]]);
     // createIndexes is always called with an array of index spec objects
 
-    super(parent, collectionName, [makeIndexSpec(indexOrSpec, options)], options);
+    super(parent, collectionName, [makeIndexSpec(indexSpec, options)], options);
   }
 }
 
@@ -218,8 +227,13 @@ export class EnsureIndexOperation extends CreateIndexOperation {
   db: Db;
   collectionName: string;
 
-  constructor(db: Db, collectionName: string, fieldOrSpec: any, options?: CreateIndexesOptions) {
-    super(db, collectionName, fieldOrSpec, options);
+  constructor(
+    db: Db,
+    collectionName: string,
+    indexSpec: IndexSpecification,
+    options?: CreateIndexesOptions
+  ) {
+    super(db, collectionName, indexSpec, options);
 
     this.readPreference = ReadPreference.primary;
     this.db = db;

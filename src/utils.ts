@@ -2,16 +2,39 @@ import * as os from 'os';
 import * as crypto from 'crypto';
 import { PromiseProvider } from './promise_provider';
 import { MongoError, AnyError } from './error';
-import { WriteConcern } from './write_concern';
-
-const MAX_JS_INT = Number.MAX_SAFE_INTEGER + 1;
+import { WriteConcern, WriteConcernOptions, W, writeConcernKeys } from './write_concern';
+import type { Server } from './sdam/server';
+import type { Topology } from './sdam/topology';
+import type { EventEmitter } from 'events';
+import type { Db } from './db';
+import type { Collection } from './collection';
+import type { OperationOptions, OperationBase, Hint } from './operations/operation';
+import type { ClientSession } from './sessions';
+import type { ReadConcern } from './read_concern';
+import type { Connection } from './cmap/connection';
+import type { SortDirection, Sort } from './operations/find';
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
+import type { Document } from './bson';
+import type { IndexSpecification, IndexDirection } from './operations/indexes';
 
 export type Callback<T = any> = (error?: AnyError, result?: T) => void;
 export type Callback2<T0 = any, T1 = any> = (error?: AnyError, result0?: T0, result1?: T1) => void;
 export type CallbackWithType<E = AnyError, T0 = any> = (error?: E, result?: T0) => void;
 
-// Set simple property
-function getSingleProperty(obj: any, name: any, value: any) {
+export const MAX_JS_INT = Number.MAX_SAFE_INTEGER + 1;
+
+type ArbitraryOptions = Document;
+
+/**
+ * @internal
+ * Add a readonly enumerable property.
+ */
+export function getSingleProperty(
+  obj: ArbitraryOptions,
+  name: string | number | symbol,
+  value: unknown
+): void {
   Object.defineProperty(obj, name, {
     enumerable: true,
     get() {
@@ -20,7 +43,11 @@ function getSingleProperty(obj: any, name: any, value: any) {
   });
 }
 
-function formatSortValue(sortDirection: any) {
+/**
+ * @internal
+ * Translate the variety of sort specifiers into 1 or -1
+ */
+export function formatSortValue(sortDirection: SortDirection): -1 | 1 {
   const value = ('' + sortDirection).toLowerCase();
 
   switch (value) {
@@ -41,7 +68,11 @@ function formatSortValue(sortDirection: any) {
   }
 }
 
-function formattedOrderClause(sortValue: any) {
+/**
+ * @internal
+ * Ensure the sort specifier is in a shape we expect, and maps keys to 1 or -1.
+ */
+export function formattedOrderClause(sortValue?: unknown): Sort | null {
   let orderBy: any = {};
   if (sortValue == null) return null;
   if (Array.isArray(sortValue)) {
@@ -70,7 +101,11 @@ function formattedOrderClause(sortValue: any) {
   return orderBy;
 }
 
-function checkCollectionName(collectionName: any) {
+/**
+ * @internal
+ * Throws if collectionName is not a valid mongodb collection namespace.
+ */
+export function checkCollectionName(collectionName: string): void {
   if ('string' !== typeof collectionName) {
     throw new MongoError('collection name must be a String');
   }
@@ -97,21 +132,24 @@ function checkCollectionName(collectionName: any) {
 }
 
 /**
- * @param {any} hint
+ * @internal
+ * Ensure Hint field is in a shape we expect:
+ * - object of index names mapping to 1 or -1
+ * - just an index name
  */
-function normalizeHintField(hint: any) {
-  let finalHint: any = null;
+export function normalizeHintField(hint?: Hint): Hint | undefined {
+  let finalHint = undefined;
 
   if (typeof hint === 'string') {
     finalHint = hint;
   } else if (Array.isArray(hint)) {
     finalHint = {};
 
-    hint.forEach(function (param: any) {
+    hint.forEach(param => {
       finalHint[param] = 1;
     });
   } else if (hint != null && typeof hint === 'object') {
-    finalHint = {};
+    finalHint = {} as Document;
     for (const name in hint) {
       finalHint[name] = hint[name];
     }
@@ -120,23 +158,28 @@ function normalizeHintField(hint: any) {
   return finalHint;
 }
 
+interface IndexOptions {
+  name: string;
+  keys?: string[];
+  fieldHash: Document;
+}
+
 /**
- * Create index name based on field spec
- *
- * @param {any} fieldOrSpec
+ * @internal
+ * Create an index specifier based on
  */
-function parseIndexOptions(fieldOrSpec: any) {
-  const fieldHash: any = {};
+export function parseIndexOptions(indexSpec: IndexSpecification): IndexOptions {
+  const fieldHash: { [key: string]: IndexDirection } = {};
   const indexes = [];
   let keys;
 
   // Get all the fields accordingly
-  if ('string' === typeof fieldOrSpec) {
+  if ('string' === typeof indexSpec) {
     // 'type'
-    indexes.push(fieldOrSpec + '_' + 1);
-    fieldHash[fieldOrSpec] = 1;
-  } else if (Array.isArray(fieldOrSpec)) {
-    fieldOrSpec.forEach(function (f: any) {
+    indexes.push(indexSpec + '_' + 1);
+    fieldHash[indexSpec] = 1;
+  } else if (Array.isArray(indexSpec)) {
+    indexSpec.forEach((f: any) => {
       if ('string' === typeof f) {
         // [{location:'2d'}, 'type']
         indexes.push(f + '_' + 1);
@@ -148,20 +191,20 @@ function parseIndexOptions(fieldOrSpec: any) {
       } else if (isObject(f)) {
         // [{location:'2d'}, {type:1}]
         keys = Object.keys(f);
-        keys.forEach(function (k: any) {
-          indexes.push(k + '_' + f[k]);
-          fieldHash[k] = f[k];
+        keys.forEach(k => {
+          indexes.push(k + '_' + (f as ArbitraryOptions)[k]);
+          fieldHash[k] = (f as ArbitraryOptions)[k];
         });
       } else {
         // undefined (ignore)
       }
     });
-  } else if (isObject(fieldOrSpec)) {
+  } else if (isObject(indexSpec)) {
     // {location:'2d', type:1}
-    keys = Object.keys(fieldOrSpec);
-    keys.forEach(function (key: any) {
-      indexes.push(key + '_' + fieldOrSpec[key]);
-      fieldHash[key] = fieldOrSpec[key];
+    keys = Object.keys(indexSpec);
+    keys.forEach(key => {
+      indexes.push(key + '_' + indexSpec[key]);
+      fieldHash[key] = indexSpec[key];
     });
   }
 
@@ -172,58 +215,65 @@ function parseIndexOptions(fieldOrSpec: any) {
   };
 }
 
-function isObject(arg: any) {
+/**
+ * @internal
+ * Checks if arg is an Object:
+ * - **NOTE**: the check is based on the `[Symbol.toStringTag]() === 'Object'`
+ */
+export function isObject(arg: unknown): arg is object {
   return '[object Object]' === Object.prototype.toString.call(arg);
 }
 
-function debugOptions(debugFields: any, options: any) {
-  const finalOptions: any = {};
-  debugFields.forEach(function (n: any) {
+/** @internal */
+export function debugOptions(debugFields: string[], options?: ArbitraryOptions): Document {
+  const finalOptions: ArbitraryOptions = {};
+  if (!options) return finalOptions;
+  debugFields.forEach(n => {
     finalOptions[n] = options[n];
   });
 
   return finalOptions;
 }
 
-function decorateCommand(command: any, options: any, exclude: any) {
+/** @internal */
+export function decorateCommand(command: Document, options: Document, exclude: string[]): Document {
   for (const name in options) {
-    if (exclude.indexOf(name) === -1) command[name] = options[name];
+    if (!exclude.includes(name)) {
+      command[name] = options[name];
+    }
   }
 
   return command;
 }
 
-function mergeOptions(target: any, source: any) {
-  for (const name in source) {
-    target[name] = source[name];
-  }
-
-  return target;
+/** @internal */
+export function mergeOptions<T, S>(target: T, source: S): T & S {
+  return { ...target, ...source };
 }
 
-function filterOptions(options: any, names: any) {
-  const filterOptions: any = {};
+/** @internal */
+export function filterOptions(options: ArbitraryOptions, names: string[]): ArbitraryOptions {
+  const filterOptions: ArbitraryOptions = {};
 
   for (const name in options) {
-    if (names.indexOf(name) !== -1) filterOptions[name] = options[name];
+    if (names.includes(name)) {
+      filterOptions[name] = options[name];
+    }
   }
 
   // Filtered options
   return filterOptions;
 }
 
-// Write concern keys
-const writeConcernKeys = ['w', 'j', 'wtimeout', 'fsync'];
-
-// Merge the write concern options
-function mergeOptionsAndWriteConcern(
-  targetOptions: any,
-  sourceOptions: any,
-  keys: any,
-  mergeWriteConcern: any
-) {
+/** @internal */
+export function mergeOptionsAndWriteConcern(
+  targetOptions: ArbitraryOptions,
+  sourceOptions: ArbitraryOptions,
+  keys: string[],
+  mergeWriteConcern: boolean
+): ArbitraryOptions {
   // Mix in any allowed options
-  for (var i = 0; i < keys.length; i++) {
+  for (let i = 0; i < keys.length; i++) {
     if (!targetOptions[keys[i]] && sourceOptions[keys[i]] !== undefined) {
       targetOptions[keys[i]] = sourceOptions[keys[i]];
     }
@@ -234,7 +284,7 @@ function mergeOptionsAndWriteConcern(
 
   // Found no write Concern options
   let found = false;
-  for (i = 0; i < writeConcernKeys.length; i++) {
+  for (let i = 0; i < writeConcernKeys.length; i++) {
     if (targetOptions[writeConcernKeys[i]]) {
       found = true;
       break;
@@ -242,7 +292,7 @@ function mergeOptionsAndWriteConcern(
   }
 
   if (!found) {
-    for (i = 0; i < writeConcernKeys.length; i++) {
+    for (let i = 0; i < writeConcernKeys.length; i++) {
       if (sourceOptions[writeConcernKeys[i]]) {
         targetOptions[writeConcernKeys[i]] = sourceOptions[writeConcernKeys[i]];
       }
@@ -253,6 +303,7 @@ function mergeOptionsAndWriteConcern(
 }
 
 /**
+ * @internal
  * Executes the given operation with provided arguments.
  *
  * This method reduces large amounts of duplication in the entire codebase by providing
@@ -261,12 +312,17 @@ function mergeOptionsAndWriteConcern(
  * are required by the Driver Sessions specification in the event that a ClientSession is
  * not provided
  *
- * @param {any} topology The topology to execute this operation on
- * @param {Function} operation The operation to execute
- * @param {any[]} args Arguments to apply the provided operation
- * @param {any} [options] Options that modify the behavior of the method
+ * @param topology The topology to execute this operation on
+ * @param operation The operation to execute
+ * @param args Arguments to apply the provided operation
+ * @param [options] Options that modify the behavior of the method
  */
-const executeLegacyOperation = (topology: any, operation: Function, args: any, options?: any) => {
+export function executeLegacyOperation<T extends OperationBase>(
+  topology: Topology,
+  operation: (...args: any[]) => void | Promise<Document>,
+  args: any[],
+  options?: ArbitraryOptions
+): void | Promise<any> {
   const Promise = PromiseProvider.get();
 
   if (topology == null) {
@@ -283,7 +339,9 @@ const executeLegacyOperation = (topology: any, operation: Function, args: any, o
 
   // The driver sessions spec mandates that we implicitly create sessions for operations
   // that are not explicitly provided with a session.
-  let session: any, opOptions: any, owner: any;
+  let session: ClientSession;
+  let opOptions: any;
+  let owner: any;
   if (!options.skipSessions && topology.hasSessionSupport()) {
     opOptions = args[args.length - 2];
     if (opOptions == null || opOptions.session == null) {
@@ -296,9 +354,12 @@ const executeLegacyOperation = (topology: any, operation: Function, args: any, o
     }
   }
 
-  const makeExecuteCallback = (resolve: any, reject: any) =>
-    function executeCallback(err?: any, result?: any) {
-      if (session && session.owner === owner && !options.returnsCursor) {
+  function makeExecuteCallback(
+    resolve: (value?: Document) => void,
+    reject: (reason?: AnyError) => void
+  ) {
+    return function (err?: AnyError, result?: any) {
+      if (session && session.owner === owner && !options?.returnsCursor) {
         session.endSession(() => {
           delete opOptions.session;
           if (err) return reject(err);
@@ -309,13 +370,14 @@ const executeLegacyOperation = (topology: any, operation: Function, args: any, o
         resolve(result);
       }
     };
+  }
 
   // Execute using callback
   if (typeof callback === 'function') {
     callback = args.pop();
     const handler = makeExecuteCallback(
-      (result: any) => callback(undefined, result),
-      (err: any) => callback(err, null)
+      result => callback(undefined, result),
+      err => callback(err, null)
     );
     args.push(handler);
 
@@ -332,7 +394,7 @@ const executeLegacyOperation = (topology: any, operation: Function, args: any, o
     throw new TypeError('final argument to `executeLegacyOperation` must be a callback');
   }
 
-  return new Promise(function (resolve: any, reject: any) {
+  return new Promise<any>((resolve, reject) => {
     const handler = makeExecuteCallback(resolve, reject);
     args[args.length - 1] = handler;
 
@@ -342,32 +404,43 @@ const executeLegacyOperation = (topology: any, operation: Function, args: any, o
       handler(e);
     }
   });
-};
+}
 
+interface HasRetryableWrites {
+  retryWrites?: boolean;
+}
 /**
+ * @internal
  * Applies retryWrites: true to a command if retryWrites is set on the command's database.
  *
- * @param {any} target The target command to which we will apply retryWrites.
- * @param {any} db The database from which we can inherit a retryWrites value.
+ * @param target - The target command to which we will apply retryWrites.
+ * @param db - The database from which we can inherit a retryWrites value.
  */
-function applyRetryableWrites(target: any, db: any) {
-  if (db && db.s.options.retryWrites) {
+export function applyRetryableWrites<T extends HasRetryableWrites>(target: T, db?: Db): T {
+  if (db && db.s.options?.retryWrites) {
     target.retryWrites = true;
   }
 
   return target;
 }
 
+interface HasWriteConcern {
+  writeConcern?: WriteConcernOptions | WriteConcern | W;
+}
 /**
+ * @internal
  * Applies a write concern to a command based on well defined inheritance rules, optionally
  * detecting support for the write concern in the first place.
  *
- * @param {any} target the target command we will be applying the write concern to
- * @param {any} sources sources where we can inherit default write concerns from
- * @param {any} [options] optional settings passed into a command for write concern overrides
- * @returns {any} the (now) decorated target
+ * @param target - the target command we will be applying the write concern to
+ * @param sources - sources where we can inherit default write concerns from
+ * @param options - optional settings passed into a command for write concern overrides
  */
-function applyWriteConcern(target: any, sources: any, options?: any): any {
+export function applyWriteConcern<T extends HasWriteConcern>(
+  target: T,
+  sources: { db?: Db; collection?: Collection },
+  options?: OperationOptions & WriteConcernOptions
+): T {
   options = options || {};
   const db = sources.db;
   const coll = sources.collection;
@@ -398,24 +471,33 @@ function applyWriteConcern(target: any, sources: any, options?: any): any {
 }
 
 /**
+ * @internal
  * Checks if a given value is a Promise
  *
  * @param {any} maybePromise
  * @returns true if the provided value is a Promise
  */
-function isPromiseLike(maybePromise: any): maybePromise is Promise<any> {
-  return maybePromise && typeof maybePromise.then === 'function';
+export function isPromiseLike(
+  maybePromise?: PromiseLike<any> | void
+): maybePromise is Promise<any> {
+  return !!maybePromise && typeof maybePromise.then === 'function';
 }
 
 /**
+ * @internal
  * Applies collation to a given command.
  *
- * @param {any} [command] the command on which to apply collation
- * @param {(Cursor|Collection)} [target] target of command
- * @param {any} [options] options containing collation settings
+ * @param command - the command on which to apply collation
+ * @param target - target of command
+ * @param options - options containing collation settings
  */
-function decorateWithCollation(command?: any, target?: any, options?: any) {
-  const topology = (target.s && target.s.topology) || target.topology;
+export function decorateWithCollation(
+  command: Document,
+  target: { s: { topology: Topology } } | { topology: Topology },
+  options: ArbitraryOptions
+): void {
+  const topology =
+    ('s' in target && target.s.topology) || ('topology' in target && target.topology);
 
   if (!topology) {
     throw new TypeError('parameter "target" is missing a topology');
@@ -432,13 +514,17 @@ function decorateWithCollation(command?: any, target?: any, options?: any) {
 }
 
 /**
+ * @internal
  * Applies a read concern to a given command.
  *
- * @param {any} command the command on which to apply the read concern
- * @param {Collection} coll the parent collection of the operation calling this method
- * @param {any} [options]
+ * @param command - the command on which to apply the read concern
+ * @param coll - the parent collection of the operation calling this method
  */
-function decorateWithReadConcern(command: any, coll: any, options?: any) {
+export function decorateWithReadConcern(
+  command: Document,
+  coll: { s: { readConcern?: ReadConcern } },
+  options?: OperationOptions
+): void {
   if (options && options.session && options.session.inTransaction()) {
     return;
   }
@@ -452,29 +538,48 @@ function decorateWithReadConcern(command: any, coll: any, options?: any) {
   }
 }
 
-const emitDeprecationWarning = (msg: any) => process.emitWarning(msg, 'DeprecationWarning');
+/** @internal */
+export function emitDeprecationWarning(msg: string): void {
+  return process.emitWarning(msg, 'DeprecationWarning');
+}
 
 /**
+ * @internal
  * Default message handler for generating deprecation warnings.
  *
  * @param {string} name function name
  * @param {string} option option name
- * @returns {string} warning message */
-function defaultMsgHandler(name: string, option: string): string {
+ * @returns {string} warning message
+ */
+export function defaultMsgHandler(name: string, option: string): string {
   return `${name} option [${option}] is deprecated and will be removed in a later version.`;
 }
 
+export interface DeprecateOptionsConfig {
+  /** function name */
+  name: string;
+  /** options to deprecate */
+  deprecatedOptions: string[];
+  /** index of options object in function arguments array */
+  optionsIndex: number;
+  /** optional custom message handler to generate warnings */
+  msgHandler?(name: string, option: string): string;
+}
+
 /**
+ * @internal
  * Deprecates a given function's options.
  *
- * @param {object} config configuration for deprecation
- * @param {string} config.name function name
- * @param {Array} config.deprecatedOptions options to deprecate
- * @param {number} config.optionsIndex index of options object in function arguments array
- * @param {Function} [config.msgHandler] optional custom message handler to generate warnings
- * @param {Function} fn the target function of deprecation
- * @returns {any} modified function that warns once per deprecated option, and executes original function */
-function deprecateOptions(config: any, fn: Function): any {
+ * @param this - the bound class if this is a method
+ * @param config - configuration for deprecation
+ * @param fn - the target function of deprecation
+ * @returns modified function that warns once per deprecated option, and executes original function
+ */
+export function deprecateOptions(
+  this: unknown,
+  config: DeprecateOptionsConfig,
+  fn: (...args: any[]) => any
+): any {
   if ((process as any).noDeprecation === true) {
     return fn;
   }
@@ -482,33 +587,30 @@ function deprecateOptions(config: any, fn: Function): any {
   const msgHandler = config.msgHandler ? config.msgHandler : defaultMsgHandler;
 
   const optionsWarned = new Set();
-  function deprecated(this: any) {
-    const options = arguments[config.optionsIndex];
+  function deprecated(this: any, ...args: any[]) {
+    const options = args[config.optionsIndex] as ArbitraryOptions;
 
     // ensure options is a valid, non-empty object, otherwise short-circuit
     if (!isObject(options) || Object.keys(options).length === 0) {
-      return fn.apply(this, arguments);
+      return fn.bind(this)(...args); // call the function, no change
     }
 
-    const self = this;
-    config.deprecatedOptions.forEach(function (deprecatedOption: any) {
-      if (
-        Object.prototype.hasOwnProperty.call(options, deprecatedOption) &&
-        !optionsWarned.has(deprecatedOption)
-      ) {
+    // interrupt the function call with a warning
+    for (const deprecatedOption of config.deprecatedOptions) {
+      if (deprecatedOption in options && !optionsWarned.has(deprecatedOption)) {
         optionsWarned.add(deprecatedOption);
         const msg = msgHandler(config.name, deprecatedOption);
         emitDeprecationWarning(msg);
-        if (self && self.getLogger) {
-          const logger = self.getLogger();
+        if (this && 'getLogger' in this) {
+          const logger = this.getLogger();
           if (logger) {
             logger.warn(msg);
           }
         }
       }
-    });
+    }
 
-    return fn.apply(this, arguments);
+    return fn.bind(this)(...args);
   }
 
   // These lines copied from https://github.com/nodejs/node/blob/25e5ae41688676a5fd29b2e2e7602168eee4ceb5/lib/internal/util.js#L73-L80
@@ -524,7 +626,7 @@ function deprecateOptions(config: any, fn: Function): any {
   return deprecated;
 }
 
-class MongoDBNamespace {
+export class MongoDBNamespace {
   db: string;
   collection?: string;
   /**
@@ -556,7 +658,8 @@ class MongoDBNamespace {
   }
 }
 
-function* makeCounter(seed = 0) {
+/** @internal */
+export function* makeCounter(seed = 0): Generator<number> {
   let count = seed;
   while (true) {
     const newCount = count;
@@ -566,25 +669,27 @@ function* makeCounter(seed = 0) {
 }
 
 /**
+ * @internal
  * Helper function for either accepting a callback, or returning a promise
  *
- * @param {?Function} callback The last function argument in exposed method, controls if a Promise is returned
- * @param {Function} wrapper A function that wraps the callback
- * @returns {any|void} Returns nothing if a callback is supplied, else returns a Promise.
+ * @param callback - The last function argument in exposed method, controls if a Promise is returned
+ * @param wrapper - A function that wraps the callback
+ * @returns Returns void if a callback is supplied, else returns a Promise.
  */
-function maybePromise<T>(
+export function maybePromise<T>(
   callback: Callback<T> | undefined,
-  wrapper: (cb: Callback<T>) => void
+  wrapper: (fn: Callback<T>) => void
 ): Promise<T> | void {
   const Promise = PromiseProvider.get();
-
   let result: Promise<T> | void;
   if (typeof callback !== 'function') {
     result = new Promise((resolve, reject) => {
-      callback = (err, res) => (err ? reject(err) : resolve(res));
+      callback = (err, res) => {
+        if (err) return reject(err);
+        resolve(res);
+      };
     });
   }
-
   wrapper((err, res) => {
     if (err != null) {
       try {
@@ -596,65 +701,63 @@ function maybePromise<T>(
       }
       return;
     }
-
     callback!(err, res);
   });
-
   return result;
 }
 
-function databaseNamespace(ns: string) {
+/** @internal */
+export function databaseNamespace(ns: string): string {
   return ns.split('.')[0];
 }
 
-function collectionNamespace(ns: string) {
+/** @internal */
+export function collectionNamespace(ns: string): string {
   return ns.split('.').slice(1).join('.');
 }
 
-/**
- * Generate a UUIDv4
- */
-const uuidV4 = () => {
+/** @internal Synchronously Generate a UUIDv4 */
+export function uuidV4(): Buffer {
   const result = crypto.randomBytes(16);
   result[6] = (result[6] & 0x0f) | 0x40;
   result[8] = (result[8] & 0x3f) | 0x80;
   return result;
-};
-
-/**
- * Relays events for a given listener and emitter
- *
- * @param {EventEmitter} listener the EventEmitter to listen to the events from
- * @param {EventEmitter} emitter the EventEmitter to relay the events to
- * @param {any} events
- */
-function relayEvents(listener: any, emitter: any, events: any) {
-  events.forEach((eventName: any) =>
-    listener.on(eventName, (event: any) => emitter.emit(eventName, event))
-  );
 }
 
 /**
- * A helper function for determining `maxWireVersion` between legacy and new topology
- * instances
+ * @internal
+ * Relays events for a given listener and emitter
  *
- * @private
- * @param {(Topology|Server)} topologyOrServer
+ * @param listener - the EventEmitter to listen to the events from
+ * @param emitter - the EventEmitter to relay the events to
+ * @param events - list of events to relay
  */
-function maxWireVersion(topologyOrServer?: any) {
+export function relayEvents(listener: EventEmitter, emitter: EventEmitter, events: string[]): void {
+  events.forEach(eventName => listener.on(eventName, event => emitter.emit(eventName, event)));
+}
+
+/**
+ * @internal
+ * A helper function for determining `maxWireVersion` between legacy and new topology instances
+ */
+export function maxWireVersion(topologyOrServer?: Connection | Topology | Server): number {
   if (topologyOrServer) {
     if (topologyOrServer.ismaster) {
       return topologyOrServer.ismaster.maxWireVersion;
     }
 
-    if (typeof topologyOrServer.lastIsMaster === 'function') {
+    if ('lastIsMaster' in topologyOrServer && typeof topologyOrServer.lastIsMaster === 'function') {
       const lastIsMaster = topologyOrServer.lastIsMaster();
       if (lastIsMaster) {
         return lastIsMaster.maxWireVersion;
       }
     }
 
-    if (topologyOrServer.description) {
+    if (
+      topologyOrServer.description &&
+      'maxWireVersion' in topologyOrServer.description &&
+      'undefined' !== typeof topologyOrServer.description.maxWireVersion
+    ) {
       return topologyOrServer.description.maxWireVersion;
     }
   }
@@ -662,30 +765,30 @@ function maxWireVersion(topologyOrServer?: any) {
   return 0;
 }
 
-/*
+/**
+ * @internal
  * Checks that collation is supported by server.
  *
- * @param {Server} [server] to check against
- * @param {object} [cmd] object where collation may be specified
- * @param {function} [callback] callback function
- * @return true if server does not support collation
+ * @param server - to check against
+ * @param cmd - object where collation may be specified
  */
-function collationNotSupported(server: any, cmd: any) {
+export function collationNotSupported(server: Server, cmd: Document): boolean {
   return cmd && cmd.collation && maxWireVersion(server) < 5;
 }
 
 /**
+ * @internal
  * Applies the function `eachFn` to each item in `arr`, in parallel.
  *
- * @param {Array} arr an array of items to asynchronously iterate over
- * @param {Function} eachFn A function to call on each item of the array. The callback signature is `(item, callback)`, where the callback indicates iteration is complete.
- * @param {Function} callback The callback called after every item has been iterated
+ * @param arr - An array of items to asynchronously iterate over
+ * @param eachFn - A function to call on each item of the array. The callback signature is `(item, callback)`, where the callback indicates iteration is complete.
+ * @param callback - The callback called after every item has been iterated
  */
-function eachAsync<T, E = any>(
+export function eachAsync<T = any>(
   arr: T[],
-  eachFn: (item: T, callback: Callback<CallbackWithType<E>>) => void,
-  callback: CallbackWithType<E>
-) {
+  eachFn: (item: T, callback: (err?: AnyError) => void) => void,
+  callback: Callback
+): void {
   arr = arr || [];
 
   let idx = 0;
@@ -700,7 +803,7 @@ function eachAsync<T, E = any>(
     return;
   }
 
-  function eachCallback(err: any) {
+  function eachCallback(err?: AnyError) {
     awaiting--;
     if (err) {
       callback(err);
@@ -713,7 +816,12 @@ function eachAsync<T, E = any>(
   }
 }
 
-function eachAsyncSeries(arr: any, eachFn: any, callback: Callback) {
+/** @internal */
+export function eachAsyncSeries<T = any>(
+  arr: T[],
+  eachFn: (item: T, callback: (err?: AnyError) => void) => void,
+  callback: Callback
+): void {
   arr = arr || [];
 
   let idx = 0;
@@ -723,7 +831,7 @@ function eachAsyncSeries(arr: any, eachFn: any, callback: Callback) {
     return;
   }
 
-  function eachCallback(err: any) {
+  function eachCallback(err?: AnyError) {
     idx++;
     awaiting--;
     if (err) {
@@ -742,17 +850,23 @@ function eachAsyncSeries(arr: any, eachFn: any, callback: Callback) {
   eachFn(arr[idx], eachCallback);
 }
 
-function arrayStrictEqual(arr: any, arr2: any) {
+/** @internal */
+export function arrayStrictEqual(arr: any[], arr2: any[]): boolean {
   if (!Array.isArray(arr) || !Array.isArray(arr2)) {
     return false;
   }
 
-  return arr.length === arr2.length && arr.every((elt: any, idx: any) => elt === arr2[idx]);
+  return arr.length === arr2.length && arr.every((elt, idx) => elt === arr2[idx]);
 }
 
-function errorStrictEqual(lhs: any, rhs: any) {
+/** @internal */
+export function errorStrictEqual(lhs?: AnyError, rhs?: AnyError): boolean {
   if (lhs === rhs) {
     return true;
+  }
+
+  if (!lhs || !rhs) {
+    return lhs === rhs;
   }
 
   if ((lhs == null && rhs != null) || (lhs != null && rhs == null)) {
@@ -770,8 +884,20 @@ function errorStrictEqual(lhs: any, rhs: any) {
   return true;
 }
 
-function makeStateMachine(stateTable: any) {
-  return function stateTransition(target: any, newState: any) {
+interface StateTable {
+  [key: string]: string[];
+}
+interface ObjectWithState {
+  s: { state: string };
+  emit(event: 'stateChanged', state: string, newState: string): void;
+}
+interface StateTransitionFunction {
+  (target: ObjectWithState, newState: string): void;
+}
+
+/** @internal */
+export function makeStateMachine(stateTable: StateTable): StateTransitionFunction {
+  return function stateTransition(target, newState) {
     const legalStates = stateTable[target.s.state];
     if (legalStates && legalStates.indexOf(newState) < 0) {
       throw new TypeError(
@@ -811,13 +937,17 @@ export interface ClientMetadataOptions {
   appname?: string;
 }
 
-function makeClientMetadata(options: ClientMetadataOptions): ClientMetadata {
+const NODE_DRIVER_VERSION = JSON.parse(
+  readFileSync(resolve(__dirname, '..', 'package.json'), { encoding: 'utf-8' })
+).version;
+
+export function makeClientMetadata(options: ClientMetadataOptions): ClientMetadata {
   options = options || {};
 
   const metadata: ClientMetadata = {
     driver: {
       name: 'nodejs',
-      version: require('../package.json').version
+      version: NODE_DRIVER_VERSION
     },
     os: {
       type: os.type(),
@@ -854,28 +984,33 @@ function makeClientMetadata(options: ClientMetadataOptions): ClientMetadata {
   return metadata;
 }
 
-const noop = () => {};
-
 /**
+ * @internal
  * Loops over deprecated keys, will emit warning if key matched in options.
  *
- * @param {any} options an object of options
- * @param {string[]} list deprecated option keys
+ * @param options - an object of options
+ * @param list - deprecated option keys
  */
-function emitDeprecatedOptionWarning(options: any, list: any) {
-  list.forEach((option: any) => {
-    if (options && typeof options[option] !== 'undefined') {
+export function emitDeprecatedOptionWarning(
+  options: ArbitraryOptions | undefined,
+  list: string[]
+): void {
+  if (!options) return;
+  list.forEach(option => {
+    if (typeof options[option] !== 'undefined') {
       emitDeprecationWarning(`option [${option}] is deprecated`);
     }
   });
 }
 
-function now() {
+/** @internal */
+export function now(): number {
   const hrtime = process.hrtime();
   return Math.floor(hrtime[0] * 1000 + hrtime[1] / 1000000);
 }
 
-function calculateDurationInMs(started: number) {
+/** @internal */
+export function calculateDurationInMs(started: number): number {
   if (typeof started !== 'number') {
     throw TypeError('numeric value required to calculate duration');
   }
@@ -887,7 +1022,7 @@ function calculateDurationInMs(started: number) {
 export interface InterruptableAsyncIntervalOptions {
   /** The interval to execute a method on */
   interval: number;
-  /** A minumum interval that must elapse before the method is called */
+  /** A minimum interval that must elapse before the method is called */
   minInterval: number;
   /** Whether the method should be called immediately when the interval is started  */
   immediate: boolean;
@@ -899,19 +1034,16 @@ export interface InterruptableAsyncInterval {
 }
 
 /**
+ * @internal
  * Creates an interval timer which is able to be woken up sooner than
  * the interval. The timer will also debounce multiple calls to wake
  * ensuring that the function is only ever called once within a minimum
  * interval window.
  *
- * @param {Function} fn An async function to run on an interval, must accept a `callback` as its only parameter
- * @param {object} [options] Optional settings
- * @param {number} [options.interval] The interval at which to run the provided function
- * @param {number} [options.minInterval] The minimum time which must pass between invocations of the provided function
- * @param {boolean} [options.immediate] Execute the function immediately when the interval is started
+ * @param fn - An async function to run on an interval, must accept a `callback` as its only parameter
  */
-function makeInterruptableAsyncInterval(
-  fn: Function,
+export function makeInterruptableAsyncInterval(
+  fn: (callback: Callback) => void,
   options?: Partial<InterruptableAsyncIntervalOptions>
 ): InterruptableAsyncInterval {
   let timerId: NodeJS.Timeout | undefined;
@@ -960,7 +1092,7 @@ function makeInterruptableAsyncInterval(
     lastWakeTime = 0;
   }
 
-  function reschedule(ms: any) {
+  function reschedule(ms?: number) {
     if (stopped) return;
     if (timerId) {
       clearTimeout(timerId);
@@ -973,7 +1105,7 @@ function makeInterruptableAsyncInterval(
     lastWakeTime = 0;
     lastCallTime = now();
 
-    fn((err: any) => {
+    fn(err => {
       if (err) throw err;
       reschedule(interval);
     });
@@ -989,56 +1121,17 @@ function makeInterruptableAsyncInterval(
   return { wake, stop };
 }
 
-function hasAtomicOperators(doc: any): boolean {
+/** @internal */
+export function hasAtomicOperators(doc: Document | Document[]): boolean {
   if (Array.isArray(doc)) {
-    return doc.reduce((err, u) => err || hasAtomicOperators(u), null);
+    for (const document of doc) {
+      if (hasAtomicOperators(document)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   const keys = Object.keys(doc);
   return keys.length > 0 && keys[0][0] === '$';
 }
-
-export {
-  filterOptions,
-  mergeOptions,
-  getSingleProperty,
-  checkCollectionName,
-  formatSortValue,
-  formattedOrderClause,
-  parseIndexOptions,
-  normalizeHintField,
-  decorateCommand,
-  isObject,
-  debugOptions,
-  MAX_JS_INT,
-  mergeOptionsAndWriteConcern,
-  executeLegacyOperation,
-  applyRetryableWrites,
-  applyWriteConcern,
-  isPromiseLike,
-  decorateWithCollation,
-  decorateWithReadConcern,
-  deprecateOptions,
-  MongoDBNamespace,
-  emitDeprecationWarning,
-  emitDeprecatedOptionWarning,
-  makeCounter,
-  maybePromise,
-  databaseNamespace,
-  collectionNamespace,
-  uuidV4,
-  relayEvents,
-  collationNotSupported,
-  maxWireVersion,
-  eachAsync,
-  eachAsyncSeries,
-  arrayStrictEqual,
-  errorStrictEqual,
-  makeStateMachine,
-  makeClientMetadata,
-  noop,
-  now,
-  calculateDurationInMs,
-  makeInterruptableAsyncInterval,
-  hasAtomicOperators
-};

@@ -12,6 +12,7 @@ import type { ClientSession } from '../sessions';
 import type { OperationTime, ResumeToken } from '../change_stream';
 import type { CommandOperationOptions } from '../operations/command';
 import type { CloseOptions } from '../cmap/connection_pool';
+import type { ReadConcern } from '../read_concern';
 
 export interface DocumentTransforms {
   /** Transform each document returned */
@@ -30,6 +31,7 @@ export interface CoreCursorPrivate {
   batchSize: number;
 
   state: CursorState;
+  readConcern?: ReadConcern;
 }
 
 export interface CursorCloseOptions {

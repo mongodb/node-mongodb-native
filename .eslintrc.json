@@ -29,7 +29,7 @@
     "jsdoc/check-tag-names": [
       "warn",
       {
-        "definedTags": ["example-class", "example-method"]
+        "definedTags": ["example-class", "example-method", "internal"]
       }
     ],
     "jsdoc/require-jsdoc": "off",
