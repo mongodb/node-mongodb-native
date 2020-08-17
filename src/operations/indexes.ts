@@ -43,7 +43,7 @@ const VALID_INDEX_OPTIONS = new Set([
   'wildcardProjection'
 ]);
 
-export type IndexDirection = -1 | 1 | '2d' | number;
+export type IndexDirection = -1 | 1 | '2d' | '2dsphere' | 'text' | 'geoHaystack' | number;
 export type IndexSpecification =
   | string
   | [string, IndexDirection]
