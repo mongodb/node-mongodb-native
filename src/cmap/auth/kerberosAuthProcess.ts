@@ -1,16 +1,17 @@
 const dns = require('dns');
-const kerberos = require('kerberos');
+import { Kerberos } from '../../deps';
 
 type TransitionCallback = (err?: Error | null, payload?: any) => void;
 type Transition = typeof MongoAuthProcess.prototype.transition;
+
 interface KerberosClient {
-  step: (challenge: string, callback?: TransitionCallback) => Promise<void> | void;
+  step: (challenge: string, callback?: TransitionCallback) => Promise<string> | string;
   wrap: (
     challenge: string,
     options?: { user: string },
     callback?: TransitionCallback
-  ) => Promise<void> | void;
-  unwrap: (challenge: string, callback?: TransitionCallback) => Promise<void> | void;
+  ) => Promise<string> | string;
+  unwrap: (challenge: string, callback?: TransitionCallback) => Promise<string> | string;
 }
 
 interface gssapiOptions {
@@ -94,12 +95,16 @@ export class MongoAuthProcess {
           ? `${this.serviceName}/${this.host}`
           : `${this.serviceName}@${this.host}`;
 
-      kerberos.initializeClient(service, initOptions, (err: Error, client: KerberosClient) => {
-        if (err) return callback(err, null);
+      Kerberos.initializeClient(
+        service,
+        initOptions,
+        (err: string, client: KerberosClient): void => {
+          if (err) return callback(new Error(err), null);
 
-        self.client = client;
-        callback(null, client);
-      });
+          self.client = client;
+          callback(null, client);
+        }
+      );
     });
   }
 
